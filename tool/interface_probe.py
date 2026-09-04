@@ -577,7 +577,11 @@ def douyin_search_probe() -> None:
                 headers={"User-Agent": USER_AGENT, "Cache-Control": "no-cache", "Connection": "close"},
             )
             with opener.open(home_request, timeout=20) as response:
-                response.read(1)
+                # Drain the bootstrap response before reusing its anonymous
+                # cookies. With urllib, closing it after one byte consistently
+                # made the immediately following feed return HTTP 503; fully
+                # consuming the same response produces a healthy feed request.
+                response.read()
             break
         except Exception as error:  # noqa: BLE001 - bounded transient retry
             last_home_error = error
@@ -649,7 +653,10 @@ def douyin_feed_probe() -> None:
     }
     home_request = urllib.request.Request("https://live.douyin.com/?from_nav=1", headers=headers)
     with opener.open(home_request, timeout=20) as response:
-        response.read(1)
+        # Reading one byte and closing the bootstrap caused a repeatable false
+        # 503 in this readiness probe. The application already consumes the
+        # full response, so mirror that production lifecycle here.
+        response.read()
 
     params = {
         "aid": 6383,

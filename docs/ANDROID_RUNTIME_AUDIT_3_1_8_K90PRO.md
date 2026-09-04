@@ -90,6 +90,7 @@
 - cycle 163 完成网易 CC 当前房间的全链路短录。房间、`高清 / 原画`、`线路1 / 线路2`、录制写入、停止封装、最新录制卡片和退出清理均通过；该适配器当前明确不提供弹幕，测试器按平台能力矩阵验收，没有把 0 条消息误报为成功弹幕。TS 在 5.086 秒内从 1,572,864 B 增至 2,097,152 B，最终 MP4 为 8,068,717 B、58.178367 秒，含 H.264 与 AAC，SHA-256 `83C4E05B23DE0BFCA70E161D10BFFD79F1F61DF7E520D250A3E4F2CC80EAE03C`。27/27 门禁通过，证据为 `local-artifacts/diagnostics/android-recording-smoke-20260904T214953428/summary.json`。
 - Twitch 首次代理实测发现两个独立根因：Android `dart:io` 在本机 Clash 的 CONNECT 隧道后被对端提前关闭；而 Twitch 允许首个目录页，却对更深的 cursor 请求返回 `IntegrityCheckFailed`。控制器为了补足 20 个去重卡片发起第二页时又把首轮成功的 18 个结果整体丢弃，最终呈现为慢等待后的全页错误。修复后，Android 对 `gql.twitch.tv` 使用严格 host allowlist 的系统 TLS 备用通道；Twitch 首次目录窗口以 100 条请求并本地分页；通用远端/固定分页控制器在后续页失败时提交已经成功取得的部分结果并关闭继续加载，而首请求失败仍保留原错误语义。对应确定性回归 22/22 且 Analyze 0 issue，记录为 `local-artifacts/build-records/20260904T145749489Z-quality-focused.json`。
 - cycle 168 使用提交 `783f1f79` 对应的 arm64 Debug APK 完成 Twitch 全链路实测并真实退出 0。热门目录可用，当前房间有 9 条实时聊天且连接状态正常；清晰度为 `1080P60（原画） / 720P60 / 480P / 360P / 160P`，线路1可用。TS 在 4.960 秒内从 1,835,008 B 增至 6,291,456 B，停止后得到 55,131,881 B、53.933667 秒、H.264 + AAC 的 MP4，SHA-256 `F89C2CF3D180589F20CBDB3ED254219624A964223113BCCB6DF724B6B337B274`。27/27 门禁通过，监控、进程及活动 Wake Lock 全部清理，代理也在租约 `finally` 中恢复；证据为 `local-artifacts/diagnostics/android-recording-smoke-20260904T230048954/summary.json`。
+- cycle 169 完成 SOOP 当前房间的全链路短录并真实退出 0。热门目录、房间、弹幕连接、`原画 / 高清 / 标清`、线路1、录制写入、停止封装、最新录制卡片及清理均通过；观察窗口内只有两条连接系统消息、没有用户聊天，因此保留 `liveDanmakuVisible=false` 的样本事实，但平台弹幕连接门禁通过。TS 在 11.441 秒内从 6,553,600 B 增至 12,320,768 B，成品为 48,519,002 B、47.732667 秒且包含 H.264 与 AAC，SHA-256 `D39075A0B3E2D26E533563A850EA54B2F31EB96709C36637B74FC342C73CC9D9`。27/27 门禁通过，代理、监控、进程和活动 Wake Lock 全部清理；证据为 `local-artifacts/diagnostics/android-recording-smoke-20260904T230821913/summary.json`。
 
 ### 7.1 YY HTTPS HLS 录制根因与修复复验
 
@@ -109,5 +110,5 @@
 2. 抖音原生竖屏房间：普通页、竖屏沉浸、横屏居中背景、PiP 与应用小窗；
 3. 虎牙、斗鱼和快手的当前短录、画质/线路入口、真实弹幕与清理已通过；继续执行实际画质/线路切换、短签名续接与 2～3 分钟录制；
 4. 纯音频往返已完成单轮；继续执行后台总开关、锁屏、重复 10 次系统 PiP 与停止计时；
-5. Bilibili、虎牙、斗鱼、抖音、快手、YY、网易 CC 和 Twitch 单次短录已通过；继续补充录制中心删除和滚动边界，以及 SOOP、重试分片和稳定会话开始时间；
+5. Bilibili、虎牙、斗鱼、抖音、快手、YY、网易 CC、Twitch 和 SOOP 单次短录已通过；继续补充录制中心删除和滚动边界、重试分片和稳定会话开始时间；
 6. 30～60 分钟资源趋势、CPU/温度、播放器结束后的进程/媒体会话/Wake Lock 回落。

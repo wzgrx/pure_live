@@ -80,7 +80,7 @@ bool shouldHandleVideoSurfaceTap({
   return localPosition.dy > guardedHeight && localPosition.dy < surfaceSize.height - guardedHeight;
 }
 
-const double portraitFullscreenBottomBarHeight = 104;
+const double portraitFullscreenBottomBarHeight = portraitFullscreenControlsHeight;
 
 @visibleForTesting
 String fullscreenActionLabelKey(bool expanded) => expanded ? 'exit_fullscreen' : 'enter_fullscreen';

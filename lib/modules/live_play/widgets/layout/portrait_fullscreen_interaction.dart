@@ -5,6 +5,8 @@ import 'package:pure_live/common/index.dart';
 enum PortraitPanelDragDisposition { restorePanel, enterFullscreen }
 
 const double portraitFullscreenRestoreGestureZone = 96;
+// Shared by the controls and entry guidance so their layout cannot drift.
+const double portraitFullscreenControlsHeight = 104;
 
 PortraitPanelDragDisposition resolvePortraitPanelDragEnd({
   required bool entryEnabled,
@@ -138,7 +140,7 @@ class _PortraitFullscreenEntryHintState extends State<PortraitFullscreenEntryHin
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: SafeArea(
-        minimum: const EdgeInsets.only(bottom: 18),
+        minimum: const EdgeInsets.fromLTRB(12, 0, 12, portraitFullscreenControlsHeight + 12),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: AnimatedOpacity(
@@ -159,10 +161,13 @@ class _PortraitFullscreenEntryHintState extends State<PortraitFullscreenEntryHin
                   children: [
                     const Icon(Icons.keyboard_arrow_up_rounded, color: Colors.white, size: 20),
                     const SizedBox(width: 6),
-                    Text(
-                      i18n('portrait_fullscreen_restore_hint'),
-                      key: const ValueKey('portrait-fullscreen-entry-hint'),
-                      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                    Flexible(
+                      child: Text(
+                        i18n('portrait_fullscreen_restore_hint'),
+                        key: const ValueKey('portrait-fullscreen-entry-hint'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ],
                 ),

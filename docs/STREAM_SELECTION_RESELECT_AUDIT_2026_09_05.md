@@ -23,3 +23,5 @@
 - 修复后：11/11 通过，记录 `local-artifacts/build-records/20260904T212317313Z-quality-focused.json`。
 - 同轮 Analyze 无错误/警告、1 项花括号风格提示；随后已为该条件补齐花括号，未重复启动全仓 Analyze，最终发布门禁仍需复核。
 - 真机的旧 Debug 包平台切换/短录证据不算此修复的新包复验。新包安装、回选与相邻模式检查仍待执行。
+
+后续 `8cda379d` Debug 包已覆盖安装：虎牙 `蓝光30M→流畅`、`线路1→线路2` 稳定提交，3 条实时弹幕，35.246667 秒 / 30,195,046 B 音视频 MP4，进程/Wake Lock 清理通过。证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T052947550/summary.json`。竖屏源与标准源的横屏、系统返回、PiP 往返分别通过 `android-portrait-presentation-20260905T053410185`、`android-standard-presentation-20260905T053641903`。快速回选的精确竞争顺序由前述确定性测试证明；这些真机步骤是正常切换及相邻模式补充，不冒充人为稳定复现了毫秒级竞争。

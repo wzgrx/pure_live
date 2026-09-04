@@ -124,6 +124,38 @@ void main() {
     expect(taps, 1);
   });
 
+  testWidgets('entry guidance stays above the portrait controller bar', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: PortraitFullscreenEntryHint())));
+    final hint = tester.getRect(find.byKey(const ValueKey('portrait-fullscreen-entry-hint')));
+    expect(hint.bottom, lessThanOrEqualTo(800 - 104 - 12));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('entry guidance wraps on narrow screens with larger system text', (tester) async {
+    tester.view.physicalSize = const Size(320, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.8)),
+          child: child!,
+        ),
+        home: const Scaffold(body: PortraitFullscreenEntryHint()),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final text = tester.widget<Text>(find.byKey(const ValueKey('portrait-fullscreen-entry-hint')));
+    expect(text.style?.color, Colors.white);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('disabled bottom restore region leaves upward drags inert', (tester) async {
     var restores = 0;
     await tester.pumpWidget(

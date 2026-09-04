@@ -332,7 +332,14 @@ try {
         # WebView2 loader without adding it to that list. Keep this small,
         # reviewed runtime allowlist explicit rather than reopening the whole
         # incremental Release directory.
-        foreach ($requiredRunnerFile in @('pure_live.exe', 'WebView2Loader.dll')) {
+        $requiredRunnerFiles = @('pure_live.exe', 'WebView2Loader.dll')
+        if ($Configuration -eq 'Release') {
+            # These are app-local runtime files required by Flutter's Windows
+            # deployment contract. CMake resolves the versions matching the
+            # active MSVC toolset and adds them to the install manifest.
+            $requiredRunnerFiles += @('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')
+        }
+        foreach ($requiredRunnerFile in $requiredRunnerFiles) {
             $sourceFile = Join-Path $windowsSourceFull $requiredRunnerFile
             if (-not (Test-Path -LiteralPath $sourceFile -PathType Leaf)) {
                 throw "Required Windows runner file is missing: $sourceFile"
@@ -341,6 +348,13 @@ try {
         }
         if (-not (Test-Path -LiteralPath (Join-Path $windowsPackageFull 'pure_live.exe') -PathType Leaf)) {
             throw 'The staged Windows package does not contain pure_live.exe.'
+        }
+        if ($Configuration -eq 'Release') {
+            foreach ($runtimeFile in @('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')) {
+                if (-not (Test-Path -LiteralPath (Join-Path $windowsPackageFull $runtimeFile) -PathType Leaf)) {
+                    throw "The staged Windows package is missing the app-local MSVC runtime: $runtimeFile"
+                }
+            }
         }
         $developmentFiles = Get-ChildItem -LiteralPath $windowsPackageFull -Recurse -File |
             Where-Object Extension -In $developmentExtensions

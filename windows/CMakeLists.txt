@@ -87,6 +87,43 @@ endif()
 set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
 set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 
+# Flutter's Windows deployment contract requires the MSVC app-local runtime
+# beside the executable. Development machines usually have it installed
+# globally, which previously hid the omission until a clean Windows 10 host
+# tried to launch the portable ZIP or installer. Let CMake resolve the exact
+# redistributables that match the active Visual Studio toolset, then install
+# only the three DLLs documented by Flutter for Release packages.
+if(MSVC)
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+  set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
+  include(InstallRequiredSystemLibraries)
+  set(PURELIVE_REQUIRED_MSVC_RUNTIME_NAMES
+    "msvcp140.dll"
+    "vcruntime140.dll"
+    "vcruntime140_1.dll"
+  )
+  set(PURELIVE_MSVC_RUNTIME_LIBS "")
+  foreach(RUNTIME_LIBRARY IN LISTS CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+    get_filename_component(RUNTIME_LIBRARY_NAME "${RUNTIME_LIBRARY}" NAME)
+    string(TOLOWER "${RUNTIME_LIBRARY_NAME}" RUNTIME_LIBRARY_NAME_LOWER)
+    if(RUNTIME_LIBRARY_NAME_LOWER IN_LIST PURELIVE_REQUIRED_MSVC_RUNTIME_NAMES)
+      list(APPEND PURELIVE_MSVC_RUNTIME_LIBS "${RUNTIME_LIBRARY}")
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES PURELIVE_MSVC_RUNTIME_LIBS)
+  list(LENGTH PURELIVE_MSVC_RUNTIME_LIBS PURELIVE_MSVC_RUNTIME_COUNT)
+  if(NOT PURELIVE_MSVC_RUNTIME_COUNT EQUAL 3)
+    message(FATAL_ERROR
+      "Pure Live requires msvcp140.dll, vcruntime140.dll and "
+      "vcruntime140_1.dll for app-local Windows deployment; found: "
+      "${PURELIVE_MSVC_RUNTIME_LIBS}")
+  endif()
+  install(PROGRAMS ${PURELIVE_MSVC_RUNTIME_LIBS}
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    CONFIGURATIONS Release
+    COMPONENT Runtime)
+endif()
+
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 

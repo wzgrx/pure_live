@@ -239,11 +239,25 @@ foreach ($marker in @(
     '/DArtifactVersion=$artifactVersion',
     'build\windows\x64\install_manifest.txt',
     '$manifestSourceMarker = "\build\windows\x64\runner\$configurationDirectory\"',
+    "'msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll'",
+    'The staged Windows package is missing the app-local MSVC runtime',
     'Keep dependency resolution single-owner',
     'Retired QuickJS runtime files appeared in the Windows package',
     'automatic_follow_up = $false'
 )) {
     if (-not $buildScript.Contains($marker)) { throw "Build script policy marker is missing: $marker" }
+}
+
+$windowsCmake = Get-Content -LiteralPath (Join-Path $repoRoot 'windows\CMakeLists.txt') -Raw
+foreach ($marker in @(
+    'include(InstallRequiredSystemLibraries)',
+    'CMAKE_INSTALL_UCRT_LIBRARIES FALSE',
+    'PURELIVE_REQUIRED_MSVC_RUNTIME_NAMES',
+    'CONFIGURATIONS Release'
+)) {
+    if (-not $windowsCmake.Contains($marker)) {
+        throw "Windows app-local runtime policy marker is missing: $marker"
+    }
 }
 
 $windowsInstaller = Get-Content -LiteralPath (Join-Path $repoRoot 'windows\packaging\exe\local_release.iss') -Raw

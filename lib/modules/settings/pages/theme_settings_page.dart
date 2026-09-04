@@ -6,6 +6,7 @@ import 'package:pure_live/modules/settings/pages/page_settings.dart';
 import 'package:pure_live/modules/settings/pages/font_settings_page.dart';
 import 'package:pure_live/modules/settings/pages/font_family_manager_page.dart';
 import 'package:pure_live/modules/settings/pages/loading_style_settings_page.dart';
+import 'package:pure_live/modules/settings/widgets/app_color_picker_dialog.dart';
 
 class ThemeSettingsPage extends GetView<SettingsService> {
   const ThemeSettingsPage({super.key});
@@ -210,53 +211,21 @@ class ThemeSettingsPage extends GetView<SettingsService> {
 
   Future<bool> colorPickerDialog() async {
     final bool isZh = Get.locale?.languageCode == 'zh';
-    return ColorPicker(
-      color: HexColor(SettingsService.to.theme.themeColorSwitch.v),
+    final initialColor = HexColor(SettingsService.to.theme.themeColorSwitch.v);
+    return showAppColorPickerDialog(
+      context: Get.context!,
+      initialColor: initialColor,
+      title: i18n('theme_color'),
+      enableOpacity: false,
+      labels: buildAppColorPickerLabels(translate: (key) => i18n(key), isChinese: isZh, enableOpacity: false),
+      customColorSwatchesAndNames: AppConsts.colorsNameMap,
       onColorChanged: (Color color) {
         SettingsService.to.theme.themeColorSwitch.v = color.hex;
-        var themeColor = color;
-        var lightTheme = MyTheme(primaryColor: themeColor).lightThemeData;
-        var darkTheme = MyTheme(primaryColor: themeColor).darkThemeData;
+        final lightTheme = MyTheme(primaryColor: color).lightThemeData;
+        final darkTheme = MyTheme(primaryColor: color).darkThemeData;
         Get.changeTheme(lightTheme);
         Get.changeTheme(darkTheme);
       },
-      width: 40,
-      height: 40,
-      borderRadius: 4,
-      spacing: 5,
-      runSpacing: 5,
-      wheelDiameter: 155,
-      heading: Text(i18n("theme_color"), style: Theme.of(Get.context!).textTheme.titleMedium),
-      subheading: Text(i18n("select_opacity"), style: Theme.of(Get.context!).textTheme.titleMedium),
-      wheelSubheading: Text(i18n("theme_color_opacity"), style: Theme.of(Get.context!).textTheme.titleMedium),
-      showMaterialName: false,
-      showColorName: false,
-      showColorCode: true,
-      copyPasteBehavior: const ColorPickerCopyPasteBehavior(longPressMenu: true),
-      materialNameTextStyle: Theme.of(Get.context!).textTheme.bodySmall,
-      colorNameTextStyle: Theme.of(Get.context!).textTheme.bodySmall,
-      colorCodeTextStyle: Theme.of(Get.context!).textTheme.bodyMedium,
-      colorCodePrefixStyle: Theme.of(Get.context!).textTheme.bodySmall,
-      selectedPickerTypeColor: Theme.of(Get.context!).colorScheme.primary,
-      customColorSwatchesAndNames: AppConsts.colorsNameMap,
-      pickerTypeLabels: <ColorPickerType, String>{
-        ColorPickerType.primary: isZh ? "常用色" : "Primary",
-        ColorPickerType.accent: isZh ? "鲜艳色" : "Accent",
-        ColorPickerType.custom: isZh ? "自定义" : "Custom",
-        ColorPickerType.wheel: isZh ? "调色盘" : "Wheel",
-      },
-      pickersEnabled: const <ColorPickerType, bool>{
-        ColorPickerType.both: false,
-        ColorPickerType.primary: true,
-        ColorPickerType.accent: true,
-        ColorPickerType.bw: false,
-        ColorPickerType.custom: true,
-        ColorPickerType.wheel: true,
-      },
-    ).showPickerDialog(
-      Get.context!,
-      actionsPadding: const EdgeInsets.all(16),
-      constraints: const BoxConstraints(minHeight: 480, minWidth: 375, maxWidth: 420),
     );
   }
 

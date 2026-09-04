@@ -1,6 +1,25 @@
 import 'package:pure_live/common/index.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
+
+/// Resolves the app-wide font without overriding a platform's native default.
+///
+/// Downloaded fonts are registered under their persisted IDs and therefore
+/// take precedence. Windows deliberately keeps Microsoft YaHei as its stable
+/// CJK default; Android and the remaining platforms use a null family so
+/// Flutter follows the device's own system font and fallback chain.
+String? resolveAppFontFamily({
+  required String selectedName,
+  required Iterable<String> customFonts,
+  required bool isWindows,
+}) {
+  if (customFonts.contains(selectedName)) {
+    return selectedName;
+  }
+  if (isWindows) {
+    return 'Microsoft YaHei';
+  }
+  return null;
+}
 
 class MyTheme {
   final Color? primaryColor;
@@ -17,19 +36,11 @@ class MyTheme {
   ThemeData get darkThemeData => _buildTheme(Brightness.dark);
 
   String? _resolveFontFamily(String selectedName, List<String> customFonts) {
-    if (customFonts.contains(selectedName)) {
-      return selectedName;
-    }
-    if (PlatformUtils.isWindows) {
-      // PingFang is not bundled and is normally absent on Windows. Falling
-      // back to it makes every glyph perform another font lookup, which is
-      // especially visible while scrolling long danmaku/settings lists.
-      return 'Microsoft YaHei';
-    }
-    if (PlatformUtils.isAndroid) {
-      return GoogleFonts.roboto().fontFamily;
-    }
-    return null;
+    return resolveAppFontFamily(
+      selectedName: selectedName,
+      customFonts: customFonts,
+      isWindows: PlatformUtils.isWindows,
+    );
   }
 
   TextTheme _buildTextTheme({required TextTheme base, required String? fontFamily}) {

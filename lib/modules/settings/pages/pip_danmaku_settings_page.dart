@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/modules/settings/widgets/app_color_picker_dialog.dart';
 import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
@@ -470,27 +471,18 @@ class PipDanmakuSettingsSection extends StatelessWidget {
   }
 
   Future<void> _showColorPicker(BuildContext context, Color initialColor) async {
-    final confirmed = await ColorPicker(
-      color: initialColor,
+    final isZh = Get.locale?.languageCode == 'zh';
+    await showAppColorPickerDialog(
+      context: context,
+      initialColor: initialColor,
+      title: i18n('pip_danmaku_color'),
+      enableOpacity: false,
+      labels: buildAppColorPickerLabels(translate: (key) => i18n(key), isChinese: isZh, enableOpacity: false),
+      customColorSwatchesAndNames: AppConsts.colorsNameMap,
       onColorChanged: (color) {
         SettingsService.to.danmaku.pipDanmakuColor.v = color.toARGB32();
       },
-      enableOpacity: false,
-      showColorCode: true,
-      showColorName: false,
-      showMaterialName: false,
-      pickersEnabled: const {
-        ColorPickerType.both: false,
-        ColorPickerType.primary: true,
-        ColorPickerType.accent: true,
-        ColorPickerType.bw: true,
-        ColorPickerType.custom: true,
-        ColorPickerType.wheel: true,
-      },
-    ).showPickerDialog(context);
-    if (!confirmed) {
-      SettingsService.to.danmaku.pipDanmakuColor.v = initialColor.toARGB32();
-    }
+    );
   }
 }
 

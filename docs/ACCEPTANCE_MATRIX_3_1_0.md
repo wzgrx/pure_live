@@ -54,6 +54,8 @@
 | A2-03 | PASS | 后台播放与手动纯音频策略一致；自动助眠按计时继续 | `6458d541` arm64 Release 四组合实机通过：关闭开关后手动纯音频退桌面由 `PLAYING` 转 `PAUSED` 且当前 Wake Lock 为 0，回前台恢复；开启开关时普通视频退桌面保持 `PLAYING` 并持有必要锁；关闭开关后主动进入系统 PiP 仍保持 `PLAYING`；关闭开关并启用 1 分钟自动助眠时，后台在期限内保持 `PLAYING`，到点变为 `NONE`，Pure Live 保活锁消失且 CPU 样本为 0%。证据：`local-artifacts/runtime/android-6458d541/background-off-audio-only.txt`、`background-on-video.txt`、`pip-background-off.txt`、`auto-sleep-one-minute.txt` |
 | A2-04 | NR | 小窗弹幕固定预览/双栏预览实时更新，保存/恢复默认与模板状态一致 |
 | A2-05 | RUN | 应用代理覆盖平台 API、封面/头像和弹幕 WebSocket；全角地址归一化，播放器代理保持独立 | 路由与 WebSocket 回归通过，虎牙协议探针收到 command 22；v3.1.2 Android Release 已用可达 Clash 端点验证 Twitch 原生搜索由直连失败恢复为真实结果，播放代理保持关闭。最终 APK 的弹幕 WebSocket 与视频播放代理仍待逐平台复验；详见 `docs/NETWORK_PROXY_AUDIT_3_1_0.md`、`docs/ANDROID_RUNTIME_AUDIT_3_1_2.md` |
+| A2-06 | PASS | 颜色选择器真实区分 RGB 与 ARGB；加载颜色可调透明度，主题/小窗颜色不伪装成透明度；输入、预览、确认与取消一致 | Widget 回归覆盖 RGB/ARGB 解析、非法值、即时预览和取消恢复。K90 Pro / cycle 196 验证主题入口显示 RGB 与“选择色阶”，加载入口显示真实 alpha 滑块与 ARGB，输入 `0x800080DD` 后取消并重开恢复 `0xFFA0CAFD`。证据：`local-artifacts/diagnostics/android-color-picker-20260905T023013977/summary.json` |
+| A2-07 | PASS | “System Default”不再被应用层强制替换；下载字体仍按 ID 使用，失效 ID 安全回落，Windows 保留 Microsoft YaHei | `test/theme_font_resolution_test.dart` 覆盖四条解析路径；根因和 Issue 边界见 `docs/ISSUE_AUDIT_2026_09_05.md` |
 
 ### A3 播放与呈现核心矩阵
 

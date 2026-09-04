@@ -5,6 +5,7 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:pure_live/common/index.dart' hide Indicator;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:pure_live/modules/settings/widgets/app_color_picker_dialog.dart';
 
 class LoadingStyleSettingsPage extends StatefulWidget {
   const LoadingStyleSettingsPage({super.key});
@@ -24,54 +25,21 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
 
   Future<bool> colorPickerDialog() async {
     final bool isZh = Get.locale?.languageCode == 'zh';
-    return ColorPicker(
-      color: HexColor(
-        SettingsService.to.theme.loadingStyleColorSwitch.v.isEmpty
-            ? Theme.of(context).colorScheme.primary.hex
-            : SettingsService.to.theme.loadingStyleColorSwitch.v,
-      ),
-      onColorChanged: (Color color) {
-        SettingsService.to.theme.loadingStyleColorSwitch.v = color.hex;
-      },
-
-      width: 40,
-      height: 40,
-      borderRadius: 4,
-      spacing: 5,
-      runSpacing: 5,
-      wheelDiameter: 155,
-      heading: Text(i18n("theme_color"), style: Theme.of(Get.context!).textTheme.titleMedium),
-      subheading: Text(i18n("select_opacity"), style: Theme.of(Get.context!).textTheme.titleMedium),
-      wheelSubheading: Text(i18n("theme_color_opacity"), style: Theme.of(Get.context!).textTheme.titleMedium),
-      showMaterialName: false,
-      showColorName: false,
-      showColorCode: true,
-      copyPasteBehavior: const ColorPickerCopyPasteBehavior(longPressMenu: true),
-      materialNameTextStyle: Theme.of(Get.context!).textTheme.bodySmall,
-      colorNameTextStyle: Theme.of(Get.context!).textTheme.bodySmall,
-      colorCodeTextStyle: Theme.of(Get.context!).textTheme.bodyMedium,
-      colorCodePrefixStyle: Theme.of(Get.context!).textTheme.bodySmall,
-      selectedPickerTypeColor: Theme.of(Get.context!).colorScheme.primary,
+    final initialColor = HexColor(
+      SettingsService.to.theme.loadingStyleColorSwitch.v.isEmpty
+          ? Theme.of(context).colorScheme.primary.hex
+          : SettingsService.to.theme.loadingStyleColorSwitch.v,
+    );
+    return showAppColorPickerDialog(
+      context: context,
+      initialColor: initialColor,
+      title: i18n('change_loading_color'),
+      enableOpacity: true,
+      labels: buildAppColorPickerLabels(translate: (key) => i18n(key), isChinese: isZh, enableOpacity: true),
       customColorSwatchesAndNames: AppConsts.colorsNameMap,
-
-      pickerTypeLabels: <ColorPickerType, String>{
-        ColorPickerType.primary: isZh ? "常用色" : "Primary",
-        ColorPickerType.accent: isZh ? "鲜艳色" : "Accent",
-        ColorPickerType.custom: isZh ? "自定义" : "Custom",
-        ColorPickerType.wheel: isZh ? "调色盘" : "Wheel",
+      onColorChanged: (Color color) {
+        SettingsService.to.theme.loadingStyleColorSwitch.v = color.hexAlpha;
       },
-      pickersEnabled: const <ColorPickerType, bool>{
-        ColorPickerType.both: false,
-        ColorPickerType.primary: true,
-        ColorPickerType.accent: true,
-        ColorPickerType.bw: false,
-        ColorPickerType.custom: true,
-        ColorPickerType.wheel: true,
-      },
-    ).showPickerDialog(
-      Get.context!,
-      actionsPadding: const EdgeInsets.all(16),
-      constraints: const BoxConstraints(minHeight: 480, minWidth: 375, maxWidth: 420),
     );
   }
 

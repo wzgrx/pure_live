@@ -149,6 +149,7 @@
 | W0-01 | RUN | v3.1.0 Windows x64 便携 ZIP 已独立解压到 `.local-build/windows-v3.1.0-runtime-20260831T060618Z/`，`pure_live.exe` 报告 `3.1.0+4113`，数据目录位于便携目录旁的 `AppData`；程序启动、运行和窗口关闭正常。安装器自选目录、旧版本覆盖迁移和卸载残留仍待执行 |
 | W0-02 | PASS | v3.1.7 Windows x64 便携 ZIP 在全新隔离目录以独立 instance 启动，FileVersion/ProductVersion 均为 `3.1.7+4120`；数据只写入便携目录内独立 `AppData`，180 秒 37/37 样本均响应，退出后同路径残留进程为 0。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_7.md` |
 | W0-03 | PASS | v3.1.8 正式便携 ZIP 在独立目录与独立 instance 启动，FileVersion/ProductVersion 均为 `3.1.8+4121`；完成真实播放、弹幕和短录后正常退出，匹配的应用与 FFmpeg 进程均为 0。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_8.md` |
+| W0-04 | RUN | #849 的 Release 部署缺口已修复：便携 ZIP 与安装器携带 Flutter 官方要求的三项 app-local VC++ runtime；最终 ZIP 共 1305 项，隔离实例 24.534 秒内 12/12 样本响应，并实证三项 DLL 都从解压目录加载。当前主机通过不替代报告者具体 Win10 build 复验；证据：`local-artifacts/diagnostics/windows-startup-20260904T190044783Z/summary.json` |
 | W1-01 | RUN | 热门页已验证哔哩哔哩到最右侧“网络”平台切换、20 张卡片加载、缩略图懒加载与纵向滚动；直播间弹幕设置长页滚动可达下部选项，Esc 从直播间返回热门页。多 DPI、主副屏、触控板和全部二/三级页面仍待执行 |
 | W1-02 | PASS | v3.1.2 Windows x64 便携 Release 在 `3840×2400 / 200 Hz` 显示器正确显示当前与最高刷新率。省电、均衡、最高三档均即时刷新文案与策略；均衡模式在强制结束隔离实例并用相同 instance id 冷启动后仍恢复，随后成功回到省电默认。应用全过程响应，证据见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_2.md` 与 `local-artifacts/runtime/windows-v3.1.2/refresh-rate-and-fullscreen-20260831.json` |
 | W2-01 | RUN | Windows 实际进入 Bilibili `EdmundDZhang` 房间并持续播放，画面、声音、画面弹幕和列表弹幕均工作；画质从“超清”请求“原画”时，平台实际仍返回“超清”，提示与最终 UI 都保留真实结果而非伪成功；弹幕设置主题与应用主题一致。宽屏/真全屏、PiP 置顶和多窗口矩阵仍待执行 |

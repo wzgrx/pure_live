@@ -9,7 +9,7 @@
 | Issue | 来源与首个错误状态 | 维护分支处置 | 验证边界 |
 |---|---|---|---|
 | [#850 Android 颜色选择器不能调透明度](https://github.com/liuchuancong/pure_live/issues/850) | 上游和维护分支共有的 UI/持久化缺陷。旧页面没有启用 `ColorPicker.enableOpacity`，却把色阶标题写成“选择透明度”；加载颜色保存 `color.hex` 又会丢失 alpha。依赖自身的代码输入框固定为 6 位且只在色轮页可编辑，不能完成 AARRGGBB 编辑 | 新增统一 `AppColorPickerDialog`：需要透明度的加载颜色提供真实 alpha 滑块和始终可见的 8 位 ARGB 输入；主题色与小窗弹幕颜色使用 6 位 RGB，避免与独立不透明度设置冲突；输入支持 `#`/`0x`，错误格式原地提示，取消恢复原值。三个页面不再各自复制不同的弹窗逻辑 | Widget 回归覆盖 RGB/ARGB 解析、完整 ARGB 输入、即时预览、非法值与取消恢复；K90 Pro 共享轮转 cycle 198 使用最终 APK 真实验证主题/加载两个入口、`0x800080DD` 输入和取消恢复。证据：`local-artifacts/diagnostics/android-color-picker-20260905T024906912/summary.json` |
-| [#849 Windows 10 在 2.0 后不能启动](https://github.com/liuchuancong/pure_live/issues/849) | 报告没有 Windows build、系统版本、事件查看器、缺失 DLL 或启动日志，因此当前证据不足以定位到一个代码错误 | 不以猜测性的启动延迟、打包库回退或全局异常吞噬覆盖现有启动链。现有 Windows 3.1.8 x64 调试构建在本机连续运行 903.642 秒，181/181 样本响应，进程没有退出；工作集 619.69→616.37 MiB、私有字节 759.00→747.06 MiB | 当前 Windows 主机的通过不能代表报告者的 Win10 环境。现有证据：`local-artifacts/diagnostics/windows-regression/20260904T122150002Z-startup-idle-gpu-15m-pid39732-summary.json`；后续至少需要失败机器的精确 Windows build、CPU、安装/便携类型、Event Viewer fault module 与应用日志 |
+| [#849 Windows 10 在 2.0 后不能启动](https://github.com/liuchuancong/pure_live/issues/849) | 报告缺少精确 Windows build 和 Event Viewer 日志，但包审计找到了与“开发机正常、旧 Win10 双击无反应”相符的确定部署缺陷：Release ZIP/安装器没有携带 Flutter 官方要求的三项 VC++ app-local runtime，构建机已全局安装运行库会掩盖遗漏 | Windows CMake 现在从当前 MSVC toolset 精确解析并只把 `msvcp140.dll`、`vcruntime140.dll`、`vcruntime140_1.dll` 安装到应用根目录；本机构建脚本把三项列为 Release 阻断门禁，便携 ZIP、Inno 安装器和使用同一 CMake bundle 的工作流共同继承。最终 ZIP 为 1305 项，三项运行库版本均为 14.52.36615.0 | 从最终 ZIP 解压的隔离实例运行 24.534 秒、12/12 样本响应，进程模块确认三项 DLL 全部从应用目录加载而非系统目录。证据：`local-artifacts/diagnostics/windows-startup-20260904T190044783Z/summary.json`。该证据关闭了包自身的运行库缺口；报告者具体 Win10 是否还有过旧系统 build、驱动或 WebView2 问题，仍需其机器复验 |
 | [#848 3.1.2 系统字体问题](https://github.com/liuchuancong/pure_live/issues/848) | 报告正文没有截图和字体名称，但代码审查发现一个确定的共享语义错误：Android 选择“System Default”时仍强制 `GoogleFonts.roboto()`，没有遵循设备系统字体和厂商 CJK fallback | 将字体解析提为可测试的单一函数：已下载字体继续按 ID 使用；Windows 保留 `Microsoft YaHei` 性能基线；Android 和其他平台的系统默认返回 `null`，交给 Flutter/操作系统字体回退链。移除只为强制 Roboto 引入的 `google_fonts` 运行依赖；被删除或失效的自定义字体 ID 也安全回落系统字体 | 确定性测试覆盖自定义字体、Android 系统默认、失效字体 ID 和 Windows CJK 回退。由于 #848 没有复现材料，本修复只声明纠正了可证实的“系统默认不是真默认”，不宣称覆盖报告者未描述的所有字体问题 |
 
 ## 颜色设置的产品语义
@@ -33,6 +33,9 @@ Roboto，但中文实际会由设备系统 CJK 字体补齐；显式指定通过
 [Flutter `TextStyle` 字体回退说明](https://api.flutter.dev/flutter/painting/TextStyle-class.html)、
 [FlexColorPicker `enableOpacity` API](https://pub.dev/documentation/flex_color_picker/latest/flex_color_picker/ColorPicker-class.html)。
 
+Windows 部署参考：[Flutter Windows 构建与 ZIP 部署说明](https://docs.flutter.dev/platform-integration/windows/building)、
+[Microsoft 最新 VC++ v14 Redistributable 说明](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)。
+
 ## 质量与构建证据
 
 - `flutter analyze` 0 issue；颜色、字体、Material 兼容与弹幕设置相邻回归共 15/15 通过。
@@ -41,6 +44,10 @@ Roboto，但中文实际会由设备系统 CJK 字体补齐；显式指定通过
   `0x4000`，Flutter 资源与版本清单完整。产物：
   `local-artifacts/3.1.8-4121/PureLive-3.1.8-4121-android-arm64-v8a-debug.apk`；
   构建记录：`local-artifacts/build-records/20260904T184549085Z-build-androidarm64-debug.json`。
+- Windows x64 Release 从提交 `571765af` 串行生成便携 ZIP 与安装器；最终 ZIP SHA-256 为
+  `C21DA63124C80AE17112DD2CCD37D7A3AAC30B0DE5186F4DE5BC6BC41375DF8E`，
+  隔离启动和 app-local 模块来源通过。构建记录：
+  `local-artifacts/build-records/20260904T185956165Z-build-windowsx64-release.json`。
 
 ## 本轮边界
 

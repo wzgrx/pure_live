@@ -75,6 +75,14 @@ PowerShell -ExecutionPolicy Bypass -File .\tool\build_local_release.ps1 `
 
 Windows 保留 Flutter/CMake 的增量构建目录，只清理可丢弃的打包暂存区；脚本检查 `AppData`、缓存数据库等运行时状态未进入便携包或安装器，并剔除 `.lib`、`.exp`、`.pdb`、`.ilk` 等仅供原生开发/链接使用的文件。请勿直接把运行过的 Release 目录手工压缩发布。
 
+Windows Release 便携 ZIP 与 EXE 安装包会把当前 Visual C++ 工具链解析出的
+`msvcp140.dll`、`vcruntime140.dll`、`vcruntime140_1.dll` 放在 `pure_live.exe`
+同级目录。打包脚本把这三个文件列为必需运行时并逐项检查，避免构建机已安装的全局
+运行库掩盖干净 Windows 10/11 设备上的启动依赖。该布局遵循
+[Flutter Windows 部署说明](https://docs.flutter.dev/platform-integration/windows/building)；
+运行库版本必须不低于构建工具链要求，参见
+[Microsoft VC++ Redistributable 兼容规则](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)。
+
 质量模式也必须明确二选一：正式交付使用 `-FullRegression`；已经完成本轮定向验证或同提交完整门禁时使用 `-SkipQuality`。其他参数：`-SkipInstaller`、`-UseOfficialRepositories`、`-RequireReleaseSigning`、`-DedicatedBuild`。交互模式 Gradle workers 为 16；专门构建传 `-DedicatedBuild` 后为 20。
 
 本地打包默认通过临时 Gradle init script 优先使用阿里云 Maven 镜像，并保留 Google/Maven Central 回退，解决国内网络的 TLS 中断；`-UseOfficialRepositories` 会只使用项目声明的官方仓库。该设置仅对当前脚本进程生效，不改全局 Gradle 配置。

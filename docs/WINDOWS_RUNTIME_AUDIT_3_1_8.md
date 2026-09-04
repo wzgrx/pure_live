@@ -86,3 +86,11 @@
 - 当前 Debug 隔离实例在 `3840×2400@200Hz` 上进行 15 秒、5 秒间隔的链路冒烟，4/4 样本均响应；识别到 NVIDIA GeForce RTX 5090 Laptop GPU，驱动 `32.0.16.1664`。空闲样本的 GPU 引擎为 0，独显/共享显存各约 297.582/16.707 MiB；working set 从 636.7852 回落到 632.6641 MiB，private bytes 从 796.4023 回落到 779.3477 MiB。
 - 证据为 `local-artifacts/diagnostics/windows-regression/20260904T121224573Z-gpu-sampler-smoke-pid39148-summary.json`。该样本只证明采样器、进程归属和缺失值语义；上游 #767 所述 4K/150% 缩放下真实播放与列表滚动仍需带画面的同链采样，空闲 0% 不作为 Issue 已解决结论。
 - 随后用同一隔离 Debug 可执行文件完成 15 分钟空闲趋势：181/181 个样本响应，实际 903.642 秒。working set 为 619.6914 → 616.3711 MiB（线性斜率 `+0.0201 MiB/min`），private bytes 为 759.0039 → 747.0625 MiB（`-0.093 MiB/min`），句柄 1187 → 1097、线程 164 → 149，CPU 平均/P95 为 0.0541%/0.0522%。独显显存 287.3867 → 287.3398 MiB（`-0.0032 MiB/min`），共享显存 11.6523 → 0.625 MiB，空闲 3D/Video Decode 均为 0；采样后目标进程已回收。该段没有呈现线性资源增长。证据为 `local-artifacts/diagnostics/windows-regression/20260904T122150002Z-startup-idle-gpu-15m-pid39732-summary.json`。
+
+## 8. Win10 启动依赖闭包
+
+- 上游 #849 报告 2.0 之后的安装版和绿色版在 Win10 双击均无反应。报告没有精确系统 build 或事件日志，但当前发布包审计确认三项 VC++ 运行库缺失；开发机的全局 Visual Studio/Redistributable 会掩盖这个包缺口。
+- Windows CMake 现使用 `InstallRequiredSystemLibraries` 从实际 MSVC toolset 解析运行库，并只把 Flutter 官方 app-local 部署要求的 `msvcp140.dll`、`vcruntime140.dll`、`vcruntime140_1.dll` 安装到应用根目录。Release 打包脚本缺少任意一项都会中止，Debug 开发包不混入 Release runtime。
+- 提交 `571765af` 构建的最终便携 ZIP 共 1305 项，三项 DLL 均为 `14.52.36615.0`；Inno 编译日志也确认它们进入安装器。ZIP SHA-256 为 `C21DA63124C80AE17112DD2CCD37D7A3AAC30B0DE5186F4DE5BC6BC41375DF8E`。
+- 从 ZIP 解压到全新隔离目录后启动 `3.1.8+4121`，持续 24.534 秒取得 12/12 个 responding 样本。进程模块列表确认三项 DLL 全部加载自该隔离目录，而不是本机 System32；退出后没有目标进程残留。证据：`local-artifacts/diagnostics/windows-startup-20260904T190044783Z/summary.json`，构建记录：`local-artifacts/build-records/20260904T185956165Z-build-windowsx64-release.json`。
+- 这项验证证明发布包不再依赖目标机器预装匹配版本的 VC++ v14 runtime；报告者机器仍需复验，以区分剩余的过旧 Win10 build、显卡驱动或 WebView2 环境差异。

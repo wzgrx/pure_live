@@ -107,7 +107,15 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
         if (_bigPageCache.containsKey(serverBigPage)) {
           bigPageData = _bigPageCache[serverBigPage]!;
         } else {
-          bigPageData = await fetchFixedNetworkData(serverBigPage, fixedServerPageSize);
+          try {
+            bigPageData = await fetchFixedNetworkData(serverBigPage, fixedServerPageSize);
+          } catch (_) {
+            // Keep an already assembled partial client page when only a later
+            // server page fails. Throwing here would replace valid cards with
+            // a full-page error even though the first request succeeded.
+            if (combinedData.isEmpty) rethrow;
+            break;
+          }
           _bigPageCache[serverBigPage] = bigPageData;
         }
 

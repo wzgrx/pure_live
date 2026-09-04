@@ -168,7 +168,19 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
 
       while (combinedResult.length < sizeToFetch && requestCount < 20 && noProgressCount < 2) {
         final int neededCount = sizeToFetch - combinedResult.length;
-        final result = await fetchNetworkData(_virtualNetworkPage, neededCount);
+        late final List<T> result;
+        try {
+          result = await fetchNetworkData(_virtualNetworkPage, neededCount);
+        } catch (_) {
+          // A later cursor/page is allowed to fail without erasing items that
+          // the same transaction has already fetched successfully. This is
+          // common with APIs that protect deeper pagination more aggressively
+          // than their first page and with transient mobile network changes.
+          // The partial page is committed below with canLoadMore=false; an
+          // initial request failure still follows the normal error path.
+          if (combinedResult.isEmpty) rethrow;
+          break;
+        }
         requestCount++;
         if (result.isEmpty) break;
 

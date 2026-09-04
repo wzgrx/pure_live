@@ -7,7 +7,7 @@ import 'package:pure_live/common/base/server_remote_page_controller.dart';
 import 'package:pure_live/get/get.dart';
 
 class _FixedController extends ServerFixedPageController<int> {
-  _FixedController() : super(fixedServerPageSize: 20);
+  _FixedController({super.fixedServerPageSize = 20});
 
   final requests = <Completer<List<int>>>[];
 
@@ -90,6 +90,38 @@ void main() {
     await refresh;
 
     expect(controller.list, refreshedPage);
+  });
+
+  test('remote page commits earlier results when only a later cursor fails', () async {
+    final controller = _RemoteController();
+    addTearDown(controller.onClose);
+
+    final load = controller.loadData();
+    await _waitForRequest(controller.requests, 1);
+    controller.requests[0].complete(List<int>.generate(18, (index) => index + 1));
+    await _waitForRequest(controller.requests, 2);
+    controller.requests[1].completeError(StateError('later cursor rejected'));
+    await load;
+
+    expect(controller.list, List<int>.generate(18, (index) => index + 1));
+    expect(controller.pageError.value, isFalse);
+    expect(controller.canLoadMore.value, isFalse);
+  });
+
+  test('fixed page commits earlier results when only a later server page fails', () async {
+    final controller = _FixedController(fixedServerPageSize: 10);
+    addTearDown(controller.onClose);
+
+    final load = controller.loadData();
+    await _waitForRequest(controller.requests, 1);
+    controller.requests[0].complete(List<int>.generate(10, (index) => index + 1));
+    await _waitForRequest(controller.requests, 2);
+    controller.requests[1].completeError(StateError('later server page rejected'));
+    await load;
+
+    expect(controller.list, List<int>.generate(10, (index) => index + 1));
+    expect(controller.pageError.value, isFalse);
+    expect(controller.canLoadMore.value, isFalse);
   });
 
   test('tab pages can bind independent scroll controllers without transferring ownership', () {

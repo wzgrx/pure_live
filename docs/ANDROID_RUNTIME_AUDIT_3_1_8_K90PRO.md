@@ -105,6 +105,11 @@
 - cycle 169 完成 SOOP 当前房间的全链路短录并真实退出 0。热门目录、房间、弹幕连接、`原画 / 高清 / 标清`、线路1、录制写入、停止封装、最新录制卡片及清理均通过；观察窗口内只有两条连接系统消息、没有用户聊天，因此保留 `liveDanmakuVisible=false` 的样本事实，但平台弹幕连接门禁通过。TS 在 11.441 秒内从 6,553,600 B 增至 12,320,768 B，成品为 48,519,002 B、47.732667 秒且包含 H.264 与 AAC，SHA-256 `D39075A0B3E2D26E533563A850EA54B2F31EB96709C36637B74FC342C73CC9D9`。27/27 门禁通过，代理、监控、进程和活动 Wake Lock 全部清理；证据为 `local-artifacts/diagnostics/android-recording-smoke-20260904T230821913/summary.json`。
 - 录制冒烟的 `-ExerciseStreamSelection` 模式现在会选择一个不同的低带宽清晰度及备用线路，等待菜单真正关闭、直播页标签异步提交，再延迟复核标签未回退且页面没有播放器/解码/网络错误；单一清晰度或单一线路按平台能力记为不适用，不制造失败。这样“菜单里看见选项”与“真实源切换成功”成为两层独立证据。
 - cycle 212 在最终 Debug APK 的当前虎牙房间真实执行 `蓝光30M → 流畅` 与 `线路1 → 线路2`。两个选择分别在 UIAutomator 观察的 2,940 ms、2,942 ms 内提交，三秒后的稳定快照仍保留新标签，7 条真实弹幕继续更新；随后同一低清晰度/备用线路会话完成短录，得到 16,380,319 B、32.004667 秒、H.264 + AAC 的 MP4，SHA-256 `63F8759FE678705006F645B9D8C9C9BE882B057059E0A15F6CF9FF88A12BE508`。32/32 门禁、监控移除、进程退出、活动 Wake Lock 清理及 FATAL 过滤全部通过；证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T044047480/summary.json`。
+- cycle 213 的斗鱼样本真实执行 `原画1080P60 → 超清`，3,196 ms 内提交且稳定快照未回退；当前源只给出线路1。4 条实时弹幕继续，切换后的短录为 22,573,698 B、26.582167 秒、H.264 + AAC，32/32 门禁通过；证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T044528385/summary.json`。
+- cycle 214 的快手样本真实执行 `蓝光 质臻 → 超清`，2,990 ms 内提交且保持稳定；当前源只给出线路1。播放、弹幕连接、切换、短录和资源清理 31 项成立，唯一未成立项是可选的 `-RequireLiveDanmaku`：该房间观察窗口没有用户评论。切换后成品 33,286,970 B、32.269667 秒、H.264 + AAC；证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T044822072/summary.json`。
+- cycle 215 的 Bilibili 匿名样本仅返回 `原画`，因此清晰度切换按能力不适用；6 条 CDN 线路中真实执行 `线路1 → 线路2`，3,132 ms 内提交且稳定。弹幕连接成立但当前房间观察窗口无用户消息，其他 31 项成立；切换后短录为 8,510,067 B、27.749333 秒、H.264 + AAC。证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T045116564/summary.json`。
+- cycle 216 的抖音样本真实执行 `高清 → 标清` 与 `线路1 → 线路2`，分别在 2,994 ms、2,978 ms 内提交，稳定快照没有回退；本轮房间安静但弹幕连接成立。切换后的短录为 10,321,701 B、28.933333 秒、H.264 + AAC，31 个常规门禁及 4 个真实切换门禁全部通过；证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T045522555/summary.json`。
+- cycle 217 准备验证网易 CC 时，Android 无线调试从 mDNS serial 消失，第二次 UI 观察收到 `device not found`；该轮在录制前终止，不形成 CC 产品结论。测试包装层现把唤醒阶段实际选中的 serial 通过 `PURELIVE_ADB_SERIAL` 传给整轮命令，录制脚本遇到无线 transport 改名/掉线时会复用唤醒解析器重连一次并同步最终清理目标；原包装层在主错误与清理错误叠加时还会错误解析 `Write-Error` 参数，现改为不覆盖 first failure 的 warning。两份 PowerShell 脚本静态解析通过，待网络 ADB 再次出现时复验 transport 恢复路径。
 - cycle 195 用 `tool/android_recording_center_boundary_smoke.ps1` 验证录制中心交互边界。手机宽度下 9 个状态固定为 3×3 网格且一次全部可见；状态区左右各 12 次、任务区左右各 8 次手势后仍停留在录制中心并保留全部状态入口。任务列表向下 24+8 次和向上 24+8 次到达两端后，额外同向手势前后的可见语义签名分别保持一致，证明页面没有无限横移、纵向越界或回弹漂移。截图同时确认顶部状态选择器与底部导航不随任务列表滚动。测试没有删除或重启任何现存录制任务，最终真实退出 0；证据为 `local-artifacts/diagnostics/android-recording-center-boundary-20260905T020844875/summary.json`。
 - cycle 198 用 `tool/android_color_picker_smoke.ps1` 和最终 Debug APK 验证统一颜色入口。主题色弹窗明确使用“选择色阶”和 6 位 RGB，不再把色阶标题误写成透明度；加载颜色弹窗显示真实 alpha 滑块、透明棋盘和始终可编辑的 8 位 ARGB。输入 `0x800080DD` 后预览/代码同步，显式取消并重开恢复原始 `0xFFA0CAFD`，全部命名断言通过。cycle 197 已通过产品断言，但 UIAutomator 生成树时收起输入法，测试器随后用系统返回提前关闭弹窗并把找不到“取消”误报为失败；脚本现区分“输入法仍在”和“弹窗已由系统返回取消”两个合法路径。包装器在取得 C 轮后唤醒无密码锁屏设备、测试期间临时保持供电常亮，并在交棒前恢复 10 分钟锁屏策略。最终证据为 `local-artifacts/diagnostics/android-color-picker-20260905T024906912/summary.json`。
 
@@ -124,7 +129,7 @@
 
 1. Bilibili 普通横向房间的普通页、横屏全屏、系统返回与系统 PiP 已在 cycle 206 闭环；继续补充应用外悬浮窗授权后的独立窗口和异常宽高比样本；
 2. 抖音原生竖屏房间的普通页、竖屏沉浸、横屏居中背景和系统 PiP 已在 cycle 205 闭环；继续补充应用外悬浮窗授权后的独立窗口、不同平台竖屏样本及异常元数据切换；
-3. 虎牙的实际画质/线路切换及切换后短录已通过；继续对斗鱼、快手、Bilibili、抖音、网易 CC、Twitch、SOOP、YY 的多选项能力逐项执行同一真实切换门禁，并补充虎牙短签名续接与 2～3 分钟录制；
+3. 虎牙、斗鱼、快手、Bilibili、抖音的当前可用画质/线路已执行真实切换及切换后短录；继续对网易 CC、Twitch、SOOP、YY 的多选项能力执行同一门禁，并补充虎牙短签名续接与 2～3 分钟录制；
 4. 纯音频往返已完成单轮；继续执行后台总开关、锁屏、重复 10 次系统 PiP 与停止计时；
 5. Bilibili、虎牙、斗鱼、抖音、快手、YY、网易 CC、Twitch 和 SOOP 单次短录已通过；继续补充录制中心删除和滚动边界、重试分片和稳定会话开始时间；
 6. 30～60 分钟资源趋势、CPU/温度、播放器结束后的进程/媒体会话/Wake Lock 回落。

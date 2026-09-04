@@ -39,8 +39,14 @@ $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rawC
 $effectiveCommand = @"
 `$turnFailure = `$null
 try {
-    & '.\tool\wake_android_device.ps1' -StayAwake
+    `$wakeOutput = @(& '.\tool\wake_android_device.ps1' -StayAwake)
     if (`$LASTEXITCODE -ne 0) { throw "Device wake guard exited with code `$LASTEXITCODE." }
+    `$wakeOutput | Write-Output
+    `$wakeState = `$wakeOutput | Select-Object -Last 1 | ConvertFrom-Json
+    if ([string]::IsNullOrWhiteSpace([string]`$wakeState.Serial)) {
+        throw 'Device wake guard did not return a target serial.'
+    }
+    `$env:PURELIVE_ADB_SERIAL = [string]`$wakeState.Serial
     `$decodedCommand = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('$encodedCommand'))
     & ([scriptblock]::Create(`$decodedCommand))
     if (`$LASTEXITCODE -ne 0) { throw "Device command exited with code `$LASTEXITCODE." }
@@ -48,11 +54,15 @@ try {
     `$turnFailure = `$_
 } finally {
     try {
-        & '.\tool\wake_android_device.ps1' -ReleaseStayAwake
+        `$releaseArguments = @{ ReleaseStayAwake = `$true }
+        if (-not [string]::IsNullOrWhiteSpace(`$env:PURELIVE_ADB_SERIAL)) {
+            `$releaseArguments.Serial = `$env:PURELIVE_ADB_SERIAL
+        }
+        & '.\tool\wake_android_device.ps1' @releaseArguments
         if (`$LASTEXITCODE -ne 0) { throw "Device wake guard cleanup exited with code `$LASTEXITCODE." }
     } catch {
         if (`$null -eq `$turnFailure) { `$turnFailure = `$_ }
-        else { Write-Error "Device wake guard cleanup also failed: `$(`$_.Exception.Message)" -ErrorAction Continue }
+        else { Write-Warning ('Device wake guard cleanup also failed: ' + [string]`$_.Exception.Message) }
     }
 }
 if (`$null -ne `$turnFailure) { throw `$turnFailure }

@@ -69,7 +69,7 @@
 | A3-02 | PASS | K90 Pro / cycle 208 使用提交 `6e1deea1` 的最终 Debug APK，在当前抖音原生竖屏房间完成普通页 → 下滑竖屏全屏 → 可见控制栏上滑恢复 → 横屏全屏 → 系统返回 → PiP → 恢复全链路；普通页和竖屏沉浸均为 `1200×2608`，横屏为 `2608×1200` 且主体居中、两侧使用环境背景，PiP 保持竖向比例，恢复后仍为同一直播间并继续显示弹幕。9 项运行断言及致命日志检查全部通过；脚本 `tool/android_presentation_smoke.ps1 -Mode Portrait`，证据 `local-artifacts/diagnostics/android-portrait-presentation-20260905T042024096/summary.json`。几何与手势确定性覆盖另见 `test/portrait_stream_support_test.dart`、`test/live_stream_geometry_hint_test.dart`、`test/mobile_video_frame_test.dart`、`test/live_play_normal_layout_test.dart` 与 `test/portrait_fullscreen_interaction_test.dart` |
 | A3-03 | NR | 内嵌黑边/延迟几何/异常元数据：稳定仲裁后再切换，不污染下一房间或重启后的普通流 |
 | A3-04 | RUN | cycle 208 在抖音竖屏源的横屏全屏中发送 Android 系统返回，先恢复 `1200×2608` 普通直播页且竖屏手势与弹幕栏仍存活；竖屏沉浸的控制栏现直接接管上滑恢复，不再依赖控制栏先隐藏。对话框/底部面板的返回优先级及连续第二次返回仍按本行继续 |
-| A3-05 | RUN | `tool/android_recording_smoke.ps1 -ExerciseStreamSelection` 现把“仅打开菜单”提升为真实选择、提交后稳定及错误态门禁。K90 Pro / cycle 212 在最终 Debug APK 的当前虎牙房间取得 6 档清晰度和 4 条线路，真实执行 `蓝光30M → 流畅`（2,940 ms）及 `线路1 → 线路2`（2,942 ms）；两个标签只在异步切换完成后更新，继续稳定播放、接收 7 条真实弹幕并完成 H.264 + AAC 短录，32/32 断言通过。确定性回归另覆盖稳定平台 ID、服务端实际档位回写、相同 URL 拒绝假切换、快速点击 latest-wins、失败原子回滚和新线路数钳制；Android 原生播放器尚不具备 Windows 离屏首帧接管能力，其余平台实际多档/多线路切换继续逐项采样。证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T044047480/summary.json` |
+| A3-05 | RUN | `tool/android_recording_smoke.ps1 -ExerciseStreamSelection` 现把“仅打开菜单”提升为真实选择、提交后稳定及错误态门禁。K90 Pro / cycle 212～216 已在最终 Debug APK 分别完成虎牙 `蓝光30M→流畅`/`线路1→线路2`、斗鱼 `原画1080P60→超清`、快手 `蓝光 质臻→超清`、Bilibili `线路1→线路2`、抖音 `高清→标清`/`线路1→线路2`，每次切换后继续稳定播放并完成 H.264 + AAC 短录；单一档位/线路按平台实际能力记为不适用。确定性回归另覆盖稳定平台 ID、服务端实际档位回写、相同 URL 拒绝假切换、快速点击 latest-wins、失败原子回滚和新线路数钳制；Android 原生播放器尚不具备 Windows 离屏首帧接管能力，网易 CC、Twitch、SOOP、YY 的实际切换继续逐项采样。首个证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T044047480/summary.json`，其余逐轮证据见 Android 审计 |
 | A3-06 | NR | 播放意外暂停、buffering、EOF、签名过期均有界恢复；用户暂停不被自动恢复 |
 | A3-07 | RUN | 虎牙普通视频在其他应用前台时连续后台播放 10 分钟，21/21 媒体状态均为 `PLAYING`；PSS/RSS 呈波动平台，CPU 平均 2.24%、最高 5%，结束后媒体会话与 Wake Lock 释放。横竖屏、PiP、纯音频和锁屏组合仍按矩阵继续 |
 | A3-08 | RUN | 多画面真全屏显式退出表面已完成聚焦 Widget 回归：安全区 44×44 按钮、系统留白剥离、退出回调和按钮外格子点击隔离均通过。v3.1.3 Windows Release 便携包已验证按钮与 `Escape` 均从 `1536×960` 真全屏恢复到 `1276×718` 普通窗口；Android 16 正式 APK 已覆盖安装、冷启动正常，系统返回/方向恢复与真实多路播放连续性仍待不打扰用户前台操作时复验 |
@@ -88,11 +88,11 @@
 
 | 平台 | 目录/搜索 | 详情/状态 | 热度/在线语义 | 画质/线路 | 弹幕 | 播放 | 录制 |
 |---|---|---|---|---|---|---|---|
-| Bilibili | PASS（热门双列） | PASS（当前房间） | PASS（热门热度降序） | RUN（显示/选择入口） | PASS（真实消息） | PASS（视频/音频/PiP 恢复） | PASS（当前短录） |
-| 斗鱼 | PASS（热门进房） | PASS（当前房间） | PASS（热度标签） | RUN（4 档/线路1，待切换） | PASS（真实消息） | PASS（1080p60/4K 样本） | PASS（两次短录） |
+| Bilibili | PASS（热门双列） | PASS（当前房间） | PASS（热门热度降序） | RUN（当前匿名样本仅原画；真实 `线路1→线路2` 后稳定，6 线路可选） | PASS（连接；本轮安静样本） | PASS（视频/音频/PiP 恢复） | PASS（切换后短录） |
+| 斗鱼 | PASS（热门进房） | PASS（当前房间） | PASS（热度标签） | PASS（4 档；真实 `原画1080P60→超清` 后稳定；当前仅线路1） | PASS（真实消息） | PASS（1080p60/4K 样本） | PASS（切换后短录） |
 | 虎牙 | PASS（热门进房） | PASS（当前房间） | RUN（当前卡片） | PASS（6 档清晰度、4 线路；真实 `蓝光30M→流畅`、`线路1→线路2` 后稳定） | PASS（真实消息） | PASS（当前样本） | PASS（切换后短录） |
-| 抖音 | PASS（热门进房） | PASS（横/竖样本） | PASS（累计观看标签） | PASS（5 档/2 线路入口，纯音频项已隔离） | PASS（真实消息） | PASS（当前样本） | PASS（当前短录） |
-| 快手 | PASS（热门进房） | PASS（当前房间） | PASS（真实在线人数） | RUN（4 档/线路1，待切换） | PASS（真实消息） | PASS（当前样本） | PASS（当前短录） |
+| 抖音 | PASS（热门进房） | PASS（横/竖样本） | PASS（累计观看标签） | PASS（纯音频项已隔离；当前 3 档/2 线路真实 `高清→标清`、`线路1→线路2` 后稳定） | PASS（连接；活跃样本另有真实消息） | PASS（当前样本） | PASS（切换后短录） |
+| 快手 | PASS（热门进房） | PASS（当前房间） | PASS（真实在线人数） | PASS（4 档；真实 `蓝光 质臻→超清` 后稳定；当前仅线路1） | PASS（连接；活跃样本另有真实消息） | PASS（当前样本） | PASS（切换后短录） |
 | 网易 CC | PASS（分类迁移回退/热门进房） | PASS（当前房间） | RUN（当前卡片） | PASS（高清/原画、2 线路入口） | N/A（当前适配器无弹幕） | PASS（当前样本） | PASS（当前短录） |
 | Twitch（Clash） | PASS（原生搜索/热门） | PASS（当前房间） | PASS（搜索在线人数） | PASS（5 档/线路1入口） | PASS（当前 9 条实时聊天） | PASS（当前样本） | PASS（当前短录） |
 | SOOP Live（Clash） | PASS（热门进房） | PASS（当前房间） | RUN（当前卡片） | PASS（3 档/线路1入口） | RUN（连接通过，安静样本无聊天） | PASS（当前样本） | PASS（当前短录） |

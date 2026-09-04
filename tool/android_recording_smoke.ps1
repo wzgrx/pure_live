@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $Serial,
+    [string] $Serial = $env:PURELIVE_ADB_SERIAL,
     [string] $EvidenceDirectory,
     [ValidateRange(20, 300)]
     [int] $RecordSeconds = 45,
@@ -83,6 +83,26 @@ function Invoke-Adb {
         Start-Sleep -Milliseconds 350
         $output = & $adb -s $script:serial @AdbArguments 2>&1
         $exitCode = $LASTEXITCODE
+        $text = $output -join "`n"
+    }
+    if ($exitCode -ne 0 -and $text -match "(?i)device '.*' not found|device offline|transport.*closed") {
+        # Wireless Debugging can rotate from the mDNS alias to a numeric
+        # endpoint while a long recording run is active. Reuse the same wake
+        # guard as the outer lease, adopt its newly resolved serial, and retry
+        # the interrupted observation once instead of invalidating the whole
+        # product result because the host transport name changed.
+        $wakeOutput = @(& (Join-Path $repo 'tool\wake_android_device.ps1') -StayAwake 2>&1)
+        $wakeExitCode = $LASTEXITCODE
+        $wakeJson = $wakeOutput | Where-Object { $_ -match '^\s*\{' } | Select-Object -Last 1
+        if ($wakeExitCode -eq 0 -and $wakeJson) {
+            $wakeState = $wakeJson | ConvertFrom-Json
+            if (-not [string]::IsNullOrWhiteSpace([string]$wakeState.Serial)) {
+                $script:serial = [string]$wakeState.Serial
+                $env:PURELIVE_ADB_SERIAL = $script:serial
+                $output = & $adb -s $script:serial @AdbArguments 2>&1
+                $exitCode = $LASTEXITCODE
+            }
+        }
     }
     if ($exitCode -ne 0) {
         throw "adb failed ($exitCode): $($AdbArguments -join ' ')`n$($output -join "`n")"
@@ -775,6 +795,7 @@ if ([string]::IsNullOrWhiteSpace($Serial)) {
     if ($matched.Count -ne 1) { throw "Requested ADB serial '$Serial' is not online." }
     $script:serial = $Serial
 }
+$env:PURELIVE_ADB_SERIAL = $script:serial
 
 $result = [ordered]@{
     schemaVersion = 1

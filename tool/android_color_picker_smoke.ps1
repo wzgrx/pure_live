@@ -181,9 +181,23 @@ try {
     Save-Screenshot 'loading-color-edited'
     if (-not $result.checks.fullArgbEntryAccepted) { throw 'The full ARGB code did not remain in the edit field.' }
 
+    # UIAutomator may close the software keyboard while producing the dump. In
+    # that state KEYCODE_BACK dismisses the dialog itself instead of only the
+    # IME. Accept both correct cancel paths, but fail if neither the dialog nor
+    # its parent page remains visible.
     Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_BACK') | Out-Null
     Start-Sleep -Milliseconds 350
-    Tap-Text -Text '取消' -EvidenceName 'loading-color-cancel'
+    $afterBack = Save-UiDump 'loading-color-cancel'
+    $cancelAfterBack = Find-UiNode -Document $afterBack -Text '取消'
+    if ($cancelAfterBack) {
+        Tap-UiNode $cancelAfterBack
+        $result.checks.cancelPath = 'explicit-button'
+        Start-Sleep -Milliseconds 900
+    } elseif ((Find-UiNode -Document $afterBack -Text '修改加载颜色')) {
+        $result.checks.cancelPath = 'system-back'
+    } else {
+        throw 'Neither the loading color dialog nor its parent settings page remained after back.'
+    }
     Tap-Text -Text '修改加载颜色' -EvidenceName 'loading-settings-after-cancel'
     $restoredDialog = Save-UiDump 'loading-color-restored'
     $restoredField = @($restoredDialog.SelectNodes('//node') | Where-Object { [string]$_.class -match 'EditText' }) | Select-Object -First 1

@@ -114,5 +114,13 @@ void main() {
       expect(headers, isNot(contains('Device-Id')));
       expect(headers, isNot(contains('Client-Integrity')));
     });
+
+    test('normalizes Twitch integrity expirations expressed in seconds or milliseconds', () {
+      expect(TwitchSite.normalizeIntegrityExpirationMilliseconds(1800000000), 1800000000000);
+      expect(TwitchSite.normalizeIntegrityExpirationMilliseconds('1800000000'), 1800000000000);
+      expect(TwitchSite.normalizeIntegrityExpirationMilliseconds(1800000000000), 1800000000000);
+      expect(TwitchSite.normalizeIntegrityExpirationMilliseconds(0), isNull);
+      expect(TwitchSite.normalizeIntegrityExpirationMilliseconds('invalid'), isNull);
+    });
   });
 }

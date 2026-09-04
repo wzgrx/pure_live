@@ -25,7 +25,8 @@ class TwitchWebIntegrityProvider {
 
   static bool get isSupported => !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS);
 
-  static Future<TwitchWebIntegrityToken?>? _inFlight;
+  static final Map<String, Future<TwitchWebIntegrityToken?>> _inFlight = <String, Future<TwitchWebIntegrityToken?>>{};
+  static Future<void> _evaluationTail = Future<void>.value();
 
   static Future<TwitchWebIntegrityToken?> acquire({
     required String clientId,
@@ -40,7 +41,8 @@ class TwitchWebIntegrityProvider {
     // ProxyController is process-global on Android. Reuse the active browser
     // acquisition instead of racing multiple headless WebViews that could
     // overwrite and clear each other's proxy configuration.
-    final active = _inFlight;
+    final key = '$clientId\u0000$deviceId\u0000${proxyHost ?? ''}\u0000${proxyPort ?? 0}';
+    final active = _inFlight[key];
     if (active != null) return active;
     final request = _acquire(
       clientId: clientId,
@@ -50,11 +52,11 @@ class TwitchWebIntegrityProvider {
       proxyHost: proxyHost,
       proxyPort: proxyPort,
     );
-    _inFlight = request;
+    _inFlight[key] = request;
     try {
       return await request;
     } finally {
-      if (identical(_inFlight, request)) _inFlight = null;
+      if (identical(_inFlight[key], request)) _inFlight.remove(key);
     }
   }
 
@@ -96,13 +98,20 @@ class TwitchWebIntegrityProvider {
     required String clientId,
     required String deviceId,
     required String userAgent,
+    String? integrityToken,
+    void Function(TwitchWebIntegrityToken token)? onIntegrityToken,
     String channel = 'twitch',
     String? proxyHost,
     int? proxyPort,
   }) async {
     if (!isSupported) return null;
     final value = await _evaluate(
-      functionBody: buildGraphQlScript(body: body, clientId: clientId, deviceId: deviceId),
+      functionBody: buildGraphQlScript(
+        body: body,
+        clientId: clientId,
+        deviceId: deviceId,
+        integrityToken: integrityToken,
+      ),
       userAgent: userAgent,
       channel: channel,
       proxyHost: proxyHost,
@@ -111,10 +120,56 @@ class TwitchWebIntegrityProvider {
     if (value is! String || value.trim().isEmpty) {
       throw StateError('Twitch browser GraphQL returned an empty response');
     }
-    return jsonDecode(value);
+    final envelope = jsonDecode(value);
+    if (envelope is! Map) {
+      throw StateError('Twitch browser GraphQL returned an invalid envelope');
+    }
+    final responseBody = envelope['responseBody']?.toString() ?? '';
+    if (responseBody.isEmpty) {
+      throw StateError('Twitch browser GraphQL returned an empty response body');
+    }
+    final integrity = envelope['integrity'];
+    if (integrity is Map) {
+      final token = integrity['token']?.toString().trim() ?? '';
+      final expirationValue = integrity['expiration'];
+      final expiration = expirationValue is num
+          ? expirationValue.toInt()
+          : int.tryParse(expirationValue?.toString() ?? '');
+      if (token.isNotEmpty && expiration != null) {
+        onIntegrityToken?.call(TwitchWebIntegrityToken(token: token, expiration: expiration));
+      }
+    }
+    return jsonDecode(responseBody);
   }
 
   static Future<dynamic> _evaluate({
+    required String functionBody,
+    required String userAgent,
+    required String channel,
+    String? proxyHost,
+    int? proxyPort,
+  }) async {
+    // Android WebView's ProxyController is process-global. Serialize every
+    // integrity/GraphQL browser operation, not only identical token requests,
+    // so one request never clears another request's proxy override.
+    final predecessor = _evaluationTail;
+    final release = Completer<void>();
+    _evaluationTail = release.future;
+    try {
+      await predecessor;
+      return await _evaluateExclusive(
+        functionBody: functionBody,
+        userAgent: userAgent,
+        channel: channel,
+        proxyHost: proxyHost,
+        proxyPort: proxyPort,
+      );
+    } finally {
+      release.complete();
+    }
+  }
+
+  static Future<dynamic> _evaluateExclusive({
     required String functionBody,
     required String userAgent,
     required String channel,
@@ -210,7 +265,12 @@ class TwitchWebIntegrityProvider {
   }
 
   @visibleForTesting
-  static String buildGraphQlScript({required String body, required String clientId, required String deviceId}) {
+  static String buildGraphQlScript({
+    required String body,
+    required String clientId,
+    required String deviceId,
+    String? integrityToken,
+  }) {
     final encodedBody = jsonEncode(body);
     final encodedHeaders = jsonEncode(<String, String>{
       'Accept': 'application/json',
@@ -218,19 +278,94 @@ class TwitchWebIntegrityProvider {
       'Client-ID': clientId,
       'Device-Id': deviceId,
     });
+    final encodedIntegrityHeaders = jsonEncode(<String, String>{'Client-ID': clientId, 'X-Device-Id': deviceId});
+    final encodedInitialToken = jsonEncode(integrityToken?.trim() ?? '');
+    final source = jsonEncode(scriptUrl);
     return '''
-const response = await window.fetch('https://gql.twitch.tv/gql', {
-  headers: $encodedHeaders,
-  body: $encodedBody,
-  method: 'POST',
-  mode: 'cors',
-  credentials: 'omit'
-});
-const responseBody = await response.text();
-if (response.status < 200 || response.status >= 300) {
-  throw new Error('Unexpected Twitch GraphQL status ' + response.status + ': ' + responseBody.slice(0, 240));
+const gqlHeaders = $encodedHeaders;
+const requestBody = $encodedBody;
+const initialToken = $encodedInitialToken;
+const requestGraphQl = async token => {
+  const headers = Object.assign({}, gqlHeaders);
+  if (token) headers['Client-Integrity'] = token;
+  const response = await window.fetch('https://gql.twitch.tv/gql', {
+    headers,
+    body: requestBody,
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'omit'
+  });
+  return {status: response.status, body: await response.text()};
+};
+const failedIntegrity = body => {
+  const normalized = body.toLowerCase();
+  return normalized.includes('failed integrity check') || normalized.includes('integrity token');
+};
+const validateGraphQl = result => {
+  if (result.status < 200 || result.status >= 300) {
+    throw new Error('Unexpected Twitch GraphQL status ' + result.status + ': ' + result.body.slice(0, 240));
+  }
+  return result;
+};
+let result = await requestGraphQl(initialToken);
+let integrity = null;
+if (failedIntegrity(result.body)) {
+  integrity = await new Promise((resolve, reject) => {
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject('Twitch KPSDK readiness timed out');
+    }, 20000);
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      callback(value);
+    };
+    const configure = () => {
+      window.KPSDK.configure([{
+        protocol: 'https:',
+        method: 'POST',
+        domain: 'gql.twitch.tv',
+        path: '/integrity'
+      }]);
+    };
+    const fetchIntegrity = async () => {
+      const response = await window.fetch('https://gql.twitch.tv/integrity', {
+        headers: $encodedIntegrityHeaders,
+        body: null,
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      const responseBody = await response.text();
+      if (response.status !== 200) {
+        throw new Error('Unexpected Twitch integrity status ' + response.status + ': ' + responseBody.slice(0, 240));
+      }
+      return JSON.parse(responseBody);
+    };
+    document.addEventListener('kpsdk-load', configure, {once: true});
+    document.addEventListener('kpsdk-ready', () => {
+      fetchIntegrity().then(
+        value => finish(resolve, value),
+        error => finish(reject, String(error))
+      );
+    }, {once: true});
+    const script = document.createElement('script');
+    script.addEventListener('error', () => finish(reject, 'Twitch KPSDK script failed to load'));
+    script.src = $source;
+    document.body.appendChild(script);
+  });
+  const token = integrity && typeof integrity.token === 'string' ? integrity.token : '';
+  if (!token) throw new Error('Twitch integrity endpoint returned an incomplete token');
+  result = await requestGraphQl(token);
+  if (failedIntegrity(result.body)) {
+    throw new Error('Twitch Chromium GraphQL response still failed integrity validation');
+  }
 }
-return responseBody;
+validateGraphQl(result);
+return JSON.stringify({responseBody: result.body, integrity});
 ''';
   }
 

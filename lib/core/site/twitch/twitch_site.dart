@@ -144,12 +144,16 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
     // replaying it through the already-rejected native socket stack.
     if (TwitchWebIntegrityProvider.isSupported) {
       final proxy = SettingsService.to.proxy;
+      Object? browserError;
+      StackTrace? browserStackTrace;
       try {
         final browserResponse = await TwitchWebIntegrityProvider.postGraphQl(
           body: liveGpl,
           clientId: headers['Client-ID']!,
           deviceId: _deviceId,
           userAgent: headers['User-Agent']!,
+          integrityToken: _usableIntegrityToken,
+          onIntegrityToken: _applyBrowserIntegrityToken,
           proxyHost: proxy.enableAppProxy.v ? proxy.appProxyHost.v : null,
           proxyPort: proxy.enableAppProxy.v ? proxy.appProxyPort.v : null,
         );
@@ -161,10 +165,14 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
         }
       } catch (error, stackTrace) {
         CoreLog.e('Twitch Chromium GraphQL transport failed: $error', stackTrace);
-        if (nativeError == null) {
-          nativeError = error;
-          nativeStackTrace = stackTrace;
-        }
+        browserError = error;
+        browserStackTrace = stackTrace;
+      }
+      // The browser fallback is the last and most capable transport. Surface
+      // its diagnostic rather than an earlier Dart socket error so production
+      // logs identify CORS/KPSDK/GraphQL failures precisely.
+      if (browserError != null && browserStackTrace != null) {
+        Error.throwWithStackTrace(browserError, browserStackTrace);
       }
     }
 
@@ -209,11 +217,30 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
   }
 
   Future<void> _refreshIntegrityToken() async {
+    if (TwitchWebIntegrityProvider.isSupported) {
+      final proxy = SettingsService.to.proxy;
+      try {
+        final browserToken = await TwitchWebIntegrityProvider.acquire(
+          clientId: headers['Client-ID']!,
+          deviceId: _deviceId,
+          userAgent: headers['User-Agent']!,
+          proxyHost: proxy.enableAppProxy.v ? proxy.appProxyHost.v : null,
+          proxyPort: proxy.enableAppProxy.v ? proxy.appProxyPort.v : null,
+        );
+        if (browserToken != null) {
+          _applyBrowserIntegrityToken(browserToken);
+          return;
+        }
+      } catch (error, stackTrace) {
+        CoreLog.e('Twitch Chromium integrity acquisition failed: $error', stackTrace);
+      }
+    }
+
     final integrityHeaders = buildIntegrityHeaders(headers, _deviceId);
     final response = await HttpClient.instance.postJson(integrityApiUrl, header: integrityHeaders);
     final data = _stringMap(response);
     final token = data?['token']?.toString().trim() ?? '';
-    final expiration = _epochMilliseconds(data?['expiration']);
+    final expiration = normalizeIntegrityExpirationMilliseconds(data?['expiration']);
     if (token.isEmpty || expiration == null) {
       throw StateError('Twitch integrity endpoint returned an incomplete token');
     }
@@ -222,6 +249,26 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
       throw StateError('Twitch integrity endpoint returned an expired token');
     }
     _integrityToken = token;
+    _integrityExpiresAt = expiresAt;
+  }
+
+  String? get _usableIntegrityToken {
+    final token = _integrityToken;
+    final expiresAt = _integrityExpiresAt;
+    if (token == null || token.isEmpty || expiresAt == null) return null;
+    return expiresAt.isAfter(DateTime.now().add(const Duration(seconds: 30))) ? token : null;
+  }
+
+  void _applyBrowserIntegrityToken(TwitchWebIntegrityToken browserToken) {
+    final expiration = normalizeIntegrityExpirationMilliseconds(browserToken.expiration);
+    if (expiration == null) {
+      throw StateError('Twitch browser integrity token has an invalid expiration');
+    }
+    final expiresAt = DateTime.fromMillisecondsSinceEpoch(expiration);
+    if (!expiresAt.isAfter(DateTime.now())) {
+      throw StateError('Twitch browser integrity token is already expired');
+    }
+    _integrityToken = browserToken.token;
     _integrityExpiresAt = expiresAt;
   }
 
@@ -238,10 +285,18 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
     _integrityExpiresAt = null;
   }
 
-  static int? _epochMilliseconds(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    return int.tryParse(value?.toString() ?? '');
+  @visibleForTesting
+  static int? normalizeIntegrityExpirationMilliseconds(dynamic value) {
+    final parsed = switch (value) {
+      int number => number,
+      num number => number.toInt(),
+      _ => int.tryParse(value?.toString() ?? ''),
+    };
+    if (parsed == null || parsed <= 0) return null;
+    // Twitch/Streamlink expose this field as Unix seconds, while older API
+    // captures used milliseconds. Accept both without treating a valid
+    // seconds timestamp as a date in January 1970.
+    return parsed < 100000000000 ? parsed * 1000 : parsed;
   }
 
   @visibleForTesting
@@ -665,8 +720,7 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
       }),
     ];
     String requestQuery = "[${queries.map((q) => q.toString()).join(',')}]";
-    getRequestHeaders();
-    var response = await HttpClient.instance.postJson(gplApiUrl, header: headers, data: requestQuery);
+    var response = await getGplResponse(requestQuery);
 
     final decoded = response is List ? response : const <dynamic>[];
     final responses = decoded.map((item) => TwitchResponse.fromJson(item as Map<String, dynamic>)).toList();

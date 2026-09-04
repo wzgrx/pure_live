@@ -532,7 +532,11 @@ class PlayerManager {
   }
 
   void _scheduleVideoGeometryObservation() {
-    _geometryObservationTimer?.cancel();
+    // Coalesce a burst without postponing its deadline. Some adapters repeat
+    // dimensions while a Surface is resizing; a trailing-edge debounce can
+    // then starve detection indefinitely. Source changes explicitly cancel
+    // this timer and fence the observation with a new generation below.
+    if (_geometryObservationTimer != null) return;
     final generation = _geometrySessionGeneration;
     _geometryObservationTimer = Timer(const Duration(milliseconds: 120), () {
       _geometryObservationTimer = null;
@@ -932,8 +936,8 @@ class PlayerManager {
       _cancelTransientLiveRetry();
     }
     // Start a geometry generation for every new source, including quality and
-    // CDN switches in the same room. Same-room presentation remains visible;
-    // another room receives only its own bounded cache entry.
+    // CDN switches in the same room. Every source starts with fresh evidence;
+    // room identity alone must not carry a stale crop or orientation forward.
     _beginVideoGeometrySession(room, selectedUrl: url);
 
     // Recovery needs the complete request even when the preferred native

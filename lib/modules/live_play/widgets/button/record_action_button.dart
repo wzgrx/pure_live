@@ -1,3 +1,5 @@
+import 'record_action_content.dart';
+
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/recorder/models/record_status.dart';
@@ -74,36 +76,7 @@ class RecordActionButton extends StatelessWidget {
             onPressed: () {
               _handlePressed(context, task: task, exists: exists, isRunning: isRunning);
             },
-            child: compactHeader
-                ? AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    transitionBuilder: (child, animation) {
-                      return ScaleTransition(scale: animation, child: child);
-                    },
-                    child: Icon(icon, key: ValueKey(icon), size: 18),
-                  )
-                : AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    child: Row(
-                      key: ValueKey(label),
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(icon, size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          label,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            child: RecordActionContent(compactHeader: compactHeader, label: label, icon: icon),
           ),
         ),
       );

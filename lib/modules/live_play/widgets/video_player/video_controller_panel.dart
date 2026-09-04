@@ -25,6 +25,7 @@ import 'package:pure_live/modules/live_play/widgets/danmaku/danmaku_settings_bin
 import 'package:pure_live/modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart';
 import 'package:pure_live/player/core/portrait_stream_support.dart';
 import 'package:pure_live/modules/live_play/widgets/layout/portrait_fullscreen_interaction.dart';
+import 'package:pure_live/modules/live_play/widgets/layout/bottom_control_surface.dart';
 
 @visibleForTesting
 enum TopActionLeadingSlot { back, datetime, battery }
@@ -244,7 +245,11 @@ class _VideoControllerPanelState extends State<VideoControllerPanel> {
                 LockButton(controller: controller),
                 const PortraitStreamDiagnosticsBadge(),
                 TopActionBar(controller: controller, barHeight: barHeight),
-                BottomActionBar(controller: controller, barHeight: bottomBarHeight),
+                BottomActionBar(
+                  controller: controller,
+                  barHeight: bottomBarHeight,
+                  portraitFullscreen: screenMode == VideoMode.portraitFullscreen,
+                ),
               ],
             ),
           );
@@ -1907,24 +1912,26 @@ class _StreamChoicePane extends StatelessWidget {
 
 // Bottom action bar widgets
 class BottomActionBar extends StatelessWidget {
-  const BottomActionBar({super.key, required this.controller, required this.barHeight});
+  const BottomActionBar({
+    super.key,
+    required this.controller,
+    required this.barHeight,
+    required this.portraitFullscreen,
+  });
 
   final VideoController controller;
   final double barHeight;
+  // Keep the layout and its height from the same parent mode snapshot.
+  final bool portraitFullscreen;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       bool shouldShow =
           (controller.showController.value || controller.isMenuOpen.value) && !controller.showLocked.value;
-      final portraitFullscreen =
-          controller.livePlayController.state.value.ui.screenMode == VideoMode.portraitFullscreen;
-      return AnimatedPositioned(
-        bottom: shouldShow ? 0 : -barHeight,
-        left: 0,
-        right: 0,
+      return BottomControlSurface(
+        visible: shouldShow,
         height: barHeight,
-        duration: const Duration(milliseconds: 300),
         child: PortraitFullscreenRestoreGestureRegion(
           enabled: portraitFullscreen,
           onRestore: () => unawaited(controller.exitPortraitFullScreen()),

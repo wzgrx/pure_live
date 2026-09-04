@@ -180,6 +180,81 @@ void main() {
     await manager.dispose();
   });
 
+  test('repeated decoder dimensions cannot starve portrait detection', () async {
+    final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, emittedWidth: 720, emittedHeight: 1280);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: mediaKit});
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    await manager.play(
+      'https://cdn.example/portrait.flv',
+      const ['https://cdn.example/portrait.flv'],
+      const {},
+      room: LiveRoom(roomId: 'portrait', platform: 'test'),
+    );
+    for (var frame = 0; frame < 60; frame++) {
+      mediaKit._width.add(720);
+      mediaKit._height.add(1280);
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
+    // Keep the producer active while checking; waiting for it to become quiet
+    // would conceal an indefinitely postponed trailing-edge geometry timer.
+    final snapshot = manager.videoGeometry.value;
+    await manager.dispose();
+    expect(snapshot.orientation, VideoSourceOrientation.portrait);
+    expect(snapshot.isStable, isTrue);
+  });
+
+  test('PiP return and temporary null dimensions preserve the current source geometry', () async {
+    final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, emittedWidth: 720, emittedHeight: 1280);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: mediaKit});
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    await manager.play(
+      'https://cdn.example/portrait.flv',
+      const ['https://cdn.example/portrait.flv'],
+      const {},
+      room: LiveRoom(roomId: 'portrait', platform: 'test'),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    await Future<void>.delayed(const Duration(seconds: 1));
+    expect(manager.isVerticalVideo.value, isTrue);
+    for (var cycle = 0; cycle < 3; cycle++) {
+      manager.isInPip.value = true;
+      mediaKit._width.add(null);
+      mediaKit._height.add(null);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      manager.isInPip.value = false;
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(manager.isVerticalVideo.value, isTrue);
+      expect(manager.currentPresentationAspectRatio, closeTo(9 / 16, 0.001));
+      mediaKit._width.add(720);
+      mediaKit._height.add(1280);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+    }
+    expect(mediaKit.openedUrls, hasLength(1));
+    await manager.dispose();
+  });
+
+  test('a pending portrait sample cannot contaminate a new landscape source', () async {
+    final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, emittedWidth: 720, emittedHeight: 1280);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: mediaKit});
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    final room = LiveRoom(roomId: 'switching', platform: 'test');
+    await manager.play('https://cdn.example/portrait.flv', const [], const {}, room: room);
+    mediaKit.emittedWidth = null;
+    mediaKit.emittedHeight = null;
+    await manager.play('https://cdn.example/landscape.flv', const [], const {}, room: room);
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    expect(manager.videoGeometry.value.hasValidDimensions, isFalse);
+    expect(manager.isVerticalVideo.value, isFalse);
+    mediaKit._width.add(1920);
+    mediaKit._height.add(1080);
+    final snapshot = await manager.videoGeometry.stream
+        .firstWhere((snapshot) => snapshot.orientation == VideoSourceOrientation.landscape && snapshot.isStable)
+        .timeout(const Duration(seconds: 2));
+    expect(snapshot.effectiveAspectRatio, closeTo(16 / 9, 0.001));
+    expect(manager.isVerticalVideo.value, isFalse);
+    await manager.dispose();
+  });
+
   test('current source decoder dimensions reach portrait geometry without a path signal', () async {
     final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, emittedWidth: 720, emittedHeight: 1280);
     final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: mediaKit});
@@ -1042,8 +1117,8 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
   final Object? initFailure;
   final bool emitPlaying;
   final bool hangWhileOpening;
-  final int? emittedWidth;
-  final int? emittedHeight;
+  int? emittedWidth;
+  int? emittedHeight;
   final List<String> openedUrls = <String>[];
   final StreamController<PlayerState> _state = StreamController<PlayerState>.broadcast(sync: true);
   final StreamController<bool> _playing = StreamController<bool>.broadcast(sync: true);

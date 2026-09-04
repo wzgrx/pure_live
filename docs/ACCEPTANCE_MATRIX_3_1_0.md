@@ -77,7 +77,7 @@
 | A4-01 | NR | 房间隔离、时间戳、去重、重连、横竖屏/PiP 返回后继续；关闭房间后旧消息不进入新房 |
 | A4-02 | NR | 列表上滑一次即冻结，累计新消息，回到底部一次追平；快速滚动、长按屏蔽、关键词管理 |
 | A4-03 | NR | 主画面、小窗弹幕速度/FPS/密度/字体/描边/区域一致，120 Hz 下无明显跳步 |
-| A4-04 | NR | 本地弹幕 2 秒后同时进入列表和画面；平台体验包、等级、礼物和样式跨入口同步 |
+| A4-04 | RUN | K90 Pro / cycle 193 已验证本地互动开关启用、重启持久化、竖屏与横屏全屏输入、2 秒排队、同一共享列表回显和原设置恢复；横屏输入期间控制栏保持挂载，测试器通过被键盘遮挡时仍可达的 IME `send` 动作提交。平台体验包、等级、礼物和样式跨入口的组合矩阵继续执行。证据：`local-artifacts/diagnostics/android-local-interaction-enabled-20260905T015317914/summary.json` |
 | A4-05 | RUN | 虎牙醒目留言通知不阻塞普通弹幕；WUP 留言板短暂滞后时自动补偿，空板不抛异常，同一快照不重复显示，旧房间未完成请求不会抑制新房间通知。v3.1.7 进一步使用平台 `lMessageId` 区分“可见内容相同但实际是两次付费”的合法事件，并将会话去重缓存限制为 512 项；协议定向回归与到期策略合计 11/11 通过：`local-artifacts/build-records/20260831T214641341Z-quality-focused.json`；真实付费消息触发依赖外部房间事件，保留为运行观察项 |
 
 ### A5 平台适配器
@@ -89,10 +89,10 @@
 | 虎牙 | PASS（热门进房） | PASS（当前房间） | RUN（当前卡片） | RUN（蓝光30M/线路1，待切换） | PASS（真实消息） | PASS（当前样本） | PASS（当前短录） |
 | 抖音 | PASS（热门进房） | PASS（横/竖样本） | PASS（累计观看标签） | PASS（5 档/2 线路入口，纯音频项已隔离） | PASS（真实消息） | PASS（当前样本） | PASS（当前短录） |
 | 快手 | PASS（热门进房） | PASS（当前房间） | PASS（真实在线人数） | RUN（4 档/线路1，待切换） | PASS（真实消息） | PASS（当前样本） | PASS（当前短录） |
-| 网易 CC | PASS（分类迁移回退） | NR | NR | NR | NR | NR | NR |
-| Twitch（Clash） | PASS（原生搜索） | NR | PASS（搜索在线人数） | NR | NR | NR | NR |
-| SOOP Live（Clash） | NR | NR | NR | NR | NR | NR | NR |
-| YY | NR | NR | NR | NR | NR | NR | NR |
+| 网易 CC | PASS（分类迁移回退/热门进房） | PASS（当前房间） | RUN（当前卡片） | PASS（高清/原画、2 线路入口） | N/A（当前适配器无弹幕） | PASS（当前样本） | PASS（当前短录） |
+| Twitch（Clash） | PASS（原生搜索/热门） | PASS（当前房间） | PASS（搜索在线人数） | PASS（5 档/线路1入口） | PASS（当前 9 条实时聊天） | PASS（当前样本） | PASS（当前短录） |
+| SOOP Live（Clash） | PASS（热门进房） | PASS（当前房间） | RUN（当前卡片） | PASS（3 档/线路1入口） | RUN（连接通过，安静样本无聊天） | PASS（当前样本） | PASS（当前短录） |
+| YY | PASS（热门进房） | PASS（当前房间） | RUN（当前卡片） | PASS（2 档/线路1入口） | RUN（当前样本） | PASS（HTTPS HLS） | PASS（当前短录） |
 | IPTV | NR | NR | N/A | NR | N/A | NR | NR |
 
 ### A6 录制中心

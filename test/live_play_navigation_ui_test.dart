@@ -56,6 +56,13 @@ void main() {
     }
   });
 
+  test('player expansion controls expose stable accessibility action labels', () {
+    expect(fullscreenActionLabelKey(false), 'enter_fullscreen');
+    expect(fullscreenActionLabelKey(true), 'exit_fullscreen');
+    expect(playerWindowActionLabelKey(false), 'expand_player_window');
+    expect(playerWindowActionLabelKey(true), 'collapse_player_window');
+  });
+
   test('visible playback bars reserve their hit area from danmaku interactions', () {
     const size = Size(800, 450);
 

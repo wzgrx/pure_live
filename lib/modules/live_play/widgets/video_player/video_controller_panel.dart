@@ -83,6 +83,12 @@ bool shouldHandleVideoSurfaceTap({
 const double portraitFullscreenBottomBarHeight = 104;
 
 @visibleForTesting
+String fullscreenActionLabelKey(bool expanded) => expanded ? 'exit_fullscreen' : 'enter_fullscreen';
+
+@visibleForTesting
+String playerWindowActionLabelKey(bool expanded) => expanded ? 'collapse_player_window' : 'expand_player_window';
+
+@visibleForTesting
 double resolveBottomActionBarHeight(VideoMode screenMode, {double regularHeight = 56}) {
   return screenMode == VideoMode.portraitFullscreen ? portraitFullscreenBottomBarHeight : regularHeight;
 }
@@ -2076,23 +2082,42 @@ bool shouldShowFullscreenLocalDanmakuComposer(bool localInteractionEnabled) => l
 class _FullscreenLocalDanmakuComposerState extends State<FullscreenLocalDanmakuComposer> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  bool _pinsControllerBar = false;
 
   VideoController get controller => widget.controller;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        controller.stopHideController();
-      } else {
-        controller.enableController();
-      }
-    });
+    _focusNode.addListener(_handleFocusChanged);
+  }
+
+  void _handleFocusChanged() {
+    if (_focusNode.hasFocus) {
+      _pinsControllerBar = true;
+      // `showController` is allowed to time out while the IME is animating.
+      // Keep the bar mounted through `isMenuOpen` as well, otherwise the
+      // TextField is disposed together with the typed draft before Send can be
+      // pressed on slower Android keyboards.
+      controller.isMenuOpen.value = true;
+      controller.stopHideController();
+      return;
+    }
+    if (_pinsControllerBar) {
+      _pinsControllerBar = false;
+      controller.isMenuOpen.value = false;
+    }
+    controller.enableController();
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_handleFocusChanged);
+    if (_pinsControllerBar && controller.status != PlayerStatus.disposed) {
+      _pinsControllerBar = false;
+      controller.isMenuOpen.value = false;
+      controller.enableController();
+    }
     _focusNode.dispose();
     _textController.dispose();
     super.dispose();
@@ -2314,22 +2339,28 @@ class ExpandWindowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => controller.toggleWindowFullScreen(),
-      child: Container(
-        alignment: Alignment.center,
-        child: RotatedBox(
-          quarterTurns: 1,
-          child: Obx(
-            () => Icon(
-              GlobalPlayerState.to.isWindowFullscreen.value ? Icons.unfold_less_rounded : Icons.unfold_more_rounded,
-              color: Colors.white,
-              size: 26,
+    return Obx(() {
+      final expanded = GlobalPlayerState.to.isWindowFullscreen.value;
+      return Semantics(
+        button: true,
+        label: i18n(playerWindowActionLabelKey(expanded)),
+        child: GestureDetector(
+          excludeFromSemantics: true,
+          onTap: () => controller.toggleWindowFullScreen(),
+          child: Container(
+            alignment: Alignment.center,
+            child: RotatedBox(
+              quarterTurns: 1,
+              child: Icon(
+                expanded ? Icons.unfold_less_rounded : Icons.unfold_more_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -2340,22 +2371,28 @@ class ExpandButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => controller.toggleFullScreen(),
-      child: Container(
-        alignment: Alignment.center,
-        child: Obx(
-          () => Padding(
-            padding: const EdgeInsets.only(left: 6),
-            child: Icon(
-              GlobalPlayerState.to.isFullscreen.value ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
-              color: Colors.white,
-              size: 26,
+    return Obx(() {
+      final expanded = GlobalPlayerState.to.isFullscreen.value;
+      return Semantics(
+        button: true,
+        label: i18n(fullscreenActionLabelKey(expanded)),
+        child: GestureDetector(
+          excludeFromSemantics: true,
+          onTap: () => controller.toggleFullScreen(),
+          child: Container(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Icon(
+                expanded ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

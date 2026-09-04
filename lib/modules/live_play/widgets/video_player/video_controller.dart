@@ -266,7 +266,11 @@ class DanmakuManager {
 
 class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   // 常量定义
-  static const _controllerHideDelay = Duration(seconds: 2);
+  // Two seconds was shorter than the orientation animation plus an
+  // accessibility scan on phones, so controls could disappear before a user
+  // reached Fullscreen or the local composer. Four seconds matches common
+  // media-control behavior while any focused editor/menu still pins the bar.
+  static const _controllerHideDelay = Duration(seconds: 4);
   static const _fullscreenDelay = Duration(milliseconds: 1000);
   static const _volumeHideDelay = Duration(seconds: 1);
   static const _epgLookBackDays = 2;

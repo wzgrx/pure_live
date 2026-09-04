@@ -20,3 +20,15 @@ foreach ($case in $cases) {
     if ($actual -ne $case.Expected) { throw "$($case.Name): expected $($case.Expected), got $actual" }
     Write-Output "PASS $($case.Name)"
 }
+
+foreach ($case in @(
+    @{ Name = 'pidof-no-matches'; Code = 1; Text = ''; Expected = $true },
+    @{ Name = 'pidof-vendor-empty-success'; Code = 0; Text = ''; Expected = $true },
+    @{ Name = 'pidof-still-running'; Code = 0; Text = '1234'; Expected = $false },
+    @{ Name = 'pidof-device-offline'; Code = 1; Text = 'error: device offline'; Expected = $false },
+    @{ Name = 'pidof-command-missing'; Code = 127; Text = ''; Expected = $false }
+)) {
+    $actual = Test-AndroidPidAbsent -ExitCode $case.Code -Output $case.Text
+    if ($actual -ne $case.Expected) { throw "$($case.Name): expected $($case.Expected), got $actual" }
+    Write-Output "PASS $($case.Name)"
+}

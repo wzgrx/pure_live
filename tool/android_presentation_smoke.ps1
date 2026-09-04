@@ -291,6 +291,9 @@ try {
         Save-Screenshot 'portrait-normal'
 
         Swipe-Relative -X1 0.5 -Y1 0.63 -X2 0.5 -Y2 0.96 -DurationMilliseconds 650
+        # Capture the three-second guidance before UIAutomator/orientation
+        # queries consume its visible window. The settled shot is separate.
+        Save-Screenshot 'portrait-entry-hint-immediate'
         $portraitFull = Wait-ForText -Needle '已进入竖屏全屏' -EvidencePrefix 'portrait-fullscreen'
         $result.checks.portraitFullscreenHintVisible = $portraitFull.text.Contains('上滑恢复弹幕栏')
         $result.checks.portraitFullscreenMetrics = Wait-ForOrientation -Orientation portrait

@@ -75,7 +75,7 @@ if ($NoRotation) {
     $encodedTurn = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($effectiveCommand))
     Push-Location $repositoryRoot
     try {
-        & pwsh -NoProfile -EncodedCommand $encodedTurn
+        & pwsh -NoProfile -OutputFormat Text -EncodedCommand $encodedTurn
         $turnExitCode = $LASTEXITCODE
     } finally {
         Pop-Location

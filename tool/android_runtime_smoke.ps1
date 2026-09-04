@@ -348,7 +348,17 @@ try {
 } finally {
     try { Invoke-Adb -AdbArguments @('shell', 'am', 'force-stop', $package) | Out-Null } catch {}
     Start-Sleep -Seconds 2
-    try { Save-Text 'process-after-stop.txt' (Invoke-Adb -AdbArguments @('shell', 'pidof', $package)) } catch {}
+    $result.checks.processGoneAfterStop = $false
+    try {
+        $processResult = & $adb -s $serial shell pidof $package 2>&1
+        $processExitCode = $LASTEXITCODE
+        $processText = $processResult -join "`n"
+        Save-Text 'process-after-stop.txt' $processText
+        $result.checks.processAfterStopQueryExitCode = $processExitCode
+        $result.checks.processGoneAfterStop = Test-AndroidPidAbsent -ExitCode $processExitCode -Output $processText
+    } catch {
+        $result.checks.processAfterStopQueryError = $_.Exception.Message
+    }
     try { Save-Text 'wake-locks-after-stop.txt' (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'power')) } catch {}
     $result.completedAt = [DateTime]::Now.ToString('o')
     $result | ConvertTo-Json -Depth 8 | Out-File -LiteralPath (Join-Path $evidence 'summary.json') -Encoding utf8
@@ -369,6 +379,7 @@ $assertions = [ordered]@{
     afterPipForeground = ($result.checks.afterPipForeground -match $package)
     afterPipDanmakuUiAlive = [bool]$result.checks.afterPipDanmakuUiAlive
     noFatal = [bool]$result.checks.noFatal
+    processGoneAfterStop = [bool]$result.checks.processGoneAfterStop
     returnedForeground = ($result.checks.returnedForeground -match $package)
 }
 $result.assertions = $assertions

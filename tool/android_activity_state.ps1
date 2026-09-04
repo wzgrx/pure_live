@@ -1,4 +1,11 @@
 # Pure parsing helpers: sourcing this file never connects to a device.
+function Test-AndroidPidAbsent {
+    param([int] $ExitCode, [AllowEmptyString()][string] $Output)
+    # Android pidof normally returns 1 for no matches. Transport failures also
+    # return 1, but carry error text and must never count as resource cleanup.
+    return $ExitCode -in @(0, 1) -and [string]::IsNullOrWhiteSpace($Output)
+}
+
 function Test-AndroidTargetPictureInPicture {
     param(
         [Parameter(Mandatory = $true)][AllowEmptyString()][string] $ActivityDump,

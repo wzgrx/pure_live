@@ -25,7 +25,13 @@
 
 ## 当前构建追溯
 
+### 当前阻断观察
+
+最新个别抖音竖屏房间在 PiP 返回后出现黑画面与竖屏入口丢失；此前不同房间通过不覆盖这次失败。详见 `ANDROID_PIP_RETURN_FAILURE_2026_09_05.md`。来源及稳定复现待定位，3.2.0 暂不进入正式发布。
+
 Android Debug 源码 `8cda379d88aafaaf9bbc4c6757ef73530e4943c4`，包含 `54ee0d76` 切换竞态修复。本机构建 112.949 秒，299,135,975 B，SHA-256 `30B9D36B5524ABFA2E98CBC5D4E4ABA08D9D0C4CBEE5F6F6DC23F21C782118A5`。Manifest code 6121，16 个原生库、1262 项 Flutter 资源及 16 KB ELF/ZIP 对齐检查通过。重型进程结束后为 0；记录 `local-artifacts/build-records/20260904T212654625Z-build-androidarm64-debug.json`。
+
+随后补入竖屏提示布局修复的源码 `cf114605a9a4a9ad83838b9d9c884f70fb10fe66` Debug 包也已构建、覆盖安装：118.915 秒，299,153,622 B，SHA-256 `10F6CF00FC569DAC282B91F20358FC8AE9697FCAC1EC1444E53BC88FCB3ED785`。记录 `local-artifacts/build-records/20260904T214456120Z-build-androidarm64-debug.json`。提示快照已目视确认避开控制栏；该构建仍是开发验收包，不是 3.2.0 Release。
 
 ## 发布门禁
 
@@ -40,3 +46,10 @@ Android Debug 源码 `8cda379d88aafaaf9bbc4c6757ef73530e4943c4`，包含 `54ee0d
 3. Android / Windows 用最终提交的安装包完成目标模式与录制复验；资源趋势需要空闲、播放、退出回落对照。
 4. 全平台产物与同一源码提交对应，串行构建、签名及完整性核验，不借用旧包。
 5. README、详细更新日志、已知限制、回滚说明、校验文件、标签与下载链接保持一致；只更新本仓库，不向上游提交 PR。
+
+## 最新补充证据与测试器加固
+
+- `cf114605` 包在 K90 Pro 上的常规运行回归 `local-artifacts/diagnostics/android-runtime-smoke-20260905T055614894/summary.json` 为 16/16：音频进入、视频恢复、目标 Activity PiP、返回弹幕界面及无 FATAL 成立。退出查询明确 code=1 / 空输出，`processGoneAfterStop=true`，证据不再被 pidof 的正常非零返回吞掉。
+- PSS 807,409 KiB、RSS 1,013,492 KiB；gfxinfo 仅 11 帧，CPU 字段未取得。此为 Debug 单点，不代表 Release 性能或长期内存平台期通过。上一短样本 CPU=0 也不作为低占用结论。
+- PiP/退出判定共 13 个纯 PowerShell 正反例通过，包含能力声明、其他应用、包名前缀、空 PID、在线存活、离线错误、命令失败。与真实退出复验分别记录。
+- `android-portrait-presentation-20260905T055016643/portrait-entry-hint-immediate.png` 目视确认提示位于底部控制栏上方；该轮后续 PiP 返回存在前述失败，整轮仍为 FAIL，不将局部提示修复写成整轮通过。

@@ -69,6 +69,20 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             sliver: SliverList.list(
               children: [
+                context.buildGroupTitle(i18n('platform_danmaku_filter')),
+                Obx(
+                  () => context.buildModernCard([
+                    _switch(
+                      theme,
+                      title: i18n('douyu_suspected_automated_filter'),
+                      subtitle: i18n('douyu_suspected_automated_filter_desc'),
+                      value: dm.filterDouyuSuspectedAutomatedMessages.v,
+                      onChanged: (value) => dm.filterDouyuSuspectedAutomatedMessages.v = value,
+                      labelColor: labelColor,
+                    ),
+                  ]),
+                ),
+                const SizedBox(height: 20),
                 context.buildGroupTitle(i18n('danmaku_similarity_filter')),
                 Obx(
                   () => context.buildModernCard([
@@ -310,6 +324,7 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
   Widget _switch(
     ThemeData theme, {
     required String title,
+    String? subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
     required Color labelColor,
@@ -320,9 +335,18 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: Text(
-              title,
-              style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: AppTextStyles.t12.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                ],
+              ],
             ),
           ),
           Switch(value: value, activeThumbColor: theme.colorScheme.primary, onChanged: onChanged),

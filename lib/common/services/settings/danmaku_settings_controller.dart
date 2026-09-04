@@ -18,6 +18,11 @@ class DanmakuSettingsController extends GetxController {
   static const int defaultPipDanmakuFps = 30;
   static const bool defaultNoEmojiMode = false;
   static const bool defaultPipDanmakuNoEmojiMode = false;
+  static const bool defaultFilterDouyuSuspectedAutomatedMessages = true;
+  // Preserve the complete platform feed unless the user explicitly chooses
+  // fuzzy suppression. Enabling this by default can hide a large share of
+  // short messages in busy rooms even though the transport received them.
+  static const bool defaultEnableDanmakuSimilarityFilter = false;
 
   static int normalizeFontWeight(Object? value, {int fallback = 500}) {
     final raw = value is num ? value.toInt() : fallback;
@@ -62,8 +67,20 @@ class DanmakuSettingsController extends GetxController {
   final RxInt pipDanmakuFps = hiveInt('pipDanmakuFps', defaultPipDanmakuFps);
   final RxBool pipDanmakuAutoFps = hiveBool('pipDanmakuAutoFps', true);
 
+  // Douyu sometimes emits room-local chat packets without either of the
+  // decoration/fan markers used by its web client. Keep the conservative
+  // behavior by default, while allowing users who prefer the complete raw
+  // room feed to opt in explicitly.
+  final RxBool filterDouyuSuspectedAutomatedMessages = hiveBool(
+    'filterDouyuSuspectedAutomatedMessages',
+    defaultFilterDouyuSuspectedAutomatedMessages,
+  );
+
   //   Enable danmaku Similarity Filter
-  final RxBool enableDanmakuSimilarityFilter = hiveBool('enableDanmakuSimilarityFilter', true);
+  final RxBool enableDanmakuSimilarityFilter = hiveBool(
+    'enableDanmakuSimilarityFilter',
+    defaultEnableDanmakuSimilarityFilter,
+  );
   final RxInt danmakuSimilarityThreshold = hiveInt('danmakuSimilarityThreshold', 85);
   final RxInt danmakuSimilarityCacheDuration = hiveInt('danmakuSimilarityCacheDuration', 3);
   final RxInt danmakuSimilarityMaxCacheSize = hiveInt('danmakuSimilarityMaxCacheSize', 100);
@@ -164,6 +181,7 @@ class DanmakuSettingsController extends GetxController {
       'pipDanmakuEmitInterval': pipDanmakuEmitInterval.v,
       'pipDanmakuFps': pipDanmakuFps.v,
       'pipDanmakuAutoFps': pipDanmakuAutoFps.v,
+      'filterDouyuSuspectedAutomatedMessages': filterDouyuSuspectedAutomatedMessages.v,
       'enableDanmakuSimilarityFilter': enableDanmakuSimilarityFilter.v,
       'danmakuSimilarityThreshold': danmakuSimilarityThreshold.v,
       'danmakuSimilarityCacheDuration': danmakuSimilarityCacheDuration.v,
@@ -216,7 +234,9 @@ class DanmakuSettingsController extends GetxController {
         .toDouble();
     pipDanmakuFps.v = (json['pipDanmakuFps'] ?? defaultPipDanmakuFps).toInt().clamp(15, 240).toInt();
     pipDanmakuAutoFps.v = json['pipDanmakuAutoFps'] ?? true;
-    enableDanmakuSimilarityFilter.v = json['enableDanmakuSimilarityFilter'] ?? true;
+    filterDouyuSuspectedAutomatedMessages.v =
+        json['filterDouyuSuspectedAutomatedMessages'] ?? defaultFilterDouyuSuspectedAutomatedMessages;
+    enableDanmakuSimilarityFilter.v = json['enableDanmakuSimilarityFilter'] ?? defaultEnableDanmakuSimilarityFilter;
     danmakuSimilarityThreshold.v = (json['danmakuSimilarityThreshold'] ?? 85).toInt().clamp(50, 100).toInt();
     danmakuSimilarityCacheDuration.v = (json['danmakuSimilarityCacheDuration'] ?? 3).toInt().clamp(1, 60).toInt();
     danmakuSimilarityMaxCacheSize.v = (json['danmakuSimilarityMaxCacheSize'] ?? 100).toInt().clamp(20, 1000).toInt();
@@ -278,7 +298,9 @@ class DanmakuSettingsController extends GetxController {
           .toDouble(),
       'pipDanmakuFps': (danmaku['pipDanmakuFps'] ?? defaultPipDanmakuFps).toInt().clamp(15, 240).toInt(),
       'pipDanmakuAutoFps': danmaku['pipDanmakuAutoFps'] ?? true,
-      'enableDanmakuSimilarityFilter': danmaku['enableDanmakuSimilarityFilter'] ?? true,
+      'filterDouyuSuspectedAutomatedMessages':
+          danmaku['filterDouyuSuspectedAutomatedMessages'] ?? defaultFilterDouyuSuspectedAutomatedMessages,
+      'enableDanmakuSimilarityFilter': danmaku['enableDanmakuSimilarityFilter'] ?? defaultEnableDanmakuSimilarityFilter,
       'danmakuSimilarityThreshold': (danmaku['danmakuSimilarityThreshold'] ?? 85).toInt().clamp(50, 100).toInt(),
       'danmakuSimilarityCacheDuration': (danmaku['danmakuSimilarityCacheDuration'] ?? 3).toInt().clamp(1, 60).toInt(),
       'danmakuSimilarityMaxCacheSize': (danmaku['danmakuSimilarityMaxCacheSize'] ?? 100)

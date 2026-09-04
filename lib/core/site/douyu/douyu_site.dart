@@ -21,7 +21,9 @@ class DouyuSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomRe
   String name = "斗鱼直播";
 
   @override
-  LiveDanmaku getDanmaku() => DouyuDanmaku();
+  LiveDanmaku getDanmaku() => DouyuDanmaku(
+    filterSuspectedAutomatedMessages: () => SettingsService.to.danmaku.filterDouyuSuspectedAutomatedMessages.v,
+  );
 
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {

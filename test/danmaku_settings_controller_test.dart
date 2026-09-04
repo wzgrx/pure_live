@@ -52,7 +52,8 @@ void main() {
       expect(config['repeatedDanmakuWindowSeconds'], 5);
       expect(config['danmakuFontWeight'], 500);
       expect(config['pipDanmakuFontWeight'], 500);
-      expect(config['enableDanmakuSimilarityFilter'], isTrue);
+      expect(config['filterDouyuSuspectedAutomatedMessages'], isTrue);
+      expect(config['enableDanmakuSimilarityFilter'], isFalse);
       expect(config['danmakuSimilarityThreshold'], 85);
     });
 
@@ -72,6 +73,22 @@ void main() {
       expect(config['danmakuSimilarityThreshold'], 50);
       expect(config['danmakuSimilarityCacheDuration'], 60);
       expect(config['danmakuSimilarityMaxCacheSize'], 20);
+    });
+
+    test('preserves an explicit similarity-filter choice from backup', () {
+      final config = DanmakuSettingsController.extractConfig({
+        'danmaku': {'enableDanmakuSimilarityFilter': true},
+      });
+
+      expect(config['enableDanmakuSimilarityFilter'], isTrue);
+    });
+
+    test('preserves an explicit Douyu platform-filter choice from backup', () {
+      final config = DanmakuSettingsController.extractConfig({
+        'danmaku': {'filterDouyuSuspectedAutomatedMessages': false},
+      });
+
+      expect(config['filterDouyuSuspectedAutomatedMessages'], isFalse);
     });
 
     test('clamps the repeated-text merge window from imported settings', () {

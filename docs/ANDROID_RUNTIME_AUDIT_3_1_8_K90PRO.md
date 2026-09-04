@@ -88,6 +88,16 @@
 - cycle 54 强制锁屏/Dozing 60 秒，Bilibili 同一 TS 从 1,310,720 B 增至 7,602,176 B；Pure Live 进程与 `AudioService` 媒体前台服务保持活动，唤醒解锁后仍回到原直播间。停止后得到 11,224,519 B、112.749333 秒、H.264 + AAC MP4；播放、弹幕、画质/线路、锁屏写入、恢复、封装、监控移除、进程和 Wake Lock 清理共 25 项断言全部通过。证据为 `local-artifacts/diagnostics/android-recording-smoke-20260902T004408576/summary.json`。
 - cycle 157 使用当前维护分支对应的 `3.1.8 / 6121` arm64 Debug 包再次抽样抖音。所选“篮球直播”房间完成播放、弹幕 WebSocket 建连、4 个视频清晰度入口、2 条线路、持续写入、停止封装、录制中心状态及退出资源清理；私有 TS 在 2.804 秒内从 2,359,296 B 增至 3,145,728 B，最终 MP4 为 15,373,448 B、39.033333 秒，含 H.264 视频和 AAC 音频。26 个非聊天门禁全部通过，`-RequireLiveDanmaku` 单独因该房间观察窗口内只有两条连接系统消息、没有用户聊天而报 `liveDanmakuVisible=false`；该结果明确保留为“当前样本无聊天”，不把安静房间伪装成抖音弹幕回归。生产 Webcast 链路另有活跃房间 5 秒 47 条 chat 的主机实时探针证据。实机证据为 `local-artifacts/diagnostics/android-recording-smoke-20260904T201523918/summary.json`。
 
+### 7.1 YY HTTPS HLS 录制根因与修复复验
+
+- YY 播放正常但录制失败的 first-invalid-state 已定位到 FFmpeg 的**子资源**请求，而不是房间接口、保存目录或顶层播放列表。cycle 158 中 `-ca_file` 已使 FFmpeg 成功打开 `https://sslproxy.yy.com:4443/...m3u8`，随后媒体分片的 OpenSSL 上下文仍报告 `certificate verify failed`。FFmpeg 9.0.1 的 `hls.c` 通过 `ffio_copy_url_options` 创建子请求，而 `aviobuf.c` 的复制白名单只有 headers、user-agent、cookies、proxy、referer、timeout 与 icy，没有 `ca_file`；因此顶层证书配置不会传播给子播放列表、密钥和分片。
+- cycle 159 实证否定了仅设置 `SSL_CERT_FILE` 的初版设想：当前 FFmpegKit/OpenSSL 组合仍在分片请求复现同一证书错误。该方案已从提交历史撤除，没有保留一个“测试绿但真机失败”的实现。
+- 最终实现只在 Android/Linux 的 HTTPS HLS 录制输入上建立随机端口、随机路径的 loopback relay。上游播放列表、重定向、密钥和媒体分片由 Dart `HttpClient` 按系统信任链及主机名验证；播放列表内的相对/绝对 URI 与 `URI="..."` 属性改写为短时本地 URL，FFmpeg 不再为嵌套 HLS 资源建立第二套缺少信任库的 TLS 上下文。Range、User-Agent、Referer 与自定义请求头继续转发，relay 在录制完成、取消、创建会话失败和执行异常时幂等关闭；Windows、非 HLS、HTTP、RTMP/RTSP 与本地文件路径保持原链路。
+- cycle 160 首次 relay 样本已越过 TLS，但暴露 FFmpeg 会在发起请求前校验本地 opaque URL 后缀，报 `not in allowed_segment_extensions`。relay 现在保留 FFmpeg 已知的媒体后缀，CDN 使用无后缀或脚本式地址时采用本地 `.ts` 提示；上游真实 URI 仍只保存在内存映射中。确定性测试覆盖主/子播放列表、相对分片、AES key URI、查询参数、请求头、字节内容与非 HLS 旁路。
+- cycle 161 已取得首个真实 YY 成品，但旧测试器把同屏历史任务的“最近失败”算到本轮，并用按下录制按钮后的完整墙钟要求媒体覆盖尚未产生输出的启动阶段，产生两个假阴性。录制中心现按“可操作状态优先、同状态最新任务优先”稳定排序；测试器只检查刚完成且含时长/大小的最新卡片，并从时长下限扣除实测的有界启动/双采样区间，历史失败记录仍原样保留。
+- 最终 cycle 162 在提交 `806d47ab` 的 arm64 Debug APK 上真实退出 0，27/27 命名门禁通过。YY 当前房间给出 `高清 · 1080p / 流畅 · 360p` 与线路1；私有 TS 在 4.853 秒的双采样窗口内从 786,432 B 增至 1,048,576 B，停止后得到 5,349,637 B、50.954344 秒的 H.264 1080×1920 + AAC MP4，SHA-256 为 `741454DDB2C8437F84AD271FD4720A28ED86591480E7C3CDCD954934090CA5C4`。本轮没有证书、扩展名或输入打开失败；最新卡片可见且无本轮失败，监控项、进程和活动 Wake Lock 均清理。
+- 最终 APK 为 301,883,971 B，SHA-256 `64AB56AE451156395EDFE48A54B3D8B70A7492256EB614FBE06A6E58C9D254BD`；16 个 arm64 原生库的 ELF LOAD 对齐和 APK `zipalign -P 16` 继续通过。源码回归为 12/12 且 Analyze 0 issue，质量记录 `local-artifacts/build-records/20260904T134219676Z-quality-focused.json`，构建记录 `local-artifacts/build-records/20260904T134410027Z-build-androidarm64-debug.json`，最终实机证据 `local-artifacts/diagnostics/android-recording-smoke-20260904T214440005/summary.json`。
+
 ## 8. 后续实机顺序
 
 手机空闲且 Pure Live 处于前台后，按以下顺序继续，并在每次触控前保留前台保护：
@@ -96,5 +106,5 @@
 2. 抖音原生竖屏房间：普通页、竖屏沉浸、横屏居中背景、PiP 与应用小窗；
 3. 虎牙、斗鱼和快手的当前短录、画质/线路入口、真实弹幕与清理已通过；继续执行实际画质/线路切换、短签名续接与 2～3 分钟录制；
 4. 纯音频往返已完成单轮；继续执行后台总开关、锁屏、重复 10 次系统 PiP 与停止计时；
-5. Bilibili、虎牙、斗鱼、抖音和快手单次短录已通过；继续补充录制中心指标的连续单调采样、删除和滚动边界，以及 YY、Twitch、SOOP、CC 等平台、重试分片和稳定会话开始时间；
+5. Bilibili、虎牙、斗鱼、抖音、快手和 YY 单次短录已通过；继续补充录制中心删除和滚动边界，以及 Twitch、SOOP、CC 等平台、重试分片和稳定会话开始时间；
 6. 30～60 分钟资源趋势、CPU/温度、播放器结束后的进程/媒体会话/Wake Lock 回落。

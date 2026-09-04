@@ -8,7 +8,7 @@
 
 | Issue | 来源与首个错误状态 | 维护分支处置 | 验证边界 |
 |---|---|---|---|
-| [#850 Android 颜色选择器不能调透明度](https://github.com/liuchuancong/pure_live/issues/850) | 上游和维护分支共有的 UI/持久化缺陷。旧页面没有启用 `ColorPicker.enableOpacity`，却把色阶标题写成“选择透明度”；加载颜色保存 `color.hex` 又会丢失 alpha。依赖自身的代码输入框固定为 6 位且只在色轮页可编辑，不能完成 AARRGGBB 编辑 | 新增统一 `AppColorPickerDialog`：需要透明度的加载颜色提供真实 alpha 滑块和始终可见的 8 位 ARGB 输入；主题色与小窗弹幕颜色使用 6 位 RGB，避免与独立不透明度设置冲突；输入支持 `#`/`0x`，错误格式原地提示，取消恢复原值。三个页面不再各自复制不同的弹窗逻辑 | Widget 回归覆盖 RGB/ARGB 解析、完整 ARGB 输入、即时预览、非法值与取消恢复；K90 Pro 共享轮转 cycle 196 真实验证主题/加载两个入口、`0x800080DD` 输入和取消恢复。证据：`local-artifacts/diagnostics/android-color-picker-20260905T023013977/summary.json` |
+| [#850 Android 颜色选择器不能调透明度](https://github.com/liuchuancong/pure_live/issues/850) | 上游和维护分支共有的 UI/持久化缺陷。旧页面没有启用 `ColorPicker.enableOpacity`，却把色阶标题写成“选择透明度”；加载颜色保存 `color.hex` 又会丢失 alpha。依赖自身的代码输入框固定为 6 位且只在色轮页可编辑，不能完成 AARRGGBB 编辑 | 新增统一 `AppColorPickerDialog`：需要透明度的加载颜色提供真实 alpha 滑块和始终可见的 8 位 ARGB 输入；主题色与小窗弹幕颜色使用 6 位 RGB，避免与独立不透明度设置冲突；输入支持 `#`/`0x`，错误格式原地提示，取消恢复原值。三个页面不再各自复制不同的弹窗逻辑 | Widget 回归覆盖 RGB/ARGB 解析、完整 ARGB 输入、即时预览、非法值与取消恢复；K90 Pro 共享轮转 cycle 198 使用最终 APK 真实验证主题/加载两个入口、`0x800080DD` 输入和取消恢复。证据：`local-artifacts/diagnostics/android-color-picker-20260905T024906912/summary.json` |
 | [#849 Windows 10 在 2.0 后不能启动](https://github.com/liuchuancong/pure_live/issues/849) | 报告没有 Windows build、系统版本、事件查看器、缺失 DLL 或启动日志，因此当前证据不足以定位到一个代码错误 | 不以猜测性的启动延迟、打包库回退或全局异常吞噬覆盖现有启动链。现有 Windows 3.1.8 x64 调试构建在本机连续运行 903.642 秒，181/181 样本响应，进程没有退出；工作集 619.69→616.37 MiB、私有字节 759.00→747.06 MiB | 当前 Windows 主机的通过不能代表报告者的 Win10 环境。现有证据：`local-artifacts/diagnostics/windows-regression/20260904T122150002Z-startup-idle-gpu-15m-pid39732-summary.json`；后续至少需要失败机器的精确 Windows build、CPU、安装/便携类型、Event Viewer fault module 与应用日志 |
 | [#848 3.1.2 系统字体问题](https://github.com/liuchuancong/pure_live/issues/848) | 报告正文没有截图和字体名称，但代码审查发现一个确定的共享语义错误：Android 选择“System Default”时仍强制 `GoogleFonts.roboto()`，没有遵循设备系统字体和厂商 CJK fallback | 将字体解析提为可测试的单一函数：已下载字体继续按 ID 使用；Windows 保留 `Microsoft YaHei` 性能基线；Android 和其他平台的系统默认返回 `null`，交给 Flutter/操作系统字体回退链。移除只为强制 Roboto 引入的 `google_fonts` 运行依赖；被删除或失效的自定义字体 ID 也安全回落系统字体 | 确定性测试覆盖自定义字体、Android 系统默认、失效字体 ID 和 Windows CJK 回退。由于 #848 没有复现材料，本修复只声明纠正了可证实的“系统默认不是真默认”，不宣称覆盖报告者未描述的所有字体问题 |
 
@@ -40,7 +40,7 @@ Roboto，但中文实际会由设备系统 CJK 字体补齐；显式指定通过
 - Android arm64 Debug 构建通过，包内只有目标 ABI，16 个原生库最小 ELF LOAD 对齐不低于
   `0x4000`，Flutter 资源与版本清单完整。产物：
   `local-artifacts/3.1.8-4121/PureLive-3.1.8-4121-android-arm64-v8a-debug.apk`；
-  构建记录：`local-artifacts/build-records/20260904T184331307Z-build-androidarm64-debug.json`。
+  构建记录：`local-artifacts/build-records/20260904T184549085Z-build-androidarm64-debug.json`。
 
 ## 本轮边界
 

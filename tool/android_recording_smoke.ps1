@@ -6,10 +6,13 @@ param(
     [int] $RecordSeconds = 45,
     [ValidateRange(0, 180)]
     [int] $ScreenOffSeconds = 0,
-    [ValidateSet('bilibili', 'douyu', 'huya', 'douyin', 'kuaishou')]
+    [ValidateRange(10, 90)]
+    [int] $PlatformLoadTimeoutSeconds = 45,
+    [ValidateSet('bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop', 'yy')]
     [string] $Platform = 'bilibili',
     [string] $Package = 'com.mystyle.purelive',
-    [string] $Activity = '.MainActivity'
+    [string] $Activity = '.MainActivity',
+    [switch] $RequireLiveDanmaku
 )
 
 Set-StrictMode -Version Latest
@@ -47,8 +50,18 @@ $platformLabels = @{
     huya = '虎牙'
     douyin = '抖音'
     kuaishou = '快手'
+    cc = '网易CC'
+    twitch = 'Twitch'
+    soop = 'Soop'
+    yy = 'YY'
 }
 $platformLabel = $platformLabels[$Platform]
+$danmakuSupported = $Platform -ne 'cc'
+$script:foregroundInterferenceCount = 0
+$script:foregroundRecoveryCount = 0
+$script:uiProfileData = $null
+$script:uiWidth = 0
+$script:uiHeight = 0
 
 function Start-AdbServer {
     $output = & $adb start-server 2>&1
@@ -79,8 +92,37 @@ function Save-Text {
     $Value | Out-File -LiteralPath (Join-Path $evidence $Name) -Encoding utf8 -Width 4096
 }
 
+function Save-ForegroundForensics {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string] $Foreground
+    )
+
+    Save-Text "foreground-changed-$Name.txt" $Foreground
+    $processOutput = & $adb -s $script:serial shell pidof $Package 2>&1
+    $processExitCode = $LASTEXITCODE
+    Save-Text "foreground-changed-$Name-process.txt" @(
+        "exitCode=$processExitCode"
+        $processOutput
+    )
+    Save-Text "foreground-changed-$Name-activities.txt" (
+        Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'activities')
+    )
+    Save-Text "foreground-changed-$Name-exit-info.txt" (
+        Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'exit-info', $Package)
+    )
+    Save-Text "foreground-changed-$Name-logcat.txt" (
+        Invoke-Adb -AdbArguments @('logcat', '-d', '-t', '800')
+    )
+    return $processExitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace(($processOutput -join ''))
+}
+
 function Save-UiDump {
     param([string] $Name)
+    # K90 Pro locks after ten minutes. Slow wireless ADB calls can cross that
+    # boundary during one smoke, so refresh the no-password keyguard before
+    # every UI observation instead of trusting the wrapper's initial wake.
+    Wake-AndDismissKeyguard
     $remote = "/sdcard/purelive-record-$PID-$Name.xml"
     $local = Join-Path $evidence "$Name.xml"
     $failures = [Collections.Generic.List[string]]::new()
@@ -91,6 +133,24 @@ function Save-UiDump {
             if ($dumpText -match '(?i)error|exception') { throw $dumpText }
             Invoke-Adb -AdbArguments @('pull', $remote, $local) | Out-Null
             if ((Test-Path -LiteralPath $local -PathType Leaf) -and (Get-Item -LiteralPath $local).Length -gt 0) {
+                $foreground = Get-Foreground
+                if ($foreground -notmatch [regex]::Escape($Package)) {
+                    $processAlive = Save-ForegroundForensics `
+                        -Name "$Name-attempt$attempt" `
+                        -Foreground $foreground
+                    $script:foregroundInterferenceCount++
+                    Save-Text "foreground-changed-$Name-attempt$attempt-restore.txt" (
+                        Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity")
+                    )
+                    Start-Sleep -Milliseconds 900
+                    $restoredForeground = Get-Foreground
+                    $restored = $restoredForeground -match [regex]::Escape($Package)
+                    if ($restored) { $script:foregroundRecoveryCount++ }
+                    throw (
+                        "Pure Live lost foreground during its device lease " +
+                        "(processAlive=$processAlive, restored=$restored): $foreground"
+                    )
+                }
                 return
             }
             throw 'UI dump was empty.'
@@ -106,6 +166,7 @@ function Save-UiDump {
 
 function Save-Screenshot {
     param([string] $Name)
+    Wake-AndDismissKeyguard
     $remote = "/sdcard/purelive-record-$PID-$Name.png"
     try {
         Invoke-Adb -AdbArguments @('shell', 'screencap', '-p', $remote) | Out-Null
@@ -113,6 +174,40 @@ function Save-Screenshot {
     } finally {
         Invoke-Adb -AdbArguments @('shell', 'rm', '-f', $remote) | Out-Null
     }
+}
+
+function Wait-HomeRoomCard {
+    param([int] $TimeoutSeconds = 45)
+
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    $attempt = 0
+    do {
+        $attempt++
+        $name = "home-platform-ready-$attempt"
+        Save-UiDump $name
+        $path = Join-Path $evidence "$name.xml"
+        [xml]$document = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+        $roomNodes = @(
+            $document.SelectNodes('//node') | Where-Object {
+                if ($_.GetAttribute('clickable') -ne 'true' -or
+                    $_.GetAttribute('long-clickable') -ne 'true' -or
+                    $_.GetAttribute('bounds') -notmatch '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$') {
+                    return $false
+                }
+                $left = [int]$Matches[1]
+                $top = [int]$Matches[2]
+                $right = [int]$Matches[3]
+                $bottom = [int]$Matches[4]
+                ($right - $left) -ge 240 -and ($bottom - $top) -ge 180 -and $top -ge 280
+            }
+        )
+        if ($roomNodes.Count -gt 0) {
+            return Get-Content -LiteralPath $path -Raw -Encoding UTF8
+        }
+        if ([DateTime]::UtcNow -lt $deadline) { Start-Sleep -Seconds 2 }
+    } while ([DateTime]::UtcNow -lt $deadline)
+
+    return $null
 }
 
 function Wait-UiPattern {
@@ -158,6 +253,46 @@ function Test-UiSemanticEnabled {
     }
 }
 
+function Test-UiSemanticSelected {
+    param(
+        [Parameter(Mandatory = $true)][string] $Xml,
+        [Parameter(Mandatory = $true)][string] $Semantic
+    )
+    try {
+        [xml]$document = $Xml
+        $matches = @($document.SelectNodes('//node') | Where-Object {
+            (
+                $_.GetAttribute('text') -eq $Semantic -or
+                $_.GetAttribute('content-desc') -eq $Semantic -or
+                $_.GetAttribute('text') -like "$Semantic`n*" -or
+                $_.GetAttribute('content-desc') -like "$Semantic`n*"
+            ) -and $_.GetAttribute('selected') -eq 'true'
+        })
+        $matches.Count -gt 0
+    } catch {
+        $false
+    }
+}
+
+function Select-UiSemanticTab {
+    param(
+        [Parameter(Mandatory = $true)][string] $Label,
+        [Parameter(Mandatory = $true)][string] $EvidencePrefix
+    )
+    for ($attempt = 0; $attempt -lt 4; $attempt++) {
+        $name = "$EvidencePrefix-$attempt"
+        Save-UiDump $name
+        $xml = Get-Content -LiteralPath (Join-Path $evidence "$name.xml") -Raw -Encoding UTF8
+        if (Test-UiSemanticSelected -Xml $xml -Semantic $Label) { return $xml }
+        if (-not (Test-UiSemanticEnabled -Xml $xml -Semantic $Label)) {
+            throw "UI tab '$Label' was not visible and enabled."
+        }
+        Invoke-Ui -Action TapSemantic -Value $Label -Xml $xml
+        Start-Sleep -Milliseconds 900
+    }
+    throw "UI tab '$Label' did not become selected after bounded retries."
+}
+
 function Get-UiLabels {
     param([Parameter(Mandatory = $true)][string] $Xml)
     [xml]$document = $Xml
@@ -172,23 +307,32 @@ function Select-PlatformTab {
     param([Parameter(Mandatory = $true)][string] $Label)
 
     $targetIndex = @{
-        '哔哩哔哩' = 1
-        '斗鱼' = 2
-        '虎牙' = 3
-        '抖音' = 4
-        '快手' = 5
+        # Current Flutter semantics include the aggregate "全部" item in the
+        # platform TabBar. Keep these in sync with the accessibility ordinals;
+        # unrelated status/bottom tabs are filtered by their smaller totals.
+        '哔哩哔哩' = 2
+        '斗鱼' = 3
+        '虎牙' = 4
+        '抖音' = 5
+        '快手' = 6
+        '网易CC' = 7
+        'Twitch' = 8
+        'Soop' = 9
+        'YY' = 10
     }[$Label]
     if (-not $targetIndex) { throw "No platform tab index is registered for '$Label'." }
 
-    for ($attempt = 0; $attempt -lt 4; $attempt++) {
+    for ($attempt = 0; $attempt -lt 5; $attempt++) {
         $name = "home-platform-tab-$attempt"
         Save-UiDump $name
         $xmlText = Get-Content -LiteralPath (Join-Path $evidence "$name.xml") -Raw -Encoding UTF8
         if (Test-UiSemanticEnabled -Xml $xmlText -Semantic $Label) {
-            Invoke-Ui -Action TapSemantic -Value $Label
-            return
+            if (Test-UiSemanticSelected -Xml $xmlText -Semantic $Label) { return }
+            Invoke-Ui -Action TapSemantic -Value $Label -Xml $xmlText
+            Start-Sleep -Milliseconds 900
+            continue
         }
-        if ($attempt -eq 3) { break }
+        if ($attempt -eq 4) { break }
 
         [xml]$document = $xmlText
         $visibleTabs = @(
@@ -201,7 +345,8 @@ function Select-PlatformTab {
                 if (
                     $_.GetAttribute('enabled') -eq 'true' -and
                     $_.GetAttribute('clickable') -eq 'true' -and
-                    $semantic -match '^(.+?)[\r\n]+第\s*(\d+)\s*个标签，共\s*10\s*个$' -and
+                    $semantic -match '^(.+?)[\r\n]+第\s*(\d+)\s*个标签，共\s*(\d+)\s*个$' -and
+                    [int]([regex]::Match($semantic, '共\s*(\d+)\s*个').Groups[1].Value) -ge 9 -and
                     $_.GetAttribute('bounds') -match '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$'
                 ) {
                     $ordinal = [int]([regex]::Match($semantic, '第\s*(\d+)\s*个标签').Groups[1].Value)
@@ -212,6 +357,7 @@ function Select-PlatformTab {
                         Top = [int]$Matches[2]
                         Right = [int]$Matches[3]
                         Bottom = [int]$Matches[4]
+                        Selected = $_.GetAttribute('selected') -eq 'true'
                     }
                 }
             }
@@ -226,22 +372,60 @@ function Select-PlatformTab {
         $minIndex = ($visibleTabs | Measure-Object Index -Minimum).Minimum
         $maxIndex = ($visibleTabs | Measure-Object Index -Maximum).Maximum
         $y = [math]::Round(($top + $bottom) / 2)
+        $selectedIndex = @($visibleTabs | Where-Object Selected | Select-Object -ExpandProperty Index -First 1)
+        if ($selectedIndex.Count -eq 1 -and $selectedIndex[0] -ne $targetIndex) {
+            # Change the TabBarView itself rather than only scrolling the tab
+            # header. Flutter recentres a selected tab after app resume; a
+            # shared-device foreground switch can therefore undo header-only
+            # scrolling. The selected page index survives that interruption.
+            $distance = [math]::Abs($targetIndex - $selectedIndex[0])
+            $swipeCount = [math]::Min(4, $distance)
+            $screenSize = (Invoke-Adb -AdbArguments @('shell', 'wm', 'size')) -join "`n"
+            if ($screenSize -notmatch '(\d+)x(\d+)') { throw "Could not parse device size: $screenSize" }
+            $screenWidth = [int]$Matches[1]
+            $screenHeight = [int]$Matches[2]
+            $pageY = [math]::Round($screenHeight * 0.5)
+            if ($targetIndex -gt $selectedIndex[0]) {
+                $pageX1 = [math]::Round($screenWidth * 0.84)
+                $pageX2 = [math]::Round($screenWidth * 0.16)
+            } else {
+                $pageX1 = [math]::Round($screenWidth * 0.16)
+                $pageX2 = [math]::Round($screenWidth * 0.84)
+            }
+            for ($swipe = 0; $swipe -lt $swipeCount; $swipe++) {
+                Invoke-Adb -AdbArguments @(
+                    'shell', 'input', 'swipe', $pageX1, $pageY, $pageX2, $pageY, '220'
+                ) | Out-Null
+                Start-Sleep -Milliseconds 420
+            }
+            Start-Sleep -Milliseconds 500
+            continue
+        }
         $averageWidth = [math]::Round((($visibleTabs | ForEach-Object { $_.Right - $_.Left } | Measure-Object -Average).Average))
         if ($targetIndex -gt $maxIndex) {
-            $distance = [math]::Min(2, $targetIndex - $maxIndex)
-            $delta = [math]::Max(160, [math]::Min(440, [math]::Round($averageWidth * 0.9 * $distance)))
+            $distance = $targetIndex - $maxIndex
+            $swipeCount = [math]::Max(1, [math]::Min(4, [math]::Ceiling($distance / 2)))
+            $delta = [math]::Max(260, [math]::Min(640, [math]::Round($averageWidth * 2.4)))
             $x1 = $right - 24
             $x2 = $x1 - $delta
         } elseif ($targetIndex -lt $minIndex) {
-            $distance = [math]::Min(2, $minIndex - $targetIndex)
-            $delta = [math]::Max(160, [math]::Min(440, [math]::Round($averageWidth * 0.9 * $distance)))
+            $distance = $minIndex - $targetIndex
+            $swipeCount = [math]::Max(1, [math]::Min(4, [math]::Ceiling($distance / 2)))
+            $delta = [math]::Max(260, [math]::Min(640, [math]::Round($averageWidth * 2.4)))
             $x1 = $left + 24
             $x2 = $x1 + $delta
         } else {
             throw "Platform tab '$Label' is absent inside the visible platform index range $minIndex-$maxIndex."
         }
-        Invoke-Adb -AdbArguments @('shell', 'input', 'swipe', $x1, $y, $x2, $y, '320') | Out-Null
-        Start-Sleep -Milliseconds 700
+        # Issue a short bounded batch instead of dumping after every small
+        # scroll. This reaches far-right tabs before another shared-device
+        # client can steal the foreground and keeps the gesture away from the
+        # system edge/navigation regions.
+        for ($swipe = 0; $swipe -lt $swipeCount; $swipe++) {
+            Invoke-Adb -AdbArguments @('shell', 'input', 'swipe', $x1, $y, $x2, $y, '240') | Out-Null
+            Start-Sleep -Milliseconds 180
+        }
+        Start-Sleep -Milliseconds 500
     }
     throw "Platform tab '$Label' did not become visible after bounded horizontal scrolling."
 }
@@ -296,19 +480,91 @@ function Wake-AndDismissKeyguard {
     Invoke-Adb -AdbArguments @('shell', 'wm', 'dismiss-keyguard') | Out-Null
 }
 
+function Initialize-UiProfile {
+    if ($null -ne $script:uiProfileData) { return }
+    $map = Get-Content -LiteralPath (Join-Path $repo 'tool\device_ui_map.json') -Raw -Encoding UTF8 |
+        ConvertFrom-Json
+    $size = (Invoke-Adb -AdbArguments @('shell', 'wm', 'size')) -join "`n"
+    if ($size -notmatch '(\d+)x(\d+)') { throw "Unexpected device size output: $size" }
+    $script:uiWidth = [int]$Matches[1]
+    $script:uiHeight = [int]$Matches[2]
+    $orientation = if ($script:uiWidth -gt $script:uiHeight) { 'landscape' } else { 'portrait' }
+    $profile = @($map.profiles.PSObject.Properties | Where-Object {
+        $_.Value.width -eq $script:uiWidth -and
+        $_.Value.height -eq $script:uiHeight -and
+        $_.Value.orientation -eq $orientation
+    } | Select-Object -First 1)
+    if ($profile.Count -eq 0) {
+        $profile = @($map.profiles.PSObject.Properties[$map.defaultProfile])
+    }
+    if ($profile.Count -ne 1 -or $profile[0].Value.orientation -ne $orientation) {
+        throw "No $orientation UI profile is available for $($script:uiWidth)x$($script:uiHeight)."
+    }
+    $script:uiProfileData = $profile[0].Value
+}
+
+function Get-SemanticTapTarget {
+    param(
+        [Parameter(Mandatory = $true)][string] $Semantic,
+        [string] $Xml
+    )
+    if ([string]::IsNullOrWhiteSpace($Xml)) {
+        $name = 'ui-semantic-' + ([Guid]::NewGuid().ToString('N'))
+        Save-UiDump $name
+        [xml]$document = Get-Content -LiteralPath (Join-Path $evidence "$name.xml") -Raw -Encoding UTF8
+    } else {
+        [xml]$document = $Xml
+    }
+    $matches = @($document.SelectNodes('//node') | ForEach-Object {
+        $description = $_.GetAttribute('content-desc')
+        $text = $_.GetAttribute('text')
+        if (-not (
+            $description -eq $Semantic -or $text -eq $Semantic -or
+            $description -like "$Semantic`n*" -or $text -like "$Semantic`n*"
+        )) { return }
+        $bounds = $_.GetAttribute('bounds')
+        if ($bounds -notmatch '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$') { return }
+        $left = [int]$Matches[1]
+        $top = [int]$Matches[2]
+        $right = [int]$Matches[3]
+        $bottom = [int]$Matches[4]
+        [pscustomobject]@{
+            X = [math]::Floor(($left + $right) / 2)
+            Y = [math]::Floor(($top + $bottom) / 2)
+            Clickable = $_.GetAttribute('clickable') -eq 'true'
+            Area = [math]::Max(0, ($right - $left) * ($bottom - $top))
+        }
+    } | Sort-Object @{ Expression = { -not $_.Clickable } }, Area)
+    if ($matches.Count -eq 0) { throw "Semantic target '$Semantic' is not visible." }
+    $matches[0]
+}
+
 function Invoke-Ui {
     param(
         [ValidateSet('Tap', 'TapSemantic', 'Sequence')]
         [string] $Action,
-        [string] $Value
+        [string] $Value,
+        [string] $Xml
     )
-    $parameters = @{
-        Serial = $script:serial
-        CaptureOnFailure = $true
+    Wake-AndDismissKeyguard
+    Initialize-UiProfile
+    if ($Action -eq 'TapSemantic') {
+        $target = Get-SemanticTapTarget -Semantic $Value -Xml $Xml
+        Write-Output ("tap semantic '{0}' ({1},{2})" -f $Value, $target.X, $target.Y)
+        Invoke-Adb -AdbArguments @('shell', 'input', 'tap', $target.X, $target.Y) | Out-Null
+        return
     }
-    $parameters[$Action] = $Value
-    & (Join-Path $repo 'tool\android_ui.ps1') @parameters |
-        Out-File -LiteralPath (Join-Path $evidence ("ui-{0}-{1}.txt" -f $Action, ([Guid]::NewGuid().ToString('N')))) -Encoding utf8
+    if ($Action -eq 'Tap') {
+        $property = $script:uiProfileData.points.PSObject.Properties[$Value]
+        if (-not $property) { throw "Unknown UI point '$Value'." }
+        $point = $property.Value
+        $x = [math]::Round(([double]$point.x / [double]$script:uiProfileData.width) * $script:uiWidth)
+        $y = [math]::Round(([double]$point.y / [double]$script:uiProfileData.height) * $script:uiHeight)
+        Write-Output ("tap {0} ({1},{2}) [cached once]" -f $Value, $x, $y)
+        Invoke-Adb -AdbArguments @('shell', 'input', 'tap', $x, $y) | Out-Null
+        return
+    }
+    throw "Unsupported in-process UI action: $Action"
 }
 
 function Get-PrivateRecordingFiles {
@@ -471,10 +727,13 @@ try {
     $beforeFiles = @(Get-PrivateRecordingFiles)
     Save-Text 'record-files-before.txt' $beforeFiles
 
-    Invoke-Ui -Action TapSemantic -Value '热门'
-    Start-Sleep -Milliseconds 1200
+    Select-UiSemanticTab -Label '热门' -EvidencePrefix 'home-mode-popular' | Out-Null
     Select-PlatformTab -Label $platformLabel
-    Start-Sleep -Seconds 8
+    $homeRoomXml = Wait-HomeRoomCard -TimeoutSeconds $PlatformLoadTimeoutSeconds
+    $result.checks.platformRoomListReady = -not [string]::IsNullOrWhiteSpace($homeRoomXml)
+    if (-not $result.checks.platformRoomListReady) {
+        throw "The $Platform room list did not become ready within $PlatformLoadTimeoutSeconds seconds."
+    }
     Invoke-Ui -Action Tap -Value 'home.first_left_room'
     Start-Sleep -Seconds 12
     $result.checks.roomForeground = Get-Foreground
@@ -487,8 +746,20 @@ try {
         Get-UiLabels -Xml $roomXml | Where-Object { $_ -match '^.{1,48}[:：]\s*.+$' }
     )
     Save-Text 'visible-danmaku-lines.txt' $visibleDanmakuLines
+    $liveDanmakuLines = @(
+        $visibleDanmakuLines | Where-Object { $_ -notmatch '^系统消息[:：]\s*' }
+    )
+    Save-Text 'live-danmaku-lines.txt' $liveDanmakuLines
     $result.checks.visibleDanmakuLineCount = $visibleDanmakuLines.Count
-    $result.checks.liveDanmakuVisible = $visibleDanmakuLines.Count -ge 3
+    $result.checks.liveDanmakuLineCount = $liveDanmakuLines.Count
+    $result.checks.danmakuSupported = $danmakuSupported
+    $result.checks.liveDanmakuVisible = $liveDanmakuLines.Count -gt 0
+    # Busy rooms can push the one-time "connected" system row out of the
+    # virtualized list before this snapshot. A real platform chat line is
+    # stronger end-to-end proof that the socket joined and decoded correctly.
+    $result.checks.danmakuConnectionReady =
+        [bool]($visibleDanmakuLines | Where-Object { $_ -match '^系统消息[:：]\s*弹幕服务器连接正常$' }) -or
+        [bool]$result.checks.liveDanmakuVisible
 
     # The quality/line row moves down for portrait live streams. Semantic taps
     # follow the actual control instead of reusing a coordinate learned from a
@@ -497,7 +768,7 @@ try {
     $roomLabels = @(Get-UiLabels -Xml $roomXml)
     $currentQualityLabel = @(
         $roomLabels | Where-Object {
-            $_ -match '^(?:原画.*|蓝光.*|超清.*|高清.*|标清.*|流畅.*|省流.*|自动.*|origin|uhd|hd|sd|ld)$'
+            $_ -match '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3})?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
         }
     ) | Select-Object -First 1
     if ([string]::IsNullOrWhiteSpace($currentQualityLabel)) {
@@ -512,7 +783,12 @@ try {
     Save-Screenshot 'quality-before-record'
     $qualityOptions = @(
         Get-UiLabels -Xml $qualityState.Xml | Where-Object {
-            $_ -match '^(?:原画.*|蓝光.*|超清.*|高清.*|标清.*|流畅.*|省流.*|自动.*|origin|uhd|hd|sd|ld)$'
+            # Platform labels are not consistently prefix-based. Twitch, for
+            # example, exposes `1080P60（原画）`, while Chinese providers use
+            # values such as `原画2K60` or `蓝光10M`. Match the quality token
+            # anywhere, or a complete resolution/FPS label, without treating
+            # unrelated room text as a quality option.
+            $_ -match '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3})?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
         }
     )
     $audioOnlyQualityLabels = @(
@@ -554,14 +830,14 @@ try {
         -Pattern '立即启动录制|停止录制|取消监控' `
         -TimeoutSeconds 10
     if (Test-UiSemanticEnabled -Xml $preflightDialog.Xml -Semantic '停止录制') {
-        Invoke-Ui -Action TapSemantic -Value '停止录制'
+        Invoke-Ui -Action TapSemantic -Value '停止录制' -Xml $preflightDialog.Xml
         $preflightDialog = Wait-UiSemanticEnabled `
             -Name 'record-dialog-after-preflight-stop' `
             -Semantic '取消监控' `
             -TimeoutSeconds 60
     }
     if (Test-UiSemanticEnabled -Xml $preflightDialog.Xml -Semantic '取消监控') {
-        Invoke-Ui -Action TapSemantic -Value '取消监控'
+        Invoke-Ui -Action TapSemantic -Value '取消监控' -Xml $preflightDialog.Xml
         Wait-UiPattern -Name 'room-after-preflight-cleanup' -Pattern '弹幕列表' -TimeoutSeconds 12 | Out-Null
         Start-Sleep -Seconds 2
         Invoke-Ui -Action Tap -Value 'live.record'
@@ -573,18 +849,19 @@ try {
     if (-not (Test-UiSemanticEnabled -Xml $preflightDialog.Xml -Semantic '立即启动录制')) {
         throw 'The record action did not reach the one-shot start state.'
     }
-    Invoke-Ui -Action TapSemantic -Value '立即启动录制'
+    Invoke-Ui -Action TapSemantic -Value '立即启动录制' -Xml $preflightDialog.Xml
     $runningState = Wait-UiPattern -Name 'room-recording' -Pattern '录制中' -TimeoutSeconds 30
     $recordingWallTimer = [Diagnostics.Stopwatch]::StartNew()
     $result.checks.recordStartMs = $runningState.ElapsedMs
     Save-Screenshot 'room-recording'
 
+    $growth = $null
     if ($ScreenOffSeconds -gt 0) {
         # Prove recorder continuity while the panel and keyguard are off. This
         # is deliberately stronger than checking a notification or process:
         # the same private TS must continue growing during the dark interval.
-        $beforeScreenOff = Wait-RecordingFileGrowth -BeforeFiles $beforeFiles -TimeoutSeconds 30
-        $screenOffStart = Get-PrivateFileInfo $beforeScreenOff.Path
+        $growth = Wait-RecordingFileGrowth -BeforeFiles $beforeFiles -TimeoutSeconds 30
+        $screenOffStart = Get-PrivateFileInfo $growth.Path
         Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_SLEEP') | Out-Null
         Start-Sleep -Milliseconds 750
         $screenOffPower = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'power')) -join "`n"
@@ -595,8 +872,8 @@ try {
         $result.checks.screenOffConfirmed =
             $screenOffPower -match '(?im)mWakefulness\s*=\s*(?:Asleep|Dozing)|mInteractive\s*=\s*false|Display Power:\s*state=OFF'
         Start-Sleep -Seconds $ScreenOffSeconds
-        $screenOffEnd = Get-PrivateFileInfo $beforeScreenOff.Path
-        $result.checks.screenOffRecordingPath = $beforeScreenOff.Path
+        $screenOffEnd = Get-PrivateFileInfo $growth.Path
+        $result.checks.screenOffRecordingPath = $growth.Path
         $result.checks.screenOffInitialBytes = $screenOffStart.Bytes
         $result.checks.screenOffFinalBytes = $screenOffEnd.Bytes
         $result.checks.screenOffGrowthBytes = $screenOffEnd.Bytes - $screenOffStart.Bytes
@@ -611,22 +888,17 @@ try {
         $result.checks.roomForegroundAfterScreenOff = Get-Foreground
         Wait-UiPattern -Name 'room-after-screen-off' -Pattern '弹幕列表' -TimeoutSeconds 15 | Out-Null
     } else {
-        Start-Sleep -Seconds ([math]::Min(15, $RecordSeconds))
+        # File growth is the machine-readable running-recorder gate. Check it
+        # while the room stays foregrounded so slow network ADB/UIAutomator
+        # calls do not silently turn a 20-second smoke into a multi-minute
+        # recording before the stop action is even attempted.
+        $growth = Wait-RecordingFileGrowth -BeforeFiles $beforeFiles -TimeoutSeconds 30
     }
-    Invoke-Ui -Action Tap -Value 'live.record'
-    Wait-UiSemanticEnabled -Name 'record-dialog-running' -Semantic '进入录制中心' -TimeoutSeconds 10 | Out-Null
-    Invoke-Ui -Action TapSemantic -Value '进入录制中心'
-    Start-Sleep -Seconds 4
-    Save-Screenshot 'record-center-running'
-    $recordCenterScreenshot = Join-Path $evidence 'record-center-running.png'
-    $result.checks.recordingCenterScreenshotCaptured =
-        (Test-Path -LiteralPath $recordCenterScreenshot -PathType Leaf) -and
-        (Get-Item -LiteralPath $recordCenterScreenshot).Length -gt 0
     # The shell uiautomator command hard-codes a one-second quiet window. A
     # recorder page that legitimately publishes time/size every second may
-    # never become idle, so use two real private-file samples for the machine
-    # gate and keep the screenshot for visual UI verification.
-    $growth = Wait-RecordingFileGrowth -BeforeFiles $beforeFiles -TimeoutSeconds 30
+    # never become idle, so use two real private-file samples for the running
+    # gate. The stopped recording-center state is captured below without
+    # extending the live recording by another navigation round trip.
     $result.checks.runningFileGrowthObserved = $growth.FinalBytes -gt $growth.InitialBytes
     $result.checks.runningFilePath = $growth.Path
     $result.checks.runningFileInitialBytes = $growth.InitialBytes
@@ -639,11 +911,9 @@ try {
     )
     if ($remainingSeconds -gt 0) { Start-Sleep -Seconds $remainingSeconds }
 
-    Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', '4') | Out-Null
-    Wait-UiPattern -Name 'room-before-stop' -Pattern '弹幕列表' -TimeoutSeconds 15 | Out-Null
     Invoke-Ui -Action Tap -Value 'live.record'
-    Wait-UiSemanticEnabled -Name 'record-dialog-before-stop' -Semantic '停止录制' -TimeoutSeconds 10 | Out-Null
-    Invoke-Ui -Action TapSemantic -Value '停止录制'
+    $stopDialog = Wait-UiSemanticEnabled -Name 'record-dialog-before-stop' -Semantic '停止录制' -TimeoutSeconds 10
+    Invoke-Ui -Action TapSemantic -Value '停止录制' -Xml $stopDialog.Xml
     $recordingWallTimer.Stop()
     $result.checks.recordingWallSeconds = [math]::Round($recordingWallTimer.Elapsed.TotalSeconds, 3)
     $stoppedHeader = Wait-UiPattern -Name 'room-record-stopped' -Pattern '已监控|录制任务' -TimeoutSeconds 60
@@ -651,10 +921,14 @@ try {
     Save-Screenshot 'room-record-stopped'
 
     Invoke-Ui -Action Tap -Value 'live.record'
-    Wait-UiPattern -Name 'record-dialog-after-stop' -Pattern '进入录制中心' -TimeoutSeconds 10 | Out-Null
-    Invoke-Ui -Action TapSemantic -Value '进入录制中心'
+    $afterStopDialog = Wait-UiSemanticEnabled -Name 'record-dialog-after-stop' -Semantic '进入录制中心' -TimeoutSeconds 10
+    Invoke-Ui -Action TapSemantic -Value '进入录制中心' -Xml $afterStopDialog.Xml
     $finalCenter = Wait-UiPattern -Name 'record-center-stopped' -Pattern '已停止' -TimeoutSeconds 20
     Save-Screenshot 'record-center-stopped'
+    $recordCenterScreenshot = Join-Path $evidence 'record-center-stopped.png'
+    $result.checks.recordingCenterScreenshotCaptured =
+        (Test-Path -LiteralPath $recordCenterScreenshot -PathType Leaf) -and
+        (Get-Item -LiteralPath $recordCenterScreenshot).Length -gt 0
     $result.checks.stoppedStatusVisible = $finalCenter.Xml.Contains('已停止')
     $result.checks.failureAbsent = -not ($finalCenter.Xml -match '录制失败|最近失败|输入的直播流地址格式有误')
 
@@ -701,8 +975,8 @@ try {
     Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', '4') | Out-Null
     Wait-UiPattern -Name 'room-before-monitor-cleanup' -Pattern '弹幕列表' -TimeoutSeconds 15 | Out-Null
     Invoke-Ui -Action Tap -Value 'live.record'
-    Wait-UiSemanticEnabled -Name 'record-dialog-cleanup' -Semantic '取消监控' -TimeoutSeconds 10 | Out-Null
-    Invoke-Ui -Action TapSemantic -Value '取消监控'
+    $cleanupDialog = Wait-UiSemanticEnabled -Name 'record-dialog-cleanup' -Semantic '取消监控' -TimeoutSeconds 10
+    Invoke-Ui -Action TapSemantic -Value '取消监控' -Xml $cleanupDialog.Xml
     $cleanupState = Wait-UiPattern -Name 'room-after-monitor-cleanup' -Pattern '录制' -TimeoutSeconds 10
     $monitorRemoved = -not ($cleanupState.Xml -match '已监控|录制中')
     $result.checks.monitorRemoved = $monitorRemoved
@@ -718,6 +992,25 @@ try {
     $logText = Get-Content -LiteralPath (Join-Path $evidence 'logcat-tail.txt') -Raw -Encoding UTF8
     $result.checks.noFatal = -not ($logText -match 'FATAL EXCEPTION|ANR in com\.mystyle\.purelive')
 } finally {
+    $result.checks.foregroundInterferenceCount = $script:foregroundInterferenceCount
+    $result.checks.foregroundRecoveryCount = $script:foregroundRecoveryCount
+    try {
+        $logPath = Join-Path $evidence 'logcat-tail.txt'
+        if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) {
+            $activePid = ((Invoke-Adb -AdbArguments @('shell', 'pidof', $Package)) -join '').Trim().Split(' ')[0]
+            if ($activePid -match '^\d+$') {
+                Save-Text 'logcat-tail.txt' (
+                    Invoke-Adb -AdbArguments @('logcat', '-d', '-v', 'threadtime', "--pid=$activePid", '-t', '3000')
+                )
+            }
+        }
+        if (Test-Path -LiteralPath $logPath -PathType Leaf) {
+            $finalLogText = Get-Content -LiteralPath $logPath -Raw -Encoding UTF8
+            $result.checks.noFatal = -not ($finalLogText -match 'FATAL EXCEPTION|ANR in com\.mystyle\.purelive')
+        }
+    } catch {
+        $result.checks.noFatal = $false
+    }
     try { Invoke-Adb -AdbArguments @('shell', 'am', 'force-stop', $Package) | Out-Null } catch {}
     Start-Sleep -Seconds 2
     $processAfterStop = & $adb -s $script:serial shell pidof $Package 2>&1
@@ -762,8 +1055,9 @@ $assertions = [ordered]@{
     deviceReady = ($result.checks.deviceState -eq 'device')
     runAsAvailable = [bool]$result.checks.runAsAvailable
     roomForeground = ($result.checks.roomForeground -match $Package)
+    platformRoomListReady = [bool]$result.checks.platformRoomListReady
     roomUiAlive = [bool]$result.checks.roomUiAlive
-    liveDanmakuVisible = [bool]$result.checks.liveDanmakuVisible
+    danmakuConnectionReady = (-not [bool]$result.checks.danmakuSupported) -or [bool]$result.checks.danmakuConnectionReady
     qualitySheetVisible = [bool]$result.checks.qualitySheetVisible
     audioOnlyQualityAbsent = [bool]$result.checks.audioOnlyQualityAbsent
     lineSheetVisible = [bool]$result.checks.lineSheetVisible
@@ -787,6 +1081,12 @@ $assertions = [ordered]@{
     processGoneAfterStop = [bool]$result.checks.processGoneAfterStop
     activeWakeLockSectionParsed = [bool]$result.checks.activeWakeLockSectionParsed
     wakeLockGoneAfterStop = [bool]$result.checks.wakeLockGoneAfterStop
+}
+if ($RequireLiveDanmaku -and $danmakuSupported) {
+    # A real chat line is a useful end-to-end signal only when the selected
+    # room is known to be active. Quiet rooms must not turn an otherwise valid
+    # protocol/recording smoke into a deterministic false failure.
+    $assertions.liveDanmakuVisible = [bool]$result.checks.liveDanmakuVisible
 }
 $result.assertions = $assertions
 $result | ConvertTo-Json -Depth 10 | Out-File -LiteralPath (Join-Path $evidence 'summary.json') -Encoding utf8

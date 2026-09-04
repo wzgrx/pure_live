@@ -11,6 +11,7 @@ import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/danmaku/twitch_danmaku.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/utils/twitch/twitch_models.dart';
+import 'package:pure_live/core/utils/twitch/twitch_web_integrity.dart';
 import 'package:pure_live/core/utils/live_quality_label.dart';
 
 class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResolver {
@@ -24,32 +25,67 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36";
   static const gplApiUrl = "https://gql.twitch.tv/gql";
 
+  static const integrityApiUrl = "https://gql.twitch.tv/integrity";
+
   static const baseUrl = "https://www.twitch.tv";
 
   Map<String, String> cursorMap = {};
-  late final String _deviceId = getDeviceId();
+  late final String _deviceId = generateDeviceId();
+  String? _integrityToken;
+  DateTime? _integrityExpiresAt;
+  Future<void>? _integrityRefresh;
+  bool _bypassStoredSessionForIntegrity = false;
 
   Map<String, String> headers = {
-    'user-agent': defaultUa,
-    'accept-language': 'en-US,en;q=0.9',
-    'accept': 'application/vnd.twitchtv.v5+json',
-    'accept-encoding': 'gzip, deflate',
-    'client-id': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+    'User-Agent': defaultUa,
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept': 'application/vnd.twitchtv.v5+json',
+    'Accept-Encoding': 'gzip, deflate',
+    'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+    'Origin': baseUrl,
+    'Referer': '$baseUrl/',
   };
 
   final playSessionIds = ["bdd22331a986c7f1073628f2fc5b19da", "064bc3ff1722b6f53b0b5b8c01e46ca5"];
 
   void getRequestHeaders() {
-    headers['device-id'] = _deviceId;
-    if (SettingsService.to.cookieManager.twitchCookie.v.isNotEmpty) {
-      headers["Cookie"] = SettingsService.to.cookieManager.twitchCookie.v;
+    // Twitch binds a Client-Integrity token to `Device-Id` on GraphQL
+    // requests. `X-Device-Id` is used only while minting the token at the
+    // /integrity endpoint (matching Twitch's web flow and Streamlink).
+    headers['Device-Id'] = _deviceId;
+    headers.remove('X-Device-Id');
+    final cookie = SettingsService.to.cookieManager.twitchCookie.v.trim();
+    if (cookie.isNotEmpty && !_bypassStoredSessionForIntegrity) {
+      headers['Cookie'] = cookie;
+      final authToken = extractAuthToken(cookie);
+      if (authToken != null) {
+        headers['Authorization'] = 'OAuth $authToken';
+      } else {
+        headers.remove('Authorization');
+      }
+    } else {
+      headers.remove('Cookie');
+      headers.remove('Authorization');
     }
   }
 
-  String getDeviceId() {
-    final random = Random();
-    final deviceId = 1000000000000000 + random.nextInt(1 << 32);
-    return deviceId.toString();
+  @visibleForTesting
+  static String? extractAuthToken(String cookie) {
+    for (final part in cookie.split(';')) {
+      final separator = part.indexOf('=');
+      if (separator <= 0) continue;
+      if (part.substring(0, separator).trim().toLowerCase() != 'auth-token') continue;
+      final value = part.substring(separator + 1).trim();
+      return value.isEmpty ? null : value;
+    }
+    return null;
+  }
+
+  @visibleForTesting
+  static String generateDeviceId([Random? source]) {
+    final random = source ?? Random.secure();
+    const hex = '0123456789abcdef';
+    return List<String>.generate(32, (_) => hex[random.nextInt(hex.length)]).join();
   }
 
   String buildPersistedRequest(String operationName, String sha265Hash, Map<String, dynamic> variables) {
@@ -64,7 +100,161 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
 
   Future<dynamic> getGplResponse(String liveGpl) async {
     getRequestHeaders();
-    return await HttpClient.instance.postJson(gplApiUrl, header: headers, data: liveGpl);
+    dynamic response;
+    Object? nativeError;
+    StackTrace? nativeStackTrace;
+
+    // Twitch's web player tries the public request without Client-Integrity
+    // first. This is both faster in regions where the token is optional and
+    // avoids needlessly binding the request to a short-lived identity.
+    try {
+      response = await _postGql(liveGpl);
+      if (!hasIntegrityError(response)) return response;
+
+      _invalidateIntegrityToken();
+      await _ensureIntegrityToken();
+      response = await _postGql(liveGpl);
+      if (!hasIntegrityError(response)) return response;
+    } catch (error, stackTrace) {
+      nativeError = error;
+      nativeStackTrace = stackTrace;
+      CoreLog.e('Twitch native GraphQL transport failed: $error', stackTrace);
+    }
+
+    if (headers.containsKey('Cookie') || headers.containsKey('Authorization')) {
+      // Preserve the saved account setting, but do not let a stale account
+      // cookie poison public browsing. The bypass is local to this site
+      // instance and never mutates the user's stored cookie.
+      _bypassStoredSessionForIntegrity = true;
+      getRequestHeaders();
+      _invalidateIntegrityToken();
+      try {
+        response = await _postGql(liveGpl);
+        if (!hasIntegrityError(response)) return response;
+      } catch (error, stackTrace) {
+        nativeError = error;
+        nativeStackTrace = stackTrace;
+      }
+      CoreLog.w('Twitch stored session failed validation; public requests switched to an anonymous session');
+    }
+
+    // Android's dart:io TLS fingerprint is sometimes reset after CONNECT even
+    // though the same proxy works in Chrome. Execute the public request inside
+    // Chromium as the final transport, rather than minting a browser token and
+    // replaying it through the already-rejected native socket stack.
+    if (TwitchWebIntegrityProvider.isSupported) {
+      final proxy = SettingsService.to.proxy;
+      try {
+        final browserResponse = await TwitchWebIntegrityProvider.postGraphQl(
+          body: liveGpl,
+          clientId: headers['Client-ID']!,
+          deviceId: _deviceId,
+          userAgent: headers['User-Agent']!,
+          proxyHost: proxy.enableAppProxy.v ? proxy.appProxyHost.v : null,
+          proxyPort: proxy.enableAppProxy.v ? proxy.appProxyPort.v : null,
+        );
+        if (browserResponse != null && !hasIntegrityError(browserResponse)) {
+          return browserResponse;
+        }
+        if (browserResponse != null) {
+          throw StateError('Twitch Chromium GraphQL response still failed integrity validation');
+        }
+      } catch (error, stackTrace) {
+        CoreLog.e('Twitch Chromium GraphQL transport failed: $error', stackTrace);
+        if (nativeError == null) {
+          nativeError = error;
+          nativeStackTrace = stackTrace;
+        }
+      }
+    }
+
+    if (nativeError != null && nativeStackTrace != null) {
+      Error.throwWithStackTrace(nativeError, nativeStackTrace);
+    }
+    return response;
+  }
+
+  Future<dynamic> _postGql(String liveGpl) {
+    final requestHeaders = Map<String, String>.from(headers);
+    final token = _integrityToken;
+    if (token != null && token.isNotEmpty) {
+      requestHeaders['Client-Integrity'] = token;
+    }
+    return HttpClient.instance.postJson(gplApiUrl, header: requestHeaders, data: liveGpl);
+  }
+
+  Future<void> _ensureIntegrityToken() async {
+    final token = _integrityToken;
+    final expiry = _integrityExpiresAt;
+    final now = DateTime.now();
+    if (token != null && token.isNotEmpty && expiry != null && expiry.isAfter(now.add(const Duration(minutes: 5)))) {
+      return;
+    }
+
+    final inFlight = _integrityRefresh;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+
+    final refresh = _refreshIntegrityToken();
+    _integrityRefresh = refresh;
+    try {
+      await refresh;
+    } finally {
+      if (identical(_integrityRefresh, refresh)) {
+        _integrityRefresh = null;
+      }
+    }
+  }
+
+  Future<void> _refreshIntegrityToken() async {
+    final integrityHeaders = buildIntegrityHeaders(headers, _deviceId);
+    final response = await HttpClient.instance.postJson(integrityApiUrl, header: integrityHeaders);
+    final data = _stringMap(response);
+    final token = data?['token']?.toString().trim() ?? '';
+    final expiration = _epochMilliseconds(data?['expiration']);
+    if (token.isEmpty || expiration == null) {
+      throw StateError('Twitch integrity endpoint returned an incomplete token');
+    }
+    final expiresAt = DateTime.fromMillisecondsSinceEpoch(expiration);
+    if (!expiresAt.isAfter(DateTime.now())) {
+      throw StateError('Twitch integrity endpoint returned an expired token');
+    }
+    _integrityToken = token;
+    _integrityExpiresAt = expiresAt;
+  }
+
+  @visibleForTesting
+  static Map<String, String> buildIntegrityHeaders(Map<String, String> requestHeaders, String deviceId) {
+    return Map<String, String>.from(requestHeaders)
+      ..remove('Client-Integrity')
+      ..remove('Device-Id')
+      ..['X-Device-Id'] = deviceId;
+  }
+
+  void _invalidateIntegrityToken() {
+    _integrityToken = null;
+    _integrityExpiresAt = null;
+  }
+
+  static int? _epochMilliseconds(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '');
+  }
+
+  @visibleForTesting
+  static bool hasIntegrityError(dynamic response) {
+    if (response is List) return response.any(hasIntegrityError);
+    final map = _stringMap(response);
+    if (map == null) return false;
+    final errors = map['errors'];
+    if (errors is! List) return false;
+    return errors.map(_stringMap).whereType<Map<String, dynamic>>().any((error) {
+      final message = error['message']?.toString().toLowerCase() ?? '';
+      return message.contains('failed integrity check') || message.contains('integrity token');
+    });
   }
 
   String buildCursorKey(String type, String id, int page) {
@@ -79,6 +269,44 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
   String getCursor(String type, String id, int page) {
     var key = buildCursorKey(type, id, page);
     return cursorMap[key] ?? "";
+  }
+
+  /// Reads a Twitch GraphQL connection without assuming that the optional
+  /// `pageInfo` object is present.
+  ///
+  /// Twitch occasionally returns a usable first page of `edges` while
+  /// omitting `pageInfo` (for example during partial directory responses).
+  /// Treating the missing object as a dynamic map caused the whole visible
+  /// page to fail with `NoSuchMethodError`. The first page is still valid; the
+  /// only safe pagination decision in that case is to stop at that page.
+  @visibleForTesting
+  static ({List<Map<String, dynamic>> edges, bool hasNextPage}) parseConnection(dynamic rawConnection) {
+    final connection = _stringMap(rawConnection);
+    if (connection == null) return (edges: const <Map<String, dynamic>>[], hasNextPage: false);
+
+    final rawEdges = connection['edges'];
+    final edges = rawEdges is List
+        ? rawEdges.map(_stringMap).whereType<Map<String, dynamic>>().toList(growable: false)
+        : const <Map<String, dynamic>>[];
+    final pageInfo = _stringMap(connection['pageInfo']);
+    return (edges: edges, hasNextPage: pageInfo?['hasNextPage'] == true);
+  }
+
+  static Map<String, dynamic>? _stringMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return value.map((key, item) => MapEntry(key.toString(), item));
+    return null;
+  }
+
+  static String _graphQlErrorSummary(Map<String, dynamic> envelope) {
+    final errors = envelope['errors'];
+    if (errors is! List || errors.isEmpty) return '';
+    return errors
+        .map(_stringMap)
+        .whereType<Map<String, dynamic>>()
+        .map((error) => error['message']?.toString().trim() ?? '')
+        .where((message) => message.isNotEmpty)
+        .join('; ');
   }
 
   @override
@@ -110,9 +338,13 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
       }
       await Future.wait(futures);
       return categories;
-    } catch (e) {
-      CoreLog.error(e);
-      return [];
+    } catch (error, stackTrace) {
+      // A blocked/reset GraphQL connection is not the same as a successful
+      // empty directory. Propagate it so the shared page controller can show
+      // its retryable network-error state instead of the misleading
+      // "no live rooms" empty state.
+      CoreLog.e('Twitch directory request failed: $error', stackTrace);
+      rethrow;
     }
   }
 
@@ -160,12 +392,12 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
     );
     var response = await getGplResponse(liveGpl);
 
-    var directoriesWithTags = response['data']['directoriesWithTags'] ?? {};
-    var edges = (directoriesWithTags['edges'] ?? []) as List;
-    var pageInfo = directoriesWithTags['pageInfo'];
-    var hasNextPage = pageInfo['hasNextPage'];
-    cursor = edges.isEmpty ? "" : (edges.last["cursor"] ?? "");
-    if (!hasNextPage) cursor = "";
+    final responseMap = _stringMap(response);
+    final data = _stringMap(responseMap?['data']);
+    final connection = parseConnection(data?['directoriesWithTags']);
+    final edges = connection.edges;
+    cursor = edges.isEmpty ? "" : (edges.last["cursor"]?.toString() ?? "");
+    if (!connection.hasNextPage) cursor = "";
     saveCursor(cursorType, cursorId, page, cursor);
     List<LiveArea> subs = [];
     for (var item in edges) {
@@ -484,46 +716,64 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
       var liveGpl = jsonEncode(params);
       var response = await getGplResponse(liveGpl);
 
-      var directoriesWithTags = response[0]['data']['game']['streams'] ?? {};
-      var edges = (directoriesWithTags['edges'] ?? []) as List;
-      var pageInfo = directoriesWithTags['pageInfo'];
-      var hasNextPage = pageInfo['hasNextPage'];
+      final envelopes = response is List ? response : const <dynamic>[];
+      final envelope = envelopes.isEmpty ? null : _stringMap(envelopes.first);
+      if (envelope == null) {
+        throw StateError('Twitch stream directory returned an invalid response envelope');
+      }
+      final data = _stringMap(envelope['data']);
+      final game = _stringMap(data?['game']);
+      final streams = game == null ? null : _stringMap(game['streams']);
+      if (streams == null) {
+        final graphQlError = _graphQlErrorSummary(envelope);
+        if (graphQlError.isNotEmpty) {
+          throw StateError('Twitch GraphQL error: $graphQlError');
+        }
+        return <LiveRoom>[];
+      }
+      final connection = parseConnection(streams);
+      final edges = connection.edges;
       if (edges.isEmpty) {
         return <LiveRoom>[];
       }
-      cursor = edges.last["cursor"] ?? "";
-      if (!hasNextPage) cursor = "";
+      cursor = edges.last["cursor"]?.toString() ?? "";
+      if (!connection.hasNextPage) cursor = "";
       saveCursor(cursorType, cursorId, page, cursor);
       List<LiveRoom> subs = [];
       for (var item in edges) {
-        var node = item['node'];
+        final node = _stringMap(item['node']);
+        final broadcaster = _stringMap(node?['broadcaster']);
+        if (node == null || broadcaster == null) continue;
+        final login = broadcaster['login']?.toString().trim() ?? '';
+        if (login.isEmpty) continue;
+        final game = _stringMap(node['game']);
         var subItem = LiveRoom(
-          roomId: node["broadcaster"]["login"],
-          title: node["title"],
+          roomId: login,
+          title: node["title"]?.toString() ?? '',
           cover: (node["previewImageURL"] ?? "")
               .toString()
               .replaceFirst("https://", "https://i2.wp.com/")
               .appendTxt("?&t=${DateTime.now().millisecondsSinceEpoch ~/ 1000}"),
-          nick: node["broadcaster"]["displayName"],
-          avatar: node["broadcaster"]["profileImageURL"].replaceFirst("https://", "https://i2.wp.com/"),
+          nick: broadcaster["displayName"]?.toString() ?? login,
+          avatar: (broadcaster["profileImageURL"] ?? "").toString().replaceFirst("https://", "https://i2.wp.com/"),
           watching: (node["viewersCount"] ?? 0).toString(),
           onlineViewers: (node["viewersCount"] ?? 0).toString(),
           audienceMetricType: AudienceMetricType.onlineViewers,
           status: true,
           introduction: "",
           notice: "",
-          danmakuData: node["broadcaster"]["id"],
+          danmakuData: broadcaster["id"]?.toString() ?? login,
           platform: id,
           liveStatus: LiveStatus.live,
-          area: node["game"]["displayName"],
+          area: game?["displayName"]?.toString() ?? game?["name"]?.toString() ?? '',
           data: null,
         );
         subs.add(subItem);
       }
       return subs;
-    } catch (e) {
-      CoreLog.error(e);
-      return [];
+    } catch (error, stackTrace) {
+      CoreLog.e('Twitch stream directory request failed: $error', stackTrace);
+      rethrow;
     }
   }
 

@@ -2954,6 +2954,18 @@
             832
           ]
         },
+        "settings.network_proxy_after_short_scroll": {
+          "x": 600,
+          "y": 1615,
+          "label": "设置短距离下滑后：自定义网络代理（3.1.8 当前布局）",
+          "semantic": "自定义网络代理",
+          "bounds": [
+            48,
+            1483,
+            1152,
+            1747
+          ]
+        },
         "settings.local_interaction_after_scroll2": {
           "x": 600,
           "y": 446,
@@ -3298,6 +3310,14 @@
           "y2": 626,
           "durationMs": 420,
           "label": "设置列表向下滚动一屏"
+        },
+        "settings.scroll_down_short": {
+          "x1": 600,
+          "y1": 2050,
+          "x2": 600,
+          "y2": 1250,
+          "durationMs": 320,
+          "label": "设置列表短距离下滑（用于稳定露出网络代理卡片）"
         },
         "settings.scroll_up": {
           "x1": 600,

@@ -15,6 +15,7 @@
 - [v3.1.8 录制会话时间修复](STAGE_UPDATE_3_1_8.md)：自动续接尝试与用户录制会话时间解耦、持久化兼容及 Android/Windows 双平台交付。
 - [v3.1.8 K90 Pro Android 运行审计](ANDROID_RUNTIME_AUDIT_3_1_8_K90PRO.md)：新主设备覆盖安装、UI 地图、首页/热门、120 Hz 与资源基线，以及待执行的直播矩阵。
 - [共享 Android 实机轮转](ANDROID_DEVICE_TEST_ROTATION.md)：哔哩哔哩模块、小红书模块与 Pure Live 按 A→B→C 串行占用同一部手机的默认规则与调用方式。
+- [2026-09-04 平台传输与 K90 Pro 实机审计](PLATFORM_TRANSPORT_AUDIT_2026_09_04.md)：Twitch 完整性头、SOOP 安全弹幕端口、YY H5 协议、WebSocket 半开恢复、临时代理和锁屏防误判。
 - [v3.1.7 虎牙醒目留言事件身份修复](STAGE_UPDATE_3_1_7.md)：平台事件 ID、合法重复留言、有界去重缓存与 Android/Windows 交付。
 - [v3.1.6 虎牙醒目留言实时刷新修复](STAGE_UPDATE_3_1_6.md)：通知先于 WUP 留言板更新的时序根因、非阻塞有界补偿、Android/Windows 交付与证据边界。
 - [v3.1.5 Android / Windows 双平台发布](STAGE_UPDATE_3_1_5.md)：同一冻结源码、双平台版本对齐、串行构建、安装包与校验说明。

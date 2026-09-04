@@ -47,9 +47,16 @@ WebSocketChannel _connectIoWebSocket(
   );
 }
 
-io.HttpClient? _createWebSocketHttpClient() {
+io.HttpClient? _createWebSocketHttpClient(Uri endpoint) {
   final provider = _webSocketProxyDirectiveProvider;
   if (provider == null) return null;
+  // The app registers one dynamic provider even while proxying is disabled.
+  // Creating a custom HttpClient whose findProxy callback only returns DIRECT
+  // is unnecessary and, on Android's dart:io WebSocket path, can leave the
+  // HTTP upgrade future pending until connectTimeout on otherwise reachable
+  // hosts. Keep the SDK's default client for DIRECT and create a custom client
+  // only when this endpoint really needs a proxy.
+  if (resolveWebSocketProxyDirective(endpoint) == 'DIRECT') return null;
   final client = io.HttpClient()..idleTimeout = const Duration(seconds: 30);
   client.findProxy = resolveWebSocketProxyDirective;
   return client;
@@ -78,6 +85,7 @@ class WebScoketUtils {
   final int heartBeatTime;
   final Function(dynamic)? onMessage;
   final Function(String msg)? onClose;
+  final Function(String message)? onFailure;
   final Function()? onReconnect;
   final Function()? onReady;
   final Function()? onHeartBeat;
@@ -92,6 +100,7 @@ class WebScoketUtils {
     required this.heartBeatTime,
     this.onMessage,
     this.onClose,
+    this.onFailure,
     this.onReconnect,
     this.onReady,
     this.onHeartBeat,
@@ -142,7 +151,7 @@ class WebScoketUtils {
 
     try {
       final endpoint = serverUrls[_endpointIndex % serverUrls.length];
-      final customClient = _createWebSocketHttpClient();
+      final customClient = _createWebSocketHttpClient(Uri.parse(endpoint));
       final channel = connector(
         endpoint,
         connectTimeout: const Duration(seconds: 10),
@@ -190,7 +199,15 @@ class WebScoketUtils {
         if (!_manualClose && generation == _generation) _scheduleReconnect(error.toString());
       },
       onDone: () {
-        if (!_manualClose && generation == _generation) _scheduleReconnect('WebSocket closed');
+        if (!_manualClose && generation == _generation) {
+          final code = channel.closeCode;
+          final reason = channel.closeReason?.trim();
+          _scheduleReconnect(
+            'WebSocket closed'
+            '${code == null ? '' : ' (code=$code)'}'
+            '${reason == null || reason.isEmpty ? '' : ': $reason'}',
+          );
+        }
       },
       cancelOnError: true,
     );
@@ -230,6 +247,7 @@ class WebScoketUtils {
   void _scheduleReconnect(String message) {
     if (_manualClose || reconnectTimer?.isActive == true) return;
 
+    onFailure?.call(message);
     status = SocketStatus.failed;
     heartBeatTimer?.cancel();
     heartBeatTimer = null;

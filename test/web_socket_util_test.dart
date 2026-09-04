@@ -84,9 +84,52 @@ void main() {
     expect(resolveWebSocketProxyDirective(Uri.parse('wss://primary.example/ws')), 'PROXY localhost:7897');
     await socket.close();
   });
+
+  test('DIRECT routing keeps the dart:io default WebSocket client', () async {
+    HttpClient? capturedClient;
+    configureWebSocketProxyRouting((uri) => 'DIRECT');
+    addTearDown(() => configureWebSocketProxyRouting(null));
+
+    final socket = WebScoketUtils(
+      url: 'wss://primary.example/ws',
+      heartBeatTime: 0,
+      connector: (endpoint, {connectTimeout, protocols, headers, customClient}) {
+        capturedClient = customClient;
+        return _FakeWebSocketChannel();
+      },
+    );
+
+    await socket.connect();
+    expect(capturedClient, isNull);
+    await socket.close();
+  });
+
+  test('remote close diagnostics include the close code and reason', () async {
+    final failures = <String>[];
+    late _FakeWebSocketChannel channel;
+    final socket = WebScoketUtils(
+      url: 'wss://primary.example/ws',
+      heartBeatTime: 0,
+      reconnectBaseDelay: const Duration(seconds: 1),
+      onFailure: failures.add,
+      connector: (endpoint, {connectTimeout, protocols, headers, customClient}) {
+        channel = _FakeWebSocketChannel(closeCode: 1008, closeReason: 'policy');
+        return channel;
+      },
+    );
+
+    await socket.connect();
+    await channel.incoming.close();
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    expect(failures, ['WebSocket closed (code=1008): policy']);
+    await socket.close();
+  });
 }
 
 class _FakeWebSocketChannel implements WebSocketChannel {
+  _FakeWebSocketChannel({this.closeCode, this.closeReason});
+
   final StreamController<dynamic> incoming = StreamController<dynamic>();
   final _FakeWebSocketSink outgoing = _FakeWebSocketSink();
 
@@ -103,10 +146,10 @@ class _FakeWebSocketChannel implements WebSocketChannel {
   String? get protocol => null;
 
   @override
-  int? get closeCode => null;
+  final int? closeCode;
 
   @override
-  String? get closeReason => null;
+  final String? closeReason;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

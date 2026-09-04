@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:uuid/uuid.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/common/core_log.dart';
-import 'package:pure_live/core/utils/yy/buffer_parser.dart';
 import 'package:pure_live/core/common/web_socket_util.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
+import 'package:pure_live/core/utils/yy/yy_protocol.dart';
+import 'package:pure_live/core/utils/yy/yy_web_socket_channel.dart';
+import 'package:uuid/uuid.dart';
 
 class YyDanmakuArgs {
   final int topSid;
@@ -51,234 +52,159 @@ class YyDanmaku implements LiveDanmaku {
     _connected = false;
   }
 
-  final String appId = 'yymwebh5';
-  final String appVersion = '3.2.10';
-
-  final String uuid = const Uuid().v1();
+  final String uuid = const Uuid().v4();
 
   late YyDanmakuArgs danmakuArgs;
-
+  YyProtocolSession? _protocol;
+  Timer? _handshakeTimer;
   int _generation = 0;
+  String _lastSocketFailure = '';
 
-  String get serverUrl =>
-      'wss://h5-sinchl.yy.com/websocket'
-      '?appid=$appId'
-      '&version=$appVersion'
-      '&uuid=$uuid';
+  String get serverUrl => buildYyH5ServiceWebSocketUrl(uuid);
 
   @override
-  Future start(dynamic args) async {
+  Future<void> start(dynamic args) async {
     final generation = ++_generation;
+    _handshakeTimer?.cancel();
     await webScoketUtils?.close();
     webScoketUtils = null;
-    if (generation != _generation) {
-      return;
-    }
+    if (generation != _generation) return;
+
     danmakuArgs = args as YyDanmakuArgs;
     markDisconnected();
+    _lastSocketFailure = '';
+    _protocol = YyProtocolSession(topSid: danmakuArgs.topSid, subSid: danmakuArgs.subSid, uuid: uuid);
+
     final headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36',
+      'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+          'AppleWebKit/537.36 (KHTML, like Gecko) '
+          'Chrome/151.0.0.0 Safari/537.36',
       'Origin': 'https://www.yy.com',
     };
     webScoketUtils = WebScoketUtils(
       url: serverUrl,
       heartBeatTime: heartbeatTime,
       headers: headers,
-      onMessage: (e) {
-        if (generation != _generation) {
-          return;
-        }
-
-        decodeMessage(e);
+      connector: connectYyWebSocket,
+      inactivityTimeout: const Duration(seconds: 45),
+      onMessage: (data) {
+        if (generation != _generation) return;
+        _decodeMessage(data);
       },
       onReady: () {
-        if (generation != _generation) {
-          return;
-        }
-
-        markConnected();
-
-        onReady?.call();
-
-        joinRoom();
-
-        heartbeat();
+        if (generation != _generation) return;
+        _beginProtocolHandshake(generation);
       },
       onHeartBeat: () {
-        if (generation != _generation) {
-          return;
-        }
-
+        if (generation != _generation) return;
         heartbeat();
       },
       onReconnect: () {
-        if (generation != _generation) {
-          return;
-        }
-
+        if (generation != _generation) return;
+        _handshakeTimer?.cancel();
         markDisconnected();
-
-        onClose?.call('与服务器断开连接，正在尝试重连');
+        final detail = _lastSocketFailure.isEmpty ? '' : '（${_compactFailure(_lastSocketFailure)}）';
+        onClose?.call('与服务器断开连接$detail，正在尝试重连');
       },
-      onClose: (e) {
-        if (generation != _generation) {
-          return;
-        }
-
+      onFailure: (message) {
+        if (generation != _generation) return;
+        _lastSocketFailure = message;
+        CoreLog.error('YY WebSocket：$message');
+      },
+      onClose: (error) {
+        if (generation != _generation) return;
+        _handshakeTimer?.cancel();
         markDisconnected();
-
-        onClose?.call('服务器连接失败$e');
+        onClose?.call('服务器连接失败$error');
       },
     );
 
     await webScoketUtils?.connect();
   }
 
-  void joinRoom() {
-    final data = _buildJoinChannelPacket();
-
-    if (data != null) {
-      webScoketUtils?.sendMessage(data);
-    }
+  String _compactFailure(String message) {
+    final oneLine = message.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return oneLine.length <= 120 ? oneLine : '${oneLine.substring(0, 117)}...';
   }
 
-  Uint8List? _buildJoinChannelPacket() {
-    try {
-      const uid = 0;
+  void _beginProtocolHandshake(int generation) {
+    final protocol = _protocol;
+    if (protocol == null) return;
+    markDisconnected();
+    webScoketUtils?.sendMessage(protocol.beginHandshake());
+    _handshakeTimer?.cancel();
+    _handshakeTimer = Timer(const Duration(seconds: 15), () {
+      if (generation != _generation || isConnected) return;
+      CoreLog.error('YY 弹幕协议握手超时，准备重连');
+      onClose?.call('YY 弹幕协议握手超时，正在尝试重连');
+      webScoketUtils?.reconnect();
+    });
+  }
 
-      final topSid = danmakuArgs.topSid;
-      final subSid = danmakuArgs.subSid;
+  void _decodeMessage(dynamic data) {
+    final bytes = switch (data) {
+      Uint8List value => value,
+      ByteBuffer value => value.asUint8List(),
+      List<int> value => Uint8List.fromList(value),
+      _ => null,
+    };
+    if (bytes == null) {
+      CoreLog.error('YY 收到未知 WebSocket 数据类型：${data.runtimeType}');
+      return;
+    }
 
-      const bufferSize = 256;
-
-      final buffer = Uint8List(bufferSize);
-
-      final byteData = ByteData.view(buffer.buffer);
-
-      var offset = 0;
-
-      // 协议头
-      byteData.setUint32(offset, 0x10000001, Endian.little);
-      offset += 4;
-
-      // 加入频道指令
-      byteData.setUint32(offset, 3104100, Endian.little);
-      offset += 4;
-
-      // 保留
-      byteData.setUint16(offset, 0, Endian.little);
-      offset += 2;
-
-      // uid
-      byteData.setUint32(offset, uid, Endian.little);
-      offset += 4;
-
-      // topSid
-      byteData.setUint32(offset, topSid, Endian.little);
-      offset += 4;
-
-      // subSid
-      byteData.setUint32(offset, subSid, Endian.little);
-      offset += 4;
-
-      // client type
-      byteData.setUint32(offset, 10, Endian.little);
-      offset += 4;
-
-      // version
-      final versionBytes = utf8.encode(appVersion);
-
-      byteData.setUint16(offset, versionBytes.length, Endian.little);
-      offset += 2;
-
-      buffer.setAll(offset, versionBytes);
-
-      offset += versionBytes.length;
-
-      // uuid
-      final uuidBytes = utf8.encode(uuid);
-
-      byteData.setUint16(offset, uuidBytes.length, Endian.little);
-
-      offset += 2;
-
-      buffer.setAll(offset, uuidBytes);
-
-      offset += uuidBytes.length;
-
-      // 扩展字段
-      byteData.setUint32(offset, 0, Endian.little);
-
-      offset += 4;
-
-      return buffer.sublist(0, offset);
-    } catch (e) {
-      CoreLog.error('YY 构造加入频道协议包异常：$e');
-
-      return null;
+    final protocol = _protocol;
+    if (protocol == null) return;
+    final batch = protocol.consume(bytes);
+    for (final warning in batch.warnings) {
+      CoreLog.error(warning);
+    }
+    for (final packet in batch.outbound) {
+      webScoketUtils?.sendMessage(packet);
+    }
+    if (batch.becameReady) {
+      _handshakeTimer?.cancel();
+      markConnected();
+      onReady?.call();
+    }
+    for (final chat in batch.chats) {
+      onMessage?.call(
+        LiveMessage(
+          type: LiveMessageType.chat,
+          message: chat.message,
+          userName: chat.userName,
+          color: LiveMessageColor.white,
+        ),
+      );
+    }
+    final failure = batch.failure;
+    if (failure != null) {
+      _handshakeTimer?.cancel();
+      markDisconnected();
+      CoreLog.error(failure);
+      onClose?.call('$failure，正在尝试重连');
+      webScoketUtils?.reconnect();
     }
   }
 
   @override
   void heartbeat() {
-    final data = <int>[0x0e00, 0x0000, 0x041e, 0x0c00, 0xc800, 0x0000, 0x0000];
-
-    webScoketUtils?.sendMessage(data);
+    final packet = _protocol?.buildHeartbeat();
+    if (packet != null) webScoketUtils?.sendMessage(packet);
   }
 
   @override
-  Future stop() async {
+  Future<void> stop() async {
     _generation++;
-
+    _handshakeTimer?.cancel();
+    _handshakeTimer = null;
     markDisconnected();
-
+    _protocol = null;
     onMessage = null;
     onClose = null;
     onReady = null;
-
     await webScoketUtils?.close();
-
     webScoketUtils = null;
-  }
-
-  void decodeMessage(Uint8List data) {
-    try {
-      final parser = BufferParser(data);
-
-      // header
-      parser.getUI32();
-
-      // uri
-      final ruri = parser.getUI32();
-
-      // reserved
-      parser.getUI16();
-
-      switch (ruri) {
-        case 3104600:
-          _parseDanmu(parser);
-          break;
-      }
-    } catch (e) {
-      CoreLog.error('YY decodeMessage error: $e');
-    }
-  }
-
-  void _parseDanmu(BufferParser parser) {
-    try {
-      parser.getUI32();
-      parser.getUI32();
-      parser.getUI32();
-
-      final nick = parser.getUTF8();
-
-      final msg = parser.getUTF8();
-
-      onMessage?.call(
-        LiveMessage(type: LiveMessageType.chat, message: msg, userName: nick, color: LiveMessageColor.white),
-      );
-    } catch (e) {
-      CoreLog.error('YY parse danmaku error: $e');
-    }
   }
 }

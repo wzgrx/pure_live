@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/common/core_log.dart';
 import 'package:pure_live/core/site/soop/soop_site.dart';
 import 'package:pure_live/core/common/utils/list_util.dart';
 import 'package:pure_live/core/common/web_socket_util.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
-
+import 'package:pure_live/core/utils/yy/yy_web_socket_channel.dart';
 
 class SoopDanmakuArgs {
   String url;
@@ -76,6 +77,7 @@ class SoopDanmaku implements LiveDanmaku {
       heartBeatTime: heartbeatTime,
       protocols: const ['chat'],
       headers: mHeaders,
+      connector: connectCaseSensitiveWebSocket,
       onMessage: (e) {
         try {
           if (e is String) {
@@ -144,18 +146,46 @@ class SoopDanmaku implements LiveDanmaku {
   }
 
   void decodeMessage(List<int> data) {
-    const separatorByte = 0x0c;
-    final parts = ListUtil.splitList(data, separatorByte);
-    final messages = parts.map((part) => utf8.decode(part)).toList();
-
-    CoreLog.d("Soop chat messages : \n $messages");
-
-    if (messages.length > 5 && !['-1', '1'].contains(messages[1]) && !messages[1].contains('|')) {
-      final comment = messages[1];
-      final userName = messages[6];
-      onMessage?.call(
-        LiveMessage(type: LiveMessageType.chat, color: LiveMessageColor.white, message: comment, userName: userName),
-      );
+    const headerLength = 14;
+    var offset = 0;
+    while (offset + headerLength <= data.length) {
+      if (data[offset] != 0x1b || data[offset + 1] != 0x09) {
+        CoreLog.w('SOOP chat packet has an invalid prefix at offset $offset');
+        return;
+      }
+      final service = int.tryParse(ascii.decode(data.sublist(offset + 2, offset + 6), allowInvalid: true));
+      final bodyLength = int.tryParse(ascii.decode(data.sublist(offset + 6, offset + 12), allowInvalid: true));
+      if (service == null || bodyLength == null || bodyLength < 0) {
+        CoreLog.w('SOOP chat packet has an invalid header at offset $offset');
+        return;
+      }
+      final packetEnd = offset + headerLength + bodyLength;
+      if (packetEnd > data.length) {
+        CoreLog.w('SOOP chat packet is truncated at offset $offset');
+        return;
+      }
+      if (service == 5) {
+        _decodeChatPacket(data.sublist(offset + headerLength, packetEnd));
+      }
+      offset = packetEnd;
     }
+    if (offset != data.length) {
+      CoreLog.w('SOOP chat payload ended with ${data.length - offset} trailing bytes');
+    }
+  }
+
+  void _decodeChatPacket(List<int> body) {
+    const separatorByte = 0x0c;
+    final parts = ListUtil.splitList(body, separatorByte);
+    final fields = parts.map((part) => utf8.decode(part, allowMalformed: true)).toList(growable: false);
+    CoreLog.d("SOOP chat fields: $fields");
+
+    if (fields.length <= 6) return;
+    final comment = fields[1].trim();
+    final userName = fields[6].trim();
+    if (comment.isEmpty || userName.isEmpty || ['-1', '1'].contains(comment) || comment.contains('|')) return;
+    onMessage?.call(
+      LiveMessage(type: LiveMessageType.chat, color: LiveMessageColor.white, message: comment, userName: userName),
+    );
   }
 }

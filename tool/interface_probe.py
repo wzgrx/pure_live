@@ -91,6 +91,10 @@ def post_json(
                     "User-Agent": USER_AGENT,
                     "Accept": "application/json",
                     "Content-Type": "text/plain; charset=UTF-8",
+                    # Platform CDNs occasionally tear down pooled TLS sockets
+                    # with an EOF on this Windows host. Each bounded retry gets
+                    # an independent connection, matching request_json.
+                    "Connection": "close",
                     **(headers or {}),
                 },
             )
@@ -965,6 +969,7 @@ def twitch_gql(payload: object) -> object:
         # a repeatedly reused synthetic device id. Mirror a fresh anonymous
         # web session for every bounded probe run.
         headers={"Client-Id": TWITCH_CLIENT_ID, "Device-Id": secrets.token_hex(16)},
+        attempts=5,
     )
     nodes = response if isinstance(response, list) else [response]
     for node in nodes:
@@ -1329,19 +1334,30 @@ def cc_categories_probe() -> None:
     behavior as malformed JSON.
     """
     url = "https://cc.163.com/category/?format=json"
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": USER_AGENT,
-            "Accept": "application/json,text/plain,*/*",
-            "Connection": "close",
-        },
-    )
-    with urllib.request.urlopen(request, timeout=20) as response:
-        payload = response.read().decode("utf-8", errors="replace")
-        response_url = response.geturl()
-        final_url = urllib.parse.urlsplit(response_url)
-        content_type = response.headers.get("Content-Type", "")
+    last_error: Exception | None = None
+    for attempt in range(1, 6):
+        try:
+            request = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": USER_AGENT,
+                    "Accept": "application/json,text/plain,*/*",
+                    "Connection": "close",
+                },
+            )
+            with urllib.request.urlopen(request, timeout=20) as response:
+                payload = response.read().decode("utf-8", errors="replace")
+                response_url = response.geturl()
+                final_url = urllib.parse.urlsplit(response_url)
+                content_type = response.headers.get("Content-Type", "")
+            break
+        except Exception as error:  # noqa: BLE001 - bounded transient retry
+            last_error = error
+            if attempt < 5:
+                time.sleep(attempt)
+    else:
+        assert last_error is not None
+        raise last_error
 
     try:
         result = json.loads(payload.lstrip("\ufeff"))

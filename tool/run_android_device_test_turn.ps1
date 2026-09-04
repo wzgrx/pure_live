@@ -30,11 +30,33 @@ if (-not $coordinator) {
 }
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
-$effectiveCommand = if ($Pass.IsPresent) {
+$rawCommand = if ($Pass.IsPresent) {
     "Write-Host 'Pure Live has no device work in this round; passing the phone.'"
 } else {
-    "& '.\tool\wake_android_device.ps1'; if (`$LASTEXITCODE -ne 0) { exit `$LASTEXITCODE }; $CommandLine"
+    $CommandLine
 }
+$encodedCommand = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rawCommand))
+$effectiveCommand = @"
+`$turnFailure = `$null
+try {
+    & '.\tool\wake_android_device.ps1' -StayAwake
+    if (`$LASTEXITCODE -ne 0) { throw "Device wake guard exited with code `$LASTEXITCODE." }
+    `$decodedCommand = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('$encodedCommand'))
+    & ([scriptblock]::Create(`$decodedCommand))
+    if (`$LASTEXITCODE -ne 0) { throw "Device command exited with code `$LASTEXITCODE." }
+} catch {
+    `$turnFailure = `$_
+} finally {
+    try {
+        & '.\tool\wake_android_device.ps1' -ReleaseStayAwake
+        if (`$LASTEXITCODE -ne 0) { throw "Device wake guard cleanup exited with code `$LASTEXITCODE." }
+    } catch {
+        if (`$null -eq `$turnFailure) { `$turnFailure = `$_ }
+        else { Write-Error "Device wake guard cleanup also failed: `$(`$_.Exception.Message)" -ErrorAction Continue }
+    }
+}
+if (`$null -ne `$turnFailure) { throw `$turnFailure }
+"@
 
 & $coordinator `
     -Lane purelive `

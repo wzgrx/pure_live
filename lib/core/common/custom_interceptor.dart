@@ -13,9 +13,11 @@ class CustomLogInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     var time = DateTime.now().millisecondsSinceEpoch - err.requestOptions.extra[_keyTimestamp];
+    final underlyingError = err.error;
 
     Log.e('''[HTTP Error] [${err.type}] [Time:${time}ms]
 ${err.message}
+Underlying Error：${underlyingError == null ? 'null' : '${underlyingError.runtimeType}: $underlyingError'}
 Request Method：${err.requestOptions.method}
 Response Code：${err.response?.statusCode}
 Request URL：${err.requestOptions.uri}

@@ -565,17 +565,64 @@ class SoopSite extends LiveSite implements LiveSiteRoomRefresher, LiveSiteRecord
 
   SoopDanmakuArgs? geDanmakuArgs(Map<dynamic, dynamic> resultTextFuture, String roomId) {
     try {
-      var resultText = resultTextFuture;
-      var jsonObj = resultText['CHANNEL'];
-      var chatNo = jsonObj["CHATNO"];
-      var chatDomain = jsonObj["CHDOMAIN"];
-      var chpt = jsonObj["CHPT"];
-      final wsUrl = 'wss://$chatDomain:$chpt/Websocket/$roomId';
+      final channel = resultTextFuture['CHANNEL'];
+      if (channel is! Map) {
+        throw const FormatException('SOOP channel metadata is missing');
+      }
+      final chatNo = channel['CHATNO']?.toString().trim() ?? '';
+      if (chatNo.isEmpty) {
+        throw const FormatException('SOOP chat room number is missing');
+      }
+      final wsUrl = buildDanmakuWebSocketUrl(channel: channel, roomId: roomId);
       return SoopDanmakuArgs(url: wsUrl, chatNo: chatNo);
     } catch (e) {
       CoreLog.w("$e");
       return null;
     }
+  }
+
+  /// Resolves the current SOOP HTML5 chat endpoint.
+  ///
+  /// `CHPT` is the plain-WebSocket port. The official HTTPS player maps it to
+  /// the adjacent TLS port before opening WSS (for example 9000 -> 9001).
+  /// Connecting WSS to the unmodified port stalls during the TLS handshake.
+  @visibleForTesting
+  static String buildDanmakuWebSocketUrl({required Map<dynamic, dynamic> channel, required String roomId}) {
+    final normalizedRoomId = roomId.trim();
+    if (normalizedRoomId.isEmpty) {
+      throw const FormatException('SOOP room id is missing');
+    }
+
+    var host = channel['CHDOMAIN']?.toString().trim() ?? '';
+    if (host.isEmpty) {
+      final rawIp = channel['CHIP']?.toString().trim() ?? '';
+      host = _secureChatHostFromIpv4(rawIp);
+    }
+    final plainPort = _parsePositiveInt(channel['CHPT']);
+    if (host.isEmpty || plainPort == null || plainPort >= 65535) {
+      throw const FormatException('SOOP chat endpoint is invalid');
+    }
+
+    return Uri(
+      scheme: 'wss',
+      host: host,
+      port: plainPort + 1,
+      pathSegments: <String>['Websocket', normalizedRoomId],
+    ).toString();
+  }
+
+  static int? _parsePositiveInt(dynamic value) {
+    final parsed = value is num ? value.toInt() : int.tryParse(value?.toString().trim() ?? '');
+    return parsed != null && parsed > 0 ? parsed : null;
+  }
+
+  static String _secureChatHostFromIpv4(String rawIp) {
+    final octets = rawIp.split('.').map(int.tryParse).toList(growable: false);
+    if (octets.length != 4 || octets.any((value) => value == null || value < 0 || value > 255)) {
+      return '';
+    }
+    final encoded = octets.map((value) => value!.toRadixString(16).padLeft(2, '0')).join().toUpperCase();
+    return 'chat-$encoded.sooplive.co.kr';
   }
 
   @override

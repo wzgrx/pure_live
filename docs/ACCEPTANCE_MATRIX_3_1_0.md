@@ -31,6 +31,7 @@
 | A0-07 | PASS | v3.1.6 Android arm64-v8a 安装包静默覆盖升级 | PJZ110 / Android 16 从 v3.1.5 执行 `adb install -r` 成功，核对 `versionName=3.1.6`、`versionCode=6119`；安装前后 `com.xingin.xhs/.index.v2.IndexActivityV2` 保持同一前台 Activity，没有启动 Pure Live 或抢占用户界面。安装后空闲基线为活动进程/服务/通知/Wake Lock 均 0，DropBox 中以 Pure Live 为主进程的崩溃/ANR 为 0；见 `docs/ANDROID_POST_INSTALL_BASELINE_3_1_6.md` |
 | A0-08 | PASS | v3.1.7 Android arm64-v8a 事件身份补丁静默覆盖升级 | PJZ110 / Android 16 从 v3.1.6 执行 `adb install -r` 成功，核对 `versionName=3.1.7`、`versionCode=6120`；安装前后同一 `com.xingin.xhs/.index.v2.IndexActivityV2` 保持前台，Pure Live 没有被启动且安装后无运行进程 |
 | A0-09 | PASS | v3.1.8 Android arm64-v8a 在新主力设备覆盖升级、启动与数据保留 | K90 Pro / `25102RKBEC` / Android 17 通过网络 ADB 覆盖安装，核对 `versionName=3.1.8`、arm64 分包 `versionCode=6121`；一次启动成功、原 6 个关注记录保留、无 AndroidRuntime/FATAL。短时内存只记录为启动基线，完整运行矩阵继续执行 |
+| A0-10 | PASS | 斗鱼过滤修订后的 v3.1.8 Android arm64 Debug 覆盖安装与基础运行 | 从干净提交 `971c2753` 构建，APK 为 299,150,717 B，SHA-256 `B0EEAF3434E961EFD10419BEF59AC46164D44CDD61DC5746CCE63C3AFFF259DF`；K90 Pro / cycle 200 覆盖安装并完成 14/14 直播冒烟，无 FATAL/ANR。构建：`local-artifacts/build-records/20260904T193151421Z-build-androidarm64-debug.json`；实机：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json` |
 
 ### A1 首页、关注、热门、分区与搜索
 
@@ -76,7 +77,7 @@
 
 | ID | 状态 | 验收内容 |
 |---|---|---|
-| A4-01 | RUN | 房间隔离、时间戳、去重、重连、横竖屏/PiP 返回后继续；关闭房间后旧消息不进入新房。K90 Pro / cycle 199 再次完成远端弹幕连接、10 条可见消息、系统 PiP 与恢复后弹幕 UI 存活，14/14 门禁通过。斗鱼合帧、跨房、空文本与疑似自动消息开关回归 6/6；全平台相似文本过滤的新默认值及备份兼容回归 12/12。长时间断网重连与连续换房仍继续执行。证据：`local-artifacts/diagnostics/android-runtime-smoke-20260905T030533250/summary.json`、`local-artifacts/build-records/20260904T192547043Z-quality-focused.json` |
+| A4-01 | RUN | 房间隔离、时间戳、去重、重连、横竖屏/PiP 返回后继续；关闭房间后旧消息不进入新房。K90 Pro / cycle 200 使用包含本轮修订的最终 Debug APK，完成远端弹幕连接、10 条可见消息、系统 PiP 与恢复后弹幕 UI 存活，14/14 门禁通过。斗鱼合帧、跨房、空文本与疑似自动消息开关回归 6/6；全平台相似文本过滤的新默认值及备份兼容回归 12/12。长时间断网重连与连续换房仍继续执行。证据：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json`、`local-artifacts/build-records/20260904T192547043Z-quality-focused.json` |
 | A4-02 | NR | 列表上滑一次即冻结，累计新消息，回到底部一次追平；快速滚动、长按屏蔽、关键词管理 |
 | A4-03 | NR | 主画面、小窗弹幕速度/FPS/密度/字体/描边/区域一致，120 Hz 下无明显跳步 |
 | A4-04 | RUN | K90 Pro / cycle 193 已验证本地互动开关启用、重启持久化、竖屏与横屏全屏输入、2 秒排队、同一共享列表回显和原设置恢复；横屏输入期间控制栏保持挂载，测试器通过被键盘遮挡时仍可达的 IME `send` 动作提交。平台体验包、等级、礼物和样式跨入口的组合矩阵继续执行。证据：`local-artifacts/diagnostics/android-local-interaction-enabled-20260905T015317914/summary.json` |

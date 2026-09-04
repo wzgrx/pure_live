@@ -64,6 +64,13 @@ Windows 部署参考：[Flutter Windows 构建与 ZIP 部署说明](https://docs
   `local-artifacts/build-records/20260904T192547043Z-quality-focused.json`。
 - 本轮代码完成后只执行一次 `flutter analyze`，结果为 0 issue。记录：
   `local-artifacts/build-records/20260904T192910396Z-quality-focused.json`。
+- 从干净提交 `971c2753` 串行构建 Android arm64 Debug：APK 为 299,150,717 B，
+  SHA-256 `B0EEAF3434E961EFD10419BEF59AC46164D44CDD61DC5746CCE63C3AFFF259DF`；
+  16 个原生库最小 ELF LOAD 对齐不低于 `0x4000`。构建记录：
+  `local-artifacts/build-records/20260904T193151421Z-build-androidarm64-debug.json`。
+- K90 Pro / Android 17 覆盖安装后在共享轮转 cycle 200 完成冷启动、远端弹幕、
+  画质/线路、纯音频往返、系统 PiP、恢复后弹幕 UI 与返回，14/14 门禁通过且无
+  FATAL/ANR。证据：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json`。
 
 ## 本轮边界
 

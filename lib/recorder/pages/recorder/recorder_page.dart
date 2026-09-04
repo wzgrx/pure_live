@@ -5,6 +5,7 @@ import 'package:pure_live/routes/app_navigation.dart';
 import 'package:pure_live/recorder/models/record_status.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pure_live/recorder/models/live_record_task.dart';
+import 'package:pure_live/recorder/models/recorder_task_ordering.dart';
 import 'package:pure_live/recorder/pages/recorder/recorder_controller.dart';
 import 'package:pure_live/recorder/widgets/recorder_bounded_scroll.dart';
 
@@ -85,11 +86,8 @@ class _TaskList extends GetView<RecorderController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      List<LiveRecordTask> list = controller.tasks;
-
-      if (filter != null) {
-        list = list.where(filter!).toList();
-      }
+      final matchingTasks = filter == null ? controller.tasks : controller.tasks.where(filter!);
+      final list = RecorderTaskOrdering.forDisplay(matchingTasks, groupByStatus: filter == null);
 
       if (list.isEmpty) {
         return const _EmptyView();

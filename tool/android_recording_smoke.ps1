@@ -930,7 +930,25 @@ try {
         (Test-Path -LiteralPath $recordCenterScreenshot -PathType Leaf) -and
         (Get-Item -LiteralPath $recordCenterScreenshot).Length -gt 0
     $result.checks.stoppedStatusVisible = $finalCenter.Xml.Contains('已停止')
-    $result.checks.failureAbsent = -not ($finalCenter.Xml -match '录制失败|最近失败|输入的直播流地址格式有误')
+    [xml]$finalCenterDocument = $finalCenter.Xml
+    $currentStoppedCards = @(
+        $finalCenterDocument.SelectNodes('//node') | ForEach-Object {
+            $_.GetAttribute('content-desc')
+        } | Where-Object {
+            $_ -like "已停止`n*" -and
+            $_ -match '(?m)^\d{2}:\d{2}:\d{2}$' -and
+            $_ -match '(?m)^\d+(?:\.\d+)?\s+(?:KB|MB|GB)$'
+        }
+    )
+    # The app keeps active status groups first and sorts each group newest
+    # first. Scope the failure check to the just-finished card; historical
+    # failures elsewhere in the visible list are valid persisted evidence and
+    # must not invalidate a successful new recording.
+    $currentStoppedCard = $currentStoppedCards | Select-Object -First 1
+    $result.checks.currentStoppedCardVisible = -not [string]::IsNullOrWhiteSpace($currentStoppedCard)
+    $result.checks.failureAbsent =
+        $result.checks.currentStoppedCardVisible -and
+        $currentStoppedCard -notmatch '录制失败|最近失败|输入的直播流地址格式有误'
 
     $afterFiles = @(Get-PrivateRecordingFiles)
     Save-Text 'record-files-after.txt' $afterFiles
@@ -964,8 +982,16 @@ try {
     )
     $result.checks.mediaDurationSeconds = $durationSeconds
     $recordingWallSeconds = [double]$result.checks.recordingWallSeconds
+    # HLS startup includes stream resolution, manifest selection, demux probing
+    # and the interval until two growing-file samples are observed. Do not
+    # require the final media to cover time before media output existed. Keep a
+    # five-second sampling/finalization tolerance after subtracting the
+    # measured, bounded startup interval.
+    $startupSeconds = [double]$result.checks.runningFileGrowthMs / 1000.0
+    $result.checks.recordingStartupSeconds = [math]::Round($startupSeconds, 3)
+    $minimumMediaSeconds = [math]::Max(8, $recordingWallSeconds - $startupSeconds - 5)
     $result.checks.mediaDurationPlausible =
-        $durationSeconds -ge ([math]::Max(8, $recordingWallSeconds - 12)) -and
+        $durationSeconds -ge $minimumMediaSeconds -and
         $durationSeconds -le ($recordingWallSeconds + 12)
     $result.checks.hasVideoStream = @($probe.streams | Where-Object codec_type -eq 'video').Count -gt 0
     $result.checks.hasAudioStream = @($probe.streams | Where-Object codec_type -eq 'audio').Count -gt 0
@@ -1071,6 +1097,7 @@ $assertions = [ordered]@{
         ([string]$result.checks.roomForegroundAfterScreenOff -match $Package)
     )
     stoppedStatusVisible = [bool]$result.checks.stoppedStatusVisible
+    currentStoppedCardVisible = [bool]$result.checks.currentStoppedCardVisible
     failureAbsent = [bool]$result.checks.failureAbsent
     recordingFileNonEmpty = [bool]$result.checks.recordingFileNonEmpty
     mediaDurationPlausible = [bool]$result.checks.mediaDurationPlausible

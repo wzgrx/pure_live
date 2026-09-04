@@ -12,7 +12,8 @@ param(
     [string] $Platform = 'bilibili',
     [string] $Package = 'com.mystyle.purelive',
     [string] $Activity = '.MainActivity',
-    [switch] $RequireLiveDanmaku
+    [switch] $RequireLiveDanmaku,
+    [switch] $ExerciseStreamSelection
 )
 
 Set-StrictMode -Version Latest
@@ -57,6 +58,8 @@ $platformLabels = @{
 }
 $platformLabel = $platformLabels[$Platform]
 $danmakuSupported = $Platform -ne 'cc'
+$qualityLabelPattern = '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3})?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
+$lineLabelPattern = '^(?:线路\s*\d+|主线路|备用线路)$'
 $script:foregroundInterferenceCount = 0
 $script:foregroundRecoveryCount = 0
 $script:uiProfileData = $null
@@ -301,6 +304,83 @@ function Get-UiLabels {
             @($_.GetAttribute('text'), $_.GetAttribute('content-desc'))
         } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique
     )
+}
+
+function Get-CurrentStreamLabel {
+    param(
+        [Parameter(Mandatory = $true)][string] $Xml,
+        [Parameter(Mandatory = $true)][ValidateSet('quality', 'line')][string] $Kind
+    )
+    [xml]$document = $Xml
+    $pattern = if ($Kind -eq 'quality') { $qualityLabelPattern } else { $lineLabelPattern }
+    @(
+        $document.SelectNodes('//node') | ForEach-Object {
+            $label = if (-not [string]::IsNullOrWhiteSpace($_.GetAttribute('content-desc'))) {
+                $_.GetAttribute('content-desc')
+            } else {
+                $_.GetAttribute('text')
+            }
+            if (
+                $_.GetAttribute('enabled') -eq 'true' -and
+                $_.GetAttribute('clickable') -eq 'true' -and
+                $label -match $pattern
+            ) {
+                $label
+            }
+        }
+    ) | Select-Object -First 1
+}
+
+function Select-StreamSwitchTarget {
+    param(
+        [Parameter(Mandatory = $true)][string[]] $Options,
+        [string] $Current,
+        [Parameter(Mandatory = $true)][ValidateSet('quality', 'line')][string] $Kind
+    )
+    $candidates = @($Options | Where-Object { $_ -ne $Current })
+    if ($candidates.Count -eq 0) { return $null }
+    if ($Kind -eq 'quality') {
+        $lowBandwidth = @(
+            $candidates | Where-Object {
+                $_ -match '(?i:流畅|标清|省流|低清|\b(?:360p?|240p?|160p?|sd|ld|low)\b)'
+            }
+        ) | Select-Object -First 1
+        if ($lowBandwidth) { return $lowBandwidth }
+    }
+    $candidates | Select-Object -First 1
+}
+
+function Wait-StreamSelectionCommit {
+    param(
+        [Parameter(Mandatory = $true)][ValidateSet('quality', 'line')][string] $Kind,
+        [Parameter(Mandatory = $true)][string] $RequestedLabel,
+        [Parameter(Mandatory = $true)][string] $EvidencePrefix,
+        [int] $TimeoutSeconds = 35
+    )
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $lastLabel = $null
+    do {
+        Save-UiDump $EvidencePrefix
+        $xml = Get-Content -LiteralPath (Join-Path $evidence "$EvidencePrefix.xml") -Raw -Encoding UTF8
+        # A menu item already contains the requested label. Only inspect the
+        # compact room control after the modal barrier has disappeared, or the
+        # assertion would pass before the asynchronous source switch commits.
+        if ($xml -notmatch '关闭菜单' -and $xml -match '弹幕列表') {
+            $lastLabel = Get-CurrentStreamLabel -Xml $xml -Kind $Kind
+            if ($lastLabel -eq $RequestedLabel) {
+                return [pscustomobject]@{
+                    Xml = $xml
+                    AppliedLabel = $lastLabel
+                    ElapsedMs = $timer.ElapsedMilliseconds
+                }
+            }
+            if ($xml -match '播放器异常|解码失败|直播已结束|网络请求失败') {
+                throw "The $Kind switch entered an error state before commit."
+            }
+        }
+        Start-Sleep -Milliseconds 500
+    } while ($timer.Elapsed.TotalSeconds -lt $TimeoutSeconds)
+    throw "The $Kind switch did not commit '$RequestedLabel' within $TimeoutSeconds seconds; current='$lastLabel'."
 }
 
 function Select-PlatformTab {
@@ -705,6 +785,7 @@ $result = [ordered]@{
     platformLabel = $platformLabel
     requestedRecordSeconds = $RecordSeconds
     requestedScreenOffSeconds = $ScreenOffSeconds
+    exerciseStreamSelection = $ExerciseStreamSelection.IsPresent
     checks = [ordered]@{}
 }
 $monitorRemoved = $false
@@ -768,7 +849,7 @@ try {
     $roomLabels = @(Get-UiLabels -Xml $roomXml)
     $currentQualityLabel = @(
         $roomLabels | Where-Object {
-            $_ -match '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3})?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
+            $_ -match $qualityLabelPattern
         }
     ) | Select-Object -First 1
     if ([string]::IsNullOrWhiteSpace($currentQualityLabel)) {
@@ -788,7 +869,7 @@ try {
             # values such as `原画2K60` or `蓝光10M`. Match the quality token
             # anywhere, or a complete resolution/FPS label, without treating
             # unrelated room text as a quality option.
-            $_ -match '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3})?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
+            $_ -match $qualityLabelPattern
         }
     )
     $audioOnlyQualityLabels = @(
@@ -798,11 +879,44 @@ try {
     $result.checks.qualitySheetVisible = $qualityOptions.Count -gt 0
     $result.checks.audioOnlyQualityLabels = $audioOnlyQualityLabels
     $result.checks.audioOnlyQualityAbsent = $audioOnlyQualityLabels.Count -eq 0
-    Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', '4') | Out-Null
-    Wait-UiPattern -Name 'room-after-quality-check' -Pattern '弹幕列表' -TimeoutSeconds 12 | Out-Null
+
+    $qualitySwitchTarget = Select-StreamSwitchTarget `
+        -Options $qualityOptions `
+        -Current $currentQualityLabel `
+        -Kind quality
+    if ($ExerciseStreamSelection -and $qualityOptions.Count -gt 1 -and $qualitySwitchTarget) {
+        $result.checks.qualityBeforeSwitch = $currentQualityLabel
+        $result.checks.qualityRequested = $qualitySwitchTarget
+        Invoke-Ui -Action TapSemantic -Value $qualitySwitchTarget -Xml $qualityState.Xml
+        $qualityCommit = Wait-StreamSelectionCommit `
+            -Kind quality `
+            -RequestedLabel $qualitySwitchTarget `
+            -EvidencePrefix 'quality-switch-committed'
+        $result.checks.qualityAfterSwitch = $qualityCommit.AppliedLabel
+        $result.checks.qualitySwitchMs = $qualityCommit.ElapsedMs
+        $result.checks.qualitySwitchCommitted = $qualityCommit.AppliedLabel -eq $qualitySwitchTarget
+        Save-Screenshot 'quality-switch-committed'
+        Start-Sleep -Seconds 3
+        $qualityStable = Wait-UiPattern `
+            -Name 'quality-switch-stable' `
+            -Pattern '弹幕列表' `
+            -TimeoutSeconds 12
+        $result.checks.qualitySwitchStable =
+            (Get-CurrentStreamLabel -Xml $qualityStable.Xml -Kind quality) -eq $qualitySwitchTarget -and
+            $qualityStable.Xml -notmatch '播放器异常|解码失败|直播已结束|网络请求失败'
+        $roomXml = $qualityStable.Xml
+        $roomLabels = @(Get-UiLabels -Xml $roomXml)
+    } else {
+        $result.checks.qualitySwitchCommitted = $null
+        $result.checks.qualitySwitchStable = $null
+        Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', '4') | Out-Null
+        $roomAfterQuality = Wait-UiPattern -Name 'room-after-quality-check' -Pattern '弹幕列表' -TimeoutSeconds 12
+        $roomXml = $roomAfterQuality.Xml
+        $roomLabels = @(Get-UiLabels -Xml $roomXml)
+    }
 
     $currentLineLabel = @(
-        $roomLabels | Where-Object { $_ -match '^(?:线路\s*\d+|主线路|备用线路)$' }
+        $roomLabels | Where-Object { $_ -match $lineLabelPattern }
     ) | Select-Object -First 1
     if ([string]::IsNullOrWhiteSpace($currentLineLabel)) {
         Invoke-Ui -Action Tap -Value 'live.line'
@@ -816,13 +930,38 @@ try {
     Save-Screenshot 'line-before-record'
     $lineOptions = @(
         Get-UiLabels -Xml $lineState.Xml | Where-Object {
-            $_ -match '^(?:线路\s*\d+|主线路|备用线路|播放线路.*)$'
+            $_ -match $lineLabelPattern
         }
     )
     $result.checks.lineOptions = $lineOptions
     $result.checks.lineSheetVisible = $lineOptions.Count -gt 0
-    Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', '4') | Out-Null
-    Wait-UiPattern -Name 'room-after-line-check' -Pattern '弹幕列表' -TimeoutSeconds 12 | Out-Null
+    $lineSwitchTarget = Select-StreamSwitchTarget -Options $lineOptions -Current $currentLineLabel -Kind line
+    if ($ExerciseStreamSelection -and $lineOptions.Count -gt 1 -and $lineSwitchTarget) {
+        $result.checks.lineBeforeSwitch = $currentLineLabel
+        $result.checks.lineRequested = $lineSwitchTarget
+        Invoke-Ui -Action TapSemantic -Value $lineSwitchTarget -Xml $lineState.Xml
+        $lineCommit = Wait-StreamSelectionCommit `
+            -Kind line `
+            -RequestedLabel $lineSwitchTarget `
+            -EvidencePrefix 'line-switch-committed'
+        $result.checks.lineAfterSwitch = $lineCommit.AppliedLabel
+        $result.checks.lineSwitchMs = $lineCommit.ElapsedMs
+        $result.checks.lineSwitchCommitted = $lineCommit.AppliedLabel -eq $lineSwitchTarget
+        Save-Screenshot 'line-switch-committed'
+        Start-Sleep -Seconds 3
+        $lineStable = Wait-UiPattern `
+            -Name 'line-switch-stable' `
+            -Pattern '弹幕列表' `
+            -TimeoutSeconds 12
+        $result.checks.lineSwitchStable =
+            (Get-CurrentStreamLabel -Xml $lineStable.Xml -Kind line) -eq $lineSwitchTarget -and
+            $lineStable.Xml -notmatch '播放器异常|解码失败|直播已结束|网络请求失败'
+    } else {
+        $result.checks.lineSwitchCommitted = $null
+        $result.checks.lineSwitchStable = $null
+        Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', '4') | Out-Null
+        Wait-UiPattern -Name 'room-after-line-check' -Pattern '弹幕列表' -TimeoutSeconds 12 | Out-Null
+    }
 
     Invoke-Ui -Action Tap -Value 'live.record'
     $preflightDialog = Wait-UiPattern `
@@ -1114,6 +1253,16 @@ if ($RequireLiveDanmaku -and $danmakuSupported) {
     # room is known to be active. Quiet rooms must not turn an otherwise valid
     # protocol/recording smoke into a deterministic false failure.
     $assertions.liveDanmakuVisible = [bool]$result.checks.liveDanmakuVisible
+}
+if ($ExerciseStreamSelection) {
+    $assertions.qualitySwitchCommitted =
+        @($result.checks.qualityOptions).Count -le 1 -or [bool]$result.checks.qualitySwitchCommitted
+    $assertions.qualitySwitchStable =
+        @($result.checks.qualityOptions).Count -le 1 -or [bool]$result.checks.qualitySwitchStable
+    $assertions.lineSwitchCommitted =
+        @($result.checks.lineOptions).Count -le 1 -or [bool]$result.checks.lineSwitchCommitted
+    $assertions.lineSwitchStable =
+        @($result.checks.lineOptions).Count -le 1 -or [bool]$result.checks.lineSwitchStable
 }
 $result.assertions = $assertions
 $result | ConvertTo-Json -Depth 10 | Out-File -LiteralPath (Join-Path $evidence 'summary.json') -Encoding utf8

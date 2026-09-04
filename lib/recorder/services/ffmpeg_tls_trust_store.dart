@@ -82,8 +82,11 @@ class FFmpegTlsTrustStore {
   /// Inserts the CA input option immediately before each HTTPS input.
   ///
   /// This transformation runs after the complete command has been assembled,
-  /// so every recorder and audio-only relay receives the same TLS policy. It is
-  /// idempotent and leaves HTTP, RTMP, RTSP and local-file inputs untouched.
+  /// so every recorder and audio-only relay receives the same TLS policy. The
+  /// HTTPS HLS child resources are handled by `FFmpegHlsInputRelay`, because
+  /// FFmpeg 9.0.1 does not propagate this option from a manifest to its child
+  /// requests. This transformation is idempotent and leaves HTTP, RTMP, RTSP
+  /// and local-file inputs untouched.
   static List<String> injectCaFile(Iterable<String> arguments, {String? caFile}) {
     final source = List<String>.of(arguments);
     final trustedFile = caFile?.trim() ?? '';

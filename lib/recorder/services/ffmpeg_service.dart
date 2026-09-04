@@ -9,6 +9,7 @@ import 'package:pure_live/core/common/log.dart';
 import 'package:pure_live/plugins/locale_helper.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/ffmpeg_tls_trust_store.dart';
 
 /// Converts FFmpegKit's progress timestamp into a live-session duration.
@@ -160,12 +161,14 @@ class FFmpegRecordSession {
     required this.sessionId,
     required this.session,
     required this.liveRecording,
+    this.inputRelay,
   });
 
   final String taskId;
   final int sessionId;
   final FFmpegSession session;
   final bool liveRecording;
+  final FFmpegHlsInputRelay? inputRelay;
   final DateTime createdAt = DateTime.now();
   final Completer<void> completion = Completer<void>();
   final List<String> _diagnosticLines = <String>[];
@@ -228,13 +231,22 @@ class FFmpegService {
     // Pass the exact argument vector to FFI. Re-parsing a shell-like command
     // string was platform-dependent and could corrupt signed URLs, header CRLF
     // blocks or Android storage paths before FFmpeg saw them.
-    final effectiveArguments = FFmpegTlsTrustStore.injectCaFile(arguments, caFile: _trustedCaFile);
-    final nativeSession = FFmpegKit.createSessionFromArguments(effectiveArguments);
+    final inputRelay = await FFmpegHlsInputRelay.startForArguments(arguments);
+    final inputArguments = inputRelay?.replaceFirstInput(arguments) ?? arguments;
+    final effectiveArguments = FFmpegTlsTrustStore.injectCaFile(inputArguments, caFile: _trustedCaFile);
+    late final FFmpegSession nativeSession;
+    try {
+      nativeSession = FFmpegKit.createSessionFromArguments(effectiveArguments);
+    } catch (_) {
+      await inputRelay?.close();
+      rethrow;
+    }
     final session = FFmpegRecordSession(
       taskId: taskId,
       sessionId: nativeSession.getSessionId(),
       session: nativeSession,
       liveRecording: liveRecording,
+      inputRelay: inputRelay,
     );
     _sessions[taskId] = session;
 
@@ -358,6 +370,7 @@ class FFmpegService {
       } finally {
         if (identical(_sessions[taskId], session)) _sessions.remove(taskId);
         if (!session.completion.isCompleted) session.completion.complete();
+        unawaited(session.inputRelay?.close());
       }
     });
 
@@ -394,6 +407,7 @@ class FFmpegService {
     } finally {
       if (identical(_sessions[taskId], session)) _sessions.remove(taskId);
       if (!session.completion.isCompleted) session.completion.complete();
+      await session.inputRelay?.close();
     }
   }
 
@@ -404,9 +418,7 @@ class FFmpegService {
 
     final future = Future.wait<void>([
       FFmpegKitExtended.initialize(),
-      FFmpegTlsTrustStore.ensureReady().then<void>((path) {
-        _trustedCaFile = path;
-      }),
+      FFmpegTlsTrustStore.ensureReady().then<void>((path) => _trustedCaFile = path),
     ]);
     _initializing = future;
     try {

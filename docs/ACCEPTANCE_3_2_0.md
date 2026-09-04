@@ -29,6 +29,12 @@ Android Debug 源码 `8cda379d88aafaaf9bbc4c6757ef73530e4943c4`，包含 `54ee0d
 
 ## 发布门禁
 
+### 自动验收判定加固
+
+本輪审查发现原 Android PiP 判定对整份 dumpsys 搜索 `supportsPictureInPicture`，存在把能力声明或其他应用状态当成进入成功的假阳性。现改为只读取目标包的 ActivityRecord 中 `mLastReportedPictureInPictureMode=true`，并由本地 CI 执行 8 个正反例（未进入、仅支持、其他应用进入、包名前缀、跨 Task 状态等）。旧的标准/竖屏两份真实日志经新判定再次读取均为 true；新包继续执行真机模式往返。此修正属于测试证据加固，不虚构产品 PiP 故障。
+
+### 正式交付条件
+
 1. 完成上述工作组的逐项结论；产品缺陷修复、外部条件缺口与未执行项分开记录。
 2. 最终源码完整静态分析、单元/Widget 回归、接口探针与全仓审计通过；不存在已知 P0/P1 阻断。
 3. Android / Windows 用最终提交的安装包完成目标模式与录制复验；资源趋势需要空闲、播放、退出回落对照。

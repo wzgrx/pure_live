@@ -63,6 +63,7 @@ try {
     $monitor = Start-PureLiveResourceMonitor
 
     & (Join-Path $PSScriptRoot 'validate_build_policy.ps1')
+    & (Join-Path $PSScriptRoot 'test_android_activity_state.ps1')
 
     python (Join-Path $PSScriptRoot 'validate_device_ui_map.py')
     Assert-PureLiveCommandSucceeded 'Device UI map validation'

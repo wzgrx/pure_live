@@ -11,6 +11,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'android_activity_state.ps1')
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $evidence = if ($EvidenceDirectory) {
     [IO.Path]::GetFullPath($(if ([IO.Path]::IsPathRooted($EvidenceDirectory)) { $EvidenceDirectory } else { Join-Path $repo $EvidenceDirectory }))
@@ -333,7 +334,7 @@ try {
     Start-Sleep -Seconds 4
     $pipState = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'activities')) -join "`n"
     $pipState | Out-File -LiteralPath (Join-Path $evidence 'pip-activity.txt') -Encoding utf8
-    $result.checks.pipReported = $pipState -match 'pictureInPicture|mLastReportedPictureInPictureMode=true|supportsPictureInPicture'
+    $result.checks.pipReported = Test-AndroidTargetPictureInPicture -ActivityDump $pipState -Package $Package
     Save-Screenshot "$($Mode.ToLowerInvariant())-system-pip"
 
     Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity") | Out-Null

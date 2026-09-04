@@ -699,6 +699,94 @@ void main() {
     await manager.dispose();
   }, skip: !Platform.isWindows);
 
+  test('native Huya credential refresh never restarts a healthy Windows transport', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    var creations = 0;
+    final refreshed = Completer<void>();
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+      playerCreator: (_) => creations++ == 0 ? active : candidate,
+      windowsHuyaProactiveRefreshInterval: const Duration(milliseconds: 20),
+    );
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+    await manager.play(
+      url,
+      const [url],
+      const {},
+      room: LiveRoom(roomId: 'native-lease', platform: 'huya'),
+      sourceRefreshAt: DateTime.now().toUtc(),
+      sourceResolver: (_) async {
+        if (!refreshed.isCompleted) refreshed.complete();
+        return PlaybackSourceRefreshResult(
+          urls: const ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+          preferredLineIndex: 0,
+          refreshAt: DateTime.now().toUtc().add(const Duration(minutes: 4)),
+          invalidAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+        );
+      },
+    );
+    await refreshed.future.timeout(const Duration(seconds: 3));
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    final owner = manager.currentPlayer;
+    final playing = active.isPlayingNow;
+    await manager.dispose();
+    expect(owner, same(active));
+    expect(playing, isTrue);
+    expect(creations, 1);
+    expect(active.openedUrls, [url]);
+  }, skip: !Platform.isWindows);
+
+  test('native Huya has no early timer but can consume a prefetched lease after real EOF', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    var creations = 0;
+    var refreshCalls = 0;
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+      playerCreator: (_) => creations++ == 0 ? active : candidate,
+      windowsHuyaProactiveRefreshInterval: const Duration(milliseconds: 20),
+    );
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+    await manager.play(
+      url,
+      const [url],
+      const {},
+      room: LiveRoom(roomId: 'native-expiry', platform: 'huya'),
+      sourceRefreshAt: DateTime.now().toUtc().add(const Duration(milliseconds: 1600)),
+      sourceResolver: (_) async {
+        refreshCalls++;
+        return PlaybackSourceRefreshResult(
+          urls: const ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+          preferredLineIndex: 0,
+          refreshAt: DateTime.now().toUtc().add(const Duration(minutes: 4)),
+          invalidAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+        );
+      },
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 1150));
+    expect(refreshCalls, 0, reason: 'the former early Huya timer must not apply');
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (refreshCalls == 0 && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(refreshCalls, 1);
+    expect(manager.currentPlayer, same(active));
+    active.emitError(PlayerException(message: 'real EOF', type: PlayerErrorType.network));
+    final recoveryDeadline = DateTime.now().add(const Duration(seconds: 2));
+    while (!identical(manager.currentPlayer, candidate) && DateTime.now().isBefore(recoveryDeadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    final owner = manager.currentPlayer;
+    await manager.dispose();
+    expect(owner, same(candidate));
+    expect(refreshCalls, 1, reason: 'a fresh prefetched lease should avoid another network lookup');
+    expect(candidate.openedUrls, ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100']);
+  }, skip: !Platform.isWindows);
+
   test('signed source lease hands off a healthy Windows transport before expiry', () async {
     final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);

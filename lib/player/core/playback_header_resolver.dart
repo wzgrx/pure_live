@@ -52,7 +52,7 @@ class PlaybackHeaderResolver {
         // Huya's URL signer refreshes this process-wide value while resolving
         // the stream. Falling back here avoids a second network request solely
         // for headers and keeps deterministic callers offline-safe.
-        final userAgent = HuyaSite.playUserAgent ?? HuyaSite.fallbackPlayUserAgent;
+        final userAgent = HuyaSite.playUserAgent ?? HuyaSite.nativePlayUserAgent;
         final cookie = _configuredCookie((settings) => settings.cookieManager.huyaCookie.value);
         headers = <String, String>{
           'user-agent': userAgent,

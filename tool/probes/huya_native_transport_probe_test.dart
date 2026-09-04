@@ -1,0 +1,122 @@
+// Opt-in external probe, deliberately outside the ordinary offline test suite.
+// No signed URLs, cookies, room snapshots or media bytes are persisted.
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:pure_live/core/site/huya/huya_site.dart';
+import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
+import 'package:pure_live/player/core/playback_header_resolver.dart';
+
+void main() {
+  test(
+    'production Huya native FLV transport outlives the old short lease',
+    () async {
+      await HttpOverrides.runWithHttpOverrides(() async {
+        final room = Platform.environment['PURELIVE_HUYA_ROOM'] ?? '660000';
+        final seconds = int.tryParse(Platform.environment['PURELIVE_HUYA_SECONDS'] ?? '') ?? 180;
+        final duration = Duration(seconds: seconds.clamp(130, 600));
+        final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
+        try {
+          final pageRequest = await client.getUrl(Uri.https('www.huya.com', '/$room'));
+          pageRequest.headers.set('user-agent', HuyaSite.nativePlayUserAgent);
+          final pageResponse = await pageRequest.close().timeout(const Duration(seconds: 20));
+          expect(pageResponse.statusCode, 200);
+          final page = await utf8.decoder.bind(pageResponse).join().timeout(const Duration(seconds: 20));
+          final stream = _extractStream(page);
+          final profile = (stream['data'] as List).first as Map;
+          final source = (profile['gameStreamInfoList'] as List).first as Map;
+          final info = profile['gameLiveInfo'] as Map;
+          final line = HuyaLineModel(
+            line: source['sFlvUrl'].toString(),
+            lineType: HuyaLineType.flv,
+            flvAntiCode: source['sFlvAntiCode'].toString(),
+            hlsAntiCode: source['sHlsAntiCode'].toString(),
+            streamName: source['sStreamName'].toString(),
+            cdnType: source['sCdnType'].toString(),
+            presenterUid: int.parse((info['lChannelId'] ?? info['uid']).toString()),
+          );
+          final site = HuyaSite();
+          final url = await site.getPlayUrl(line, 500);
+          expect(HuyaTransportPolicy.hasNativeFlvCredential(url), isTrue);
+          final headers = await PlaybackHeaderResolver.resolve(platform: 'huya', roomId: room);
+          final request = await client.getUrl(Uri.parse(url));
+          headers.forEach(request.headers.set);
+          final clock = Stopwatch()..start();
+          final response = await request.close().timeout(const Duration(seconds: 20));
+          expect(response.statusCode, 200);
+          var bytes = 0;
+          var chunks = 0;
+          var maxGap = Duration.zero;
+          var lastChunk = clock.elapsed;
+          var reachedLimit = false;
+          await for (final chunk in response.timeout(const Duration(seconds: 20))) {
+            final gap = clock.elapsed - lastChunk;
+            if (gap > maxGap) maxGap = gap;
+            lastChunk = clock.elapsed;
+            bytes += chunk.length;
+            chunks++;
+            if (clock.elapsed >= duration) {
+              reachedLimit = true;
+              break;
+            }
+          }
+          // Token-safe result only: this is transport evidence, not rendered FPS.
+          // ignore: avoid_print
+          print(
+            jsonEncode({
+              'probe': 'production-huya-native-flv',
+              'room': room,
+              'host': Uri.parse(url).host,
+              'durationMs': clock.elapsedMilliseconds,
+              'bytes': bytes,
+              'chunks': chunks,
+              'maxReadGapMs': maxGap.inMilliseconds,
+              'reachedLimit': reachedLimit,
+              'secretsPersisted': false,
+            }),
+          );
+          expect(reachedLimit, isTrue, reason: 'transport ended before the requested duration');
+          expect(bytes, greaterThan(0));
+        } catch (error) {
+          // Do not let HttpException/DioException print a signed request URI.
+          fail('Huya native transport probe failed (${error.runtimeType})');
+        } finally {
+          client.close(force: true);
+        }
+      }, _RealNetwork());
+    },
+    skip: Platform.environment['PURELIVE_HUYA_LIVE_PROBE'] != '1',
+    timeout: const Timeout(Duration(minutes: 12)),
+  );
+}
+
+class _RealNetwork extends HttpOverrides {}
+
+Map<String, dynamic> _extractStream(String page) {
+  final marker = page.indexOf('stream:');
+  if (marker < 0) throw const FormatException('room stream metadata missing');
+  final start = page.indexOf('{', marker);
+  var depth = 0;
+  var quoted = false;
+  var escaped = false;
+  for (var i = start; i < page.length; i++) {
+    final char = page[i];
+    if (quoted) {
+      if (escaped) {
+        escaped = false;
+      } else if (char == r'\') {
+        escaped = true;
+      } else if (char == '"') {
+        quoted = false;
+      }
+    } else if (char == '"') {
+      quoted = true;
+    } else if (char == '{') {
+      depth++;
+    } else if (char == '}' && --depth == 0) {
+      return jsonDecode(page.substring(start, i + 1)) as Map<String, dynamic>;
+    }
+  }
+  throw const FormatException('room stream metadata truncated');
+}

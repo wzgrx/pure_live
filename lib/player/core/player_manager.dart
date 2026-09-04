@@ -32,6 +32,7 @@ import 'package:pure_live/player/utils/fullscreen.dart';
 import 'package:flutter_floating/flutter_floating.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
+import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
 import 'package:pure_live/player/utils/pip_window_widget.dart';
 import 'package:pure_live/player/core/live_audio_service.dart';
 import 'package:pure_live/common/utils/latest_async_value_queue.dart';
@@ -3127,7 +3128,7 @@ class PlayerManager {
       final selectedIndex = refreshed.preferredLineIndex.clamp(0, urls.length - 1);
       final selectedUrl = urls[selectedIndex];
       if (proactive) {
-        if (PlatformUtils.isWindows) {
+        if (PlatformUtils.isWindows && !HuyaTransportPolicy.hasNativeFlvCredential(currentUrl)) {
           // Huya edge transports have been observed ending after roughly two
           // minutes on both FLV and HLS, even when wsTime remains valid much
           // longer. This is runtime evidence rather than a published SLA.
@@ -3175,9 +3176,9 @@ class PlayerManager {
           }
           return false;
         }
-        // Other platforms keep a refreshed lease ready for the next real
-        // reconnect. Their native renderers do not expose the Windows
-        // first-frame transaction used above.
+        // Credential expiry is not necessarily an active transport deadline.
+        // Native Huya FLV (on Windows too) and other platforms keep the current
+        // connection while preparing credentials for an actual reconnect.
         _prefetchedSourceRefresh = PlaybackSourceRefreshResult(
           urls: List<String>.unmodifiable(urls),
           preferredLineIndex: selectedIndex,
@@ -3472,12 +3473,7 @@ class PlayerManager {
     final advertised = advertisedRefreshAt?.toUtc();
     if (!PlatformUtils.isWindows || windowsHuyaProactiveRefreshInterval <= Duration.zero) return advertised;
 
-    final uri = Uri.tryParse(url);
-    final host = uri?.host.toLowerCase() ?? '';
-    final path = uri?.path.toLowerCase() ?? '';
-    final isHuyaMedia =
-        (host == 'huya.com' || host.endsWith('.huya.com')) && (path.endsWith('.flv') || path.endsWith('.m3u8'));
-    if (!isHuyaMedia) return advertised;
+    if (!HuyaTransportPolicy.hasShortTransportLease(url)) return advertised;
 
     final earlyWarmAt = DateTime.now().toUtc().add(windowsHuyaProactiveRefreshInterval);
     if (advertised == null || earlyWarmAt.isBefore(advertised)) return earlyWarmAt;

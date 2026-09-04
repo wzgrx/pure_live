@@ -20,6 +20,7 @@ import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/tars/get_cdn_token_ex_req.dart';
 import 'package:pure_live/core/tars/get_cdn_token_ex_resp.dart';
 import 'package:pure_live/core/site/huya/huya_request_params.dart';
+import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
 import 'package:pure_live/core/tars/get_game_event_message_board_req.dart';
 import 'package:pure_live/core/tars/get_game_event_message_board_rsp.dart';
 import 'package:pure_live/modules/live_play/controllers/player_controller.dart';
@@ -45,6 +46,8 @@ class HuyaSite
   /// signed static URL. Keep one anonymous identity for this site instance and
   /// deduplicate only requests concurrently acquiring the same token.
   final Map<String, Future<HuyaCdnTokenLease>> _inFlightTokenRequests = <String, Future<HuyaCdnTokenLease>>{};
+  final Map<String, Future<HuyaCdnTokenLease>> _nativeTokenRequests = {};
+  int _lastSignatureMillis = 0;
   final Map<String, HuyaCdnTokenLease> _playbackTokenLeases = <String, HuyaCdnTokenLease>{};
   final Map<String, DateTime> _playbackTransportIssuedAt = <String, DateTime>{};
   HuyaViewerIdentity? _anonymousViewerIdentity;
@@ -60,7 +63,7 @@ class HuyaSite
     final current = (now ?? DateTime.now()).toUtc();
     final signedInvalidAt = _getSignedUrlInvalidAt(url);
     final tokenLease = _getPlaybackTokenLease(url);
-    final transportIssuedAt = _isHuyaCdnUrl(url)
+    final transportIssuedAt = HuyaTransportPolicy.hasShortTransportLease(url)
         ? getSignedSequenceIssuedAt(url) ?? _getRememberedTransportIssuedAt(url)
         : null;
     final transportInvalidAt = transportIssuedAt?.add(_transportInvalidAge);
@@ -76,7 +79,7 @@ class HuyaSite
   @override
   DateTime? getPlayUrlInvalidAt(String url, {DateTime? now}) {
     final tokenLease = _getPlaybackTokenLease(url);
-    final transportIssuedAt = _isHuyaCdnUrl(url)
+    final transportIssuedAt = HuyaTransportPolicy.hasShortTransportLease(url)
         ? getSignedSequenceIssuedAt(url) ?? _getRememberedTransportIssuedAt(url)
         : null;
     return _earlierDate(
@@ -100,11 +103,6 @@ class HuyaSite
     if (first == null) return second;
     if (second == null) return first;
     return first.isBefore(second) ? first : second;
-  }
-
-  static bool _isHuyaCdnUrl(String url) {
-    final host = Uri.tryParse(url)?.host.toLowerCase() ?? '';
-    return host == 'huya.com' || host.endsWith('.huya.com');
   }
 
   /// Recovers the issue time encoded by the official web player's
@@ -138,6 +136,7 @@ class HuyaSite
   static const String webPlaybackTarsUserAgent = 'webh5&0.1.0&websocket';
   static const int webPlaybackAppId = 66;
   static const int webPlaybackTokenLoopTime = 0;
+  static const String nativePlayUserAgent = HuyaRequestParams.hysdkUa;
   static const String fallbackPlayUserAgent = HuyaRequestParams.kUserAgent;
   static Map<String, String> requestHeaders = {'Origin': baseUrl, 'Referer': baseUrl, 'User-Agent': HYSDK_UA};
 
@@ -369,7 +368,7 @@ class HuyaSite
     final urls = mirror.mirrors('assets/play_config.json');
     final data = await RaceHttp.fetchJson(urls);
     final ua = data?['huya']?['user_agent']?.toString().trim();
-    playUserAgent = ua == null || ua.isEmpty ? fallbackPlayUserAgent : ua;
+    playUserAgent = ua == null || ua.isEmpty ? nativePlayUserAgent : ua;
     Log.d("HuyaSite: getHuYaUA: $playUserAgent");
     return playUserAgent!;
   }
@@ -383,14 +382,26 @@ class HuyaSite
     // promise that invariant.
     var antiCode = line.lineType == HuyaLineType.flv ? line.flvAntiCode.trim() : line.hlsAntiCode.trim();
     var signatureAlreadyBuilt = false;
-    if (line.lineType == HuyaLineType.flv) {
+    // A syntactically valid web template may still yield a ~120 second stream.
+    // Prefer the native WUP contract proven by sustained, single-open probes.
+    // Never reuse its FLV token for HLS.
+    if (line.lineType == HuyaLineType.flv && RegExp(r'(^|&)fm=').hasMatch(antiCode)) {
+      try {
+        final nativeLease = await getNativeCdnTokenInfoEx(line);
+        if (nativeLease.isExpired(DateTime.now().toUtc())) throw StateError('Native token expired');
+        final nativeUid = line.presenterUid > 0 ? line.presenterUid : (await resolveViewerIdentity()).uid;
+        antiCode = buildAntiCode(line.streamName, nativeUid, nativeLease.antiCode);
+        tokenLease = nativeLease;
+        signatureAlreadyBuilt = true;
+      } on Object catch (error) {
+        CoreLog.error('Huya native token acquisition failed: ${error.runtimeType}');
+      }
+    }
+    if (line.lineType == HuyaLineType.flv && !signatureAlreadyBuilt) {
       final roomFlvAntiCode = line.flvAntiCode.trim();
       final isLegacyStaticToken = !RegExp(r'(^|&)fm=').hasMatch(roomFlvAntiCode);
-      // The official web player opens a fresh room with the room-provided FLV
-      // template. It asks getCdnTokenInfoEx only after that lease expires.
-      // Refreshing an already-valid room template on every open changes the
-      // token family unnecessarily and was the first invalid state behind the
-      // Windows FLV 403 -> HLS fallback -> visible black-screen delay.
+      // Retain the protocol-correct web path as an explicit fallback when
+      // native WUP is unavailable. Its shorter transport lease remains active.
       if (isLegacyStaticToken) {
         antiCode = roomFlvAntiCode;
       } else {
@@ -414,9 +425,8 @@ class HuyaSite
       final protocol = line.lineType == HuyaLineType.hls ? 'HLS' : 'FLV';
       throw StateError('Huya $protocol token is unavailable');
     }
-    // `viewer.uid`, rather than `line.presenterUid`, is the identity used by
-    // Huya's current web player. Queries without `fm` are legacy fixtures and
-    // remain as-is.
+    // The web fallback uses its anonymous viewer identity. Native WUP above
+    // has a separate request/signing contract; do not mix those identities.
     if (!signatureAlreadyBuilt && RegExp(r'(^|&)fm=').hasMatch(antiCode)) {
       viewer ??= await resolveViewerIdentity();
       antiCode = buildAntiCode(line.streamName, viewer.uid, antiCode);
@@ -1061,7 +1071,9 @@ class HuyaSite
     final platformId = original['t']?.trim().isNotEmpty == true ? original['t']!.trim() : '100';
     final isWap = platformId == '103';
     final timestamp = now ?? DateTime.now();
-    final currentMillis = timestamp.millisecondsSinceEpoch;
+    final wallMillis = timestamp.millisecondsSinceEpoch;
+    final currentMillis = now != null ? wallMillis : max(wallMillis, _lastSignatureMillis + 1);
+    if (now == null) _lastSignatureMillis = currentMillis;
     final currentSeconds = currentMillis ~/ 1000;
     final uid = viewerUid > 0 ? viewerUid : _fallbackViewerUid;
 
@@ -1124,6 +1136,44 @@ class HuyaSite
     }
 
     return Uri(queryParameters: antiCodeRes).query;
+  }
+
+  /// Share only an in-flight template request. Each consumer signs a new URL.
+  Future<HuyaCdnTokenLease> getNativeCdnTokenInfoEx(HuyaLineModel line) async {
+    final key = line.streamName;
+    final pending = _nativeTokenRequests[key];
+    if (pending != null) return pending;
+    final request = _fetchNativeCdnTokenInfoEx(line);
+    _nativeTokenRequests[key] = request;
+    try {
+      return await request;
+    } finally {
+      if (identical(_nativeTokenRequests[key], request)) _nativeTokenRequests.remove(key);
+    }
+  }
+
+  @visibleForTesting
+  static GetCdnTokenExReq buildNativePlaybackTokenRequest(HuyaLineModel line) => GetCdnTokenExReq()
+    ..sStreamName = line.streamName
+    ..tId = (HuyaUserId()..sHuYaUA = 'pc_exe&7060000&official');
+
+  Future<HuyaCdnTokenLease> _fetchNativeCdnTokenInfoEx(HuyaLineModel line) async {
+    final client = BaseTarsHttp(
+      'https://wup.huya.com',
+      'liveui',
+      timeOut: 6,
+      headers: const {'Origin': baseUrl, 'Referer': '$baseUrl/', 'User-Agent': nativePlayUserAgent},
+    );
+    client.dio.options.sendTimeout = const Duration(seconds: 6);
+    client.dio.options.receiveTimeout = const Duration(seconds: 6);
+    try {
+      final response = await client
+          .tupRequest('getCdnTokenInfoEx', buildNativePlaybackTokenRequest(line), GetCdnTokenExResp())
+          .timeout(const Duration(seconds: 8));
+      return HuyaCdnTokenLease.fromResponse(response);
+    } finally {
+      client.dio.close(force: true);
+    }
   }
 
   Future<HuyaCdnTokenLease> getCndTokenInfoEx(HuyaLineModel line, HuyaViewerIdentity viewer) async {

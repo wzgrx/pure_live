@@ -267,7 +267,7 @@ void main() {
     expect(request.tId.sCookie, 'yyuid=1400123456789');
   });
 
-  test('Huya keeps a valid room FLV template instead of forcing a WUP refresh', () async {
+  test('Huya retains a valid room FLV fallback when native WUP is unavailable', () async {
     final now = DateTime.now();
     final wsTime = (now.millisecondsSinceEpoch ~/ 1000 + 120).toRadixString(16);
     final fm = Uri.encodeComponent(base64Encode(utf8.encode(r'prefix_$0_$1_$2_$3')));
@@ -285,6 +285,65 @@ void main() {
     expect(site.tokenRefreshes, 0);
     expect(Uri.parse(url).queryParameters['ctype'], 'huya_webh5');
     expect(Uri.parse(url).queryParameters['u'], HuyaSite.rotateViewerUid32(site.viewer.uid).toString());
+  });
+
+  test('native WUP request keeps its own identity contract and server expiry', () {
+    final request = HuyaSite.buildNativePlaybackTokenRequest(line(HuyaLineType.flv, 'https://tx.flv.huya.com/src'));
+    expect(request.sFlvUrl, isEmpty);
+    expect(request.sStreamName, 'stream-name');
+    expect(request.iLoopTime, 0);
+    expect(request.iAppId, 66);
+    expect(request.tId.lUid, 0);
+    expect(request.tId.sCookie, isEmpty);
+    expect(request.tId.sHuYaUA, 'pc_exe&7060000&official');
+  });
+
+  test('independent playback and recorder opens receive distinct native signatures', () {
+    final site = HuyaSite();
+    final ws = (DateTime.now().millisecondsSinceEpoch ~/ 1000 + 300).toRadixString(16);
+    final fm = Uri.encodeComponent(base64Encode(utf8.encode(r'prefix_$0_$1_$2_$3')));
+    final urls = List.generate(
+      64,
+      (_) => site.buildAntiCode('stream', 123, 'wsTime=$ws&fm=$fm&ctype=huya_pc_exe&t=100'),
+    );
+    expect(urls.toSet(), hasLength(64));
+    expect(urls.map((url) => Uri.splitQueryString(url)['wsTime']).toSet(), {ws});
+  });
+
+  test('Huya native WUP token is preferred over a valid short-lived room template', () async {
+    final now = DateTime.now().toUtc();
+    final ws = (now.millisecondsSinceEpoch ~/ 1000 + 300).toRadixString(16);
+    final fm = Uri.encodeComponent(base64Encode(utf8.encode(r'prefix_$0_$1_$2_$3')));
+    final site = _NativeHuyaFixtureSite(
+      HuyaCdnTokenLease(
+        antiCode: 'wsTime=$ws&fm=$fm&ctype=huya_pc_exe&t=100',
+        invalidAt: now.add(const Duration(minutes: 5)),
+        refreshAt: now.add(const Duration(minutes: 4, seconds: 30)),
+        serverExpireValue: 300,
+      ),
+    );
+    final url = await site.getPlayUrl(
+      line(HuyaLineType.flv, 'https://al.flv.huya.com/src', flvAntiCode: 'wsTime=$ws&fm=$fm&ctype=huya_live&t=100'),
+      500,
+    );
+    expect(Uri.parse(url).queryParameters['ctype'], 'huya_pc_exe');
+    expect(Uri.parse(url).queryParameters['u'], HuyaSite.rotateViewerUid32(123).toString());
+    expect(Uri.parse(url).queryParameters['ratio'], '500');
+    expect(site.nativeRequests, 1);
+    expect(site.getPlayUrlInvalidAt(url), site.nativeLease.invalidAt);
+    expect(site.getPlayUrlRefreshAt(url), site.nativeLease.refreshAt);
+  });
+
+  test('Huya native WUP failure retains protocol-correct room fallback', () async {
+    final site = _FakeHuyaSessionSite();
+    final ws = (DateTime.now().millisecondsSinceEpoch ~/ 1000 + 300).toRadixString(16);
+    final fm = Uri.encodeComponent(base64Encode(utf8.encode(r'prefix_$0_$1_$2_$3')));
+    final url = await site.getPlayUrl(
+      line(HuyaLineType.flv, 'https://al.flv.huya.com/src', flvAntiCode: 'wsTime=$ws&fm=$fm&ctype=huya_live&t=100'),
+      0,
+    );
+    expect(Uri.parse(url).queryParameters['ctype'], 'huya_live');
+    expect(site.nativeRequests, 1);
   });
 
   test('Huya WUP lease refreshes before the official wsTime allowance expires', () {
@@ -511,6 +570,13 @@ class _FakeHuyaSessionSite extends HuyaSite {
     isAnonymous: true,
   );
   int tokenRefreshes = 0;
+  int nativeRequests = 0;
+
+  @override
+  Future<HuyaCdnTokenLease> getNativeCdnTokenInfoEx(HuyaLineModel line) async {
+    nativeRequests++;
+    throw StateError('native fixture unavailable');
+  }
 
   @override
   Future<HuyaViewerIdentity> resolveViewerIdentity({String? cookie}) async => viewer;
@@ -527,6 +593,13 @@ class _FakeHuyaLeaseSite extends HuyaSite {
 
   final HuyaCdnTokenLease lease;
   int tokenRefreshes = 0;
+  int nativeRequests = 0;
+
+  @override
+  Future<HuyaCdnTokenLease> getNativeCdnTokenInfoEx(HuyaLineModel line) async {
+    nativeRequests++;
+    throw StateError('native fixture unavailable');
+  }
 
   @override
   Future<HuyaViewerIdentity> resolveViewerIdentity({String? cookie}) async {
@@ -537,5 +610,15 @@ class _FakeHuyaLeaseSite extends HuyaSite {
   Future<HuyaCdnTokenLease> getCndTokenInfoEx(HuyaLineModel line, HuyaViewerIdentity viewer) async {
     tokenRefreshes++;
     return lease;
+  }
+}
+
+class _NativeHuyaFixtureSite extends _FakeHuyaSessionSite {
+  _NativeHuyaFixtureSite(this.nativeLease);
+  final HuyaCdnTokenLease nativeLease;
+  @override
+  Future<HuyaCdnTokenLease> getNativeCdnTokenInfoEx(HuyaLineModel line) async {
+    nativeRequests++;
+    return nativeLease;
   }
 }

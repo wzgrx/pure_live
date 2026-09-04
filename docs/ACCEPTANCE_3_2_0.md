@@ -49,6 +49,8 @@ Android Debug 源码 `8cda379d88aafaaf9bbc4c6757ef73530e4943c4`，包含 `54ee0d
 
 ## 最新补充证据与测试器加固
 
+- 虎牙连续播放定向修复见 `HUYA_NATIVE_LEASE_FIX_2026_09_05.md`：网页路径约 121 秒 EOF，对照原生 WUP 在两个 CDN 均读取 420 秒未结束，实际 Dart 生产入口读取 180 秒通过。已取消原生 FLV 健康连接的固定 40 秒交接，保留真实断流恢复。此证据不等同于 Android/Windows 实际渲染零卡顿，不解除其他 3.2.0 阻断。
+
 - `cf114605` 包在 K90 Pro 上的常规运行回归 `local-artifacts/diagnostics/android-runtime-smoke-20260905T055614894/summary.json` 为 16/16：音频进入、视频恢复、目标 Activity PiP、返回弹幕界面及无 FATAL 成立。退出查询明确 code=1 / 空输出，`processGoneAfterStop=true`，证据不再被 pidof 的正常非零返回吞掉。
 - PSS 807,409 KiB、RSS 1,013,492 KiB；gfxinfo 仅 11 帧，CPU 字段未取得。此为 Debug 单点，不代表 Release 性能或长期内存平台期通过。上一短样本 CPU=0 也不作为低占用结论。
 - PiP/退出判定共 13 个纯 PowerShell 正反例通过，包含能力声明、其他应用、包名前缀、空 PID、在线存活、离线错误、命令失败。与真实退出复验分别记录。

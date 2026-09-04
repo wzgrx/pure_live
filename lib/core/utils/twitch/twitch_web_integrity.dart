@@ -298,8 +298,20 @@ const requestGraphQl = async token => {
   return {status: response.status, body: await response.text()};
 };
 const failedIntegrity = body => {
-  const normalized = body.toLowerCase();
-  return normalized.includes('failed integrity check') || normalized.includes('integrity token');
+  let decoded;
+  try {
+    decoded = JSON.parse(body);
+  } catch (_) {
+    return false;
+  }
+  const envelopes = Array.isArray(decoded) ? decoded : [decoded];
+  return envelopes.some(envelope => {
+    if (!envelope || !Array.isArray(envelope.errors)) return false;
+    return envelope.errors.some(error => {
+      const message = String(error && error.message || '').toLowerCase();
+      return message.includes('failed integrity check') || message.includes('integrity token');
+    });
+  });
 };
 const validateGraphQl = result => {
   if (result.status < 200 || result.status >= 300) {

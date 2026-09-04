@@ -5,6 +5,7 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/model/live_category.dart';
 import 'package:pure_live/core/common/core_log.dart';
 import 'package:pure_live/model/live_anchor_item.dart';
+import 'package:pure_live/core/common/android_native_http.dart';
 import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/core/interface/live_site.dart';
@@ -112,13 +113,30 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
       if (!hasIntegrityError(response)) return response;
 
       _invalidateIntegrityToken();
-      await _ensureIntegrityToken();
-      response = await _postGql(liveGpl);
-      if (!hasIntegrityError(response)) return response;
     } catch (error, stackTrace) {
       nativeError = error;
       nativeStackTrace = stackTrace;
       CoreLog.e('Twitch native GraphQL transport failed: $error', stackTrace);
+    }
+
+    // Some Android proxy paths accept CONNECT and then reset dart:io's TLS
+    // socket. Retry the exact request through Android's platform TLS stack
+    // before involving Chromium/KPSDK. The native channel is host-allowlisted
+    // to gql.twitch.tv and is intentionally unavailable on other platforms.
+    if (AndroidNativeHttp.isSupported) {
+      try {
+        response = await _postAndroidSystemGql(liveGpl);
+        if (!hasIntegrityError(response)) return response;
+
+        _invalidateIntegrityToken();
+        await _ensureIntegrityToken();
+        response = await _postAndroidSystemGql(liveGpl);
+        if (!hasIntegrityError(response)) return response;
+      } catch (error, stackTrace) {
+        nativeError = error;
+        nativeStackTrace = stackTrace;
+        CoreLog.e('Twitch Android-system GraphQL transport failed: $error', stackTrace);
+      }
     }
 
     if (headers.containsKey('Cookie') || headers.containsKey('Authorization')) {
@@ -134,6 +152,20 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
       } catch (error, stackTrace) {
         nativeError = error;
         nativeStackTrace = stackTrace;
+      }
+      if (AndroidNativeHttp.isSupported) {
+        try {
+          response = await _postAndroidSystemGql(liveGpl);
+          if (!hasIntegrityError(response)) return response;
+
+          _invalidateIntegrityToken();
+          await _ensureIntegrityToken();
+          response = await _postAndroidSystemGql(liveGpl);
+          if (!hasIntegrityError(response)) return response;
+        } catch (error, stackTrace) {
+          nativeError = error;
+          nativeStackTrace = stackTrace;
+        }
       }
       CoreLog.w('Twitch stored session failed validation; public requests switched to an anonymous session');
     }
@@ -183,12 +215,28 @@ class TwitchSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomR
   }
 
   Future<dynamic> _postGql(String liveGpl) {
+    final requestHeaders = _gqlRequestHeaders();
+    return HttpClient.instance.postJson(gplApiUrl, header: requestHeaders, data: liveGpl);
+  }
+
+  Future<dynamic> _postAndroidSystemGql(String liveGpl) {
+    final proxy = SettingsService.to.proxy;
+    return AndroidNativeHttp.postTwitchJson(
+      url: gplApiUrl,
+      headers: _gqlRequestHeaders(),
+      body: liveGpl,
+      proxyHost: proxy.enableAppProxy.v ? proxy.appProxyHost.v : null,
+      proxyPort: proxy.enableAppProxy.v ? proxy.appProxyPort.v : null,
+    );
+  }
+
+  Map<String, String> _gqlRequestHeaders() {
     final requestHeaders = Map<String, String>.from(headers);
     final token = _integrityToken;
     if (token != null && token.isNotEmpty) {
       requestHeaders['Client-Integrity'] = token;
     }
-    return HttpClient.instance.postJson(gplApiUrl, header: requestHeaders, data: liveGpl);
+    return requestHeaders;
   }
 
   Future<void> _ensureIntegrityToken() async {

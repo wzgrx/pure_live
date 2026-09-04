@@ -34,6 +34,8 @@ void main() {
     expect(script, contains(TwitchWebIntegrityProvider.scriptUrl));
     expect(script, contains("document.addEventListener('kpsdk-ready'"));
     expect(script, contains("result = await requestGraphQl(token)"));
+    expect(script, contains('decoded = JSON.parse(body)'));
+    expect(script, contains('Array.isArray(envelope.errors)'));
     expect(script, contains('DirectoryPage_Game'));
     expect(script, contains("credentials: 'omit'"));
     expect(script, isNot(contains('Cookie')));

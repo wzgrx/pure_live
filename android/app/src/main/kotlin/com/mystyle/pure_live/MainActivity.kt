@@ -30,6 +30,7 @@ class MainActivity : AudioServiceActivity() {
     private var highRefreshRateEnabled = false
     private var displayModeChannel: MethodChannel? = null
     private var predictiveBackChannel: MethodChannel? = null
+    private var nativeHttpChannel: NativeHttpChannel? = null
     private var predictiveBackEnabled = false
     private var predictiveBackRegistered = false
     private var displayListenerRegistered = false
@@ -136,6 +137,7 @@ class MainActivity : AudioServiceActivity() {
                 }
             }
         }
+        nativeHttpChannel = NativeHttpChannel(flutterEngine.dartExecutor.binaryMessenger)
         applyPreferredDisplayMode(highRefreshRateEnabled)
     }
 
@@ -249,6 +251,8 @@ class MainActivity : AudioServiceActivity() {
         displayModeChannel = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) unregisterPredictiveBack()
         predictiveBackChannel = null
+        nativeHttpChannel?.dispose()
+        nativeHttpChannel = null
         super.onDestroy()
     }
 

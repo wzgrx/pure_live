@@ -120,6 +120,61 @@ void main() {
     expect(host.state.value.player.currentLineIndex, 1);
   });
 
+  test('returning to the current quality supersedes a pending URL request', () async {
+    final room = LiveRoom(roomId: 'room', platform: 'test');
+    final host = _SelectionHost(room);
+    final siteImpl = _ReversibleSelectionLiveSite();
+    final opened = <String>[];
+    final controller = PlayerController(
+      host,
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) async {
+        opened.add(url);
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
+
+    final first = controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0);
+    final latest = controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 0, lineIndex: 0);
+    expect(await latest, isTrue);
+    siteImpl.newQuality.complete(const ['https://new/one']);
+    expect(await first, isFalse);
+    expect(host.state.value.player.currentQuality, 0);
+    expect(opened, isNot(contains('https://new/one')));
+    expect(controller.isStreamSwitching.value, isFalse);
+  });
+
+  test('returning to the current line queues a restore behind an opening source', () async {
+    final room = LiveRoom(roomId: 'room', platform: 'test');
+    final host = _SelectionHost(room);
+    final opening = Completer<void>();
+    final started = Completer<void>();
+    final opened = <String>[];
+    var nativeQueue = Future<void>.value();
+    final controller = PlayerController(
+      host,
+      // Model PlayerManager's existing serial native lifecycle queue.
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) {
+        nativeQueue = nativeQueue.then((_) async {
+          opened.add(url);
+          if (url.endsWith('/two')) {
+            started.complete();
+            await opening.future;
+          }
+        });
+        return nativeQueue;
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _SelectionLiveSite()));
+
+    final first = controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 1);
+    await started.future;
+    final latest = controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 0);
+    opening.complete();
+    expect(await first, isFalse);
+    expect(await latest, isTrue);
+    expect(opened, ['https://old/two', 'https://old/one']);
+    expect(host.state.value.player.currentLineIndex, 0);
+    expect(controller.isStreamSwitching.value, isFalse);
+  });
+
   test('signed platform line switch reacquires fresh URLs and installs a recovery resolver', () async {
     final room = LiveRoom(roomId: 'room', platform: 'signed');
     final siteImpl = _SignedSelectionLiveSite();
@@ -209,6 +264,15 @@ class _SelectionLiveSite extends LiveSite {
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) {
     playUrlCalls++;
     return qualityUrls.future;
+  }
+}
+
+class _ReversibleSelectionLiveSite extends LiveSite {
+  final newQuality = Completer<List<String>>();
+
+  @override
+  Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) {
+    return quality.quality == '原画' ? newQuality.future : Future.value(const ['https://old/one', 'https://old/two']);
   }
 }
 

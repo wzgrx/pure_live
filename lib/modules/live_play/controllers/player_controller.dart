@@ -447,7 +447,12 @@ class PlayerController extends GetxController {
     final requestedQuality = type == ReloadDataType.changeLine
         ? before.currentQuality.clamp(0, before.qualites.length - 1)
         : qualityIndex.clamp(0, before.qualites.length - 1);
-    if (requestedQuality == before.currentQuality && lineIndex == before.currentLineIndex) return true;
+    // A pending selection may already be opening a different native source.
+    // Selecting the committed choice must supersede it and queue a restore;
+    // only an idle selection of the current source is a genuine no-op.
+    if (!isStreamSwitching.value && requestedQuality == before.currentQuality && lineIndex == before.currentLineIndex) {
+      return true;
+    }
 
     final selectionEpoch = ++_streamSelectionEpoch;
     final loadEpoch = ++_loadEpoch;

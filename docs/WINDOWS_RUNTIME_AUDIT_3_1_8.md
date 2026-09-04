@@ -79,3 +79,9 @@
 - 媒体文件保存在同一隔离实例的 `AppData/.../RECORDS/` 下。
 
 本轮已经实测 Windows 启动、Bilibili 首页、真实播放、远端弹幕、本地弹幕、短录、媒体落盘及退出回落。多画质/多线路、纯音频、PiP、虎牙签名续接和 30 分钟以上资源趋势继续沿验收矩阵执行，不由本次 Bilibili 单房间样本外推。
+
+## 7. 4K/高刷新率 GPU 采样链路
+
+- `tool/sample_windows_runtime.ps1` 新增可选 `-IncludeGpu`，在原有 CPU、working set、private bytes、句柄、线程和 I/O 之外，记录进程 GPU engine sum、3D、Video Decode、Video Processing、Copy、独显/共享显存，并固化显卡名称、驱动版本、当前分辨率和刷新率。性能计数器缺失或一次采样失败时写 `null`，不会伪装成 0，也不会中止 CPU/内存趋势。
+- 当前 Debug 隔离实例在 `3840×2400@200Hz` 上进行 15 秒、5 秒间隔的链路冒烟，4/4 样本均响应；识别到 NVIDIA GeForce RTX 5090 Laptop GPU，驱动 `32.0.16.1664`。空闲样本的 GPU 引擎为 0，独显/共享显存各约 297.582/16.707 MiB；working set 从 636.7852 回落到 632.6641 MiB，private bytes 从 796.4023 回落到 779.3477 MiB。
+- 证据为 `local-artifacts/diagnostics/windows-regression/20260904T121224573Z-gpu-sampler-smoke-pid39148-summary.json`。该样本只证明采样器、进程归属和缺失值语义；上游 #767 所述 4K/150% 缩放下真实播放与列表滚动仍需带画面的同链采样，空闲 0% 不作为 Issue 已解决结论。

@@ -86,6 +86,7 @@
 - cycle 52 覆盖安装上述 APK 后，快手当前房间完成播放、11 条真实可见评论、`蓝光 质臻 / 蓝光4M / 超清 / 高清` 画质入口、线路1、持续写入、停止封装和退出清理。私有 TS 在 3.551 秒内从 110,624,768 B 增至 117,702,656 B；最终 MP4 为 151,779,525 B，SHA-256 `71E3719C0F592912B0D7FCF27E8C389757CC85E5C0335FB9E2F4FA2336CF1F1F`，`ffprobe` 读取 H.264 + AAC、时长 60.225667 秒。监控已移除、进程消失、活动 Wake Lock 无 Pure Live，证据为 `local-artifacts/diagnostics/android-recording-smoke-20260902T002303173/summary.json`。
 - 录制冒烟新增可选锁屏区间，并以“同一个私有 TS 在锁屏前后真实增长”作为门禁，而不是只检查通知或进程。K90 Pro 的常显屏在交互面板关闭后报告 `mWakefulness=Dozing`，测试器现把 Dozing 与 Asleep 都视为有效暗屏状态，不再误判常显屏设备。
 - cycle 54 强制锁屏/Dozing 60 秒，Bilibili 同一 TS 从 1,310,720 B 增至 7,602,176 B；Pure Live 进程与 `AudioService` 媒体前台服务保持活动，唤醒解锁后仍回到原直播间。停止后得到 11,224,519 B、112.749333 秒、H.264 + AAC MP4；播放、弹幕、画质/线路、锁屏写入、恢复、封装、监控移除、进程和 Wake Lock 清理共 25 项断言全部通过。证据为 `local-artifacts/diagnostics/android-recording-smoke-20260902T004408576/summary.json`。
+- cycle 157 使用当前维护分支对应的 `3.1.8 / 6121` arm64 Debug 包再次抽样抖音。所选“篮球直播”房间完成播放、弹幕 WebSocket 建连、4 个视频清晰度入口、2 条线路、持续写入、停止封装、录制中心状态及退出资源清理；私有 TS 在 2.804 秒内从 2,359,296 B 增至 3,145,728 B，最终 MP4 为 15,373,448 B、39.033333 秒，含 H.264 视频和 AAC 音频。26 个非聊天门禁全部通过，`-RequireLiveDanmaku` 单独因该房间观察窗口内只有两条连接系统消息、没有用户聊天而报 `liveDanmakuVisible=false`；该结果明确保留为“当前样本无聊天”，不把安静房间伪装成抖音弹幕回归。生产 Webcast 链路另有活跃房间 5 秒 47 条 chat 的主机实时探针证据。实机证据为 `local-artifacts/diagnostics/android-recording-smoke-20260904T201523918/summary.json`。
 
 ## 8. 后续实机顺序
 

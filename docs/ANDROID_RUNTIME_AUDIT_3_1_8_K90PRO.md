@@ -64,9 +64,11 @@
 - 上游 #829 相邻场景已用 `tool/android_local_interaction_visibility_smoke.ps1` 单独验收：覆盖安装、读取并暂时关闭“本地互动体验”、进入 Bilibili 房间、切换横屏全屏、检查禁用入口不占位、恢复用户原设置并停止应用。cycle 19 的一次运行在安装后遇到进程级 ADB daemon 被重启，命令没有送达；测试器补充有界 server 恢复。cycle 20 随后真实退出 0，观察到 `2608×1200` 横屏视口、`enablePromptHidden=true`、`originalStateRestored=true`，且没有触发 server 恢复。
 - 本地互动启用链路由 `tool/android_local_interaction_enabled_smoke.ps1` 在共享轮转 cycle 193 完成实机闭环。测试暂时启用全局开关，以不提供远端弹幕的网易 CC 作为安静样本：竖屏输入 `PLP015501` 后按产品的 2 秒延迟进入列表；强制停止并重启应用后开关仍保持；横屏全屏输入 `PLF015613` 后同样完成排队、画面发送并在返回竖屏时出现在同一共享列表。测试同时验证竖屏/横屏输入法、全屏入口、原设置恢复和 ADB 恢复次数，全部命名断言通过并真实退出 0。Android 横屏 IME 会覆盖底部 Flutter 控件，因此测试器按 TextField 的 IME `send` 动作提交，而不是误点仍存在于可访问树、实际被键盘遮挡的坐标；播放器控制栏在编辑器持有焦点时也保持挂载，避免慢键盘下草稿随控制栏超时被销毁。证据：`local-artifacts/diagnostics/android-local-interaction-enabled-20260905T015317914/summary.json`。
 - 平台过滤设置由 `tool/android_danmaku_filter_settings_smoke.ps1` 在 cycle 203 完成最终 APK 实测。脚本进入真实直播间“屏蔽管理”，确认“平台弹幕过滤”、斗鱼疑似自动消息开关及说明、相似弹幕分组全部可见；斗鱼开关即时由开切到关再恢复开，相似过滤保持原关闭状态，证明两个策略没有串写。测试结束停止应用并由轮转包装器恢复 10 分钟锁屏；证据：`local-artifacts/diagnostics/android-danmaku-filter-settings-20260905T035024190/summary.json`。
+- 竖屏呈现由新增的 `tool/android_portrait_presentation_smoke.ps1` 在 cycle 205 完成当前抖音原生竖屏房间的真实闭环。普通直播页同时出现明确的下滑竖屏沉浸与横屏全屏入口；下滑后维持 `1200×2608` 并显示上滑恢复提示，恢复弹幕栏后进入 `2608×1200` 横屏全屏，截图确认竖向主体完整居中且两侧为同源环境背景；系统返回恢复普通直播页，系统 PiP 保持竖向比例，重新进入应用后仍为同一房间并继续显示弹幕。9 项运行断言、方向和 FATAL 检查全部通过；证据：`local-artifacts/diagnostics/android-portrait-presentation-20260905T040128729/summary.json`。
+- cycle 204 的第一次竖屏脚本运行还定位了一个测试输入问题：从物理屏幕最底边起始的“恢复弹幕栏”上滑先被 HyperOS 系统导航识别为最近任务，应用没有收到该手势。产品内提示条本身位于系统保留区上方；K90 Pro 的 UI 地图和测试器现从提示条内部起滑，cycle 205 复验成功。该次失败没有归到播放器或竖屏状态机，也没有用重复点击掩盖系统手势抢占。
 - 截图顶部的坐标、压力与边界线来自手机开发者选项“指针位置/布局边界”，不是 Pure Live 绘制层。PiP 截图中的底层页面属于进入 PiP 前的其他任务，Pure Live 只占右上系统 PiP 窗口，恢复后前台包重新为 Pure Live。
 
-本轮证据目录：`local-artifacts/diagnostics/android-runtime-smoke-20260901T142833509/`、`local-artifacts/diagnostics/android-runtime-smoke-20260901T145018348/`、`local-artifacts/diagnostics/android-local-interaction-20260901T154001015/`、`local-artifacts/diagnostics/android-runtime-smoke-20260901T202512542/`、`local-artifacts/diagnostics/android-runtime-smoke-20260905T030533250/`、`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/`、`local-artifacts/diagnostics/android-danmaku-filter-settings-20260905T035024190/`。
+本轮证据目录：`local-artifacts/diagnostics/android-runtime-smoke-20260901T142833509/`、`local-artifacts/diagnostics/android-runtime-smoke-20260901T145018348/`、`local-artifacts/diagnostics/android-local-interaction-20260901T154001015/`、`local-artifacts/diagnostics/android-runtime-smoke-20260901T202512542/`、`local-artifacts/diagnostics/android-runtime-smoke-20260905T030533250/`、`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/`、`local-artifacts/diagnostics/android-danmaku-filter-settings-20260905T035024190/`、`local-artifacts/diagnostics/android-portrait-presentation-20260905T040128729/`。
 
 ## 7. Android 真实录制与退出清理
 
@@ -113,7 +115,7 @@
 手机空闲且 Pure Live 处于前台后，按以下顺序继续，并在每次触控前保留前台保护：
 
 1. Bilibili 普通 16:9 房间：继续补充非竖屏样本的画面比例、横屏全屏、应用小窗与系统返回；
-2. 抖音原生竖屏房间：普通页、竖屏沉浸、横屏居中背景、PiP 与应用小窗；
+2. 抖音原生竖屏房间的普通页、竖屏沉浸、横屏居中背景和系统 PiP 已在 cycle 205 闭环；继续补充应用外悬浮窗授权后的独立窗口、不同平台竖屏样本及异常元数据切换；
 3. 虎牙、斗鱼和快手的当前短录、画质/线路入口、真实弹幕与清理已通过；继续执行实际画质/线路切换、短签名续接与 2～3 分钟录制；
 4. 纯音频往返已完成单轮；继续执行后台总开关、锁屏、重复 10 次系统 PiP 与停止计时；
 5. Bilibili、虎牙、斗鱼、抖音、快手、YY、网易 CC、Twitch 和 SOOP 单次短录已通过；继续补充录制中心删除和滚动边界、重试分片和稳定会话开始时间；

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import 'proto/douyin.pb.dart';
 
 import 'package:crypto/crypto.dart';
@@ -23,7 +25,14 @@ class DouyinDanmakuArgs {
 
   @override
   String toString() {
-    return json.encode({"webRid": webRid, "roomId": roomId, "userId": userId, "cookie": cookie});
+    return json.encode({
+      "webRid": webRid,
+      "roomId": roomId,
+      "userId": userId,
+      // This object is included in lifecycle diagnostics. Never put an
+      // authenticated session into logs or exception text.
+      "cookie": cookie.isEmpty ? "" : "<redacted>",
+    });
   }
 }
 
@@ -51,7 +60,15 @@ class DouyinDanmaku implements LiveDanmaku {
   Function(String msg)? onClose;
   @override
   Function()? onReady;
-  String serverUrl = "wss://webcast100-ws-web-lq.douyin.com/webcast/im/push/v2/";
+  static const String _webSocketPath = "/webcast/im/push/v2/";
+  static const List<String> _webSocketHosts = <String>[
+    // Current web rooms are distributed between the low- and high-latency
+    // webcast100 pools. A single hard-coded pool made otherwise healthy rooms
+    // appear to have no danmaku whenever that edge rejected the handshake.
+    "webcast100-ws-web-lq.douyin.com",
+    "webcast100-ws-web-hl.douyin.com",
+  ];
+  String serverUrl = "wss://${_webSocketHosts.first}$_webSocketPath";
   late DouyinDanmakuArgs danmakuArgs;
   WebScoketUtils? webScoketUtils;
   int _generation = 0;
@@ -93,11 +110,12 @@ class DouyinDanmaku implements LiveDanmaku {
         "browser_language": "zh-CN",
         "browser_platform": "Win32",
         "browser_name": "Mozilla",
-        "browser_version": DouyinRequestParams.kDefaultUserAgent.replaceAll("Mozilla/", ""),
+        "browser_version": DouyinRequestParams.browserVersion,
         "browser_online": "true",
         "tz_name": "Asia/Shanghai",
         "identity": "audience",
         "room_id": danmakuArgs.roomId,
+        "need_persist_msg_count": "15",
         "heartbeatDuration": "0",
         //"signature": "00000000"
       },
@@ -106,17 +124,14 @@ class DouyinDanmaku implements LiveDanmaku {
     var sign = await getSignature(danmakuArgs.roomId, danmakuArgs.userId);
     if (generation != _generation) return;
 
-    var url = "$uri&signature=$sign";
-    var backupUrl = url.replaceAll("webcast3-ws-web-lq", "webcast5-ws-web-lf");
+    final serverUrls = buildServerUrls(uri, signature: sign);
+    final requestHeaders = buildHandshakeHeaders(danmakuArgs);
     webScoketUtils = WebScoketUtils(
-      url: url,
-      backupUrl: backupUrl,
-      headers: {
-        "User-Agent": DouyinRequestParams.kDefaultUserAgent,
-        "Cookie": danmakuArgs.cookie,
-        "Origin": "https://live.douyin.com",
-      },
+      url: serverUrls.first,
+      serverUrls: serverUrls,
+      headers: requestHeaders,
       heartBeatTime: heartbeatTime,
+      inactivityTimeout: const Duration(seconds: 45),
       onMessage: (e) {
         if (generation != _generation) return;
         try {
@@ -146,6 +161,32 @@ class DouyinDanmaku implements LiveDanmaku {
       },
     );
     await webScoketUtils?.connect();
+  }
+
+  /// Builds equivalent signed URLs for every current web IM edge.
+  ///
+  /// The signature alphabet contains `+` and `/`. Appending it as a raw string
+  /// changed `+` into a query-space on some HTTP stacks, so failures depended
+  /// on the random signature generated for that particular room attempt.
+  @visibleForTesting
+  static List<String> buildServerUrls(Uri baseUri, {required String signature}) {
+    final signed = baseUri.replace(
+      path: _webSocketPath,
+      queryParameters: <String, String>{...baseUri.queryParameters, "signature": signature},
+    );
+    return List<String>.unmodifiable(
+      _webSocketHosts.map((host) => signed.replace(scheme: "wss", host: host).toString()),
+    );
+  }
+
+  @visibleForTesting
+  static Map<String, dynamic> buildHandshakeHeaders(DouyinDanmakuArgs args) {
+    return <String, dynamic>{
+      "User-Agent": DouyinRequestParams.kDefaultUserAgent,
+      if (args.cookie.trim().isNotEmpty) "Cookie": args.cookie,
+      "Origin": "https://live.douyin.com",
+      "Referer": "https://live.douyin.com/${args.webRid}",
+    };
   }
 
   @override

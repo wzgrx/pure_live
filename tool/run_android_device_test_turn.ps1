@@ -2,6 +2,7 @@
 param(
     [string]$CommandLine,
     [switch]$Pass,
+    [switch]$NoRotation,
     [int]$TimeoutMinutes = 180,
     [int]$TurnGraceSeconds = 120,
     [int]$PollSeconds = 3
@@ -25,7 +26,7 @@ while ($null -ne $cursor) {
     }
     $cursor = $cursor.Parent
 }
-if (-not $coordinator) {
+if (-not $coordinator -and -not $NoRotation) {
     throw 'Shared device-test coordinator was not found above the repository.'
 }
 
@@ -67,6 +68,20 @@ try {
 }
 if (`$null -ne `$turnFailure) { throw `$turnFailure }
 "@
+
+if ($NoRotation) {
+    # Explicit single-task device work still owns the wake/cleanup guard.
+    # Encode the full script to preserve quotes across the native boundary.
+    $encodedTurn = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($effectiveCommand))
+    Push-Location $repositoryRoot
+    try {
+        & pwsh -NoProfile -EncodedCommand $encodedTurn
+        $turnExitCode = $LASTEXITCODE
+    } finally {
+        Pop-Location
+    }
+    exit $turnExitCode
+}
 
 & $coordinator `
     -Lane purelive `

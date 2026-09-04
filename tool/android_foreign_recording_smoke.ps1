@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Serial,
+    [string]$Serial = $env:PURELIVE_ADB_SERIAL,
     [ValidateSet('twitch', 'soop')]
     [string]$Platform = 'twitch',
     [ValidateRange(20, 300)]
@@ -9,7 +9,8 @@ param(
     [int]$PlatformLoadTimeoutSeconds = 60,
     [ValidateRange(1, 65535)]
     [int]$ProxyPort = 7897,
-    [switch]$RequireLiveDanmaku
+    [switch]$RequireLiveDanmaku,
+    [switch]$ExerciseStreamSelection
 )
 
 Set-StrictMode -Version Latest
@@ -31,6 +32,7 @@ try {
         PlatformLoadTimeoutSeconds = $PlatformLoadTimeoutSeconds
     }
     if ($RequireLiveDanmaku) { $smokeParameters.RequireLiveDanmaku = $true }
+    if ($ExerciseStreamSelection) { $smokeParameters.ExerciseStreamSelection = $true }
     & $smoke @smokeParameters
     if ($LASTEXITCODE -ne 0) { throw "$Platform recording smoke exited with code $LASTEXITCODE." }
 } catch {

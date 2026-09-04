@@ -68,11 +68,7 @@ class MediaKitAdapter
     // much compressed data only makes long Windows/Android sessions appear
     // to grow indefinitely. Keep this shared with the tested policy rather
     // than scattering raw byte strings through the adapter.
-    await native.setProperty('demuxer-max-bytes', LiveBufferPolicy.forwardBytes.toString());
-
-    await native.setProperty('demuxer-max-back-bytes', LiveBufferPolicy.backBytes.toString());
-
-    await native.setProperty('demuxer-readahead-secs', LiveBufferPolicy.readaheadSeconds.toString());
+    await LiveBufferPolicy.apply((name, value) async => await native.setProperty(name, value));
 
     await native.setProperty('network-timeout', '15');
 

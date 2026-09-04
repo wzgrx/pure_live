@@ -801,6 +801,79 @@ void main() {
     expect(second.disposeCalls, 1);
   }, skip: !Platform.isWindows);
 
+  test('pause while a Windows candidate warms keeps the active player paused', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, emitPlaying: false);
+    var creations = 0;
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+      playerCreator: (_) => creations++ == 0 ? active : candidate,
+      sourceReadyTimeout: const Duration(seconds: 3),
+    );
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    await manager.play(
+      'https://cdn.example/old.flv',
+      const [],
+      const {},
+      room: LiveRoom(roomId: 'warm-pause', platform: 'huya'),
+      sourceResolver: (_) async =>
+          const PlaybackSourceRefreshResult(urls: ['https://cdn.example/fresh.flv'], preferredLineIndex: 0),
+    );
+    active.emitError(PlayerException(message: 'expired', type: PlayerErrorType.network));
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (candidate.openedUrls.isEmpty && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    expect(candidate.openedUrls, isNotEmpty);
+    await manager.pause();
+    candidate.emitUnexpectedPlaying(true);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    final owner = manager.currentPlayer;
+    final playing = manager.isPlayingNow;
+    final candidateDisposals = candidate.disposeCalls;
+    await manager.dispose();
+    expect(owner, same(active));
+    expect(playing, isFalse);
+    expect(candidateDisposals, 1);
+  }, skip: !Platform.isWindows);
+
+  test('pause during signed lease resolution prevents a stale transport handoff', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final resolving = Completer<void>();
+    final resolved = Completer<PlaybackSourceRefreshResult>();
+    var creations = 0;
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+      playerCreator: (_) => creations++ == 0 ? active : replacement,
+      windowsHuyaProactiveRefreshInterval: const Duration(milliseconds: 20),
+    );
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    await manager.play(
+      'https://al.flv.huya.com/live.flv',
+      const [],
+      const {},
+      room: LiveRoom(roomId: 'lease-pause', platform: 'huya'),
+      sourceRefreshAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+      sourceResolver: (_) {
+        resolving.complete();
+        return resolved.future;
+      },
+    );
+    await resolving.future.timeout(const Duration(seconds: 3));
+    await manager.pause();
+    resolved.complete(
+      const PlaybackSourceRefreshResult(urls: ['https://al.flv.huya.com/fresh.flv'], preferredLineIndex: 0),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    final playerAfterResolution = manager.currentPlayer;
+    final playingAfterResolution = manager.isPlayingNow;
+    await manager.dispose();
+    expect(playerAfterResolution, same(active));
+    expect(playingAfterResolution, isFalse);
+    expect(replacement.openedUrls, isEmpty);
+  }, skip: !Platform.isWindows);
+
   test('failed proactive Windows handoff retains the healthy active transport', () async {
     final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     final replacement = _RecoveryFakePlayer(

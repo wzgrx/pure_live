@@ -1490,6 +1490,7 @@ class PlayerManager {
     final oldRequestedAudioOnly = _requestedAudioOnly;
     final oldNativeAudioOnly = _nativeAudioOnly;
     final oldSourceRefreshAt = _currentSourceRefreshAt;
+    final expectedIntentRevision = _playbackIntentRevision;
     UnifiedPlayer? candidate;
     StreamSubscription<int>? frameSubscription;
     StreamSubscription<bool>? playingSubscription;
@@ -1531,7 +1532,13 @@ class PlayerManager {
       );
       final warmTimeout = sourceReadyTimeout > Duration.zero ? sourceReadyTimeout : const Duration(seconds: 8);
       await ready.future.timeout(warmTimeout);
-      if (_disposed || _isClosing || _sessionId != oldSessionId || !identical(_currentPlayer, oldPlayer)) {
+      if (_disposed ||
+          _isClosing ||
+          _sessionId != oldSessionId ||
+          !identical(_currentPlayer, oldPlayer) ||
+          _playbackIntentRevision != expectedIntentRevision ||
+          !_playbackRequested ||
+          _playbackSuspensions.isNotEmpty) {
         return true;
       }
 
@@ -3075,6 +3082,8 @@ class PlayerManager {
       return false;
     }
 
+    final expectedSessionId = _sessionId;
+    final expectedIntentRevision = _playbackIntentRevision;
     final currentIndex = _currentPlayUrls.indexOf(currentUrl);
     final attempt = proactive ? 0 : _sourceRefreshAttempts++;
     try {
@@ -3103,6 +3112,16 @@ class PlayerManager {
           PlaybackSourceRefreshRequest(currentLineIndex: currentIndex < 0 ? 0 : currentIndex, advanceLine: false),
         );
       }
+      // A resolver may finish after pause, close or a newer playback request.
+      // Consume stale recovery without handing it to the fallback/reopen path.
+      if (_disposed ||
+          _isClosing ||
+          _sessionId != expectedSessionId ||
+          _playbackIntentRevision != expectedIntentRevision ||
+          !_playbackRequested ||
+          _playbackSuspensions.isNotEmpty) {
+        return true;
+      }
       final urls = refreshed.urls.map((url) => url.trim()).where((url) => url.isNotEmpty).toList(growable: false);
       if (urls.isEmpty) return false;
       final selectedIndex = refreshed.preferredLineIndex.clamp(0, urls.length - 1);
@@ -3114,8 +3133,8 @@ class PlayerManager {
           // longer. This is runtime evidence rather than a published SLA.
           // Start the fresh transport off-screen while the old one is still
           // presenting, then commit only after the candidate's first frame.
-          // This turns a server-forced EOF + black recovery into a seamless
-          // hand-off and also refreshes the Windows native texture generation.
+          // This reduces the black recovery interval. A ready candidate does
+          // not prove timestamp alignment or a gap-free visible hand-off.
           _prefetchedSourceRefresh = null;
           final activePlayer = _currentPlayer;
           if (activePlayer == null) return false;
@@ -3135,7 +3154,7 @@ class PlayerManager {
               sessionId: _sessionId,
               elapsedMilliseconds: handoffStopwatch.elapsedMilliseconds,
             );
-            log('Seamlessly handed off the expiring Windows live transport', name: 'PlayerManager');
+            log('Completed the expiring Windows live transport handoff', name: 'PlayerManager');
             return true;
           }
 

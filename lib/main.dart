@@ -13,6 +13,7 @@ import 'package:pure_live/routes/route_observer_controller.dart';
 import 'package:pure_live/core/iptv/services/epg_import_manager.dart';
 import 'package:pure_live/common/global/platform/desktop_manager.dart';
 import 'package:pure_live/core/iptv/services/iptv_import_manager.dart';
+import 'package:material_ui/material_ui.dart' as material;
 
 void main(List<String> args) async {
   // Flutter abbreviates every framework error after the first one. In release
@@ -116,7 +117,7 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
-      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+      builder: (lightDynamic, darkDynamic) {
         return Obx(() {
           final themeColor = HexColor(SettingsService.to.theme.themeColorSwitch.v);
           final showSplashPage = SettingsService.to.app.showSplashPage.v;
@@ -126,8 +127,8 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
           ThemeData darkTheme;
 
           if (SettingsService.to.theme.enableDynamicTheme.v && lightDynamic != null && darkDynamic != null) {
-            lightTheme = MyTheme(colorScheme: lightDynamic.harmonized()).lightThemeData;
-            darkTheme = MyTheme(colorScheme: darkDynamic.harmonized()).darkThemeData;
+            lightTheme = MyTheme(colorScheme: toFlutterColorScheme(lightDynamic)).lightThemeData;
+            darkTheme = MyTheme(colorScheme: toFlutterColorScheme(darkDynamic)).darkThemeData;
           } else {
             lightTheme = MyTheme(primaryColor: themeColor).lightThemeData;
             darkTheme = MyTheme(primaryColor: themeColor).darkThemeData;
@@ -174,12 +175,18 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
                 }
                 return MediaQuery(
                   data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(currentFactor)),
-                  child: resultWidget,
+                  child: MaterialUiThemeBridge(child: resultWidget),
                 );
               },
             ),
             supportedLocales: context.supportedLocales,
-            localizationsDelegates: context.localizationDelegates,
+            localizationsDelegates: [
+              ...context.localizationDelegates,
+              // flex_color_picker 4.x and cached_network_image 4.x use the
+              // decoupled Material library. Its localization type is distinct
+              // from flutter/material.dart and must be registered alongside it.
+              material.GlobalMaterialLocalizations.delegate,
+            ],
             initialRoute: showSplashPage ? RoutePath.kSplash : RoutePath.kInitial,
             defaultTransition: Transition.native,
             routingCallback: (routing) {

@@ -54,7 +54,7 @@ PowerShell -ExecutionPolicy Bypass -File .\tool\local_ci.ps1 -Scope Full
 
 Android 构建使用 Java 25 运行 Gradle 与 lint，应用和插件的 Java/Kotlin 字节码目标保持 17。脚本优先读取 `PURE_LIVE_JAVA_HOME`，随后检测 Android Studio JBR，最后回退到本机 Temurin；当前工具链为 compileSdk/targetSdk 37、Gradle 9.5.0、AGP 9.3.1 和 AGP Built-in Kotlin。`tool/audit_built_in_kotlin.py` 会在本地 CI 中阻止独立 KGP、模块私有 AGP classpath 和旧 Kotlin DSL 回归。
 
-Android 打包前会由 `tool/prefetch_android_native.ps1` 下载并逐一校验 media_kit 的四个 libmpv JAR及 FFmpeg builders v0.11.0 AAR；质量门禁以 `-SkipAndroidMedia` 只准备 Windows FFmpeg ZIP。原生文件写入持久缓存和 Native Assets 共享缓存，减少重复下载并拦截损坏文件。
+Android 打包前会由 `tool/prefetch_android_native.ps1` 下载并逐一校验 media_kit 的四个 libmpv JAR及 FFmpeg builders v0.11.1 AAR；质量门禁以 `-SkipAndroidMedia` 只准备 Windows FFmpeg ZIP。原生文件写入持久缓存和 Native Assets 共享缓存，减少重复下载并拦截损坏文件。
 
 Windows 的 `flutter_inappwebview_windows` 需要 `nuget.exe`。脚本会自动发现 `%LOCALAPPDATA%\Codex\nuget\nuget.exe` 或 `PATH` 中的 NuGet；建议从 `https://dist.nuget.org/` 下载并核验 Microsoft Authenticode 签名。
 

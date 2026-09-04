@@ -1,19 +1,19 @@
 # 依赖与接口审计
 
-最近核验日期：2026-09-01
+最近核验日期：2026-09-04
 
 ## 固定工具链
 
 - Flutter 3.47.0 / Dart 3.13.0（`.fvmrc`）。
 - Android compileSdk/targetSdk 37，Java 25 构建运行时，Java/Kotlin 17 字节码目标，AGP 9.3.1，Gradle 9.5.0。
 - Google Services Gradle Plugin 4.5.0。
-- FFmpeg Kit Extended Flutter 0.6.0，按插件配置解析 builders v0.11.0，并复用经过 SHA-256 校验的 Android/Windows Native Assets 共享缓存。
+- FFmpeg Kit Extended Flutter 0.6.2，按插件构建钩子解析 builders v0.11.1 / FFmpeg 9.0.1，并复用经过 SHA-256 校验的 Android/Windows Native Assets 共享缓存。
 
 Android 已启用 AGP 9 Built-in Kotlin。主应用、`flv_lzc` 以及六个仍使用独立 KGP 的插件已完成本地迁移，根设置不再声明或应用 `org.jetbrains.kotlin.android`。当前 Flutter 3.47 的通用依赖检查会把 AGP 自带编译器套用到独立 KGP 最低版本规则，因此 Gradle 属性跳过该项误判，同时由 `tool/audit_built_in_kotlin.py` 固定检查 AGP/Gradle 下限、开关和全部本地模块；实际 release 编译继续作为最终门禁。
 
 AGP 9.3.1 是当前 9.3 稳定补丁，官方兼容表给出的默认 Gradle 为 9.5.0；仓库保持该验证组合。Google Services 4.5.0 与 Firebase 当前官方设置文档一致。Gradle 独立发行线虽已有更新版本，但不越过 AGP/Flutter 已验证默认组合做孤立升级。
 
-`flutter pub outdated` 已于 2026-08-25 再次复核：Syncfusion sliders 已更新到兼容补丁 `34.2.5`，上游邮箱校验已迁移到 `best_form_validator 1.4.0`；除 `dynamic_color` 外，直接依赖与开发依赖均处于当前约束可升级的最新版本。`dynamic_color` 1.9.0 是当前 Flutter Material `ColorScheme` 可直接使用的最新系列；2.1.0 已把公开类型迁移到独立 `material_ui.ColorScheme`，全应用主题迁移前保持 1.9.0。其余可见更新均为 Flutter 3.47 SDK或上游约束锁定的传递依赖，保持解析器给出的兼容组合，避免以 override 破坏播放器或代码生成组合。
+`flutter pub outdated` 已于 2026-09-04 在 Flutter 3.47.0 上重新复核并完成全部可解析升级。直接依赖当前包括 `cached_network_image 4.0.0`、`dynamic_color 2.1.0`、`ffmpeg_kit_extended_flutter 0.6.2`、`flex_color_picker 4.0.0`、`loading_indicator 4.0.2`、`permission_handler 13.0.2`、`file_picker 12.2.0` 与 Syncfusion sliders `34.2.6`。`dynamic_color` 2.x 和图像/颜色组件采用独立 `material_ui`；应用在单一边界把其完整 Material 3 `ColorScheme` 转换为 Flutter 框架主题，并以字段完整性及组件渲染测试防止主题角色丢失。剩余提示均为 Flutter SDK、生成器或上游约束锁定的传递依赖（例如 `code_assets`、`qr`），不使用 override 强行拆开其兼容组合。
 
 播放器依赖在 v2.6.0 再次单独核验：`better_player_plus` 为 1.3.5 的 Built-in Kotlin 本地快照；项目使用的 `Predidit/media-kit` 修订分支仍固定到 `994465d9bfca3f39d0b41199d16e7fd93fe97881`，`media_kit_video` 使用包含 Surface/音频模式生命周期修复的仓库副本。`pub outdated` 中其余较新版本均为当前 Flutter SDK 或上游依赖约束锁定的传递包，未用强制 override 破坏播放器组合兼容性。
 
@@ -30,7 +30,8 @@ AGP 9.3.1 是当前 9.3 稳定补丁，官方兼容表给出的默认 Gradle 为
 - `volume_controller 3.6.1` 在发布日的官方归档哈希发生变化；锁文件已通过官方 `pub.dev` API 与 `flutter pub get` 重建为当前归档 SHA-256 `9e776874…b446f`，随后 `--enforce-lockfile` 复核通过。
 - Windows 单实例插件同步上游恢复为 hosted `windows_single_instance 1.2.0`，删除仓库内旧副本；`file_picker` 使用稳定版 12.0.0 API。
 - `flv_lzc` 固定自上游 `030d611` 并存放在 `plugins/flv_lzc`；仅移除 Android 注册阶段的临时 `SurfaceTexture` 探测，规避 Flutter 3.47 平台纹理注册断言，保留上游许可证和来源说明。
-- Android 本地构建会预取并校验 MediaKit arm64 库与 FFmpeg Kit v0.11.0 AAR；质量门禁和 Windows 构建会单独预取同版本 Windows ZIP。两者预先写入 Native Assets 共享缓存，避免 Windows Dart 下载器在 GitHub Release 重定向处长时间等待。
+- Android 本地构建会预取并校验 MediaKit arm64 库与 FFmpeg Kit builders v0.11.1 AAR；质量门禁和 Windows 构建会单独预取同版本 Windows ZIP。0.6.2 对应的 Android AAR SHA-256 为 `b214c2aa…134fc`，Windows ZIP 为 `ac4f7c68…7cb47`；两者预先写入 Native Assets 共享缓存，避免 Windows Dart 下载器在 GitHub Release 重定向处长时间等待。
+- FFmpeg 9 默认校验 TLS 对端证书，而 Android/Linux OpenSSL 构建时写入的 `OPENSSLDIR` 不存在于用户设备。应用因此保留证书校验，显式使用 curl 于 2026-08-13 从 Mozilla NSS 导出的 `assets/certificates/mozilla-ca-bundle.pem`，固定 SHA-256 `f66dff1b…80bc9`。启动时复制到应用数据目录并再次校验，仅对 HTTPS 输入注入 `-ca_file`；不以关闭 TLS 校验掩盖信任库缺失。
 - 删除已停止作用的 `sqlite3_flutter_libs`；项目使用 `sqlite3` 3.x 的 Native Assets。
 - 升级 `app_links`、`connectivity_plus`、`pro_mpack` 与 Syncfusion sliders，并通过静态分析和完整测试。
 - GitHub Actions 固定到已核验的完整提交 SHA，Dependabot 每月汇总检查 pub、Gradle 和 Actions 更新；日常分支推送不构建，仅手动入口或显式阶段标签按平台运行。

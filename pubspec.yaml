@@ -55,7 +55,7 @@ dependencies:
   best_form_validator: ^1.4.0
   flutter_spinkit: ^5.2.2
   loading_animation_widget: ^1.3.0
-  loading_indicator: ^3.1.1
+  loading_indicator: ^4.0.2
   flame_barrage:
     path: ./plugins/flame_barrage # Local patch keeps per-item speed effective
 
@@ -79,24 +79,24 @@ dependencies:
   audio_service: ^0.18.18 # 后台音频服务
   audio_service_win: ^0.0.3
   audio_session: ^0.2.3 # 音频会话管理
-  # Controlled native-binary rollback: 0.6.0 moved the bundle from FFmpeg 8 to
-  # FFmpeg 9 in the same regression window as the Android live-FLV recorder
-  # failures. Keep the last known build profile exact while both bundles are
-  # compared by the recorder contract probes; a caret silently changes native
-  # code between otherwise identical application builds.
-  ffmpeg_kit_extended_flutter: 0.5.13
+  # Keep this exact: each package patch selects a different reviewed native
+  # builders release. 0.6.2 preserves argv through FFmpeg/FFprobe/FFplay and
+  # selects builders 0.11.1 (FFmpeg 9.0.1); the repository prefetch gate pins
+  # the Android and Windows archive hashes.
+  ffmpeg_kit_extended_flutter: 0.6.2
 
   flv_lzc:
     path: plugins/flv_lzc # Vendored from liuchuancong/flv_lzc@030d611
   # -------------------------- UI组件/界面样式 --------------------------
   flutter_svg: ^2.2.1 # SVG图片渲染
   lottie: ^3.3.3 #动画
-  cached_network_image: ^3.3.0 # 网络图片缓存
-  dynamic_color: ^1.9.0 # 动态主题色
+  cached_network_image: ^4.0.0 # 网络图片缓存
+  dynamic_color: ^2.1.0 # 动态主题色
+  material_ui: ^1.1.1 # dynamic_color 2.x 的独立 Material ColorScheme 桥接
   waterfall_flow: ^3.1.1 # 瀑布流布局
   easy_refresh: ^3.5.0 # 下拉刷新/上拉加载
   flutter_smart_dialog: ^5.1.0 # 自定义弹窗
-  flex_color_picker: ^3.7.2 # 颜色选择器
+  flex_color_picker: ^4.0.0 # 颜色选择器
   bordered_text: ^3.0.2 # 带边框文字
   flutter_color: ^2.1.1 # 颜色工具
   syncfusion_flutter_sliders: ^34.2.5 # 滑块组件
@@ -287,6 +287,7 @@ flutter:
     - assets/animations/empty.json
     - assets/animations/error.json
     - assets/fonts/fonts-manifest.json
+    - assets/certificates/
   # 字体配置
   fonts:
     - family: CustomIcons

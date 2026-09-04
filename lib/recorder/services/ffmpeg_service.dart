@@ -9,6 +9,7 @@ import 'package:pure_live/core/common/log.dart';
 import 'package:pure_live/plugins/locale_helper.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
+import 'package:pure_live/recorder/services/ffmpeg_tls_trust_store.dart';
 
 /// Converts FFmpegKit's progress timestamp into a live-session duration.
 ///
@@ -202,6 +203,7 @@ class FFmpegService {
   final Map<String, FFmpegRecordSession> _sessions = {};
   Future<void>? _initializing;
   bool _initialized = false;
+  String? _trustedCaFile;
 
   static void initInIsolate(RootIsolateToken token) {
     BackgroundIsolateBinaryMessenger.ensureInitialized(token);
@@ -226,7 +228,8 @@ class FFmpegService {
     // Pass the exact argument vector to FFI. Re-parsing a shell-like command
     // string was platform-dependent and could corrupt signed URLs, header CRLF
     // blocks or Android storage paths before FFmpeg saw them.
-    final nativeSession = FFmpegKit.createSessionFromArguments(List<String>.of(arguments));
+    final effectiveArguments = FFmpegTlsTrustStore.injectCaFile(arguments, caFile: _trustedCaFile);
+    final nativeSession = FFmpegKit.createSessionFromArguments(effectiveArguments);
     final session = FFmpegRecordSession(
       taskId: taskId,
       sessionId: nativeSession.getSessionId(),
@@ -399,7 +402,12 @@ class FFmpegService {
     final inFlight = _initializing;
     if (inFlight != null) return inFlight;
 
-    final future = FFmpegKitExtended.initialize();
+    final future = Future.wait<void>([
+      FFmpegKitExtended.initialize(),
+      FFmpegTlsTrustStore.ensureReady().then<void>((path) {
+        _trustedCaFile = path;
+      }),
+    ]);
     _initializing = future;
     try {
       await future;

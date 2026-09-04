@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_command_builder.dart';
+import 'package:pure_live/recorder/services/ffmpeg_tls_trust_store.dart';
 
 void main() {
   test('recording passes signed URLs, headers and output paths as exact native arguments', () {
@@ -108,6 +109,32 @@ void main() {
 
     expect(_valueAfter(arguments, '-i'), 'https://cdn.example/audio.m3u8?token=a&expires=2');
     expect(arguments, isNot(contains('-tls_verify')));
+  });
+
+  test('FFmpeg 9 HTTPS inputs receive the reviewed CA file before input', () {
+    final arguments = FFmpegCommandBuilder.buildRecordArguments(
+      url: 'https://cdn.example/live.flv?token=a&expires=2',
+      outputDir: Directory.systemTemp.path,
+      segmentTime: 60,
+      preferBestStream: true,
+      rwTimeout: 15,
+      threadQueueSize: 1024,
+    );
+
+    final trusted = FFmpegTlsTrustStore.injectCaFile(arguments, caFile: '/app/certificates/mozilla.pem');
+    final inputIndex = trusted.indexOf('-i');
+
+    expect(trusted.sublist(inputIndex - 2, inputIndex), <String>['-ca_file', '/app/certificates/mozilla.pem']);
+    expect(trusted.where((argument) => argument == '-ca_file'), hasLength(1));
+    expect(trusted, isNot(contains('-tls_verify')));
+  });
+
+  test('CA injection leaves non-TLS inputs unchanged and is idempotent', () {
+    const http = <String>['-rw_timeout', '1000000', '-i', 'http://cdn.example/live.flv', '-c', 'copy'];
+    const httpsWithCa = <String>['-ca_file', '/app/certificates/first.pem', '-i', 'https://cdn.example/live.flv'];
+
+    expect(FFmpegTlsTrustStore.injectCaFile(http, caFile: '/app/certificates/mozilla.pem'), http);
+    expect(FFmpegTlsTrustStore.injectCaFile(httpsWithCa, caFile: '/app/certificates/second.pem'), httpsWithCa);
   });
 
   test('display formatting does not alter the native argument vector', () {

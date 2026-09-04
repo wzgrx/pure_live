@@ -100,6 +100,14 @@ function Get-FFmpegBuilderProfile {
             AndroidSha256 = '2b66caaaefbe5032ffe6e32d87e1af398653ec8dbbc193f4481dd4f562f2182d'
             WindowsSha256 = '2367fbc6ecd7c5df1995c5c0cf5d95f65a99396d4d3fe9d1968c683d3481c125'
         }
+        # ffmpeg_kit_extended_flutter 0.6.2 / FFmpeg 9.0.1. The package fixes
+        # argv preservation and debug native builds; its hook pins builders
+        # 0.11.1, whose Android and Windows archives were reviewed together.
+        '0.6.2' = @{
+            BuilderVersion = '0.11.1'
+            AndroidSha256 = 'b214c2aafb20af5416989600826b2b7cb59c8f1572fb78547cc4a222b65134fc'
+            WindowsSha256 = 'ac4f7c6893eb2d2a7d9c1c7a08e8cad42105b509d097ce2b2eceabcdcbd7cb47'
+        }
     }
     $profile = $profiles[$packageVersion]
     if ($null -eq $profile) {

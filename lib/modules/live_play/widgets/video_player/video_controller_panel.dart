@@ -1917,71 +1917,75 @@ class BottomActionBar extends StatelessWidget {
     return Obx(() {
       bool shouldShow =
           (controller.showController.value || controller.isMenuOpen.value) && !controller.showLocked.value;
+      final portraitFullscreen =
+          controller.livePlayController.state.value.ui.screenMode == VideoMode.portraitFullscreen;
       return AnimatedPositioned(
         bottom: shouldShow ? 0 : -barHeight,
         left: 0,
         right: 0,
         height: barHeight,
         duration: const Duration(milliseconds: 300),
-        child: Container(
-          height: barHeight,
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.transparent, Colors.black45],
+        child: PortraitFullscreenRestoreGestureRegion(
+          enabled: portraitFullscreen,
+          onRestore: () => unawaited(controller.exitPortraitFullScreen()),
+          child: Container(
+            height: barHeight,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black45],
+              ),
             ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final fullscreen = GlobalPlayerState.to.fullscreenUI;
-              final portraitFullscreen =
-                  controller.livePlayController.state.value.ui.screenMode == VideoMode.portraitFullscreen;
-              if (portraitFullscreen) {
-                return _buildPortraitFullscreenLayout();
-              }
-              final compact = constraints.maxWidth < 760;
-              final left = _buildLeftActions(compact: fullscreen && compact);
-              final right = _buildRightActions(compact: fullscreen && compact);
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final fullscreen = GlobalPlayerState.to.fullscreenUI;
+                if (portraitFullscreen) {
+                  return _buildPortraitFullscreenLayout();
+                }
+                final compact = constraints.maxWidth < 760;
+                final left = _buildLeftActions(compact: fullscreen && compact);
+                final right = _buildRightActions(compact: fullscreen && compact);
 
-              if (fullscreen) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    children: [
-                      left,
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 420),
-                            child: FullscreenLocalDanmakuComposer(controller: controller),
+                if (fullscreen) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      children: [
+                        left,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 420),
+                              child: FullscreenLocalDanmakuComposer(controller: controller),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      right,
-                    ],
+                        const SizedBox(width: 8),
+                        right,
+                      ],
+                    ),
+                  );
+                }
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const PureLiveBoundedScrollPhysics(),
+                  clipBehavior: Clip.hardEdge,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [left, right]),
+                    ),
                   ),
                 );
-              }
-
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const PureLiveBoundedScrollPhysics(),
-                clipBehavior: Clip.hardEdge,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [left, right]),
-                  ),
-                ),
-              );
-            },
+              },
+            ),
           ),
         ),
       );

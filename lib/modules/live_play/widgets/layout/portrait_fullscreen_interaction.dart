@@ -37,6 +37,60 @@ bool shouldRestorePortraitPanelFromSwipe({required double upwardDistance, requir
   return upwardDistance >= 64 || (velocity <= -850 && upwardDistance >= 24);
 }
 
+/// Keeps the portrait-fullscreen restore gesture reachable while the visible
+/// bottom controller bar is on top of the full-surface brightness/volume
+/// gesture layer. Child buttons still receive taps; a deliberate upward drag
+/// wins the gesture arena and restores the room panel.
+class PortraitFullscreenRestoreGestureRegion extends StatefulWidget {
+  const PortraitFullscreenRestoreGestureRegion({
+    super.key,
+    required this.enabled,
+    required this.onRestore,
+    required this.child,
+  });
+
+  final bool enabled;
+  final VoidCallback onRestore;
+  final Widget child;
+
+  @override
+  State<PortraitFullscreenRestoreGestureRegion> createState() => _PortraitFullscreenRestoreGestureRegionState();
+}
+
+class _PortraitFullscreenRestoreGestureRegionState extends State<PortraitFullscreenRestoreGestureRegion> {
+  double _upwardDistance = 0;
+
+  void _reset() {
+    _upwardDistance = 0;
+  }
+
+  void _update(DragUpdateDetails details) {
+    _upwardDistance = (_upwardDistance - details.delta.dy).clamp(0.0, double.infinity).toDouble();
+  }
+
+  void _finish(DragEndDetails details) {
+    final shouldRestore = shouldRestorePortraitPanelFromSwipe(
+      upwardDistance: _upwardDistance,
+      velocity: details.primaryVelocity ?? 0,
+    );
+    _reset();
+    if (shouldRestore) widget.onRestore();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onVerticalDragStart: (_) => _reset(),
+      onVerticalDragUpdate: _update,
+      onVerticalDragEnd: _finish,
+      onVerticalDragCancel: _reset,
+      child: widget.child,
+    );
+  }
+}
+
 /// Transient guidance shown only after the dedicated portrait fullscreen mode
 /// has been entered. Player controls hide first; this affordance follows one
 /// second later so the settled screen contains only video and overlay danmaku.

@@ -4,7 +4,9 @@ param(
     [string] $Serial,
     [string] $EvidenceDirectory,
     [string] $Package = 'com.mystyle.purelive',
-    [string] $Activity = '.MainActivity'
+    [string] $Activity = '.MainActivity',
+    [ValidateSet('Portrait', 'Standard')]
+    [string] $Mode = 'Portrait'
 )
 
 Set-StrictMode -Version Latest
@@ -13,7 +15,8 @@ $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $evidence = if ($EvidenceDirectory) {
     [IO.Path]::GetFullPath($(if ([IO.Path]::IsPathRooted($EvidenceDirectory)) { $EvidenceDirectory } else { Join-Path $repo $EvidenceDirectory }))
 } else {
-    Join-Path $repo ("local-artifacts\diagnostics\android-portrait-presentation-{0}" -f (Get-Date -Format 'yyyyMMddTHHmmssfff'))
+    $modeSlug = $Mode.ToLowerInvariant()
+    Join-Path $repo ("local-artifacts\diagnostics\android-$modeSlug-presentation-{0}" -f (Get-Date -Format 'yyyyMMddTHHmmssfff'))
 }
 [IO.Directory]::CreateDirectory($evidence) | Out-Null
 
@@ -212,9 +215,10 @@ function Dismiss-DebugCompatibilityDialog {
     }
 }
 
-function Open-Portrait-Douyin-Room {
+function Open-Test-Room {
     Tap-Text -Text '热门' -EvidenceName 'home-before-popular' -WaitMilliseconds 1200
-    Tap-Text -Text '抖音' -EvidenceName 'popular-before-douyin' -WaitMilliseconds 5000
+    $platform = if ($Mode -eq 'Portrait') { '抖音' } else { '哔哩哔哩' }
+    Tap-Text -Text $platform -EvidenceName "popular-before-$($platform.ToLowerInvariant())" -WaitMilliseconds 5000
 
     $candidates = @(
         @{ x = 0.27; y = 0.29 },
@@ -230,8 +234,14 @@ function Open-Portrait-Douyin-Room {
             Start-Sleep -Seconds 10
             $document = Save-UiDump "candidate-$attempt"
             $text = Get-UiText $document
-            if ($text.Contains('弹幕列表') -and $text.Contains('下滑进入竖屏全屏') -and $text.Contains('横屏全屏')) {
-                Save-Screenshot "candidate-$attempt-portrait-room"
+            $isRoom = $text.Contains('弹幕列表') -and $text.Contains('弹幕设置')
+            $matchesMode = if ($Mode -eq 'Portrait') {
+                $isRoom -and $text.Contains('下滑进入竖屏全屏') -and $text.Contains('横屏全屏')
+            } else {
+                $isRoom -and -not $text.Contains('下滑进入竖屏全屏')
+            }
+            if ($matchesMode) {
+                Save-Screenshot "candidate-$attempt-$($Mode.ToLowerInvariant())-room"
                 return [pscustomobject]@{ attempt = $attempt; page = $page; document = $document; text = $text }
             }
             Save-Screenshot "candidate-$attempt-rejected"
@@ -245,7 +255,7 @@ function Open-Portrait-Douyin-Room {
             Start-Sleep -Seconds 3
         }
     }
-    throw 'No native portrait Douyin room was found in the first three visible result pages.'
+    throw "No $Mode room was found for $platform in the first three visible result pages."
 }
 
 $result = [ordered]@{
@@ -253,6 +263,7 @@ $result = [ordered]@{
     startedAt = (Get-Date).ToString('o')
     serial = $Serial
     package = $Package
+    mode = $Mode
     apk = if ($ApkPath) { [IO.Path]::GetFullPath($ApkPath) } else { $null }
     checks = [ordered]@{}
 }
@@ -269,29 +280,37 @@ try {
     Start-Sleep -Seconds 7
     Dismiss-DebugCompatibilityDialog
 
-    $room = Open-Portrait-Douyin-Room
-    $result.checks.portraitRoomCandidate = $room.attempt
+    $room = Open-Test-Room
+    $result.checks.roomCandidate = $room.attempt
     $normalMetrics = Wait-ForOrientation -Orientation portrait
     $result.checks.normalPortrait = $normalMetrics
-    $result.checks.normalHasPortraitGesture = $room.text.Contains('下滑进入竖屏全屏')
-    $result.checks.normalHasLandscapeAction = $room.text.Contains('横屏全屏')
-    Save-Screenshot 'portrait-normal'
+    if ($Mode -eq 'Portrait') {
+        $result.checks.normalHasPortraitGesture = $room.text.Contains('下滑进入竖屏全屏')
+        $result.checks.normalHasLandscapeAction = $room.text.Contains('横屏全屏')
+        Save-Screenshot 'portrait-normal'
 
-    Swipe-Relative -X1 0.5 -Y1 0.63 -X2 0.5 -Y2 0.96 -DurationMilliseconds 650
-    $portraitFull = Wait-ForText -Needle '已进入竖屏全屏' -EvidencePrefix 'portrait-fullscreen'
-    $result.checks.portraitFullscreenHintVisible = $portraitFull.text.Contains('上滑恢复弹幕栏')
-    $result.checks.portraitFullscreenMetrics = Wait-ForOrientation -Orientation portrait
-    Save-Screenshot 'portrait-fullscreen'
+        Swipe-Relative -X1 0.5 -Y1 0.63 -X2 0.5 -Y2 0.96 -DurationMilliseconds 650
+        $portraitFull = Wait-ForText -Needle '已进入竖屏全屏' -EvidencePrefix 'portrait-fullscreen'
+        $result.checks.portraitFullscreenHintVisible = $portraitFull.text.Contains('上滑恢复弹幕栏')
+        $result.checks.portraitFullscreenMetrics = Wait-ForOrientation -Orientation portrait
+        Save-Screenshot 'portrait-fullscreen'
 
-    # Start above Android's bottom-edge navigation reservation. A gesture that
-    # begins at the physical edge opens HyperOS recents before Flutter can see
-    # it, which is different from using the in-app restore affordance.
-    Swipe-Relative -X1 0.5 -Y1 0.935 -X2 0.5 -Y2 0.73 -DurationMilliseconds 420
-    $restored = Wait-ForText -Needle '弹幕列表' -EvidencePrefix 'portrait-restored'
-    $result.checks.portraitPanelRestored = $restored.text.Contains('下滑进入竖屏全屏')
-    Save-Screenshot 'portrait-restored'
+        # Start above Android's bottom-edge navigation reservation. A gesture that
+        # begins at the physical edge opens HyperOS recents before Flutter can see
+        # it, which is different from using the in-app restore affordance.
+        Swipe-Relative -X1 0.5 -Y1 0.935 -X2 0.5 -Y2 0.73 -DurationMilliseconds 420
+        $restored = Wait-ForText -Needle '弹幕列表' -EvidencePrefix 'portrait-restored'
+        $result.checks.portraitPanelRestored = $restored.text.Contains('下滑进入竖屏全屏')
+        Save-Screenshot 'portrait-restored'
 
-    Tap-Text -Text '横屏全屏' -EvidenceName 'before-landscape-fullscreen' -WaitMilliseconds 700
+        Tap-Text -Text '横屏全屏' -EvidenceName 'before-landscape-fullscreen' -WaitMilliseconds 700
+    } else {
+        $result.checks.standardPortraitPathAbsent = -not $room.text.Contains('下滑进入竖屏全屏')
+        Save-Screenshot 'standard-normal'
+        Tap-Relative -X 0.5 -Y 0.25
+        Start-Sleep -Milliseconds 500
+        Tap-Text -Text '进入全屏' -EvidenceName 'standard-before-fullscreen' -WaitMilliseconds 700
+    }
     $landscapeMetrics = Wait-ForOrientation -Orientation landscape
     $result.checks.landscapeFullscreen = $landscapeMetrics
     Start-Sleep -Seconds 2
@@ -300,9 +319,13 @@ try {
 
     Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_BACK') | Out-Null
     $result.checks.backReturnedPortrait = Wait-ForOrientation -Orientation portrait
-    $afterBack = Wait-ForText -Needle '弹幕列表' -EvidencePrefix 'portrait-after-back'
-    $result.checks.backReturnedToRoom = $afterBack.text.Contains('下滑进入竖屏全屏')
-    Save-Screenshot 'portrait-after-back'
+    $afterBack = Wait-ForText -Needle '弹幕列表' -EvidencePrefix "$($Mode.ToLowerInvariant())-after-back"
+    $result.checks.backReturnedToRoom = if ($Mode -eq 'Portrait') {
+        $afterBack.text.Contains('下滑进入竖屏全屏')
+    } else {
+        -not $afterBack.text.Contains('下滑进入竖屏全屏')
+    }
+    Save-Screenshot "$($Mode.ToLowerInvariant())-after-back"
 
     & (Join-Path $repo 'tool\android_ui.ps1') -Sequence enter_pip -Serial $Serial -CaptureOnFailure |
         Out-File -LiteralPath (Join-Path $evidence 'enter-pip.txt') -Encoding utf8
@@ -311,14 +334,18 @@ try {
     $pipState = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'activities')) -join "`n"
     $pipState | Out-File -LiteralPath (Join-Path $evidence 'pip-activity.txt') -Encoding utf8
     $result.checks.pipReported = $pipState -match 'pictureInPicture|mLastReportedPictureInPictureMode=true|supportsPictureInPicture'
-    Save-Screenshot 'portrait-system-pip'
+    Save-Screenshot "$($Mode.ToLowerInvariant())-system-pip"
 
     Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity") | Out-Null
     Start-Sleep -Seconds 5
-    $afterPip = Wait-ForText -Needle '弹幕列表' -EvidencePrefix 'portrait-after-pip'
-    $result.checks.afterPipRoomAlive = $afterPip.text.Contains('下滑进入竖屏全屏')
+    $afterPip = Wait-ForText -Needle '弹幕列表' -EvidencePrefix "$($Mode.ToLowerInvariant())-after-pip"
+    $result.checks.afterPipRoomAlive = if ($Mode -eq 'Portrait') {
+        $afterPip.text.Contains('下滑进入竖屏全屏')
+    } else {
+        -not $afterPip.text.Contains('下滑进入竖屏全屏')
+    }
     $result.checks.afterPipPortrait = (Wait-ForOrientation -Orientation portrait).orientation -eq 'portrait'
-    Save-Screenshot 'portrait-after-pip'
+    Save-Screenshot "$($Mode.ToLowerInvariant())-after-pip"
 
     $logcat = (Invoke-Adb -AdbArguments @('shell', 'logcat', '-d', '-v', 'threadtime')) -join "`n"
     $logcat | Out-File -LiteralPath (Join-Path $evidence 'logcat.txt') -Encoding utf8
@@ -326,18 +353,25 @@ try {
         $_ -match 'FATAL EXCEPTION|AndroidRuntime: Process: com\.mystyle\.purelive|SIGABRT|Fatal signal'
     })
     $result.checks.noFatal = $fatalLines.Count -eq 0
+    $modeAssertions = if ($Mode -eq 'Portrait') {
+        @(
+            $result.checks.normalHasPortraitGesture,
+            $result.checks.normalHasLandscapeAction,
+            $result.checks.portraitFullscreenHintVisible,
+            $result.checks.portraitPanelRestored
+        )
+    } else {
+        @($result.checks.standardPortraitPathAbsent)
+    }
     $result.checks.passed = @(
-        $result.checks.normalHasPortraitGesture,
-        $result.checks.normalHasLandscapeAction,
-        $result.checks.portraitFullscreenHintVisible,
-        $result.checks.portraitPanelRestored,
-        $result.checks.backReturnedToRoom,
-        $result.checks.pipReported,
-        $result.checks.afterPipRoomAlive,
-        $result.checks.afterPipPortrait,
+        $modeAssertions
+        $result.checks.backReturnedToRoom
+        $result.checks.pipReported
+        $result.checks.afterPipRoomAlive
+        $result.checks.afterPipPortrait
         $result.checks.noFatal
     ) -notcontains $false
-    if (-not $result.checks.passed) { throw 'One or more portrait presentation assertions failed.' }
+    if (-not $result.checks.passed) { throw "One or more $Mode presentation assertions failed." }
 } catch {
     $failure = $_
     $result.error = $_.Exception.Message

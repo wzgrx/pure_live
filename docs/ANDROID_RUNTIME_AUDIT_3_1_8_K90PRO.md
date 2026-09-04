@@ -142,3 +142,4 @@
 - YY：`高清 · 720p → 流畅 · 360p` 标签提交并稳定，单线路不执行伪切换；31 项断言通过。MP4 10,607,701 B / 29.496344 秒，音视频轨道可读，文件持续增长与最终清理通过。当前短窗口未见用户弹幕，只确认连接状态。证据：`local-artifacts/diagnostics/android-recording-smoke-20260905T051709089/summary.json`。
 - 边界：录制使用独立源选择，因此上述结果只验证播放选择与录制可连续操作，未验证录制继承播放画质。未启用锁屏测试的断言是条件跳过，不计入本轮锁屏覆盖。UIAutomator 测得的毫秒数包含观察开销，不等于视频首帧切换耗时。
 - Twitch（本地 Clash）：`1080P（原画） → 160P` 标签提交且保持稳定，单线路；短录 MP4 30,485,621 B / 29.716667 秒，音视频轨道、文件增长、停止收尾、监控移除和无崩溃断言通过。证据：`local-artifacts/diagnostics/android-recording-smoke-20260905T052113014/summary.json`；代理 finally 恢复默认关闭，包装器退出 0。此结果不代表已测试 SOOP 或全部国外站点。
+- SOOP（本地 Clash）：`原画 → 标清` 标签提交且稳定；MP4 26,429,087 B / 25.866667 秒，音视频、文件增长、停止和清理断言通过。证据：`local-artifacts/diagnostics/android-recording-smoke-20260905T052531485/summary.json`；代理恢复关闭，包装器退出 0。

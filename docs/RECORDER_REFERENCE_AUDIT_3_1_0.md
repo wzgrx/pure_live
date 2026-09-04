@@ -55,3 +55,13 @@ Pure Live 面向交互式播放器，不能照搬服务器录播器“无限重�
 - 30 秒短录通过不等于短签名长时续接通过；
 - 单元测试通过不等于 Android 后台、Windows DPI/任务栏和真实磁盘路径通过；
 - v3.1.0 Release 只写入本轮取得证据的结论，未执行项继续保留在 `ACCEPTANCE_MATRIX_3_1_0.md`。
+
+## 6. 3.2.0 新一轮逐源码核查（2026-09-05）
+
+本节不改写前述历史基线。当前远程 HEAD：biliup `906e0f6fdb104d65989d12b76c9a6f02205384cb`，bililive-go `ef71711a7c573b013d82fec01ee8d0609ee36aca`。仅只读获取参考文件，没有合并上游 Pure Live。
+
+- [biliup AcFun 适配器](https://github.com/biliup/biliup/blob/906e0f6fdb104d65989d12b76c9a6f02205384cb/crates/biliup/src/downloader/live/acfun.rs)：可借鉴游客会话与 startPlay 分离、Referer/UA 绑定、嵌套 videoPlayRes 解码。当前实现将 startPlay 的所有非 1 结果映射 Offline；本项目接入时须区分明确下播、认证失效、限流、未知/结构变化，避免关注卡片和录制监控误判。该实现选 representation 的最后一个 URL，不等于可靠的最高画质排序；本项目应保留稳定 ID、码率/尺寸与 CDN 维度，缺字段时明确未知。
+- [bililive-go OPENREC 适配器](https://github.com/bililive-go/bililive-go/blob/ef71711a7c573b013d82fec01ee8d0609ee36aca/src/live/openrec/openrec.go)：可借鉴独立平台 URL 注册和状态读取；当前按页面正则匹配标题、状态和 m3u8，任意非 200 映射房间不存在，且正则限定地址以 m3u8 结尾。直接照搬会误处理 429/5xx、带签名查询的 HLS 与页面嵌套结构。应验证页面公开结构化数据、完整 URL、返回码分类、重试边界和媒体探针后再接入。
+- biliup Picarto 文件读取遇到 GitHub HTTP 504，本轮未完成源码核查，不将失败读取记作已审查。
+
+下一阶段先给候选平台建立脱敏 fixture：在播、明确下播、无权限、限流、5xx、字段缺失、签名 HLS、多个画质/线路和 URL 过期。通过解析与状态合同后再实现目录/搜索/入口、真机播放与录制。新增平台仍待实施，本节是设计审查而非功能交付。

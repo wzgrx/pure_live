@@ -65,10 +65,10 @@
 
 | ID | 状态 | 验收内容 |
 |---|---|---|
-| A3-01 | PASS | K90 Pro / cycle 206 在当前 Bilibili 普通横向房间完成普通页 → 横屏全屏 → 系统返回 → PiP → 恢复；普通页没有竖屏手势入口，横屏全屏为 `2608×1200` 且完整铺满，PiP 保持横向比例，返回前后仍为同一直播间。7 项模式断言及致命日志检查全部通过；脚本 `tool/android_presentation_smoke.ps1 -Mode Standard`，证据 `local-artifacts/diagnostics/android-standard-presentation-20260905T040738909/summary.json` |
-| A3-02 | PASS | K90 Pro / cycle 205 在当前抖音原生竖屏房间完成普通页 → 下滑竖屏全屏 → 上滑恢复 → 横屏全屏 → 系统返回 → PiP → 恢复全链路；普通页和竖屏沉浸均为 `1200×2608`，横屏为 `2608×1200` 且实图确认主体居中、两侧使用环境背景，PiP 保持竖向比例，恢复后仍为同一直播间并继续显示弹幕。9 项运行断言及致命日志检查全部通过；脚本 `tool/android_presentation_smoke.ps1 -Mode Portrait`，证据 `local-artifacts/diagnostics/android-portrait-presentation-20260905T040128729/summary.json`。几何仲裁的确定性覆盖另见 `test/portrait_stream_support_test.dart`、`test/live_stream_geometry_hint_test.dart`、`test/mobile_video_frame_test.dart`、`test/live_play_normal_layout_test.dart` 与 `test/portrait_fullscreen_interaction_test.dart` |
+| A3-01 | PASS | K90 Pro / cycle 209 使用提交 `6e1deea1` 的最终 Debug APK，在当前 Bilibili 普通横向房间完成普通页 → 横屏全屏 → 系统返回 → PiP → 恢复；普通页没有竖屏手势入口，横屏全屏为 `2608×1200` 且完整铺满，PiP 保持横向比例，返回前后仍为同一直播间。7 项模式断言及致命日志检查全部通过，证明竖屏控制栏手势补丁在普通流上保持禁用；脚本 `tool/android_presentation_smoke.ps1 -Mode Standard`，证据 `local-artifacts/diagnostics/android-standard-presentation-20260905T042627364/summary.json` |
+| A3-02 | PASS | K90 Pro / cycle 208 使用提交 `6e1deea1` 的最终 Debug APK，在当前抖音原生竖屏房间完成普通页 → 下滑竖屏全屏 → 可见控制栏上滑恢复 → 横屏全屏 → 系统返回 → PiP → 恢复全链路；普通页和竖屏沉浸均为 `1200×2608`，横屏为 `2608×1200` 且主体居中、两侧使用环境背景，PiP 保持竖向比例，恢复后仍为同一直播间并继续显示弹幕。9 项运行断言及致命日志检查全部通过；脚本 `tool/android_presentation_smoke.ps1 -Mode Portrait`，证据 `local-artifacts/diagnostics/android-portrait-presentation-20260905T042024096/summary.json`。几何与手势确定性覆盖另见 `test/portrait_stream_support_test.dart`、`test/live_stream_geometry_hint_test.dart`、`test/mobile_video_frame_test.dart`、`test/live_play_normal_layout_test.dart` 与 `test/portrait_fullscreen_interaction_test.dart` |
 | A3-03 | NR | 内嵌黑边/延迟几何/异常元数据：稳定仲裁后再切换，不污染下一房间或重启后的普通流 |
-| A3-04 | RUN | cycle 205 在抖音竖屏源的横屏全屏中发送 Android 系统返回，先恢复 `1200×2608` 普通直播页且竖屏手势与弹幕栏仍存活；对话框/底部面板的返回优先级及连续第二次返回仍按本行继续 |
+| A3-04 | RUN | cycle 208 在抖音竖屏源的横屏全屏中发送 Android 系统返回，先恢复 `1200×2608` 普通直播页且竖屏手势与弹幕栏仍存活；竖屏沉浸的控制栏现直接接管上滑恢复，不再依赖控制栏先隐藏。对话框/底部面板的返回优先级及连续第二次返回仍按本行继续 |
 | A3-05 | NR | 画质/线路只在成功首帧后提交 UI，失败保留旧流；所有平台标签本地化且对应真实 ID |
 | A3-06 | NR | 播放意外暂停、buffering、EOF、签名过期均有界恢复；用户暂停不被自动恢复 |
 | A3-07 | RUN | 虎牙普通视频在其他应用前台时连续后台播放 10 分钟，21/21 媒体状态均为 `PLAYING`；PSS/RSS 呈波动平台，CPU 平均 2.24%、最高 5%，结束后媒体会话与 Wake Lock 释放。横竖屏、PiP、纯音频和锁屏组合仍按矩阵继续 |

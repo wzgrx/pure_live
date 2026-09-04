@@ -71,6 +71,10 @@ Windows 部署参考：[Flutter Windows 构建与 ZIP 部署说明](https://docs
 - K90 Pro / Android 17 覆盖安装后在共享轮转 cycle 200 完成冷启动、远端弹幕、
   画质/线路、纯音频往返、系统 PiP、恢复后弹幕 UI 与返回，14/14 门禁通过且无
   FATAL/ANR。证据：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json`。
+- 新增 `tool/android_danmaku_filter_settings_smoke.ps1`，在共享轮转 cycle 203 对最终 APK
+  打开真实直播间的“屏蔽管理”：平台分组、斗鱼开关、风险说明及相似过滤分组全部可见；
+  斗鱼开关即时切换并恢复原值，相似过滤状态全程不受影响。证据：
+  `local-artifacts/diagnostics/android-danmaku-filter-settings-20260905T035024190/summary.json`。
 
 ## 本轮边界
 

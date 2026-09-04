@@ -13,7 +13,9 @@ param(
     [ValidatePattern('^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$')]
     [string] $Scenario = 'runtime',
 
-    [string] $OutputDirectory = 'local-artifacts\diagnostics\windows-regression'
+    [string] $OutputDirectory = 'local-artifacts\diagnostics\windows-regression',
+
+    [switch] $IncludeGpu
 )
 
 $ErrorActionPreference = 'Stop'
@@ -64,7 +66,8 @@ function Get-MetricSummary {
         [string] $Property
     )
 
-    $values = @($Samples | ForEach-Object { [double]$_.$Property })
+    $usableSamples = @($Samples | Where-Object { $null -ne $_.$Property })
+    $values = @($usableSamples | ForEach-Object { [double]$_.$Property })
     if ($values.Count -eq 0) { return $null }
     return [ordered]@{
         first = $values[0]
@@ -73,8 +76,67 @@ function Get-MetricSummary {
         maximum = [double](($values | Measure-Object -Maximum).Maximum)
         average = [Math]::Round([double](($values | Measure-Object -Average).Average), 4)
         p95 = [Math]::Round((Get-Percentile -Values $values -Percentile 0.95), 4)
-        slope_per_minute = [Math]::Round((Get-LinearSlopePerMinute -Samples $Samples -Property $Property), 4)
+        slope_per_minute = [Math]::Round((Get-LinearSlopePerMinute -Samples $usableSamples -Property $Property), 4)
     }
+}
+
+function Get-GpuSnapshot {
+    param(
+        [Parameter(Mandatory = $true)][int] $ProcessId,
+        [Parameter(Mandatory = $true)][string] $EngineCounterPath,
+        [string[]] $MemoryCounterPaths = @()
+    )
+
+    $result = [ordered]@{
+        EngineSumPercent = $null
+        ThreeDPercent = $null
+        VideoDecodePercent = $null
+        VideoProcessingPercent = $null
+        CopyPercent = $null
+        DedicatedMiB = $null
+        SharedMiB = $null
+    }
+    try {
+        $engineSamples = @(
+            (Get-Counter -Counter $EngineCounterPath -ErrorAction Stop).CounterSamples |
+                Where-Object { $_.InstanceName -match "^pid_${ProcessId}_" }
+        )
+        if ($engineSamples.Count -gt 0) {
+            $sum = {
+                param([object[]] $Items)
+                if ($Items.Count -eq 0) { return 0.0 }
+                return [double](($Items | Measure-Object -Property CookedValue -Sum).Sum)
+            }
+            $result.EngineSumPercent = & $sum $engineSamples
+            $result.ThreeDPercent = & $sum @($engineSamples | Where-Object { $_.InstanceName -match '_engtype_3d$' })
+            $result.VideoDecodePercent = & $sum @(
+                $engineSamples | Where-Object { $_.InstanceName -match '_engtype_(videodecode|video codec)$' }
+            )
+            $result.VideoProcessingPercent = & $sum @(
+                $engineSamples | Where-Object { $_.InstanceName -match '_engtype_videoprocessing$' }
+            )
+            $result.CopyPercent = & $sum @($engineSamples | Where-Object { $_.InstanceName -match '_engtype_copy$' })
+        }
+
+        if ($MemoryCounterPaths.Count -gt 0) {
+            $memorySamples = @(
+                (Get-Counter -Counter $MemoryCounterPaths -ErrorAction Stop).CounterSamples |
+                    Where-Object { $_.InstanceName -match "^pid_${ProcessId}_" }
+            )
+            $dedicated = @($memorySamples | Where-Object { $_.Path -match '\\Dedicated Usage$' })
+            $shared = @($memorySamples | Where-Object { $_.Path -match '\\Shared Usage$' })
+            if ($dedicated.Count -gt 0) {
+                $result.DedicatedMiB = [double](($dedicated | Measure-Object -Property CookedValue -Sum).Sum) / 1MB
+            }
+            if ($shared.Count -gt 0) {
+                $result.SharedMiB = [double](($shared | Measure-Object -Property CookedValue -Sum).Sum) / 1MB
+            }
+        }
+    } catch {
+        # GPU counters are optional diagnostic evidence. Preserve the CPU/RAM
+        # run and record the missing samples instead of fabricating zero load.
+    }
+    return [pscustomobject]$result
 }
 
 $initialProcess = Get-Process -Id $TargetProcessId -ErrorAction Stop
@@ -96,6 +158,35 @@ $previousCpuSeconds = [double]$initialProcess.CPU
 $previousElapsed = 0.0
 $processExitObserved = $false
 $plannedSampleCount = [Math]::Floor($DurationSeconds / $IntervalSeconds) + 1
+$gpuEngineCounterPath = $null
+[string[]] $gpuMemoryCounterPaths = @()
+if ($IncludeGpu) {
+    try {
+        $gpuEngineCounterPath = (Get-Counter -ListSet 'GPU Engine' -ErrorAction Stop).Paths |
+            Where-Object { $_ -match '\\Utilization Percentage$' } |
+            Select-Object -First 1
+        $gpuMemoryCounterPaths = @(
+            (Get-Counter -ListSet 'GPU Process Memory' -ErrorAction Stop).Paths |
+                Where-Object { $_ -match '\\(Dedicated|Shared) Usage$' }
+        )
+    } catch {
+        $gpuEngineCounterPath = $null
+        $gpuMemoryCounterPaths = @()
+    }
+}
+$displayAdapters = @(
+    Get-CimInstance -ClassName Win32_VideoController -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            [ordered]@{
+                name = $_.Name
+                driver_version = $_.DriverVersion
+                current_width = $_.CurrentHorizontalResolution
+                current_height = $_.CurrentVerticalResolution
+                current_refresh_hz = $_.CurrentRefreshRate
+                video_mode = $_.VideoModeDescription
+            }
+        }
+)
 
 for ($sampleIndex = 0; $sampleIndex -lt $plannedSampleCount; $sampleIndex++) {
     if ($sampleIndex -gt 0) {
@@ -124,6 +215,15 @@ for ($sampleIndex = 0; $sampleIndex -lt $plannedSampleCount; $sampleIndex++) {
         0.0
     }
 
+    $gpu = if ($IncludeGpu -and $gpuEngineCounterPath) {
+        Get-GpuSnapshot `
+            -ProcessId $TargetProcessId `
+            -EngineCounterPath $gpuEngineCounterPath `
+            -MemoryCounterPaths $gpuMemoryCounterPaths
+    } else {
+        $null
+    }
+
     $samples.Add([pscustomobject][ordered]@{
         timestamp_utc = [DateTime]::UtcNow.ToString('o')
         elapsed_seconds = [Math]::Round($elapsed, 3)
@@ -137,6 +237,13 @@ for ($sampleIndex = 0; $sampleIndex -lt $plannedSampleCount; $sampleIndex++) {
         threads = [int]$process.Threads.Count
         io_read_mib = [Math]::Round($readTransferCount / 1MB, 4)
         io_write_mib = [Math]::Round($writeTransferCount / 1MB, 4)
+        gpu_engine_sum_percent = if ($null -ne $gpu -and $null -ne $gpu.EngineSumPercent) { [Math]::Round($gpu.EngineSumPercent, 4) } else { $null }
+        gpu_3d_percent = if ($null -ne $gpu -and $null -ne $gpu.ThreeDPercent) { [Math]::Round($gpu.ThreeDPercent, 4) } else { $null }
+        gpu_video_decode_percent = if ($null -ne $gpu -and $null -ne $gpu.VideoDecodePercent) { [Math]::Round($gpu.VideoDecodePercent, 4) } else { $null }
+        gpu_video_processing_percent = if ($null -ne $gpu -and $null -ne $gpu.VideoProcessingPercent) { [Math]::Round($gpu.VideoProcessingPercent, 4) } else { $null }
+        gpu_copy_percent = if ($null -ne $gpu -and $null -ne $gpu.CopyPercent) { [Math]::Round($gpu.CopyPercent, 4) } else { $null }
+        gpu_dedicated_mib = if ($null -ne $gpu -and $null -ne $gpu.DedicatedMiB) { [Math]::Round($gpu.DedicatedMiB, 4) } else { $null }
+        gpu_shared_mib = if ($null -ne $gpu -and $null -ne $gpu.SharedMiB) { [Math]::Round($gpu.SharedMiB, 4) } else { $null }
     })
 
     $previousCpuSeconds = $cpuSeconds
@@ -164,6 +271,9 @@ $summary = [ordered]@{
     interval_seconds = $IntervalSeconds
     sample_count = $samples.Count
     logical_processors = $logicalProcessors
+    display_adapters = $displayAdapters
+    gpu_sampling_requested = [bool]$IncludeGpu
+    gpu_counter_available = [bool]$gpuEngineCounterPath
     all_samples_responding = $allResponding
     process_exit_observed = $processExitObserved
     metrics = [ordered]@{
@@ -174,6 +284,13 @@ $summary = [ordered]@{
         threads = Get-MetricSummary -Samples $samples -Property 'threads'
         io_read_mib = Get-MetricSummary -Samples $samples -Property 'io_read_mib'
         io_write_mib = Get-MetricSummary -Samples $samples -Property 'io_write_mib'
+        gpu_engine_sum_percent = Get-MetricSummary -Samples $samples -Property 'gpu_engine_sum_percent'
+        gpu_3d_percent = Get-MetricSummary -Samples $samples -Property 'gpu_3d_percent'
+        gpu_video_decode_percent = Get-MetricSummary -Samples $samples -Property 'gpu_video_decode_percent'
+        gpu_video_processing_percent = Get-MetricSummary -Samples $samples -Property 'gpu_video_processing_percent'
+        gpu_copy_percent = Get-MetricSummary -Samples $samples -Property 'gpu_copy_percent'
+        gpu_dedicated_mib = Get-MetricSummary -Samples $samples -Property 'gpu_dedicated_mib'
+        gpu_shared_mib = Get-MetricSummary -Samples $samples -Property 'gpu_shared_mib'
     }
     csv_path = [IO.Path]::GetFullPath($csvPath)
 }

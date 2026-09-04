@@ -223,7 +223,7 @@ Windows 阶段复用 A2–A8 的公共业务案例，并补充桌面特有检查
 ### W4 — Windows 性能、故障和长测
 
 - [ ] WIN-PERF-01 首页静置 15 分钟、列表连续滚动 5 分钟、播放+弹幕 30 分钟、录制 30 分钟、小窗 15 分钟。
-- [ ] WIN-PERF-02 每 5 秒记录 working set/private bytes/handles/threads/GPU/CPU；退出直播后观察 60 秒回落。
+- [ ] WIN-PERF-02 每 5 秒记录 working set/private bytes/handles/threads/GPU/CPU；退出直播后观察 60 秒回落。使用 `tool/sample_windows_runtime.ps1 -IncludeGpu` 同时采集进程 GPU engine sum、3D、Video Decode、Video Processing、Copy、独显/共享显存，以及显卡驱动、当前分辨率和刷新率；计数器不可用时记录 `null`，不把缺失数据伪装成 0。GPU engine sum 是多个引擎/适配器实例之和，允许超过 100%，判读时必须同时查看分项。
 - [ ] WIN-PERF-03 A/B 房间切换 20 次、全屏/小窗 20 次、打开关闭二级页 50 次；资源不线性增长。
 - [ ] WIN-FAULT-01 断网、代理错误、DNS/超时、流断开、窗口失焦、显示器休眠恢复；状态可解释且可恢复。
 - [ ] WIN-SOAK-01 1–2 小时综合长测：播放、弹幕、定时切模式、短录制、网络抖动；若趋势提前稳定可按计划提前结束。

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:floating/floating.dart';
 
 import 'package:flutter/material.dart';
+import 'package:pure_live/common/services/settings_service.dart';
+import 'package:pure_live/common/services/settings/player_settings_controller.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -28,6 +30,61 @@ void main() {
   });
 
   tearDown(Get.reset);
+
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    testWidgets('app floating controls can be revealed and closed after timeout on $platform', (tester) async {
+      Get.put<SettingsService>(_FloatingSettings());
+      final manager = _createManager(_FakePlayer());
+      await manager.initialize(engine: PlayerEngine.mediaKit);
+      await tester.pumpWidget(GetMaterialApp(home: const Scaffold(body: SizedBox.expand())));
+      await tester.pump();
+      manager.prepareAppFloating(onClose: () async {});
+      manager.showAppFloating();
+      await tester.pump();
+      expect(manager.isFloating.value, isTrue);
+      expect(find.byIcon(Icons.close).hitTestable(), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(manager.isHovered.value, isFalse);
+      expect(find.byIcon(Icons.close).hitTestable(), findsNothing);
+      // A hidden button's position belongs to the reveal surface, not stop.
+      await tester.tapAt(tester.getCenter(find.byIcon(Icons.close)));
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(manager.isFloating.value, isTrue);
+      expect(manager.isHovered.value, isTrue);
+      expect(find.byIcon(Icons.close).hitTestable(), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump();
+      expect(manager.isFloating.value, isFalse);
+      expect(find.byIcon(Icons.close), findsNothing);
+      await tester.runAsync(() => manager.dispose().timeout(const Duration(seconds: 2)));
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    }, variant: TargetPlatformVariant({platform}));
+  }
+
+  testWidgets('closing app floating cancels its control timer before the next presentation', (tester) async {
+    Get.put<SettingsService>(_FloatingSettings());
+    final manager = _createManager(_FakePlayer());
+    await manager.initialize(engine: PlayerEngine.mediaKit);
+    await tester.pumpWidget(GetMaterialApp(home: const Scaffold(body: SizedBox.expand())));
+    await tester.pump();
+    manager.prepareAppFloating(onClose: () async {});
+    manager.showAppFloating();
+    await tester.pump();
+    final closing = manager.closeAppFloating();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    await tester.pump();
+    await _pumpFloatingCleanup(tester, closing);
+    manager.isHovered.value = true;
+    await tester.pump(const Duration(seconds: 4));
+    expect(manager.isHovered.value, isTrue, reason: 'A retired overlay must not hide controls in a new presentation.');
+    await tester.runAsync(() => manager.dispose().timeout(const Duration(seconds: 2)));
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: TargetPlatformVariant({TargetPlatform.android}));
 
   test('warm room re-entry restarts exactly one Android PiP observer', () async {
     final player = _FakePlayer();
@@ -1017,6 +1074,42 @@ PlayerManager _createManager(
     audioModeServiceSync: audioModeServiceSync,
     audioSessionStart: audioSessionStart,
   );
+}
+
+Future<void> _pumpFloatingCleanup(WidgetTester tester, Future<void> cleanup) async {
+  var completed = false;
+  final result = cleanup.whenComplete(() => completed = true);
+  // Teardown explicitly fences two frames. Advance the fake widget clock
+  // while awaiting it rather than deadlocking on a frame the test never pumps.
+  for (var frame = 0; frame < 20 && !completed; frame++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+  expect(completed, isTrue, reason: 'Floating cleanup must finish within bounded frame fences.');
+  await result;
+}
+
+class _FloatingSettings extends SettingsService {
+  @override
+  final player = _FloatingPlayerSettings();
+  @override
+  // The widget fixture uses no disk-backed settings or service startup.
+  // ignore: must_call_super
+  void onInit() {}
+}
+
+class _FloatingPlayerSettings implements PlayerSettingsController {
+  @override
+  final videoFitIndex = 0.obs;
+  @override
+  final enablePortraitStreamAdaptation = true.obs;
+  @override
+  final portraitPipFollowSource = true.obs;
+  @override
+  List<BoxFit> get videoFitArray => const [BoxFit.contain];
+  @override
+  PortraitOrientationOverride portraitOverrideForRoom(LiveRoom? room) => PortraitOrientationOverride.automatic;
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeAndroidFloating implements Floating {

@@ -1,7 +1,9 @@
 import 'dart:ui' as ui;
+
 import '../../get.dart';
 import 'root/get_root.dart';
 import 'dialog/dialog_route.dart';
+
 import 'package:flutter/material.dart';
 import 'package:pure_live/common/style/app_text_styles.dart';
 import 'package:pure_live/get/get_navigation/src/routes/test_kit.dart';
@@ -584,9 +586,8 @@ extension GetNavigationExt on GetInterface {
       page = uri.toString();
     }
 
-    return searchDelegate(
-      id,
-    ).toNamed(page, arguments: arguments, id: id, preventDuplicates: preventDuplicates, parameters: parameters);
+    return searchDelegate(id)
+        .toNamed(page, arguments: arguments, id: id, preventDuplicates: preventDuplicates, parameters: parameters);
   }
 
   /// **Navigation.pushReplacementNamed()** shortcut.<br><br>
@@ -672,9 +673,8 @@ extension GetNavigationExt on GetInterface {
       page = uri.toString();
     }
 
-    return searchDelegate(
-      id,
-    ).offNamedUntil<T>(page, predicate: predicate, id: id, arguments: arguments, parameters: parameters);
+    return searchDelegate(id)
+        .offNamedUntil<T>(page, predicate: predicate, id: id, arguments: arguments, parameters: parameters);
   }
 
   /// **Navigation.popAndPushNamed()** shortcut.<br><br>
@@ -1138,11 +1138,23 @@ extension GetNavigationExt on GetInterface {
 
   /// give access to current Overlay Context
   BuildContext? get overlayContext {
-    BuildContext? overlay;
-    key.currentState?.overlay?.context.visitChildElements((element) {
-      overlay = element;
-    });
-    return overlay;
+    final target = key.currentState?.overlay;
+    if (target == null || !target.mounted) return null;
+    BuildContext? result;
+    void findEntryContext(Element element) {
+      if (result != null) return;
+      // New Flutter overlays resolve through an entry's inherited marker.
+      // The Overlay's immediate _Theater child is outside that marker, so
+      // returning the first child breaks Overlay.of despite a live Navigator.
+      if (identical(Overlay.maybeOf(element), target)) {
+        result = element;
+        return;
+      }
+      element.visitChildElements(findEntryContext);
+    }
+
+    target.context.visitChildElements(findEntryContext);
+    return result;
   }
 
   /// give access to Theme.of(context)

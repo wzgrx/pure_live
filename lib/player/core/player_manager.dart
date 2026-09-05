@@ -12,6 +12,7 @@ import 'engine_fallback_manager.dart';
 import 'playback_lifecycle_coordinator.dart';
 
 import 'package:floating/floating.dart';
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/scheduler.dart';
 
 import '../models/player_exception.dart';
@@ -2316,9 +2317,12 @@ class PlayerManager {
     floatingManager.disposeFloating(_floatTag);
     _hideTimer?.cancel();
     final maxSide = Platform.isWindows ? 350.0 : 220.0;
+    // This selects Flutter interaction behavior, not a native platform API.
+    final touchControls =
+        defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
 
     void resetHideTimer() {
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (touchControls) {
         _hideTimer?.cancel();
         _hideTimer = Timer(const Duration(seconds: 3), () {
           isHovered.value = false;
@@ -2332,10 +2336,10 @@ class PlayerManager {
       FloatingOverlay(
         MouseRegion(
           onEnter: (_) {
-            if (Platform.isWindows || Platform.isMacOS) isHovered.value = true;
+            if (!touchControls && (Platform.isWindows || Platform.isMacOS)) isHovered.value = true;
           },
           onExit: (_) {
-            if (Platform.isWindows || Platform.isMacOS) isHovered.value = false;
+            if (!touchControls && (Platform.isWindows || Platform.isMacOS)) isHovered.value = false;
           },
           child: Obx(() {
             // The overlay is created before late decoder/frame evidence may
@@ -2371,7 +2375,7 @@ class PlayerManager {
                         // revealed again without racing the three-second
                         // timer.  Match native PiP behaviour: the first tap
                         // reveals controls; a second tap resumes the room.
-                        if ((Platform.isAndroid || Platform.isIOS) && !isHovered.value) {
+                        if (touchControls && !isHovered.value) {
                           isHovered.value = true;
                           resetHideTimer();
                           return;
@@ -2448,7 +2452,7 @@ class PlayerManager {
       ),
     );
     final overlay = floatingManager.getFloating(_floatTag);
-    final overlayContext = Get.overlayContext ?? Get.context;
+    final overlayContext = Get.overlayContext;
     if (overlayContext != null) {
       overlay.open(overlayContext);
     }
@@ -2461,13 +2465,15 @@ class PlayerManager {
       return;
     }
     isFloating.value = true;
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (touchControls) {
       isHovered.value = true;
       resetHideTimer();
     }
   }
 
   Future<void> closeAppFloating() async {
+    _hideTimer?.cancel();
+    _hideTimer = null;
     final cleanupInFlight = _floatingCleanup;
     if (cleanupInFlight != null) {
       await cleanupInFlight;

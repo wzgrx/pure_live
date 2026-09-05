@@ -20,7 +20,10 @@ enum PiPStatus {
 /// Support for other platforms is not planned.
 class Floating {
   final _channel = const MethodChannel('floating');
-  final _controller = StreamController<PiPStatus>();
+  late final _controller = StreamController<PiPStatus>.broadcast(
+    onListen: _scheduleProbe,
+    onCancel: _stopPolling,
+  );
   // Method-channel polling every 10 ms caused continuous work even while PiP
   // was idle. 100 ms remains responsive while removing most of that UI-thread
   // and platform-channel pressure.
@@ -34,16 +37,18 @@ class Floating {
   Timer? _timer;
   Stream<PiPStatus>? _stream;
   bool? _isPipAvailable;
+  int _observationGeneration = 0;
+  bool _probeInFlight = false;
+  bool _probeFailureReported = false;
 
   static final _singleton = Floating._internal();
 
   @visibleForTesting
   void reset() {
     lastEnableArguments = null;
-    _timer?.cancel();
-    _timer = null;
-    _stream = null;
+    _stopPolling();
     _isPipAvailable = null;
+    _scheduleProbe();
   }
 
   /// Facilities Floating singleton access.
@@ -89,20 +94,55 @@ class Floating {
 
   // Notifies about changes of the PiP mode.
   //
-  // PiP state is probed, by default in the 100 milliseconds interval.
-  // The probing interval can be configured in the constructor.
+  // Poll only while observed, with at most one native request in flight.
+  // Delay the next probe until the previous one finishes, rather than stacking
+  // async Timer callbacks when the platform thread is busy.
   //
   // This stream will call listeners only when the value changed.
   Stream<PiPStatus> get pipStatusStream {
-    _timer ??= Timer.periodic(_probeInterval, (_) async {
-      final currentStatus = await pipStatus;
-      if (_controller.isClosed) {
-        return;
-      }
-      _controller.add(currentStatus);
+    return _stream ??= _controller.stream.distinct();
+  }
+
+  void _stopPolling() {
+    _observationGeneration++;
+    _timer?.cancel();
+    _timer = null;
+    _probeFailureReported = false;
+  }
+
+  void _scheduleProbe() {
+    if (!_controller.hasListener || _timer != null || _probeInFlight) return;
+    _timer = Timer(_probeInterval, () {
+      _timer = null;
+      unawaited(_probeStatus());
     });
-    _stream ??= _controller.stream.asBroadcastStream();
-    return _stream!.distinct();
+  }
+
+  Future<void> _probeStatus() async {
+    if (!_controller.hasListener || _probeInFlight) return;
+    final generation = _observationGeneration;
+    _probeInFlight = true;
+    try {
+      final status = await pipStatus;
+      if (generation == _observationGeneration && _controller.hasListener) {
+        _probeFailureReported = false;
+        _controller.add(status);
+      }
+    } catch (error) {
+      // A failed observation is not a disabled PiP state. Keep the last valid
+      // presentation, report once per failure stretch, and retry normally.
+      if (generation == _observationGeneration &&
+          _controller.hasListener &&
+          !_probeFailureReported) {
+        _probeFailureReported = true;
+        debugPrint('Floating PiP status observation failed: $error');
+      }
+    } finally {
+      _probeInFlight = false;
+      // A listener may have rejoined while the retired request was pending.
+      // Its old result is discarded; the new observation still gets scheduled.
+      _scheduleProbe();
+    }
   }
 
   /// Turns on PiP mode.
@@ -158,7 +198,10 @@ class Floating {
   /// Updates an active PiP window after the decoded programme geometry changes.
   /// Android recommends publishing parameters as soon as the source ratio is
   /// known instead of leaving the system window at its entry-time shape.
-  Future<void> update({required Rational aspectRatio, Rectangle<int>? sourceRectHint}) async {
+  Future<void> update({
+    required Rational aspectRatio,
+    Rectangle<int>? sourceRectHint,
+  }) async {
     if (!aspectRatio.fitsInAndroidRequirements) {
       throw RationalNotMatchingAndroidRequirementsException(aspectRatio);
     }

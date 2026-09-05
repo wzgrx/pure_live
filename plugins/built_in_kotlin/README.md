@@ -13,7 +13,7 @@ Kotlin Gradle Plugin, which conflicts with AGP 9 Built-in Kotlin.
 | `mobile_scanner` | 7.4.0 | <https://github.com/juliansteenbakker/mobile_scanner> |
 | `share_handler_android` | 0.0.11 | <https://github.com/AboutShout/share_handler> |
 
-The patch only modernizes Android build integration:
+The baseline patches modernize Android build integration:
 
 - removes `kotlin-android`/`org.jetbrains.kotlin.android` and KGP classpaths;
 - lets AGP provide Kotlin compilation and the Kotlin standard library;
@@ -23,4 +23,16 @@ The patch only modernizes Android build integration:
 
 Original licenses, source metadata and changelogs are preserved in each package.
 When an upstream release gains AGP 9 Built-in Kotlin support, replace its path
-dependency with the hosted release and remove the corresponding snapshot.
+dependency with the hosted release only after reviewing local runtime changes,
+then remove the corresponding snapshot.
+
+## Additional floating runtime changes
+
+`floating` also contains the maintained 100 ms status-probe interval, active PiP
+geometry updates, and listener-owned single-flight status observation. Queries
+stop with the last listener; replies from a retired observation are discarded.
+Transient query failures retain the last known presentation and log once per
+failure stretch. These are runtime changes, not merely Kotlin migration edits.
+Preserve or explicitly replace them when changing the dependency source. See
+`docs/PIP_STATUS_OBSERVATION_AUDIT_2026_09_06.md` and
+`test/floating_status_lifecycle_test.dart` in the repository root.

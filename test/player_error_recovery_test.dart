@@ -1756,6 +1756,124 @@ void main() {
     await manager.dispose();
   }, skip: !Platform.isWindows);
 
+  for (final result in ['fresh-url', 'empty', 'failure']) {
+    test('media recovery during a dispatched backoff resolver cancels its $result result', () async {
+      final active = _FrameProgressFakePlayer();
+      final resolvingRetry = Completer<void>();
+      final releaseResolver = Completer<void>();
+      var creations = 0;
+      var resolverCalls = 0;
+      final manager = _manager(
+        <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+        videoFrameStallTimeout: Duration.zero,
+        bufferingStallTimeout: Duration.zero,
+        transientLiveRetryDelays: const [Duration(milliseconds: 12)],
+        playerCreator: (_) {
+          if (creations++ == 0) return active;
+          return _RecoveryFakePlayer(
+            PlayerEngine.mediaKit,
+            (_) => PlayerException(message: 'replacement TLS failure', type: PlayerErrorType.source),
+          );
+        },
+      );
+      manager.configureDefaultEngine(PlayerEngine.mediaKit);
+      final loading = <bool>[];
+      final subscription = manager.onLoading.listen(loading.add);
+      try {
+        await manager.play(
+          'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100',
+          const ['https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100'],
+          const {},
+          room: LiveRoom(roomId: 'native-backoff-recovery', platform: 'huya'),
+          sourceResolver: (_) async {
+            resolverCalls++;
+            if (resolverCalls == 1) return const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0);
+            if (!resolvingRetry.isCompleted) resolvingRetry.complete();
+            await releaseResolver.future;
+            if (result == 'failure') throw StateError('late resolver failure');
+            return PlaybackSourceRefreshResult(
+              urls: result == 'empty' ? const [] : const ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+              preferredLineIndex: 0,
+            );
+          },
+        );
+        active.emitError(PlayerException(message: 'network interruption', type: PlayerErrorType.network));
+        await resolvingRetry.future.timeout(const Duration(seconds: 2));
+        final creationsBeforeRecovery = creations;
+        final opensBeforeRecovery = active.openedUrls.length;
+        // The timer has already fired: only its native operation is waiting.
+        active.emitFrame();
+        releaseResolver.complete();
+        await Future<void>.delayed(const Duration(milliseconds: 60));
+        expect(creations, creationsBeforeRecovery, reason: 'a recovered renderer must retain native ownership');
+        expect(active.openedUrls.length, opensBeforeRecovery, reason: 'late retry must not reopen the active stream');
+        expect(manager.currentPlayer, same(active));
+        expect(manager.isPlayingNow, isTrue);
+        expect(loading.last, isFalse);
+        expect(manager.hasError.value, isFalse);
+        if (result == 'empty') {
+          final callsBeforeNewFailure = resolverCalls;
+          active.emitError(PlayerException(message: 'network interruption', type: PlayerErrorType.network));
+          final deadline = DateTime.now().add(const Duration(milliseconds: 300));
+          while (resolverCalls == callsBeforeNewFailure && DateTime.now().isBefore(deadline)) {
+            await Future<void>.delayed(const Duration(milliseconds: 5));
+          }
+          expect(
+            resolverCalls,
+            greaterThan(callsBeforeNewFailure),
+            reason: 'a later real failure keeps its recovery path',
+          );
+        }
+      } finally {
+        if (!releaseResolver.isCompleted) releaseResolver.complete();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        await subscription.cancel();
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
+
+  test('duplicate native failures do not cancel the pending bounded retry', () async {
+    final active = _FrameProgressFakePlayer();
+    var creations = 0;
+    var resolverCalls = 0;
+    final retryEntered = Completer<void>();
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+      videoFrameStallTimeout: Duration.zero,
+      bufferingStallTimeout: Duration.zero,
+      transientLiveRetryDelays: const [Duration(milliseconds: 40)],
+      playerCreator: (_) => creations++ == 0
+          ? active
+          : _RecoveryFakePlayer(
+              PlayerEngine.mediaKit,
+              (_) => PlayerException(message: 'replacement TLS failure', type: PlayerErrorType.source),
+            ),
+    );
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    try {
+      await manager.play(
+        'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100',
+        const ['https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100'],
+        const {},
+        room: LiveRoom(roomId: 'native-duplicate-error', platform: 'huya'),
+        sourceResolver: (_) async {
+          if (++resolverCalls >= 2 && !retryEntered.isCompleted) retryEntered.complete();
+          return const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0);
+        },
+      );
+      // Both events belong to the same failed source. The second one waits in
+      // the lifecycle queue until the first schedules its backoff timer.
+      final error = PlayerException(message: 'repeated native network error', type: PlayerErrorType.network);
+      active.emitError(error);
+      active.emitError(error);
+      await Future.any<void>([retryEntered.future, Future<void>.delayed(const Duration(milliseconds: 500))]);
+      expect(retryEntered.isCompleted, isTrue, reason: 'deduplication must have no recovery-cancelling side effects');
+    } finally {
+      await manager.dispose();
+    }
+  }, skip: !Platform.isWindows);
+
   test('continuous presented frames keep the live renderer healthy', () async {
     final first = _FrameProgressFakePlayer();
     final replacement = _FrameProgressFakePlayer();

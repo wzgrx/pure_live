@@ -141,6 +141,9 @@ class PlayerManager {
   PlaybackSourceResolver? _sourceRefreshResolver;
   Timer? _sourceRefreshAttemptResetTimer;
   Timer? _transientLiveRetryTimer;
+  // A timer can finish while its queued resolver/candidate still owns work.
+  // Keep the operation alive until commit, cancellation or async completion.
+  _PendingPlayerError? _transientLiveRetryOwner;
   int _transientLiveRetryRevision = 0;
   Timer? _proactiveSourceRefreshTimer;
   DateTime? _currentSourceRefreshAt;
@@ -1842,6 +1845,7 @@ class PlayerManager {
     _transientLiveRetryRevision++;
     _transientLiveRetryTimer?.cancel();
     _transientLiveRetryTimer = null;
+    _transientLiveRetryOwner = null;
   }
 
   void _cancelVideoFrameStallRecovery() {
@@ -1947,8 +1951,12 @@ class PlayerManager {
     // A real presented frame is authoritative recovery evidence. If the native
     // transport recovered by itself during a backoff window, do not disrupt it
     // with an unnecessary source reopen.
-    if (_transientLiveRetryTimer != null) {
+    final retry = _transientLiveRetryOwner;
+    if (retry != null) {
       _cancelTransientLiveRetry();
+      // A future independent interruption in this same source generation is
+      // not a duplicate of the attempt that real media progress just retired.
+      _errorDedupeSignatures.remove('${retry.error.type.name}:${retry.error.code ?? '-'}:${retry.error.message}');
       _playingSubject.add(true);
       _loadingSubject.add(false);
       _stateSubject.add(PlayerState.playing);
@@ -2916,6 +2924,13 @@ class PlayerManager {
     if (_disposed || _isClosing) return;
     final mySessionId = sessionId ?? _sessionId;
     if (!_isSessionValid(mySessionId)) return;
+    final request = _PendingPlayerError(error: error, sessionId: mySessionId);
+    // Reject duplicates before touching any watchdog or backoff owner. Native
+    // layers can repeat the same failure after its first recovery was queued.
+    if (!_registerPlayerError(request)) {
+      log('skip duplicated source-generation error: ${error.message}', name: 'PlayerManager');
+      return;
+    }
     _cancelContinuityRecovery();
     _cancelVideoFrameStallRecovery();
     _cancelTransientLiveRetry();
@@ -2925,11 +2940,6 @@ class PlayerManager {
     _sourceReadyTimer?.cancel();
     _sourceReadyTimer = null;
 
-    final request = _PendingPlayerError(error: error, sessionId: mySessionId);
-    if (!_registerPlayerError(request)) {
-      log('skip duplicated source-generation error: ${error.message}', name: 'PlayerManager');
-      return;
-    }
     if (_isHandlingError) {
       // A replacement line/engine can fail synchronously while the previous
       // recovery is still on the stack. Dropping that event left the second
@@ -3165,65 +3175,68 @@ class PlayerManager {
     final expectedSessionId = _sessionId;
     final expectedIntentRevision = _playbackIntentRevision;
     final expectedRoom = currentFloatRoom;
+    final expectedPlayer = _currentPlayer;
     final revision = ++_transientLiveRetryRevision;
     _transientLiveRetryTimer?.cancel();
+    _transientLiveRetryOwner = _PendingPlayerError(error: error, sessionId: expectedSessionId);
     hasError.value = false;
     _loadingSubject.add(true);
     _stateSubject.add(PlayerState.buffering);
     log('Immediate live recovery exhausted; retrying after ${delay.inMilliseconds} ms', name: 'PlayerManager');
 
+    bool isStillRequired() =>
+        revision == _transientLiveRetryRevision &&
+        !_disposed &&
+        !_isClosing &&
+        _playbackRequested &&
+        _playbackSuspensions.isEmpty &&
+        _playbackIntentRevision == expectedIntentRevision &&
+        _sessionId == expectedSessionId &&
+        identical(_currentPlayer, expectedPlayer) &&
+        currentFloatRoom == expectedRoom;
+
     _transientLiveRetryTimer = Timer(delay, () {
       _transientLiveRetryTimer = null;
-      if (revision != _transientLiveRetryRevision ||
-          _disposed ||
-          _isClosing ||
-          !_playbackRequested ||
-          _playbackSuspensions.isNotEmpty ||
-          _playbackIntentRevision != expectedIntentRevision ||
-          _sessionId != expectedSessionId ||
-          currentFloatRoom != expectedRoom) {
+      if (!isStillRequired()) {
+        if (revision == _transientLiveRetryRevision) _transientLiveRetryOwner = null;
         return;
       }
       unawaited(
         _enqueuePlayerLifecycle(() async {
-          if (revision != _transientLiveRetryRevision ||
-              _disposed ||
-              _isClosing ||
-              !_playbackRequested ||
-              _playbackSuspensions.isNotEmpty ||
-              _playbackIntentRevision != expectedIntentRevision ||
-              _sessionId != expectedSessionId ||
-              currentFloatRoom != expectedRoom) {
-            return;
-          }
+              if (!isStillRequired()) return;
 
-          // A new recovery round receives fresh bounded line/engine budgets.
-          // The delayed-round budget itself remains monotonic until sustained
-          // playback proves the transport healthy again.
-          _sameEngineRecoveryAttempts = 0;
-          _sourceRefreshAttempts = 0;
-          _prefetchedSourceRefresh = null;
-          lineManager.reset();
-          fallbackManager.resetAll();
+              // A new recovery round receives fresh bounded line/engine budgets.
+              // The delayed-round budget itself remains monotonic until sustained
+              // playback proves the transport healthy again.
+              _sameEngineRecoveryAttempts = 0;
+              _sourceRefreshAttempts = 0;
+              _prefetchedSourceRefresh = null;
+              lineManager.reset();
+              fallbackManager.resetAll();
 
-          if (await _tryRefreshSignedPlaybackSource()) return;
-          final retryUrl = _currentUrl;
-          if (retryUrl == null || retryUrl.isEmpty) return;
-          await _playInternal(
-            retryUrl,
-            _currentPlayUrls,
-            _currentHeaders,
-            room: currentFloatRoom,
-            audioOnly: _runtimeAudioOnly,
-          );
-        }).catchError((Object retryError, StackTrace stackTrace) {
-          log(
-            'Delayed live recovery failed: $retryError',
-            name: 'PlayerManager',
-            error: retryError,
-            stackTrace: stackTrace,
-          );
-        }),
+              if (await _tryRefreshSignedPlaybackSource(isStillRequired: isStillRequired)) return;
+              if (!isStillRequired()) return;
+              final retryUrl = _currentUrl;
+              if (retryUrl == null || retryUrl.isEmpty) return;
+              await _playInternal(
+                retryUrl,
+                _currentPlayUrls,
+                _currentHeaders,
+                room: currentFloatRoom,
+                audioOnly: _runtimeAudioOnly,
+              );
+            })
+            .catchError((Object retryError, StackTrace stackTrace) {
+              log(
+                'Delayed live recovery failed: $retryError',
+                name: 'PlayerManager',
+                error: retryError,
+                stackTrace: stackTrace,
+              );
+            })
+            .whenComplete(() {
+              if (revision == _transientLiveRetryRevision) _transientLiveRetryOwner = null;
+            }),
       );
     });
     return true;

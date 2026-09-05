@@ -44,6 +44,7 @@ def check_workflows(workflows):
         if doc.get('permissions') == 'write-all':
             errors.append(f'{name}: broad permissions')
         push = events.get('push') or {}
+        dispatch_inputs = (events.get('workflow_dispatch') or {}).get('inputs', {})
         for tag in push.get('tags', []):
             tag_owners.setdefault(tag, []).append(name)
         jobs = doc.get('jobs', {})
@@ -58,6 +59,12 @@ def check_workflows(workflows):
                 uses = step.get('uses', '')
                 if uses and not uses.startswith('./') and not re.fullmatch(r'[^@]+@[0-9a-f]{40}', uses):
                     errors.append(f'{name}/{job}: mutable external Action {uses}')
+                script = step.get('run', '')
+                for key in re.findall(r'\$\{\{\s*inputs\.(\w+)\s*\}\}', script):
+                    if dispatch_inputs.get(key, {}).get('type', 'string') == 'string':
+                        errors.append(f'{name}/{job}: string input {key} embedded in script; use env')
+                if re.search(r'\$\{\{[^\n]*\.version_desc\s*\}\}', script):
+                    errors.append(f'{name}/{job}: release description embedded in script; use env')
         visited, visiting = set(), set()
 
         def visit(job):
@@ -138,11 +145,20 @@ def main():
     duplicate['build-ios-unsigned.yml']['on']['push'] = {'tags': ['stage-ios-*']}
     missing_guard = copy.deepcopy(workflows)
     missing_guard['feature-build.yml']['jobs']['linux']['if'] = '${{ always() }}'
-    if not check_workflows(duplicate) or not check_workflows(missing_guard):
+    script_input = copy.deepcopy(workflows)
+    script_input['feature-build.yml']['jobs']['publish-release']['steps'].append({
+        'run': 'echo "${{ inputs.release_tag }}"',
+    })
+    release_text = copy.deepcopy(workflows)
+    release_text['feature-build.yml']['jobs']['publish-release']['steps'].append({
+        'run': "cat <<'EOF'\n${{ fromJson(steps.version.outputs.content).version_desc }}\nEOF",
+    })
+    controls = (duplicate, missing_guard, script_input, release_text)
+    if not all(check_workflows(control) for control in controls):
         errors.append('validator negative controls failed')
     for error in errors:
         print(f'ERROR {error}')
-    print(f'Agent/workflow static audit: {len(entries)} instruction files, {len(workflows)} workflows, {len(errors)} errors; 2 negative controls checked.')
+    print(f'Agent/workflow static audit: {len(entries)} instruction files, {len(workflows)} workflows, {len(errors)} errors; {len(controls)} negative controls checked.')
     return bool(errors)
 
 

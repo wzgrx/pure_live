@@ -29,7 +29,6 @@ Read [BUILD_POLICY.md](BUILD_POLICY.md) before heavy commands. Use [docs/AGENT_W
 
 - Documentation/instruction/config-only work: links, syntax and relevant static policy checks. App analyze/tests/packages are not an automatic next step.
 - Behavior changes: meaningful affected tests; analyze once after Dart changes settle. Broaden or repeat checks only for new edits, failures, unresolved risk or a formal delivery gate.
-- Use `tool/local_ci.ps1 -Scope Focused -TestPath <paths> -Analyze`; `-SkipPubGet` is allowed only under its checked unchanged-lockfile conditions. Formal delivery uses the full gate.
 - Use the SDK pinned in `.fvmrc` through `tool/flutterw.ps1`. Preserve incremental outputs; format changed Dart files only (exclude JS-vendoring `lib/core/scripts/douyin_sign.dart`).
 - Heavy work uses `tool/build_resource_guard.ps1`; one heavy task and one platform/variant at a time. Resource values and cache rules live only in BUILD_POLICY.md.
 - Completed bug-fix batches retain `bugfix-android-release-default` under BUILD_POLICY.md: one Android patch/build release per batch. Analysis-only or explicitly deferred delivery stays within that scope. Ordinary docs work does not trigger a version bump.
@@ -43,4 +42,4 @@ Read [BUILD_POLICY.md](BUILD_POLICY.md) before heavy commands. Use [docs/AGENT_W
 
 ## Completion
 
-Verify the changed behavior and required delivery stages. Report actual outcomes with paths/SHAs where useful. Reuse valid evidence for unchanged code; record a concrete next step for incomplete work. A successful unit test is not a claim of zero runtime bugs.
+Verify the changed behavior and required delivery stages. Report actual outcomes with paths/SHAs where useful; record a concrete next step for incomplete work. A successful unit test is not a claim of zero runtime bugs.

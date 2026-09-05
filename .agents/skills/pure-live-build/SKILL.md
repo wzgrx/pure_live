@@ -11,6 +11,6 @@ Identify the platform, variant and requested delivery stage. Related fixes share
 
 - Quality: `tool/local_ci.ps1`; packaging: `tool/build_local_release.ps1`, one target/configuration. Both own the resource lease; avoid nesting it. Direct heavy commands use `tool/build_resource_guard.ps1`.
 - Resume retries at the failed stage. Reuse app-source quality evidence only under BUILD_POLICY.md's unchanged-input conditions; check an existing run's result before starting another.
-- Verify ABI, assets, 16 KB ELF/alignment, actual APK versionCode, source SHA and the fixed signing certificate using repository scripts. Record command, duration, resources, hashes and paths.
+- Apply only the selected platform/stage checks in BUILD_POLICY.md. Android publication checks include APK content, ABI, 16 KB alignment, Manifest versionCode and release certificate; Windows packaging checks cover its manifest, runtime DLLs and installer. Code-only validation stops before packaging/signing. Record source SHA, commands, results and artifact hashes where applicable.
 
 Root-cause/upstream review belongs to [MAINTENANCE_POLICY.md](../../../MAINTENANCE_POLICY.md) when that work is in scope. A build request by itself does not require reopening a completed upstream audit. Keep source, build, signing, publication and device results distinct.

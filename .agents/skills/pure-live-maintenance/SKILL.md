@@ -14,4 +14,4 @@ Use [MAINTENANCE_POLICY.md](../../../MAINTENANCE_POLICY.md) for provenance and p
 - Actual upstream integration requires [UPSTREAM_REVIEW_POLICY.md](../../../UPSTREAM_REVIEW_POLICY.md)'s semantic change ledger for every incoming commit/file. Read-only comparison is separate from merging.
 - Delivery follows `bugfix-android-release-default` in [BUILD_POLICY.md](../../../BUILD_POLICY.md); retain pending evidence and respect an analysis-only/deferred request.
 
-Phone access is governed by AGENTS.md, not by this skill. Fork Issue feature requests route upstream; that intake policy does not override an explicit development request from the user.
+Device access and Issue intake follow AGENTS.md.

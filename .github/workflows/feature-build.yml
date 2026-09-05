@@ -1337,10 +1337,11 @@ jobs:
 
       - name: Validate release tag
         shell: bash
+        env:
+          TAG: ${{ inputs.release_tag }}
         run: |
           set -euo pipefail
 
-          TAG="${{ inputs.release_tag }}"
 
           if [[ -z "$TAG" ]]; then
             echo "release_tag is required when create_release=true."
@@ -1450,12 +1451,15 @@ jobs:
       - name: Build Release Body
         id: release_body
         shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_DESCRIPTION: ${{ fromJson(steps.version.outputs.content).version_desc }}
         run: |
           set -euo pipefail
 
-          cat << 'EOF' > release_body.txt
+          cat << EOF > release_body.txt
 
-          # 纯粹直播 ${{ inputs.release_tag }}
+          # 纯粹直播 $RELEASE_TAG
 
           |版本|下载地址|
           |---|---|
@@ -1497,7 +1501,7 @@ jobs:
 
           ### 📝 本次更新
 
-          ${{ fromJson(steps.version.outputs.content).version_desc }}
+          $RELEASE_DESCRIPTION
 
           EOF
 
@@ -1659,6 +1663,8 @@ jobs:
 
       - name: Commit and Push releases.json
         shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           set -euo pipefail
 
@@ -1670,7 +1676,7 @@ jobs:
             user.email \
             "github-actions[bot]@users.noreply.github.com"
 
-          if [[ -z "$(git status --porcelain)" ]]; then
+          if [[ -z "$(git status --porcelain -- assets/releases.json)" ]]; then
             echo "assets/releases.json has no changes."
             exit 0
           fi
@@ -1678,7 +1684,7 @@ jobs:
           git add assets/releases.json
 
           git commit \
-            -m "chore: update releases.json for ${{ inputs.release_tag }} [skip ci]"
+            -m "chore: update releases.json for $RELEASE_TAG [skip ci]"
 
           git pull \
             --rebase \

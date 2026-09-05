@@ -22,6 +22,7 @@ For code-only changes that still require native acceptance later, preserve the e
 
 - `tool/validate_build_policy.ps1`: static repository policy checks, no Flutter/Gradle/ADB.
 - `tool/validate_agent_workflow.py`: instruction links and workflow graph/trigger invariants (requires Python 3.11+ and PyYAML in the developer environment).
+- Release text/input changes: `python -m unittest discover -s tool/tests -p test_release_workflow_data.py`; needs Bash (Git Bash on Windows, optionally selected by `BASH_EXE`). Executes only tag validation and Markdown rendering in temporary directories; no release calls.
 - `tool/local_ci.ps1 -Scope Focused -TestPath <paths> [-Analyze] [-SkipPubGet]`: affected code verification.
 - `tool/local_ci.ps1 -Scope Full`: formal delivery quality gate.
 - `tool/build_local_release.ps1 -Target <target> -Configuration <Debug|Release>`: one selected platform. Use documented evidence-based retry flags, not ad-hoc shell builds.
@@ -48,6 +49,8 @@ GitHub Actions remain explicit fallback/signing infrastructure; local Android/Wi
 Do not run both primary and legacy builders for one deliverable. Release mutation stages are sequential; inspect a prior run's terminal result before dispatching another. A selected platform's failed/cancelled build blocks downstream builds and publication, even when an intermediate unselected job is skipped. Build cancellation must not interrupt another workflow sharing its group. A concurrency group is not a durable FIFO job queue; callers wait for a terminal result between runs.
 
 Keep stable workflow filenames/artifact names for existing callers. Consolidating all legacy signing and packaging implementations requires a separate artifact-equivalence review; removing duplicate triggers does not warrant rewriting thousands of packaging lines.
+
+Pass free-form workflow inputs and release text through environment variables or files, not GitHub-expression interpolation into `run` scripts. Validate their values before using them; script generation happens before shell validation. Static workflow checks guard this boundary without dispatching a build.
 
 ## Model and task handoff
 

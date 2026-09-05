@@ -77,6 +77,8 @@ jobs:
 
       - name: Restore packages when only the publisher workflow changed
         shell: pwsh
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
         run: |
           $ErrorActionPreference = 'Stop'
           $cache = Join-Path $env:RUNNER_TEMP 'pure-live-prebuilt-windows'
@@ -87,7 +89,7 @@ jobs:
           if ($metadata.tracked_files_dirty -or -not $metadata.source_commit) { exit 0 }
           git cat-file -e "$($metadata.source_commit)^{commit}"
           if ($LASTEXITCODE -ne 0) { exit 0 }
-          $changed = @(git diff --name-only $metadata.source_commit '${{ inputs.target_sha }}' -- .)
+          $changed = @(git diff --name-only $metadata.source_commit $env:TARGET_SHA -- .)
           if ($LASTEXITCODE -ne 0 -or $changed.Count -ne 0) { exit 0 }
           $destination = Join-Path $env:GITHUB_WORKSPACE 'local-artifacts'
           New-Item -ItemType Directory -Path $destination -Force | Out-Null

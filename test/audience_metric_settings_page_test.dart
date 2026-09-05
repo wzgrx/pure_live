@@ -116,8 +116,9 @@ class _AudienceAssetLoader extends AssetLoader {
 // Widget tests own a fake clock. Keep their observable state in memory; the
 // actual Hive write/upgrade contract is covered in acfun_catalog_migration_test.
 class _AudienceTestAppSettings extends AppSettingsController {
+  final RxList<String> _onlinePlatforms = List<String>.from(AppSettingsController.defaultRealOnlinePlatforms).obs;
   @override
-  final RxList<String> realOnlinePlatforms = List<String>.from(AppSettingsController.defaultRealOnlinePlatforms).obs;
+  RxList<String> get realOnlinePlatforms => _onlinePlatforms;
 }
 
 class _TestSettingsService extends SettingsService {

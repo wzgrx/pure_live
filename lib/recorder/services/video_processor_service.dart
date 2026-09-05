@@ -8,28 +8,48 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
 import 'package:pure_live/recorder/models/live_record_task.dart';
+import 'package:pure_live/recorder/services/cache_service.dart';
 
 class VideoProcessorService extends GetxService {
-  VideoProcessorService._internal();
+  VideoProcessorService._internal() : _ffmpeg = FFmpegManager.to, _completionTimeoutOverride = null;
+
+  @visibleForTesting
+  VideoProcessorService.forTesting({required this._ffmpeg, Duration? completionTimeout})
+    : _completionTimeoutOverride = completionTimeout;
 
   static final VideoProcessorService _instance = VideoProcessorService._internal();
   static VideoProcessorService get to => _instance;
 
-  final FFmpegManager _ffmpeg = FFmpegManager.to;
+  final FFmpegManager _ffmpeg;
+  final Duration? _completionTimeoutOverride;
   final StreamController<VideoProcessEvent> _controller = StreamController<VideoProcessEvent>.broadcast();
-  final Set<String> _processingTasks = <String>{};
-  final Set<String> _cancelledTasks = <String>{};
-  final Map<String, String> _ffmpegTaskIds = <String, String>{};
+  final Map<String, _MergeOperation> _operations = {};
 
   Stream<VideoProcessEvent> get stream => _controller.stream;
 
-  bool isProcessing(String taskId) => _processingTasks.contains(taskId);
+  bool isProcessing(String taskId) => _operations.containsKey(taskId);
 
   Future<void> cancel(String taskId) async {
-    if (!_processingTasks.contains(taskId)) return;
-    _cancelledTasks.add(taskId);
-    final ffmpegTaskId = _ffmpegTaskIds[taskId];
-    if (ffmpegTaskId != null) await _ffmpeg.stop(ffmpegTaskId);
+    final operation = _operations[taskId];
+    if (operation == null || operation.commitStarted) return;
+    operation.cancelled = true;
+    await _stopNative(operation);
+  }
+
+  Future<void> _stopNative(_MergeOperation operation) async {
+    final id = operation.nativeTaskId;
+    if (id == null || operation.nativeEnded || !_ffmpeg.isRunning(id)) return;
+    final existing = operation.stopRequest;
+    if (existing != null) return existing;
+    final request = Future<void>.sync(() => _ffmpeg.stop(id)).catchError((Object error, StackTrace stack) {
+      log('Video merge stop request failed', error: error, stackTrace: stack);
+    });
+    operation.stopRequest = request;
+    try {
+      await request;
+    } finally {
+      if (identical(operation.stopRequest, request)) operation.stopRequest = null;
+    }
   }
 
   Future<bool> convertToMp4({
@@ -40,11 +60,31 @@ class VideoProcessorService extends GetxService {
     String? filePrefix,
   }) async {
     final taskId = task.taskId;
-    if (!_processingTasks.add(taskId)) return false;
+    if (_operations.containsKey(taskId)) return false;
+    final operation = _MergeOperation();
+    _operations[taskId] = operation;
 
     StreamSubscription<FFmpegEvent>? subscription;
     File? listFile;
     File? partialFile;
+    Future<void>? execution;
+    CacheService? directoryOwner;
+    String? protectedDirectory;
+
+    Future<void> cleanup() async {
+      await subscription?.cancel();
+      for (final file in [listFile, partialFile]) {
+        if (file == null) continue;
+        try {
+          if (await file.exists()) await file.delete();
+        } on FileSystemException {
+          // Never delete the source segments on failed/cancelled finalization.
+        }
+      }
+      if (protectedDirectory != null) directoryOwner?.releaseDirectory(protectedDirectory);
+      if (identical(_operations[taskId], operation)) _operations.remove(taskId);
+    }
+
     try {
       final resolvedDirectoryPath = directoryPath?.trim().isNotEmpty == true
           ? directoryPath!.trim()
@@ -55,11 +95,20 @@ class VideoProcessorService extends GetxService {
         return false;
       }
 
+      // Own a separate cache lease: the recorder's outer lifecycle may finish
+      // before a native writer acknowledges timeout cancellation.
+      if (Get.isRegistered<CacheService>()) {
+        directoryOwner = CacheService.to;
+        protectedDirectory = resolvedDirectoryPath;
+        directoryOwner.protectDirectory(resolvedDirectoryPath);
+      }
+
       final tsDirectory = Directory(resolvedDirectoryPath);
       if (!await tsDirectory.exists()) {
         _emitFailed(taskId, i18n('video_dir_not_exist'));
         return false;
       }
+      if (operation.cancelled) return false;
 
       final legacySegments = <File>[];
       await for (final entity in tsDirectory.list(followLinks: false)) {
@@ -93,6 +142,7 @@ class VideoProcessorService extends GetxService {
           // after the stable snapshot.
         }
       }
+      if (operation.cancelled) return false;
 
       log('$taskId: ${i18n("video_ts_total", args: {"count": segments.length.toString()})}');
       _emit(VideoProcessEvent(taskId: taskId, type: VideoProcessEventType.started));
@@ -102,26 +152,35 @@ class VideoProcessorService extends GetxService {
         buildConcatManifest(segments.map((segment) => p.absolute(segment.path))),
         flush: true,
       );
+      if (operation.cancelled) return false;
 
       final outputFile = await _uniqueOutputFile(tsDirectory, resolvedFilePrefix);
       partialFile = File('${outputFile.path}.partial');
       if (await partialFile.exists()) await partialFile.delete();
+      if (operation.cancelled) return false;
 
       final ffmpegTaskId = 'merge_${taskId}_$resolvedFilePrefix';
-      _ffmpegTaskIds[taskId] = ffmpegTaskId;
+      operation.nativeTaskId = ffmpegTaskId;
       final terminalEvent = Completer<FFmpegEvent>();
       subscription = _ffmpeg.stream.listen((event) {
         if (event.taskId != ffmpegTaskId) return;
         switch (event.type) {
+          case FFmpegEventType.startAck:
+            // Initialization can finish after cancel/timeout. Keep this
+            // listener until native teardown so a late start is also stopped.
+            if (operation.cancelled) unawaited(_stopNative(operation));
+            break;
           case FFmpegEventType.progress:
-            final elapsed = (event.data['time'] as num?)?.toDouble() ?? 0;
-            final total = task.recordedSeconds <= 0 ? 1.0 : task.recordedSeconds * 1000.0;
+            if (operation.cancelled || operation.commitStarted) break;
+            final progress = mergeProgress(
+              elapsedMilliseconds: (event.data['time'] as num?) ?? 0,
+              recordedSeconds: task.recordedSeconds,
+              outputBytes: (event.data['size'] as num?) ?? 0,
+              inputBytes: inputBytes,
+            );
+            if (progress > operation.progress) operation.progress = progress;
             _emit(
-              VideoProcessEvent(
-                taskId: taskId,
-                type: VideoProcessEventType.progress,
-                progress: (elapsed / total).clamp(0.0, 1.0),
-              ),
+              VideoProcessEvent(taskId: taskId, type: VideoProcessEventType.progress, progress: operation.progress),
             );
             break;
           case FFmpegEventType.complete:
@@ -157,11 +216,18 @@ class VideoProcessorService extends GetxService {
         partialFile.path,
       ];
 
-      await _ffmpeg.start(taskId: ffmpegTaskId, arguments: arguments);
-      final event = await terminalEvent.future.timeout(
-        mergeTimeout(inputBytes: inputBytes, recordedSeconds: task.recordedSeconds),
-      );
-      if (_cancelledTasks.contains(taskId) ||
+      execution = _ffmpeg.start(taskId: ffmpegTaskId, arguments: arguments).whenComplete(() {
+        operation.nativeEnded = true;
+      });
+      // start() resolves after executeAsync finishes, not when startAck fires.
+      // The deadline covers that Future AND the terminal event, not just a
+      // terminal event that is normally already buffered after start returns.
+      final event = await execution
+          .then((_) => terminalEvent.future)
+          .timeout(
+            _completionTimeoutOverride ?? mergeTimeout(inputBytes: inputBytes, recordedSeconds: task.recordedSeconds),
+          );
+      if (operation.cancelled ||
           event.type != FFmpegEventType.complete ||
           !await partialFile.exists() ||
           await partialFile.length() <= 0) {
@@ -169,13 +235,25 @@ class VideoProcessorService extends GetxService {
         return false;
       }
 
+      // File inspection above yields to cancellation. The rename is the
+      // commit point; recheck immediately before it, then finish atomically.
+      if (operation.cancelled) return false;
+      operation.commitStarted = true;
       await partialFile.rename(outputFile.path);
       partialFile = null;
       if (deleteSourceTs) await _deleteFiles(segments, taskId);
 
-      _emit(VideoProcessEvent(taskId: taskId, type: VideoProcessEventType.completed, outputPath: outputFile.path));
+      _emit(
+        VideoProcessEvent(
+          taskId: taskId,
+          type: VideoProcessEventType.completed,
+          progress: 1,
+          outputPath: outputFile.path,
+        ),
+      );
       return true;
     } on TimeoutException {
+      operation.cancelled = true;
       _emitFailed(taskId, i18n('video_ffmpeg_failed'));
       return false;
     } catch (error, stackTrace) {
@@ -183,24 +261,27 @@ class VideoProcessorService extends GetxService {
       _emitFailed(taskId, error.toString());
       return false;
     } finally {
-      await subscription?.cancel();
-      if (listFile != null) {
-        try {
-          if (await listFile.exists()) await listFile.delete();
-        } on FileSystemException {
-          // Best-effort temporary manifest cleanup.
-        }
+      if (execution != null && !operation.nativeEnded) {
+        operation.cancelled = true;
+        await _stopNative(operation);
       }
-      if (partialFile != null) {
-        try {
-          if (await partialFile.exists()) await partialFile.delete();
-        } on FileSystemException {
-          // Preserve the original TS segments when partial cleanup fails.
-        }
+      if (execution != null && !operation.nativeEnded) {
+        // A timed-out stop is not a stopped writer. Retain its file ownership,
+        // listener and task exclusion until the actual execution settles. The
+        // caller receives failure promptly; retries do not race the old writer.
+        unawaited(
+          execution
+              .then<void>(
+                (_) {},
+                onError: (Object error, StackTrace stack) {
+                  log('Cancelled video merge settled with an error', error: error, stackTrace: stack);
+                },
+              )
+              .whenComplete(cleanup),
+        );
+      } else {
+        await cleanup();
       }
-      _processingTasks.remove(taskId);
-      _cancelledTasks.remove(taskId);
-      _ffmpegTaskIds.remove(taskId);
     }
   }
 
@@ -236,6 +317,28 @@ class VideoProcessorService extends GetxService {
       manifest.writeln("file '${_escapeConcatPath(path)}'");
     }
     return manifest.toString();
+  }
+
+  /// Copy-remux statistics can carry an AV_NOPTS-like timestamp. Prefer
+  /// actual output-byte progress; use media time only within a plausible
+  /// duration. Only the successful file commit emits 100 percent.
+  @visibleForTesting
+  static double mergeProgress({
+    required num elapsedMilliseconds,
+    required int recordedSeconds,
+    required num outputBytes,
+    required int inputBytes,
+  }) {
+    double progress = 0;
+    if (inputBytes > 0 && outputBytes.isFinite && outputBytes > 0 && outputBytes <= inputBytes * 2) {
+      progress = outputBytes / inputBytes;
+    } else if (recordedSeconds > 0 &&
+        elapsedMilliseconds.isFinite &&
+        elapsedMilliseconds > 0 &&
+        elapsedMilliseconds <= recordedSeconds * 1000 + 15000) {
+      progress = elapsedMilliseconds / (recordedSeconds * 1000);
+    }
+    return progress.clamp(0.0, 0.99).toDouble();
   }
 
   /// Copy-remux speed varies substantially with external storage, encryption
@@ -276,9 +379,22 @@ class VideoProcessorService extends GetxService {
 
   @override
   void onClose() {
+    for (final operation in _operations.values) {
+      operation.cancelled = true;
+      unawaited(_stopNative(operation));
+    }
     _controller.close();
     super.onClose();
   }
+}
+
+class _MergeOperation {
+  bool cancelled = false;
+  bool commitStarted = false;
+  bool nativeEnded = false;
+  double progress = 0;
+  String? nativeTaskId;
+  Future<void>? stopRequest;
 }
 
 class VideoProcessEvent {

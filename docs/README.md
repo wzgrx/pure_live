@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [Windows 虎牙候选复验与同页面资源对照](WINDOWS_HUYA_CANDIDATE_RECHECK_2026_09_05.md)：b231449e 的 AOT 身份、11 分钟播放、全屏与退出、空载热门页对照，以及 Esc 未闭合观察。
+
 - [关闭与快速重进的播放意图](PLAYER_CLOSE_INTENT_AUDIT_2026_09_05.md)：关闭后旧恢复接管、旧关闭覆盖新播放、取消请求仍开流的受控复现，派发代次修复与相邻回归。
 
 - [HLS 录制排空与地址生命周期](RECORDER_HLS_DRAIN_AUDIT_2026_09_05.md)：停止时冻结媒体列表、完成当前分片、旧地址回收，以及 TS/AES/fMP4/长分片四类 native 回归。

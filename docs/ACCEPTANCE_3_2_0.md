@@ -25,6 +25,15 @@
 
 ## 当前构建追溯
 
+### 当前 Windows 候选与资源对照
+
+[候选复验](WINDOWS_HUYA_CANDIDATE_RECHECK_2026_09_05.md)：以 `b231449e` 构建本机 Release
+便携候选，核对 `data/app.so` 与 ZIP 哈希，未上传或改名为 3.2.0。虎牙蓝光 10M 实际运行约
+11 分 16 秒，恢复日志没有额外重开，双击全屏往返成功。正常返回后原生输出析构、线程回到
+154、私有字节回落到约 722 MiB；新进程从未播放的热门页仍有约 2.3% CPU，页面负载另行审查。
+Esc 自动化观察未闭合，新补 Get/native/SmartDialog 两项近似 Widget 场景通过而未复现；
+保留该项和音频/小窗完整往返，不把近似测试记为全部 GUI 已通过。Android 继续保持无设备操作。
+
 ### 关闭与快速重进的播放意图
 
 [关闭意图审计](PLAYER_CLOSE_INTENT_AUDIT_2026_09_05.md) 在生产 PlayerManager 上复现四个

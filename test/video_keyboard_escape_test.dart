@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/modules/live_play/controllers/player_state.dart';
 import 'package:pure_live/modules/live_play/widgets/keyboard/video_keyboard.dart';
@@ -27,6 +28,78 @@ class _PresentationController implements VideoController {
 }
 
 void main() {
+  for (final withSmartDialog in [false, true]) {
+    testWidgets('native desktop route keeps Escape after fullscreen reparent (smart=$withSmartDialog)', (tester) async {
+      Get.testMode = true;
+      Get.put(GlobalPlayerState());
+      final controller = _PresentationController();
+      addTearDown(() {
+        Get.reset();
+        Get.testMode = false;
+      });
+      Widget desktopFrame(BuildContext context, Widget? child) => Obx(
+        () => Column(
+          children: [
+            if (!GlobalPlayerState.to.isFullscreen.value) const SizedBox(height: 30, child: Text('title-bar')),
+            Expanded(child: child!),
+          ],
+        ),
+      );
+      await tester.pumpWidget(
+        GetMaterialApp(
+          initialRoute: '/home',
+          defaultTransition: Transition.native,
+          navigatorObservers: withSmartDialog ? [FlutterSmartDialog.observer] : [],
+          builder: withSmartDialog ? FlutterSmartDialog.init(builder: desktopFrame) : desktopFrame,
+          getPages: [
+            GetPage(
+              name: '/home',
+              page: () => Scaffold(
+                body: Focus(
+                  autofocus: true,
+                  child: TextButton(
+                    onPressed: () => Get.toNamed<void>('/live_play', parameters: {'site': 'huya'}),
+                    child: const Text('open'),
+                  ),
+                ),
+              ),
+            ),
+            GetPage(
+              name: '/live_play',
+              page: () => VideoKeyboardShortcuts(
+                controller: controller,
+                child: Scaffold(
+                  body: Focus(
+                    autofocus: true,
+                    child: GestureDetector(
+                      onDoubleTap: () => GlobalPlayerState.to.isFullscreen.value = true,
+                      child: const SizedBox(width: 300, height: 200, child: Text('video-surface')),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('video-surface'));
+      await tester.pump(const Duration(milliseconds: 60));
+      await tester.tap(find.text('video-surface'));
+      await tester.pumpAndSettle();
+      expect(GlobalPlayerState.to.isFullscreen.value, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(controller.fullscreenExits, 1);
+      expect(find.text('title-bar'), findsOneWidget);
+      expect(find.text('video-surface'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  }
+
   testWidgets('a focused child consumes Escape before room presentation', (tester) async {
     Get.testMode = true;
     Get.put(GlobalPlayerState());

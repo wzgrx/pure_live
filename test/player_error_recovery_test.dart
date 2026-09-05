@@ -1797,7 +1797,13 @@ void main() {
             );
           },
         );
-        active.emitError(PlayerException(message: 'network interruption', type: PlayerErrorType.network));
+        active.emitError(
+          PlayerException(
+            message: 'no presented frame',
+            type: PlayerErrorType.source,
+            code: 'video_frame_stall_timeout',
+          ),
+        );
         await resolvingRetry.future.timeout(const Duration(seconds: 2));
         final creationsBeforeRecovery = creations;
         final opensBeforeRecovery = active.openedUrls.length;
@@ -1813,7 +1819,13 @@ void main() {
         expect(manager.hasError.value, isFalse);
         if (result == 'empty') {
           final callsBeforeNewFailure = resolverCalls;
-          active.emitError(PlayerException(message: 'network interruption', type: PlayerErrorType.network));
+          active.emitError(
+            PlayerException(
+              message: 'no presented frame',
+              type: PlayerErrorType.source,
+              code: 'video_frame_stall_timeout',
+            ),
+          );
           final deadline = DateTime.now().add(const Duration(milliseconds: 300));
           while (resolverCalls == callsBeforeNewFailure && DateTime.now().isBefore(deadline)) {
             await Future<void>.delayed(const Duration(milliseconds: 5));
@@ -1828,6 +1840,134 @@ void main() {
         if (!releaseResolver.isCompleted) releaseResolver.complete();
         await Future<void>.delayed(const Duration(milliseconds: 20));
         await subscription.cancel();
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
+
+  for (final diagnostic in ['buffering_stall_timeout', 'unexpected_pause_timeout']) {
+    for (final matchingProgress in [true, false]) {
+      test('dispatched $diagnostic requires matching progress: $matchingProgress', () async {
+        final active = _FrameProgressFakePlayer();
+        final resolvingRetry = Completer<void>();
+        final releaseResolver = Completer<void>();
+        var creations = 0;
+        var resolverCalls = 0;
+        final manager = _manager(
+          <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+          videoFrameStallTimeout: Duration.zero,
+          bufferingStallTimeout: Duration.zero,
+          transientLiveRetryDelays: const [Duration(milliseconds: 12)],
+          playerCreator: (_) => creations++ == 0
+              ? active
+              : _RecoveryFakePlayer(
+                  PlayerEngine.mediaKit,
+                  (_) => PlayerException(message: 'replacement TLS failure', type: PlayerErrorType.source),
+                ),
+        );
+        manager.configureDefaultEngine(PlayerEngine.mediaKit);
+        try {
+          await manager.play(
+            'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100',
+            const ['https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100'],
+            const {},
+            room: LiveRoom(roomId: 'progress-kind', platform: 'huya'),
+            sourceResolver: (_) async {
+              if (++resolverCalls == 1) return const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0);
+              if (!resolvingRetry.isCompleted) resolvingRetry.complete();
+              await releaseResolver.future;
+              return const PlaybackSourceRefreshResult(
+                urls: ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+                preferredLineIndex: 0,
+              );
+            },
+          );
+          if (diagnostic == 'buffering_stall_timeout') {
+            active.emitLoading(true);
+          } else {
+            active.emitUnexpectedPlaying(false);
+          }
+          active.emitError(PlayerException(message: 'inferred stall', type: PlayerErrorType.source, code: diagnostic));
+          await resolvingRetry.future.timeout(const Duration(seconds: 2));
+          final creationsBeforeProgress = creations;
+          if (!matchingProgress) {
+            active.emitFrame();
+          } else if (diagnostic == 'buffering_stall_timeout') {
+            active.emitLoading(false);
+          } else {
+            active.emitUnexpectedPlaying(true);
+          }
+          releaseResolver.complete();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          if (matchingProgress) {
+            expect(creations, creationsBeforeProgress, reason: 'the recovered native source must stay installed');
+            expect(manager.currentPlayer, same(active));
+            expect(manager.isPlayingNow, isTrue);
+          } else {
+            expect(creations, greaterThan(creationsBeforeProgress), reason: 'a frame does not refute buffering/pause');
+          }
+        } finally {
+          if (!releaseResolver.isCompleted) releaseResolver.complete();
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+          await manager.dispose();
+        }
+      }, skip: !Platform.isWindows);
+    }
+  }
+
+  for (final failure in ['completed', 'native-error']) {
+    test('a buffered tail frame cannot cancel dispatched $failure recovery', () async {
+      final active = _FrameProgressFakePlayer();
+      final resolvingRetry = Completer<void>();
+      final releaseResolver = Completer<void>();
+      var creations = 0;
+      var resolverCalls = 0;
+      final manager = _manager(
+        <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+        videoFrameStallTimeout: Duration.zero,
+        bufferingStallTimeout: Duration.zero,
+        transientLiveRetryDelays: const [Duration(milliseconds: 12)],
+        playerCreator: (_) => creations++ == 0
+            ? active
+            : _RecoveryFakePlayer(
+                PlayerEngine.mediaKit,
+                (_) => PlayerException(message: 'replacement TLS failure', type: PlayerErrorType.source),
+              ),
+      );
+      manager.configureDefaultEngine(PlayerEngine.mediaKit);
+      try {
+        await manager.play(
+          'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100',
+          const ['https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100'],
+          const {},
+          room: LiveRoom(roomId: 'native-ended-tail-frame', platform: 'huya'),
+          sourceResolver: (_) async {
+            if (++resolverCalls == 1) return const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0);
+            if (!resolvingRetry.isCompleted) resolvingRetry.complete();
+            await releaseResolver.future;
+            return const PlaybackSourceRefreshResult(
+              urls: ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+              preferredLineIndex: 0,
+            );
+          },
+        );
+        if (failure == 'completed') {
+          active.emitCompleted();
+        } else {
+          active.emitError(PlayerException(message: 'transport EOF', type: PlayerErrorType.network));
+        }
+        await resolvingRetry.future.timeout(const Duration(seconds: 2));
+        final creationsBeforeTail = creations;
+        active.emitFrame();
+        releaseResolver.complete();
+        final deadline = DateTime.now().add(const Duration(milliseconds: 300));
+        while (creations == creationsBeforeTail && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 5));
+        }
+        expect(creations, greaterThan(creationsBeforeTail), reason: 'a tail frame does not reopen an ended socket');
+      } finally {
+        if (!releaseResolver.isCompleted) releaseResolver.complete();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
         await manager.dispose();
       }
     }, skip: !Platform.isWindows);
@@ -1873,6 +2013,43 @@ void main() {
       await manager.dispose();
     }
   }, skip: !Platform.isWindows);
+
+  test('frame watchdog does not allocate a fresh timer for every presented frame', () async {
+    var timerCreations = 0;
+    await runZoned(
+      () async {
+        final active = _FrameProgressFakePlayer();
+        final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active});
+        manager.configureDefaultEngine(PlayerEngine.mediaKit);
+        try {
+          await manager.play(
+            'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100',
+            const ['https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100'],
+            const {},
+            room: LiveRoom(roomId: 'frame-allocation-budget', platform: 'huya'),
+          );
+          active.emitFrame();
+          final before = timerCreations;
+          for (var frame = 0; frame < 600; frame++) {
+            active.emitFrame();
+          }
+          expect(
+            timerCreations - before,
+            0,
+            reason: 'frame progress updates one deadline, not 600 timers',
+          );
+        } finally {
+          await manager.dispose();
+        }
+      },
+      zoneSpecification: ZoneSpecification(
+        createTimer: (self, parent, zone, duration, callback) {
+          timerCreations++;
+          return parent.createTimer(zone, duration, callback);
+        },
+      ),
+    );
+  });
 
   test('continuous presented frames keep the live renderer healthy', () async {
     final first = _FrameProgressFakePlayer();

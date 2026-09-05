@@ -131,6 +131,8 @@ class PlayerManager {
   Timer? _continuityTimer;
   Timer? _bufferingStallTimer;
   Timer? _videoFrameStallTimer;
+  final Stopwatch _videoFrameWatchdogClock = Stopwatch();
+  Duration? _videoFrameDeadline;
   int _continuityRevision = 0;
   DateTime? _lastPresentedFrameAt;
   int _presentedFrameRevision = 0;
@@ -1860,6 +1862,10 @@ class PlayerManager {
   void _cancelVideoFrameStallRecovery() {
     _videoFrameStallTimer?.cancel();
     _videoFrameStallTimer = null;
+    _videoFrameDeadline = null;
+    _videoFrameWatchdogClock
+      ..stop()
+      ..reset();
   }
 
   /// Marks whether the current route owns a mounted video presentation.
@@ -1893,7 +1899,6 @@ class PlayerManager {
   }
 
   void _armVideoFrameStallRecovery(UnifiedPlayer player, int sessionId) {
-    _cancelVideoFrameStallRecovery();
     if (videoFrameStallTimeout <= Duration.zero ||
         !_videoPresentationVisible ||
         _runtimeAudioOnly ||
@@ -1901,17 +1906,36 @@ class PlayerManager {
         !_shouldOwnContinuousPlayback(player, sessionId) ||
         _loadingSubject.value ||
         (!player.isPlayingNow && !isPlayingNow)) {
+      _cancelVideoFrameStallRecovery();
       return;
     }
-    _videoFrameStallTimer = Timer(videoFrameStallTimeout, () {
+    // Frames move a monotonic deadline, not a native Timer allocation. At
+    // 60/120 Hz the old cancel/recreate path performed thousands of redundant
+    // allocations per minute. Check the remaining time only when the one
+    // pending timer wakes; this preserves the full timeout after the last
+    // frame and is independent of wall-clock adjustments.
+    _videoFrameWatchdogClock.start();
+    _videoFrameDeadline = _videoFrameWatchdogClock.elapsed + videoFrameStallTimeout;
+    if (_videoFrameStallTimer != null) return;
+
+    void checkDeadline() {
       _videoFrameStallTimer = null;
       if (!_videoPresentationVisible ||
           _runtimeAudioOnly ||
           !_shouldOwnContinuousPlayback(player, sessionId) ||
           _loadingSubject.value ||
           (!player.isPlayingNow && !isPlayingNow)) {
+        _cancelVideoFrameStallRecovery();
         return;
       }
+      final deadline = _videoFrameDeadline;
+      if (deadline == null) return;
+      final remaining = deadline - _videoFrameWatchdogClock.elapsed;
+      if (remaining > Duration.zero) {
+        _videoFrameStallTimer = Timer(remaining, checkDeadline);
+        return;
+      }
+      _cancelVideoFrameStallRecovery();
       final observedFrameRevision = _presentedFrameRevision;
       _schedulePlayerError(
         PlayerException(
@@ -1927,7 +1951,9 @@ class PlayerManager {
             !_loadingSubject.value &&
             (player.isPlayingNow || isPlayingNow),
       );
-    });
+    }
+
+    _videoFrameStallTimer = Timer(videoFrameStallTimeout, checkDeadline);
   }
 
   void _scheduleRecoveryBudgetReset(UnifiedPlayer player, int sessionId) {
@@ -1957,21 +1983,34 @@ class PlayerManager {
     if (!_isPlayerEventCurrent(player, sessionId)) return;
     _lastPresentedFrameAt = DateTime.now();
     _presentedFrameRevision++;
-    // A real presented frame is authoritative recovery evidence. If the native
-    // transport recovered by itself during a backoff window, do not disrupt it
-    // with an unnecessary source reopen.
-    final retry = _transientLiveRetryOwner;
-    if (retry != null) {
-      _cancelTransientLiveRetry();
-      // A future independent interruption in this same source generation is
-      // not a duplicate of the attempt that real media progress just retired.
-      _errorDedupeSignatures.remove('${retry.error.type.name}:${retry.error.code ?? '-'}:${retry.error.message}');
-      _playingSubject.add(true);
-      _loadingSubject.add(false);
-      _stateSubject.add(PlayerState.playing);
-      hasError.value = false;
-    }
+    _retireTransientLiveRetryForProgress(videoFrame: true);
     _scheduleRecoveryBudgetReset(player, sessionId);
+  }
+
+  void _retireTransientLiveRetryForProgress({
+    bool videoFrame = false,
+    bool bufferingEnded = false,
+    bool playingResumed = false,
+  }) {
+    final retry = _transientLiveRetryOwner;
+    if (retry == null) return;
+    // Use the same evidence contract as immediate recovery. Buffered tail
+    // frames or late texture notifications never refute an explicit EOF or a
+    // terminal native error. Only the matching inferred stall is retired.
+    final refuted = switch (retry.error.code) {
+      'video_frame_stall_timeout' => videoFrame,
+      'buffering_stall_timeout' => bufferingEnded,
+      'unexpected_pause_resume_failed' || 'unexpected_pause_timeout' || 'source_ready_timeout' => playingResumed,
+      _ => false,
+    };
+    if (!refuted) return;
+    _cancelTransientLiveRetry();
+    _errorDedupeSignatures.remove('${retry.error.type.name}:${retry.error.code ?? '-'}:${retry.error.message}');
+    final playing = _currentPlayer?.isPlayingNow == true;
+    _playingSubject.add(playing);
+    _loadingSubject.add(_nativeLoading);
+    _stateSubject.add(_nativeLoading ? PlayerState.buffering : (playing ? PlayerState.playing : PlayerState.paused));
+    hasError.value = false;
   }
 
   void _scheduleBufferingStallRecovery(UnifiedPlayer player, int sessionId) {
@@ -3524,6 +3563,7 @@ class PlayerManager {
         _playingSubject.add(event);
         if (event) {
           _playingRecoveryRevision++;
+          _retireTransientLiveRetryForProgress(playingResumed: true);
           _sourceReadyTimer?.cancel();
           _sourceReadyTimer = null;
           hasError.value = false;
@@ -3587,6 +3627,7 @@ class PlayerManager {
         _traceWindowsRecovery('loading=$event', sessionId: sessionId);
         if (!event && _nativeLoading) _bufferingRecoveryRevision++;
         _nativeLoading = event;
+        if (!event) _retireTransientLiveRetryForProgress(bufferingEnded: true);
         _loadingSubject.add(event);
         if (event) {
           _cancelVideoFrameStallRecovery();

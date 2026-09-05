@@ -92,7 +92,12 @@ class _FlameBarrageWidgetState extends State<FlameBarrageWidget> {
   Widget build(BuildContext context) {
     Widget child = ClipRect(
       clipBehavior: Clip.hardEdge,
-      child: GameWidget(game: _engine),
+      // This canvas renders/interacts with danmaku, not a keyboard-driven game.
+      // Flame otherwise autofocuses and handles every key before the room's
+      // Escape/media shortcuts can see it. IgnorePointer does not exclude focus.
+      // ExcludeFocus also prevents Tab/click-driven focus after reparenting,
+      // without disabling danmaku pointer callbacks.
+      child: ExcludeFocus(child: GameWidget(game: _engine, autofocus: false)),
     );
 
     if (!widget.enablePointerEvents) {

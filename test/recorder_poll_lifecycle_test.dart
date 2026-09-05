@@ -361,6 +361,8 @@ class _Scheduler implements FFmpegScheduler {
   @override
   bool isQueued(String taskId) => queued.contains(taskId);
   @override
+  Future<void> waitForTask(String taskId) async {}
+  @override
   Future<void> clearAll() async => queued.clear();
   @override
   Future<void> cancel(String taskId) async {

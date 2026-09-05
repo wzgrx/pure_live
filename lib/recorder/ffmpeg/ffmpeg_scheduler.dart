@@ -96,6 +96,12 @@ class FFmpegScheduler {
     _scheduleNext();
   }
 
+  /// Wait for the current running owner, not merely the bounded cancel request.
+  /// Call after cancel when output/state mutation requires the native writer
+  /// and its finalizer to have actually exited. A later task with the same ID
+  /// does not extend the captured completion fence.
+  Future<void> waitForTask(String taskId) => _runningTasks[taskId]?.future ?? Future<void>.value();
+
   /// 清空所有
   Future<void> clearAll() async {
     _taskQueue.clear();

@@ -68,6 +68,10 @@ class RecorderController extends GetxService {
   final Map<String, _PrefetchedRecorderLease> _prefetchedRecorderLeases = <String, _PrefetchedRecorderLease>{};
   final Map<String, _PendingRecorderLease> _pendingRecorderLeases = <String, _PendingRecorderLease>{};
   final Set<String> _startingTasks = <String>{};
+  final Map<String, _RecorderStartRequest> _startRequests = {};
+  final Map<String, _RecorderStopRequest> _stopRequests = {};
+  final Map<String, Completer<void>> _interruptedRecoveries = {};
+  final Set<LiveRecordTask> _removingTasks = {};
   final Set<String> _rapidRecoveryTasks = <String>{};
   final Map<String, Completer<void>> _lifecycleCompleters = <String, Completer<void>>{};
   final Map<String, int> _activeSessionIds = <String, int>{};
@@ -447,6 +451,7 @@ class RecorderController extends GetxService {
     )) {
       return;
     }
+    if (_isClosing || !_ownsTask(task)) return;
     task.queuePendingAttempt(directoryPath: directoryPath, filePrefix: filePrefix);
     updateTask(task);
   }
@@ -455,23 +460,25 @@ class RecorderController extends GetxService {
     var allSucceeded = true;
     final attempts = List<PendingRecordingAttempt>.of(task.pendingAttempts);
     for (final attempt in attempts) {
-      if (_isClosing) return false;
+      if (_isClosing || !_ownsTask(task)) return false;
       // Capture the provisional TS size before the successful converter
       // deletes those source files. Each attempt is reconciled independently
       // so a later retry never loses output committed by an earlier pass.
       final source = await _outputMetrics.measure(directoryPath: attempt.directoryPath, filePrefix: attempt.filePrefix);
-      if (_isClosing) return false;
+      if (_isClosing || !_ownsTask(task)) return false;
       final merged = await VideoProcessorService.to.convertToMp4(
         task: task,
         allowLegacySegments: allowLegacy,
         directoryPath: attempt.directoryPath,
         filePrefix: attempt.filePrefix,
       );
+      if (_isClosing || !_ownsTask(task)) return false;
       if (merged) {
         final output = await _outputMetrics.measureFinalized(
           directoryPath: attempt.directoryPath,
           filePrefix: attempt.filePrefix,
         );
+        if (_isClosing || !_ownsTask(task)) return false;
         if (source.bytes > 0 && output.bytes > 0) {
           task.fileSize = RecordingOutputMetrics.reconcileFinalizedBytes(
             totalBytes: task.fileSize,
@@ -514,7 +521,7 @@ class RecorderController extends GetxService {
 
   void updateTask(LiveRecordTask task, {bool persist = true}) {
     final index = tasks.indexWhere((candidate) => candidate.taskId == task.taskId);
-    if (index == -1) return;
+    if (_isClosing || index == -1 || !identical(tasks[index], task)) return;
     // Preserve the user's spatial context. Sorting on every status/progress
     // transition made recorder cards jump between rows while they were being
     // read or operated. Tabs already expose status-specific views; the all tab
@@ -596,7 +603,7 @@ class RecorderController extends GetxService {
   }
 
   Future<LiveRecordTask?> addTask({required LiveRoom room, bool startImmediately = true}) async {
-    if (!await requestStoragePermission()) return null;
+    if (_isClosing || !await requestStoragePermission() || _isClosing) return null;
     final existing = tasks.firstWhereOrNull((task) => task.roomId == room.roomId && task.platform == room.platform);
     if (existing != null) return existing;
 
@@ -614,27 +621,61 @@ class RecorderController extends GetxService {
       updateTask(task);
       _schedulePoll(task);
     }
-    return task;
+    return !_isClosing && _ownsTask(task) && !_removingTasks.contains(task) ? task : null;
   }
 
-  Future<bool> startTask(LiveRecordTask task) async {
-    if (_isClosing) return false;
-    if (!await requestStoragePermission()) return false;
-    if (_isClosing) return false;
-    if (_startingTasks.contains(task.taskId) || scheduler.isRunning(task.taskId) || scheduler.isQueued(task.taskId)) {
-      return true;
+  Future<bool> startTask(LiveRecordTask task) {
+    if (_isClosing || !_ownsTask(task) || _removingTasks.contains(task)) return Future.value(false);
+    final existing = _startRequests[task.taskId];
+    if (existing != null && identical(existing.task, task)) return existing.done.future;
+    existing?.complete(false);
+    final request = _RecorderStartRequest(task);
+    _startRequests[task.taskId] = request;
+    unawaited(_performUserStart(request));
+    return request.done.future;
+  }
+
+  bool _ownsStart(_RecorderStartRequest request) =>
+      !_isClosing &&
+      _ownsTask(request.task) &&
+      !_removingTasks.contains(request.task) &&
+      identical(_startRequests[request.task.taskId], request);
+
+  void _cancelUserStart(String taskId) => _startRequests.remove(taskId)?.complete(false);
+
+  Future<void> _performUserStart(_RecorderStartRequest request) async {
+    final task = request.task;
+    try {
+      if (!await requestStoragePermission() || !_ownsStart(request)) return;
+      // Permission is not a recording intent. Wait for the old writer/file
+      // transaction to drain before resetting this mutable task's counters.
+      await _stopRequests[task.taskId]?.done.future;
+      if (!_ownsStart(request)) return;
+      await _interruptedRecoveries[task.taskId]?.future;
+      if (!_ownsStart(request)) return;
+      await _finalizationFutures[task.taskId];
+      if (!_ownsStart(request)) return;
+      if (_startingTasks.contains(task.taskId) || scheduler.isRunning(task.taskId) || scheduler.isQueued(task.taskId)) {
+        request.complete(true);
+        return;
+      }
+      task.beginNewRecording();
+      _attemptProgress.remove(task.taskId);
+      _rapidRecoveryTasks.remove(task.taskId);
+      _cancelRecorderLease(task.taskId);
+      task.retryCount = 0;
+      task.selectedQualityId = null;
+      task.selectedLineIndex = null;
+      task.wasStoppedByUser = false;
+      task.autoReconnect = settings.autoReconnect.value;
+      await _startTask(task);
+      request.complete(_ownsStart(request) && task.status != RecordStatus.failed);
+    } catch (error, stack) {
+      if (_ownsStart(request) && !request.done.isCompleted) request.done.completeError(error, stack);
+    } finally {
+      if (identical(_startRequests[task.taskId], request)) _startRequests.remove(task.taskId);
+      request.complete(false);
     }
-    task.beginNewRecording();
-    _attemptProgress.remove(task.taskId);
-    _rapidRecoveryTasks.remove(task.taskId);
-    _cancelRecorderLease(task.taskId);
-    task.retryCount = 0;
-    task.selectedQualityId = null;
-    task.selectedLineIndex = null;
-    task.wasStoppedByUser = false;
-    task.autoReconnect = settings.autoReconnect.value;
-    await _startTask(task);
-    return true;
   }
 
   Future<void> forceStartTask(LiveRecordTask task) async {
@@ -642,7 +683,10 @@ class RecorderController extends GetxService {
   }
 
   Future<void> _startTask(LiveRecordTask task) async {
-    if (_isClosing || task.wasStoppedByUser || !_ownsTask(task)) return;
+    if (_isClosing || task.wasStoppedByUser || !_ownsTask(task) || _removingTasks.contains(task)) return;
+    await _interruptedRecoveries[task.taskId]?.future;
+    await _stopRequests[task.taskId]?.done.future;
+    if (_isClosing || task.wasStoppedByUser || !_ownsTask(task) || _removingTasks.contains(task)) return;
     if (_startingTasks.contains(task.taskId)) {
       ToastUtil.show(i18n('recorder_task_starting'));
       return;
@@ -926,14 +970,45 @@ class RecorderController extends GetxService {
     });
   }
 
-  Future<void> stopTask(LiveRecordTask task) async {
+  Future<void> stopTask(LiveRecordTask task) {
+    if (_isClosing || !_ownsTask(task)) return Future.value();
+    _cancelUserStart(task.taskId);
     task.wasStoppedByUser = true;
     _stopPolling(task.taskId);
     _retryTimers.remove(task.taskId)?.cancel();
     _cancelRecorderLease(task.taskId);
+    final existing = _stopRequests[task.taskId];
+    if (existing != null && identical(existing.task, task)) return existing.done.future;
+    final request = _RecorderStopRequest(task);
+    _stopRequests[task.taskId] = request;
+    unawaited(_performUserStop(request, previous: existing));
+    return request.done.future;
+  }
+
+  Future<void> _performUserStop(_RecorderStopRequest request, {_RecorderStopRequest? previous}) async {
+    try {
+      await previous?.done.future;
+      await _stopTask(request.task);
+      request.done.complete();
+    } catch (error, stack) {
+      request.done.completeError(error, stack);
+    } finally {
+      if (identical(_stopRequests[request.task.taskId], request)) _stopRequests.remove(request.task.taskId);
+    }
+  }
+
+  Future<void> _stopTask(LiveRecordTask task) async {
+    if (_isClosing || !_ownsTask(task)) return;
     await scheduler.cancel(task.taskId);
+    // cancel has a bounded wait and may return while a native writer is still
+    // draining. Do not clear monitoring or allow a new start on that signal.
+    await scheduler.waitForTask(task.taskId);
+    if (_isClosing || !_ownsTask(task)) return;
+    await _interruptedRecoveries[task.taskId]?.future;
+    if (_isClosing || !_ownsTask(task)) return;
     final finalization = _finalizationFutures[task.taskId];
     if (finalization != null) await finalization;
+    if (_isClosing || !_ownsTask(task)) return;
     _stopOutputMonitor(task.taskId);
     _attemptProgress.remove(task.taskId);
     _rapidRecoveryTasks.remove(task.taskId);
@@ -941,7 +1016,9 @@ class RecorderController extends GetxService {
       task.status = RecordStatus.processing;
       updateTask(task);
       final merged = await _finalizePendingAttempts(task);
+      if (_isClosing || !_ownsTask(task)) return;
       await settings.refreshCacheSize();
+      if (_isClosing || !_ownsTask(task)) return;
       task.status = merged ? RecordStatus.stopped : RecordStatus.failed;
       if (!merged) task.markFailure(stage: 'merge', error: i18n('video_ffmpeg_failed'));
     } else {
@@ -978,6 +1055,10 @@ class RecorderController extends GetxService {
       !task.wasStoppedByUser &&
       _ownsTask(task) &&
       !_startingTasks.contains(task.taskId) &&
+      !_startRequests.containsKey(task.taskId) &&
+      !_stopRequests.containsKey(task.taskId) &&
+      !_interruptedRecoveries.containsKey(task.taskId) &&
+      !_removingTasks.contains(task) &&
       !scheduler.isRunning(task.taskId) &&
       !scheduler.isQueued(task.taskId) &&
       !_finalizationFutures.containsKey(task.taskId);
@@ -1087,11 +1168,18 @@ class RecorderController extends GetxService {
   }
 
   Future<void> unRecorder(LiveRecordTask task) async {
-    await stopTask(task);
-    _activeSessionIds.remove(task.taskId);
-    _completeLifecycle(task.taskId);
-    tasks.removeWhere((candidate) => candidate.taskId == task.taskId);
-    schedulePersist();
+    if (_isClosing || !_ownsTask(task)) return;
+    _removingTasks.add(task);
+    try {
+      await stopTask(task);
+      if (_isClosing || !_ownsTask(task)) return;
+      _activeSessionIds.remove(task.taskId);
+      _completeLifecycle(task.taskId);
+      tasks.removeWhere((candidate) => identical(candidate, task));
+      schedulePersist();
+    } finally {
+      _removingTasks.remove(task);
+    }
   }
 
   Future<void> _persist() async {
@@ -1160,18 +1248,36 @@ class RecorderController extends GetxService {
     }
 
     restored.sort((left, right) => left.status.order.compareTo(right.status.order));
+    // Reserve every interrupted output before publishing the cards: a user
+    // can start the second task while recovery of the first one is awaiting IO.
+    final recovering = {
+      for (final task in restored)
+        if (interruptedTaskIds.contains(task.taskId) || task.pendingAttempts.isNotEmpty) task: Completer<void>(),
+    };
+    for (final entry in recovering.entries) {
+      _interruptedRecoveries[entry.key.taskId] = entry.value;
+    }
     tasks.assignAll(restored);
     schedulePersist();
 
     // A process kill cannot run FFmpeg's completion callback. Finish only
     // tasks that were persisted in an active lifecycle; completed/manual
     // tasks are never reprocessed merely because a TS file still exists.
-    for (final task in restored.where(
-      (candidate) => interruptedTaskIds.contains(candidate.taskId) || candidate.pendingAttempts.isNotEmpty,
-    )) {
-      if (_isClosing) return;
-      if (!_ownsTask(task)) continue;
-      await _recoverInterruptedRecording(task);
+    for (final entry in recovering.entries) {
+      final task = entry.key;
+      try {
+        if (!_isClosing && _ownsTask(task)) await _recoverInterruptedRecording(task);
+      } catch (error, stack) {
+        developer.log('Interrupted recording recovery failed', error: error, stackTrace: stack);
+        if (!_isClosing && _ownsTask(task)) {
+          task.markFailure(stage: 'merge', error: error);
+          task.status = RecordStatus.failed;
+          updateTask(task);
+        }
+      } finally {
+        if (identical(_interruptedRecoveries[task.taskId], entry.value)) _interruptedRecoveries.remove(task.taskId);
+        entry.value.complete();
+      }
     }
     if (_isClosing || !settings.autoStartOnBoot.value || resumeTaskIds.isEmpty) return;
     if (!await requestStoragePermission() || _isClosing || !settings.autoStartOnBoot.value) return;
@@ -1198,7 +1304,7 @@ class RecorderController extends GetxService {
     if (directory.isNotEmpty) {
       await _queueCurrentAttempt(task, allowLegacy: true);
     }
-    if (_isClosing || task.pendingAttempts.isEmpty) return;
+    if (_isClosing || !_ownsTask(task) || task.pendingAttempts.isEmpty) return;
 
     final directories = task.pendingAttempts.map((attempt) => attempt.directoryPath).toSet();
     final directoryOwner = CacheService.to;
@@ -1209,7 +1315,7 @@ class RecorderController extends GetxService {
       task.status = RecordStatus.processing;
       updateTask(task);
       final merged = await _finalizePendingAttempts(task, allowLegacy: true);
-      if (_isClosing) return;
+      if (_isClosing || !_ownsTask(task)) return;
       task.status = merged ? RecordStatus.stopped : RecordStatus.failed;
       updateTask(task);
       await settings.refreshCacheSize();
@@ -1229,6 +1335,10 @@ class RecorderController extends GetxService {
   @override
   void onClose() {
     _isClosing = true;
+    for (final request in _startRequests.values) {
+      request.complete(false);
+    }
+    _startRequests.clear();
     _pollingWorker?.dispose();
     _pollingWorker = null;
     for (final request in _pollInFlight.values) {
@@ -1299,6 +1409,21 @@ class RecorderController extends GetxService {
     }
     super.onClose();
   }
+}
+
+class _RecorderStartRequest {
+  _RecorderStartRequest(this.task);
+  final LiveRecordTask task;
+  final Completer<bool> done = Completer<bool>();
+  void complete(bool value) {
+    if (!done.isCompleted) done.complete(value);
+  }
+}
+
+class _RecorderStopRequest {
+  _RecorderStopRequest(this.task);
+  final LiveRecordTask task;
+  final Completer<void> done = Completer<void>();
 }
 
 class _RecorderPollRequest {

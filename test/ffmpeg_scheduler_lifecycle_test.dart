@@ -93,4 +93,35 @@ void main() {
     await cancellation;
     expect(scheduler.totalCount, 0);
   });
+
+  test('the explicit drain fence follows only the captured native owner', () async {
+    final scheduler = FFmpegScheduler.forTesting();
+    final entered = Completer<void>();
+    final exit = Completer<void>();
+    scheduler.enqueue(
+      taskId: 'fixture',
+      taskRunner: (_) {
+        entered.complete();
+        return exit.future;
+      },
+    );
+    await entered.future;
+    var drained = false;
+    final drain = scheduler.waitForTask('fixture').then((_) => drained = true);
+    await scheduler.waitForTask('absent');
+    await Future<void>.delayed(Duration.zero);
+    expect(drained, isFalse);
+    final cancellation = scheduler.cancel('fixture');
+    exit.complete();
+    await Future.wait([drain, cancellation]);
+    expect(drained, isTrue);
+    expect(scheduler.isRunning('fixture'), isFalse);
+    final replacementExit = Completer<void>();
+    scheduler.enqueue(taskId: 'fixture', taskRunner: (_) => replacementExit.future);
+    await drain;
+    expect(scheduler.isRunning('fixture'), isTrue);
+    replacementExit.complete();
+    await scheduler.waitForTask('fixture');
+    expect(scheduler.totalCount, 0);
+  });
 }

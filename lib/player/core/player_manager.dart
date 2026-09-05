@@ -1909,11 +1909,11 @@ class PlayerManager {
       _cancelVideoFrameStallRecovery();
       return;
     }
-    // Frames move a monotonic deadline, not a native Timer allocation. At
-    // 60/120 Hz the old cancel/recreate path performed thousands of redundant
-    // allocations per minute. Check the remaining time only when the one
-    // pending timer wakes; this preserves the full timeout after the last
-    // frame and is independent of wall-clock adjustments.
+    // Progress notifications move a monotonic deadline, not a Timer allocation.
+    // Windows currently throttles them to 500 ms; other implementations may
+    // emit more often. Check the remaining time only when the one pending
+    // timer wakes, preserving the full timeout after the last notification
+    // independently of wall-clock adjustments and notification frequency.
     _videoFrameWatchdogClock.start();
     _videoFrameDeadline = _videoFrameWatchdogClock.elapsed + videoFrameStallTimeout;
     if (_videoFrameStallTimer != null) return;

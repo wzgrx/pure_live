@@ -26,6 +26,7 @@ import 'package:pure_live/modules/live_play/widgets/local_interaction/local_danm
 import 'package:pure_live/player/core/portrait_stream_support.dart';
 import 'package:pure_live/modules/live_play/widgets/layout/portrait_fullscreen_interaction.dart';
 import 'package:pure_live/modules/live_play/widgets/layout/bottom_control_surface.dart';
+import 'package:pure_live/modules/live_play/widgets/layout/control_hover_region.dart';
 
 @visibleForTesting
 enum TopActionLeadingSlot { back, datetime, battery }
@@ -301,112 +302,118 @@ class TopActionBar extends StatelessWidget {
         right: 0,
         height: barHeight,
         duration: const Duration(milliseconds: 300),
-        child: Container(
-          height: barHeight,
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [Colors.transparent, Colors.black45],
+        child: ControlHoverRegion(
+          enabled: controller.showController.value && !controller.showLocked.value,
+          onEnter: controller.onMouseEnterController,
+          onExit: controller.onMouseExitController,
+          child: Container(
+            height: barHeight,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [Colors.transparent, Colors.black45],
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              for (final slot in resolveTopActionLeadingSlots(
-                fullscreen: GlobalPlayerState.to.fullscreenUI,
-                android: PlatformUtils.isAndroid,
-              ))
-                switch (slot) {
-                  TopActionLeadingSlot.back => BackButton(controller: controller),
-                  TopActionLeadingSlot.datetime => const DatetimeInfo(key: ValueKey('fullscreen-leading-time')),
-                  TopActionLeadingSlot.battery => BatteryInfo(
-                    key: const ValueKey('fullscreen-leading-battery'),
-                    controller: controller,
-                  ),
-                },
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        controller.room.title!,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.t16.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                      if (controller.room.currentProgramme != null && controller.room.currentProgramme!.isNotEmpty) ...[
-                        const SizedBox(height: 2),
+            child: Row(
+              children: [
+                for (final slot in resolveTopActionLeadingSlots(
+                  fullscreen: GlobalPlayerState.to.fullscreenUI,
+                  android: PlatformUtils.isAndroid,
+                ))
+                  switch (slot) {
+                    TopActionLeadingSlot.back => BackButton(controller: controller),
+                    TopActionLeadingSlot.datetime => const DatetimeInfo(key: ValueKey('fullscreen-leading-time')),
+                    TopActionLeadingSlot.battery => BatteryInfo(
+                      key: const ValueKey('fullscreen-leading-battery'),
+                      controller: controller,
+                    ),
+                  },
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          "${i18n('now_playing')}: ${controller.room.currentProgramme!}",
+                          controller.room.title!,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.85),
+                          style: AppTextStyles.t16.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                             decoration: TextDecoration.none,
                           ),
                         ),
+                        if (controller.room.currentProgramme != null &&
+                            controller.room.currentProgramme!.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            "${i18n('now_playing')}: ${controller.room.currentProgramme!}",
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.85),
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
 
-              if (controller.room.platform == Sites.iptvSite)
-                IconButton(
-                  icon: const Icon(Icons.assignment_outlined), // 节目单账本图标
-                  tooltip: i18n('view_schedule'),
-                  color: Colors.white,
-                  onPressed: () async {
-                    Get.dialog(
-                      AlertDialog(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        contentPadding: EdgeInsets.zero,
-                        content: _buildFullSchedulePanel(),
-                      ),
-                    );
-                  },
-                ),
-              for (final slot in resolveTopActionTrailingSlots(
-                fullscreen: GlobalPlayerState.to.fullscreenUI,
-                android: PlatformUtils.isAndroid,
-                windows: PlatformUtils.isWindows,
-              ))
-                switch (slot) {
-                  TopActionTrailingSlot.roomHistory => IconButton(
-                    key: const ValueKey('fullscreen-room-history'),
-                    icon: const Icon(Icons.swap_horiz_outlined),
-                    tooltip: i18n('switch_live_room'),
+                if (controller.room.platform == Sites.iptvSite)
+                  IconButton(
+                    icon: const Icon(Icons.assignment_outlined), // 节目单账本图标
+                    tooltip: i18n('view_schedule'),
                     color: Colors.white,
-                    onPressed: () {
-                      Get.dialog(PlayOther(controller: Get.find<LivePlayController>()));
+                    onPressed: () async {
+                      Get.dialog(
+                        AlertDialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          contentPadding: EdgeInsets.zero,
+                          content: _buildFullSchedulePanel(),
+                        ),
+                      );
                     },
-                    style: IconButton.styleFrom(backgroundColor: Colors.black26),
                   ),
-                  TopActionTrailingSlot.datetime => const DatetimeInfo(),
-                  TopActionTrailingSlot.battery => BatteryInfo(controller: controller),
-                  TopActionTrailingSlot.audioOnly => AudioOnlyButton(
-                    key: const ValueKey('playback-action-audio-only'),
-                    controller: controller,
-                  ),
-                  TopActionTrailingSlot.cast => CastButton(
-                    key: const ValueKey('playback-action-cast'),
-                    controller: controller,
-                  ),
-                  TopActionTrailingSlot.pip => PIPButton(
-                    key: GlobalPlayerState.to.fullscreenUI
-                        ? const ValueKey('fullscreen-pip-shortcut')
-                        : const ValueKey('playback-action-pip'),
-                    controller: controller,
-                  ),
-                },
-            ],
+                for (final slot in resolveTopActionTrailingSlots(
+                  fullscreen: GlobalPlayerState.to.fullscreenUI,
+                  android: PlatformUtils.isAndroid,
+                  windows: PlatformUtils.isWindows,
+                ))
+                  switch (slot) {
+                    TopActionTrailingSlot.roomHistory => IconButton(
+                      key: const ValueKey('fullscreen-room-history'),
+                      icon: const Icon(Icons.swap_horiz_outlined),
+                      tooltip: i18n('switch_live_room'),
+                      color: Colors.white,
+                      onPressed: () {
+                        Get.dialog(PlayOther(controller: Get.find<LivePlayController>()));
+                      },
+                      style: IconButton.styleFrom(backgroundColor: Colors.black26),
+                    ),
+                    TopActionTrailingSlot.datetime => const DatetimeInfo(),
+                    TopActionTrailingSlot.battery => BatteryInfo(controller: controller),
+                    TopActionTrailingSlot.audioOnly => AudioOnlyButton(
+                      key: const ValueKey('playback-action-audio-only'),
+                      controller: controller,
+                    ),
+                    TopActionTrailingSlot.cast => CastButton(
+                      key: const ValueKey('playback-action-cast'),
+                      controller: controller,
+                    ),
+                    TopActionTrailingSlot.pip => PIPButton(
+                      key: GlobalPlayerState.to.fullscreenUI
+                          ? const ValueKey('fullscreen-pip-shortcut')
+                          : const ValueKey('playback-action-pip'),
+                      controller: controller,
+                    ),
+                  },
+              ],
+            ),
           ),
         ),
       ),
@@ -1932,66 +1939,71 @@ class BottomActionBar extends StatelessWidget {
       return BottomControlSurface(
         visible: shouldShow,
         height: barHeight,
-        child: PortraitFullscreenRestoreGestureRegion(
-          enabled: portraitFullscreen,
-          onRestore: () => unawaited(controller.exitPortraitFullScreen()),
-          child: Container(
-            height: barHeight,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Colors.black45],
+        child: ControlHoverRegion(
+          enabled: shouldShow,
+          onEnter: controller.onMouseEnterController,
+          onExit: controller.onMouseExitController,
+          child: PortraitFullscreenRestoreGestureRegion(
+            enabled: portraitFullscreen,
+            onRestore: () => unawaited(controller.exitPortraitFullScreen()),
+            child: Container(
+              height: barHeight,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black45],
+                ),
               ),
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final fullscreen = GlobalPlayerState.to.fullscreenUI;
-                if (portraitFullscreen) {
-                  return _buildPortraitFullscreenLayout();
-                }
-                final compact = constraints.maxWidth < 760;
-                final left = _buildLeftActions(compact: fullscreen && compact);
-                final right = _buildRightActions(compact: fullscreen && compact);
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final fullscreen = GlobalPlayerState.to.fullscreenUI;
+                  if (portraitFullscreen) {
+                    return _buildPortraitFullscreenLayout();
+                  }
+                  final compact = constraints.maxWidth < 760;
+                  final left = _buildLeftActions(compact: fullscreen && compact);
+                  final right = _buildRightActions(compact: fullscreen && compact);
 
-                if (fullscreen) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      children: [
-                        left,
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 420),
-                              child: FullscreenLocalDanmakuComposer(controller: controller),
+                  if (fullscreen) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        children: [
+                          left,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 420),
+                                child: FullscreenLocalDanmakuComposer(controller: controller),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        right,
-                      ],
+                          const SizedBox(width: 8),
+                          right,
+                        ],
+                      ),
+                    );
+                  }
+
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const PureLiveBoundedScrollPhysics(),
+                    clipBehavior: Clip.hardEdge,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [left, right]),
+                      ),
                     ),
                   );
-                }
-
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const PureLiveBoundedScrollPhysics(),
-                  clipBehavior: Clip.hardEdge,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [left, right]),
-                    ),
-                  ),
-                );
-              },
+                },
+              ),
             ),
           ),
         ),

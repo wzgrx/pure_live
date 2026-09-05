@@ -700,7 +700,11 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   void enableController() {
     if (_isDisposed) return;
     showController.value = true;
+    _armControllerHide();
+  }
 
+  void _armControllerHide() {
+    if (_isDisposed) return;
     if (!_isMouseOverController && !_isMouseOverPlayer) {
       _controllerIdleClock.start();
       _controllerHideDeadlineMs = _controllerIdleClock.elapsedMilliseconds + _controllerHideDelay.inMilliseconds;
@@ -729,16 +733,18 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   // 鼠标进入控制器区域
-  void onMouseEnterController() {
-    _isMouseOverController = true;
+  void onMouseEnterController([Object? owner]) {
+    if (_isDisposed || !_controlHoverOwners.add(owner ?? _legacyControlHoverOwner)) return;
     stopHideController();
     showController.value = true;
   }
 
   // 鼠标离开控制器区域
-  void onMouseExitController() {
-    _isMouseOverController = false;
-    enableController(); // 重新开始计时
+  void onMouseExitController([Object? owner]) {
+    if (_isDisposed || !_controlHoverOwners.remove(owner ?? _legacyControlHoverOwner)) return;
+    // Unmount can occur during build. Re-arm without publishing Rx changes,
+    // and never release another mounted control bar's hover ownership.
+    _armControllerHide();
   }
 
   // 鼠标进入播放器区域
@@ -1201,7 +1207,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     _danmakuManager.dispose();
     _cancelAllTimers();
     scheduleScrollController.dispose();
-    _isMouseOverController = false;
+    _controlHoverOwners.clear();
     _isMouseOverPlayer = false;
     // 异步清理
     unawaited(_disposeAsync());
@@ -1219,7 +1225,9 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   final Stopwatch _controllerIdleClock = Stopwatch();
   int? _controllerHideDeadlineMs;
   // 添加鼠标状态跟踪
-  bool _isMouseOverController = false;
+  final _controlHoverOwners = <Object>{};
+  final _legacyControlHoverOwner = Object();
+  bool get _isMouseOverController => _controlHoverOwners.isNotEmpty;
   bool _isMouseOverPlayer = false;
   Timer? _defaultFullscreenTimer;
   Timer? _controllerTransitionTimer;

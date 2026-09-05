@@ -42,6 +42,16 @@ class MediaKitAdapter
     _audioModeTransitions = LatestAsyncValueQueue<bool>(_applyAudioOnly);
   }
 
+  /// Exercises the real source lifecycle and subscriptions without a renderer.
+  /// The supplied player owns its event contract; widget/native rendering is
+  /// intentionally outside this deterministic adapter-test entry point.
+  @visibleForTesting
+  factory MediaKitAdapter.headlessForTest(Player player) {
+    return MediaKitAdapter()
+      .._player = player
+      .._initialized = true;
+  }
+
   /// Applies the shared low-latency live-stream mpv property set to a native
   /// (libmpv) player platform.
   ///
@@ -435,11 +445,7 @@ class MediaKitAdapter
     // PlayerManager recreate watchdog timers and notify UI listeners dozens of
     // times per second on Windows. Keep the dedicated frame stream hot while
     // emitting state only when it actually changes.
-    if (_loadingSubject.value) _loadingSubject.add(false);
-    if (_player.state.playing) {
-      if (!_playingSubject.value) _playingSubject.add(true);
-      if (_stateSubject.value != PlayerState.playing) _stateSubject.add(PlayerState.playing);
-    }
+    _publishMediaProgressState();
     _cancelRecoveredNativeError(NativeDiagnosticComponent.video);
   }
 
@@ -448,11 +454,23 @@ class MediaKitAdapter
     _sourceHasAudioFrame = true;
     _sourceProgressRevision++;
     if (_isAudioOnly && _player.state.playing) {
-      if (_loadingSubject.value) _loadingSubject.add(false);
-      if (!_playingSubject.value) _playingSubject.add(true);
-      if (_stateSubject.value != PlayerState.playing) _stateSubject.add(PlayerState.playing);
+      _publishMediaProgressState();
     }
     _cancelRecoveredNativeError(NativeDiagnosticComponent.audio);
+  }
+
+  void _publishMediaProgressState() {
+    // A queued frame or playing=true may arrive while mpv is still waiting
+    // for cache. Only the native buffering contract ends that episode; media
+    // readiness must not retire PlayerManager's independent stall watchdog.
+    final buffering = _player.state.buffering;
+    if (_loadingSubject.value != buffering) _loadingSubject.add(buffering);
+    if (_player.state.playing && !_playingSubject.value) _playingSubject.add(true);
+    if (buffering) {
+      if (_stateSubject.value != PlayerState.buffering) _stateSubject.add(PlayerState.buffering);
+    } else if (_player.state.playing) {
+      if (_stateSubject.value != PlayerState.playing) _stateSubject.add(PlayerState.playing);
+    }
   }
 
   @override
@@ -551,7 +569,7 @@ class MediaKitAdapter
           );
         }
       }
-      _stateSubject.add(PlayerState.ready);
+      _stateSubject.add(_loadingSubject.value ? PlayerState.buffering : PlayerState.ready);
 
       if (PlatformUtils.isMobile) {
         await setVolume(1.0);
@@ -576,8 +594,10 @@ class MediaKitAdapter
 
       throw exception;
     } finally {
-      if (!_disposed && (_sourceHasVideoFrame || (_isAudioOnly && _sourceHasAudioFrame))) {
-        _loadingSubject.add(false);
+      if (!_disposed &&
+          _sourceFence.accepts(sourceGeneration) &&
+          (_sourceHasVideoFrame || (_isAudioOnly && _sourceHasAudioFrame))) {
+        _publishMediaProgressState();
       }
     }
   }
@@ -605,14 +625,17 @@ class MediaKitAdapter
         final publishPlaying = shouldPublishMediaKitPlaying(playing);
         _playingSubject.add(publishPlaying);
         if (publishPlaying) {
-          _sourceProgressRevision++;
           // `Player.stream.playing` is the native playback authority. Optional
           // mpv frame properties are not available on every Android backend and
           // must never suppress this state or keep the manager's readiness
           // deadline alive for a stream which is already playing.
-          _loadingSubject.add(false);
-          _stateSubject.add(PlayerState.playing);
-          _cancelRecoveredNativeError(_isAudioOnly ? NativeDiagnosticComponent.audio : NativeDiagnosticComponent.video);
+          _publishMediaProgressState();
+          if (!_player.state.buffering) {
+            _sourceProgressRevision++;
+            _cancelRecoveredNativeError(
+              _isAudioOnly ? NativeDiagnosticComponent.audio : NativeDiagnosticComponent.video,
+            );
+          }
         } else {
           if (!_loadingSubject.value) _stateSubject.add(PlayerState.paused);
         }
@@ -756,9 +779,10 @@ class MediaKitAdapter
     }
     if (shouldPublishMediaKitPlaying(_player.state.playing)) {
       _playingSubject.add(true);
-      _loadingSubject.add(false);
-      _stateSubject.add(PlayerState.playing);
-      _cancelRecoveredNativeError(_isAudioOnly ? NativeDiagnosticComponent.audio : NativeDiagnosticComponent.video);
+      _publishMediaProgressState();
+      if (!_player.state.buffering) {
+        _cancelRecoveredNativeError(_isAudioOnly ? NativeDiagnosticComponent.audio : NativeDiagnosticComponent.video);
+      }
     }
   }
 

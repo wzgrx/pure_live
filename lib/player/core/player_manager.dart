@@ -1072,7 +1072,9 @@ class PlayerManager {
         }
       }
       if (!_isSessionValid(mySessionId)) return;
-      _stateSubject.add(PlayerState.ready);
+      // Opening the source can finish before the native cache has refilled.
+      // Keep that buffering episode authoritative for both UI and recovery.
+      _stateSubject.add(_nativeLoading ? PlayerState.buffering : PlayerState.ready);
       _scheduleAudioServiceSync(player, audioOnly, room: room, sessionId: mySessionId);
     } on PlayerException catch (e) {
       if (_isSessionValid(mySessionId)) await _handleError(e, sessionId: mySessionId);

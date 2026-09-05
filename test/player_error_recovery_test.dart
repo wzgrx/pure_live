@@ -1535,6 +1535,164 @@ void main() {
     expect(candidateDisposals, 1);
   }, skip: !Platform.isWindows);
 
+  test('close immediately revokes a Windows candidate before queued teardown', () async {
+    final opened = Completer<void>();
+    final releaseOpen = Completer<void>();
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final candidate = _RecoveryFakePlayer(
+      PlayerEngine.mediaKit,
+      (_) => null,
+      openBarrier: releaseOpen.future,
+      onOpenSource: () => opened.complete(),
+    );
+    var creations = 0;
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{
+      PlayerEngine.mediaKit: active,
+    }, playerCreator: (_) => creations++ == 0 ? active : candidate)..configureDefaultEngine(PlayerEngine.mediaKit);
+    try {
+      await manager.play(
+        'https://cdn.example/old.flv',
+        const [],
+        const {},
+        room: LiveRoom(roomId: 'close-warm', platform: 'huya'),
+        sourceResolver: (_) async =>
+            const PlaybackSourceRefreshResult(urls: ['https://cdn.example/fresh.flv'], preferredLineIndex: 0),
+      );
+      active.emitError(PlayerException(message: 'transport ended', type: PlayerErrorType.network));
+      await opened.future;
+      final closing = manager.close();
+      releaseOpen.complete();
+      await closing;
+      expect(candidate.unmuteCalls, 0, reason: 'a retired recovery must never become audible');
+      expect(
+        manager.currentPlayer,
+        same(active),
+        reason: 'close must stop the original owner, not install a replacement',
+      );
+      expect(active.softStopCalls, 1);
+      expect(candidate.disposeCalls, 1);
+    } finally {
+      if (!releaseOpen.isCompleted) releaseOpen.complete();
+      await manager.dispose();
+    }
+  }, skip: !Platform.isWindows);
+
+  test('close followed immediately by play preserves the newer playback intent', () async {
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: player});
+    try {
+      await manager.initialize(engine: PlayerEngine.mediaKit);
+      final closing = manager.close();
+      final opening = manager.play(
+        'https://cdn.example/reopen.flv',
+        const [],
+        const {},
+        room: LiveRoom(roomId: 'reopen-intent', platform: 'huya'),
+      );
+      await Future.wait([closing, opening]);
+      expect(player.isPlayingNow, isTrue);
+      final token = await manager.pauseForLifecycle();
+      expect(token, isNotNull, reason: 'native playing alone must not hide a lost playback intent');
+      expect(await manager.resumeFromLifecycle(token!), isTrue);
+      expect(player.isPlayingNow, isTrue);
+    } finally {
+      await manager.dispose();
+    }
+  });
+
+  test('play superseded by close before dispatch never opens a source', () async {
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: player});
+    try {
+      await manager.initialize(engine: PlayerEngine.mediaKit);
+      final opening = manager.play(
+        'https://cdn.example/cancelled.flv',
+        const [],
+        const {},
+        room: LiveRoom(roomId: 'cancelled-intent', platform: 'huya'),
+      );
+      final closing = manager.close();
+      await Future.wait([opening, closing]);
+      expect(player.openedUrls, isEmpty);
+      expect(player.unmuteCalls, 0);
+    } finally {
+      await manager.dispose();
+    }
+  });
+
+  test('close during native allocation fences the late player before source open', () async {
+    final allocationStarted = Completer<void>();
+    final releaseAllocation = Completer<void>();
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: player},
+      playerCreator: (_) async {
+        allocationStarted.complete();
+        await releaseAllocation.future;
+        return player;
+      },
+    )..configureDefaultEngine(PlayerEngine.mediaKit);
+    try {
+      final opening = manager.play(
+        'https://cdn.example/late-allocation.flv',
+        const [],
+        const {},
+        room: LiveRoom(roomId: 'late-allocation', platform: 'huya'),
+      );
+      await allocationStarted.future;
+      final closing = manager.close();
+      releaseAllocation.complete();
+      await Future.wait([opening, closing]);
+      expect(player.openedUrls, isEmpty);
+      expect(player.disposeCalls, 1);
+      expect(manager.currentPlayer, isNull);
+    } finally {
+      if (!releaseAllocation.isCompleted) releaseAllocation.complete();
+      await manager.dispose();
+    }
+  });
+
+  for (final command in ['replay', 'retry']) {
+    test('close retires an already queued $command without another source open', () async {
+      final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: player})
+        ..configureDefaultEngine(PlayerEngine.mediaKit);
+      try {
+        await manager.play(
+          'https://cdn.example/live.flv',
+          const [],
+          const {},
+          room: LiveRoom(roomId: 'cancel-$command', platform: 'huya'),
+        );
+        final reopening = command == 'replay' ? manager.replay() : manager.retry();
+        final closing = manager.close();
+        await Future.wait([reopening, closing]);
+        expect(player.openedUrls, ['https://cdn.example/live.flv']);
+        expect(player.softStopCalls, 1);
+        expect(player.isPlayingNow, isFalse);
+      } finally {
+        await manager.dispose();
+      }
+    });
+  }
+
+  test('rapid queued selections open only the latest requested source', () async {
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: player})
+      ..configureDefaultEngine(PlayerEngine.mediaKit);
+    final room = LiveRoom(roomId: 'latest-selection', platform: 'huya');
+    try {
+      final previous = manager.play('https://cdn.example/obsolete.flv', const [], const {}, room: room);
+      final latest = manager.play('https://cdn.example/current.flv', const [], const {}, room: room);
+      await Future.wait([previous, latest]);
+      expect(player.openedUrls, ['https://cdn.example/current.flv']);
+      expect(player.isPlayingNow, isTrue);
+      expect(await manager.pauseForLifecycle(), isNotNull);
+    } finally {
+      await manager.dispose();
+    }
+  });
+
   test('pause during signed lease resolution prevents a stale transport handoff', () async {
     final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
@@ -2033,11 +2191,7 @@ void main() {
           for (var frame = 0; frame < 600; frame++) {
             active.emitFrame();
           }
-          expect(
-            timerCreations - before,
-            0,
-            reason: 'frame progress updates one deadline, not 600 timers',
-          );
+          expect(timerCreations - before, 0, reason: 'frame progress updates one deadline, not 600 timers');
         } finally {
           await manager.dispose();
         }
@@ -2175,6 +2329,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
     this.hangWhileOpening = false,
     this.initBarrier,
     this.openBarrier,
+    this.onOpenSource,
     this.pauseBarrier,
     this.unmuteBarrier,
     this.emittedWidth,
@@ -2189,6 +2344,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
   final bool hangWhileOpening;
   final Future<void>? initBarrier;
   final Future<void>? openBarrier;
+  final void Function()? onOpenSource;
   final Future<void>? pauseBarrier;
   final Future<void>? unmuteBarrier;
   int unmuteCalls = 0;
@@ -2248,6 +2404,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
     bool audioOnly = false,
   }) async {
     openedUrls.add(url);
+    onOpenSource?.call();
     if (openBarrier != null) await openBarrier;
     if (hangWhileOpening) await Completer<void>().future;
     final failure = failureForUrl(url);

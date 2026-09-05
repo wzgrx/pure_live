@@ -195,6 +195,9 @@ class PlayerManager {
 
   bool _isSessionValid(int id) => !_disposed && !_isClosing && _sessionId == id;
 
+  bool _isPlaybackCommandCurrent(int revision) =>
+      !_disposed && !_isClosing && _playbackRequested && _playbackIntentRevision == revision;
+
   UnifiedPlayer? _currentPlayer;
   // Windows uses a first-frame-gated handoff for actual source failures and
   // short-lived fallback transports, not periodic native Huya FLV replacement.
@@ -875,7 +878,9 @@ class PlayerManager {
     _cancelTransientLiveRetry();
     _cancelContinuityRecovery();
     _cancelVideoFrameStallRecovery();
+    final intentRevision = _playbackIntentRevision;
     return _enqueuePlayerLifecycle(() async {
+      if (!_isPlaybackCommandCurrent(intentRevision)) return;
       _sourceRefreshResolver = sourceResolver;
       _sourceRefreshAttempts = 0;
       _prefetchedSourceRefresh = null;
@@ -1084,8 +1089,9 @@ class PlayerManager {
     _transientLiveRetryAttempts = 0;
     _cancelTransientLiveRetry();
     _cancelContinuityRecovery();
+    final intentRevision = _playbackIntentRevision;
     return _enqueuePlayerLifecycle(() async {
-      if (_currentUrl == null) return;
+      if (!_isPlaybackCommandCurrent(intentRevision) || _currentUrl == null) return;
 
       await _playInternal(
         _currentUrl!,
@@ -2816,18 +2822,26 @@ class PlayerManager {
   }
 
   Future<void> close() {
-    return _enqueuePlayerLifecycle(_closeInternal);
-  }
-
-  Future<void> _closeInternal() async {
+    if (_disposed) return Future<void>.value();
+    // Intent changes belong to dispatch, not native teardown. A pending source
+    // open/recovery must lose ownership as soon as close is requested. Waiting
+    // for the lifecycle queue used to let it become audible first, and a later
+    // close callback could overwrite a newer play() already in the queue.
     _cancelIdlePlayerRelease();
     _playbackRequested = false;
     _playbackIntentEstablished = true;
     _playbackIntentRevision++;
+    _sessionId++;
     _playbackSuspensions.clear();
     _cancelContinuityRecovery();
     _cancelVideoFrameStallRecovery();
     _cancelTransientLiveRetry();
+    return _enqueuePlayerLifecycle(_closeInternal);
+  }
+
+  Future<void> _closeInternal() async {
+    if (_disposed) return;
+    _cancelIdlePlayerRelease();
     _sourceReadyTimer?.cancel();
     _sourceReadyTimer = null;
     _audioModeVideoWarmTimer?.cancel();
@@ -2843,7 +2857,6 @@ class PlayerManager {
     _prefetchedSourceRefresh = null;
     _pendingRoomReentry = null;
     _appFloatingSession = null;
-    _sessionId++;
     _isClosing = true;
     isVideoRestorePending.value = false;
     // Let route/overlay widgets release their listeners before native teardown,
@@ -2961,7 +2974,9 @@ class PlayerManager {
     _transientLiveRetryAttempts = 0;
     _cancelTransientLiveRetry();
     _cancelContinuityRecovery();
+    final intentRevision = _playbackIntentRevision;
     return _enqueuePlayerLifecycle(() async {
+      if (!_isPlaybackCommandCurrent(intentRevision)) return;
       final url = _currentUrl;
       if (url == null) return;
       await _playInternal(url, _currentPlayUrls, _currentHeaders, room: currentFloatRoom, audioOnly: _runtimeAudioOnly);

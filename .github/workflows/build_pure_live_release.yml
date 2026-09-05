@@ -1,4 +1,4 @@
-# main 仓库专用请勿修改此文件
+# Manual compatibility entrypoint; stage tags belong to feature-build.yml.
 name: PureLive All-Platform Release
 on:
   workflow_dispatch:
@@ -43,16 +43,11 @@ on:
         required: true
         type: string
         default: "v3.1.8"
-  push:
-    tags:
-      - "stage-linux-*"
-      - "stage-macos-*"
-      - "stage-ios-*"
 permissions:
   contents: read
 concurrency:
   group: manual-build-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 env:
   FLUTTER_VERSION: 3.47.0
   FLUTTER_LINUX_ARCHIVE: stable/linux/flutter_linux_3.47.0-stable.tar.xz
@@ -263,6 +258,10 @@ jobs:
         run: flutter config --enable-windows-desktop
       - name: Resolve packages
         run: flutter pub get --enforce-lockfile
+
+      - name: Prefetch verified Firebase C++ SDK
+        shell: pwsh
+        run: .\tool\prefetch_windows_native.ps1
       - name: Generate production AppConfig
         run: |
           dart run enven `
@@ -388,33 +387,12 @@ jobs:
   linux:
     name: Linux x64 portable
     if: >-
-      ${{
-        always() &&
-        (
-          (
-            github.event_name == 'workflow_dispatch' &&
-            inputs.build_linux
-          ) ||
-          (
-            github.event_name == 'push' &&
-            startsWith(github.ref_name, 'stage-linux-')
-          )
-        ) &&
-        (
-          needs.quality.result == 'success' ||
-          needs.quality.result == 'skipped'
-        ) &&
-        (
-          github.event_name == 'push' ||
-          !inputs.build_android ||
-          needs.android.result == 'success'
-        ) &&
-        (
-          github.event_name == 'push' ||
-          !inputs.build_windows ||
-          needs.windows.result == 'success'
-        )
-      }}
+      ${{ always() &&
+        github.event_name == 'workflow_dispatch' &&
+        inputs.build_linux &&
+        (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
+        (!inputs.build_android || needs.android.result == 'success') &&
+        (!inputs.build_windows || needs.windows.result == 'success') }}
     needs: [quality, android, windows]
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -517,41 +495,13 @@ jobs:
   apple:
     name: Apple platform packages
     if: >-
-      ${{
-        always() &&
-        (
-          (
-            github.event_name == 'workflow_dispatch' &&
-            (inputs.build_macos || inputs.build_ios)
-          ) ||
-          (
-            github.event_name == 'push' &&
-            (
-              startsWith(github.ref_name, 'stage-macos-') ||
-              startsWith(github.ref_name, 'stage-ios-')
-            )
-          )
-        ) &&
-        (
-          needs.quality.result == 'success' ||
-          needs.quality.result == 'skipped'
-        ) &&
-        (
-          github.event_name == 'push' ||
-          !inputs.build_android ||
-          needs.android.result == 'success'
-        ) &&
-        (
-          github.event_name == 'push' ||
-          !inputs.build_windows ||
-          needs.windows.result == 'success'
-        ) &&
-        (
-          github.event_name == 'push' ||
-          !inputs.build_linux ||
-          needs.linux.result == 'success'
-        )
-      }}
+      ${{ always() &&
+        github.event_name == 'workflow_dispatch' &&
+        (inputs.build_macos || inputs.build_ios) &&
+        (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
+        (!inputs.build_android || needs.android.result == 'success') &&
+        (!inputs.build_windows || needs.windows.result == 'success') &&
+        (!inputs.build_linux || needs.linux.result == 'success') }}
     needs: [quality, android, windows, linux]
     runs-on: macos-15
     timeout-minutes: 90
@@ -751,8 +701,18 @@ jobs:
           if-no-files-found: error
           retention-days: 7
   publish-release:
+    timeout-minutes: 15
     name: Publish GitHub Release
-    if: ${{ always() && inputs.create_release && (needs.quality.result == 'success' || needs.quality.result == 'skipped') }}
+    if: >-
+      ${{ always() &&
+        github.event_name == 'workflow_dispatch' &&
+        inputs.create_release &&
+        (inputs.build_android || inputs.build_windows || inputs.build_linux || inputs.build_macos || inputs.build_ios) &&
+        (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
+        (!inputs.build_android || needs.android.result == 'success') &&
+        (!inputs.build_windows || needs.windows.result == 'success') &&
+        (!inputs.build_linux || needs.linux.result == 'success') &&
+        (!(inputs.build_macos || inputs.build_ios) || needs.apple.result == 'success') }}
     needs:
       - quality
       - android
@@ -914,6 +874,7 @@ jobs:
             artifacts/**/*
             BUILD_METADATA.json
   update-json:
+    timeout-minutes: 15
     name: Update releases.json
     if: ${{ always() && inputs.create_release && needs.publish-release.result == 'success' }}
     needs:

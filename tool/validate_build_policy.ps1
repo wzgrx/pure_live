@@ -567,8 +567,8 @@ if ($featureWorkflow -match 'stage-build-' -or $featureWorkflow -match 'stage-ap
 }
 foreach ($marker in @(
     'needs: [quality, android]',
-    'needs: [quality, windows]',
-    'needs: [quality, linux]',
+    'needs: [quality, android, windows]',
+    'needs: [quality, android, windows, linux]',
     'cancel-in-progress: false',
     'flutter test --concurrency=12',
     '--target-platform android-arm64',

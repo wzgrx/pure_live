@@ -3,7 +3,7 @@ version = 1
 name = "pure_live"
 
 [setup]
-script = "flutter pub get"
+script = "" # Resolve dependencies on demand through the repository gate.
 
 [[actions]]
 name = "flutter run -d macos"

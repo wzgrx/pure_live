@@ -123,10 +123,6 @@ jobs:
       - name: Resolve locked packages
         run: flutter pub get --enforce-lockfile
 
-      - name: Prefetch verified Firebase C++ SDK
-        shell: pwsh
-        run: .\tool\prefetch_windows_native.ps1
-
       - name: Generate production AppConfig
         run: |
           dart run enven \
@@ -305,8 +301,8 @@ jobs:
   windows:
     name: Windows EXE + MSIX
 
-    if: ${{ always() && inputs.build_windows && (needs.quality.result == 'success' || needs.quality.result == 'skipped') && (needs.android.result == 'success' || needs.android.result == 'skipped') }}
-
+    if: >-
+      ${{ always() && inputs.build_windows && (needs.quality.result == 'success' || needs.quality.result == 'skipped') && (!inputs.build_android || needs.android.result == 'success') }}
     needs: [quality, android]
 
     runs-on: windows-latest
@@ -391,6 +387,10 @@ jobs:
 
       - name: Resolve locked packages
         run: flutter pub get --enforce-lockfile
+
+      - name: Prefetch verified Firebase C++ SDK
+        shell: pwsh
+        run: .\tool\prefetch_windows_native.ps1
 
       - name: Generate production AppConfig
         run: |
@@ -548,9 +548,14 @@ jobs:
   linux:
     name: Linux x64 portable
 
-    if: ${{ always() && ((github.event_name == 'push' && startsWith(github.ref_name, 'stage-linux-')) || inputs.build_linux) && (needs.quality.result == 'success' || needs.quality.result == 'skipped') && (needs.windows.result == 'success' || needs.windows.result == 'skipped') }}
-
-    needs: [quality, windows]
+    if: >-
+      ${{ always() &&
+        ((github.event_name == 'push' &&
+        startsWith(github.ref_name, 'stage-linux-')) || inputs.build_linux) &&
+        (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
+        (!inputs.build_android || needs.android.result == 'success') &&
+        (!inputs.build_windows || needs.windows.result == 'success') }}
+    needs: [quality, android, windows]
 
     runs-on: ubuntu-24.04
 
@@ -746,9 +751,15 @@ jobs:
   apple:
     name: Apple platform packages
 
-    if: ${{ always() && ((github.event_name == 'push' && (startsWith(github.ref_name, 'stage-macos-') || startsWith(github.ref_name, 'stage-ios-'))) || inputs.build_macos || inputs.build_ios) && (needs.quality.result == 'success' || needs.quality.result == 'skipped') && (needs.linux.result == 'success' || needs.linux.result == 'skipped') }}
-
-    needs: [quality, linux]
+    if: >-
+      ${{ always() &&
+        ((github.event_name == 'push' &&
+        (startsWith(github.ref_name, 'stage-macos-') || startsWith(github.ref_name, 'stage-ios-'))) || inputs.build_macos || inputs.build_ios) &&
+        (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
+        (!inputs.build_android || needs.android.result == 'success') &&
+        (!inputs.build_windows || needs.windows.result == 'success') &&
+        (!inputs.build_linux || needs.linux.result == 'success') }}
+    needs: [quality, android, windows, linux]
 
     runs-on: macos-15
 
@@ -1293,16 +1304,19 @@ jobs:
 # =========================================================
 
   publish-release:
+    timeout-minutes: 15
     name: Publish GitHub Release
 
     if: >-
-      ${{ always() && inputs.create_release &&
-          (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
-          (!inputs.build_android || needs.android.result == 'success') &&
-          (!inputs.build_windows || needs.windows.result == 'success') &&
-          (!inputs.build_linux || needs.linux.result == 'success') &&
-          (!(inputs.build_macos || inputs.build_ios) || needs.apple.result == 'success') }}
-
+      ${{ always() &&
+        github.event_name == 'workflow_dispatch' &&
+        inputs.create_release &&
+        (inputs.build_android || inputs.build_windows || inputs.build_linux || inputs.build_macos || inputs.build_ios) &&
+        (needs.quality.result == 'success' || needs.quality.result == 'skipped') &&
+        (!inputs.build_android || needs.android.result == 'success') &&
+        (!inputs.build_windows || needs.windows.result == 'success') &&
+        (!inputs.build_linux || needs.linux.result == 'success') &&
+        (!(inputs.build_macos || inputs.build_ios) || needs.apple.result == 'success') }}
     needs:
       - quality
       - android
@@ -1517,6 +1531,7 @@ jobs:
 # =========================================================
 
   update-json:
+    timeout-minutes: 15
     name: Update releases.json
 
     if: ${{ always() && inputs.create_release && needs.publish-release.result == 'success' }}

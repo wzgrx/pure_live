@@ -3,8 +3,16 @@ name: 手动更新历史发布数据
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: release-index-master
+  cancel-in-progress: false
+
 jobs:
   update-json:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
     permissions:
@@ -15,6 +23,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        ref: master
         fetch-depth: 0
 
     # 2. 设置 Python 环境
@@ -36,9 +45,9 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
         # 检查是否有文件变动
-        if [ -n "$(git status --porcelain)" ]; then
+        if ! git diff --quiet -- assets/releases.json; then
           git add assets/releases.json
-          git commit -m "chore: 定时更新 releases.json 数据 [skip ci]"
+          git commit -m "chore: update releases.json [skip ci]"
 
           # 推送前先拉取远程最新修改，防止与其他任务（如发布 Release）冲突
           git pull --rebase origin master

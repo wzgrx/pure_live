@@ -1,28 +1,18 @@
 ---
 name: pure-live-maintenance
-description: Triage Pure Live bugs, review upstream changes or upstream Issues, and integrate fixes while preserving the Android/Windows maintenance fork's behavior and evidence requirements.
+description: Diagnose Pure Live bugs and review upstream Issues or code changes while preserving fork behavior. Use for bug fixes or upstream reviews; not ordinary wording edits or standalone builds.
 ---
 
 # Pure Live Maintenance
 
 <!-- maintenance-skill-markers: bug-provenance-required; semantic change ledger -->
 
-Read [`../../../MAINTENANCE_POLICY.md`](../../../MAINTENANCE_POLICY.md) whenever a task reports a Bug, requests an upstream sync, asks to inspect upstream Issues, or changes repository maintenance rules.
+Use [MAINTENANCE_POLICY.md](../../../MAINTENANCE_POLICY.md) for provenance and product invariants. Read only the sections relevant to the task.
 
-## Bug workflow
+1. Inspect current Git state, the symptom and its call/event path. Record the local SHA; inspect the relevant upstream history when needed to distinguish provenance. Mark unproven claims explicitly rather than blocking a local repair on an unrelated network fetch.
+2. Identify the first invalid state, ownership and affected modes. Build a focused reproduction from tests, logs or source evidence, then implement the smallest coherent fix and check its callers.
+3. Match verification to risk using [AGENT_WORKFLOW.md](../../../docs/AGENT_WORKFLOW.md). Lifecycle, retry, persistence and source-switch changes need behavioral regression; cosmetic edits do not need implementation-mirroring tests.
+4. For actual upstream integration, follow [UPSTREAM_REVIEW_POLICY.md](../../../UPSTREAM_REVIEW_POLICY.md), including the semantic change ledger for every incoming commit/file. Read-only comparison is separate from merge authorization.
+5. Finish the requested work and record remaining evidence gaps. Completed bug-fix delivery follows `bugfix-android-release-default` in [BUILD_POLICY.md](../../../BUILD_POLICY.md); an analysis-only request or deferred release stays scoped accordingly.
 
-1. Freeze the current fork SHA, relevant upstream SHA and merge base.
-2. Reproduce from source, deterministic tests, logs or interface fixtures before editing.
-3. Classify the source as `upstream-existing`, `fork-regression`, `integration-conflict`, `external-drift`, `environment-or-data`, or `not-reproduced`.
-4. Trace the first invalid state and its call/event lifecycle. Do not treat the final UI symptom as the root cause.
-5. Select direct reuse, adapted merge, compatibility layer or local rewrite based on product invariants and regression surface.
-6. Record affected modes, focused regression evidence, migration/rollback behavior and remaining evidence gaps.
-7. Apply `bugfix-android-release-default` after the repair batch passes: increment one patch/build version, complete the local Android arm64 Release gate, sync `master`, publish the fixed-certificate GitHub Release, and refresh the release index. Related fixes in the same user task share one version; other platforms remain explicitly scoped.
-
-## Upstream workflow
-
-Before merging, also read [`../../../UPSTREAM_REVIEW_POLICY.md`](../../../UPSTREAM_REVIEW_POLICY.md) and run `tool/review_upstream_update.ps1`. Review the three-way history and every incoming file. The committed audit must include the semantic change ledger, issue/Bug mapping, fork-feature impact, quality assessment, explicit disposition and regression plan required by the gate.
-
-Feature requests filed against this maintenance fork route to the original project. Local Issue work focuses on reproducible maintenance regressions, with Android first and Windows as the other primary maintained target.
-
-Use [`../../../BUILD_POLICY.md`](../../../BUILD_POLICY.md) only when validation, packaging or release commands are part of the current task.
+Phone access is governed by AGENTS.md, not by this skill. Fork Issue feature requests route upstream; that intake policy does not override an explicit development request from the user.

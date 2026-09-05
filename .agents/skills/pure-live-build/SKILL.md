@@ -1,50 +1,16 @@
 ---
 name: pure-live-build
-description: Plan or execute Pure Live Flutter validation, Android/Windows builds, packaging, or releases with the repository's resource limits, serial platform staging, caches, and build records.
+description: Select and run Pure Live validation, local platform builds, packaging and verified GitHub releases. Use for build or delivery work; not for routine source reading or documentation-only edits.
 ---
 
 # Pure Live Build
 
-Before selecting or running a validation/build command, read [`../../../BUILD_POLICY.md`](../../../BUILD_POLICY.md). Treat it as the authoritative default for this repository.
+Read [BUILD_POLICY.md](../../../BUILD_POLICY.md) for resource and delivery invariants, then choose the applicable route in [AGENT_WORKFLOW.md](../../../docs/AGENT_WORKFLOW.md). Do not load unrelated release or device procedures.
 
-When the build follows a Bug fix, upstream Issue review or upstream merge, first complete the provenance, semantic review and evidence workflow in [`../../../MAINTENANCE_POLICY.md`](../../../MAINTENANCE_POLICY.md). A successful package is a build evidence layer, not a substitute for root-cause or compatibility review.
+1. Identify the requested platform, variant and delivery stage. Completed bug-fix batches retain `bugfix-android-release-default`; an explicit analysis-only/deferred request takes precedence. Multiple related fixes share one version.
+2. Use `tool/local_ci.ps1` for affected tests/analyze or formal Full validation. Use `tool/build_local_release.ps1` for a single target/configuration. These entrypoints own resource arbitration; do not wrap them in a second nested lease.
+3. Direct heavy commands use `tool/build_resource_guard.ps1`. Preserve caches and use the pinned wrapper. Check existing command results before starting another run.
+4. After required checks pass, continue to the requested delivery stage. Repeat or broaden validation only for new edits, failures or unresolved risks. Packaging-only retries can reuse the same app-source quality evidence under BUILD_POLICY.md.
+5. Verify artifacts with the repository scripts; preserve ABI, assets, 16 KB ELF/alignment, versionCode, source SHA and fixed signing-certificate checks. Record command, duration, resource data, hashes and output paths.
 
-## Workflow
-
-1. Extract the platform, architecture, configuration, validation scope, packaging, and publication actions from the current task. For a completed Bug-fix batch, apply `bugfix-android-release-default`: one patch/build increment, local Android arm64 Release, source push, GitHub fixed-certificate signing, Release publication, and release-index sync are standing scope. Treat multiple related fixes in one task as one version; other platforms remain explicit.
-   For an upstream sync, freeze the full upstream SHA and run
-   `tool/review_upstream_update.ps1` under `UPSTREAM_REVIEW_POLICY.md` before
-   merging. The range must be merge-base-to-upstream, every incoming commit and
-   file must be classified, and any incoming change requires a committed audit
-   document plus explicit approval at the gate. After merging, run
-   `python tool/audit_repository.py` before tests or packaging.
-2. Keep one platform/variant per build invocation. Queue Android, Windows, Linux, macOS, and iOS stages serially.
-3. During development, use focused tests and target-platform Debug. Run Analyze once after edits settle.
-4. Use full regression and target-platform Release only for formal delivery.
-   A failed packaging stage may use `-SkipQuality` only when the same app source
-   already passed full regression and the retry changes build/Gradle/release
-   plumbing only; cite that prior run in the delivery report.
-5. Before staging or signing Android, run `tool/verify_android_apk.ps1`. Require the
-   complete Flutter asset bundle, the single requested ABI, and the FFmpegKit,
-   SQLite, MediaKit, Flutter, IJK and app native libraries. Also assert and record
-   `versionName`, the pubspec base build number, Flutter's split-ABI offset, the
-   APK Manifest's effective `versionCode`, size, and SHA-256; package metadata and
-   signature checks alone are insufficient.
-6. Android packaging consumes the package config produced by the preceding
-   quality/dependency stage and uses `--no-pub`; do not regenerate unrelated
-   desktop/Apple plugin links inside the Android Gradle invocation.
-7. Enter the repository heavy-task guard before Gradle, Java, Dart, Flutter, or broad-search work. Default to 16 Gradle workers; use 20 only for an explicitly dedicated build. Start Flutter tests at concurrency 12. Classify work by sustained CPU/build-client activity so an `rg` process merely waiting on stdin does not block the queue indefinitely.
-8. Preserve incremental outputs and caches. Do not add a clean step unless evidence identifies damaged or incompatible generated state.
-   Keep Configuration Cache in strict failure mode. Mark a confirmed incompatible
-   Flutter aggregate task with `notCompatibleWithConfigurationCache` so Gradle
-   discards only that entry instead of persisting incomplete state in warning mode.
-   For Windows packaging, stage only files in the current CMake
-   `install_manifest.txt` plus the reviewed runner-runtime allowlist; never copy
-   the complete incremental Release directory, which can retain DLLs from removed plugins.
-9. Report the generated build record and artifacts. For a Bug-fix batch, continue only through the predeclared Android signing, GitHub Release, and index-sync stages; do not append another platform or a second full regression. For ordinary build requests, stop after the requested target.
-
-Use `tool/local_ci.ps1` for focused/full validation and `tool/build_local_release.ps1` for the single explicitly selected local target.
-For a focused regression only, add `-SkipPubGet` when no root or local-plugin
-`pubspec.yaml`/`pubspec.lock` changed and `.dart_tool/package_config.json` already
-exists. The script enforces these conditions. Full validation always resolves
-the locked graph.
+Root-cause/upstream review belongs to [MAINTENANCE_POLICY.md](../../../MAINTENANCE_POLICY.md) when that work is in scope. A build request by itself does not require reopening a completed upstream audit. Keep source, build, signing, publication and device results distinct.

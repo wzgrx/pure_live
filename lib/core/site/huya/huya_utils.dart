@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 
 import 'huya_request_params.dart';
 
@@ -15,24 +15,41 @@ int rotl64(int t) {
   return high | rotatedLow;
 }
 
-// 这里会有一个复用，当taf-websocket监听到 type=2001314 重新拉起huya-sc-list
-// 为了符合各个平台接口数据统一直通前端的需求，从site.getSuperMessage 标记首次拉起全量返回
-// 从 danmaku.websocket拉起，则只返回最后一个，实现增量SC
-// WebSocket 通知可能早于留言板写入；调用方会执行有界补偿拉取。
-// lPid--s = a.lPresenterUid == topSid
-Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList({required int lPid, bool first = false}) async {
-  final BaseTarsHttp messageBoardClient = BaseTarsHttp(
-    "http://wup.huya.com",
-    "wupui",
-    headers: HuyaRequestParams.requestHeaders,
-  );
+BaseTarsHttp createHuyaMessageBoardClient() {
+  // This endpoint is auxiliary to playback. Do not inherit the legacy TARS
+  // timeout (60000 seconds) or let one retry retain another retry's socket.
+  final client = BaseTarsHttp('https://wup.huya.com', 'wupui', timeOut: 2, headers: HuyaRequestParams.requestHeaders);
+  client.dio.options.sendTimeout = const Duration(seconds: 2);
+  client.dio.options.receiveTimeout = const Duration(seconds: 2);
+  return client;
+}
+
+/// Both initial room load and WebSocket reconciliation request full snapshots
+/// with [first]; the latter deduplicates by event ID in its current session.
+/// The compatibility single-item path chooses the newest start time, not price.
+/// Each call owns the client supplied by [clientFactory] and always closes it.
+Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList({
+  required int lPid,
+  bool first = false,
+  BaseTarsHttp Function()? clientFactory,
+}) async {
+  final messageBoardClient = (clientFactory ?? createHuyaMessageBoardClient)();
   var userId = HuyaUserId()..sHuYaUA = HuyaRequestParams.hysdkUa;
   var req = GetGameEventMessageBoardReq()
     ..lPid = lPid
     ..tId = userId
     ..iMessageBoardScope = 0
     ..iPageSize = 10;
-  var rsp = await messageBoardClient.tupRequest("getHeadLineMessageBoard", req, GetGameEventMessageBoardRsp());
+  final GetGameEventMessageBoardRsp rsp;
+  try {
+    rsp = await messageBoardClient
+        .tupRequest('getHeadLineMessageBoard', req, GetGameEventMessageBoardRsp())
+        .timeout(const Duration(seconds: 3));
+  } finally {
+    // Future.timeout only stops waiting. Closing the actual transport here
+    // prevents outstanding HTTP requests from accumulating on repeated SCs.
+    messageBoardClient.dio.close(force: true);
+  }
   final now = DateTime.now();
   final List<LiveSuperChatMessage> messages = [];
   for (final item in rsp.tMessageBoardPanel.vGameEventMessageBoardInfo) {

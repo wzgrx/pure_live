@@ -21,8 +21,7 @@ import 'package:pure_live/core/tars/get_cdn_token_ex_req.dart';
 import 'package:pure_live/core/tars/get_cdn_token_ex_resp.dart';
 import 'package:pure_live/core/site/huya/huya_request_params.dart';
 import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
-import 'package:pure_live/core/tars/get_game_event_message_board_req.dart';
-import 'package:pure_live/core/tars/get_game_event_message_board_rsp.dart';
+import 'package:pure_live/core/site/huya/huya_utils.dart' as huya_utils;
 import 'package:pure_live/modules/live_play/controllers/player_controller.dart';
 import 'package:pure_live/core/utils/live_quality_label.dart';
 
@@ -1266,62 +1265,8 @@ class HuyaSite
     return high | originalLow;
   }
 
-  Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList({required int lPid, bool first = false}) async {
-    final BaseTarsHttp messageBoardClient = BaseTarsHttp(
-      "https://wup.huya.com",
-      "wupui",
-      headers: HuyaRequestParams.requestHeaders,
-    );
-    var userId = HuyaUserId()..sHuYaUA = HuyaRequestParams.hysdkUa;
-    var req = GetGameEventMessageBoardReq()
-      ..lPid = lPid
-      ..tId = userId
-      ..iMessageBoardScope = 0
-      ..iPageSize = 10;
-    var rsp = await messageBoardClient.tupRequest("getHeadLineMessageBoard", req, GetGameEventMessageBoardRsp());
-    final now = DateTime.now();
-    final List<LiveSuperChatMessage> messages = [];
-    for (final item in rsp.tMessageBoardPanel.vGameEventMessageBoardInfo) {
-      final content = item.sContent.trim();
-      if (content.isEmpty) {
-        continue;
-      }
-      // start_time---cur--->end_time
-      final remainSec = item.iCountDown > 0 ? item.iCountDown : item.iTotalSec;
-      if (remainSec <= 0) {
-        continue;
-      }
-
-      final totalSeconds = item.iTotalSec > 0 ? item.iTotalSec : remainSec;
-
-      var price = item.iCost;
-      if (price <= 0 && item.iCostPay > 0) {
-        price = max(1, (item.iCostPay / 100).round());
-      }
-
-      final endTime = now.add(Duration(seconds: remainSec));
-      final startTime = endTime.subtract(Duration(seconds: totalSeconds));
-
-      final message = LiveSuperChatMessage(
-        messageId: item.lMessageId > 0 ? 'huya:${item.lMessageId}' : '',
-        backgroundBottomColor: "#246488",
-        backgroundColor: "#ffffff",
-        endTime: endTime,
-        face: item.tMessageUser.sAvatar,
-        message: content,
-        price: price,
-        startTime: startTime,
-        userName: item.tMessageUser.sNick.trim(),
-      );
-
-      messages.add(message);
-    }
-    if (first) {
-      return messages;
-    } else {
-      return [messages.last];
-    }
-  }
+  Future<List<LiveSuperChatMessage>> getHuyaSuperChatMessageList({required int lPid, bool first = false}) =>
+      huya_utils.getHuyaSuperChatMessageList(lPid: lPid, first: first);
 }
 
 @immutable

@@ -55,4 +55,6 @@ The runtime controls model and reasoning effort. The audited agent/build configu
 
 For long work, retain a concise checkpoint: current request, changed paths, evidence already passed, failures/pending acceptance and the next action. New user scope changes take effect immediately; preserve previous uncommitted work separately. Ask a focused question only when the missing answer changes the outcome, while continuing independent authorized work.
 
+Keep task-specific device status, temporary merge freezes, running command IDs and past failures in that checkpoint or an acceptance record, not permanent AGENTS/skill defaults. After a handoff, verify Git state and the current request before resuming a historical next action. Retrieve relevant report sections by path rather than repeatedly loading entire histories. For asynchronous tools, wait on the returned task/session ID; launch a replacement only after checking the prior attempt's outcome.
+
 Use subagents only with an explicit request under AGENTS.md. Delegate bounded independent work if requested, avoid competing writes, and keep resource/device gates serial. No blanket maximum-effort, forced delegation or repeated full-test mandate.

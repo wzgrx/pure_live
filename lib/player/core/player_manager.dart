@@ -87,10 +87,10 @@ class PlayerManager {
   final Duration idlePlayerReleaseDelay;
   final bool enableActiveContentProbe;
 
-  /// Maximum time a Windows Huya transport is allowed to run before a fresh
-  /// player is warmed in parallel. A single Huya edge connection has ended as
-  /// early as roughly 100 seconds (and concurrent reuse of one signed URL can
-  /// be evicted sooner) while the longer `wsTime` lease remains valid. Native
+  /// Compatibility interval for Windows Huya web/HLS fallback transports only.
+  /// Validated native FLV credentials bypass this timer and keep a healthy
+  /// connection open. A fallback edge connection has ended as early as roughly
+  /// 100 seconds while its longer `wsTime` lease remained valid. Native
   /// room resolution plus D3D/player initialization has also consumed about
   /// 51 seconds in a real Windows run, so the hand-off starts after 40 seconds.
   /// This leaves about a minute before the shortest isolated connection end
@@ -111,6 +111,12 @@ class PlayerManager {
   bool _playbackRequested = false;
   bool _playbackIntentEstablished = false;
   bool _videoPresentationVisible = true;
+  // Native buffering is independent of the loading UI written by recovery.
+  // Event revisions let an in-flight recovery notice that its observation was
+  // refuted, even if another buffering cycle begins before a resolver returns.
+  bool _nativeLoading = false;
+  int _bufferingRecoveryRevision = 0;
+  int _playingRecoveryRevision = 0;
   final Set<_PlaybackSuspensionReason> _playbackSuspensions = <_PlaybackSuspensionReason>{};
   Timer? _continuityTimer;
   Timer? _bufferingStallTimer;
@@ -176,8 +182,9 @@ class PlayerManager {
   bool _isSessionValid(int id) => !_disposed && !_isClosing && _sessionId == id;
 
   UnifiedPlayer? _currentPlayer;
-  // Windows Huya uses a first-frame-gated source hand-off before the active
-  // CDN transport reaches its short edge-session window. Keep the retired
+  // Windows uses a first-frame-gated handoff for actual source failures and
+  // short-lived fallback transports, not periodic native Huya FLV replacement.
+  // Keep the retired
   // native player initialized but with its media unloaded, then alternate the
   // two instances. Recreating D3D/player state for every lease consumed up to
   // tens of seconds in one real run and also produced avoidable native-memory
@@ -881,7 +888,9 @@ class PlayerManager {
     required bool allowWarmSwap,
     required DateTime? sourceRefreshAt,
     bool forceTransportRestart = false,
+    bool Function()? isStillRequired,
   }) async {
+    if (isStillRequired?.call() == false) return;
     final canWarmSwap =
         allowWarmSwap &&
         PlatformUtils.isWindows &&
@@ -899,9 +908,11 @@ class PlayerManager {
           room: room,
           audioOnly: audioOnly,
           sourceRefreshAt: sourceRefreshAt,
+          isStillRequired: isStillRequired,
         )) {
       return;
     }
+    if (isStillRequired?.call() == false) return;
     _proactiveSourceRefreshTimer?.cancel();
     _proactiveSourceRefreshTimer = null;
     _currentSourceRefreshAt = _effectiveSourceRefreshAt(sourceRefreshAt, url: url);
@@ -1322,8 +1333,9 @@ class PlayerManager {
     bool? audioOnly,
     bool openCurrentSource = true,
     bool forceRecreate = false,
+    bool Function()? isStillRequired,
   }) async {
-    if (_disposed || _isClosing) return;
+    if (_disposed || _isClosing || isStillRequired?.call() == false) return;
 
     if (!forceRecreate && _runtimeEngine == engine && _currentPlayer != null) {
       return;
@@ -1345,7 +1357,7 @@ class PlayerManager {
       if (forceRecreate && identical(candidate, oldPlayer)) {
         throw StateError('Forced player recreation returned the active player instance');
       }
-      if (!_isSessionValid(sessionId)) {
+      if (!_isSessionValid(sessionId) || isStillRequired?.call() == false) {
         await _safeDestroyPlayer(candidate);
         return;
       }
@@ -1363,7 +1375,7 @@ class PlayerManager {
           room: currentFloatRoom,
           audioOnly: targetAudioOnly,
         );
-        if (!_isSessionValid(sessionId)) {
+        if (!_isSessionValid(sessionId) || isStillRequired?.call() == false) {
           await _safeDestroyPlayer(candidate);
           return;
         }
@@ -1477,6 +1489,7 @@ class PlayerManager {
     required LiveRoom? room,
     required bool audioOnly,
     required DateTime? sourceRefreshAt,
+    bool Function()? isStillRequired,
   }) async {
     final oldPlayer = _currentPlayer;
     final engine = _runtimeEngine;
@@ -1496,14 +1509,28 @@ class PlayerManager {
     StreamSubscription<int>? frameSubscription;
     StreamSubscription<bool>? playingSubscription;
     StreamSubscription<PlayerException>? errorSubscription;
-    final ready = Completer<void>();
+    // An error can arrive while native open is still awaited, before the
+    // readiness Future has a listener. Carry the result as data until this
+    // transaction awaits it; completeError here escaped to the root Zone.
+    final ready = Completer<PlayerException?>();
+    PlayerException? candidateError;
     var oldPausedForCommit = false;
     var installed = false;
+    bool ownsTransaction() =>
+        _isSessionValid(oldSessionId) &&
+        identical(_currentPlayer, oldPlayer) &&
+        _playbackIntentRevision == expectedIntentRevision &&
+        _playbackRequested &&
+        _playbackSuspensions.isEmpty;
+    bool mayCommit() => ownsTransaction() && (isStillRequired?.call() ?? true);
 
     try {
+      if (!mayCommit()) return true;
       candidate = await _takeWindowsWarmStandby(engine, audioOnly: audioOnly);
       if (identical(candidate, oldPlayer)) return false;
+      if (!mayCommit()) return true;
       await candidate.setVolume(0);
+      if (!mayCommit()) return true;
 
       if (candidate is VideoFrameProgressAwarePlayer &&
           (candidate as VideoFrameProgressAwarePlayer).supportsVideoFrameProgress &&
@@ -1517,7 +1544,8 @@ class PlayerManager {
         });
       }
       errorSubscription = candidate.onError.listen((error) {
-        if (!ready.isCompleted) ready.completeError(error);
+        candidateError = error;
+        if (!ready.isCompleted) ready.complete(error);
       });
 
       if (candidate is SourceTransitionAwarePlayer) {
@@ -1532,16 +1560,10 @@ class PlayerManager {
         audioOnly: audioOnly,
       );
       final warmTimeout = sourceReadyTimeout > Duration.zero ? sourceReadyTimeout : const Duration(seconds: 8);
-      await ready.future.timeout(warmTimeout);
-      if (_disposed ||
-          _isClosing ||
-          _sessionId != oldSessionId ||
-          !identical(_currentPlayer, oldPlayer) ||
-          _playbackIntentRevision != expectedIntentRevision ||
-          !_playbackRequested ||
-          _playbackSuspensions.isNotEmpty) {
-        return true;
-      }
+      final readyError = await ready.future.timeout(warmTimeout);
+      if (readyError != null) throw readyError;
+      if (candidateError != null) throw candidateError!;
+      if (!mayCommit()) return true;
 
       var targetVolume = 1.0;
       if (room != null) {
@@ -1558,7 +1580,11 @@ class PlayerManager {
       }
       await oldPlayer.pause();
       oldPausedForCommit = true;
+      if (!mayCommit()) return true;
+      if (candidateError != null) throw candidateError!;
       await candidate.setVolume(targetVolume);
+      if (!mayCommit()) return true;
+      if (candidateError != null) throw candidateError!;
 
       final newSessionId = ++_sessionId;
       _currentPlayer = candidate;
@@ -1597,6 +1623,7 @@ class PlayerManager {
         stackTrace: stackTrace,
       );
       if (candidate != null && identical(_currentPlayer, candidate)) {
+        installed = false;
         final rollbackSessionId = ++_sessionId;
         _currentPlayer = oldPlayer;
         _runtimeEngine = engine;
@@ -1610,18 +1637,27 @@ class PlayerManager {
         currentFloatRoom = oldRoom;
         await _bindPlayerStreams(oldPlayer, sessionId: rollbackSessionId);
       }
-      if (oldPausedForCommit && identical(_currentPlayer, oldPlayer)) {
-        try {
-          await oldPlayer.play();
-        } catch (_) {}
-      }
-      return false;
+      // Cancellation is a consumed transaction, including on failure. A false
+      // result permits the caller to reopen the active player destructively.
+      return !mayCommit();
     } finally {
       await frameSubscription?.cancel();
       await playingSubscription?.cancel();
       await errorSubscription?.cancel();
       if (!installed && candidate != null && !identical(candidate, oldPlayer)) {
         await _safeDestroyPlayer(candidate);
+      }
+      if (!installed &&
+          oldPausedForCommit &&
+          identical(_currentPlayer, oldPlayer) &&
+          !_disposed &&
+          !_isClosing &&
+          _playbackRequested &&
+          _playbackSuspensions.isEmpty &&
+          _playbackIntentRevision == expectedIntentRevision) {
+        try {
+          await oldPlayer.play();
+        } catch (_) {}
       }
     }
   }
@@ -1727,6 +1763,7 @@ class PlayerManager {
         PlayerException(
           message: 'Source opened but produced no playable frame before the readiness deadline',
           type: PlayerErrorType.source,
+          code: 'source_ready_timeout',
         ),
         sessionId,
         isStillRelevant: () => !player.isPlayingNow && !_playingSubject.value,
@@ -2922,15 +2959,45 @@ class PlayerManager {
   Future<void> _recoverOrPublishPlayerError(_PendingPlayerError request) async {
     if (!_isSessionValid(request.sessionId)) return;
     final error = request.error;
+    final activeAtStart = _currentPlayer;
+    final intentAtStart = _playbackIntentRevision;
+    final bufferRecoveryAtStart = _bufferingRecoveryRevision;
+    final playingRecoveryAtStart = _playingRecoveryRevision;
+    final frameAtStart = _presentedFrameRevision;
+    final sourceAttemptsAtStart = _sourceRefreshAttempts;
+    final engineAttemptsAtStart = _sameEngineRecoveryAttempts;
+    bool isStillRequired() {
+      if (!_isSessionValid(request.sessionId) ||
+          !identical(_currentPlayer, activeAtStart) ||
+          _playbackIntentRevision != intentAtStart ||
+          !_playbackRequested ||
+          _playbackSuspensions.isNotEmpty) {
+        return false;
+      }
+      // Only inferred stalls can be refuted by new progress. A real EOF or
+      // native error still needs recovery even while buffered frames drain.
+      return switch (error.code) {
+        'buffering_stall_timeout' => bufferRecoveryAtStart == _bufferingRecoveryRevision,
+        'video_frame_stall_timeout' =>
+          frameAtStart == _presentedFrameRevision && _videoPresentationVisible && !_runtimeAudioOnly,
+        'unexpected_pause_resume_failed' ||
+        'unexpected_pause_timeout' ||
+        'source_ready_timeout' => playingRecoveryAtStart == _playingRecoveryRevision,
+        _ => true,
+      };
+    }
+
+    if (!isStillRequired()) return;
     _traceWindowsRecovery('recover', error: error, sessionId: request.sessionId);
     _loadingSubject.add(true);
     _stateSubject.add(PlayerState.buffering);
 
     try {
       if ((error.type == PlayerErrorType.network || error.type == PlayerErrorType.source) &&
-          await _tryRefreshSignedPlaybackSource()) {
+          await _tryRefreshSignedPlaybackSource(isStillRequired: isStillRequired)) {
         return;
       }
+      if (!isStillRequired()) return;
       final currentUrl = _currentUrl;
       if ((error.type == PlayerErrorType.network || error.type == PlayerErrorType.source) &&
           currentUrl != null &&
@@ -2957,9 +3024,11 @@ class PlayerManager {
       // switching source on the existing engine is both faster and safer than
       // opening the same signed URL concurrently on a replacement engine.
       // The single-line case still gets the bounded same-engine recreation.
-      if (error.code == 'video_frame_stall_timeout' && await _tryRecreateCurrentEngineForStall(error)) {
+      if (error.code == 'video_frame_stall_timeout' &&
+          await _tryRecreateCurrentEngineForStall(error, isStillRequired: isStillRequired)) {
         return;
       }
+      if (!isStillRequired()) return;
 
       final activePlayer = _currentPlayer;
       final currentDecoderUrl = _currentUrl;
@@ -2968,6 +3037,7 @@ class PlayerManager {
           activePlayer is DecoderRecoveryAwarePlayer &&
           currentDecoderUrl != null &&
           await (activePlayer as DecoderRecoveryAwarePlayer).prepareSoftwareDecoderFallback(error)) {
+        if (!isStillRequired()) return;
         log('recover playback with software decoder on the current engine', name: 'PlayerManager');
         await _playInternal(
           currentDecoderUrl,
@@ -2978,6 +3048,7 @@ class PlayerManager {
         );
         return;
       }
+      if (!isStillRequired()) return;
 
       if (fallbackManager.shouldFallback(error)) {
         final activeEngine = _runtimeEngine;
@@ -2986,16 +3057,23 @@ class PlayerManager {
           var engineError = error;
           while (true) {
             final nextEngine = await fallbackManager.fallback(engineCursor, engineError);
+            if (!isStillRequired()) return;
             if (nextEngine == engineCursor) break;
             log('recover playback with engine: ${engineCursor.name} -> ${nextEngine.name}', name: 'PlayerManager');
             _isSwitchingDueToFallback = true;
             try {
-              await _switchEngineInternal(nextEngine, isManual: false, audioOnly: _runtimeAudioOnly);
+              await _switchEngineInternal(
+                nextEngine,
+                isManual: false,
+                audioOnly: _runtimeAudioOnly,
+                isStillRequired: isStillRequired,
+              );
             } catch (switchError, stackTrace) {
               // Initialization can fail before the replacement engine owns a
               // source. Continue through the remaining engines instead of
               // leaving the old engine marked as switching forever.
               _isSwitchingDueToFallback = false;
+              if (!isStillRequired()) return;
               engineCursor = nextEngine;
               engineError = switchError is PlayerException
                   ? switchError
@@ -3011,17 +3089,49 @@ class PlayerManager {
           }
         }
       }
-      if (_shouldRecreateCurrentEngine(error) && await _tryRecreateCurrentEngineForStall(error)) {
+      if (!isStillRequired()) return;
+      if (_shouldRecreateCurrentEngine(error) &&
+          await _tryRecreateCurrentEngineForStall(error, isStillRequired: isStillRequired)) {
         return;
       }
+      if (!isStillRequired()) return;
       _isSwitchingDueToFallback = false;
       if (_scheduleTransientLiveRetry(error)) return;
       _publishTerminalPlayerError(error);
     } catch (fallbackError, stackTrace) {
       _isSwitchingDueToFallback = false;
+      if (!isStillRequired()) return;
       log('player recovery exhausted: $fallbackError', name: 'PlayerManager', stackTrace: stackTrace);
       if (_scheduleTransientLiveRetry(error)) return;
       _publishTerminalPlayerError(fallbackError is PlayerException ? fallbackError : error);
+    } finally {
+      if (activeAtStart != null &&
+          !hasError.value &&
+          !isStillRequired() &&
+          _isPlayerEventCurrent(activeAtStart, request.sessionId)) {
+        // Retire only this obsolete diagnostic; a later independent stall in
+        // the same source generation must not be swallowed by deduplication.
+        _errorDedupeSignatures.remove('${error.type.name}:${error.code ?? '-'}:${error.message}');
+        // An aborted transaction is not an exhausted repair attempt. Keep
+        // earlier real failures, but refund this uncommitted transaction.
+        _sourceRefreshAttempts = sourceAttemptsAtStart;
+        _sameEngineRecoveryAttempts = engineAttemptsAtStart;
+        fallbackManager.reset(activeAtStart.engine);
+        _isSwitchingDueToFallback = false;
+        final loading = _playbackRequested && _playbackSuspensions.isEmpty && _nativeLoading;
+        final playing = activeAtStart.isPlayingNow;
+        _loadingSubject.add(loading);
+        _playingSubject.add(playing);
+        _stateSubject.add(loading ? PlayerState.buffering : (playing ? PlayerState.playing : PlayerState.paused));
+        if (loading) {
+          _scheduleBufferingStallRecovery(activeAtStart, request.sessionId);
+        } else {
+          _armVideoFrameStallRecovery(activeAtStart, request.sessionId);
+          _scheduleContinuityRecovery(activeAtStart, request.sessionId);
+          _scheduleRecoveryBudgetReset(activeAtStart, request.sessionId);
+        }
+        _traceWindowsRecovery('retire-obsolete', error: error, sessionId: request.sessionId);
+      }
     }
   }
 
@@ -3108,7 +3218,8 @@ class PlayerManager {
     return true;
   }
 
-  Future<bool> _tryRefreshSignedPlaybackSource({bool proactive = false}) async {
+  Future<bool> _tryRefreshSignedPlaybackSource({bool proactive = false, bool Function()? isStillRequired}) async {
+    if (isStillRequired?.call() == false) return true;
     final resolver = _sourceRefreshResolver;
     final currentUrl = _currentUrl;
     if (resolver == null || currentUrl == null || currentUrl.isEmpty || (!proactive && _sourceRefreshAttempts >= 2)) {
@@ -3123,7 +3234,8 @@ class PlayerManager {
         _isSessionValid(expectedSessionId) &&
         _playbackIntentRevision == expectedIntentRevision &&
         _playbackRequested &&
-        _playbackSuspensions.isEmpty;
+        _playbackSuspensions.isEmpty &&
+        (isStillRequired?.call() ?? true);
     try {
       PlaybackSourceRefreshResult refreshed;
       if (!proactive) {
@@ -3182,12 +3294,18 @@ class PlayerManager {
             sourceRefreshAt: refreshed.refreshAt,
           );
           if (handedOff) {
+            final committed =
+                !_disposed &&
+                !_isClosing &&
+                _currentPlayer != null &&
+                !identical(_currentPlayer, activePlayer) &&
+                _currentUrl == selectedUrl;
             _traceWindowsRecovery(
-              'proactive-handoff-commit',
+              committed ? 'proactive-handoff-commit' : 'proactive-handoff-cancelled',
               sessionId: _sessionId,
               elapsedMilliseconds: handoffStopwatch.elapsedMilliseconds,
             );
-            log('Completed the expiring Windows live transport handoff', name: 'PlayerManager');
+            if (committed) log('Completed the expiring Windows live transport handoff', name: 'PlayerManager');
             return true;
           }
 
@@ -3246,6 +3364,7 @@ class PlayerManager {
         allowWarmSwap: true,
         sourceRefreshAt: refreshed.refreshAt,
         forceTransportRestart: forceTransportRestart,
+        isStillRequired: isStillRequired,
       );
       return true;
     } catch (error, stackTrace) {
@@ -3287,7 +3406,8 @@ class PlayerManager {
     }.contains(error.code);
   }
 
-  Future<bool> _tryRecreateCurrentEngineForStall(PlayerException error) async {
+  Future<bool> _tryRecreateCurrentEngineForStall(PlayerException error, {bool Function()? isStillRequired}) async {
+    if (isStillRequired?.call() == false) return true;
     if (!_shouldRecreateCurrentEngine(error) || _sameEngineRecoveryAttempts >= 1) return false;
     final activeEngine = _runtimeEngine;
     final activePlayer = _currentPlayer;
@@ -3317,9 +3437,16 @@ class PlayerManager {
           room: currentFloatRoom,
           audioOnly: _runtimeAudioOnly,
           sourceRefreshAt: _currentSourceRefreshAt,
+          isStillRequired: isStillRequired,
         );
       }
-      await _switchEngineInternal(activeEngine, isManual: false, audioOnly: _runtimeAudioOnly, forceRecreate: true);
+      await _switchEngineInternal(
+        activeEngine,
+        isManual: false,
+        audioOnly: _runtimeAudioOnly,
+        forceRecreate: true,
+        isStillRequired: isStillRequired,
+      );
       return true;
     } catch (recreateError, recreateStackTrace) {
       log(
@@ -3338,6 +3465,7 @@ class PlayerManager {
 
   Future<void> _bindPlayerStreams(UnifiedPlayer player, {required int sessionId}) async {
     await _clearSubscriptions();
+    _nativeLoading = false;
     if (_supportsVideoFrameProgress(player)) {
       final frameAwarePlayer = player as VideoFrameProgressAwarePlayer;
       _subscriptions.add(
@@ -3354,6 +3482,7 @@ class PlayerManager {
         _traceWindowsRecovery('playing=$event', sessionId: sessionId);
         _playingSubject.add(event);
         if (event) {
+          _playingRecoveryRevision++;
           _sourceReadyTimer?.cancel();
           _sourceReadyTimer = null;
           hasError.value = false;
@@ -3415,6 +3544,8 @@ class PlayerManager {
       player.onLoading.distinct().listen((event) {
         if (!_isPlayerEventCurrent(player, sessionId)) return;
         _traceWindowsRecovery('loading=$event', sessionId: sessionId);
+        if (!event && _nativeLoading) _bufferingRecoveryRevision++;
+        _nativeLoading = event;
         _loadingSubject.add(event);
         if (event) {
           _cancelVideoFrameStallRecovery();

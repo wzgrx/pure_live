@@ -781,6 +781,383 @@ void main() {
     }, skip: !Platform.isWindows);
   }
 
+  for (final observation in ['buffer', 'frame', 'EOF']) {
+    for (final resolverFails in [false, true]) {
+      test(
+        'in-flight $observation recovery rechecks progress when resolver ${resolverFails ? 'fails' : 'returns'}',
+        () async {
+          final active = _FrameProgressFakePlayer();
+          final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+          final entered = Completer<void>();
+          final lease = Completer<PlaybackSourceRefreshResult>();
+          var creations = 0;
+          final manager = _manager(
+            {PlayerEngine.mediaKit: active},
+            playerCreator: (_) => creations++ == 0 ? active : replacement,
+            bufferingStallTimeout: const Duration(milliseconds: 30),
+            videoFrameStallTimeout: const Duration(seconds: 3),
+            transientLiveRetryDelays: const [],
+          );
+          manager.configureDefaultEngine(PlayerEngine.mediaKit);
+          final loading = <bool>[];
+          final subscription = manager.onLoading.listen(loading.add);
+          const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+          try {
+            await manager.play(
+              url,
+              const [url],
+              const {},
+              room: LiveRoom(roomId: 'inflight-recovery', platform: 'huya'),
+              sourceResolver: (_) {
+                if (!entered.isCompleted) entered.complete();
+                return lease.future;
+              },
+            );
+            if (observation == 'buffer') {
+              active.emitLoading(true);
+            } else {
+              active.emitError(
+                PlayerException(
+                  message: observation == 'EOF' ? 'Live source ended' : 'No presented frame',
+                  type: PlayerErrorType.source,
+                  code: observation == 'EOF' ? 'live_source_completed' : 'video_frame_stall_timeout',
+                ),
+              );
+            }
+            await entered.future.timeout(const Duration(seconds: 2));
+            if (observation == 'buffer') {
+              active.emitLoading(false);
+            } else {
+              // A new frame refutes a frame-stall observation. At EOF it can
+              // instead be a last buffered frame and is not a renewed socket.
+              active.emitFrame();
+            }
+            if (resolverFails) {
+              lease.completeError(StateError('fixture signer unavailable'));
+            } else {
+              lease.complete(
+                const PlaybackSourceRefreshResult(
+                  urls: ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+                  preferredLineIndex: 0,
+                ),
+              );
+            }
+            await Future<void>.delayed(const Duration(milliseconds: 90));
+            if (observation == 'EOF') {
+              expect(creations, 2, reason: 'a cached frame must not cancel real EOF recovery');
+            } else {
+              expect(creations, 1, reason: 'the original transport recovered while the signer was pending');
+              expect(manager.currentPlayer, same(active));
+              expect(active.openedUrls, [url]);
+              expect(active.softStopCalls, 0);
+              expect(active.isPlayingNow, isTrue);
+              expect(loading.last, isFalse, reason: 'retired recovery must also dismiss its own loading state');
+              // A later independent stall of the same generation still gets a
+              // recovery chance, rather than being swallowed by deduplication.
+              if (observation == 'buffer' && !resolverFails) {
+                active.emitLoading(true);
+                await Future<void>.delayed(const Duration(milliseconds: 100));
+                expect(creations, 2);
+              }
+            }
+          } finally {
+            if (!lease.isCompleted) {
+              lease.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+            }
+            await subscription.cancel();
+            await manager.dispose();
+          }
+        },
+      );
+    }
+  }
+
+  for (final outcome in ['recovered', 'paused', 'paused candidate failed', 'still stalled']) {
+    test('in-flight Windows candidate respects $outcome before committing', () async {
+      final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, emitPlaying: false);
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: active},
+        playerCreator: (_) => creations++ == 0 ? active : candidate,
+        bufferingStallTimeout: const Duration(milliseconds: 30),
+        sourceReadyTimeout: const Duration(seconds: 2),
+        transientLiveRetryDelays: const [],
+      );
+      manager.configureDefaultEngine(PlayerEngine.mediaKit);
+      final loading = <bool>[];
+      final subscription = manager.onLoading.listen(loading.add);
+      const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+      try {
+        await manager.play(
+          url,
+          const [url],
+          const {},
+          room: LiveRoom(roomId: 'inflight-candidate', platform: 'huya'),
+          sourceResolver: (_) async => const PlaybackSourceRefreshResult(
+            urls: ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+            preferredLineIndex: 0,
+          ),
+        );
+        active.emitLoading(true);
+        final deadline = DateTime.now().add(const Duration(seconds: 2));
+        while (candidate.openedUrls.isEmpty && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 5));
+        }
+        expect(candidate.openedUrls, hasLength(1));
+        if (outcome == 'recovered') active.emitLoading(false);
+        if (outcome.startsWith('paused')) await manager.pause();
+        if (outcome == 'paused candidate failed') {
+          candidate.emitError(PlayerException(message: 'candidate TLS failed', type: PlayerErrorType.network));
+        } else {
+          candidate.emitUnexpectedPlaying(true);
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        if (outcome == 'still stalled') {
+          expect(manager.currentPlayer, same(candidate));
+        } else {
+          expect(manager.currentPlayer, same(active));
+          expect(active.openedUrls, [url], reason: 'candidate failure must not fall through to destructive reopen');
+          expect(active.isPlayingNow, outcome == 'recovered');
+          expect(active.softStopCalls, 0);
+          expect(candidate.disposeCalls, 1);
+          expect(loading.last, isFalse);
+        }
+      } finally {
+        await subscription.cancel();
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
+
+  test('obsolete recoveries do not exhaust the later real EOF credential budget', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    var entered = Completer<void>();
+    var lease = Completer<PlaybackSourceRefreshResult>();
+    final requests = <PlaybackSourceRefreshRequest>[];
+    var creations = 0;
+    final manager = _manager(
+      {PlayerEngine.mediaKit: active},
+      playerCreator: (_) => creations++ == 0 ? active : candidate,
+      bufferingStallTimeout: const Duration(milliseconds: 30),
+      transientLiveRetryDelays: const [],
+    )..configureDefaultEngine(PlayerEngine.mediaKit);
+    try {
+      await manager.play(
+        'https://cdn.example/live.flv',
+        const [],
+        const {},
+        room: LiveRoom(roomId: 'obsolete-budget', platform: 'huya'),
+        sourceResolver: (request) {
+          requests.add(request);
+          entered.complete();
+          return lease.future;
+        },
+      );
+      for (var cycle = 0; cycle < 4; cycle++) {
+        if (cycle < 3) {
+          active.emitLoading(true);
+        } else {
+          active.emitCompleted();
+        }
+        await entered.future.timeout(const Duration(seconds: 2));
+        expect(requests.last.advanceLine, isFalse, reason: 'obsolete work must not mark a healthy line failed');
+        if (cycle < 3) active.emitLoading(false);
+        lease.complete(
+          PlaybackSourceRefreshResult(urls: ['https://cdn.example/fresh-$cycle.flv'], preferredLineIndex: 0),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+        expect(manager.currentPlayer, same(cycle < 3 ? active : candidate));
+        entered = Completer<void>();
+        lease = Completer<PlaybackSourceRefreshResult>();
+      }
+      expect(requests, hasLength(4));
+      expect(candidate.openedUrls, ['https://cdn.example/fresh-3.flv']);
+    } finally {
+      if (!lease.isCompleted) lease.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+      await manager.dispose();
+    }
+  }, skip: !Platform.isWindows);
+
+  for (final outcome in ['recovered', 'paused']) {
+    test('IJK recovery checks ownership after allocating a native engine: $outcome', () async {
+      final active = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);
+      final allocation = Completer<void>();
+      final candidate = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null, initBarrier: allocation.future);
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.fijk: active},
+        playerCreator: (_) => creations++ == 0 ? active : candidate,
+        bufferingStallTimeout: const Duration(milliseconds: 30),
+        transientLiveRetryDelays: const [],
+      )..configureDefaultEngine(PlayerEngine.fijk);
+      try {
+        await manager.play(
+          'https://cdn.example/live.flv',
+          const [],
+          const {},
+          room: LiveRoom(roomId: 'ijk-recovery', platform: 'test'),
+        );
+        active.emitLoading(true);
+        final deadline = DateTime.now().add(const Duration(seconds: 2));
+        while (creations < 2 && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 5));
+        }
+        expect(creations, 2);
+        if (outcome == 'paused') {
+          await manager.pause();
+        } else {
+          active.emitLoading(false);
+        }
+        allocation.complete();
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+        expect(manager.currentPlayer, same(active));
+        expect(candidate.openedUrls, isEmpty);
+        expect(candidate.disposeCalls, 1);
+        expect(active.disposeCalls, 0);
+        expect(active.isPlayingNow, outcome == 'recovered');
+      } finally {
+        if (!allocation.isCompleted) allocation.complete();
+        await manager.dispose();
+      }
+    });
+  }
+
+  for (final commitStep in ['pause active', 'unmute candidate']) {
+    test('Windows handoff respects user pause during $commitStep', () async {
+      final barrier = Completer<void>();
+      final active = _RecoveryFakePlayer(
+        PlayerEngine.mediaKit,
+        (_) => null,
+        pauseBarrier: commitStep == 'pause active' ? barrier.future : null,
+      );
+      final candidate = _RecoveryFakePlayer(
+        PlayerEngine.mediaKit,
+        (_) => null,
+        unmuteBarrier: commitStep == 'unmute candidate' ? barrier.future : null,
+      );
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: active},
+        playerCreator: (_) => creations++ == 0 ? active : candidate,
+        transientLiveRetryDelays: const [],
+      )..configureDefaultEngine(PlayerEngine.mediaKit);
+      try {
+        await manager.play(
+          'https://cdn.example/live.flv',
+          const [],
+          const {},
+          room: LiveRoom(roomId: 'commit-pause', platform: 'huya'),
+          sourceResolver: (_) async =>
+              const PlaybackSourceRefreshResult(urls: ['https://cdn.example/new.flv'], preferredLineIndex: 0),
+        );
+        active.emitError(PlayerException(message: 'network EOF', type: PlayerErrorType.network));
+        bool commitReached() => commitStep == 'pause active' ? !active.isPlayingNow : candidate.unmuteCalls > 0;
+        final deadline = DateTime.now().add(const Duration(seconds: 2));
+        while (!commitReached() && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 5));
+        }
+        expect(commitReached(), isTrue);
+        final userPause = manager.pause();
+        barrier.complete();
+        await userPause;
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+        expect(manager.currentPlayer, same(active));
+        expect(active.isPlayingNow, isFalse);
+        expect(active.playCalls, 0, reason: 'rollback must not resume against the latest pause intent');
+        expect(candidate.disposeCalls, 1);
+        expect(active.openedUrls, ['https://cdn.example/live.flv']);
+      } finally {
+        if (!barrier.isCompleted) barrier.complete();
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
+
+  test('candidate errors before open completes stay inside the recovery transaction', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final opening = Completer<void>();
+    final candidate = _RecoveryFakePlayer(
+      PlayerEngine.mediaKit,
+      (_) => null,
+      emitPlaying: false,
+      openBarrier: opening.future,
+    );
+    var creations = 0;
+    final manager = _manager(
+      {PlayerEngine.mediaKit: active},
+      playerCreator: (_) => creations++ == 0 ? active : candidate,
+      bufferingStallTimeout: const Duration(milliseconds: 30),
+      transientLiveRetryDelays: const [],
+    )..configureDefaultEngine(PlayerEngine.mediaKit);
+    try {
+      await manager.play(
+        'https://cdn.example/live.flv',
+        const [],
+        const {},
+        room: LiveRoom(roomId: 'early-candidate-error', platform: 'huya'),
+        sourceResolver: (_) async =>
+            const PlaybackSourceRefreshResult(urls: ['https://cdn.example/new.flv'], preferredLineIndex: 0),
+      );
+      active.emitLoading(true);
+      final deadline = DateTime.now().add(const Duration(seconds: 2));
+      while (candidate.openedUrls.isEmpty && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(candidate.openedUrls, hasLength(1));
+      active.emitLoading(false);
+      candidate.emitError(PlayerException(message: 'early candidate error', type: PlayerErrorType.network));
+      // The open operation still owns the await. Any error on the separate
+      // readiness Future must be contained rather than escaping to the Zone.
+      await Future<void>.delayed(Duration.zero);
+      opening.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+      expect(manager.currentPlayer, same(active));
+      expect(active.isPlayingNow, isTrue);
+      expect(active.openedUrls, ['https://cdn.example/live.flv']);
+      expect(candidate.disposeCalls, 1);
+    } finally {
+      if (!opening.isCompleted) opening.complete();
+      await manager.dispose();
+    }
+  }, skip: !Platform.isWindows);
+
+  test('a candidate error after its first frame still prevents installing that candidate', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final opening = Completer<void>();
+    final candidate = _RecoveryFakePlayer(
+      PlayerEngine.mediaKit,
+      (_) => null,
+      emitPlaying: false,
+      openBarrier: opening.future,
+    );
+    var creations = 0;
+    final manager = _manager({
+      PlayerEngine.mediaKit: active,
+    }, playerCreator: (_) => creations++ == 0 ? active : candidate)..configureDefaultEngine(PlayerEngine.mediaKit);
+    final room = LiveRoom(roomId: 'late-candidate-error', platform: 'test');
+    try {
+      await manager.play('https://cdn.example/live.flv', const [], const {}, room: room);
+      final changeQuality = manager.play('https://cdn.example/new.flv', const [], const {}, room: room);
+      final deadline = DateTime.now().add(const Duration(seconds: 2));
+      while (candidate.openedUrls.isEmpty && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(candidate.openedUrls, hasLength(1));
+      candidate.emitUnexpectedPlaying(true);
+      candidate.emitError(PlayerException(message: 'candidate failed after readiness', type: PlayerErrorType.network));
+      opening.complete();
+      await changeQuality;
+      expect(manager.currentPlayer, same(active));
+      expect(candidate.disposeCalls, 1);
+      expect(active.openedUrls, ['https://cdn.example/live.flv', 'https://cdn.example/new.flv']);
+    } finally {
+      if (!opening.isCompleted) opening.complete();
+      await manager.dispose();
+    }
+  }, skip: !Platform.isWindows);
+
   test('native Huya credential refresh never restarts a healthy Windows transport', () async {
     final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
@@ -1324,7 +1701,7 @@ PlayerManager _manager(
   return PlayerManager(
     playerCreator: playerCreator ?? (engine) => players[engine]!,
     fallbackManager: EngineFallbackManager(
-      defaultEngine: PlayerEngine.mediaKit,
+      defaultEngine: players.containsKey(PlayerEngine.mediaKit) ? PlayerEngine.mediaKit : players.keys.first,
       supportedEngines: players.keys.toList(growable: false),
     ),
     lineManager: LineFallbackManager(),
@@ -1350,6 +1727,10 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
     this.initFailure,
     this.emitPlaying = true,
     this.hangWhileOpening = false,
+    this.initBarrier,
+    this.openBarrier,
+    this.pauseBarrier,
+    this.unmuteBarrier,
     this.emittedWidth,
     this.emittedHeight,
   });
@@ -1360,6 +1741,11 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
   final Object? initFailure;
   final bool emitPlaying;
   final bool hangWhileOpening;
+  final Future<void>? initBarrier;
+  final Future<void>? openBarrier;
+  final Future<void>? pauseBarrier;
+  final Future<void>? unmuteBarrier;
+  int unmuteCalls = 0;
   int? emittedWidth;
   int? emittedHeight;
   final List<String> openedUrls = <String>[];
@@ -1403,6 +1789,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
   Future<void> init({bool audioOnly = false}) async {
     final error = initFailure;
     if (error != null) throw error;
+    if (initBarrier != null) await initBarrier;
     _initialized = true;
   }
 
@@ -1415,6 +1802,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
     bool audioOnly = false,
   }) async {
     openedUrls.add(url);
+    if (openBarrier != null) await openBarrier;
     if (hangWhileOpening) await Completer<void>().future;
     final failure = failureForUrl(url);
     if (failure != null) throw failure;
@@ -1441,6 +1829,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
   Future<void> pause() async {
     _isPlaying = false;
     _playing.add(false);
+    if (pauseBarrier != null) await pauseBarrier;
   }
 
   @override
@@ -1454,7 +1843,12 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
   Future<void> setAudioOnly(bool audioOnly) async {}
 
   @override
-  Future<void> setVolume(double volume) async {}
+  Future<void> setVolume(double volume) async {
+    if (volume > 0) {
+      unmuteCalls++;
+      if (unmuteBarrier != null) await unmuteBarrier;
+    }
+  }
 
   @override
   Future<void> softStop() async {

@@ -445,6 +445,93 @@ void main() {
     await manager.dispose();
   });
 
+  for (final notification in ['paused-state', 'playing-toggle']) {
+    test('continuous buffering deadline survives repeated $notification notifications', () async {
+      final first = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: first},
+        bufferingStallTimeout: const Duration(seconds: 2),
+        playerCreator: (_) => creations++ == 0 ? first : replacement,
+      );
+      manager.configureDefaultEngine(PlayerEngine.mediaKit);
+      const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+      try {
+        await manager.play(
+          url,
+          const [url],
+          const {},
+          room: LiveRoom(roomId: 'deadline', platform: 'huya'),
+        );
+        first.emitLoading(true);
+        for (var i = 0; i < 4; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          if (notification == 'paused-state') {
+            first.emitNativeState(PlayerState.paused);
+          } else {
+            first.emitUnexpectedPlaying(i.isOdd);
+          }
+        }
+        expect(creations, 1, reason: 'a short buffering episode must not reopen a live source');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        expect(creations, 2, reason: 'state notifications are not media progress and must not extend the deadline');
+        expect(manager.currentPlayer, same(replacement));
+      } finally {
+        await manager.dispose();
+      }
+    });
+  }
+
+  for (final outcome in ['resumed', 'user-pause', 'new-buffer']) {
+    test('buffering deadline retires on $outcome without a stale source replacement', () async {
+      final first = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: first},
+        bufferingStallTimeout: const Duration(seconds: 2),
+        playerCreator: (_) => creations++ == 0 ? first : replacement,
+      );
+      manager.configureDefaultEngine(PlayerEngine.mediaKit);
+      const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+      try {
+        await manager.play(
+          url,
+          const [url],
+          const {},
+          room: LiveRoom(roomId: 'deadline-end', platform: 'huya'),
+        );
+        first.emitLoading(true);
+        await Future<void>.delayed(const Duration(milliseconds: 800));
+        first.emitNativeState(PlayerState.paused);
+        await Future<void>.delayed(const Duration(milliseconds: 800));
+        if (outcome == 'user-pause') {
+          await manager.pause();
+        } else {
+          first.emitLoading(false);
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        expect(creations, 1);
+        if (outcome == 'new-buffer') {
+          first.emitLoading(true);
+          await Future<void>.delayed(const Duration(milliseconds: 1900));
+          expect(creations, 1, reason: 'a new episode gets its own complete deadline');
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          expect(creations, 2);
+        } else {
+          await Future<void>.delayed(const Duration(seconds: 3));
+          expect(creations, 1, reason: 'retired buffering must not reopen the source');
+          expect(first.playCalls, 0, reason: 'native buffering and user pause do not request a resume command');
+        }
+      } finally {
+        await manager.dispose();
+      }
+    });
+  }
+
   test('a live buffering stall enters bounded source recovery', () async {
     final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     final fijk = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);

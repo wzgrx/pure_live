@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import sys
 import time
+from urllib.parse import urlsplit
 from flv_observation_relay import FlvObservationRelay
 
 
@@ -63,7 +64,11 @@ def memory_bytes():
 def run(config):
     relay = None
     dll = Path(config["library"]).resolve(strict=True)
-    duration = max(130, min(600, int(config["seconds"])))
+    synthetic = config.get('syntheticFixture') is True
+    if synthetic and urlsplit(config['url']).hostname != '127.0.0.1':
+        raise ValueError('synthetic fixture must use loopback')
+    # Real Huya probes retain their >=130-second transport acceptance window.
+    duration = max(10 if synthetic else 130, min(600, int(config["seconds"])))
     mpv = c.CDLL(str(dll))
     signatures = {
         "mpv_create": (c.c_void_p, []),
@@ -241,7 +246,8 @@ def run(config):
         with dll.open("rb") as library_file:
             library_hash = hashlib.file_digest(library_file, "sha256").hexdigest()
         result = {
-            "probe": "production-huya-headless-libmpv", "libraryVersion": version,
+            "probe": "synthetic-jitter-headless-libmpv" if synthetic else "production-huya-headless-libmpv",
+            "libraryVersion": version,
             "librarySha256": library_hash,
             "durationMs": round(elapsed * 1000), "termination": termination,
             "endEvents": end_events, "firstClockMs": None if first_progress is None else round((first_progress - start) * 1000),

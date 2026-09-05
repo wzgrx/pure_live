@@ -2034,10 +2034,14 @@ class PlayerManager {
   void _scheduleBufferingStallRecovery(UnifiedPlayer player, int sessionId) {
     if (bufferingStallTimeout <= Duration.zero ||
         !_loadingSubject.value ||
-        !_shouldOwnContinuousPlayback(player, sessionId)) {
+        !_shouldOwnContinuousPlayback(player, sessionId) ||
+        _bufferingStallTimer != null) {
       return;
     }
-    _bufferingStallTimer?.cancel();
+    // Own one deadline per uninterrupted buffering episode. Playing/paused
+    // notifications do not prove media arrived; renewing the timer on each
+    // notification could postpone recovery indefinitely. Loading=false,
+    // explicit pause, a new source and disposal already cancel this owner.
     final revision = ++_continuityRevision;
     _bufferingStallTimer = Timer(bufferingStallTimeout, () {
       _bufferingStallTimer = null;

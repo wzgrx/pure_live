@@ -3,7 +3,12 @@ import 'package:pure_live/player/utils/live_buffer_policy.dart';
 
 void main() {
   test('live memory budget overrides inherited on-disk and unbounded time caching', () async {
-    final properties = <String, String>{'cache': 'yes', 'cache-on-disk': 'yes', 'cache-secs': '3600000'};
+    final properties = <String, String>{
+      'cache': 'yes',
+      'cache-on-disk': 'yes',
+      'cache-secs': '3600000',
+      'demuxer-donate-buffer': 'yes',
+    };
     await LiveBufferPolicy.apply((name, value) async {
       properties[name] = value;
     });
@@ -12,6 +17,7 @@ void main() {
     expect(double.parse(properties['cache-secs']!), lessThanOrEqualTo(6));
     expect(properties['demuxer-max-bytes'], '${32 * 1024 * 1024}');
     expect(properties['demuxer-max-back-bytes'], '${4 * 1024 * 1024}');
+    expect(properties['demuxer-donate-buffer'], 'no', reason: 'past packets must not consume the forward reserve');
   });
 
   test('live player keeps a bounded low-latency native buffer budget', () {
@@ -34,7 +40,7 @@ void main() {
     expect(properties, first);
     expect(properties['cache-pause'], 'yes');
     expect(properties['hwdec'], 'auto-safe');
-    expect(properties.keys, hasLength(8));
+    expect(properties.keys, hasLength(9));
   });
 
   test('unsupported native property is surfaced to the adapter rather than ignored', () async {

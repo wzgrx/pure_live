@@ -17,6 +17,9 @@ abstract final class LiveBufferPolicy {
     await setProperty('cache-secs', cacheSeconds.toString());
     await setProperty('demuxer-max-bytes', forwardBytes.toString());
     await setProperty('demuxer-max-back-bytes', backBytes.toString());
+    // Past media must not borrow the unused forward reserve. Otherwise low
+    // bitrate live streams keep accumulating minutes of unwanted back cache.
+    await setProperty('demuxer-donate-buffer', 'no');
     await setProperty('demuxer-readahead-secs', readaheadSeconds.toString());
   }
 }

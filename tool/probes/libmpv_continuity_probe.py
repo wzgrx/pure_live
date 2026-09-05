@@ -99,6 +99,35 @@ def run(config):
         except (TypeError, ValueError):
             return None
 
+    def native_value(node):
+        if node.format == 1:
+            return node.u.string.decode('utf-8', errors='replace')
+        if node.format == 3:
+            return bool(node.u.flag)
+        if node.format == 4:
+            return node.u.int64
+        if node.format == 5:
+            return node.u.double
+        if node.format in (7, 8):
+            items = node.u.list.contents
+            values = [native_value(items.values[index]) for index in range(items.num)]
+            if node.format == 7:
+                return values
+            return {items.keys[index].decode(): value for index, value in enumerate(values)}
+        return None
+
+    def cache_state():
+        value = Node()
+        if mpv.mpv_get_property(handle, b'demuxer-cache-state', 6, c.byref(value)) < 0:
+            return {}
+        try:
+            data = native_value(value)
+            return {key: data[key] for key in (
+                'fw-bytes', 'total-bytes', 'cache-duration', 'seekable-ranges',
+                'bof-cached', 'eof-cached', 'idle', 'underrun') if key in data}
+        finally:
+            mpv.mpv_free_node_contents(c.byref(value))
+
     try:
         options = {
             "config": "no", "terminal": "no", "msg-level": "all=no",
@@ -134,6 +163,10 @@ def run(config):
         finally:
             mpv.mpv_free_node_contents(c.byref(actual))
         version = get("mpv-version")
+        initialized_memory = memory_bytes()
+        cache_options = {name: get(name) for name in (
+            'demuxer-donate-buffer', 'cache-on-disk', 'cache-secs',
+            'demuxer-max-bytes', 'demuxer-max-back-bytes')}
         command = (c.c_char_p * 4)(b"loadfile", config["url"].encode(), b"replace", None)
         start, cpu_start = time.monotonic(), time.process_time()
         if mpv.mpv_command(handle, command) < 0:
@@ -165,7 +198,8 @@ def run(config):
             cache_pause_samples += get("paused-for-cache") == "yes"
             pause_samples += get("pause") == "yes"
             if samples % 5 == 0:
-                memory_samples.append({"seconds": round(now - start, 2), **memory_bytes()})
+                memory_samples.append({"seconds": round(now - start, 2),
+                                       **memory_bytes(), "cache": cache_state()})
             stats = {name: number(name) for name in (
                 "width", "height", "estimated-vf-fps", "frame-drop-count",
                 "decoder-frame-drop-count", "demuxer-cache-duration", "avsync")}
@@ -174,7 +208,7 @@ def run(config):
             max_clock_gap = max(max_clock_gap, time.monotonic() - last_progress)
         with dll.open("rb") as library_file:
             library_hash = hashlib.file_digest(library_file, "sha256").hexdigest()
-        return {
+        result = {
             "probe": "production-huya-headless-libmpv", "libraryVersion": version,
             "librarySha256": library_hash,
             "durationMs": round(elapsed * 1000), "termination": termination,
@@ -187,9 +221,25 @@ def run(config):
             "bufferProperties": config["bufferProperties"], "secretsPersisted": False,
             "flutterTextureTested": False, "audibleOutputTested": False,
             "headerRoundTripVerified": True,
+            "initializedMemory": initialized_memory, "nativeCacheOptions": cache_options,
         }
-    finally:
+        # Preserve the sampled playback result before explicitly stopping this
+        # probe instance. Observe resource release without touching any app.
+        stop = (c.c_char_p * 2)(b'stop', None)
+        if mpv.mpv_command(handle, stop) < 0:
+            raise RuntimeError('native stop failed')
+        stop_start = time.monotonic()
+        while time.monotonic() - stop_start < 3:
+            mpv.mpv_wait_event(handle, 0.20)
+        result['stoppedMemory'] = memory_bytes()
+        result['stoppedCache'] = cache_state()
         mpv.mpv_terminate_destroy(handle)
+        handle = None
+        result['destroyedMemory'] = memory_bytes()
+        return result
+    finally:
+        if handle:
+            mpv.mpv_terminate_destroy(handle)
 
 
 if __name__ == "__main__":

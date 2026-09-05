@@ -2414,22 +2414,27 @@ class AudioOnlyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final switching = controller.audioModeSwitching.value;
-    return IconButton(
-      tooltip: i18n(controller.isAudioOnly ? 'restore_video_mode' : 'switch_audio_only_mode'),
-      visualDensity: VisualDensity.compact,
-      iconSize: 21,
-      color: controller.isAudioOnly ? const Color(0xFFFFD166) : Colors.white,
-      onPressed: switching
-          ? null
-          : () {
-              controller.enableController();
-              controller.toggleAudioOnly();
-            },
-      // The headphone always means room-scoped audio-only. A television icon
-      // is reserved exclusively for casting so the two actions stay distinct.
-      icon: Icon(controller.isAudioOnly ? Remix.headphone_fill : Remix.headphone_line),
-    );
+    // Child builds run outside the parent's Obx dependency collector. Keep
+    // mode and in-flight state subscribed here, including failure completion.
+    return Obx(() {
+      final switching = controller.audioModeSwitching.value;
+      final audioOnly = controller.isAudioOnly;
+      return IconButton(
+        tooltip: i18n(audioOnly ? 'restore_video_mode' : 'switch_audio_only_mode'),
+        visualDensity: VisualDensity.compact,
+        iconSize: 21,
+        color: audioOnly ? const Color(0xFFFFD166) : Colors.white,
+        onPressed: switching
+            ? null
+            : () {
+                controller.enableController();
+                controller.toggleAudioOnly();
+              },
+        // The headphone always means room-scoped audio-only. A television icon
+        // is reserved exclusively for casting so the two actions stay distinct.
+        icon: Icon(audioOnly ? Remix.headphone_fill : Remix.headphone_line),
+      );
+    });
   }
 }
 

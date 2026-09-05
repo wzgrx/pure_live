@@ -117,6 +117,8 @@ class PlayerManager {
   final Duration? audioModeVideoWarmRetention;
   final UnifiedPlayerCreator _playerCreator;
   final bool Function() _useHardStopOnExit;
+  final Floating? _androidFloatingOverride;
+  bool get _usesAndroidPip => PlatformUtils.isAndroid || _androidFloatingOverride != null;
   final Future<void> Function(UnifiedPlayer player, bool audioOnly)? _audioModeServiceSync;
   final Future<void> Function(LiveRoom room) _audioSessionStart;
   Future<void> _playerLifecycleQueue = Future.value();
@@ -178,10 +180,12 @@ class PlayerManager {
     this.enableActiveContentProbe = false,
     this.audioModeVideoWarmRetention,
     UnifiedPlayerCreator? playerCreator,
+    Floating? androidFloating,
     bool Function()? useHardStopOnExit,
     this._audioModeServiceSync,
     Future<void> Function(LiveRoom room)? audioSessionStart,
-  }) : _playerCreator = playerCreator ?? PlayerAdapterFactory.create,
+  }) : _androidFloatingOverride = androidFloating,
+       _playerCreator = playerCreator ?? PlayerAdapterFactory.create,
        _useHardStopOnExit = useHardStopOnExit ?? (() => SettingsService.to.player.useHardStopOnExit.v),
        _audioSessionStart =
            audioSessionStart ??
@@ -190,7 +194,10 @@ class PlayerManager {
     _audioServiceTransitions = LatestAsyncValueQueue<_AudioServiceRequest>(_applyAudioServiceRequest);
     _pipStateSubscription = isInPip.listen((value) {
       GlobalPlayerState.to.isPipMode.value = value;
-      if (!value) _lastAppliedPipAspectRatio = null;
+      if (!value) {
+        _lastAppliedPipAspectRatio = null;
+        _pipGeometryUpdateGeneration++;
+      }
       if (!value && !isFloating.value && !_appFloatingPrepared) {
         _videoController?.clearPipDanmaku();
       }
@@ -290,6 +297,10 @@ class PlayerManager {
   Future<void>? _floatingCleanup;
   bool _appFloatingPrepared = false;
   bool _pipTransitionInFlight = false;
+  int _pipTransitionRevision = 0;
+  Completer<void>? _pipTransitionCancellation;
+  int _pipObservationGeneration = 0;
+  int _pipStatusRevision = 0;
   int _pipGeometryUpdateGeneration = 0;
   double? _lastAppliedPipAspectRatio;
   final GlobalKey _pipSourceKey = GlobalKey(debugLabel: 'pip-video-source');
@@ -735,7 +746,7 @@ class PlayerManager {
   }
 
   Future<void> _updateActiveAndroidPip() async {
-    if (!Platform.isAndroid || !isInPip.value || _pipTransitionInFlight) return;
+    if (!_usesAndroidPip || !isInPip.value || _pipTransitionInFlight) return;
     final generation = ++_pipGeometryUpdateGeneration;
     // Mirror Android's layout-listener guidance: publish geometry only after
     // the compact video view has adopted the new presentation ratio.
@@ -754,6 +765,7 @@ class PlayerManager {
         aspectRatio: Rational(pipRatio.width, pipRatio.height),
         sourceRectHint: _currentPipSourceRect(contentAspectRatio: pipRatio.value),
       );
+      if (generation != _pipGeometryUpdateGeneration || !isInPip.value || _disposed || _isClosing) return;
       _lastAppliedPipAspectRatio = pipRatio.value;
     } catch (error, stackTrace) {
       log(
@@ -831,13 +843,7 @@ class PlayerManager {
 
         return;
       }
-      if (Platform.isAndroid) {
-        floating = Floating();
-        _pipSubscription?.cancel();
-        _pipSubscription = floating.pipStatusStream.listen((status) {
-          isInPip.value = status == PiPStatus.enabled;
-        });
-      }
+      _startAndroidPipObservation();
 
       isInitialized.value = true;
       videoPresentationRevision.value++;
@@ -1025,6 +1031,8 @@ class PlayerManager {
 
       throw PlayerException(message: 'Current player is null', type: PlayerErrorType.lifecycle);
     }
+
+    _startAndroidPipObservation();
 
     // Every bundled player has a native audio-only path.  Opening the original
     // live URL directly avoids a second FFmpeg decode pipeline and removes the
@@ -2178,20 +2186,61 @@ class PlayerManager {
     (player as VideoFitAwarePlayer).setVideoFit(fit);
   }
 
+  void _startAndroidPipObservation() {
+    if (!_usesAndroidPip || _disposed || _isClosing || _currentPlayer == null || _pipSubscription != null) return;
+    floating = _androidFloatingOverride ?? Floating();
+    final generation = ++_pipObservationGeneration;
+    _pipSubscription = floating.pipStatusStream.listen((status) {
+      if (generation != _pipObservationGeneration || _disposed || _isClosing) return;
+      _pipStatusRevision++;
+      isInPip.value = status == PiPStatus.enabled;
+    });
+  }
+
+  void _stopAndroidPipObservation() {
+    _pipObservationGeneration++;
+    final subscription = _pipSubscription;
+    _pipSubscription = null;
+    if (subscription != null) unawaited(subscription.cancel());
+  }
+
+  void _cancelPipTransition() {
+    _pipTransitionRevision++;
+    _pipGeometryUpdateGeneration++;
+    final cancellation = _pipTransitionCancellation;
+    _pipTransitionCancellation = null;
+    if (cancellation != null && !cancellation.isCompleted) cancellation.complete();
+    _pipTransitionInFlight = false;
+    isPipPreparing.value = false;
+  }
+
   Future<void> enablePip() async {
-    if (PlatformUtils.isAndroid) {
-      if (_pipTransitionInFlight) return;
+    if (_usesAndroidPip) {
+      if (_pipTransitionInFlight || _disposed || _isClosing || _currentPlayer == null || !isInitialized.value) return;
+      _startAndroidPipObservation();
+      final sessionId = _sessionId;
+      final intentRevision = _playbackIntentRevision;
+      final player = _currentPlayer;
+      final revision = ++_pipTransitionRevision;
+      final cancellation = Completer<void>();
+      _pipTransitionCancellation = cancellation;
+      bool ownsTransition() =>
+          revision == _pipTransitionRevision &&
+          _isSessionValid(sessionId) &&
+          intentRevision == _playbackIntentRevision &&
+          identical(player, _currentPlayer);
       _pipTransitionInFlight = true;
       try {
-        final status = await floating.pipStatus;
-        if (status != PiPStatus.disabled) return;
+        final status = await Future.any<PiPStatus?>([floating.pipStatus, cancellation.future.then((_) => null)]);
+        if (!ownsTransition() || status != PiPStatus.disabled) return;
 
         // Android captures the Activity at the start of the PiP animation.
         // Build the compact video-only surface first, then enter PiP after a
         // rendered frame so Texture/PlatformView players do not show an app
         // icon or a black placeholder while being reattached.
         isPipPreparing.value = true;
-        await SchedulerBinding.instance.endOfFrame;
+        await Future.any<void>([SchedulerBinding.instance.endOfFrame, cancellation.future]);
+        if (!ownsTransition()) return;
 
         final compactRatio = currentVideoRatio;
         final sourceRectHint = _currentPipSourceRect(contentAspectRatio: compactRatio);
@@ -2201,14 +2250,23 @@ class PlayerManager {
           portraitFallback: isVerticalVideo.value,
         );
         final rational = Rational(pipRatio.width, pipRatio.height);
-        final result = await floating.enable(ImmediatePiP(aspectRatio: rational, sourceRectHint: sourceRectHint));
-        if (result == PiPStatus.enabled) {
+        final statusRevision = _pipStatusRevision;
+        final result = await Future.any<PiPStatus?>([
+          floating.enable(ImmediatePiP(aspectRatio: rational, sourceRectHint: sourceRectHint)),
+          cancellation.future.then((_) => null),
+        ]);
+        // A later native status event (including a system restore) outranks
+        // the reply to our earlier request to enter PiP.
+        if (ownsTransition() && statusRevision == _pipStatusRevision && result == PiPStatus.enabled) {
           _lastAppliedPipAspectRatio = pipRatio.value;
           isInPip.value = true;
         }
       } finally {
-        isPipPreparing.value = false;
-        _pipTransitionInFlight = false;
+        if (revision == _pipTransitionRevision) {
+          isPipPreparing.value = false;
+          _pipTransitionInFlight = false;
+          _pipTransitionCancellation = null;
+        }
       }
     } else if (Platform.isWindows) {
       await WindowService().enterWinPiP(currentVideoRatio);
@@ -2827,6 +2885,9 @@ class PlayerManager {
 
   Future<void> close() {
     if (_disposed) return Future<void>.value();
+    _cancelPipTransition();
+    _stopAndroidPipObservation();
+    if (_usesAndroidPip) isInPip.value = false;
     // Intent changes belong to dispatch, not native teardown. A pending source
     // open/recovery must lose ownership as soon as close is requested. Waiting
     // for the lifecycle queue used to let it become audible first, and a later
@@ -2933,6 +2994,8 @@ class PlayerManager {
   }
 
   Future<void> _hardDisposeInternal() async {
+    _cancelPipTransition();
+    _stopAndroidPipObservation();
     _cancelIdlePlayerRelease();
     _sourceReadyTimer?.cancel();
     _sourceReadyTimer = null;
@@ -3849,6 +3912,9 @@ class PlayerManager {
 
   Future<void> dispose() async {
     if (_disposed) return;
+    _cancelPipTransition();
+    _stopAndroidPipObservation();
+    if (_usesAndroidPip) isInPip.value = false;
     _disposed = true;
     _playbackRequested = false;
     _playbackSuspensions.clear();

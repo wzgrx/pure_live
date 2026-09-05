@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:floating/floating.dart';
+
 import 'package:flutter/material.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +28,158 @@ void main() {
   });
 
   tearDown(Get.reset);
+
+  test('warm room re-entry restarts exactly one Android PiP observer', () async {
+    final player = _FakePlayer();
+    final floating = _FakeAndroidFloating();
+    final manager = _createManager(player, androidFloating: floating);
+    await manager.initialize();
+    await manager.close();
+    expect(floating.events.hasListener, isFalse);
+    await manager.play('https://example.invalid/live.flv', const ['https://example.invalid/live.flv'], const {});
+    expect(manager.currentPlayer, same(player));
+    expect(player.initCalls, 1);
+    expect(floating.events.hasListener, isTrue);
+    floating.events.add(PiPStatus.enabled);
+    await Future<void>.delayed(Duration.zero);
+    expect(manager.isInPip.value, isTrue);
+    floating.events.add(PiPStatus.disabled);
+    await Future<void>.delayed(Duration.zero);
+    expect(manager.isInPip.value, isFalse);
+    await manager.dispose();
+    expect(floating.events.hasListener, isFalse);
+    await floating.events.close();
+  });
+
+  testWidgets('closing releases a pending PiP request without waiting for the platform', (tester) async {
+    final reply = Completer<PiPStatus>();
+    final floating = _FakeAndroidFloating()..statusReply = reply;
+    final manager = _createManager(_FakePlayer(), androidFloating: floating);
+    await manager.initialize();
+    var finished = false;
+    final entry = manager.enablePip().then((_) => finished = true);
+    await tester.pump();
+    final closing = manager.close();
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(finished, isTrue);
+    expect(manager.isPipPreparing.value, isFalse);
+    expect(floating.enableCalls, 0);
+    reply.complete(PiPStatus.disabled);
+    await tester.pump();
+    await entry;
+    await closing;
+    unawaited(manager.dispose());
+    await tester.pump();
+    unawaited(floating.events.close());
+    await tester.pump();
+  });
+
+  testWidgets('PiP enters normally, coalesces repeated taps and follows system restore', (tester) async {
+    final floating = _FakeAndroidFloating();
+    final manager = _createManager(_FakePlayer(), androidFloating: floating);
+    await manager.enablePip();
+    expect(floating.enableCalls, 0);
+    await manager.initialize();
+    final first = manager.enablePip();
+    final duplicate = manager.enablePip();
+    await tester.pump();
+    await tester.pump();
+    await first;
+    await duplicate;
+    expect(floating.enableCalls, 1);
+    expect(manager.isInPip.value, isTrue);
+    expect(manager.isPipPreparing.value, isFalse);
+    floating.events.add(PiPStatus.disabled);
+    await tester.pump();
+    expect(manager.isInPip.value, isFalse);
+    unawaited(manager.dispose());
+    await tester.pump();
+    unawaited(floating.events.close());
+    await tester.pump();
+  });
+
+  test('idle native disposal releases the Android PiP observer', () async {
+    final floating = _FakeAndroidFloating();
+    final manager = _createManager(
+      _FakePlayer(),
+      androidFloating: floating,
+      idleReleaseDelay: const Duration(milliseconds: 20),
+    );
+    await manager.initialize();
+    expect(floating.events.hasListener, isTrue);
+    await manager.close();
+    await Future<void>.delayed(const Duration(milliseconds: 70));
+    expect(manager.currentPlayer, isNull);
+    final listening = floating.events.hasListener;
+    await manager.dispose();
+    await floating.events.close();
+    expect(listening, isFalse);
+  });
+
+  testWidgets('closing during PiP status lookup prevents native entry', (tester) async {
+    final floating = _FakeAndroidFloating()..statusReply = Completer<PiPStatus>();
+    final manager = _createManager(_FakePlayer(), androidFloating: floating);
+    await manager.initialize();
+    final entry = manager.enablePip();
+    await tester.pump();
+    final closing = manager.close();
+    floating.statusReply!.complete(PiPStatus.disabled);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    await entry;
+    await closing;
+    final calls = floating.enableCalls;
+    unawaited(manager.dispose());
+    await tester.pump();
+    unawaited(floating.events.close());
+    await tester.pump();
+    expect(calls, 0);
+  });
+
+  testWidgets('late PiP enable completion never revives a closed room', (tester) async {
+    final floating = _FakeAndroidFloating()..enableReply = Completer<PiPStatus>();
+    final manager = _createManager(_FakePlayer(), androidFloating: floating);
+    await manager.initialize();
+    final entry = manager.enablePip();
+    await tester.pump();
+    await tester.pump();
+    expect(floating.enableCalls, 1);
+    final closing = manager.close();
+    await tester.pump();
+    floating.enableReply!.complete(PiPStatus.enabled);
+    await tester.pump(const Duration(milliseconds: 150));
+    await entry;
+    await closing;
+    final inPip = manager.isInPip.value;
+    unawaited(manager.dispose());
+    await tester.pump();
+    unawaited(floating.events.close());
+    await tester.pump();
+    expect(inPip, isFalse);
+  });
+
+  testWidgets('PiP status events outrank an older enable result', (tester) async {
+    final floating = _FakeAndroidFloating()..enableReply = Completer<PiPStatus>();
+    final manager = _createManager(_FakePlayer(), androidFloating: floating);
+    await manager.initialize();
+    final entry = manager.enablePip();
+    await tester.pump();
+    await tester.pump();
+    expect(floating.enableCalls, 1);
+    floating.events.add(PiPStatus.enabled);
+    await tester.pump();
+    floating.events.add(PiPStatus.disabled);
+    await tester.pump();
+    floating.enableReply!.complete(PiPStatus.enabled);
+    await tester.pump();
+    await entry;
+    final inPip = manager.isInPip.value;
+    unawaited(manager.dispose());
+    await tester.pump();
+    unawaited(floating.events.close());
+    await tester.pump();
+    expect(inPip, isFalse);
+  });
 
   test('unrelated player-state updates retain the active route video controller', () {
     final controller = Object();
@@ -846,8 +1000,10 @@ PlayerManager _createManager(
   Future<void> Function(UnifiedPlayer player, bool audioOnly)? audioModeServiceSync,
   Future<void> Function(LiveRoom room)? audioSessionStart,
   UnifiedPlayerCreator? playerCreator,
+  Floating? androidFloating,
 }) {
   return PlayerManager(
+    androidFloating: androidFloating,
     playerCreator: playerCreator ?? (_) => player,
     fallbackManager: EngineFallbackManager(
       defaultEngine: PlayerEngine.mediaKit,
@@ -861,6 +1017,25 @@ PlayerManager _createManager(
     audioModeServiceSync: audioModeServiceSync,
     audioSessionStart: audioSessionStart,
   );
+}
+
+class _FakeAndroidFloating implements Floating {
+  final events = StreamController<PiPStatus>.broadcast();
+  Completer<PiPStatus>? statusReply;
+  Completer<PiPStatus>? enableReply;
+  int enableCalls = 0;
+  @override
+  Stream<PiPStatus> get pipStatusStream => events.stream;
+  @override
+  Future<PiPStatus> get pipStatus async => statusReply == null ? PiPStatus.disabled : await statusReply!.future;
+  @override
+  Future<PiPStatus> enable(EnableArguments arguments) async {
+    enableCalls++;
+    return enableReply == null ? PiPStatus.enabled : await enableReply!.future;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakePlayer implements UnifiedPlayer {

@@ -13,6 +13,8 @@ import 'package:pure_live/common/services/settings/app_settings_controller.dart'
 class LiveAudioService {
   static LiveAudioHandler? _handler;
   static UnifiedPlayer? _boundPlayer;
+  static int? _boundSessionId;
+  static int _bindingRevision = 0;
   static Future<LiveAudioHandler?>? _initializationFuture;
   static int _sleepMinutes = 60;
   static Future<void> Function()? _playCommand;
@@ -102,27 +104,42 @@ class LiveAudioService {
     );
   }
 
-  static Future<void> setPlayer(UnifiedPlayer player, {required bool audioOnly}) async {
+  static Future<void> setPlayer(
+    UnifiedPlayer player, {
+    required bool audioOnly,
+    int? sessionId,
+    bool Function()? isSourceCurrent,
+    double Function()? targetVolume,
+  }) async {
+    if (isSourceCurrent?.call() == false) return;
+    final revision = ++_bindingRevision;
+    bool isCurrent() => revision == _bindingRevision && (isSourceCurrent?.call() ?? true);
+    if (!isCurrent()) return;
     BackgroundPlaybackService.audioOnlySessionActive = audioOnly;
     if (PlatformUtils.isMobile || PlatformUtils.isMacOS) {
       final handler = await _ensureInitialized();
-      if (handler != null && !identical(_boundPlayer, player)) {
-        await handler.setPlayer(player);
+      if (!isCurrent()) return;
+      if (handler != null && (!identical(_boundPlayer, player) || _boundSessionId != sessionId)) {
+        await handler.setPlayer(player, isSourceCurrent: isSourceCurrent, targetVolume: targetVolume);
+        if (!isCurrent()) return;
         _boundPlayer = player;
+        _boundSessionId = sessionId;
       }
     }
     await syncKeepAlive();
   }
 
   static Future<void> start(String roomId, String title, String author, String? cover) async {
+    final revision = _bindingRevision;
+    bool isCurrent() => revision == _bindingRevision && _boundPlayer != null && (_handler?.hasActiveBinding ?? false);
     if (!PlatformUtils.isMobile && !PlatformUtils.isMacOS) return;
     final handler = await _ensureInitialized();
-    if (handler == null) return;
+    if (handler == null || !isCurrent()) return;
 
     final item = buildMediaItem(roomId: roomId, title: title, author: author, cover: cover);
 
     try {
-      await handler.activateSession();
+      await handler.activateSession(isCurrent: isCurrent);
     } catch (error, stackTrace) {
       // Audio focus improves background continuity, but a vendor-specific
       // session failure must not turn an otherwise playable room into an
@@ -130,7 +147,9 @@ class LiveAudioService {
       debugPrint('Audio session activation failed: $error');
       debugPrintStack(stackTrace: stackTrace);
     }
+    if (!isCurrent()) return;
     await handler.playMediaItem(item);
+    if (!isCurrent()) return;
     handler.configureSleepTimer(BackgroundPlaybackService.sleepSessionActive ? Duration(minutes: _sleepMinutes) : null);
     await syncKeepAlive();
   }
@@ -158,12 +177,14 @@ class LiveAudioService {
   }
 
   static Future<void> stop() async {
+    ++_bindingRevision;
+    _boundPlayer = null;
+    _boundSessionId = null;
     BackgroundPlaybackService.sleepSessionActive = false;
     BackgroundPlaybackService.audioOnlySessionActive = false;
     if (_handler == null) return;
     if (!PlatformUtils.isMobile && !PlatformUtils.isMacOS) return;
     await _handler!.releasePlayer();
-    _boundPlayer = null;
   }
 
   static Future<void> releaseKeepAlive() => BackgroundPlaybackService.setKeepAlive(false);

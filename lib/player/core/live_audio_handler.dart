@@ -17,6 +17,12 @@ class LiveAudioHandler extends BaseAudioHandler {
   StreamSubscription? _playStateSubscription;
   Timer? _sleepTimer;
   Future<void> _audioEventQueue = Future<void>.value();
+  Future<void> _focusQueue = Future<void>.value();
+  int _bindingRevision = 0;
+  bool Function()? _sourceIsCurrent;
+  double Function()? _targetVolume;
+  bool _fallbackInterruptedPlaying = false;
+  bool _ducked = false;
   PlaybackLifecyclePauseToken? _interruptionToken;
   Future<void> Function()? _playCommand;
   Future<void> Function()? _pauseCommand;
@@ -24,15 +30,41 @@ class LiveAudioHandler extends BaseAudioHandler {
   Future<PlaybackLifecyclePauseToken?> Function()? _pauseForInterruption;
   Future<bool> Function(PlaybackLifecyclePauseToken token)? _resumeFromInterruption;
 
-  LiveAudioHandler() {
+  LiveAudioHandler({Future<AudioSession> Function()? sessionProvider})
+    : _sessionProvider = sessionProvider ?? _defaultSessionProvider {
     _sessionReady = _initSession();
   }
 
-  Future<void> setPlayer(UnifiedPlayer player) async {
-    await _playStateSubscription?.cancel();
+  final Future<AudioSession> Function() _sessionProvider;
+  static Future<AudioSession> _defaultSessionProvider() => AudioSession.instance;
+
+  Future<void> setPlayer(
+    UnifiedPlayer player, {
+    bool Function()? isSourceCurrent,
+    double Function()? targetVolume,
+  }) async {
+    final revision = ++_bindingRevision;
+    // A slow native pause in the previous binding must not block the new
+    // source's system events. Detached callbacks still check their revision.
+    _audioEventQueue = Future<void>.value();
+    final previous = _playStateSubscription;
+    _playStateSubscription = null;
     _interruptionToken = null;
+    _fallbackInterruptedPlaying = false;
+    _ducked = false;
     _currentPlayer = player;
-    _listenPlayState();
+    _sourceIsCurrent = isSourceCurrent;
+    _targetVolume = targetVolume;
+    await previous?.cancel();
+    if (_ownsBinding(player, revision)) _listenPlayState(player, revision);
+  }
+
+  bool _ownsBinding(UnifiedPlayer player, int revision) =>
+      revision == _bindingRevision && identical(_currentPlayer, player) && (_sourceIsCurrent?.call() ?? true);
+
+  bool get hasActiveBinding {
+    final player = _currentPlayer;
+    return player != null && _ownsBinding(player, _bindingRevision);
   }
 
   void configurePlaybackCommands({
@@ -49,14 +81,22 @@ class LiveAudioHandler extends BaseAudioHandler {
     _resumeFromInterruption = resumeFromInterruption;
   }
 
-  void _enqueueAudioEvent(Future<void> Function() operation) {
-    _audioEventQueue = _audioEventQueue.then((_) => operation()).catchError((Object error, StackTrace stackTrace) {
-      developer.log('Audio session event failed: $error', stackTrace: stackTrace);
-    });
+  void _enqueueAudioEvent(Future<void> Function(bool Function() isCurrent) operation) {
+    final player = _currentPlayer;
+    final revision = _bindingRevision;
+    if (player == null) return;
+    bool isCurrent() => _ownsBinding(player, revision);
+    _audioEventQueue = _audioEventQueue
+        .then((_) async {
+          if (isCurrent()) await operation(isCurrent);
+        })
+        .catchError((Object error, StackTrace stackTrace) {
+          developer.log('Audio session event failed: $error', stackTrace: stackTrace);
+        });
   }
 
   Future<void> _initSession() async {
-    _session = await AudioSession.instance;
+    _session = await _sessionProvider();
     await _session.configure(const AudioSessionConfiguration.music());
 
     // 音频中断（来电、通知）
@@ -66,38 +106,52 @@ class LiveAudioHandler extends BaseAudioHandler {
       if (event.begin) {
         switch (event.type) {
           case AudioInterruptionType.pause:
-            _enqueueAudioEvent(() async {
-              if (_interruptionToken != null) return;
+            _enqueueAudioEvent((isCurrent) async {
+              if (_interruptionToken != null || _fallbackInterruptedPlaying) return;
               final pauseForInterruption = _pauseForInterruption;
               if (pauseForInterruption != null) {
-                _interruptionToken = await pauseForInterruption();
+                final token = await pauseForInterruption();
+                if (isCurrent()) _interruptionToken = token;
               } else {
-                await _currentPlayer?.pause();
+                final player = _currentPlayer!;
+                final wasPlaying = player.isPlayingNow;
+                if (wasPlaying) await player.pause();
+                if (isCurrent()) _fallbackInterruptedPlaying = wasPlaying;
               }
             });
             break;
           case AudioInterruptionType.unknown:
             break;
           case AudioInterruptionType.duck:
-            _currentPlayer!.setVolume(0.2);
+            _enqueueAudioEvent((isCurrent) async {
+              if (_ducked) return;
+              await _currentPlayer!.setVolume((_targetVolume?.call() ?? 1.0).clamp(0.0, 1.0) * 0.2);
+              if (isCurrent()) _ducked = true;
+            });
             break;
         }
       } else {
         switch (event.type) {
           case AudioInterruptionType.pause:
-            _enqueueAudioEvent(() async {
+            _enqueueAudioEvent((isCurrent) async {
               final token = _interruptionToken;
               _interruptionToken = null;
+              final fallbackWasPlaying = _fallbackInterruptedPlaying;
+              _fallbackInterruptedPlaying = false;
               final resumeFromInterruption = _resumeFromInterruption;
               if (token != null && resumeFromInterruption != null) {
                 await resumeFromInterruption(token);
-              } else if (resumeFromInterruption == null) {
+              } else if (resumeFromInterruption == null && fallbackWasPlaying && !_currentPlayer!.isPlayingNow) {
                 await _currentPlayer?.play();
               }
             });
             break;
           case AudioInterruptionType.duck:
-            _currentPlayer!.setVolume(1.0);
+            _enqueueAudioEvent((isCurrent) async {
+              if (!_ducked) return;
+              _ducked = false;
+              await _currentPlayer!.setVolume((_targetVolume?.call() ?? 1.0).clamp(0.0, 1.0));
+            });
             break;
           case AudioInterruptionType.unknown:
             break;
@@ -107,8 +161,9 @@ class LiveAudioHandler extends BaseAudioHandler {
 
     // 拔掉耳机 / 连接蓝牙音箱暂停
     _session.becomingNoisyEventStream.listen((_) {
-      _enqueueAudioEvent(() async {
+      _enqueueAudioEvent((isCurrent) async {
         _interruptionToken = null;
+        _fallbackInterruptedPlaying = false;
         final pauseCommand = _pauseCommand;
         if (pauseCommand != null) {
           await pauseCommand();
@@ -120,12 +175,9 @@ class LiveAudioHandler extends BaseAudioHandler {
   }
 
   /// 监听播放状态同步到通知栏
-  void _listenPlayState() {
-    if (_currentPlayer == null) return;
-
-    _playStateSubscription?.cancel();
-
-    _playStateSubscription = _currentPlayer!.onPlaying.listen((playing) {
+  void _listenPlayState(UnifiedPlayer player, int revision) {
+    _playStateSubscription = player.onPlaying.listen((playing) {
+      if (!_ownsBinding(player, revision)) return;
       final keepAlive =
           playing &&
           BackgroundPlaybackPolicy.shouldContinue(
@@ -169,23 +221,37 @@ class LiveAudioHandler extends BaseAudioHandler {
   /// Claims media audio focus as soon as playback starts in the room. Waiting
   /// until the notification play action is pressed makes Android pause the
   /// already-running stream when the app first goes to the background.
-  Future<void> activateSession() async {
-    await _sessionReady;
-    await _session.setActive(true);
+  Future<bool> activateSession({bool Function()? isCurrent}) => _setSessionActive(true, isCurrent: isCurrent);
+
+  Future<bool> _setSessionActive(bool active, {bool Function()? isCurrent}) {
+    final operation = _focusQueue.then((_) async {
+      await _sessionReady;
+      if (isCurrent?.call() == false) return false;
+      return _session.setActive(active);
+    });
+    // Preserve the caller's error, but one failure must not poison later focus commands.
+    _focusQueue = operation.then<void>((_) {}).catchError((Object _, StackTrace _) {});
+    return operation;
   }
 
   @override
   Future<void> play() async {
-    if (_currentPlayer == null) return;
-
-    await activateSession();
+    final player = _currentPlayer;
+    final revision = _bindingRevision;
+    if (player == null) return;
+    bool isCurrent() => _ownsBinding(player, revision);
+    if (!await activateSession(isCurrent: isCurrent)) return;
+    if (!isCurrent()) return;
     final playCommand = _playCommand;
     await (playCommand != null ? playCommand() : _currentPlayer!.play());
   }
 
   @override
   Future<void> pause() async {
-    if (_currentPlayer == null) return;
+    final player = _currentPlayer;
+    if (player == null || !_ownsBinding(player, _bindingRevision)) return;
+    _fallbackInterruptedPlaying = false;
+    _interruptionToken = null;
     final pauseCommand = _pauseCommand;
     await (pauseCommand != null ? pauseCommand() : _currentPlayer!.pause());
   }
@@ -201,25 +267,44 @@ class LiveAudioHandler extends BaseAudioHandler {
   }
 
   Future<void> releasePlayer() async {
-    if (_currentPlayer == null) return;
-
+    final player = _currentPlayer;
+    final revision = ++_bindingRevision;
+    _audioEventQueue = Future<void>.value();
+    final subscription = _playStateSubscription;
+    _playStateSubscription = null;
+    _currentPlayer = null;
+    _sourceIsCurrent = null;
+    _targetVolume = null;
     BackgroundPlaybackService.sleepSessionActive = false;
     BackgroundPlaybackService.audioOnlySessionActive = false;
     _interruptionToken = null;
+    _fallbackInterruptedPlaying = false;
+    _ducked = false;
 
     _sleepTimer?.cancel();
     _sleepTimer = null;
 
     try {
-      await _currentPlayer!.stop();
+      try {
+        await subscription?.cancel();
+      } finally {
+        // The same adapter may already own a newer source while subscription
+        // cleanup awaits. Do not stop that replacement source.
+        if (_bindingRevision == revision || !identical(_currentPlayer, player)) await player?.stop();
+      }
     } catch (e) {
       developer.log("Player already disposed or failed to stop: $e");
     } finally {
-      await _sessionReady;
-      await _session.setActive(false);
-      await BackgroundPlaybackService.setKeepAlive(false);
-
-      playbackState.add(playbackState.value.copyWith(playing: false, processingState: AudioProcessingState.idle));
+      bool stillReleased() => _bindingRevision == revision && _currentPlayer == null;
+      if (stillReleased()) {
+        await _setSessionActive(false, isCurrent: stillReleased);
+        if (stillReleased()) {
+          await BackgroundPlaybackService.setKeepAlive(false);
+          if (stillReleased()) {
+            playbackState.add(playbackState.value.copyWith(playing: false, processingState: AudioProcessingState.idle));
+          }
+        }
+      }
     }
   }
 }

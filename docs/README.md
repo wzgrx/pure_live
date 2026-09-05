@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [音频事件与播放器绑定所有权](AUDIO_SESSION_OWNERSHIP_AUDIT_2026_09_05.md)：旧中断/通知串房、停止收尾覆盖新焦点、事件队列饥饿、音量恢复与 131 项定向回归；历史 PiP 观察分开保留。
+
 - [录制轮询与启动意图审计](RECORDER_POLL_OWNERSHIP_AUDIT_2026_09_05.md)：迟到请求、停止/退出、启动历史状态、并发上限、开关逻辑与确定性回归。
 
 - [维护范围与问题处置策略](../MAINTENANCE_POLICY.md)：Android/Windows 维护边界、Issue 分流、Bug 来源判定、上游 Issue 优先级、验证和回滚标准。

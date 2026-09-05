@@ -113,7 +113,7 @@ class PlayerManager {
   final Duration? audioModeVideoWarmRetention;
   final UnifiedPlayerCreator _playerCreator;
   final bool Function() _useHardStopOnExit;
-  final Future<void> Function(UnifiedPlayer player, bool audioOnly) _audioModeServiceSync;
+  final Future<void> Function(UnifiedPlayer player, bool audioOnly)? _audioModeServiceSync;
   final Future<void> Function(LiveRoom room) _audioSessionStart;
   Future<void> _playerLifecycleQueue = Future.value();
   int _sessionId = 0;
@@ -173,12 +173,10 @@ class PlayerManager {
     this.audioModeVideoWarmRetention,
     UnifiedPlayerCreator? playerCreator,
     bool Function()? useHardStopOnExit,
-    Future<void> Function(UnifiedPlayer player, bool audioOnly)? audioModeServiceSync,
+    this._audioModeServiceSync,
     Future<void> Function(LiveRoom room)? audioSessionStart,
   }) : _playerCreator = playerCreator ?? PlayerAdapterFactory.create,
        _useHardStopOnExit = useHardStopOnExit ?? (() => SettingsService.to.player.useHardStopOnExit.v),
-       _audioModeServiceSync =
-           audioModeServiceSync ?? ((player, audioOnly) => LiveAudioService.setPlayer(player, audioOnly: audioOnly)),
        _audioSessionStart =
            audioSessionStart ??
            ((room) => LiveAudioService.start(room.roomId!, room.title ?? "", room.nick ?? "", room.avatar)) {
@@ -1315,7 +1313,18 @@ class PlayerManager {
     }
 
     try {
-      await _audioModeServiceSync(request.player, request.audioOnly);
+      final sync = _audioModeServiceSync;
+      if (sync != null) {
+        await sync(request.player, request.audioOnly);
+      } else {
+        await LiveAudioService.setPlayer(
+          request.player,
+          audioOnly: request.audioOnly,
+          sessionId: request.sessionId,
+          isSourceCurrent: () => _isPlayerEventCurrent(request.player, request.sessionId),
+          targetVolume: () => currentFloatRoom?.getSavedVolume() ?? 1.0,
+        );
+      }
       if (_disposed || _isClosing || !identical(_currentPlayer, request.player) || request.sessionId != _sessionId) {
         return;
       }

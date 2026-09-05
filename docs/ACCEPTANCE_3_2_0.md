@@ -5,7 +5,9 @@
 - [小窗审计](APP_FLOATING_OVERLAY_AUDIT_2026_09_06.md)：真实 PlayerManager/FloatingOverlay Widget 红测发现共享 Get.overlayContext 与 Flutter 3.47.0 OverlayEntry 标记解析不兼容；修复目标上下文定位，保留正确导航根，去掉错误 Navigator context 兜底。
 - 上游 #851 的首次点击唤出控件逻辑本仓库已有；本次新增 Android/iOS 控件隐藏、唤出、关闭的真实 Widget 回归，并独立复现/修复 closeAppFloating 遗留隐藏 timer。
 - 六组 **63/63**，记录 `20260905T211633514Z-quality-focused.json`；一次 analyze 无错误，一条冗余测试 import 提示已整理，未反复 analyze。结束活跃重型进程 0。
-- 未改画面比例、直播源、解码、缓存或系统 PiP；本轮源码尚未进入下方旧 Windows 候选或公开 APK。全平台 3.2.0 继续验收，局部测试不代表整个目标完成。
+- 修复 `b24fa1d2` 已推送；干净提交全 test 目录 **1120/1120**，记录 `20260905T212009867Z-quality-focused.json`。Windows Debug 候选本地构建 104.046 秒，记录 `20260905T212213918Z-build-windowsx64-debug.json`；两次均结束活跃重型进程 0。
+- 新 ZIP 141,193,792 字节、SHA256 `abe9495a6a469ef0ac57a6a01021b067b56056329a9d35601cac7ccb329686cb`，已校验并解压到 `local-artifacts/candidates/windows-b24fa1d2-debug/`，尚未启动。开发版本仍为 3.1.8+4121；下方旧候选与旧安装器不计为本次产物。
+- 未改画面比例、直播源、解码、缓存或系统 PiP；公开 APK 未替换。全平台 3.2.0 继续验收，下一步实际 Windows 控件/小窗往返与剩余平台验证；确定性全 test 通过不代表整个目标完成。
 
 ## 最新候选与新 Issue 核验入口（2026-09-06）
 

@@ -28,6 +28,14 @@
 - 一次 analyze（61.2 秒）无错误，有一条新增测试的冗余 foundation import 提示；已删除重复 import，未为该非行为整理重复全量分析。最终测试通过不等同于手机/桌面截图、解码画面和长时间运行验收。
 - 最终日志 `local-artifacts/app-floating-controls-final.log`；等待其他项目 Java 构建结束后按重型互斥执行。没有手机操作或上游合并。正式 3.2.0、Android 安装包和真实客户端验收仍未完成。
 
+## 提交、扩展回归与新 Windows 候选
+
+- 修复提交 `b24fa1d22703d20b3682715eb7994132fa6c0228` 已推送维护仓库 master；规则精简独立提交 `35e481e0` 同步保留。
+- 因 getter 被多个全局 UI 共用，在干净修复提交上扩展到整个 `test` 目录，**1120/1120** 通过；`20260905T212009867Z-quality-focused.json`，141.743 秒，结束活跃重型进程 0。这是完整测试目录回归，未伪装成包含重新依赖核验、实网接口、所有设备与最终签名的正式发布验收。
+- 同一干净提交本地串行构建 Windows x64 Debug：`20260905T212213918Z-build-windowsx64-debug.json`，104.046 秒，结束活跃重型进程 0；复用上述回归，未重复 analyze。构建保留已知 MSB8028 中间目录共享警告，未做无证据全量 clean。
+- ZIP：`local-artifacts/3.1.8-4121/PureLive-3.1.8-4121-windows-x64-debug.zip`，141,193,792 字节，SHA256 `abe9495a6a469ef0ac57a6a01021b067b56056329a9d35601cac7ccb329686cb`；元数据 source_commit 与修复提交一致、tracked_files_dirty=false。此目录的旧 portable Release 和安装器未重建。
+- CRC 校验通过后解压到独立 `local-artifacts/candidates/windows-b24fa1d2-debug/`；记录 `local-artifacts/agent-audit/app-floating-windows-candidate.json`。本轮尚未启动此候选，下一步用它核验实际窗口、Overlay 菜单与小窗往返，避免误测旧 PID/旧程序。候选保持开发版本 3.1.8+4121，未发布正式 3.2.0，也没有替换公开 Android APK。
+
 ## 回滚与相邻风险
 
 改动集中于 `extension_navigation.dart` 的 getter、PlayerManager 小窗入口/显隐生命周期和相关测试。getter 也被 bottomSheet、dialog、snackbar 使用，需要一并验证上下文归属和返回行为。保持原 getter 的导航根选择，针对同一根因恢复旧实现即可回滚；避免通过全局 Overlay 叠加或反复重建播放器回避异常。

@@ -23,6 +23,7 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
   bool _sourceTransitionPrepared = false;
   bool _acceptSourceEvents = false;
   bool _sourceOpening = false;
+  bool _sourceBuffering = false;
   PlayerException? _deferredSourceError;
   BoxFit _videoFit = BoxFit.contain;
   VoidCallback? _playerListener;
@@ -70,6 +71,25 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
     // 先移除旧监听
     _removePlayerListener();
 
+    // Fijk sends freeze=start/end on a separate stream; its native state can
+    // remain started throughout buffering. Track it inside this source scope,
+    // since FijkPlayer.isBuffering itself survives reset into the next source.
+    _subscriptions.add(
+      _player.onBufferStateUpdate.listen((buffering) {
+        if (!_acceptSourceEvents || _disposed) return;
+        final state = _player.state;
+        if (state == FijkState.idle ||
+            state == FijkState.stopped ||
+            state == FijkState.completed ||
+            state == FijkState.end ||
+            state == FijkState.error) {
+          return;
+        }
+        _sourceBuffering = buffering;
+        if (state == FijkState.started) _publishStartedState();
+      }),
+    );
+
     _playerListener = () {
       if (!_acceptSourceEvents || _disposed) return;
       final value = _player.value;
@@ -91,16 +111,16 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
           _stateSubject.add(PlayerState.buffering);
           break;
         case FijkState.started:
-          _loadingSubject.add(false);
-          _playingSubject.add(true);
-          _stateSubject.add(PlayerState.playing);
+          _publishStartedState();
           break;
         case FijkState.paused:
           _playingSubject.add(false);
+          _loadingSubject.add(false);
           _stateSubject.add(PlayerState.paused);
           break;
         case FijkState.completed:
           _playingSubject.add(false);
+          _loadingSubject.add(false);
           _completeSubject.add(true);
           _stateSubject.add(PlayerState.completed);
           break;
@@ -129,6 +149,13 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
     };
 
     _player.addListener(_playerListener!);
+  }
+
+  void _publishStartedState() {
+    if (_loadingSubject.value != _sourceBuffering) _loadingSubject.add(_sourceBuffering);
+    if (!_playingSubject.value) _playingSubject.add(true);
+    final state = _sourceBuffering ? PlayerState.buffering : PlayerState.playing;
+    if (_stateSubject.value != state) _stateSubject.add(state);
   }
 
   Future<void> _cancelAllSubscriptions() async {
@@ -190,6 +217,7 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
     _acceptSourceEvents = false;
     _sourceTransitionPrepared = true;
     _sourceOpening = false;
+    _sourceBuffering = false;
     _deferredSourceError = null;
     _playingSubject.add(false);
     _loadingSubject.add(true);
@@ -212,9 +240,7 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
       _heightSubject.add(size.height.toInt());
     }
     if (value.state == FijkState.started) {
-      _playingSubject.add(true);
-      _loadingSubject.add(false);
-      _stateSubject.add(PlayerState.playing);
+      _publishStartedState();
     }
   }
 
@@ -248,7 +274,9 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
         throw deferredError;
       }
       _publishCurrentSourceState();
-      _stateSubject.add(PlayerState.ready);
+      if (!_playingSubject.value && _stateSubject.value != PlayerState.buffering) {
+        _stateSubject.add(PlayerState.ready);
+      }
       await setVolume(1.0);
     } catch (e, s) {
       _sourceOpening = false;
@@ -263,8 +291,6 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
             );
       _safeAddError(exception);
       throw exception;
-    } finally {
-      if (_playingSubject.value) _loadingSubject.add(false);
     }
   }
 
@@ -301,6 +327,8 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
   @override
   Future<void> softStop() async {
     if (!_initialized) return;
+    _acceptSourceEvents = false;
+    _sourceBuffering = false;
     await _player.reset();
     _playingSubject.add(false);
     _loadingSubject.add(false);

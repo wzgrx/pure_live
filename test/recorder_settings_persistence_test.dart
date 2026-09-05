@@ -29,6 +29,7 @@ void main() {
     controller.enablePolling.value = true;
     controller.enableCacheLimit.value = true;
     controller.preferBestStream.value = false;
+    controller.autoStartOnBoot.value = true;
 
     await Future<void>.delayed(Duration.zero);
     await HivePrefUtil.flush();
@@ -37,6 +38,12 @@ void main() {
     expect(RecorderConfig.enablePolling, isTrue);
     expect(RecorderConfig.enableCacheLimit, isTrue);
     expect(RecorderConfig.preferBestStream, isFalse);
+    expect(RecorderConfig.autoStartOnBoot, isTrue);
+    controller.enablePolling.value = false;
+    await HivePrefUtil.flush();
+    final reopened = RecordSettingsController();
+    expect(reopened.enablePolling.value, isFalse);
+    expect(reopened.autoStartOnBoot.value, isTrue);
   });
 
   test('cache-limit getter observes changes made after first read', () async {

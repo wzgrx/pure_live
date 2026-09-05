@@ -31,6 +31,8 @@ class RecorderController extends GetxService {
     : settings = Get.find<RecordSettingsController>(),
       ffmpeg = FFmpegManager.to,
       scheduler = FFmpegScheduler.instance,
+      _siteResolver = _defaultSiteResolver,
+      _pollTimeout = const Duration(seconds: 20),
       _outputSampleInterval = const Duration(seconds: 1);
 
   @visibleForTesting
@@ -38,6 +40,8 @@ class RecorderController extends GetxService {
     required this.settings,
     required this.ffmpeg,
     required this.scheduler,
+    this._siteResolver = _defaultSiteResolver,
+    this._pollTimeout = const Duration(seconds: 20),
     this._outputMetrics = const RecordingOutputMetrics(),
     this._outputSampleInterval = const Duration(seconds: 1),
   });
@@ -47,12 +51,17 @@ class RecorderController extends GetxService {
   final RecordSettingsController settings;
   final FFmpegManager ffmpeg;
   final FFmpegScheduler scheduler;
+  final RecorderLiveSiteResolver _siteResolver;
+  final Duration _pollTimeout;
+  static LiveSite _defaultSiteResolver(String platform) => Sites.of(platform).liveSite;
   final Duration _outputSampleInterval;
   final RxList<LiveRecordTask> tasks = <LiveRecordTask>[].obs;
 
   final Map<String, Timer> _pollTimers = <String, Timer>{};
   final Map<String, int> _pollFailures = <String, int>{};
-  final Set<String> _pollInFlight = <String>{};
+  final Map<String, _RecorderPollRequest> _pollInFlight = <String, _RecorderPollRequest>{};
+  Worker? _pollingWorker;
+  Future<void>? _restoreInFlight;
   final Map<String, Timer> _retryTimers = <String, Timer>{};
   final Map<String, Timer> _leasePrefetchTimers = <String, Timer>{};
   final Map<String, Timer> _leaseRotationTimers = <String, Timer>{};
@@ -86,6 +95,7 @@ class RecorderController extends GetxService {
       if (settings.enableCacheLimit.value) unawaited(_checkResources());
     });
     _ffmpegSub = ffmpeg.stream.listen((event) => unawaited(_handleFFmpegEvent(event)));
+    _pollingWorker = ever<bool>(settings.enablePolling, _onPollingChanged);
     unawaited(restoreAndAutoPoll());
   }
 
@@ -632,7 +642,7 @@ class RecorderController extends GetxService {
   }
 
   Future<void> _startTask(LiveRecordTask task) async {
-    if (_isClosing) return;
+    if (_isClosing || task.wasStoppedByUser || !_ownsTask(task)) return;
     if (_startingTasks.contains(task.taskId)) {
       ToastUtil.show(i18n('recorder_task_starting'));
       return;
@@ -941,7 +951,7 @@ class RecorderController extends GetxService {
   }
 
   void _schedulePoll(LiveRecordTask task, {Duration? delay}) {
-    if (!settings.enablePolling.value || task.wasStoppedByUser || !_containsTask(task.taskId)) return;
+    if (!settings.enablePolling.value || !_canPoll(task)) return;
     _pollTimers.remove(task.taskId)?.cancel();
     final failureCount = _pollFailures[task.taskId] ?? 0;
     final effectiveDelay =
@@ -952,19 +962,55 @@ class RecorderController extends GetxService {
           maximumSeconds: settings.maxCheckInterval.value,
           enableBackoff: settings.enableBackoff.value,
         );
-    _pollTimers[task.taskId] = Timer(effectiveDelay, () {
+    late final Timer timer;
+    timer = Timer(effectiveDelay, () {
+      if (!identical(_pollTimers[task.taskId], timer)) return;
       _pollTimers.remove(task.taskId);
-      unawaited(_pollTask(task));
+      unawaited(_pollTask(task, automatic: true));
     });
+    _pollTimers[task.taskId] = timer;
   }
 
-  Future<void> _pollTask(LiveRecordTask task) async {
-    if (!_pollInFlight.add(task.taskId) || task.wasStoppedByUser || !_containsTask(task.taskId)) return;
+  bool _ownsTask(LiveRecordTask task) => tasks.any((candidate) => identical(candidate, task));
+
+  bool _canPoll(LiveRecordTask task) =>
+      !_isClosing &&
+      !task.wasStoppedByUser &&
+      _ownsTask(task) &&
+      !_startingTasks.contains(task.taskId) &&
+      !scheduler.isRunning(task.taskId) &&
+      !scheduler.isQueued(task.taskId) &&
+      !_finalizationFutures.containsKey(task.taskId);
+
+  bool _ownsPoll(_RecorderPollRequest request) =>
+      identical(_pollInFlight[request.task.taskId], request) &&
+      _canPoll(request.task) &&
+      (!request.automatic || settings.enablePolling.value);
+
+  Future<void> _pollTask(LiveRecordTask task, {bool automatic = false}) {
+    // Validate before claiming ownership: a skipped task must not leave a
+    // permanent busy flag. Explicit refreshes coalesce until this request ends.
+    if (!_canPoll(task) || (automatic && !settings.enablePolling.value)) return Future<void>.value();
+    final existing = _pollInFlight[task.taskId];
+    if (existing != null && identical(existing.task, task)) return existing.done.future;
+    existing?.complete();
+    final request = _RecorderPollRequest(task: task, automatic: automatic);
+    _pollInFlight[task.taskId] = request;
+    unawaited(_performPoll(request));
+    return request.done.future;
+  }
+
+  Future<void> _performPoll(_RecorderPollRequest request) async {
+    final task = request.task;
     try {
-      final site = Sites.of(task.platform).liveSite;
-      final room = site is LiveSiteRoomRefresher
-          ? await (site as LiveSiteRoomRefresher).getRoomDetailForRefresh(roomId: task.roomId, platform: task.platform)
-          : await site.getRoomDetail(roomId: task.roomId, platform: task.platform);
+      final site = _siteResolver(task.platform);
+      final response = site is LiveSiteRoomRefresher
+          ? (site as LiveSiteRoomRefresher).getRoomDetailForRefresh(roomId: task.roomId, platform: task.platform)
+          : site.getRoomDetail(roomId: task.roomId, platform: task.platform);
+      // This bounds controller waiting, not the adapter's underlying socket.
+      // A late success/error remains isolated by request ownership.
+      final room = await response.timeout(_pollTimeout);
+      if (!_ownsPoll(request)) return;
       task.updateFromRoom(room);
       updateTask(task);
       if (room.isPlayableNow) {
@@ -977,24 +1023,51 @@ class RecorderController extends GetxService {
       updateTask(task);
       _pollFailures[task.taskId] = (_pollFailures[task.taskId] ?? 0) + 1;
     } catch (error) {
+      if (!_ownsPoll(request)) return;
       _pollFailures[task.taskId] = (_pollFailures[task.taskId] ?? 0) + 1;
       task.markFailure(stage: 'status', error: error);
       updateTask(task);
       developer.log('Recorder status poll failed: $error', name: 'RecorderController');
     } finally {
-      _pollInFlight.remove(task.taskId);
+      if (identical(_pollInFlight[task.taskId], request)) {
+        _pollInFlight.remove(task.taskId);
+        _schedulePoll(task);
+      }
+      request.complete();
     }
-    _schedulePoll(task);
   }
 
   void _stopPolling(String taskId) {
     _pollTimers.remove(taskId)?.cancel();
     _pollFailures.remove(taskId);
+    _pollInFlight.remove(taskId)?.complete();
   }
 
   Future<void> refreshTaskStatus(LiveRecordTask task) async {
-    _stopPolling(task.taskId);
+    if (!_canPoll(task)) return;
+    _pollTimers.remove(task.taskId)?.cancel();
+    _pollFailures.remove(task.taskId);
     await _pollTask(task);
+  }
+
+  void _onPollingChanged(bool enabled) {
+    if (_isClosing) return;
+    if (!enabled) {
+      for (final timer in _pollTimers.values) {
+        timer.cancel();
+      }
+      _pollTimers.clear();
+      for (final request in _pollInFlight.values.where((request) => request.automatic).toList()) {
+        if (identical(_pollInFlight[request.task.taskId], request)) {
+          _pollInFlight.remove(request.task.taskId);
+          request.complete();
+        }
+      }
+      return;
+    }
+    for (final task in tasks) {
+      if (task.status == RecordStatus.waitingLive) _schedulePoll(task, delay: Duration.zero);
+    }
   }
 
   Future<void> _checkResources() async {
@@ -1029,12 +1102,25 @@ class RecorderController extends GetxService {
     }
   }
 
-  Future<void> restoreAndAutoPoll() async {
+  Future<void> restoreAndAutoPoll() {
+    if (_isClosing) return Future<void>.value();
+    final existing = _restoreInFlight;
+    if (existing != null) return existing;
+    late final Future<void> operation;
+    operation = _restoreAndAutoPoll().whenComplete(() {
+      if (identical(_restoreInFlight, operation)) _restoreInFlight = null;
+    });
+    _restoreInFlight = operation;
+    return operation;
+  }
+
+  Future<void> _restoreAndAutoPoll() async {
     final raw = HivePrefUtil.getString(RecorderKeys.recorderTasks);
     if (raw == null || raw.trim().isEmpty) return;
 
     final restored = <LiveRecordTask>[];
     final interruptedTaskIds = <String>{};
+    final resumeTaskIds = <String>{};
     try {
       final decoded = jsonDecode(raw);
       if (decoded is List) {
@@ -1043,6 +1129,7 @@ class RecorderController extends GetxService {
           try {
             final task = LiveRecordTask.fromJson(Map<String, dynamic>.from(entry));
             if (task.roomId.trim().isEmpty || !Sites.isSupported(task.platform)) continue;
+            if (restored.any((candidate) => candidate.taskId == task.taskId)) continue;
             if (const <RecordStatus>{
               RecordStatus.preparing,
               RecordStatus.running,
@@ -1051,10 +1138,18 @@ class RecorderController extends GetxService {
             }.contains(task.status)) {
               interruptedTaskIds.add(task.taskId);
             }
-            task
-              ..status = RecordStatus.stopped
-              ..wasStoppedByUser = false;
-            if (restored.every((candidate) => candidate.taskId != task.taskId)) restored.add(task);
+            if (!task.wasStoppedByUser &&
+                const <RecordStatus>{
+                  RecordStatus.queued,
+                  RecordStatus.preparing,
+                  RecordStatus.running,
+                  RecordStatus.reconnecting,
+                  RecordStatus.waitingLive,
+                }.contains(task.status)) {
+              resumeTaskIds.add(task.taskId);
+            }
+            if (!task.status.isFinished) task.status = RecordStatus.stopped;
+            restored.add(task);
           } catch (error) {
             developer.log('Skipped malformed recorder task: $error', name: 'RecorderController');
           }
@@ -1074,13 +1169,28 @@ class RecorderController extends GetxService {
     for (final task in restored.where(
       (candidate) => interruptedTaskIds.contains(candidate.taskId) || candidate.pendingAttempts.isNotEmpty,
     )) {
+      if (_isClosing) return;
+      if (!_ownsTask(task)) continue;
       await _recoverInterruptedRecording(task);
     }
-    if (!settings.autoStartOnBoot.value || restored.isEmpty || !await requestStoragePermission()) return;
+    if (_isClosing || !settings.autoStartOnBoot.value || resumeTaskIds.isEmpty) return;
+    if (!await requestStoragePermission() || _isClosing || !settings.autoStartOnBoot.value) return;
 
-    for (final task in restored) {
-      await refreshTaskStatus(task);
+    final candidates = restored.where((task) => resumeTaskIds.contains(task.taskId)).toList();
+    var next = 0;
+    Future<void> worker() async {
+      while (!_isClosing && settings.autoStartOnBoot.value && next < candidates.length) {
+        final task = candidates[next++];
+        if (!_canPoll(task)) continue;
+        task.status = RecordStatus.waitingLive;
+        updateTask(task);
+        await refreshTaskStatus(task);
+      }
     }
+
+    // Bound startup request fan-out. One slow platform should not delay every
+    // other recorder card, while native recording concurrency stays scheduler-owned.
+    await Future.wait(List.generate(math.min(3, candidates.length), (_) => worker()));
   }
 
   Future<void> _recoverInterruptedRecording(LiveRecordTask task) async {
@@ -1119,6 +1229,13 @@ class RecorderController extends GetxService {
   @override
   void onClose() {
     _isClosing = true;
+    _pollingWorker?.dispose();
+    _pollingWorker = null;
+    for (final request in _pollInFlight.values) {
+      request.complete();
+    }
+    _pollInFlight.clear();
+    _pollFailures.clear();
     for (final timer in _pollTimers.values) {
       timer.cancel();
     }
@@ -1181,6 +1298,16 @@ class RecorderController extends GetxService {
       unawaited(pending == null ? _persist() : pending.whenComplete(_persist));
     }
     super.onClose();
+  }
+}
+
+class _RecorderPollRequest {
+  _RecorderPollRequest({required this.task, required this.automatic});
+  final LiveRecordTask task;
+  final bool automatic;
+  final Completer<void> done = Completer<void>();
+  void complete() {
+    if (!done.isCompleted) done.complete();
   }
 }
 

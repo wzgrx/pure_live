@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [录制轮询与启动意图审计](RECORDER_POLL_OWNERSHIP_AUDIT_2026_09_05.md)：迟到请求、停止/退出、启动历史状态、并发上限、开关逻辑与确定性回归。
+
 - [维护范围与问题处置策略](../MAINTENANCE_POLICY.md)：Android/Windows 维护边界、Issue 分流、Bug 来源判定、上游 Issue 优先级、验证和回滚标准。
 - [上游同步审查策略](../UPSTREAM_REVIEW_POLICY.md)：三方差异、全入站文件审查、语义变更台账、冲突处置与合并门禁。
 - [Bug 根因分析模板](BUG_TRIAGE_TEMPLATE.md)：复现基线、来源分类、首次错误状态、影响矩阵与分层证据模板。

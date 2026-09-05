@@ -1,3 +1,5 @@
+import 'package:pure_live/common/utils/play_quality_label.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -785,7 +787,7 @@ class RecorderController extends GetxService {
 
       task
         ..currentUrl = resolved.url
-        ..selectedQuality = resolved.quality.quality
+        ..selectedQuality = resolved.quality.playbackLabel
         ..selectedQualityId = resolved.qualityCursorId
         ..selectedLineIndex = resolved.lineIndex
         ..selectedLine = resolved.lineLabel

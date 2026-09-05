@@ -306,16 +306,6 @@ class StreamResolverService extends GetxService {
 
   static String _normalizeQualityLabel(String value) => value.toLowerCase().replaceAll(RegExp(r'[\s_-]+'), '');
 
-  static LivePlayQuality _appliedQuality(
-    List<LivePlayQuality> qualities,
-    LivePlayQuality requested,
-    Object? appliedId,
-  ) {
-    if (appliedId == null) return requested;
-    final normalized = appliedId.toString();
-    return qualities.firstWhere((quality) => quality.selectionId.toString() == normalized, orElse: () => requested);
-  }
-
   static Future<_ResolvedQuality> _resolveQuality({
     required LiveSite site,
     required LiveRoom detail,
@@ -336,7 +326,11 @@ class StreamResolverService extends GetxService {
         .where(_isRecordableUrl)
         .where((url) => seen.add(_streamIdentity(url)))
         .toList(growable: false);
-    final appliedQuality = _appliedQuality(orderedQualities, requestedQuality, resolution.appliedQualityData);
+    final appliedQuality = resolveAppliedPlayQuality(
+      qualities: orderedQualities,
+      requested: requestedQuality,
+      resolution: resolution,
+    );
     final leaseMetadata = site is LivePlayLeaseMetadata ? site as LivePlayLeaseMetadata : null;
     return _ResolvedQuality(
       requestedQualityId: requestedQuality.selectionId.toString(),

@@ -210,6 +210,7 @@ class DouyuSite
     return LivePlayUrlResolution(
       urls: List<String>.unmodifiable(urlsByRate[appliedRate]!),
       appliedQualityData: appliedRate,
+      qualityUnconfirmed: appliedRate == null,
     );
   }
 
@@ -245,6 +246,7 @@ class DouyuSite
     return LivePlayUrlResolution(
       urls: List<String>.unmodifiable([parsePlayUrl(playData)]),
       appliedQualityData: appliedRate != null && appliedRate >= 0 ? appliedRate : null,
+      qualityUnconfirmed: appliedRate == null || appliedRate < 0,
     );
   }
 

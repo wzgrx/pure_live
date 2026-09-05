@@ -116,6 +116,7 @@ void main() {
       rates = {'main': value};
       final result = await DouyuSite().resolvePlayUrlAtRaw(detail: room, quality: quality(['main']), lineIndex: 0);
       expect(result.appliedQualityData, isNull, reason: 'rate=$value');
+      expect(result.qualityUnconfirmed, isTrue);
       expect(result.urls, hasLength(1));
     }
   });
@@ -137,6 +138,7 @@ void main() {
     rates = {};
     final result = await DouyuSite().resolvePlayUrls(detail: room, quality: quality());
     expect(result.appliedQualityData, isNull);
+    expect(result.qualityUnconfirmed, isTrue);
     expect(result.urls, hasLength(2));
   });
 
@@ -186,6 +188,22 @@ void main() {
     expect(next.lineIndex, 1);
     expect(requests.map((request) => request['cdn']), ['main', 'backup']);
     expect(requests.map((request) => request['rate']), ['0', '0']);
+  });
+
+  test('recorder missing or unmapped rate keeps playback and marks its visible label', () async {
+    for (final rate in [null, 'bad', 99]) {
+      rates = {'main': rate};
+      final resolver = StreamResolverService(
+        siteResolver: (_) => _RecordingDouyuSite([
+          quality(['main']),
+        ]),
+      );
+      final stream = await resolver.resolveStream(roomId: '123', platform: 'douyu', preferredQuality: '原画');
+      expect(stream.quality.isPlaybackUnconfirmed, isTrue);
+      expect(stream.quality.quality, '原画', reason: 'the request option is not renamed');
+      expect(stream.qualityCursorId, '0');
+      expect(stream.url, 'https://main.example.test/live/stream.flv');
+    }
   });
 
   test('an out of bounds cursor issues no requests and makes no quality claim', () async {

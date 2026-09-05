@@ -1,3 +1,5 @@
+import 'package:pure_live/common/utils/play_quality_label.dart';
+
 import 'dart:io';
 import 'dart:async';
 
@@ -1584,8 +1586,7 @@ class ResolutionSelectorButton extends StatelessWidget {
   }
 
   Widget _buildButtonChild() {
-    final currentIndex = controller.livePlayController.state.value.player.currentQuality;
-    final qualityName = controller.livePlayController.state.value.player.qualites[currentIndex].quality;
+    final qualityName = controller.livePlayController.state.value.player.qualitySafe.playbackLabel;
     return Container(
       height: 30,
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -1756,7 +1757,7 @@ class FullscreenStreamSelectorButton extends StatelessWidget {
       }
       final switching = live.playerController.isStreamSwitching.value;
       final label =
-          '${state.qualitySafe.quality} · ${i18n('toolbox_line', args: {'index': '${state.currentLineIndex + 1}'})}';
+          '${state.qualitySafe.playbackLabel} · ${i18n('toolbox_line', args: {'index': '${state.currentLineIndex + 1}'})}';
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3),
         child: Material(

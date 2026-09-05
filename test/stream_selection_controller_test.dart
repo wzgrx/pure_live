@@ -55,6 +55,75 @@ void main() {
     expect(normalizeResolvedPlayUrls(const [' a ', '', 'a', 'b']), const ['a', 'b']);
   });
 
+  for (final appliedId in [null, 'unadvertised']) {
+    test('unknown acknowledgement $appliedId reaches state and survives a local line switch', () async {
+      final room = LiveRoom(roomId: 'room', platform: 'test');
+      final host = _SelectionHost(room);
+      final siteImpl = _AcknowledgedSelectionSite(appliedId: appliedId, unconfirmed: appliedId == null);
+      final controller = PlayerController(
+        host,
+        streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, resolver, refreshAt) async {},
+      )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
+
+      expect(
+        await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
+        isTrue,
+      );
+      expect(host.state.value.player.qualitySafe.isPlaybackUnconfirmed, isTrue);
+      expect(host.state.value.player.qualitySafe.selectionId, '原画');
+      expect(host.state.value.player.qualitySafe.quality, '原画');
+      expect(
+        await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 1, lineIndex: 1),
+        isTrue,
+      );
+      expect(host.state.value.player.qualitySafe.isPlaybackUnconfirmed, isTrue);
+
+      // A later successful acknowledgement clears the warning; switching away
+      // and back uses the same original request identity and existing URLs API.
+      siteImpl.appliedId = '高清';
+      siteImpl.unconfirmed = false;
+      expect(
+        await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 0, lineIndex: 0),
+        isTrue,
+      );
+      expect(host.state.value.player.qualitySafe.isPlaybackUnconfirmed, isFalse);
+      expect(host.state.value.player.qualitySafe.quality, '高清');
+      expect(host.state.value.player.qualites.every((quality) => !quality.isPlaybackUnconfirmed), isTrue);
+    });
+  }
+
+  test('unknown quality metadata is not committed when native open fails', () async {
+    final host = _SelectionHost(LiveRoom(roomId: 'room', platform: 'test'));
+    final controller = PlayerController(
+      host,
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) async =>
+          throw StateError('open failed'),
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _AcknowledgedSelectionSite(unconfirmed: true)));
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
+      isFalse,
+    );
+    expect(host.state.value.player.qualitySafe.isPlaybackUnconfirmed, isFalse);
+    expect(host.state.value.player.qualitySafe.quality, '高清');
+    expect(host.state.value.player.currentQuality, 0);
+  });
+
+  test('post-commit failure restores quality confirmation with the previous selection', () async {
+    final host = _ThrowingRoomHost(LiveRoom(roomId: 'room', platform: 'test'));
+    final previous = host.state.value.player;
+    final controller = PlayerController(
+      host,
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) async {},
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _AcknowledgedSelectionSite(unconfirmed: true)));
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
+      isFalse,
+    );
+    expect(host.state.value.player.qualites, same(previous.qualites));
+    expect(host.state.value.player.currentQuality, previous.currentQuality);
+    expect(host.state.value.player.playUrls, previous.playUrls);
+  });
+
   test('duplicate visible labels are numbered without changing stable ids', () {
     final qualities = normalizePlayQualities([
       LivePlayQuality(quality: '高清', id: 'hd-1'),
@@ -326,6 +395,22 @@ class _SelectionLiveSite extends LiveSite {
   }
 }
 
+class _AcknowledgedSelectionSite extends LiveSite implements LivePlayUrlResolver {
+  _AcknowledgedSelectionSite({this.appliedId, this.unconfirmed = false});
+  Object? appliedId;
+  bool unconfirmed;
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution(
+    urls: ['https://cdn.test/${quality.quality}/one', 'https://cdn.test/${quality.quality}/two'],
+    appliedQualityData: appliedId,
+    qualityUnconfirmed: unconfirmed,
+  );
+}
+
 class _ReversibleSelectionLiveSite extends LiveSite {
   final newQuality = Completer<List<String>>();
 
@@ -434,6 +519,14 @@ class _SelectionHost implements PlayerSessionHost {
         loadError: loadError,
       ),
     );
+  }
+}
+
+class _ThrowingRoomHost extends _SelectionHost {
+  _ThrowingRoomHost(super.room);
+  @override
+  void updateRoom({LiveRoom? detail, bool? isLiving, bool? success, bool? isLoading, String? loadError}) {
+    throw StateError('post-commit room update failed');
   }
 }
 

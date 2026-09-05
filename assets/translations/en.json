@@ -394,6 +394,7 @@
     "queue_size": "Input Buffer Queue",
     "quick_select": "Quick Select",
     "read_video_failed": "Failed to read video information",
+    "quality_playback_unconfirmed": "Unconfirmed · {quality}",
     "quality_limited_to": "The platform returned {quality}; playback now matches the actual quality",
     "quality_stream_unchanged": "The platform returned the current stream for that option, so the current quality was kept",
     "record": "Record",

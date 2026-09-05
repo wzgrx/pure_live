@@ -20,10 +20,37 @@ import 'package:pure_live/core/interface/live_danmaku.dart';
 /// [LivePlayQuality.selectionId] for platforms whose URL response has no
 /// separate acknowledgement.
 class LivePlayUrlResolution {
-  const LivePlayUrlResolution({required this.urls, this.appliedQualityData});
+  const LivePlayUrlResolution({required this.urls, this.appliedQualityData, this.qualityUnconfirmed = false});
 
   final List<String> urls;
   final Object? appliedQualityData;
+
+  /// An adapter expected an acknowledgement but the response did not contain a
+  /// usable one. False preserves the legacy contract for platforms with no ack.
+  final bool qualityUnconfirmed;
+}
+
+/// Keeps request identity and display evidence separate for both playback and
+/// recording. A server identifier outside a stale menu is also unconfirmed;
+/// choosing the requested option as a cursor does not confirm its visible name.
+LivePlayQuality resolveAppliedPlayQuality({
+  required List<LivePlayQuality> qualities,
+  required LivePlayQuality requested,
+  required LivePlayUrlResolution resolution,
+}) {
+  final appliedId = resolution.appliedQualityData?.toString();
+  LivePlayQuality? matched;
+  if (appliedId != null) {
+    for (final quality in qualities) {
+      if (quality.selectionId.toString() == appliedId) {
+        matched = quality;
+        break;
+      }
+    }
+  }
+  return (matched ?? requested).withPlaybackUnconfirmed(
+    resolution.qualityUnconfirmed || (appliedId != null && matched == null),
+  );
 }
 
 /// Removes blank and duplicate lines while preserving platform priority.
@@ -190,6 +217,7 @@ extension LiveSitePlayUrlResolution on LiveSite {
       return LivePlayUrlResolution(
         urls: normalizeResolvedPlayUrls(resolution.urls),
         appliedQualityData: resolution.appliedQualityData,
+        qualityUnconfirmed: resolution.qualityUnconfirmed,
       );
     }
 
@@ -212,6 +240,7 @@ extension LiveSitePlayUrlResolution on LiveSite {
       return LivePlayUrlResolution(
         urls: normalizeResolvedPlayUrls(resolution.urls),
         appliedQualityData: resolution.appliedQualityData,
+        qualityUnconfirmed: resolution.qualityUnconfirmed,
       );
     }
     return resolvePlayUrls(detail: detail, quality: quality);

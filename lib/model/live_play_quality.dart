@@ -14,7 +14,15 @@ class LivePlayQuality {
 
   final int sort;
 
-  LivePlayQuality({required this.quality, this.data, this.id, this.sort = 0});
+  /// Presentation evidence for the active stream, separate from the option's
+  /// requested name/id. Missing acknowledgements must not rename request data.
+  final bool isPlaybackUnconfirmed;
+
+  LivePlayQuality({required this.quality, this.data, this.id, this.sort = 0, this.isPlaybackUnconfirmed = false});
+
+  LivePlayQuality withPlaybackUnconfirmed(bool value) => value == isPlaybackUnconfirmed
+      ? this
+      : LivePlayQuality(quality: quality, data: data, id: id, sort: sort, isPlaybackUnconfirmed: value);
 
   /// Never derive identity from [data]: URL lists and request maps are mutable
   /// implementation details and their string form is not a platform contract.

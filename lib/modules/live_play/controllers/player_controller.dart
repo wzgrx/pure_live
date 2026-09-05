@@ -1,3 +1,5 @@
+import 'package:pure_live/common/utils/play_quality_label.dart';
+
 import 'dart:developer' as developer;
 
 import 'package:pure_live/common/index.dart';
@@ -68,6 +70,23 @@ int resolveAppliedQualityIndex({
   final applied = appliedQualityData.toString();
   final index = qualities.indexWhere((quality) => quality.selectionId.toString() == applied);
   return index < 0 ? fallback : index;
+}
+
+List<LivePlayQuality> _qualityChoicesWithConfirmation(
+  List<LivePlayQuality> qualities,
+  int requestedIndex,
+  LivePlayUrlResolution resolution,
+) {
+  if (qualities.isEmpty) return qualities;
+  final applied = resolveAppliedPlayQuality(
+    qualities: qualities,
+    requested: qualities[requestedIndex.clamp(0, qualities.length - 1)],
+    resolution: resolution,
+  );
+  return List<LivePlayQuality>.unmodifiable([
+    for (final quality in qualities)
+      quality.selectionId == applied.selectionId ? applied : quality.withPlaybackUnconfirmed(false),
+  ]);
 }
 
 @visibleForTesting
@@ -264,7 +283,7 @@ class PlayerController extends GetxController {
       datasource: playerState.playUrlSafe,
       allowScreenKeepOn: SettingsService.to.app.enableScreenKeepOn.v,
       headers: headers,
-      qualiteName: playerState.qualitySafe.quality,
+      qualiteName: playerState.qualitySafe.playbackLabel,
       currentLineIndex: playerState.currentLineIndex,
       currentQuality: playerState.currentQuality,
       isAudioOnly: playerState.isCurrentRoomAudioOnly,
@@ -317,7 +336,7 @@ class PlayerController extends GetxController {
           : (playUrls.isEmpty ? '' : playUrls[currentLineIndex]),
       allowScreenKeepOn: SettingsService.to.app.enableScreenKeepOn.v,
       headers: session.headers,
-      qualiteName: qualities[currentQuality].quality,
+      qualiteName: qualities[currentQuality].playbackLabel,
       currentLineIndex: currentLineIndex,
       currentQuality: currentQuality,
       isAudioOnly: manager.desiredAudioOnlyMode,
@@ -420,6 +439,7 @@ class PlayerController extends GetxController {
     );
     final lineIndex = playerState.currentLineIndex.clamp(0, resolution.urls.length - 1);
     _main.updatePlayer(
+      qualites: _qualityChoicesWithConfirmation(playerState.qualites, playerState.currentQuality, resolution),
       playUrls: List<String>.unmodifiable(resolution.urls),
       currentQuality: appliedQuality,
       currentLineIndex: lineIndex,
@@ -476,6 +496,7 @@ class PlayerController extends GetxController {
           : LivePlayUrlResolution(
               urls: List<String>.from(before.playUrls),
               appliedQualityData: before.qualites[before.currentQuality].selectionId,
+              qualityUnconfirmed: before.qualitySafe.isPlaybackUnconfirmed,
             );
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
       final urls = resolution.urls;
@@ -527,6 +548,7 @@ class PlayerController extends GetxController {
       );
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
       _main.updatePlayer(
+        qualites: _qualityChoicesWithConfirmation(before.qualites, requestedQuality, resolution),
         currentQuality: selection.qualityIndex,
         playUrls: immutableUrls,
         currentLineIndex: selection.lineIndex,
@@ -540,6 +562,7 @@ class PlayerController extends GetxController {
     } catch (error, stackTrace) {
       if (_isLoadCurrent(loadEpoch, room, site) && selectionEpoch == _streamSelectionEpoch) {
         _main.updatePlayer(
+          qualites: before.qualites,
           currentQuality: before.currentQuality,
           playUrls: before.playUrls,
           currentLineIndex: before.currentLineIndex,

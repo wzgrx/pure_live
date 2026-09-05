@@ -18,6 +18,8 @@
 - [2026-09-04 平台传输与 K90 Pro 实机审计](PLATFORM_TRANSPORT_AUDIT_2026_09_04.md)：Twitch 完整性头、SOOP 安全弹幕端口、YY H5 协议、WebSocket 半开恢复、临时代理和锁屏防误判。
 - [2026-09-04 Issue 与弹幕传输审计](ISSUE_AUDIT_2026_09_04.md)：最新上游 Issue 映射、斗鱼 71415 原始捕获，以及抖音双端点/签名/访客 ID/匿名实时弹幕验证。
 - [2026-09-05 最新 Issue 审计](ISSUE_AUDIT_2026_09_05.md)：#850 Android 颜色/透明度、#849 Win10 启动证据边界与 #848 系统字体语义修复。
+- [虎牙完整链路与后台预取复核](HUYA_PREFETCH_OWNERSHIP_AUDIT_2026_09_05.md)：上游与本分支差异、预取所有权、双 CDN 原画连续解码、868 项回归及发布包证据边界。
+- [虎牙醒目留言 HTTP 生命周期](HUYA_MESSAGE_BOARD_HTTP_AUDIT_2026_09_05.md)：默认超时单位、连接释放、重复实现合并、实际 Dio/TARS 回归与公开 HTTPS 验证。
 - [v3.1.7 虎牙醒目留言事件身份修复](STAGE_UPDATE_3_1_7.md)：平台事件 ID、合法重复留言、有界去重缓存与 Android/Windows 交付。
 - [v3.1.6 虎牙醒目留言实时刷新修复](STAGE_UPDATE_3_1_6.md)：通知先于 WUP 留言板更新的时序根因、非阻塞有界补偿、Android/Windows 交付与证据边界。
 - [v3.1.5 Android / Windows 双平台发布](STAGE_UPDATE_3_1_5.md)：同一冻结源码、双平台版本对齐、串行构建、安装包与校验说明。

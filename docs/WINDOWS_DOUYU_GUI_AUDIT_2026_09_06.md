@@ -46,3 +46,12 @@
 ## 下一步与发布状态
 
 优先从暂停恢复、旧地址重试、错误终态和 watchdog 所有权定位第一处错误状态，建立确定性回归；再用新候选核验相同步骤。Windows 长暂停恢复和 UI 响应仍是发布前缺口，继续保留完整平台与功能验收范围。上述局部成功不等同于全平台稳定版完成。
+
+## 代码诊断补充
+
+- 首次可观测卡帧是 session 3 在恢复后的 `video_frame_stall_timeout`，随后才发生 EOF / 原生 source 错误。没有证据把 PiP 本身认定为根因。
+- DouyuSite 未实现 `LivePlayRecoveryResolver`；PlayerController `_buildSourceResolver` 对它返回 null。恢复过程缺少重新请求平台播放地址的能力，只能使用 `_currentPlayUrls` 的旧集合切线 / 重开。
+- 两档重试约 750 ms / 2 s 均耗尽，最后进入 PlayerManager `_publishTerminalPlayerError`；其主动设置 `_playbackRequested=false`、停止 watchdog、发出 error 状态，与快照相符。这不是仍在无期限恢复。
+- VideoController 错误签名和时间字段已赋值，证明终态错误到达控制层。但视频树没有对应持久错误页，Toast 消失后仍是黑色原生纹理。这是单独的可感知错误展示缺口。
+- 新进房会重新请求 Douyu H5 播放 API 并重新生成签名。可确认旧会话没有 fresh URL；URL 到期、暂停连接被回收或 CDN 策略三者尚未区分，不把“签名过期”写成已证实服务端原因。
+- 下一批先补 Douyu 恢复能力跨层红测，同时核对恢复后的实际画质确认传播；当前通用恢复返回对象只携带 URL / 线路，直接启用可能丢失服务端降档状态。生产修复待该合同一并审定。

@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'dart:math';
+
 import '../../../get.dart';
 import '../root/get_root.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -642,7 +644,7 @@ Cannot read the previousTitle for a route that has not yet been installed''');
           );
 
         case Transition.native:
-          return const PageTransitionsTheme().buildTransitions(
+          return Theme.of(context).pageTransitionsTheme.buildTransitions(
             route,
             context,
             iosAnimation,

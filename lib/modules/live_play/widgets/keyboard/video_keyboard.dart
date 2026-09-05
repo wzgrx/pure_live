@@ -5,31 +5,17 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/modules/live_play/controllers/player_state.dart';
 import 'package:pure_live/modules/live_play/widgets/video_player/video_controller.dart';
 
-class VideoKeyboardShortcuts extends StatefulWidget {
+class VideoKeyboardShortcuts extends StatelessWidget {
   final VideoController? controller;
   final Widget child;
 
   const VideoKeyboardShortcuts({super.key, required this.controller, required this.child});
 
-  @override
-  State<VideoKeyboardShortcuts> createState() => _VideoKeyboardShortcutsState();
-}
-
-class _VideoKeyboardShortcutsState extends State<VideoKeyboardShortcuts> {
-  @override
-  void initState() {
-    super.initState();
-    HardwareKeyboard.instance.addHandler(_handleGlobalKey);
-  }
-
-  @override
-  void dispose() {
-    HardwareKeyboard.instance.removeHandler(_handleGlobalKey);
-    super.dispose();
-  }
-
-  bool _handleGlobalKey(KeyEvent event) {
-    if (event is! KeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape) return false;
+  void _handleEscape(BuildContext context) {
+    // A popup/opaque route owns its focus and its first Escape. HardwareKeyboard
+    // global handlers also run when Flutter has already handled the same key,
+    // which used to change the room presentation behind an open menu.
+    if (ModalRoute.of(context)?.isCurrent == false) return;
 
     switch (resolveEscapePresentationAction(
       pip: GlobalPlayerState.to.isPipMode.value,
@@ -37,15 +23,15 @@ class _VideoKeyboardShortcutsState extends State<VideoKeyboardShortcuts> {
       // inherit a stale global presentation flag.  It has no controller with
       // which to exit that presentation, so Escape must retain its route-pop
       // contract instead of becoming a dead key.
-      fullscreen: widget.controller != null && GlobalPlayerState.to.isFullscreen.value,
-      widescreen: widget.controller != null && GlobalPlayerState.to.isWindowFullscreen.value,
+      fullscreen: controller != null && GlobalPlayerState.to.isFullscreen.value,
+      widescreen: controller != null && GlobalPlayerState.to.isWindowFullscreen.value,
     )) {
       case EscapePresentationAction.exitFullscreen:
-        widget.controller!.toggleFullScreen();
-        return true;
+        controller!.toggleFullScreen();
+        return;
       case EscapePresentationAction.exitWidescreen:
-        widget.controller!.toggleWindowFullScreen();
-        return true;
+        controller!.toggleWindowFullScreen();
+        return;
       case EscapePresentationAction.popRoute:
         // Desktop Flutter does not translate an unhandled Escape key into a
         // Navigator pop. Returning false here left a normal live room open,
@@ -53,19 +39,20 @@ class _VideoKeyboardShortcutsState extends State<VideoKeyboardShortcuts> {
         // normal-room action explicitly while preserving the page's existing
         // PopScope/lifecycle cleanup.
         unawaited(Navigator.of(context).maybePop());
-        return true;
+        return;
       case EscapePresentationAction.none:
         // PiP owns its own close path and must not be mutated by the parent
         // room shortcut.
-        return false;
+        return;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = widget.controller;
+    final controller = this.controller;
     return CallbackShortcuts(
       bindings: {
+        const SingleActivator(LogicalKeyboardKey.escape, includeRepeats: false): () => _handleEscape(context),
         const SingleActivator(LogicalKeyboardKey.mediaPlay): () => GlobalPlayerService.instance.player.resume(),
         const SingleActivator(LogicalKeyboardKey.mediaPause): () => GlobalPlayerService.instance.player.pause(),
         const SingleActivator(LogicalKeyboardKey.mediaPlayPause): () =>
@@ -89,7 +76,9 @@ class _VideoKeyboardShortcutsState extends State<VideoKeyboardShortcuts> {
             controller.updateVolumn(volume);
           },
       },
-      child: widget.child,
+      // Rooms with no initialized player still need a focus target. Descendant
+      // controls/text inputs retain their own focus and key handling priority.
+      child: FocusScope(autofocus: true, child: child),
     );
   }
 }

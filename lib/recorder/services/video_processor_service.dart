@@ -197,6 +197,10 @@ class VideoProcessorService extends GetxService {
         '-hide_banner',
         '-loglevel',
         'warning',
+        // Fail on demux/mux errors before atomic MP4 commit/source deletion.
+        // FFmpegService also latches error diagnostics: some native versions
+        // return zero even with -xerror. Neither check is full codec decoding.
+        '-xerror',
         '-f',
         'concat',
         '-safe',

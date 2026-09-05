@@ -4,6 +4,19 @@ import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/services/recorder_continuation_policy.dart';
 
 void main() {
+  test('credential maintenance follows the renewed lease and bounds stale metadata', () {
+    final now = DateTime.utc(2026, 9, 5);
+    expect(
+      RecorderContinuationPolicy.leaseMaintenanceDelay(now: now, refreshAt: now.add(const Duration(minutes: 4))),
+      const Duration(seconds: 235),
+    );
+    for (final deadline in [null, now, now.subtract(const Duration(minutes: 1)), now.add(const Duration(seconds: 1))]) {
+      expect(
+        RecorderContinuationPolicy.leaseMaintenanceDelay(now: now, refreshAt: deadline),
+        const Duration(seconds: 30),
+      );
+    }
+  });
   test('unexpected stream exit resumes monitoring when auto reconnect is enabled', () {
     expect(RecorderContinuationPolicy.shouldMonitorAfterExit(manuallyStopped: false, autoReconnect: true), isTrue);
     expect(RecorderContinuationPolicy.shouldMonitorAfterExit(manuallyStopped: true, autoReconnect: true), isFalse);

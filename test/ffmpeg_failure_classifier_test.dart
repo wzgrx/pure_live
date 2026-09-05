@@ -1,7 +1,49 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ffmpeg_kit_extended_flutter/ffmpeg_kit_extended_flutter.dart' show FFmpegSession;
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
 
 void main() {
+  test('integrity verdict survives bounded log eviction and stays session-local', () {
+    FFmpegRecordSession create(int id) =>
+        FFmpegRecordSession(taskId: 'fixture', sessionId: id, session: _NativeSession(), liveRecording: false);
+    final damaged = create(1);
+    damaged.appendDiagnostic('[mpegts] PES packet size mismatch', maxLines: 1);
+    damaged.appendDiagnostic('frame=1000', maxLines: 1);
+    expect(damaged.diagnosticTail, 'frame=1000');
+    expect(damaged.hasMediaIntegrityError, true);
+    expect(create(2).hasMediaIntegrityError, false);
+  });
+  test('strict output integrity failure overrides a zero native result', () {
+    for (final stopped in [false, true]) {
+      final decision = FFmpegTerminalDecision.forSession(
+        code: 0,
+        manuallyStopped: stopped,
+        liveRecording: false,
+        corruptOutput: true,
+      );
+      expect(decision.isComplete, false);
+      expect(decision.retryable, false);
+    }
+  });
+
+  test('integrity guard recognises actual packet/trailer errors but not ordinary warnings', () {
+    for (final log in [
+      '[mpegts] PES packet size mismatch',
+      '[mpegts] Packet corrupt (stream = 1, dts = 2722007).',
+      '[concat] corrupt input packet in stream 1',
+      '[segment] Error writing trailer: Immediate exit requested',
+    ]) {
+      expect(FFmpegMediaIntegrity.hasError(log), true);
+    }
+    for (final log in [
+      'task_stop: pthread_join esrch; task completion observed through scheduler signal',
+      'deprecated pixel format used',
+      'Non-monotonic DTS corrected',
+      'frame=600 time=00:00:10',
+    ]) {
+      expect(FFmpegMediaIntegrity.hasError(log), false);
+    }
+  });
   test('FFmpeg diagnostics distinguish output configuration from retryable input failures', () {
     final output = FFmpegFailureClassifier.classify(
       code: 1,
@@ -84,4 +126,9 @@ void main() {
     expect(leaseRotation.retryable, isTrue);
     expect(leaseRotation.unexpectedEof, isTrue);
   });
+}
+
+class _NativeSession implements FFmpegSession {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

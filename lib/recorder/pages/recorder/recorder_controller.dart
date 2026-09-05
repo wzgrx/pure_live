@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
 import 'package:pure_live/plugins/file_utils.dart';
 import 'package:pure_live/recorder/consts/recorder_keys.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_command_builder.dart';
@@ -65,6 +66,7 @@ class RecorderController extends GetxService {
   final Map<String, Timer> _retryTimers = <String, Timer>{};
   final Map<String, Timer> _leasePrefetchTimers = <String, Timer>{};
   final Map<String, Timer> _leaseRotationTimers = <String, Timer>{};
+  final Map<String, _RecorderLeasePrefetch> _leasePrefetchRequests = {};
   final Map<String, _PrefetchedRecorderLease> _prefetchedRecorderLeases = <String, _PrefetchedRecorderLease>{};
   final Map<String, _PendingRecorderLease> _pendingRecorderLeases = <String, _PendingRecorderLease>{};
   final Set<String> _startingTasks = <String>{};
@@ -197,7 +199,6 @@ class RecorderController extends GetxService {
         final refreshSignedStream =
             failureKind == 'leaseRefresh' || failureKind == 'unexpectedEof' || failureKind == 'httpAccess';
         if (refreshSignedStream) _rapidRecoveryTasks.add(task.taskId);
-        if (failureKind != 'leaseRefresh') _prefetchedRecorderLeases.remove(task.taskId);
         final fastReconnect = refreshSignedStream || _rapidRecoveryTasks.contains(task.taskId);
         final classifiedRetryable = event.data['retryable'];
         final shouldRetry =
@@ -205,6 +206,12 @@ class RecorderController extends GetxService {
             (classifiedRetryable is bool
                 ? classifiedRetryable
                 : RecorderContinuationPolicy.shouldRetryFailure(errorCode: errorCode, rawLogs: rawLogs));
+        // A native FLV credential is prefetched without rotating its healthy
+        // transport. Keep it for actual EOF/access recovery, not just for the
+        // old timer-driven cancellation path. _runTask rechecks URL and expiry.
+        if (manuallyStopped || !refreshSignedStream || !shouldRetry) {
+          _prefetchedRecorderLeases.remove(task.taskId);
+        }
         if (isError) {
           final message = event.data['message']?.toString();
           task.markFailure(
@@ -867,29 +874,51 @@ class RecorderController extends GetxService {
     );
 
     final prefetchDelay = RecorderContinuationPolicy.leasePrefetchDelay(now: now, refreshAt: refreshAt);
-    _leasePrefetchTimers[task.taskId] = Timer(prefetchDelay, () {
-      _leasePrefetchTimers.remove(task.taskId);
-      unawaited(_prefetchRecorderLease(task, sourceUrl: sourceUrl, sessionId: sessionId));
-    });
+    _scheduleRecorderCredentialPrefetch(task, sourceUrl: sourceUrl, sessionId: sessionId, delay: prefetchDelay);
+
+    // Native WUP FLV has demonstrated a connection lifetime longer than its
+    // open credential. Keep capturing packets; only prepare the next URL.
+    // Web/HLS leases and other adapters retain their existing rotation policy.
+    if (HuyaTransportPolicy.hasNativeFlvCredential(sourceUrl)) return;
 
     final rotationDelay = RecorderContinuationPolicy.leaseRotationDelay(now: now, refreshAt: refreshAt);
     _leaseRotationTimers[task.taskId] = Timer(rotationDelay, () {
       _leaseRotationTimers.remove(task.taskId);
-      if (!_isCurrentSession(task.taskId, sessionId) ||
-          task.wasStoppedByUser ||
-          task.currentUrl != sourceUrl ||
-          ffmpeg.getSession(task.taskId)?.sessionId != sessionId) {
-        return;
-      }
-      // The platform lease is a transport boundary, not an offline signal.
-      // End the old input before the server does so the controller can consume
-      // the prefetched same-quality/same-CDN URL without waiting for EOF.
+      if (!_ownsRecorderLease(task, sourceUrl: sourceUrl, sessionId: sessionId)) return;
       unawaited(ffmpeg.refreshLease(task.taskId));
     });
   }
 
+  bool _ownsRecorderLease(LiveRecordTask task, {required String sourceUrl, required int sessionId}) =>
+      !_isClosing &&
+      _ownsTask(task) &&
+      !task.wasStoppedByUser &&
+      task.currentUrl == sourceUrl &&
+      _isCurrentSession(task.taskId, sessionId) &&
+      ffmpeg.getSession(task.taskId)?.sessionId == sessionId;
+
+  void _scheduleRecorderCredentialPrefetch(
+    LiveRecordTask task, {
+    required String sourceUrl,
+    required int sessionId,
+    required Duration delay,
+  }) {
+    _leasePrefetchTimers.remove(task.taskId)?.cancel();
+    if (!_ownsRecorderLease(task, sourceUrl: sourceUrl, sessionId: sessionId)) return;
+    _leasePrefetchTimers[task.taskId] = Timer(delay, () {
+      _leasePrefetchTimers.remove(task.taskId);
+      unawaited(_prefetchRecorderLease(task, sourceUrl: sourceUrl, sessionId: sessionId));
+    });
+  }
+
   Future<void> _prefetchRecorderLease(LiveRecordTask task, {required String sourceUrl, required int sessionId}) async {
-    if (!_isCurrentSession(task.taskId, sessionId) || task.wasStoppedByUser || task.currentUrl != sourceUrl) return;
+    if (!_ownsRecorderLease(task, sourceUrl: sourceUrl, sessionId: sessionId) ||
+        _leasePrefetchRequests.containsKey(task.taskId)) {
+      return;
+    }
+    final request = _RecorderLeasePrefetch();
+    _leasePrefetchRequests[task.taskId] = request;
+    DateTime? nextRefreshAt;
     try {
       final renewed = await StreamResolverService.to.resolveStream(
         roomId: task.roomId,
@@ -899,24 +928,44 @@ class RecorderController extends GetxService {
         previousLineIndex: task.selectedLineIndex,
         renewCurrent: true,
       );
-      if (!_isCurrentSession(task.taskId, sessionId) || task.wasStoppedByUser || task.currentUrl != sourceUrl) return;
+      if (!identical(_leasePrefetchRequests[task.taskId], request) ||
+          !_ownsRecorderLease(task, sourceUrl: sourceUrl, sessionId: sessionId)) {
+        return;
+      }
       final invalidAt = renewed.invalidAt?.toUtc();
       if (invalidAt != null && !invalidAt.isAfter(DateTime.now().toUtc())) return;
       _prefetchedRecorderLeases[task.taskId] = _PrefetchedRecorderLease(sourceUrl: sourceUrl, stream: renewed);
+      nextRefreshAt = renewed.refreshAt;
     } catch (error, stackTrace) {
-      // Prefetch is opportunistic. The scheduled rotation still performs a
-      // synchronous fresh resolve, while ordinary EOF recovery remains armed.
+      // Prefetch is opportunistic; its failure never cancels healthy native
+      // FLV. Genuine EOF recovery still resolves a URL when no valid cache exists.
       developer.log(
         'Recorder signed-stream prefetch failed: $error',
         name: 'RecorderController',
         stackTrace: stackTrace,
       );
+    } finally {
+      if (identical(_leasePrefetchRequests[task.taskId], request)) {
+        _leasePrefetchRequests.remove(task.taskId);
+        if (HuyaTransportPolicy.hasNativeFlvCredential(sourceUrl)) {
+          _scheduleRecorderCredentialPrefetch(
+            task,
+            sourceUrl: sourceUrl,
+            sessionId: sessionId,
+            delay: RecorderContinuationPolicy.leaseMaintenanceDelay(
+              now: DateTime.now().toUtc(),
+              refreshAt: nextRefreshAt,
+            ),
+          );
+        }
+      }
     }
   }
 
   void _cancelRecorderLeaseTimers(String taskId) {
     _leasePrefetchTimers.remove(taskId)?.cancel();
     _leaseRotationTimers.remove(taskId)?.cancel();
+    _leasePrefetchRequests.remove(taskId);
   }
 
   void _cancelRecorderLease(String taskId) {
@@ -1362,6 +1411,7 @@ class RecorderController extends GetxService {
     }
     _leasePrefetchTimers.clear();
     _leaseRotationTimers.clear();
+    _leasePrefetchRequests.clear();
     _prefetchedRecorderLeases.clear();
     _pendingRecorderLeases.clear();
     for (final monitor in _outputMonitors.values) {
@@ -1456,6 +1506,8 @@ class _PrefetchedRecorderLease {
   final String sourceUrl;
   final ResolvedRecordStream stream;
 }
+
+class _RecorderLeasePrefetch {}
 
 class _PendingRecorderLease {
   const _PendingRecorderLease({required this.sourceUrl, required this.stream});

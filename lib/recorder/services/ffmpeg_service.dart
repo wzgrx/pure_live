@@ -138,7 +138,11 @@ class FFmpegTerminalDecision {
     required bool manuallyStopped,
     required bool liveRecording,
     bool leaseRefresh = false,
+    bool corruptOutput = false,
   }) {
+    if (corruptOutput) {
+      return const FFmpegTerminalDecision(isComplete: false, retryable: false, unexpectedEof: false);
+    }
     if (manuallyStopped) {
       return const FFmpegTerminalDecision(isComplete: true, retryable: false, unexpectedEof: false);
     }
@@ -173,6 +177,7 @@ class FFmpegRecordSession {
   final Completer<void> completion = Completer<void>();
   final List<String> _diagnosticLines = <String>[];
   var _diagnosticCharacters = 0;
+  bool hasMediaIntegrityError = false;
 
   bool manualStop = false;
   bool leaseRefresh = false;
@@ -187,6 +192,10 @@ class FFmpegRecordSession {
   void appendDiagnostic(String message, {int maxLines = 120, int maxCharacters = 12000}) {
     final sanitized = FFmpegService._sanitizeLogs(message).trim();
     if (sanitized.isEmpty) return;
+    // Keep the integrity verdict even after the bounded diagnostic tail rolls
+    // over. Some native builds return zero despite a demux/mux error (-xerror
+    // alone was insufficient in the 0.11.1 Windows source-retention probe).
+    hasMediaIntegrityError = hasMediaIntegrityError || FFmpegMediaIntegrity.hasError(sanitized);
     _diagnosticLines.add(sanitized);
     _diagnosticCharacters += sanitized.length;
     while (_diagnosticLines.length > maxLines || _diagnosticCharacters > maxCharacters) {
@@ -302,15 +311,18 @@ class FFmpegService {
         final code = completedSession.getReturnCode();
         final manuallyStopped = session.manualStop;
         final leaseRefresh = session.leaseRefresh;
+        final rawLogs = session.diagnosticTail.isNotEmpty ? session.diagnosticTail : (completedSession.getLogs() ?? '');
+        final corruptOutput =
+            arguments.contains('-xerror') && (session.hasMediaIntegrityError || FFmpegMediaIntegrity.hasError(rawLogs));
         final sessionAgeMilliseconds = DateTime.now().difference(session.createdAt).inMilliseconds;
         final terminal = FFmpegTerminalDecision.forSession(
           code: code,
           manuallyStopped: manuallyStopped,
           liveRecording: session.liveRecording,
           leaseRefresh: leaseRefresh,
+          corruptOutput: corruptOutput,
         );
 
-        final rawLogs = session.diagnosticTail.isNotEmpty ? session.diagnosticTail : (completedSession.getLogs() ?? '');
         final diagnosticLogs = _sanitizeLogs(rawLogs).toLowerCase();
         final logTail = _diagnosticTail(diagnosticLogs, maxCharacters: 1600);
         Log.i(
@@ -344,17 +356,25 @@ class FFmpegService {
           'sessionAgeMs': sessionAgeMilliseconds,
           if (!isComplete) 'raw_logs': _diagnosticTail(diagnosticLogs),
           if (!isComplete)
-            'failure_kind': leaseRefresh
+            'failure_kind': corruptOutput
+                ? 'outputIntegrity'
+                : leaseRefresh
                 ? 'leaseRefresh'
                 : terminal.unexpectedEof
                 ? 'unexpectedEof'
                 : diagnosis.kind.name,
           if (!isComplete)
-            'retryable': leaseRefresh || terminal.unexpectedEof ? terminal.retryable : diagnosis.retryable,
+            'retryable': corruptOutput
+                ? false
+                : leaseRefresh || terminal.unexpectedEof
+                ? terminal.retryable
+                : diagnosis.retryable,
           if (terminal.unexpectedEof || leaseRefresh) 'silent': true,
         };
         if (!isComplete) {
-          errorData['message'] = terminal.unexpectedEof || leaseRefresh
+          errorData['message'] = corruptOutput
+              ? i18n('video_ffmpeg_failed')
+              : terminal.unexpectedEof || leaseRefresh
               ? i18n('recorder_transport_failed')
               : _friendlyError(code, diagnosticLogs, diagnosis);
         }
@@ -513,5 +533,23 @@ class FFmpegService {
     final value = logs.trim();
     if (value.length <= maxCharacters) return value;
     return value.substring(value.length - maxCharacters);
+  }
+}
+
+/// Exact media-error diagnostics, not a blanket rejection of warnings.
+/// Remuxing is still stream copy; this is not full codec bitstream validation.
+class FFmpegMediaIntegrity {
+  const FFmpegMediaIntegrity._();
+
+  static bool hasError(String message) {
+    final value = message.toLowerCase();
+    return const [
+      'packet corrupt (stream',
+      'corrupt input packet in stream',
+      'pes packet size mismatch',
+      'error writing trailer',
+      'error muxing a packet',
+      'error during demuxing',
+    ].any(value.contains);
   }
 }

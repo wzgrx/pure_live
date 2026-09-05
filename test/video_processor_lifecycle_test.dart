@@ -123,6 +123,7 @@ void main() {
     await native.started.future;
     native.finish();
     expect(await conversion!, isTrue);
+    expect(native.arguments, contains('-xerror'), reason: 'Corrupt packets must stop finalization before deleting TS.');
     expect(await oldOutput.readAsBytes(), [9]);
     expect(await File(p.join(directory.path, '${task.recordingFilePrefix}-1.mp4')).readAsBytes(), [1, 2, 3, 4]);
     expect(await source.exists(), isFalse);
@@ -184,6 +185,7 @@ class _NativeLifecycleFixture implements FFmpegManager {
   int startCalls = 0;
   int stopCalls = 0;
   String? output;
+  List<String> arguments = [];
   String? nativeTaskId;
   @override
   Stream<FFmpegEvent> get stream => events.stream;
@@ -191,6 +193,7 @@ class _NativeLifecycleFixture implements FFmpegManager {
   bool isRunning(String taskId) => running;
   @override
   Future<void> start({required String taskId, required List<String> arguments, bool liveRecording = false}) async {
+    this.arguments = arguments;
     startCalls++;
     nativeTaskId = taskId;
     await startGate?.future;

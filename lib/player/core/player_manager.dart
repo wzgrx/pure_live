@@ -1729,16 +1729,30 @@ class PlayerManager {
           type: PlayerErrorType.source,
         ),
         sessionId,
+        isStillRelevant: () => !player.isPlayingNow && !_playingSubject.value,
       );
     });
   }
 
-  void _schedulePlayerError(PlayerException error, int sessionId) {
+  void _schedulePlayerError(PlayerException error, int sessionId, {bool Function()? isStillRelevant}) {
+    final expectedPlayer = _currentPlayer;
+    final expectedIntentRevision = _playbackIntentRevision;
     _traceWindowsRecovery('schedule', error: error, sessionId: sessionId);
     unawaited(
-      _enqueuePlayerLifecycle(() {
+      _enqueuePlayerLifecycle(() async {
+        // Queueing preserves native ownership but can outlive the observation:
+        // a token request may still be in flight while media recovers or the
+        // user pauses. Revalidate before changing loading, timers or sources.
+        if (!_isSessionValid(sessionId) ||
+            !identical(expectedPlayer, _currentPlayer) ||
+            expectedIntentRevision != _playbackIntentRevision ||
+            !_playbackRequested ||
+            _playbackSuspensions.isNotEmpty ||
+            (isStillRelevant != null && !isStillRelevant())) {
+          return;
+        }
         _traceWindowsRecovery('dispatch', error: error, sessionId: sessionId);
-        return _handleError(error, sessionId: sessionId);
+        await _handleError(error, sessionId: sessionId);
       }).catchError((Object failure, StackTrace stackTrace) {
         log(
           'Scheduled player recovery failed: $failure',
@@ -1837,6 +1851,7 @@ class PlayerManager {
           (!player.isPlayingNow && !isPlayingNow)) {
         return;
       }
+      final observedFrameRevision = _presentedFrameRevision;
       _schedulePlayerError(
         PlayerException(
           message: 'Live player remained active but presented no new video frame',
@@ -1844,6 +1859,12 @@ class PlayerManager {
           code: 'video_frame_stall_timeout',
         ),
         sessionId,
+        isStillRelevant: () =>
+            observedFrameRevision == _presentedFrameRevision &&
+            _videoPresentationVisible &&
+            !_runtimeAudioOnly &&
+            !_loadingSubject.value &&
+            (player.isPlayingNow || isPlayingNow),
       );
     });
   }
@@ -1910,6 +1931,7 @@ class PlayerManager {
           code: 'buffering_stall_timeout',
         ),
         sessionId,
+        isStillRelevant: () => revision == _continuityRevision && _loadingSubject.value,
       );
     });
   }
@@ -1944,6 +1966,11 @@ class PlayerManager {
                 stackTrace: stackTrace,
               ),
               sessionId,
+              isStillRelevant: () =>
+                  revision == _continuityRevision &&
+                  _shouldMaintainPlayback(player, sessionId) &&
+                  !player.isPlayingNow &&
+                  !isPlayingNow,
             );
             return;
           }
@@ -1964,6 +1991,11 @@ class PlayerManager {
                 code: 'unexpected_pause_timeout',
               ),
               sessionId,
+              isStillRelevant: () =>
+                  confirmationRevision == _continuityRevision &&
+                  _shouldMaintainPlayback(player, sessionId) &&
+                  !player.isPlayingNow &&
+                  !isPlayingNow,
             );
           });
         }).catchError((Object error, StackTrace stackTrace) {
@@ -2834,13 +2866,13 @@ class PlayerManager {
 
   Future<void> _handleError(PlayerException error, {int? sessionId}) async {
     if (_disposed || _isClosing) return;
+    final mySessionId = sessionId ?? _sessionId;
+    if (!_isSessionValid(mySessionId)) return;
     _cancelContinuityRecovery();
     _cancelVideoFrameStallRecovery();
     _cancelTransientLiveRetry();
     _sourceRefreshAttemptResetTimer?.cancel();
     _sourceRefreshAttemptResetTimer = null;
-    final mySessionId = sessionId ?? _sessionId;
-    if (!_isSessionValid(mySessionId)) return;
     _traceWindowsRecovery('handle', error: error, sessionId: mySessionId);
     _sourceReadyTimer?.cancel();
     _sourceReadyTimer = null;
@@ -3087,6 +3119,11 @@ class PlayerManager {
     final expectedIntentRevision = _playbackIntentRevision;
     final currentIndex = _currentPlayUrls.indexOf(currentUrl);
     final attempt = proactive ? 0 : _sourceRefreshAttempts++;
+    bool requestIsCurrent() =>
+        _isSessionValid(expectedSessionId) &&
+        _playbackIntentRevision == expectedIntentRevision &&
+        _playbackRequested &&
+        _playbackSuspensions.isEmpty;
     try {
       PlaybackSourceRefreshResult refreshed;
       if (!proactive) {
@@ -3115,12 +3152,7 @@ class PlayerManager {
       }
       // A resolver may finish after pause, close or a newer playback request.
       // Consume stale recovery without handing it to the fallback/reopen path.
-      if (_disposed ||
-          _isClosing ||
-          _sessionId != expectedSessionId ||
-          _playbackIntentRevision != expectedIntentRevision ||
-          !_playbackRequested ||
-          _playbackSuspensions.isNotEmpty) {
+      if (!requestIsCurrent()) {
         return true;
       }
       final urls = refreshed.urls.map((url) => url.trim()).where((url) => url.isNotEmpty).toList(growable: false);
@@ -3217,6 +3249,9 @@ class PlayerManager {
       );
       return true;
     } catch (error, stackTrace) {
+      // Failure is also an asynchronous result. A stale failed prefetch must
+      // not overwrite the new session's refresh deadline or restart retries.
+      if (!requestIsCurrent()) return true;
       log('Signed playback source refresh failed: $error', name: 'PlayerManager', error: error, stackTrace: stackTrace);
       if (proactive) {
         _currentSourceRefreshAt = DateTime.now().toUtc().add(const Duration(seconds: 10));

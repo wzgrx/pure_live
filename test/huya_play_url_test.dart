@@ -8,6 +8,21 @@ import 'package:pure_live/core/tars/get_cdn_token_ex_resp.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 
 void main() {
+  test('native and web token clients use bounded seconds rather than the legacy 60000 second default', () {
+    for (final userAgent in [HuyaSite.nativePlayUserAgent, HuyaSite.fallbackPlayUserAgent]) {
+      final client = HuyaSite.createCdnTokenClient({'User-Agent': userAgent});
+      try {
+        expect(client.dio.options.connectTimeout, const Duration(seconds: 6));
+        expect(client.dio.options.sendTimeout, const Duration(seconds: 6));
+        expect(client.dio.options.receiveTimeout, const Duration(seconds: 6));
+        expect(client.dio.options.headers['User-Agent'], userAgent);
+        expect(client.baseUrl, 'https://wup.huya.com');
+      } finally {
+        client.dio.close(force: true);
+      }
+    }
+  });
+
   test('Huya treats only explicit inactive states as authoritative offline', () {
     expect(HuyaSite.isExplicitOfflineState('OFF'), isTrue);
     expect(HuyaSite.isExplicitOfflineState(' offline '), isTrue);

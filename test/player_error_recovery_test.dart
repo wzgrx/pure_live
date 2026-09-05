@@ -699,6 +699,88 @@ void main() {
     await manager.dispose();
   }, skip: !Platform.isWindows);
 
+  for (final outcome in [
+    'new frame',
+    'buffer recovered',
+    'user paused',
+    'presentation hidden',
+    'pause and resume',
+    'still stalled',
+    'real EOF',
+  ]) {
+    test('queued recovery behind native Huya prefetch rechecks $outcome', () async {
+      final active = _FrameProgressFakePlayer();
+      final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final lease = Completer<PlaybackSourceRefreshResult>();
+      final prefetchEntered = Completer<void>();
+      var requests = 0;
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: active},
+        playerCreator: (_) => creations++ == 0 ? active : replacement,
+        videoFrameStallTimeout: const Duration(seconds: 2),
+        bufferingStallTimeout: const Duration(milliseconds: 500),
+        transientLiveRetryDelays: const [],
+      );
+      final loading = <bool>[];
+      final loadingSubscription = manager.onLoading.listen(loading.add);
+      manager.configureDefaultEngine(PlayerEngine.mediaKit);
+      const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+      try {
+        await manager.play(
+          url,
+          const [url],
+          const {},
+          room: LiveRoom(roomId: 'queued-native-recovery', platform: 'huya'),
+          sourceRefreshAt: DateTime.now().toUtc(),
+          sourceResolver: (_) {
+            requests++;
+            if (!prefetchEntered.isCompleted) prefetchEntered.complete();
+            return lease.future;
+          },
+        );
+        await prefetchEntered.future.timeout(const Duration(seconds: 3));
+        expect(requests, 1, reason: 'the resolver now owns the lifecycle queue');
+        if (outcome == 'buffer recovered') active.emitLoading(true);
+        if (outcome == 'real EOF' || outcome == 'user paused' || outcome == 'pause and resume') {
+          active.emitError(PlayerException(message: 'transport EOF', type: PlayerErrorType.network));
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 1100));
+        expect(manager.currentPlayer, same(active), reason: 'recovery is waiting behind prefetch');
+        if (outcome == 'new frame' || outcome == 'real EOF') active.emitFrame();
+        if (outcome == 'buffer recovered') active.emitLoading(false);
+        if (outcome == 'user paused') await manager.pause();
+        if (outcome == 'presentation hidden') manager.setVideoPresentationVisible(false);
+        if (outcome == 'pause and resume') {
+          await manager.pause();
+          await manager.resume();
+        }
+        lease.complete(
+          PlaybackSourceRefreshResult(
+            urls: const ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
+            preferredLineIndex: 0,
+            refreshAt: DateTime.now().toUtc().add(const Duration(minutes: 4)),
+            invalidAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+        final shouldRecover = outcome == 'still stalled' || outcome == 'real EOF';
+        expect(creations, shouldRecover ? 2 : 1);
+        expect(manager.currentPlayer, same(shouldRecover ? replacement : active));
+        if (!shouldRecover) {
+          expect(active.openedUrls, [url]);
+          expect(active.softStopCalls, 0);
+          expect(active.isPlayingNow, outcome != 'user paused');
+          expect(loading.last, isFalse, reason: 'obsolete recovery must not put a healthy or paused room into loading');
+        }
+      } finally {
+        if (!lease.isCompleted) lease.completeError(StateError('test cleanup'));
+        await loadingSubscription.cancel();
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
+
   test('native Huya credential refresh never restarts a healthy Windows transport', () async {
     final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);

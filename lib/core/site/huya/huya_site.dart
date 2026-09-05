@@ -1157,15 +1157,20 @@ class HuyaSite
     ..sStreamName = line.streamName
     ..tId = (HuyaUserId()..sHuYaUA = 'pc_exe&7060000&official');
 
-  Future<HuyaCdnTokenLease> _fetchNativeCdnTokenInfoEx(HuyaLineModel line) async {
-    final client = BaseTarsHttp(
-      'https://wup.huya.com',
-      'liveui',
-      timeOut: 6,
-      headers: const {'Origin': baseUrl, 'Referer': '$baseUrl/', 'User-Agent': nativePlayUserAgent},
-    );
+  @visibleForTesting
+  static BaseTarsHttp createCdnTokenClient(Map<String, String> headers) {
+    final client = BaseTarsHttp('https://wup.huya.com', 'liveui', timeOut: 6, headers: headers);
     client.dio.options.sendTimeout = const Duration(seconds: 6);
     client.dio.options.receiveTimeout = const Duration(seconds: 6);
+    return client;
+  }
+
+  Future<HuyaCdnTokenLease> _fetchNativeCdnTokenInfoEx(HuyaLineModel line) async {
+    final client = createCdnTokenClient(const {
+      'Origin': baseUrl,
+      'Referer': '$baseUrl/',
+      'User-Agent': nativePlayUserAgent,
+    });
     try {
       final response = await client
           .tupRequest('getCdnTokenInfoEx', buildNativePlaybackTokenRequest(line), GetCdnTokenExResp())
@@ -1195,18 +1200,20 @@ class HuyaSite
   Future<HuyaCdnTokenLease> _fetchCdnTokenInfoEx(HuyaLineModel line, HuyaViewerIdentity viewer) async {
     final cookie = SettingsService.to.cookieManager.huyaCookie.v.trim();
     final request = buildPlaybackTokenRequest(line, viewer, cookie: cookie);
-    final tokenClient = BaseTarsHttp(
-      "https://wup.huya.com",
-      "liveui",
-      headers: <String, String>{
-        'Origin': baseUrl,
-        'Referer': '$baseUrl/',
-        'User-Agent': fallbackPlayUserAgent,
-        if (cookie.isNotEmpty) 'Cookie': cookie,
-      },
-    );
-    final response = await tokenClient.tupRequest('getCdnTokenInfoEx', request, GetCdnTokenExResp());
-    return HuyaCdnTokenLease.fromResponse(response);
+    final tokenClient = createCdnTokenClient(<String, String>{
+      'Origin': baseUrl,
+      'Referer': '$baseUrl/',
+      'User-Agent': fallbackPlayUserAgent,
+      if (cookie.isNotEmpty) 'Cookie': cookie,
+    });
+    try {
+      final response = await tokenClient
+          .tupRequest('getCdnTokenInfoEx', request, GetCdnTokenExResp())
+          .timeout(const Duration(seconds: 8));
+      return HuyaCdnTokenLease.fromResponse(response);
+    } finally {
+      tokenClient.dio.close(force: true);
+    }
   }
 
   @visibleForTesting

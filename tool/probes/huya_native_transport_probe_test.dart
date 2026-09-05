@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/core/site/huya/huya_site.dart';
 import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
 import 'package:pure_live/player/core/playback_header_resolver.dart';
+import 'package:pure_live/player/utils/live_buffer_policy.dart';
 
 void main() {
   test(
@@ -40,6 +41,43 @@ void main() {
           final url = await site.getPlayUrl(line, 500);
           expect(HuyaTransportPolicy.hasNativeFlvCredential(url), isTrue);
           final headers = await PlaybackHeaderResolver.resolve(platform: 'huya', roomId: room);
+          final nativeLibrary = Platform.environment['PURELIVE_HUYA_PROBE_LIBMPV'];
+          if (nativeLibrary != null && nativeLibrary.isNotEmpty) {
+            final properties = <String, String>{};
+            await LiveBufferPolicy.apply((name, value) async {
+              properties[name] = value;
+            });
+            final process = await Process.start('python', ['tool/probes/libmpv_continuity_probe.py']);
+            try {
+              final output = process.stdout.transform(utf8.decoder).join();
+              final errors = process.stderr.drain<void>();
+              process.stdin.write(
+                jsonEncode({
+                  'url': url,
+                  'headers': headers,
+                  'seconds': duration.inSeconds,
+                  'library': nativeLibrary,
+                  'bufferProperties': properties,
+                }),
+              );
+              await process.stdin.close();
+              final exit = await process.exitCode.timeout(duration + const Duration(seconds: 45));
+              final result = jsonDecode(await output) as Map<String, dynamic>;
+              await errors;
+              // Sanitized native counters only. This is not texture/audio-device acceptance.
+              // ignore: avoid_print
+              print(jsonEncode(result));
+              expect(exit, 0);
+              expect(result['headerRoundTripVerified'], isTrue);
+              expect(result['endEvents'], 0);
+              expect(result['clockAdvancedSeconds'], greaterThan(duration.inSeconds - 15));
+              expect(result['nativeStats']['width'], greaterThan(0));
+              expect(result['nativeStats']['height'], greaterThan(0));
+            } finally {
+              process.kill();
+            }
+            return;
+          }
           final request = await client.getUrl(Uri.parse(url));
           headers.forEach(request.headers.set);
           final clock = Stopwatch()..start();

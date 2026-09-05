@@ -14,6 +14,7 @@ class AudienceMetricSettingsPage extends StatelessWidget {
     (id: 'twitch', name: 'Twitch', detailKey: 'audience_twitch_detail'),
     (id: 'soop', name: 'SOOP', detailKey: 'audience_soop_detail'),
     (id: 'yy', name: 'YY Live', detailKey: 'audience_yy_detail'),
+    (id: 'acfun', name: 'AcFun', detailKey: 'audience_acfun_detail'),
   ];
 
   @override

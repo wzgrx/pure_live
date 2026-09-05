@@ -44,18 +44,19 @@ class FavoriteRoomController extends GetxController {
   }
 
   void _migrateSiteCatalog() {
-    if (siteCatalogMigration.v >= 2) return;
-
     final updated = List<String>.from(hotAreasList);
-
-    for (final site in Sites.supportSites) {
-      if (!updated.contains(site.id)) {
-        updated.add(site.id);
+    if (siteCatalogMigration.v < 2) {
+      for (final site in Sites.supportSites) {
+        if (!updated.contains(site.id)) updated.add(site.id);
       }
     }
-
-    hotAreasList.assignAll(updated);
-    siteCatalogMigration.v = 2;
+    // Add only the new platform. Re-enabling all supported IDs here would
+    // discard the user's deliberately hidden platforms on each new release.
+    if (siteCatalogMigration.v < 3) {
+      if (!updated.contains(Sites.acfunSite)) updated.add(Sites.acfunSite);
+      hotAreasList.assignAll(updated);
+      siteCatalogMigration.v = 3;
+    }
   }
 
   void _normalizeSiteCatalogIds() {

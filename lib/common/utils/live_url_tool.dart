@@ -4,6 +4,7 @@ import 'package:dio/dio.dart' as dio;
 import 'package:flutter/services.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/modules/live_play/dialogs/live_dlna_dialog.dart';
+import 'package:pure_live/modules/search/web_search_room_parser.dart';
 
 class LiveUrlTool {
   static Future<List<String>> parseLiveUrl(String url) async {
@@ -15,6 +16,10 @@ class LiveUrlTool {
     if (urlMatches.isEmpty) return [];
 
     String realUrl = urlMatches.first!;
+    if (Uri.tryParse(realUrl)?.host == 'live.acfun.cn') {
+      final target = WebSearchRoomParser.parse(realUrl);
+      return target == null ? [] : [target.roomId, target.platform];
+    }
 
     // B站短链跳转
     if (realUrl.contains("b23.tv")) {

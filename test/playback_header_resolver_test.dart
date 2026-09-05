@@ -50,6 +50,7 @@ void main() {
       'twitch': 'https://www.twitch.tv',
       'soop': 'https://www.sooplive.co.kr',
       'yy': 'https://www.yy.com',
+      'acfun': 'https://live.acfun.cn',
     };
 
     for (final entry in expectedOrigins.entries) {
@@ -60,5 +61,13 @@ void main() {
       expect(headers.keys, everyElement(matches(RegExp(r'^[a-z0-9-]+$'))), reason: entry.key);
       expect(headers.values, everyElement(isNot(contains('\n'))), reason: entry.key);
     }
+  });
+
+  test('AcFun uses anonymous media headers identically for playback and FFmpeg', () async {
+    final playback = await PlaybackHeaderResolver.resolve(platform: 'acfun', roomId: '42');
+    final recording = await FFmpegHeaderFactory.build(platform: 'acfun', roomId: '42');
+    expect(recording, playback);
+    expect(playback['referer'], 'https://live.acfun.cn/');
+    expect(playback.containsKey('cookie'), isFalse);
   });
 }

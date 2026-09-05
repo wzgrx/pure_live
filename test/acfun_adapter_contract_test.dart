@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/site/acfun/acfun_api.dart';
 import 'package:pure_live/core/site/acfun/acfun_site.dart';
+import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 
 Map<String, dynamic> room({bool live = true}) => {
   'result': 0,
@@ -41,6 +42,37 @@ Map<String, dynamic> manifest(List<List<Map<String, dynamic>>> groups) => {
 };
 
 void main() {
+  test(
+    'recorder production resolver accepts AcFun and distinguishes offline from retryable metadata failure',
+    () async {
+      final fixture = _AcfunFixture();
+      final resolver = StreamResolverService(
+        siteResolver: (_) => AcfunSite(api: AcfunApi(request: fixture.request)),
+      );
+      final stream = await resolver.resolveStream(roomId: '42', platform: 'acfun', preferredQuality: '超清');
+      expect(stream.quality.selectionId, 'HIGH');
+      expect(stream.url, 'https://cdn.example/1-high.flv?sign=fixture');
+      expect(stream.lineIndex, 0);
+      fixture.live = false;
+      await expectLater(
+        resolver.resolveStream(roomId: '42', platform: 'acfun', preferredQuality: '超清'),
+        throwsA(isA<StreamException>().having((e) => e.type, 'offline', StreamErrorType.notLive)),
+      );
+      final failing = StreamResolverService(
+        siteResolver: (_) =>
+            AcfunSite(api: AcfunApi(request: (method, url, {query, body, headers}) async => {'result': 503})),
+      );
+      await expectLater(
+        failing.resolveStream(roomId: '42', platform: 'acfun', preferredQuality: '超清'),
+        throwsA(
+          isA<StreamException>()
+              .having((e) => e.retryable, 'retryable', isTrue)
+              .having((e) => e.type, 'kind', StreamErrorType.networkError),
+        ),
+      );
+    },
+  );
+
   test('qualities sort by server rank, not response order, and merge CDN lines without changing signatures', () {
     const signed = 'https://cdn.example/high.flv?sign=a%2Bb%2Fc%3D&expires=9';
     final result = AcfunApi.parseQualities(

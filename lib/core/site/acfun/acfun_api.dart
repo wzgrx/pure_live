@@ -11,7 +11,7 @@ typedef AcfunRequest = Future<Object?> Function(
   Map<String, dynamic>? headers,
 });
 
-enum AcfunFailureKind { transport, service, schema, qualityUnavailable }
+enum AcfunFailureKind { transport, service, schema, qualityUnavailable, paginationExpired }
 
 /// Safe to log: never retains the response body, visitor credential or URL.
 class AcfunApiException implements Exception {
@@ -25,9 +25,27 @@ class AcfunApiException implements Exception {
 }
 
 class AcfunDirectoryPage {
-  const AcfunDirectoryPage(this.rooms, this.nextCursor);
+  const AcfunDirectoryPage(this.rooms, this.nextCursor, {this.categories = const []});
   final List<Map<String, dynamic>> rooms;
   final String? nextCursor;
+  final List<AcfunCategoryFilter> categories;
+}
+
+class AcfunCategoryFilter {
+  const AcfunCategoryFilter({required this.type, required this.id, required this.name, this.cover = ''});
+  final int type;
+  final int id;
+  final String name;
+  final String cover;
+
+  String get query => encode(type, id);
+
+  static String encode(int type, int id) {
+    if (type < 0 || id < 0) throw const AcfunApiException(AcfunFailureKind.schema);
+    return jsonEncode([
+      {'filterType': type, 'filterId': id},
+    ]);
+  }
 }
 
 class AcfunStreamQuality {
@@ -117,6 +135,15 @@ class AcfunApi {
 
   static String text(Object? value) => value is String ? value.trim() : (value is num ? value.toString() : '');
 
+  static String imageUrl(Object? value) {
+    var raw = text(value);
+    if (raw.startsWith('//')) raw = 'https:$raw';
+    final uri = Uri.tryParse(raw);
+    return uri != null && {'http', 'https'}.contains(uri.scheme) && uri.host.isNotEmpty && uri.userInfo.isEmpty
+        ? raw
+        : '';
+  }
+
   static void _success(Map<String, dynamic> data, int expected) {
     final code = integer(data['result']);
     if (code == null) throw const AcfunApiException(AcfunFailureKind.schema);
@@ -146,11 +173,39 @@ class AcfunApi {
     _success(data, 0);
     final list = data['liveList'];
     if (list is! List || !data.containsKey('pcursor')) throw const AcfunApiException(AcfunFailureKind.schema);
+    if (data['pcursor'] is! String && data['pcursor'] is! int) {
+      throw const AcfunApiException(AcfunFailureKind.schema);
+    }
     final cursor = text(data['pcursor']);
     return AcfunDirectoryPage(
       List.unmodifiable(list.map(object)),
       cursor.isEmpty || cursor == 'no_more' ? null : cursor,
+      categories: wrapper.containsKey('channelFilters') ? parseCategories(wrapper['channelFilters']) : const [],
     );
+  }
+
+  static List<AcfunCategoryFilter> parseCategories(Object? raw) {
+    final groups = object(raw)['liveChannelDisplayFilters'];
+    if (groups is! List) throw const AcfunApiException(AcfunFailureKind.schema);
+    final result = <(int, int), AcfunCategoryFilter>{};
+    for (final group in groups) {
+      final filters = object(group)['displayFilters'];
+      if (filters is! List) throw const AcfunApiException(AcfunFailureKind.schema);
+      for (final rawFilter in filters) {
+        final filter = object(rawFilter);
+        final type = integer(filter['filterType']);
+        final id = integer(filter['filterId']);
+        final name = text(filter['name']);
+        if (type == null || type < 0 || id == null || id < 0 || name.isEmpty) {
+          throw const AcfunApiException(AcfunFailureKind.schema);
+        }
+        result.putIfAbsent((
+          type,
+          id,
+        ), () => AcfunCategoryFilter(type: type, id: id, name: name, cover: imageUrl(filter['cover'])));
+      }
+    }
+    return List.unmodifiable(result.values);
   }
 
   Future<Map<String, dynamic>> roomInfo(String authorId) async {

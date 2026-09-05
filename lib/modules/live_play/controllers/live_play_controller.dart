@@ -882,6 +882,10 @@ class LivePlayController extends GetxController
         nativeUrl = "https://play.sooplive.co.kr/${detail.roomId}";
         webUrl = nativeUrl;
         break;
+      case Sites.acfunSite:
+        nativeUrl = 'https://live.acfun.cn/live/${Uri.encodeComponent(detail.roomId ?? '')}';
+        webUrl = nativeUrl;
+        break;
       case Sites.kuaishouSite:
         nativeUrl =
             "kwai://liveaggregatesquare?liveStreamId=${detail.link}&recoStreamId=${detail.link}&recoLiveStreamId=${detail.link}&liveSquareSource=28&path=/rest/n/live/feed/sharePage/slide/more&mt_product=H5_OUTSIDE_CLIENT_SHARE";

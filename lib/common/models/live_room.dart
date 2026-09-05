@@ -94,6 +94,13 @@ class LiveRoom {
       hasTotalViewers: false,
       onlineAvailability: AudienceOnlineAvailability.unsupported,
     ),
+    // AcFun liveList/live info expose onlineCount independently of likeCount
+    // and user fanCountValue. Author search has no concurrent count.
+    'acfun': AudiencePlatformCapability(
+      hasPopularity: false,
+      hasTotalViewers: false,
+      onlineAvailability: AudienceOnlineAvailability.roomList,
+    ),
   };
 
   static const AudiencePlatformCapability _unknownAudienceCapability = AudiencePlatformCapability(

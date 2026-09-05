@@ -71,6 +71,8 @@ class SearchController extends GetxController {
         return "https://www.sooplive.co.kr/?szKeyword=$q";
       case Sites.yySite:
         return "https://www.yy.com/search-$q";
+      case Sites.acfunSite:
+        return 'https://www.acfun.cn/search?keyword=$q&type=user';
       default:
         return "https://www.baidu.com/s?wd=$q&rsv_spt=1&rsv_iqid=0x84b83a1e077a0c1a&issp=1&f=8&rsv_bp=1&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_dl=tb_click&rsv_enter=1&rsv_sug3=3&rsv_sug1=2&rsv_sug7=100&rsv_btype=i&prefixsug=12&rsp=0&inputT=1112&rsv_sug4=1287";
     }
@@ -258,6 +260,7 @@ class SearchController extends GetxController {
     if (index.v > 0 && index.v <= sites.length) {
       final site = sites[index.v - 1];
       final capability = LiveSearchCapabilities.forPlatform(site.id);
+      if (site.id == Sites.acfunSite) return i18n('search_coverage_acfun');
       return switch (capability.coverage) {
         NativeSearchCoverage.liveAndOffline => i18n('search_coverage_live_and_offline', args: {'site': site.name}),
         NativeSearchCoverage.liveOnly => i18n('search_coverage_live_only', args: {'site': site.name}),

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/common/core_log.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
+import 'package:pure_live/core/danmaku/empty_danmaku.dart';
 import 'package:pure_live/modules/live_play/states/live_play_state.dart';
 import 'package:pure_live/modules/live_play/controllers/danmaku_message_gate.dart';
 import 'package:pure_live/modules/live_play/controllers/danmaku_session_host.dart';
@@ -100,8 +101,12 @@ class DanmakuController extends GetxController {
     if (!_initialized) return true;
     final key = _roomKey(room);
     if (_connectingKey == key) return false;
-    return _sessionKey != key || !liveDanmaku.isConnected;
+    return _sessionKey != key || !_sessionSettled;
   }
+
+  // An unsupported transport has a settled local session, not a connected
+  // remote socket. Presentation changes must not keep retrying an empty engine.
+  bool get _sessionSettled => liveDanmaku is EmptyDanmaku || liveDanmaku.isConnected;
 
   /// Connects the room, optionally rebuilding its transport.
   ///
@@ -112,7 +117,7 @@ class DanmakuController extends GetxController {
   Future<void> connectRoom(LiveRoom room, {bool force = false}) {
     final key = _roomKey(room);
     if (!_initialized) return Future<void>.value();
-    final healthyMatchingSession = _sessionKey == key && liveDanmaku.isConnected;
+    final healthyMatchingSession = _sessionKey == key && _sessionSettled;
     // This fast path is deliberately before the request epoch increment. A
     // duplicate lifecycle/PiP request must not invalidate an already-running
     // handshake merely to discover the same key again in the serialized body.
@@ -123,7 +128,7 @@ class DanmakuController extends GetxController {
     final request = ++_requestEpoch;
     return _serialize(() async {
       if (request != _requestEpoch || !_initialized) return;
-      final stillHealthy = _sessionKey == key && liveDanmaku.isConnected;
+      final stillHealthy = _sessionKey == key && _sessionSettled;
       if (!force && (stillHealthy || _connectingKey == key)) return;
 
       final previousKey = _sessionKey ?? _connectingKey;
@@ -138,6 +143,13 @@ class DanmakuController extends GetxController {
       }
 
       final engine = liveDanmaku;
+      if (engine is EmptyDanmaku) {
+        _connectingKey = null;
+        _sessionKey = key;
+        _main.updateDanmakuRoomId(null);
+        _addStatusMessage(i18n('remote_danmaku_not_integrated'));
+        return;
+      }
       final token = ++_sessionToken;
       _maskedNameNoticeShown = false;
       _connectingKey = key;

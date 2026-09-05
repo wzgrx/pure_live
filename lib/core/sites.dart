@@ -1,16 +1,17 @@
 import 'site/yy/yy_site.dart';
+import 'site/acfun/acfun_site.dart';
 import 'site/soop/soop_site.dart';
 import 'site/huya/huya_site.dart';
 import 'interface/live_site.dart';
 import 'site/douyu/douyu_site.dart';
 import 'site/douyin/douyin_site.dart';
+
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/site/cc/cc_site.dart';
 import 'package:pure_live/core/site/iptv/iptv_site.dart';
 import 'package:pure_live/core/site/twitch/twitch_site.dart';
 import 'package:pure_live/core/site/kuaishou/kuaishou_site.dart';
 import 'package:pure_live/core/site/bilibili/bilibili_site.dart';
-
 
 class Sites {
   static const String allSite = "all";
@@ -24,6 +25,7 @@ class Sites {
   static const String twitchSite = "twitch";
   static const String soopSite = 'soop';
   static const String yySite = 'yy';
+  static const String acfunSite = 'acfun';
 
   static const Set<String> supportedSiteIds = {
     bilibiliSite,
@@ -35,6 +37,7 @@ class Sites {
     twitchSite,
     soopSite,
     yySite,
+    acfunSite,
     iptvSite,
   };
 
@@ -50,6 +53,7 @@ class Sites {
     Site(id: twitchSite, name: i18n("site_twitch"), logo: "assets/images/twitch.png", liveSite: TwitchSite()),
     Site(id: soopSite, name: i18n("site_soop"), logo: "assets/images/soop.png", liveSite: SoopSite()),
     Site(id: yySite, name: i18n("site_yy"), logo: "assets/images/yy.png", liveSite: YYSite()),
+    Site(id: acfunSite, name: i18n('site_acfun'), logo: 'assets/images/logo.png', liveSite: AcfunSite()),
     Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
   ];
 
@@ -94,6 +98,7 @@ class Sites {
       ),
       soopSite => Site(id: soopSite, name: i18n("site_soop"), logo: "assets/images/soop.png", liveSite: SoopSite()),
       yySite => Site(id: yySite, name: i18n("site_yy"), logo: "assets/images/yy.png", liveSite: YYSite()),
+      acfunSite => Site(id: acfunSite, name: i18n('site_acfun'), logo: 'assets/images/logo.png', liveSite: AcfunSite()),
       iptvSite => Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
       _ => throw StateError('Unsupported live site: $normalizedId'),
     };

@@ -28,13 +28,13 @@ void main() {
     Get.testMode = true;
     Get.reset();
     await HivePrefUtil.clear();
-    Get.put<SettingsService>(_TestSettingsService(AppSettingsController()));
+    Get.put<SettingsService>(_TestSettingsService(_AudienceTestAppSettings()));
   });
 
   tearDown(Get.reset);
 
   tearDownAll(() async {
-    await Hive.close();
+    await Hive.close().timeout(const Duration(seconds: 10));
     await hiveDirectory.delete(recursive: true);
   });
 
@@ -70,6 +70,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('audience-platform-douyin')), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    final acfun = find.byKey(const ValueKey('audience-platform-acfun'));
+    await tester.ensureVisible(acfun);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(acfun).value, isTrue);
+    await tester.tap(acfun);
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.app.isRealOnlineEnabledFor('acfun'), isFalse);
+    expect(tester.widget<SwitchListTile>(acfun).value, isFalse);
+    expect(tester.takeException(), isNull);
   });
 }
 
@@ -98,8 +108,16 @@ class _AudienceAssetLoader extends AssetLoader {
     'audience_twitch_detail': '列表可提供在线值',
     'audience_soop_detail': '列表可提供在线值',
     'audience_yy_detail': '仅提供热度',
+    'audience_acfun_detail': '列表提供在线数，作者搜索没有在线数',
     'audience_metric_fallback_desc': '各平台字段口径会单独标注。',
   };
+}
+
+// Widget tests own a fake clock. Keep their observable state in memory; the
+// actual Hive write/upgrade contract is covered in acfun_catalog_migration_test.
+class _AudienceTestAppSettings extends AppSettingsController {
+  @override
+  final RxList<String> realOnlinePlatforms = List<String>.from(AppSettingsController.defaultRealOnlinePlatforms).obs;
 }
 
 class _TestSettingsService extends SettingsService {

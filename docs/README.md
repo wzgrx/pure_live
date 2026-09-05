@@ -20,6 +20,7 @@
 - [2026-09-05 最新 Issue 审计](ISSUE_AUDIT_2026_09_05.md)：#850 Android 颜色/透明度、#849 Win10 启动证据边界与 #848 系统字体语义修复。
 - [虎牙完整链路与后台预取复核](HUYA_PREFETCH_OWNERSHIP_AUDIT_2026_09_05.md)：上游与本分支差异、预取所有权、双 CDN 原画连续解码、868 项回归及发布包证据边界。
 - [虎牙醒目留言 HTTP 生命周期](HUYA_MESSAGE_BOARD_HTTP_AUDIT_2026_09_05.md)：默认超时单位、连接释放、重复实现合并、实际 Dio/TARS 回归与公开 HTTPS 验证。
+- [AcFun 目录与搜索接入](ACFUN_NAVIGATION_AUDIT_2026_09_05.md)：官网分类、稀疏分页、取消/缓存边界、平台入口和设置迁移；协议、接口与设备验收分开记录。
 - [v3.1.7 虎牙醒目留言事件身份修复](STAGE_UPDATE_3_1_7.md)：平台事件 ID、合法重复留言、有界去重缓存与 Android/Windows 交付。
 - [v3.1.6 虎牙醒目留言实时刷新修复](STAGE_UPDATE_3_1_6.md)：通知先于 WUP 留言板更新的时序根因、非阻塞有界补偿、Android/Windows 交付与证据边界。
 - [v3.1.5 Android / Windows 双平台发布](STAGE_UPDATE_3_1_5.md)：同一冻结源码、双平台版本对齐、串行构建、安装包与校验说明。

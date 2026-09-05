@@ -5,11 +5,44 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/common/models/live_message.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
+import 'package:pure_live/core/danmaku/empty_danmaku.dart';
 import 'package:pure_live/modules/live_play/states/live_play_state.dart';
 import 'package:pure_live/modules/live_play/controllers/danmaku_controller.dart';
 import 'package:pure_live/modules/live_play/controllers/danmaku_session_host.dart';
 
 void main() {
+  test('unsupported remote chat reports its capability once without fake connection or repeated PiP starts', () async {
+    final host = _TestDanmakuHost();
+    final engine = _CountingEmptyDanmaku();
+    final controller = DanmakuController(host, recoveryAllowed: (_) => true);
+    final room = LiveRoom(roomId: '42', platform: 'acfun');
+    controller.initDanmaku(engine);
+    await controller.connectRoom(room);
+    await controller.connectRoom(room);
+    await controller.recoverRoomConnection(room);
+    expect(engine.startCalls, 0);
+    expect(engine.isConnected, isFalse);
+    expect(engine.onReady, isNull);
+    expect(host.currentRoomId, isNull);
+    expect(host.systemMessages, ['remote_danmaku_not_integrated']);
+    expect(controller.needReconnect(room), isFalse);
+  });
+
+  test('switching from unsupported chat to a supported room installs a real connection', () async {
+    final host = _TestDanmakuHost();
+    final controller = DanmakuController(host);
+    controller.initDanmaku(EmptyDanmaku());
+    await controller.connectRoom(LiveRoom(roomId: '42', platform: 'acfun'));
+    final engine = _CountingDanmaku();
+    await controller.replaceDanmaku(engine);
+    final room = LiveRoom(roomId: 'next', platform: 'test');
+    expect(controller.needReconnect(room), isTrue);
+    await controller.connectRoom(room);
+    expect(engine.startCalls, 1);
+    expect(host.currentRoomId, 'next');
+    expect(engine.isConnected, isTrue);
+  });
+
   test('a stalled transport start is bounded, stopped and available for reconnect', () async {
     final host = _TestDanmakuHost();
     final engine = _StalledStartDanmaku();
@@ -104,6 +137,14 @@ void main() {
     expect(host.currentRoomId, 'room-pip-connecting');
     expect(controller.needReconnect(room), isFalse);
   });
+}
+
+class _CountingEmptyDanmaku extends EmptyDanmaku {
+  int startCalls = 0;
+  @override
+  Future<void> start(dynamic args) async {
+    startCalls++;
+  }
 }
 
 class _TestDanmakuHost implements DanmakuSessionHost {

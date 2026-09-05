@@ -4,7 +4,22 @@ import 'package:pure_live/core/sites.dart';
 
 void main() {
   test('every built-in platform exposes strict playback-complete recording metadata', () {
-    expect(Sites.supportedSiteIds, hasLength(10));
+    expect(
+      Sites.supportedSiteIds,
+      unorderedEquals(const [
+        Sites.bilibiliSite,
+        Sites.douyuSite,
+        Sites.huyaSite,
+        Sites.douyinSite,
+        Sites.kuaishouSite,
+        Sites.ccSite,
+        Sites.twitchSite,
+        Sites.soopSite,
+        Sites.yySite,
+        Sites.acfunSite,
+        Sites.iptvSite,
+      ]),
+    );
     for (final siteId in Sites.supportedSiteIds) {
       expect(Sites.of(siteId).liveSite, isA<LiveSiteRecordRoomResolver>(), reason: siteId);
     }

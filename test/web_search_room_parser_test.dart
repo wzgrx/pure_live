@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/modules/search/web_search_room_parser.dart';
+import 'package:pure_live/common/utils/live_url_tool.dart';
 
 void main() {
   test('extracts native room identities for every web-search platform', () {
@@ -14,6 +15,7 @@ void main() {
       'https://www.twitch.tv/some_streamer': (Sites.twitchSite, 'some_streamer'),
       'https://play.sooplive.co.kr/streamer_1/123': (Sites.soopSite, 'streamer_1'),
       'https://www.yy.com/1382731151': (Sites.yySite, '1382731151'),
+      'https://live.acfun.cn/live/42?from=search': (Sites.acfunSite, '42'),
     };
 
     for (final entry in cases.entries) {
@@ -33,10 +35,21 @@ void main() {
       'https://www.yy.com/search-test',
       'https://www.huya.com.evil.example/1234',
       'javascript:alert(1)',
+      'https://www.acfun.cn/u/42',
+      'https://www.acfun.cn/v/ac42',
+      'https://live.acfun.cn/live/0',
+      'https://live.acfun.cn/live/42/extra',
+      'https://live.acfun.cn.evil.example/live/42',
+      'https://secret@live.acfun.cn/live/42',
     ];
 
     for (final url in urls) {
       expect(WebSearchRoomParser.parse(url), isNull, reason: url);
     }
+  });
+
+  test('AcFun shared room links resolve offline without treating author pages as streams', () async {
+    expect(await LiveUrlTool.parseLiveUrl('看看这个直播 https://live.acfun.cn/live/42?source=share'), ['42', 'acfun']);
+    expect(await LiveUrlTool.parseLiveUrl('https://live.acfun.cn/search?keyword=huya.com'), isEmpty);
   });
 }

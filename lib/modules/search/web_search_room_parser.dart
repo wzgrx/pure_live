@@ -69,6 +69,9 @@ class WebSearchRoomParser {
     if (_matchesHost(host, 'yy.com')) {
       return _firstSegment(segments, Sites.yySite, RegExp(r'^\d+$'));
     }
+    if (host == 'live.acfun.cn' && uri.userInfo.isEmpty && segments.length == 2 && segments.first == 'live') {
+      return _target(Sites.acfunSite, segments[1], RegExp(r'^[1-9][0-9]{0,19}$'));
+    }
     return null;
   }
 

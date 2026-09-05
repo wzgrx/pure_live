@@ -13,6 +13,7 @@ class AppSettingsController extends GetxController {
     Sites.ccSite,
     Sites.twitchSite,
     Sites.soopSite,
+    Sites.acfunSite,
   ];
 
   Worker? _refreshRateModeWorker;
@@ -73,6 +74,10 @@ class AppSettingsController extends GetxController {
     if (audienceMetricMigration.v < 2) {
       if (!realOnlinePlatforms.contains('soop')) realOnlinePlatforms.add('soop');
       audienceMetricMigration.v = 2;
+    }
+    if (audienceMetricMigration.v < 3) {
+      if (!realOnlinePlatforms.contains(Sites.acfunSite)) realOnlinePlatforms.add(Sites.acfunSite);
+      audienceMetricMigration.v = 3;
     }
     _removeUnsupportedOnlinePlatforms();
     if (Platform.isAndroid || Platform.isWindows) {

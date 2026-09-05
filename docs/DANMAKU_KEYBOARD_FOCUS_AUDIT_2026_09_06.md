@@ -54,6 +54,26 @@
 一次 analyze 41.5 秒无诊断，结束活跃重型进程 0。两种真实画布 Escape 红测转绿；
 双画布挂载期间输入框继续持有主焦点并接收文字。源码/自动化与原生客户端结果分层登记。
 
-本次 `f91dd15b` 候选在补丁之前构建，用于复现；不拿它证明键盘补丁已运行。修复后还需
-重新构建并复验 Escape。Android 实际呈现与全平台 3.2.0 正式交付仍独立保留。
+本次 `f91dd15b` 候选在补丁之前构建，用于复现；修复后独立构建与复验见下节。
+Android 实际呈现与全平台 3.2.0 正式交付仍独立保留。
 回滚只撤销弹幕画布的焦点隔离和对应测试，保留取流、悬停、模式状态机及缓存修复。
+
+## 修复后的真实 Windows 闭环
+
+- 干净业务提交 `1c22bffe19b9a2f66635730f3fd34811edfcc3b6`，相同 Debug 构建命令与独立目录
+  `local-artifacts/candidates/windows-1c22bffe-debug`；实例 `acceptance_1c22bffe`，PID 17292。
+- 记录 `20260905T182329731Z-build-windowsx64-debug.json`，含互斥排队 189.548 秒，Flutter
+  增量阶段 55.7 秒，结束活跃重型进程 0；没有 clean、并发打包或占用其他项目进程。
+- 新 ZIP 141,176,274 B，SHA256 `F595332B49588636552CD23AB3385EB90AED71B567CAE7C4470C8A66C95942BF`；
+  新 kernel blob `00F6C5FBAC747734D9B47D06B2649457BD7E6D3AC815FC0F356E063B2EB15412`，
+  与复现候选不同。此目录中的旧 Release ZIP、setup 和 APK 不属于本轮构建。
+- 同一公开虎牙房间、弹幕画布已显示：按钮进入全屏后 **Escape 返回普通页成功**；
+  **空格暂停、再次空格恢复**，原生 playing=false/true 时间分别为 02:25:15.810、02:25:26.782。
+- 画质菜单打开后 **Escape 只关闭菜单，直播间保留**；再按 Escape **返回热门页**，
+  没有回到“全局按键监听一键穿透多层”的旧问题。
+- 再取只读 focus tree，主焦点链为 `VideoControllerPanel` 中的 Focus，而非 Flame 画布；
+  证据 `local-artifacts/diagnostics/windows-1c22bffe-20260906/focus-after-menu.json`。
+- 从热门页正常确认退出，操作系统查询两个测试 PID 均已消失。本轮两次构建串行、只运行
+  独立候选，未改用户安装目录、账户配置和手机。
+- 这些结果关闭上述 Windows 键盘场景，不外推为全平台键盘、音频连续性、性能或全部功能
+  验收完成。Debug 帧率/CPU 不作为 Release 性能数字；3.2.0 保持未发布。

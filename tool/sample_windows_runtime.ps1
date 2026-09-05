@@ -20,6 +20,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'windows_runtime_metrics.ps1')
 
 function Get-Percentile {
     param(
@@ -154,7 +155,7 @@ $summaryPath = Join-Path $resolvedOutput "$baseName-summary.json"
 $logicalProcessors = [Math]::Max(1, [Environment]::ProcessorCount)
 $stopwatch = [Diagnostics.Stopwatch]::StartNew()
 $samples = [Collections.Generic.List[object]]::new()
-$previousCpuSeconds = [double]$initialProcess.CPU
+$previousCpuSeconds = $null
 $previousElapsed = 0.0
 $processExitObserved = $false
 $plannedSampleCount = [Math]::Floor($DurationSeconds / $IntervalSeconds) + 1
@@ -209,11 +210,9 @@ for ($sampleIndex = 0; $sampleIndex -lt $plannedSampleCount; $sampleIndex++) {
     $readTransferCount = if ($processCounters) { [double]$processCounters.ReadTransferCount } else { 0.0 }
     $writeTransferCount = if ($processCounters) { [double]$processCounters.WriteTransferCount } else { 0.0 }
     $elapsedDelta = $elapsed - $previousElapsed
-    $cpuPercent = if ($elapsedDelta -gt 0) {
-        (($cpuSeconds - $previousCpuSeconds) / $elapsedDelta / $logicalProcessors) * 100.0
-    } else {
-        0.0
-    }
+    $cpuPercent = Get-PureLiveIntervalCpuPercent -CurrentCpuSeconds $cpuSeconds `
+        -PreviousCpuSeconds $previousCpuSeconds -ElapsedSeconds $elapsedDelta `
+        -LogicalProcessors $logicalProcessors
 
     $gpu = if ($IncludeGpu -and $gpuEngineCounterPath) {
         Get-GpuSnapshot `
@@ -230,7 +229,7 @@ for ($sampleIndex = 0; $sampleIndex -lt $plannedSampleCount; $sampleIndex++) {
         scenario = $Scenario
         process_id = $TargetProcessId
         responding = [bool]$process.Responding
-        cpu_percent = [Math]::Round([Math]::Max(0.0, $cpuPercent), 4)
+        cpu_percent = $cpuPercent
         working_set_mib = [Math]::Round($process.WorkingSet64 / 1MB, 4)
         private_bytes_mib = [Math]::Round($process.PrivateMemorySize64 / 1MB, 4)
         handles = [int]$process.HandleCount
@@ -270,6 +269,8 @@ $summary = [ordered]@{
     actual_duration_seconds = [Math]::Round($stopwatch.Elapsed.TotalSeconds, 3)
     interval_seconds = $IntervalSeconds
     sample_count = $samples.Count
+    cpu_sample_count = @($samples | Where-Object { $null -ne $_.cpu_percent }).Count
+    cpu_baseline_policy = 'exclude-first-and-invalid-intervals'
     logical_processors = $logicalProcessors
     display_adapters = $displayAdapters
     gpu_sampling_requested = [bool]$IncludeGpu

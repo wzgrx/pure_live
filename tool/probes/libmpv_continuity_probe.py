@@ -175,6 +175,18 @@ def run(config):
         last_sample, max_clock_gap, samples = start, 0.0, 0
         cache_pause_samples = pause_samples = end_events = 0
         stats, memory_samples = {}, []
+        timeline = []
+        last_cache_pause = False
+        previous_drops = 0
+        max_poll_interval = 0.0
+
+        def mark(kind, now, position, **fields):
+            # Bounded, token-free timeline. Samples are observations, not
+            # individual rendered frames or a count of separate stalls.
+            if len(timeline) < 64:
+                timeline.append({"event": kind, "seconds": round(now - start, 3),
+                                 "position": position, **fields})
+
         termination = "duration_limit"
         while time.monotonic() - start < duration:
             event = mpv.mpv_wait_event(handle, 0.20).contents
@@ -186,6 +198,8 @@ def run(config):
             now = time.monotonic()
             if now - last_sample < 0.20:
                 continue
+            poll_interval = now - last_sample
+            max_poll_interval = max(max_poll_interval, poll_interval)
             last_sample = now
             position = number("time-pos")
             if position is not None and (previous_position is None or position > previous_position + 0.0001):
@@ -195,7 +209,14 @@ def run(config):
                     max_clock_gap = max(max_clock_gap, now - last_progress)
                 last_progress, previous_position = now, position
             samples += 1
-            cache_pause_samples += get("paused-for-cache") == "yes"
+            cache_paused = get("paused-for-cache") == "yes"
+            cache_pause_samples += cache_paused
+            if cache_paused != last_cache_pause:
+                mark("cache_pause_start" if cache_paused else "cache_pause_end",
+                     now, position, cache=cache_state())
+                last_cache_pause = cache_paused
+            if poll_interval > 0.75:
+                mark("slow_poll", now, position, intervalMs=round(poll_interval * 1000))
             pause_samples += get("pause") == "yes"
             if samples % 5 == 0:
                 memory_samples.append({"seconds": round(now - start, 2),
@@ -203,6 +224,11 @@ def run(config):
             stats = {name: number(name) for name in (
                 "width", "height", "estimated-vf-fps", "frame-drop-count",
                 "decoder-frame-drop-count", "demuxer-cache-duration", "avsync")}
+            drops = stats.get("frame-drop-count") or 0
+            if drops > previous_drops:
+                mark("presenter_drop_count", now, position, count=drops,
+                     cachePaused=cache_paused, avsync=stats.get("avsync"))
+            previous_drops = drops
         elapsed = time.monotonic() - start
         if last_progress is not None:
             max_clock_gap = max(max_clock_gap, time.monotonic() - last_progress)
@@ -216,6 +242,7 @@ def run(config):
             "maxClockProgressGapMs": round(max_clock_gap * 1000),
             "clockAdvancedSeconds": None if previous_position is None else round(previous_position - initial_position, 3),
             "sampleCount": samples, "cachePauseSamples": cache_pause_samples, "pauseSamples": pause_samples,
+            "maxPollIntervalMs": round(max_poll_interval * 1000), "timeline": timeline,
             "cpuPercentMachine": round((time.process_time() - cpu_start) / elapsed / (os.cpu_count() or 1) * 100, 3),
             "nativeStats": stats, "memorySamples": memory_samples,
             "bufferProperties": config["bufferProperties"], "secretsPersisted": False,

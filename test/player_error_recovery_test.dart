@@ -1310,6 +1310,48 @@ void main() {
     }
   });
 
+  test('other signed platforms only prefetch without replacing a healthy Windows transport', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    var creations = 0;
+    final refreshed = Completer<void>();
+    final requests = <PlaybackSourceRefreshRequest>[];
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
+      playerCreator: (_) => creations++ == 0 ? active : candidate,
+      windowsHuyaProactiveRefreshInterval: const Duration(milliseconds: 20),
+    );
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    const url = 'https://cdn.example/live.flv?token=first';
+    await manager.play(
+      url,
+      const [url],
+      const {},
+      room: LiveRoom(roomId: 'native-lease', platform: 'other'),
+      sourceRefreshAt: DateTime.now().toUtc(),
+      sourceResolver: (request) async {
+        requests.add(request);
+        if (!refreshed.isCompleted) refreshed.complete();
+        return PlaybackSourceRefreshResult(
+          urls: const ['https://cdn.example/live.flv?token=second'],
+          preferredLineIndex: 0,
+          refreshAt: DateTime.now().toUtc().add(const Duration(minutes: 4)),
+          invalidAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+        );
+      },
+    );
+    await refreshed.future.timeout(const Duration(seconds: 3));
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    final owner = manager.currentPlayer;
+    final playing = active.isPlayingNow;
+    await manager.dispose();
+    expect(owner, same(active));
+    expect(playing, isTrue);
+    expect(creations, 1);
+    expect(active.openedUrls, [url]);
+    expect(requests.single.currentUrl, url);
+  }, skip: !Platform.isWindows);
+
   test('native Huya credential refresh never restarts a healthy Windows transport', () async {
     final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
@@ -1748,15 +1790,15 @@ void main() {
     manager.configureDefaultEngine(PlayerEngine.mediaKit);
 
     await manager.play(
-      'https://cdn.example/leased.flv',
-      const <String>['https://cdn.example/leased.flv'],
+      'https://al.flv.huya.com/leased.flv',
+      const <String>['https://al.flv.huya.com/leased.flv'],
       const <String, String>{},
       room: LiveRoom(roomId: 'huya-proactive-refresh-failure', platform: 'huya'),
       sourceRefreshAt: DateTime.now().toUtc().add(const Duration(milliseconds: 20)),
       sourceResolver: (_) async {
         refreshCalls++;
         return PlaybackSourceRefreshResult(
-          urls: const <String>['https://cdn.example/refreshed.flv'],
+          urls: const <String>['https://al.flv.huya.com/refreshed.flv'],
           preferredLineIndex: 0,
           refreshAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
         );
@@ -1769,7 +1811,7 @@ void main() {
     expect(creations, 2);
     expect(manager.currentPlayer, same(active));
     expect(active.isPlayingNow, isTrue);
-    expect(active.openedUrls, <String>['https://cdn.example/leased.flv']);
+    expect(active.openedUrls, <String>['https://al.flv.huya.com/leased.flv']);
     expect(replacement.disposeCalls, 1);
     expect(manager.hasError.value, isFalse);
     await manager.dispose();

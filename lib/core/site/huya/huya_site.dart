@@ -314,9 +314,8 @@ class HuyaSite
     final platform = detail.platform?.trim().isNotEmpty == true ? detail.platform! : Sites.huyaSite;
     if (roomId.isEmpty) return LivePlayUrlResolution(urls: const <String>[], appliedQualityData: quality.selectionId);
 
-    // Reacquire the room template and build a fresh viewer signature. HLS
-    // AntiCode material lives in the room snapshot, while FLV additionally
-    // obtains a WUP token when that template is unusable or expired.
+    // Reacquire the room snapshot and build a fresh signature. HLS uses its
+    // own AntiCode; FLV first obtains independent native WUP material.
     final refreshedDetail = await getRoomDetailForRecording(platform: platform, roomId: roomId);
     if (refreshedDetail.isExplicitlyOfflineNow) {
       return LivePlayUrlResolution(urls: const <String>[], appliedQualityData: quality.selectionId);
@@ -384,7 +383,11 @@ class HuyaSite
     // A syntactically valid web template may still yield a ~120 second stream.
     // Prefer the native WUP contract proven by sustained, single-open probes.
     // Never reuse its FLV token for HLS.
-    if (line.lineType == HuyaLineType.flv && RegExp(r'(^|&)fm=').hasMatch(antiCode)) {
+    // Native WUP needs the stream name, not the web template's `fm`. A room
+    // snapshot may carry an empty/already-signed AntiCode; gating on `fm`
+    // silently skipped the long-lived path or rejected an otherwise valid
+    // stream. Keep legacy web material only as a fallback after native fails.
+    if (line.lineType == HuyaLineType.flv) {
       try {
         final nativeLease = await getNativeCdnTokenInfoEx(line);
         if (nativeLease.isExpired(DateTime.now().toUtc())) throw StateError('Native token expired');

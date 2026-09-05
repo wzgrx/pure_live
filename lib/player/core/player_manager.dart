@@ -3439,7 +3439,7 @@ class PlayerManager {
       final selectedIndex = refreshed.preferredLineIndex.clamp(0, urls.length - 1);
       final selectedUrl = urls[selectedIndex];
       if (proactive) {
-        if (PlatformUtils.isWindows && !HuyaTransportPolicy.hasNativeFlvCredential(currentUrl)) {
+        if (PlatformUtils.isWindows && HuyaTransportPolicy.hasShortTransportLease(currentUrl)) {
           // Huya edge transports have been observed ending after roughly two
           // minutes on both FLV and HLS, even when wsTime remains valid much
           // longer. This is runtime evidence rather than a published SLA.
@@ -3865,7 +3865,7 @@ class PlayerManager {
       _proactiveSourceRefreshTimer = null;
       if (!_isPlayerEventCurrent(player, sessionId) || !_playbackRequested || _playbackSuspensions.isNotEmpty) return;
       final intentRevision = _playbackIntentRevision;
-      if (!PlatformUtils.isWindows || HuyaTransportPolicy.hasNativeFlvCredential(_currentUrl ?? '')) {
+      if (!PlatformUtils.isWindows || !HuyaTransportPolicy.hasShortTransportLease(_currentUrl ?? '')) {
         // Fetching a standby credential is network work, not a player command.
         // Holding the native queue here made slow HTTP block room changes and
         // close even though the active native FLV transport remained healthy.

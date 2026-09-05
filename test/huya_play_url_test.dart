@@ -57,7 +57,7 @@ void main() {
   }
 
   test('Huya FLV URL uses the FLV token and extension', () async {
-    final url = await HuyaSite().getPlayUrl(line(HuyaLineType.flv, 'http://al.flv.huya.com/src'), 8000);
+    final url = await _FakeHuyaSessionSite().getPlayUrl(line(HuyaLineType.flv, 'http://al.flv.huya.com/src'), 8000);
 
     expect(url, startsWith('https://al.flv.huya.com/src/stream-name.flv?'));
     expect(url, contains('wsSecret=flv-token'));
@@ -67,7 +67,9 @@ void main() {
   });
 
   test('Huya HLS URL uses the HLS token and extension', () async {
-    final url = await HuyaSite().getPlayUrl(line(HuyaLineType.hls, 'http://al.hls.huya.com/src'), 2000);
+    final site = _FakeHuyaSessionSite();
+    final url = await site.getPlayUrl(line(HuyaLineType.hls, 'http://al.hls.huya.com/src'), 2000);
+    expect(site.nativeRequests, 0, reason: 'HLS must never consume an FLV native token');
 
     expect(url, startsWith('https://al.hls.huya.com/src/stream-name.m3u8?'));
     expect(url, contains('wsSecret=hls-token'));
@@ -82,7 +84,7 @@ void main() {
   });
 
   test('Huya quality selection replaces a captured ratio instead of keeping stale quality', () async {
-    final url = await HuyaSite().getPlayUrl(
+    final url = await _FakeHuyaSessionSite().getPlayUrl(
       line(
         HuyaLineType.hls,
         'https://al.hls.huya.com/src',
@@ -99,7 +101,7 @@ void main() {
   });
 
   test('Huya source quality removes a captured transcode ratio', () async {
-    final url = await HuyaSite().getPlayUrl(
+    final url = await _FakeHuyaSessionSite().getPlayUrl(
       line(
         HuyaLineType.flv,
         'https://tx.flv.huya.com/src',
@@ -325,29 +327,39 @@ void main() {
     expect(urls.map((url) => Uri.splitQueryString(url)['wsTime']).toSet(), {ws});
   });
 
-  test('Huya native WUP token is preferred over a valid short-lived room template', () async {
-    final now = DateTime.now().toUtc();
-    final ws = (now.millisecondsSinceEpoch ~/ 1000 + 300).toRadixString(16);
-    final fm = Uri.encodeComponent(base64Encode(utf8.encode(r'prefix_$0_$1_$2_$3')));
-    final site = _NativeHuyaFixtureSite(
-      HuyaCdnTokenLease(
-        antiCode: 'wsTime=$ws&fm=$fm&ctype=huya_pc_exe&t=100',
-        invalidAt: now.add(const Duration(minutes: 5)),
-        refreshAt: now.add(const Duration(minutes: 4, seconds: 30)),
-        serverExpireValue: 300,
-      ),
-    );
-    final url = await site.getPlayUrl(
-      line(HuyaLineType.flv, 'https://al.flv.huya.com/src', flvAntiCode: 'wsTime=$ws&fm=$fm&ctype=huya_live&t=100'),
-      500,
-    );
-    expect(Uri.parse(url).queryParameters['ctype'], 'huya_pc_exe');
-    expect(Uri.parse(url).queryParameters['u'], HuyaSite.rotateViewerUid32(123).toString());
-    expect(Uri.parse(url).queryParameters['ratio'], '500');
-    expect(site.nativeRequests, 1);
-    expect(site.getPlayUrlInvalidAt(url), site.nativeLease.invalidAt);
-    expect(site.getPlayUrlRefreshAt(url), site.nativeLease.refreshAt);
-  });
+  for (final roomToken in ['empty', 'signed', 'template']) {
+    test('Huya native WUP works independently of $roomToken room token', () async {
+      final now = DateTime.now().toUtc();
+      final ws = (now.millisecondsSinceEpoch ~/ 1000 + 300).toRadixString(16);
+      final fm = Uri.encodeComponent(base64Encode(utf8.encode(r'prefix_$0_$1_$2_$3')));
+      final site = _NativeHuyaFixtureSite(
+        HuyaCdnTokenLease(
+          antiCode: 'wsTime=$ws&fm=$fm&ctype=huya_pc_exe&t=100',
+          invalidAt: now.add(const Duration(minutes: 5)),
+          refreshAt: now.add(const Duration(minutes: 4, seconds: 30)),
+          serverExpireValue: 300,
+        ),
+      );
+      final url = await site.getPlayUrl(
+        line(
+          HuyaLineType.flv,
+          'https://al.flv.huya.com/src',
+          flvAntiCode: switch (roomToken) {
+            'empty' => '',
+            'signed' => 'wsSecret=web-token&wsTime=$ws&ctype=huya_live&t=100',
+            _ => 'wsTime=$ws&fm=$fm&ctype=huya_live&t=100',
+          },
+        ),
+        500,
+      );
+      expect(Uri.parse(url).queryParameters['ctype'], 'huya_pc_exe');
+      expect(Uri.parse(url).queryParameters['u'], HuyaSite.rotateViewerUid32(123).toString());
+      expect(Uri.parse(url).queryParameters['ratio'], '500');
+      expect(site.nativeRequests, 1);
+      expect(site.getPlayUrlInvalidAt(url), site.nativeLease.invalidAt);
+      expect(site.getPlayUrlRefreshAt(url), site.nativeLease.refreshAt);
+    });
+  }
 
   test('Huya native WUP failure retains protocol-correct room fallback', () async {
     final site = _FakeHuyaSessionSite();
@@ -449,7 +461,7 @@ void main() {
   });
 
   test('Huya remembers a short transport lease for legacy URLs without seqid', () async {
-    final site = HuyaSite();
+    final site = _FakeHuyaSessionSite();
     final before = DateTime.now().toUtc();
     final url = await site.getPlayUrl(
       line(

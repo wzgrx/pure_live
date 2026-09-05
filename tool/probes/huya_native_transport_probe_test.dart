@@ -19,6 +19,9 @@ void main() {
         final duration = Duration(seconds: seconds.clamp(130, 600));
         final bitRate = int.tryParse(Platform.environment['PURELIVE_HUYA_BITRATE'] ?? '') ?? 500;
         final requestedCdn = Platform.environment['PURELIVE_HUYA_CDN']?.trim().toUpperCase();
+        // Fault injection: prove native WUP is independent of the web token.
+        // The room/CDN/stream identity and the media request remain real.
+        final omitWebToken = Platform.environment['PURELIVE_HUYA_EMPTY_WEB_TOKEN'] == '1';
         expect(bitRate, greaterThanOrEqualTo(0));
         final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
         try {
@@ -37,7 +40,7 @@ void main() {
           final line = HuyaLineModel(
             line: source['sFlvUrl'].toString(),
             lineType: HuyaLineType.flv,
-            flvAntiCode: source['sFlvAntiCode'].toString(),
+            flvAntiCode: omitWebToken ? '' : source['sFlvAntiCode'].toString(),
             hlsAntiCode: source['sHlsAntiCode'].toString(),
             streamName: source['sStreamName'].toString(),
             cdnType: source['sCdnType'].toString(),
@@ -53,6 +56,14 @@ void main() {
             await LiveBufferPolicy.apply((name, value) async {
               properties[name] = value;
             });
+            // Measurement-only candidate; does not change app defaults. A
+            // cache size ceiling alone never guarantees a startup reserve.
+            final initialBuffer = int.tryParse(Platform.environment['PURELIVE_HUYA_INITIAL_BUFFER_SECONDS'] ?? '');
+            if (initialBuffer != null) {
+              expect(initialBuffer, inInclusiveRange(1, LiveBufferPolicy.cacheSeconds));
+              properties['cache-pause-initial'] = 'yes';
+              properties['cache-pause-wait'] = initialBuffer.toString();
+            }
             final process = await Process.start('python', ['tool/probes/libmpv_continuity_probe.py']);
             try {
               final output = process.stdout.transform(utf8.decoder).join();
@@ -69,7 +80,12 @@ void main() {
               await process.stdin.close();
               final exit = await process.exitCode.timeout(duration + const Duration(seconds: 45));
               final result = jsonDecode(await output) as Map<String, dynamic>;
-              result.addAll({'room': room, 'cdn': line.cdnType, 'requestedBitRate': bitRate});
+              result.addAll({
+                'room': room,
+                'cdn': line.cdnType,
+                'requestedBitRate': bitRate,
+                'webTokenOmitted': omitWebToken,
+              });
               await errors;
               // Sanitized native counters only. This is not texture/audio-device acceptance.
               // ignore: avoid_print
@@ -116,6 +132,7 @@ void main() {
               'host': Uri.parse(url).host,
               'cdn': line.cdnType,
               'requestedBitRate': bitRate,
+              'webTokenOmitted': omitWebToken,
               'durationMs': clock.elapsedMilliseconds,
               'bytes': bytes,
               'chunks': chunks,

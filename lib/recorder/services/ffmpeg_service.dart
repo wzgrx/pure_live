@@ -10,6 +10,7 @@ import 'package:pure_live/plugins/locale_helper.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
+import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 import 'package:pure_live/recorder/services/ffmpeg_tls_trust_store.dart';
 
 /// Converts FFmpegKit's progress timestamp into a live-session duration.
@@ -166,6 +167,7 @@ class FFmpegRecordSession {
     required this.session,
     required this.liveRecording,
     this.inputRelay,
+    this.flvInputRelay,
   });
 
   final String taskId;
@@ -173,6 +175,9 @@ class FFmpegRecordSession {
   final FFmpegSession session;
   final bool liveRecording;
   final FFmpegHlsInputRelay? inputRelay;
+  final FFmpegFlvInputRelay? flvInputRelay;
+  Future<void>? stopRequest;
+  bool forcedCancel = false;
   final DateTime createdAt = DateTime.now();
   final Completer<void> completion = Completer<void>();
   final List<String> _diagnosticLines = <String>[];
@@ -241,13 +246,16 @@ class FFmpegService {
     // string was platform-dependent and could corrupt signed URLs, header CRLF
     // blocks or Android storage paths before FFmpeg saw them.
     final inputRelay = await FFmpegHlsInputRelay.startForArguments(arguments);
-    final inputArguments = inputRelay?.replaceFirstInput(arguments) ?? arguments;
+    final flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
+    final inputArguments =
+        flvInputRelay?.replaceFirstInput(arguments) ?? inputRelay?.replaceFirstInput(arguments) ?? arguments;
     final effectiveArguments = FFmpegTlsTrustStore.injectCaFile(inputArguments, caFile: _trustedCaFile);
     late final FFmpegSession nativeSession;
     try {
       nativeSession = FFmpegKit.createSessionFromArguments(effectiveArguments);
     } catch (_) {
       await inputRelay?.close();
+      await flvInputRelay?.close();
       rethrow;
     }
     final session = FFmpegRecordSession(
@@ -256,6 +264,7 @@ class FFmpegService {
       session: nativeSession,
       liveRecording: liveRecording,
       inputRelay: inputRelay,
+      flvInputRelay: flvInputRelay,
     );
     _sessions[taskId] = session;
 
@@ -353,6 +362,8 @@ class FFmpegService {
           'sessionId': session.sessionId,
           'code': code,
           'manualStop': manuallyStopped,
+          'forcedCancel': session.forcedCancel,
+          'inputDrained': session.flvInputRelay?.finishRequested == true && !session.forcedCancel,
           'sessionAgeMs': sessionAgeMilliseconds,
           if (!isComplete) 'raw_logs': _diagnosticTail(diagnosticLogs),
           if (!isComplete)
@@ -391,6 +402,7 @@ class FFmpegService {
         if (identical(_sessions[taskId], session)) _sessions.remove(taskId);
         if (!session.completion.isCompleted) session.completion.complete();
         unawaited(session.inputRelay?.close());
+        unawaited(session.flvInputRelay?.close());
       }
     });
 
@@ -428,6 +440,7 @@ class FFmpegService {
       if (identical(_sessions[taskId], session)) _sessions.remove(taskId);
       if (!session.completion.isCompleted) session.completion.complete();
       await session.inputRelay?.close();
+      await session.flvInputRelay?.close();
     }
   }
 
@@ -454,12 +467,7 @@ class FFmpegService {
     if (session == null) return;
     session.manualStop = true;
     log('FFmpeg stop => $taskId (${session.sessionId})');
-    FFmpegKit.cancel(session.session);
-    try {
-      await session.completion.future.timeout(const Duration(seconds: 10));
-    } on TimeoutException {
-      Log.w('FFmpeg stop timeout => taskId: $taskId; sessionId: ${session.sessionId}');
-    }
+    await _requestSessionStop(session);
   }
 
   /// Ends the current native input at a platform lease boundary. This is not a
@@ -470,13 +478,27 @@ class FFmpegService {
     if (session == null || session.manualStop || session.leaseRefresh) return;
     session.leaseRefresh = true;
     log('FFmpeg lease refresh => $taskId (${session.sessionId})');
+    await _requestSessionStop(session);
+  }
+
+  Future<void> _requestSessionStop(FFmpegRecordSession session) => session.stopRequest ??= () async {
+    final relay = session.flvInputRelay;
+    if (relay != null) {
+      final drained = await FFmpegInputDrain.tryFinish(
+        finishInput: relay.finish,
+        completion: session.completion.future,
+      );
+      if (drained) return;
+    }
+    if (session.completion.isCompleted) return;
+    session.forcedCancel = true;
     FFmpegKit.cancel(session.session);
     try {
       await session.completion.future.timeout(const Duration(seconds: 10));
     } on TimeoutException {
-      Log.w('FFmpeg lease refresh timeout => taskId: $taskId; sessionId: ${session.sessionId}');
+      Log.w('FFmpeg stop timeout => taskId: ${session.taskId}; sessionId: ${session.sessionId}');
     }
-  }
+  }();
 
   FFmpegRecordSession? getSession(String taskId) => _sessions[taskId];
   bool isRunning(String taskId) => _sessions.containsKey(taskId);
@@ -533,6 +555,24 @@ class FFmpegService {
     final value = logs.trim();
     if (value.length <= maxCharacters) return value;
     return value.substring(value.length - maxCharacters);
+  }
+}
+
+/// A bounded EOF/drain attempt. A timeout bounds waiting, not the lifetime of
+/// native output: callers still cancel/await the real session before cleanup.
+class FFmpegInputDrain {
+  const FFmpegInputDrain._();
+  static Future<bool> tryFinish({
+    required Future<void> Function() finishInput,
+    required Future<void> completion,
+    Duration deadline = const Duration(seconds: 3),
+  }) async {
+    try {
+      await Future<void>.sync(finishInput).then((_) => completion).timeout(deadline);
+      return true;
+    } on Object {
+      return false;
+    }
   }
 }
 

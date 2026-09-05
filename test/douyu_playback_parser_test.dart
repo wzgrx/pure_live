@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
+import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/site/douyu/douyu_site.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 
@@ -133,8 +134,8 @@ class _FakeDouyuCursorSite extends DouyuSite {
   final List<String> calls = <String>[];
 
   @override
-  Future<String> getPlayUrl(String roomId, int rate, String cdn) async {
+  Future<LivePlayUrlResolution> resolvePlayUrl(String roomId, int rate, String cdn) async {
     calls.add(cdn);
-    return 'https://$cdn.example/$roomId-$rate.flv';
+    return LivePlayUrlResolution(urls: ['https://$cdn.example/$roomId-$rate.flv'], appliedQualityData: rate);
   }
 }

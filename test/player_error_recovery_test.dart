@@ -683,6 +683,7 @@ void main() {
 
     expect(requests, hasLength(1));
     expect(requests.single.advanceLine, isFalse);
+    expect(requests.single.currentUrl, 'https://cdn.example/expired.flv');
     expect(manager.currentPlayer, same(active));
     expect(active.isPlayingNow, isTrue);
     expect(replacement.openedUrls, <String>['https://cdn.example/fresh.flv']);
@@ -1314,6 +1315,7 @@ void main() {
     final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
     var creations = 0;
     final refreshed = Completer<void>();
+    final requests = <PlaybackSourceRefreshRequest>[];
     final manager = _manager(
       <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: active},
       playerCreator: (_) => creations++ == 0 ? active : candidate,
@@ -1327,7 +1329,8 @@ void main() {
       const {},
       room: LiveRoom(roomId: 'native-lease', platform: 'huya'),
       sourceRefreshAt: DateTime.now().toUtc(),
-      sourceResolver: (_) async {
+      sourceResolver: (request) async {
+        requests.add(request);
         if (!refreshed.isCompleted) refreshed.complete();
         return PlaybackSourceRefreshResult(
           urls: const ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
@@ -1346,6 +1349,7 @@ void main() {
     expect(playing, isTrue);
     expect(creations, 1);
     expect(active.openedUrls, [url]);
+    expect(requests.single.currentUrl, url);
   }, skip: !Platform.isWindows);
 
   test('native Huya has no early timer but can consume a prefetched lease after real EOF', () async {

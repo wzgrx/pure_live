@@ -47,10 +47,14 @@ typedef UnifiedPlayerCreator = FutureOr<UnifiedPlayer> Function(PlayerEngine eng
 
 @immutable
 class PlaybackSourceRefreshRequest {
-  const PlaybackSourceRefreshRequest({required this.currentLineIndex, required this.advanceLine});
+  const PlaybackSourceRefreshRequest({required this.currentLineIndex, required this.advanceLine, this.currentUrl});
 
   final int currentLineIndex;
   final bool advanceLine;
+
+  /// The active transport, not a URL captured when the room first opened.
+  /// Refreshed manifests may reorder or remove CDN entries.
+  final String? currentUrl;
 }
 
 @immutable
@@ -3349,12 +3353,17 @@ class PlayerManager {
             PlaybackSourceRefreshRequest(
               currentLineIndex: currentIndex < 0 ? 0 : currentIndex,
               advanceLine: attempt > 0,
+              currentUrl: currentUrl,
             ),
           );
         }
       } else {
         refreshed = await resolver(
-          PlaybackSourceRefreshRequest(currentLineIndex: currentIndex < 0 ? 0 : currentIndex, advanceLine: false),
+          PlaybackSourceRefreshRequest(
+            currentLineIndex: currentIndex < 0 ? 0 : currentIndex,
+            advanceLine: false,
+            currentUrl: currentUrl,
+          ),
         );
       }
       // A resolver may finish after pause, close or a newer playback request.

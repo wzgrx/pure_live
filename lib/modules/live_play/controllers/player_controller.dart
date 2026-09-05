@@ -9,6 +9,7 @@ import 'package:pure_live/player/core/player_manager.dart';
 import 'package:pure_live/player/models/player_exception.dart';
 import 'package:pure_live/player/models/player_error_type.dart';
 import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
 import 'package:pure_live/modules/live_play/states/load_type.dart';
 import 'package:pure_live/common/utils/latest_async_value_queue.dart';
 import 'package:pure_live/modules/live_play/states/live_play_state.dart';
@@ -206,7 +207,14 @@ class PlayerController extends GetxController {
         return const PlaybackSourceRefreshResult(urls: <String>[], preferredLineIndex: 0);
       }
       final currentIndex = request.currentLineIndex.clamp(0, urls.length - 1);
-      final preferredIndex = request.advanceLine ? (currentIndex + 1) % urls.length : currentIndex;
+      final preferredIndex = site.id == Sites.huyaSite
+          ? HuyaTransportPolicy.selectRefreshedLine(
+              urls: urls,
+              currentUrl: request.currentUrl,
+              currentLineIndex: currentIndex,
+              advanceLine: request.advanceLine,
+            )
+          : (request.advanceLine ? (currentIndex + 1) % urls.length : currentIndex);
       return PlaybackSourceRefreshResult(
         urls: urls,
         preferredLineIndex: preferredIndex,

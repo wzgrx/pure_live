@@ -206,6 +206,65 @@ void main() {
     expect(refreshed.preferredLineIndex, 1);
   });
 
+  for (final scenario in [
+    (
+      name: 'keeps the CDN when an earlier line disappears',
+      urls: [
+        'https://tx.flv.huya.com/src/room.flv?ctype=huya_pc_exe&t=100&seqid=new',
+        'https://tx.hls.huya.com/src/room.m3u8?ctype=huya_live',
+      ],
+      advance: false,
+      expected: 0,
+    ),
+    (
+      name: 'advances from the matched CDN after reordering, not the stale index',
+      urls: [
+        'https://tx.flv.huya.com/src/room.flv?ctype=huya_pc_exe&t=100&seqid=new',
+        'https://al.flv.huya.com/src/room.flv?ctype=huya_pc_exe&t=100&seqid=new',
+        'https://tx.hls.huya.com/src/room.m3u8?ctype=huya_live',
+      ],
+      advance: true,
+      expected: 1,
+    ),
+    (
+      name: 'retains a native FLV option when the old CDN only has a web fallback',
+      urls: [
+        'https://al.flv.huya.com/src/room.flv?ctype=huya_pc_exe&t=100&seqid=new',
+        'https://tx.flv.huya.com/src/room.flv?ctype=huya_live',
+        'https://tx.hls.huya.com/src/room.m3u8?ctype=huya_live',
+      ],
+      advance: false,
+      expected: 0,
+    ),
+  ]) {
+    test('Huya recovery ${scenario.name}', () async {
+      const currentUrl = 'https://tx.flv.huya.com/src/room.flv?ctype=huya_pc_exe&t=100&seqid=old';
+      final host = _SelectionHost(LiveRoom(roomId: 'room', platform: Sites.huyaSite));
+      final siteImpl = _HuyaRecoverySelectionLiveSite();
+      PlaybackSourceResolver? resolver;
+      final controller = PlayerController(
+        host,
+        streamSourceOpener: (url, urls, headers, room, audioOnly, sourceResolver, refreshAt) async {
+          resolver = sourceResolver;
+        },
+      )..initSite(Site(id: Sites.huyaSite, name: 'Huya', logo: '', liveSite: siteImpl));
+      expect(
+        await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 1),
+        isTrue,
+      );
+      siteImpl.urls = scenario.urls;
+
+      final refreshed = await resolver!(
+        PlaybackSourceRefreshRequest(currentLineIndex: 1, currentUrl: currentUrl, advanceLine: scenario.advance),
+      );
+
+      expect(refreshed.preferredLineIndex, scenario.expected);
+      expect(refreshed.urls, scenario.urls, reason: 'the displayed manifest must not be silently reordered');
+      expect(refreshed.refreshAt, DateTime.utc(2030).add(Duration(minutes: scenario.expected)));
+      expect(refreshed.invalidAt, DateTime.utc(2030).add(Duration(minutes: scenario.expected + 1)));
+    });
+  }
+
   test('failed player open rolls quality, line and URL state back atomically', () async {
     final room = LiveRoom(roomId: 'room', platform: 'test');
     final siteImpl = _SelectionLiveSite();
@@ -290,6 +349,26 @@ class _SignedSelectionLiveSite extends LiveSite implements LivePlayRecoveryResol
       appliedQualityData: quality.selectionId,
     );
   }
+}
+
+class _HuyaRecoverySelectionLiveSite extends LiveSite implements LivePlayRecoveryResolver, LivePlayLeaseMetadata {
+  List<String> urls = [
+    'https://al.flv.huya.com/src/room.flv?ctype=huya_pc_exe&t=100',
+    'https://tx.flv.huya.com/src/room.flv?ctype=huya_pc_exe&t=100&seqid=old',
+  ];
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution(urls: urls, appliedQualityData: quality.selectionId);
+
+  @override
+  DateTime getPlayUrlRefreshAt(String url, {DateTime? now}) =>
+      DateTime.utc(2030).add(Duration(minutes: urls.indexOf(url)));
+
+  @override
+  DateTime getPlayUrlInvalidAt(String url, {DateTime? now}) => getPlayUrlRefreshAt(url).add(const Duration(minutes: 1));
 }
 
 class _SelectionHost implements PlayerSessionHost {

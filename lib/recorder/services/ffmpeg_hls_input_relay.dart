@@ -7,7 +7,8 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:pure_live/core/common/log.dart';
 
-/// Relays verified HTTPS HLS resources over an app-private loopback server.
+/// Relays HLS resources over an app-private loopback server, verifying upstream
+/// HTTPS and allowing recording inputs to end without cancelling output IO.
 ///
 /// FFmpeg 9.0.1's HLS demuxer copies headers, cookies and timeouts from the
 /// manifest connection to child requests, but not the `ca_file` TLS option.
@@ -22,6 +23,7 @@ class FFmpegHlsInputRelay {
     required Uri upstream,
     required this._headers,
     required this._secret,
+    required this.drainOnStop,
   }) {
     _resources['root'] = upstream;
   }
@@ -61,18 +63,41 @@ class FFmpegHlsInputRelay {
   final HttpClient _client;
   final Map<String, String> _headers;
   final String _secret;
+  final bool drainOnStop;
   final Map<String, Uri> _resources = <String, Uri>{};
   final Map<String, String> _resourceIds = <String, String>{};
+  final Map<String, String> _manifests = <String, String>{};
+  // Retain current and previous playlist generations, including keys/maps and
+  // all nested renditions. Never retain every segment seen since startup.
+  final Map<String, List<Set<String>>> _manifestReferences = {};
+  final Map<String, int> _activeResources = {};
   StreamSubscription<HttpRequest>? _subscription;
+  Future<void>? _closing;
   var _nextResourceId = 0;
   var _closed = false;
+  var _finishing = false;
+  var _targetSeconds = 1;
+
+  bool get finishRequested => _finishing;
+
+  // Native HLS reloads on the playlist's target duration. Do not impose FLV's
+  // shorter drain budget and cancel before a healthy playlist can be reloaded.
+  Duration get drainTimeout => Duration(seconds: (2 * _targetSeconds + 2).clamp(3, 20));
+
+  @visibleForTesting
+  int get resourceCount => _resources.length;
 
   Uri get inputUri =>
       Uri(scheme: 'http', host: InternetAddress.loopbackIPv4.address, port: _server.port, path: '/$_secret/root.m3u8');
 
-  /// Creates a relay only for the first HTTPS HLS input on Android/Linux.
+  /// TLS relay: first HTTPS HLS input on Android/Linux. Live recordings opt in
+  /// on every native platform so ENDLIST can finish input without cancel IO.
   /// [force] exists for deterministic loopback unit tests on desktop hosts.
-  static Future<FFmpegHlsInputRelay?> startForArguments(Iterable<String> source, {bool force = false}) async {
+  static Future<FFmpegHlsInputRelay?> startForArguments(
+    Iterable<String> source, {
+    bool force = false,
+    bool drainOnStop = false,
+  }) async {
     final arguments = List<String>.of(source);
     final inputIndex = arguments.indexOf('-i');
     if (inputIndex < 0 || inputIndex + 1 >= arguments.length) return null;
@@ -80,7 +105,7 @@ class FFmpegHlsInputRelay {
     final upstream = Uri.tryParse(arguments[inputIndex + 1].trim());
     if (upstream == null || !_isHlsUri(upstream)) return null;
     final supportedHost = !kIsWeb && (Platform.isAndroid || Platform.isLinux);
-    if (!force && (!supportedHost || upstream.scheme.toLowerCase() != 'https')) return null;
+    if (!force && !drainOnStop && (!supportedHost || upstream.scheme.toLowerCase() != 'https')) return null;
 
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 15)
@@ -93,6 +118,7 @@ class FFmpegHlsInputRelay {
       upstream: upstream,
       headers: _readInputHeaders(arguments, inputIndex),
       secret: _newSecret(),
+      drainOnStop: drainOnStop,
     );
     relay._subscription = server.listen(relay._handleRequest, onError: relay._handleServerError);
     return relay;
@@ -107,14 +133,23 @@ class FFmpegHlsInputRelay {
     return List<String>.unmodifiable(arguments);
   }
 
-  Future<void> close() async {
-    if (_closed) return;
+  /// Freeze each media playlist at the last published generation with ENDLIST.
+  /// Keep active media/key/map responses intact; no bytes are cut mid-segment.
+  Future<void> finish() async {
+    if (drainOnStop) _finishing = true;
+  }
+
+  Future<void> close() => _closing ??= _close();
+
+  Future<void> _close() async {
     _closed = true;
     _client.close(force: true);
-    await _subscription?.cancel();
     await _server.close(force: true);
+    await _subscription?.cancel();
     _resources.clear();
     _resourceIds.clear();
+    _manifests.clear();
+    _manifestReferences.clear();
   }
 
   Future<void> _handleRequest(HttpRequest request) async {
@@ -130,7 +165,13 @@ class FFmpegHlsInputRelay {
       return;
     }
 
+    _activeResources.update(resourceId, (count) => count + 1, ifAbsent: () => 1);
     try {
+      final cached = _manifests[resourceId];
+      if (_finishing && (cached != null || _isHlsUri(upstream))) {
+        await _replyManifest(request, _endedManifest(cached));
+        return;
+      }
       final upstreamRequest = await _client.openUrl(request.method, upstream);
       for (final entry in _headers.entries) {
         upstreamRequest.headers.set(entry.key, entry.value, preserveHeaderCase: true);
@@ -155,30 +196,42 @@ class FFmpegHlsInputRelay {
         return;
       }
 
-      if (_isManifest(finalUri, contentType)) {
+      if (upstreamResponse.statusCode == HttpStatus.ok && _isManifest(finalUri, contentType)) {
         final bytes = await _readManifest(upstreamResponse);
+        if (_closed) return;
         final manifest = utf8.decode(bytes, allowMalformed: true);
-        final rewritten = _rewriteManifest(manifest, finalUri);
-        request.response.headers.contentType = ContentType('application', 'vnd.apple.mpegurl', charset: 'utf-8');
-        request.response.write(rewritten);
-        await request.response.close();
+        // Stop may arrive while a refresh is in flight. Do not extend the
+        // recording by publishing its newer generation after the stop intent.
+        final previous = _manifests[resourceId];
+        final rewritten = _finishing && previous != null ? previous : _rewriteManifest(manifest, finalUri, resourceId);
+        await _replyManifest(request, _finishing ? _endedManifest(rewritten) : rewritten);
         return;
       }
 
       final length = upstreamResponse.contentLength;
       if (length >= 0) request.response.contentLength = length;
+      request.response.bufferOutput = false;
       await upstreamResponse.pipe(request.response);
     } on TimeoutException {
       await _replyStatus(request, HttpStatus.gatewayTimeout);
     } on Object catch (error) {
-      Log.w('FFmpeg HLS relay request failed for ${upstream.host}: $error');
+      if (!_closed) Log.w('FFmpeg HLS relay request failed for ${upstream.host}: $error');
       await _replyStatus(request, HttpStatus.badGateway);
+    } finally {
+      final count = _activeResources[resourceId] ?? 1;
+      if (count <= 1) {
+        _activeResources.remove(resourceId);
+      } else {
+        _activeResources[resourceId] = count - 1;
+      }
+      _pruneResources();
     }
   }
 
-  String _rewriteManifest(String source, Uri baseUri) {
+  String _rewriteManifest(String source, Uri baseUri, String manifestId) {
     final hadTrailingNewline = source.endsWith('\n');
     final output = <String>[];
+    final referenced = <String>{};
     for (final rawLine in const LineSplitter().convert(source)) {
       final line = rawLine.endsWith('\r') ? rawLine.substring(0, rawLine.length - 1) : rawLine;
       final trimmed = line.trim();
@@ -187,19 +240,35 @@ class FFmpegHlsInputRelay {
       } else if (trimmed.startsWith('#')) {
         output.add(
           line.replaceAllMapped(_uriAttribute, (match) {
-            final replacement = _localResource(baseUri.resolve(match.group(1)!));
+            final replacement = _localResource(baseUri.resolve(match.group(1)!), referenced);
             return replacement == null ? match.group(0)! : 'URI="$replacement"';
           }),
         );
       } else {
-        output.add(_localResource(baseUri.resolve(trimmed)) ?? line);
+        output.add(_localResource(baseUri.resolve(trimmed), referenced) ?? line);
       }
     }
     final value = output.join('\n');
-    return hadTrailingNewline ? '$value\n' : value;
+    final rewritten = hadTrailingNewline ? '$value\n' : value;
+    // Per-response cap plus aggregate cap bound malicious/oversized trees.
+    final retainedCharacters = _manifests.entries
+        .where((entry) => entry.key != manifestId)
+        .fold<int>(0, (total, entry) => total + entry.value.length);
+    if (retainedCharacters + rewritten.length > 8 * 1024 * 1024) {
+      throw const FormatException('HLS manifest tree exceeds the relay limit');
+    }
+    _manifests[manifestId] = rewritten;
+    final previous = _manifestReferences[manifestId];
+    _manifestReferences[manifestId] = [referenced, if (previous != null) previous.first];
+    final target = RegExp(r'^#EXT-X-TARGETDURATION:(\d+)', multiLine: true).firstMatch(source);
+    _targetSeconds = max(_targetSeconds, int.tryParse(target?.group(1) ?? '') ?? 1);
+    // Publish a generation only after its registry is reconciled. Waiting for
+    // response.close lets the next request observe an obsolete third window.
+    _pruneResources();
+    return rewritten;
   }
 
-  String? _localResource(Uri upstream) {
+  String? _localResource(Uri upstream, Set<String> referenced) {
     if (!const <String>{'http', 'https'}.contains(upstream.scheme.toLowerCase())) return null;
     final key = upstream.toString();
     final id = _resourceIds.putIfAbsent(key, () {
@@ -207,6 +276,7 @@ class FFmpegHlsInputRelay {
       _resources[value] = upstream;
       return value;
     });
+    referenced.add(id);
     final extension = _localExtension(upstream);
     return Uri(
       scheme: 'http',
@@ -214,6 +284,39 @@ class FFmpegHlsInputRelay {
       port: _server.port,
       path: '/$_secret/$id$extension',
     ).toString();
+  }
+
+  void _pruneResources() {
+    if (_closed) return;
+    final reachable = <String>{};
+    final pending = <String>['root', ..._activeResources.keys];
+    while (pending.isNotEmpty) {
+      final id = pending.removeLast();
+      if (!reachable.add(id)) continue;
+      for (final generation in _manifestReferences[id] ?? <Set<String>>[]) {
+        pending.addAll(generation);
+      }
+    }
+    for (final id in _resources.keys.where((id) => !reachable.contains(id)).toList()) {
+      final uri = _resources.remove(id);
+      if (uri != null) _resourceIds.remove(uri.toString());
+      _manifests.remove(id);
+      _manifestReferences.remove(id);
+    }
+  }
+
+  static String _endedManifest(String? cached) {
+    if (cached == null) return '#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXT-X-ENDLIST\n';
+    // ENDLIST belongs to media playlists, never a master variant catalogue.
+    if (!cached.contains('#EXT-X-TARGETDURATION:') || cached.contains('#EXT-X-ENDLIST')) return cached;
+    return '${cached.trimRight()}\n#EXT-X-ENDLIST\n';
+  }
+
+  static Future<void> _replyManifest(HttpRequest request, String manifest) async {
+    request.response.headers.contentType = ContentType('application', 'vnd.apple.mpegurl', charset: 'utf-8');
+    request.response.headers.set(HttpHeaders.cacheControlHeader, 'no-store');
+    if (request.method != 'HEAD') request.response.write(manifest);
+    await request.response.close();
   }
 
   static bool _isHlsUri(Uri uri) {
@@ -309,7 +412,11 @@ class FFmpegHlsInputRelay {
       // it still wakes FFmpeg immediately instead of leaving a partial request
       // waiting for the read timeout.
     }
-    await request.response.close();
+    try {
+      await request.response.close();
+    } on Object {
+      // The native reader or service close may already have ended this socket.
+    }
   }
 
   void _handleServerError(Object error, StackTrace stackTrace) {

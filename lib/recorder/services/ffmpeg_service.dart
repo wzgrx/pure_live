@@ -245,7 +245,7 @@ class FFmpegService {
     // Pass the exact argument vector to FFI. Re-parsing a shell-like command
     // string was platform-dependent and could corrupt signed URLs, header CRLF
     // blocks or Android storage paths before FFmpeg saw them.
-    final inputRelay = await FFmpegHlsInputRelay.startForArguments(arguments);
+    final inputRelay = await FFmpegHlsInputRelay.startForArguments(arguments, drainOnStop: liveRecording);
     final flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
     final inputArguments =
         flvInputRelay?.replaceFirstInput(arguments) ?? inputRelay?.replaceFirstInput(arguments) ?? arguments;
@@ -363,7 +363,9 @@ class FFmpegService {
           'code': code,
           'manualStop': manuallyStopped,
           'forcedCancel': session.forcedCancel,
-          'inputDrained': session.flvInputRelay?.finishRequested == true && !session.forcedCancel,
+          'inputDrained':
+              (session.flvInputRelay?.finishRequested == true || session.inputRelay?.finishRequested == true) &&
+              !session.forcedCancel,
           'sessionAgeMs': sessionAgeMilliseconds,
           if (!isComplete) 'raw_logs': _diagnosticTail(diagnosticLogs),
           if (!isComplete)
@@ -487,6 +489,14 @@ class FFmpegService {
       final drained = await FFmpegInputDrain.tryFinish(
         finishInput: relay.finish,
         completion: session.completion.future,
+      );
+      if (drained) return;
+    } else if (session.inputRelay?.drainOnStop == true) {
+      final hls = session.inputRelay!;
+      final drained = await FFmpegInputDrain.tryFinish(
+        finishInput: hls.finish,
+        completion: session.completion.future,
+        deadline: hls.drainTimeout,
       );
       if (drained) return;
     }

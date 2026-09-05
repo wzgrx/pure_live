@@ -70,6 +70,16 @@ class PlaybackSourceRefreshResult {
 
 typedef PlaybackSourceResolver = Future<PlaybackSourceRefreshResult> Function(PlaybackSourceRefreshRequest request);
 
+class _PlaybackCredentialPrefetch {
+  const _PlaybackCredentialPrefetch(this.sessionId, this.intentRevision, this.operation);
+
+  final int sessionId;
+  final int intentRevision;
+  final Future<bool> operation;
+
+  bool belongsTo(int session, int intent) => sessionId == session && intentRevision == intent;
+}
+
 enum _PlaybackSuspensionReason { lifecycle, audioInterruption }
 
 class PlayerManager {
@@ -135,6 +145,7 @@ class PlayerManager {
   Timer? _proactiveSourceRefreshTimer;
   DateTime? _currentSourceRefreshAt;
   PlaybackSourceRefreshResult? _prefetchedSourceRefresh;
+  _PlaybackCredentialPrefetch? _credentialPrefetch;
 
   PlayerManager({
     required this.fallbackManager,
@@ -3239,6 +3250,14 @@ class PlayerManager {
     try {
       PlaybackSourceRefreshResult refreshed;
       if (!proactive) {
+        // A credential-only prefetch has no native ownership. An actual EOF
+        // can consume its result instead of launching a duplicate signer call,
+        // but a new room/intent must never wait for the old request.
+        final prefetch = _credentialPrefetch;
+        if (attempt == 0 && prefetch?.belongsTo(expectedSessionId, expectedIntentRevision) == true) {
+          await prefetch!.operation;
+          if (!requestIsCurrent()) return true;
+        }
         final cached = _prefetchedSourceRefresh;
         final invalidAt = cached?.invalidAt?.toUtc();
         final cacheUsable =
@@ -3695,13 +3714,50 @@ class PlayerManager {
     _proactiveSourceRefreshTimer = Timer(delay, () {
       _proactiveSourceRefreshTimer = null;
       if (!_isPlayerEventCurrent(player, sessionId) || !_playbackRequested || _playbackSuspensions.isNotEmpty) return;
+      final intentRevision = _playbackIntentRevision;
+      if (!PlatformUtils.isWindows || HuyaTransportPolicy.hasNativeFlvCredential(_currentUrl ?? '')) {
+        // Fetching a standby credential is network work, not a player command.
+        // Holding the native queue here made slow HTTP block room changes and
+        // close even though the active native FLV transport remained healthy.
+        unawaited(_prefetchPlaybackCredential(player, sessionId, intentRevision));
+        return;
+      }
       unawaited(
         _enqueuePlayerLifecycle(() async {
-          if (!_isPlayerEventCurrent(player, sessionId)) return;
+          if (!_isPlayerEventCurrent(player, sessionId) ||
+              intentRevision != _playbackIntentRevision ||
+              !_playbackRequested ||
+              _playbackSuspensions.isNotEmpty) {
+            return;
+          }
+          // Windows web/HLS compatibility handoffs still touch two native
+          // players and therefore retain serialized ownership.
           await _tryRefreshSignedPlaybackSource(proactive: true);
         }),
       );
     });
+  }
+
+  Future<void> _prefetchPlaybackCredential(UnifiedPlayer player, int sessionId, int intentRevision) async {
+    if (!_isPlayerEventCurrent(player, sessionId) ||
+        intentRevision != _playbackIntentRevision ||
+        !_playbackRequested ||
+        _playbackSuspensions.isNotEmpty ||
+        _credentialPrefetch?.belongsTo(sessionId, intentRevision) == true) {
+      return;
+    }
+    final prefetch = _PlaybackCredentialPrefetch(
+      sessionId,
+      intentRevision,
+      _tryRefreshSignedPlaybackSource(proactive: true),
+    );
+    _credentialPrefetch = prefetch;
+    try {
+      await prefetch.operation;
+    } finally {
+      // A new session may already have its own in-flight credential request.
+      if (identical(_credentialPrefetch, prefetch)) _credentialPrefetch = null;
+    }
   }
 
   Future<void> dispose() async {

@@ -708,7 +708,7 @@ void main() {
     'still stalled',
     'real EOF',
   ]) {
-    test('queued recovery behind native Huya prefetch rechecks $outcome', () async {
+    test('recovery sharing native Huya prefetch rechecks $outcome', () async {
       final active = _FrameProgressFakePlayer();
       final replacement = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
       final lease = Completer<PlaybackSourceRefreshResult>();
@@ -740,13 +740,13 @@ void main() {
           },
         );
         await prefetchEntered.future.timeout(const Duration(seconds: 3));
-        expect(requests, 1, reason: 'the resolver now owns the lifecycle queue');
+        expect(requests, 1, reason: 'one credential request is pending');
         if (outcome == 'buffer recovered') active.emitLoading(true);
         if (outcome == 'real EOF' || outcome == 'user paused' || outcome == 'pause and resume') {
           active.emitError(PlayerException(message: 'transport EOF', type: PlayerErrorType.network));
         }
         await Future<void>.delayed(const Duration(milliseconds: 1100));
-        expect(manager.currentPlayer, same(active), reason: 'recovery is waiting behind prefetch');
+        expect(manager.currentPlayer, same(active), reason: 'a recovery can await the shared credential');
         if (outcome == 'new frame' || outcome == 'real EOF') active.emitFrame();
         if (outcome == 'buffer recovered') active.emitLoading(false);
         if (outcome == 'user paused') await manager.pause();
@@ -765,6 +765,7 @@ void main() {
         );
         await Future<void>.delayed(const Duration(milliseconds: 80));
         final shouldRecover = outcome == 'still stalled' || outcome == 'real EOF';
+        expect(requests, 1, reason: 'reuse the pending credential instead of issuing a duplicate request');
         expect(creations, shouldRecover ? 2 : 1);
         expect(manager.currentPlayer, same(shouldRecover ? replacement : active));
         if (!shouldRecover) {
@@ -1157,6 +1158,156 @@ void main() {
       await manager.dispose();
     }
   }, skip: !Platform.isWindows);
+
+  for (final action in ['change room', 'close', 'change room / late failure', 'close / late failure']) {
+    test('slow native Huya credential prefetch does not block $action', () async {
+      final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final started = Completer<void>();
+      final lease = Completer<PlaybackSourceRefreshResult>();
+      final manager = _manager({PlayerEngine.mediaKit: active});
+      manager.configureDefaultEngine(PlayerEngine.mediaKit);
+      const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+      Future<void>? command;
+      try {
+        await manager.play(
+          url,
+          const [url],
+          const {},
+          room: LiveRoom(roomId: 'slow-prefetch', platform: 'huya'),
+          sourceRefreshAt: DateTime.now().toUtc(),
+          sourceResolver: (_) {
+            if (!started.isCompleted) started.complete();
+            return lease.future;
+          },
+        );
+        await started.future.timeout(const Duration(seconds: 3));
+        var completed = false;
+        command =
+            (action.startsWith('close')
+                    ? manager.close()
+                    : manager.play(
+                        'https://cdn.example/next-room.flv',
+                        const ['https://cdn.example/next-room.flv'],
+                        const {},
+                        room: LiveRoom(roomId: 'next-room', platform: 'test'),
+                      ))
+                .then((_) => completed = true);
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        expect(completed, isTrue, reason: 'a credential request must not own the native command queue');
+        expect(lease.isCompleted, isFalse);
+        if (action.endsWith('late failure')) {
+          lease.completeError(StateError('obsolete credential request failed'));
+        } else {
+          lease.complete(
+            const PlaybackSourceRefreshResult(
+              urls: ['https://al.flv.huya.com/obsolete.flv?ctype=huya_pc_exe&t=100'],
+              preferredLineIndex: 0,
+            ),
+          );
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        expect(active.openedUrls.any((url) => url.contains('obsolete')), isFalse);
+        expect(active.isPlayingNow, !action.startsWith('close'));
+      } finally {
+        if (!lease.isCompleted) {
+          lease.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+        }
+        await command;
+        await manager.dispose();
+      }
+    });
+  }
+
+  test('native playing events do not duplicate an in-flight credential prefetch', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final entered = Completer<void>();
+    final lease = Completer<PlaybackSourceRefreshResult>();
+    final manager = _manager({PlayerEngine.mediaKit: active});
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    var requests = 0;
+    const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
+    try {
+      await manager.play(
+        url,
+        const [url],
+        const {},
+        room: LiveRoom(roomId: 'prefetch-single-flight', platform: 'huya'),
+        sourceRefreshAt: DateTime.now().toUtc(),
+        sourceResolver: (_) {
+          requests++;
+          if (!entered.isCompleted) entered.complete();
+          return lease.future;
+        },
+      );
+      await entered.future.timeout(const Duration(seconds: 3));
+      active.emitUnexpectedPlaying(false);
+      active.emitUnexpectedPlaying(true);
+      await Future<void>.delayed(const Duration(milliseconds: 1150));
+      expect(requests, 1);
+      expect(active.openedUrls, [url]);
+      expect(active.isPlayingNow, isTrue);
+    } finally {
+      if (!lease.isCompleted) {
+        lease.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+      }
+      await Future<void>.delayed(Duration.zero);
+      await manager.dispose();
+    }
+  });
+
+  test('obsolete prefetch completion cannot clear the new room single-flight owner', () async {
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final oldEntered = Completer<void>();
+    final newEntered = Completer<void>();
+    final oldLease = Completer<PlaybackSourceRefreshResult>();
+    final newLease = Completer<PlaybackSourceRefreshResult>();
+    final manager = _manager({PlayerEngine.mediaKit: active});
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    var newRequests = 0;
+    const oldUrl = 'https://al.flv.huya.com/old.flv?ctype=huya_pc_exe&t=100';
+    const newUrl = 'https://tx.flv.huya.com/new.flv?ctype=huya_pc_exe&t=100';
+    try {
+      await manager.play(
+        oldUrl,
+        const [oldUrl],
+        const {},
+        room: LiveRoom(roomId: 'old-prefetch', platform: 'huya'),
+        sourceRefreshAt: DateTime.now().toUtc(),
+        sourceResolver: (_) {
+          if (!oldEntered.isCompleted) oldEntered.complete();
+          return oldLease.future;
+        },
+      );
+      await oldEntered.future.timeout(const Duration(seconds: 3));
+      await manager.play(
+        newUrl,
+        const [newUrl],
+        const {},
+        room: LiveRoom(roomId: 'new-prefetch', platform: 'huya'),
+        sourceRefreshAt: DateTime.now().toUtc(),
+        sourceResolver: (_) {
+          newRequests++;
+          if (!newEntered.isCompleted) newEntered.complete();
+          return newLease.future;
+        },
+      );
+      await newEntered.future.timeout(const Duration(seconds: 3));
+      oldLease.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+      await Future<void>.delayed(Duration.zero);
+      active.emitUnexpectedPlaying(false);
+      active.emitUnexpectedPlaying(true);
+      await Future<void>.delayed(const Duration(milliseconds: 1150));
+      expect(newRequests, 1);
+      expect(active.openedUrls, [oldUrl, newUrl]);
+      expect(active.isPlayingNow, isTrue);
+    } finally {
+      for (final lease in [oldLease, newLease]) {
+        if (!lease.isCompleted) lease.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+      }
+      await Future<void>.delayed(Duration.zero);
+      await manager.dispose();
+    }
+  });
 
   test('native Huya credential refresh never restarts a healthy Windows transport', () async {
     final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);

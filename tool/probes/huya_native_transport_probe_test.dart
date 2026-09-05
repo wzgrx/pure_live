@@ -17,6 +17,9 @@ void main() {
         final room = Platform.environment['PURELIVE_HUYA_ROOM'] ?? '660000';
         final seconds = int.tryParse(Platform.environment['PURELIVE_HUYA_SECONDS'] ?? '') ?? 180;
         final duration = Duration(seconds: seconds.clamp(130, 600));
+        final bitRate = int.tryParse(Platform.environment['PURELIVE_HUYA_BITRATE'] ?? '') ?? 500;
+        final requestedCdn = Platform.environment['PURELIVE_HUYA_CDN']?.trim().toUpperCase();
+        expect(bitRate, greaterThanOrEqualTo(0));
         final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
         try {
           final pageRequest = await client.getUrl(Uri.https('www.huya.com', '/$room'));
@@ -26,7 +29,10 @@ void main() {
           final page = await utf8.decoder.bind(pageResponse).join().timeout(const Duration(seconds: 20));
           final stream = _extractStream(page);
           final profile = (stream['data'] as List).first as Map;
-          final source = (profile['gameStreamInfoList'] as List).first as Map;
+          final sources = (profile['gameStreamInfoList'] as List).cast<Map>();
+          final source = requestedCdn == null || requestedCdn.isEmpty
+              ? sources.first
+              : sources.firstWhere((source) => source['sCdnType'].toString().toUpperCase() == requestedCdn);
           final info = profile['gameLiveInfo'] as Map;
           final line = HuyaLineModel(
             line: source['sFlvUrl'].toString(),
@@ -38,7 +44,7 @@ void main() {
             presenterUid: int.parse((info['lChannelId'] ?? info['uid']).toString()),
           );
           final site = HuyaSite();
-          final url = await site.getPlayUrl(line, 500);
+          final url = await site.getPlayUrl(line, bitRate);
           expect(HuyaTransportPolicy.hasNativeFlvCredential(url), isTrue);
           final headers = await PlaybackHeaderResolver.resolve(platform: 'huya', roomId: room);
           final nativeLibrary = Platform.environment['PURELIVE_HUYA_PROBE_LIBMPV'];
@@ -63,6 +69,7 @@ void main() {
               await process.stdin.close();
               final exit = await process.exitCode.timeout(duration + const Duration(seconds: 45));
               final result = jsonDecode(await output) as Map<String, dynamic>;
+              result.addAll({'room': room, 'cdn': line.cdnType, 'requestedBitRate': bitRate});
               await errors;
               // Sanitized native counters only. This is not texture/audio-device acceptance.
               // ignore: avoid_print
@@ -70,6 +77,7 @@ void main() {
               expect(exit, 0);
               expect(result['headerRoundTripVerified'], isTrue);
               expect(result['endEvents'], 0);
+              expect(result['pauseSamples'], 0);
               expect(result['clockAdvancedSeconds'], greaterThan(duration.inSeconds - 15));
               expect(result['nativeStats']['width'], greaterThan(0));
               expect(result['nativeStats']['height'], greaterThan(0));
@@ -106,6 +114,8 @@ void main() {
               'probe': 'production-huya-native-flv',
               'room': room,
               'host': Uri.parse(url).host,
+              'cdn': line.cdnType,
+              'requestedBitRate': bitRate,
               'durationMs': clock.elapsedMilliseconds,
               'bytes': bytes,
               'chunks': chunks,

@@ -1,5 +1,12 @@
 # 3.2.0 完整验收入口
 
+## 最新候选与新 Issue 核验入口（2026-09-06）
+
+- 应用修复与流程改动已推送 master；源码 `6a8c007d0d17f5fdeffae40222f231db831e1348` 生成新的 Windows Debug ZIP，141,193,459 字节，SHA256 `9e3bbc057dd18970dc59fa1453644916a3e6ea2737158c43e76249518792d5fc`。
+- 记录 `20260905T204432564Z-build-windowsx64-debug.json`：本地串行构建 103.086 秒、干净应用提交、结束活跃重型进程 0；质量依据为此前相同应用源码 1114/1114 回归和原生适配器探针。构建出现 MSBuild 中间目录共享警告，尚未归因为运行问题，未盲目 clean。
+- ZIP 已完成 CRC 检查并解压到 `local-artifacts/candidates/windows-6a8c007d-debug/`，尚未启动。libmpv SHA 与实际原生探针一致。版本仍为开发候选 3.1.8+4121，不能把同目录旧 Release ZIP/安装器计为本次构建，也没有替换公开 APK。
+- 下一步使用此独立候选核验实际 Windows 控件/播放/音频/小窗往返和资源趋势，避免继续运行旧候选后判断新修复。新上游报告 #853/#852/#851 初审见 [Issue 映射](ISSUE_AUDIT_2026_09_06.md)；维护仓库本次查询 open Issues 为 0。
+
 ## 最新增量：原生缓冲状态合同与工作流收敛（2026-09-06）
 
 - [MediaKit 审计](MEDIAKIT_BUFFER_STATE_AUDIT_2026_09_06.md)：复现并修复 playing、视频尾帧、音频尾帧、成功 open 快照提前清除原生 buffering 的本地回归；旧 open 的 finally 增加代次检查，Manager 成功 open 保留 buffering 状态。

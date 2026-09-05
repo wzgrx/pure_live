@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import sys
 import time
+from flv_observation_relay import FlvObservationRelay
 
 
 class Event(c.Structure):
@@ -60,6 +61,7 @@ def memory_bytes():
 
 
 def run(config):
+    relay = None
     dll = Path(config["library"]).resolve(strict=True)
     duration = max(130, min(600, int(config["seconds"])))
     mpv = c.CDLL(str(dll))
@@ -167,8 +169,12 @@ def run(config):
         cache_options = {name: get(name) for name in (
             'demuxer-donate-buffer', 'cache-on-disk', 'cache-secs',
             'demuxer-max-bytes', 'demuxer-max-back-bytes')}
-        command = (c.c_char_p * 4)(b"loadfile", config["url"].encode(), b"replace", None)
         start, cpu_start = time.monotonic(), time.process_time()
+        media_url = config["url"]
+        if config.get('observeFlvTransport'):
+            relay = FlvObservationRelay(media_url, config['headers'], start)
+            media_url = relay.url
+        command = (c.c_char_p * 4)(b"loadfile", media_url.encode(), b"replace", None)
         if mpv.mpv_command(handle, command) < 0:
             raise RuntimeError("native open failed")
         first_progress = last_progress = previous_position = initial_position = None
@@ -252,6 +258,8 @@ def run(config):
         }
         # Preserve the sampled playback result before explicitly stopping this
         # probe instance. Observe resource release without touching any app.
+        if relay:
+            relay.stop.set()  # Attribute the following consumer close to us.
         stop = (c.c_char_p * 2)(b'stop', None)
         if mpv.mpv_command(handle, stop) < 0:
             raise RuntimeError('native stop failed')
@@ -263,10 +271,16 @@ def run(config):
         mpv.mpv_terminate_destroy(handle)
         handle = None
         result['destroyedMemory'] = memory_bytes()
+        if relay:
+            relay.close()
+            result['flvTransport'] = relay.summary()
+            relay = None
         return result
     finally:
         if handle:
             mpv.mpv_terminate_destroy(handle)
+        if relay:
+            relay.close()
 
 
 if __name__ == "__main__":

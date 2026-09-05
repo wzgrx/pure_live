@@ -75,6 +75,7 @@ void main() {
                   'seconds': duration.inSeconds,
                   'library': nativeLibrary,
                   'bufferProperties': properties,
+                  'observeFlvTransport': Platform.environment['PURELIVE_HUYA_OBSERVE_FLV'] == '1',
                 }),
               );
               await process.stdin.close();
@@ -97,6 +98,14 @@ void main() {
               expect(result['clockAdvancedSeconds'], greaterThan(duration.inSeconds - 15));
               expect(result['nativeStats']['width'], greaterThan(0));
               expect(result['nativeStats']['height'], greaterThan(0));
+              if (Platform.environment['PURELIVE_HUYA_OBSERVE_FLV'] == '1') {
+                final transport = result['flvTransport'] as Map<String, dynamic>;
+                expect(transport['opens'], 1);
+                expect(transport['bytes'], greaterThan(0));
+                expect(transport['tags'], greaterThan(0));
+                expect(transport['parseError'], isNull);
+                expect(transport['handlerFinished'], isTrue);
+              }
             } finally {
               process.kill();
             }

@@ -633,6 +633,7 @@
     "webdav_add_new_config": "Add New Config",
     "webdav_address": "Address",
     "webdav_address_empty": "Address cannot be empty",
+    "webdav_address_invalid": "Use an HTTP(S) directory URL without credentials, query or fragment.",
     "webdav_cancel": "Cancel",
     "webdav_config_name": "Config Name",
     "webdav_config_name_empty": "Config name cannot be empty",

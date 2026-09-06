@@ -63,8 +63,8 @@ void main() {
     await directory.delete(recursive: true);
   });
 
-  Future<void> openPage(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(360, 640);
+  Future<void> openPage(WidgetTester tester, {Size size = const Size(360, 640), double textScale = 1}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -78,7 +78,10 @@ void main() {
             locale: context.locale,
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
-            builder: FlutterSmartDialog.init(),
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+              child: FlutterSmartDialog.init()(context, child),
+            ),
             home: const WebDavPage(),
           ),
         ),
@@ -102,6 +105,134 @@ void main() {
     controller.currentConfig.value = config;
     controller.initializeWebDAV();
   }
+
+  Future<void> openCreateDialog(WidgetTester tester) async {
+    await tester.tap(find.text('创建新配置'));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> enterConfig(WidgetTester tester, String address) async {
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), '  Form fixture  ');
+    await tester.enterText(fields.at(1), address);
+    await tester.enterText(fields.at(2), '  fixture-user  ');
+    await tester.enterText(fields.at(3), ' fixture-password ');
+  }
+
+  Future<void> completeReads(WidgetTester tester) async {
+    for (final read in service.reads) {
+      if (!read.isCompleted) read.complete([]);
+    }
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('cancelling a focused config form keeps its controllers alive through the route transition', (
+    tester,
+  ) async {
+    await openPage(tester);
+    await openCreateDialog(tester);
+    await tester.enterText(find.byType(TextFormField).first, 'discarded fixture');
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect(controller.configs, isEmpty);
+    expect(service.reads, isEmpty);
+    await openCreateDialog(tester);
+    expect(tester.widget<TextFormField>(find.byType(TextFormField).first).controller!.text, isEmpty);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    await finish(tester);
+  });
+
+  testWidgets('malformed WebDAV address stays in the form without saving or creating a request', (tester) async {
+    await openPage(tester);
+    await openCreateDialog(tester);
+    await enterConfig(tester, 'not-a-url');
+    await tester.tap(find.text('添加'));
+    await tester.pump();
+    final saved = controller.configs.length;
+    final requests = service.reads.length;
+    final formVisible = find.byType(TextFormField).evaluate().isNotEmpty;
+    if (formVisible) await tester.tap(find.text('取消'));
+    await completeReads(tester);
+    await finish(tester);
+    expect(saved, 0);
+    expect(requests, 0);
+    expect(formVisible, isTrue);
+  });
+
+  testWidgets('valid config save normalizes labels but preserves password bytes', (tester) async {
+    await openPage(tester);
+    await openCreateDialog(tester);
+    await enterConfig(tester, '  https://example.test/dav/  ');
+    await tester.tap(find.text('添加'));
+    await completeReads(tester);
+    final saved = controller.configs.single;
+    expect(saved.name, 'Form fixture');
+    expect(saved.address, 'https://example.test/dav/');
+    expect(saved.username, 'fixture-user');
+    expect(saved.password, ' fixture-password ');
+    expect(service.reads, hasLength(1));
+    expect(jsonDecode(Get.find<WebDavController>().currentWebDavConfig.value), saved.toJson());
+    await finish(tester);
+  });
+
+  testWidgets('configuration validation remains usable in a small large-text window', (tester) async {
+    await openPage(tester, size: const Size(320, 480), textScale: 2);
+    await openCreateDialog(tester);
+    await enterConfig(tester, 'not-a-url');
+    await tester.tap(find.text('添加'));
+    await tester.pumpAndSettle();
+    expect(controller.configs, isEmpty);
+    expect(find.text(translations['webdav_address_invalid'] as String), findsOneWidget);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    await finish(tester);
+  });
+
+  testWidgets('duplicate configuration names are rejected against the live list', (tester) async {
+    await openPage(tester);
+    await openCreateDialog(tester);
+    await enterConfig(tester, 'https://example.test/dav/');
+    const existing = WebDAVConfig(
+      name: 'Form fixture',
+      address: 'https://previous.test/',
+      username: 'u',
+      password: 'p',
+    );
+    controller.configs.add(existing);
+    await tester.tap(find.text('添加'));
+    await tester.pumpAndSettle();
+    expect(find.text(translations['webdav_config_name_exists'] as String), findsOneWidget);
+    expect(controller.configs.single, same(existing));
+    expect(service.reads, isEmpty);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    await finish(tester);
+  });
+
+  testWidgets('editing a configuration replaces it without creating a duplicate', (tester) async {
+    await openPage(tester);
+    selectConfig();
+    await completeReads(tester);
+    await tester.tap(find.byTooltip('更多操作'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('打开配置列表'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.edit));
+    await tester.pumpAndSettle();
+    final fields = find.byType(TextFormField);
+    expect(tester.widget<TextFormField>(fields.first).enabled, isFalse);
+    await tester.enterText(fields.at(1), 'https://edited.test/dav/');
+    await tester.enterText(fields.at(2), 'edited-user');
+    await tester.enterText(fields.at(3), ' edited-password ');
+    await tester.tap(find.text('更新'));
+    await completeReads(tester);
+    expect(controller.configs, hasLength(1));
+    expect(controller.currentConfig.value!.address, 'https://edited.test/dav/');
+    expect(controller.currentConfig.value!.password, ' edited-password ');
+    expect(service.reads, hasLength(2));
+    await finish(tester);
+  });
 
   testWidgets('no-config menu refresh preserves the create action and starts no network request', (tester) async {
     await openPage(tester);

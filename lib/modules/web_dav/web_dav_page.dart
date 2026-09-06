@@ -21,155 +21,7 @@ class _WebDavPageState extends State<WebDavPage> {
   final GlobalKey _currentBreadcrumbKey = GlobalKey();
 
   void _showConfigDialog({WebDAVConfig? existingConfig}) {
-    final isEditing = existingConfig != null;
-    final nameController = TextEditingController(text: existingConfig?.name);
-    final addressController = TextEditingController(text: existingConfig?.address);
-    final userController = TextEditingController(text: existingConfig?.username);
-    final pwdController = TextEditingController(text: existingConfig?.password);
-    final formKey = GlobalKey<FormState>();
-
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        titlePadding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 12),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-        actionsPadding: const EdgeInsets.only(left: 24, right: 24, bottom: 16, top: 8),
-        title: Row(
-          children: [
-            Icon(
-              isEditing ? Remix.edit_box_line : Remix.add_box_line,
-              color: Theme.of(Get.context!).colorScheme.primary,
-              size: 24,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                isEditing
-                    ? i18n("webdav_edit_config", args: {"name": existingConfig.name})
-                    : i18n("webdav_add_new_config"),
-                style: AppTextStyles.t18Bold,
-              ),
-            ),
-          ],
-        ),
-        content: SizedBox(
-          width: 400,
-          child: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: i18n("webdav_config_name"),
-                        prefixIcon: const Icon(Remix.bookmark_line, size: 20),
-                        border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      ),
-                      enabled: !isEditing,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) return i18n("webdav_config_name_empty");
-                        if (!isEditing && controller.configs.any((c) => c.name == value.trim())) {
-                          return i18n("webdav_config_name_exists");
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: addressController,
-                      decoration: InputDecoration(
-                        labelText: i18n("webdav_address"),
-                        prefixIcon: const Icon(Remix.global_line, size: 20),
-                        border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      ),
-                      validator: (value) => value == null || value.trim().isEmpty ? i18n("webdav_address_empty") : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: userController,
-                      decoration: InputDecoration(
-                        labelText: i18n("webdav_username"),
-                        prefixIcon: const Icon(Remix.user_3_line, size: 20),
-                        border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      ),
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty ? i18n("webdav_username_empty") : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: pwdController,
-                      decoration: InputDecoration(
-                        labelText: i18n("webdav_password"),
-                        prefixIcon: const Icon(Remix.lock_password_line, size: 20),
-                        border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      ),
-                      obscureText: true,
-                      validator: (value) => value == null || value.isEmpty ? i18n("webdav_password_empty") : null,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          OutlinedButton(
-            onPressed: Navigator.of(Get.context!).pop,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: Text(i18n("webdav_cancel")),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState?.validate() ?? false) {
-                final newConfig = WebDAVConfig(
-                  name: nameController.text.trim(),
-                  address: addressController.text.trim(),
-                  username: userController.text.trim(),
-                  password: pwdController.text,
-                );
-
-                if (isEditing) {
-                  final index = controller.configs.indexWhere((c) => c.name == existingConfig.name);
-                  controller.configs[index] = newConfig;
-                } else {
-                  controller.configs.add(newConfig);
-                }
-                controller.currentConfig.value = newConfig;
-                controller.saveCurrentConfig(newConfig.name);
-                controller.dirPath.value = '/';
-                controller.initializeWebDAV();
-                Navigator.of(Get.context!).pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(Get.context!).colorScheme.primary,
-              foregroundColor: Theme.of(Get.context!).colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              elevation: 0,
-            ),
-            child: Text(isEditing ? i18n("webdav_update") : i18n("webdav_add")),
-          ),
-        ],
-      ),
-    ).whenComplete(() {
-      nameController.dispose();
-      addressController.dispose();
-      userController.dispose();
-      pwdController.dispose();
-    });
+    Get.dialog(_WebDavConfigDialog(controller: controller, existingConfig: existingConfig));
   }
 
   @override
@@ -488,6 +340,182 @@ class _WebDavPageState extends State<WebDavPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _WebDavConfigDialog extends StatefulWidget {
+  const _WebDavConfigDialog({required this.controller, this.existingConfig});
+
+  final WebDavPageController controller;
+  final WebDAVConfig? existingConfig;
+
+  @override
+  State<_WebDavConfigDialog> createState() => _WebDavConfigDialogState();
+}
+
+class _WebDavConfigDialogState extends State<_WebDavConfigDialog> {
+  WebDavPageController get controller => widget.controller;
+  WebDAVConfig? get existingConfig => widget.existingConfig;
+  bool get isEditing => existingConfig != null;
+  final formKey = GlobalKey<FormState>();
+  late final nameController = TextEditingController(text: existingConfig?.name);
+  late final addressController = TextEditingController(text: existingConfig?.address);
+  late final userController = TextEditingController(text: existingConfig?.username);
+  late final pwdController = TextEditingController(text: existingConfig?.password);
+
+  @override
+  void dispose() {
+    // A popped dialog remains mounted until its reverse transition completes.
+    // Its State, rather than the route-result future, owns these controllers.
+    nameController.dispose();
+    addressController.dispose();
+    userController.dispose();
+    pwdController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      titlePadding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      actionsPadding: const EdgeInsets.only(left: 24, right: 24, bottom: 16, top: 8),
+      title: Row(
+        children: [
+          Icon(
+            isEditing ? Remix.edit_box_line : Remix.add_box_line,
+            color: Theme.of(context).colorScheme.primary,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              isEditing
+                  ? i18n("webdav_edit_config", args: {"name": existingConfig!.name})
+                  : i18n("webdav_add_new_config"),
+              style: AppTextStyles.t18Bold,
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 400,
+        child: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: i18n("webdav_config_name"),
+                      prefixIcon: const Icon(Remix.bookmark_line, size: 20),
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    ),
+                    enabled: !isEditing,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return i18n("webdav_config_name_empty");
+                      if (!isEditing && controller.configs.any((c) => c.name == value.trim())) {
+                        return i18n("webdav_config_name_exists");
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: addressController,
+                    keyboardType: TextInputType.url,
+                    autocorrect: false,
+                    decoration: InputDecoration(
+                      labelText: i18n("webdav_address"),
+                      errorMaxLines: 6,
+                      prefixIcon: const Icon(Remix.global_line, size: 20),
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return i18n("webdav_address_empty");
+                      return WebDAVConfig.isValidAddress(value) ? null : i18n("webdav_address_invalid");
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: userController,
+                    decoration: InputDecoration(
+                      labelText: i18n("webdav_username"),
+                      prefixIcon: const Icon(Remix.user_3_line, size: 20),
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    ),
+                    validator: (value) => value == null || value.trim().isEmpty ? i18n("webdav_username_empty") : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: pwdController,
+                    decoration: InputDecoration(
+                      labelText: i18n("webdav_password"),
+                      prefixIcon: const Icon(Remix.lock_password_line, size: 20),
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    ),
+                    obscureText: true,
+                    validator: (value) => value == null || value.isEmpty ? i18n("webdav_password_empty") : null,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        OutlinedButton(
+          onPressed: Navigator.of(context).pop,
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: Text(i18n("webdav_cancel")),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton(
+          onPressed: () {
+            if (formKey.currentState?.validate() ?? false) {
+              final newConfig = WebDAVConfig(
+                name: nameController.text.trim(),
+                address: addressController.text.trim(),
+                username: userController.text.trim(),
+                password: pwdController.text,
+              );
+
+              if (isEditing) {
+                final index = controller.configs.indexWhere((c) => c.name == existingConfig!.name);
+                controller.configs[index] = newConfig;
+              } else {
+                controller.configs.add(newConfig);
+              }
+              controller.currentConfig.value = newConfig;
+              controller.saveCurrentConfig(newConfig.name);
+              controller.dirPath.value = '/';
+              controller.initializeWebDAV();
+              Navigator.of(context).pop();
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0,
+          ),
+          child: Text(isEditing ? i18n("webdav_update") : i18n("webdav_add")),
+        ),
+      ],
     );
   }
 }

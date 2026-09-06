@@ -634,6 +634,7 @@
     "webdav_add_new_config": "添加新配置",
     "webdav_address": "地址",
     "webdav_address_empty": "地址不能为空",
+    "webdav_address_invalid": "请输入有效的 HTTP(S) 目录地址，不含账号、? 或 #",
     "webdav_cancel": "取消",
     "webdav_config_name": "配置名称",
     "webdav_config_name_empty": "配置名称不能为空",

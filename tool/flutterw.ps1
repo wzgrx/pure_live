@@ -6,6 +6,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
+# A caller may already be inside the test/Windows SUBST drive. Normalize it
+# before choosing the Android same-drive junction; otherwise a short P: path
+# bypasses that branch and mixes Kotlin/Flutter cache output identities.
+. (Join-Path $PSScriptRoot 'resolve_subst_path.ps1')
+$substMappings = @(& subst.exe)
+if ($LASTEXITCODE -ne 0) { throw 'Failed to inspect SUBST mappings.' }
+$repoRoot = Resolve-PureLiveSubstPath -Path $repoRoot -Mappings $substMappings
 $expectedVersion = ((Get-Content (Join-Path $repoRoot '.fvmrc') -Raw | ConvertFrom-Json).flutter)
 $candidates = @(
     $env:PURE_LIVE_FLUTTER,

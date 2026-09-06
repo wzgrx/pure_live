@@ -10,18 +10,12 @@ class WebDAVService {
   webdav.Client get client => _client;
 
   WebDAVService({required this.url, required this.username, required this.password}) {
-    _client = webdav.newClient(url.trim(), user: username, password: password, debug: true);
+    // Protocol debug logs include request headers and response bodies, which
+    // can contain authentication and backup data.
+    _client = webdav.newClient(url.trim(), user: username, password: password, debug: false);
   }
 
-  Future<List<webdav.File>> readDirectory(String path) async {
-    try {
-      final response = await _client.readDir(path);
-      if (response.isEmpty) {
-        throw Exception('Empty response from server');
-      }
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
+  // readDir validates the HTTP response and parses XML. A collection without
+  // children is a successful empty list, not a transport or parsing failure.
+  Future<List<webdav.File>> readDirectory(String path) => _client.readDir(path);
 }

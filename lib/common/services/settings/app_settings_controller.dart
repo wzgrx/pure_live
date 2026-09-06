@@ -177,25 +177,56 @@ class AppSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    T typed<T>(dynamic value) => value as T;
+    return {
+      'refreshRateMode': refreshRateModeFromConfig(json),
+      'autoRefreshTime': typed<int>(json['autoRefreshTime'] ?? 3),
+      'enableDenseFavorites': typed<bool>(json['enableDenseFavorites'] ?? true),
+      'enableBackgroundPlay': typed<bool>(json['enableBackgroundPlay'] ?? false),
+      'enableAsmrSleepMode': typed<bool>(json['enableAsmrSleepMode'] ?? false),
+      'asmrSleepMinutes': typed<int>(
+        (((json['asmrSleepMinutes'] as num?)?.toInt() ?? 60).clamp(1, maxSleepMinutes)).toInt(),
+      ),
+      'enableRotateScreen': typed<bool>(json['enableRotateScreen'] ?? false),
+      'enableScreenKeepOn': typed<bool>(json['enableScreenKeepOn'] ?? true),
+      'enableAutoCheckUpdate': typed<bool>(json['enableAutoCheckUpdate'] ?? true),
+      'useGitHubOriginForUpdates': typed<bool>(json['useGitHubOriginForUpdates'] ?? false),
+      'enableFullScreenDefault': typed<bool>(json['enableFullScreenDefault'] ?? false),
+      'showSplashPage': typed<bool>(json['showSplashPage'] ?? true),
+      'preferRealOnlineCounts': typed<bool>(json['preferRealOnlineCounts'] ?? false),
+      'realOnlinePlatforms': typed<List<String>>(
+        List<String>.from(json['realOnlinePlatforms'] ?? defaultRealOnlinePlatforms),
+      ),
+      'savedMenuIds': typed<List<String>>(
+        List<String>.from(json['savedMenuIds'] ?? HomeMenu.values.map((e) => e.id).toList()),
+      ),
+      'enableMultiView': typed<bool>(json['enableMultiView'] ?? true),
+      'enableNewWindowPlay': typed<bool>(json['enableNewWindowPlay'] ?? true),
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    autoRefreshTime.v = json['autoRefreshTime'] ?? 3;
-    enableDenseFavorites.v = json['enableDenseFavorites'] ?? true;
-    enableBackgroundPlay.v = json['enableBackgroundPlay'] ?? false;
-    enableAsmrSleepMode.v = json['enableAsmrSleepMode'] ?? false;
-    asmrSleepMinutes.v = (((json['asmrSleepMinutes'] as num?)?.toInt() ?? 60).clamp(1, maxSleepMinutes)).toInt();
-    enableRotateScreen.v = json['enableRotateScreen'] ?? false;
-    enableScreenKeepOn.v = json['enableScreenKeepOn'] ?? true;
-    enableAutoCheckUpdate.v = json['enableAutoCheckUpdate'] ?? true;
-    useGitHubOriginForUpdates.v = json['useGitHubOriginForUpdates'] ?? false;
-    enableFullScreenDefault.v = json['enableFullScreenDefault'] ?? false;
-    showSplashPage.v = json['showSplashPage'] ?? true;
-    setRefreshRateMode(refreshRateModeFromConfig(json));
-    preferRealOnlineCounts.v = json['preferRealOnlineCounts'] ?? false;
-    realOnlinePlatforms.v = List<String>.from(json['realOnlinePlatforms'] ?? defaultRealOnlinePlatforms);
+    final parsed = parseConfig(json);
+    autoRefreshTime.v = parsed['autoRefreshTime'];
+    enableDenseFavorites.v = parsed['enableDenseFavorites'];
+    enableBackgroundPlay.v = parsed['enableBackgroundPlay'];
+    enableAsmrSleepMode.v = parsed['enableAsmrSleepMode'];
+    asmrSleepMinutes.v = parsed['asmrSleepMinutes'];
+    enableRotateScreen.v = parsed['enableRotateScreen'];
+    enableScreenKeepOn.v = parsed['enableScreenKeepOn'];
+    enableAutoCheckUpdate.v = parsed['enableAutoCheckUpdate'];
+    useGitHubOriginForUpdates.v = parsed['useGitHubOriginForUpdates'];
+    enableFullScreenDefault.v = parsed['enableFullScreenDefault'];
+    showSplashPage.v = parsed['showSplashPage'];
+    setRefreshRateMode(parsed['refreshRateMode']);
+    preferRealOnlineCounts.v = parsed['preferRealOnlineCounts'];
+    realOnlinePlatforms.v = parsed['realOnlinePlatforms'];
     _removeUnsupportedOnlinePlatforms();
-    savedMenuIds.v = List<String>.from(json['savedMenuIds'] ?? HomeMenu.values.map((e) => e.id).toList());
-    enableMultiView.v = json['enableMultiView'] ?? true;
-    enableNewWindowPlay.v = json['enableNewWindowPlay'] ?? true;
+    savedMenuIds.v = parsed['savedMenuIds'];
+    enableMultiView.v = parsed['enableMultiView'];
+    enableNewWindowPlay.v = parsed['enableNewWindowPlay'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

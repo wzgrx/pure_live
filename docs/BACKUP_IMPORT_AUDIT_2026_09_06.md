@@ -59,3 +59,11 @@
 本批及相邻历史/收藏回归共 20 项通过，analyze 无问题：`local-artifacts/build-records/20260906T151644728Z-quality-focused.json`。夹具使用临时 Hive；未触及手机配置。
 
 剩余纯解析分区：app、player、danmaku、windowSize。空输入识别、完整有效恢复往返、所有分区组合保持性及异步写盘失败仍待验收；目前只证明已覆盖坏输入在写入前失败，不宣称全事务恢复。
+
+## 第四批纯解析：应用、播放器、弹幕、窗口
+
+最后 4 个分区接入统一预检。应用在菜单列表转换成功前保持全部值，刷新率旧配置先归一化；弹幕保留范围限制及 pipDanmaNoEmojiMode 旧别名。播放器将竖屏房间覆盖字典解析独立出来：启动读取仍容错，备份导入遇到坏字典则在任何设置写入前失败，合法枚举过滤保持。窗口导入严格检查嵌套 PiP 对象及非有限/错误坐标，旧 player-owned rememberPipPosition 在所有权归一化后再次校验。
+
+54 项定向回归及一次 analyze 通过：`local-artifacts/build-records/20260906T152303774Z-quality-focused.json`。相邻 PiP/旧设置迁移 10 项通过：`local-artifacts/build-records/20260906T152420764Z-quality-focused.json`。目前 18 个分区均有输入预解析路径。
+
+剩余验收重点：空对象/仅版本/无关 JSON 的识别；v2/v3/legacy 完整导入往返及隐私保留；所有分区的组合快照；异步持久化失败反馈。类型预检并不等同于所有语义值有效或写盘事务完成。未构建、安装、发布。

@@ -189,57 +189,121 @@ class DanmakuSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    T typed<T>(dynamic value) => value as T;
+    return {
+      'hideDanmaku': typed<bool>(json['hideDanmaku'] ?? false),
+      'noEmojiMode': typed<bool>(json['noEmojiMode'] ?? defaultNoEmojiMode),
+      'danmakuTopArea': typed<double>(json['danmakuTopArea']?.toDouble() ?? 0.0),
+      'danmakuArea': typed<double>(json['danmakuArea']?.toDouble() ?? 1.0),
+      'danmakuBottomArea': typed<double>(json['danmakuBottomArea']?.toDouble() ?? 0.5),
+      'danmakuSpeed': typed<double>((json['danmakuSpeed'] ?? 120.0).toDouble().clamp(20.0, 400.0).toDouble()),
+      'danmakuFontSize': typed<double>(json['danmakuFontSize']?.toDouble() ?? 16.0),
+      'danmakuFontWeight': typed<int>(normalizeFontWeight(json['danmakuFontWeight'])),
+      'danmakuFontBorder': typed<double>((json['danmakuFontBorder']?.toDouble() ?? 1.5).clamp(0.0, 4.0).toDouble()),
+      'danmakuOpacity': typed<double>(json['danmakuOpacity']?.toDouble() ?? 1.0),
+      'enableDanmakuDisplay': typed<bool>(json['enableDanmakuDisplay'] ?? true),
+      'danmakuFontFamilyName': typed<String>(json['danmakuFontFamilyName'] ?? 'Default'),
+      'enableDanmakuStroke': typed<bool>(json['enableDanmakuStroke'] ?? true),
+      'danmakuFps': typed<int>(json['danmakuFps']?.toInt() ?? 60),
+      'danmakuAutoFps': typed<bool>(json['danmakuAutoFps'] ?? true),
+      'enableDanmakuTapInteraction': typed<bool>(json['enableDanmakuTapInteraction'] ?? true),
+      'enableDanmakuLongPressInteraction': typed<bool>(json['enableDanmakuLongPressInteraction'] ?? true),
+      'collapseRepeatedDanmaku': typed<bool>(json['collapseRepeatedDanmaku'] ?? false),
+      'repeatedDanmakuWindowSeconds': typed<int>(
+        (json['repeatedDanmakuWindowSeconds'] ?? 5).toInt().clamp(1, 30).toInt(),
+      ),
+      'savedDanmakuTemplate': typed<String>(json['savedDanmakuTemplate']?.toString() ?? ''),
+      'enablePipDanmaku': typed<bool>(json['enablePipDanmaku'] ?? defaultEnablePipDanmaku),
+      'pipDanmakuAutoScale': typed<bool>(json['pipDanmakuAutoScale'] ?? defaultPipDanmakuAutoScale),
+      'pipDanmakuNoEmojiMode': typed<bool>(
+        json['pipDanmakuNoEmojiMode'] ?? json['pipDanmaNoEmojiMode'] ?? defaultPipDanmakuNoEmojiMode,
+      ),
+      'pipDanmakuUseOriginalColor': typed<bool>(
+        json['pipDanmakuUseOriginalColor'] ?? defaultPipDanmakuUseOriginalColor,
+      ),
+      'pipDanmakuColor': typed<int>(json['pipDanmakuColor']?.toInt() ?? defaultPipDanmakuColor),
+      'pipDanmakuFontSize': typed<double>(
+        (json['pipDanmakuFontSize'] ?? defaultPipDanmakuFontSize).toDouble().clamp(8.0, 24.0).toDouble(),
+      ),
+      'pipDanmakuFontWeight': typed<int>(normalizeFontWeight(json['pipDanmakuFontWeight'])),
+      'pipDanmakuSpeed': typed<double>(
+        (json['pipDanmakuSpeed'] ?? defaultPipDanmakuSpeed).toDouble().clamp(20.0, 400.0).toDouble(),
+      ),
+      'pipDanmakuOpacity': typed<double>(
+        (json['pipDanmakuOpacity'] ?? defaultPipDanmakuOpacity).toDouble().clamp(0.1, 1.0).toDouble(),
+      ),
+      'pipDanmakuArea': typed<double>(
+        (json['pipDanmakuArea'] ?? defaultPipDanmakuArea).toDouble().clamp(0.1, 1.0).toDouble(),
+      ),
+      'pipDanmakuMaxVisibleCount': typed<int>(
+        (json['pipDanmakuMaxVisibleCount'] ?? defaultPipDanmakuMaxVisibleCount).toInt().clamp(1, 20).toInt(),
+      ),
+      'pipDanmakuEmitInterval': typed<double>(
+        (json['pipDanmakuEmitInterval'] ?? defaultPipDanmakuEmitInterval).toDouble().clamp(0.05, 2.0).toDouble(),
+      ),
+      'pipDanmakuFps': typed<int>((json['pipDanmakuFps'] ?? defaultPipDanmakuFps).toInt().clamp(15, 240).toInt()),
+      'pipDanmakuAutoFps': typed<bool>(json['pipDanmakuAutoFps'] ?? true),
+      'filterDouyuSuspectedAutomatedMessages': typed<bool>(
+        json['filterDouyuSuspectedAutomatedMessages'] ?? defaultFilterDouyuSuspectedAutomatedMessages,
+      ),
+      'enableDanmakuSimilarityFilter': typed<bool>(
+        json['enableDanmakuSimilarityFilter'] ?? defaultEnableDanmakuSimilarityFilter,
+      ),
+      'danmakuSimilarityThreshold': typed<int>(
+        (json['danmakuSimilarityThreshold'] ?? 85).toInt().clamp(50, 100).toInt(),
+      ),
+      'danmakuSimilarityCacheDuration': typed<int>(
+        (json['danmakuSimilarityCacheDuration'] ?? 3).toInt().clamp(1, 60).toInt(),
+      ),
+      'danmakuSimilarityMaxCacheSize': typed<int>(
+        (json['danmakuSimilarityMaxCacheSize'] ?? 100).toInt().clamp(20, 1000).toInt(),
+      ),
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    hideDanmaku.v = json['hideDanmaku'] ?? false;
-    noEmojiMode.v = json['noEmojiMode'] ?? defaultNoEmojiMode;
-    danmakuTopArea.v = json['danmakuTopArea']?.toDouble() ?? 0.0;
-    danmakuArea.v = json['danmakuArea']?.toDouble() ?? 1.0;
-    danmakuBottomArea.v = json['danmakuBottomArea']?.toDouble() ?? 0.5;
-    danmakuSpeed.v = (json['danmakuSpeed'] ?? 120.0).toDouble().clamp(20.0, 400.0).toDouble();
-    danmakuFontSize.v = json['danmakuFontSize']?.toDouble() ?? 16.0;
-    danmakuFontWeight.v = normalizeFontWeight(json['danmakuFontWeight']);
-    danmakuFontBorder.v = (json['danmakuFontBorder']?.toDouble() ?? 1.5).clamp(0.0, 4.0).toDouble();
-    danmakuOpacity.v = json['danmakuOpacity']?.toDouble() ?? 1.0;
-    enableDanmakuDisplay.v = json['enableDanmakuDisplay'] ?? true;
-    danmakuFontFamilyName.v = json['danmakuFontFamilyName'] ?? 'Default';
-    enableDanmakuStroke.v = json['enableDanmakuStroke'] ?? true;
-    danmakuFps.v = json['danmakuFps']?.toInt() ?? 60;
-    danmakuAutoFps.v = json['danmakuAutoFps'] ?? true;
-    enableDanmakuTapInteraction.v = json['enableDanmakuTapInteraction'] ?? true;
-    enableDanmakuLongPressInteraction.v = json['enableDanmakuLongPressInteraction'] ?? true;
-    collapseRepeatedDanmaku.v = json['collapseRepeatedDanmaku'] ?? false;
-    repeatedDanmakuWindowSeconds.v = (json['repeatedDanmakuWindowSeconds'] ?? 5).toInt().clamp(1, 30).toInt();
-    savedDanmakuTemplate.v = json['savedDanmakuTemplate']?.toString() ?? '';
-    enablePipDanmaku.v = json['enablePipDanmaku'] ?? defaultEnablePipDanmaku;
-    pipDanmakuAutoScale.v = json['pipDanmakuAutoScale'] ?? defaultPipDanmakuAutoScale;
-    pipDanmakuNoEmojiMode.v =
-        json['pipDanmakuNoEmojiMode'] ?? json['pipDanmaNoEmojiMode'] ?? defaultPipDanmakuNoEmojiMode;
-    pipDanmakuUseOriginalColor.v = json['pipDanmakuUseOriginalColor'] ?? defaultPipDanmakuUseOriginalColor;
-    pipDanmakuColor.v = json['pipDanmakuColor']?.toInt() ?? defaultPipDanmakuColor;
-    pipDanmakuFontSize.v = (json['pipDanmakuFontSize'] ?? defaultPipDanmakuFontSize)
-        .toDouble()
-        .clamp(8.0, 24.0)
-        .toDouble();
-    pipDanmakuFontWeight.v = normalizeFontWeight(json['pipDanmakuFontWeight']);
-    pipDanmakuSpeed.v = (json['pipDanmakuSpeed'] ?? defaultPipDanmakuSpeed).toDouble().clamp(20.0, 400.0).toDouble();
-    pipDanmakuOpacity.v = (json['pipDanmakuOpacity'] ?? defaultPipDanmakuOpacity).toDouble().clamp(0.1, 1.0).toDouble();
-    pipDanmakuArea.v = (json['pipDanmakuArea'] ?? defaultPipDanmakuArea).toDouble().clamp(0.1, 1.0).toDouble();
-    pipDanmakuMaxVisibleCount.v = (json['pipDanmakuMaxVisibleCount'] ?? defaultPipDanmakuMaxVisibleCount)
-        .toInt()
-        .clamp(1, 20)
-        .toInt();
-    pipDanmakuEmitInterval.v = (json['pipDanmakuEmitInterval'] ?? defaultPipDanmakuEmitInterval)
-        .toDouble()
-        .clamp(0.05, 2.0)
-        .toDouble();
-    pipDanmakuFps.v = (json['pipDanmakuFps'] ?? defaultPipDanmakuFps).toInt().clamp(15, 240).toInt();
-    pipDanmakuAutoFps.v = json['pipDanmakuAutoFps'] ?? true;
-    filterDouyuSuspectedAutomatedMessages.v =
-        json['filterDouyuSuspectedAutomatedMessages'] ?? defaultFilterDouyuSuspectedAutomatedMessages;
-    enableDanmakuSimilarityFilter.v = json['enableDanmakuSimilarityFilter'] ?? defaultEnableDanmakuSimilarityFilter;
-    danmakuSimilarityThreshold.v = (json['danmakuSimilarityThreshold'] ?? 85).toInt().clamp(50, 100).toInt();
-    danmakuSimilarityCacheDuration.v = (json['danmakuSimilarityCacheDuration'] ?? 3).toInt().clamp(1, 60).toInt();
-    danmakuSimilarityMaxCacheSize.v = (json['danmakuSimilarityMaxCacheSize'] ?? 100).toInt().clamp(20, 1000).toInt();
+    final parsed = parseConfig(json);
+    hideDanmaku.v = parsed['hideDanmaku'];
+    noEmojiMode.v = parsed['noEmojiMode'];
+    danmakuTopArea.v = parsed['danmakuTopArea'];
+    danmakuArea.v = parsed['danmakuArea'];
+    danmakuBottomArea.v = parsed['danmakuBottomArea'];
+    danmakuSpeed.v = parsed['danmakuSpeed'];
+    danmakuFontSize.v = parsed['danmakuFontSize'];
+    danmakuFontWeight.v = parsed['danmakuFontWeight'];
+    danmakuFontBorder.v = parsed['danmakuFontBorder'];
+    danmakuOpacity.v = parsed['danmakuOpacity'];
+    enableDanmakuDisplay.v = parsed['enableDanmakuDisplay'];
+    danmakuFontFamilyName.v = parsed['danmakuFontFamilyName'];
+    enableDanmakuStroke.v = parsed['enableDanmakuStroke'];
+    danmakuFps.v = parsed['danmakuFps'];
+    danmakuAutoFps.v = parsed['danmakuAutoFps'];
+    enableDanmakuTapInteraction.v = parsed['enableDanmakuTapInteraction'];
+    enableDanmakuLongPressInteraction.v = parsed['enableDanmakuLongPressInteraction'];
+    collapseRepeatedDanmaku.v = parsed['collapseRepeatedDanmaku'];
+    repeatedDanmakuWindowSeconds.v = parsed['repeatedDanmakuWindowSeconds'];
+    savedDanmakuTemplate.v = parsed['savedDanmakuTemplate'];
+    enablePipDanmaku.v = parsed['enablePipDanmaku'];
+    pipDanmakuAutoScale.v = parsed['pipDanmakuAutoScale'];
+    pipDanmakuNoEmojiMode.v = parsed['pipDanmakuNoEmojiMode'];
+    pipDanmakuUseOriginalColor.v = parsed['pipDanmakuUseOriginalColor'];
+    pipDanmakuColor.v = parsed['pipDanmakuColor'];
+    pipDanmakuFontSize.v = parsed['pipDanmakuFontSize'];
+    pipDanmakuFontWeight.v = parsed['pipDanmakuFontWeight'];
+    pipDanmakuSpeed.v = parsed['pipDanmakuSpeed'];
+    pipDanmakuOpacity.v = parsed['pipDanmakuOpacity'];
+    pipDanmakuArea.v = parsed['pipDanmakuArea'];
+    pipDanmakuMaxVisibleCount.v = parsed['pipDanmakuMaxVisibleCount'];
+    pipDanmakuEmitInterval.v = parsed['pipDanmakuEmitInterval'];
+    pipDanmakuFps.v = parsed['pipDanmakuFps'];
+    pipDanmakuAutoFps.v = parsed['pipDanmakuAutoFps'];
+    filterDouyuSuspectedAutomatedMessages.v = parsed['filterDouyuSuspectedAutomatedMessages'];
+    enableDanmakuSimilarityFilter.v = parsed['enableDanmakuSimilarityFilter'];
+    danmakuSimilarityThreshold.v = parsed['danmakuSimilarityThreshold'];
+    danmakuSimilarityCacheDuration.v = parsed['danmakuSimilarityCacheDuration'];
+    danmakuSimilarityMaxCacheSize.v = parsed['danmakuSimilarityMaxCacheSize'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

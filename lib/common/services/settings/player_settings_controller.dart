@@ -126,22 +126,27 @@ class PlayerSettingsController extends GetxController {
 
   void _loadPortraitRoomOverrides(dynamic raw) {
     try {
-      final decoded = raw is String ? jsonDecode(raw) : raw;
-      if (decoded is! Map) throw const FormatException('Expected map');
-      final values = <String, String>{};
-      for (final entry in decoded.entries) {
-        final key = entry.key.toString();
-        final value = entry.value.toString();
-        if (key != ':' && PortraitOrientationOverride.values.any((item) => item.name == value)) {
-          values[key] = value;
-        }
-      }
+      final values = parsePortraitRoomOverrides(raw);
       portraitRoomOverrides.assignAll(values);
       _persistPortraitRoomOverrides();
     } catch (_) {
       portraitRoomOverrides.clear();
       _portraitRoomOverridesRaw.v = '{}';
     }
+  }
+
+  static Map<String, String> parsePortraitRoomOverrides(dynamic raw) {
+    final decoded = raw is String ? jsonDecode(raw) : raw;
+    if (decoded is! Map) throw const FormatException('Expected portrait room map');
+    final values = <String, String>{};
+    for (final entry in decoded.entries) {
+      final key = entry.key.toString();
+      final value = entry.value.toString();
+      if (key != ':' && PortraitOrientationOverride.values.any((item) => item.name == value)) {
+        values[key] = value;
+      }
+    }
+    return values;
   }
 
   void _persistPortraitRoomOverrides() {
@@ -203,48 +208,82 @@ class PlayerSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    T typed<T>(dynamic value) => value as T;
+    return {
+      'portraitRoomOverrides': parsePortraitRoomOverrides(json['portraitRoomOverrides'] ?? '{}'),
+      'videoFitIndex': typed<int>(json['videoFitIndex'] ?? 0),
+      'videoPlayerKey': typed<String>(json['videoPlayerKey'] ?? _defaultVideoPlayerKey),
+      'preferResolution': typed<String>(json['preferResolution'] ?? PlayerConsts.resolutions.first),
+      'preferResolutionCellular': typed<String>(json['preferResolutionCellular'] ?? PlayerConsts.resolutions.first),
+      'enableCodec': typed<bool>(json['enableCodec'] ?? true),
+      'playerCompatMode': typed<bool>(json['playerCompatMode'] ?? false),
+      'customPlayerOutput': typed<bool>(json['customPlayerOutput'] ?? false),
+      'videoOutputDriver': typed<String>(json['videoOutputDriver'] ?? 'gpu'),
+      'audioOutputDriver': typed<String>(json['audioOutputDriver'] ?? 'auto'),
+      'videoHardwareDecoder': typed<String>(json['videoHardwareDecoder'] ?? 'auto'),
+      'floatPlay': typed<bool>(json['floatPlay'] ?? false),
+      'windowsPipAlwaysOnTop': typed<bool>(json['windowsPipAlwaysOnTop'] ?? false),
+      'enableRtxVsr': typed<bool>(json['enableRtxVsr'] ?? false),
+      'audioOnly': typed<bool>(false),
+      'useHardStopOnExit': typed<bool>(json['useHardStopOnExit'] ?? false),
+      'enablePortraitStreamAdaptation': typed<bool>(json['enablePortraitStreamAdaptation'] ?? true),
+      'portraitAdaptiveHeight': typed<bool>(json['portraitAdaptiveHeight'] ?? true),
+      'portraitLayoutModeName': typed<String>(
+        _enumName(PortraitLayoutMode.values, json['portraitLayoutMode'], PortraitLayoutMode.balanced),
+      ),
+      'portraitFullscreenPolicyName': typed<String>(
+        _enumName(
+          PortraitFullscreenPolicy.values,
+          json['portraitFullscreenPolicy'],
+          PortraitFullscreenPolicy.followSource,
+        ),
+      ),
+      'portraitFullscreenDisplayModeName': typed<String>(
+        _enumName(
+          PortraitFullscreenDisplayMode.values,
+          json['portraitFullscreenDisplayMode'],
+          PortraitFullscreenDisplayMode.ambient,
+        ),
+      ),
+      'portraitPipFollowSource': typed<bool>(json['portraitPipFollowSource'] ?? true),
+      'portraitDanmakuModeName': typed<String>(
+        _enumName(PortraitDanmakuMode.values, json['portraitDanmakuMode'], PortraitDanmakuMode.followGlobal),
+      ),
+      'rememberPortraitRoomOverride': typed<bool>(json['rememberPortraitRoomOverride'] ?? true),
+      'showPortraitDiagnostics': typed<bool>(json['showPortraitDiagnostics'] ?? false),
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    videoFitIndex.v = json['videoFitIndex'] ?? 0;
-    videoPlayerKey.v = json['videoPlayerKey'] ?? _defaultVideoPlayerKey;
-    preferResolution.v = json['preferResolution'] ?? PlayerConsts.resolutions.first;
-    preferResolutionCellular.v = json['preferResolutionCellular'] ?? PlayerConsts.resolutions.first;
-    enableCodec.v = json['enableCodec'] ?? true;
-    playerCompatMode.v = json['playerCompatMode'] ?? false;
-    customPlayerOutput.v = json['customPlayerOutput'] ?? false;
-    videoOutputDriver.v = json['videoOutputDriver'] ?? 'gpu';
-    audioOutputDriver.v = json['audioOutputDriver'] ?? 'auto';
-    videoHardwareDecoder.v = json['videoHardwareDecoder'] ?? 'auto';
-    floatPlay.v = json['floatPlay'] ?? false;
-    windowsPipAlwaysOnTop.v = json['windowsPipAlwaysOnTop'] ?? false;
-    enableRtxVsr.v = json['enableRtxVsr'] ?? false;
-    audioOnly.v = false;
-    useHardStopOnExit.v = json['useHardStopOnExit'] ?? false;
-    enablePortraitStreamAdaptation.v = json['enablePortraitStreamAdaptation'] ?? true;
-    portraitAdaptiveHeight.v = json['portraitAdaptiveHeight'] ?? true;
-    portraitLayoutModeName.v = _enumName(
-      PortraitLayoutMode.values,
-      json['portraitLayoutMode'],
-      PortraitLayoutMode.balanced,
-    );
-    portraitFullscreenPolicyName.v = _enumName(
-      PortraitFullscreenPolicy.values,
-      json['portraitFullscreenPolicy'],
-      PortraitFullscreenPolicy.followSource,
-    );
-    portraitFullscreenDisplayModeName.v = _enumName(
-      PortraitFullscreenDisplayMode.values,
-      json['portraitFullscreenDisplayMode'],
-      PortraitFullscreenDisplayMode.ambient,
-    );
-    portraitPipFollowSource.v = json['portraitPipFollowSource'] ?? true;
-    portraitDanmakuModeName.v = _enumName(
-      PortraitDanmakuMode.values,
-      json['portraitDanmakuMode'],
-      PortraitDanmakuMode.followGlobal,
-    );
-    rememberPortraitRoomOverride.v = json['rememberPortraitRoomOverride'] ?? true;
-    showPortraitDiagnostics.v = json['showPortraitDiagnostics'] ?? false;
-    _loadPortraitRoomOverrides(json['portraitRoomOverrides'] ?? '{}');
+    final parsed = parseConfig(json);
+    videoFitIndex.v = parsed['videoFitIndex'];
+    videoPlayerKey.v = parsed['videoPlayerKey'];
+    preferResolution.v = parsed['preferResolution'];
+    preferResolutionCellular.v = parsed['preferResolutionCellular'];
+    enableCodec.v = parsed['enableCodec'];
+    playerCompatMode.v = parsed['playerCompatMode'];
+    customPlayerOutput.v = parsed['customPlayerOutput'];
+    videoOutputDriver.v = parsed['videoOutputDriver'];
+    audioOutputDriver.v = parsed['audioOutputDriver'];
+    videoHardwareDecoder.v = parsed['videoHardwareDecoder'];
+    floatPlay.v = parsed['floatPlay'];
+    windowsPipAlwaysOnTop.v = parsed['windowsPipAlwaysOnTop'];
+    enableRtxVsr.v = parsed['enableRtxVsr'];
+    audioOnly.v = parsed['audioOnly'];
+    useHardStopOnExit.v = parsed['useHardStopOnExit'];
+    enablePortraitStreamAdaptation.v = parsed['enablePortraitStreamAdaptation'];
+    portraitAdaptiveHeight.v = parsed['portraitAdaptiveHeight'];
+    portraitLayoutModeName.v = parsed['portraitLayoutModeName'];
+    portraitFullscreenPolicyName.v = parsed['portraitFullscreenPolicyName'];
+    portraitFullscreenDisplayModeName.v = parsed['portraitFullscreenDisplayModeName'];
+    portraitPipFollowSource.v = parsed['portraitPipFollowSource'];
+    portraitDanmakuModeName.v = parsed['portraitDanmakuModeName'];
+    rememberPortraitRoomOverride.v = parsed['rememberPortraitRoomOverride'];
+    showPortraitDiagnostics.v = parsed['showPortraitDiagnostics'];
+    portraitRoomOverrides.assignAll(parsed['portraitRoomOverrides']);
+    _persistPortraitRoomOverrides();
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

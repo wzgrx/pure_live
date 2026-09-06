@@ -137,15 +137,24 @@ class WindowSizeController extends GetxController {
   }
 
   void fromJson(Map<String, dynamic> json) {
-    storedWidth.v = (json['storedWidth'] as num?)?.toDouble() ?? 1280.0;
-
-    storedHeight.v = (json['storedHeight'] as num?)?.toDouble() ?? 720.0;
-
-    rememberPipPosition.v = json['rememberPipPosition'] ?? true;
-
-    windowsPip.fromJson(_extractPipGeometry(json));
-
+    final parsed = parseConfig(json);
+    storedWidth.v = parsed['storedWidth'];
+    storedHeight.v = parsed['storedHeight'];
+    rememberPipPosition.v = parsed['rememberPipPosition'];
+    windowsPip.fromJson(parsed['windowsPip']);
     windowSize.value = Size(storedWidth.v, storedHeight.v);
+  }
+
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    final width = (json['storedWidth'] as num?)?.toDouble() ?? 1280.0;
+    final height = (json['storedHeight'] as num?)?.toDouble() ?? 720.0;
+    if (!width.isFinite || !height.isFinite) throw const FormatException('Invalid window size');
+    return {
+      'storedWidth': width,
+      'storedHeight': height,
+      'rememberPipPosition': json['rememberPipPosition'] as bool? ?? true,
+      'windowsPip': _extractPipGeometry(json, strict: true),
+    };
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {
@@ -204,12 +213,16 @@ class WindowSizeController extends GetxController {
       key == 'windowsPipX' ||
       key == 'windowsPipY';
 
-  static Map<String, dynamic> _extractPipGeometry(Map<String, dynamic> windowSize) {
+  static Map<String, dynamic> _extractPipGeometry(Map<String, dynamic> windowSize, {bool strict = false}) {
     final nested = windowSize['windowsPip'];
+    if (strict && nested != null && nested is! Map) throw const FormatException('Invalid PiP rectangle');
     final pip = nested is Map ? Map<String, dynamic>.from(nested) : const <String, dynamic>{};
 
     double number(String key) {
       final value = pip[key] ?? windowSize[key];
+      if (strict && value != null && (value is! num || !value.isFinite)) {
+        throw FormatException('Invalid PiP coordinate: $key');
+      }
       return value is num ? value.toDouble() : 0.0;
     }
 

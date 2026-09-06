@@ -142,4 +142,45 @@ void main() {
     expect(parsed['enableDynamicTheme'], true);
     expect(parsed['languageName'], '简体中文');
   });
+  test('playback sections preflight malformed late values before any app writes', () {
+    final app = Get.put(AppSettingsController());
+    app.enableBackgroundPlay.value = true;
+    final before = app.toJson();
+    for (final entry in <String, Map<String, dynamic>>{
+      'app': {
+        'enableBackgroundPlay': false,
+        'savedMenuIds': [42],
+      },
+      'danmaku': {'pipDanmakuNoEmojiMode': 'bad'},
+      'player': {'portraitRoomOverrides': []},
+      'windowSize': {'storedWidth': 900, 'windowsPip': 'bad'},
+    }.entries) {
+      final error = ['player', 'windowSize'].contains(entry.key) ? isA<FormatException>() : isA<TypeError>();
+      for (final data in <Map<String, dynamic>>[
+        {
+          'backupVersion': 3,
+          'app': {'enableBackgroundPlay': false},
+          entry.key: entry.value,
+        },
+        {'enableBackgroundPlay': false, ...entry.value},
+      ]) {
+        expect(() => BackupController().importAllSettings(data), throwsA(error), reason: entry.key);
+        expect(app.toJson(), before, reason: entry.key);
+      }
+    }
+  });
+
+  test('direct app import rejects invalid menu before changing background playback', () {
+    final app = Get.put(AppSettingsController());
+    app.enableBackgroundPlay.value = true;
+    final before = app.toJson();
+    expect(
+      () => app.fromJson({
+        'enableBackgroundPlay': false,
+        'savedMenuIds': [42],
+      }),
+      throwsA(isA<TypeError>()),
+    );
+    expect(app.toJson(), before);
+  });
 }

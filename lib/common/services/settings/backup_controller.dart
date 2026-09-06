@@ -74,10 +74,14 @@ class BackupController extends GetxController {
   void importAllSettings(Map<String, dynamic> data) {
     final version = data['backupVersion'];
 
-    // Pure preflight. Extend with the remaining controller parsers before
-    // treating this as an all-settings validation boundary.
+    // Validate input before any controller notifies observers or persists it.
+    // This does not make asynchronous storage failures transactional.
     if (version != null) validateSectionStructure(data);
     final parsers = <String, Map<String, dynamic> Function(Map<String, dynamic>)>{
+      'app': AppSettingsController.parseConfig,
+      'player': PlayerSettingsController.parseConfig,
+      'danmaku': DanmakuSettingsController.parseConfig,
+      'windowSize': WindowSizeController.parseConfig,
       'theme': ThemeSettingsController.parseConfig,
       'font': FontSettingsController.parseConfig,
       'exit': ExitSettingsController.parseConfig,
@@ -105,8 +109,9 @@ class BackupController extends GetxController {
     if (version == null) {
       VolumeSettingsController.parseConfig(data);
     } else {
-      validateSectionStructure(data);
       VolumeSettingsController.parseConfig(Map<String, dynamic>.from(data['volume'] ?? {}));
+      // Validate the legacy player-owned flag after normalizing its ownership.
+      WindowSizeController.parseConfig(WindowSizeController.extractConfig(data));
     }
 
     if (version == null) {

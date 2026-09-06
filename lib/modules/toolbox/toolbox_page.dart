@@ -7,9 +7,6 @@ class ToolBoxPage extends GetView<ToolBoxController> {
 
   @override
   Widget build(BuildContext context) {
-    // Check clipboard automatically when the page is opened
-    WidgetsBinding.instance.addPostFrameCallback((_) => controller.autoCheckClipboard());
-
     return Scaffold(
       appBar: AppBar(title: Text(i18n("toolbox_title")), centerTitle: true, elevation: 0),
       body: ListView(
@@ -83,6 +80,7 @@ class ToolBoxPage extends GetView<ToolBoxController> {
                   fillColor: Theme.of(context).dividerColor.withValues(alpha: .05),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                   suffixIcon: IconButton(
+                    tooltip: i18n('clear'),
                     icon: const Icon(Remix.close_circle_line, size: 20),
                     onPressed: () => controller.clear(),
                   ),
@@ -120,9 +118,11 @@ class ToolBoxPage extends GetView<ToolBoxController> {
           children: [
             Icon(Remix.information_line, size: 14, color: Colors.grey[600]),
             const SizedBox(width: 6),
-            Text(
-              i18n("toolbox_support_list"),
-              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                i18n("toolbox_support_list"),
+                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),

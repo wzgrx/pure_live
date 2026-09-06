@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:pure_live/common/index.dart';
 import 'package:date_format/date_format.dart';
 import 'package:pure_live/plugins/utils.dart';
@@ -207,7 +208,7 @@ class WebDavPageController extends GetxController {
     try {
       final bytes = await _webdavService.client.read(file.path!);
       final data = jsonDecode(utf8.decode(bytes));
-      _backupController.importAllSettings(data);
+      await _backupController.restoreAllSettings(Map<String, dynamic>.from(data as Map));
       SnackBarUtil.success(i18n("webdav_sync_success"));
     } catch (e) {
       SnackBarUtil.error('${i18n("webdav_download_failed")}: $e');

@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 
+final _persistCurrentValue = Expando<void Function()>('hive-persist-current');
+
 RxBool hiveBool(String key, bool defaultValue) {
   final initialValue = HivePrefUtil.getBool(key) ?? defaultValue;
 
@@ -62,9 +64,13 @@ extension HiveRxExtension<T> on Rx<T> {
 
   set v(T newValue) {
     value = newValue;
+    // A failed disk write may leave this Rx value already equal to a retry's
+    // input. Persist it without manufacturing a UI notification in that case.
+    if (HivePrefUtil.isCollectingWrites) _persistCurrentValue[this]?.call();
   }
 
   void hive(String key) {
+    _persistCurrentValue[this] = () => unawaited(HivePrefUtil.setAnyPref(key, value));
     ever<T>(this, (value) {
       if (value is bool) {
         unawaited(HivePrefUtil.setBool(key, value));
@@ -81,6 +87,7 @@ extension HiveRxExtension<T> on Rx<T> {
   }
 
   void hiveObject(String key, {required Map<String, dynamic> Function(T value) toJson}) {
+    _persistCurrentValue[this] = () => unawaited(HivePrefUtil.setString(key, jsonEncode(toJson(value))));
     ever<T>(this, (value) {
       try {
         unawaited(HivePrefUtil.setString(key, jsonEncode(toJson(value))));

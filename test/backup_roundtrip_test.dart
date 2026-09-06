@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:pure_live/get/get.dart';
@@ -57,7 +56,7 @@ void main() {
       source['history']['historyRooms'] = [
         {'roomId': '123', 'platform': 'bilibili', 'title': 'Roundtrip'},
       ];
-      backup.importAllSettings(source);
+      await backup.restoreAllSettings(source);
       await Future<void>.delayed(const Duration(milliseconds: 600));
       final expected = detached(backup.exportAllSettings());
       settings.app.enableBackgroundPlay.value = false;
@@ -66,7 +65,7 @@ void main() {
       settings.cookieManager.twitchCookie.value = 'local-fixture-cookie';
       settings.webdav.currentWebDavConfig.value = 'local-fixture-config';
       final file = File('${directory.path}/v$version.json')..writeAsStringSync(jsonEncode(source));
-      expect(backup.recover(file), isTrue);
+      expect(await backup.recover(file), isTrue);
       await Future<void>.delayed(const Duration(milliseconds: 600));
       expect(detached(backup.exportAllSettings()), expected);
       expect(settings.cookieManager.twitchCookie.value, 'local-fixture-cookie');
@@ -102,12 +101,12 @@ void main() {
     }
     legacy['enableBackgroundPlay'] = true;
     legacy['twitchCookie'] = 'legacy-fixture-cookie';
-    backup.importAllSettings(legacy);
+    await backup.restoreAllSettings(legacy);
     await Future<void>.delayed(const Duration(milliseconds: 600));
     final expected = detached(backup.exportAllSettings(includeSensitiveData: true));
     settings.app.enableBackgroundPlay.value = false;
     settings.cookieManager.twitchCookie.value = '';
-    backup.importAllSettings(legacy);
+    await backup.restoreAllSettings(legacy);
     await Future<void>.delayed(const Duration(milliseconds: 600));
     expect(detached(backup.exportAllSettings(includeSensitiveData: true)), expected);
     expect(settings.cookieManager.twitchCookie.value, 'legacy-fixture-cookie');
@@ -125,7 +124,37 @@ void main() {
       },
     };
     final file = File('${directory.path}/invalid.json')..writeAsStringSync(jsonEncode(invalid));
-    expect(backup.recover(file), isFalse);
+    expect(await backup.recover(file), isFalse);
     expect(detached(backup.exportAllSettings(includeSensitiveData: true)), before);
+  });
+  test('failed storage reports recovery failure and permits a later retry', () async {
+    final settings = await initialize();
+    final backup = settings.backup;
+    final source = detached(backup.exportAllSettings());
+    source['app']['enableBackgroundPlay'] = true;
+    final file = File('${directory.path}/storage-error.json')..writeAsStringSync(jsonEncode(source));
+    // Finish startup migration notifications before injecting a restore-only fault.
+    await Future<void>.delayed(Duration.zero);
+    await HivePrefUtil.flush();
+    await Hive.box('app_settings').close();
+    try {
+      expect(await backup.recover(file), isFalse);
+      // Input validation is not an in-memory rollback guarantee.
+      expect(settings.app.enableBackgroundPlay.value, isTrue);
+    } finally {
+      await HivePrefUtil.init();
+    }
+    // Retry the exact same input even though its Rx value is already true.
+    expect(await backup.recover(file), isTrue);
+    expect(HivePrefUtil.getBool('enableBackgroundPlay'), isTrue);
+  });
+  test('overlapping restores reject rather than interleave writes', () async {
+    final settings = await initialize();
+    final backup = settings.backup;
+    final source = detached(backup.exportAllSettings());
+    final first = backup.restoreAllSettings(source);
+    await expectLater(backup.restoreAllSettings(source), throwsStateError);
+    await first;
+    await backup.restoreAllSettings(source);
   });
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/common/services/utils/hive_rx.dart';
+import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/modules/tags/tag_management_controller.dart';
 import 'package:pure_live/common/services/settings/web_dav_controller.dart';
 import 'package:pure_live/common/services/settings/history_controller.dart';
@@ -26,6 +27,7 @@ class BackupController extends GetxController {
   static BackupController get to => Get.find();
 
   static const int backupVersion = 3;
+  static bool _restoreInProgress = false;
 
   final RxString backupDirectory = hiveString('backupDirectory', '');
 
@@ -305,7 +307,17 @@ class BackupController extends GetxController {
     }
   }
 
-  bool recover(File file) {
+  Future<void> restoreAllSettings(Map<String, dynamic> data) async {
+    if (_restoreInProgress) throw StateError('A settings restore is already running');
+    _restoreInProgress = true;
+    try {
+      await HivePrefUtil.persistBatch(() => importAllSettings(data));
+    } finally {
+      _restoreInProgress = false;
+    }
+  }
+
+  Future<bool> recover(File file) async {
     try {
       final json = file.readAsStringSync();
       final data = jsonDecode(json);
@@ -314,7 +326,7 @@ class BackupController extends GetxController {
         return false;
       }
 
-      importAllSettings(data);
+      await restoreAllSettings(data);
 
       return true;
     } catch (_) {

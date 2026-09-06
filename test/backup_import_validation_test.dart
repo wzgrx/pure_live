@@ -42,7 +42,7 @@ void main() {
     }
   });
 
-  test('a malformed later section does not mutate earlier app settings', () {
+  test('a malformed later section does not mutate earlier app settings', () async {
     final app = Get.put(AppSettingsController());
     Get.put(ThemeSettingsController());
     app.enableBackgroundPlay.value = true;
@@ -55,7 +55,7 @@ void main() {
           'theme': 'invalid section',
         }),
       );
-    expect(BackupController().recover(file), isFalse);
+    expect(await BackupController().recover(file), isFalse);
     expect(app.toJson(), before);
   });
   test('volume parser retains object and legacy JSON forms', () {

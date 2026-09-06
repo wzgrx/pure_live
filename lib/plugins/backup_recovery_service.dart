@@ -49,7 +49,7 @@ class BackupRecoveryService {
     if (result?.path == null) return;
 
     final file = File(result!.path!);
-    if (backup.recover(file)) {
+    if (await backup.recover(file)) {
       ToastUtil.show(i18n("recover_backup_success"));
     } else {
       ToastUtil.show(i18n("recover_backup_failed"));

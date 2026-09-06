@@ -183,4 +183,63 @@ void main() {
     );
     expect(app.toJson(), before);
   });
+  test('empty and unrelated JSON reject without resetting current settings', () {
+    final app = Get.put(AppSettingsController());
+    app.enableBackgroundPlay.value = true;
+    final before = app.toJson();
+    for (final data in <Map<String, dynamic>>[
+      {},
+      {'unrelated': 'document'},
+      {'backupVersion': 3},
+      {'backupVersion': 3, 'app': {}},
+      {
+        'backupVersion': 3,
+        'app': {'unrelated': true},
+      },
+      {'backupVersion': 3, 'app': null},
+      {'custom_tags_data': null},
+      {'custom_tags_data': {}},
+      {
+        'backupVersion': '3',
+        'app': {'enableBackgroundPlay': false},
+      },
+      {
+        'backupVersion': -1,
+        'app': {'enableBackgroundPlay': false},
+      },
+    ]) {
+      expect(() => BackupController().importAllSettings(data), throwsFormatException, reason: '$data');
+      expect(app.toJson(), before, reason: '$data');
+    }
+  });
+
+  test('identity recognition preserves current, legacy and forward-compatible settings', () {
+    for (final data in <Map<String, dynamic>>[
+      {'enableBackgroundPlay': false},
+      {'themeMode': 'Dark'},
+      {
+        'custom_tags_data': {'tags': []},
+      },
+      {'pipDanmaNoEmojiMode': true},
+      {
+        'backupVersion': 2,
+        'windowSize': {'windowsPipX': 12},
+      },
+      {
+        'backupVersion': 3,
+        'danmaku': {'pipDanmaNoEmojiMode': true},
+      },
+      {
+        'backupVersion': 3,
+        'app': {'enableBackgroundPlay': null},
+      },
+      {
+        'backupVersion': 99,
+        'theme': {'language': '简体中文'},
+        'futureSection': {'newFlag': 42},
+      },
+    ]) {
+      expect(() => BackupController.validateBackupIdentity(data), returnsNormally, reason: '$data');
+    }
+  });
 }

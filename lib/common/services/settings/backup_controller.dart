@@ -71,7 +71,55 @@ class BackupController extends GetxController {
     return result;
   }
 
+  // Derive recognized wire keys from the existing canonical configuration
+  // extractors, rather than maintaining another list of hundreds of fields.
+  static final Map<String, Set<String>> _sectionKeys = {
+    'app': AppSettingsController.extractConfig(null).keys.toSet(),
+    'theme': ThemeSettingsController.extractConfig(null).keys.toSet(),
+    'font': FontSettingsController.extractConfig(null).keys.toSet(),
+    'player': PlayerSettingsController.extractConfig(null).keys.toSet(),
+    'danmaku': DanmakuSettingsController.extractConfig(null).keys.toSet()..add('pipDanmaNoEmojiMode'),
+    'volume': VolumeSettingsController.extractConfig(null).keys.toSet(),
+    'favorite': FavoriteRoomController.extractConfig(null).keys.toSet(),
+    'history': HistoryController.extractConfig(null).keys.toSet(),
+    'webdav': WebDavController.extractConfig(null).keys.toSet(),
+    'iptv': IptvSettingsController.extractConfig(null).keys.toSet(),
+    'cookie': CookieSettingsController.extractConfig(null).keys.toSet(),
+    'proxy': ProxySettingsController.extractConfig(null).keys.toSet(),
+    'windowSize': WindowSizeController.extractConfig(null).keys.toSet(),
+    'exit': ExitSettingsController.extractConfig(null).keys.toSet(),
+    'startup': StartupController.extractConfig(null).keys.toSet(),
+    'refresh': RefreshConfigController.extractConfig(null).keys.toSet(),
+    'page': PageSettingsController.extractConfig(null).keys.toSet(),
+    'tags': {'tags', 'roomTagsMap'},
+  };
+
+  static void validateBackupIdentity(Map<String, dynamic> data) {
+    final version = data['backupVersion'];
+    if (version != null && (version is! int || version < 1)) {
+      throw const FormatException('Invalid backup version');
+    }
+    bool recognized = false;
+    if (version == null) {
+      final legacyTags = data['custom_tags_data'];
+      recognized =
+          (legacyTags is Map && legacyTags.keys.any(_sectionKeys['tags']!.contains)) ||
+          data.containsKey('pipDanmaNoEmojiMode') ||
+          _sectionKeys.entries
+              .where((entry) => entry.key != 'tags')
+              .any((entry) => data.keys.any(entry.value.contains));
+    } else {
+      validateSectionStructure(data);
+      recognized = _sectionKeys.entries.any((entry) {
+        final section = data[entry.key];
+        return section is Map && section.keys.any(entry.value.contains);
+      });
+    }
+    if (!recognized) throw const FormatException('No recognized backup settings');
+  }
+
   void importAllSettings(Map<String, dynamic> data) {
+    validateBackupIdentity(data);
     final version = data['backupVersion'];
 
     // Validate input before any controller notifies observers or persists it.

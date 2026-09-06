@@ -1011,11 +1011,11 @@ try {
     if (-not (Test-UiSemanticEnabled -Xml $preflightDialog.Xml -Semantic '立即启动录制')) {
         throw 'The record action did not reach the one-shot start state.'
     }
-    Invoke-Ui -Action TapSemantic -Value '立即启动录制' -Xml $preflightDialog.Xml
-    $runningState = Wait-UiPattern -Name 'room-recording' -Pattern '录制中' -TimeoutSeconds 30
     $recordingWallTimer = [Diagnostics.Stopwatch]::StartNew()
-    $result.checks.recordStartMs = $runningState.ElapsedMs
-    Save-Screenshot 'room-recording'
+    Invoke-Ui -Action TapSemantic -Value '立即启动录制' -Xml $preflightDialog.Xml
+    # Time/size updates can prevent UIAutomator's one-second idle window.
+    # Use actual file growth, not a pre-growth UI dump, as the running gate.
+    $growthStartedMs = $recordingWallTimer.ElapsedMilliseconds
 
     $growth = $null
     if ($ScreenOffSeconds -gt 0) {
@@ -1066,6 +1066,8 @@ try {
     $result.checks.runningFileInitialBytes = $growth.InitialBytes
     $result.checks.runningFileFinalBytes = $growth.FinalBytes
     $result.checks.runningFileGrowthMs = $growth.ElapsedMs
+    $result.checks.recordStartMs = $growthStartedMs + $growth.ElapsedMs
+    Save-Screenshot 'room-recording'
 
     $remainingSeconds = [math]::Max(
         0,

@@ -39,3 +39,13 @@
 
 音量标量和房间字典先完整解析再修改 Rx；非对象、错误条目、非有限数值报错，保留旧 JSON 字符串字典与 null 默认行为。版本化和 legacy 备份入口均先执行此解析，避免晚期坏音量修改早期 app。定向导入/隐私测试及 analyze 通过，证据：local-artifacts/build-records/20260906T080917770Z-quality-focused.json（217.151 秒）。进程句柄中断后已失效，但终态记录为 succeeded、active_heavy_processes_after=0，未重复启动。其余分区预解析、空输入辨识和持久化失败处理仍未完成。
 
+
+## 第二批纯解析：8 个简单分区
+
+主题、字体、退出、IPTV、启动、代理、刷新、Cookie 的 fromJson 复用各自无副作用 parseConfig，先转换完整分区再修改 Rx；备份入口在 app 写入之前统一调用这些解析器。原默认值、代理地址归一化和刷新并发数归一化保持；浮点设置明确接受 JSON 整数并转 double。Cookie 的账户同步仍只在提交阶段执行。
+
+新增回归覆盖全部 8 分区的错误字段，分别走 versioned/legacy 路径并断言 app 完整快照保持；直接主题导入的后置坏字段同样在早期写入前失败。原诊断中的 theme 字段类型错误已由正式回归覆盖修复。
+
+9 项导入/隐私测试及 analyze 通过：`local-artifacts/build-records/20260906T150859508Z-quality-focused.json`（No issues found）。此处不是整份备份的最终原子性验收：app/player/danmaku/window/favorite/history/webdav/page/tags 尚待提取纯解析，空输入识别和写盘失败边界仍待完成。未构建、安装或发布新包。
+
+相邻刷新/主题字体/代理/字体路径 12 项回归通过：`local-artifacts/build-records/20260906T151008880Z-quality-focused.json`；未重复 analyze。

@@ -102,4 +102,44 @@ void main() {
       expect(app.toJson(), before);
     }
   });
+  test('all simple sections preflight before app writes in legacy and versioned backups', () {
+    final app = Get.put(AppSettingsController());
+    app.enableBackgroundPlay.value = true;
+    final before = app.toJson();
+    final fields = <String, Map<String, dynamic>>{
+      'theme': {'enableDynamicTheme': 'bad'},
+      'font': {'fontSizeBodySmall': 'bad'},
+      'exit': {'autoShutDownTime': 'bad'},
+      'iptv': {'autoSyncHoursInterval': 'bad'},
+      'startup': {'enableStartUp': 'bad'},
+      'proxy': {'proxyPort': 'bad'},
+      'refresh': {'autoRefreshInterval': 'bad'},
+      'cookie': {'bilibiliUid': 'bad'},
+    };
+    for (final entry in fields.entries) {
+      for (final data in <Map<String, dynamic>>[
+        {
+          'backupVersion': 3,
+          'app': {'enableBackgroundPlay': false},
+          entry.key: entry.value,
+        },
+        {'enableBackgroundPlay': false, ...entry.value},
+      ]) {
+        expect(() => BackupController().importAllSettings(data), throwsA(isA<TypeError>()), reason: entry.key);
+        expect(app.toJson(), before, reason: entry.key);
+      }
+    }
+  });
+
+  test('direct theme import parses late fields before modifying early values', () {
+    final theme = Get.put(ThemeSettingsController());
+    theme.enableDynamicTheme.value = true;
+    final before = theme.toJson();
+    expect(() => theme.fromJson({'enableDynamicTheme': false, 'mainAxisSpacing': 'bad'}), throwsA(isA<TypeError>()));
+    expect(theme.toJson(), before);
+    final parsed = ThemeSettingsController.parseConfig({'mainAxisSpacing': 8, 'enableDynamicTheme': true});
+    expect(parsed['mainAxisSpacing'], 8.0);
+    expect(parsed['enableDynamicTheme'], true);
+    expect(parsed['languageName'], '简体中文');
+  });
 }

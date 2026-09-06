@@ -68,15 +68,30 @@ class ThemeSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'themeModeName': (json['themeMode'] ?? "System") as String,
+      'enableDynamicTheme': (json['enableDynamicTheme'] ?? false) as bool,
+      'themeColorSwitch': (json['themeColorSwitch'] ?? const Color.fromARGB(255, 218, 70, 12).hex) as String,
+      'languageName': (json['language'] ?? "简体中文") as String,
+      'crossAxisSpacing': ((json['crossAxisSpacing'] ?? 6.0) as num).toDouble(),
+      'mainAxisSpacing': ((json['mainAxisSpacing'] ?? 6.0) as num).toDouble(),
+      'loadingStyle': (json['loadingStyle'] ?? AppConsts.defaultLoadingStyleKey) as String,
+      'loadingStyleColorSwitch': (json['loadingStyleColorSwitch'] ?? '') as String,
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    themeModeName.v = json['themeMode'] ?? "System";
-    enableDynamicTheme.v = json['enableDynamicTheme'] ?? false;
-    themeColorSwitch.v = json['themeColorSwitch'] ?? const Color.fromARGB(255, 218, 70, 12).hex;
-    languageName.v = json['language'] ?? "简体中文";
-    crossAxisSpacing.v = json['crossAxisSpacing'] ?? 6.0;
-    mainAxisSpacing.v = json['mainAxisSpacing'] ?? 6.0;
-    loadingStyle.v = json['loadingStyle'] ?? AppConsts.defaultLoadingStyleKey;
-    loadingStyleColorSwitch.v = json['loadingStyleColorSwitch'] ?? '';
+    final parsed = parseConfig(json);
+    themeModeName.v = parsed['themeModeName'];
+    enableDynamicTheme.v = parsed['enableDynamicTheme'];
+    themeColorSwitch.v = parsed['themeColorSwitch'];
+    languageName.v = parsed['languageName'];
+    crossAxisSpacing.v = parsed['crossAxisSpacing'];
+    mainAxisSpacing.v = parsed['mainAxisSpacing'];
+    loadingStyle.v = parsed['loadingStyle'];
+    loadingStyleColorSwitch.v = parsed['loadingStyleColorSwitch'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

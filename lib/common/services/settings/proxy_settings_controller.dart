@@ -42,13 +42,26 @@ class ProxySettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'enableProxy': (json['enableProxy'] ?? false) as bool,
+      'proxyHost': normalizeProxyHost((json['proxyHost'] ?? '').toString()),
+      'proxyPort': (json['proxyPort'] ?? 1080) as int,
+      'enableAppProxy': (json['enableAppProxy'] ?? false) as bool,
+      'appProxyHost': normalizeProxyHost((json['appProxyHost'] ?? '').toString()),
+      'appProxyPort': (json['appProxyPort'] ?? 1080) as int,
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    enableProxy.v = json['enableProxy'] ?? false;
-    proxyHost.v = normalizeProxyHost((json['proxyHost'] ?? '').toString());
-    proxyPort.v = json['proxyPort'] ?? 1080;
-    enableAppProxy.v = json['enableAppProxy'] ?? false;
-    appProxyHost.v = normalizeProxyHost((json['appProxyHost'] ?? '').toString());
-    appProxyPort.v = json['appProxyPort'] ?? 1080;
+    final parsed = parseConfig(json);
+    enableProxy.v = parsed['enableProxy'];
+    proxyHost.v = parsed['proxyHost'];
+    proxyPort.v = parsed['proxyPort'];
+    enableAppProxy.v = parsed['enableAppProxy'];
+    appProxyHost.v = parsed['appProxyHost'];
+    appProxyPort.v = parsed['appProxyPort'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

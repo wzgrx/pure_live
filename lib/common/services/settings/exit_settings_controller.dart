@@ -111,11 +111,22 @@ class ExitSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'dontAskExit': (json['dontAskExit'] ?? false) as bool,
+      'exitChoose': (json['exitChoose'] ?? '') as String,
+      'autoShutDownTime': (json['autoShutDownTime'] ?? 120) as int,
+      'enableAutoShutDownTime': (json['enableAutoShutDownTime'] ?? false) as bool,
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    dontAskExit.v = json['dontAskExit'] ?? false;
-    exitChoose.v = json['exitChoose'] ?? '';
-    autoShutDownTime.v = json['autoShutDownTime'] ?? 120;
-    enableAutoShutDownTime.v = json['enableAutoShutDownTime'] ?? false;
+    final parsed = parseConfig(json);
+    dontAskExit.v = parsed['dontAskExit'];
+    exitChoose.v = parsed['exitChoose'];
+    autoShutDownTime.v = parsed['autoShutDownTime'];
+    enableAutoShutDownTime.v = parsed['enableAutoShutDownTime'];
   }
 
   @override

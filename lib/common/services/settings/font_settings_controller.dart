@@ -222,16 +222,32 @@ class FontSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'textScaleFactor': ((json['textScaleFactor'] ?? 1.0) as num).toDouble(),
+      'fontSizeBodySmall': ((json['fontSizeBodySmall'] ?? 12.0) as num).toDouble(),
+      'fontSizeBodyMedium': ((json['fontSizeBodyMedium'] ?? 13.0) as num).toDouble(),
+      'fontSizeBodyLarge': ((json['fontSizeBodyLarge'] ?? 14.0) as num).toDouble(),
+      'fontSizeTitleMedium': ((json['fontSizeTitleMedium'] ?? 15.0) as num).toDouble(),
+      'fontSizeTitleLarge': ((json['fontSizeTitleLarge'] ?? 20.0) as num).toDouble(),
+      'fontFamilyName': (json['fontFamilyName'] ?? 'Default') as String,
+      'fontFamilyFileName': (json['fontFamilyFileName'] ?? '') as String,
+      'danmakuFontFamilyFileName': (json['danmakuFontFamilyFileName'] ?? '') as String,
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    textScaleFactor.v = json['textScaleFactor'] ?? 1.0;
-    fontSizeBodySmall.v = json['fontSizeBodySmall'] ?? 12.0;
-    fontSizeBodyMedium.v = json['fontSizeBodyMedium'] ?? 13.0;
-    fontSizeBodyLarge.v = json['fontSizeBodyLarge'] ?? 14.0;
-    fontSizeTitleMedium.v = json['fontSizeTitleMedium'] ?? 15.0;
-    fontSizeTitleLarge.v = json['fontSizeTitleLarge'] ?? 20.0;
-    fontFamilyName.v = json['fontFamilyName'] ?? 'Default';
-    fontFamilyFileName.v = json['fontFamilyFileName'] ?? '';
-    danmakuFontFamilyFileName.v = json['danmakuFontFamilyFileName'] ?? '';
+    final parsed = parseConfig(json);
+    textScaleFactor.v = parsed['textScaleFactor'];
+    fontSizeBodySmall.v = parsed['fontSizeBodySmall'];
+    fontSizeBodyMedium.v = parsed['fontSizeBodyMedium'];
+    fontSizeBodyLarge.v = parsed['fontSizeBodyLarge'];
+    fontSizeTitleMedium.v = parsed['fontSizeTitleMedium'];
+    fontSizeTitleLarge.v = parsed['fontSizeTitleLarge'];
+    fontFamilyName.v = parsed['fontFamilyName'];
+    fontFamilyFileName.v = parsed['fontFamilyFileName'];
+    danmakuFontFamilyFileName.v = parsed['danmakuFontFamilyFileName'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

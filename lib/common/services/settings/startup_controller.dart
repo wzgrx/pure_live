@@ -1,4 +1,5 @@
 import 'dart:developer' as dev;
+
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/core/site/huya/huya_site.dart';
 import 'package:pure_live/common/global/win_auto_start.dart';
@@ -50,8 +51,14 @@ class StartupController extends GetxController {
     return {'enableStartUp': enableStartUp.v};
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {'enableStartUp': (json['enableStartUp'] ?? true) as bool};
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    enableStartUp.v = json['enableStartUp'] ?? true;
+    final parsed = parseConfig(json);
+    enableStartUp.v = parsed['enableStartUp'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

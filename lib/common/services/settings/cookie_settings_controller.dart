@@ -35,15 +35,30 @@ class CookieSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'bilibiliCookie': (json['bilibiliCookie'] ?? '') as String,
+      'huyaCookie': (json['huyaCookie'] ?? '') as String,
+      'douyinCookie': (json['douyinCookie'] ?? '') as String,
+      'kuaishouCookie': (json['kuaishouCookie'] ?? '') as String,
+      'bilibiliUid': (json['bilibiliUid'] ?? 0) as int,
+      'twitchCookie': (json['twitchCookie'] ?? '') as String,
+      'soopCookie': (json['soopCookie'] ?? '') as String,
+      'yyCookie': (json['yyCookie'] ?? '') as String,
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    bilibiliCookie.v = json['bilibiliCookie'] ?? '';
-    huyaCookie.v = json['huyaCookie'] ?? '';
-    douyinCookie.v = json['douyinCookie'] ?? '';
-    kuaishouCookie.v = json['kuaishouCookie'] ?? '';
-    bilibiliUid.v = json['bilibiliUid'] ?? 0;
-    twitchCookie.v = json['twitchCookie'] ?? '';
-    soopCookie.v = json['soopCookie'] ?? '';
-    yyCookie.v = json['yyCookie'] ?? '';
+    final parsed = parseConfig(json);
+    bilibiliCookie.v = parsed['bilibiliCookie'];
+    huyaCookie.v = parsed['huyaCookie'];
+    douyinCookie.v = parsed['douyinCookie'];
+    kuaishouCookie.v = parsed['kuaishouCookie'];
+    bilibiliUid.v = parsed['bilibiliUid'];
+    twitchCookie.v = parsed['twitchCookie'];
+    soopCookie.v = parsed['soopCookie'];
+    yyCookie.v = parsed['yyCookie'];
 
     BiliBiliAccountService.instance.setCookie(bilibiliCookie.v);
     BiliBiliAccountService.instance.loadUserInfo();

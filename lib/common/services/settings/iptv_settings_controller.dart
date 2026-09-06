@@ -51,13 +51,26 @@ class IptvSettingsController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'selectedSourceName': (json['selectedSourceName'] ?? '') as String,
+      'selectedSourceId': (json['selectedSourceId'] ?? '') as String,
+      'isAutoSyncEnabled': (json['isAutoSyncEnabled'] ?? false) as bool,
+      'autoSyncHoursInterval': (json['autoSyncHoursInterval'] ?? 24) as int,
+      'customIptvUserAgent': (json['customIptvUserAgent'] ?? '') as String,
+      'm3uDirectory': (json['m3uDirectory'] ?? 'm3uDirectory') as String,
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    selectedSourceName.v = json['selectedSourceName'] ?? '';
-    selectedSourceId.v = json['selectedSourceId'] ?? '';
-    isAutoSyncEnabled.v = json['isAutoSyncEnabled'] ?? false;
-    autoSyncHoursInterval.v = json['autoSyncHoursInterval'] ?? 24;
-    customIptvUserAgent.v = json['customIptvUserAgent'] ?? '';
-    m3uDirectory.v = json['m3uDirectory'] ?? 'm3uDirectory';
+    final parsed = parseConfig(json);
+    selectedSourceName.v = parsed['selectedSourceName'];
+    selectedSourceId.v = parsed['selectedSourceId'];
+    isAutoSyncEnabled.v = parsed['isAutoSyncEnabled'];
+    autoSyncHoursInterval.v = parsed['autoSyncHoursInterval'];
+    customIptvUserAgent.v = parsed['customIptvUserAgent'];
+    m3uDirectory.v = parsed['m3uDirectory'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

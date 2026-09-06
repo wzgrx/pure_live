@@ -76,6 +76,24 @@ class BackupController extends GetxController {
 
     // Pure preflight. Extend with the remaining controller parsers before
     // treating this as an all-settings validation boundary.
+    if (version != null) validateSectionStructure(data);
+    final parsers = <String, Map<String, dynamic> Function(Map<String, dynamic>)>{
+      'theme': ThemeSettingsController.parseConfig,
+      'font': FontSettingsController.parseConfig,
+      'exit': ExitSettingsController.parseConfig,
+      'iptv': IptvSettingsController.parseConfig,
+      'startup': StartupController.parseConfig,
+      'proxy': ProxySettingsController.parseConfig,
+      'refresh': RefreshConfigController.parseConfig,
+      'cookie': CookieSettingsController.parseConfig,
+    };
+    for (final entry in parsers.entries) {
+      if (version == null) {
+        entry.value(data);
+      } else if (data.containsKey(entry.key)) {
+        entry.value(Map<String, dynamic>.from(data[entry.key] ?? {}));
+      }
+    }
     if (version == null) {
       VolumeSettingsController.parseConfig(data);
     } else {

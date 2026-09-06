@@ -65,13 +65,26 @@ class RefreshConfigController extends GetxController {
     };
   }
 
+  /// Parse the complete section without notifying observers or persisting values.
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'autoRefreshFavorite': (json['autoRefreshFavorite'] ?? false) as bool,
+      'refreshFavoriteOnResume': (json['refreshFavoriteOnResume'] ?? true) as bool,
+      'autoRefreshInterval': (json['autoRefreshInterval'] ?? 30) as int,
+      'maxConcurrentRefresh': normalizeMaxConcurrentRefresh(json['maxConcurrentRefresh']),
+      'autoRefreshThumbnails': (json['autoRefreshThumbnails'] ?? false) as bool,
+      'thumbnailRefreshInterval': (json['thumbnailRefreshInterval'] ?? 30) as int,
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    autoRefreshFavorite.v = json['autoRefreshFavorite'] ?? false;
-    refreshFavoriteOnResume.v = json['refreshFavoriteOnResume'] ?? true;
-    autoRefreshInterval.v = json['autoRefreshInterval'] ?? 30;
-    maxConcurrentRefresh.v = normalizeMaxConcurrentRefresh(json['maxConcurrentRefresh']);
-    autoRefreshThumbnails.v = json['autoRefreshThumbnails'] ?? false;
-    thumbnailRefreshInterval.v = json['thumbnailRefreshInterval'] ?? 30;
+    final parsed = parseConfig(json);
+    autoRefreshFavorite.v = parsed['autoRefreshFavorite'];
+    refreshFavoriteOnResume.v = parsed['refreshFavoriteOnResume'];
+    autoRefreshInterval.v = parsed['autoRefreshInterval'];
+    maxConcurrentRefresh.v = parsed['maxConcurrentRefresh'];
+    autoRefreshThumbnails.v = parsed['autoRefreshThumbnails'];
+    thumbnailRefreshInterval.v = parsed['thumbnailRefreshInterval'];
   }
 
   @override

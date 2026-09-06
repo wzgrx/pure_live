@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$CommandLine,
+    [string]$Serial = $env:PURELIVE_ADB_SERIAL,
     [switch]$Pass,
     [switch]$NoRotation,
     [int]$TimeoutMinutes = 180,
@@ -37,10 +38,17 @@ $rawCommand = if ($Pass.IsPresent) {
     $CommandLine
 }
 $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($rawCommand))
+$encodedSerial = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$Serial))
 $effectiveCommand = @"
 `$turnFailure = `$null
+`$wakeState = `$null
 try {
-    `$wakeOutput = @(& '.\tool\wake_android_device.ps1' -StayAwake)
+    `$requestedSerial = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('$encodedSerial'))
+    `$wakeArguments = @{ StayAwake = `$true }
+    if (-not [string]::IsNullOrWhiteSpace(`$requestedSerial)) {
+        `$wakeArguments.Serial = `$requestedSerial
+    }
+    `$wakeOutput = @(& '.\tool\wake_android_device.ps1' @wakeArguments)
     if (`$LASTEXITCODE -ne 0) { throw "Device wake guard exited with code `$LASTEXITCODE." }
     `$wakeOutput | Write-Output
     `$wakeState = `$wakeOutput | Select-Object -Last 1 | ConvertFrom-Json
@@ -55,12 +63,13 @@ try {
     `$turnFailure = `$_
 } finally {
     try {
-        `$releaseArguments = @{ ReleaseStayAwake = `$true }
-        if (-not [string]::IsNullOrWhiteSpace(`$env:PURELIVE_ADB_SERIAL)) {
-            `$releaseArguments.Serial = `$env:PURELIVE_ADB_SERIAL
+        # Only release the target whose wake guard actually acquired stay-awake.
+        # A failed/ambiguous discovery must not mutate a stale environment target.
+        if (`$null -ne `$wakeState -and `$wakeState.StayAwake -and
+            -not [string]::IsNullOrWhiteSpace([string]`$wakeState.Serial)) {
+            & '.\tool\wake_android_device.ps1' -ReleaseStayAwake -Serial ([string]`$wakeState.Serial)
+            if (`$LASTEXITCODE -ne 0) { throw "Device wake guard cleanup exited with code `$LASTEXITCODE." }
         }
-        & '.\tool\wake_android_device.ps1' @releaseArguments
-        if (`$LASTEXITCODE -ne 0) { throw "Device wake guard cleanup exited with code `$LASTEXITCODE." }
     } catch {
         if (`$null -eq `$turnFailure) { `$turnFailure = `$_ }
         else { Write-Warning ('Device wake guard cleanup also failed: ' + [string]`$_.Exception.Message) }

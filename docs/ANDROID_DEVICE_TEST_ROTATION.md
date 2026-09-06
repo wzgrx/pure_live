@@ -4,6 +4,8 @@
 
 用户已暂停三个任务轮转。本次完整验收使用 `tool/run_android_device_test_turn.ps1 -NoRotation -CommandLine '…'` 直接执行本项目的串行设备步骤，保留唤醒、常亮恢复、前台校验和失败清理。网络 ADB 在线先测 Android，离线改测 Windows；不等待其他任务交棒，也不操作其他应用。恢复共享实机安排时再使用下面的默认租约流程。此开关只改变调度，不代表绕过设备检查。
 
+多条在线 transport 时，包装器使用 `-Serial IP:PORT` 明确选择，或从当前进程 `PURELIVE_ADB_SERIAL` 读取默认值；显式参数优先。该编号经编码传给唤醒步骤，成功后再传给测试正文。清理只针对唤醒成功的同一编号，不跟随正文改写的环境变量；预检选择失败时不对旧环境目标执行常亮清理。离线回归命令为 `python -m unittest discover -s tool/tests -p test_android_device_test_turn.py`，只执行假的唤醒脚本，不调用 ADB。
+
 国外平台可在同一包装器中调用 `tool/android_foreign_recording_smoke.ps1 -Platform twitch -ExerciseStreamSelection`，完成画质/线路选择与短录，结束后恢复代理默认值。录制器独立选择录制画质，短录通过不代表它继承了播放器选择。
 
 同一台 Android 手机同时服务三个 Codex 任务。所有会读取或改变实机运行状态的测试按固定顺序串行：

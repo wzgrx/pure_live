@@ -140,3 +140,20 @@ GetX stream 并非同步投递，首次实现的同步收集窗口遗漏后续�
 最终 **22/22** 页面、导入和往返测试通过：`20260906T171212019Z-quality-focused.json`；页面四种目录行为均已转绿。该 UI 简化尚未构建新的原生候选，上节 EXE/APK 仍对应 `9c20ad11`，不得据旧候选宣称此增量已完成原生验收。
 
 最终独立 analyze 通过：`20260906T171623822Z-quality-focused.json`，No issues found（158.8 秒），结束活跃重型进程 0。测试通过记录和 analyze 记录均以 `9d02305b` 为提交基准，包含上述两处产品修改及新增页面测试，后续提交固化相同源码。完整 1213/42 门禁仍是前一批基准，并非本增量的完整重跑。
+
+## 首次导出新入口的完整门禁及 Windows 原生验收
+
+`cb0082e1` 干净提交（包含首次导出简化及 WebDAV 空目录/协议日志修复）完成新一轮完整门禁：**1223/1223 测试、42/42 公开接口探针、analyze 无问题**。记录 `20260906T173500498Z-quality-full.json`，329.895 秒。Windows x64 Debug 随后构建成功，`20260906T173808861Z-build-windowsx64-debug.json`；同一命令总计 518.432 秒，实际 Flutter 构建 110.3 秒，结束活跃重型进程 0。版本保持 3.1.8+4121，旧安装器没有作为本轮新产物。
+
+新 ZIP SHA-256：`EA06A954A23642ECDD2C6BF17C10534FD57B664269FDF44ECCB6AE45B3C5AA9E`；运行目录 Dart `kernel_blob.bin` SHA-256：`81EC576F5F6D432AB40267587BE90326C06776C50B1C8330C5696952BEB35849`。Debug runner EXE 本身与上一包哈希相同，因此不单用 EXE 哈希判断 Dart 应用源码；同时核对构建元数据、kernel 与实际行为。旧 `9c20ad11` ZIP 和元数据已保留至 `local-artifacts/candidates/windows-9c20ad11-debug/`，旧 ZIP 哈希复核一致。
+
+原生操作使用没有 AppData 的候选目录开始：
+
+1. 备份目录显示尚未设置，直接点击“创建备份”即出现系统目录选择器，不再要求预先设置目录。
+2. 取消选择后备份目录仍为空，Hive 哈希前后完全相同；没有创建新备份。
+3. 再次创建，只需选择一次目录即显示成功，页面自动记住目录。实际生成 v3 备份 5,463 B，`sensitiveDataIncluded: false`，SHA-256 与上一批同默认配置备份一致。
+4. 正常退出并重新启动，再进入备份页面，所选目录仍保留，证明本次原生路径经过持久化而不只是内存更新。
+
+证据 `local-artifacts/backup-first-run-native-20260907/`（候选哈希、取消/导出/重启结果）。本次生成的 AppData 在正常退出后完整保留于该目录的 `candidate-AppData`。本轮导出文件保留在 `local-artifacts/backup-native-20260907/purelive_2026-09-07T01_40_49.txt`；没有触及用户云端数据或其他安装目录。
+
+这关闭 Windows 首次导出入口的待验收项；Android 新入口及其他工作组继续。原生顺带复现的 WebDAV 无配置刷新错误单独见 WebDAV 目录审计，不以完整门禁通过宣称所有界面正常。

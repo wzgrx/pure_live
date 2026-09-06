@@ -29,6 +29,7 @@ class WebDavPageController extends GetxController {
   final RxList<webdav.File> files = <webdav.File>[].obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  final RxString configurationIssueKey = ''.obs;
   final RxString dirPath = '/'.obs;
   final RxList<String> breadcrumbParts = <String>[].obs;
   final RxBool isFromBreadcrumb = false.obs;
@@ -49,10 +50,7 @@ class WebDavPageController extends GetxController {
     super.onInit();
     // 从全局 WebDavController 读取配置
     configs.assignAll(_webDavController.webDavConfigs.v);
-    if (_webDavController.currentWebDavConfig.v.isNotEmpty) {
-      currentConfig.value = WebDAVConfig.fromJson(jsonDecode(_webDavController.currentWebDavConfig.v));
-      initializeWebDAV();
-    }
+    _restoreSelection();
 
     // 监听同步到全局
     _configsSubscription = configs.listen((_) {
@@ -67,6 +65,32 @@ class WebDavPageController extends GetxController {
         _webDavController.currentWebDavConfig.v = '';
       }
     });
+  }
+
+  void _restoreSelection() {
+    final raw = _webDavController.currentWebDavConfig.v;
+    if (raw.isEmpty) return;
+    // The saved snapshot identifies a selection, not a second source of
+    // connection credentials. Opening the page must not rewrite damaged data.
+    configurationIssueKey.value = 'webdav_saved_selection_invalid';
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(raw);
+    } on FormatException {
+      return;
+    }
+    if (decoded is! Map<String, dynamic>) return;
+    final name = decoded['name'];
+    if (name is! String || name.trim().isEmpty) return;
+    final matches = configs.where((config) => config.name == name).toList();
+    if (matches.length != 1) return;
+    final selected = matches.single;
+    if (!WebDAVConfig.isValidAddress(selected.address)) {
+      configurationIssueKey.value = 'webdav_saved_address_invalid';
+      return;
+    }
+    currentConfig.value = selected;
+    initializeWebDAV();
   }
 
   @override
@@ -91,6 +115,7 @@ class WebDavPageController extends GetxController {
     _serviceConfig = currentConfig.value;
     files.clear();
     errorMessage.value = '';
+    configurationIssueKey.value = '';
     isLoading.value = false;
     if (_serviceConfig == null) {
       dirPath.value = '/';
@@ -98,6 +123,10 @@ class WebDavPageController extends GetxController {
       return;
     }
     rebuildBreadcrumb();
+    if (!WebDAVConfig.isValidAddress(_serviceConfig!.address)) {
+      errorMessage.value = i18n('webdav_saved_address_invalid');
+      return;
+    }
     _webdavService = _serviceFactory(_serviceConfig!);
     unawaited(loadFiles());
   }
@@ -121,7 +150,7 @@ class WebDavPageController extends GetxController {
     final epoch = _serviceEpoch;
     if (service == null || !_ownsService(service, epoch)) {
       files.clear();
-      errorMessage.value = '';
+      if (currentConfig.value == null) errorMessage.value = '';
       isLoading.value = false;
       return;
     }

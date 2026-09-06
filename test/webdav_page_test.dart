@@ -126,6 +126,52 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  void reloadStoredSelection(String raw, List<WebDAVConfig> configs) {
+    Get.delete<WebDavPageController>(force: true);
+    final settings = Get.find<WebDavController>();
+    settings.currentWebDavConfig.v = raw;
+    settings.webDavConfigs.v = configs;
+    controller = Get.put(WebDavPageController(serviceFactory: (_) => service));
+  }
+
+  testWidgets('orphan selection keeps a usable creation entry and warning after refresh with large text', (
+    tester,
+  ) async {
+    final raw = jsonEncode(
+      const WebDAVConfig(name: 'orphan', address: 'https://example.test', username: '', password: '').toJson(),
+    );
+    reloadStoredSelection(raw, []);
+    await openPage(tester, size: const Size(320, 480), textScale: 2);
+    await controller.loadFiles();
+    await tester.pumpAndSettle();
+    expect(find.text(translations['webdav_saved_selection_invalid']), findsOneWidget);
+    expect(service.reads, isEmpty);
+    expect(Get.find<WebDavController>().currentWebDavConfig.v, raw);
+    await tester.ensureVisible(find.text('创建新配置'));
+    await openCreateDialog(tester);
+    expect(find.byType(TextFormField), findsNWidgets(4));
+    await tester.tap(find.text('取消'));
+    await finish(tester);
+  });
+
+  testWidgets('damaged selection offers the existing list and explicit selection clears the warning', (tester) async {
+    const saved = WebDAVConfig(name: 'fixture', address: 'http://127.0.0.1', username: '', password: '');
+    reloadStoredSelection('{broken', [saved]);
+    await openPage(tester);
+    expect(find.text(translations['webdav_saved_selection_invalid']), findsOneWidget);
+    expect(service.reads, isEmpty);
+    await tester.tap(find.text(translations['webdav_open_config_list']));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('fixture').last);
+    await completeReads(tester);
+    expect(controller.currentConfig.value, same(saved));
+    expect(controller.configurationIssueKey.value, isEmpty);
+    expect(find.text(translations['webdav_saved_selection_invalid']), findsNothing);
+    expect(service.reads, hasLength(1));
+    expect(jsonDecode(Get.find<WebDavController>().currentWebDavConfig.v), saved.toJson());
+    await finish(tester);
+  });
+
   testWidgets('cancelling a focused config form keeps its controllers alive through the route transition', (
     tester,
   ) async {

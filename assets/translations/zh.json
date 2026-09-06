@@ -632,6 +632,8 @@
     "webdav": "WebDav",
     "webdav_add": "添加",
     "webdav_add_new_config": "添加新配置",
+    "webdav_saved_selection_invalid": "已保存的选择已失效，请重新选择或创建配置。原始数据已保留。",
+    "webdav_saved_address_invalid": "已保存的目录地址格式有误，请在配置列表中编辑地址。",
     "webdav_address": "地址",
     "webdav_address_empty": "地址不能为空",
     "webdav_address_invalid": "请输入有效的 HTTP(S) 目录地址，不含账号、? 或 #",

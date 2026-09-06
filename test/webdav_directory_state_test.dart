@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:pure_live/common/services/settings/backup_controller.dart';
 import 'package:pure_live/common/services/settings/web_dav_controller.dart';
+import 'package:pure_live/common/services/utils/hive_rx.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/modules/web_dav/web_dav_controller.dart';
@@ -22,6 +23,7 @@ void main() {
   late List<_Service> services;
   late _BackupController backup;
   late Completer<bool> confirmation;
+  late List<WebDAVConfig> connectedConfigs;
 
   setUpAll(() async {
     hiveDirectory = await Directory.systemTemp.createTemp('webdav-directory-state-');
@@ -36,9 +38,11 @@ void main() {
     Get.put<BackupController>(backup);
     confirmation = Completer<bool>();
     services = [];
+    connectedConfigs = [];
     controller = WebDavPageController(
       confirmDelete: () => confirmation.future,
-      serviceFactory: (_) {
+      serviceFactory: (selected) {
+        connectedConfigs.add(selected);
         final service = _Service();
         services.add(service);
         return service;
@@ -58,6 +62,8 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     Get.deleteAll(force: true);
     Get.reset();
+    await Future<void>.delayed(Duration.zero);
+    await Hive.box('app_settings').clear();
   });
 
   tearDownAll(() async {
@@ -72,6 +78,84 @@ void main() {
   }
 
   Future<void> settle() => Future<void>.delayed(Duration.zero);
+
+  Future<void> seed(String selection, List<WebDAVConfig> entries) async {
+    final settings = Get.find<WebDavController>();
+    settings.webDavConfigs.v = entries;
+    settings.currentWebDavConfig.v = selection;
+    await settle();
+  }
+
+  for (final raw in ['{broken', 'null', '[]', '42', '{"name":7}', '{}']) {
+    test('invalid stored selection $raw preserves data and opens without a connection', () async {
+      await seed(raw, [config]);
+      expect(controller.onInit, returnsNormally);
+      await settle();
+      expect(controller.currentConfig.value, isNull);
+      expect(controller.configs, [config]);
+      expect(services, isEmpty);
+      expect(Get.find<WebDavController>().currentWebDavConfig.v, raw);
+      expect(Hive.box('app_settings').get('currentWebDavConfig'), raw);
+      expect(controller.configurationIssueKey.value, isNotEmpty);
+      await controller.loadFiles();
+      expect(controller.configurationIssueKey.value, isNotEmpty);
+      expect(services, isEmpty);
+    });
+  }
+
+  test('orphaned stored selection never connects or rewrites persistent data', () async {
+    final raw = jsonEncode(config.toJson());
+    await seed(raw, []);
+    controller.onInit();
+    await settle();
+    expect(controller.currentConfig.value, isNull);
+    expect(services, isEmpty);
+    expect(Get.find<WebDavController>().currentWebDavConfig.v, raw);
+    expect(Get.find<WebDavController>().webDavConfigs.v, isEmpty);
+  });
+
+  test('stored selection resolves to the authoritative list object including anonymous credentials', () async {
+    const stale = WebDAVConfig(name: 'fixture', address: 'https://old.example.test', username: 'old', password: 'old');
+    final raw = jsonEncode(stale.toJson());
+    await seed(raw, [config]);
+    controller.onInit();
+    await settle();
+    expect(controller.currentConfig.value, same(config));
+    expect(connectedConfigs.single, same(config));
+    expect(Get.find<WebDavController>().currentWebDavConfig.v, raw);
+  });
+
+  test('invalid saved address remains editable and refresh never creates a service', () async {
+    const invalid = WebDAVConfig(name: 'fixture', address: 'file:///tmp/dav', username: '', password: '');
+    await seed(jsonEncode(invalid.toJson()), [invalid]);
+    controller.onInit();
+    expect(services, isEmpty);
+    expect(controller.configs.single, same(invalid));
+    await controller.loadFiles();
+    expect(services, isEmpty);
+    // A user may select the invalid list entry again before editing it.
+    controller.currentConfig.value = invalid;
+    controller.initializeWebDAV();
+    expect(controller.errorMessage.value, isNotEmpty);
+    await controller.loadFiles();
+    expect(controller.errorMessage.value, isNotEmpty);
+    expect(services, isEmpty);
+  });
+
+  test('ambiguous duplicate names require an explicit selection', () async {
+    await seed(jsonEncode(config.toJson()), [config, config]);
+    controller.onInit();
+    expect(controller.currentConfig.value, isNull);
+    expect(controller.configurationIssueKey.value, isNotEmpty);
+    expect(services, isEmpty);
+  });
+
+  test('selection snapshot fields other than the name do not override the list', () async {
+    await seed('{"name":"fixture","address":7,"password":null}', [config]);
+    controller.onInit();
+    expect(connectedConfigs.single, same(config));
+    expect(controller.configurationIssueKey.value, isEmpty);
+  });
 
   test('refresh without a selected configuration keeps the creation state', () async {
     await controller.loadFiles();

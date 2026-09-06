@@ -227,12 +227,15 @@ class _WebDavPageState extends State<WebDavPage> {
     return Obx(() {
       if (controller.configs.isEmpty) {
         return SliverFillRemaining(
+          hasScrollBody: false,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.add_circle_outline, size: 48),
                 const SizedBox(height: 16),
+                ..._configurationIssueKeyWidgets(),
                 Text(i18n("webdav_no_config_create_first")),
                 TextButton(onPressed: () => _showConfigDialog(), child: Text(i18n("webdav_create_new_config"))),
               ],
@@ -243,12 +246,15 @@ class _WebDavPageState extends State<WebDavPage> {
 
       if (controller.currentConfig.value == null) {
         return SliverFillRemaining(
+          hasScrollBody: false,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.cloud_queue, size: 48),
                 const SizedBox(height: 16),
+                ..._configurationIssueKeyWidgets(),
                 Text(i18n("webdav_select_config_from_sidebar")),
                 TextButton(
                   onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
@@ -282,6 +288,14 @@ class _WebDavPageState extends State<WebDavPage> {
       );
     });
   }
+
+  List<Widget> _configurationIssueKeyWidgets() => [
+    if (controller.configurationIssueKey.value.isNotEmpty)
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        child: Text(i18n(controller.configurationIssueKey.value), textAlign: TextAlign.center),
+      ),
+  ];
 
   Widget _buildFileItem(webdav.File file, int index) {
     return ListTile(

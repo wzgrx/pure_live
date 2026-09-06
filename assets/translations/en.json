@@ -631,6 +631,8 @@
     "webdav": "WebDav",
     "webdav_add": "Add",
     "webdav_add_new_config": "Add New Config",
+    "webdav_saved_selection_invalid": "The saved selection is invalid. Select or create a configuration. Original data has been kept.",
+    "webdav_saved_address_invalid": "The saved directory URL is invalid. Edit the address in the configuration list.",
     "webdav_address": "Address",
     "webdav_address_empty": "Address cannot be empty",
     "webdav_address_invalid": "Use an HTTP(S) directory URL without credentials, query or fragment.",

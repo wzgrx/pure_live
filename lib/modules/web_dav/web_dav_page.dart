@@ -37,7 +37,12 @@ class _WebDavPageState extends State<WebDavPage> {
       backgroundColor: Theme.of(Get.context!).colorScheme.surface,
       body: CustomScrollView(
         physics: const PureLiveScrollPhysics(),
-        slivers: [_buildAppBar(), _buildNavigationBar(), _buildBodyContent()],
+        slivers: [
+          _buildAppBar(),
+          _buildNavigationBar(),
+          SliverToBoxAdapter(child: _buildFileActionStatus()),
+          _buildBodyContent(),
+        ],
       ),
       endDrawer: _buildDrawer(),
       floatingActionButton: Obx(
@@ -51,6 +56,21 @@ class _WebDavPageState extends State<WebDavPage> {
       ),
     );
   }
+
+  Widget _buildFileActionStatus() => Obx(() {
+    final key = controller.fileActionLabelKey.value;
+    if (key.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      child: Column(
+        children: [
+          Text(i18n(key)),
+          const SizedBox(height: 6),
+          LinearProgressIndicator(semanticsLabel: i18n(key)),
+        ],
+      ),
+    );
+  });
 
   Widget _buildDrawer() {
     return Drawer(
@@ -326,19 +346,22 @@ class _WebDavPageState extends State<WebDavPage> {
         file.mTime?.toString() ?? i18n("webdav_unknown_time"),
         style: TextStyle(color: Theme.of(Get.context!).colorScheme.onSurfaceVariant),
       ),
-      trailing: PopupMenuButton<String>(
-        icon: Icon(Icons.more_vert, color: Theme.of(Get.context!).colorScheme.onSurface),
-        itemBuilder: (context) => [
-          if (file.isDir != true) PopupMenuItem(value: 'Download', child: Text(i18n("webdav_sync_to_local"))),
-          PopupMenuItem(value: 'Delete', child: Text(i18n("webdav_delete"))),
-        ],
-        onSelected: (value) {
-          if (value == 'Download') {
-            controller.downloadFile(file);
-          } else if (value == 'Delete') {
-            controller.deleteFile(file);
-          }
-        },
+      trailing: Obx(
+        () => PopupMenuButton<String>(
+          enabled: controller.canStartFileAction,
+          icon: Icon(Icons.more_vert, color: Theme.of(Get.context!).colorScheme.onSurface),
+          itemBuilder: (context) => [
+            if (file.isDir != true) PopupMenuItem(value: 'Download', child: Text(i18n("webdav_sync_to_local"))),
+            PopupMenuItem(value: 'Delete', child: Text(i18n("webdav_delete"))),
+          ],
+          onSelected: (value) {
+            if (value == 'Download') {
+              controller.downloadFile(file);
+            } else if (value == 'Delete') {
+              controller.deleteFile(file);
+            }
+          },
+        ),
       ),
       onTap: () => controller.onFileTap(file),
     );

@@ -436,6 +436,85 @@ void main() {
     expect(service.uploads, hasLength(2));
     await finish(tester);
   });
+
+  Future<void> showBackupFile(WidgetTester tester) async {
+    await openPage(tester);
+    selectConfig();
+    service.reads.single.complete([webdav.File(name: 'backup.txt', path: '/backup.txt', isDir: false)]);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> openFileMenu(WidgetTester tester) async {
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('restore menu shows busy state and blocks conflicting operations through local persistence', (
+    tester,
+  ) async {
+    await showBackupFile(tester);
+    await openFileMenu(tester);
+    await tester.tap(find.text(translations['webdav_sync_to_local']));
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.text(translations['webdav_restoring']), findsOneWidget);
+    expect(tester.widget<PopupMenuButton<String>>(find.byType(PopupMenuButton<String>)).enabled, isFalse);
+    expect(tester.widget<FloatingActionButton>(find.byType(FloatingActionButton)).onPressed, isNull);
+    await controller.downloadFile(webdav.File(path: '/backup.txt'));
+    await controller.uploadConfigSettings();
+    expect(service.downloadPaths, ['/backup.txt']);
+    expect(service.uploads, isEmpty);
+    expect(backup.restores, hasLength(1));
+    backup.restore.complete();
+    await tester.pumpAndSettle();
+    expect(find.text(translations['webdav_restoring']), findsNothing);
+    expect(tester.widget<PopupMenuButton<String>>(find.byType(PopupMenuButton<String>)).enabled, isTrue);
+    await finish(tester);
+  });
+
+  testWidgets('delete confirmation cancel and network failure both restore a working retry entry', (tester) async {
+    await showBackupFile(tester);
+    await openFileMenu(tester);
+    await tester.tap(find.text(translations['webdav_delete']));
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.tap(find.text(translations['cancel']));
+    await tester.pumpAndSettle();
+    expect(service.deletePaths, isEmpty);
+    expect(controller.canStartFileAction, isTrue);
+
+    for (var attempt = 0; attempt < 2; attempt++) {
+      await openFileMenu(tester);
+      await tester.tap(find.text(translations['webdav_delete']));
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.tap(find.text(translations['confirm']));
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(controller.canStartFileAction, isFalse);
+      if (attempt == 0) {
+        service.deletions.last.completeError(StateError('fixture delete failure'));
+        await tester.pumpAndSettle();
+        expect(find.textContaining(translations['webdav_delete_failed']), findsOneWidget);
+      } else {
+        service.deletions.last.complete();
+        await tester.pump();
+        await completeReads(tester);
+      }
+      expect(controller.canStartFileAction, isTrue);
+    }
+    expect(service.deletePaths, ['/backup.txt', '/backup.txt']);
+    await finish(tester);
+  });
+
+  testWidgets('invalid downloaded JSON releases the menu without beginning a settings restore', (tester) async {
+    service.downloadBytes = utf8.encode('{invalid');
+    await showBackupFile(tester);
+    await openFileMenu(tester);
+    await tester.tap(find.text(translations['webdav_sync_to_local']));
+    await tester.pumpAndSettle();
+    expect(backup.restores, isEmpty);
+    expect(controller.canStartFileAction, isTrue);
+    expect(find.textContaining(translations['webdav_download_failed']), findsOneWidget);
+    await finish(tester);
+  });
 }
 
 class _MemoryAssetLoader extends AssetLoader {
@@ -464,6 +543,18 @@ class _Service extends WebDAVService {
   final uploads = <Completer<void>>[];
   final uploadPaths = <String>[];
   final uploadBytes = <List<int>>[];
+  final downloadPaths = <String>[];
+  List<int> downloadBytes = utf8.encode('{"backupVersion":3}');
+  final deletePaths = <String>[];
+  final deletions = <Completer<void>>[];
+
+  @override
+  Future<void> removeFile(String path) {
+    deletePaths.add(path);
+    final pending = Completer<void>();
+    deletions.add(pending);
+    return pending.future;
+  }
 
   @override
   Future<void> writeFile(String path, List<int> bytes) {
@@ -482,7 +573,10 @@ class _Service extends WebDAVService {
   }
 
   @override
-  Future<List<int>> readFile(String path) async => utf8.encode('{"backupVersion":3}');
+  Future<List<int>> readFile(String path) async {
+    downloadPaths.add(path);
+    return downloadBytes;
+  }
 }
 
 class _BackupController extends BackupController {

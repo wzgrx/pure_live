@@ -16,13 +16,16 @@ class WebDavPageController extends GetxController {
     WebDAVService Function(WebDAVConfig)? serviceFactory,
     Future<bool> Function()? confirmDelete,
     DateTime Function()? now,
+    void Function(String message, {bool isError})? feedback,
   }) : _serviceFactory = serviceFactory ?? _createService,
        _confirmDelete = confirmDelete ?? _showDeleteConfirmation,
-       _now = now ?? DateTime.now;
+       _now = now ?? DateTime.now,
+       _feedback = feedback ?? _showTransferFeedback;
 
   final WebDAVService Function(WebDAVConfig) _serviceFactory;
   final Future<bool> Function() _confirmDelete;
   final DateTime Function() _now;
+  final void Function(String message, {bool isError}) _feedback;
 
   static Future<bool> _showDeleteConfirmation() =>
       Utils.showAlertDialog(i18n("webdav_confirm_delete"), title: i18n("webdav_delete"));
@@ -30,7 +33,7 @@ class WebDavPageController extends GetxController {
   static WebDAVService _createService(WebDAVConfig config) =>
       WebDAVService(url: config.fullUrl, username: config.username, password: config.password);
 
-  static void _showUploadFeedback(String message, {bool isError = false}) {
+  static void _showTransferFeedback(String message, {bool isError = false}) {
     final context = Get.context;
     if (context == null) return;
     final messenger = ScaffoldMessenger.maybeOf(context);
@@ -52,6 +55,9 @@ class WebDavPageController extends GetxController {
   final RxList<webdav.File> files = <webdav.File>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool isUploading = false.obs;
+  // Retained across service changes until download/restore or deletion settles.
+  // A local restore already committing must finish before exporting a backup.
+  final RxString fileActionLabelKey = ''.obs;
   final RxString errorMessage = ''.obs;
   final RxString configurationIssueKey = ''.obs;
   final RxString dirPath = '/'.obs;
@@ -71,9 +77,11 @@ class WebDavPageController extends GetxController {
 
   bool get canUpload {
     final selected = currentConfig.value;
-    final busy = isUploading.value;
+    final busy = isUploading.value || fileActionLabelKey.value.isNotEmpty;
     return !_disposed && selected != null && !busy && _webdavService != null && identical(selected, _serviceConfig);
   }
+
+  bool get canStartFileAction => canUpload;
 
   @override
   void onInit() {
@@ -272,7 +280,7 @@ class WebDavPageController extends GetxController {
   Future<void> uploadConfigSettings() async {
     final service = _webdavService;
     final epoch = _serviceEpoch;
-    if (service == null || !_ownsService(service, epoch) || isUploading.value) return;
+    if (service == null || !_ownsService(service, epoch) || !canUpload) return;
     final path = dirPath.value;
     isUploading.value = true;
     try {
@@ -289,11 +297,11 @@ class WebDavPageController extends GetxController {
       await service.writeFile(remotePath, bytes);
       if (!_ownsService(service, epoch)) return;
 
-      _showUploadFeedback(i18n("webdav_upload_success"));
+      _feedback(i18n("webdav_upload_success"));
       if (dirPath.value == path) await loadFiles();
     } catch (e) {
       if (!_ownsService(service, epoch)) return;
-      _showUploadFeedback('${i18n("webdav_upload_failed")}: $e', isError: true);
+      _feedback('${i18n("webdav_upload_failed")}: $e', isError: true);
     } finally {
       if (_ownsService(service, epoch)) isUploading.value = false;
     }
@@ -304,18 +312,20 @@ class WebDavPageController extends GetxController {
     final epoch = _serviceEpoch;
     final path = dirPath.value;
     final remotePath = file.path;
-    if (service == null || !_ownsService(service, epoch) || remotePath == null) return;
-    final result = await _confirmDelete();
-    if (result && _ownsService(service, epoch) && dirPath.value == path) {
-      try {
-        await service.removeFile(remotePath);
-        if (!_ownsService(service, epoch)) return;
-        SnackBarUtil.success(i18n("webdav_delete_success"));
-        if (dirPath.value == path) await loadFiles();
-      } catch (e) {
-        if (!_ownsService(service, epoch)) return;
-        SnackBarUtil.error('${i18n("webdav_delete_failed")}: $e');
-      }
+    if (service == null || !_ownsService(service, epoch) || remotePath == null || !canStartFileAction) return;
+    fileActionLabelKey.value = 'webdav_deleting';
+    try {
+      final result = await _confirmDelete();
+      if (!result || !_ownsService(service, epoch) || dirPath.value != path) return;
+      await service.removeFile(remotePath);
+      if (!_ownsService(service, epoch)) return;
+      _feedback(i18n("webdav_delete_success"));
+      if (dirPath.value == path) await loadFiles();
+    } catch (e) {
+      if (!_ownsService(service, epoch)) return;
+      _feedback('${i18n("webdav_delete_failed")}: $e', isError: true);
+    } finally {
+      if (!_disposed) fileActionLabelKey.value = '';
     }
   }
 
@@ -324,7 +334,14 @@ class WebDavPageController extends GetxController {
     final service = _webdavService;
     final epoch = _serviceEpoch;
     final remotePath = file.path;
-    if (service == null || !_ownsService(service, epoch) || remotePath == null || file.isDir == true) return;
+    if (service == null ||
+        !_ownsService(service, epoch) ||
+        remotePath == null ||
+        file.isDir == true ||
+        !canStartFileAction) {
+      return;
+    }
+    fileActionLabelKey.value = 'webdav_restoring';
     try {
       final bytes = await service.readFile(remotePath);
       // Fence before local mutation, not only before its success notification.
@@ -332,10 +349,12 @@ class WebDavPageController extends GetxController {
       final data = jsonDecode(utf8.decode(bytes));
       await _backupController.restoreAllSettings(Map<String, dynamic>.from(data as Map));
       if (!_ownsService(service, epoch)) return;
-      SnackBarUtil.success(i18n("webdav_sync_success"));
+      _feedback(i18n("webdav_sync_success"));
     } catch (e) {
       if (!_ownsService(service, epoch)) return;
-      SnackBarUtil.error('${i18n("webdav_download_failed")}: $e');
+      _feedback('${i18n("webdav_download_failed")}: $e', isError: true);
+    } finally {
+      if (!_disposed) fileActionLabelKey.value = '';
     }
   }
 }

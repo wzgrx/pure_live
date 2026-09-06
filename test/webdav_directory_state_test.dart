@@ -24,6 +24,8 @@ void main() {
   late _BackupController backup;
   late Completer<bool> confirmation;
   late List<WebDAVConfig> connectedConfigs;
+  late int confirmationCount;
+  late List<String> feedback;
 
   setUpAll(() async {
     hiveDirectory = await Directory.systemTemp.createTemp('webdav-directory-state-');
@@ -39,8 +41,14 @@ void main() {
     confirmation = Completer<bool>();
     services = [];
     connectedConfigs = [];
+    confirmationCount = 0;
+    feedback = [];
     controller = WebDavPageController(
-      confirmDelete: () => confirmation.future,
+      feedback: (message, {isError = false}) => feedback.add(message),
+      confirmDelete: () {
+        confirmationCount++;
+        return confirmation.future;
+      },
       serviceFactory: (selected) {
         connectedConfigs.add(selected);
         final service = _Service();
@@ -343,6 +351,78 @@ void main() {
     expect(service.removals, isEmpty);
   });
 
+  test('repeated restore clicks start only one download', () async {
+    final service = connect();
+    final first = controller.downloadFile(webdav.File(path: '/backup.txt'));
+    final second = controller.downloadFile(webdav.File(path: '/backup.txt'));
+    final requests = service.downloadPaths.length;
+    controller.onClose();
+    service.download.complete(utf8.encode('{"backupVersion":3}'));
+    await Future.wait([first, second]);
+    expect(requests, 1);
+  });
+
+  test('repeated delete clicks open only one confirmation', () async {
+    connect();
+    final first = controller.deleteFile(webdav.File(path: '/backup.txt'));
+    final second = controller.deleteFile(webdav.File(path: '/backup.txt'));
+    confirmation.complete(false);
+    await Future.wait([first, second]);
+    expect(confirmationCount, 1);
+    expect(controller.canStartFileAction, isTrue);
+  });
+
+  test('confirmation failure releases the operation without deleting anything', () async {
+    final service = connect();
+    final deletion = controller.deleteFile(webdav.File(path: '/backup.txt'));
+    confirmation.completeError(StateError('confirmation fixture'));
+    await deletion;
+    expect(service.removals, isEmpty);
+    expect(controller.fileActionLabelKey.value, isEmpty);
+    expect(controller.canUpload, isTrue);
+    expect(feedback.single, contains('confirmation fixture'));
+  });
+
+  test('changing configuration does not allow exporting during a pending local restore', () async {
+    final service = connect();
+    backup.pendingRestore = Completer<void>();
+    final download = controller.downloadFile(webdav.File(path: '/backup.txt'));
+    service.download.complete(utf8.encode('{"backupVersion":3}'));
+    await settle();
+    expect(backup.restores, hasLength(1));
+    controller.initializeWebDAV();
+    await controller.uploadConfigSettings();
+    expect(services.last.uploadPaths, isEmpty);
+    expect(controller.canUpload, isFalse);
+    backup.pendingRestore!.complete();
+    await download;
+    expect(controller.canUpload, isTrue);
+  });
+
+  test('an in-flight upload prevents a conflicting restore download', () async {
+    final service = connect();
+    final upload = controller.uploadConfigSettings();
+    final download = controller.downloadFile(webdav.File(path: '/backup.txt'));
+    final downloads = service.downloadPaths.length;
+    controller.onClose();
+    service.upload.complete();
+    service.download.complete(utf8.encode('{"backupVersion":3}'));
+    await Future.wait([upload, download]);
+    expect(downloads, 0);
+  });
+
+  test('an in-flight restore prevents exporting a new backup', () async {
+    final service = connect();
+    final download = controller.downloadFile(webdav.File(path: '/backup.txt'));
+    final upload = controller.uploadConfigSettings();
+    final uploads = service.uploadPaths.length;
+    controller.onClose();
+    service.upload.complete();
+    service.download.complete(utf8.encode('{"backupVersion":3}'));
+    await Future.wait([download, upload]);
+    expect(uploads, 0);
+  });
+
   test('directory items never start a backup download', () async {
     final service = connect();
     await controller.downloadFile(webdav.File(path: '/folder/', isDir: true));
@@ -396,10 +476,14 @@ class _Service extends WebDAVService {
 
 class _BackupController extends BackupController {
   final restores = <Map<String, dynamic>>[];
+  Completer<void>? pendingRestore;
 
   @override
   Map<String, dynamic> exportAllSettings({bool includeSensitiveData = false}) => {'backupVersion': 3};
 
   @override
-  Future<void> restoreAllSettings(Map<String, dynamic> data) async => restores.add(data);
+  Future<void> restoreAllSettings(Map<String, dynamic> data) async {
+    restores.add(data);
+    await pendingRestore?.future;
+  }
 }

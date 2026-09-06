@@ -16,6 +16,43 @@ void main() {
     );
   });
 
+  test('recovery refreshes CDN metadata and preserves the server quality acknowledgement', () async {
+    final site = _FakeDouyuRecoverySite();
+    final requested = LivePlayQuality(quality: '蓝光4M', id: 1, data: DouyuPlayData(1, const <String>['expired']));
+    final result = await site.resolvePlayUrlsForRecovery(
+      detail: LiveRoom(roomId: '123'),
+      quality: requested,
+    );
+    expect(site, isA<LivePlayRecoveryResolver>());
+    expect(site.metadataCalls, 1);
+    expect(site.calls, ['1/new-main', '1/new-backup']);
+    expect(result.urls, ['https://new-main.example/fresh.flv', 'https://new-backup.example/fresh.flv']);
+    expect(result.appliedQualityData, 3);
+    expect(result.qualityUnconfirmed, isFalse);
+  });
+
+  test('a rate absent from fresh options still requests that rate with current CDNs', () async {
+    final site = _FakeDouyuRecoverySite()..advertisedRate = 3;
+    final result = await site.resolvePlayUrlsForRecovery(
+      detail: LiveRoom(roomId: '123'),
+      quality: LivePlayQuality(quality: '蓝光4M', id: 1, data: DouyuPlayData(1, ['expired'])),
+    );
+    expect(site.calls, ['1/new-main', '1/new-backup']);
+    expect(result.appliedQualityData, 3);
+    expect(result.urls, hasLength(2));
+  });
+
+  test('recovery keeps missing acknowledgement unknown and does not reuse old URLs', () async {
+    final site = _FakeDouyuRecoverySite()..appliedRate = null;
+    final result = await site.resolvePlayUrlsForRecovery(
+      detail: LiveRoom(roomId: '123'),
+      quality: LivePlayQuality(quality: '蓝光4M', id: 1, data: DouyuPlayData(1, ['expired'])),
+    );
+    expect(result.qualityUnconfirmed, isTrue);
+    expect(result.appliedQualityData, isNull);
+    expect(result.urls.every((url) => !url.contains('expired')), isTrue);
+  });
+
   group('Douyu H5 playback response', () {
     test('accepts numeric/string success and preserves playback data', () {
       final data = DouyuSite.parsePlayResponse(<String, dynamic>{
@@ -137,5 +174,34 @@ class _FakeDouyuCursorSite extends DouyuSite {
   Future<LivePlayUrlResolution> resolvePlayUrl(String roomId, int rate, String cdn) async {
     calls.add(cdn);
     return LivePlayUrlResolution(urls: ['https://$cdn.example/$roomId-$rate.flv'], appliedQualityData: rate);
+  }
+}
+
+class _FakeDouyuRecoverySite extends DouyuSite {
+  int metadataCalls = 0;
+  int advertisedRate = 1;
+  int? appliedRate = 3;
+  final calls = <String>[];
+
+  @override
+  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoom detail}) async {
+    metadataCalls++;
+    return [
+      LivePlayQuality(
+        quality: 'current',
+        id: advertisedRate,
+        data: DouyuPlayData(advertisedRate, ['new-main', 'new-backup']),
+      ),
+    ];
+  }
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrl(String roomId, int rate, String cdn) async {
+    calls.add('$rate/$cdn');
+    return LivePlayUrlResolution(
+      urls: ['https://$cdn.example/fresh.flv'],
+      appliedQualityData: appliedRate,
+      qualityUnconfirmed: appliedRate == null,
+    );
   }
 }

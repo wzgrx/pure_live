@@ -19,6 +19,7 @@ class DouyuSite
         LiveSiteRoomRefresher,
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
+        LivePlayRecoveryResolver,
         LivePlayUrlCursorResolver {
   @override
   String id = Sites.douyuSite;
@@ -175,6 +176,35 @@ class DouyuSite
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async {
     return (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
+  }
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async {
+    // Both the signed URL and advertised CDN set can change while a live
+    // connection is paused. Refresh the metadata, then ask for the committed
+    // rate with those current CDNs rather than reopening the old URL cohort.
+    final qualities = await getPlayQualites(detail: detail);
+    if (qualities.isEmpty) return const LivePlayUrlResolution(urls: <String>[]);
+    final requestedId = quality.selectionId.toString();
+    final matching = qualities.where((item) => item.selectionId.toString() == requestedId).firstOrNull;
+    final freshData = qualities.first.data;
+    final requestedData = quality.data;
+    final request =
+        matching ??
+        (freshData is DouyuPlayData && requestedData is DouyuPlayData
+            ? LivePlayQuality(
+                quality: quality.quality,
+                id: quality.selectionId,
+                data: DouyuPlayData(requestedData.rate, freshData.cdns),
+              )
+            : qualities.first);
+    // A no-longer-advertised rate can still be accepted or downgraded by the
+    // server. Preserve that acknowledgement for the successful-source commit;
+    // never label a fallback using only the requested rate.
+    return resolvePlayUrlsRaw(detail: detail, quality: request);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/site/douyu/douyu_site.dart';
 import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/model/live_play_quality.dart';
@@ -62,7 +63,7 @@ void main() {
       final siteImpl = _AcknowledgedSelectionSite(appliedId: appliedId, unconfirmed: appliedId == null);
       final controller = PlayerController(
         host,
-        streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, resolver, refreshAt) async {},
+        streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, resolver, refreshAt, sourceSelection) async {},
       )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
 
       expect(
@@ -96,7 +97,7 @@ void main() {
     final host = _SelectionHost(LiveRoom(roomId: 'room', platform: 'test'));
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) async =>
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt, sourceSelection) async =>
           throw StateError('open failed'),
     )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _AcknowledgedSelectionSite(unconfirmed: true)));
     expect(
@@ -113,7 +114,7 @@ void main() {
     final previous = host.state.value.player;
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) async {},
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt, sourceSelection) async {},
     )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _AcknowledgedSelectionSite(unconfirmed: true)));
     expect(
       await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
@@ -141,9 +142,10 @@ void main() {
     final opened = <_OpenedStream>[];
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt) async {
-        opened.add(_OpenedStream(url, urls, openedRoom, audioOnly));
-      },
+      streamSourceOpener:
+          (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt, sourceSelection) async {
+            opened.add(_OpenedStream(url, urls, openedRoom, audioOnly));
+          },
     )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
 
     final switching = controller.switchStreamSelection(
@@ -174,9 +176,10 @@ void main() {
     final opened = <_OpenedStream>[];
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt) async {
-        opened.add(_OpenedStream(url, urls, openedRoom, audioOnly));
-      },
+      streamSourceOpener:
+          (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt, sourceSelection) async {
+            opened.add(_OpenedStream(url, urls, openedRoom, audioOnly));
+          },
     )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
 
     expect(
@@ -196,7 +199,7 @@ void main() {
     final opened = <String>[];
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) async {
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt, sourceSelection) async {
         opened.add(url);
       },
     )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
@@ -221,7 +224,7 @@ void main() {
     final controller = PlayerController(
       host,
       // Model PlayerManager's existing serial native lifecycle queue.
-      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt) {
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt, sourceSelection) {
         nativeQueue = nativeQueue.then((_) async {
           opened.add(url);
           if (url.endsWith('/two')) {
@@ -252,10 +255,11 @@ void main() {
     final opened = <_OpenedStream>[];
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt) async {
-        installedResolver = sourceResolver;
-        opened.add(_OpenedStream(url, urls, openedRoom, audioOnly));
-      },
+      streamSourceOpener:
+          (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt, sourceSelection) async {
+            installedResolver = sourceResolver;
+            opened.add(_OpenedStream(url, urls, openedRoom, audioOnly));
+          },
     )..initSite(Site(id: 'signed', name: 'Signed', logo: '', liveSite: siteImpl));
 
     expect(
@@ -274,6 +278,149 @@ void main() {
     expect(refreshed.urls, const <String>['https://fresh-2/one', 'https://fresh-2/two']);
     expect(refreshed.preferredLineIndex, 1);
   });
+
+  test('Douyu recovery refreshes URL generations without changing quality or line cursor', () async {
+    final room = LiveRoom(roomId: '24422', platform: Sites.douyuSite);
+    final siteImpl = _FreshDouyuSelectionSite();
+    final host = _SelectionHost(room);
+    host.updatePlayer(
+      qualites: [
+        LivePlayQuality(
+          quality: '蓝光4M',
+          id: 1,
+          data: DouyuPlayData(1, const <String>['main', 'backup']),
+          isPlaybackUnconfirmed: true,
+        ),
+      ],
+      currentQuality: 0,
+      playUrls: const <String>['https://old.example/main.flv', 'https://old.example/backup.flv'],
+      currentLineIndex: 0,
+    );
+    PlaybackSourceResolver? installedResolver;
+    final opened = <_OpenedStream>[];
+    final controller = PlayerController(
+      host,
+      streamSourceOpener:
+          (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt, sourceSelection) async {
+            installedResolver = sourceResolver;
+            opened.add(_OpenedStream(url, urls, openedRoom, audioOnly));
+          },
+    )..initSite(Site(id: Sites.douyuSite, name: 'Douyu', logo: '', liveSite: siteImpl));
+
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 1),
+      isTrue,
+    );
+
+    expect(siteImpl.recoveryCalls, 1);
+    expect(opened.single.url, 'https://fresh-1.example/backup.flv');
+    expect(opened.single.urls, const <String>[
+      'https://fresh-1.example/main.flv',
+      'https://fresh-1.example/backup.flv',
+    ]);
+    expect(host.state.value.player.currentLineIndex, 1);
+    expect(host.state.value.player.qualitySafe.selectionId, 1);
+    expect(host.state.value.player.qualitySafe.isPlaybackUnconfirmed, isFalse);
+    expect(installedResolver, isNotNull);
+
+    final sameLine = await installedResolver!(
+      const PlaybackSourceRefreshRequest(
+        currentLineIndex: 1,
+        currentUrl: 'https://fresh-1.example/backup.flv',
+        advanceLine: false,
+      ),
+    );
+    expect(siteImpl.recoveryCalls, 2);
+    expect(sameLine.urls, const <String>['https://fresh-2.example/main.flv', 'https://fresh-2.example/backup.flv']);
+    expect(sameLine.preferredLineIndex, 1);
+
+    final nextLine = await installedResolver!(
+      const PlaybackSourceRefreshRequest(
+        currentLineIndex: 1,
+        currentUrl: 'https://fresh-2.example/backup.flv',
+        advanceLine: true,
+      ),
+    );
+    expect(siteImpl.recoveryCalls, 3);
+    expect(nextLine.urls, const <String>['https://fresh-3.example/main.flv', 'https://fresh-3.example/backup.flv']);
+    expect(nextLine.preferredLineIndex, 0);
+  });
+
+  for (final appliedId in <Object?>[3, null, 'unadvertised']) {
+    test('recovery acknowledgement $appliedId only changes UI after a source commit', () async {
+      final room = LiveRoom(roomId: 'room', platform: 'test');
+      final host = _SelectionHost(room)..updatePlayer(qualites: _recoveryQualities(), currentQuality: 0);
+      final siteImpl = _AcknowledgedRecoverySite();
+      PlaybackSourceResolver? resolver;
+      final controller = PlayerController(
+        host,
+        streamSourceOpener: (url, urls, headers, room, audioOnly, nextResolver, refreshAt, sourceSelection) async {
+          resolver = nextResolver;
+          expect(sourceSelection?.quality.selectionId, 0);
+        },
+      )..initSite(Site(id: 'test', name: 'test', logo: '', liveSite: siteImpl));
+      expect(
+        await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 1),
+        isTrue,
+      );
+      final before = host.state.value.player;
+      siteImpl.appliedId = appliedId;
+      final refreshed = await resolver!(
+        PlaybackSourceRefreshRequest(currentLineIndex: 1, advanceLine: false, currentQuality: before.qualitySafe),
+      );
+      expect(host.state.value.player, same(before), reason: 'resolving is not a native source commit');
+      expect(refreshed.selection, isNotNull);
+      expect(refreshed.selection!.quality.selectionId, appliedId == 3 ? 3 : 0);
+      expect(refreshed.selection!.quality.isPlaybackUnconfirmed, appliedId != 3);
+      controller.applySourceCommit(_sourceCommit(room, refreshed, revision: 1));
+      final committed = host.state.value.player;
+      expect(committed.qualites, refreshed.selection!.qualities);
+      expect(committed.currentQuality, refreshed.selection!.currentQuality);
+      expect(committed.playUrls, refreshed.urls);
+      expect(committed.currentLineIndex, 1);
+      // Simulate the manager passing its canonical quality to the next refresh.
+      // The resolver must not keep the source rate captured at first open.
+      await resolver!(
+        PlaybackSourceRefreshRequest(currentLineIndex: 1, advanceLine: false, currentQuality: committed.qualitySafe),
+      );
+      expect(siteImpl.requestedIds.last, appliedId == 3 ? 3 : 0);
+      controller.applySourceCommit(_sourceCommit(room, refreshed, revision: 1));
+      expect(host.state.value.player, same(committed), reason: 'duplicate commit is ignored');
+      controller.applySourceCommit(_sourceCommit(LiveRoom(roomId: 'other', platform: 'test'), refreshed, revision: 2));
+      expect(host.state.value.player, same(committed), reason: 'another room cannot update this route');
+    });
+  }
+
+  for (final failsAfterCommit in [false, true]) {
+    test('native recovery commit wins over the pending selection payload (failure=$failsAfterCommit)', () async {
+      final room = LiveRoom(roomId: 'room', platform: 'test');
+      final host = _SelectionHost(room)..updatePlayer(qualites: _recoveryQualities(), currentQuality: 0);
+      final siteImpl = _AcknowledgedRecoverySite();
+      late PlayerController controller;
+      controller = PlayerController(
+        host,
+        streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt, sourceSelection) async {
+          siteImpl.appliedId = 3;
+          final recovered = await resolver!(
+            PlaybackSourceRefreshRequest(
+              currentLineIndex: 0,
+              advanceLine: false,
+              currentQuality: sourceSelection!.quality,
+            ),
+          );
+          controller.applySourceCommit(_sourceCommit(room, recovered, revision: 5));
+          if (failsAfterCommit) throw StateError('presentation update failed after the source committed');
+        },
+      )..initSite(Site(id: 'test', name: 'test', logo: '', liveSite: siteImpl));
+      expect(
+        await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 1),
+        !failsAfterCommit,
+      );
+      expect(host.state.value.player.qualitySafe.selectionId, 3);
+      expect(host.state.value.player.playUrlSafe, 'https://generation-2.example/one');
+      expect(host.state.value.player.currentLineIndex, 0);
+    });
+  }
 
   for (final scenario in [
     (
@@ -313,7 +460,7 @@ void main() {
       PlaybackSourceResolver? resolver;
       final controller = PlayerController(
         host,
-        streamSourceOpener: (url, urls, headers, room, audioOnly, sourceResolver, refreshAt) async {
+        streamSourceOpener: (url, urls, headers, room, audioOnly, sourceResolver, refreshAt, sourceSelection) async {
           resolver = sourceResolver;
         },
       )..initSite(Site(id: Sites.huyaSite, name: 'Huya', logo: '', liveSite: siteImpl));
@@ -340,9 +487,10 @@ void main() {
     final host = _SelectionHost(room);
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt) async {
-        throw StateError('decoder rejected source');
-      },
+      streamSourceOpener:
+          (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt, sourceSelection) async {
+            throw StateError('decoder rejected source');
+          },
     )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
 
     final switching = controller.switchStreamSelection(
@@ -366,9 +514,10 @@ void main() {
     var openCalls = 0;
     final controller = PlayerController(
       host,
-      streamSourceOpener: (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt) async {
-        openCalls++;
-      },
+      streamSourceOpener:
+          (url, urls, headers, openedRoom, audioOnly, sourceResolver, sourceRefreshAt, sourceSelection) async {
+            openCalls++;
+          },
     )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: siteImpl));
 
     final switching = controller.switchStreamSelection(
@@ -431,6 +580,73 @@ class _SignedSelectionLiveSite extends LiveSite implements LivePlayRecoveryResol
     recoveryCalls++;
     return LivePlayUrlResolution(
       urls: <String>['https://fresh-$recoveryCalls/one', 'https://fresh-$recoveryCalls/two'],
+      appliedQualityData: quality.selectionId,
+    );
+  }
+}
+
+List<LivePlayQuality> _recoveryQualities() => [
+  LivePlayQuality(quality: 'Original', id: 0),
+  LivePlayQuality(quality: 'Fluent', id: 3),
+];
+
+PlaybackSourceCommitSnapshot _sourceCommit(
+  LiveRoom room,
+  PlaybackSourceRefreshResult result, {
+  required int revision,
+}) => PlaybackSourceCommitSnapshot(
+  revision: revision,
+  sessionId: revision,
+  intentRevision: 1,
+  room: room,
+  urls: result.urls,
+  currentUrl: result.urls[result.preferredLineIndex],
+  currentLineIndex: result.preferredLineIndex,
+  headers: const {},
+  audioOnly: false,
+  selection: result.selection,
+);
+
+class _AcknowledgedRecoverySite extends LiveSite implements LivePlayRecoveryResolver {
+  Object? appliedId = 0;
+  final requestedIds = <Object>[];
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async {
+    requestedIds.add(quality.selectionId);
+    return LivePlayUrlResolution(
+      urls: [
+        'https://generation-${requestedIds.length}.example/one',
+        'https://generation-${requestedIds.length}.example/two',
+      ],
+      appliedQualityData: appliedId,
+      qualityUnconfirmed: appliedId == null,
+    );
+  }
+}
+
+class _FreshDouyuSelectionSite extends DouyuSite {
+  int recoveryCalls = 0;
+
+  @override
+  Future<LiveRoom> getRoomDetailForRecording({required String platform, required String roomId}) async {
+    return LiveRoom(roomId: roomId, platform: platform, status: true);
+  }
+
+  @override
+  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoom detail}) async {
+    return <LivePlayQuality>[
+      LivePlayQuality(quality: '蓝光4M', id: 1, data: DouyuPlayData(1, const <String>['main', 'backup'])),
+    ];
+  }
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
+    final generation = ++recoveryCalls;
+    return LivePlayUrlResolution(
+      urls: <String>['https://fresh-$generation.example/main.flv', 'https://fresh-$generation.example/backup.flv'],
       appliedQualityData: quality.selectionId,
     );
   }

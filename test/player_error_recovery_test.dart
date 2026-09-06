@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/modules/live_play/controllers/player_state.dart';
+import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/player/core/engine_fallback_manager.dart';
 import 'package:pure_live/player/core/line_fallback_manager.dart';
 import 'package:pure_live/player/core/player_manager.dart';
@@ -25,6 +26,224 @@ void main() {
   });
 
   tearDown(Get.reset);
+
+  test('source commit snapshot is published only after a successful native open', () async {
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: player})
+      ..configureDefaultEngine(PlayerEngine.mediaKit);
+    final room = LiveRoom(roomId: 'source-commit', platform: 'test');
+    final mutableQualities = <LivePlayQuality>[LivePlayQuality(quality: '蓝光', id: 1)];
+    final selection = PlaybackSourceQualitySelection(qualities: mutableQualities, currentQuality: 0);
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
+
+    try {
+      await manager.play(
+        'https://cdn.example/committed.flv',
+        const ['https://cdn.example/backup.flv', 'https://cdn.example/committed.flv'],
+        const {'referer': 'https://example.invalid'},
+        room: room,
+        sourceSelection: selection,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      mutableQualities.add(LivePlayQuality(quality: '原画', id: 2));
+      final committed = manager.currentSourceCommit;
+      expect(committed, isNotNull);
+      expect(commits, hasLength(1));
+      expect(committed, same(commits.single));
+      expect(manager.isSourceCommitCurrent(committed!), isTrue);
+      expect(committed.currentLineIndex, 1);
+      expect(committed.selection?.quality.quality, '蓝光');
+      expect(committed.selection?.qualities, hasLength(1), reason: 'selection must not retain a mutable caller list');
+      await manager.pause();
+      expect(
+        manager.isSourceCommitCurrent(committed),
+        isTrue,
+        reason: 'pause changes playback intent but not the committed source metadata',
+      );
+      await manager.resume();
+      expect(manager.isSourceCommitCurrent(committed), isTrue);
+    } finally {
+      await subscription.cancel();
+      await manager.dispose();
+    }
+  });
+
+  test('failed native open does not publish or retain a source commit', () async {
+    final failure = PlayerException(message: 'source rejected', type: PlayerErrorType.source);
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => failure);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{
+      PlayerEngine.mediaKit: player,
+    }, transientLiveRetryDelays: const [])..configureDefaultEngine(PlayerEngine.mediaKit);
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
+
+    try {
+      await manager.play(
+        'https://cdn.example/rejected.flv',
+        const ['https://cdn.example/rejected.flv'],
+        const {},
+        room: LiveRoom(roomId: 'source-rejected', platform: 'test'),
+        sourceSelection: PlaybackSourceQualitySelection(
+          qualities: <LivePlayQuality>[LivePlayQuality(quality: '蓝光', id: 1)],
+          currentQuality: 0,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(commits, isEmpty);
+      expect(manager.currentSourceCommit, isNull);
+    } finally {
+      await subscription.cancel();
+      await manager.dispose();
+    }
+  });
+
+  test('signed recovery commits returned selection and requests it on the next refresh', () async {
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{
+      PlayerEngine.mediaKit: player,
+    }, transientLiveRetryDelays: const [])..configureDefaultEngine(PlayerEngine.mediaKit);
+    final room = LiveRoom(roomId: 'selection-refresh', platform: 'test');
+    final selections = <PlaybackSourceQualitySelection>[
+      PlaybackSourceQualitySelection(
+        qualities: <LivePlayQuality>[LivePlayQuality(quality: '初始', id: 0)],
+        currentQuality: 0,
+      ),
+      PlaybackSourceQualitySelection(
+        qualities: <LivePlayQuality>[LivePlayQuality(quality: '确认一', id: 1)],
+        currentQuality: 0,
+      ),
+      PlaybackSourceQualitySelection(
+        qualities: <LivePlayQuality>[LivePlayQuality(quality: '确认二', id: 2)],
+        currentQuality: 0,
+      ),
+    ];
+    final requests = <PlaybackSourceRefreshRequest>[];
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
+
+    try {
+      await manager.play(
+        'https://cdn.example/generation-0.flv',
+        const ['https://cdn.example/generation-0.flv'],
+        const {},
+        room: room,
+        sourceSelection: selections[0],
+        sourceResolver: (request) async {
+          requests.add(request);
+          final generation = requests.length;
+          return PlaybackSourceRefreshResult(
+            urls: <String>['https://cdn.example/generation-$generation.flv'],
+            preferredLineIndex: 0,
+            selection: selections[generation],
+          );
+        },
+      );
+
+      player.emitError(PlayerException(message: 'first expiry', type: PlayerErrorType.network));
+      var deadline = DateTime.now().add(const Duration(seconds: 1));
+      while (manager.currentSourceCommit?.currentUrl != 'https://cdn.example/generation-1.flv' &&
+          DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(requests, hasLength(1));
+      expect(requests.single.currentQuality?.selectionId, 0);
+      expect(manager.currentSourceCommit?.selection, same(selections[1]));
+
+      player.emitError(PlayerException(message: 'second expiry', type: PlayerErrorType.network));
+      deadline = DateTime.now().add(const Duration(seconds: 1));
+      while (manager.currentSourceCommit?.currentUrl != 'https://cdn.example/generation-2.flv' &&
+          DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      await Future<void>.delayed(Duration.zero);
+
+      expect(requests, hasLength(2));
+      expect(
+        requests.last.currentQuality?.selectionId,
+        1,
+        reason: 'the resolver must receive the last committed quality instead of its original closure value',
+      );
+      expect(manager.currentSourceCommit?.selection, same(selections[2]));
+      expect(commits.map((event) => event.selection).toList(), selections);
+    } finally {
+      await subscription.cancel();
+      await manager.dispose();
+    }
+  });
+
+  test('engine fallback keeps the fresh source cohort selection after its first open fails', () async {
+    const initialUrl = 'https://cdn.example/cohort-0.flv';
+    const freshUrl = 'https://cdn.example/cohort-1.flv';
+    final mediaKit = _RecoveryFakePlayer(
+      PlayerEngine.mediaKit,
+      (url) => url == freshUrl
+          ? PlayerException(message: 'fresh source rejected by first engine', type: PlayerErrorType.source)
+          : null,
+    );
+    final fijk = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{
+      PlayerEngine.mediaKit: mediaKit,
+      PlayerEngine.fijk: fijk,
+    }, transientLiveRetryDelays: const [])..configureDefaultEngine(PlayerEngine.mediaKit);
+    final initialSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '初始', id: 0)],
+      currentQuality: 0,
+    );
+    final freshSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '服务端确认', id: 1)],
+      currentQuality: 0,
+    );
+    final requests = <PlaybackSourceRefreshRequest>[];
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
+
+    try {
+      await manager.play(
+        initialUrl,
+        const [initialUrl],
+        const {},
+        room: LiveRoom(roomId: 'fresh-cohort-fallback', platform: 'test'),
+        sourceSelection: initialSelection,
+        sourceResolver: (request) async {
+          requests.add(request);
+          if (requests.length > 1) {
+            return const PlaybackSourceRefreshResult(urls: <String>[], preferredLineIndex: 0);
+          }
+          return PlaybackSourceRefreshResult(
+            urls: const <String>[freshUrl],
+            preferredLineIndex: 0,
+            selection: freshSelection,
+          );
+        },
+      );
+      mediaKit.emitError(PlayerException(message: 'initial transport expired', type: PlayerErrorType.network));
+
+      final deadline = DateTime.now().add(const Duration(seconds: 1));
+      while (!identical(manager.currentPlayer, fijk) && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      await Future<void>.delayed(Duration.zero);
+
+      expect(manager.currentPlayer, same(fijk));
+      expect(fijk.openedUrls, <String>[freshUrl]);
+      expect(requests, hasLength(2));
+      expect(
+        requests.last.currentQuality?.selectionId,
+        1,
+        reason: 'fallback resolution must inherit metadata for the fresh URL cohort',
+      );
+      expect(commits, hasLength(2), reason: 'the failed first fresh open must not emit a commit');
+      expect(commits.last.currentUrl, freshUrl);
+      expect(commits.last.selection, same(freshSelection));
+      expect(manager.currentSourceCommit, same(commits.last));
+    } finally {
+      await subscription.cancel();
+      await manager.dispose();
+    }
+  });
 
   test('active content screenshot probing is opt-in', () async {
     final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
@@ -1492,6 +1711,17 @@ void main() {
       windowsHuyaProactiveRefreshInterval: const Duration(milliseconds: 20),
     );
     manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    final initialSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '蓝光', id: 1)],
+      currentQuality: 0,
+    );
+    final refreshedSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '蓝光', id: 1, isPlaybackUnconfirmed: false)],
+      currentQuality: 0,
+    );
+    final requests = <PlaybackSourceRefreshRequest>[];
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
     const url = 'https://al.flv.huya.com/live.flv?ctype=huya_pc_exe&t=100';
     await manager.play(
       url,
@@ -1499,13 +1729,16 @@ void main() {
       const {},
       room: LiveRoom(roomId: 'native-expiry', platform: 'huya'),
       sourceRefreshAt: DateTime.now().toUtc().add(const Duration(milliseconds: 1600)),
-      sourceResolver: (_) async {
+      sourceSelection: initialSelection,
+      sourceResolver: (request) async {
+        requests.add(request);
         refreshCalls++;
         return PlaybackSourceRefreshResult(
           urls: const ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100'],
           preferredLineIndex: 0,
           refreshAt: DateTime.now().toUtc().add(const Duration(minutes: 4)),
           invalidAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+          selection: refreshedSelection,
         );
       },
     );
@@ -1517,17 +1750,31 @@ void main() {
     }
     await Future<void>.delayed(const Duration(milliseconds: 30));
     expect(refreshCalls, 1);
+    expect(requests.single.currentQuality?.quality, '蓝光');
     expect(manager.currentPlayer, same(active));
+    expect(
+      manager.currentSourceCommit?.selection,
+      same(initialSelection),
+      reason: 'prefetch alone must not commit metadata',
+    );
     active.emitError(PlayerException(message: 'real EOF', type: PlayerErrorType.network));
     final recoveryDeadline = DateTime.now().add(const Duration(seconds: 2));
     while (!identical(manager.currentPlayer, candidate) && DateTime.now().isBefore(recoveryDeadline)) {
       await Future<void>.delayed(const Duration(milliseconds: 5));
     }
     final owner = manager.currentPlayer;
+    await Future<void>.delayed(Duration.zero);
+    final committed = manager.currentSourceCommit;
+    await subscription.cancel();
     await manager.dispose();
     expect(owner, same(candidate));
     expect(refreshCalls, 1, reason: 'a fresh prefetched lease should avoid another network lookup');
     expect(candidate.openedUrls, ['https://al.flv.huya.com/fresh.flv?ctype=huya_pc_exe&t=100']);
+    expect(committed?.selection, same(refreshedSelection));
+    expect(commits.map((event) => event.selection).toList(), <PlaybackSourceQualitySelection?>[
+      initialSelection,
+      refreshedSelection,
+    ]);
   }, skip: !Platform.isWindows);
 
   test('signed source lease hands off a healthy Windows transport before expiry', () async {
@@ -1814,14 +2061,38 @@ void main() {
     final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: player})
       ..configureDefaultEngine(PlayerEngine.mediaKit);
     final room = LiveRoom(roomId: 'latest-selection', platform: 'huya');
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
     try {
-      final previous = manager.play('https://cdn.example/obsolete.flv', const [], const {}, room: room);
-      final latest = manager.play('https://cdn.example/current.flv', const [], const {}, room: room);
+      final previous = manager.play(
+        'https://cdn.example/obsolete.flv',
+        const [],
+        const {},
+        room: room,
+        sourceSelection: PlaybackSourceQualitySelection(
+          qualities: <LivePlayQuality>[LivePlayQuality(quality: 'obsolete', id: 1)],
+          currentQuality: 0,
+        ),
+      );
+      final latest = manager.play(
+        'https://cdn.example/current.flv',
+        const [],
+        const {},
+        room: room,
+        sourceSelection: PlaybackSourceQualitySelection(
+          qualities: <LivePlayQuality>[LivePlayQuality(quality: 'current', id: 2)],
+          currentQuality: 0,
+        ),
+      );
       await Future.wait([previous, latest]);
+      await Future<void>.delayed(Duration.zero);
       expect(player.openedUrls, ['https://cdn.example/current.flv']);
       expect(player.isPlayingNow, isTrue);
+      expect(commits, hasLength(1), reason: 'a superseded playback intent must not publish a source commit');
+      expect(commits.single.selection?.quality.quality, 'current');
       expect(await manager.pauseForLifecycle(), isNotNull);
     } finally {
+      await subscription.cancel();
       await manager.dispose();
     }
   });
@@ -1838,12 +2109,19 @@ void main() {
       windowsHuyaProactiveRefreshInterval: const Duration(milliseconds: 20),
     );
     manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    final initialSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '蓝光', id: 1)],
+      currentQuality: 0,
+    );
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
     await manager.play(
       'https://al.flv.huya.com/live.flv',
       const [],
       const {},
       room: LiveRoom(roomId: 'lease-pause', platform: 'huya'),
       sourceRefreshAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+      sourceSelection: initialSelection,
       sourceResolver: (_) {
         resolving.complete();
         return resolved.future;
@@ -1857,10 +2135,15 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     final playerAfterResolution = manager.currentPlayer;
     final playingAfterResolution = manager.isPlayingNow;
+    await Future<void>.delayed(Duration.zero);
+    final committedAfterResolution = manager.currentSourceCommit;
+    await subscription.cancel();
     await manager.dispose();
     expect(playerAfterResolution, same(active));
     expect(playingAfterResolution, isFalse);
     expect(replacement.openedUrls, isEmpty);
+    expect(commits, hasLength(1), reason: 'a cancelled resolver must not publish its result');
+    expect(committedAfterResolution?.selection, same(initialSelection));
   }, skip: !Platform.isWindows);
 
   test('failed proactive Windows handoff retains the healthy active transport', () async {
@@ -1875,6 +2158,16 @@ void main() {
       PlayerEngine.mediaKit: active,
     }, playerCreator: (_) => creations++ == 0 ? active : replacement);
     manager.configureDefaultEngine(PlayerEngine.mediaKit);
+    final initialSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '蓝光', id: 1)],
+      currentQuality: 0,
+    );
+    final refreshedSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '原画', id: 2)],
+      currentQuality: 0,
+    );
+    final commits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(commits.add);
 
     await manager.play(
       'https://al.flv.huya.com/leased.flv',
@@ -1882,12 +2175,14 @@ void main() {
       const <String, String>{},
       room: LiveRoom(roomId: 'huya-proactive-refresh-failure', platform: 'huya'),
       sourceRefreshAt: DateTime.now().toUtc().add(const Duration(milliseconds: 20)),
+      sourceSelection: initialSelection,
       sourceResolver: (_) async {
         refreshCalls++;
         return PlaybackSourceRefreshResult(
           urls: const <String>['https://al.flv.huya.com/refreshed.flv'],
           preferredLineIndex: 0,
           refreshAt: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+          selection: refreshedSelection,
         );
       },
     );
@@ -1901,6 +2196,10 @@ void main() {
     expect(active.openedUrls, <String>['https://al.flv.huya.com/leased.flv']);
     expect(replacement.disposeCalls, 1);
     expect(manager.hasError.value, isFalse);
+    expect(commits, hasLength(1), reason: 'a failed warm candidate must not publish resolved metadata');
+    expect(manager.currentSourceCommit?.selection, same(initialSelection));
+    expect(manager.isSourceCommitCurrent(manager.currentSourceCommit!), isTrue);
+    await subscription.cancel();
     await manager.dispose();
   }, skip: !Platform.isWindows);
 

@@ -1003,6 +1003,10 @@ void main() {
       const ['https://example.invalid/live.flv'],
       const {},
       room: room,
+      sourceSelection: PlaybackSourceQualitySelection(
+        qualities: <LivePlayQuality>[LivePlayQuality(quality: '蓝光')],
+        currentQuality: 0,
+      ),
     );
     manager.prepareAppFloating(
       onClose: () async {},
@@ -1018,15 +1022,62 @@ void main() {
       ),
     );
 
+    final recoveredSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[
+        LivePlayQuality(quality: '蓝光'),
+        LivePlayQuality(quality: '原画'),
+      ],
+      currentQuality: 1,
+    );
+    await manager.play(
+      'https://example.invalid/recovered.flv',
+      const <String>['https://example.invalid/recovered.flv', 'https://backup.invalid/recovered.flv'],
+      const <String, String>{'referer': 'https://example.invalid/recovered'},
+      room: room,
+      sourceSelection: recoveredSelection,
+    );
+    await manager.setAudioOnlyMode(true);
+
     manager.prepareRoomSessionReentry(room);
     await manager.closeAppFloating().timeout(const Duration(milliseconds: 500));
 
     final resumed = manager.consumeRoomSessionReentry(room);
     expect(resumed, isNotNull);
-    expect(resumed!.qualities.single.quality, '蓝光');
-    expect(resumed.headers, containsPair('referer', 'https://example.invalid'));
+    expect(resumed!.qualities.map((item) => item.quality), <String>['蓝光', '原画']);
+    expect(resumed.currentQuality, 1);
+    expect(resumed.dataSource, 'https://example.invalid/recovered.flv');
+    expect(resumed.playUrls, hasLength(2));
+    expect(resumed.headers, containsPair('referer', 'https://example.invalid/recovered'));
+    expect(resumed.isAudioOnly, isTrue, reason: 'in-place audio mode is newer than the source commit snapshot');
+    final consumedCommit = manager.currentSourceCommit!;
+    expect(
+      manager.isSourceCommitCurrent(consumedCommit),
+      isTrue,
+      reason: 'consuming a route handoff must not clear canonical source truth',
+    );
+
+    final laterCommits = <PlaybackSourceCommitSnapshot>[];
+    final subscription = manager.onSourceCommitted.listen(laterCommits.add);
+    final laterSelection = PlaybackSourceQualitySelection(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '超清')],
+      currentQuality: 0,
+    );
+    await manager.play(
+      'https://example.invalid/later.flv',
+      const <String>['https://example.invalid/later.flv'],
+      const <String, String>{},
+      room: room,
+      sourceSelection: laterSelection,
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    expect(laterCommits, hasLength(1));
+    expect(manager.currentSourceCommit, same(laterCommits.single));
+    expect(laterCommits.single.selection, same(laterSelection));
+    expect(manager.isSourceCommitCurrent(consumedCommit), isFalse);
     expect(manager.currentPlayer, same(player));
-    expect(player.setDataSourceCalls, 1);
+    expect(player.setDataSourceCalls, 3);
+    await subscription.cancel();
     await manager.dispose();
   });
 

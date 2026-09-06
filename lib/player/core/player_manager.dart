@@ -48,7 +48,12 @@ typedef UnifiedPlayerCreator = FutureOr<UnifiedPlayer> Function(PlayerEngine eng
 
 @immutable
 class PlaybackSourceRefreshRequest {
-  const PlaybackSourceRefreshRequest({required this.currentLineIndex, required this.advanceLine, this.currentUrl});
+  const PlaybackSourceRefreshRequest({
+    required this.currentLineIndex,
+    required this.advanceLine,
+    this.currentUrl,
+    this.currentQuality,
+  });
 
   final int currentLineIndex;
   final bool advanceLine;
@@ -56,6 +61,29 @@ class PlaybackSourceRefreshRequest {
   /// The active transport, not a URL captured when the room first opened.
   /// Refreshed manifests may reorder or remove CDN entries.
   final String? currentUrl;
+
+  /// The quality which owns the active native source. Resolvers must prefer
+  /// this value over a quality captured when the route first opened: the route
+  /// may have been disposed while an application-floating session continued.
+  final LivePlayQuality? currentQuality;
+}
+
+@immutable
+class PlaybackSourceQualitySelection {
+  factory PlaybackSourceQualitySelection({required List<LivePlayQuality> qualities, required int currentQuality}) {
+    final immutableQualities = List<LivePlayQuality>.unmodifiable(qualities);
+    if (immutableQualities.isEmpty) {
+      throw ArgumentError.value(qualities, 'qualities', 'must contain the committed quality');
+    }
+    return PlaybackSourceQualitySelection._(immutableQualities, currentQuality.clamp(0, immutableQualities.length - 1));
+  }
+
+  const PlaybackSourceQualitySelection._(this.qualities, this.currentQuality);
+
+  final List<LivePlayQuality> qualities;
+  final int currentQuality;
+
+  LivePlayQuality get quality => qualities[currentQuality];
 }
 
 @immutable
@@ -65,12 +93,44 @@ class PlaybackSourceRefreshResult {
     required this.preferredLineIndex,
     this.refreshAt,
     this.invalidAt,
+    this.selection,
   });
 
   final List<String> urls;
   final int preferredLineIndex;
   final DateTime? refreshAt;
   final DateTime? invalidAt;
+  final PlaybackSourceQualitySelection? selection;
+}
+
+/// Immutable source metadata published only after the corresponding native
+/// source transaction has committed.
+@immutable
+class PlaybackSourceCommitSnapshot {
+  PlaybackSourceCommitSnapshot({
+    required this.revision,
+    required this.sessionId,
+    required this.intentRevision,
+    required this.room,
+    required List<String> urls,
+    required this.currentUrl,
+    required this.currentLineIndex,
+    required Map<String, String> headers,
+    required this.audioOnly,
+    required this.selection,
+  }) : urls = List<String>.unmodifiable(urls),
+       headers = Map<String, String>.unmodifiable(headers);
+
+  final int revision;
+  final int sessionId;
+  final int intentRevision;
+  final LiveRoom room;
+  final List<String> urls;
+  final String currentUrl;
+  final int currentLineIndex;
+  final Map<String, String> headers;
+  final bool audioOnly;
+  final PlaybackSourceQualitySelection? selection;
 }
 
 typedef PlaybackSourceResolver = Future<PlaybackSourceRefreshResult> Function(PlaybackSourceRefreshRequest request);
@@ -158,6 +218,13 @@ class PlayerManager {
   DateTime? _currentSourceRefreshAt;
   PlaybackSourceRefreshResult? _prefetchedSourceRefresh;
   _PlaybackCredentialPrefetch? _credentialPrefetch;
+  final StreamController<PlaybackSourceCommitSnapshot> _sourceCommitController =
+      StreamController<PlaybackSourceCommitSnapshot>.broadcast();
+  PlaybackSourceCommitSnapshot? _currentSourceCommit;
+  int _sourceCommitRevision = 0;
+  PlaybackSourceQualitySelection? _sourceCohortSelection;
+  LiveRoom? _sourceCohortRoom;
+  String? _sourceCohortUrl;
 
   PlayerManager({
     required this.fallbackManager,
@@ -209,6 +276,24 @@ class PlayerManager {
 
   bool _isPlaybackCommandCurrent(int revision) =>
       !_disposed && !_isClosing && _playbackRequested && _playbackIntentRevision == revision;
+
+  PlaybackSourceCommitSnapshot? get currentSourceCommit => _currentSourceCommit;
+
+  Stream<PlaybackSourceCommitSnapshot> get onSourceCommitted => _sourceCommitController.stream;
+
+  bool isSourceCommitCurrent(PlaybackSourceCommitSnapshot snapshot) {
+    final current = _currentSourceCommit;
+    return !_disposed &&
+        !_isClosing &&
+        current != null &&
+        current.revision == snapshot.revision &&
+        current.sessionId == snapshot.sessionId &&
+        current.intentRevision == snapshot.intentRevision &&
+        current.room == snapshot.room &&
+        current.sessionId == _sessionId &&
+        current.room == currentFloatRoom &&
+        current.currentUrl == _currentUrl;
+  }
 
   UnifiedPlayer? _currentPlayer;
   // Windows uses a first-frame-gated handoff for actual source failures and
@@ -422,14 +507,19 @@ class PlayerManager {
 
     final cached = _appFloatingSession;
     _appFloatingSession = null;
-    if (cached != null && cached.room == room) return cached;
+    final committed = _currentSourceCommit;
+    if (cached != null && cached.room == room) {
+      return committed != null && isSourceCommitCurrent(committed) && committed.room == room
+          ? _mergeRoomSessionWithCommit(cached, committed)
+          : cached;
+    }
 
     // Compatibility fallback for a floating session created before the route
     // supplied its complete presentation state. It is still preferable to
     // reopening the same native live source during route construction.
     final urls = List<String>.unmodifiable(_currentPlayUrls);
     final currentUrl = _currentUrl ?? (urls.isEmpty ? '' : urls.first);
-    return RoomSessionSnapshot(
+    final fallback = RoomSessionSnapshot(
       room: currentFloatRoom!,
       qualities: <LivePlayQuality>[LivePlayQuality(quality: '原画')],
       currentQuality: 0,
@@ -440,6 +530,9 @@ class PlayerManager {
       isLiving: true,
       dataSource: currentUrl,
     );
+    return committed != null && isSourceCommitCurrent(committed) && committed.room == room
+        ? _mergeRoomSessionWithCommit(fallback, committed)
+        : fallback;
   }
 
   void cancelRoomSessionReentry() {
@@ -462,6 +555,115 @@ class PlayerManager {
     }
   }
 
+  PlaybackSourceQualitySelection? _sourceSelectionForCurrentCohort() {
+    if (_sourceCohortRoom == currentFloatRoom && _sourceCohortUrl == _currentUrl) {
+      return _sourceCohortSelection;
+    }
+    final committed = _currentSourceCommit;
+    if (committed != null && committed.room == currentFloatRoom) return committed.selection;
+    return null;
+  }
+
+  void _setSourceCohort({
+    required LiveRoom? room,
+    required String url,
+    required PlaybackSourceQualitySelection? selection,
+  }) {
+    _sourceCohortRoom = room;
+    _sourceCohortUrl = url;
+    _sourceCohortSelection = selection;
+  }
+
+  void _clearSourceCommitState({bool clearSourceCohort = true}) {
+    _currentSourceCommit = null;
+    if (clearSourceCohort) {
+      _sourceCohortSelection = null;
+      _sourceCohortRoom = null;
+      _sourceCohortUrl = null;
+    }
+  }
+
+  void _rebindSourceCommitToSession(int sessionId) {
+    final committed = _currentSourceCommit;
+    if (committed == null || committed.room != currentFloatRoom || committed.currentUrl != _currentUrl) return;
+    _currentSourceCommit = PlaybackSourceCommitSnapshot(
+      revision: committed.revision,
+      sessionId: sessionId,
+      intentRevision: _playbackIntentRevision,
+      room: committed.room,
+      urls: committed.urls,
+      currentUrl: committed.currentUrl,
+      currentLineIndex: committed.currentLineIndex,
+      headers: committed.headers,
+      audioOnly: committed.audioOnly,
+      selection: committed.selection,
+    );
+  }
+
+  bool _publishSourceCommit({
+    required int sessionId,
+    required int intentRevision,
+    required LiveRoom? room,
+    required String currentUrl,
+    required List<String> urls,
+    required Map<String, String> headers,
+    required bool audioOnly,
+    required PlaybackSourceQualitySelection? selection,
+  }) {
+    if (room == null ||
+        !_isSessionValid(sessionId) ||
+        intentRevision != _playbackIntentRevision ||
+        !_playbackRequested ||
+        _playbackSuspensions.isNotEmpty ||
+        _currentPlayer == null ||
+        currentFloatRoom != room ||
+        _currentUrl != currentUrl) {
+      return false;
+    }
+
+    final immutableUrls = List<String>.unmodifiable(
+      urls.isEmpty && currentUrl.isNotEmpty ? <String>[currentUrl] : urls,
+    );
+    final index = immutableUrls.isEmpty ? 0 : immutableUrls.indexOf(currentUrl).clamp(0, immutableUrls.length - 1);
+    final snapshot = PlaybackSourceCommitSnapshot(
+      revision: ++_sourceCommitRevision,
+      sessionId: sessionId,
+      intentRevision: intentRevision,
+      room: room,
+      urls: immutableUrls,
+      currentUrl: currentUrl,
+      currentLineIndex: index,
+      headers: headers,
+      audioOnly: audioOnly,
+      selection: selection,
+    );
+    _currentSourceCommit = snapshot;
+    _setSourceCohort(room: room, url: currentUrl, selection: selection);
+    final floatingSession = _appFloatingSession;
+    if (floatingSession != null && floatingSession.room == room) {
+      _appFloatingSession = _mergeRoomSessionWithCommit(floatingSession, snapshot);
+    }
+    if (!_sourceCommitController.isClosed) _sourceCommitController.add(snapshot);
+    return true;
+  }
+
+  RoomSessionSnapshot _mergeRoomSessionWithCommit(RoomSessionSnapshot session, PlaybackSourceCommitSnapshot commit) {
+    if (session.room != commit.room) return session;
+    final selection = commit.selection;
+    return session.copyWith(
+      qualities: selection?.qualities,
+      currentQuality: selection?.currentQuality,
+      playUrls: commit.urls,
+      currentLineIndex: commit.currentLineIndex,
+      headers: commit.headers,
+      // Audio-only is an in-place player mode and can change without a source
+      // transaction. The commit snapshot's value is historical; the manager's
+      // desired mode is authoritative at hand-off time.
+      isAudioOnly: _requestedAudioOnly,
+      dataSource: commit.currentUrl,
+    );
+  }
+
   void prepareAppFloating({required Future<void> Function() onClose, RoomSessionSnapshot? session}) {
     // Keep every pending owner until the overlay and popped route have fully
     // unmounted. Releasing a previous owner here recreated the same late-Obx
@@ -470,12 +672,16 @@ class PlayerManager {
     if (session != null && session.room == currentFloatRoom && _currentPlayer != null) {
       final currentUrl = _currentUrl ?? session.dataSource;
       final urls = _currentPlayUrls.isEmpty ? session.playUrls : _currentPlayUrls;
-      _appFloatingSession = session.copyWith(
+      final transportSnapshot = session.copyWith(
         dataSource: currentUrl,
         playUrls: List<String>.unmodifiable(urls),
         headers: Map<String, String>.unmodifiable(_currentHeaders.isEmpty ? session.headers : _currentHeaders),
         isAudioOnly: _requestedAudioOnly,
       );
+      final committed = _currentSourceCommit;
+      _appFloatingSession = committed != null && isSourceCommitCurrent(committed) && committed.room == session.room
+          ? _mergeRoomSessionWithCommit(transportSnapshot, committed)
+          : transportSnapshot;
     } else {
       _appFloatingSession = null;
     }
@@ -878,11 +1084,18 @@ class PlayerManager {
     bool audioOnly = false,
     PlaybackSourceResolver? sourceResolver,
     DateTime? sourceRefreshAt,
+    PlaybackSourceQualitySelection? sourceSelection,
   }) {
     _cancelIdlePlayerRelease();
     _playbackRequested = true;
     _playbackIntentEstablished = true;
     _playbackIntentRevision++;
+    final roomChanged = room != currentFloatRoom;
+    _currentSourceCommit = null;
+    if (roomChanged) {
+      _pendingRoomReentry = null;
+      _appFloatingSession = null;
+    }
     _playbackSuspensions.clear();
     _sameEngineRecoveryAttempts = 0;
     _transientLiveRetryAttempts = 0;
@@ -905,6 +1118,8 @@ class PlayerManager {
         audioOnly: audioOnly,
         allowWarmSwap: true,
         sourceRefreshAt: sourceRefreshAt,
+        sourceSelection: sourceSelection,
+        replaceSourceSelection: true,
       );
     });
   }
@@ -917,6 +1132,8 @@ class PlayerManager {
     required bool audioOnly,
     required bool allowWarmSwap,
     required DateTime? sourceRefreshAt,
+    PlaybackSourceQualitySelection? sourceSelection,
+    bool replaceSourceSelection = false,
     bool forceTransportRestart = false,
     bool Function()? isStillRequired,
   }) async {
@@ -938,6 +1155,8 @@ class PlayerManager {
           room: room,
           audioOnly: audioOnly,
           sourceRefreshAt: sourceRefreshAt,
+          sourceSelection: sourceSelection,
+          replaceSourceSelection: replaceSourceSelection,
           isStillRequired: isStillRequired,
         )) {
       return;
@@ -946,7 +1165,15 @@ class PlayerManager {
     _proactiveSourceRefreshTimer?.cancel();
     _proactiveSourceRefreshTimer = null;
     _currentSourceRefreshAt = _effectiveSourceRefreshAt(sourceRefreshAt, url: url);
-    await _playInternal(url, playUrls, headers, room: room, audioOnly: audioOnly);
+    await _playInternal(
+      url,
+      playUrls,
+      headers,
+      room: room,
+      audioOnly: audioOnly,
+      sourceSelection: sourceSelection,
+      replaceSourceSelection: replaceSourceSelection,
+    );
   }
 
   Future<void> _playInternal(
@@ -955,6 +1182,8 @@ class PlayerManager {
     Map<String, String> headers, {
     LiveRoom? room,
     bool audioOnly = false,
+    PlaybackSourceQualitySelection? sourceSelection,
+    bool replaceSourceSelection = false,
   }) async {
     if (_disposed) return;
     _cancelIdlePlayerRelease();
@@ -967,6 +1196,8 @@ class PlayerManager {
     isVideoRestorePending.value = false;
     if (_disposed || _isClosing) return;
     final mySessionId = ++_sessionId;
+    final sourceIntentRevision = _playbackIntentRevision;
+    final committedSelection = replaceSourceSelection ? sourceSelection : _sourceSelectionForCurrentCohort();
 
     final roomChanged = room != currentFloatRoom;
     if (roomChanged) {
@@ -991,6 +1222,7 @@ class PlayerManager {
     _currentPlayUrls = List<String>.from(playUrls);
     _currentHeaders = Map<String, String>.from(headers);
     currentFloatRoom = room;
+    _setSourceCohort(room: room, url: url, selection: committedSelection);
     refreshPortraitPresentationPolicy(notifyController: false);
     hasError.value = false;
 
@@ -1077,6 +1309,16 @@ class PlayerManager {
       // Keep that buffering episode authoritative for both UI and recovery.
       _stateSubject.add(_nativeLoading ? PlayerState.buffering : PlayerState.ready);
       _scheduleAudioServiceSync(player, audioOnly, room: room, sessionId: mySessionId);
+      _publishSourceCommit(
+        sessionId: mySessionId,
+        intentRevision: sourceIntentRevision,
+        room: room,
+        currentUrl: targetUrl,
+        urls: targetPlayUrls,
+        headers: headers,
+        audioOnly: audioOnly,
+        selection: committedSelection,
+      );
     } on PlayerException catch (e) {
       if (_isSessionValid(mySessionId)) await _handleError(e, sessionId: mySessionId);
     } catch (e, s) {
@@ -1395,6 +1637,8 @@ class PlayerManager {
     final oldRequestedAudioOnly = _requestedAudioOnly;
     final oldNativeAudioOnly = _nativeAudioOnly;
     final targetAudioOnly = audioOnly ?? _runtimeAudioOnly;
+    final entryIntentRevision = _playbackIntentRevision;
+    final sourceSelection = _sourceSelectionForCurrentCohort();
     UnifiedPlayer? candidate;
     var candidateInstalled = false;
 
@@ -1501,6 +1745,18 @@ class PlayerManager {
       videoKey.value = ValueKey("video_${DateTime.now().millisecondsSinceEpoch}");
       _scheduleAudioServiceSync(candidate, targetAudioOnly, room: currentFloatRoom, sessionId: sessionId);
       _scheduleRecoveryBudgetReset(candidate, sessionId);
+      if (openCurrentSource && sourceUrl != null && sourceUrl.isNotEmpty) {
+        _publishSourceCommit(
+          sessionId: sessionId,
+          intentRevision: entryIntentRevision,
+          room: currentFloatRoom,
+          currentUrl: sourceUrl,
+          urls: _currentPlayUrls,
+          headers: _currentHeaders,
+          audioOnly: targetAudioOnly,
+          selection: sourceSelection,
+        );
+      }
     } catch (e, s) {
       if (!candidateInstalled && candidate != null && !identical(candidate, oldPlayer)) {
         await _safeDestroyPlayer(candidate);
@@ -1535,6 +1791,8 @@ class PlayerManager {
     required LiveRoom? room,
     required bool audioOnly,
     required DateTime? sourceRefreshAt,
+    PlaybackSourceQualitySelection? sourceSelection,
+    bool replaceSourceSelection = false,
     bool Function()? isStillRequired,
   }) async {
     final oldPlayer = _currentPlayer;
@@ -1551,6 +1809,7 @@ class PlayerManager {
     final oldNativeAudioOnly = _nativeAudioOnly;
     final oldSourceRefreshAt = _currentSourceRefreshAt;
     final expectedIntentRevision = _playbackIntentRevision;
+    final committedSelection = replaceSourceSelection ? sourceSelection : _sourceSelectionForCurrentCohort();
     UnifiedPlayer? candidate;
     StreamSubscription<int>? frameSubscription;
     StreamSubscription<bool>? playingSubscription;
@@ -1660,6 +1919,16 @@ class PlayerManager {
       _scheduleRecoveryBudgetReset(candidate, newSessionId);
       _scheduleProactiveSourceRefresh(candidate, newSessionId);
       await _parkWindowsWarmStandby(oldPlayer, audioOnly: oldNativeAudioOnly);
+      _publishSourceCommit(
+        sessionId: newSessionId,
+        intentRevision: expectedIntentRevision,
+        room: room,
+        currentUrl: url,
+        urls: playUrls,
+        headers: headers,
+        audioOnly: audioOnly,
+        selection: committedSelection,
+      );
       return true;
     } catch (error, stackTrace) {
       log(
@@ -1682,6 +1951,9 @@ class PlayerManager {
         _currentSourceRefreshAt = oldSourceRefreshAt;
         currentFloatRoom = oldRoom;
         await _bindPlayerStreams(oldPlayer, sessionId: rollbackSessionId);
+        // The source transaction failed and emits no commit, but the restored
+        // source remains canonical under a new native event generation.
+        _rebindSourceCommitToSession(rollbackSessionId);
       }
       // Cancellation is a consumed transaction, including on failure. A false
       // result permits the caller to reopen the active player destructively.
@@ -2909,6 +3181,7 @@ class PlayerManager {
     _playbackIntentEstablished = true;
     _playbackIntentRevision++;
     _sessionId++;
+    _clearSourceCommitState();
     _playbackSuspensions.clear();
     _cancelContinuityRecovery();
     _cancelVideoFrameStallRecovery();
@@ -2934,6 +3207,7 @@ class PlayerManager {
     _prefetchedSourceRefresh = null;
     _pendingRoomReentry = null;
     _appFloatingSession = null;
+    _clearSourceCommitState();
     _isClosing = true;
     isVideoRestorePending.value = false;
     // Let route/overlay widgets release their listeners before native teardown,
@@ -3022,6 +3296,7 @@ class PlayerManager {
     _sourceRefreshAttempts = 0;
     _transientLiveRetryAttempts = 0;
     _prefetchedSourceRefresh = null;
+    _clearSourceCommitState();
     _sessionId++;
     lineManager.reset();
     await _clearSubscriptions();
@@ -3395,6 +3670,7 @@ class PlayerManager {
     final expectedSessionId = _sessionId;
     final expectedIntentRevision = _playbackIntentRevision;
     final currentIndex = _currentPlayUrls.indexOf(currentUrl);
+    final currentSelection = _sourceSelectionForCurrentCohort();
     final attempt = proactive ? 0 : _sourceRefreshAttempts++;
     bool requestIsCurrent() =>
         _isSessionValid(expectedSessionId) &&
@@ -3429,6 +3705,7 @@ class PlayerManager {
               currentLineIndex: currentIndex < 0 ? 0 : currentIndex,
               advanceLine: attempt > 0,
               currentUrl: currentUrl,
+              currentQuality: currentSelection?.quality,
             ),
           );
         }
@@ -3438,6 +3715,7 @@ class PlayerManager {
             currentLineIndex: currentIndex < 0 ? 0 : currentIndex,
             advanceLine: false,
             currentUrl: currentUrl,
+            currentQuality: currentSelection?.quality,
           ),
         );
       }
@@ -3450,6 +3728,7 @@ class PlayerManager {
       if (urls.isEmpty) return false;
       final selectedIndex = refreshed.preferredLineIndex.clamp(0, urls.length - 1);
       final selectedUrl = urls[selectedIndex];
+      final refreshedSelection = refreshed.selection ?? currentSelection;
       if (proactive) {
         if (PlatformUtils.isWindows && HuyaTransportPolicy.hasShortTransportLease(currentUrl)) {
           // Huya edge transports have been observed ending after roughly two
@@ -3471,6 +3750,8 @@ class PlayerManager {
             room: currentFloatRoom,
             audioOnly: _runtimeAudioOnly,
             sourceRefreshAt: refreshed.refreshAt,
+            sourceSelection: refreshedSelection,
+            replaceSourceSelection: true,
           );
           if (handedOff) {
             final committed =
@@ -3513,6 +3794,7 @@ class PlayerManager {
           preferredLineIndex: selectedIndex,
           refreshAt: refreshed.refreshAt?.toUtc(),
           invalidAt: refreshed.invalidAt?.toUtc(),
+          selection: refreshedSelection,
         );
         log('Prefetched signed playback lease without replacing the active transport', name: 'PlayerManager');
         final nextRefreshAt = refreshed.refreshAt?.toUtc();
@@ -3542,6 +3824,8 @@ class PlayerManager {
         audioOnly: _runtimeAudioOnly,
         allowWarmSwap: true,
         sourceRefreshAt: refreshed.refreshAt,
+        sourceSelection: refreshedSelection,
+        replaceSourceSelection: true,
         forceTransportRestart: forceTransportRestart,
         isStillRequired: isStillRequired,
       );
@@ -3953,6 +4237,7 @@ class PlayerManager {
     _sourceRefreshAttempts = 0;
     _transientLiveRetryAttempts = 0;
     _prefetchedSourceRefresh = null;
+    _clearSourceCommitState();
     _cancelIdlePlayerRelease();
     await closeAppFloating();
     await _pipSubscription?.cancel();
@@ -3967,6 +4252,7 @@ class PlayerManager {
       _errorSubject.close(),
       _widthSubject.close(),
       _heightSubject.close(),
+      _sourceCommitController.close(),
     ]);
   }
 }

@@ -292,6 +292,10 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   final bool reuseCurrentSession;
   final PlaybackSourceResolver? sourceResolver;
   final DateTime? sourceRefreshAt;
+  final PlaybackSourceQualitySelection? sourceSelection;
+  final ValueChanged<PlaybackSourceCommitSnapshot>? onSourceCommitted;
+  int _lastSourceCommitRevision = 0;
+  bool _acceptSourceCommits = false;
 
   final Battery _battery;
   final SettingsService _settingsService;
@@ -386,6 +390,8 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     required bool isAudioOnly,
     this.sourceResolver,
     this.sourceRefreshAt,
+    this.sourceSelection,
+    this.onSourceCommitted,
     this.reuseCurrentSession = false,
     this.allowScreenKeepOn = false,
     this.allowFullScreen = true,
@@ -484,6 +490,10 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   Future<void> _playVideo() async {
+    // play() invalidates the previous intent synchronously before it queues
+    // native work. Only from this point may a newly constructed route consume
+    // events; its volume initialization must not replay the old same-room URL.
+    _acceptSourceCommits = true;
     await _playerManager.play(
       datasource,
       playUrs,
@@ -492,6 +502,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
       audioOnly: isAudioOnly,
       sourceResolver: sourceResolver,
       sourceRefreshAt: sourceRefreshAt,
+      sourceSelection: sourceSelection,
     );
   }
 
@@ -548,6 +559,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   Future<void> _cancelAllSubscriptions() async {
+    _acceptSourceCommits = false;
     for (final sub in _subscriptions) {
       await sub.cancel();
     }
@@ -581,6 +593,12 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   void initPlayerListener() {
     if (_playerListenerBound || _isDisposed) return;
     _playerListenerBound = true;
+    _acceptSourceCommits = reuseCurrentSession;
+    // Subscribe before replaying the canonical snapshot: a retained native
+    // session may commit a new source while the old room route is gone.
+    _addSubscription(_playerManager.onSourceCommitted.listen(_handleSourceCommit));
+    final sourceCommit = _playerManager.currentSourceCommit;
+    if (reuseCurrentSession && sourceCommit != null) _handleSourceCommit(sourceCommit);
     final errorSub = _playerManager.onError.listen((error) {
       log('error: ${error.toString()}', name: 'initPlayerListener');
       _handlePlayerError(error);
@@ -602,6 +620,25 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
         if (loading) _setStatus(PlayerStatus.loading);
       }),
     );
+  }
+
+  void _handleSourceCommit(PlaybackSourceCommitSnapshot commit) {
+    if (_isDisposed ||
+        !_acceptSourceCommits ||
+        commit.revision <= _lastSourceCommitRevision ||
+        commit.room.roomId != room.roomId ||
+        commit.room.platform != room.platform ||
+        !_playerManager.isSourceCommitCurrent(commit)) {
+      return;
+    }
+    _lastSourceCommitRevision = commit.revision;
+    try {
+      onSourceCommitted?.call(commit);
+    } catch (error, stackTrace) {
+      // Presentation callbacks must not roll a successfully opened native
+      // source back or leave a broadcast subscription with an unhandled error.
+      log('Source commit presentation failed', name: 'VideoController', error: error, stackTrace: stackTrace);
+    }
   }
 
   void _handlePlayerError(PlayerException error) {
@@ -987,8 +1024,14 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   void clearListener() {
+    _acceptSourceCommits = false;
     final listenersToRemove = _subscriptions
-        .where((s) => s is StreamSubscription<PlayerException> || s is StreamSubscription<bool>)
+        .where(
+          (s) =>
+              s is StreamSubscription<PlayerException> ||
+              s is StreamSubscription<bool> ||
+              s is StreamSubscription<PlaybackSourceCommitSnapshot>,
+        )
         .toList();
 
     for (final sub in listenersToRemove) {

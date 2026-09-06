@@ -25,6 +25,7 @@ typedef StreamSourceOpener = Future<void> Function(
   bool audioOnly,
   PlaybackSourceResolver? sourceResolver,
   DateTime? sourceRefreshAt,
+  PlaybackSourceQualitySelection? sourceSelection,
 );
 
 @immutable
@@ -152,6 +153,7 @@ class PlayerController extends GetxController {
   late Site currentSite;
   int _loadEpoch = 0;
   int _streamSelectionEpoch = 0;
+  int _lastSourceCommitRevision = 0;
   final RxBool isStreamSwitching = false.obs;
 
   static Future<void> _openGlobalStream(
@@ -162,6 +164,7 @@ class PlayerController extends GetxController {
     bool audioOnly,
     PlaybackSourceResolver? sourceResolver,
     DateTime? sourceRefreshAt,
+    PlaybackSourceQualitySelection? sourceSelection,
   ) {
     final manager = GlobalPlayerService.instance.player;
     return manager
@@ -173,6 +176,7 @@ class PlayerController extends GetxController {
           audioOnly: audioOnly,
           sourceResolver: sourceResolver,
           sourceRefreshAt: sourceRefreshAt,
+          sourceSelection: sourceSelection,
         )
         .then((_) {
           if (manager.hasError.value) {
@@ -218,9 +222,27 @@ class PlayerController extends GetxController {
   }) {
     final liveSite = site.liveSite;
     if (liveSite is! LivePlayRecoveryResolver) return null;
+    final initialChoices = List<LivePlayQuality>.unmodifiable(
+      _state.player.qualites.isEmpty ? <LivePlayQuality>[quality] : _state.player.qualites,
+    );
 
     return (request) async {
-      final resolution = await liveSite.resolvePlayUrlsForRecovery(detail: room, quality: quality);
+      // The native session survives route disposal (app floating). Do not read
+      // route state here or keep requesting the quality captured at first open
+      // after the server has committed a different rate during recovery.
+      final requested = request.currentQuality ?? quality;
+      final choices = <LivePlayQuality>[
+        for (final item in initialChoices)
+          item.selectionId.toString() == requested.selectionId.toString() ? requested : item,
+      ];
+      var requestedIndex = choices.indexWhere(
+        (item) => item.selectionId.toString() == requested.selectionId.toString(),
+      );
+      if (requestedIndex < 0) {
+        requestedIndex = choices.length;
+        choices.add(requested);
+      }
+      final resolution = await liveSite.resolvePlayUrlsForRecovery(detail: room, quality: requested);
       final urls = resolution.urls;
       if (urls.isEmpty) {
         return const PlaybackSourceRefreshResult(urls: <String>[], preferredLineIndex: 0);
@@ -237,6 +259,14 @@ class PlayerController extends GetxController {
       return PlaybackSourceRefreshResult(
         urls: urls,
         preferredLineIndex: preferredIndex,
+        selection: PlaybackSourceQualitySelection(
+          qualities: _qualityChoicesWithConfirmation(choices, requestedIndex, resolution),
+          currentQuality: resolveAppliedQualityIndex(
+            qualities: choices,
+            requestedIndex: requestedIndex,
+            appliedQualityData: resolution.appliedQualityData,
+          ),
+        ),
         refreshAt: liveSite is LivePlayLeaseMetadata
             ? (liveSite as LivePlayLeaseMetadata).getPlayUrlRefreshAt(urls[preferredIndex])
             : null,
@@ -245,6 +275,30 @@ class PlayerController extends GetxController {
             : null,
       );
     };
+  }
+
+  /// Only called by the route's listener after the manager validates that this
+  /// immutable snapshot still owns the native source. Resolver completion is
+  /// not a commit, so it never updates these visible selection fields.
+  void applySourceCommit(PlaybackSourceCommitSnapshot commit) {
+    final room = currentRoom;
+    if (_main.isClosed ||
+        commit.revision <= _lastSourceCommitRevision ||
+        room == null ||
+        commit.room.roomId != room.roomId ||
+        commit.room.platform != room.platform ||
+        currentSite.id != room.platform) {
+      return;
+    }
+    _lastSourceCommitRevision = commit.revision;
+    final selection = commit.selection;
+    _main.updatePlayer(
+      qualites: selection?.qualities,
+      currentQuality: selection?.currentQuality,
+      playUrls: commit.urls,
+      currentLineIndex: commit.currentLineIndex,
+    );
+    _main.updateRoom(success: true, isLoading: false, loadError: null);
   }
 
   DateTime? _getSourceRefreshAt({required Site site, required String url}) {
@@ -293,6 +347,11 @@ class PlayerController extends GetxController {
         quality: playerState.qualites[playerState.currentQuality.clamp(0, playerState.qualites.length - 1)],
       ),
       sourceRefreshAt: _getSourceRefreshAt(site: site, url: playerState.playUrlSafe),
+      sourceSelection: PlaybackSourceQualitySelection(
+        qualities: playerState.qualites,
+        currentQuality: playerState.currentQuality,
+      ),
+      onSourceCommitted: applySourceCommit,
       onAudioOnlyChanged: _main.setCurrentRoomAudioOnlyFromUser,
     );
 
@@ -346,6 +405,8 @@ class PlayerController extends GetxController {
         site: currentSite,
         url: session.dataSource.isNotEmpty ? session.dataSource : (playUrls.isEmpty ? '' : playUrls[currentLineIndex]),
       ),
+      sourceSelection: PlaybackSourceQualitySelection(qualities: qualities, currentQuality: currentQuality),
+      onSourceCommitted: applySourceCommit,
       onAudioOnlyChanged: _main.setCurrentRoomAudioOnlyFromUser,
     );
     _main.updatePlayer(videoController: videoController);
@@ -484,6 +545,7 @@ class PlayerController extends GetxController {
 
     final selectionEpoch = ++_streamSelectionEpoch;
     final loadEpoch = ++_loadEpoch;
+    final sourceCommitBeforeSelection = _lastSourceCommitRevision;
     isStreamSwitching.value = true;
 
     try {
@@ -537,6 +599,8 @@ class PlayerController extends GetxController {
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
 
       final immutableUrls = List<String>.unmodifiable(urls);
+      final committedChoices = _qualityChoicesWithConfirmation(before.qualites, requestedQuality, resolution);
+      final sourceCommitBeforeOpen = _lastSourceCommitRevision;
       await _streamSourceOpener(
         immutableUrls[selection.lineIndex],
         immutableUrls,
@@ -545,15 +609,22 @@ class PlayerController extends GetxController {
         _state.player.isCurrentRoomAudioOnly,
         _buildSourceResolver(site: site, room: room, quality: before.qualites[selection.qualityIndex]),
         _getSourceRefreshAt(site: site, url: immutableUrls[selection.lineIndex]),
+        PlaybackSourceQualitySelection(qualities: committedChoices, currentQuality: selection.qualityIndex),
       );
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
-      _main.updatePlayer(
-        qualites: _qualityChoicesWithConfirmation(before.qualites, requestedQuality, resolution),
-        currentQuality: selection.qualityIndex,
-        playUrls: immutableUrls,
-        currentLineIndex: selection.lineIndex,
-        hasUseDefaultResolution: true,
-      );
+      if (_lastSourceCommitRevision == sourceCommitBeforeOpen) {
+        _main.updatePlayer(
+          qualites: committedChoices,
+          currentQuality: selection.qualityIndex,
+          playUrls: immutableUrls,
+          currentLineIndex: selection.lineIndex,
+          hasUseDefaultResolution: true,
+        );
+      } else {
+        // Native open may have recovered to another acknowledged source before
+        // returning. Its successful commit is newer than this request payload.
+        _main.updatePlayer(hasUseDefaultResolution: true);
+      }
       _main.updateRoom(success: true, isLoading: false, loadError: null);
       if (qualityAdjusted) {
         ToastUtil.show(i18n('quality_limited_to', args: {'quality': before.qualites[selection.qualityIndex].quality}));
@@ -561,13 +632,15 @@ class PlayerController extends GetxController {
       return true;
     } catch (error, stackTrace) {
       if (_isLoadCurrent(loadEpoch, room, site) && selectionEpoch == _streamSelectionEpoch) {
-        _main.updatePlayer(
-          qualites: before.qualites,
-          currentQuality: before.currentQuality,
-          playUrls: before.playUrls,
-          currentLineIndex: before.currentLineIndex,
-          hasUseDefaultResolution: before.hasUseDefaultResolution,
-        );
+        if (_lastSourceCommitRevision == sourceCommitBeforeSelection) {
+          _main.updatePlayer(
+            qualites: before.qualites,
+            currentQuality: before.currentQuality,
+            playUrls: before.playUrls,
+            currentLineIndex: before.currentLineIndex,
+            hasUseDefaultResolution: before.hasUseDefaultResolution,
+          );
+        }
         developer.log(
           'Stream selection failed (${error.runtimeType})',
           name: 'PlayerController',

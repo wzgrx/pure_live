@@ -109,3 +109,22 @@ GetX stream 并非同步投递，首次实现的同步收集窗口遗漏后续�
 完整重跑通过：**1213/1213 测试、42/42 公开接口探针、analyze 无问题**，记录 `local-artifacts/build-records/20260906T161752615Z-quality-full.json`，426.032 秒，结束活跃重型进程 0。完整日志保留于 `local-artifacts/full-quality-finalization-wait-20260907.log`。此记录源码基准为 0f6f695f，包含本次测试等待修正；其后提交仅固化测试和文档。
 
 下一步：以此完整质量证据构建本地候选包，按网络 ADB 状态选择原生验证；仍不把自动测试通过等同于全平台功能/长时稳定验收，正式 3.2.0 保持未发布。
+
+## 候选构建与 Windows 原生备份验证（2026-09-07）
+
+源码 `9c20ad11`（构建时 tracked clean），保留候选标签 3.1.8+4121：
+
+- Android arm64 Debug 构建成功，`20260906T162313904Z-build-androidarm64-debug.json`，APK 286,960,675 B，16 个原生库的 16 KB ELF 对齐检查通过。网络 ADB 本轮无设备，未安装新 APK。
+- Windows x64 Debug 成功，`20260906T163704450Z-build-windowsx64-debug.json`，ZIP 141,243,403 B。首次构建缺少生成的 Flutter wrapper/engine 文件；SDK 原件完整，保留并重命名单个 `flutter_assemble.tlog` 跟踪目录后增量重试成功，没有清空全量缓存。失败记录 `20260906T163011936Z-build-windowsx64-debug.json` 保留。
+- Windows EXE SHA-256：`BC49A263FF1947B48165484663C3D67918502C0AC64ACF61EE4FEAB40C73FE7B`；ZIP SHA-256：`5B155F4A36839D3CDEF40B848B82CCCCD352A74F288A897E413A8B599C43B226`。
+
+使用原生窗口实际点击设置 → 备份与恢复，走产品文件/目录选择器，而非直接调用控制器：
+
+1. 导入 UTF-8 `.txt` 文件 `{}`，界面显示“恢复备份失败”。前后 Hive 文件 SHA-256 完全相同，`post-invalid-result.json` 为 `unchanged: true`。
+2. 设置本地测试目录 → 创建备份，显示“创建备份成功”；导出的 v3 JSON 5,463 B，默认不含敏感分区，`sensitiveDataIncluded: false`。
+3. 选择刚导出的文件恢复，显示“恢复备份成功”；再次导出，两个文件逐字节一致，SHA-256 均为 `DC18C53DC84CAEF9431F8179A53D550CEFCDDB35908884902AE648442A5A0000`，`roundtrip-result.json` 为 `identical: true`。
+4. 再次打开恢复选择器后取消，没有成功/失败提示；Hive 哈希保持，`cancel-result.json` 为 `unchanged: true`。
+
+证据和备份保留在 `local-artifacts/backup-native-20260907/`，没有提交备份内容。启动前候选输出目录没有 AppData；启动后的 Hive 已留存初始副本。测试仅设置了候选自身备份目录，没有登录、云端上传或修改其他安装目录。正常确认退出后，将这次生成的整个 AppData 保留到上述证据目录的 `candidate-AppData`，没有丢弃用户数据。原生工具首次启动报未发现窗口；刷新后出现使用真实路径标识的唯一窗口，选定后继续验证，没有重复启动应用。
+
+本次有效恢复是同配置往返，未在原生 UI 注入磁盘失败；Android 新包、WebDAV/Firebase 恢复及其他历史 NR/RUN 仍待验证。另发现首次“创建备份”先要求设置目录，设置后创建时又弹出目录选择器；属于重复前置操作，下一小批从页面入口修正并补 Widget 回归，不把该候选的点击结果用于尚未构建的新源码。

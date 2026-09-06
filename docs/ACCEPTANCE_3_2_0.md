@@ -1,10 +1,17 @@
 # 3.2.0 完整验收入口
 
+## 最新增量：Android 新候选实际观看与录制（2026-09-06）
+
+- [实机审计](ANDROID_CANDIDATE_RUNTIME_AUDIT_2026_09_06.md)：`c252e522` Debug覆盖安装成功，网络ADB优先；斗鱼原画→超清、线路1→线路2后画面和标签稳定。
+- 33.526667秒1080P60 H.264/AAC录制，19,460,622字节；严格完整解码退出0、错误日志空。独立录制档位与观看档位区分正确。
+- Bilibili纯音频往返和系统PiP进入/前台恢复通过截图及Activity状态核验；Debug小样本不作为Release性能达标证据。
+- 本轮未测试锁屏录制、长暂停、终态按钮实际重试；Windows新候选与其他完整清单项继续。未发布3.2.0。
+
 ## 最新增量：完整门禁与 Android 构建路径（2026-09-06）
 
 - `7ba627fd` 完整门禁：1162/1162 测试、42/42 接口、analyze 无诊断；记录 `20260906T002133716Z-quality-full.json`。
 - 网络 ADB 已在线，Android 优先。Debug 编译完成但 APK 缺少 Flutter 静态资源，已由完整性门禁拦截，未安装。
-- [构建路径审计](ANDROID_BUILD_PATH_AUDIT_2026_09_06.md)：修复 SUBST 调用跳过 Android 同盘路径归一化的问题，定向隔离失效资源 stamp 后等待重建核验。Windows 新候选验收仍保留。
+- [构建路径审计](ANDROID_BUILD_PATH_AUDIT_2026_09_06.md)：修复 SUBST 调用跳过 Android 同盘路径归一化的问题，资源别名清理诊断后，稳定路径重建通过：记录 `20260906T003956314Z-build-androidarm64-debug.json`，1262 个 Flutter 资源、16 个原生库及 16 KB 对齐通过。Android 候选进入实机验收；Windows 新候选验收仍保留。
 
 ## 最新增量：播放终态提示与重试（2026-09-06）
 

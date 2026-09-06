@@ -21,3 +21,12 @@
 ## 下一验证
 
 从归一化入口重建同一应用源码 Android Debug，仍须通过原 APK 资源/ABI/版本/16 KB 对齐门禁，再进入安装与实际观看录制验收。构建脚本修复不改变应用源码，复用上述完整质量证据。缺失资源候选未安装，3.2.0 未发布。
+
+## 实际重建结果
+
+1. 首次归一化后的构建 `20260906T003623654Z-build-androidarm64-debug.json` 仍失败于 `:app:compressDebugAssets`。进一步读取固定 SDK 的 `trackSharedBuildDirectory` 证实：除单节点 stamp 外，跨配置的 `outputs.json` 也在新输出生成后按路径字符串清理旧产物。此前 P: 配置 `051c50784328b16ebb0abf7cfd79423b` 切换到物理路径配置 `241c164f2276c6b4dcf2715b34197897` 时，别名指向同一文件；`.last_build_id` 已更新，而资源再次只剩 3 个。补充证据为 `shared-output-cleanup.json`。不把第一次归一化构建计为成功。
+2. 保持归一化后的同一配置、不再切换别名，增量重建通过原有门禁：`20260906T003956314Z-build-androidarm64-debug.json`，提交 `c252e522`，154.683 秒，结束活跃重型进程 0。应用源码与已通过完整门禁的 `7ba627fd` 一致。
+3. APK **286,927,827 字节**，SHA256 `1bf557676633f4b0f3e23058d8e8ec2835c8a86726ed72f800326ff3b4fda99f`；包名 `com.mystyle.purelive`，开发版本 3.1.8，基础 build 4121 / Manifest code 6121，唯一 arm64 ABI，16 个 ELF 的 LOAD 对齐 ≥ 0x4000、ZIP 16 KB 对齐通过。
+4. Flutter 资源 **1262 个 / 202,005,087 字节**，原资源清单、翻译、版本等门禁全部通过；没有手工向 APK 补资源。最新日志未再出现 Kotlin 跨盘根目录错误，但保留 firebase_auth/core 的旧 KGP 迁移警告。
+
+产物在 `local-artifacts/3.1.8-4121/PureLive-3.1.8-4121-android-arm64-v8a-debug.apk`；同目录旧 Release APK、Windows ZIP/安装器均不属于本轮构建。进入 Android 候选实机验收，不是正式 3.2.0 交付。

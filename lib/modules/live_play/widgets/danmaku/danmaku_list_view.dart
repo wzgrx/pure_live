@@ -13,6 +13,7 @@ import 'package:pure_live/modules/live_play/states/ui_state.dart';
 import 'package:pure_live/modules/live_play/controllers/player_state.dart';
 import 'package:pure_live/modules/live_play/controllers/live_play_controller.dart';
 import 'package:pure_live/modules/live_play/widgets/danmaku/danmaku_message_actions.dart';
+import 'package:pure_live/modules/live_play/widgets/danmaku/danmaku_arrival_counter.dart';
 import 'package:pure_live/modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart';
 
 bool isDanmakuUserScrollStart(
@@ -65,8 +66,7 @@ class DanmakuListViewState extends State<DanmakuListView> {
   bool userScrolling = false;
   bool _autoScrollEnabled = true;
   final ValueNotifier<int> _pendingMessageCount = ValueNotifier<int>(0);
-  int _lastControllerLength = 0;
-  LiveMessage? _lastControllerTail;
+  final _arrivalCounter = DanmakuArrivalCounter<LiveMessage>();
   List<LiveMessage> _visibleMessages = const [];
   final LinkedHashMap<LiveMessage, DanmakuItem> _itemCache = LinkedHashMap<LiveMessage, DanmakuItem>.identity();
   final DanmakuTailFollowGuard _tailFollowGuard = DanmakuTailFollowGuard();
@@ -86,8 +86,7 @@ class DanmakuListViewState extends State<DanmakuListView> {
   void initState() {
     super.initState();
     _visibleMessages = List<LiveMessage>.from(controller.danmakuMessages);
-    _lastControllerLength = _visibleMessages.length;
-    _lastControllerTail = _visibleMessages.isEmpty ? null : _visibleMessages.last;
+    _arrivalCounter.update(_visibleMessages);
 
     messagesSub = controller.danmakuMessages.listen((_) => _onMessagesChanged());
 
@@ -117,13 +116,8 @@ class DanmakuListViewState extends State<DanmakuListView> {
   void _onMessagesChanged() {
     if (!mounted) return;
     final currentMessages = controller.danmakuMessages;
-    final nextLength = currentMessages.length;
     final nextTail = currentMessages.isEmpty ? null : currentMessages.last;
-    final tailChanged = !identical(nextTail, _lastControllerTail);
-    final lengthDelta = nextLength - _lastControllerLength;
-    final addedCount = lengthDelta > 0 ? lengthDelta : (tailChanged ? 1 : 0);
-    _lastControllerLength = nextLength;
-    _lastControllerTail = nextTail;
+    final addedCount = _arrivalCounter.update(currentMessages);
 
     if (!_autoScrollEnabled) {
       if (addedCount > 0) {
@@ -213,8 +207,7 @@ class DanmakuListViewState extends State<DanmakuListView> {
       _autoScrollEnabled = true;
       userScrolling = false;
     });
-    _lastControllerLength = messages.length;
-    _lastControllerTail = messages.isEmpty ? null : messages.last;
+    _arrivalCounter.update(messages);
     _pendingMessageCount.value = 0;
     await forceScrollToBottom();
   }

@@ -15,6 +15,8 @@ param(
     [switch] $RequireLiveDanmaku,
     [switch] $RequireIndependentBackground,
     [switch] $FinishActivityDuringScreenOff,
+    [ValidateSet('none', 'timeout', 'serviceStop')]
+    [string] $Interruption = 'none',
     [switch] $ExerciseStreamSelection
 )
 
@@ -22,6 +24,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if ($RequireIndependentBackground -and $ScreenOffSeconds -eq 0) { throw 'Independent background checks require ScreenOffSeconds > 0.' }
 if ($FinishActivityDuringScreenOff -and $ScreenOffSeconds -eq 0) { throw 'Activity destruction checks require ScreenOffSeconds > 0.' }
+if ($Interruption -ne 'none' -and (-not $FinishActivityDuringScreenOff -or -not $RequireIndependentBackground)) {
+    throw 'Interruption checks require Activity destruction and independent background checks.'
+}
 . (Join-Path $PSScriptRoot 'recorder_background_snapshot.ps1')
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -1072,6 +1077,55 @@ try {
         $backgroundSnapshot = Get-RecorderBackgroundSnapshot -Services $screenOffServices -Power $screenOffPower -Package $Package
         $result.checks.backgroundSnapshot = $backgroundSnapshot
         Save-Text 'recorder-background-snapshot.json' ($backgroundSnapshot | ConvertTo-Json)
+        if ($Interruption -ne 'none') {
+            # This branch has its own acceptance result: it never claims that
+            # normal stop, foreground restoration or user retry was exercised.
+            $drainTimer = [Diagnostics.Stopwatch]::StartNew()
+            $probe = (Invoke-Adb -AdbArguments @(
+                'shell', 'am', 'broadcast', '-n', "$Package/.RecorderLifecycleProbeReceiver",
+                '-a', 'com.mystyle.purelive.debug.RECORDER_LIFECYCLE_PROBE', '--es', 'operation', $Interruption
+            )) -join "`n"
+            Save-Text 'interruption-probe.txt' $probe
+            $expectedAck = if ($Interruption -eq 'timeout') { 'ok:timeout_callback_injected' } else { 'ok:service_stop_requested' }
+            if ($probe -notmatch ('result=-1.*' + [regex]::Escape($expectedAck))) {
+                throw 'Interruption probe did not acknowledge an active service.'
+            }
+            do {
+                $services = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'services', $Package)) -join "`n"
+                $power = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'power')) -join "`n"
+                $after = Get-RecorderBackgroundSnapshot -Services $services -Power $power -Package $Package
+                $finalFiles = @(Get-PrivateRecordingFiles | Where-Object { $_ -notin $beforeFiles -and $_ -match '(?i)\.mp4$' })
+                if (-not $after.recorderServicePresent -and -not $after.recorderCpuLockHeld -and $finalFiles.Count -gt 0) { break }
+                Start-Sleep -Milliseconds 500
+            } while ($drainTimer.Elapsed.TotalSeconds -lt 12)
+            Save-Text 'services-after-interruption.txt' $services
+            Save-Text 'power-after-interruption.txt' $power
+            $result.checks.interruption = $Interruption
+            $result.checks.interruptionDrainMs = $drainTimer.ElapsedMilliseconds
+            $result.checks.backgroundAfterInterruption = $after
+            $result.checks.finalFilesAfterInterruption = $finalFiles
+            $result.assertions = [ordered]@{
+                activityDestroyed = [bool]$result.checks.activityDestroyedDuringRecording
+                screenOffConfirmed = [bool]$result.checks.screenOffConfirmed
+                sameFileGrew = [bool]$result.checks.screenOffRecordingContinued
+                independentForeground = [bool]$backgroundSnapshot.recorderForeground -and -not [bool]$backgroundSnapshot.audioForeground
+                independentCpuLock = [bool]$backgroundSnapshot.recorderCpuLockHeld
+                recorderServiceReleased = -not [bool]$after.recorderServicePresent
+                recorderCpuLockReleased = -not [bool]$after.recorderCpuLockHeld
+                activeWakeLockSectionParsed = $power -match '(?m)^Wake Locks:\s*size=\d+'
+                finalFileExists = $finalFiles.Count -gt 0
+                drainedBeforeFallbackWindow = $drainTimer.Elapsed.TotalSeconds -lt 15
+            }
+            if ($finalFiles.Count -eq 1) {
+                Copy-PrivateFile -Source $finalFiles[0] -Destination (Join-Path $evidence 'interrupted-recording.mp4')
+            }
+            $result.checks.pendingAcceptance = @('error classification after cold restart', 'explicit user retry', 'native idle acknowledgement ordering')
+            $failedInterruption = @($result.assertions.GetEnumerator() | Where-Object { -not [bool]$_.Value })
+            if ($failedInterruption.Count -gt 0) {
+                throw "Interruption assertions failed: $($failedInterruption.Key -join ', ')"
+            }
+            return
+        }
         Wake-AndDismissKeyguard
         if ($FinishActivityDuringScreenOff) {
             Save-Text 'activity-relaunch.txt' (Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity"))

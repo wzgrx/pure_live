@@ -84,56 +84,66 @@ class HomeTabletView extends StatelessWidget {
 
             return Row(
               children: [
-                NavigationRail(
-                  groupAlignment: 0.9,
-                  labelType: NavigationRailLabelType.all,
-                  leading: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Padding(padding: EdgeInsets.all(12), child: MenuButton()),
-                      Obx(
-                        () => SettingsService.to.app.enableMultiView.v
-                            ? Padding(
-                                padding: const EdgeInsets.only(top: 0, bottom: 12, left: 12, right: 12),
-                                child: IconButton(
-                                  onPressed: () => AppNavigator.toMultiview(),
-                                  tooltip: i18n("multiview_title"),
-                                  icon: const Icon(Remix.layout_grid_line),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 0, bottom: 12, left: 12, right: 12),
-                        child: IconButton(
-                          onPressed: () => Get.toNamed(RoutePath.kToolbox),
-                          icon: const Icon(Remix.link),
+                // Keep the whole rail reachable in landscape/short windows.
+                // Its scroll position must not attach to the page body's primary
+                // controller (automatically inherited on mobile platforms).
+                PrimaryScrollController.none(
+                  child: NavigationRail(
+                    groupAlignment: -1,
+                    scrollable: true,
+                    leadingAtTop: false,
+                    labelType: NavigationRailLabelType.all,
+                    leading: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Padding(padding: EdgeInsets.all(12), child: MenuButton()),
+                        Obx(
+                          () => SettingsService.to.app.enableMultiView.v
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 0, bottom: 12, left: 12, right: 12),
+                                  child: IconButton(
+                                    onPressed: () => AppNavigator.toMultiview(),
+                                    tooltip: i18n("multiview_title"),
+                                    icon: const Icon(Remix.layout_grid_line),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 0, bottom: 12, left: 12, right: 12),
-                        child: IconButton(
-                          onPressed: () => Get.toNamed(RoutePath.kSearch),
-                          icon: const Icon(CustomIcons.search),
-                        ),
-                      ),
-                      if (showRecord)
                         Padding(
                           padding: const EdgeInsets.only(top: 0, bottom: 12, left: 12, right: 12),
                           child: IconButton(
-                            onPressed: () => Get.toNamed(RoutePath.kRecordPage),
-                            icon: const Icon(Remix.download_2_line),
+                            onPressed: () => Get.toNamed(RoutePath.kToolbox),
+                            tooltip: i18n("toolbox_title"),
+                            icon: const Icon(Remix.link),
                           ),
                         ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 0, bottom: 12, left: 12, right: 12),
+                          child: IconButton(
+                            onPressed: () => Get.toNamed(RoutePath.kSearch),
+                            tooltip: i18n("search_live"),
+                            icon: const Icon(CustomIcons.search),
+                          ),
+                        ),
+                        if (showRecord)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 0, bottom: 12, left: 12, right: 12),
+                            child: IconButton(
+                              onPressed: () => Get.toNamed(RoutePath.kRecordPage),
+                              tooltip: i18n("record_center"),
+                              icon: const Icon(Remix.download_2_line),
+                            ),
+                          ),
+                      ],
+                    ),
+                    destinations: destinations,
+                    selectedIndex: activeSelectedIndex,
+                    onDestinationSelected: (int virtualIndex) {
+                      if (virtualIndex >= 0 && virtualIndex < virtualToRealMap.length) {
+                        onDestinationSelected(virtualToRealMap[virtualIndex]);
+                      }
+                    },
                   ),
-                  destinations: destinations,
-                  selectedIndex: activeSelectedIndex,
-                  onDestinationSelected: (int virtualIndex) {
-                    if (virtualIndex >= 0 && virtualIndex < virtualToRealMap.length) {
-                      onDestinationSelected(virtualToRealMap[virtualIndex]);
-                    }
-                  },
                 ),
                 const VerticalDivider(width: 1),
                 Expanded(

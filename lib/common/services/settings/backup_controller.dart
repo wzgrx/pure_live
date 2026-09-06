@@ -96,6 +96,7 @@ class BackupController extends GetxController {
   }
 
   void _importV2(Map<String, dynamic> data) {
+    validateSectionStructure(data);
     Get.find<AppSettingsController>().fromJson(Map<String, dynamic>.from(data['app'] ?? {}));
 
     Get.find<ThemeSettingsController>().fromJson(Map<String, dynamic>.from(data['theme'] ?? {}));
@@ -143,6 +144,38 @@ class BackupController extends GetxController {
     final tagsData = data['tags'];
     if (tagsData is Map) {
       Get.find<TagManagementController>().importFromJson(Map<String, dynamic>.from(tagsData));
+    }
+  }
+
+  /// Reject malformed sections before any controller persists an earlier one.
+  /// Missing/null sections keep their historical default-import behavior.
+  static void validateSectionStructure(Map<String, dynamic> data) {
+    const sections = <String>[
+      'app',
+      'theme',
+      'font',
+      'player',
+      'danmaku',
+      'volume',
+      'favorite',
+      'history',
+      'webdav',
+      'iptv',
+      'cookie',
+      'proxy',
+      'windowSize',
+      'exit',
+      'startup',
+      'refresh',
+      'page',
+      'tags',
+    ];
+    for (final name in sections) {
+      final section = data[name];
+      if (section == null) continue;
+      if (section is! Map || section.keys.any((key) => key is! String)) {
+        throw FormatException('Invalid backup section: $name');
+      }
     }
   }
 

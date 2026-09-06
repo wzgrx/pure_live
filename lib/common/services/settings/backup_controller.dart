@@ -74,6 +74,15 @@ class BackupController extends GetxController {
   void importAllSettings(Map<String, dynamic> data) {
     final version = data['backupVersion'];
 
+    // Pure preflight. Extend with the remaining controller parsers before
+    // treating this as an all-settings validation boundary.
+    if (version == null) {
+      VolumeSettingsController.parseConfig(data);
+    } else {
+      validateSectionStructure(data);
+      VolumeSettingsController.parseConfig(Map<String, dynamic>.from(data['volume'] ?? {}));
+    }
+
     if (version == null) {
       _importLegacy(data);
       return;

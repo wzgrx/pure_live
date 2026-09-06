@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pure_live/common/services/settings/volume_settings_controller.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:pure_live/get/get.dart';
@@ -55,5 +57,49 @@ void main() {
       );
     expect(BackupController().recover(file), isFalse);
     expect(app.toJson(), before);
+  });
+  test('volume parser retains object and legacy JSON forms', () {
+    for (final value in [
+      <String, dynamic>{'room': 1},
+      '{"room":1}',
+    ]) {
+      expect(VolumeSettingsController.parseRoomVolumes(value), {'room': 1.0});
+    }
+    expect(VolumeSettingsController.parseRoomVolumes(null), isEmpty);
+  });
+
+  test('malformed volume data preserves all volume settings', () {
+    final volume = Get.put(VolumeSettingsController());
+    volume.roomVolumes = {'kept': 0.6};
+    volume.defaultMobileVolume.value = 0.7;
+    for (final invalid in [
+      42,
+      [],
+      'broken',
+      {'room': 'bad'},
+      {1: 0.3},
+      {'room': double.nan},
+    ]) {
+      expect(() => volume.fromJson({'defaultMobileVolume': 0.2, 'roomVolumes': invalid}), throwsFormatException);
+      expect(volume.defaultMobileVolume.value, 0.7);
+      expect(volume.roomVolumes, {'kept': 0.6});
+    }
+  });
+
+  test('bad late volume is rejected before any app import in current and legacy backups', () {
+    final app = Get.put(AppSettingsController());
+    app.enableBackgroundPlay.value = true;
+    final before = app.toJson();
+    for (final data in <Map<String, dynamic>>[
+      {
+        'backupVersion': 3,
+        'app': {'enableBackgroundPlay': false},
+        'volume': {'roomVolumes': []},
+      },
+      {'enableBackgroundPlay': false, 'roomVolumes': []},
+    ]) {
+      expect(() => BackupController().importAllSettings(data), throwsFormatException);
+      expect(app.toJson(), before);
+    }
   });
 }

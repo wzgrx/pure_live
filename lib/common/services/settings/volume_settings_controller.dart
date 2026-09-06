@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/common/services/utils/hive_rx.dart';
 
@@ -63,30 +64,39 @@ class VolumeSettingsController extends GetxController {
   }
 
   void fromJson(Map<String, dynamic> json) {
-    defaultMobileVolume.v = (json['defaultMobileVolume'] as num?)?.toDouble() ?? 0.5;
-    defaultDesktopVolume.v = (json['defaultDesktopVolume'] as num?)?.toDouble() ?? 1.0;
-    globalVolumeMute.v = json['globalVolumeMute'] ?? false;
-    final roomVolumesData = json['roomVolumes'];
-    if (roomVolumesData == null) {
-      rxRoomVolumes.clear();
-      _roomVolumesRaw.v = '{}';
-      return;
-    }
-    try {
-      Map<String, dynamic> map;
-      if (roomVolumesData is String) {
-        map = Map<String, dynamic>.from(jsonDecode(roomVolumesData));
-      } else if (roomVolumesData is Map) {
-        map = Map<String, dynamic>.from(roomVolumesData);
-      } else {
-        map = {};
+    final parsed = parseConfig(json);
+    defaultMobileVolume.v = parsed.mobile;
+    defaultDesktopVolume.v = parsed.desktop;
+    globalVolumeMute.v = parsed.mute;
+    rxRoomVolumes.assignAll(parsed.volumes);
+    _roomVolumesRaw.v = jsonEncode(parsed.volumes);
+  }
+
+  static ({double mobile, double desktop, bool mute, Map<String, double> volumes}) parseConfig(
+    Map<String, dynamic> json,
+  ) {
+    final mobile = (json['defaultMobileVolume'] as num?)?.toDouble() ?? 0.5;
+    final desktop = (json['defaultDesktopVolume'] as num?)?.toDouble() ?? 1.0;
+    final mute = json['globalVolumeMute'] as bool? ?? false;
+    final volumes = parseRoomVolumes(json['roomVolumes']);
+    if (!mobile.isFinite || !desktop.isFinite) throw const FormatException('Invalid default volume');
+    return (mobile: mobile, desktop: desktop, mute: mute, volumes: volumes);
+  }
+
+  /// Parse before changing Rx values: malformed imports must not erase volumes.
+  static Map<String, double> parseRoomVolumes(dynamic data) {
+    if (data == null) return {};
+    final decoded = data is String ? jsonDecode(data) : data;
+    if (decoded is! Map) throw const FormatException('Invalid roomVolumes');
+    final result = <String, double>{};
+    for (final entry in decoded.entries) {
+      final value = entry.value;
+      if (entry.key is! String || value is! num || !value.isFinite) {
+        throw const FormatException('Invalid roomVolumes entry');
       }
-      rxRoomVolumes.assignAll(map.map((k, v) => MapEntry(k, (v as num).toDouble())));
-      _roomVolumesRaw.v = jsonEncode(rxRoomVolumes);
-    } catch (_) {
-      rxRoomVolumes.clear();
-      _roomVolumesRaw.v = '{}';
+      result[entry.key as String] = value.toDouble();
     }
+    return result;
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

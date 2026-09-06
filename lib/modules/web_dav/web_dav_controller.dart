@@ -11,16 +11,33 @@ import 'package:pure_live/common/services/settings/backup_controller.dart';
 import 'package:pure_live/common/services/settings/web_dav_controller.dart';
 
 class WebDavPageController extends GetxController {
+  WebDavPageController({WebDAVService Function(WebDAVConfig)? serviceFactory, Future<bool> Function()? confirmDelete})
+    : _serviceFactory = serviceFactory ?? _createService,
+      _confirmDelete = confirmDelete ?? _showDeleteConfirmation;
+
+  final WebDAVService Function(WebDAVConfig) _serviceFactory;
+  final Future<bool> Function() _confirmDelete;
+
+  static Future<bool> _showDeleteConfirmation() =>
+      Utils.showAlertDialog(i18n("webdav_confirm_delete"), title: i18n("webdav_delete"));
+
+  static WebDAVService _createService(WebDAVConfig config) =>
+      WebDAVService(url: config.fullUrl, username: config.username, password: config.password);
+
   final RxList<WebDAVConfig> configs = <WebDAVConfig>[].obs;
   final Rx<WebDAVConfig?> currentConfig = Rx<WebDAVConfig?>(null);
   final RxList<webdav.File> files = <webdav.File>[].obs;
-  final RxBool isLoading = true.obs;
+  final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString dirPath = '/'.obs;
   final RxList<String> breadcrumbParts = <String>[].obs;
   final RxBool isFromBreadcrumb = false.obs;
 
-  late WebDAVService _webdavService;
+  WebDAVService? _webdavService;
+  WebDAVConfig? _serviceConfig;
+  int _serviceEpoch = 0;
+  int _loadEpoch = 0;
+  bool _disposed = false;
 
   final WebDavController _webDavController = Get.find<WebDavController>();
   final BackupController _backupController = Get.find<BackupController>();
@@ -54,21 +71,42 @@ class WebDavPageController extends GetxController {
 
   @override
   void onClose() {
+    if (_disposed) return;
+    _disposed = true;
+    _serviceEpoch++;
+    _loadEpoch++;
+    _webdavService?.close();
+    _webdavService = null;
     _configsSubscription?.cancel();
     _currentConfigSubscription?.cancel();
     super.onClose();
   }
 
   void initializeWebDAV() {
-    if (currentConfig.value != null) {
-      _webdavService = WebDAVService(
-        url: currentConfig.value!.fullUrl,
-        username: currentConfig.value!.username,
-        password: currentConfig.value!.password,
-      );
-      loadFiles();
+    if (_disposed) return;
+    _serviceEpoch++;
+    _loadEpoch++;
+    _webdavService?.close();
+    _webdavService = null;
+    _serviceConfig = currentConfig.value;
+    files.clear();
+    errorMessage.value = '';
+    isLoading.value = false;
+    if (_serviceConfig == null) {
+      dirPath.value = '/';
+      breadcrumbParts.clear();
+      return;
     }
+    rebuildBreadcrumb();
+    _webdavService = _serviceFactory(_serviceConfig!);
+    unawaited(loadFiles());
   }
+
+  bool _ownsService(WebDAVService service, int epoch) =>
+      !_disposed &&
+      epoch == _serviceEpoch &&
+      identical(service, _webdavService) &&
+      identical(currentConfig.value, _serviceConfig);
 
   Future<void> saveCurrentConfig(String configName) async {
     if (currentConfig.value != null) {
@@ -77,22 +115,33 @@ class WebDavPageController extends GetxController {
   }
 
   Future<void> loadFiles() async {
+    if (_disposed) return;
+    final request = ++_loadEpoch;
+    final service = _webdavService;
+    final epoch = _serviceEpoch;
+    if (service == null || !_ownsService(service, epoch)) {
+      files.clear();
+      errorMessage.value = '';
+      isLoading.value = false;
+      return;
+    }
+    final path = dirPath.value;
+    bool isCurrent() => _ownsService(service, epoch) && request == _loadEpoch && path == dirPath.value;
     isLoading.value = true;
     errorMessage.value = '';
+    files.clear();
+    rebuildBreadcrumb();
     try {
-      final loadedFiles = await _webdavService.readDirectory(dirPath.value);
+      final loadedFiles = await service.readDirectory(path);
+      if (!isCurrent()) return;
       files.assignAll(loadedFiles);
-      isLoading.value = false;
     } catch (e) {
-      isLoading.value = false;
+      if (!isCurrent()) return;
+      // The page owns the persistent error and retry action. No detached toast
+      // should outlive a directory selection or the page itself.
       errorMessage.value = '${i18n("webdav_load_dir_failed")}: $e';
-      Get.showSnackbar(
-        GetSnackBar(
-          message: '${i18n("webdav_load_failed")}: $e',
-          duration: const Duration(seconds: 2),
-          backgroundColor: Get.theme.colorScheme.error,
-        ),
-      );
+    } finally {
+      if (isCurrent()) isLoading.value = false;
     }
   }
 
@@ -133,12 +182,7 @@ class WebDavPageController extends GetxController {
   }
 
   void updateBreadcrumbParts() {
-    if (!isFromBreadcrumb.value) {
-      String path = dirPath.value;
-      if (path.startsWith('/')) path = path.substring(1);
-      if (path.endsWith('/')) path = path.substring(0, path.length - 1);
-      breadcrumbParts.assignAll(path.isEmpty ? [] : path.split('/'));
-    }
+    rebuildBreadcrumb();
   }
 
   void triggerBreadcrumbScroll() {}
@@ -165,8 +209,16 @@ class WebDavPageController extends GetxController {
   }
 
   /// 上传配置到 WebDAV（走新备份系统）
-  void uploadConfigSettings() async {
+  Future<void> uploadConfigSettings() async {
+    final service = _webdavService;
+    final epoch = _serviceEpoch;
+    if (service == null || !_ownsService(service, epoch)) return;
+    final path = dirPath.value;
     try {
+      if (path == '/') {
+        SnackBarUtil.error(i18n("webdav_select_dir_first"));
+        return;
+      }
       final dateStr = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd, 'T', HH, '_', nn, '_', ss]);
       final fileName = 'purelive_$dateStr.txt';
 
@@ -175,42 +227,54 @@ class WebDavPageController extends GetxController {
       final content = jsonEncode(data);
       final bytes = utf8.encode(content);
 
-      if (dirPath.value == '/') {
-        SnackBarUtil.error(i18n("webdav_select_dir_first"));
-        return;
-      }
-
-      final remotePath = '${dirPath.value}$fileName';
-      await _webdavService.client.write(remotePath, bytes);
+      final remotePath = '$path$fileName';
+      await service.writeFile(remotePath, bytes);
+      if (!_ownsService(service, epoch)) return;
 
       SnackBarUtil.success(i18n("webdav_upload_success"));
-      loadFiles();
+      if (dirPath.value == path) await loadFiles();
     } catch (e) {
+      if (!_ownsService(service, epoch)) return;
       SnackBarUtil.error('${i18n("webdav_upload_failed")}: $e');
     }
   }
 
-  void deleteFile(webdav.File file) async {
-    final result = await Utils.showAlertDialog(i18n("webdav_confirm_delete"), title: i18n("webdav_delete"));
-    if (result) {
+  Future<void> deleteFile(webdav.File file) async {
+    final service = _webdavService;
+    final epoch = _serviceEpoch;
+    final path = dirPath.value;
+    final remotePath = file.path;
+    if (service == null || !_ownsService(service, epoch) || remotePath == null) return;
+    final result = await _confirmDelete();
+    if (result && _ownsService(service, epoch) && dirPath.value == path) {
       try {
-        await _webdavService.client.remove(file.path!);
-        loadFiles();
+        await service.removeFile(remotePath);
+        if (!_ownsService(service, epoch)) return;
         SnackBarUtil.success(i18n("webdav_delete_success"));
+        if (dirPath.value == path) await loadFiles();
       } catch (e) {
+        if (!_ownsService(service, epoch)) return;
         SnackBarUtil.error('${i18n("webdav_delete_failed")}: $e');
       }
     }
   }
 
   /// 下载并恢复配置（走新备份系统）
-  void downloadFile(webdav.File file) async {
+  Future<void> downloadFile(webdav.File file) async {
+    final service = _webdavService;
+    final epoch = _serviceEpoch;
+    final remotePath = file.path;
+    if (service == null || !_ownsService(service, epoch) || remotePath == null || file.isDir == true) return;
     try {
-      final bytes = await _webdavService.client.read(file.path!);
+      final bytes = await service.readFile(remotePath);
+      // Fence before local mutation, not only before its success notification.
+      if (!_ownsService(service, epoch)) return;
       final data = jsonDecode(utf8.decode(bytes));
       await _backupController.restoreAllSettings(Map<String, dynamic>.from(data as Map));
+      if (!_ownsService(service, epoch)) return;
       SnackBarUtil.success(i18n("webdav_sync_success"));
     } catch (e) {
+      if (!_ownsService(service, epoch)) return;
       SnackBarUtil.error('${i18n("webdav_download_failed")}: $e');
     }
   }

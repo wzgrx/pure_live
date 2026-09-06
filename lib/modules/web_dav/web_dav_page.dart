@@ -146,8 +146,8 @@ class _WebDavPageState extends State<WebDavPage> {
                 } else {
                   controller.configs.add(newConfig);
                 }
-                controller.saveCurrentConfig(newConfig.name);
                 controller.currentConfig.value = newConfig;
+                controller.saveCurrentConfig(newConfig.name);
                 controller.dirPath.value = '/';
                 controller.initializeWebDAV();
                 Navigator.of(Get.context!).pop();
@@ -188,9 +188,11 @@ class _WebDavPageState extends State<WebDavPage> {
         slivers: [_buildAppBar(), _buildNavigationBar(), _buildBodyContent()],
       ),
       endDrawer: _buildDrawer(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => controller.uploadConfigSettings(),
-        child: const Icon(Icons.add),
+      floatingActionButton: Obx(
+        () => FloatingActionButton(
+          onPressed: controller.currentConfig.value == null ? null : () => controller.uploadConfigSettings(),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -371,10 +373,6 @@ class _WebDavPageState extends State<WebDavPage> {
 
   Widget _buildBodyContent() {
     return Obx(() {
-      if (controller.errorMessage.value != '') {
-        return _buildErrorPage(controller.errorMessage.value);
-      }
-
       if (controller.configs.isEmpty) {
         return SliverFillRemaining(
           child: Center(
@@ -410,10 +408,18 @@ class _WebDavPageState extends State<WebDavPage> {
         );
       }
 
+      if (controller.errorMessage.value.isNotEmpty) {
+        return _buildErrorPage(controller.errorMessage.value);
+      }
+
       if (controller.isLoading.value) {
         return const SliverFillRemaining(
           child: AppStatusView(type: AppStatusType.loading, title: "", subtitle: ""),
         );
+      }
+
+      if (controller.files.isEmpty) {
+        return SliverFillRemaining(hasScrollBody: false, child: Center(child: Text(i18n("status_empty_title"))));
       }
 
       return SliverList(
@@ -454,7 +460,7 @@ class _WebDavPageState extends State<WebDavPage> {
       trailing: PopupMenuButton<String>(
         icon: Icon(Icons.more_vert, color: Theme.of(Get.context!).colorScheme.onSurface),
         itemBuilder: (context) => [
-          PopupMenuItem(value: 'Download', child: Text(i18n("webdav_sync_to_local"))),
+          if (file.isDir != true) PopupMenuItem(value: 'Download', child: Text(i18n("webdav_sync_to_local"))),
           PopupMenuItem(value: 'Delete', child: Text(i18n("webdav_delete"))),
         ],
         onSelected: (value) {
@@ -478,6 +484,7 @@ class _WebDavPageState extends State<WebDavPage> {
             Icon(Icons.error, size: 64, color: Theme.of(Get.context!).colorScheme.onPrimaryContainer),
             const SizedBox(height: 16),
             Text(message, style: AppTextStyles.t12),
+            TextButton(onPressed: controller.loadFiles, child: Text(i18n("retry"))),
           ],
         ),
       ),

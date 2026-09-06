@@ -36,7 +36,7 @@ void main() {
     if (native.startGate?.isCompleted == false) native.startGate!.complete();
     native.finish();
     await conversion?.timeout(const Duration(seconds: 2));
-    await Future<void>.delayed(const Duration(milliseconds: 20));
+    await _waitForMergeRelease(service, task.taskId);
     service.onClose();
     Get.reset();
     await native.events.close();
@@ -96,7 +96,7 @@ void main() {
     expect(await service.convertToMp4(task: task), isFalse);
     expect(native.startCalls, 1);
     native.finish();
-    await Future<void>.delayed(const Duration(milliseconds: 30));
+    await _waitForMergeRelease(service, task.taskId);
     expect(service.isProcessing(task.taskId), isFalse);
     expect(await File(native.output!).exists(), isFalse);
     expect(await source.exists(), isTrue);
@@ -111,7 +111,7 @@ void main() {
     expect(native.stopCalls, 0);
     native.startGate!.complete();
     await native.started.future;
-    await Future<void>.delayed(const Duration(milliseconds: 30));
+    await _waitForMergeRelease(service, task.taskId);
     expect(native.stopCalls, 1);
     expect(service.isProcessing(task.taskId), isFalse);
     expect(await source.exists(), isTrue);
@@ -170,6 +170,18 @@ void main() {
     expect(observed.last.type, VideoProcessEventType.completed);
     expect(observed.last.progress, 1);
   });
+}
+
+/// Cleanup performs asynchronous file I/O after the native Future settles.
+/// Observe release, rather than assuming Windows finished it within 30 ms.
+Future<void> _waitForMergeRelease(VideoProcessorService service, String taskId) async {
+  final watch = Stopwatch()..start();
+  while (service.isProcessing(taskId)) {
+    if (watch.elapsed > const Duration(seconds: 2)) {
+      throw TestFailure('Native merge ownership was not released after execution settled');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
 }
 
 /// Mirrors FFmpegService.start / FFmpegSession.executeAsync: it resolves only

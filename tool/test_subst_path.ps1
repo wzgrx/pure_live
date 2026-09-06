@@ -13,8 +13,8 @@ $cases = @(
 foreach ($case in $cases) {
     $threw = $false
     try { $actual = Resolve-PureLiveSubstPath -Path $case.Path -Mappings $case.Mappings }
-    catch { $threw = $true; if (-not $case.Throws) { throw } }
-    if ($case.Throws) {
+    catch { $threw = $true; if (-not $case['Throws']) { throw } }
+    if ($case['Throws']) {
         if (-not $threw) { throw "$($case.Name): expected cycle failure" }
     } elseif ($actual.TrimEnd('\') -cne $case.Expected.TrimEnd('\')) {
         throw "$($case.Name): expected '$($case.Expected)', got '$actual'"

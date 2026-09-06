@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'recorder_proxy_routing.dart';
+
 /// Recorder-only FLV input with an explicit, packet-aligned end of input.
 ///
 /// Cancelling FFmpegKit 0.11.1 interrupts output IO as well as input IO, so
@@ -64,6 +66,7 @@ class FFmpegFlvInputRelay {
       }
     }
     final client = HttpClient()
+      ..findProxy = resolveRecorderProxyDirective
       ..connectionTimeout = const Duration(seconds: 15)
       ..autoUncompress = true;
     try {

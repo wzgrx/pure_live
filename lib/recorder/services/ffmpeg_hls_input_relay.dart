@@ -7,6 +7,8 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:pure_live/core/common/log.dart';
 
+import 'recorder_proxy_routing.dart';
+
 /// Relays HLS resources over an app-private loopback server, verifying upstream
 /// HTTPS and allowing recording inputs to end without cancelling output IO.
 ///
@@ -108,6 +110,7 @@ class FFmpegHlsInputRelay {
     if (!force && !drainOnStop && (!supportedHost || upstream.scheme.toLowerCase() != 'https')) return null;
 
     final client = HttpClient()
+      ..findProxy = resolveRecorderProxyDirective
       ..connectionTimeout = const Duration(seconds: 15)
       ..idleTimeout = const Duration(seconds: 20)
       ..autoUncompress = true;

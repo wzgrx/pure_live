@@ -15,6 +15,7 @@ import 'package:pure_live/common/global/initial_services.dart';
 import 'package:pure_live/core/common/proxy_routing.dart';
 import 'package:pure_live/core/common/web_socket_util.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
+import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
 import 'package:pure_live/common/global/platform/mobile_manager.dart';
 import 'package:pure_live/common/global/platform/desktop_manager.dart';
@@ -82,6 +83,14 @@ class AppInitializer {
     // SettingsService was registered, then work on a later launch only because
     // the database/cache files had already been created.
     await InitialServices.init();
+    configureRecorderProxyRouting((_) {
+      final proxy = SettingsService.to.proxy;
+      return buildProxyDirective(
+        enabled: proxy.enableAppProxy.v,
+        host: proxy.appProxyHost.v,
+        port: proxy.appProxyPort.v,
+      );
+    });
     configureWebSocketProxyRouting((_) {
       final proxy = SettingsService.to.proxy;
       return buildProxyDirective(

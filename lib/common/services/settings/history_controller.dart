@@ -90,6 +90,17 @@ class HistoryController extends GetxController {
     historyRooms.v = <LiveRoom>[];
   }
 
+  void applyRefreshedRooms(List<LiveRoom> snapshot, List<LiveRoom?> refreshed) {
+    // LiveRoom equality compares room identity, not the particular watch/import.
+    // Only replace the exact entries still owned by this refresh snapshot.
+    final replacements = Map<LiveRoom, LiveRoom>.identity();
+    for (var i = 0; i < snapshot.length && i < refreshed.length; i++) {
+      final updated = refreshed[i];
+      if (updated != null) replacements[snapshot[i]] = updated;
+    }
+    historyRooms.v = applyHistoryLimit(historyRooms.v.map((room) => replacements[room] ?? room), historyLimit.v);
+  }
+
   Map<String, dynamic> toJson() {
     return {'historyRooms': historyRooms.v.map((e) => e.toJson()).toList(), historyLimitKey: historyLimit.v};
   }

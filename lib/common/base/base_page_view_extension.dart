@@ -1,3 +1,4 @@
+import 'package:pure_live/plugins/global.dart';
 import 'package:flutter/services.dart';
 import 'package:pure_live/common/index.dart';
 
@@ -33,15 +34,22 @@ extension BasePageViewContentExtension<C extends BasePageScrollAndStateBone<T>, 
         ),
       );
     } else if (wrapMobileRefresh) {
-      return EasyRefresh(
-        controller: controller.easyRefreshController,
-        onRefresh: enableRefresh ? controller.refreshData : null,
-        onLoad: (enableLoadMore && controller.canLoadMore.value)
-            ? () async {
-                await controller.loadMoreData();
-              }
-            : null,
-        child: contentBuilder(context, controller.list, controller.scrollController),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final indicators = appRefreshIndicators(context, maxWidth: constraints.maxWidth);
+          return EasyRefresh(
+            header: indicators.header,
+            footer: indicators.footer,
+            controller: controller.easyRefreshController,
+            onRefresh: enableRefresh ? controller.refreshData : null,
+            onLoad: (enableLoadMore && controller.canLoadMore.value)
+                ? () async {
+                    await controller.loadMoreData();
+                  }
+                : null,
+            child: contentBuilder(context, controller.list, controller.scrollController),
+          );
+        },
       );
     }
     return contentBuilder(context, controller.list, controller.scrollController);

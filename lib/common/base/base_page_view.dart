@@ -1,3 +1,4 @@
+import 'package:pure_live/plugins/global.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/base/base_controller.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
@@ -142,7 +143,7 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
                                 buttonText: i18n("go_to_login"),
                                 onButtonPressed: () => Get.toNamed(RoutePath.kSettingsAccount),
                               );
-                        return _buildScrollableStatus(isDesktop, constraint, controller, view);
+                        return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
                       }
                       if (controller.pageError.value) {
                         final view = errorBuilder != null
@@ -155,13 +156,13 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
                                 buttonText: i18n("retry"),
                                 onButtonPressed: () => controller.refreshData(),
                               );
-                        return _buildScrollableStatus(isDesktop, constraint, controller, view);
+                        return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
                       }
                       if (controller.pageEmpty.value && !preserveContentWhenEmpty) {
                         final view = emptyBuilder != null
                             ? emptyBuilder!(context)
                             : AppStatusView(type: AppStatusType.empty, title: i18n('no_data'), subtitle: '');
-                        return _buildScrollableStatus(isDesktop, constraint, controller, view);
+                        return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
                       }
                       if (preserveContentWhenEmpty && controller.totalCount.value != null) {
                         return buildActualContent(context, isDesktop);
@@ -197,11 +198,20 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
     );
   }
 
-  Widget _buildScrollableStatus(bool isDesktop, BoxConstraints constraint, C controller, Widget statusView) {
+  Widget _buildScrollableStatus(
+    BuildContext context,
+    bool isDesktop,
+    BoxConstraints constraint,
+    C controller,
+    Widget statusView,
+  ) {
     if (isDesktop || !enableRefresh) {
       return Center(child: statusView);
     }
+    final indicators = appRefreshIndicators(context, maxWidth: constraint.maxWidth);
     return EasyRefresh(
+      header: indicators.header,
+      footer: indicators.footer,
       controller: controller.easyRefreshController,
       onRefresh: () => controller.refreshData(),
       child: ListView(

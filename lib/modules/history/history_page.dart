@@ -1,16 +1,20 @@
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/services/settings/history_controller.dart';
 import 'package:pure_live/common/services/settings/refresh_config_controller.dart';
+import 'package:pure_live/plugins/global.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
 
 class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key});
+  const HistoryPage({super.key, this.loadRoom});
+
+  final Future<LiveRoom> Function(LiveRoom room)? loadRoom;
   @override
   State<HistoryPage> createState() => _HistoryPageState();
 }
 
 class _HistoryPageState extends State<HistoryPage> {
   final refreshController = EasyRefreshController(controlFinishRefresh: true, controlFinishLoad: true);
+  Future<void>? _refreshTask;
 
   @override
   void dispose() {
@@ -18,9 +22,12 @@ class _HistoryPageState extends State<HistoryPage> {
     super.dispose();
   }
 
-  Future<void> onRefresh() async {
+  Future<void> onRefresh() => _refreshTask ??= _refreshHistory().whenComplete(() => _refreshTask = null);
+
+  Future<void> _refreshHistory() async {
     bool result = true;
-    final list = List<LiveRoom>.from(SettingsService.to.history.historyRooms.v);
+    final history = SettingsService.to.history;
+    final list = List<LiveRoom>.from(history.historyRooms.v);
     final concurrency = RefreshConfigController.normalizeMaxConcurrentRefresh(
       SettingsService.to.refreshConfig.maxConcurrentRefresh.v,
     );
@@ -35,9 +42,10 @@ class _HistoryPageState extends State<HistoryPage> {
           return room;
         }
         try {
-          final newRoom = await Sites.of(platform).liveSite
-              .getRoomDetail(roomId: roomId, platform: platform)
-              .timeout(const Duration(seconds: 12));
+          final newRoom =
+              await (widget.loadRoom?.call(room) ??
+                      Sites.of(platform).liveSite.getRoomDetail(roomId: roomId, platform: platform))
+                  .timeout(const Duration(seconds: 12));
           return preserveHistoryMetadata(newRoom, room);
         } catch (_) {
           result = false;
@@ -46,8 +54,8 @@ class _HistoryPageState extends State<HistoryPage> {
       },
       shouldCancel: () => !mounted,
     );
-    if (!mounted) return;
-    SettingsService.to.history.historyRooms.v = refreshed.whereType<LiveRoom>().toList(growable: true);
+    if (!mounted || history.isClosed) return;
+    history.applyRefreshedRooms(list, refreshed);
     if (result) {
       refreshController.finishRefresh(IndicatorResult.success);
       refreshController.resetFooter();
@@ -57,136 +65,33 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   void _showHistoryLimitDialog(BuildContext context) {
-    final controller = SettingsService.to.history;
-    int draftLimit = controller.historyLimit.v;
-    final customController = TextEditingController();
-    const presetOptions = <int>[20, 50, 100, 200, 500];
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) {
-        final theme = Theme.of(context);
-        return AlertDialog(
-          title: Text(i18n("history_limit"), style: AppTextStyles.t16Bold),
-          content: SizedBox(
-            width: 320,
-            child: StatefulBuilder(
-              builder: (context, setDialogState) {
-                return SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(i18n("current_options"), style: AppTextStyles.t12Muted),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          ...presetOptions.map(
-                            (value) => ChoiceChip(
-                              label: Text('$value', style: AppTextStyles.t12),
-                              selected: draftLimit == value,
-                              onSelected: (_) => setDialogState(() => draftLimit = value),
-                            ),
-                          ),
-                          ChoiceChip(
-                            label: Text(i18n('history_unlimited'), style: AppTextStyles.t12),
-                            selected: draftLimit == unlimitedHistoryLimit,
-                            onSelected: (_) => setDialogState(() => draftLimit = unlimitedHistoryLimit),
-                          ),
-                          if (!presetOptions.contains(draftLimit) && draftLimit != unlimitedHistoryLimit)
-                            ChoiceChip(
-                              label: Text('$draftLimit', style: AppTextStyles.t12),
-                              selected: true,
-                              onSelected: (_) {},
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Text(i18n("custom_input"), style: AppTextStyles.t13Medium),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: customController,
-                              keyboardType: TextInputType.number,
-                              style: AppTextStyles.t14,
-                              decoration: InputDecoration(
-                                hintText: '50',
-                                suffixText: i18n("items"),
-                                suffixStyle: AppTextStyles.t12Muted,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              final value = int.tryParse(customController.text.trim());
-                              if (value == null) return;
-                              setDialogState(() => draftLimit = normalizeHistoryLimit(value));
-                              customController.clear();
-                            },
-                            child: Text(
-                              i18n("apply"),
-                              style: AppTextStyles.t13Medium.copyWith(color: theme.colorScheme.primary),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '${i18n("current_value")}: ${_historyLimitLabel(draftLimit)}',
-                        style: AppTextStyles.t12Muted,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(i18n('history_limit_desc'), style: AppTextStyles.t12Muted),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(i18n("cancel"), style: AppTextStyles.t14Muted),
-            ),
-            TextButton(
-              onPressed: () {
-                controller.setHistoryLimit(draftLimit);
-                if (context.mounted) Navigator.pop(context);
-              },
-              child: Text(i18n("confirm"), style: AppTextStyles.t14Primary),
-            ),
-          ],
-        );
-      },
-    ).whenComplete(customController.dispose);
+      builder: (_) => _HistoryLimitDialog(controller: SettingsService.to.history),
+    );
   }
 
   Future<void> _clearHistory() async {
     final controller = SettingsService.to.history;
     if (controller.historyRooms.v.isEmpty) return;
-    final result = await Get.dialog<bool>(
-      AlertDialog(
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
         title: Text(i18n("clear_history"), style: AppTextStyles.t16Bold),
         content: Text(i18n("clear_history_confirm"), style: AppTextStyles.t14),
         actions: [
           TextButton(
-            onPressed: () => Get.back(result: false),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(i18n("cancel"), style: AppTextStyles.t14Muted),
           ),
           TextButton(
-            onPressed: () => Get.back(result: true),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(i18n("confirm"), style: AppTextStyles.t14Primary),
           ),
         ],
       ),
     );
-    if (result == true) controller.clearHistory();
+    if (result == true && !controller.isClosed) controller.clearHistory();
   }
 
   @override
@@ -225,7 +130,10 @@ class _HistoryPageState extends State<HistoryPage> {
             final width = constraint.maxWidth;
             int crossAxisCount = width > 1280 ? 4 : (width > 960 ? 3 : (width > 640 ? 2 : 1));
             if (dense) crossAxisCount = width > 1280 ? 5 : (width > 960 ? 4 : (width > 640 ? 3 : 2));
+            final indicators = appRefreshIndicators(context, maxWidth: width);
             return EasyRefresh(
+              header: indicators.header,
+              footer: indicators.footer,
               controller: refreshController,
               onRefresh: onRefresh,
               onLoad: () => refreshController.finishLoad(IndicatorResult.noMore),
@@ -255,8 +163,131 @@ class _HistoryPageState extends State<HistoryPage> {
       }),
     );
   }
+}
 
-  String _historyLimitLabel(int limit) {
-    return limit == unlimitedHistoryLimit ? i18n('history_unlimited') : '$limit';
+String _historyLimitLabel(int limit) => limit == unlimitedHistoryLimit ? i18n('history_unlimited') : '$limit';
+
+class _HistoryLimitDialog extends StatefulWidget {
+  const _HistoryLimitDialog({required this.controller});
+  final HistoryController controller;
+  @override
+  State<_HistoryLimitDialog> createState() => _HistoryLimitDialogState();
+}
+
+class _HistoryLimitDialogState extends State<_HistoryLimitDialog> {
+  late int draftLimit;
+  final customController = TextEditingController();
+  static const presetOptions = <int>[20, 50, 100, 200, 500];
+
+  @override
+  void initState() {
+    super.initState();
+    draftLimit = widget.controller.historyLimit.v;
+  }
+
+  @override
+  void dispose() {
+    customController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      title: Text(i18n("history_limit"), style: AppTextStyles.t16Bold),
+      content: SizedBox(
+        width: 320,
+        child: StatefulBuilder(
+          builder: (context, setDialogState) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(i18n("current_options"), style: AppTextStyles.t12Muted),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ...presetOptions.map(
+                        (value) => ChoiceChip(
+                          label: Text('$value', style: AppTextStyles.t12),
+                          selected: draftLimit == value,
+                          onSelected: (_) => setDialogState(() => draftLimit = value),
+                        ),
+                      ),
+                      ChoiceChip(
+                        label: Text(i18n('history_unlimited'), style: AppTextStyles.t12),
+                        selected: draftLimit == unlimitedHistoryLimit,
+                        onSelected: (_) => setDialogState(() => draftLimit = unlimitedHistoryLimit),
+                      ),
+                      if (!presetOptions.contains(draftLimit) && draftLimit != unlimitedHistoryLimit)
+                        ChoiceChip(
+                          label: Text('$draftLimit', style: AppTextStyles.t12),
+                          selected: true,
+                          onSelected: (_) {},
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(i18n("custom_input"), style: AppTextStyles.t13Medium),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: customController,
+                          keyboardType: TextInputType.number,
+                          style: AppTextStyles.t14,
+                          decoration: InputDecoration(
+                            hintText: '50',
+                            suffixText: i18n("items"),
+                            suffixStyle: AppTextStyles.t12Muted,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          final value = int.tryParse(customController.text.trim());
+                          if (value == null) return;
+                          setDialogState(() => draftLimit = normalizeHistoryLimit(value));
+                          customController.clear();
+                        },
+                        child: Text(
+                          i18n("apply"),
+                          style: AppTextStyles.t13Medium.copyWith(color: theme.colorScheme.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text('${i18n("current_value")}: ${_historyLimitLabel(draftLimit)}', style: AppTextStyles.t12Muted),
+                  const SizedBox(height: 6),
+                  Text(i18n('history_limit_desc'), style: AppTextStyles.t12Muted),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(i18n("cancel"), style: AppTextStyles.t14Muted),
+        ),
+        TextButton(
+          onPressed: () {
+            widget.controller.setHistoryLimit(draftLimit);
+            if (context.mounted) Navigator.pop(context);
+          },
+          child: Text(i18n("confirm"), style: AppTextStyles.t14Primary),
+        ),
+      ],
+    );
   }
 }

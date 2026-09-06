@@ -41,7 +41,7 @@
 | A1-02 | RUN | 热门：平台页签边界、快速左右滑、网格纵向惯性、切回保持位置、卡片不跳动。v3.0.24 已完成页签条左右各 20 次快速滑动并稳定停在首尾边界，无 FATAL/ANR；截图、语义树与日志位于 `local-artifacts/runtime/android-v3.0.24/home-platform-boundary/`。K90 Pro / v3.1.8 的 Bilibili 热门约 7 秒得到完整双列缩略图，可见热度严格递减且无逐卡跳位；下拉刷新和连续上下滑后仍可操作。Flutter Surface 没有进入本轮 `gfxinfo` View 帧计数，纵向帧时序仍需 SurfaceFlinger/Perfetto 证据。见 `docs/ANDROID_RUNTIME_AUDIT_3_1_8_K90PRO.md` |
 | A1-03 | PASS | 分区：平台标签左右各重复 10/20 次后稳定停在首尾硬边界；网易 CC 旧 JSON 跳转官方 HTML 时返回稳定的“全部 / 端游 / 手游 / 其他”，未串数据、未崩溃。见 `docs/ANDROID_RUNTIME_AUDIT_3_1_2.md` |
 | A1-04 | RUN | 搜索：全部/单平台标签左右端点稳定，`LOL` 聚合结果、开播优先排序和平台能力说明均可用；直连 Twitch 明确显示部分平台失败，经可达 Clash 应用代理后 Twitch 原生结果和在线人数正常。分页终止、重复结果与连续输入防抖仍待长列表压力复验 |
-| A1-05 | NR | 历史、标签、工具箱、IPTV、WebDAV、备份/恢复、关于、更新检查 |
+| A1-05 | RUN | 历史、标签、工具箱、IPTV、WebDAV、备份/恢复、关于、更新检查；09-07 历史页面刷新/清空/删除/上限及公共提示已有 44/44 定向测试，未将源码证据当作新候选实机通过，其余辅助页和原生动作继续。见 [辅助页面审查](AUXILIARY_PAGES_AUDIT_2026_09_07.md) |
 | A1-06 | NR | 首页上/下各 20 次、平台左/右各 20 次；记录 SurfaceFlinger/Perfetto 帧和主线程阻塞 |
 
 ### A2 设置全量

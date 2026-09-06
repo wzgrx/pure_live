@@ -50,6 +50,8 @@ class LivePlayController extends GetxController
   @override
   final Rx<LivePlayState> state = const LivePlayState().obs;
   final RxList<LiveMessage> danmakuMessages = <LiveMessage>[].obs;
+  final _danmakuRemovals = StreamController<bool Function(LiveMessage)>.broadcast(sync: true);
+  Stream<bool Function(LiveMessage)> get danmakuRemovals => _danmakuRemovals.stream;
   final RxInt danmakuPresentationRevision = 0.obs;
   final Rxn<LiveMessage> localGiftEffect = Rxn<LiveMessage>();
   final RxList<LiveSuperChatMessage> superChats = <LiveSuperChatMessage>[].obs;
@@ -493,6 +495,7 @@ class LivePlayController extends GetxController
   }
 
   void removeDanmakuWhere(bool Function(LiveMessage message) predicate) {
+    if (!_danmakuRemovals.isClosed) _danmakuRemovals.add(predicate);
     _pendingDanmakuMessages.removeWhere(predicate);
     final next = danmakuMessages.where((message) => !predicate(message)).toList(growable: false);
     if (next.length != danmakuMessages.length) danmakuMessages.assignAll(next);
@@ -1051,6 +1054,7 @@ class LivePlayController extends GetxController
     _danmakuFlushTimer?.cancel();
     _pendingDanmakuMessages.clear();
     tabController.dispose();
+    unawaited(_danmakuRemovals.close());
 
     final keepForAppFloating = GlobalPlayerService.instance.player.shouldKeepDanmakuForAppFloating;
     if (!keepForAppFloating) {

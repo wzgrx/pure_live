@@ -79,6 +79,7 @@ class DanmakuListViewState extends State<DanmakuListView> {
   Worker? windowFullscreenWorker;
   Worker? presentationWorker;
   StreamSubscription? messagesSub;
+  StreamSubscription? removalsSub;
 
   LivePlayController get controller => Get.find<LivePlayController>();
 
@@ -89,6 +90,15 @@ class DanmakuListViewState extends State<DanmakuListView> {
     _arrivalCounter.update(_visibleMessages);
 
     messagesSub = controller.danmakuMessages.listen((_) => _onMessagesChanged());
+    removalsSub = controller.danmakuRemovals.listen((predicate) {
+      if (!mounted) return;
+      // A paused snapshot can contain rows already evicted from live history.
+      // Remove only explicitly blocked rows; preserve unrelated frozen rows
+      // and the user's paused position instead of replacing the snapshot.
+      final filtered = _visibleMessages.where((message) => !predicate(message)).toList(growable: false);
+      _itemCache.removeWhere((message, _) => predicate(message));
+      if (filtered.length != _visibleMessages.length) setState(() => _visibleMessages = filtered);
+    });
 
     fullscreenWorker = ever(GlobalPlayerState.to.isFullscreen, (value) {
       if (value == false && _autoScrollEnabled) {
@@ -146,6 +156,7 @@ class DanmakuListViewState extends State<DanmakuListView> {
   void dispose() {
     _tailFollowGuard.invalidate();
     messagesSub?.cancel();
+    removalsSub?.cancel();
     fullscreenWorker?.dispose();
     windowFullscreenWorker?.dispose();
     presentationWorker?.dispose();

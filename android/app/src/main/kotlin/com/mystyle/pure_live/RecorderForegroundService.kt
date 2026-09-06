@@ -80,6 +80,26 @@ class RecorderForegroundService : Service() {
             }
         }
 
+        /** Debug probe: injects the framework timeout callback, not its six-hour clock. */
+        internal fun debugInjectTimeout(): Boolean {
+            check(Looper.myLooper() == Looper.getMainLooper())
+            if (!BuildConfig.DEBUG) return false
+            val service = runningService?.takeIf {
+                it.generation != 0L && !it.timeoutReported
+            } ?: return false
+            service.onTimeout(0, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            return true
+        }
+
+        /** Debug probe: requests an unexpected service teardown through onDestroy. */
+        internal fun debugStopActiveService(): Boolean {
+            check(Looper.myLooper() == Looper.getMainLooper())
+            if (!BuildConfig.DEBUG) return false
+            val service = runningService?.takeIf { it.generation != 0L } ?: return false
+            service.stopSelf()
+            return true
+        }
+
 
         private fun notifyReady(generation: Long) {
             mainHandler.post { listeners[generation]?.onForegroundReady(generation) }

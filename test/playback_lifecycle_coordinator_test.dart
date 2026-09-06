@@ -120,6 +120,56 @@ void main() {
     expect(pauses, 1);
     await coordinator.dispose();
   });
+
+  for (final directDetach in <bool>[false, true]) {
+    testWidgets('detached pauses a retained engine (direct: $directDetach)', (tester) async {
+      var pauses = 0;
+      var resumes = 0;
+      final coordinator = _coordinator(
+        hiddenPauseDelay: const Duration(milliseconds: 20),
+        pause: () async {
+          pauses++;
+          return (sessionId: 6, intentRevision: 3);
+        },
+        resume: (token) async {
+          expect(token, (sessionId: 6, intentRevision: 3));
+          resumes++;
+          return true;
+        },
+      );
+      if (!directDetach) {
+        await coordinator.handleState(AppLifecycleState.hidden);
+        await coordinator.handleState(AppLifecycleState.paused);
+      }
+      await coordinator.handleState(AppLifecycleState.detached);
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(pauses, 1);
+      await coordinator.handleState(AppLifecycleState.resumed);
+      expect(resumes, 1);
+      await coordinator.dispose();
+    });
+  }
+
+  for (final continueInBackground in <bool>[false, true]) {
+    testWidgets('quick reattach preserves playback (background: $continueInBackground)', (tester) async {
+      var pauses = 0;
+      final coordinator = _coordinator(
+        continueInBackground: continueInBackground,
+        hiddenPauseDelay: const Duration(milliseconds: 20),
+        pause: () async {
+          pauses++;
+          return (sessionId: 1, intentRevision: 0);
+        },
+      );
+      await coordinator.handleState(AppLifecycleState.detached);
+      if (!continueInBackground) {
+        await coordinator.handleState(AppLifecycleState.resumed);
+      }
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(pauses, 0);
+      await coordinator.dispose();
+    });
+  }
 }
 
 PlaybackLifecycleCoordinator _coordinator({

@@ -472,6 +472,18 @@ void main() {
     expect(backgroundCalls, [true, false]);
   });
 
+  test('controller close retains protection until its final snapshot finishes', () async {
+    await recorder.startTask(task);
+    persistGates.add(Completer<void>());
+    Get.delete<RecorderController>(force: true);
+    await until(() => persistedSnapshots.length == 1);
+    await flush();
+    expect(backgroundCalls, [true], reason: 'closing must join the tracked persistence barrier');
+    persistGates.single.complete();
+    await until(() => backgroundCalls.length == 2);
+    expect(backgroundCalls, [true, false]);
+  });
+
   for (final close in [false, true]) {
     test('add does not return a detached card after its start was cancelled (close=$close)', () async {
       final initialPermission = Completer<bool>();

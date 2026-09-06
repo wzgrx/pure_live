@@ -14,12 +14,14 @@ param(
     [string] $Activity = '.MainActivity',
     [switch] $RequireLiveDanmaku,
     [switch] $RequireIndependentBackground,
+    [switch] $FinishActivityDuringScreenOff,
     [switch] $ExerciseStreamSelection
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if ($RequireIndependentBackground -and $ScreenOffSeconds -eq 0) { throw 'Independent background checks require ScreenOffSeconds > 0.' }
+if ($FinishActivityDuringScreenOff -and $ScreenOffSeconds -eq 0) { throw 'Activity destruction checks require ScreenOffSeconds > 0.' }
 . (Join-Path $PSScriptRoot 'recorder_background_snapshot.ps1')
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -812,6 +814,7 @@ $result = [ordered]@{
     requestedRecordSeconds = $RecordSeconds
     requestedScreenOffSeconds = $ScreenOffSeconds
     requireIndependentBackground = $RequireIndependentBackground.IsPresent
+    finishActivityDuringScreenOff = $FinishActivityDuringScreenOff.IsPresent
     exerciseStreamSelection = $ExerciseStreamSelection.IsPresent
     checks = [ordered]@{}
 }
@@ -1028,6 +1031,24 @@ try {
         # the same private TS must continue growing during the dark interval.
         $growth = Wait-RecordingFileGrowth -BeforeFiles $beforeFiles -TimeoutSeconds 30
         $screenOffStart = Get-PrivateFileInfo $growth.Path
+        if ($FinishActivityDuringScreenOff) {
+            $probe = (Invoke-Adb -AdbArguments @(
+                'shell', 'am', 'broadcast', '-n', "$Package/.RecorderLifecycleProbeReceiver",
+                '-a', 'com.mystyle.purelive.debug.RECORDER_LIFECYCLE_PROBE', '--es', 'operation', 'finishActivity'
+            )) -join "`n"
+            Save-Text 'activity-finish-probe.txt' $probe
+            if ($probe -notmatch 'result=-1.*ok:activity_finish_requested') { throw 'Debug Activity finish probe did not acknowledge an active Activity.' }
+            $deadline = [DateTime]::UtcNow.AddSeconds(8)
+            do {
+                $activities = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'activities')) -join "`n"
+                $activityPresent = $activities -match ('(?m)^.*Hist #\d+:.*' + [regex]::Escape($Package) + '/[^\r\n]*MainActivity')
+                if (-not $activityPresent) { break }
+                Start-Sleep -Milliseconds 500
+            } while ([DateTime]::UtcNow -lt $deadline)
+            Save-Text 'activities-after-finish.txt' $activities
+            $result.checks.activityDestroyedDuringRecording = -not $activityPresent
+            if ($activityPresent) { throw 'MainActivity remained in task history after finish.' }
+        }
         Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_SLEEP') | Out-Null
         Start-Sleep -Milliseconds 750
         $screenOffPower = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'power')) -join "`n"
@@ -1052,6 +1073,9 @@ try {
         $result.checks.backgroundSnapshot = $backgroundSnapshot
         Save-Text 'recorder-background-snapshot.json' ($backgroundSnapshot | ConvertTo-Json)
         Wake-AndDismissKeyguard
+        if ($FinishActivityDuringScreenOff) {
+            Save-Text 'activity-relaunch.txt' (Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity"))
+        }
         Start-Sleep -Seconds 2
         $result.checks.roomForegroundAfterScreenOff = Get-Foreground
         Wait-UiPattern -Name 'room-after-screen-off' -Pattern '弹幕列表' -TimeoutSeconds 15 | Out-Null
@@ -1310,6 +1334,9 @@ if ($RequireIndependentBackground) {
     $assertions.playbackNotForeground = $null -ne $during -and -not [bool]$during.audioForeground
     $assertions.recordingServiceReleasedNormally = $null -ne $after -and -not [bool]$after.recorderServicePresent
     $assertions.recorderCpuLockReleasedNormally = $null -ne $after -and -not [bool]$after.recorderCpuLockHeld
+}
+if ($FinishActivityDuringScreenOff) {
+    $assertions.activityDestroyedDuringRecording = [bool]$result.checks['activityDestroyedDuringRecording']
 }
 $result.assertions = $assertions
 . (Join-Path $repo 'tool/recording_smoke_coverage.ps1')

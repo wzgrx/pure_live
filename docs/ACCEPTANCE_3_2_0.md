@@ -4,7 +4,7 @@
 
 - [后台保障审计](RECORDER_BACKGROUND_AUDIT_2026_09_06.md)：独立 dataSync 服务、身份租约、实际 drain 与持久化屏障；修复异常解绑、停止失败缓存和 Kotlin 接口作用域错误。
 - 修复后 35 项定向回归通过；Android arm64 Debug 编译及 APK 内容/16 KB 对齐通过，构建记录 `20260906T031528104Z-build-androidarm64-debug.json`。
-- 两阶段空闲释放已实现，38 项定向回归和新候选编译通过；关闭后台播放后锁屏 30 秒增长 13,107,200 字节，录制服务独立前台、CPU锁及正常释放通过，用户设置已恢复。系统中断和无 Activity 交接注入仍待验证，不宣称 3.2.0 完整验收通过。
+- 两阶段空闲释放已实现；最新 49 项定向回归、analyze 和 Android arm64 Debug 编译通过。Activity 真正销毁后锁屏 30 秒增长 12,058,624 字节，播放服务非前台、录制独立前台/CPU锁及正常释放通过；57.95 秒成片严格解码通过，用户设置已恢复。证据 `android-recorder-activity-finish-20260906T124124846`；系统中断和无 Activity 异常交接仍待验证，不宣称 3.2.0 完整验收通过。
 ## 最新增量：Soop 206 清单零增长修复与实际短录（2026-09-06）
 
 - [Soop HLS 审计](SOOP_HLS_RANGE_AUDIT_2026_09_06.md)：CDN 的 Range 清单响应 206 绕过重写，导致本地分片持续 404；修复后 24 项定向测试及 analyze 通过。

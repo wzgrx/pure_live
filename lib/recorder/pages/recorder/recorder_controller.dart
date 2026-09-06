@@ -1564,11 +1564,9 @@ class RecorderController extends GetxService {
         );
       }
     }
-    if (_persistDirty) {
-      _persistDirty = false;
-      final pending = _persistInFlight;
-      unawaited(pending == null ? _persist() : pending.whenComplete(_persist));
-    }
+    // Shutdown must use the same tracked barrier as the final background
+    // release, rather than starting an untracked write after clearing dirty.
+    unawaited(_flushPersist());
     super.onClose();
   }
 }

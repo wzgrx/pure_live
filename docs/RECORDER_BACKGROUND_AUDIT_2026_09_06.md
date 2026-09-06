@@ -46,8 +46,20 @@
 
 ## 未完成的关键验收
 
+### Activity 销毁扩展（新候选真机复验通过）
+
+- Debug 增加仅 shell/system 可调用的 `android.permission.DUMP` 生命周期探针；执行实际 Activity.finish、服务 timeout 回调或 stopSelf。Release source set 不注册接收器；回调注入不等于系统六小时计时验收。
+- 旧候选 `20260906T041417166Z-build-androidarm64-debug.json` 编译通过。实际记录 `local-artifacts/diagnostics/android-recorder-activity-finish-20260906T120630398/smoke/summary.json` 确认 Activity 已销毁且黑屏录制增长 12,845,056 字节，但 `playbackNotForeground` 失败；此次已核实后台播放关闭，区别于前面的用户配置场景。正常停止释放录制服务与锁，用户后台播放原值已恢复。
+- 源码定位到 hidden/paused 后 detached 会令延迟暂停条件失效。新增直接 detached、hidden/paused→detached 两例在旧实现均失败（期望暂停 1 次、实际 0 次），记录 `20260906T042905769Z-quality-focused.json`。修复将 detached 纳入非可见状态，并保留快速重建合并、后台播放设置和原有恢复 token。
+- 原生 HTTP 从 Activity 字段改为 `NativeHttpPlugin` 引擎级所有权；只在引擎分离时销毁通道/线程池，避免录制保留引擎但 Activity 销毁后丢失 Twitch HTTP 回退。未改变请求白名单或代理设置；该条件下 Twitch 网络重连仍待实际验证。
+- 同批修复 RecorderController.onClose 最终持久化进入统一 `_flushPersist` 屏障，避免解绑早于最终快照完成。
+- 最终 Dart 定向 49 项和 analyze 通过：`20260906T043335089Z-quality-focused.json`。该证据不替代新候选 Activity 销毁或系统中断验收。
+- 新候选 Android arm64 Debug 编译通过：`20260906T044010250Z-build-androidarm64-debug.json`，Gradle 311.3 秒，APK 286,923,129 字节，16 个原生库及 1262 个 Flutter 资源完整性、16 KB 对齐通过。此包覆盖同名旧候选。
+- 新包实际复验 `local-artifacts/diagnostics/android-recorder-activity-finish-20260906T124124846/smoke/summary.json` 通过全部已执行断言。Activity.finish 回执及任务栈消失均确认；30 秒黑屏期间同一文件增长 12,058,624 字节，录制服务前台/CPU锁存在，AudioService 非前台。重建 Activity 恢复观看，正常停止录制后服务和 CPU 锁消失（早于末尾 force-stop）。
+- 成片 20,839,141 字节、57.951667 秒，音视频流均存在；严格完整解码退出 0、错误日志 0 字节（同目录 `strict-decode-result.json`），SHA-256 `81A8BB6F2E65E3599D22383842646809E3F501696EDAE3933D60EA5641A85B53`。设置 XML 确认原后台播放 true 已恢复，包装器退出 0、常亮恢复 false；画质/线路切换本轮未执行，不作为新增覆盖。
+
 1. 两阶段交接的代码、Dart 可控顺序与编译已完成；无 Activity 时的原生交接故障注入仍待集成验证。空闲释放已确认之后到达的全新请求不属于此交接窗口。
-2. 关闭播放后台保活后的锁屏增长/独立前台服务/CPU锁/正常释放已通过；Activity 真正销毁、更多平台和较长连续录制仍待覆盖。
+2. 关闭播放后台保活后的锁屏增长/独立前台服务/CPU锁/正常释放、Activity 真正销毁及重建已通过；更多平台和较长连续录制仍待覆盖。
 3. 系统超时/意外服务销毁：验证 Dart 收尾和持久化先于最终解绑，错误卡片保持分类并允许用户重试。
 4. 原生收尾窗口最多 45 秒；超长封装可能超出窗口。该上限不是成功收尾证明，需保留中断片段恢复能力。
 5. 当前保障覆盖已启动录制及其收尾，不宣称应用完全空闲后仍能无限后台轮询/自动启动；受系统前台服务限制的启动应真实显示失败。

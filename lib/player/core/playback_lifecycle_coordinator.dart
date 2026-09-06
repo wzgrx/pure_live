@@ -93,13 +93,15 @@ class PlaybackLifecycleCoordinator with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
+      // A recording service can retain the engine after its Activity is gone.
+      // Keep enforcing playback policy while that engine has no visible view.
+      case AppLifecycleState.detached:
         await _enterHiddenState();
         return;
       case AppLifecycleState.resumed:
         await _enterResumedState();
         return;
       case AppLifecycleState.inactive:
-      case AppLifecycleState.detached:
         return;
     }
   }
@@ -130,7 +132,9 @@ class PlaybackLifecycleCoordinator with WidgetsBindingObserver {
     if (_disposed ||
         revision != _hiddenPauseRevision ||
         !_hiddenApplied ||
-        (_lastState != AppLifecycleState.hidden && _lastState != AppLifecycleState.paused) ||
+        (_lastState != AppLifecycleState.hidden &&
+            _lastState != AppLifecycleState.paused &&
+            _lastState != AppLifecycleState.detached) ||
         _shouldContinueInBackground() ||
         _pendingPause != null) {
       return;

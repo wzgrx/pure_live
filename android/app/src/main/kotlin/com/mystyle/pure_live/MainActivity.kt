@@ -4,6 +4,7 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.net.wifi.WifiManager
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
@@ -15,6 +16,7 @@ import android.window.OnBackInvokedDispatcher
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.lang.ref.WeakReference
 
 class MainActivity : AudioServiceActivity() {
     companion object {
@@ -23,6 +25,19 @@ class MainActivity : AudioServiceActivity() {
         private const val PREDICTIVE_BACK_CHANNEL = "pure_live/predictive_back"
         private var playbackWakeLock: PowerManager.WakeLock? = null
         private var playbackWifiLock: WifiManager.WifiLock? = null
+        private var activeActivity: WeakReference<MainActivity>? = null
+
+        internal fun debugFinishActiveActivity(): Boolean {
+            check(Looper.myLooper() == Looper.getMainLooper())
+            if (!BuildConfig.DEBUG) return false
+            val activity = activeActivity?.get()
+            if (activity == null || activity.isFinishing || activity.isDestroyed) {
+                activeActivity = null
+                return false
+            }
+            activity.finish()
+            return true
+        }
     }
 
     // Start in Android's dynamic policy. Dart raises the request only around
@@ -30,7 +45,6 @@ class MainActivity : AudioServiceActivity() {
     private var highRefreshRateEnabled = false
     private var displayModeChannel: MethodChannel? = null
     private var predictiveBackChannel: MethodChannel? = null
-    private var nativeHttpChannel: NativeHttpChannel? = null
     private var predictiveBackEnabled = false
     private var predictiveBackRegistered = false
     private var displayListenerRegistered = false
@@ -91,10 +105,18 @@ class MainActivity : AudioServiceActivity() {
             null
         }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activeActivity = WeakReference(this)
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         if (!flutterEngine.plugins.has(RecorderBackgroundPlugin::class.java)) {
             flutterEngine.plugins.add(RecorderBackgroundPlugin())
+        }
+        if (!flutterEngine.plugins.has(NativeHttpPlugin::class.java)) {
+            flutterEngine.plugins.add(NativeHttpPlugin())
         }
         displayModeChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -140,7 +162,6 @@ class MainActivity : AudioServiceActivity() {
                 }
             }
         }
-        nativeHttpChannel = NativeHttpChannel(flutterEngine.dartExecutor.binaryMessenger)
         applyPreferredDisplayMode(highRefreshRateEnabled)
     }
 
@@ -250,12 +271,11 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
+        if (activeActivity?.get() === this) activeActivity = null
         mainHandler.removeCallbacks(displayModeRefresh)
         displayModeChannel = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) unregisterPredictiveBack()
         predictiveBackChannel = null
-        nativeHttpChannel?.dispose()
-        nativeHttpChannel = null
         super.onDestroy()
     }
 

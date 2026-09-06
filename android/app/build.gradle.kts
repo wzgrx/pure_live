@@ -31,6 +31,9 @@ if (requireReleaseSigning && !hasReleaseSigning) {
 
 extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     namespace = "com.mystyle.purelive"
+    buildFeatures {
+        buildConfig = true
+    }
     compileSdk = 37
     ndkVersion = flutter.ndkVersion
     lint {

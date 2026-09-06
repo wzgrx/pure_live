@@ -180,7 +180,13 @@ class FFmpegHlsInputRelay {
         upstreamRequest.headers.set(entry.key, entry.value, preserveHeaderCase: true);
       }
       final range = request.headers.value(HttpHeaders.rangeHeader);
-      if (range != null && range.isNotEmpty) upstreamRequest.headers.set(HttpHeaders.rangeHeader, range);
+      // FFmpeg probes even playlists with Range: bytes=0-. A CDN may return
+      // 206, which is not a complete rewritten manifest response: forwarding
+      // its relative segment paths makes FFmpeg request unknown loopback IDs.
+      // Fetch known playlists whole; retain byte ranges for media/key inputs.
+      if (!_isHlsUri(upstream) && !_manifests.containsKey(resourceId) && range != null && range.isNotEmpty) {
+        upstreamRequest.headers.set(HttpHeaders.rangeHeader, range);
+      }
 
       final upstreamResponse = await upstreamRequest.close().timeout(const Duration(seconds: 20));
       final finalUri = upstreamResponse.redirects.fold<Uri>(

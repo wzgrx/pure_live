@@ -6,6 +6,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
 void main() {
+  test('manifest range requests still rewrite child URLs before serving FFmpeg', () async {
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => origin.close(force: true));
+    origin.listen((request) async {
+      if (request.uri.path == '/live.m3u8') {
+        const manifest = '#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nsegment.ts\n#EXT-X-ENDLIST\n';
+        if (request.headers.value(HttpHeaders.rangeHeader) != null) {
+          request.response.statusCode = HttpStatus.partialContent;
+          final length = utf8.encode(manifest).length;
+          request.response.headers.set(HttpHeaders.contentRangeHeader, 'bytes 0-${length - 1}/$length');
+        }
+        request.response.write(manifest);
+      } else if (request.uri.path == '/segment.ts') {
+        request.response.write('media');
+      } else {
+        request.response.statusCode = HttpStatus.notFound;
+      }
+      await request.response.close();
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments([
+      '-i',
+      'http://127.0.0.1:${origin.port}/live.m3u8',
+    ], force: true))!;
+    addTearDown(relay.close);
+    final client = HttpClient();
+    addTearDown(() => client.close(force: true));
+    final request = await client.getUrl(relay.inputUri);
+    request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-');
+    final response = await request.close();
+    final manifest = await utf8.decoder.bind(response).join();
+    final segment = manifest.split('\n').firstWhere((line) => line.isNotEmpty && !line.startsWith('#'));
+    final media = await (await client.getUrl(relay.inputUri.resolve(segment))).close();
+    expect(media.statusCode, HttpStatus.ok);
+    expect(await utf8.decoder.bind(media).join(), 'media');
+  });
+
   test('relay rewrites nested HLS resources and preserves input headers', () async {
     final seenUserAgents = <String?>[];
     final seenReferers = <String?>[];

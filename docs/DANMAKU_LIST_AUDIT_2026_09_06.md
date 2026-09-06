@@ -26,3 +26,9 @@
 Android arm64 Debug 新候选编译通过：`local-artifacts/build-records/20260906T071614010Z-build-androidarm64-debug.json`，Gradle 413.8 秒、APK 286,943,550 字节，16 个原生库及 1262 个资源、16 KB 对齐检查通过。覆盖同名本地候选，尚未安装；不把此前设备上的旧包当成包含本批弹幕修复。
 
 累计数修复不替代长按屏蔽、回到底部、滚动手势及 120 Hz 呈现矩阵。其余通过证据继续复用，后续构建与设备验证与同批列表修复合并。
+
+## 新候选 Android 列表实测
+
+`local-artifacts/diagnostics/android-danmaku-list-20260906T151735226/summary.json`：安装上述新候选成功，斗鱼高消息量房间第一下手势即暂停列表；`paused-1.png` 与 `paused-2.png` 中可见行及位置保持一致，新消息提示从 3 增至 10。点击回到底部后按钮消失，`resumed-1.png` 与 `resumed-2.png` 显示后续消息继续更新。
+
+本组为已逐张核对的截图证据，不是 XML 自动断言。初始 UIAutomator 因高频界面更新报 idle 失败，后续改用截图和前台包守卫完成定向输入，保留原脚本失败。未改屏蔽设置或其他用户配置，返回后结束测试进程、常亮恢复。长按屏蔽菜单实机操作仍未执行，消费者行为继续由 Widget 测试证明；不将本组标成 A4-02 全部通过。

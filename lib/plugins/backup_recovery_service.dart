@@ -19,7 +19,7 @@ class BackupRecoveryService {
     }
 
     String? selectedDirectory = await FilePicker.getDirectoryPath(
-      initialDirectory: backupDirectory.isEmpty ? '/' : backupDirectory,
+      initialDirectory: backupDirectory.isEmpty ? null : backupDirectory,
     );
     if (selectedDirectory == null) return null;
 

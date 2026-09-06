@@ -130,10 +130,8 @@ class _BackupPageState extends State<BackupPage> {
                 title: i18n("create_backup"),
                 subtitle: i18n("create_backup_subtitle"),
                 onTap: () async {
-                  if (backupDirectory.isEmpty) {
-                    ToastUtil.show(i18n('please_set_backup_directory'));
-                    return;
-                  }
+                  // The export flow chooses a directory and remembers the first
+                  // successful choice; no separate first-run settings step.
                   await BackupRecoveryService().createAppSettingsBackup(backupDirectory);
                 },
               ),

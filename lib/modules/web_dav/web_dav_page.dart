@@ -42,8 +42,11 @@ class _WebDavPageState extends State<WebDavPage> {
       endDrawer: _buildDrawer(),
       floatingActionButton: Obx(
         () => FloatingActionButton(
-          onPressed: controller.currentConfig.value == null ? null : () => controller.uploadConfigSettings(),
-          child: const Icon(Icons.add),
+          onPressed: controller.canUpload ? () => controller.uploadConfigSettings() : null,
+          tooltip: i18n(controller.isUploading.value ? 'webdav_uploading' : 'webdav_upload_current'),
+          child: controller.isUploading.value
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.cloud_upload_outlined),
         ),
       ),
     );

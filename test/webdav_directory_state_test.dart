@@ -299,6 +299,32 @@ void main() {
     expect(services.last.reads, hasLength(1));
   });
 
+  test('controller suppresses duplicate uploads even before the button rebuilds', () async {
+    final service = connect();
+    final first = controller.uploadConfigSettings();
+    await controller.uploadConfigSettings();
+    expect(service.uploadPaths, hasLength(1));
+    expect(controller.isUploading.value, isTrue);
+    controller.onClose();
+    service.upload.complete();
+    await first;
+  });
+
+  test('old upload completion does not release the new service upload state', () async {
+    final firstService = connect();
+    final first = controller.uploadConfigSettings();
+    controller.initializeWebDAV();
+    final secondService = services.last;
+    final second = controller.uploadConfigSettings();
+    firstService.upload.complete();
+    await first;
+    expect(controller.isUploading.value, isTrue);
+    expect(secondService.uploadPaths, hasLength(1));
+    controller.onClose();
+    secondService.upload.complete();
+    await second;
+  });
+
   test('delete confirmed after service replacement never removes from either service', () async {
     final service = connect();
     final deletion = controller.deleteFile(webdav.File(path: '/backup.txt'));

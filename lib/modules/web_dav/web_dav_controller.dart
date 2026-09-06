@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:pure_live/common/index.dart';
 import 'package:date_format/date_format.dart';
+import 'package:uuid/uuid.dart';
 import 'package:pure_live/plugins/utils.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:pure_live/modules/web_dav/webdav_config.dart';
@@ -11,12 +12,17 @@ import 'package:pure_live/common/services/settings/backup_controller.dart';
 import 'package:pure_live/common/services/settings/web_dav_controller.dart';
 
 class WebDavPageController extends GetxController {
-  WebDavPageController({WebDAVService Function(WebDAVConfig)? serviceFactory, Future<bool> Function()? confirmDelete})
-    : _serviceFactory = serviceFactory ?? _createService,
-      _confirmDelete = confirmDelete ?? _showDeleteConfirmation;
+  WebDavPageController({
+    WebDAVService Function(WebDAVConfig)? serviceFactory,
+    Future<bool> Function()? confirmDelete,
+    DateTime Function()? now,
+  }) : _serviceFactory = serviceFactory ?? _createService,
+       _confirmDelete = confirmDelete ?? _showDeleteConfirmation,
+       _now = now ?? DateTime.now;
 
   final WebDAVService Function(WebDAVConfig) _serviceFactory;
   final Future<bool> Function() _confirmDelete;
+  final DateTime Function() _now;
 
   static Future<bool> _showDeleteConfirmation() =>
       Utils.showAlertDialog(i18n("webdav_confirm_delete"), title: i18n("webdav_delete"));
@@ -24,10 +30,28 @@ class WebDavPageController extends GetxController {
   static WebDAVService _createService(WebDAVConfig config) =>
       WebDAVService(url: config.fullUrl, username: config.username, password: config.password);
 
+  static void _showUploadFeedback(String message, {bool isError = false}) {
+    final context = Get.context;
+    if (context == null) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    final colors = Theme.of(context).colorScheme;
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(message, style: TextStyle(color: isError ? colors.onErrorContainer : colors.onSurfaceVariant)),
+        backgroundColor: isError ? colors.errorContainer : colors.surfaceContainerHighest,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   final RxList<WebDAVConfig> configs = <WebDAVConfig>[].obs;
   final Rx<WebDAVConfig?> currentConfig = Rx<WebDAVConfig?>(null);
   final RxList<webdav.File> files = <webdav.File>[].obs;
   final RxBool isLoading = false.obs;
+  final RxBool isUploading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString configurationIssueKey = ''.obs;
   final RxString dirPath = '/'.obs;
@@ -44,6 +68,12 @@ class WebDavPageController extends GetxController {
   final BackupController _backupController = Get.find<BackupController>();
   StreamSubscription<List<WebDAVConfig>>? _configsSubscription;
   StreamSubscription<WebDAVConfig?>? _currentConfigSubscription;
+
+  bool get canUpload {
+    final selected = currentConfig.value;
+    final busy = isUploading.value;
+    return !_disposed && selected != null && !busy && _webdavService != null && identical(selected, _serviceConfig);
+  }
 
   @override
   void onInit() {
@@ -113,6 +143,7 @@ class WebDavPageController extends GetxController {
     _webdavService?.close();
     _webdavService = null;
     _serviceConfig = currentConfig.value;
+    isUploading.value = false;
     files.clear();
     errorMessage.value = '';
     configurationIssueKey.value = '';
@@ -241,30 +272,30 @@ class WebDavPageController extends GetxController {
   Future<void> uploadConfigSettings() async {
     final service = _webdavService;
     final epoch = _serviceEpoch;
-    if (service == null || !_ownsService(service, epoch)) return;
+    if (service == null || !_ownsService(service, epoch) || isUploading.value) return;
     final path = dirPath.value;
+    isUploading.value = true;
     try {
-      if (path == '/') {
-        SnackBarUtil.error(i18n("webdav_select_dir_first"));
-        return;
-      }
-      final dateStr = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd, 'T', HH, '_', nn, '_', ss]);
-      final fileName = 'purelive_$dateStr.txt';
+      final dateStr = formatDate(_now(), [yyyy, '-', mm, '-', dd, 'T', HH, '_', nn, '_', ss]);
+      // Timestamp-only names overwrite earlier backups within the same second.
+      final fileName = 'purelive_${dateStr}_${const Uuid().v4()}.txt';
 
       // 备份所有配置
       final data = _backupController.exportAllSettings();
       final content = jsonEncode(data);
       final bytes = utf8.encode(content);
 
-      final remotePath = '$path$fileName';
+      final remotePath = '${path.endsWith('/') ? path : '$path/'}$fileName';
       await service.writeFile(remotePath, bytes);
       if (!_ownsService(service, epoch)) return;
 
-      SnackBarUtil.success(i18n("webdav_upload_success"));
+      _showUploadFeedback(i18n("webdav_upload_success"));
       if (dirPath.value == path) await loadFiles();
     } catch (e) {
       if (!_ownsService(service, epoch)) return;
-      SnackBarUtil.error('${i18n("webdav_upload_failed")}: $e');
+      _showUploadFeedback('${i18n("webdav_upload_failed")}: $e', isError: true);
+    } finally {
+      if (_ownsService(service, epoch)) isUploading.value = false;
     }
   }
 

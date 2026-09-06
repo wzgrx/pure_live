@@ -49,7 +49,9 @@ void main() {
     Get.put<SettingsService>(_SettingsService());
     Get.put(ThemeSettingsController());
     service = _Service();
-    controller = Get.put(WebDavPageController(serviceFactory: (_) => service));
+    controller = Get.put(
+      WebDavPageController(serviceFactory: (_) => service, now: () => DateTime(2026, 9, 7, 4, 0, 0)),
+    );
   });
 
   tearDown(() {
@@ -357,6 +359,83 @@ void main() {
     expect(operationFinished, isTrue);
     expect(successCount, 1);
   });
+
+  Future<void> finishUploads(WidgetTester tester) async {
+    for (final upload in service.uploads) {
+      if (!upload.isCompleted) upload.complete();
+    }
+    await tester.pump();
+    await completeReads(tester);
+  }
+
+  testWidgets('upload action writes a backup in the configured root directory', (tester) async {
+    await openPage(tester);
+    selectConfig();
+    await completeReads(tester);
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    final paths = List<String>.from(service.uploadPaths);
+    await finishUploads(tester);
+    await finish(tester);
+    expect(paths, hasLength(1));
+    expect(paths.single, startsWith('/purelive_'));
+    expect(jsonDecode(utf8.decode(service.uploadBytes.single)), {'backupVersion': 3});
+  });
+
+  testWidgets('repeated upload taps send one backup and keep the action disabled until completion', (tester) async {
+    await openPage(tester);
+    selectConfig();
+    await completeReads(tester);
+    controller.dirPath.value = '/backups/';
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    final disabled = tester.widget<FloatingActionButton>(find.byType(FloatingActionButton)).onPressed == null;
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    final requests = service.uploads.length;
+    await finishUploads(tester);
+    final enabled = tester.widget<FloatingActionButton>(find.byType(FloatingActionButton)).onPressed != null;
+    await finish(tester);
+    expect(requests, 1);
+    expect(disabled, isTrue);
+    expect(enabled, isTrue);
+  });
+
+  testWidgets('sequential backups in the same clock second receive distinct names', (tester) async {
+    await openPage(tester);
+    selectConfig();
+    await completeReads(tester);
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+      await finishUploads(tester);
+    }
+    final paths = List<String>.from(service.uploadPaths);
+    await finish(tester);
+    expect(paths, hasLength(2));
+    expect(paths.toSet(), hasLength(2));
+    for (final path in paths) {
+      expect(path, matches(RegExp(r'^/purelive_2026-09-07T04_00_00_[0-9a-f-]{36}\.txt$')));
+    }
+  });
+
+  testWidgets('failed root upload restores the action and allows an explicit retry', (tester) async {
+    await openPage(tester);
+    selectConfig();
+    await completeReads(tester);
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    service.uploads.single.completeError(StateError('fixture 403'));
+    await tester.pumpAndSettle();
+    expect(controller.isUploading.value, isFalse);
+    expect(find.textContaining('文件上传失败'), findsOneWidget);
+    expect(service.reads, hasLength(1));
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    await finishUploads(tester);
+    expect(service.uploads, hasLength(2));
+    await finish(tester);
+  });
 }
 
 class _MemoryAssetLoader extends AssetLoader {
@@ -382,6 +461,18 @@ class _SettingsService extends SettingsService {
 class _Service extends WebDAVService {
   _Service() : super(url: 'http://127.0.0.1', username: '', password: '');
   final reads = <Completer<List<webdav.File>>>[];
+  final uploads = <Completer<void>>[];
+  final uploadPaths = <String>[];
+  final uploadBytes = <List<int>>[];
+
+  @override
+  Future<void> writeFile(String path, List<int> bytes) {
+    uploadPaths.add(path);
+    uploadBytes.add(List<int>.from(bytes));
+    final pending = Completer<void>();
+    uploads.add(pending);
+    return pending.future;
+  }
 
   @override
   Future<List<webdav.File>> readDirectory(String path) {
@@ -397,6 +488,9 @@ class _Service extends WebDAVService {
 class _BackupController extends BackupController {
   final restores = <Map<String, dynamic>>[];
   late Completer<void> restore;
+
+  @override
+  Map<String, dynamic> exportAllSettings({bool includeSensitiveData = false}) => {'backupVersion': 3};
 
   @override
   Future<void> restoreAllSettings(Map<String, dynamic> data) {

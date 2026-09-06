@@ -665,6 +665,8 @@
     "webdav_unknown_time": "未知时间",
     "webdav_unnamed_file": "未命名文件",
     "webdav_update": "更新",
+    "webdav_upload_current": "备份到当前目录",
+    "webdav_uploading": "正在上传备份",
     "webdav_upload_failed": "文件上传失败",
     "webdav_upload_success": "文件上传成功",
     "webdav_username": "用户名",

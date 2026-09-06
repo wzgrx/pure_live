@@ -664,6 +664,8 @@
     "webdav_unknown_time": "Unknown Time",
     "webdav_unnamed_file": "Unnamed File",
     "webdav_update": "Update",
+    "webdav_upload_current": "Back up to this directory",
+    "webdav_uploading": "Uploading backup",
     "webdav_upload_failed": "File upload failed",
     "webdav_upload_success": "File uploaded successfully",
     "webdav_username": "Username",

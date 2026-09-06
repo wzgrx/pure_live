@@ -477,6 +477,7 @@ class LiveRecordTask {
           'ffmpeg',
           'merge',
           'scheduler',
+          'background',
           'status',
           'recorder',
         }.contains(normalized)

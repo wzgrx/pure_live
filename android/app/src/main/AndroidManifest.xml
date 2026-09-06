@@ -97,6 +97,10 @@
         <action android:name="android.media.browse.MediaBrowserService" />
       </intent-filter>
     </service>
+    <service android:name=".RecorderForegroundService"
+      android:exported="false"
+      android:foregroundServiceType="dataSync"
+      android:stopWithTask="false" />
     <!-- ADD THIS "RECEIVER" element -->
     <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver"
       android:exported="true" tools:ignore="Instantiatable">

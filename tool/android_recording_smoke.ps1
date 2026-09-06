@@ -13,11 +13,14 @@ param(
     [string] $Package = 'com.mystyle.purelive',
     [string] $Activity = '.MainActivity',
     [switch] $RequireLiveDanmaku,
+    [switch] $RequireIndependentBackground,
     [switch] $ExerciseStreamSelection
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if ($RequireIndependentBackground -and $ScreenOffSeconds -eq 0) { throw 'Independent background checks require ScreenOffSeconds > 0.' }
+. (Join-Path $PSScriptRoot 'recorder_background_snapshot.ps1')
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $evidence = if ([string]::IsNullOrWhiteSpace($EvidenceDirectory)) {
@@ -808,6 +811,7 @@ $result = [ordered]@{
     platformLabel = $platformLabel
     requestedRecordSeconds = $RecordSeconds
     requestedScreenOffSeconds = $ScreenOffSeconds
+    requireIndependentBackground = $RequireIndependentBackground.IsPresent
     exerciseStreamSelection = $ExerciseStreamSelection.IsPresent
     checks = [ordered]@{}
 }
@@ -1042,9 +1046,11 @@ try {
         $result.checks.screenOffRecordingContinued = $screenOffEnd.Bytes -gt $screenOffStart.Bytes
         $result.checks.processAliveDuringScreenOff =
             -not [string]::IsNullOrWhiteSpace(((Invoke-Adb -AdbArguments @('shell', 'pidof', $Package)) -join '').Trim())
-        Save-Text 'services-during-screen-off.txt' (
-            Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'services', $Package)
-        )
+        $screenOffServices = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'services', $Package)) -join "`n"
+        Save-Text 'services-during-screen-off.txt' $screenOffServices
+        $backgroundSnapshot = Get-RecorderBackgroundSnapshot -Services $screenOffServices -Power $screenOffPower -Package $Package
+        $result.checks.backgroundSnapshot = $backgroundSnapshot
+        Save-Text 'recorder-background-snapshot.json' ($backgroundSnapshot | ConvertTo-Json)
         Wake-AndDismissKeyguard
         Start-Sleep -Seconds 2
         $result.checks.roomForegroundAfterScreenOff = Get-Foreground
@@ -1083,6 +1089,13 @@ try {
     $stoppedHeader = Wait-UiPattern -Name 'room-record-stopped' -Pattern '已监控|录制任务' -TimeoutSeconds 60
     $result.checks.stopFinalizeMs = $stoppedHeader.ElapsedMs
     Save-Screenshot 'room-record-stopped'
+    if ($RequireIndependentBackground) {
+        $stoppedServices = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'services', $Package)) -join "`n"
+        $stoppedPower = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'power')) -join "`n"
+        Save-Text 'services-after-normal-record-stop.txt' $stoppedServices
+        Save-Text 'power-after-normal-record-stop.txt' $stoppedPower
+        $result.checks.backgroundAfterNormalStop = Get-RecorderBackgroundSnapshot -Services $stoppedServices -Power $stoppedPower -Package $Package
+    }
 
     Invoke-Ui -Action Tap -Value 'live.record'
     $afterStopDialog = Wait-UiSemanticEnabled -Name 'record-dialog-after-stop' -Semantic '进入录制中心' -TimeoutSeconds 10
@@ -1289,7 +1302,25 @@ if ($ExerciseStreamSelection) {
     $assertions.lineSwitchStable =
         @($result.checks.lineOptions).Count -le 1 -or [bool]$result.checks.lineSwitchStable
 }
+if ($RequireIndependentBackground) {
+    $during = $result.checks['backgroundSnapshot']
+    $after = $result.checks['backgroundAfterNormalStop']
+    $assertions.independentRecordingForeground = $null -ne $during -and [bool]$during.recorderForeground
+    $assertions.independentRecorderCpuLock = $null -ne $during -and [bool]$during.recorderCpuLockHeld
+    $assertions.playbackNotForeground = $null -ne $during -and -not [bool]$during.audioForeground
+    $assertions.recordingServiceReleasedNormally = $null -ne $after -and -not [bool]$after.recorderServicePresent
+    $assertions.recorderCpuLockReleasedNormally = $null -ne $after -and -not [bool]$after.recorderCpuLockHeld
+}
 $result.assertions = $assertions
+. (Join-Path $repo 'tool/recording_smoke_coverage.ps1')
+# Preserve legacy boolean gates, but do not label disabled/single-option
+# scenarios as executed PASS in the evidence consumed by release audits.
+$result.assertionResults = Get-RecordingSmokeAssertionResults `
+    -Assertions $assertions `
+    -ScreenOffSeconds $ScreenOffSeconds `
+    -ExerciseStreamSelection $ExerciseStreamSelection.IsPresent `
+    -QualityOptionCount @($result.checks.qualityOptions).Count `
+    -LineOptionCount @($result.checks.lineOptions).Count
 $result | ConvertTo-Json -Depth 10 | Out-File -LiteralPath (Join-Path $evidence 'summary.json') -Encoding utf8
 $failed = @($assertions.GetEnumerator() | Where-Object { -not [bool]$_.Value })
 if ($failed.Count -gt 0) {

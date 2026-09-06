@@ -16,6 +16,7 @@ import 'package:pure_live/recorder/models/record_status.dart';
 import 'package:pure_live/recorder/pages/record_settings/record_settings_controller.dart';
 import 'package:pure_live/recorder/pages/recorder/recorder_controller.dart';
 import 'package:pure_live/recorder/services/cache_service.dart';
+import 'package:pure_live/recorder/services/recorder_background_service.dart';
 import 'package:pure_live/recorder/services/recording_output_metrics.dart';
 
 void main() {
@@ -25,6 +26,13 @@ void main() {
   late _Scheduler scheduler;
   late _Metrics metrics;
   late LiveRecordTask task;
+  late RecorderBackgroundService background;
+  late List<bool> backgroundCalls;
+  Completer<void>? backgroundGate;
+  var rejectBackground = false;
+  void Function()? onBackgroundRelease;
+  final persistGates = <Completer<void>>[];
+  final persistedSnapshots = <String>[];
 
   setUp(() async {
     Get.testMode = true;
@@ -37,18 +45,45 @@ void main() {
     final settings = _Settings();
     settings.autoStartOnBoot.value = false;
     settings.enablePolling.value = false;
-    recorder = _Recorder(settings, scheduler, metrics);
+    backgroundCalls = [];
+    persistGates.clear();
+    persistedSnapshots.clear();
+    backgroundGate = null;
+    rejectBackground = false;
+    onBackgroundRelease = null;
+    background = RecorderBackgroundService(
+      supported: true,
+      apply: (active) async {
+        backgroundCalls.add(active);
+        if (!active) onBackgroundRelease?.call();
+        if (active) {
+          await backgroundGate?.future;
+          if (rejectBackground) throw StateError('fixture denied');
+        }
+      },
+    );
+    recorder = _Recorder(settings, scheduler, metrics, background, (snapshot) async {
+      final index = persistedSnapshots.length;
+      persistedSnapshots.add(snapshot);
+      if (index < persistGates.length) await persistGates[index].future;
+      await HivePrefUtil.setString(RecorderKeys.recorderTasks, snapshot);
+    });
     Get.put<RecorderController>(recorder);
     task = makeTask('fixture');
     recorder.tasks.add(task);
   });
   tearDown(() async {
     Get.delete<RecorderController>(force: true);
+    if (backgroundGate?.isCompleted == false) backgroundGate!.complete();
     if (recorder.permission?.isCompleted == false) recorder.permission!.complete(true);
     if (scheduler.cancellation?.isCompleted == false) scheduler.cancellation!.complete();
     if (scheduler.drain?.isCompleted == false) scheduler.drain!.complete();
     if (metrics.gate?.isCompleted == false) metrics.gate!.complete(RecordingOutputSnapshot.empty);
+    for (final gate in persistGates) {
+      if (!gate.isCompleted) gate.complete();
+    }
     await Future<void>.delayed(const Duration(milliseconds: 40));
+    await background.dispose();
     Get.reset();
     await Hive.close();
     await root.delete(recursive: true);
@@ -338,6 +373,105 @@ void main() {
     expect(task.status, RecordStatus.queued);
   });
 
+  test('stop during native activation never enqueues the recording', () async {
+    backgroundGate = Completer<void>();
+    final starting = recorder.startTask(task);
+    await until(() => backgroundCalls.isNotEmpty);
+    final stopping = recorder.stopTask(task);
+    backgroundGate!.complete();
+    await stopping;
+    expect(await starting, isFalse);
+    expect(scheduler.starts, isEmpty);
+    expect(backgroundCalls, [true, false]);
+    expect(background.ownerCount, 0);
+  });
+
+  test('queued tasks share protection until the last stop', () async {
+    final second = makeTask('second');
+    recorder.tasks.add(second);
+    expect(await recorder.startTask(task), isTrue);
+    expect(await recorder.startTask(second), isTrue);
+    await recorder.stopTask(task);
+    expect(backgroundCalls, [true]);
+    expect(background.ownerCount, 1);
+    await recorder.stopTask(second);
+    expect(backgroundCalls, [true, false]);
+  });
+
+  test('platform start rejection prevents enqueue and explicit retry recovers', () async {
+    rejectBackground = true;
+    expect(await recorder.startTask(task), isFalse);
+    expect(task.status, RecordStatus.failed);
+    expect(task.lastErrorStage, 'background');
+    expect(scheduler.starts, isEmpty);
+    expect(background.ownerCount, 0);
+    rejectBackground = false;
+    onBackgroundRelease = null;
+    expect(await recorder.startTask(task), isTrue);
+    expect(scheduler.starts, ['fixture']);
+  });
+
+  test('interruption drains native work before final background release', () async {
+    await recorder.startTask(task);
+    scheduler.runningTask = task.taskId;
+    scheduler.drain = Completer<void>();
+    var persistedBeforeRelease = false;
+    onBackgroundRelease = () {
+      final saved = jsonDecode(HivePrefUtil.getString(RecorderKeys.recorderTasks)!) as List;
+      final restored = LiveRecordTask.fromJson(Map<String, dynamic>.from(saved.single as Map));
+      expect(restored.status, RecordStatus.failed);
+      expect(restored.lastErrorStage, 'background');
+      persistedBeforeRelease = true;
+    };
+    final interrupted = background.handleInterruption('timeout');
+    await until(() => scheduler.cancelCalls > 0);
+    expect(backgroundCalls, [true]);
+    scheduler.drain!.complete();
+    await interrupted;
+    expect(persistedBeforeRelease, isTrue);
+    onBackgroundRelease = null;
+    expect(task.status, RecordStatus.failed);
+    expect(task.lastErrorStage, 'background');
+    expect(task.wasStoppedByUser, isTrue);
+    expect(backgroundCalls, [true, false]);
+    expect(background.ownerCount, 0);
+  });
+
+  test('last owner waits for an in-flight snapshot and subsequent final status write', () async {
+    final second = makeTask('second');
+    recorder.tasks.add(second);
+    await recorder.startTask(task);
+    await recorder.startTask(second);
+    persistGates.addAll([Completer<void>(), Completer<void>()]);
+    final stopping = recorder.stopTask(task);
+    await until(() => persistedSnapshots.length == 1);
+    final interrupted = background.handleInterruption('timeout');
+    await until(() => second.status == RecordStatus.stopped);
+    expect(backgroundCalls, [true]);
+    persistGates[0].complete();
+    await until(() => persistedSnapshots.length >= 2);
+    expect(backgroundCalls, [true]);
+    persistGates[1].complete();
+    await stopping;
+    await interrupted;
+    expect(backgroundCalls, [true, false]);
+    final saved = jsonDecode(HivePrefUtil.getString(RecorderKeys.recorderTasks)!) as List;
+    final finalSecond = LiveRecordTask.fromJson(Map<String, dynamic>.from(saved.last as Map));
+    expect(finalSecond.status, RecordStatus.failed);
+    expect(finalSecond.lastErrorStage, 'background');
+  });
+  test('controller close retains protection until actual native drain', () async {
+    await recorder.startTask(task);
+    scheduler.runningTask = task.taskId;
+    scheduler.drain = Completer<void>();
+    Get.delete<RecorderController>(force: true);
+    await flush();
+    expect(backgroundCalls, [true]);
+    scheduler.drain!.complete();
+    await until(() => backgroundCalls.length == 2);
+    expect(backgroundCalls, [true, false]);
+  });
+
   for (final close in [false, true]) {
     test('add does not return a detached card after its start was cancelled (close=$close)', () async {
       final initialPermission = Completer<bool>();
@@ -378,8 +512,20 @@ LiveRecordTask makeTask(String id) => LiveRecordTask(
 );
 
 class _Recorder extends RecorderController {
-  _Recorder(RecordSettingsController settings, FFmpegScheduler scheduler, RecordingOutputMetrics metrics)
-    : super.forTesting(settings: settings, scheduler: scheduler, ffmpeg: _Events(), outputMetrics: metrics);
+  _Recorder(
+    RecordSettingsController settings,
+    FFmpegScheduler scheduler,
+    RecordingOutputMetrics metrics,
+    RecorderBackgroundService background,
+    Future<void> Function(String) persistTasks,
+  ) : super.forTesting(
+        settings: settings,
+        scheduler: scheduler,
+        ffmpeg: _Events(),
+        outputMetrics: metrics,
+        background: background,
+        persistTasks: persistTasks,
+      );
   Completer<bool>? permission;
   var permissionCalls = 0;
   @override

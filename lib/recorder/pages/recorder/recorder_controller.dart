@@ -25,6 +25,7 @@ import 'package:pure_live/recorder/pages/record_settings/record_settings_control
 import 'package:pure_live/recorder/services/cache_service.dart';
 import 'package:pure_live/recorder/services/ffmpeg_header_factory.dart';
 import 'package:pure_live/recorder/services/recorder_continuation_policy.dart';
+import 'package:pure_live/recorder/services/recorder_background_service.dart';
 import 'package:pure_live/recorder/services/recording_output_metrics.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
@@ -32,6 +33,8 @@ import 'package:pure_live/recorder/services/video_processor_service.dart';
 class RecorderController extends GetxService {
   RecorderController([this._outputMetrics = const RecordingOutputMetrics()])
     : settings = Get.find<RecordSettingsController>(),
+      _background = RecorderBackgroundService.shared,
+      _persistTasks = _defaultPersistTasks,
       ffmpeg = FFmpegManager.to,
       scheduler = FFmpegScheduler.instance,
       _siteResolver = _defaultSiteResolver,
@@ -47,7 +50,10 @@ class RecorderController extends GetxService {
     this._pollTimeout = const Duration(seconds: 20),
     this._outputMetrics = const RecordingOutputMetrics(),
     this._outputSampleInterval = const Duration(seconds: 1),
-  });
+    RecorderBackgroundService? background,
+    Future<void> Function(String)? persistTasks,
+  }) : _background = background ?? RecorderBackgroundService(supported: false),
+       _persistTasks = persistTasks ?? _defaultPersistTasks;
 
   static RecorderController get to => Get.find<RecorderController>();
 
@@ -58,6 +64,14 @@ class RecorderController extends GetxService {
   final Duration _pollTimeout;
   static LiveSite _defaultSiteResolver(String platform) => Sites.of(platform).liveSite;
   final Duration _outputSampleInterval;
+  final Future<void> Function(String) _persistTasks;
+  static Future<void> _defaultPersistTasks(String snapshot) async {
+    await HivePrefUtil.setString(RecorderKeys.recorderTasks, snapshot);
+  }
+
+  final RecorderBackgroundService _background;
+  final Map<String, _RecorderBackgroundTaskLease> _backgroundLeases = {};
+  late final Future<void> Function(String) _backgroundInterruptionListener;
   final RxList<LiveRecordTask> tasks = <LiveRecordTask>[].obs;
 
   final Map<String, Timer> _pollTimers = <String, Timer>{};
@@ -99,6 +113,8 @@ class RecorderController extends GetxService {
   @override
   void onInit() {
     super.onInit();
+    _backgroundInterruptionListener = _onBackgroundInterrupted;
+    _background.addInterruptionListener(_backgroundInterruptionListener);
     _resourceMonitor = Timer.periodic(const Duration(minutes: 1), (_) {
       if (settings.enableCacheLimit.value) unawaited(_checkResources());
     });
@@ -549,20 +565,23 @@ class RecorderController extends GetxService {
   }
 
   Future<void> _flushPersist() async {
-    if (!_persistDirty) return;
-    if (_persistInFlight != null) {
-      schedulePersist();
-      return;
-    }
-
-    _persistDirty = false;
-    final pending = _persist();
-    _persistInFlight = pending;
-    try {
-      await pending;
-    } finally {
-      _persistInFlight = null;
-      if (_persistDirty && !_isClosing) schedulePersist();
+    // Every caller joins the actual write and any newer dirty snapshot. A
+    // scheduled retry is insufficient when the last engine owner is leaving.
+    while (true) {
+      final inFlight = _persistInFlight;
+      if (inFlight != null) {
+        await inFlight;
+        continue;
+      }
+      if (!_persistDirty) return;
+      _persistDirty = false;
+      final pending = _persist();
+      _persistInFlight = pending;
+      try {
+        await pending;
+      } finally {
+        if (identical(_persistInFlight, pending)) _persistInFlight = null;
+      }
     }
   }
 
@@ -677,6 +696,7 @@ class RecorderController extends GetxService {
       task.selectedLineIndex = null;
       task.wasStoppedByUser = false;
       task.autoReconnect = settings.autoReconnect.value;
+      _background.allowUserRetry();
       await _startTask(task);
       request.complete(_ownsStart(request) && task.status != RecordStatus.failed);
     } catch (error, stack) {
@@ -705,12 +725,25 @@ class RecorderController extends GetxService {
     }
 
     _startingTasks.add(task.taskId);
+    _RecorderBackgroundTaskLease? backgroundLease;
     try {
+      backgroundLease = await _acquireBackgroundLease(task);
+      if (_isClosing || task.wasStoppedByUser || !_ownsTask(task) || _removingTasks.contains(task)) {
+        await _releaseBackgroundLease(backgroundLease);
+        return;
+      }
       _stopPolling(task.taskId);
       _retryTimers.remove(task.taskId)?.cancel();
       task.status = RecordStatus.queued;
       updateTask(task);
-      scheduler.enqueue(taskId: task.taskId, taskRunner: (token) => _runTask(task, token));
+      final lease = backgroundLease;
+      scheduler.enqueue(taskId: task.taskId, taskRunner: (token) => _runTask(task, token, lease));
+    } on RecorderBackgroundException catch (error) {
+      if (_ownsTask(task) && !task.wasStoppedByUser && !_isClosing) {
+        task.markFailure(stage: 'background', error: _backgroundFailureText(error.reason));
+        task.status = RecordStatus.failed;
+        updateTask(task);
+      }
     } catch (error, stackTrace) {
       developer.log('Start recorder task failed: $error', name: 'RecorderController', stackTrace: stackTrace);
       task.markFailure(stage: 'scheduler', error: error);
@@ -718,10 +751,17 @@ class RecorderController extends GetxService {
       updateTask(task);
     } finally {
       _startingTasks.remove(task.taskId);
+      if (backgroundLease != null && !scheduler.isRunning(task.taskId) && !scheduler.isQueued(task.taskId)) {
+        await _releaseBackgroundLease(backgroundLease);
+      }
     }
   }
 
-  Future<void> _runTask(LiveRecordTask task, TaskCancelToken token) async {
+  Future<void> _runTask(
+    LiveRecordTask task,
+    TaskCancelToken token,
+    _RecorderBackgroundTaskLease backgroundLease,
+  ) async {
     final previousUrl = task.currentUrl;
     final previousQualityId = task.selectedQualityId;
     final previousLineIndex = task.selectedLineIndex;
@@ -859,6 +899,58 @@ class RecorderController extends GetxService {
         _lifecycleCompleters.remove(task.taskId);
       }
       if (protectedDirectory != null) directoryOwner?.releaseDirectory(protectedDirectory);
+      // Preserve the same lease over signed-source rotation and short retries.
+      // A user stop keeps it through any remaining pending-attempt merge.
+      if (!identical(_stopRequests[task.taskId]?.task, task) &&
+          (_isClosing || !_ownsTask(task) || task.status != RecordStatus.reconnecting)) {
+        await _releaseBackgroundLease(backgroundLease);
+      }
+    }
+  }
+
+  Future<_RecorderBackgroundTaskLease> _acquireBackgroundLease(LiveRecordTask task) async {
+    final current = _backgroundLeases[task.taskId];
+    if (current != null && identical(current.task, task)) return current;
+    final lease = _RecorderBackgroundTaskLease(task);
+    _backgroundLeases[task.taskId] = lease;
+    try {
+      await _background.acquire(lease);
+      return lease;
+    } catch (_) {
+      if (identical(_backgroundLeases[task.taskId], lease)) _backgroundLeases.remove(task.taskId);
+      rethrow;
+    }
+  }
+
+  Future<void> _releaseBackgroundLease(_RecorderBackgroundTaskLease lease) async {
+    if (identical(_backgroundLeases[lease.task.taskId], lease)) _backgroundLeases.remove(lease.task.taskId);
+    // Unbinding the last native owner may destroy a detached cached engine.
+    // Persist final file/status metadata before allowing that destruction.
+    await _flushPersist();
+    await _background.release(lease);
+  }
+
+  String _backgroundFailureText(String reason) =>
+      i18n(reason == 'timeout' ? 'recorder_background_time_limit' : 'recorder_background_unavailable');
+
+  Future<void> _onBackgroundInterrupted(String reason) async {
+    if (_isClosing) return;
+    final cleanup = Object();
+    _background.retainForCleanup(cleanup);
+    try {
+      final affected = _backgroundLeases.values.map((lease) => lease.task).toSet().toList();
+      await Future.wait(
+        affected.map((task) async {
+          await stopTask(task);
+          if (_isClosing || !_ownsTask(task)) return;
+          task.markFailure(stage: 'background', error: _backgroundFailureText(reason));
+          task.status = RecordStatus.failed;
+          updateTask(task);
+        }),
+      );
+      await _flushPersist();
+    } finally {
+      await _background.release(cleanup);
     }
   }
 
@@ -1040,6 +1132,8 @@ class RecorderController extends GetxService {
     try {
       await previous?.done.future;
       await _stopTask(request.task);
+      final lease = _backgroundLeases[request.task.taskId];
+      if (lease != null && identical(lease.task, request.task)) await _releaseBackgroundLease(lease);
       request.done.complete();
     } catch (error, stack) {
       request.done.completeError(error, stack);
@@ -1235,7 +1329,7 @@ class RecorderController extends GetxService {
 
   Future<void> _persist() async {
     try {
-      await HivePrefUtil.setString(RecorderKeys.recorderTasks, jsonEncode(tasks.map((task) => task.toJson()).toList()));
+      await _persistTasks(jsonEncode(tasks.map((task) => task.toJson()).toList()));
     } catch (error) {
       developer.log('Persist recorder tasks failed: $error', name: 'RecorderController');
     }
@@ -1426,7 +1520,23 @@ class RecorderController extends GetxService {
     _resourceMonitor?.cancel();
     _persistTimer?.cancel();
     _persistTimer = null;
-    unawaited(scheduler.clearAll());
+    final backgroundLeases = _backgroundLeases.values.toList();
+    final shutdown = scheduler.clearAll();
+    unawaited(() async {
+      try {
+        await shutdown;
+        // clearAll has a bounded cancel wait, not a native completion guarantee.
+        await Future.wait(backgroundLeases.map((lease) => scheduler.waitForTask(lease.task.taskId)));
+        await Future.wait(_finalizationFutures.values.toList());
+        for (final lease in backgroundLeases) {
+          await _releaseBackgroundLease(lease);
+        }
+      } catch (error, stack) {
+        developer.log('Recorder background shutdown failed', error: error, stackTrace: stack);
+      } finally {
+        _background.removeInterruptionListener(_backgroundInterruptionListener);
+      }
+    }());
     unawaited(_ffmpegSub.cancel());
     _activeSessionIds.clear();
     // The subscription is gone, so a later native terminal event cannot
@@ -1461,6 +1571,11 @@ class RecorderController extends GetxService {
     }
     super.onClose();
   }
+}
+
+class _RecorderBackgroundTaskLease {
+  _RecorderBackgroundTaskLease(this.task);
+  final LiveRecordTask task;
 }
 
 class _RecorderStartRequest {

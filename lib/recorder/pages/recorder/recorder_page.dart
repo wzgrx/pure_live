@@ -245,6 +245,7 @@ class _TaskCard extends GetView<RecorderController> {
       'merge' => i18n('recorder_stage_merge'),
       'scheduler' => i18n('recorder_stage_scheduler'),
       'status' => i18n('recorder_stage_status'),
+      'background' => i18n('recorder_stage_background'),
       _ => i18n('recorder_stage_unknown'),
     };
   }

@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 class BackupMigrationUtil {
-  static List<T> parseObjectList<T>(dynamic data, T Function(Map<String, dynamic>) factory) {
+  static List<T> parseObjectList<T>(dynamic data, T Function(Map<String, dynamic>) factory, {bool strict = false}) {
+    if (strict && data != null && data is! List) {
+      throw const FormatException('Expected backup object list');
+    }
     if (data == null || data is! List) {
       return [];
     }

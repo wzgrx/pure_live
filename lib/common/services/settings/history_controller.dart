@@ -95,12 +95,20 @@ class HistoryController extends GetxController {
   }
 
   void fromJson(Map<String, dynamic> json) {
+    final parsed = parseConfig(json);
+    historyLimit.v = parsed[historyLimitKey];
+    historyRooms.v = parsed['historyRooms'];
+  }
+
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
     final limit = normalizeHistoryLimit(json[historyLimitKey]);
-    historyLimit.v = limit;
-    historyRooms.v = applyHistoryLimit(
-      BackupMigrationUtil.parseObjectList(json['historyRooms'], (m) => LiveRoom.fromJson(m)),
-      limit,
-    );
+    return {
+      historyLimitKey: limit,
+      'historyRooms': applyHistoryLimit(
+        BackupMigrationUtil.parseObjectList(json['historyRooms'], LiveRoom.fromJson, strict: true),
+        limit,
+      ),
+    };
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

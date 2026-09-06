@@ -338,25 +338,25 @@ class FavoriteRoomController extends GetxController {
     };
   }
 
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'shieldList': List<String>.from(json['shieldList'] ?? const <String>[]),
+      'blockedDanmakuUsers': List<String>.from(json['blockedDanmakuUsers'] ?? const <String>[]),
+      'hotAreasList': List<String>.from(json['hotAreasList'] ?? AppConsts.supportSites),
+      'preferPlatform': json['preferPlatform']?.toString().trim().toLowerCase() ?? Sites.bilibiliSite,
+      'favoriteRooms': BackupMigrationUtil.parseObjectList(json['favoriteRooms'], LiveRoom.fromJson, strict: true),
+      'favoriteAreas': BackupMigrationUtil.parseObjectList(json['favoriteAreas'], LiveArea.fromJson, strict: true),
+    };
+  }
+
   void fromJson(Map<String, dynamic> json) {
-    shieldList.assignAll(List<String>.from(json['shieldList'] ?? const <String>[]));
-
-    blockedDanmakuUsers.assignAll(List<String>.from(json['blockedDanmakuUsers'] ?? const <String>[]));
-
-    hotAreasList.assignAll(List<String>.from(json['hotAreasList'] ?? AppConsts.supportSites));
-
-    final preferred = json['preferPlatform']?.toString();
-
-    preferPlatform.v = preferred?.trim().toLowerCase() ?? Sites.bilibiliSite;
-
-    favoriteRooms.v = List<LiveRoom>.from(
-      BackupMigrationUtil.parseObjectList(json['favoriteRooms'], (m) => LiveRoom.fromJson(m)),
-    );
-
-    favoriteAreas.v = List<LiveArea>.from(
-      BackupMigrationUtil.parseObjectList(json['favoriteAreas'], (m) => LiveArea.fromJson(m)),
-    );
-
+    final parsed = parseConfig(json);
+    shieldList.assignAll(parsed['shieldList']);
+    blockedDanmakuUsers.assignAll(parsed['blockedDanmakuUsers']);
+    hotAreasList.assignAll(parsed['hotAreasList']);
+    preferPlatform.v = parsed['preferPlatform'];
+    favoriteRooms.v = parsed['favoriteRooms'];
+    favoriteAreas.v = parsed['favoriteAreas'];
     _normalizeSiteCatalogIds();
     _normalizeFavoriteRoomIdentities();
   }

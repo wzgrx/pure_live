@@ -49,3 +49,13 @@
 9 项导入/隐私测试及 analyze 通过：`local-artifacts/build-records/20260906T150859508Z-quality-focused.json`（No issues found）。此处不是整份备份的最终原子性验收：app/player/danmaku/window/favorite/history/webdav/page/tags 尚待提取纯解析，空输入识别和写盘失败边界仍待完成。未构建、安装或发布新包。
 
 相邻刷新/主题字体/代理/字体路径 12 项回归通过：`local-artifacts/build-records/20260906T151008880Z-quality-focused.json`；未重复 analyze。
+
+## 第三批纯解析：5 个集合分区
+
+收藏、历史、WebDAV、分页和标签已接入导入入口的统一预检，并在各自直接导入方法中先完整解析再写入。对象列表导入启用 strict 模式：非 List 报错而非静默清空；原通用迁移读取默认行为保持。对象记录与旧 JSON 字符串记录两种格式仍兼容，历史限制及收藏归一化保留。
+
+分页选项采用 eager List<int> 拷贝，避免 lazy cast 在写入标量后抛错。标签先同时解析 tags 和 roomTagsMap，再替换/保存两者；缺省/null 标签字段仍保留原值。版本化 tags 和 legacy custom_tags_data 均在 app 修改前预检。
+
+本批及相邻历史/收藏回归共 20 项通过，analyze 无问题：`local-artifacts/build-records/20260906T151644728Z-quality-focused.json`。夹具使用临时 Hive；未触及手机配置。
+
+剩余纯解析分区：app、player、danmaku、windowSize。空输入识别、完整有效恢复往返、所有分区组合保持性及异步写盘失败仍待验收；目前只证明已覆盖坏输入在写入前失败，不宣称全事务恢复。

@@ -160,23 +160,32 @@ class TagManagementController extends GetxController {
     return {'tags': tags.map((e) => e.toJson()).toList(), 'roomTagsMap': roomTagsMap};
   }
 
-  void importFromJson(Map<String, dynamic>? json) {
-    if (json == null) return;
-
-    if (json.containsKey('tags') && json['tags'] != null) {
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    final result = <String, dynamic>{};
+    if (json['tags'] != null) {
       final storedTags = json['tags'] as List;
       final list = storedTags.map((e) => LiveTag.fromJson(Map<String, dynamic>.from(e))).toList();
       list.sort((a, b) => a.order.compareTo(b.order));
-      tags.assignAll(list);
-      saveTags();
+      result['tags'] = list;
     }
-
-    if (json.containsKey('roomTagsMap') && json['roomTagsMap'] != null) {
+    if (json['roomTagsMap'] != null) {
       final storedMap = json['roomTagsMap'] as Map;
-      final convertedMap = storedMap.map((key, value) {
+      result['roomTagsMap'] = storedMap.map((key, value) {
         return MapEntry(key.toString(), List<String>.from(value as List));
       });
-      roomTagsMap.assignAll(convertedMap);
+    }
+    return result;
+  }
+
+  void importFromJson(Map<String, dynamic>? json) {
+    if (json == null) return;
+    final parsed = parseConfig(json);
+    if (parsed.containsKey('tags')) {
+      tags.assignAll(parsed['tags']);
+      saveTags();
+    }
+    if (parsed.containsKey('roomTagsMap')) {
+      roomTagsMap.assignAll(parsed['roomTagsMap']);
       saveRoomTagsMapping();
     }
   }

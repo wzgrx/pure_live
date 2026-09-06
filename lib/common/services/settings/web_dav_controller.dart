@@ -49,8 +49,16 @@ class WebDavController extends GetxController {
   }
 
   void fromJson(Map<String, dynamic> json) {
-    currentWebDavConfig.v = json['currentWebDavConfig'] ?? '';
-    webDavConfigs.v = BackupMigrationUtil.parseObjectList(json['webDavConfigs'], (m) => WebDAVConfig.fromJson(m));
+    final parsed = parseConfig(json);
+    currentWebDavConfig.v = parsed['currentWebDavConfig'];
+    webDavConfigs.v = parsed['webDavConfigs'];
+  }
+
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    return {
+      'currentWebDavConfig': (json['currentWebDavConfig'] ?? '') as String,
+      'webDavConfigs': BackupMigrationUtil.parseObjectList(json['webDavConfigs'], WebDAVConfig.fromJson, strict: true),
+    };
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

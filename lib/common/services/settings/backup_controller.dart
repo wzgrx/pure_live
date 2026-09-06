@@ -86,6 +86,10 @@ class BackupController extends GetxController {
       'proxy': ProxySettingsController.parseConfig,
       'refresh': RefreshConfigController.parseConfig,
       'cookie': CookieSettingsController.parseConfig,
+      'favorite': FavoriteRoomController.parseConfig,
+      'history': HistoryController.parseConfig,
+      'webdav': WebDavController.parseConfig,
+      'page': PageSettingsController.parseConfig,
     };
     for (final entry in parsers.entries) {
       if (version == null) {
@@ -93,6 +97,10 @@ class BackupController extends GetxController {
       } else if (data.containsKey(entry.key)) {
         entry.value(Map<String, dynamic>.from(data[entry.key] ?? {}));
       }
+    }
+    final tags = version == null ? data['custom_tags_data'] : data['tags'];
+    if (tags != null) {
+      TagManagementController.parseConfig(Map<String, dynamic>.from(tags));
     }
     if (version == null) {
       VolumeSettingsController.parseConfig(data);

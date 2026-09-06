@@ -105,20 +105,28 @@ class PageSettingsController extends GetxController {
     };
   }
 
-  void fromJson(Map<String, dynamic> json) {
-    showPageSizeSelector.v = json['showPageSizeSelector'] as bool? ?? false;
-    showGotoButton.v = json['showGotoButton'] as bool? ?? false;
-    showScrollToTopBtn.v = json['showScrollToTopBtn'] as bool? ?? true;
-    defaultPageSize.v = json['defaultPageSize'] as int? ?? _getInitPageSize();
+  static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
+    final raw = json['pageSizeOptions'] as List?;
+    // Eager copy: a lazy cast could throw after scalar settings were committed.
+    final options = raw == null ? getInitPageSizeOptions() : List<int>.from(raw);
+    return {
+      'showPageSizeSelector': json['showPageSizeSelector'] as bool? ?? false,
+      'showGotoButton': json['showGotoButton'] as bool? ?? false,
+      'showScrollToTopBtn': json['showScrollToTopBtn'] as bool? ?? true,
+      'defaultPageSize': json['defaultPageSize'] as int? ?? _getInitPageSize(),
+      'pageSizeOptions': options,
+      'pageSizeOptionsRaw': raw == null ? '' : jsonEncode(options),
+    };
+  }
 
-    final List<dynamic>? options = json['pageSizeOptions'] as List<dynamic>?;
-    if (options != null) {
-      pageSizeOptions.assignAll(options.cast<int>());
-      _pageSizeOptionsRaw.v = jsonEncode(options);
-    } else {
-      pageSizeOptions.assignAll(getInitPageSizeOptions());
-      _pageSizeOptionsRaw.v = '';
-    }
+  void fromJson(Map<String, dynamic> json) {
+    final parsed = parseConfig(json);
+    showPageSizeSelector.v = parsed['showPageSizeSelector'];
+    showGotoButton.v = parsed['showGotoButton'];
+    showScrollToTopBtn.v = parsed['showScrollToTopBtn'];
+    defaultPageSize.v = parsed['defaultPageSize'];
+    pageSizeOptions.assignAll(parsed['pageSizeOptions']);
+    _pageSizeOptionsRaw.v = parsed['pageSizeOptionsRaw'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {

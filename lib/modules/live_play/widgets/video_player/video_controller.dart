@@ -288,6 +288,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   final int currentQuality;
   final RxBool audioOnlyState;
   bool get isAudioOnly => audioOnlyState.value;
+  bool get hasPlaybackError => _playerManager.hasError.value;
   final AudioOnlyCallback? onAudioOnlyChanged;
   final bool reuseCurrentSession;
   final PlaybackSourceResolver? sourceResolver;

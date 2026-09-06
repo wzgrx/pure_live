@@ -215,6 +215,8 @@
     "error_lifecycle": "播放器状态异常",
     "error_native": "播放器异常",
     "error_network": "网络连接失败",
+    "playback_failure_title": "播放已中断",
+    "playback_failure_hint": "重新加载直播间以获取最新播放源。",
     "error_source": "播放源异常",
     "error_texture": "视频渲染失败",
     "error_unknown": "未知播放错误",

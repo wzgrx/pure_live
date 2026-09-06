@@ -1,3 +1,4 @@
+import 'package:pure_live/modules/live_play/widgets/video_player/playback_failure_overlay.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
 import 'package:pure_live/modules/live_play/widgets/video_player/video_loading.dart';
@@ -29,6 +30,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       final audioOnly = controller.audioOnlyState.value;
       final state = controller.livePlayController.state.value;
       final displayVideo = state.ui.displayVideoLayer;
+      final hasError = controller.hasPlaybackError;
 
       return StableVideoLayer(
         visible: displayVideo,
@@ -40,15 +42,19 @@ class _VideoPlayerState extends State<VideoPlayer> {
         // texture widget down only on Windows; the Player itself stays alive.
         preserveMountedVideo: !PlatformUtils.isWindows,
         placeholder: const VideoLoading(),
-        video: GlobalPlayerService.instance.player.getVideoWidget(
-          SettingsService.to.player.videoFitIndex.v,
-          fitList: SettingsService.to.player.videoFitArray,
-          trackPipSource: true,
-          audioOnlyOverride: audioOnly,
-          controls: VideoControllerPanel(controller: controller),
-          surfaceColor: widget.surfaceColor,
-          videoViewportAspectRatio: widget.videoViewportAspectRatio,
-          portraitFullscreenDisplayMode: widget.portraitFullscreenDisplayMode,
+        video: PlaybackFailureOverlay(
+          hasError: hasError,
+          onRetry: controller.refresh,
+          child: GlobalPlayerService.instance.player.getVideoWidget(
+            SettingsService.to.player.videoFitIndex.v,
+            fitList: SettingsService.to.player.videoFitArray,
+            trackPipSource: true,
+            audioOnlyOverride: audioOnly,
+            controls: VideoControllerPanel(controller: controller),
+            surfaceColor: widget.surfaceColor,
+            videoViewportAspectRatio: widget.videoViewportAspectRatio,
+            portraitFullscreenDisplayMode: widget.portraitFullscreenDisplayMode,
+          ),
         ),
       );
     });

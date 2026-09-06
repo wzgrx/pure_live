@@ -214,6 +214,8 @@
     "error_lifecycle": "Player status abnormal",
     "error_native": "Player exception",
     "error_network": "Network connection failed",
+    "playback_failure_title": "Playback interrupted",
+    "playback_failure_hint": "Reload the room to get a fresh stream.",
     "error_source": "Play source exception",
     "error_texture": "Video rendering failed",
     "error_unknown": "Unknown playback error",

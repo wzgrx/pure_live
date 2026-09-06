@@ -8,7 +8,7 @@ param(
     [int] $ScreenOffSeconds = 0,
     [ValidateRange(10, 90)]
     [int] $PlatformLoadTimeoutSeconds = 45,
-    [ValidateSet('bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop', 'yy')]
+    [ValidateSet('bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop', 'yy', 'acfun')]
     [string] $Platform = 'bilibili',
     [string] $Package = 'com.mystyle.purelive',
     [string] $Activity = '.MainActivity',
@@ -55,9 +55,10 @@ $platformLabels = @{
     twitch = 'Twitch'
     soop = 'Soop'
     yy = 'YY'
+    acfun = 'AcFun 直播'
 }
 $platformLabel = $platformLabels[$Platform]
-$danmakuSupported = $Platform -ne 'cc'
+$danmakuSupported = $Platform -notin @('cc', 'acfun')
 $qualityLabelPattern = '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3})?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
 $lineLabelPattern = '^(?:线路\s*\d+|主线路|备用线路)$'
 $script:foregroundInterferenceCount = 0
@@ -419,6 +420,7 @@ function Select-PlatformTab {
         'Twitch' = 8
         'Soop' = 9
         'YY' = 10
+        'AcFun 直播' = 11
     }[$Label]
     if (-not $targetIndex) { throw "No platform tab index is registered for '$Label'." }
 

@@ -2,6 +2,14 @@
 
 ## 当前任务覆盖规则（2026-09-05）
 
+### 2026-09-07 用户补充：K90 Pro Max 远程操作边界
+
+当前主机 DESKTOP-F2H984F，ADB 固定路径 `C:\Users\123\AppData\Local\Android\Sdk\platform-tools\adb.exe`。目标优先 `192.168.1.2:5555`，备用 `192.168.1.2:36883`（动态端口）。任何唤醒或应用操作前先用明确 `-s` 只读核对 `ro.product.model=25102RKBEC`、`ro.product.device=myron`；当前系统 Android 17。安装、输入及状态读取均绑定该编号，不按设备列表顺序猜测。
+
+用户缺少现场救援条件：不重启手机/adbd，不切换 Wi-Fi，不撤销调试授权，不修改 ADB 端口，不更新 Root/LSP/其他模块，不执行 `adb kill-server`。本段覆盖下方历史默认恢复策略。连接失败只先读 devices/mdns，再尝试用户给定备用地址；不将离线等同配对失效。Wireless ADB 的开机 5555 尚未重启验证，本任务不通过重启补证；既有 Root 能力不意味着本次测试需要调用 su。
+
+### 当前调度
+
 用户已暂停三个任务轮转。本次完整验收使用 `tool/run_android_device_test_turn.ps1 -NoRotation -CommandLine '…'` 直接执行本项目的串行设备步骤，保留唤醒、常亮恢复、前台校验和失败清理。网络 ADB 在线先测 Android，离线改测 Windows；不等待其他任务交棒，也不操作其他应用。恢复共享实机安排时再使用下面的默认租约流程。此开关只改变调度，不代表绕过设备检查。
 
 多条在线 transport 时，包装器使用 `-Serial IP:PORT` 明确选择，或从当前进程 `PURELIVE_ADB_SERIAL` 读取默认值；显式参数优先。该编号经编码传给唤醒步骤，成功后再传给测试正文。清理只针对唤醒成功的同一编号，不跟随正文改写的环境变量；预检选择失败时不对旧环境目标执行常亮清理。离线回归命令为 `python -m unittest discover -s tool/tests -p test_android_device_test_turn.py`，只执行假的唤醒脚本，不调用 ADB。

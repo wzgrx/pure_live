@@ -10,6 +10,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:pure_live/common/base/base_page_scroll_bone.dart';
 import 'package:pure_live/common/base/base_controller.dart';
 import 'package:pure_live/common/base/base_page_view.dart';
+import 'package:pure_live/common/base/desktop_components.dart';
 import 'package:pure_live/common/base/live_directory_controller.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/common/models/live_room.dart';
@@ -315,6 +316,323 @@ void main() {
     expect(source.calls, [1, 2, 2, 3]);
     expect(controller.currentPage, 3);
     expect(controller.list.map((r) => r.roomId), _range(41, 60).map((i) => '$i'));
+  });
+
+  for (final desktop in [false, true]) {
+    test('failed refresh preserves the committed page and metadata ($desktop)', () async {
+      var refreshing = false;
+      final response = Completer<LiveDirectoryPage>();
+      final source = _Source((page, _, _) async {
+        if (refreshing) return response.future;
+        return _page(page, _range(1, 60), more: false);
+      });
+      final controller = _Controller(source, desktop: desktop)..pageSize.value = 20;
+      addTearDown(controller.onClose);
+      await controller.loadData();
+      if (desktop) {
+        await controller.goToPage(3);
+      } else {
+        await controller.loadMoreData();
+        await controller.loadMoreData();
+      }
+      final rooms = controller.list.toList();
+      refreshing = true;
+      final refresh = controller.refreshData();
+      await _until(() => source.calls.length == 2);
+      final pendingPage = controller.currentPage;
+      response.completeError(StateError('refresh failed'));
+      await refresh;
+      expect(pendingPage, 3, reason: 'pending refresh must not relabel old cards');
+      expect(controller.currentPage, 3);
+      expect(controller.list, rooms);
+      expect(controller.totalCount.value, 60);
+      expect(controller.canLoadMore.value, isFalse);
+      expect(controller.pageError.value, isTrue);
+      expect(controller.loadding.value, isFalse);
+    });
+  }
+
+  test('refresh retry stages empty pages without resetting its cursor or old snapshot', () async {
+    var refreshing = false;
+    final source = _Source((page, _, _) async {
+      if (!refreshing) return _page(page, _range(1, 60), more: false);
+      return page < 3 ? _page(page, []) : _page(page, [99], more: false);
+    });
+    final controller = _Controller(source, desktop: true, maxRequestsPerLoad: 2)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    await controller.loadData();
+    await controller.goToPage(3);
+    refreshing = true;
+    await controller.refreshData();
+    expect(controller.currentPage, 3);
+    expect(controller.totalCount.value, 60);
+    expect(controller.list.first.roomId, '41');
+    await controller.retryData();
+    expect(source.calls, [1, 1, 2, 3]);
+    expect(controller.currentPage, 1);
+    expect(controller.totalCount.value, 1);
+    expect(controller.list.single.roomId, '99');
+    expect(controller.pageError.value, isFalse);
+  });
+
+  for (final action in ['navigate', 'resize', 'load-more']) {
+    test('$action after a failed refresh never mixes directory snapshots', () async {
+      var phase = 'initial';
+      final source = _Source((page, _, _) async {
+        if (phase == 'fail') throw StateError('refresh failed');
+        if (phase == 'retry') return _page(page, [99], more: false);
+        return _page(page, _range(1, 60), more: false);
+      });
+      final controller = _Controller(source, desktop: true)..pageSize.value = 20;
+      addTearDown(controller.onClose);
+      await controller.loadData();
+      await controller.goToPage(3);
+      phase = 'fail';
+      await controller.refreshData();
+      phase = 'retry';
+      if (action == 'navigate') {
+        await controller.goToPage(2);
+        expect(source.calls, [1, 1]);
+        expect(controller.currentPage, 2);
+        expect(controller.list.first.roomId, '21');
+        expect(controller.totalCount.value, 60);
+      } else if (action == 'resize') {
+        controller.setPageSize(10);
+        await controller.loadData();
+        expect(source.calls, [1, 1]);
+        expect(controller.currentPage, 5);
+        expect(controller.list.first.roomId, '41');
+        expect(controller.list, hasLength(10));
+        expect(controller.totalCount.value, 60);
+      } else {
+        await controller.loadMoreData();
+        expect(source.calls, [1, 1, 1]);
+        expect(controller.currentPage, 1);
+        expect(controller.list.single.roomId, '99');
+      }
+    });
+  }
+
+  for (final ids in [
+    <int>[],
+    [1, 99],
+  ]) {
+    test('successful refresh commits its own cards, page and end metadata ($ids)', () async {
+      var refreshing = false;
+      final source = _Source((page, _, _) async => _page(page, refreshing ? ids : _range(1, 60), more: false));
+      final controller = _Controller(source, desktop: true)..pageSize.value = 20;
+      addTearDown(controller.onClose);
+      await controller.loadData();
+      await controller.goToPage(3);
+      refreshing = true;
+      await controller.refreshData();
+      expect(controller.currentPage, 1);
+      expect(controller.totalCount.value, ids.length);
+      expect(controller.list.map((r) => r.roomId), ids.map((id) => '$id'));
+      expect(controller.canLoadMore.value, isFalse);
+      expect(controller.pageEmpty.value, ids.isEmpty);
+      expect(controller.pageError.value, isFalse);
+    });
+  }
+
+  test('partial fresh snapshot replaces old rows and retries only its own cursor', () async {
+    var refreshing = false;
+    var fail = true;
+    final source = _Source((page, _, _) async {
+      if (!refreshing) return _page(page, _range(1, 60), more: false);
+      if (page == 1) return _page(page, _range(101, 105));
+      if (fail) throw StateError('fresh second page failed');
+      return _page(page, _range(106, 120), more: false);
+    });
+    final controller = _Controller(source, desktop: true)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    await controller.loadData();
+    await controller.goToPage(3);
+    refreshing = true;
+    await controller.refreshData();
+    expect(controller.currentPage, 1);
+    expect(controller.list.map((r) => r.roomId), _range(101, 105).map((id) => '$id'));
+    expect(controller.totalCount.value, isNull);
+    expect(controller.pageError.value, isTrue);
+    fail = false;
+    await controller.retryData();
+    expect(source.calls, [1, 1, 2, 2]);
+    expect(controller.list.map((r) => r.roomId), _range(101, 120).map((id) => '$id'));
+    expect(controller.totalCount.value, 20);
+    expect(controller.canLoadMore.value, isFalse);
+  });
+
+  test('navigation abandons failed refresh but retains the old native cursor', () async {
+    var failing = false;
+    final source = _Source((page, _, _) async {
+      if (failing) throw StateError('refresh failed');
+      return _page(page, page == 1 ? _range(1, 60) : _range(61, 80), more: page == 1);
+    });
+    final controller = _Controller(source, desktop: true)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    await controller.loadData();
+    await controller.goToPage(3);
+    failing = true;
+    await controller.refreshData();
+    failing = false;
+    await controller.goToPage(4);
+    expect(source.calls, [1, 1, 2]);
+    expect(controller.currentPage, 4);
+    expect(controller.list.map((r) => r.roomId), _range(61, 80).map((id) => '$id'));
+    expect(controller.totalCount.value, 80);
+  });
+
+  test('refresh capacity failure retains old catalogue and refresh action resets only staging', () async {
+    var phase = 'initial';
+    final source = _Source(
+      (page, _, _) async => _page(page, phase == 'retry' ? [99] : _range(1, phase == 'initial' ? 60 : 61), more: false),
+    );
+    final controller = _Controller(source, desktop: true, maxBufferedItems: 60)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    await controller.loadData();
+    await controller.goToPage(3);
+    phase = 'overflow';
+    await controller.refreshData();
+    expect(controller.currentPage, 3);
+    expect(controller.totalCount.value, 60);
+    expect(controller.list.first.roomId, '41');
+    expect(controller.errorMsg.value, 'directory_cache_limit');
+    expect(controller.retryActionLabel, 'refresh');
+    phase = 'retry';
+    await controller.retryData();
+    expect(source.calls, [1, 1, 1]);
+    expect(controller.currentPage, 1);
+    expect(controller.list.single.roomId, '99');
+    expect(controller.totalCount.value, 1);
+  });
+
+  test('offline refresh retains committed end metadata through production preflight', () async {
+    final source = _Source((page, _, _) async => _page(page, _range(1, 60), more: false));
+    final controller = _PreflightController(directory: source)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    final initial = controller.loadData();
+    controller.checks.single.complete([ConnectivityResult.wifi]);
+    await initial;
+    await controller.loadMoreData();
+    await controller.loadMoreData();
+    final refresh = controller.refreshData();
+    await _until(() => controller.checks.length == 2);
+    controller.checks.last.complete([ConnectivityResult.none]);
+    await refresh;
+    expect(source.calls, [1]);
+    expect(controller.currentPage, 3);
+    expect(controller.totalCount.value, 60);
+    expect(controller.list, hasLength(60));
+    expect(controller.canLoadMore.value, isFalse);
+    expect(controller.errors, ['network_disconnected']);
+    expect(controller.loadding.value, isFalse);
+  });
+
+  for (final action in ['refresh', 'resize', 'close']) {
+    test('$action supersedes a staging response without consuming old catalogue rows', () async {
+      final response = Completer<LiveDirectoryPage>();
+      var call = 0;
+      final source = _Source((page, _, _) async {
+        switch (call++) {
+          case 0:
+            return _page(page, _range(1, 60), more: false);
+          case 1:
+            return response.future;
+          default:
+            return _page(page, [99], more: false);
+        }
+      });
+      final controller = _Controller(source, desktop: true)..pageSize.value = 20;
+      if (action != 'close') addTearDown(controller.onClose);
+      await controller.loadData();
+      await controller.goToPage(3);
+      final stale = controller.refreshData();
+      await _until(() => source.calls.length == 2);
+      late final Future<void> replacement;
+      if (action == 'refresh') {
+        replacement = controller.refreshData();
+      } else if (action == 'resize') {
+        controller.setPageSize(10);
+        replacement = controller.loadData();
+      } else {
+        controller.onClose();
+        replacement = Future.value();
+      }
+      final cancelled = source.tokens[1]!.isCancelled;
+      response.complete(_page(1, [777], more: false));
+      await Future.wait([stale, replacement]);
+      expect(cancelled, isTrue);
+      expect(controller.list.any((room) => room.roomId == '777'), isFalse);
+      if (action == 'refresh') {
+        expect(source.calls, [1, 1, 1]);
+        expect(controller.list.single.roomId, '99');
+        expect(controller.currentPage, 1);
+      } else if (action == 'resize') {
+        expect(source.calls, [1, 1]);
+        expect(controller.currentPage, 5);
+        expect(controller.list.map((r) => r.roomId), _range(41, 50).map((id) => '$id'));
+      } else {
+        expect(source.calls, [1, 1]);
+        expect(controller.currentPage, 3);
+        expect(controller.list.first.roomId, '41');
+      }
+      expect(controller.errors, isEmpty);
+    });
+  }
+
+  testWidgets('desktop refresh and inline retry keep the selected page aligned with its cards', (tester) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var phase = 'initial';
+    final source = _Source((page, _, _) async {
+      if (phase == 'fail') throw StateError('refresh failed');
+      return _page(page, phase == 'retry' ? [99] : _range(1, 60), more: false);
+    });
+    final controller = _Controller(source, desktop: true)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(Duration.zero);
+    });
+    await controller.loadData();
+    await controller.goToPage(3);
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(
+          body: BasePageView<LiveDirectoryController, LiveRoom>(
+            controller: controller,
+            showScrollToTopBtn: false,
+            contentBuilder: (_, rooms, scroll) =>
+                ListView(controller: scroll, children: [for (final room in rooms) Text('room:${room.roomId}')]),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('room:41'), findsOneWidget);
+    final thirdPage = find.ancestor(
+      of: find.descendant(of: find.byType(DesktopPaginationBar), matching: find.text('3')),
+      matching: find.byType(InkWell),
+    );
+    expect(tester.widget<InkWell>(thirdPage).onTap, isNull);
+    phase = 'fail';
+    await tester.tap(find.text('refresh'));
+    await tester.pumpAndSettle();
+    expect(find.text('room:41'), findsOneWidget);
+    expect(tester.widget<InkWell>(thirdPage).onTap, isNull);
+    expect(controller.currentPage, 3);
+    expect(find.byType(MaterialBanner), findsOneWidget);
+    phase = 'retry';
+    await tester.tap(find.text('retry'));
+    await tester.pumpAndSettle();
+    expect(controller.currentPage, 1);
+    expect(find.text('room:99'), findsOneWidget);
+    expect(find.text('room:41'), findsNothing);
+    expect(find.byType(MaterialBanner), findsNothing);
+    expect(source.calls, [1, 1, 1]);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('actual full-page retry resumes after empty-page budget, not page one', (tester) async {

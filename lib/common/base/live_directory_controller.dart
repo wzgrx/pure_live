@@ -4,6 +4,16 @@ import 'package:dio/dio.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/interface/live_directory.dart';
 
+/// One native cursor generation. Refresh builds a replacement separately from
+/// the committed catalogue, so failures cannot relabel or consume old cards.
+class _DirectoryBuffer {
+  final rooms = <LiveRoom>[];
+  final identities = <String>{};
+  int nextPage = 1;
+  bool hasMore = true;
+  bool capacityReached = false;
+}
+
 /// A bounded, per-tab native-page pool. Keeps complete responses (including
 /// overflow) and presents independent mobile/desktop page sizes. No other
 /// paging implementation changes for platforms without the optional contract.
@@ -20,11 +30,8 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
   final List<LiveRoom> Function(List<LiveRoom>)? transform;
   final int maxBufferedItems;
   final int maxRequestsPerLoad;
-  final _pool = <LiveRoom>[];
-  final _identities = <String>{};
-  int _nextNativePage = 1;
-  bool _serverHasMore = true;
-  bool _capacityReached = false;
+  _DirectoryBuffer _buffer = _DirectoryBuffer();
+  _DirectoryBuffer? _refreshBuffer;
   int _epoch = 0;
   int _visiblePage = 1;
   int _lastRequestedPage = 1;
@@ -34,6 +41,7 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
   CancelToken? _cancel;
 
   bool _owns(int epoch) => !_disposed && !isClosed && epoch == _epoch;
+  bool get _capacityReached => (_refreshBuffer ?? _buffer).capacityReached;
 
   @override
   bool Function() captureNetworkRequestOwnership() {
@@ -59,36 +67,42 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
     _cancel?.cancel();
     await _activeLoad;
     if (!_owns(epoch)) return;
-    _pool.clear();
-    _identities.clear();
-    _nextNativePage = 1;
-    _serverHasMore = true;
-    _capacityReached = false;
-    currentPage = 1;
-    _visiblePage = 1;
+    // Keep both the visible rows AND their paging metadata until a replacement
+    // is publishable. At most two independently bounded buffers are retained;
+    // repeated refresh discards the previous staging buffer, not the catalogue.
+    _refreshBuffer = _DirectoryBuffer();
     await _startLoad(1);
   }
 
   @override
-  Future<void> loadData() => _pendingRepage ?? _activeLoad ?? _startLoad(currentPage);
+  Future<void> loadData() => _pendingRepage ?? _activeLoad ?? _startLoad(_refreshBuffer != null ? 1 : currentPage);
 
   @override
   Future<void> loadMoreData() async {
-    if (_activeLoad != null || _pendingRepage != null || !canLoadMore.value) return;
-    final partialPage = _pool.length < _visiblePage * pageSize.value && _serverHasMore;
+    if (_activeLoad != null || _pendingRepage != null) return;
+    if (_refreshBuffer != null) {
+      await retryData();
+      return;
+    }
+    if (!canLoadMore.value) return;
+    final partialPage = _buffer.rooms.length < _visiblePage * pageSize.value && _buffer.hasMore;
     await _startLoad(partialPage ? _visiblePage : _visiblePage + 1);
   }
 
   @override
   Future<void> goToPage(int page) async {
     if (!usesDesktopPagination || _activeLoad != null || _pendingRepage != null || page < 1) return;
-    if (page > _visiblePage && !canLoadMore.value && (page - 1) * pageSize.value >= _pool.length) return;
+    if (page > _visiblePage && !canLoadMore.value && (page - 1) * pageSize.value >= _buffer.rooms.length) return;
+    // Explicit navigation chooses the still-visible catalogue rather than
+    // applying its page number to a failed refresh's unrelated cursor.
+    _refreshBuffer = null;
     await _startLoad(page);
   }
 
   @override
   void setPageSize(int? newSize) {
     if (newSize == null || newSize < 1 || newSize == pageSize.value || _disposed) return;
+    _refreshBuffer = null;
     final firstIndex = usesDesktopPagination ? (_visiblePage - 1) * pageSize.value : 0;
     pageSize.value = newSize;
     currentPage = firstIndex ~/ newSize + 1;
@@ -114,14 +128,14 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
     if (active != null) return active;
     _lastRequestedPage = targetPage;
     late final Future<void> operation;
-    operation = _performLoad(targetPage, _epoch).whenComplete(() {
+    operation = _performLoad(targetPage, _epoch, _refreshBuffer ?? _buffer).whenComplete(() {
       if (identical(_activeLoad, operation)) _activeLoad = null;
     });
     _activeLoad = operation;
     return operation;
   }
 
-  Future<void> _performLoad(int targetPage, int epoch) async {
+  Future<void> _performLoad(int targetPage, int epoch, _DirectoryBuffer buffer) async {
     if (targetPage < 1 || pageSize.value < 1 || maxRequestsPerLoad < 1 || maxBufferedItems < 1) {
       return;
     }
@@ -138,14 +152,17 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
       notLogin.value = false;
       errorMsg.value = '';
       var requests = 0;
-      while (_pool.length < targetEnd && _serverHasMore && !_capacityReached && requests < maxRequestsPerLoad) {
+      while (buffer.rooms.length < targetEnd &&
+          buffer.hasMore &&
+          !buffer.capacityReached &&
+          requests < maxRequestsPerLoad) {
         final networkReady = await checkNetworkBeforeRequest();
         if (!_owns(epoch)) return;
         if (!networkReady) {
           finishRefreshControllers(IndicatorResult.fail);
           return;
         }
-        final expectedPage = _nextNativePage;
+        final expectedPage = buffer.nextPage;
         late final LiveDirectoryPage response;
         try {
           response = await directory.getDirectoryPage(page: expectedPage, category: category, cancel: token);
@@ -165,44 +182,48 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
         final fresh = <LiveRoom>[];
         final pageIdentities = <String>{};
         for (final room in rows) {
-          if (!_identities.contains(room.identityKey) && pageIdentities.add(room.identityKey)) fresh.add(room);
+          if (!buffer.identities.contains(room.identityKey) && pageIdentities.add(room.identityKey)) fresh.add(room);
         }
         // Never partially consume a native page and then advance past the
         // discarded remainder. A capacity failure keeps that page uncommitted.
-        if (_pool.length + fresh.length > maxBufferedItems) {
-          _capacityReached = true;
+        if (buffer.rooms.length + fresh.length > maxBufferedItems) {
+          buffer.capacityReached = true;
           failure = i18n('directory_cache_limit');
           break;
         }
-        _pool.addAll(fresh);
-        _identities.addAll(pageIdentities);
-        _nextNativePage++;
-        _serverHasMore = response.hasMore;
+        buffer.rooms.addAll(fresh);
+        buffer.identities.addAll(pageIdentities);
+        buffer.nextPage++;
+        buffer.hasMore = response.hasMore;
         requests++;
       }
       if (!_owns(epoch)) return;
-      if (_capacityReached) {
+      if (buffer.capacityReached) {
         // The buffer limit is still in effect when revisiting cached rows or
         // changing UI page size. It is not a successful end-of-directory read.
         failure = i18n('directory_cache_limit');
-      } else if (_pool.length < targetEnd && _serverHasMore && failure == null) {
+      } else if (buffer.rooms.length < targetEnd && buffer.hasMore && failure == null) {
         failure = i18n('directory_continue_loading');
       }
       // Errors and request budgets are retryable, not a fabricated end of the
       // list. Already committed cards remain available, including overflow.
-      if (targetStart < _pool.length || (_pool.isEmpty && targetPage == 1 && !_serverHasMore)) {
-        final end = targetEnd.clamp(0, _pool.length);
-        list.assignAll(_pool.sublist(targetStart, end));
+      if (targetStart < buffer.rooms.length || (buffer.rooms.isEmpty && targetPage == 1 && !buffer.hasMore)) {
+        final end = targetEnd.clamp(0, buffer.rooms.length);
+        _buffer = buffer;
+        if (identical(_refreshBuffer, buffer)) _refreshBuffer = null;
         _visiblePage = targetPage;
         currentPage = targetPage;
+        list.assignAll(buffer.rooms.sublist(targetStart, end));
         if (usesDesktopPagination) scrollToTopImmediate();
       } else {
         currentPage = _visiblePage;
       }
-      final visibleEnd = _visiblePage * targetSize;
-      canLoadMore.value = visibleEnd < _pool.length || (_serverHasMore && !_capacityReached);
-      totalCount.value = !_serverHasMore ? _pool.length : null;
-      pageEmpty.value = list.isEmpty && !_serverHasMore && failure == null;
+      if (identical(buffer, _buffer)) {
+        final visibleEnd = _visiblePage * targetSize;
+        canLoadMore.value = visibleEnd < buffer.rooms.length || (buffer.hasMore && !buffer.capacityReached);
+        totalCount.value = !buffer.hasMore ? buffer.rooms.length : null;
+        pageEmpty.value = list.isEmpty && !buffer.hasMore && failure == null;
+      }
       if (failure != null) {
         // Keep the visible list mounted; BasePageView renders a full-page error
         // only when there are no usable cards. Retry resumes the failed page.
@@ -234,8 +255,8 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
     _epoch++;
     _cancel?.cancel();
     _cancel = null;
-    _pool.clear();
-    _identities.clear();
+    _buffer = _DirectoryBuffer();
+    _refreshBuffer = null;
     super.onClose();
   }
 }

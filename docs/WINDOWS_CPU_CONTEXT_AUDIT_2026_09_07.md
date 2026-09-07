@@ -40,3 +40,55 @@
 下一步在同一固定SDK构建一个不带业务插件的最小Windows runner，对照可见/最小化及Debug/Release；如最小样本复现，再测消息种类/调用栈；如不复现，再逐层缩小本项目插件和页面。保留播放、长录、签名续接、多平台及发布验收的原范围，不用此诊断替代它们。
 
 证据目录 `local-artifacts/windows-cpu-fadd5bdb-20260907/`：三组进程、CPU窗口JSON、60秒CSV/summary、VM flags与采样、timeline及摘要、stdout/stderr、清理result。三PID76248/63028/43332均正常退出后查询消失；采样会话全部终止。没有手机操作、模块改动或应用数据删除。
+
+## 后续：无业务插件的 Debug / Release 最小程序
+
+在本地忽略目录 `local-artifacts/windows-minimal-probe-20260907/` 新建隔离项目，使用相同 Flutter **3.47.0**（framework `4cf24164269a5ebf0c16a028a00727d0e77bbb05`，engine `5f77625673248ee5846fbcaf5d3e1a3878386fd7`，Dart 3.13.0）。固定 SDK 的 `create --empty --platforms=windows --no-pub` 生成 Windows runner；离线解析依赖后串行 `build windows --debug/--release --no-pub`，两次均在仓库重型资源守卫内。没有改产品工程或依赖锁文件。
+
+最小程序仅保留以下静态页面，无业务定时器、播放器、网络请求或插件；生成的普通插件和 FFI 插件列表均为空，`RegisterPlugins` 函数体为空。默认 Windows runner 保持生成内容，未添加消息延时。
+
+```dart
+import 'package:flutter/material.dart';
+
+void main() => runApp(const IdleProbe());
+
+class IdleProbe extends StatelessWidget {
+  const IdleProbe({super.key});
+
+  @override
+  Widget build(BuildContext context) => const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(body: Center(child: Text('Static Flutter idle probe'))),
+  );
+}
+```
+
+Debug / Release 构建前后核对 Dart、pubspec/lock、runner 和生成插件清单共7个文件的 SHA-256，均未变化。两种配置及此前 Pure Live Debug 的 stderr 均记录 Impeller OpenGLESSDF 后端。本轮未开启 VM CPU profiler，未连续抓取主比较样本的截图/无障碍树，也未修改显示设置。
+
+| 构建 | 守卫及构建记录耗时 | Flutter 构建耗时 | 结束活跃重型进程 | exe SHA-256 |
+| --- | ---: | ---: | ---: | --- |
+| Debug | 129.041秒 | 58.0秒 | 0 | `50AC799D2715E12B041D0A1C38ABAAD7542B37458BFA8D8A89CE6ED3C164B2CD` |
+| Release | 87.534秒 | 59.5秒 | 0 | `E5C956F18F21A062AD3350FD04458959AE8FB7DE4E3514F32DB4D561669C6201` |
+
+上述是**隔离诊断程序**的构建结果，不是 Pure Live 新候选或全量测试。两次开始曾等待其他项目 Java 工作，遵守排队且未结束其进程；本任务的构建与 CPU 采样没有重叠。采样使用已有 `tool/sample_windows_runtime.ps1`，24逻辑核归一化、排除首个基线、间隔5秒；每段60秒、13次响应检查。显示元数据仍为 RTX5090 Laptop、3840×2400@200Hz，另有 Oray 虚拟显示驱动；GPU未采样。
+
+| 程序/PID | 窗口条件 | 实际秒数 | CPU均值 | CPU P95 | 响应 |
+| --- | --- | ---: | ---: | ---: | --- |
+| 最小Debug / 70004 | 静态页可见 | 60.413 | 0.2426% | 0.3123% | 13/13 |
+| 同PID | 已确认最小化 | 60.620 | 0.0132% | 0.0276% | 13/13 |
+| 同PID | 恢复静态页 | 60.447 | 0.2878% | 0.4820% | 13/13 |
+| 最小Release / 56164 | 静态页可见 | 60.490 | 0.3060% | 0.4044% | 13/13 |
+| 同PID | 已确认最小化 | 60.637 | 0.0067% | 0.0172% | 13/13 |
+| 同PID | 恢复静态页 | 60.531 | 0.3078% | 0.3779% | 13/13 |
+
+Release恢复段工作集114.8164→114.8477 MiB、private bytes379.6680→379.6406 MiB。这是短期静态模板采样，不是产品长时内存稳定性结论。
+
+观察例外保留：Debug恢复采样结束后首次截图返回 `no monitor found for window`，重新选取并激活同窗口后恢复；未由此宣称整段遮挡状态完全受控。Release第一次坐标最小化后的截图仍显示遮挡画面，没有得到明确最小化状态，该60.564秒样本（CPU0.0098%）**排除在上表之外**。随后重新观察无障碍树，操作其实际“最小化”按钮，工具明确返回 `window is minimized`，才进行上表的确认样本。Debug最小化亦得到该明确状态。可见/恢复阶段采样前截图核对静态文字；未通过持续截图保证用户桌面每一刻的遮挡状态。
+
+### 推论边界与下一步
+
+- **确定**：无业务插件的模板在Debug与Release都出现可见性相关CPU差异；“全部来自Pure Live业务代码”或“全部只是Debug开销”均不足以解释这组模板观测。
+- **尚未确定**：该约0.24–0.31%的负载是否是引擎缺陷、图形/显示环境、观察条件或其他原生路径；也未解释Pure Live空关注页约0.96%以及热门页约2.3%的额外负载。短串行样本不支持据此判断Release比Debug更慢。
+- 下一步优先构建并测量**当前Pure Live自身Release候选**的相同空页面/可见性组合，区分产品与模板差额，并继续播放后资源回落验收。仍有异常时，在隔离runner中测量消息种类或原生调用栈；保持产品消息循环和系统设置原状，避免无根因延时补丁。长录、平台能力和最终发布仍按原范围继续。
+
+本地证据包含 `build-probe.ps1`、两种构建JSON/log、SDK身份、源文件/engine/exe哈希、7项同源检查、7组CSV/summary、`observation-context.json`及进程启动/退出记录。Debug和Release按标题栏正常关闭后，PID70004/56164均查询消失。两次构建及全部采样命令已取得exit0；没有手机、MT、LSP或Root操作，没有改变应用版本、正式候选ZIP/APK、用户数据或发布状态。

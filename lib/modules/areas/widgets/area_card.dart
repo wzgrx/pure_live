@@ -1,4 +1,5 @@
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/utils/category_artwork.dart';
 import 'package:pure_live/plugins/cache_manager.dart';
 import 'package:pure_live/routes/app_navigation.dart';
 import 'package:pure_live/plugins/area_pic_mapper.dart';
@@ -33,6 +34,7 @@ class _AreaCardState extends State<AreaCard> {
             httpHeaders: networkImageHeaders(imageUrl),
             cacheManager: CustomImageCacheManager.instance,
             fit: BoxFit.cover,
+            alignment: categoryArtworkAlignment(imageUrl),
             filterQuality: FilterQuality.low,
             memCacheWidth: cacheWidth,
             // maxWidthDiskCache: 512,

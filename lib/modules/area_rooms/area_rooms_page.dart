@@ -1,4 +1,5 @@
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/utils/category_artwork.dart';
 import 'package:pure_live/modules/area_rooms/area_rooms_controller.dart';
 import 'package:pure_live/plugins/cache_manager.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
@@ -101,6 +102,7 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
                 width: 32,
                 height: 32,
                 fit: BoxFit.cover,
+                alignment: categoryArtworkAlignment(pictureUrl),
                 memCacheWidth: 64,
                 // maxWidthDiskCache: 128,
                 fadeInDuration: Duration.zero,

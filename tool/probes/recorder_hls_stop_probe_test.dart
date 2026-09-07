@@ -182,6 +182,13 @@ void main() {
                   session.diagnosticTail.toLowerCase().contains('error muxing a packet'),
               'inputDrained': terminal?['inputDrained'],
               'forcedCancel': terminal?['forcedCancel'],
+              'manualStop': terminal?['manualStop'],
+              'stopRequested': terminal?['stopRequested'],
+              'stopElapsedMs': terminal?['stopElapsedMs'],
+              'inputDrainKind': terminal?['inputDrainKind'],
+              'inputDrainBudgetMs': terminal?['inputDrainBudgetMs'],
+              'inputFinishRequested': terminal?['inputFinishRequested'],
+              'inputIntegrityError': terminal?['inputIntegrityError'],
               'sizes': sizes,
               'packetAligned': sizes.isNotEmpty && sizes.every((s) => s > 0 && s % 188 == 0),
               'decodeCode': code,
@@ -211,6 +218,18 @@ void main() {
           reason: 'Original TS must remain fully decodable after manual stop.',
         );
         expect(results.every((r) => r['inputDrained'] == true && r['forcedCancel'] == false), true);
+        expect(
+          results.every(
+            (r) =>
+                r['manualStop'] == true &&
+                r['stopRequested'] == true &&
+                r['inputFinishRequested'] == true &&
+                r['inputDrainKind'] == 'hls' &&
+                r['inputIntegrityError'] == false &&
+                (r['stopElapsedMs'] as int) >= 0,
+          ),
+          true,
+        );
       } finally {
         Get.reset();
         await Hive.close();

@@ -70,6 +70,12 @@ void main() {
             final event = await terminal.future.timeout(const Duration(seconds: 5));
             await File(p.join(directory.path, 'terminal.json'))
                 .writeAsString(const JsonEncoder.withIndent('  ').convert(event.data));
+            expect(event.data['manualStop'], false);
+            expect(event.data['stopRequested'], false);
+            expect(event.data['stopElapsedMs'], isNull);
+            expect(event.data['inputDrainKind'], 'none');
+            expect(event.data['inputFinishRequested'], false);
+            expect(event.data['forcedCancel'], false);
             final segments = await directory.list().where((f) => p.extension(f.path) == '.ts').cast<File>().toList();
             expect(segments, isNotEmpty);
             task.queuePendingAttempt(

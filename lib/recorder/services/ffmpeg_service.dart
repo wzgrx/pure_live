@@ -184,6 +184,38 @@ class FFmpegRecordSession {
   var _diagnosticCharacters = 0;
   bool hasMediaIntegrityError = false;
   bool hasInputPacketError = false;
+  Stopwatch? _stopWatch;
+
+  void markStopRequested() => _stopWatch ??= Stopwatch()..start();
+
+  /// One immutable snapshot for terminal events and all diagnostic sinks.
+  /// inputDrained means native ended after finish was requested without forced
+  /// cancel, not that every media packet decoded or every input byte arrived.
+  Map<String, Object?> terminalEvidence({String fallbackLogs = ''}) {
+    final finishRequested = flvInputRelay?.finishRequested == true || inputRelay?.finishRequested == true;
+    final drainKind = flvInputRelay != null
+        ? 'flv'
+        : inputRelay?.drainOnStop == true
+        ? 'hls'
+        : 'none';
+    return Map.unmodifiable({
+      'manualStop': manualStop,
+      'leaseRefresh': leaseRefresh,
+      'stopRequested': _stopWatch != null,
+      'stopElapsedMs': _stopWatch?.elapsedMilliseconds,
+      'inputDrainKind': drainKind,
+      'inputDrainBudgetMs': drainKind == 'flv'
+          ? 3000
+          : drainKind == 'hls'
+          ? inputRelay!.drainTimeout.inMilliseconds
+          : 0,
+      'inputFinishRequested': finishRequested,
+      'forcedCancel': forcedCancel,
+      'inputDrained': finishRequested && !forcedCancel,
+      'inputIntegrityError':
+          liveRecording && (hasInputPacketError || FFmpegMediaIntegrity.hasPacketError(fallbackLogs)),
+    });
+  }
 
   bool manualStop = false;
   bool leaseRefresh = false;
@@ -336,10 +368,12 @@ class FFmpegService {
 
         final diagnosticLogs = _sanitizeLogs(rawLogs).toLowerCase();
         final logTail = _diagnosticTail(diagnosticLogs, maxCharacters: 1600);
+        final lifecycleData = session.terminalEvidence(fallbackLogs: rawLogs);
+        final lifecycleSummary = lifecycleData.entries.map((entry) => '${entry.key}=${entry.value}').join(' ');
         Log.i(
           'FFmpeg complete => taskId: $taskId; sessionId: ${session.sessionId}; '
           'code: $code; live: ${session.liveRecording}; leaseRefresh: $leaseRefresh; '
-          'ageMs: $sessionAgeMilliseconds; diagnostics: $logTail',
+          'ageMs: $sessionAgeMilliseconds; $lifecycleSummary; diagnostics: $logTail',
         );
         // `dart:developer` reaches Android logcat in debug builds, while the
         // app logger may be disabled by the user's diagnostics preference.
@@ -348,14 +382,14 @@ class FFmpegService {
           'terminal task=$taskId session=${session.sessionId} code=$code '
           'live=${session.liveRecording} media=${session.mediaStarted} '
           'leaseRefresh=$leaseRefresh ageMs=$sessionAgeMilliseconds '
-          'seconds=${session.recordedSeconds} bytes=${session.fileSize}\n$logTail',
+          'seconds=${session.recordedSeconds} bytes=${session.fileSize} $lifecycleSummary\n$logTail',
           name: 'PureLiveRecorder',
         );
         if (kDebugMode) {
           debugPrint(
             'PureLiveRecorder terminal task=$taskId session=${session.sessionId} code=$code '
             'live=${session.liveRecording} media=${session.mediaStarted} '
-            'seconds=${session.recordedSeconds} bytes=${session.fileSize}\n$logTail',
+            'seconds=${session.recordedSeconds} bytes=${session.fileSize} $lifecycleSummary\n$logTail',
           );
         }
         final diagnosis = FFmpegFailureClassifier.classify(code: code, logs: diagnosticLogs);
@@ -363,16 +397,7 @@ class FFmpegService {
         final errorData = <String, dynamic>{
           'sessionId': session.sessionId,
           'code': code,
-          'manualStop': manuallyStopped,
-          'forcedCancel': session.forcedCancel,
-          // Stream-copy remux can return zero after capture dropped a damaged
-          // packet. Carry the capture verdict to the attempt's persistent
-          // source-retention policy, independently of manual stop/exit code.
-          'inputIntegrityError':
-              session.liveRecording && (session.hasInputPacketError || FFmpegMediaIntegrity.hasPacketError(rawLogs)),
-          'inputDrained':
-              (session.flvInputRelay?.finishRequested == true || session.inputRelay?.finishRequested == true) &&
-              !session.forcedCancel,
+          ...lifecycleData,
           'sessionAgeMs': sessionAgeMilliseconds,
           if (!isComplete) 'raw_logs': _diagnosticTail(diagnosticLogs),
           if (!isComplete)
@@ -491,6 +516,7 @@ class FFmpegService {
   }
 
   Future<void> _requestSessionStop(FFmpegRecordSession session) => session.stopRequest ??= () async {
+    session.markStopRequested();
     final relay = session.flvInputRelay;
     if (relay != null) {
       final drained = await FFmpegInputDrain.tryFinish(

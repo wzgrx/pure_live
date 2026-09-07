@@ -212,6 +212,7 @@ class FFmpegRecordSession {
       'inputFinishRequested': finishRequested,
       'forcedCancel': forcedCancel,
       'inputDrained': finishRequested && !forcedCancel,
+      'inputTailDiscarded': liveRecording && inputRelay?.inputTailDiscarded == true,
       'inputIntegrityError':
           liveRecording && (hasInputPacketError || FFmpegMediaIntegrity.hasPacketError(fallbackLogs)),
     });

@@ -4,6 +4,19 @@ import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/models/record_status.dart';
 
 void main() {
+  test('discarded input survives restore and retry but resets for a new recording', () {
+    final task = LiveRecordTask.fromJson({'roomId': 'fixture', 'platform': 'picarto'});
+    expect(task.inputTailDiscarded, false);
+    task.inputTailDiscarded = true;
+    task.clearFailure();
+    task.beginNewAttempt();
+    final restored = LiveRecordTask.fromJson(task.toJson());
+    expect(restored.inputTailDiscarded, true);
+    restored.beginNewRecording();
+    expect(restored.inputTailDiscarded, false);
+    expect(LiveRecordTask.fromJson(restored.toJson()).inputTailDiscarded, false);
+  });
+
   test('input packet damage survives pending-attempt persistence and duplicate order', () {
     for (final reversed in [false, true]) {
       final damaged = {'directoryPath': '/recording', 'filePrefix': 'attempt', 'inputIntegrityError': true};
@@ -117,7 +130,7 @@ void main() {
     );
 
     final json = task.toJson();
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(json['lastErrorStage'], 'ffmpeg');
     expect(json['lastError'], contains('[stream-url]'));
     expect(json['lastError'], isNot(contains('secret')));

@@ -700,6 +700,7 @@
     "recorder_input_open_failed": "录制内核未能打开当前直播线路，将重新获取地址并尝试下一线路或清晰度。",
     "recorder_transport_failed": "录制内核连接直播 CDN 失败，将重新获取地址并尝试下一线路或清晰度。",
     "recorder_input_integrity_failed": "录制输入存在损坏的数据包，原始分段已保留，未自动封装或删除。请检查录制文件后决定是否重新录制。",
+    "recorder_input_tail_discarded": "停止时部分输入未完整接收，已跳过；录像可能缺少相应内容。",
     "recorder_input_format_failed": "录制内核未识别当前线路的媒体格式，将尝试下一线路或清晰度。",
     "recorder_decoder_failed": "录制内核处理当前线路的编码失败，将尝试下一线路或清晰度。",
     "unknown_error": "录制错误：发生未知异常，底层日志：\"{error_log}\"",

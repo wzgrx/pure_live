@@ -81,6 +81,7 @@ class FFmpegHlsInputRelay {
   final Set<Future<void>> _handlers = {};
   Timer? _finishTimer;
   bool _fetchStopped = false;
+  bool _inputTailDiscarded = false;
   int _stagingBodies = 0;
   StreamSubscription<HttpRequest>? _subscription;
   Future<void>? _closing;
@@ -90,6 +91,10 @@ class FFmpegHlsInputRelay {
   var _targetSeconds = 1;
 
   bool get finishRequested => _finishing;
+
+  /// An input resource was retired at stop before publication. This is not
+  /// packet corruption, but successful remux must not hide the missing input.
+  bool get inputTailDiscarded => _inputTailDiscarded;
 
   // Native HLS reloads on the playlist's target duration. Do not impose FLV's
   // shorter drain budget and cancel before a healthy playlist can be reloaded.
@@ -259,6 +264,7 @@ class FFmpegHlsInputRelay {
         await _replyManifest(request, _endedManifest(cached));
       } else {
         // A missing whole tail fragment is not a corrupt partially delivered one.
+        if (_finishing && !_closed) _inputTailDiscarded = true;
         await _replyStatus(request, HttpStatus.gone);
       }
     } on TimeoutException {

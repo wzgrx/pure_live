@@ -111,6 +111,10 @@ class LiveRecordTask {
   /// Stable stage id: room, stream, ffmpeg, merge, scheduler or status.
   String? lastErrorStage;
 
+  /// Current user recording, latched across native attempts and persistence.
+  /// Distinct from packet damage: complete saved segments may still be usable.
+  bool inputTailDiscarded;
+
   bool wasStoppedByUser;
 
   LiveRecordTask({
@@ -155,6 +159,7 @@ class LiveRecordTask {
     this.lastFailTime,
     this.lastError,
     this.lastErrorStage,
+    this.inputTailDiscarded = false,
   }) : pendingAttempts = List<PendingRecordingAttempt>.of(pendingAttempts);
 
   /// =========================
@@ -231,6 +236,7 @@ class LiveRecordTask {
 
   void beginNewRecording({DateTime? now}) {
     final startedAt = now ?? DateTime.now();
+    inputTailDiscarded = false;
     recordedSeconds = 0;
     fileSize = 0;
     recordingStartedAt = startedAt;
@@ -310,7 +316,7 @@ class LiveRecordTask {
   /// =========================
 
   Map<String, dynamic> toJson() => {
-    "schemaVersion": 8,
+    "schemaVersion": 9,
     "taskId": taskId,
     "roomId": roomId,
     "platform": platform,
@@ -360,6 +366,7 @@ class LiveRecordTask {
     "lastFailTime": lastFailTime?.toIso8601String(),
     "lastError": lastError,
     "lastErrorStage": lastErrorStage,
+    "inputTailDiscarded": inputTailDiscarded,
     "wasStoppedByUser": wasStoppedByUser,
   };
 
@@ -450,6 +457,7 @@ class LiveRecordTask {
       lastFailTime: _date(json["lastFailTime"]),
       lastError: _diagnostic(json["lastError"]),
       lastErrorStage: _stage(json["lastErrorStage"]),
+      inputTailDiscarded: _bool(json["inputTailDiscarded"]),
       wasStoppedByUser: _bool(json["wasStoppedByUser"]),
     );
   }

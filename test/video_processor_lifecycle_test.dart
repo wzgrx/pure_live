@@ -68,6 +68,7 @@ void main() {
   });
 
   test('damage on another attempt does not prevent exact healthy source finalization', () async {
+    task.inputTailDiscarded = true;
     task.queuePendingAttempt(directoryPath: directory.path, filePrefix: 'other', inputIntegrityError: true);
     native.finish();
     conversion = service.convertToMp4(task: task);
@@ -75,6 +76,7 @@ void main() {
     expect(native.startCalls, 1);
     expect(await source.exists(), false);
     expect(task.pendingAttempts.single.inputIntegrityError, true);
+    expect(task.inputTailDiscarded, true, reason: 'successful remux must not erase missing-input provenance');
   });
 
   test('merge timeout covers the running native Future and cancels before cleanup', () async {

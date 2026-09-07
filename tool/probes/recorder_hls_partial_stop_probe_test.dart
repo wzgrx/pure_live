@@ -189,10 +189,11 @@ void main() {
             final terminal = r['terminal'] as Map<String, dynamic>?;
             return terminal?['inputDrained'] == true &&
                 terminal?['forcedCancel'] == false &&
+                terminal?['inputTailDiscarded'] == ((r['fraction'] as double) < 1) &&
                 terminal?['inputIntegrityError'] == false;
           }),
           true,
-          reason: 'Whole-fragment staging must end input normally, not merely preserve a decodable prefix.',
+          reason: 'Whole-fragment staging must avoid native cancellation and disclose discarded input.',
         );
       } finally {
         Get.reset();

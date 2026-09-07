@@ -40,6 +40,7 @@ void main() {
       await partial.future.timeout(const Duration(seconds: 2));
       await relay.finish();
       expect(await refresh.timeout(const Duration(seconds: 3)), '$first#EXT-X-ENDLIST\n');
+      expect(relay.inputTailDiscarded, false, reason: 'a manifest refresh is not a retired media input');
     } finally {
       release.complete();
       client.close(force: true);
@@ -87,11 +88,15 @@ void main() {
         });
         await accepted.future.timeout(const Duration(seconds: 2));
         expect(published, false);
+        expect(relay.inputTailDiscarded, false);
         await relay.finish();
         final response = await responseFuture.timeout(const Duration(seconds: 3));
         expect(response.statusCode, HttpStatus.gone);
         expect(await response.fold<int>(0, (count, bytes) => count + bytes.length), 0);
         expect(await _readText(client, relay.inputUri), contains('#EXT-X-ENDLIST'));
+        expect(relay.inputTailDiscarded, true);
+        await relay.close();
+        expect(relay.inputTailDiscarded, true, reason: 'cleanup must retain the terminal verdict');
       } finally {
         if (!release.isCompleted) release.complete();
         client.close(force: true);
@@ -126,6 +131,7 @@ void main() {
       final response = await (await client.getUrl(media)).close();
       expect(response.statusCode, HttpStatus.badGateway);
       expect(await response.fold<int>(0, (count, bytes) => count + bytes.length), 0);
+      expect(relay.inputTailDiscarded, false, reason: 'upstream failure is not a stop-time retirement');
     } finally {
       client.close(force: true);
       await relay.close();
@@ -649,6 +655,7 @@ void main() {
       await relay.finish();
       release.complete();
       expect(await received, [1, 2, 3, 4]);
+      expect(relay.inputTailDiscarded, false, reason: 'a body completed inside the stop window is preserved');
       // A further request runs only after the old response has finished.
       await _readText(client, relay.inputUri);
       expect(relay.resourceCount, 3);
@@ -677,6 +684,7 @@ void main() {
       await Future.wait([relay.close(), relay.close()]).timeout(const Duration(seconds: 2));
       await response.timeout(const Duration(seconds: 2));
       expect(relay.resourceCount, 0);
+      expect(relay.inputTailDiscarded, false, reason: 'cleanup alone is not a user input stop');
     } finally {
       client.close(force: true);
       await relay?.close();

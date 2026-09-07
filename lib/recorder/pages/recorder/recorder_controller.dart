@@ -209,6 +209,10 @@ class RecorderController extends GetxService {
         _cancelRecorderLeaseTimers(event.taskId);
         _pendingRecorderLeases.remove(event.taskId);
         _activeSessionIds.remove(event.taskId);
+        // Only a current terminal session may enrich the recording verdict.
+        // Keep it through successful remux/reconnection; missing input is not
+        // equivalent to damaged packets and does not block healthy segment use.
+        task.inputTailDiscarded = task.inputTailDiscarded || event.data['inputTailDiscarded'] == true;
         final manuallyStopped = event.data['manualStop'] == true || task.wasStoppedByUser;
         final isError = event.type == FFmpegEventType.error;
         final errorCode = (event.data['code'] as num?)?.toInt() ?? 0;

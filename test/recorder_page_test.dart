@@ -95,6 +95,24 @@ void main() {
   }
 
   for (final locale in ['zh', 'en']) {
+    testWidgets('discarded input warning is readable without obscuring actions in $locale', (tester) async {
+      task.status = RecordStatus.stopped;
+      task.inputTailDiscarded = true;
+      await open(tester, locale, 320, 2);
+      final warning = find.byKey(const ValueKey('recorder-input-tail-warning'));
+      expect(warning, findsOneWidget);
+      expect(find.text(translations[locale]!['recorder_input_tail_discarded'] as String), findsOneWidget);
+      await tester.ensureVisible(warning);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final start = find.widgetWithText(FilledButton, translations[locale]!['recorder_start'] as String);
+      await tester.ensureVisible(start);
+      await tester.pumpAndSettle();
+      await tester.tap(start);
+      expect(recorder.starts, 1);
+      expect(tester.takeException(), isNull);
+    });
+
     for (final status in RecordStatus.values) {
       testWidgets('recorder $status actions remain reachable in $locale at double text size', (tester) async {
         task.status = status;

@@ -27,6 +27,7 @@ void main() {
       'inputFinishRequested': false,
       'forcedCancel': false,
       'inputDrained': false,
+      'inputTailDiscarded': false,
       'inputIntegrityError': false,
     });
     expect(() => evidence['manualStop'] = true, throwsUnsupportedError);
@@ -89,6 +90,28 @@ void main() {
     expect(create().terminalEvidence(fallbackLogs: logs).toString(), isNot(contains('secret')));
     expect(create().terminalEvidence(fallbackLogs: logs).toString(), isNot(contains('private')));
   });
+
+  test('discarded input is disclosed separately from packet damage and drain completion', () {
+    final session = create(hls: _DiscardedRelay())..manualStop = true;
+    final evidence = session.terminalEvidence();
+    expect(evidence['inputTailDiscarded'], true);
+    expect(evidence['inputIntegrityError'], false);
+    expect(evidence['inputDrained'], true);
+    expect(create(live: false, hls: _DiscardedRelay()).terminalEvidence()['inputTailDiscarded'], false);
+  });
+}
+
+class _DiscardedRelay implements FFmpegHlsInputRelay {
+  @override
+  bool get inputTailDiscarded => true;
+  @override
+  bool get finishRequested => true;
+  @override
+  bool get drainOnStop => true;
+  @override
+  Duration get drainTimeout => const Duration(seconds: 6);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _NativeSession implements FFmpegSession {

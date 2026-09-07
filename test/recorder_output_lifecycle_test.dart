@@ -101,6 +101,24 @@ void main() {
     expect(await segment.exists(), true);
   });
 
+  test('current terminal input retirement survives stop and later clean native attempts', () async {
+    final first = metrics.add();
+    emit(FFmpegEventType.startAck, 1);
+    await until(() => first.calls > 0 && first.active == 0);
+    emit(FFmpegEventType.complete, 1, {'manualStop': true, 'inputTailDiscarded': true});
+    await until(() => task.status == RecordStatus.stopped);
+    expect(task.inputTailDiscarded, true);
+    expect(task.lastError, isNull, reason: 'missing input is not a synthetic packet corruption error');
+    expect(LiveRecordTask.fromJson(task.toJson()).inputTailDiscarded, true);
+    final second = metrics.add();
+    emit(FFmpegEventType.startAck, 2);
+    await until(() => second.calls > 0 && second.active == 0);
+    expect(task.inputTailDiscarded, true);
+    emit(FFmpegEventType.complete, 2, {'manualStop': true, 'inputTailDiscarded': false});
+    await until(() => task.status == RecordStatus.stopped);
+    expect(task.inputTailDiscarded, true);
+  });
+
   test('late old-session sampling cannot release the new session sampling lock', () async {
     final old = metrics.add()..holdNext();
     final current = metrics.add()..holdNext();
@@ -132,7 +150,7 @@ void main() {
     emit(FFmpegEventType.startAck, 1);
     await until(() => old.calls >= 1 && old.active == 0);
     old.holdNext();
-    emit(FFmpegEventType.complete, 1, {'manualStop': true, 'inputIntegrityError': true});
+    emit(FFmpegEventType.complete, 1, {'manualStop': true, 'inputIntegrityError': true, 'inputTailDiscarded': true});
     await until(() => old.active == 1);
     emit(FFmpegEventType.startAck, 2);
     await until(() => current.calls >= 1 && task.fileSize == 20);
@@ -143,6 +161,7 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 10));
     expect(task.status, RecordStatus.running);
     expect(task.fileSize, 333, reason: 'new native progress must still own this task');
+    expect(task.inputTailDiscarded, false, reason: 'a stale terminal event must not contaminate the new session');
   });
 
   test('terminal handling waits for an active sample and takes a final fresh snapshot', () async {

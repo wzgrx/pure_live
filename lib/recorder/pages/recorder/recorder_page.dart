@@ -658,6 +658,31 @@ class _TaskCard extends GetView<RecorderController> {
                   ),
                 ),
               ],
+              if (task.inputTailDiscarded) ...[
+                const SizedBox(height: 12),
+                Container(
+                  key: const ValueKey('recorder-input-tail-warning'),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.warning_amber_rounded, size: 17, color: theme.colorScheme.onTertiaryContainer),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          i18n('recorder_input_tail_discarded'),
+                          style: AppTextStyles.t12.copyWith(color: theme.colorScheme.onTertiaryContainer, height: 1.3),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               if (task.lastError?.isNotEmpty == true && task.status != RecordStatus.running) ...[
                 const SizedBox(height: 12),
                 Container(

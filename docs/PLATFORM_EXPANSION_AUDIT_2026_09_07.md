@@ -1,5 +1,7 @@
 # 参考平台扩展差距与 Picarto 输入样本（2026-09-07）
 
+后续增量：[Picarto接入审计](PICARTO_ADAPTER_AUDIT_2026_09_07.md)记录第一组源码实施。当前源码为11直播站点加IPTV；剩余16组未注册，Picarto仍待完整能力与原生验收。下文17组为实施前的固定差距快照，不表示17组已验收完成。
+
 本轮以 d509bd8d 源码注册表为准，重新读取参考仓库远程HEAD、完整Git树（truncated=false）、README与实际注册入口，不合并或运行参考代码。
 
 - [biliup 固定入口](https://github.com/biliup/biliup/blob/906e0f6fdb104d65989d12b76c9a6f02205384cb/crates/biliup/src/downloader/live/mod.rs)：19个站点，另有Twitch录像分支与通用适配器；辅助wbi/huya_wup模块不是独立平台。

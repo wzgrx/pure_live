@@ -44,6 +44,7 @@ class LiveUrlTool {
       'sooplive.co.kr',
       'yy.com',
       'live.acfun.cn',
+      'picarto.tv',
     };
     return sharedHttpUris(text).any((uri) => roots.any((root) => _hostIs(uri.host.toLowerCase(), root)));
   }

@@ -51,6 +51,7 @@ void main() {
       'soop': 'https://www.sooplive.co.kr',
       'yy': 'https://www.yy.com',
       'acfun': 'https://live.acfun.cn',
+      'picarto': 'https://picarto.tv',
     };
 
     for (final entry in expectedOrigins.entries) {

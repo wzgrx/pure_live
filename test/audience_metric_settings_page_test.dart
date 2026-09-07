@@ -79,6 +79,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(SettingsService.to.app.isRealOnlineEnabledFor('acfun'), isFalse);
     expect(tester.widget<SwitchListTile>(acfun).value, isFalse);
+    final picarto = find.byKey(const ValueKey('audience-platform-picarto'));
+    await tester.ensureVisible(picarto);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(picarto).value, isTrue);
+    await tester.tap(picarto);
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.app.isRealOnlineEnabledFor('picarto'), isFalse);
+    expect(tester.widget<SwitchListTile>(picarto).value, isFalse);
     expect(tester.takeException(), isNull);
   });
 }
@@ -109,6 +117,7 @@ class _AudienceAssetLoader extends AssetLoader {
     'audience_soop_detail': '列表可提供在线值',
     'audience_yy_detail': '仅提供热度',
     'audience_acfun_detail': '列表提供在线数，作者搜索没有在线数',
+    'audience_picarto_detail': '在线人数与累计观看分列',
     'audience_metric_fallback_desc': '各平台字段口径会单独标注。',
   };
 }

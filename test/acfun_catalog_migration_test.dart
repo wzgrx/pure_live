@@ -27,15 +27,15 @@ void main() {
     await directory.delete(recursive: true);
   });
 
-  test('catalog upgrade appends only AcFun and preserves existing order and disabled platforms', () async {
+  test('catalog upgrade appends new platforms and preserves existing order and disabled platforms', () async {
     await HivePrefUtil.setInt('siteCatalogMigration', 2);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'bilibili']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'bilibili', 'acfun']);
-    expect(settings.siteCatalogMigration.value, 3);
+    expect(settings.hotAreasList, ['huya', 'bilibili', 'acfun', 'picarto']);
+    expect(settings.siteCatalogMigration.value, 4);
     settings.hotAreasList.remove('acfun');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'bilibili']);
+    expect(settings.hotAreasList, ['huya', 'bilibili', 'picarto']);
   });
 
   test('online-count capability is explicit and backup normalization preserves an AcFun toggle', () {
@@ -51,12 +51,12 @@ void main() {
     await HivePrefUtil.setInt('audienceMetricMigration', 2);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final settings = Get.put(AppSettingsController());
-    expect(settings.realOnlinePlatforms, ['twitch', 'acfun']);
-    expect(settings.audienceMetricMigration.value, 3);
+    expect(settings.realOnlinePlatforms, ['twitch', 'acfun', 'picarto']);
+    expect(settings.audienceMetricMigration.value, 4);
     settings.setRealOnlineEnabledFor('acfun', false);
     settings.onInit();
-    expect(settings.realOnlinePlatforms, ['twitch']);
+    expect(settings.realOnlinePlatforms, ['twitch', 'picarto']);
     await Hive.box<dynamic>('app_settings').flush();
-    expect(HivePrefUtil.getStringList('realOnlinePlatforms'), ['twitch']);
+    expect(HivePrefUtil.getStringList('realOnlinePlatforms'), ['twitch', 'picarto']);
   });
 }

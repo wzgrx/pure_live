@@ -6,6 +6,7 @@ import 'package:pure_live/core/site/huya/huya_site.dart';
 import 'package:pure_live/core/site/twitch/twitch_site.dart';
 import 'package:pure_live/core/site/acfun/acfun_api.dart';
 import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/core/site/picarto/picarto_api.dart';
 
 /// Resolves the HTTP headers used to read a platform's media stream.
 ///
@@ -124,6 +125,9 @@ class PlaybackHeaderResolver {
       case Sites.iptvSite:
         final userAgent = _configuredValue((settings) => settings.iptv.customIptvUserAgent.value);
         headers = userAgent.isEmpty ? const <String, String>{} : <String, String>{'user-agent': userAgent};
+        break;
+      case Sites.picartoSite:
+        headers = {...PicartoApi.playHeaders, 'User-Agent': _desktopUserAgent};
         break;
       case Sites.acfunSite:
         headers = {...AcfunApi.playHeaders, 'origin': AcfunApi.origin};

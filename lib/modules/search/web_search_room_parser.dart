@@ -1,4 +1,5 @@
 import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/core/site/picarto/picarto_api.dart';
 
 class WebSearchRoomTarget {
   const WebSearchRoomTarget({required this.platform, required this.roomId});
@@ -38,6 +39,8 @@ class WebSearchRoomParser {
   static WebSearchRoomTarget? parse(String rawUrl) {
     final uri = Uri.tryParse(rawUrl.trim());
     if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return null;
+    final picarto = PicartoApi.channelFromUri(uri);
+    if (picarto != null) return WebSearchRoomTarget(platform: Sites.picartoSite, roomId: picarto);
     final host = uri.host.toLowerCase();
     final segments = uri.pathSegments.where((segment) => segment.trim().isNotEmpty).toList(growable: false);
 

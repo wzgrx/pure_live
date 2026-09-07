@@ -94,8 +94,13 @@ class LiveRoom {
       hasTotalViewers: false,
       onlineAvailability: AudienceOnlineAvailability.unsupported,
     ),
-    // AcFun liveList/live info expose onlineCount independently of likeCount
-    // and user fanCountValue. Author search has no concurrent count.
+    // Picarto viewers and total_views have separate concurrent/cumulative meanings.
+    'picarto': AudiencePlatformCapability(
+      hasPopularity: false,
+      hasTotalViewers: true,
+      onlineAvailability: AudienceOnlineAvailability.roomList,
+    ),
+    // AcFun onlineCount is independent of likes/followers; author search omits it.
     'acfun': AudiencePlatformCapability(
       hasPopularity: false,
       hasTotalViewers: false,

@@ -20,7 +20,8 @@ class ToolBoxPage extends GetView<ToolBoxController> {
             controller: controller.roomJumpToController,
             btnIcon: Remix.play_circle_line,
             btnLabel: i18n("toolbox_link_jump"),
-            onAction: controller.jumpToRoom,
+            actionKind: ToolBoxAction.jump,
+            onAction: (text) => controller.jumpToRoom(text, context: context),
           ),
 
           const SizedBox(height: 16),
@@ -33,7 +34,8 @@ class ToolBoxPage extends GetView<ToolBoxController> {
             controller: controller.getUrlController,
             btnIcon: Remix.download_2_line,
             btnLabel: i18n("toolbox_get_parse"),
-            onAction: controller.getPlayUrl,
+            actionKind: ToolBoxAction.directLink,
+            onAction: (text) => controller.getPlayUrl(text, context: context),
             extraFooter: _buildDescription(),
           ),
         ],
@@ -48,6 +50,7 @@ class ToolBoxPage extends GetView<ToolBoxController> {
     required TextEditingController controller,
     required IconData btnIcon,
     required String btnLabel,
+    required ToolBoxAction actionKind,
     required Function(String) onAction,
     Widget? extraFooter,
   }) {
@@ -89,15 +92,24 @@ class ToolBoxPage extends GetView<ToolBoxController> {
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () => onAction(controller.text),
-                  icon: Icon(btnIcon, size: 18),
-                  label: Text(btnLabel),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                child: Obx(
+                  () => FilledButton.icon(
+                    onPressed: this.controller.isBusy ? null : () => onAction(controller.text),
+                    icon: this.controller.action.value == actionKind
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Icon(btnIcon, size: 18),
+                    label: Text(btnLabel),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
                   ),
                 ),
+              ),
+              Obx(
+                () => this.controller.action.value == actionKind
+                    ? TextButton(onPressed: this.controller.cancelAction, child: Text(i18n('cancel')))
+                    : const SizedBox.shrink(),
               ),
             ],
           ),

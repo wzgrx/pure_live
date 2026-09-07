@@ -195,6 +195,30 @@ void main() {
     expect(fixture.created, 2);
     expect(fixture.closed, 2);
   });
+  test('an already cancelled caller allocates no client', () async {
+    final token = CancelToken()..cancel('fixture');
+    final fixture = ShortLinkFixture((_) async => redirect(302, 'https://live.bilibili.com/123'));
+    expect(await fixture.parse('https://b23.tv/fixture', cancelToken: token), isEmpty);
+    expect(fixture.created, 0);
+  });
+
+  test('caller cancellation closes the short-link client before a late response', () async {
+    final token = CancelToken();
+    final pending = Completer<ResponseBody>();
+    final started = Completer<void>();
+    final fixture = ShortLinkFixture((_) {
+      started.complete();
+      return pending.future;
+    });
+    final action = fixture.parse('https://b23.tv/fixture', cancelToken: token);
+    await started.future;
+    token.cancel('fixture');
+    expect(await action, isEmpty);
+    expect(fixture.closed, 1);
+    pending.complete(redirect(302, 'https://b23.tv/late'));
+    await started.future;
+    expect(fixture.requests, hasLength(1));
+  });
 }
 
 ResponseBody redirect(int status, String location) => ResponseBody.fromString(
@@ -213,14 +237,16 @@ class ShortLinkFixture {
   int closed = 0;
   int cancelled = 0;
 
-  Future<List<String>> parse(String text, {Duration timeout = const Duration(seconds: 12)}) => LiveUrlTool.parseLiveUrl(
-    text,
-    timeout: timeout,
-    clientFactory: () {
-      created++;
-      return Dio()..httpClientAdapter = FixtureAdapter(this);
-    },
-  );
+  Future<List<String>> parse(String text, {Duration timeout = const Duration(seconds: 12), CancelToken? cancelToken}) =>
+      LiveUrlTool.parseLiveUrl(
+        text,
+        timeout: timeout,
+        cancelToken: cancelToken,
+        clientFactory: () {
+          created++;
+          return Dio()..httpClientAdapter = FixtureAdapter(this);
+        },
+      );
 }
 
 class FixtureAdapter implements HttpClientAdapter {

@@ -581,6 +581,7 @@
     "toolbox_empty_link": "Link cannot be empty",
     "toolbox_get_direct_link": "Get Direct Link",
     "toolbox_get_parse": "Parse Link",
+    "toolbox_copy_failed": "Copy failed. Please try again.",
     "toolbox_get_url_failed": "Failed to get direct link",
     "toolbox_input_hint": "Paste platform link here...",
     "toolbox_line": "Line {index}",

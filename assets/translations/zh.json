@@ -581,6 +581,7 @@
     "toolbox_empty_link": "链接不能为空",
     "toolbox_get_direct_link": "获取直链",
     "toolbox_get_parse": "获取解析",
+    "toolbox_copy_failed": "复制失败，请重试",
     "toolbox_get_url_failed": "读取直链失败",
     "toolbox_input_hint": "请在此处粘贴平台链接...",
     "toolbox_line": "线路{index}",

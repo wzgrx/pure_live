@@ -1,5 +1,7 @@
 # v3.1.0 直播录制参考项目审计
 
+最新3.2.0增量见 [2026-09-07平台完整差距表](PLATFORM_EXPANSION_AUDIT_2026_09_07.md)：按两个固定源码注册入口核对，补齐17个未注册候选分组；Picarto源码读取及公开接口可达性已补证。下文保留各历史阶段的时间边界。
+
 审计日期：2026-08-31。参考基线固定为：
 
 - [`biliup/biliup@c4dbf81c5d3d`](https://github.com/biliup/biliup/commit/c4dbf81c5d3dbae7036660ddc180f10eb183d102)（MIT）；

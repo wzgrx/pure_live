@@ -4,7 +4,10 @@
 
 ## 当前平台能力
 
-源码开发中的 AcFun（当前 v3.1.8 安装包不含）：已接入官网直播分类与目录、包含未开播作者的
+2026-09-07 按 `lib/core/sites.dart` 核对：当前源码注册 **10 个直播站点 + IPTV，共11个适配器**。
+参考项目尚未接入的平台单列于 [平台扩展差距表](PLATFORM_EXPANSION_AUDIT_2026_09_07.md)，不计作本项目已支持。
+
+源码开发中的 AcFun（正式 v3.1.8 发布包不含；当前 af88a032 Android Debug 候选已包含）：已接入官网直播分类与目录、包含未开播作者的
 原生搜索、直播分享链接、游客取流、画质/线路、录制输入和在线人数开关。
 搜索按实际条目衔接官网的稀疏分页；`onlineCount`、点赞、粉丝分别处理。
 远端弹幕尚未接入，房间内会说明并保留本地互动入口。完整录制文件、实际观看和正式产物
@@ -16,11 +19,13 @@
 | 斗鱼 | 动态读取移动端分类接口 | 原生直播间搜索，可返回未开播结果 | WebSocket | 热度 |
 | 虎牙 | 网站业务分类与动态游戏列表 | 原生搜索当前直播间 | `wsapi.huya.com` WebSocket，按 `live:<uid>`/`chat:<uid>` 注册房间组并解析批量推送 | 列表/详情/URI 8006 均为热度 |
 | 抖音 | 从直播首页动态提取分类 | 带网页签名参数的当前直播搜索 | WebSocket | 顶层/嵌套 `user_count` 为当前在线；`display_value/total_user` 为累计观看，缺少累计值时不再用在线值冒充 |
-| 快手 | 网站当前直播频道、动态子分类与推荐回放 | 网页搜索入口 | 当前未接入 | 在线；房间页下播但卡片仍带播放地址时按录播处理 |
+| 快手 | 网站当前直播频道、动态子分类与推荐回放 | 网页搜索入口 | 移动端增量 feed，cursor 串行轮询、断开取消；已有真实评论补证 | 在线；房间页下播但卡片仍带播放地址时按录播处理 |
 | 网易 CC | 动态游戏列表，保留网站顶层入口 | 原生主播/直播间搜索，可返回未开播结果 | 当前未接入 | `webcc_visitor/hot_score/visitor` 为同一热度口径；只有 `vision_visitor/online_num` 为并发人数 |
 | Twitch | 网站 GraphQL 标签与目录接口 | 原生频道搜索，可返回未开播频道 | Twitch IRC WebSocket；登录 Cookie 中的 `auth-token`/`login` 用于认证聊天 | `viewersCount` 为并发观看人数 |
 | SOOP Live | 官方分类与推荐接口 | 原生搜索当前直播间 | SOOP WebSocket；账号 Cookie 可选 | 推荐/搜索以 `total_view_cnt`（PC + 移动端）为并发人数；分类使用 `view_cnt`；`current_view_cnt` 仅是 PC 端分量 |
 | YY Live | 动态读取头部与分类元数据 | 原生直播间/主播搜索，可返回未开播结果 | YY WebSocket | `users` 为平台热度值 |
+| AcFun | 官网直播分类与目录 | 原生作者搜索，含未开播作者；稀疏分页 | 当前未接入，页面明确说明 | `onlineCount` 为在线；点赞、粉丝分列 |
+| IPTV | 本地导入频道分组 | 本地频道查询 | 无远端弹幕服务 | 不虚构观看人数 |
 
 > “热度”是平台排序/活跃度指标，不等同于唯一在线用户数。界面会按平台字段分别显示“热度”“在线”或“累计观看”，避免把不同含义的数据统一标成在线人数。
 
@@ -51,6 +56,7 @@
 | SOOP Live | preset name | 过滤 `auto` 和重复 preset，按平台 `bps` 排序，请求沿用同一 preset 名称 |
 | YY Live | gear | 同名但不同 gear 保持独立并编号，播放响应只接收有效 HTTP(S) CDN 地址 |
 | IPTV | `default` | 单一导入源，空地址不生成伪画质 |
+| AcFun | representation 解析所得稳定 ID | 同档多个有效 URL 合并；续签重新读取详情，按 ID 找回对应画质 |
 
 横屏“清晰度与播放线路”面板根据画质数、线路数和可用高度计算整体尺寸。一个画质/一条线路时收紧面板；常见四画质使用均衡 `2×2`；项目多时只让按钮网格滚动，不用固定比例制造空白。按钮区域是主要视觉，标题、留白和重复的当前值标签均已压缩。
 
@@ -60,7 +66,7 @@
 python tool/interface_probe.py
 ```
 
-The release probe runs 40 checks across categories, recommendations, searches, room metadata, danmaku discovery and playback contracts. Its existing recommendation checks now also validate the audience-field contract for Douyu `ol`, Huya `totalCount`, Douyin `user_count`, Kuaishou `watchingCount`, CC heat/concurrent pairs, Twitch `viewersCount`, SOOP PC/mobile totals and YY `users`. Douyu additionally executes signing, H5 metadata retrieval, CDN selection and a real FLV-header request with player-equivalent headers; Bilibili, Huya and CC verify current quality/line descriptors; YY verifies categories, both search types, room status and playback lines. Deterministic parser tests separately cover the display/ranking semantics and platform playback mappings.
+The probe covers categories, recommendations, searches, room metadata, danmaku discovery and playback contracts; its runtime summary is the authoritative count. The 2026-09-07 af88a032 full gate passed 42/42 checks, not a new run for every later documentation change. Recommendation checks also validate the audience-field contract for Douyu `ol`, Huya `totalCount`, Douyin `user_count`, Kuaishou `watchingCount`, CC heat/concurrent pairs, Twitch `viewersCount`, SOOP PC/mobile totals and YY `users`. Douyu executes signing, H5 metadata retrieval, CDN selection and a real FLV-header request with player-equivalent headers; Bilibili, Huya and CC verify quality/line descriptors; YY verifies categories, searches, room status and playback lines. These probes do not establish native playback, full-file recording or complete AcFun coverage; AcFun has separate adapter/navigation evidence.
 
 2026-08-17 再次完成哔哩哔哩访客 WebSocket 实连：`uid=0` 会话连续取得当前房间弹幕，但平台把 legacy 与 rich user 两处昵称和 UID 一并脱敏。客户端会优先读取平台 rich user 的完整昵称；访客数据仍为脱敏值时在弹幕列表提示来源。公开直播的弹幕接收继续使用访客会话，登录账号用于完整昵称、发送平台弹幕、关注、会员清晰度和其他账号功能。
 

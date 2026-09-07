@@ -7,103 +7,100 @@ import 'package:pure_live/modules/live_play/dialogs/live_dlna_dialog.dart';
 import 'package:pure_live/modules/search/web_search_room_parser.dart';
 
 class LiveUrlTool {
-  static Future<List<String>> parseLiveUrl(String url) async {
-    if (url.isEmpty) return [];
-    final urlRegExp = RegExp(
-      r"((https?:www\.)|(https?:\/\/)|(www\.))[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}(\/[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)?",
-    );
-    List<String?> urlMatches = urlRegExp.allMatches(url).map((m) => m.group(0)).toList();
-    if (urlMatches.isEmpty) return [];
+  /// Extract complete HTTP URLs before inspecting host/path. This also avoids
+  /// treating an embedded www address in an FTP URL as a second HTTP link.
+  static Iterable<Uri> sharedHttpUris(String text) sync* {
+    final urls = RegExp(r'(?:[a-z][a-z0-9+.-]*://|www\.)[^\s<>]+', caseSensitive: false);
+    for (final match in urls.allMatches(text)) {
+      var candidate = match.group(0)!.replaceFirst(RegExp(r'''[.,!?;:)\]}。！？、，；：）》」』”’"']+$'''), '');
+      if (candidate.toLowerCase().startsWith('www.')) candidate = 'https://$candidate';
+      final uri = Uri.tryParse(candidate);
+      if (uri == null ||
+          uri.userInfo.isNotEmpty ||
+          uri.host.isEmpty ||
+          (uri.scheme != 'http' && uri.scheme != 'https')) {
+        continue;
+      }
+      yield uri;
+    }
+  }
 
-    String realUrl = urlMatches.first!;
-    if (Uri.tryParse(realUrl)?.host == 'live.acfun.cn') {
+  static bool _hostIs(String host, String root) => host == root || host.endsWith('.$root');
+
+  static bool containsSupportedLink(String text) {
+    const roots = {
+      'bilibili.com',
+      'b23.tv',
+      'douyu.com',
+      'huya.com',
+      'douyin.com',
+      'webcast.amemv.com',
+      'live.kuaishou.com',
+      'live.kuaishou.cn',
+      'cc.163.com',
+      'twitch.tv',
+      'sooplive.com',
+      'sooplive.co.kr',
+      'yy.com',
+      'live.acfun.cn',
+    };
+    return sharedHttpUris(text).any((uri) => roots.any((root) => _hostIs(uri.host.toLowerCase(), root)));
+  }
+
+  static Future<List<String>> parseLiveUrl(String text) async {
+    for (final uri in sharedHttpUris(text)) {
+      final host = uri.host.toLowerCase();
+      final realUrl = uri.toString();
+      late List<String> segments;
+      try {
+        segments = uri.pathSegments.where((part) => part.isNotEmpty).toList(growable: false);
+      } on FormatException {
+        continue;
+      }
+      if (segments.isEmpty) continue;
+      if (_hostIs(host, 'b23.tv')) {
+        final location = await _getRedirectLocation(realUrl);
+        final target = await parseLiveUrl(location);
+        if (target.isNotEmpty) return target;
+        continue;
+      }
+      if (host == 'v.douyin.com') {
+        final id = await _getRealDouyinRoomId(realUrl);
+        if (id.isNotEmpty) return [id, Sites.douyinSite];
+        continue;
+      }
       final target = WebSearchRoomParser.parse(realUrl);
-      return target == null ? [] : [target.roomId, target.platform];
-    }
-
-    // B站短链跳转
-    if (realUrl.contains("b23.tv")) {
-      var location = await _getRedirectLocation(realUrl);
-      return await parseLiveUrl(location);
-    }
-
-    // B站直播间
-    if (realUrl.contains("bilibili.com")) {
-      var reg = RegExp(r"bilibili\.com/([\d|\w]+)");
-      String id = reg.firstMatch(realUrl)?.group(1) ?? "";
-      return [id, Sites.bilibiliSite];
-    }
-
-    // 斗鱼
-    if (realUrl.contains("douyu.com")) {
-      realUrl = realUrl.trimEndChar('/');
-      var reg = RegExp(r"douyu\.com/([\d|\w]+)");
-      String id = reg.firstMatch(realUrl)?.group(1) ?? "";
-      return [id, Sites.douyuSite];
-    }
-
-    // 虎牙
-    if (realUrl.contains("huya.com")) {
-      realUrl = realUrl.trimEndChar('/');
-      var reg = RegExp(r"huya\.com/([\d|\w]+)");
-      String id = reg.firstMatch(realUrl)?.group(1) ?? "";
-      return [id, Sites.huyaSite];
-    }
-
-    // 抖音直播
-    if (realUrl.contains("live.douyin.com")) {
-      realUrl = realUrl.trimEndChar('/');
-      var reg = RegExp(r"live\.douyin\.com/([\d|\w]+)");
-      String id = reg.firstMatch(realUrl)?.group(1) ?? "";
-      return [id, Sites.douyinSite];
-    }
-    if (realUrl.contains("www.douyin.com")) {
-      realUrl = realUrl.split("?")[0].trimEndChar('/');
-      Uri uri = Uri.parse(realUrl);
-      return [uri.pathSegments.last, Sites.douyinSite];
-    }
-    if (realUrl.contains("v.douyin.com")) {
-      String id = await _getRealDouyinRoomId(realUrl);
-      return [id, Sites.douyinSite];
-    }
-
-    if (url.contains("webcast.amemv.com")) {
-      var reg = RegExp(r"reflow/(\d+)");
-      String id = reg.firstMatch(url)?.group(1) ?? "";
-      return [id, Sites.douyinSite];
-    }
-
-    // 快手
-    if (realUrl.contains("live.kuaishou.com") || realUrl.contains("live.kuaishou.cn")) {
-      realUrl = realUrl.trimEndChar('/');
-      var reg = RegExp(r"live\.kuaishou\.(com|cn)/u/([a-zA-Z0-9]+)$");
-      String id = reg.firstMatch(realUrl)?.group(2) ?? "";
-      return [id, Sites.kuaishouSite];
-    }
-
-    // 网易CC
-    if (realUrl.contains("cc.163.com")) {
-      realUrl = realUrl.trimEndChar('/');
-      var reg = RegExp(r"cc\.163\.com/([a-zA-Z0-9]+)$");
-      String id = reg.firstMatch(realUrl)?.group(1) ?? "";
-      return [id, Sites.ccSite];
-    }
-    if (realUrl.contains("twitch.tv/")) {
-      final regExp = RegExp(r'twitch\.tv/([^/?]+)');
-      String id = regExp.firstMatch(url)?.group(1) ?? "";
-      return [id, Sites.twitchSite];
-    }
-    if (realUrl.contains("sooplive.com/") || realUrl.contains("sooplive.co.kr/")) {
-      final regExp = RegExp(r'(?:www\.|play\.)?sooplive\.(?:com|co\.kr)/([^/?]+)');
-
-      final id = regExp.firstMatch(realUrl)?.group(1) ?? "";
-
-      return [id, Sites.soopSite];
-    }
-    if (realUrl.contains("yy.com/")) {
-      final regExp = RegExp(r'(?:www\.)?yy\.com/([^/?]+)');
-      final roomId = regExp.firstMatch(realUrl)?.group(1) ?? "";
-      return [roomId, Sites.yySite];
+      if (target != null) return [target.roomId, target.platform];
+      // Preserve manual-tool aliases not exposed by the web-search parser.
+      String? platform;
+      String? id;
+      var pattern = RegExp(r'^[a-zA-Z0-9_-]+$');
+      if (_hostIs(host, 'bilibili.com')) {
+        platform = Sites.bilibiliSite;
+        id = segments.first;
+        pattern = RegExp(r'^\d+$');
+      } else if (_hostIs(host, 'douyu.com')) {
+        platform = Sites.douyuSite;
+        id = segments.first;
+      } else if (host == 'www.douyin.com') {
+        platform = Sites.douyinSite;
+        id = segments.last;
+      } else if (host == 'webcast.amemv.com') {
+        platform = Sites.douyinSite;
+        id = RegExp(r'(?:^|/)reflow/(\d+)(?:/|$)').firstMatch(uri.path)?.group(1);
+      } else if (host == 'live.kuaishou.cn' && segments.length >= 2 && segments.first == 'u') {
+        platform = Sites.kuaishouSite;
+        id = segments[1];
+      } else if (host == 'cc.163.com') {
+        platform = Sites.ccSite;
+        id = segments.first;
+      } else if (_hostIs(host, 'sooplive.com')) {
+        platform = Sites.soopSite;
+        id = segments.first;
+      }
+      if (platform != null && id != null && WebSearchRoomParser.isRoomIdentifier(id, pattern)) {
+        return [id, platform];
+      }
     }
     return [];
   }

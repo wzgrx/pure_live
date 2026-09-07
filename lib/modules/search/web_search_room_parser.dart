@@ -82,9 +82,12 @@ class WebSearchRoomParser {
     return _target(platform, segments.first, pattern);
   }
 
+  static bool isRoomIdentifier(String roomId, RegExp pattern) =>
+      roomId.isNotEmpty && !_reservedSegments.contains(roomId.toLowerCase()) && pattern.hasMatch(roomId);
+
   static WebSearchRoomTarget? _target(String platform, String rawRoomId, RegExp pattern) {
     final roomId = rawRoomId.trim();
-    if (roomId.isEmpty || _reservedSegments.contains(roomId.toLowerCase()) || !pattern.hasMatch(roomId)) return null;
+    if (!isRoomIdentifier(roomId, pattern)) return null;
     return WebSearchRoomTarget(platform: platform, roomId: roomId);
   }
 }

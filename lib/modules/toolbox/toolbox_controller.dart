@@ -99,35 +99,8 @@ class ToolBoxController extends GetxController {
     }
   }
 
-  /// Local detection only; resolving a short link waits for a user action.
-  static bool containsSupportedLink(String text) {
-    const roots = {
-      'bilibili.com',
-      'b23.tv',
-      'douyu.com',
-      'huya.com',
-      'douyin.com',
-      'webcast.amemv.com',
-      'live.kuaishou.com',
-      'live.kuaishou.cn',
-      'cc.163.com',
-      'twitch.tv',
-      'sooplive.com',
-      'sooplive.co.kr',
-      'yy.com',
-      'live.acfun.cn',
-    };
-    final urls = RegExp(r'(?:[a-z][a-z0-9+.-]*://|www\.)[^\s<>]+', caseSensitive: false);
-    for (final match in urls.allMatches(text)) {
-      var candidate = match.group(0)!;
-      if (candidate.toLowerCase().startsWith('www.')) candidate = 'https://$candidate';
-      final uri = Uri.tryParse(candidate);
-      if (uri == null || uri.userInfo.isNotEmpty || (uri.scheme != 'http' && uri.scheme != 'https')) continue;
-      final host = uri.host.toLowerCase();
-      if (roots.any((root) => host == root || host.endsWith('.$root'))) return true;
-    }
-    return false;
-  }
+  /// Local detection only; use the same URI extraction as manual parsing.
+  static bool containsSupportedLink(String text) => LiveUrlTool.containsSupportedLink(text);
 
   @override
   void onClose() {

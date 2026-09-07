@@ -196,7 +196,8 @@ try {
     $finalTry=@($ast.EndBlock.Statements | Where-Object {$_ -is [Management.Automation.Language.TryStatementAst]})[-1]
     $finalText=$finalTry.Finally.Extent.Text
     if($finalText.IndexOf('Restore-RecordingProxyBeforeStop') -lt 0 -or
-       $finalText.IndexOf('Restore-RecordingProxyBeforeStop') -gt $finalText.IndexOf("'force-stop'")) { throw 'Proxy cleanup must precede app stop' }
+       $finalText.IndexOf('Stop-OwnedRecordingTurnProcess') -lt 0 -or
+       $finalText.IndexOf('Restore-RecordingProxyBeforeStop') -gt $finalText.IndexOf('Stop-OwnedRecordingTurnProcess')) { throw 'Proxy cleanup must precede app stop' }
     $script:ProxySessionPath = ''
     $homeFunction = $ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Enter-RecordingHome'}, $true)
     . ([scriptblock]::Create($homeFunction.Extent.Text))

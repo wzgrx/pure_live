@@ -32,6 +32,7 @@ if ($Interruption -ne 'none' -and (-not $FinishActivityDuringScreenOff -or -not 
 . (Join-Path $PSScriptRoot 'recorder_background_snapshot.ps1')
 . (Join-Path $PSScriptRoot 'android_recording_navigation.ps1')
 . (Join-Path $PSScriptRoot 'android_activity_state.ps1')
+. (Join-Path $PSScriptRoot 'recording_turn_ownership.ps1')
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $evidence = if ([string]::IsNullOrWhiteSpace($EvidenceDirectory)) {
@@ -81,6 +82,7 @@ $script:foregroundInterferenceCount = 0
 $script:foregroundRecoveryCount = 0
 $script:foregroundLost = $false
 $script:transportFailed = $false
+$script:recordingStartOwned = $false
 $script:homePackage = ''
 $script:uiProfileData = $null
 $script:uiWidth = 0
@@ -733,6 +735,11 @@ $monitorRemoved = $false
 $recordingWallTimer = $null
 
 try {
+    $entryServices = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'services', $Package)) -join "`n"
+    Save-Text 'services-before-turn.txt' $entryServices
+    if (-not (Test-RecordingRuntimeIdle -ServiceDump $entryServices)) {
+        throw 'Existing or uncertain app services; preserve runtime and defer this recording turn.'
+    }
     $result.checks.deviceState = ((Invoke-Adb -AdbArguments @('get-state')) -join '').Trim()
     $runAsIdentity = (Invoke-Adb -AdbArguments @('shell', 'run-as', $Package, 'id')) -join "`n"
     Save-Text 'run-as.txt' $runAsIdentity
@@ -907,27 +914,11 @@ try {
         -Name 'record-dialog-preflight' `
         -Pattern '立即启动录制|停止录制|取消监控' `
         -TimeoutSeconds 10
-    if (Test-UiSemanticEnabled -Xml $preflightDialog.Xml -Semantic '停止录制') {
-        Invoke-Ui -Action TapSemantic -Value '停止录制' -Xml $preflightDialog.Xml
-        $preflightDialog = Wait-UiSemanticEnabled `
-            -Name 'record-dialog-after-preflight-stop' `
-            -Semantic '取消监控' `
-            -TimeoutSeconds 60
-    }
-    if (Test-UiSemanticEnabled -Xml $preflightDialog.Xml -Semantic '取消监控') {
-        Invoke-Ui -Action TapSemantic -Value '取消监控' -Xml $preflightDialog.Xml
-        Wait-UiPattern -Name 'room-after-preflight-cleanup' -Pattern '弹幕列表' -TimeoutSeconds 12 | Out-Null
-        Start-Sleep -Seconds 2
-        Invoke-Ui -Action Tap -Value 'live.record'
-        $preflightDialog = Wait-UiSemanticEnabled `
-            -Name 'record-dialog-before-start' `
-            -Semantic '立即启动录制' `
-            -TimeoutSeconds 10
-    }
-    if (-not (Test-UiSemanticEnabled -Xml $preflightDialog.Xml -Semantic '立即启动录制')) {
-        throw 'The record action did not reach the one-shot start state.'
-    }
+    Assert-RecordingStartAvailable -Xml $preflightDialog.Xml
     $recordingWallTimer = [Diagnostics.Stopwatch]::StartNew()
+    # A transport failure may happen after input reached Android. Record intent
+    # before sending, but require confirmed monitor removal before process stop.
+    $script:recordingStartOwned = $true
     Invoke-Ui -Action TapSemantic -Value '立即启动录制' -Xml $preflightDialog.Xml
     # Time/size updates can prevent UIAutomator's one-second idle window.
     # Use actual file growth, not a pre-growth UI dump, as the running gate.
@@ -1197,7 +1188,10 @@ try {
     } catch {
         $result.checks.noFatal = $false
     }
-    try { Invoke-Adb -AdbArguments @('shell', 'am', 'force-stop', $Package) | Out-Null } catch {}
+    $result.checks.processStopDisposition = Stop-OwnedRecordingTurnProcess `
+        -StartOwned $script:recordingStartOwned -MonitorRemoved $monitorRemoved -Package $Package `
+        -Invoke { param([string[]] $Arguments) Invoke-Adb -AdbArguments $Arguments }
+    $result.checks.recordingStartOwned = $script:recordingStartOwned
     Start-Sleep -Seconds 2
     $processAfterStop = & $adb -s $script:serial shell pidof $Package 2>&1
     $processAfterStopExitCode = $LASTEXITCODE

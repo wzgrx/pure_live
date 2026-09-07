@@ -15,6 +15,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'recording_turn_ownership.ps1')
 
 $configure = Join-Path $PSScriptRoot 'android_configure_proxy.ps1'
 $smoke = Join-Path $PSScriptRoot 'android_recording_smoke.ps1'
@@ -25,6 +26,9 @@ $sessionDirectory = Join-Path (Split-Path -Parent $PSScriptRoot) ('local-artifac
 $sessionPath = Join-Path $sessionDirectory 'session.json'
 
 try {
+    # Observe before creating a proxy/reverse session or navigating settings.
+    Assert-AndroidRecordingRuntimeIdle `
+        -Adb (Join-Path $env:LOCALAPPDATA 'Android/Sdk/platform-tools/adb.exe') -Serial $Serial
     # Recording now requires the verified target app to remain foreground.
     & $configure -Serial $Serial -Mode LocalClash -Port $ProxyPort -KeepAppOpen -SessionPath $sessionPath -EvidenceDirectory $sessionDirectory
     if ($LASTEXITCODE -ne 0) { throw "Proxy setup exited with code $LASTEXITCODE." }
@@ -45,7 +49,7 @@ try {
 } finally {
     try {
         if (Test-Path -LiteralPath $sessionPath -PathType Leaf) {
-            & $restore -Serial $Serial -SessionPath $sessionPath -EvidenceDirectory (Join-Path $sessionDirectory 'cleanup')
+            & $restore -Serial $Serial -SessionPath $sessionPath -EvidenceDirectory (Join-Path $sessionDirectory 'cleanup') -KeepAppOpen
             if ($LASTEXITCODE -ne 0) { throw "Proxy cleanup exited with code $LASTEXITCODE." }
         }
     } catch {

@@ -20,8 +20,8 @@ class MissevanException implements Exception {
 typedef MissevanRequest = Future<({int status, String body})> Function(Uri uri, CancelToken? cancel);
 
 /// Anonymous public website contracts. No login, push URL, account mutation,
-/// shared page cursor or downloader dependency. The app registry remains gated
-/// on playback/recording integration acceptance (see the platform audit).
+/// shared page cursor or downloader dependency. Native acceptance is recorded
+/// independently from API and application integration evidence.
 class MissevanApi {
   MissevanApi({MissevanRequest? request}) : _request = request ?? _defaultRequest;
   static const origin = 'https://fm.missevan.com';

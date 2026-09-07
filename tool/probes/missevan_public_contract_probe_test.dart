@@ -1,5 +1,5 @@
-// Opt-in anonymous API requests through the staged production adapter. This
-// neither registers the platform nor proves native playback/recording support.
+// Opt-in anonymous API requests through the registered production adapter.
+// This does not prove native playback/recording support.
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -10,6 +10,8 @@ import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_site.dart';
+import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 
 void main() {
   test(
@@ -22,7 +24,7 @@ void main() {
         )..httpClientAdapter = IOHttpClientAdapter(createHttpClient: () => io.HttpClient());
         HttpClient.instance.dio = dio;
         try {
-          final site = MissevanSite();
+          final site = Sites.of('missevan').liveSite as MissevanSite;
           final categories = (await site.getCategores(1, 30)).single.children;
           expect(categories, isNotEmpty);
           final categoryRooms = await site.getCategoryRooms(categories.first, pageSize: 20);
@@ -39,6 +41,13 @@ void main() {
           expect(resolved.appliedQualityData, qualities.first.selectionId);
           expect(Uri.parse(resolved.urls.single).scheme, 'https');
           expect(site.getPlayUrlInvalidAt(resolved.urls.single), isNotNull);
+          final record = await StreamResolverService().resolveStream(
+            roomId: detail.roomId!,
+            platform: 'missevan',
+            preferredQuality: 'hls',
+          );
+          expect(record.qualityCursorId, 'hls');
+          expect(record.invalidAt, isNotNull);
           await expectLater(
             site.getRoomDetail(roomId: '1', platform: 'missevan'),
             throwsA(isA<MissevanException>().having((error) => error.kind, 'kind', MissevanFailure.notFound)),
@@ -55,7 +64,8 @@ void main() {
             'leaseMetadata': true,
             'notFoundClassified': true,
             'nativePlaybackOrRecording': false,
-            'platformRegistered': false,
+            'platformRegistered': Sites.isSupported('missevan'),
+            'productionRecorderResolution': true,
             'mediaFetched': false,
             'routing': 'anonymous direct Dio test adapter; application settings/proxy integration not exercised',
           };

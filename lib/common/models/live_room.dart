@@ -105,6 +105,11 @@ class LiveRoom {
       hasTotalViewers: false,
       onlineAvailability: AudienceOnlineAvailability.roomList,
     ),
+    'missevan': AudiencePlatformCapability(
+      hasPopularity: true,
+      hasTotalViewers: false,
+      onlineAvailability: AudienceOnlineAvailability.unsupported,
+    ),
     // AcFun onlineCount is independent of likes/followers; author search omits it.
     'acfun': AudiencePlatformCapability(
       hasPopularity: false,
@@ -466,7 +471,7 @@ class LiveRoom {
       return audienceMetricType!;
     }
     return switch (normalizedPlatformId) {
-      'bilibili' || 'douyu' || 'huya' || 'cc' || 'yy' => AudienceMetricType.popularity,
+      'bilibili' || 'douyu' || 'huya' || 'cc' || 'yy' || 'missevan' => AudienceMetricType.popularity,
       'kuaishou' || 'twitch' || 'soop' => AudienceMetricType.onlineViewers,
       'douyin' => AudienceMetricType.totalViewers,
       _ => AudienceMetricType.unknown,

@@ -53,6 +53,8 @@ class SearchController extends GetxController {
   String buildSearchUrl(String platform, String keyword) {
     final q = Uri.encodeComponent(keyword);
     switch (platform) {
+      case Sites.missevanSite:
+        throw StateError('Missevan search is not integrated');
       case Sites.ccSite:
         return "https://cc.163.com/search/all/?query=$q&only=all";
       case Sites.kuaishouSite:
@@ -164,7 +166,11 @@ class SearchController extends GetxController {
       if (generation != _searchGeneration) return;
       if (selectedSites.length == 1 &&
           !LiveSearchCapabilities.forPlatform(selectedSites.single.id).supportsNativeSearch) {
-        errorMessage.v = i18n('search_web_only_platform', args: {'site': selectedSites.single.name});
+        final capability = LiveSearchCapabilities.forPlatform(selectedSites.single.id);
+        errorMessage.v = i18n(
+          capability.supportsWebSearch ? 'search_web_only_platform' : 'search_coverage_unavailable',
+          args: {'site': selectedSites.single.name},
+        );
       }
       _applyFiltersAndSort();
       hasMore.v = false;
@@ -270,18 +276,28 @@ class SearchController extends GetxController {
         NativeSearchCoverage.liveOnly => i18n('search_coverage_live_only', args: {'site': site.name}),
         NativeSearchCoverage.localChannels => i18n('search_coverage_local', args: {'site': site.name}),
         NativeSearchCoverage.webOnly => i18n('search_coverage_web_only', args: {'site': site.name}),
+        NativeSearchCoverage.unavailable => i18n('search_coverage_unavailable', args: {'site': site.name}),
       };
     }
 
     final nativeCount = sites.where((site) => LiveSearchCapabilities.forPlatform(site.id).supportsNativeSearch).length;
     final webOnlySites = sites
-        .where((site) => !LiveSearchCapabilities.forPlatform(site.id).supportsNativeSearch)
+        .where((site) => LiveSearchCapabilities.forPlatform(site.id).coverage == NativeSearchCoverage.webOnly)
         .map((site) => site.name)
         .join('、');
-    return i18n(
-      webOnlySites.isEmpty ? 'search_coverage_all_native' : 'search_coverage_all',
+    final unavailableSites = sites
+        .where((site) => LiveSearchCapabilities.forPlatform(site.id).coverage == NativeSearchCoverage.unavailable)
+        .map((site) => site.name)
+        .join('、');
+    final summary = i18n(
+      webOnlySites.isNotEmpty
+          ? 'search_coverage_all'
+          : (nativeCount == sites.length ? 'search_coverage_all_native' : 'search_coverage_native_partial'),
       args: {'native': '$nativeCount', 'total': '${sites.length}', 'sites': webOnlySites},
     );
+    return unavailableSites.isEmpty
+        ? summary
+        : '$summary ${i18n('search_coverage_unavailable', args: {'site': unavailableSites})}';
   }
 
   int _compareAudience(LiveRoom left, LiveRoom right) {

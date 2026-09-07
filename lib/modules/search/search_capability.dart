@@ -1,6 +1,6 @@
 import 'package:pure_live/core/sites.dart';
 
-enum NativeSearchCoverage { liveOnly, liveAndOffline, localChannels, webOnly }
+enum NativeSearchCoverage { liveOnly, liveAndOffline, localChannels, webOnly, unavailable }
 
 class LiveSearchCapability {
   const LiveSearchCapability({required this.coverage, required this.supportsPagination, this.supportsWebSearch = true});
@@ -9,7 +9,8 @@ class LiveSearchCapability {
   final bool supportsPagination;
   final bool supportsWebSearch;
 
-  bool get supportsNativeSearch => coverage != NativeSearchCoverage.webOnly;
+  bool get supportsNativeSearch =>
+      coverage != NativeSearchCoverage.webOnly && coverage != NativeSearchCoverage.unavailable;
   bool get mayIncludeOffline => coverage == NativeSearchCoverage.liveAndOffline;
 }
 
@@ -29,6 +30,11 @@ class LiveSearchCapabilities {
     Sites.acfunSite: LiveSearchCapability(coverage: NativeSearchCoverage.liveAndOffline, supportsPagination: true),
     Sites.picartoSite: LiveSearchCapability(coverage: NativeSearchCoverage.webOnly, supportsPagination: false),
     Sites.twitcastingSite: LiveSearchCapability(coverage: NativeSearchCoverage.webOnly, supportsPagination: false),
+    Sites.missevanSite: LiveSearchCapability(
+      coverage: NativeSearchCoverage.unavailable,
+      supportsPagination: false,
+      supportsWebSearch: false,
+    ),
     Sites.iptvSite: LiveSearchCapability(
       coverage: NativeSearchCoverage.localChannels,
       supportsPagination: false,

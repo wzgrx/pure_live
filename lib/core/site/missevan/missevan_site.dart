@@ -10,8 +10,8 @@ import 'package:pure_live/model/live_play_quality.dart';
 
 import 'missevan_api.dart';
 
-/// Staged adapter, not yet enabled in Sites or settings migration. Search and
-/// danmaku are intentionally absent until their public contracts are verified.
+/// Anonymous directory, room, playback and recording adapter. Search and
+/// danmaku remain absent until their public contracts are verified.
 class MissevanSite extends LiveSite
     implements
         LiveSiteRoomRefresher,

@@ -1,4 +1,5 @@
 import 'site/picarto/picarto_site.dart';
+import 'site/missevan/missevan_site.dart';
 import 'site/twitcasting/twitcasting_site.dart';
 import 'site/yy/yy_site.dart';
 import 'site/acfun/acfun_site.dart';
@@ -30,6 +31,7 @@ class Sites {
   static const String acfunSite = 'acfun';
   static const String picartoSite = 'picarto';
   static const String twitcastingSite = 'twitcasting';
+  static const String missevanSite = 'missevan';
 
   static const Set<String> supportedSiteIds = {
     bilibiliSite,
@@ -44,6 +46,7 @@ class Sites {
     acfunSite,
     picartoSite,
     twitcastingSite,
+    missevanSite,
     iptvSite,
   };
 
@@ -62,6 +65,7 @@ class Sites {
     Site(id: acfunSite, name: i18n('site_acfun'), logo: 'assets/images/logo.png', liveSite: AcfunSite()),
     Site(id: picartoSite, name: 'Picarto', logo: 'assets/images/logo.png', liveSite: PicartoSite()),
     Site(id: twitcastingSite, name: 'TwitCasting', logo: 'assets/images/logo.png', liveSite: TwitcastingSite()),
+    Site(id: missevanSite, name: i18n('site_missevan'), logo: 'assets/images/logo.png', liveSite: MissevanSite()),
     Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
   ];
 
@@ -113,6 +117,12 @@ class Sites {
         name: 'TwitCasting',
         logo: 'assets/images/logo.png',
         liveSite: TwitcastingSite(),
+      ),
+      missevanSite => Site(
+        id: missevanSite,
+        name: i18n('site_missevan'),
+        logo: 'assets/images/logo.png',
+        liveSite: MissevanSite(),
       ),
       iptvSite => Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
       _ => throw StateError('Unsupported live site: $normalizedId'),

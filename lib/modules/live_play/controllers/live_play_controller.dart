@@ -893,6 +893,10 @@ class LivePlayController extends GetxController
         nativeUrl = 'https://twitcasting.tv/${Uri.encodeComponent(detail.roomId ?? '')}';
         webUrl = nativeUrl;
         break;
+      case Sites.missevanSite:
+        nativeUrl = 'https://fm.missevan.com/live/${Uri.encodeComponent(detail.roomId ?? '')}';
+        webUrl = nativeUrl;
+        break;
       case Sites.acfunSite:
         nativeUrl = 'https://live.acfun.cn/live/${Uri.encodeComponent(detail.roomId ?? '')}';
         webUrl = nativeUrl;

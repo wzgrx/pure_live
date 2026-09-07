@@ -10,6 +10,14 @@ import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_site.dart';
 import 'package:pure_live/model/live_play_quality.dart';
+import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/common/utils/live_url_tool.dart';
+import 'package:pure_live/modules/search/web_search_room_parser.dart';
+import 'package:pure_live/modules/search/search_capability.dart';
+import 'package:pure_live/modules/multiview/danmaku/multiview_danmaku_session.dart';
+import 'package:pure_live/player/core/playback_header_resolver.dart';
+import 'package:pure_live/recorder/services/ffmpeg_header_factory.dart';
+import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 
 const _hls = 'http://d1-missevan104.bilivideo.com/live/sample.m3u8?expires=1900000000&sign=fixture%2Bonly';
 const _flv = 'http://d1-missevan04.bilivideo.com/live/sample.flv?expires=1900000000&sign=fixture';
@@ -39,6 +47,102 @@ Map<String, dynamic> _page(int p, {int count = 65}) => {
 };
 
 void main() {
+  group('application integration', () {
+    test('registry exposes the adapter and only its verified audience capabilities', () {
+      expect(Sites.of(' MISSEVAN ').liveSite, isA<MissevanSite>());
+      expect(Sites.supportSites.where((s) => s.id == 'missevan'), hasLength(1));
+      expect(Sites.supportSites.map((s) => s.id).toSet(), Sites.supportedSiteIds);
+      final capability = LiveRoom.audienceCapabilityFor('missevan');
+      expect(capability.hasPopularity, isTrue);
+      expect(capability.supportsConcurrentOnline, isFalse);
+      expect(capability.hasTotalViewers, isFalse);
+      expect(
+        LiveRoom(platform: 'missevan', watching: '120').effectiveAudienceMetricType,
+        AudienceMetricType.popularity,
+      );
+      expect(LiveSearchCapabilities.forPlatform('missevan').supportsNativeSearch, isFalse);
+      expect(LiveSearchCapabilities.forPlatform('missevan').supportsWebSearch, isFalse);
+      expect(MultiviewDanmakuSession.isSupportedPlatform('missevan'), isFalse);
+      expect(MultiviewDanmakuSession.isSupportedPlatform('future-platform'), isFalse);
+      for (final id in ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'twitch', 'soop', 'yy']) {
+        expect(MultiviewDanmakuSession.isSupportedPlatform(id), isTrue);
+      }
+    });
+
+    test('shared links use the exact live-room contract without network requests', () async {
+      const link = 'https://fm.missevan.com/live/100';
+      expect(WebSearchRoomParser.parse(link)?.key, 'missevan:100');
+      expect(LiveUrlTool.containsSupportedLink('分享 $link。'), isTrue);
+      expect(await LiveUrlTool.parseLiveUrl('分享 $link。'), ['100', 'missevan']);
+      for (final invalid in [
+        'https://fm.missevan.com.evil.test/live/100',
+        'https://fm.missevan.com/catalog/100',
+        'https://fm.missevan.com:8787/live/100',
+        'https://name@fm.missevan.com/live/100',
+      ]) {
+        expect(WebSearchRoomParser.parse(invalid), isNull);
+        expect(LiveUrlTool.containsSupportedLink(invalid), isFalse);
+        expect(await LiveUrlTool.parseLiveUrl(invalid), isEmpty);
+      }
+    });
+
+    test('playback and recording headers agree and contain no account cookies', () async {
+      final playback = await PlaybackHeaderResolver.resolve(platform: 'missevan', roomId: '100');
+      expect(await FFmpegHeaderFactory.build(platform: 'missevan', roomId: '100'), playback);
+      final lower = playback.map((k, v) => MapEntry(k.toLowerCase(), v));
+      expect(lower['referer'], '${MissevanApi.origin}/');
+      expect(lower['origin'], MissevanApi.origin);
+      expect(lower, isNot(contains('cookie')));
+    });
+
+    for (final transport in ['hls', 'flv']) {
+      test('production recorder resolves and renews $transport with expiry metadata', () async {
+        var requests = 0;
+        final site = MissevanSite(
+          api: MissevanApi(
+            request: (_, _) async {
+              requests++;
+              return _ok(_detail());
+            },
+          ),
+        );
+        final resolver = StreamResolverService(siteResolver: (_) => site);
+        final first = await resolver.resolveStream(roomId: '100', platform: 'missevan', preferredQuality: transport);
+        expect(first.qualityCursorId, transport);
+        expect(first.invalidAt, DateTime.fromMillisecondsSinceEpoch(1900000000000, isUtc: true));
+        expect(first.refreshAt, first.invalidAt!.subtract(const Duration(minutes: 1)));
+        final next = await resolver.resolveStream(
+          roomId: '100',
+          platform: 'missevan',
+          preferredQuality: transport,
+          previousQualityId: first.qualityCursorId,
+          previousLineIndex: first.lineIndex,
+          renewCurrent: true,
+        );
+        expect(next.qualityCursorId, transport);
+        expect(requests, 2);
+      });
+    }
+
+    test('recorder distinguishes explicit offline from failed metadata', () async {
+      final offline = MissevanSite(api: _fixed(_detail(open: 0)));
+      await expectLater(
+        StreamResolverService(siteResolver: (_) => offline)
+            .resolveStream(roomId: '100', platform: 'missevan', preferredQuality: 'hls'),
+        throwsA(isA<StreamException>().having((e) => e.type, 'kind', StreamErrorType.notLive)),
+      );
+      final broken = MissevanSite(api: MissevanApi(request: (_, _) async => (status: 503, body: '')));
+      await expectLater(
+        StreamResolverService(siteResolver: (_) => broken)
+            .resolveStream(roomId: '100', platform: 'missevan', preferredQuality: 'hls'),
+        throwsA(
+          isA<StreamException>()
+              .having((e) => e.type, 'kind', StreamErrorType.networkError)
+              .having((e) => e.retryable, 'retryable', isTrue),
+        ),
+      );
+    });
+  });
   group('public detail contract', () {
     test('HTTPS streams, stable transport IDs, score is heat rather than viewers', () async {
       final site = MissevanSite(api: _fixed(_detail()));

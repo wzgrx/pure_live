@@ -52,8 +52,18 @@ class MultiviewDanmakuSession {
 
   /// Empty/unsupported remote transports never create a multiview chat session.
   static bool isSupportedPlatform(String? platform) {
-    const except = [Sites.iptvSite, Sites.ccSite, Sites.acfunSite, Sites.picartoSite, Sites.twitcastingSite];
-    return platform != null && !except.contains(platform);
+    // New platform registration must not silently advertise a chat transport.
+    const supported = {
+      Sites.bilibiliSite,
+      Sites.douyuSite,
+      Sites.huyaSite,
+      Sites.douyinSite,
+      Sites.kuaishouSite,
+      Sites.twitchSite,
+      Sites.soopSite,
+      Sites.yySite,
+    };
+    return supported.contains(platform?.trim().toLowerCase());
   }
 
   /// 房间是否具备建会话的最小条件（平台支持且携带弹幕连接参数）。

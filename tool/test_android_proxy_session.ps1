@@ -214,6 +214,23 @@ try{
         Invoke-ProxyTap (Find-ProxyNode $document '自定义网络代理')
         Equal $calls[$calls.Count-1] 'shell input tap 219 399' 'uncovered left rectangle, not player-covered center'
     }
+    Case 'native popup MenuItem is above its uniquely labelled dismiss backdrop' {
+        $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_menu_backdrop.xml') -Raw -Encoding utf8)
+        $fake.Page='tap-only';Invoke-ProxyTap (Find-ProxyNode $document '设置')
+        Equal $calls[$calls.Count-1] 'shell input tap 204 384' 'native menu role, not a fullscreen obstruction'
+    }
+    Case 'unlabelled popup backdrop still blocks the menu item' {
+        $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_menu_backdrop.xml') -Raw -Encoding utf8)
+        $document.SelectSingleNode('//node[@content-desc="关闭菜单"]').SetAttribute('content-desc','unknown')
+        Throws {Invoke-ProxyTap (Find-ProxyNode $document '设置')} 'occluded'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no inferred layering'
+    }
+    Case 'dismiss label does not exempt a non-menu target' {
+        $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_menu_backdrop.xml') -Raw -Encoding utf8)
+        $document.SelectSingleNode('//node[@content-desc="设置"]').SetAttribute('class','android.widget.Button')
+        Throws {Invoke-ProxyTap (Find-ProxyNode $document '设置')} 'occluded'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'role pairing is required'
+    }
     Case 'fully occluded proxy control produces no input' {
         $document=[xml]('<hierarchy>'+(Node 'target' 100)+'<node enabled="true" clickable="true" bounds="[0,0][600,400]"/></hierarchy>')
         Throws {Invoke-ProxyTap (Find-ProxyNode $document 'target')} 'occluded'

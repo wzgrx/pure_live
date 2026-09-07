@@ -103,6 +103,19 @@ function Get-ProxyTapPoint {
         # Flutter also exposes collapsed/off-screen controls with zero area.
         # They occupy no hit region; the actual target still requires area.
         if($o.Left -eq $o.Right -or $o.Top -eq $o.Bottom){continue}
+        # A native MenuItem belongs above its single labelled popup-dismiss
+        # backdrop. With a floating player Flutter may expose that backdrop as
+        # a sibling instead of an ancestor. Recognize only this observed role
+        # pairing; arbitrary full-screen clickables remain blockers.
+        if($Node.Node.GetAttribute('class') -ceq 'android.view.MenuItem' -and
+            $Node.Node.GetAttribute('package') -ceq $script:ProxyContext.Package -and
+            $other.GetAttribute('class') -ceq 'android.view.View' -and
+            $other.GetAttribute('package') -ceq $script:ProxyContext.Package -and
+            $other.GetAttribute('content-desc') -ceq '关闭菜单' -and
+            $Node.Node.OwnerDocument.SelectNodes('//node[@content-desc="关闭菜单" and @enabled="true" and @clickable="true"]').Count -eq 1 -and
+            $o.Left -le $b.Left -and $o.Top -le $b.Top -and $o.Right -ge $b.Right -and $o.Bottom -ge $b.Bottom){
+            continue
+        }
         $o=@{Left=$o.Left-$margin;Top=$o.Top-$margin;Right=$o.Right+$margin;Bottom=$o.Bottom+$margin}
         $intersected=$false
         $regions=@(foreach($r in $regions){

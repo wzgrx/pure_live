@@ -23,3 +23,10 @@ It contains only generic settings UI. The proxy entry center (600,399) overlaps
 the clickable floating player [390,300][1050,671]. It verifies rectangle
 exclusion and an uncovered point (219,399), not Android hit-test order or a
 successful live route transition. Foreground checks remain required per input.
+
+`android_proxy_menu_backdrop.xml` is the floating-player popup hierarchy from
+`android-recording-smoke-20260907T181304774/proxy-before-stop/proxy-ui-2.xml`.
+Only generic settings/about/history and popup-dismiss semantics are present.
+Unlike a cold-start popup, its labelled dismiss backdrop is not an ancestor of
+the native MenuItems. Tests recognize that exact role pairing, not arbitrary
+overlay order; an unlabelled backdrop or a non-menu target still blocks input.

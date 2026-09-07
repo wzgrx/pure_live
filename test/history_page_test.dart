@@ -23,6 +23,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
   late Map<String, dynamic> translations;
+  late Map<String, dynamic> english;
   late HistoryController history;
   late List<(LiveRoom, Completer<LiveRoom>)> requests;
   final originalHeader = EasyRefresh.defaultHeaderBuilder;
@@ -36,6 +37,7 @@ void main() {
     Hive.init(directory.path);
     await HivePrefUtil.init();
     translations = jsonDecode(await File('assets/translations/zh.json').readAsString()) as Map<String, dynamic>;
+    english = jsonDecode(await File('assets/translations/en.json').readAsString()) as Map<String, dynamic>;
   });
   setUp(() {
     Get.testMode = true;
@@ -58,7 +60,12 @@ void main() {
     await directory.delete(recursive: true);
   });
 
-  Future<void> open(WidgetTester tester, {Size size = const Size(900, 600), double scale = 1}) async {
+  Future<void> open(
+    WidgetTester tester, {
+    Size size = const Size(900, 600),
+    double scale = 1,
+    String locale = 'zh',
+  }) async {
     addTearDown(() async {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
@@ -69,9 +76,11 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       EasyLocalization(
-        supportedLocales: const [Locale('zh')],
+        supportedLocales: [Locale(locale)],
+        startLocale: Locale(locale),
+        saveLocale: false,
         path: 'assets/translations',
-        assetLoader: _Loader(translations),
+        assetLoader: _Loader(locale == 'en' ? english : translations),
         child: Builder(
           builder: (context) => GetMaterialApp(
             locale: context.locale,
@@ -187,6 +196,26 @@ void main() {
     expect(count, 2);
     await finish(tester);
   });
+
+  for (final locale in ['zh', 'en']) {
+    testWidgets('$locale history limits use count labels rather than dimensions', (tester) async {
+      final labels = locale == 'en' ? english : translations;
+      await open(tester, locale: locale, size: const Size(320, 480), scale: 2);
+      await tester.tap(find.byTooltip(labels['history_limit'] as String));
+      await tester.pumpAndSettle();
+      expect(find.text(locale == 'en' ? 'Preset Limits' : '预设数量'), findsOneWidget);
+      expect(find.text(locale == 'en' ? 'Custom Limit' : '自定义数量'), findsOneWidget);
+      expect(find.text(labels['custom_input'] as String), findsNothing);
+      expect(find.text(labels['current_options'] as String), findsNothing);
+      final cancel = find.widgetWithText(TextButton, labels['cancel'] as String);
+      await tester.ensureVisible(cancel);
+      await tester.tap(cancel);
+      await tester.pumpAndSettle();
+      expect(history.historyLimit.value, 50);
+      expect(history.historyRooms.value.map((room) => room.roomId), ['a', 'b']);
+      await finish(tester);
+    });
+  }
 
   testWidgets('history limit input remains alive through dialog dismissal', (tester) async {
     await open(tester);

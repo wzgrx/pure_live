@@ -205,7 +205,7 @@ class _HistoryLimitDialogState extends State<_HistoryLimitDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(i18n("current_options"), style: AppTextStyles.t12Muted),
+                  Text(i18n('history_limit_presets'), style: AppTextStyles.t12Muted),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -232,7 +232,7 @@ class _HistoryLimitDialogState extends State<_HistoryLimitDialog> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  Text(i18n("custom_input"), style: AppTextStyles.t13Medium),
+                  Text(i18n('history_limit_custom'), style: AppTextStyles.t13Medium),
                   const SizedBox(height: 12),
                   Row(
                     children: [

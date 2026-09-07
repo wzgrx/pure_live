@@ -1,4 +1,5 @@
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/modules/area_rooms/area_rooms_controller.dart';
 import 'package:pure_live/plugins/cache_manager.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -16,7 +17,7 @@ class AreasRoomPage extends StatefulWidget {
 
 class _AreasRoomPageState extends State<AreasRoomPage> {
   BasePageScrollAndStateBone<LiveRoom> get controller =>
-      Get.find<BasePageScrollAndStateBone<LiveRoom>>(tag: "${widget.site.id}_${widget.subCategory.areaId}");
+      Get.find<BasePageScrollAndStateBone<LiveRoom>>(tag: areaRoomsControllerTag(widget.site, widget.subCategory));
 
   @override
   void initState() {

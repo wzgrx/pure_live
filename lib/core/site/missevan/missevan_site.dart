@@ -3,6 +3,8 @@ import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/danmaku/empty_danmaku.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/interface/live_directory.dart';
+import 'package:dio/dio.dart';
 import 'package:pure_live/model/live_category.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 
@@ -11,9 +13,20 @@ import 'missevan_api.dart';
 /// Staged adapter, not yet enabled in Sites or settings migration. Search and
 /// danmaku are intentionally absent until their public contracts are verified.
 class MissevanSite extends LiveSite
-    implements LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LivePlayRecoveryResolver, LivePlayLeaseMetadata {
+    implements
+        LiveSiteRoomRefresher,
+        LiveSiteRecordRoomResolver,
+        LivePlayRecoveryResolver,
+        LivePlayLeaseMetadata,
+        LiveSiteDirectoryPager {
   MissevanSite({MissevanApi? api}) : _api = api ?? MissevanApi();
   final MissevanApi _api;
+  @override
+  Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
+    final result = await _api.directoryPage(page: page, category: category, cancel: cancel);
+    return LiveDirectoryPage(rooms: result.rooms, page: result.page, hasMore: result.hasMore);
+  }
+
   @override
   String get id => 'missevan';
   @override

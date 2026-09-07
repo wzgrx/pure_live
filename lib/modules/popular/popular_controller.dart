@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/modules/popular/popular_grid_controller.dart';
+import 'package:pure_live/common/base/live_directory_controller.dart';
+import 'package:pure_live/core/interface/live_directory.dart';
 
 class PopularController extends GetxController with GetTickerProviderStateMixin {
   late TabController tabController;
@@ -41,6 +43,17 @@ class PopularController extends GetxController with GetTickerProviderStateMixin 
 
       Get.lazyPut<BasePageScrollAndStateBone<LiveRoom>>(
         () {
+          final directory = site.liveSite;
+          if (directory is LiveSiteDirectoryPager) {
+            return LiveDirectoryController(
+              directory: directory as LiveSiteDirectoryPager,
+              transform: (rooms) => rankPopularRoomsByAudience(
+                rooms,
+                preferRealOnline: SettingsService.to.app.preferRealOnlineCounts.v,
+                realOnlinePlatforms: SettingsService.to.app.realOnlinePlatforms,
+              ),
+            );
+          }
           if (site.id == Sites.iptvSite) {
             return PopularLocalReactiveController(site);
           }

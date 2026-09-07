@@ -151,6 +151,26 @@ void main() {
   });
 
   group('directory and categories', () {
+    test('site native-page bridge preserves hasMore after all rows are filtered and forwards cancellation', () async {
+      final cancel = CancelToken();
+      final site = MissevanSite(
+        api: MissevanApi(
+          request: (uri, token) async {
+            expect(identical(token, cancel), isTrue);
+            final p = int.parse(uri.queryParameters['p']!);
+            final info = _page(p, count: 21);
+            if (p == 1) info['Datas'] = [for (var i = 1; i <= 20; i++) _row(i, open: 0)];
+            return _ok(info);
+          },
+        ),
+      );
+      final first = await site.getDirectoryPage(cancel: cancel);
+      expect(first.rooms, isEmpty);
+      expect(first.hasMore, isTrue);
+      final last = await site.getDirectoryPage(page: 2, cancel: cancel);
+      expect(last.rooms.single.roomId, '21');
+      expect(last.hasMore, isFalse);
+    });
     test('native pagination retains rows beyond nominal pagesize, without offset truncation', () async {
       final pages = <int>[];
       final api = MissevanApi(

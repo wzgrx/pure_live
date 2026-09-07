@@ -1510,5 +1510,7 @@
     "portrait_fullscreen_restore_hint": "Portrait fullscreen · Swipe up to restore danmaku",
     "picarto_public_directory": "Public live streams (adult content excluded)",
     "audience_picarto_detail": "Directory and room viewers are concurrent viewers; total_views is cumulative and remains separate.",
-    "audience_twitcasting_detail": "Directory current_viewer_count is concurrent audience. Room detail omits it; no cumulative count is substituted."
+    "audience_twitcasting_detail": "Directory current_viewer_count is concurrent audience. Room detail omits it; no cumulative count is substituted.",
+    "directory_cache_limit": "The local directory cache is full. Refresh to start a new browsing session.",
+    "directory_continue_loading": "This directory request budget was reached. Continue loading to resume."
 }

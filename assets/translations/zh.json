@@ -1510,5 +1510,7 @@
     "portrait_fullscreen_restore_hint": "已进入竖屏全屏 · 上滑恢复弹幕栏",
     "picarto_public_directory": "公开直播（不含成人内容）",
     "audience_picarto_detail": "目录和房间详情的 viewers 为在线人数，total_views 为累计观看，分别显示",
-    "audience_twitcasting_detail": "公开目录的 current_viewer_count 为在线人数；房间详情未提供该值，不与累计观看混用"
+    "audience_twitcasting_detail": "公开目录的 current_viewer_count 为在线人数；房间详情未提供该值，不与累计观看混用",
+    "directory_cache_limit": "目录已达到本地缓存上限，请刷新后继续浏览。",
+    "directory_continue_loading": "已达到本次目录请求预算，请继续加载。"
 }

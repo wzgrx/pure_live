@@ -3,9 +3,161 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pure_live/common/services/settings/log_controller.dart';
+import 'package:pure_live/get/get.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
 void main() {
+  test('playlist session cookies reach init and media without reaching the local reader', () async {
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => origin.close(force: true));
+    origin.listen((request) async {
+      if (request.uri.path == '/live/root.m3u8') {
+        request.response.headers.add(HttpHeaders.setCookieHeader, 'session=fixture; Path=/live/; HttpOnly');
+        request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:2,\nmedia.m4s\n');
+      } else if (request.headers.value(HttpHeaders.cookieHeader) == 'session=fixture') {
+        request.response.write('media');
+      } else {
+        request.response.statusCode = HttpStatus.unauthorized;
+      }
+      await request.response.close();
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments([
+      '-i',
+      'http://127.0.0.1:${origin.port}/live/root.m3u8',
+    ], force: true))!;
+    addTearDown(relay.close);
+    final client = HttpClient();
+    addTearDown(() => client.close(force: true));
+    final response = await (await client.getUrl(relay.inputUri)).close();
+    expect(response.headers[HttpHeaders.setCookieHeader], isNull);
+    final manifest = await utf8.decoder.bind(response).join();
+    final init = Uri.parse(RegExp(r'URI="([^"]+)"').firstMatch(manifest)!.group(1)!);
+    expect(await _readText(client, init), 'media');
+    expect(await _readText(client, Uri.parse(_mediaLines(manifest).single)), 'media');
+  });
+
+  test('redirect cookies rotate and caller credentials stay on their original origin', () async {
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final other = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => origin.close(force: true));
+    addTearDown(() => other.close(force: true));
+    other.listen((request) async {
+      expect(request.headers.value(HttpHeaders.cookieHeader), isNull);
+      expect(request.headers.value(HttpHeaders.authorizationHeader), isNull);
+      expect(request.headers.value(HttpHeaders.userAgentHeader), 'RelayFixture');
+      request.response.write('other media');
+      await request.response.close();
+    });
+    origin.listen((request) async {
+      expect(request.headers.value(HttpHeaders.authorizationHeader), 'Bearer fixture');
+      if (request.uri.path == '/root.m3u8') {
+        expect(request.headers.value(HttpHeaders.cookieHeader), 'session=stale; caller=keep');
+        request.response.statusCode = HttpStatus.found;
+        request.response.headers.set(HttpHeaders.locationHeader, '/nested/live.m3u8');
+        request.response.headers.add(HttpHeaders.setCookieHeader, 'session=first; Path=/');
+      } else if (request.uri.path == '/nested/live.m3u8') {
+        expect(request.headers.value(HttpHeaders.cookieHeader), 'session=first; caller=keep');
+        request.response.headers.add(HttpHeaders.setCookieHeader, 'session=second; Path=/');
+        request.response.write(
+          '#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2,\nseg.ts\n'
+          '#EXTINF:2,\nhttp://127.0.0.1:${other.port}/other.ts\n',
+        );
+      } else {
+        expect(request.uri.path, '/nested/seg.ts');
+        expect(request.headers.value(HttpHeaders.cookieHeader), 'session=second; caller=keep');
+        request.response.statusCode = HttpStatus.temporaryRedirect;
+        request.response.headers.set(HttpHeaders.locationHeader, 'http://127.0.0.1:${other.port}/redirect.ts');
+      }
+      await request.response.close();
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments([
+      '-headers',
+      'Cookie: session=stale; caller=keep\r\nAuthorization: Bearer fixture\r\n',
+      '-user_agent',
+      'RelayFixture',
+      '-i',
+      'http://127.0.0.1:${origin.port}/root.m3u8',
+    ], force: true))!;
+    addTearDown(relay.close);
+    final client = HttpClient();
+    addTearDown(() => client.close(force: true));
+    final manifest = await _readText(client, relay.inputUri);
+    for (final resource in _mediaLines(manifest)) {
+      expect(await _readText(client, Uri.parse(resource)), 'other media');
+    }
+  });
+
+  test('relay sessions remain independent and close drops cookies with resources', () async {
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => origin.close(force: true));
+    var sessions = 0;
+    origin.listen((request) async {
+      if (request.uri.path == '/root.m3u8') {
+        expect(request.headers.value(HttpHeaders.cookieHeader), isNull);
+        final id = ++sessions;
+        request.response.headers.add(HttpHeaders.setCookieHeader, 'session=$id; Path=/');
+        request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2,\n$id.ts\n');
+      } else {
+        expect(
+          request.headers.value(HttpHeaders.cookieHeader),
+          'session=${request.uri.path.substring(1).split('.').first}',
+        );
+        request.response.write('media');
+      }
+      await request.response.close();
+    });
+    final client = HttpClient();
+    addTearDown(() => client.close(force: true));
+    final relays = <FFmpegHlsInputRelay>[];
+    addTearDown(() async {
+      for (final relay in relays) {
+        await relay.close();
+      }
+    });
+    for (var i = 0; i < 2; i++) {
+      relays.add(
+        (await FFmpegHlsInputRelay.startForArguments([
+          '-i',
+          'http://127.0.0.1:${origin.port}/root.m3u8',
+        ], force: true))!,
+      );
+    }
+    final manifests = await Future.wait(relays.map((relay) => _readText(client, relay.inputUri)));
+    for (var i = 0; i < 2; i++) {
+      expect(await _readText(client, Uri.parse(_mediaLines(manifests[i]).single)), 'media');
+      expect(relays[i].sessionCookieCount, 1);
+      await relays[i].close();
+      expect(relays[i].sessionCookieCount, 0);
+      expect(relays[i].resourceCount, 0);
+    }
+  });
+
+  test('redirect loops stop after five hops', () async {
+    Get.put<LogController>(_QuietLogController());
+    addTearDown(() => Get.delete<LogController>(force: true));
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => origin.close(force: true));
+    var requests = 0;
+    origin.listen((request) async {
+      requests++;
+      request.response.statusCode = HttpStatus.found;
+      request.response.headers.set(HttpHeaders.locationHeader, '/root.m3u8');
+      await request.response.close();
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments([
+      '-i',
+      'http://127.0.0.1:${origin.port}/root.m3u8',
+    ], force: true))!;
+    addTearDown(relay.close);
+    final client = HttpClient();
+    addTearDown(() => client.close(force: true));
+    final response = await (await client.getUrl(relay.inputUri)).close();
+    expect(response.statusCode, HttpStatus.badGateway);
+    await response.drain<void>();
+    expect(requests, 6);
+  });
+
   test('manifest range requests still rewrite child URLs before serving FFmpeg', () async {
     final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => origin.close(force: true));
@@ -388,4 +540,17 @@ Future<List<int>> _readBytes(HttpClient client, Uri uri) async {
   final response = await (await client.getUrl(uri)).close();
   expect(response.statusCode, HttpStatus.ok);
   return response.fold<List<int>>(<int>[], (bytes, chunk) => bytes..addAll(chunk));
+}
+
+class _QuietLogController extends GetxController implements LogController {
+  // HTTP-only fixture: no frame scheduling or Hive-backed log controller.
+  @override
+  // ignore: must_call_super
+  Future<void> onInit() async {}
+
+  @override
+  bool get enableLog => false;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

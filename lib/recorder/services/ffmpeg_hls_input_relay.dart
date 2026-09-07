@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:pure_live/core/common/log.dart';
 
+import 'hls_session_cookies.dart';
 import 'recorder_proxy_routing.dart';
 
 /// Relays HLS resources over an app-private loopback server, verifying upstream
@@ -66,6 +67,7 @@ class FFmpegHlsInputRelay {
   final Map<String, String> _headers;
   final String _secret;
   final bool drainOnStop;
+  final HlsSessionCookies _cookies = HlsSessionCookies();
   final Map<String, Uri> _resources = <String, Uri>{};
   final Map<String, String> _resourceIds = <String, String>{};
   final Map<String, String> _manifests = <String, String>{};
@@ -88,6 +90,9 @@ class FFmpegHlsInputRelay {
 
   @visibleForTesting
   int get resourceCount => _resources.length;
+
+  @visibleForTesting
+  int get sessionCookieCount => _cookies.count;
 
   Uri get inputUri =>
       Uri(scheme: 'http', host: InternetAddress.loopbackIPv4.address, port: _server.port, path: '/$_secret/root.m3u8');
@@ -146,6 +151,7 @@ class FFmpegHlsInputRelay {
 
   Future<void> _close() async {
     _closed = true;
+    _cookies.clear();
     _client.close(force: true);
     await _server.close(force: true);
     await _subscription?.cancel();
@@ -175,23 +181,15 @@ class FFmpegHlsInputRelay {
         await _replyManifest(request, _endedManifest(cached));
         return;
       }
-      final upstreamRequest = await _client.openUrl(request.method, upstream);
-      for (final entry in _headers.entries) {
-        upstreamRequest.headers.set(entry.key, entry.value, preserveHeaderCase: true);
-      }
       final range = request.headers.value(HttpHeaders.rangeHeader);
       // FFmpeg probes even playlists with Range: bytes=0-. A CDN may return
       // 206, which is not a complete rewritten manifest response: forwarding
       // its relative segment paths makes FFmpeg request unknown loopback IDs.
       // Fetch known playlists whole; retain byte ranges for media/key inputs.
-      if (!_isHlsUri(upstream) && !_manifests.containsKey(resourceId) && range != null && range.isNotEmpty) {
-        upstreamRequest.headers.set(HttpHeaders.rangeHeader, range);
-      }
-
-      final upstreamResponse = await upstreamRequest.close().timeout(const Duration(seconds: 20));
-      final finalUri = upstreamResponse.redirects.fold<Uri>(
+      final (upstreamResponse, finalUri) = await _openUpstream(
+        request.method,
         upstream,
-        (current, redirect) => current.resolveUri(redirect.location),
+        range: _isHlsUri(upstream) || _manifests.containsKey(resourceId) ? null : range,
       );
       request.response.statusCode = upstreamResponse.statusCode;
       final contentType = upstreamResponse.headers.contentType;
@@ -234,6 +232,65 @@ class FFmpegHlsInputRelay {
         _activeResources[resourceId] = count - 1;
       }
       _pruneResources();
+    }
+  }
+
+  Future<(HttpClientResponse, Uri)> _openUpstream(String method, Uri upstream, {String? range}) async {
+    var uri = upstream;
+    final originalOrigin = _resources['root']!.origin;
+    // Process each redirect ourselves: HttpClient does not retain Set-Cookie
+    // from intermediate responses. Re-evaluate sensitive headers at every hop.
+    for (var redirects = 0; ; redirects++) {
+      if (_closed) throw StateError('HLS relay is closed');
+      final request = await _client.openUrl(method, uri);
+      request.followRedirects = false;
+      String? initialCookie;
+      for (final entry in _headers.entries) {
+        final name = entry.key.toLowerCase();
+        if (name == HttpHeaders.cookieHeader) {
+          if (uri.origin == originalOrigin) initialCookie = entry.value;
+          continue;
+        }
+        if (name == HttpHeaders.authorizationHeader && uri.origin != originalOrigin) continue;
+        request.headers.set(entry.key, entry.value, preserveHeaderCase: true);
+      }
+      final cookie = _cookies.headerFor(uri, initialHeader: initialCookie);
+      if (cookie != null) request.headers.set(HttpHeaders.cookieHeader, cookie);
+      if (!_isHlsUri(uri) && range != null && range.isNotEmpty) {
+        request.headers.set(HttpHeaders.rangeHeader, range);
+      }
+      final response = await request.close().timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          request.abort();
+          throw TimeoutException('HLS upstream headers timed out');
+        },
+      );
+      if (_closed) {
+        request.abort();
+        throw StateError('HLS relay is closed');
+      }
+      _cookies.receive(uri, response.headers[HttpHeaders.setCookieHeader] ?? const []);
+      final location = response.headers.value(HttpHeaders.locationHeader);
+      if (!const {301, 302, 303, 307, 308}.contains(response.statusCode) || location == null) {
+        return (response, uri);
+      }
+      final next = uri.resolve(location);
+      if (redirects >= 5 ||
+          !const {'http', 'https'}.contains(next.scheme) ||
+          next.userInfo.isNotEmpty ||
+          (uri.scheme == 'https' && next.scheme != 'https')) {
+        request.abort();
+        throw const HttpException('HLS redirect rejected or limit exceeded');
+      }
+      await response.drain<void>().timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          request.abort();
+          throw TimeoutException('HLS redirect body timed out');
+        },
+      );
+      uri = next;
     }
   }
 

@@ -10,6 +10,8 @@
 
 ### 当前调度
 
+最新[TwitCasting原生与会话审计](TWITCASTING_ANDROID_NATIVE_AUDIT_2026_09_07.md)：Android 1a18f353已保留数据覆盖安装，首段401导致短录FAIL，源码Cookie修订尚待新候选实机复验。11:55:25 UTC精确核验两个代理session恢复、reverse回到基线、本包进程/唤醒锁消失；测试监控已明确取消，原有监控保留，常亮恢复。手机当前未安装后续Cookie修复。NoRotation及用户远程边界保持。
+
 最新[浮窗遮挡收尾审计](ANDROID_PROXY_OCCLUSION_AUDIT_2026_09_07.md)：复用1aa6886f，已完成一次实际录制后代理开关自动恢复与session/映射/进程/唤醒锁清理。10:26:02 UTC最终核验通过；这是历史证据，下一次仍重新核对设备与前台。NoRotation调度规则保持不变。
 
 最新[Picarto 原生审计](PICARTO_ANDROID_NATIVE_AUDIT_2026_09_07.md)：候选已覆盖安装，独立代理往返通过，短录因解码损坏与自动收尾失败尚未通过；明确恢复及进程/唤醒锁/常亮清理已完成。录制入口使用实际返回导航；嵌套滚动修订只有离线复验，下一轮先补最小原生恢复证据。

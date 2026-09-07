@@ -17,6 +17,7 @@ void main() {
         Sites.soopSite,
         Sites.yySite,
         Sites.acfunSite,
+        Sites.picartoSite,
         Sites.iptvSite,
       ]),
     );

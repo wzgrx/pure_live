@@ -10,6 +10,8 @@
 
 ### 当前调度
 
+最新[Picarto 原生审计](PICARTO_ANDROID_NATIVE_AUDIT_2026_09_07.md)：候选已覆盖安装，独立代理往返通过，短录因解码损坏与自动收尾失败尚未通过；明确恢复及进程/唤醒锁/常亮清理已完成。录制入口使用实际返回导航；嵌套滚动修订只有离线复验，下一轮先补最小原生恢复证据。
+
 本轮录制工具更新见[守卫审计](ANDROID_RECORDING_GUARD_AUDIT_2026_09_07.md)：`android_recording_smoke.ps1`要求明确Serial、型号/代号一致且Pure Live已在前台；前台或连接异常时停止，不重选目标、不重放输入、不抢回应用。平台导航按实际标签逐次观察。[代理事务](ANDROID_PROXY_TRANSACTION_AUDIT_2026_09_07.md)现已完成离线回归；国外录制前先独立验证本轮代理开启/恢复和session对账，不把旧入口说明当作当前手机已验收。
 
 用户已暂停三个任务轮转。本次完整验收使用 `tool/run_android_device_test_turn.ps1 -NoRotation -CommandLine '…'` 直接执行本项目的串行设备步骤，保留唤醒、常亮恢复、前台校验和失败清理。网络 ADB 在线先测 Android，离线改测 Windows；不等待其他任务交棒，也不操作其他应用。恢复共享实机安排时再使用下面的默认租约流程。此开关只改变调度，不代表绕过设备检查。

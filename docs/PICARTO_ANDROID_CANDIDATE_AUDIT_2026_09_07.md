@@ -1,5 +1,7 @@
 # Picarto 累计 Android 候选（2026-09-07）
 
+后续进展：[覆盖安装与 Picarto 原生审计](PICARTO_ANDROID_NATIVE_AUDIT_2026_09_07.md)。新候选已安装，独立代理往返通过；首个短录文件完整解码失败、自动代理恢复失败后已明确恢复。后续脚本回归与剩余范围以该记录为准，下文保留本批历史证据。
+
 候选源码 `2006c04403c6a7e93a6c0bfc7edabc5d8f1a9024`，构建时 tracked files 干净。包含 [Picarto 接入](PICARTO_ADAPTER_AUDIT_2026_09_07.md)、[录制卡片布局](RECORDER_PAGE_LAYOUT_AUDIT_2026_09_07.md)及此前累计修复。版本仍为 3.1.8+4121；这是本机 Debug 候选，不是 3.2.0 发布。
 
 ## 测试失败与闭合

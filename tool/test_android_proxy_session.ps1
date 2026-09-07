@@ -208,6 +208,32 @@ try{
         Save-ProxySession $s $sessionPath
         Throws {Read-ProxySession $sessionPath '192.0.2.10:5555'} 'identity/schema'
     }
+    Case 'native nested settings uses the inner scroll viewport' {
+        $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_nested_settings.xml') -Raw -Encoding utf8)
+        Invoke-ProxyScroll $document
+        Equal @($calls | Where-Object {$_ -match '^shell input swipe'}).Count 1 'one observed gesture'
+        Equal $calls[$calls.Count-1] 'shell input swipe 600 2148 600 886 280' 'inner viewport coordinates'
+    }
+    Case 'sibling scroll areas remain ambiguous with no input' {
+        $document=[xml]'<hierarchy><node enabled="true" scrollable="true" bounds="[0,0][1200,2608]"><node enabled="true" scrollable="true" bounds="[0,300][600,2608]"/><node enabled="true" scrollable="true" bounds="[600,300][1200,2608]"/></node></hierarchy>'
+        Throws {Invoke-ProxyScroll $document} 'missing or ambiguous'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no guessed gesture'
+    }
+    Case 'empty scroll candidates remain stopped' {
+        Throws {Invoke-ProxyScroll ([xml]'<hierarchy/>')} 'missing or ambiguous'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no fallback gesture'
+    }
+    Case 'nested but non-contained bounds stop before input' {
+        $document=[xml]'<hierarchy><node enabled="true" scrollable="true" bounds="[0,0][1200,1600]"><node enabled="true" scrollable="true" bounds="[0,300][1200,2608]"/></node></hierarchy>'
+        Throws {Invoke-ProxyScroll $document} 'inconsistent nested bounds'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no out-of-viewport gesture'
+    }
+    Case 'nested scroll still checks foreground immediately before input' {
+        $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_nested_settings.xml') -Raw -Encoding utf8)
+        $fake.Foreground='example.other'
+        Throws {Invoke-ProxyScroll $document} 'foreground changed'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no other app input'
+    }
     Write-Output "SUMMARY $script:passed proxy transaction scenarios passed; actual ADB commands: 0"
 }finally{
     $absolute=[IO.Path]::GetFullPath($root)

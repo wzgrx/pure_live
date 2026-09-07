@@ -91,10 +91,34 @@ function Invoke-ProxyScroll {
         $_.GetAttribute('scrollable') -eq 'true' -and $_.GetAttribute('enabled') -eq 'true'
     } | ForEach-Object {
         $b=Get-ProxyBounds $_.GetAttribute('bounds')
-        if ($b.Bottom-$b.Top -ge 160 -and $b.Right-$b.Left -ge 160) { $b }
+        if ($b.Bottom-$b.Top -ge 160 -and $b.Right-$b.Left -ge 160) {
+            [pscustomobject]@{Node=$_;Bounds=$b}
+        }
     })
-    if ($areas.Count -ne 1) { throw 'Proxy scroll container is missing or ambiguous.' }
-    $b=$areas[0]; $x=[math]::Floor(($b.Left+$b.Right)/2)
+    # Flutter's floating-player wrapper can expose an outer scrollable View
+    # around the actual settings ScrollView. Accept only one nested chain,
+    # never guess between sibling scroll targets or outside ancestor bounds.
+    $leaves=@($areas | Where-Object {
+        $candidate=$_
+        @($areas | Where-Object {
+            $ancestor=$_.Node.ParentNode
+            while ($null -ne $ancestor) {
+                if ([object]::ReferenceEquals($ancestor,$candidate.Node)) { return $true }
+                $ancestor=$ancestor.ParentNode
+            }
+            return $false
+        }).Count -eq 0
+    })
+    if ($leaves.Count -ne 1) { throw 'Proxy scroll container is missing or ambiguous.' }
+    $b=$leaves[0].Bounds
+    foreach ($area in $areas) {
+        $outer=$area.Bounds
+        if ($outer.Left -gt $b.Left -or $outer.Top -gt $b.Top -or
+            $outer.Right -lt $b.Right -or $outer.Bottom -lt $b.Bottom) {
+            throw 'Proxy scroll container has inconsistent nested bounds.'
+        }
+    }
+    $x=[math]::Floor(($b.Left+$b.Right)/2)
     $y1=[math]::Floor($b.Top+($b.Bottom-$b.Top)*0.8); $y2=[math]::Floor($b.Top+($b.Bottom-$b.Top)*0.25)
     if ($TowardStart) { $swap=$y1; $y1=$y2; $y2=$swap }
     Invoke-ProxyAdb @('shell','input','swipe',$x,$y1,$x,$y2,'280') | Out-Null

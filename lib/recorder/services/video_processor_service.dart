@@ -41,14 +41,17 @@ class VideoProcessorService extends GetxService {
     if (id == null || operation.nativeEnded || !_ffmpeg.isRunning(id)) return;
     final existing = operation.stopRequest;
     if (existing != null) return existing;
-    final request = Future<void>.sync(() => _ffmpeg.stop(id)).catchError((Object error, StackTrace stack) {
-      log('Video merge stop request failed', error: error, stackTrace: stack);
-    });
-    operation.stopRequest = request;
+    // Publish ownership before invoking native code: stop may synchronously
+    // emit startAck/terminal events and re-enter this path. A completed stop
+    // acknowledgement is not a completed writer, so retain it until disposal.
+    final stopped = Completer<void>();
+    operation.stopRequest = stopped.future;
     try {
-      await request;
+      await _ffmpeg.stop(id);
+    } catch (error, stackTrace) {
+      log('Video merge stop request failed', error: error, stackTrace: stackTrace);
     } finally {
-      if (identical(operation.stopRequest, request)) operation.stopRequest = null;
+      stopped.complete();
     }
   }
 

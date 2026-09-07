@@ -36,6 +36,7 @@ void main() {
   });
   tearDown(() async {
     if (native.startGate?.isCompleted == false) native.startGate!.complete();
+    if (native.exitGate?.isCompleted == false) native.exitGate!.complete();
     native.finish();
     await conversion?.timeout(const Duration(seconds: 2));
     await _waitForMergeRelease(service, task.taskId);
@@ -91,10 +92,30 @@ void main() {
     expect(escapedDeadline, isFalse, reason: 'The native start Future is the execution, not a start acknowledgement.');
     expect(result, isFalse);
     expect(native.stopCalls, 1);
+    // Stop acknowledgement can precede both native exit and asynchronous file
+    // cleanup. Observe the ownership release, not a microtask ordering.
+    await _waitForMergeRelease(service, task.taskId);
     expect(native.running, isFalse);
     expect(service.isProcessing(task.taskId), isFalse);
     expect(await source.exists(), isTrue);
     expect(await File(native.output!).exists(), isFalse);
+  });
+
+  test('stop acknowledgement is latched until the actual writer exits', () async {
+    native.exitGate = Completer<void>();
+    conversion = service.convertToMp4(task: task);
+    await native.started.future;
+    await service.cancel(task.taskId);
+    expect(native.running, true);
+    await service.cancel(task.taskId);
+    service.onClose();
+    expect(native.stopCalls, 1);
+    expect(service.isProcessing(task.taskId), true);
+    expect(await source.exists(), true);
+    native.exitGate!.complete();
+    expect(await conversion!, false);
+    await _waitForMergeRelease(service, task.taskId);
+    expect(native.stopCalls, 1);
   });
 
   test('cancel during directory preparation never starts a native merge', () async {
@@ -231,6 +252,7 @@ class _NativeLifecycleFixture implements FFmpegManager {
   bool stopCompletes = true;
   bool failOnFinish = false;
   Completer<void>? startGate;
+  Completer<void>? exitGate;
   int startCalls = 0;
   int stopCalls = 0;
   String? output;
@@ -252,6 +274,7 @@ class _NativeLifecycleFixture implements FFmpegManager {
     events.add(FFmpegEvent(taskId: taskId, type: FFmpegEventType.startAck));
     started.complete();
     await _finish.future;
+    await exitGate?.future;
     running = false;
     if (failOnFinish) throw StateError('fixture native execution failure');
     events.add(FFmpegEvent(taskId: taskId, type: FFmpegEventType.complete));

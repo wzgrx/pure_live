@@ -8,6 +8,161 @@ import 'package:pure_live/get/get.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
 void main() {
+  test('stop replaces a stalled refresh body with the last complete playlist', () async {
+    var requests = 0;
+    final partial = Completer<void>();
+    final release = Completer<void>();
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final subscription = origin.listen((request) async {
+      try {
+        if (++requests == 1) {
+          request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nmedia.m4s\n');
+        } else {
+          request.response.bufferOutput = false;
+          request.response.write('#EXTM3U\n');
+          await request.response.flush();
+          partial.complete();
+          await release.future;
+        }
+        await request.response.close();
+      } on Object {
+        /* Intentionally interrupted response. */
+      }
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments([
+      '-i',
+      'http://127.0.0.1:${origin.port}/live.m3u8',
+    ], drainOnStop: true))!;
+    final client = HttpClient();
+    try {
+      final first = await _readText(client, relay.inputUri);
+      final refresh = _readText(client, relay.inputUri);
+      await partial.future.timeout(const Duration(seconds: 2));
+      await relay.finish();
+      expect(await refresh.timeout(const Duration(seconds: 3)), '$first#EXT-X-ENDLIST\n');
+    } finally {
+      release.complete();
+      client.close(force: true);
+      await relay.close();
+      await origin.close(force: true);
+      await subscription.cancel();
+    }
+  });
+
+  for (final phase in ['headers', 'body']) {
+    test('stop retires an unpublished $phase response without exposing a partial fragment', () async {
+      final accepted = Completer<void>();
+      final release = Completer<void>();
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final subscription = origin.listen((request) async {
+        try {
+          if (request.uri.path == '/live.m3u8') {
+            request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nmedia.m4s\n');
+          } else {
+            request.response.contentLength = 8;
+            if (phase == 'body') {
+              request.response.bufferOutput = false;
+              request.response.add([1, 2, 3, 4]);
+              await request.response.flush();
+            }
+            if (!accepted.isCompleted) accepted.complete();
+            await release.future;
+          }
+          await request.response.close();
+        } on Object {
+          /* The intentionally incomplete fixture is closed by stop. */
+        }
+      });
+      final relay = (await FFmpegHlsInputRelay.startForArguments([
+        '-i',
+        'http://127.0.0.1:${origin.port}/live.m3u8',
+      ], drainOnStop: true))!;
+      final client = HttpClient();
+      try {
+        final media = Uri.parse(_mediaLines(await _readText(client, relay.inputUri)).single);
+        var published = false;
+        final responseFuture = (await client.getUrl(media)).close().then((response) {
+          published = true;
+          return response;
+        });
+        await accepted.future.timeout(const Duration(seconds: 2));
+        expect(published, false);
+        await relay.finish();
+        final response = await responseFuture.timeout(const Duration(seconds: 3));
+        expect(response.statusCode, HttpStatus.gone);
+        expect(await response.fold<int>(0, (count, bytes) => count + bytes.length), 0);
+        expect(await _readText(client, relay.inputUri), contains('#EXT-X-ENDLIST'));
+      } finally {
+        if (!release.isCompleted) release.complete();
+        client.close(force: true);
+        await relay.close();
+        await origin.close(force: true);
+        await subscription.cancel();
+      }
+    });
+  }
+
+  test('truncated upstream body fails before any successful response bytes reach the reader', () async {
+    Get.put<LogController>(_QuietLogController());
+    addTearDown(() => Get.delete<LogController>(force: true));
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final subscription = origin.listen((request) async {
+      if (request.uri.path == '/live.m3u8') {
+        request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nmedia.m4s\n');
+        await request.response.close();
+      } else {
+        final socket = await request.response.detachSocket(writeHeaders: false);
+        socket.add(utf8.encode('HTTP/1.1 200 OK\r\nContent-Length: 8\r\nConnection: close\r\n\r\n1234'));
+        await socket.close();
+      }
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments([
+      '-i',
+      'http://127.0.0.1:${origin.port}/live.m3u8',
+    ], drainOnStop: true))!;
+    final client = HttpClient();
+    try {
+      final media = Uri.parse(_mediaLines(await _readText(client, relay.inputUri)).single);
+      final response = await (await client.getUrl(media)).close();
+      expect(response.statusCode, HttpStatus.badGateway);
+      expect(await response.fold<int>(0, (count, bytes) => count + bytes.length), 0);
+    } finally {
+      client.close(force: true);
+      await relay.close();
+      await origin.close(force: true);
+      await subscription.cancel();
+    }
+  });
+
+  test('staging validates decompressed media using its actual byte length', () async {
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final subscription = origin.listen((request) async {
+      if (request.uri.path == '/live.m3u8') {
+        request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nmedia.ts\n');
+      } else {
+        final body = gzip.encode([1, 2, 3, 4]);
+        request.response.headers.set(HttpHeaders.contentEncodingHeader, 'gzip');
+        request.response.contentLength = body.length;
+        request.response.add(body);
+      }
+      await request.response.close();
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments([
+      '-i',
+      'http://127.0.0.1:${origin.port}/live.m3u8',
+    ], drainOnStop: true))!;
+    final client = HttpClient();
+    try {
+      final media = Uri.parse(_mediaLines(await _readText(client, relay.inputUri)).single);
+      expect(await _readBytes(client, media), [1, 2, 3, 4]);
+    } finally {
+      client.close(force: true);
+      await relay.close();
+      await origin.close(force: true);
+      await subscription.cancel();
+    }
+  });
+
   test('playlist session cookies reach init and media without reaching the local reader', () async {
     final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => origin.close(force: true));
@@ -454,6 +609,7 @@ void main() {
   test('an active old segment survives playlist pruning and then releases its address', () async {
     var sequence = 0;
     final release = Completer<void>();
+    final partial = Completer<void>();
     final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final subscription = origin.listen((request) async {
       if (request.uri.path == '/live.m3u8') {
@@ -466,6 +622,7 @@ void main() {
         request.response.bufferOutput = false;
         request.response.add([1, 2]);
         await request.response.flush();
+        if (!partial.isCompleted) partial.complete();
         await release.future;
         request.response.add([3, 4]);
         await request.response.close();
@@ -478,13 +635,13 @@ void main() {
     final client = HttpClient();
     try {
       final first = Uri.parse(_mediaLines(await _readText(client, relay!.inputUri)).single);
-      final response = await (await client.getUrl(first)).close();
-      final started = Completer<void>();
-      final received = response.fold<List<int>>([], (all, bytes) {
-        if (!started.isCompleted) started.complete();
-        return all..addAll(bytes);
+      var published = false;
+      final received = (await client.getUrl(first)).close().then((response) {
+        published = true;
+        return response.fold<List<int>>([], (all, bytes) => all..addAll(bytes));
       });
-      await started.future.timeout(const Duration(seconds: 2));
+      await partial.future.timeout(const Duration(seconds: 2));
+      expect(published, false); // No partial body has crossed the native boundary.
       for (var i = 0; i < 5; i++) {
         await _readText(client, relay.inputUri);
       }

@@ -184,6 +184,16 @@ void main() {
           true,
           reason: 'Cancellation of a partially delivered HLS fragment must not commit a damaged output packet.',
         );
+        expect(
+          results.every((r) {
+            final terminal = r['terminal'] as Map<String, dynamic>?;
+            return terminal?['inputDrained'] == true &&
+                terminal?['forcedCancel'] == false &&
+                terminal?['inputIntegrityError'] == false;
+          }),
+          true,
+          reason: 'Whole-fragment staging must end input normally, not merely preserve a decodable prefix.',
+        );
       } finally {
         Get.reset();
         await Hive.close();

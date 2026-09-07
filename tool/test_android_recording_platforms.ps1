@@ -47,7 +47,14 @@ foreach ($foreignPlatform in @('twitch', 'soop', 'picarto')) {
   throw "Foreign recording wrapper is missing $foreignPlatform"
  }
 }
-Write-Host 'PASS foreign recording wrapper accepts Picarto with existing proxy cleanup'
+$configureCall = $foreignAst.Find({param($n)
+ $n -is [Management.Automation.Language.CommandAst] -and
+ $n.CommandElements[0].Extent.Text -eq '$configure'
+}, $true)
+if ($null -eq $configureCall -or -not ($configureCall.CommandElements | Where-Object {
+ $_ -is [Management.Automation.Language.CommandParameterAst] -and $_.ParameterName -eq 'KeepAppOpen'
+})) { throw 'Proxy setup must retain the target foreground for recording preflight' }
+Write-Host 'PASS foreign wrapper parameters and retained-foreground handoff; proxy lifecycle not exercised'
 
 . (Join-Path $PSScriptRoot 'recording_smoke_coverage.ps1')
 $checks = [ordered]@{

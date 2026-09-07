@@ -10,6 +10,8 @@
 
 ### 当前调度
 
+本轮录制工具更新见[守卫审计](ANDROID_RECORDING_GUARD_AUDIT_2026_09_07.md)：`android_recording_smoke.ps1`要求明确Serial、型号/代号一致且Pure Live已在前台；前台或连接异常时停止，不重选目标、不重放输入、不抢回应用。平台导航按实际标签逐次观察。下文国外代理自动化为历史入口说明，代理配置/清理事务尚待修订，当前暂不运行整套国外录制。
+
 用户已暂停三个任务轮转。本次完整验收使用 `tool/run_android_device_test_turn.ps1 -NoRotation -CommandLine '…'` 直接执行本项目的串行设备步骤，保留唤醒、常亮恢复、前台校验和失败清理。网络 ADB 在线先测 Android，离线改测 Windows；不等待其他任务交棒，也不操作其他应用。恢复共享实机安排时再使用下面的默认租约流程。此开关只改变调度，不代表绕过设备检查。
 
 多条在线 transport 时，包装器使用 `-Serial IP:PORT` 明确选择，或从当前进程 `PURELIVE_ADB_SERIAL` 读取默认值；显式参数优先。该编号经编码传给唤醒步骤，成功后再传给测试正文。清理只针对唤醒成功的同一编号，不跟随正文改写的环境变量；预检选择失败时不对旧环境目标执行常亮清理。离线回归命令为 `python -m unittest discover -s tool/tests -p test_android_device_test_turn.py`，只执行假的唤醒脚本，不调用 ADB。

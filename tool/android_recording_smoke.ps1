@@ -10,6 +10,7 @@ param(
     [int] $PlatformLoadTimeoutSeconds = 45,
     [ValidateSet('bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop', 'yy', 'acfun', 'picarto')]
     [string] $Platform = 'bilibili',
+    [ValidatePattern('^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$')]
     [string] $Package = 'com.mystyle.purelive',
     [string] $Activity = '.MainActivity',
     [switch] $RequireLiveDanmaku,
@@ -28,6 +29,8 @@ if ($Interruption -ne 'none' -and (-not $FinishActivityDuringScreenOff -or -not 
     throw 'Interruption checks require Activity destruction and independent background checks.'
 }
 . (Join-Path $PSScriptRoot 'recorder_background_snapshot.ps1')
+. (Join-Path $PSScriptRoot 'android_recording_navigation.ps1')
+. (Join-Path $PSScriptRoot 'android_activity_state.ps1')
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $evidence = if ([string]::IsNullOrWhiteSpace($EvidenceDirectory)) {
@@ -74,52 +77,74 @@ $qualityLabelPattern = '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|�
 $lineLabelPattern = '^(?:线路\s*\d+|主线路|备用线路)$'
 $script:foregroundInterferenceCount = 0
 $script:foregroundRecoveryCount = 0
+$script:foregroundLost = $false
+$script:transportFailed = $false
+$script:homePackage = ''
 $script:uiProfileData = $null
 $script:uiWidth = 0
 $script:uiHeight = 0
 
-function Start-AdbServer {
-    $output = & $adb start-server 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        throw "adb start-server failed ($LASTEXITCODE):`n$($output -join "`n")"
+function Assert-RecordingForeground {
+    param([switch] $AllowHomeForeground)
+    if ($script:foregroundLost -or $script:transportFailed) {
+        throw 'Device turn was interrupted; stop inputs and revalidate in a new turn.'
     }
+    $output = & $adb -s $script:serial shell dumpsys activity activities 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        $script:transportFailed = $true
+        throw 'Foreground observation failed; no input was sent.'
+    }
+    $current = Get-RecordingForegroundPackage -ActivityDump ($output -join "`n")
+    if ($current -ceq $Package -or ($AllowHomeForeground -and
+        -not [string]::IsNullOrWhiteSpace($script:homePackage) -and $current -ceq $script:homePackage)) { return }
+    $script:foregroundLost = $true
+    $script:foregroundInterferenceCount++
+    throw "Target foreground changed or is unknown (observed='$current'); stopping this device turn."
 }
 
 function Invoke-Adb {
-    param([Parameter(Mandatory = $true)][string[]] $AdbArguments)
+    param(
+        [Parameter(Mandatory = $true)][string[]] $AdbArguments,
+        [switch] $AllowHomeForeground
+    )
+    if ([string]::IsNullOrWhiteSpace($script:serial)) { throw 'An explicit ADB serial is required.' }
+    if ($script:transportFailed) { throw 'Transport failed earlier; start a separately verified device turn.' }
+    # Guard every direct input/observation, including callers outside Invoke-Ui.
+    # App-private cleanup may still run after foreground loss, never UI recovery.
+    $guarded = $AdbArguments.Count -ge 2 -and $AdbArguments[0] -eq 'shell' -and (
+        $AdbArguments[1] -in @('input', 'uiautomator', 'screencap') -or
+        ($AdbArguments[1] -eq 'wm' -and $AdbArguments.Count -ge 3 -and $AdbArguments[2] -eq 'dismiss-keyguard') -or
+        ($AdbArguments[1] -eq 'am' -and $AdbArguments.Count -ge 3 -and $AdbArguments[2] -eq 'start')
+    )
+    if ($guarded) { Assert-RecordingForeground -AllowHomeForeground:$AllowHomeForeground }
     $output = & $adb -s $script:serial @AdbArguments 2>&1
     $exitCode = $LASTEXITCODE
-    $text = $output -join "`n"
-    if ($exitCode -ne 0 -and $text -match '(?i)cannot connect to daemon|daemon still not running') {
-        Start-AdbServer
-        Start-Sleep -Milliseconds 350
-        $output = & $adb -s $script:serial @AdbArguments 2>&1
-        $exitCode = $LASTEXITCODE
-        $text = $output -join "`n"
-    }
-    if ($exitCode -ne 0 -and $text -match "(?i)device '.*' not found|device offline|transport.*closed") {
-        # Wireless Debugging can rotate from the mDNS alias to a numeric
-        # endpoint while a long recording run is active. Reuse the same wake
-        # guard as the outer lease, adopt its newly resolved serial, and retry
-        # the interrupted observation once instead of invalidating the whole
-        # product result because the host transport name changed.
-        $wakeOutput = @(& (Join-Path $repo 'tool\wake_android_device.ps1') -StayAwake 2>&1)
-        $wakeExitCode = $LASTEXITCODE
-        $wakeJson = $wakeOutput | Where-Object { $_ -match '^\s*\{' } | Select-Object -Last 1
-        if ($wakeExitCode -eq 0 -and $wakeJson) {
-            $wakeState = $wakeJson | ConvertFrom-Json
-            if (-not [string]::IsNullOrWhiteSpace([string]$wakeState.Serial)) {
-                $script:serial = [string]$wakeState.Serial
-                $env:PURELIVE_ADB_SERIAL = $script:serial
-                $output = & $adb -s $script:serial @AdbArguments 2>&1
-                $exitCode = $LASTEXITCODE
-            }
-        }
-    }
     if ($exitCode -ne 0) {
+        # A failed command may already have reached Android. Never replay it,
+        # restart the daemon, re-resolve a target, or adopt another transport.
+        if (($output -join "`n") -match '(?i)daemon|device offline|not found|transport|closed|connect') {
+            $script:transportFailed = $true
+        }
         throw "adb failed ($exitCode): $($AdbArguments -join ' ')`n$($output -join "`n")"
     }
     $output
+}
+
+function Initialize-RecordingTarget {
+    param([string] $RequestedSerial)
+    if ([string]::IsNullOrWhiteSpace($RequestedSerial)) { throw 'Pass an explicit -Serial or PURELIVE_ADB_SERIAL.' }
+    $script:serial = $RequestedSerial
+    # Identity and foreground preflight precede try/finally and all device writes.
+    $model = ((Invoke-Adb -AdbArguments @('shell', 'getprop', 'ro.product.model')) -join '').Trim()
+    $device = ((Invoke-Adb -AdbArguments @('shell', 'getprop', 'ro.product.device')) -join '').Trim()
+    if ($model -cne '25102RKBEC' -or $device -cne 'myron') {
+        throw "Device identity mismatch: $model / $device."
+    }
+    Assert-RecordingForeground
+    $homeResponse = ((Invoke-Adb -AdbArguments @('shell', 'cmd', 'package', 'resolve-activity', '--brief', '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.HOME')) -join "`n")
+    if ($homeResponse -match '(?m)^(?<package>[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+)/[^\s]+\s*$') {
+        $script:homePackage = $Matches['package']
+    }
 }
 
 function Save-Text {
@@ -127,36 +152,10 @@ function Save-Text {
     $Value | Out-File -LiteralPath (Join-Path $evidence $Name) -Encoding utf8 -Width 4096
 }
 
-function Save-ForegroundForensics {
-    param(
-        [Parameter(Mandatory = $true)][string] $Name,
-        [Parameter(Mandatory = $true)][AllowEmptyString()][string] $Foreground
-    )
-
-    Save-Text "foreground-changed-$Name.txt" $Foreground
-    $processOutput = & $adb -s $script:serial shell pidof $Package 2>&1
-    $processExitCode = $LASTEXITCODE
-    Save-Text "foreground-changed-$Name-process.txt" @(
-        "exitCode=$processExitCode"
-        $processOutput
-    )
-    Save-Text "foreground-changed-$Name-activities.txt" (
-        Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'activities')
-    )
-    Save-Text "foreground-changed-$Name-exit-info.txt" (
-        Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'exit-info', $Package)
-    )
-    Save-Text "foreground-changed-$Name-logcat.txt" (
-        Invoke-Adb -AdbArguments @('logcat', '-d', '-t', '800')
-    )
-    return $processExitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace(($processOutput -join ''))
-}
-
 function Save-UiDump {
     param([string] $Name)
-    # K90 Pro locks after ten minutes. Slow wireless ADB calls can cross that
-    # boundary during one smoke, so refresh the no-password keyguard before
-    # every UI observation instead of trusting the wrapper's initial wake.
+    # Recheck target foreground before wake, capture and after pull. Foreground
+    # loss or transport uncertainty ends this turn; only dump failures retry.
     Wake-AndDismissKeyguard
     $remote = "/sdcard/purelive-record-$PID-$Name.xml"
     $local = Join-Path $evidence "$Name.xml"
@@ -168,28 +167,12 @@ function Save-UiDump {
             if ($dumpText -match '(?i)error|exception') { throw $dumpText }
             Invoke-Adb -AdbArguments @('pull', $remote, $local) | Out-Null
             if ((Test-Path -LiteralPath $local -PathType Leaf) -and (Get-Item -LiteralPath $local).Length -gt 0) {
-                $foreground = Get-Foreground
-                if ($foreground -notmatch [regex]::Escape($Package)) {
-                    $processAlive = Save-ForegroundForensics `
-                        -Name "$Name-attempt$attempt" `
-                        -Foreground $foreground
-                    $script:foregroundInterferenceCount++
-                    Save-Text "foreground-changed-$Name-attempt$attempt-restore.txt" (
-                        Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity")
-                    )
-                    Start-Sleep -Milliseconds 900
-                    $restoredForeground = Get-Foreground
-                    $restored = $restoredForeground -match [regex]::Escape($Package)
-                    if ($restored) { $script:foregroundRecoveryCount++ }
-                    throw (
-                        "Pure Live lost foreground during its device lease " +
-                        "(processAlive=$processAlive, restored=$restored): $foreground"
-                    )
-                }
+                Assert-RecordingForeground
                 return
             }
             throw 'UI dump was empty.'
         } catch {
+            if ($script:foregroundLost -or $script:transportFailed) { throw }
             $failures.Add("attempt ${attempt}: $($_.Exception.Message)")
             Start-Sleep -Milliseconds (350 * $attempt)
         } finally {
@@ -417,130 +400,46 @@ function Wait-StreamSelectionCommit {
 
 function Select-PlatformTab {
     param([Parameter(Mandatory = $true)][string] $Label)
-
-    $targetIndex = @{
-        # Current Flutter semantics include the aggregate "全部" item in the
-        # platform TabBar. Keep these in sync with the accessibility ordinals;
-        # unrelated status/bottom tabs are filtered by their smaller totals.
-        '哔哩哔哩' = 2
-        '斗鱼' = 3
-        '虎牙' = 4
-        '抖音' = 5
-        '快手' = 6
-        '网易CC' = 7
-        'Twitch' = 8
-        'Soop' = 9
-        'YY' = 10
-        'AcFun 直播' = 11
-    }[$Label]
-    if (-not $targetIndex) { throw "No platform tab index is registered for '$Label'." }
-
-    for ($attempt = 0; $attempt -lt 5; $attempt++) {
+    # Search the observed header, not a default site order or the page body.
+    # Start at the current position, inspect toward the start, then sweep right.
+    $direction = 'start'
+    $previousSignature = ''
+    for ($attempt = 0; $attempt -lt 48; $attempt++) {
         $name = "home-platform-tab-$attempt"
         Save-UiDump $name
         $xmlText = Get-Content -LiteralPath (Join-Path $evidence "$name.xml") -Raw -Encoding UTF8
-        if (Test-UiSemanticEnabled -Xml $xmlText -Semantic $Label) {
-            if (Test-UiSemanticSelected -Xml $xmlText -Semantic $Label) { return }
-            Invoke-Ui -Action TapSemantic -Value $Label -Xml $xmlText
-            Start-Sleep -Milliseconds 900
-            continue
-        }
-        if ($attempt -eq 4) { break }
-
-        [xml]$document = $xmlText
-        $visibleTabs = @(
-            $document.SelectNodes('//node') | ForEach-Object {
-                $semantic = if (-not [string]::IsNullOrWhiteSpace($_.GetAttribute('content-desc'))) {
-                    $_.GetAttribute('content-desc')
-                } else {
-                    $_.GetAttribute('text')
-                }
-                if (
-                    $_.GetAttribute('enabled') -eq 'true' -and
-                    $_.GetAttribute('clickable') -eq 'true' -and
-                    $semantic -match '^(.+?)[\r\n]+第\s*(\d+)\s*个标签，共\s*(\d+)\s*个$' -and
-                    [int]([regex]::Match($semantic, '共\s*(\d+)\s*个').Groups[1].Value) -ge 9 -and
-                    $_.GetAttribute('bounds') -match '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$'
-                ) {
-                    $ordinal = [int]([regex]::Match($semantic, '第\s*(\d+)\s*个标签').Groups[1].Value)
-                    $null = $_.GetAttribute('bounds') -match '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$'
-                    [pscustomobject]@{
-                        Index = $ordinal
-                        Left = [int]$Matches[1]
-                        Top = [int]$Matches[2]
-                        Right = [int]$Matches[3]
-                        Bottom = [int]$Matches[4]
-                        Selected = $_.GetAttribute('selected') -eq 'true'
-                    }
-                }
-            }
-        )
-        if ($visibleTabs.Count -eq 0) {
-            throw "No visible platform tabs were available while locating '$Label'."
-        }
-        $left = ($visibleTabs | Measure-Object Left -Minimum).Minimum
-        $right = ($visibleTabs | Measure-Object Right -Maximum).Maximum
-        $top = ($visibleTabs | Measure-Object Top -Minimum).Minimum
-        $bottom = ($visibleTabs | Measure-Object Bottom -Maximum).Maximum
-        $minIndex = ($visibleTabs | Measure-Object Index -Minimum).Minimum
-        $maxIndex = ($visibleTabs | Measure-Object Index -Maximum).Maximum
-        $y = [math]::Round(($top + $bottom) / 2)
-        $selectedIndex = @($visibleTabs | Where-Object Selected | Select-Object -ExpandProperty Index -First 1)
-        if ($selectedIndex.Count -eq 1 -and $selectedIndex[0] -ne $targetIndex) {
-            # Change the TabBarView itself rather than only scrolling the tab
-            # header. Flutter recentres a selected tab after app resume; a
-            # shared-device foreground switch can therefore undo header-only
-            # scrolling. The selected page index survives that interruption.
-            $distance = [math]::Abs($targetIndex - $selectedIndex[0])
-            $swipeCount = [math]::Min(4, $distance)
-            $screenSize = (Invoke-Adb -AdbArguments @('shell', 'wm', 'size')) -join "`n"
-            if ($screenSize -notmatch '(\d+)x(\d+)') { throw "Could not parse device size: $screenSize" }
-            $screenWidth = [int]$Matches[1]
-            $screenHeight = [int]$Matches[2]
-            $pageY = [math]::Round($screenHeight * 0.5)
-            if ($targetIndex -gt $selectedIndex[0]) {
-                $pageX1 = [math]::Round($screenWidth * 0.84)
-                $pageX2 = [math]::Round($screenWidth * 0.16)
-            } else {
-                $pageX1 = [math]::Round($screenWidth * 0.16)
-                $pageX2 = [math]::Round($screenWidth * 0.84)
-            }
-            for ($swipe = 0; $swipe -lt $swipeCount; $swipe++) {
-                Invoke-Adb -AdbArguments @(
-                    'shell', 'input', 'swipe', $pageX1, $pageY, $pageX2, $pageY, '220'
-                ) | Out-Null
-                Start-Sleep -Milliseconds 420
-            }
+        $tabs = @(Get-RecordingPlatformTabs -Xml $xmlText -KnownLabels @(@($platformLabels.Values) + @('全部', 'All', 'IPTV')))
+        $target = @($tabs | Where-Object { $_.Label -ceq $Label -and ($_.Right - $_.Left) -ge 20 })
+        if ($target.Count -eq 1) {
+            if ($target[0].Selected) { return }
+            if ($attempt -eq 47) { break }
+            $x = [math]::Floor(($target[0].Left + $target[0].Right) / 2)
+            $y = [math]::Floor(($target[0].Top + $target[0].Bottom) / 2)
+            Invoke-Adb -AdbArguments @('shell', 'input', 'tap', $x, $y) | Out-Null
             Start-Sleep -Milliseconds 500
             continue
         }
-        $averageWidth = [math]::Round((($visibleTabs | ForEach-Object { $_.Right - $_.Left } | Measure-Object -Average).Average))
-        if ($targetIndex -gt $maxIndex) {
-            $distance = $targetIndex - $maxIndex
-            $swipeCount = [math]::Max(1, [math]::Min(4, [math]::Ceiling($distance / 2)))
-            $delta = [math]::Max(260, [math]::Min(640, [math]::Round($averageWidth * 2.4)))
-            $x1 = $right - 24
-            $x2 = $x1 - $delta
-        } elseif ($targetIndex -lt $minIndex) {
-            $distance = $minIndex - $targetIndex
-            $swipeCount = [math]::Max(1, [math]::Min(4, [math]::Ceiling($distance / 2)))
-            $delta = [math]::Max(260, [math]::Min(640, [math]::Round($averageWidth * 2.4)))
-            $x1 = $left + 24
-            $x2 = $x1 + $delta
-        } else {
-            throw "Platform tab '$Label' is absent inside the visible platform index range $minIndex-$maxIndex."
+        if ($attempt -eq 47) { break }
+        $signature = ($tabs | ForEach-Object { "$($_.Label):$($_.Left):$($_.Right)" }) -join '|'
+        $atStart = ($tabs | Measure-Object Index -Minimum).Minimum -eq 1
+        $atEnd = ($tabs | Measure-Object Index -Maximum).Maximum -eq $tabs[0].Total
+        if ($direction -eq 'start' -and ($atStart -or $signature -ceq $previousSignature)) {
+            $direction = 'end'
+            $previousSignature = ''
+        } elseif ($direction -eq 'end' -and ($atEnd -or $signature -ceq $previousSignature)) {
+            throw "Platform '$Label' is hidden or absent in the observed tab list."
         }
-        # Issue a short bounded batch instead of dumping after every small
-        # scroll. This reaches far-right tabs before another shared-device
-        # client can steal the foreground and keeps the gesture away from the
-        # system edge/navigation regions.
-        for ($swipe = 0; $swipe -lt $swipeCount; $swipe++) {
-            Invoke-Adb -AdbArguments @('shell', 'input', 'swipe', $x1, $y, $x2, $y, '240') | Out-Null
-            Start-Sleep -Milliseconds 180
-        }
+        $left = ($tabs | Measure-Object Left -Minimum).Minimum + 12
+        $right = ($tabs | Measure-Object Right -Maximum).Maximum - 12
+        if ($right - $left -lt 40) { throw 'Observed platform header is too narrow for a gesture.' }
+        $y = [math]::Floor(($tabs[0].Top + $tabs[0].Bottom) / 2)
+        $x1 = if ($direction -eq 'start') { $left } else { $right }
+        $x2 = if ($direction -eq 'start') { $right } else { $left }
+        Invoke-Adb -AdbArguments @('shell', 'input', 'swipe', $x1, $y, $x2, $y, '240') | Out-Null
+        $previousSignature = $signature
         Start-Sleep -Milliseconds 500
     }
-    throw "Platform tab '$Label' did not become visible after bounded horizontal scrolling."
+    throw "Platform '$Label' did not become selected within 48 observed steps."
 }
 
 function Wait-UiSemanticEnabled {
@@ -562,35 +461,20 @@ function Wait-UiSemanticEnabled {
 }
 
 function Get-Foreground {
-    $line = Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'activities') |
-        Select-String 'topResumedActivity|mResumedActivity' |
-        Select-Object -First 1
-    if ($line) { return $line.Line.Trim() }
-    ''
+    $lines = @(Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'activity', 'activities'))
+    $top = @($lines | Where-Object { $_ -match '^\s*topResumedActivity\s*=' })
+    if ($top.Count -gt 0) { return ($top -join "`n").Trim() }
+    ($lines | Where-Object { $_ -match '^\s*mResumedActivity\s*[:=]' }) -join "`n"
 }
 
 function Wake-AndDismissKeyguard {
-    Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP') | Out-Null
-    Invoke-Adb -AdbArguments @('shell', 'wm', 'dismiss-keyguard') | Out-Null
-    Start-Sleep -Milliseconds 250
+    param([switch] $AllowHomeForeground)
+    Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP') -AllowHomeForeground:$AllowHomeForeground | Out-Null
+    Invoke-Adb -AdbArguments @('shell', 'wm', 'dismiss-keyguard') -AllowHomeForeground:$AllowHomeForeground | Out-Null
     $policy = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'window', 'policy')) -join "`n"
-    $locked = $policy -match '(?im)(?:mShowingLockscreen|mKeyguardShowing|isKeyguardShowing|keyguardShowing|mDreamingLockscreen|isStatusBarKeyguard)\s*=\s*true'
-    if (-not $locked) { return }
-
-    $size = (Invoke-Adb -AdbArguments @('shell', 'wm', 'size')) -join "`n"
-    if ($size -notmatch '(\d+)x(\d+)') { throw "Unexpected device size output: $size" }
-    $width = [int]$Matches[1]
-    $height = [int]$Matches[2]
-    Invoke-Adb -AdbArguments @(
-        'shell', 'input', 'swipe',
-        [math]::Round($width * 0.5),
-        [math]::Round($height * 0.84),
-        [math]::Round($width * 0.5),
-        [math]::Round($height * 0.24),
-        '350'
-    ) | Out-Null
-    Start-Sleep -Milliseconds 350
-    Invoke-Adb -AdbArguments @('shell', 'wm', 'dismiss-keyguard') | Out-Null
+    if ($policy -match '(?im)(?:mShowingLockscreen|mKeyguardShowing|isKeyguardShowing|keyguardShowing|mDreamingLockscreen|isStatusBarKeyguard)\s*=\s*true') {
+        throw 'Keyguard remains visible; no unlock swipe will be sent.'
+    }
 }
 
 function Initialize-UiProfile {
@@ -787,28 +671,7 @@ function Copy-PrivateFile {
     }
 }
 
-Start-AdbServer
-$deviceRows = & $adb devices -l
-if ([string]::IsNullOrWhiteSpace($Serial)) {
-    $devices = @(
-        $deviceRows | ForEach-Object {
-            if ($_ -match '^(\S+)\s+device(?:\s|$)') { $Matches[1] }
-        }
-    )
-    $wireless = @($devices | Where-Object { $_ -match '^(?:\d{1,3}\.){3}\d{1,3}:\d+$' })
-    if ($devices.Count -eq 1) { $script:serial = $devices[0] }
-    elseif ($wireless.Count -eq 1) { $script:serial = $wireless[0] }
-    else { throw 'Specify -Serial when a unique network ADB transport cannot be selected.' }
-} else {
-    $matched = @(
-        $deviceRows | ForEach-Object {
-            if ($_ -match '^(\S+)\s+device(?:\s|$)' -and $Matches[1] -eq $Serial) { $Matches[1] }
-        }
-    )
-    if ($matched.Count -ne 1) { throw "Requested ADB serial '$Serial' is not online." }
-    $script:serial = $Serial
-}
-$env:PURELIVE_ADB_SERIAL = $script:serial
+Initialize-RecordingTarget -RequestedSerial $Serial
 
 $result = [ordered]@{
     schemaVersion = 1
@@ -837,7 +700,7 @@ try {
     Save-Text 'keyguard-after-wake.txt' (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'window', 'policy'))
     Invoke-Adb -AdbArguments @('shell', 'am', 'force-stop', $Package) | Out-Null
     Save-Text 'cold-start.txt' (
-        Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity")
+        Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity") -AllowHomeForeground
     )
     Start-Sleep -Seconds 7
 
@@ -1055,7 +918,7 @@ try {
             $result.checks.activityDestroyedDuringRecording = -not $activityPresent
             if ($activityPresent) { throw 'MainActivity remained in task history after finish.' }
         }
-        Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_SLEEP') | Out-Null
+        Invoke-Adb -AdbArguments @('shell', 'input', 'keyevent', 'KEYCODE_SLEEP') -AllowHomeForeground:$FinishActivityDuringScreenOff | Out-Null
         Start-Sleep -Milliseconds 750
         $screenOffPower = (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'power')) -join "`n"
         Save-Text 'power-during-screen-off.txt' $screenOffPower
@@ -1127,9 +990,9 @@ try {
             }
             return
         }
-        Wake-AndDismissKeyguard
+        Wake-AndDismissKeyguard -AllowHomeForeground:$FinishActivityDuringScreenOff
         if ($FinishActivityDuringScreenOff) {
-            Save-Text 'activity-relaunch.txt' (Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity"))
+            Save-Text 'activity-relaunch.txt' (Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity") -AllowHomeForeground)
         }
         Start-Sleep -Seconds 2
         $result.checks.roomForegroundAfterScreenOff = Get-Foreground
@@ -1302,7 +1165,7 @@ try {
         $processAfterStop
     )
     $result.checks.processGoneAfterStop =
-        $processAfterStopExitCode -ne 0 -or [string]::IsNullOrWhiteSpace(($processAfterStop -join ''))
+        Test-AndroidPidAbsent -ExitCode $processAfterStopExitCode -Output ($processAfterStop -join "`n")
     try {
         $powerAfterStop = Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'power')
         Save-Text 'wake-locks-after-stop.txt' $powerAfterStop
@@ -1336,7 +1199,7 @@ try {
 $assertions = [ordered]@{
     deviceReady = ($result.checks.deviceState -eq 'device')
     runAsAvailable = [bool]$result.checks.runAsAvailable
-    roomForeground = ($result.checks.roomForeground -match $Package)
+    roomForeground = ((Get-RecordingForegroundPackage -ActivityDump $result.checks.roomForeground) -ceq $Package)
     platformRoomListReady = [bool]$result.checks.platformRoomListReady
     roomUiAlive = [bool]$result.checks.roomUiAlive
     danmakuConnectionReady = (-not [bool]$result.checks.danmakuSupported) -or [bool]$result.checks.danmakuConnectionReady
@@ -1350,7 +1213,7 @@ $assertions = [ordered]@{
     processAliveDuringScreenOff = ($ScreenOffSeconds -eq 0 -or [bool]$result.checks.processAliveDuringScreenOff)
     roomRestoredAfterScreenOff = (
         $ScreenOffSeconds -eq 0 -or
-        ([string]$result.checks.roomForegroundAfterScreenOff -match $Package)
+        ((Get-RecordingForegroundPackage -ActivityDump ([string]$result.checks.roomForegroundAfterScreenOff)) -ceq $Package)
     )
     stoppedStatusVisible = [bool]$result.checks.stoppedStatusVisible
     currentStoppedCardVisible = [bool]$result.checks.currentStoppedCardVisible

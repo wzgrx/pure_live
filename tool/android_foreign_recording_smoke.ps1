@@ -22,7 +22,8 @@ $restore = Join-Path $PSScriptRoot 'android_restore_proxy_defaults.ps1'
 $failure = $null
 
 try {
-    & $configure -Serial $Serial -Mode LocalClash -Port $ProxyPort
+    # Recording now requires the verified target app to remain foreground.
+    & $configure -Serial $Serial -Mode LocalClash -Port $ProxyPort -KeepAppOpen
     if ($LASTEXITCODE -ne 0) { throw "Proxy setup exited with code $LASTEXITCODE." }
 
     $smokeParameters = @{

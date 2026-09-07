@@ -143,6 +143,12 @@ class FFmpegCommandBuilder {
       'segment',
       '-segment_format',
       'mpegts',
+      // The native cancellation callback also interrupts output IO. Commit
+      // complete packets in each child TS while running, rather than leaving
+      // a partial 512 KiB AVIO prefix when cancellation prevents trailer flush.
+      // This protects already muxed packets; input-integrity checks still apply.
+      '-segment_format_options',
+      'flush_packets=1',
       '-segment_time',
       segmentTime.clamp(10, 86400).toString(),
       '-segment_start_number',

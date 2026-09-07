@@ -5,6 +5,31 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_command_builder.dart';
 import 'package:pure_live/recorder/services/ffmpeg_tls_trust_store.dart';
 
 void main() {
+  test('recording flushes complete packets in child TS muxers, not only the outer segment muxer', () {
+    for (final url in [
+      'https://cdn.example/live.m3u8',
+      'https://cdn.example/live.flv',
+      'rtmp://cdn.example/live',
+      'file:///fixture.ts',
+    ]) {
+      final arguments = FFmpegCommandBuilder.buildRecordArguments(
+        url: url,
+        outputDir: Directory.systemTemp.path,
+        segmentTime: 600,
+        preferBestStream: true,
+        rwTimeout: 15,
+        threadQueueSize: 1024,
+      );
+      expect(_valueAfter(arguments, '-segment_format_options'), 'flush_packets=1');
+      expect(arguments.where((value) => value == '-segment_format_options'), hasLength(1));
+      expect(arguments.indexOf('-segment_format_options'), greaterThan(arguments.indexOf('-i')));
+      expect(arguments.indexOf('-segment_format_options'), lessThan(arguments.length - 2));
+      expect(_valueAfter(arguments, '-segment_format'), 'mpegts');
+      expect(_valueAfter(arguments, '-c'), 'copy');
+      expect(arguments, isNot(contains('-flush_packets')));
+    }
+  });
+
   test('recording passes signed URLs, headers and output paths as exact native arguments', () {
     final outputDir = '${Directory.systemTemp.path}${Platform.pathSeparator}Pure Live Records';
     final arguments = FFmpegCommandBuilder.buildRecordArguments(

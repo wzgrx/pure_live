@@ -102,19 +102,16 @@ void main() {
             if (event.type == FFmpegEventType.started && !started.isCompleted) started.complete();
             if (event.type == FFmpegEventType.complete || event.type == FFmpegEventType.error) terminal = event.data;
           });
-          final execution = native.start(
-            taskId: taskId,
-            liveRecording: true,
-            arguments: FFmpegCommandBuilder.buildRecordArguments(
-              url: 'http://127.0.0.1:${origin.port}/fixture.m3u8',
-              outputDir: directory.path,
-              filePrefix: 'fixture',
-              segmentTime: 30,
-              preferBestStream: true,
-              rwTimeout: 30,
-              threadQueueSize: 1024,
-            ),
+          final arguments = FFmpegCommandBuilder.buildRecordArguments(
+            url: 'http://127.0.0.1:${origin.port}/fixture.m3u8',
+            outputDir: directory.path,
+            filePrefix: 'fixture',
+            segmentTime: 30,
+            preferBestStream: true,
+            rwTimeout: 30,
+            threadQueueSize: 1024,
           );
+          final execution = native.start(taskId: taskId, liveRecording: true, arguments: arguments);
           try {
             await Future.wait([started.future, partial.future]).timeout(const Duration(seconds: 35));
             final session = native.getSession(taskId)!;
@@ -154,6 +151,9 @@ void main() {
             await File(p.join(directory.path, 'decode.log')).writeAsString(decoded.errors);
             results.add({
               'fraction': fraction,
+              'segmentFormatOptions': arguments.contains('-segment_format_options')
+                  ? arguments[arguments.indexOf('-segment_format_options') + 1]
+                  : null,
               'partialBytes': partialBytes,
               'completeBytes': completeBytes,
               'stopMs': watch.elapsedMilliseconds,

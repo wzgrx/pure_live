@@ -2,6 +2,8 @@
 
 接续 [Android Cookie 候选复验](TWITCASTING_COOKIE_ANDROID_RETEST_2026_09_07.md)。本批只有本机诊断探针和 PowerShell 测试器修订，应用代码、APK、版本与手机均未改变；**录制损坏仍是 FAIL，不是修复交付**。
 
+后续已增加内层TS逐包刷新，[输出缓冲审计](RECORDING_OUTPUT_FLUSH_AUDIT_2026_09_07.md)记录66/66定向回归及四场景生产原生严格解码通过；输入在途停止仍未完成，未部署新APK。以下保留本批原始红项。
+
 ## 原生对照：完整响应通过，暂停响应失败
 
 新增 opt-in `tool/probes/recorder_hls_partial_stop_probe_test.dart`，使用生产 FFmpegManager、命令生成器、HLS relay 与实际 Windows FFmpegKit；只访问随机端口的 loopback 服务。输入是已有合成 fMP4 fixture，init 加固定 2 秒分片；完整原 fixture 先以外部 FFmpeg 全音视频严格解码通过。

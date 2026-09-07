@@ -4,7 +4,7 @@ function Initialize-ProxyContext {
     if ([string]::IsNullOrWhiteSpace($Serial)) { throw 'An explicit proxy Serial is required.' }
     $script:ProxyContext = @{
         Serial=$Serial; Adb=$AdbExecutable; Evidence=$EvidenceDirectory
-        Package='com.mystyle.purelive'; HomePackage=''; ForegroundLost=$false; Sequence=0
+        Package='com.mystyle.purelive'; HomePackage=''; ForegroundLost=$false; Sequence=0; ActionSequence=0
     }
     $model = ((Invoke-ProxyAdb @('shell','getprop','ro.product.model')) -join '').Trim()
     $device = ((Invoke-ProxyAdb @('shell','getprop','ro.product.device')) -join '').Trim()
@@ -79,10 +79,61 @@ function Find-ProxyNode {
     }
 }
 
-function Invoke-ProxyTap {
+function Get-ProxyTapPoint {
     param($Node)
     $b=$Node.Bounds
-    Invoke-ProxyAdb @('shell','input','tap',[math]::Floor(($b.Left+$b.Right)/2),[math]::Floor(($b.Top+$b.Bottom)/2)) | Out-Null
+    # Accessibility drawing-order is not a reliable Flutter hit-test order.
+    # Conservatively exclude every unrelated enabled clickable rectangle, even
+    # if it might be behind the target. Never close or drag the floating player.
+    $margin=8
+    $regions=@(@{Left=$b.Left+$margin;Top=$b.Top+$margin;Right=$b.Right-$margin;Bottom=$b.Bottom-$margin})
+    if($regions[0].Right-$regions[0].Left -lt 16 -or $regions[0].Bottom-$regions[0].Top -lt 16){
+        throw 'Proxy control has no usable interior hit region.'
+    }
+    $excluded=0
+    foreach($other in $Node.Node.OwnerDocument.SelectNodes('//node[@enabled="true" and @clickable="true"]')){
+        $ancestor=$Node.Node; $isAncestor=$false
+        while($null -ne $ancestor){
+            if([object]::ReferenceEquals($ancestor,$other)){$isAncestor=$true;break}
+            $ancestor=$ancestor.ParentNode
+        }
+        if($isAncestor){continue}
+        $o=Get-ProxyBounds $other.GetAttribute('bounds')
+        $o=@{Left=$o.Left-$margin;Top=$o.Top-$margin;Right=$o.Right+$margin;Bottom=$o.Bottom+$margin}
+        $intersected=$false
+        $regions=@(foreach($r in $regions){
+            $left=[math]::Max($r.Left,$o.Left);$right=[math]::Min($r.Right,$o.Right)
+            $top=[math]::Max($r.Top,$o.Top);$bottom=[math]::Min($r.Bottom,$o.Bottom)
+            if($left -ge $right -or $top -ge $bottom){$r;continue}
+            $intersected=$true
+            @(
+                @{Left=$r.Left;Top=$r.Top;Right=$left;Bottom=$r.Bottom}
+                @{Left=$right;Top=$r.Top;Right=$r.Right;Bottom=$r.Bottom}
+                @{Left=$left;Top=$r.Top;Right=$right;Bottom=$top}
+                @{Left=$left;Top=$bottom;Right=$right;Bottom=$r.Bottom}
+            ) | Where-Object {$_.Right-$_.Left -ge 16 -and $_.Bottom-$_.Top -ge 16}
+        })
+        if($intersected){$excluded++}
+        if($regions.Count -eq 0){throw 'Proxy control is fully occluded; no input issued.'}
+        if($regions.Count -gt 256){throw 'Proxy control occlusion geometry is too complex.'}
+    }
+    $x=[math]::Floor(($b.Left+$b.Right)/2);$y=[math]::Floor(($b.Top+$b.Bottom)/2)
+    $centerFree=@($regions | Where-Object {$x -ge $_.Left -and $x -lt $_.Right -and $y -ge $_.Top -and $y -lt $_.Bottom}).Count -gt 0
+    if(-not $centerFree){
+        $r=$regions | Sort-Object @{Expression={($_.Right-$_.Left)*($_.Bottom-$_.Top)};Descending=$true},Top,Left | Select-Object -First 1
+        $x=[math]::Floor(($r.Left+$r.Right)/2);$y=[math]::Floor(($r.Top+$r.Bottom)/2)
+    }
+    [pscustomobject]@{X=$x;Y=$y;ExcludedRectangles=$excluded;CenterRetained=$centerFree}
+}
+
+function Invoke-ProxyTap {
+    param($Node)
+    $point=Get-ProxyTapPoint $Node
+    $script:ProxyContext.ActionSequence++
+    $path=Join-Path $script:ProxyContext.Evidence ('proxy-tap-'+$script:ProxyContext.ActionSequence+'.json')
+    [ordered]@{documentSequence=$script:ProxyContext.Sequence;bounds=$Node.Bounds;point=$point;status='planned'} |
+        ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $path -Encoding utf8
+    Invoke-ProxyAdb @('shell','input','tap',$point.X,$point.Y) | Out-Null
 }
 
 function Invoke-ProxyScroll {
@@ -157,7 +208,14 @@ function Open-ProxySettings {
     }
     $network=Find-ProxyVisibleNode '自定义网络代理'
     Invoke-ProxyTap $network
-    Find-ProxyVisibleNode '启用应用层代理' -Switch | Out-Null
+    # A successful input command is not proof that the intended route opened.
+    # Observe a bounded transition, without replaying the tap or scrolling the
+    # previous settings page while looking for proxy-page switches.
+    for($i=0;$i -lt 3;$i++){
+        $document=Get-ProxyUiDocument
+        if($null -ne (Find-ProxyNode $document '启用应用层代理' -Switch)){return}
+    }
+    throw 'Proxy page did not open after its single navigation tap.'
 }
 
 function Set-ProxySwitch {

@@ -38,7 +38,7 @@ function Fake-Document {
 }
 function Reset-Fake {
     $script:fake=@{Model='25102RKBEC';Device='myron';Foreground='com.mystyle.purelive';Page='home';App=$false;Player=$false;Port=7909
-        Reverse='';CreateError=$false;CreateAmbiguous=$false;FailInput=$false;LoseAfterApp=$false;BadEndpoint=$false;Dump=''}
+        Reverse='';CreateError=$false;CreateAmbiguous=$false;FailInput=$false;LoseAfterApp=$false;BadEndpoint=$false;IgnoreNetworkTap=$false;Dump=''}
     $script:calls=[Collections.Generic.List[string]]::new()
     $script:FakeAdb={
         param([Parameter(ValueFromRemainingArguments=$true)][string[]]$Arguments)
@@ -68,7 +68,7 @@ function Reset-Fake {
                 switch($script:fake.Page){
                     'home' {Equal $y 140 'home semantic';$script:fake.Page='drawer'}
                     'drawer' {Equal $y 240 'drawer semantic';$script:fake.Page='settings'}
-                    'settings' {Equal $y 340 'settings semantic';$script:fake.Page='proxy'}
+                    'settings' {Equal $y 340 'settings semantic';if(-not $script:fake.IgnoreNetworkTap){$script:fake.Page='proxy'}}
                     'proxy' {
                         if($y -eq 140){$script:fake.App=-not $script:fake.App;if($script:fake.LoseAfterApp){$script:fake.Foreground='example.other'}}
                         else{$expected=if($script:fake.App){480}else{280};Equal $y $expected 'fresh player switch location';$script:fake.Player=-not $script:fake.Player}
@@ -207,6 +207,49 @@ try{
         $s=Read-ProxySession $sessionPath '192.0.2.10:5555';$s.port='7897; unexpected'
         Save-ProxySession $s $sessionPath
         Throws {Read-ProxySession $sessionPath '192.0.2.10:5555'} 'identity/schema'
+    }
+    Case 'native floating player is excluded from the proxy entry hit point' {
+        $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_occluded_entry.xml') -Raw -Encoding utf8)
+        $fake.Page='tap-only'
+        Invoke-ProxyTap (Find-ProxyNode $document '自定义网络代理')
+        Equal $calls[$calls.Count-1] 'shell input tap 219 399' 'uncovered left rectangle, not player-covered center'
+    }
+    Case 'fully occluded proxy control produces no input' {
+        $document=[xml]('<hierarchy>'+(Node 'target' 100)+'<node enabled="true" clickable="true" bounds="[0,0][600,400]"/></hierarchy>')
+        Throws {Invoke-ProxyTap (Find-ProxyNode $document 'target')} 'occluded'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no guessed occluded tap'
+    }
+    Case 'clickable ancestors are not treated as sibling overlays' {
+        $document=[xml]('<hierarchy><node enabled="true" clickable="true" bounds="[0,0][600,400]">'+(Node 'target' 100)+'</node></hierarchy>')
+        $fake.Page='tap-only';Invoke-ProxyTap (Find-ProxyNode $document 'target')
+        Equal $calls[$calls.Count-1] 'shell input tap 300 140' 'ordinary center retained'
+    }
+    Case 'disabled overlay leaves ordinary hit point unchanged' {
+        $document=[xml]('<hierarchy>'+(Node 'target' 100)+'<node enabled="false" clickable="true" bounds="[0,0][600,400]"/></hierarchy>')
+        $fake.Page='tap-only';Invoke-ProxyTap (Find-ProxyNode $document 'target')
+        Equal $calls[$calls.Count-1] 'shell input tap 300 140' 'disabled overlay ignored'
+    }
+    Case 'multiple overlapping controls leave only an interior hit region' {
+        $document=[xml]('<hierarchy>'+(Node 'target' 100)+'<node enabled="true" clickable="true" bounds="[100,100][300,180]"/><node enabled="true" clickable="true" bounds="[340,100][500,180]"/></hierarchy>')
+        $fake.Page='tap-only';Invoke-ProxyTap (Find-ProxyNode $document 'target')
+        Equal $calls[$calls.Count-1] 'shell input tap 320 140' 'intersection excluded with margins'
+    }
+    Case 'thin clipped control does not invite an edge tap' {
+        $document=[xml]'<hierarchy><node text="target" enabled="true" clickable="true" bounds="[100,100][500,112]"/></hierarchy>'
+        Throws {Invoke-ProxyTap (Find-ProxyNode $document 'target')} 'usable'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no edge input'
+    }
+    Case 'occlusion planning retains the immediate foreground check' {
+        $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_occluded_entry.xml') -Raw -Encoding utf8)
+        $fake.Foreground='example.other'
+        Throws {Invoke-ProxyTap (Find-ProxyNode $document '自定义网络代理')} 'foreground changed'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'no takeover'
+    }
+    Case 'uncommitted proxy navigation observes only and does not scroll the wrong route' {
+        $fake.Page='settings';$fake.IgnoreNetworkTap=$true
+        Throws {Open-ProxySettings} 'page did not open'
+        Equal @($calls | Where-Object {$_ -match '^shell input tap'}).Count 1 'one navigation attempt'
+        Equal @($calls | Where-Object {$_ -match '^shell input swipe'}).Count 0 'no wrong-page scrolling'
     }
     Case 'native nested settings uses the inner scroll viewport' {
         $document=[xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot 'tests/fixtures/android_proxy_nested_settings.xml') -Raw -Encoding utf8)

@@ -16,3 +16,10 @@ no account or endpoint credentials. The floating-player wrapper exposes a
 scrollable outer View around a nested ScrollView. This reproduces the cleanup
 failure and checks selection of the unique inner viewport; replaying this XML
 is an offline test, not proof that a new native recording round restored proxy.
+
+`android_proxy_occluded_entry.xml` is the actual settings hierarchy from
+`android-recording-smoke-20260907T175408445/proxy-before-stop/proxy-ui-5.xml`.
+It contains only generic settings UI. The proxy entry center (600,399) overlaps
+the clickable floating player [390,300][1050,671]. It verifies rectangle
+exclusion and an uncovered point (219,399), not Android hit-test order or a
+successful live route transition. Foreground checks remain required per input.

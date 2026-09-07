@@ -157,18 +157,18 @@
 | W2-01 | RUN | Windows 实际进入 Bilibili `EdmundDZhang` 房间并持续播放，画面、声音、画面弹幕和列表弹幕均工作；画质从“超清”请求“原画”时，平台实际仍返回“超清”，提示与最终 UI 都保留真实结果而非伪成功；弹幕设置主题与应用主题一致。宽屏/真全屏、PiP 置顶和多窗口矩阵仍待执行 |
 | W2-02 | PASS | v3.1.2 便携 Release 实际进入 Bilibili 开播房间，视频与两层弹幕持续更新。普通窗口 `1276×718 @ (325,240)` 进入真全屏后覆盖 `1536×960 @ (0,0)`，Esc 精确恢复；最大化 `1536×912` 进入后同样覆盖 `1536×960`，Esc 恢复最大化工作区。两条往返过程中播放与弹幕不中断，证据见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_2.md` |
 | W2-03 | RUN | v3.1.7 GitHub Release 便携实例加载 Bilibili 热门卡片并进入真实开播房间；约 10 秒取得首帧并连接弹幕，列表与画面持续更新。本地测试弹幕约 3.5 秒后同时进入列表和画面；浅色主题设置页、长页滚动、双击真全屏与 Esc 返回均正常，返回后弹幕继续。该房间只返回 `原画 / 线路1`，纯音频、PiP、多画质/多线路和录制继续执行。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_7.md` |
-| W2-04 | RUN | v3.1.7 Windows 实际打开虎牙房间，画质 `蓝光20M→蓝光8M`、线路 `线路1→线路2` 均提交真实结果，切换后视频和弹幕继续。短录累计 198 秒并跨一次短签名续接，两个 MP4 均有 H.264 1080p60 与 AAC 音轨。实测同时暴露录制中心时间被续接尝试覆盖；工作树已用独立 `recordingStartedAt` 修复并通过 13/13 聚焦回归，待下一 Windows 包复验。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_7.md` |
+| W2-04 | RUN | v3.1.7 Windows 实际打开虎牙房间，画质 `蓝光20M→蓝光8M`、线路 `线路1→线路2` 均提交真实结果，切换后视频和弹幕继续。短录累计 198 秒并跨一次短签名续接，两个 MP4 均有 H.264 1080p60 与 AAC 音轨。实测同时暴露录制中心时间被续接尝试覆盖；工作树已用独立 `recordingStartedAt` 修复并通过 13/13 聚焦回归，待下一 Windows 包复验。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_7.md`；09-07 fadd5bdb Debug 实际完成虎牙20M→8M、线路1→2，取直链4M/六线路选择后取消仍保留播放器8M/线路2，录制持续；本轮未覆盖签名续接，见 `docs/WINDOWS_PLAY_RECORD_AUDIT_2026_09_07.md` |
 | W2-05 | RUN | v3.1.8 Windows Bilibili 热门完成 20 张缩略图加载并进入真实在播房间，约 9 秒取得首帧，远端弹幕持续更新；本地弹幕约 3.5 秒后同时进入列表与画面层。当前样本只覆盖单一画质/线路，多画质、多线路、纯音频和 PiP 继续执行。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_8.md` |
 | W3-01 | RUN | Bilibili 短录 89.831 秒，输出 MP4 18,301,583 bytes；`ffprobe` 读到 H.264 1280×720 约 30 fps 与 AAC 音轨，统计从 0.5 MB 单调增长至 19.4 MB。随后播放/弹幕/设置/录制混合场景采样 600.643 秒、61 点、全程 Responding、CPU 平均 3.6807%/P95 4.2325%；Working Set 401.41→463.46 MiB，Private Bytes 762.41→834.80 MiB，仍需更长平台矩阵判断缓存平台期。证据：`local-artifacts/diagnostics/windows-regression/20260831T062626030Z-v3.1.0-bilibili-play-danmaku-pid70096-summary.json` |
 | W3-02 | RUN | v3.1.7 干净便携实例空闲采样 180.930 秒、37 点、全程响应；Working Set 196.0078→196.0234 MiB（+0.0024 MiB/min），Private Bytes 530.9766→528.8086 MiB，句柄 1072→1043、线程 153→147，退出后残留进程 0。空闲基线通过；播放、弹幕、录制和多窗口长时对照继续执行。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_7.md` |
 | W3-03 | RUN | v3.1.7 Bilibili 播放、弹幕、设置与全屏交互采样 300.648 秒、61 点，全部响应；CPU 平均 2.2202%/P95 3.5525%，Working Set 399.72→421.52 MiB，句柄 1666→1656、线程 242→238。Private Bytes 816.29→889.95 MiB，存在会回落的短时峰值，仍需退出回落、第二段等长与录制对照后判断缓存平台期。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_7.md` |
 | W3-04 | RUN | v3.1.7 虎牙录制中心实时大小/时长/速度/码率可见，停止后 FFmpeg 进程为 0；短签名续接产生的两段 MP4 共 83,138,772 bytes、媒体时长 195.550334 秒，均通过 `ffprobe`。工作树修复会话开始时间在续接后漂移的问题；退出后完整资源回落与新包 UI 复验继续执行。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_7.md` |
-| W3-05 | RUN | v3.1.8 Bilibili 短录停止时 UI 为 103 秒，最终 MP4 为 8,584,393 bytes / 101.283 秒，H.264 540×960 10 fps + AAC 且可读；退出后应用与 FFmpeg 残留进程为 0。实测发现停止卡片仍保留 9.00 MB 的 TS 临时累计，工作树已改为逐尝试用最终 MP4 替换临时字节并覆盖部分成功重试，待新包复验。见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_8.md` |
+| W3-05 | RUN | 旧v3.1.8发现最终卡片沿用TS临时大小。09-07 fadd5bdb Windows Debug已完成该缺陷原生复验：处理中34.82 MB→已停止32.26 MB，与最终MP4的33,832,167 B一致；207.609667秒H.264 1080p60+AAC，完整解码退出0/错误日志0 B，逐包无非正DTS或>2秒间隔。离页Working Set/Private Bytes/句柄/线程回落并正常退出；多平台、长录、签名续接与CPU约2.3%归因继续。见 `docs/WINDOWS_PLAY_RECORD_AUDIT_2026_09_07.md` |
 
 ### W4 当前 Windows 运行事实
 
 - v3.1.8+4121 的 GitHub Release 便携包已在隔离数据目录完成真实运行回归：热门/Bilibili 首屏 20 张卡片及缩略图加载正常，热度保持降序；进入直播约 9 秒后画面、弹幕、画质和线路可用；本地弹幕约 3.5 秒后同时进入列表与覆盖层。停止 103 秒录制后得到 101.283 秒、8,584,393 B 的 H.264 540×960 + AAC MP4，退出后 Pure Live/FFmpeg 剩余进程均为 0。证据见 `docs/WINDOWS_RUNTIME_AUDIT_3_1_8.md`。
-- 上述运行回归发现“录制中 TS 累计字节”被停止后的 MP4 卡片继续沿用，导致 UI 显示 9.00 MB、磁盘最终文件为 8,584,393 B。当前代码已在每个录制 attempt 完成提交后按最终文件重新核算，同时保留其他已提交 attempt 的累计字节；38/38 定向测试通过。该修复仍需随下一版 Windows 产物复测最终卡片和磁盘大小一致性。
+- 上述运行回归发现“录制中 TS 累计字节”被停止后的 MP4 卡片继续沿用，导致 UI 显示 9.00 MB、磁盘最终文件为 8,584,393 B。当前代码已在每个录制 attempt 完成提交后按最终文件重新核算，同时保留其他已提交 attempt 的累计字节；38/38 定向测试通过。09-07已在fadd5bdb Windows Debug实证最终卡片32.26 MB与33,832,167 B一致，完成此子项原生复验；见 `docs/WINDOWS_PLAY_RECORD_AUDIT_2026_09_07.md`，其余录制矩阵继续。
 - 测试对象是 GitHub Release 的 `PureLive-3.1.0-4113-windows-x64-portable.zip` 独立解压副本，不是开发态 `flutter run`。
 - v3.1.2 补充测试对象同样来自冻结提交 `4d79e5fa` 的便携 Release，而不是开发态运行；验证了当前 200 Hz 显示器检测、刷新率模式即时生效/持久化，以及普通窗口和最大化两种真全屏往返。
 - 实际录制文件：`D:\Soft\pure_live\AppData\RECORDS\PureLiveRecords\bilibili\EdmundDZhang\2026-08-31\14-27-35\20260831_142734_898.mp4`；短录期间时长、大小和速度持续更新，停止后 MP4 音视频轨均可读取。

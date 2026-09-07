@@ -1,5 +1,7 @@
 # 参考平台扩展差距与 Picarto 输入样本（2026-09-07）
 
+09-08 后续：[映客公开合同](INKE_PUBLIC_CONTRACT_AUDIT_2026_09_08.md)已补官网目录、数字状态、详情缺媒体与公开精选 FLV 的实证，并新增底层 API；26 项确定性测试、三文件 analyze、生产 API 探针通过。尚未应用注册、完整媒体覆盖或原生验收，未注册分组数不因底层文件增加而减少。
+
 后续增量：[Picarto接入审计](PICARTO_ADAPTER_AUDIT_2026_09_07.md)与[TwitCasting接入审计](TWITCASTING_ADAPTER_AUDIT_2026_09_07.md)及[猫耳应用接入审计](MISSEVAN_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)记录三组源码实施。当前源码为13直播站点加IPTV；剩余14组未注册，已注册平台的完整能力与原生验收仍分项保留。TwitCasting审计同时记录OPENREC公开请求403，OPENREC仍未实现。下文17组为实施前的固定差距快照，不表示17组已验收完成。
 
 本轮以 d509bd8d 源码注册表为准，重新读取参考仓库远程HEAD、完整Git树（truncated=false）、README与实际注册入口，不合并或运行参考代码。

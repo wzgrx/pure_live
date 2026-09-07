@@ -26,8 +26,8 @@ if($Mode -eq 'Restore' -and $env:FAIL_RESTORE -eq '1'){throw 'restore-failure'}
 $global:LASTEXITCODE=0
 '''
 SMOKE = r'''
-param($Serial,$Platform,$RecordSeconds,$PlatformLoadTimeoutSeconds,[switch]$RequireLiveDanmaku,[switch]$ExerciseStreamSelection)
-@{serial=$Serial;mode='smoke';platform=$Platform} | ConvertTo-Json -Compress |
+param($Serial,$Platform,$RecordSeconds,$PlatformLoadTimeoutSeconds,$ProxySessionPath,[switch]$RequireLiveDanmaku,[switch]$ExerciseStreamSelection)
+@{serial=$Serial;mode='smoke';platform=$Platform;session=$ProxySessionPath} | ConvertTo-Json -Compress |
  Add-Content -LiteralPath (Join-Path $PSScriptRoot '../calls.jsonl')
 if($env:FAIL_SMOKE -eq '1'){throw 'smoke-failure'}
 $global:LASTEXITCODE=0
@@ -57,6 +57,7 @@ class ProxyWrapperTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual([c['mode'] for c in calls], ['LocalClash', 'smoke', 'Restore'])
         self.assertEqual(calls[0]['session'], calls[2]['session'])
+        self.assertEqual(calls[0]['session'], calls[1]['session'])
         self.assertEqual(calls[0]['port'], 7909)
         self.assertEqual(calls[2]['port'], 7909)
         self.assertTrue(calls[0]['keep'])

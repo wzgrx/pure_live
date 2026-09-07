@@ -9,7 +9,7 @@ $errors = $null
 $ast = [Management.Automation.Language.Parser]::ParseFile(
     (Join-Path $PSScriptRoot 'android_recording_smoke.ps1'), [ref]$null, [ref]$errors)
 if ($errors.Count) { throw ($errors | Out-String) }
-foreach ($name in @('Assert-RecordingForeground', 'Invoke-Adb', 'Initialize-RecordingTarget', 'Enter-RecordingHome', 'Get-Foreground', 'Save-UiDump', 'Wake-AndDismissKeyguard', 'Select-PlatformTab')) {
+foreach ($name in @('Assert-RecordingForeground', 'Invoke-Adb', 'Initialize-RecordingTarget', 'Enter-RecordingHome', 'Restore-RecordingProxyBeforeStop', 'Test-UiSemanticEnabled', 'Get-SemanticTapTarget', 'Get-Foreground', 'Save-UiDump', 'Wake-AndDismissKeyguard', 'Select-PlatformTab')) {
     $function = $ast.Find({ param($n)
         $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name
     }, $true)
@@ -112,15 +112,6 @@ Assert-Equal $script:calls.Count 4 'matching identity and foreground completes r
 Assert-Equal $script:homePackage 'example.launcher' 'home resolved on the selected device'
 Write-Output 'PASS explicit serial, model/device and foreground preflight (5 cases)'
 
-Reset-Fake
-Enter-RecordingHome | Out-Null
-Assert-Equal $script:calls.Count 2 'home entry has one foreground read and one ActivityManager command'
-Assert-Equal $script:calls[1] '-s 192.0.2.10:5555 shell am start -W -f 0x10008000 -n com.mystyle.purelive/.MainActivity' 'reset only our task'
-Assert-Equal @($script:calls | Where-Object { $_ -match 'force-stop' }).Count 0 'no intervening previous-app foreground'
-Reset-Fake; $script:foreground = 'topResumedActivity=ActivityRecord{1 u0 bin.mt.plus/.MainLightIcon t1}'
-Assert-Throws { Enter-RecordingHome } 'foreground changed'
-Assert-Equal $script:calls.Count 1 'home reset does not gain a broad MT/other-app exception'
-Write-Output 'PASS atomic target-task entry and unchanged other-app guard (2 cases)'
 
 foreach ($observedForeground in @('', 'topResumedActivity=null',
     'topResumedActivity=ActivityRecord{1 u0 example.other/.A t1}',
@@ -179,6 +170,38 @@ try {
     Assert-Equal @($script:calls | Where-Object { $_ -match 'am start|monkey|start-server' }).Count 0 'no foreground takeover'
     Write-Output 'PASS foreground change during dump stops immediately without relaunch'
 
+    $script:repo = $temporary
+    # Home navigation itself is exercised below; this fixture owns only the
+    # cleanup handoff and its failure result, with no UI commands in the seam.
+    function Enter-RecordingHome { 'Fixture home observed.' }
+    [void][IO.Directory]::CreateDirectory((Join-Path $temporary 'tool'))
+    $stub = Join-Path $temporary 'tool/android_restore_proxy_defaults.ps1'
+    @(
+        'param($Serial,$SessionPath,$EvidenceDirectory,[switch]$KeepAppOpen)'
+        '@{serial=$Serial;session=$SessionPath;keep=[bool]$KeepAppOpen} | ConvertTo-Json | Set-Content (Join-Path $PSScriptRoot "../cleanup-call.json")'
+        '$global:LASTEXITCODE=0'
+    ) | Set-Content -LiteralPath $stub
+    $script:ProxySessionPath = Join-Path $temporary 'owned-session.json'
+    $script:result = @{checks=@{}}
+    Restore-RecordingProxyBeforeStop
+    $cleanupCall=Get-Content (Join-Path $temporary 'cleanup-call.json') -Raw | ConvertFrom-Json
+    Assert-Equal $cleanupCall.serial '192.0.2.10:5555' 'cleanup keeps selected serial'
+    Assert-Equal $cleanupCall.session $script:ProxySessionPath 'cleanup uses exact proxy session'
+    Assert-Equal $cleanupCall.keep $true 'proxy cleanup retains foreground for final stop'
+    Assert-Equal $script:result.checks.proxyRestoredBeforeStop $true 'successful cleanup is recorded'
+    "throw 'fixture restore failure'" | Set-Content -LiteralPath $stub
+    Restore-RecordingProxyBeforeStop
+    Assert-Equal $script:result.checks.proxyRestoredBeforeStop $false 'cleanup failure is not a pass'
+    Assert-Equal $script:result.checks.proxyCleanupFailure 'fixture restore failure' 'cleanup failure detail survives'
+    $finalTry=@($ast.EndBlock.Statements | Where-Object {$_ -is [Management.Automation.Language.TryStatementAst]})[-1]
+    $finalText=$finalTry.Finally.Extent.Text
+    if($finalText.IndexOf('Restore-RecordingProxyBeforeStop') -lt 0 -or
+       $finalText.IndexOf('Restore-RecordingProxyBeforeStop') -gt $finalText.IndexOf("'force-stop'")) { throw 'Proxy cleanup must precede app stop' }
+    $script:ProxySessionPath = ''
+    $homeFunction = $ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Enter-RecordingHome'}, $true)
+    . ([scriptblock]::Create($homeFunction.Extent.Text))
+    Write-Output 'PASS pre-stop proxy cleanup success/failure, exact journal and stop ordering (2 cases)'
+
     # Fake only the IO seams for navigation; production selection and parsing run.
     function Start-Sleep { param($Milliseconds, $Seconds) }
     function Save-UiDump {
@@ -196,6 +219,25 @@ try {
         $script:frames = $Frames; $script:frameIndex = 0; $script:observations = 0
         $script:platformLabels = @{picarto='Picarto'; huya='虎牙'; twitch='Twitch'; soop='Soop'}
     }
+    $backFrame = '<hierarchy><node content-desc="返回" clickable="true" enabled="true" bounds="[12,156][156,300]"/></hierarchy>'
+    $homeFrame = '<hierarchy><node content-desc="热门" clickable="true" enabled="true" bounds="[300,2368][600,2608]"/><node content-desc="关注" clickable="true" enabled="true" bounds="[0,2368][300,2608]"/></hierarchy>'
+    Reset-Navigation @($backFrame,$backFrame,$homeFrame)
+    Enter-RecordingHome | Out-Null
+    Assert-Equal $script:observations 3 'return from proxy/settings uses new frames'
+    Assert-Equal @($script:calls | Where-Object { $_ -match 'shell input tap 84 228$' }).Count 2 'two app Back buttons'
+    Assert-Equal @($script:calls | Where-Object { $_ -match 'am start|force-stop' }).Count 0 'no process or Activity restart'
+    Reset-Navigation @($homeFrame)
+    Enter-RecordingHome | Out-Null
+    Assert-Equal $script:calls.Count 0 'already-home needs no action'
+    Reset-Navigation @('<hierarchy/>')
+    Assert-Throws { Enter-RecordingHome } 'not recognized'
+    Assert-Equal $script:calls.Count 0 'unknown route remains untouched'
+    Reset-Navigation @($backFrame)
+    $script:foreground = 'topResumedActivity=ActivityRecord{1 u0 bin.mt.plus/.MainLightIcon t1}'
+    Assert-Throws { Enter-RecordingHome } 'foreground changed'
+    Assert-Equal @($script:calls | Where-Object { $_ -match 'shell input' }).Count 0 'no general MT exception'
+    Write-Output 'PASS observed app Back navigation, already-home, unknown and other-app states (4 cases)'
+
     $visible = '<hierarchy>' + (New-Tab '全部' 1 2 50) + (New-Tab 'Picarto' 2 2 150) + '</hierarchy>'
     $selected = $visible.Replace('selected="false" bounds="[150', 'selected="true" bounds="[150')
     Reset-Navigation @($visible,$selected)

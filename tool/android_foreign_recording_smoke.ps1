@@ -34,6 +34,7 @@ try {
         Platform = $Platform
         RecordSeconds = $RecordSeconds
         PlatformLoadTimeoutSeconds = $PlatformLoadTimeoutSeconds
+        ProxySessionPath = $sessionPath
     }
     if ($RequireLiveDanmaku) { $smokeParameters.RequireLiveDanmaku = $true }
     if ($ExerciseStreamSelection) { $smokeParameters.ExerciseStreamSelection = $true }

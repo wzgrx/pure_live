@@ -2,6 +2,7 @@
 param(
     [string] $Serial = $env:PURELIVE_ADB_SERIAL,
     [string] $EvidenceDirectory,
+    [string] $ProxySessionPath,
     [ValidateRange(20, 300)]
     [int] $RecordSeconds = 45,
     [ValidateRange(0, 180)]
@@ -148,11 +149,43 @@ function Initialize-RecordingTarget {
 }
 
 function Enter-RecordingHome {
-    # Keep foreground ownership until one ActivityManager operation resets only
-    # our task. force-stop followed by start exposes the prior app between two
-    # commands (for example the user's MT utility), correctly tripping the guard.
-    # NEW_TASK | CLEAR_TASK resets navigation, not a claim of a cold process.
-    Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-f', '0x10008000', '-n', "$Package/$Activity")
+    # A warm Activity restart can retain Flutter's current route. Observe and
+    # return through actual app Back buttons; never stop the process or assume
+    # Activity flags reset Dart navigation. Unknown screens stay untouched.
+    for ($attempt = 0; $attempt -lt 5; $attempt++) {
+        $name = "home-entry-$attempt"
+        Save-UiDump $name
+        $xml = Get-Content -LiteralPath (Join-Path $evidence "$name.xml") -Raw -Encoding UTF8
+        if ((Test-UiSemanticEnabled -Xml $xml -Semantic '热门') -and
+            (Test-UiSemanticEnabled -Xml $xml -Semantic '关注')) {
+            return "Observed home after $attempt app Back actions."
+        }
+        if ($attempt -eq 4 -or -not (Test-UiSemanticEnabled -Xml $xml -Semantic '返回')) {
+            throw 'Home navigation is not recognized; no further input was sent.'
+        }
+        $target = Get-SemanticTapTarget -Semantic '返回' -Xml $xml
+        Invoke-Adb -AdbArguments @('shell', 'input', 'tap', $target.X, $target.Y) | Out-Null
+    }
+}
+
+function Restore-RecordingProxyBeforeStop {
+    if ($ProxySessionPath) {
+        try {
+            # The target is still foreground here. Restore the journal before
+            # force-stop reveals the previous app; the outer wrapper retains an
+            # idempotent recovery attempt for earlier failures.
+            Enter-RecordingHome | Out-Null
+            & (Join-Path $repo 'tool/android_restore_proxy_defaults.ps1') `
+                -Serial $script:serial -SessionPath $ProxySessionPath `
+                -EvidenceDirectory (Join-Path $evidence 'proxy-before-stop') -KeepAppOpen
+            if ($LASTEXITCODE -ne 0) { throw 'Proxy cleanup before stop failed.' }
+            $result.checks.proxyRestoredBeforeStop = $true
+        } catch {
+            $result.checks.proxyRestoredBeforeStop = $false
+            $result.checks.proxyCleanupFailure = $_.Exception.Message
+            Write-Warning "Proxy cleanup remains pending: $ProxySessionPath"
+        }
+    }
 }
 
 function Save-Text {
@@ -706,7 +739,7 @@ try {
 
     Wake-AndDismissKeyguard
     Save-Text 'keyguard-after-wake.txt' (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'window', 'policy'))
-    $result.checks.entryMode = 'activity-task-reset'
+    $result.checks.entryMode = 'observed-app-back-navigation'
     Save-Text 'home-entry.txt' (Enter-RecordingHome)
     Start-Sleep -Seconds 7
 
@@ -1145,6 +1178,7 @@ try {
 } finally {
     $result.checks.foregroundInterferenceCount = $script:foregroundInterferenceCount
     $result.checks.foregroundRecoveryCount = $script:foregroundRecoveryCount
+    Restore-RecordingProxyBeforeStop
     try {
         $logPath = Join-Path $evidence 'logcat-tail.txt'
         if (-not (Test-Path -LiteralPath $logPath -PathType Leaf)) {
@@ -1239,6 +1273,9 @@ if ($RequireLiveDanmaku -and $danmakuSupported) {
     # room is known to be active. Quiet rooms must not turn an otherwise valid
     # protocol/recording smoke into a deterministic false failure.
     $assertions.liveDanmakuVisible = [bool]$result.checks.liveDanmakuVisible
+}
+if ($ProxySessionPath) {
+    $assertions.proxyRestoredBeforeStop = [bool]$result.checks.proxyRestoredBeforeStop
 }
 if ($ExerciseStreamSelection) {
     $assertions.qualitySwitchCommitted =

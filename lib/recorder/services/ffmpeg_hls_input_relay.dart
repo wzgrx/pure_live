@@ -10,6 +10,7 @@ import 'package:pure_live/core/common/log.dart';
 
 import 'hls_session_cookies.dart';
 import 'hls_media_spool.dart';
+import 'cancellable_http_connections.dart';
 import 'recorder_proxy_routing.dart';
 
 /// Relays HLS resources over an app-private loopback server, verifying upstream
@@ -25,6 +26,7 @@ class FFmpegHlsInputRelay {
   FFmpegHlsInputRelay._({
     required this._server,
     required this._client,
+    required this._connections,
     required Uri upstream,
     required this._headers,
     required this._secret,
@@ -67,6 +69,7 @@ class FFmpegHlsInputRelay {
 
   final HttpServer _server;
   final HttpClient _client;
+  final CancellableHttpConnections _connections;
   final Map<String, String> _headers;
   final String _secret;
   final bool drainOnStop;
@@ -133,7 +136,9 @@ class FFmpegHlsInputRelay {
     final supportedHost = !kIsWeb && (Platform.isAndroid || Platform.isLinux);
     if (!force && !drainOnStop && (!supportedHost || upstream.scheme.toLowerCase() != 'https')) return null;
 
+    final connections = CancellableHttpConnections();
     final client = HttpClient()
+      ..connectionFactory = connections.connect
       ..findProxy = resolveRecorderProxyDirective
       ..connectionTimeout = const Duration(seconds: 15)
       ..idleTimeout = const Duration(seconds: 20)
@@ -142,6 +147,7 @@ class FFmpegHlsInputRelay {
     final relay = FFmpegHlsInputRelay._(
       server: server,
       client: client,
+      connections: connections,
       upstream: upstream,
       headers: _readInputHeaders(arguments, inputIndex),
       secret: _newSecret(),
@@ -175,6 +181,8 @@ class FFmpegHlsInputRelay {
     for (final abort in _fetchAborters.toList()) {
       abort();
     }
+    _connections.cancel();
+    _client.close(force: true);
   }
 
   void _acceptRequest(HttpRequest request) {
@@ -198,6 +206,7 @@ class FFmpegHlsInputRelay {
     await _server.close(force: true);
     await _subscription?.cancel();
     await Future.wait(_handlers.toList());
+    await _connections.settled;
     _resources.clear();
     _resourceIds.clear();
     _manifests.clear();
@@ -353,7 +362,13 @@ class FFmpegHlsInputRelay {
     for (var redirects = 0; ; redirects++) {
       if (_closed) throw StateError('HLS relay is closed');
       if (_fetchStopped) throw const _HlsFetchStopped();
-      final request = await _client.openUrl(method, uri);
+      late HttpClientRequest request;
+      try {
+        request = await _client.openUrl(method, uri);
+      } on Object {
+        if (_fetchStopped) throw const _HlsFetchStopped();
+        rethrow;
+      }
       if (_fetchStopped) {
         request.abort();
         throw const _HlsFetchStopped();

@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
-// Opt-in regression contract. Known red on the pinned SDK: neither a prompt
-// input result nor socket release is inferred merely from HttpClient.close.
+// Regression promoted after owned network cancellation fixes the stalled TLS
+// path. A prompt input result alone never substitutes for peer disconnection.
 
 void main() {
   test('stop retires a stalled TLS handshake before an upstream request exists', () async {
@@ -92,7 +92,7 @@ void main() {
       await blackhole.close();
       await blackholeSubscription.cancel();
     }
-  }, skip: Platform.environment['PURELIVE_HLS_CONNECT_STOP_PROBE'] != '1');
+  });
 }
 
 Future<String> _text(HttpClient client, Uri uri) async =>

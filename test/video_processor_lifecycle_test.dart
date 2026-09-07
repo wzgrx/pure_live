@@ -29,7 +29,9 @@ void main() {
       ..outputDir = directory.path;
     source = await File(p.join(directory.path, '${task.recordingFilePrefix}_000000.ts')).writeAsBytes([1, 2, 3]);
     native = _NativeLifecycleFixture();
-    service = VideoProcessorService.forTesting(ffmpeg: native, completionTimeout: const Duration(milliseconds: 30));
+    // Ordinary lifecycle cases follow explicit native signals, not a 30 ms
+    // race against real temporary-file I/O under the full suite's load.
+    service = VideoProcessorService.forTesting(ffmpeg: native);
     conversion = null;
   });
   tearDown(() async {
@@ -43,7 +45,13 @@ void main() {
     await directory.delete(recursive: true);
   });
 
+  void useShortDeadline() {
+    service.onClose();
+    service = VideoProcessorService.forTesting(ffmpeg: native, completionTimeout: const Duration(milliseconds: 30));
+  }
+
   test('merge timeout covers the running native Future and cancels before cleanup', () async {
+    useShortDeadline();
     conversion = service.convertToMp4(task: task);
     await native.started.future.timeout(const Duration(seconds: 2));
     var escapedDeadline = false;
@@ -74,6 +82,7 @@ void main() {
   });
 
   test('a native stop that is still pending keeps ownership and files until it settles', () async {
+    useShortDeadline();
     native.stopCompletes = false;
     conversion = service.convertToMp4(task: task);
     await native.started.future.timeout(const Duration(seconds: 2));
@@ -104,6 +113,7 @@ void main() {
   });
 
   test('late native start acknowledgement observes a timeout cancellation', () async {
+    useShortDeadline();
     native.startGate = Completer<void>();
     conversion = service.convertToMp4(task: task);
     expect(await conversion!.timeout(const Duration(milliseconds: 300)), isFalse);
@@ -136,6 +146,7 @@ void main() {
     await native.started.future;
     await service.cancel(task.taskId);
     expect(await conversion!, isFalse);
+    await _waitForMergeRelease(service, task.taskId);
     expect(await source.exists(), isTrue);
     expect(await File(native.output!).exists(), isFalse);
     expect(native.stopCalls, 1);
@@ -148,13 +159,13 @@ void main() {
     await native.started.future;
     native.finish();
     expect(await conversion!, isFalse);
+    await _waitForMergeRelease(service, task.taskId);
     expect(await source.exists(), isTrue);
     expect(await File(native.output!).exists(), isFalse);
     expect(service.isProcessing(task.taskId), isFalse);
   });
 
   test('native timestamp sentinel does not report merge completion before the file commits', () async {
-    service = VideoProcessorService.forTesting(ffmpeg: native, completionTimeout: const Duration(seconds: 1));
     task.recordedSeconds = 32;
     final observed = <VideoProcessEvent>[];
     final subscription = service.stream.listen(observed.add);

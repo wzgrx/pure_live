@@ -92,3 +92,5 @@ Release恢复段工作集114.8164→114.8477 MiB、private bytes379.6680→379.6
 - 下一步优先构建并测量**当前Pure Live自身Release候选**的相同空页面/可见性组合，区分产品与模板差额，并继续播放后资源回落验收。仍有异常时，在隔离runner中测量消息种类或原生调用栈；保持产品消息循环和系统设置原状，避免无根因延时补丁。长录、平台能力和最终发布仍按原范围继续。
 
 本地证据包含 `build-probe.ps1`、两种构建JSON/log、SDK身份、源文件/engine/exe哈希、7项同源检查、7组CSV/summary、`observation-context.json`及进程启动/退出记录。Debug和Release按标题栏正常关闭后，PID70004/56164均查询消失。两次构建及全部采样命令已取得exit0；没有手机、MT、LSP或Root操作，没有改变应用版本、正式候选ZIP/APK、用户数据或发布状态。
+
+后续[产品自身Release复验](WINDOWS_RELEASE_CPU_AUDIT_2026_09_07.md)已完成该构建/三段对照：可见1.208%、最小化0.0166%、恢复1.330%。产品Release仍保留可见性相关负载；WPR启动失败未取得热栈，继续采用隔离runner进程内仪表定位，而非重复构建同一候选。

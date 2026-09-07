@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/services.dart';
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/utils/live_short_link_session.dart';
 import 'package:pure_live/modules/live_play/dialogs/live_dlna_dialog.dart';
 import 'package:pure_live/modules/search/web_search_room_parser.dart';
 
@@ -47,8 +48,28 @@ class LiveUrlTool {
     return sharedHttpUris(text).any((uri) => roots.any((root) => _hostIs(uri.host.toLowerCase(), root)));
   }
 
-  static Future<List<String>> parseLiveUrl(String text) async {
+  static Future<List<String>> parseLiveUrl(
+    String text, {
+    dio.Dio Function()? clientFactory,
+    Duration timeout = const Duration(seconds: 12),
+  }) async {
+    final session = LiveShortLinkSession(timeout: timeout, clientFactory: clientFactory);
+    try {
+      return await _parseLiveUrl(text, session).timeout(
+        timeout,
+        onTimeout: () {
+          session.close();
+          return <String>[];
+        },
+      );
+    } finally {
+      session.close();
+    }
+  }
+
+  static Future<List<String>> _parseLiveUrl(String text, LiveShortLinkSession session) async {
     for (final uri in sharedHttpUris(text)) {
+      if (session.isClosed) return [];
       final host = uri.host.toLowerCase();
       final realUrl = uri.toString();
       late List<String> segments;
@@ -59,13 +80,15 @@ class LiveUrlTool {
       }
       if (segments.isEmpty) continue;
       if (_hostIs(host, 'b23.tv')) {
-        final location = await _getRedirectLocation(realUrl);
-        final target = await parseLiveUrl(location);
+        final response = await session.get(uri);
+        final location = LiveShortLinkSession.redirectTarget(uri, response);
+        if (location == null) continue;
+        final target = await _parseLiveUrl(location.toString(), session);
         if (target.isNotEmpty) return target;
         continue;
       }
       if (host == 'v.douyin.com') {
-        final id = await _getRealDouyinRoomId(realUrl);
+        final id = await _getRealDouyinRoomId(uri, session);
         if (id.isNotEmpty) return [id, Sites.douyinSite];
         continue;
       }
@@ -187,54 +210,57 @@ class LiveUrlTool {
     }
   }
 
-  static Future<String> _getRedirectLocation(String url) async {
-    try {
-      await dio.Dio().get(url, options: dio.Options(followRedirects: false));
-    } on dio.DioException catch (e) {
-      if (e.response?.statusCode == 302) {
-        return e.response?.headers.value("Location") ?? "";
+  static Future<String> _getRealDouyinRoomId(Uri uri, LiveShortLinkSession session) async {
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Accept': '*/*',
+      'Origin': 'https://live.douyin.com',
+      'Referer': 'https://live.douyin.com/',
+    };
+    var current = uri;
+    while (!session.isClosed) {
+      final host = current.host.toLowerCase();
+      if (host == 'live.douyin.com') {
+        try {
+          return WebSearchRoomParser.parse(current.toString())?.roomId ?? '';
+        } on FormatException {
+          return '';
+        }
       }
-    } catch (e) {
-      log(e.toString(), name: "_getRedirectLocation");
+      if (host != 'v.douyin.com' && host != 'www.douyin.com' && host != 'webcast.amemv.com') return '';
+      final roomId = RegExp(r'(?:^|/)reflow/(\d+)(?:/|$)').firstMatch(current.path)?.group(1);
+      if (roomId != null && host != 'v.douyin.com') {
+        final info = await session.get(
+          Uri.https('webcast.amemv.com', '/webcast/room/reflow/info/', {
+            'room_id': roomId,
+            'verifyFp': '',
+            'type_id': '0',
+            'live_id': '1',
+            'sec_user_id': '',
+            'app_id': '1128',
+          }),
+          json: true,
+          headers: headers,
+        );
+        final payload = info?.data;
+        if (info?.statusCode != 200 || payload is! Map) return '';
+        final data = payload['data'];
+        if (data is! Map) return '';
+        final room = data['room'];
+        if (room is! Map) return '';
+        final owner = room['owner'];
+        if (owner is! Map) return '';
+        final raw = owner['web_rid'];
+        if (raw is! String && raw is! int) return '';
+        final id = raw.toString();
+        return RegExp(r'^\d+$').hasMatch(id) ? id : '';
+      }
+      final response = await session.get(current, headers: headers);
+      final target = LiveShortLinkSession.redirectTarget(current, response);
+      if (target == null) return '';
+      current = target;
     }
-    return "";
-  }
-
-  static Future<String> _getRealDouyinRoomId(String url) async {
-    try {
-      final headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "*/*",
-        "Origin": "https://live.douyin.com",
-        "Referer": "https://live.douyin.com/",
-      };
-
-      final resp = await dio.Dio().get(
-        url,
-        options: dio.Options(followRedirects: true, headers: headers, maxRedirects: 100),
-      );
-
-      final reg = RegExp(r"reflow/(\d+)");
-      String? roomId = reg.firstMatch(resp.realUri.toString())?.group(1);
-      if (roomId == null) return "";
-
-      final infoResp = await dio.Dio().get(
-        "https://webcast.amemv.com/webcast/room/reflow/info/",
-        queryParameters: {
-          "room_id": roomId,
-          'verifyFp': '',
-          'type_id': 0,
-          'live_id': 1,
-          'sec_user_id': '',
-          'app_id': 1128,
-        },
-      );
-
-      return infoResp.data['data']['room']['owner']['web_rid']?.toString() ?? "";
-    } catch (e) {
-      log(e.toString(), name: "_getRealDouyinRoomId");
-      return "";
-    }
+    return '';
   }
 
   static Future<void> getPlayUrlByRoomId({required String roomId, required String platform}) async {

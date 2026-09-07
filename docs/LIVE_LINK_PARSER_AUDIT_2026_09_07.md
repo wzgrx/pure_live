@@ -44,3 +44,7 @@
 新累计候选 Android/Windows 原生体验、播放/录制、全量门禁与发布另行验收，整个工具箱保持未闭环。当前已安装 `67612cc9` APK 不包含本批变更。
 
 回滚范围为 `live_url_tool.dart`、`web_search_room_parser.dart`、`toolbox_controller.dart`、两份翻译资产和新增测试；无持久化格式变化。回滚会恢复上述已复现的直接链接解析问题。
+
+## 后续短链批次
+
+上述远端辅助函数保留旧设计的说明属于本批历史范围；后续 [短链请求边界](LIVE_SHORT_LINK_AUDIT_2026_09_07.md)完成跳转、请求期限、资源释放和 loopback IO 回归，138/138 通过且 analyze 无诊断。真实平台条件、工具箱操作和原生验收仍独立待验。

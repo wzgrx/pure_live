@@ -35,6 +35,20 @@ foreach ($label in @('720p 60fps', '1080p 59.94fps', 'HLS Auto', 'HLS 3.7 Mbps',
 if ('a random 720p 60fps sentence' -match $qualityPattern) { throw 'Quality labels must be anchored' }
 Write-Host 'PASS Picarto declared HLS quality labels'
 
+$foreignErrors = $null
+$foreignAst = [Management.Automation.Language.Parser]::ParseFile(
+ (Join-Path $PSScriptRoot 'android_foreign_recording_smoke.ps1'), [ref]$null, [ref]$foreignErrors)
+if ($foreignErrors.Count) { throw ($foreignErrors | Out-String) }
+$foreignParameter = $foreignAst.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -eq 'Platform' }
+$foreignAttribute = $foreignParameter.Attributes | Where-Object { $_.TypeName.Name -eq 'ValidateSet' }
+$foreignPlatforms = @($foreignAttribute.PositionalArguments | ForEach-Object Value)
+foreach ($foreignPlatform in @('twitch', 'soop', 'picarto')) {
+ if ($foreignPlatform -notin $foreignPlatforms -or $foreignPlatform -notin $accepted) {
+  throw "Foreign recording wrapper is missing $foreignPlatform"
+ }
+}
+Write-Host 'PASS foreign recording wrapper accepts Picarto with existing proxy cleanup'
+
 . (Join-Path $PSScriptRoot 'recording_smoke_coverage.ps1')
 $checks = [ordered]@{
  runningFileGrowthObserved = $true

@@ -95,36 +95,67 @@ class CCSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResol
 
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
-    var result = await HttpClient.instance.getJson(
-      "https://cc.163.com/_next/data/nextjs/category/${category.areaId}.json",
-      queryParameters: {"game": category.areaId},
+    final game = category.areaId?.trim() ?? '';
+    final platform = category.platform?.trim().toLowerCase() ?? '';
+    if (!RegExp(r'^[1-9][0-9]{0,15}$').hasMatch(game) ||
+        (platform.isNotEmpty && platform != Sites.ccSite) ||
+        page < 1 ||
+        page > 100000 ||
+        pageSize < 1 ||
+        pageSize > 1000) {
+      throw ArgumentError('Invalid CC category or pagination');
+    }
+    // The Next.js page contains only the initial showcase. The current CC
+    // category component requests this feed for every offset, including after
+    // the official site moved its main navigation into Dashen.
+    final result = await HttpClient.instance.getJson(
+      'https://cc.163.com/api/category/$game/',
+      queryParameters: {'format': 'json', 'tag_id': 0, 'start': (page - 1) * pageSize, 'size': pageSize},
+      header: {'user-agent': kUserAgent},
     );
-    var items = <LiveRoom>[];
-    try {
-      for (var item in result["pageProps"]["gametypeData"]["lives"]) {
-        final audience = parseRoomAudience(Map<String, dynamic>.from(item as Map));
-        var roomItem = LiveRoom(
-          roomId: item["cuteid"].toString(),
-          title: item["title"].toString(),
-          cover: item["cover"].toString(),
-          nick: item["nickname"].toString(),
+    if (result is! Map || result['gametype']?.toString() != game || result['lives'] is! List) {
+      throw const FormatException('Invalid CC category response');
+    }
+    final rows = result['lives'] as List;
+    if (rows.length > 1000) throw const FormatException('CC category response exceeds row limit');
+    final items = <LiveRoom>[];
+    for (final item in rows) {
+      if (item is! Map) throw const FormatException('Invalid CC category room');
+      final rawId = item['cuteid'];
+      if ((rawId is! String && rawId is! int) ||
+          (rawId is int && rawId > 9007199254740991) ||
+          !RegExp(r'^[1-9][0-9]{0,31}$').hasMatch(rawId.toString())) {
+        throw const FormatException('Invalid CC category room identity');
+      }
+      String text(Object? value) => value is String ? value : '';
+      final audience = parseRoomAudience(Map<String, dynamic>.from(item));
+      final status = int.tryParse(item['status']?.toString() ?? '');
+      items.add(
+        LiveRoom(
+          roomId: rawId.toString(),
+          title: text(item['title']),
+          cover: text(item['cover']),
+          nick: text(item['nickname']),
           watching: audience.popularity.isNotEmpty ? audience.popularity : audience.onlineViewers,
           popularity: audience.popularity,
           onlineViewers: audience.onlineViewers,
           audienceMetricType: audience.popularity.isNotEmpty
               ? AudienceMetricType.popularity
               : AudienceMetricType.onlineViewers,
-          avatar: item["purl"],
-          area: item["game_name"] ?? '',
-          liveStatus: LiveStatus.live,
-          status: true,
+          avatar: text(item['purl']),
+          area: text(item['game_name']).isNotEmpty ? text(item['game_name']) : text(item['gamename']),
+          liveStatus: status == 1
+              ? LiveStatus.live
+              : status == 0
+              ? LiveStatus.offline
+              : LiveStatus.unknown,
+          status: status == 1,
           platform: Sites.ccSite,
-        );
-        items.add(roomItem);
-      }
-    } catch (e) {
-      CoreLog.error(e);
+        ),
+      );
     }
+    // Only the API's lives collection is consumed. Its videos fallback is not
+    // a live room, and malformed responses must not commit an empty page.
     return items;
   }
 

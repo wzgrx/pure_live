@@ -29,6 +29,7 @@ class FFmpegHlsInputRelay {
     required this._headers,
     required this._secret,
     required this.drainOnStop,
+    required this._createStagingDirectory,
   }) {
     _resources['root'] = upstream;
   }
@@ -69,6 +70,7 @@ class FFmpegHlsInputRelay {
   final Map<String, String> _headers;
   final String _secret;
   final bool drainOnStop;
+  final Future<Directory> Function() _createStagingDirectory;
   final HlsSessionCookies _cookies = HlsSessionCookies();
   final Map<String, Uri> _resources = <String, Uri>{};
   final Map<String, String> _resourceIds = <String, String>{};
@@ -104,6 +106,9 @@ class FFmpegHlsInputRelay {
   int get resourceCount => _resources.length;
 
   @visibleForTesting
+  int get stagingBodyCount => _stagingBodies;
+
+  @visibleForTesting
   int get sessionCookieCount => _cookies.count;
 
   Uri get inputUri =>
@@ -116,6 +121,8 @@ class FFmpegHlsInputRelay {
     Iterable<String> source, {
     bool force = false,
     bool drainOnStop = false,
+    // Tests supply an isolated owned directory or controlled storage failure.
+    Future<Directory> Function()? createStagingDirectory,
   }) async {
     final arguments = List<String>.of(source);
     final inputIndex = arguments.indexOf('-i');
@@ -139,6 +146,7 @@ class FFmpegHlsInputRelay {
       headers: _readInputHeaders(arguments, inputIndex),
       secret: _newSecret(),
       drainOnStop: drainOnStop,
+      createStagingDirectory: createStagingDirectory ?? _defaultStagingDirectory,
     );
     relay._subscription = server.listen(relay._acceptRequest, onError: relay._handleServerError);
     return relay;
@@ -285,12 +293,7 @@ class FFmpegHlsInputRelay {
 
   Future<void> _publishCompleteBody(HttpRequest request, HttpClientResponse upstream) async {
     final iterator = StreamIterator<List<int>>(upstream);
-    final body = HlsMediaSpool(
-      createDirectory: () async {
-        final root = Platform.isAndroid ? await getTemporaryDirectory() : Directory.systemTemp;
-        return root.createTemp('purelive-hls-media-');
-      },
-    );
+    final body = HlsMediaSpool(createDirectory: _createStagingDirectory);
     var stopped = _fetchStopped;
     void abort() {
       stopped = true;
@@ -335,6 +338,11 @@ class FFmpegHlsInputRelay {
         }
       }
     }
+  }
+
+  static Future<Directory> _defaultStagingDirectory() async {
+    final root = Platform.isAndroid ? await getTemporaryDirectory() : Directory.systemTemp;
+    return root.createTemp('purelive-hls-media-');
   }
 
   Future<(HttpClientResponse, Uri)> _openUpstream(String method, Uri upstream, {String? range}) async {

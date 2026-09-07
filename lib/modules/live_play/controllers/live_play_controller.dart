@@ -7,14 +7,11 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/plugins/event_bus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:pure_live/plugins/emoji_manager.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:pure_live/model/live_play_quality.dart';
-import 'package:pure_live/core/danmaku/huya_danmaku.dart';
-import 'package:pure_live/core/site/inke/inke_site.dart';
 import 'package:pure_live/player/core/player_manager.dart';
-import 'package:pure_live/core/danmaku/douyin_danmaku.dart';
 import 'package:pure_live/player/core/live_audio_service.dart';
 import 'package:pure_live/modules/live_play/states/ui_state.dart';
+import 'package:pure_live/modules/live_play/services/room_external_opener.dart';
 import 'package:pure_live/modules/live_play/states/load_type.dart';
 import 'package:pure_live/modules/live_play/states/room_state.dart';
 import 'package:pure_live/modules/live_play/states/player_state.dart';
@@ -63,6 +60,7 @@ class LivePlayController extends GetxController
 
   bool _floatingResourcesReleased = false;
   bool _ownerClosed = false;
+  bool _externalOpenInFlight = false;
   bool _childControllersReleased = false;
   bool _reactiveStateClosed = false;
   bool _suppressAppFloatingOnNextPop = false;
@@ -849,79 +847,28 @@ class LivePlayController extends GetxController
   }
 
   Future<void> openNaviteAPP() async {
-    var nativeUrl = "";
-    var webUrl = "";
+    if (_ownerClosed || _externalOpenInFlight) return;
     final detail = state.value.room.detail;
     if (detail == null) return;
-
-    switch (site) {
-      case Sites.bilibiliSite:
-        nativeUrl = "bilibili://live/${detail.roomId}";
-        webUrl = "https://live.bilibili.com/${detail.roomId}";
-        break;
-      case Sites.douyinSite:
-        final args = detail.danmakuData as DouyinDanmakuArgs;
-        nativeUrl = "snssdk1128://webcast_room?room_id=${args.roomId}";
-        webUrl = "https://live.douyin.com/${args.webRid}";
-        break;
-      case Sites.huyaSite:
-        final args = detail.danmakuData as HuyaDanmakuArgs;
-        nativeUrl =
-            "yykiwi://homepage/index.html?banneraction=https%3A%2F%2Fdiy-front.cdn.huya.com%2Fzt%2Ffrontpage%2Fcc%2Fupdate.html%3Fhyaction%3Dlive%26channelid%3D${args.subSid}%26subid%3D${args.subSid}%26liveuid%3D${args.subSid}%26screentype%3D1%26sourcetype%3D0%26fromapp%3Dhuya_wap%252Fclick%252Fopen_app_guide%26&fromapp=huya_wap/click/open_app_guide";
-        webUrl = "https://www.huya.com/${detail.roomId}";
-        break;
-      case Sites.douyuSite:
-        nativeUrl = "douyulink://?type=90001&schemeUrl=douyuapp%3A%2F%2Froom%3FliveType%3D0%26rid%3D${detail.roomId}";
-        webUrl = "https://www.douyu.com/${detail.roomId}";
-        break;
-      case Sites.ccSite:
-        nativeUrl = "cc://join-room/${detail.roomId}/${detail.userId}/";
-        webUrl = "https://cc.163.com/${detail.roomId}";
-        break;
-      case Sites.twitchSite:
-        nativeUrl = "https://www.twitch.tv/${detail.roomId}";
-        webUrl = "https://www.twitch.tv/${detail.roomId}";
-        break;
-      case Sites.soopSite:
-        nativeUrl = "https://play.sooplive.co.kr/${detail.roomId}";
-        webUrl = nativeUrl;
-        break;
-      case Sites.picartoSite:
-        nativeUrl = 'https://picarto.tv/${Uri.encodeComponent(detail.roomId ?? '')}';
-        webUrl = nativeUrl;
-        break;
-      case Sites.twitcastingSite:
-        nativeUrl = 'https://twitcasting.tv/${Uri.encodeComponent(detail.roomId ?? '')}';
-        webUrl = nativeUrl;
-        break;
-      case Sites.missevanSite:
-        nativeUrl = 'https://fm.missevan.com/live/${Uri.encodeComponent(detail.roomId ?? '')}';
-        webUrl = nativeUrl;
-        break;
-      case Sites.inkeSite:
-        nativeUrl = InkeSite.externalRoomUrl(detail);
-        webUrl = nativeUrl;
-        break;
-      case Sites.acfunSite:
-        nativeUrl = 'https://live.acfun.cn/live/${Uri.encodeComponent(detail.roomId ?? '')}';
-        webUrl = nativeUrl;
-        break;
-      case Sites.kuaishouSite:
-        nativeUrl =
-            "kwai://liveaggregatesquare?liveStreamId=${detail.link}&recoStreamId=${detail.link}&recoLiveStreamId=${detail.link}&liveSquareSource=28&path=/rest/n/live/feed/sharePage/slide/more&mt_product=H5_OUTSIDE_CLIENT_SHARE";
-        webUrl = "https://live.kuaishou.com/u/${detail.roomId}";
-        break;
-    }
-
+    final roomId = detail.roomId;
+    bool isCurrent() => !_ownerClosed && identical(state.value.room.detail, detail) && detail.roomId == roomId;
+    _externalOpenInFlight = true;
     try {
-      if (Platform.isAndroid) {
-        await launchUrlString(nativeUrl, mode: LaunchMode.externalApplication);
-      } else {
-        await launchUrlString(webUrl, mode: LaunchMode.externalApplication);
+      final result = await RoomExternalOpener.open(
+        site: site,
+        room: detail,
+        android: Platform.isAndroid,
+        isCurrent: isCurrent,
+        onBrowserFallback: () => ToastUtil.show(i18n('open_app_failed_fallback_browser')),
+      );
+      if (!isCurrent()) return;
+      if (result == RoomExternalOpenResult.unavailable) {
+        ToastUtil.show(i18n('open_room_external_unavailable'));
+      } else if (result == RoomExternalOpenResult.failed) {
+        ToastUtil.show(i18n('open_room_external_failed'));
       }
-    } catch (_) {
-      ToastUtil.show(i18n('open_app_failed_fallback_browser'));
-      await launchUrlString(webUrl, mode: LaunchMode.externalApplication);
+    } finally {
+      _externalOpenInFlight = false;
     }
   }
 

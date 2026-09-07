@@ -348,6 +348,8 @@
     "only_living": "只搜索直播中",
     "opacity": "透明度",
     "open_app_failed_fallback_browser": "无法打开APP，将使用浏览器打开",
+    "open_room_external_unavailable": "当前直播间没有可用的官方网页地址",
+    "open_room_external_failed": "打开直播间失败，请检查默认浏览器或应用设置",
     "open_link": "链接访问",
     "open_live_room": "打开直播间",
     "open_source_free": "本软件开源免费",

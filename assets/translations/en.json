@@ -347,6 +347,8 @@
     "only_living": "Only Living",
     "opacity": "Opacity",
     "open_app_failed_fallback_browser": "Cannot open app, fallback to browser",
+    "open_room_external_unavailable": "No official webpage is available for this room",
+    "open_room_external_failed": "Could not open the room. Check your default browser or app settings",
     "open_link": "Open Link",
     "open_live_room": "Open Live Room",
     "open_source_free": "This app is open source and free",

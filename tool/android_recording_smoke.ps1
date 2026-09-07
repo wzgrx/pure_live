@@ -147,6 +147,14 @@ function Initialize-RecordingTarget {
     }
 }
 
+function Enter-RecordingHome {
+    # Keep foreground ownership until one ActivityManager operation resets only
+    # our task. force-stop followed by start exposes the prior app between two
+    # commands (for example the user's MT utility), correctly tripping the guard.
+    # NEW_TASK | CLEAR_TASK resets navigation, not a claim of a cold process.
+    Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-f', '0x10008000', '-n', "$Package/$Activity")
+}
+
 function Save-Text {
     param([string] $Name, [object] $Value)
     $Value | Out-File -LiteralPath (Join-Path $evidence $Name) -Encoding utf8 -Width 4096
@@ -698,10 +706,8 @@ try {
 
     Wake-AndDismissKeyguard
     Save-Text 'keyguard-after-wake.txt' (Invoke-Adb -AdbArguments @('shell', 'dumpsys', 'window', 'policy'))
-    Invoke-Adb -AdbArguments @('shell', 'am', 'force-stop', $Package) | Out-Null
-    Save-Text 'cold-start.txt' (
-        Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/$Activity") -AllowHomeForeground
-    )
+    $result.checks.entryMode = 'activity-task-reset'
+    Save-Text 'home-entry.txt' (Enter-RecordingHome)
     Start-Sleep -Seconds 7
 
     $beforeFiles = @(Get-PrivateRecordingFiles)

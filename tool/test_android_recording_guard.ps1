@@ -9,7 +9,7 @@ $errors = $null
 $ast = [Management.Automation.Language.Parser]::ParseFile(
     (Join-Path $PSScriptRoot 'android_recording_smoke.ps1'), [ref]$null, [ref]$errors)
 if ($errors.Count) { throw ($errors | Out-String) }
-foreach ($name in @('Assert-RecordingForeground', 'Invoke-Adb', 'Initialize-RecordingTarget', 'Get-Foreground', 'Save-UiDump', 'Wake-AndDismissKeyguard', 'Select-PlatformTab')) {
+foreach ($name in @('Assert-RecordingForeground', 'Invoke-Adb', 'Initialize-RecordingTarget', 'Enter-RecordingHome', 'Get-Foreground', 'Save-UiDump', 'Wake-AndDismissKeyguard', 'Select-PlatformTab')) {
     $function = $ast.Find({ param($n)
         $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name
     }, $true)
@@ -28,6 +28,7 @@ function Assert-Throws([scriptblock] $Body, [string] $Pattern) {
 function Reset-Fake {
     $script:serial = '192.0.2.10:5555'
     $script:Package = 'com.mystyle.purelive'
+    $script:Activity = '.MainActivity'
     $script:homePackage = 'example.launcher'
     $script:foregroundLost = $false
     $script:transportFailed = $false
@@ -110,6 +111,16 @@ Initialize-RecordingTarget -RequestedSerial '192.0.2.10:5555'
 Assert-Equal $script:calls.Count 4 'matching identity and foreground completes read-only preflight'
 Assert-Equal $script:homePackage 'example.launcher' 'home resolved on the selected device'
 Write-Output 'PASS explicit serial, model/device and foreground preflight (5 cases)'
+
+Reset-Fake
+Enter-RecordingHome | Out-Null
+Assert-Equal $script:calls.Count 2 'home entry has one foreground read and one ActivityManager command'
+Assert-Equal $script:calls[1] '-s 192.0.2.10:5555 shell am start -W -f 0x10008000 -n com.mystyle.purelive/.MainActivity' 'reset only our task'
+Assert-Equal @($script:calls | Where-Object { $_ -match 'force-stop' }).Count 0 'no intervening previous-app foreground'
+Reset-Fake; $script:foreground = 'topResumedActivity=ActivityRecord{1 u0 bin.mt.plus/.MainLightIcon t1}'
+Assert-Throws { Enter-RecordingHome } 'foreground changed'
+Assert-Equal $script:calls.Count 1 'home reset does not gain a broad MT/other-app exception'
+Write-Output 'PASS atomic target-task entry and unchanged other-app guard (2 cases)'
 
 foreach ($observedForeground in @('', 'topResumedActivity=null',
     'topResumedActivity=ActivityRecord{1 u0 example.other/.A t1}',

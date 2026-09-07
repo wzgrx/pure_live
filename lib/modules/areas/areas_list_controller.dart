@@ -15,6 +15,9 @@ class AreasListController extends ServerAllPageController<LiveArea> {
 
   bool get isFlatten => site.id == Sites.douyinSite;
 
+  @override
+  int get localItemCount => _getCurrentTabAllChildren().length;
+
   AreasListController(this.site);
 
   @override
@@ -141,7 +144,11 @@ class AreasListController extends ServerAllPageController<LiveArea> {
 
       final newData = allItems.sublist(startIndex, endIndex);
       list.assignAll(newData);
-      currentCategory.children.assignAll(newData);
+      // This is an owned plain List, not RxList: the vendored assignAll
+      // extension appends to plain lists instead of replacing their contents.
+      currentCategory.children
+        ..clear()
+        ..addAll(newData);
       canLoadMore.value = endIndex < allItems.length;
       pageEmpty.value = list.isEmpty;
       if (currentPage == 1) {
@@ -159,7 +166,10 @@ class AreasListController extends ServerAllPageController<LiveArea> {
 }
 
 class AppLiveCategory extends LiveCategory {
-  AppLiveCategory({required super.id, required super.name, required super.children});
+  // UI pagination mutates this list. Never alias an adapter's cached,
+  // fixed-size or unmodifiable catalogue.
+  AppLiveCategory({required super.id, required super.name, required List<LiveArea> children})
+    : super(children: List<LiveArea>.of(children));
 
   factory AppLiveCategory.fromLiveCategory(LiveCategory item) {
     return AppLiveCategory(children: item.children, id: item.id, name: item.name);

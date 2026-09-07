@@ -9,6 +9,10 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
 
   Future<List<T>> fetchAllServerData();
 
+  /// Size of the active local catalogue. Tabbed controllers can project a
+  /// different catalogue without fetching again or replacing the load cache.
+  int get localItemCount => _rawAllData?.length ?? 0;
+
   @override
   Future<void> refreshData() async {
     _refreshPending = true;
@@ -25,7 +29,7 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
   Future<void> goToPage(int page) async {
     if (_activeLoad != null || page < 1 || _rawAllData == null) return;
     if (!usesDesktopPagination) return;
-    final maxPage = (_rawAllData!.length / pageSize.value).ceil();
+    final maxPage = (localItemCount / pageSize.value).ceil();
     if (page > maxPage) return;
     currentPage = page;
     processLocalPaging();

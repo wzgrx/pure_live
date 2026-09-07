@@ -2465,7 +2465,12 @@ class CastButton extends StatelessWidget {
       color: Colors.white,
       onPressed: () {
         controller.enableController();
-        LiveUrlTool.castPlayUrlByRoomId(roomId: controller.room.roomId ?? '', platform: controller.room.platform ?? '');
+        LiveUrlTool.castPlayUrlByRoomId(
+          context: context,
+          roomId: controller.room.roomId ?? '',
+          platform: controller.room.platform ?? '',
+          isCurrentRoom: () => controller.status != PlayerStatus.disposed,
+        );
       },
       icon: const Icon(Remix.tv_2_line),
     );

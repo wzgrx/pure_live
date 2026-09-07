@@ -49,7 +49,7 @@ class LivePlayMenuButton extends StatelessWidget {
         break;
 
       case 2:
-        _castScreen();
+        _castScreen(context);
         break;
 
       case 3:
@@ -61,7 +61,7 @@ class LivePlayMenuButton extends StatelessWidget {
         break;
 
       case 5:
-        _getDirectLink();
+        _getDirectLink(context);
         break;
 
       case 6:
@@ -88,10 +88,18 @@ class LivePlayMenuButton extends StatelessWidget {
     Get.dialog(PlayOther(controller: controller));
   }
 
-  void _castScreen() {
+  void _castScreen(BuildContext context) {
     final detail = controller.state.value.room.detail;
 
-    LiveUrlTool.castPlayUrlByRoomId(roomId: detail?.roomId ?? '', platform: detail?.platform ?? '');
+    LiveUrlTool.castPlayUrlByRoomId(
+      context: context,
+      roomId: detail?.roomId ?? '',
+      platform: detail?.platform ?? '',
+      isCurrentRoom: () =>
+          !controller.isClosed &&
+          detail != null &&
+          (controller.state.value.room.detail?.hasSameIdentity(detail) ?? false),
+    );
   }
 
   void _showTimer(BuildContext context) {
@@ -102,14 +110,20 @@ class LivePlayMenuButton extends StatelessWidget {
     RoomVolumeDialog.show(context: context, controller: controller);
   }
 
-  void _getDirectLink() {
+  void _getDirectLink(BuildContext context) {
     final detail = controller.state.value.room.detail;
 
     if (detail == null) {
       return;
     }
 
-    LiveUrlTool.getPlayUrlByRoomId(roomId: detail.roomId ?? '', platform: detail.platform ?? '');
+    LiveUrlTool.getPlayUrlByRoomId(
+      context: context,
+      roomId: detail.roomId ?? '',
+      platform: detail.platform ?? '',
+      isCurrentRoom: () =>
+          !controller.isClosed && (controller.state.value.room.detail?.hasSameIdentity(detail) ?? false),
+    );
   }
 
   void _shareRoom() {

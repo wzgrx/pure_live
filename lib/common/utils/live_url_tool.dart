@@ -1,10 +1,10 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart' as dio;
-import 'package:flutter/services.dart';
+
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/utils/live_short_link_session.dart';
-import 'package:pure_live/modules/live_play/dialogs/live_dlna_dialog.dart';
+import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/modules/live_play/dialogs/known_room_link_dialog.dart';
+import 'package:pure_live/modules/toolbox/toolbox_direct_link_flow.dart';
 import 'package:pure_live/modules/search/web_search_room_parser.dart';
 
 class LiveUrlTool {
@@ -187,142 +187,73 @@ class LiveUrlTool {
     return '';
   }
 
-  static Future<void> getPlayUrlByRoomId({required String roomId, required String platform}) async {
+  static Future<void> getPlayUrlByRoomId({
+    required BuildContext context,
+    required String roomId,
+    required String platform,
+    LiveSite Function(String)? siteFor,
+    bool Function()? isCurrentRoom,
+    void Function(String)? notify,
+  }) => _showKnownRoomAction(
+    context: context,
+    roomId: roomId,
+    platform: platform,
+    cast: false,
+    siteFor: siteFor,
+    isCurrentRoom: isCurrentRoom,
+    notify: notify,
+  );
+
+  static Future<void> castPlayUrlByRoomId({
+    required BuildContext context,
+    required String roomId,
+    required String platform,
+    LiveSite Function(String)? siteFor,
+    bool Function()? isCurrentRoom,
+    void Function(String)? notify,
+    Future<void> Function(String)? openCast,
+  }) => _showKnownRoomAction(
+    context: context,
+    roomId: roomId,
+    platform: platform,
+    cast: true,
+    siteFor: siteFor,
+    isCurrentRoom: isCurrentRoom,
+    notify: notify,
+    openCast: openCast,
+  );
+
+  static Future<void> _showKnownRoomAction({
+    required BuildContext context,
+    required String roomId,
+    required String platform,
+    required bool cast,
+    LiveSite Function(String)? siteFor,
+    bool Function()? isCurrentRoom,
+    void Function(String)? notify,
+    Future<void> Function(String)? openCast,
+  }) {
+    if (!context.mounted) return Future.value();
+    final showNotice = notify ?? ((String key) => ToastUtil.show(i18n(key)));
+    roomId = roomId.trim();
+    platform = platform.trim().toLowerCase();
     if (roomId.isEmpty || platform.isEmpty) {
-      ToastUtil.show(i18n("toolbox_empty_link"));
-      return;
+      showNotice('toolbox_empty_link');
+      return Future.value();
     }
-    try {
-      SmartDialog.showLoading(msg: "");
-
-      final detail = await Sites.of(platform).liveSite.getRoomDetail(roomId: roomId, platform: platform);
-
-      final qualities = await Sites.of(platform).liveSite.getPlayQualites(detail: detail);
-      SmartDialog.dismiss(status: SmartStatus.loading);
-
-      if (qualities.isEmpty) {
-        ToastUtil.show(i18n("toolbox_quality_failed"));
-        return;
-      }
-
-      final selectedQuality = await Get.dialog(
-        SimpleDialog(
-          title: Text(i18n("toolbox_select_quality")),
-          children: qualities
-              .map(
-                (e) => ListTile(
-                  title: Text(e.quality, textAlign: TextAlign.center),
-                  onTap: () => Navigator.pop(Get.context!, e),
-                ),
-              )
-              .toList(),
-        ),
-      );
-      if (selectedQuality == null) return;
-
-      SmartDialog.showLoading(msg: "");
-      final playUrls = await Sites.of(platform).liveSite.getPlayUrls(detail: detail, quality: selectedQuality);
-      SmartDialog.dismiss(status: SmartStatus.loading);
-
-      await Get.dialog(
-        SimpleDialog(
-          title: Text(i18n("toolbox_select_line")),
-          children: playUrls
-              .asMap()
-              .entries
-              .map(
-                (entry) => ListTile(
-                  title: Text(i18n("toolbox_line", args: {"index": "${entry.key + 1}"})),
-                  subtitle: Text(entry.value, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: entry.value));
-                    Navigator.pop(Get.context!);
-                    ToastUtil.show(i18n("toolbox_copy_success"));
-                  },
-                ),
-              )
-              .toList(),
-        ),
-      );
-    } catch (e) {
-      log("已知房间号获取直链失败: $e", name: "LiveUrlTool");
-      ToastUtil.show(i18n("toolbox_get_url_failed"));
-    } finally {
-      SmartDialog.dismiss(status: SmartStatus.loading);
+    if (!Sites.isSupported(platform)) {
+      showNotice('toolbox_parse_failed');
+      return Future.value();
     }
-  }
-
-  static Future<void> castPlayUrlByRoomId({required String roomId, required String platform}) async {
-    if (roomId.isEmpty || platform.isEmpty) {
-      ToastUtil.show(i18n("toolbox_empty_link"));
-      return;
-    }
-
-    try {
-      SmartDialog.showLoading(msg: "");
-      final detail = await Sites.of(platform).liveSite.getRoomDetail(roomId: roomId, platform: platform);
-
-      final qualities = await Sites.of(platform).liveSite.getPlayQualites(detail: detail);
-      SmartDialog.dismiss(status: SmartStatus.loading);
-
-      if (qualities.isEmpty) {
-        ToastUtil.show(i18n("toolbox_quality_failed"));
-        return;
-      }
-
-      final selectedQuality = await Get.dialog(
-        SimpleDialog(
-          title: Text(i18n("toolbox_select_quality")),
-          children: qualities
-              .map(
-                (e) => ListTile(
-                  title: Text(e.quality, textAlign: TextAlign.center),
-                  onTap: () {
-                    Navigator.pop(Get.context!, e);
-                  },
-                ),
-              )
-              .toList(),
-        ),
-      );
-      if (selectedQuality == null) return;
-
-      SmartDialog.showLoading(msg: "");
-      final playUrls = await Sites.of(platform).liveSite.getPlayUrls(detail: detail, quality: selectedQuality);
-      SmartDialog.dismiss(status: SmartStatus.loading);
-
-      if (playUrls.isEmpty) {
-        ToastUtil.show(i18n("toolbox_get_url_failed"));
-        return;
-      }
-
-      final selectedUrl = await Get.dialog(
-        SimpleDialog(
-          title: Text(i18n("toolbox_select_line")),
-          children: playUrls
-              .asMap()
-              .entries
-              .map(
-                (entry) => ListTile(
-                  title: Text(i18n("toolbox_line", args: {"index": "${entry.key + 1}"})),
-                  subtitle: Text(entry.value, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  onTap: () {
-                    Navigator.pop(Get.context!, entry.value);
-                  },
-                ),
-              )
-              .toList(),
-        ),
-      );
-
-      // 选中url后直接投屏
-      if (selectedUrl != null && selectedUrl.isNotEmpty) {
-        Get.dialog(LiveDlnaPage(datasource: selectedUrl));
-      }
-    } catch (e) {
-      SmartDialog.dismiss(status: SmartStatus.loading);
-      ToastUtil.show(i18n("toolbox_get_url_failed"));
-    }
+    return KnownRoomLinkDialog.show(
+      context: context,
+      room: LiveRoom(roomId: roomId, platform: platform),
+      cast: cast,
+      flow: ToolBoxDirectLinkFlow(siteFor: siteFor),
+      isCurrentRoom: isCurrentRoom ?? (() => true),
+      notify: showNotice,
+      openCast: openCast,
+    );
   }
 }
 

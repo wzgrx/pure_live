@@ -19,6 +19,7 @@ class ToolBoxDirectLinkFlow {
     required Future<LivePlayQuality?> Function(List<LivePlayQuality>) chooseQuality,
     required Future<String?> Function(List<String>) chooseLine,
     required void Function(String) notify,
+    Future<void> Function(String)? useUrl,
   }) async {
     scope.checkActive();
     final site = _siteFor(room.platform!);
@@ -38,6 +39,10 @@ class ToolBoxDirectLinkFlow {
     }
     final selected = await scope.wait(() => chooseLine(urls), timed: false);
     if (selected == null || !urls.contains(selected)) return;
+    if (useUrl != null) {
+      await scope.wait(() => useUrl(selected), timed: false);
+      return;
+    }
     try {
       await scope.wait(() => _copyText(selected));
     } on ToolBoxActionCancelled {

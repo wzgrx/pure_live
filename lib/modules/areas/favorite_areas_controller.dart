@@ -4,7 +4,9 @@ class FavoriteAreasController extends GetxController with GetTickerProviderState
   late TabController tabSiteController;
 
   var tabSiteIndex = 0.obs;
-  var favoriteAreas = [].obs;
+  // Read the persisted observable inside the page's Obx instead of retaining
+  // the list object that happened to exist when this route was opened.
+  List<LiveArea> get favoriteAreas => SettingsService.to.fav.favoriteAreas.v;
   @override
   void onInit() {
     tabSiteController = TabController(
@@ -15,7 +17,6 @@ class FavoriteAreasController extends GetxController with GetTickerProviderState
     tabSiteController.addListener(() {
       tabSiteIndex.value = tabSiteController.index;
     });
-    favoriteAreas.value = SettingsService.to.fav.favoriteAreas.v;
     super.onInit();
   }
 

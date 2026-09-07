@@ -205,7 +205,7 @@ class FavoriteRoomController extends GetxController {
   }
 
   bool isFavoriteArea(LiveArea area) {
-    return favoriteAreas.v.any((e) => e.areaId == area.areaId);
+    return favoriteAreas.v.any((candidate) => candidate.hasSameIdentity(area));
   }
 
   bool addRoom(LiveRoom room) {
@@ -257,7 +257,7 @@ class FavoriteRoomController extends GetxController {
   }
 
   bool addArea(LiveArea area) {
-    if (isFavoriteArea(area)) return false;
+    if (area.identityKey == null || isFavoriteArea(area)) return false;
 
     final updated = List<LiveArea>.from(favoriteAreas.v);
     updated.add(area);
@@ -268,9 +268,9 @@ class FavoriteRoomController extends GetxController {
 
   bool removeArea(LiveArea area) {
     final updated = List<LiveArea>.from(favoriteAreas.v);
-    final removed = updated.remove(area);
+    updated.removeWhere((candidate) => candidate.hasSameIdentity(area));
 
-    if (!removed) return false;
+    if (updated.length == favoriteAreas.v.length) return false;
 
     favoriteAreas.v = updated;
 

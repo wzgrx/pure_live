@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:hive_ce/hive.dart';
 import 'package:path/path.dart' as p;
+import 'package:pure_live/common/models/live_area.dart';
 
 class SettingsUpgradeReport {
   const SettingsUpgradeReport({
@@ -209,10 +210,17 @@ class SettingsUpgradeMigration {
   }
 
   static String _itemIdentity(String key, Map<String, dynamic> item) {
+    if (key == 'favoriteAreas') {
+      return LiveArea.identityKeyFor(
+            platform: item['platform']?.toString(),
+            areaId: item['areaId']?.toString(),
+            areaType: item['areaType']?.toString(),
+          ) ??
+          jsonEncode(item);
+    }
     String fields(List<String> names) => names.map((name) => item[name]?.toString().trim() ?? '').join('|');
     final identity = switch (key) {
       'favoriteRooms' || 'historyRooms' => fields(['platform', 'roomId']),
-      'favoriteAreas' => fields(['platform', 'areaId']),
       'webDavConfigs' => fields(['name', 'url']),
       _ => '',
     };

@@ -127,7 +127,7 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isFavorite = SettingsService.to.fav.favoriteAreas.v.any((e) => e.areaId == area.areaId);
+      final isFavorite = SettingsService.to.fav.isFavoriteArea(area);
 
       return Padding(
         padding: EdgeInsets.only(
@@ -176,14 +176,11 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
                       ),
                     ).then((value) {
                       if (value == true) {
-                        final list = List<LiveArea>.from(SettingsService.to.fav.favoriteAreas.v);
-                        list.removeWhere((e) => e.areaId == area.areaId);
-                        SettingsService.to.fav.favoriteAreas.v = list;
+                        SettingsService.to.fav.removeArea(area);
                       }
                     });
                   } else {
-                    final list = List<LiveArea>.from(SettingsService.to.fav.favoriteAreas.v)..add(area);
-                    SettingsService.to.fav.favoriteAreas.v = list;
+                    SettingsService.to.fav.addArea(area);
                   }
                 },
                 child: Padding(

@@ -55,10 +55,11 @@ function Get-ProxyUiDocument {
 }
 
 function Get-ProxyBounds {
-    param([string]$Bounds)
+    param([string]$Bounds,[switch]$AllowEmpty)
     if ($Bounds -notmatch '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$') { throw 'Invalid proxy UI bounds.' }
     $left=[int]$Matches[1]; $top=[int]$Matches[2]; $right=[int]$Matches[3]; $bottom=[int]$Matches[4]
-    if ($right -le $left -or $bottom -le $top) { throw 'Empty proxy UI bounds.' }
+    if ($right -lt $left -or $bottom -lt $top -or
+        (-not $AllowEmpty -and ($right -eq $left -or $bottom -eq $top))) { throw 'Empty proxy UI bounds.' }
     @{Left=$left;Top=$top;Right=$right;Bottom=$bottom}
 }
 
@@ -98,7 +99,10 @@ function Get-ProxyTapPoint {
             $ancestor=$ancestor.ParentNode
         }
         if($isAncestor){continue}
-        $o=Get-ProxyBounds $other.GetAttribute('bounds')
+        $o=Get-ProxyBounds $other.GetAttribute('bounds') -AllowEmpty
+        # Flutter also exposes collapsed/off-screen controls with zero area.
+        # They occupy no hit region; the actual target still requires area.
+        if($o.Left -eq $o.Right -or $o.Top -eq $o.Bottom){continue}
         $o=@{Left=$o.Left-$margin;Top=$o.Top-$margin;Right=$o.Right+$margin;Bottom=$o.Bottom+$margin}
         $intersected=$false
         $regions=@(foreach($r in $regions){

@@ -229,6 +229,18 @@ try{
         $fake.Page='tap-only';Invoke-ProxyTap (Find-ProxyNode $document 'target')
         Equal $calls[$calls.Count-1] 'shell input tap 300 140' 'disabled overlay ignored'
     }
+    Case 'native zero-area clickable placeholder does not obstruct home navigation' {
+        $document=[xml]('<hierarchy>'+(Node 'target' 100)+'<node enabled="true" clickable="true" bounds="[1080,2080][1080,2080]"/></hierarchy>')
+        $fake.Page='tap-only';Invoke-ProxyTap (Find-ProxyNode $document 'target')
+        Equal $calls[$calls.Count-1] 'shell input tap 300 140' 'zero area has no hit surface'
+    }
+    Case 'zero-area target and malformed blocker still stop input' {
+        $document=[xml]'<hierarchy><node text="target" enabled="true" clickable="true" bounds="[100,100][100,100]"/></hierarchy>'
+        Throws {Find-ProxyNode $document 'target'} 'Empty'
+        $document=[xml]('<hierarchy>'+(Node 'target' 100)+'<node enabled="true" clickable="true" bounds="invalid"/></hierarchy>')
+        Throws {Invoke-ProxyTap (Find-ProxyNode $document 'target')} 'Invalid'
+        Equal @($calls | Where-Object {$_ -match '^shell input'}).Count 0 'unknown geometry is not ignored'
+    }
     Case 'multiple overlapping controls leave only an interior hit region' {
         $document=[xml]('<hierarchy>'+(Node 'target' 100)+'<node enabled="true" clickable="true" bounds="[100,100][300,180]"/><node enabled="true" clickable="true" bounds="[340,100][500,180]"/></hierarchy>')
         $fake.Page='tap-only';Invoke-ProxyTap (Find-ProxyNode $document 'target')

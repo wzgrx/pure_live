@@ -2,6 +2,8 @@
 
 基线 `3a8f4cf32cd2015a9781cfe56c808c4d96057eeb`。本批接续[已复现的 TLS 停止红项](RECORDING_TLS_STOP_AUDIT_2026_09_07.md)，不通过提早返回 Future 隐藏仍存活的网络连接。
 
+**后续产物**：[09-08 Android候选](RECORDING_TLS_ANDROID_CANDIDATE_2026_09_08.md)已在干净b5f39c2b上构建，尚未安装。以下记录源码验证阶段当时的边界。
+
 ## 结论与边界
 
 原 ClientHello 后停止红测已通过并从 opt-in 探针移到日常 `test/ffmpeg_hls_connect_stop_test.dart`。保留原来的3秒预算、410/零字节、尾片舍弃、缓存ENDLIST、对端断开和另一relay不受影响全部断言；不是删除失败断言。

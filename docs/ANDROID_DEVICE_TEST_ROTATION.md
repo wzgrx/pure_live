@@ -10,6 +10,8 @@
 
 ### 当前调度
 
+最新[Cookie候选Android复验](TWITCASTING_COOKIE_ANDROID_RETEST_2026_09_07.md)：手机当前为80b7431c，保留数据覆盖安装成功；首段401解除，但MP4尾部附近严格解码失败，转为本机确定性复现。12:47:25 UTC最终清理核验通过，无本包进程/活动唤醒锁，代理与reverse回到基线，常亮恢复。本轮新任务已取消；下一轮设备前先处理测试器对旧监控及失败force-stop的所有权缺口。历史轮次见下。
+
 最新[TwitCasting原生与会话审计](TWITCASTING_ANDROID_NATIVE_AUDIT_2026_09_07.md)：Android 1a18f353已保留数据覆盖安装，首段401导致短录FAIL，源码Cookie修订尚待新候选实机复验。11:55:25 UTC精确核验两个代理session恢复、reverse回到基线、本包进程/唤醒锁消失；测试监控已明确取消，原有监控保留，常亮恢复。手机当前未安装后续Cookie修复。NoRotation及用户远程边界保持。
 
 最新[浮窗遮挡收尾审计](ANDROID_PROXY_OCCLUSION_AUDIT_2026_09_07.md)：复用1aa6886f，已完成一次实际录制后代理开关自动恢复与session/映射/进程/唤醒锁清理。10:26:02 UTC最终核验通过；这是历史证据，下一次仍重新核对设备与前台。NoRotation调度规则保持不变。

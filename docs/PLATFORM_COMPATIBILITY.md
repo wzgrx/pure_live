@@ -6,7 +6,7 @@
 
 2026-09-07 按 `lib/core/sites.dart` 核对：当前源码注册 **12 个直播站点 + IPTV，共13个适配器**。
 Picarto 已进入 Android 候选并取得部分原生证据，见 [接入审计](PICARTO_ADAPTER_AUDIT_2026_09_07.md)及[停止/清理补证](ANDROID_PROXY_OCCLUSION_AUDIT_2026_09_07.md)。
-TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入与恢复；Android 1a18f353已覆盖安装，但录制首段401、原生播放证据未足，保持待验收，见[原生与会话审计](TWITCASTING_ANDROID_NATIVE_AUDIT_2026_09_07.md)。Windows候选仍未包含。
+TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入与恢复；Android 80b7431c已覆盖安装并解除首段401，low出现实际画面，但短录文件严格解码仍失败，见[修复候选复验](TWITCASTING_COOKIE_ANDROID_RETEST_2026_09_07.md)。首次high/首帧、完整文件与长录仍待验收；Windows候选仍未包含。
 参考项目尚未接入的平台单列于 [平台扩展差距表](PLATFORM_EXPANSION_AUDIT_2026_09_07.md)，不计作本项目已支持。
 
 源码开发中的 AcFun（正式 v3.1.8 发布包不含；当前 af88a032 Android Debug 候选已包含）：已接入官网直播分类与目录、包含未开播作者的

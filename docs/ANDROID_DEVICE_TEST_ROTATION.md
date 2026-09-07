@@ -10,6 +10,8 @@
 
 ### 当前调度
 
+最新[浮窗遮挡收尾审计](ANDROID_PROXY_OCCLUSION_AUDIT_2026_09_07.md)：复用1aa6886f，已完成一次实际录制后代理开关自动恢复与session/映射/进程/唤醒锁清理。10:26:02 UTC最终核验通过；这是历史证据，下一次仍重新核对设备与前台。NoRotation调度规则保持不变。
+
 最新[Picarto 原生审计](PICARTO_ANDROID_NATIVE_AUDIT_2026_09_07.md)：候选已覆盖安装，独立代理往返通过，短录因解码损坏与自动收尾失败尚未通过；明确恢复及进程/唤醒锁/常亮清理已完成。录制入口使用实际返回导航；嵌套滚动修订只有离线复验，下一轮先补最小原生恢复证据。
 
 本轮录制工具更新见[守卫审计](ANDROID_RECORDING_GUARD_AUDIT_2026_09_07.md)：`android_recording_smoke.ps1`要求明确Serial、型号/代号一致且Pure Live已在前台；前台或连接异常时停止，不重选目标、不重放输入、不抢回应用。平台导航按实际标签逐次观察。[代理事务](ANDROID_PROXY_TRANSACTION_AUDIT_2026_09_07.md)现已完成离线回归；国外录制前先独立验证本轮代理开启/恢复和session对账，不把旧入口说明当作当前手机已验收。

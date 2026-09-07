@@ -1308,7 +1308,8 @@ $result.assertionResults = Get-RecordingSmokeAssertionResults `
     -ScreenOffSeconds $ScreenOffSeconds `
     -ExerciseStreamSelection $ExerciseStreamSelection.IsPresent `
     -QualityOptionCount @($result.checks.qualityOptions).Count `
-    -LineOptionCount @($result.checks.lineOptions).Count
+    -LineOptionCount @($result.checks.lineOptions).Count `
+    -DanmakuSupported $danmakuSupported
 $result | ConvertTo-Json -Depth 10 | Out-File -LiteralPath (Join-Path $evidence 'summary.json') -Encoding utf8
 $failed = @($assertions.GetEnumerator() | Where-Object { -not [bool]$_.Value })
 if ($failed.Count -gt 0) {

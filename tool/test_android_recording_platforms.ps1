@@ -82,6 +82,17 @@ if ($single.qualitySwitchCommitted -ne 'SKIP' -or $single.lineSwitchCommitted -n
 }
 if ($checks.screenOffRecordingContinued -ne $false) { throw 'Coverage must not mutate legacy assertions' }
 Write-Host 'PASS optional recording coverage distinguishes PASS / FAIL / SKIP'
+$chatChecks=[ordered]@{danmakuConnectionReady=$true;liveDanmakuVisible=$false;runningFileGrowthObserved=$true}
+$noChat=Get-RecordingSmokeAssertionResults -Assertions $chatChecks -DanmakuSupported $false
+if($noChat.danmakuConnectionReady -ne 'SKIP' -or $noChat.liveDanmakuVisible -ne 'SKIP' -or $noChat.runningFileGrowthObserved -ne 'PASS'){
+ throw 'Unimplemented remote chat is not an executed pass or failure'
+}
+$withChat=Get-RecordingSmokeAssertionResults -Assertions $chatChecks -DanmakuSupported $true
+if($withChat.danmakuConnectionReady -ne 'PASS' -or $withChat.liveDanmakuVisible -ne 'FAIL'){
+ throw 'Supported chat must retain actual outcomes'
+}
+if($chatChecks.liveDanmakuVisible -ne $false){throw 'Chat coverage must not mutate original assertions'}
+Write-Host 'PASS unsupported remote chat is SKIP; supported chat retains PASS / FAIL'
 
 . (Join-Path $PSScriptRoot 'recorder_background_snapshot.ps1')
 $services = @'

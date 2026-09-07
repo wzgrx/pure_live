@@ -4,7 +4,8 @@ function Get-RecordingSmokeAssertionResults {
         [int] $ScreenOffSeconds = 0,
         [bool] $ExerciseStreamSelection = $false,
         [int] $QualityOptionCount = 0,
-        [int] $LineOptionCount = 0
+        [int] $LineOptionCount = 0,
+        [bool] $DanmakuSupported = $true
     )
     $results = [ordered]@{}
     foreach ($entry in $Assertions.GetEnumerator()) {
@@ -20,6 +21,11 @@ function Get-RecordingSmokeAssertionResults {
     }
     if (-not $ExerciseStreamSelection -or $LineOptionCount -le 1) {
         foreach ($name in @('lineSwitchCommitted', 'lineSwitchStable')) { $results[$name] = 'SKIP' }
+    }
+    if (-not $DanmakuSupported) {
+        foreach ($name in @('danmakuConnectionReady', 'liveDanmakuVisible')) {
+            if ($results.Contains($name)) { $results[$name] = 'SKIP' }
+        }
     }
     return $results
 }

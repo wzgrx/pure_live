@@ -73,6 +73,8 @@ class SearchController extends GetxController {
         return "https://www.yy.com/search-$q";
       case Sites.picartoSite:
         return 'https://picarto.tv/search?q=$q';
+      case Sites.twitcastingSite:
+        return 'https://twitcasting.tv/search/text/?tw_search_query=$q';
       case Sites.acfunSite:
         return 'https://www.acfun.cn/search?keyword=$q&type=user';
       default:

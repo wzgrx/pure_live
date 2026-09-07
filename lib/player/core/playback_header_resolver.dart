@@ -7,6 +7,7 @@ import 'package:pure_live/core/site/twitch/twitch_site.dart';
 import 'package:pure_live/core/site/acfun/acfun_api.dart';
 import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
+import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 
 /// Resolves the HTTP headers used to read a platform's media stream.
 ///
@@ -128,6 +129,9 @@ class PlaybackHeaderResolver {
         break;
       case Sites.picartoSite:
         headers = {...PicartoApi.playHeaders, 'User-Agent': _desktopUserAgent};
+        break;
+      case Sites.twitcastingSite:
+        headers = TwitcastingApi.playHeaders;
         break;
       case Sites.acfunSite:
         headers = {...AcfunApi.playHeaders, 'origin': AcfunApi.origin};

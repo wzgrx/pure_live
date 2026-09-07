@@ -22,6 +22,9 @@ class AreaRoomsBinding extends Binding {
         if (site.id == Sites.soopSite) {
           return AreaServerFixedController(site, subCategory, fixedSize: 60);
         }
+        if (site.id == Sites.twitcastingSite) {
+          return AreaServerFixedController(site, subCategory, fixedSize: 60);
+        }
         return AreaServerRemoteController(site, subCategory);
       }, tag: tag),
     ];

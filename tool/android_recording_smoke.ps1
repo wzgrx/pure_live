@@ -9,7 +9,7 @@ param(
     [int] $ScreenOffSeconds = 0,
     [ValidateRange(10, 90)]
     [int] $PlatformLoadTimeoutSeconds = 45,
-    [ValidateSet('bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop', 'yy', 'acfun', 'picarto')]
+    [ValidateSet('bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop', 'yy', 'acfun', 'picarto', 'twitcasting')]
     [string] $Platform = 'bilibili',
     [ValidatePattern('^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$')]
     [string] $Package = 'com.mystyle.purelive',
@@ -71,10 +71,11 @@ $platformLabels = @{
     yy = 'YY'
     acfun = 'AcFun 直播'
     picarto = 'Picarto'
+    twitcasting = 'TwitCasting'
 }
 $platformLabel = $platformLabels[$Platform]
-$danmakuSupported = $Platform -notin @('cc', 'acfun', 'picarto')
-$qualityLabelPattern = '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3}|\s+\d+(?:\.\d+)?fps)?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:HLS\s+(?:Auto|\d+(?:\.\d+)?\s+Mbps))|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
+$danmakuSupported = $Platform -notin @('cc', 'acfun', 'picarto', 'twitcasting')
+$qualityLabelPattern = '^(?i:(?:.*(?:原画|蓝光|超清|高清|标清|流畅|省流|自动).*)|(?:\d{3,4}p(?:\d{2,3}|\s+\d+(?:\.\d+)?fps)?(?:\s*\([^)]*\)|（[^）]*）)?)|(?:HLS\s+(?:Auto|high|medium|low|\d+(?:\.\d+)?\s+Mbps))|(?:source|origin|uhd|fhd|hd|sd|ld|high|medium|low))$'
 $lineLabelPattern = '^(?:线路\s*\d+|主线路|备用线路)$'
 $script:foregroundInterferenceCount = 0
 $script:foregroundRecoveryCount = 0

@@ -16,12 +16,12 @@ function Find-Assignment([string]$Name) {
 $labelAssignment = Find-Assignment 'platformLabels'
 $table = $labelAssignment.Right.Find({param($n) $n -is [Management.Automation.Language.HashtableAst]}, $true).SafeGetValue()
 $capability = (Find-Assignment 'danmakuSupported').Right.Extent.Text
-$expected = @('bilibili','douyu','huya','douyin','kuaishou','cc','twitch','soop','yy','acfun','picarto')
+$expected = @('bilibili','douyu','huya','douyin','kuaishou','cc','twitch','soop','yy','acfun','picarto','twitcasting')
 if (@(Compare-Object ($accepted | Sort-Object) ($expected | Sort-Object)).Count) { throw 'Accepted platform set differs from the recording matrix' }
 if (@(Compare-Object (@($table.Keys) | Sort-Object) ($expected | Sort-Object)).Count) { throw 'Platform labels and accepted input differ' }
 foreach ($Platform in $expected) {
  $supported = & ([scriptblock]::Create($capability))
- if ($supported -ne ($Platform -notin @('cc','acfun','picarto'))) { throw "Incorrect remote chat capability for $Platform" }
+ if ($supported -ne ($Platform -notin @('cc','acfun','picarto','twitcasting'))) { throw "Incorrect remote chat capability for $Platform" }
  if ([string]::IsNullOrWhiteSpace($table[$Platform])) { throw "Missing platform label for $Platform" }
  Write-Host "PASS $Platform label/chat contract"
 }
@@ -29,11 +29,11 @@ $translations = Get-Content (Join-Path $PSScriptRoot '../assets/translations/zh.
 if ($table['acfun'] -ne $translations.site_acfun) { throw 'AcFun navigation label differs from the actual translation' }
 Write-Host 'PASS AcFun localized label'
 $qualityPattern = (Find-Assignment 'qualityLabelPattern').Right.Find({param($n) $n -is [Management.Automation.Language.StringConstantExpressionAst]}, $true).SafeGetValue()
-foreach ($label in @('720p 60fps', '1080p 59.94fps', 'HLS Auto', 'HLS 3.7 Mbps', '720p60', '原画')) {
+foreach ($label in @('720p 60fps', '1080p 59.94fps', 'HLS Auto', 'HLS 3.7 Mbps', 'HLS high', 'HLS medium', 'HLS low', '720p60', '原画')) {
  if ($label -notmatch $qualityPattern) { throw "Missing quality label: $label" }
 }
 if ('a random 720p 60fps sentence' -match $qualityPattern) { throw 'Quality labels must be anchored' }
-Write-Host 'PASS Picarto declared HLS quality labels'
+Write-Host 'PASS Picarto and TwitCasting declared HLS quality labels'
 
 $foreignErrors = $null
 $foreignAst = [Management.Automation.Language.Parser]::ParseFile(
@@ -42,7 +42,7 @@ if ($foreignErrors.Count) { throw ($foreignErrors | Out-String) }
 $foreignParameter = $foreignAst.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -eq 'Platform' }
 $foreignAttribute = $foreignParameter.Attributes | Where-Object { $_.TypeName.Name -eq 'ValidateSet' }
 $foreignPlatforms = @($foreignAttribute.PositionalArguments | ForEach-Object Value)
-foreach ($foreignPlatform in @('twitch', 'soop', 'picarto')) {
+foreach ($foreignPlatform in @('twitch', 'soop', 'picarto', 'twitcasting')) {
  if ($foreignPlatform -notin $foreignPlatforms -or $foreignPlatform -notin $accepted) {
   throw "Foreign recording wrapper is missing $foreignPlatform"
  }

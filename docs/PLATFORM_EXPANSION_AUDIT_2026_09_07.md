@@ -1,6 +1,6 @@
 # 参考平台扩展差距与 Picarto 输入样本（2026-09-07）
 
-后续增量：[Picarto接入审计](PICARTO_ADAPTER_AUDIT_2026_09_07.md)记录第一组源码实施。当前源码为11直播站点加IPTV；剩余16组未注册，Picarto仍待完整能力与原生验收。下文17组为实施前的固定差距快照，不表示17组已验收完成。
+后续增量：[Picarto接入审计](PICARTO_ADAPTER_AUDIT_2026_09_07.md)与[TwitCasting接入审计](TWITCASTING_ADAPTER_AUDIT_2026_09_07.md)记录两组源码实施。当前源码为12直播站点加IPTV；剩余15组未注册，已注册平台的完整能力与原生验收仍分项保留。TwitCasting审计同时记录OPENREC公开请求403，OPENREC仍未实现。下文17组为实施前的固定差距快照，不表示17组已验收完成。
 
 本轮以 d509bd8d 源码注册表为准，重新读取参考仓库远程HEAD、完整Git树（truncated=false）、README与实际注册入口，不合并或运行参考代码。
 

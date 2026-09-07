@@ -15,6 +15,7 @@ class AppSettingsController extends GetxController {
     Sites.soopSite,
     Sites.acfunSite,
     Sites.picartoSite,
+    Sites.twitcastingSite,
   ];
 
   Worker? _refreshRateModeWorker;
@@ -83,6 +84,10 @@ class AppSettingsController extends GetxController {
     if (audienceMetricMigration.v < 4) {
       if (!realOnlinePlatforms.contains(Sites.picartoSite)) realOnlinePlatforms.add(Sites.picartoSite);
       audienceMetricMigration.v = 4;
+    }
+    if (audienceMetricMigration.v < 5) {
+      if (!realOnlinePlatforms.contains(Sites.twitcastingSite)) realOnlinePlatforms.add(Sites.twitcastingSite);
+      audienceMetricMigration.v = 5;
     }
     _removeUnsupportedOnlinePlatforms();
     if (Platform.isAndroid || Platform.isWindows) {

@@ -31,11 +31,11 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 2);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'bilibili']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'bilibili', 'acfun', 'picarto']);
-    expect(settings.siteCatalogMigration.value, 4);
+    expect(settings.hotAreasList, ['huya', 'bilibili', 'acfun', 'picarto', 'twitcasting']);
+    expect(settings.siteCatalogMigration.value, 5);
     settings.hotAreasList.remove('acfun');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'bilibili', 'picarto']);
+    expect(settings.hotAreasList, ['huya', 'bilibili', 'picarto', 'twitcasting']);
   });
 
   test('online-count capability is explicit and backup normalization preserves an AcFun toggle', () {
@@ -51,12 +51,12 @@ void main() {
     await HivePrefUtil.setInt('audienceMetricMigration', 2);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final settings = Get.put(AppSettingsController());
-    expect(settings.realOnlinePlatforms, ['twitch', 'acfun', 'picarto']);
-    expect(settings.audienceMetricMigration.value, 4);
+    expect(settings.realOnlinePlatforms, ['twitch', 'acfun', 'picarto', 'twitcasting']);
+    expect(settings.audienceMetricMigration.value, 5);
     settings.setRealOnlineEnabledFor('acfun', false);
     settings.onInit();
-    expect(settings.realOnlinePlatforms, ['twitch', 'picarto']);
+    expect(settings.realOnlinePlatforms, ['twitch', 'picarto', 'twitcasting']);
     await Hive.box<dynamic>('app_settings').flush();
-    expect(HivePrefUtil.getStringList('realOnlinePlatforms'), ['twitch', 'picarto']);
+    expect(HivePrefUtil.getStringList('realOnlinePlatforms'), ['twitch', 'picarto', 'twitcasting']);
   });
 }

@@ -87,6 +87,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(SettingsService.to.app.isRealOnlineEnabledFor('picarto'), isFalse);
     expect(tester.widget<SwitchListTile>(picarto).value, isFalse);
+    final twitcasting = find.byKey(const ValueKey('audience-platform-twitcasting'));
+    await tester.ensureVisible(twitcasting);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(twitcasting).value, isTrue);
+    await tester.tap(twitcasting);
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.app.isRealOnlineEnabledFor('twitcasting'), isFalse);
+    expect(tester.widget<SwitchListTile>(twitcasting).value, isFalse);
     expect(tester.takeException(), isNull);
   });
 }
@@ -118,6 +126,7 @@ class _AudienceAssetLoader extends AssetLoader {
     'audience_yy_detail': '仅提供热度',
     'audience_acfun_detail': '列表提供在线数，作者搜索没有在线数',
     'audience_picarto_detail': '在线人数与累计观看分列',
+    'audience_twitcasting_detail': '目录提供在线值，详情暂缺该值',
     'audience_metric_fallback_desc': '各平台字段口径会单独标注。',
   };
 }

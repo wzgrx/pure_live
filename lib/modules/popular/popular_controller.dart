@@ -61,6 +61,12 @@ class PopularController extends GetxController with GetTickerProviderStateMixin 
             return PopularServerFixedController(site, fixedSize: 60);
           }
 
+          if (site.id == Sites.twitcastingSite) {
+            // One top window, filtered before local slicing. Remote pagination
+            // changes requested sizes after exclusions and can skip cards.
+            return PopularServerFixedController(site, fixedSize: 60);
+          }
+
           if (site.id == Sites.twitchSite) {
             // Twitch currently permits a large first directory page without
             // browser integrity, while follow-up cursor requests can be

@@ -1,4 +1,5 @@
 import 'site/picarto/picarto_site.dart';
+import 'site/twitcasting/twitcasting_site.dart';
 import 'site/yy/yy_site.dart';
 import 'site/acfun/acfun_site.dart';
 import 'site/soop/soop_site.dart';
@@ -28,6 +29,7 @@ class Sites {
   static const String yySite = 'yy';
   static const String acfunSite = 'acfun';
   static const String picartoSite = 'picarto';
+  static const String twitcastingSite = 'twitcasting';
 
   static const Set<String> supportedSiteIds = {
     bilibiliSite,
@@ -41,6 +43,7 @@ class Sites {
     yySite,
     acfunSite,
     picartoSite,
+    twitcastingSite,
     iptvSite,
   };
 
@@ -58,6 +61,7 @@ class Sites {
     Site(id: yySite, name: i18n("site_yy"), logo: "assets/images/yy.png", liveSite: YYSite()),
     Site(id: acfunSite, name: i18n('site_acfun'), logo: 'assets/images/logo.png', liveSite: AcfunSite()),
     Site(id: picartoSite, name: 'Picarto', logo: 'assets/images/logo.png', liveSite: PicartoSite()),
+    Site(id: twitcastingSite, name: 'TwitCasting', logo: 'assets/images/logo.png', liveSite: TwitcastingSite()),
     Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
   ];
 
@@ -104,6 +108,12 @@ class Sites {
       yySite => Site(id: yySite, name: i18n("site_yy"), logo: "assets/images/yy.png", liveSite: YYSite()),
       acfunSite => Site(id: acfunSite, name: i18n('site_acfun'), logo: 'assets/images/logo.png', liveSite: AcfunSite()),
       picartoSite => Site(id: picartoSite, name: 'Picarto', logo: 'assets/images/logo.png', liveSite: PicartoSite()),
+      twitcastingSite => Site(
+        id: twitcastingSite,
+        name: 'TwitCasting',
+        logo: 'assets/images/logo.png',
+        liveSite: TwitcastingSite(),
+      ),
       iptvSite => Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
       _ => throw StateError('Unsupported live site: $normalizedId'),
     };

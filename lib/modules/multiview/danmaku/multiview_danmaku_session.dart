@@ -52,7 +52,7 @@ class MultiviewDanmakuSession {
 
   /// Empty/unsupported remote transports never create a multiview chat session.
   static bool isSupportedPlatform(String? platform) {
-    const except = [Sites.iptvSite, Sites.ccSite, Sites.acfunSite, Sites.picartoSite];
+    const except = [Sites.iptvSite, Sites.ccSite, Sites.acfunSite, Sites.picartoSite, Sites.twitcastingSite];
     return platform != null && !except.contains(platform);
   }
 

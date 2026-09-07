@@ -34,7 +34,13 @@ class AreaServerFixedController extends ServerFixedPageController<LiveRoom> {
   @override
   Future<List<LiveRoom>> fetchFixedNetworkData(int bigPage, int fixedSize) async {
     try {
-      final result = await site.liveSite.getCategoryRooms(subCategory, page: bigPage);
+      final result = await site.liveSite.getCategoryRooms(
+        subCategory,
+        page: bigPage,
+        // Preserve older adapters' default contract; TwitCasting must fetch
+        // the full bounded window once before this controller slices it.
+        pageSize: site.id == Sites.twitcastingSite ? fixedSize : 30,
+      );
       for (var element in result) {
         element.area = subCategory.areaName;
       }

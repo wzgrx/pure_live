@@ -591,7 +591,7 @@
     "toolbox_room_jump": "Jump to Room",
     "toolbox_select_line": "Select Line",
     "toolbox_select_quality": "Select Quality",
-    "toolbox_support_content": "Supported link formats:\n\nBilibili:\nhttps://live.bilibili.com/xxxxx\nhttps://www.bilibili.com/xxxxx\nhttps://b23.tv/xxxxx\n\nHuya:\nhttps://www.huya.com/xxxxx\n\nDouyu:\nhttps://www.douyu.com/xxxxx\n\nDouyin Live/Video:\nhttps://live.douyin.com/xxxxx\nhttps://www.douyin.com/xxxxx\nhttps://v.douyin.com/xxxxx\nhttps://webcast.amemv.com/douyin/webcast/reflow/xxxxx\n\nKuaishou Live:\nhttps://live.kuaishou.com/u/xxxxx\nhttps://live.kuaishou.cn/u/xxxxx\n\nNetEase CC:\nhttps://cc.163.com/xxxxx\n\nTwitch:\nhttps://www.twitch.tv/xxxxx\nhttps://twitch.tv/xxxxx\n\nSOOP Live:\nhttps://www.sooplive.com/xxxxx\nhttps://sooplive.com/xxxxx\nhttps://play.sooplive.com/xxxxx\nhttps://www.sooplive.co.kr/xxxxx\nhttps://sooplive.co.kr/xxxxx\nhttps://play.sooplive.co.kr/xxxxx\n\nYY Live:\nhttps://www.yy.com/xxxxx\nhttps://yy.com/xxxxx\nhttps://www.yy.com/xxxxx/xxxxx?tempId=xxxxx\nhttps://yy.com/xxxxx/xxxxx?tempId=xxxxx\n\nAcFun Live:\nhttps://live.acfun.cn/live/123456\n\nPicarto:\nhttps://picarto.tv/ChannelName",
+    "toolbox_support_content": "Supported link formats:\n\nBilibili:\nhttps://live.bilibili.com/xxxxx\nhttps://www.bilibili.com/xxxxx\nhttps://b23.tv/xxxxx\n\nHuya:\nhttps://www.huya.com/xxxxx\n\nDouyu:\nhttps://www.douyu.com/xxxxx\n\nDouyin Live/Video:\nhttps://live.douyin.com/xxxxx\nhttps://www.douyin.com/xxxxx\nhttps://v.douyin.com/xxxxx\nhttps://webcast.amemv.com/douyin/webcast/reflow/xxxxx\n\nKuaishou Live:\nhttps://live.kuaishou.com/u/xxxxx\nhttps://live.kuaishou.cn/u/xxxxx\n\nNetEase CC:\nhttps://cc.163.com/xxxxx\n\nTwitch:\nhttps://www.twitch.tv/xxxxx\nhttps://twitch.tv/xxxxx\n\nSOOP Live:\nhttps://www.sooplive.com/xxxxx\nhttps://sooplive.com/xxxxx\nhttps://play.sooplive.com/xxxxx\nhttps://www.sooplive.co.kr/xxxxx\nhttps://sooplive.co.kr/xxxxx\nhttps://play.sooplive.co.kr/xxxxx\n\nYY Live:\nhttps://www.yy.com/xxxxx\nhttps://yy.com/xxxxx\nhttps://www.yy.com/xxxxx/xxxxx?tempId=xxxxx\nhttps://yy.com/xxxxx/xxxxx?tempId=xxxxx\n\nAcFun Live:\nhttps://live.acfun.cn/live/123456\n\nPicarto:\nhttps://picarto.tv/ChannelName\n\nTwitCasting:\nhttps://twitcasting.tv/ChannelName\nhttps://twitcasting.tv/c:ChannelName",
     "toolbox_support_list": "Supported Platforms",
     "toolbox_title": "Link Parser",
     "tray_update_failed": "Failed to update system tray",
@@ -1364,6 +1364,7 @@
     "local_gift_twitch_hype_train": "Hype Train",
     "site_soop": "Soop",
     "site_picarto": "Picarto",
+    "site_twitcasting": "TwitCasting",
     "site_acfun": "AcFun Live",
     "search_coverage_acfun": "Search AcFun authors, including live and offline authors. Live status is refreshed on entry; followers are not concurrent viewers.",
     "audience_acfun_detail": "Live directory and room details use onlineCount. Likes and followers remain separate; author search has no concurrent count.",
@@ -1507,5 +1508,6 @@
     "portrait_fullscreen_enter_hint": "Swipe down for portrait fullscreen",
     "portrait_fullscreen_restore_hint": "Portrait fullscreen · Swipe up to restore danmaku",
     "picarto_public_directory": "Public live streams (adult content excluded)",
-    "audience_picarto_detail": "Directory and room viewers are concurrent viewers; total_views is cumulative and remains separate."
+    "audience_picarto_detail": "Directory and room viewers are concurrent viewers; total_views is cumulative and remains separate.",
+    "audience_twitcasting_detail": "Directory current_viewer_count is concurrent audience. Room detail omits it; no cumulative count is substituted."
 }

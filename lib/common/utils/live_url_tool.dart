@@ -45,6 +45,7 @@ class LiveUrlTool {
       'yy.com',
       'live.acfun.cn',
       'picarto.tv',
+      'twitcasting.tv',
     };
     return sharedHttpUris(text).any((uri) => roots.any((root) => _hostIs(uri.host.toLowerCase(), root)));
   }

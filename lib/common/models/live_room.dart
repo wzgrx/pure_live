@@ -100,6 +100,11 @@ class LiveRoom {
       hasTotalViewers: true,
       onlineAvailability: AudienceOnlineAvailability.roomList,
     ),
+    'twitcasting': AudiencePlatformCapability(
+      hasPopularity: false,
+      hasTotalViewers: false,
+      onlineAvailability: AudienceOnlineAvailability.roomList,
+    ),
     // AcFun onlineCount is independent of likes/followers; author search omits it.
     'acfun': AudiencePlatformCapability(
       hasPopularity: false,

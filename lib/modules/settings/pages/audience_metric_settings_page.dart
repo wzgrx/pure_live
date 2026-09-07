@@ -15,6 +15,7 @@ class AudienceMetricSettingsPage extends StatelessWidget {
     (id: 'soop', name: 'SOOP', detailKey: 'audience_soop_detail'),
     (id: 'yy', name: 'YY Live', detailKey: 'audience_yy_detail'),
     (id: 'picarto', name: 'Picarto', detailKey: 'audience_picarto_detail'),
+    (id: 'twitcasting', name: 'TwitCasting', detailKey: 'audience_twitcasting_detail'),
     (id: 'acfun', name: 'AcFun', detailKey: 'audience_acfun_detail'),
   ];
 

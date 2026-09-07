@@ -1,5 +1,6 @@
 import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
+import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 
 class WebSearchRoomTarget {
   const WebSearchRoomTarget({required this.platform, required this.roomId});
@@ -41,6 +42,8 @@ class WebSearchRoomParser {
     if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return null;
     final picarto = PicartoApi.channelFromUri(uri);
     if (picarto != null) return WebSearchRoomTarget(platform: Sites.picartoSite, roomId: picarto);
+    final twitcasting = TwitcastingApi.channelFromUri(uri);
+    if (twitcasting != null) return WebSearchRoomTarget(platform: Sites.twitcastingSite, roomId: twitcasting);
     final host = uri.host.toLowerCase();
     final segments = uri.pathSegments.where((segment) => segment.trim().isNotEmpty).toList(growable: false);
 

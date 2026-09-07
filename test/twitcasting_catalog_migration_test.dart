@@ -13,7 +13,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
   setUpAll(() async {
-    directory = await Directory.systemTemp.createTemp('picarto-migration-');
+    directory = await Directory.systemTemp.createTemp('twitcasting-migration-');
     Hive.init(directory.path);
     await HivePrefUtil.init();
   });
@@ -32,35 +32,38 @@ void main() {
     Get.put(SettingsService());
     final controller = SearchController();
     try {
-      expect(controller.sites.map((s) => s.id), contains('picarto'));
-      expect(controller.buildSearchUrl('picarto', 'a & b'), 'https://picarto.tv/search?q=a%20%26%20b');
+      expect(controller.sites.map((s) => s.id), contains('twitcasting'));
+      expect(
+        controller.buildSearchUrl('twitcasting', 'a & b'),
+        'https://twitcasting.tv/search/text/?tw_search_query=a%20%26%20b',
+      );
     } finally {
       controller.onClose();
     }
   });
 
-  test('catalog upgrade appends Picarto once and preserves disabled platforms and order', () async {
-    await HivePrefUtil.setInt('siteCatalogMigration', 3);
+  test('catalog upgrade appends TwitCasting once and preserves disabled platforms and order', () async {
+    await HivePrefUtil.setInt('siteCatalogMigration', 4);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'acfun']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'acfun', 'picarto', 'twitcasting']);
-    expect(settings.siteCatalogMigration.value, 5);
-    settings.hotAreasList.remove('picarto');
-    settings.onInit();
     expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting']);
+    expect(settings.siteCatalogMigration.value, 5);
+    settings.hotAreasList.remove('twitcasting');
+    settings.onInit();
+    expect(settings.hotAreasList, ['huya', 'acfun']);
     await Hive.box<dynamic>('app_settings').flush();
-    expect(HivePrefUtil.getStringList('hotAreasList'), ['huya', 'acfun', 'twitcasting']);
+    expect(HivePrefUtil.getStringList('hotAreasList'), ['huya', 'acfun']);
   });
 
-  test('audience upgrade adds Picarto and later catalog entries and respects subsequent disabling', () async {
-    await HivePrefUtil.setInt('audienceMetricMigration', 3);
+  test('audience upgrade adds only TwitCasting and respects subsequent disabling', () async {
+    await HivePrefUtil.setInt('audienceMetricMigration', 4);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final settings = Get.put(AppSettingsController());
-    expect(settings.realOnlinePlatforms, ['twitch', 'picarto', 'twitcasting']);
-    expect(settings.audienceMetricMigration.value, 5);
-    settings.setRealOnlineEnabledFor('picarto', false);
-    settings.onInit();
     expect(settings.realOnlinePlatforms, ['twitch', 'twitcasting']);
-    expect(AppSettingsController.normalizeRealOnlinePlatforms([' PICARTO ', 'huya']), ['picarto']);
+    expect(settings.audienceMetricMigration.value, 5);
+    settings.setRealOnlineEnabledFor('twitcasting', false);
+    settings.onInit();
+    expect(settings.realOnlinePlatforms, ['twitch']);
+    expect(AppSettingsController.normalizeRealOnlinePlatforms([' TWITCASTING ', 'huya']), ['twitcasting']);
   });
 }

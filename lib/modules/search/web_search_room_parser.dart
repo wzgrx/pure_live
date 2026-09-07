@@ -2,6 +2,7 @@ import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
 import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
+import 'package:pure_live/core/site/inke/inke_api.dart';
 
 class WebSearchRoomTarget {
   const WebSearchRoomTarget({required this.platform, required this.roomId});
@@ -42,6 +43,8 @@ class WebSearchRoomParser {
     final uri = Uri.tryParse(rawUrl.trim());
     if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return null;
     final missevan = MissevanApi.roomFromUri(uri);
+    final inke = InkeApi.roomFromUri(uri);
+    if (inke != null) return WebSearchRoomTarget(platform: Sites.inkeSite, roomId: inke);
     if (missevan != null) return WebSearchRoomTarget(platform: Sites.missevanSite, roomId: missevan);
     final picarto = PicartoApi.channelFromUri(uri);
     if (picarto != null) return WebSearchRoomTarget(platform: Sites.picartoSite, roomId: picarto);

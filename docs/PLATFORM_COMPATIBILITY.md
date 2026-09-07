@@ -4,9 +4,10 @@
 
 ## 当前平台能力
 
-2026-09-07 按 `lib/core/sites.dart` 核对：当前源码注册 **12 个直播站点 + IPTV，共13个适配器**。
+2026-09-08 按 `lib/core/sites.dart` 核对：当前源码注册 **14 个直播站点 + IPTV，共15个适配器**。这是源码注册数量，不是已发布包或完整验收数量。
+猫耳和映客已应用接入；猫耳 Windows 原生短录有独立证据，映客当前只到公开接口和生产地址解析，见[映客应用审计](INKE_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。
 Picarto 已进入 Android 候选并取得部分原生证据，见 [接入审计](PICARTO_ADAPTER_AUDIT_2026_09_07.md)及[停止/清理补证](ANDROID_PROXY_OCCLUSION_AUDIT_2026_09_07.md)。
-TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入与恢复；Android 80b7431c已覆盖安装并解除首段401，low出现实际画面，但短录文件严格解码仍失败，见[修复候选复验](TWITCASTING_COOKIE_ANDROID_RETEST_2026_09_07.md)。首次high/首帧、完整文件与长录仍待验收；Windows候选仍未包含。
+TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入与恢复；Android 80b7431c已覆盖安装并解除首段401，low出现实际画面，但短录文件严格解码仍失败，见[修复候选复验](TWITCASTING_COOKIE_ANDROID_RETEST_2026_09_07.md)。首次high/首帧、完整文件与长录仍待验收；当前 Windows f3de664a 候选已包含源码，但没有本平台对应的新原生验收。
 参考项目尚未接入的平台单列于 [平台扩展差距表](PLATFORM_EXPANSION_AUDIT_2026_09_07.md)，不计作本项目已支持。
 
 源码开发中的 AcFun（正式 v3.1.8 发布包不含；当前 af88a032 Android Debug 候选已包含）：已接入官网直播分类与目录、包含未开播作者的
@@ -29,6 +30,8 @@ TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入�
 | AcFun | 官网直播分类与目录 | 原生作者搜索，含未开播作者；稀疏分页 | 当前未接入，页面明确说明 | `onlineCount` 为在线；点赞、粉丝分列 |
 | Picarto | 公开直播目录入口；完整分类待接入 | 官网搜索入口，分享链接回流 | 当前未接入，页面明确说明 | `viewers` 为在线，详情 `total_views` 为累计观看 |
 | TwitCasting | 官网顶栏分类与最多60条公开热门窗口；页面缓存后本地分页 | 官网搜索入口；仅频道根链接回流，movie/archive待接入 | 当前未接入，页面明确说明 | 目录 `current_viewer_count` 为在线；详情缺值时保留未知 |
+| 猫耳 FM | 官网 catalog/tag 分类与原生推荐分页 | 当前未接入，页面明确说明 | 当前未接入 | `score` 为热度，粉丝分列；不以零值冒充当前在线 |
+| 映客 | 官网有限精选及服务端频道，页面持续说明非全站列表 | 当前未接入，无虚构网页搜索入口 | 当前未接入 | 未取得人数，保持未知；主播等级不作观众数 |
 | IPTV | 本地导入频道分组 | 本地频道查询 | 无远端弹幕服务 | 不虚构观看人数 |
 
 > “热度”是平台排序/活跃度指标，不等同于唯一在线用户数。界面会按平台字段分别显示“热度”“在线”或“累计观看”，避免把不同含义的数据统一标成在线人数。
@@ -59,6 +62,8 @@ TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入�
 | Twitch | HLS variant attributes | `EXT-X-STREAM-INF` 与紧随其后的 URI 成对解析，支持相对 URL；并发多画面不共享可变 URL 列表 |
 | SOOP Live | preset name | 过滤 `auto` 和重复 preset，按平台 `bps` 排序，请求沿用同一 preset 名称 |
 | YY Live | gear | 同名但不同 gear 保持独立并编号，播放响应只接收有效 HTTP(S) CDN 地址 |
+| 猫耳 FM | `hls` / `flv` | 保留协议身份；刷新当前房间、同协议匹配，不将协议名虚构为分辨率 |
+| 映客 | `flv` | UID 与当前广播 ID 双重匹配官网公开精选；恢复重新查询，签名期限仍待实证 |
 | IPTV | `default` | 单一导入源，空地址不生成伪画质 |
 | AcFun | representation 解析所得稳定 ID | 同档多个有效 URL 合并；续签重新读取详情，按 ID 找回对应画质 |
 | Picarto | HLS 分辨率/fps/编解码与音视频组 | 同档线路合并；恢复重新读详情及列表；外置音轨保留主列表并标 HLS Auto |

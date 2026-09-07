@@ -10,6 +10,7 @@ import 'package:pure_live/plugins/emoji_manager.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/core/danmaku/huya_danmaku.dart';
+import 'package:pure_live/core/site/inke/inke_site.dart';
 import 'package:pure_live/player/core/player_manager.dart';
 import 'package:pure_live/core/danmaku/douyin_danmaku.dart';
 import 'package:pure_live/player/core/live_audio_service.dart';
@@ -895,6 +896,10 @@ class LivePlayController extends GetxController
         break;
       case Sites.missevanSite:
         nativeUrl = 'https://fm.missevan.com/live/${Uri.encodeComponent(detail.roomId ?? '')}';
+        webUrl = nativeUrl;
+        break;
+      case Sites.inkeSite:
+        nativeUrl = InkeSite.externalRoomUrl(detail);
         webUrl = nativeUrl;
         break;
       case Sites.acfunSite:

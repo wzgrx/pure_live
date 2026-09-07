@@ -53,6 +53,10 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
   bool get showInlineError => true;
 
   @override
+  String? get pageNotice =>
+      directory is LiveDirectoryNotice ? i18n((directory as LiveDirectoryNotice).directoryNoticeKey) : null;
+
+  @override
   String get retryActionLabel => i18n(_capacityReached ? 'refresh' : 'retry');
 
   @override

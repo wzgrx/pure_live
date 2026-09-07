@@ -12,10 +12,11 @@ import 'package:pure_live/model/live_play_quality.dart';
 enum InkeFailure { transport, access, rateLimited, service, notFound, schema, cancelled, mediaUnavailable }
 
 class InkeException implements Exception {
-  const InkeException(this.kind);
+  const InkeException(this.kind, {this.message});
   final InkeFailure kind;
+  final String? message;
   @override
-  String toString() => 'Inke ${kind.name}';
+  String toString() => message ?? 'Inke ${kind.name}';
 }
 
 typedef InkeRequest = Future<({int status, String body})> Function(Uri uri, CancelToken? cancel);

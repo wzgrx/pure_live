@@ -59,6 +59,11 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
       children: [
         Column(
           children: [
+            if (controller.pageNotice case final notice?)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+                child: Text(notice, style: Theme.of(context).textTheme.bodySmall),
+              ),
             Obx(() {
               if (controller.showCellularBanner.value && controller.list.isNotEmpty) {
                 return Container(

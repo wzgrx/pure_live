@@ -184,6 +184,7 @@ abstract class BasePageScrollAndStateBone<T> extends BaseController {
   Future<void> retryData() => refreshData();
   String get retryActionLabel => i18n('retry');
   bool get showInlineError => false;
+  String? get pageNotice => null;
   Future<void> refreshData();
   Future<void> goToPage(int page);
   void setPageSize(int? newSize);

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart' as dio;
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
+import 'package:pure_live/core/site/inke/inke_api.dart';
 
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/utils/live_short_link_session.dart';
@@ -48,9 +49,12 @@ class LiveUrlTool {
       'picarto.tv',
       'twitcasting.tv',
     };
-    return sharedHttpUris(
-      text,
-    ).any((uri) => MissevanApi.roomFromUri(uri) != null || roots.any((root) => _hostIs(uri.host.toLowerCase(), root)));
+    return sharedHttpUris(text).any(
+      (uri) =>
+          InkeApi.roomFromUri(uri) != null ||
+          MissevanApi.roomFromUri(uri) != null ||
+          roots.any((root) => _hostIs(uri.host.toLowerCase(), root)),
+    );
   }
 
   static Future<List<String>> parseLiveUrl(

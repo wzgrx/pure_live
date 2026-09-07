@@ -9,6 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/core/site/inke/inke_api.dart';
 import 'package:pure_live/model/live_play_quality.dart';
+import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/core/site/inke/inke_site.dart';
+import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 
 void main() {
   test(
@@ -22,6 +25,7 @@ void main() {
         HttpClient.instance.dio = dio;
         try {
           final api = InkeApi();
+          final site = Sites.of('inke').liveSite as InkeSite;
           final categories = await api.categories();
           expect(categories, isNotEmpty);
           final category = await api.directoryPage(category: categories.first);
@@ -32,7 +36,7 @@ void main() {
           final metadata = await api.detail(uid, playback: false);
           expect(metadata.isLiveNow, isTrue);
           expect(metadata.data, isNull);
-          final playable = await api.detail(uid);
+          final playable = await site.getRoomDetailForRecording(roomId: uid, platform: 'inke');
           expect(playable.isLiveNow, isTrue);
           final quality = (playable.data as List<LivePlayQuality>).single;
           final urls = quality.data as List<String>;
@@ -40,6 +44,12 @@ void main() {
           expect(Uri.parse(urls.first).path, endsWith('_t.flv'));
           final fresh = await api.detail(uid);
           expect(fresh.roomId, uid);
+          final record = await StreamResolverService().resolveStream(
+            roomId: uid,
+            platform: 'inke',
+            preferredQuality: 'flv',
+          );
+          expect(record.qualityCursorId, 'flv');
           final result = {
             'utc': DateTime.now().toUtc().toIso8601String(),
             'categories': categories.length,
@@ -51,7 +61,8 @@ void main() {
             'showcaseIsFullPlatformIndex': false,
             'mediaFetched': false,
             'nativePlaybackOrRecording': false,
-            'platformRegistered': false,
+            'platformRegistered': Sites.isSupported('inke'),
+            'productionRecorderResolution': true,
             'routing': 'anonymous direct Dio test adapter; application proxy settings not exercised',
           };
           final output = io.Platform.environment['PURELIVE_INKE_PROBE_OUTPUT'];

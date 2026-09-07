@@ -35,6 +35,11 @@ class LiveSearchCapabilities {
       supportsPagination: false,
       supportsWebSearch: false,
     ),
+    Sites.inkeSite: LiveSearchCapability(
+      coverage: NativeSearchCoverage.unavailable,
+      supportsPagination: false,
+      supportsWebSearch: false,
+    ),
     Sites.iptvSite: LiveSearchCapability(
       coverage: NativeSearchCoverage.localChannels,
       supportsPagination: false,

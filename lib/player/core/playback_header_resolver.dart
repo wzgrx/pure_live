@@ -9,6 +9,7 @@ import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
 import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
+import 'package:pure_live/core/site/inke/inke_api.dart';
 
 /// Resolves the HTTP headers used to read a platform's media stream.
 ///
@@ -136,6 +137,9 @@ class PlaybackHeaderResolver {
         break;
       case Sites.missevanSite:
         headers = MissevanApi.playHeaders;
+        break;
+      case Sites.inkeSite:
+        headers = InkeApi.playHeaders;
         break;
       case Sites.acfunSite:
         headers = {...AcfunApi.playHeaders, 'origin': AcfunApi.origin};

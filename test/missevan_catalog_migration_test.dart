@@ -28,18 +28,18 @@ void main() {
     await directory.delete(recursive: true);
   });
 
-  test('migration appends only Missevan, retains hidden choices and persists disabling', () async {
+  test('migration appends Missevan and subsequent platforms, retains hidden choices and persists disabling', () async {
     await HivePrefUtil.setInt('siteCatalogMigration', 5);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'twitcasting']);
     final controller = Get.put(FavoriteRoomController());
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'missevan']);
-    expect(controller.siteCatalogMigration.value, 6);
+    expect(controller.hotAreasList, ['huya', 'twitcasting', 'missevan', 'inke']);
+    expect(controller.siteCatalogMigration.value, 7);
     controller.hotAreasList.remove('missevan');
     controller.onInit();
-    expect(controller.hotAreasList, ['huya', 'twitcasting']);
+    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
-    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'twitcasting']);
+    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'twitcasting', 'inke']);
   });
 
   test('heat-only platform never becomes a concurrent-viewer setting', () async {

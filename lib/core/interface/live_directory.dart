@@ -15,3 +15,8 @@ class LiveDirectoryPage {
 abstract interface class LiveSiteDirectoryPager {
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel});
 }
+
+/// Optional, persistent explanation of a platform's visible directory scope.
+abstract interface class LiveDirectoryNotice {
+  String get directoryNoticeKey;
+}

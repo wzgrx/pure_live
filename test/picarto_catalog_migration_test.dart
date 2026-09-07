@@ -43,13 +43,13 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 3);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'acfun']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'acfun', 'picarto', 'twitcasting', 'missevan']);
-    expect(settings.siteCatalogMigration.value, 6);
+    expect(settings.hotAreasList, ['huya', 'acfun', 'picarto', 'twitcasting', 'missevan', 'inke']);
+    expect(settings.siteCatalogMigration.value, 7);
     settings.hotAreasList.remove('picarto');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan']);
+    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan', 'inke']);
     await Hive.box<dynamic>('app_settings').flush();
-    expect(HivePrefUtil.getStringList('hotAreasList'), ['huya', 'acfun', 'twitcasting', 'missevan']);
+    expect(HivePrefUtil.getStringList('hotAreasList'), ['huya', 'acfun', 'twitcasting', 'missevan', 'inke']);
   });
 
   test('audience upgrade adds Picarto and later catalog entries and respects subsequent disabling', () async {

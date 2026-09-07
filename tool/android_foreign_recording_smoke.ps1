@@ -20,10 +20,13 @@ $configure = Join-Path $PSScriptRoot 'android_configure_proxy.ps1'
 $smoke = Join-Path $PSScriptRoot 'android_recording_smoke.ps1'
 $restore = Join-Path $PSScriptRoot 'android_restore_proxy_defaults.ps1'
 $failure = $null
+$sessionDirectory = Join-Path (Split-Path -Parent $PSScriptRoot) ('local-artifacts/diagnostics/foreign-proxy-session-' + [Guid]::NewGuid().ToString('N'))
+[void][IO.Directory]::CreateDirectory($sessionDirectory)
+$sessionPath = Join-Path $sessionDirectory 'session.json'
 
 try {
     # Recording now requires the verified target app to remain foreground.
-    & $configure -Serial $Serial -Mode LocalClash -Port $ProxyPort -KeepAppOpen
+    & $configure -Serial $Serial -Mode LocalClash -Port $ProxyPort -KeepAppOpen -SessionPath $sessionPath -EvidenceDirectory $sessionDirectory
     if ($LASTEXITCODE -ne 0) { throw "Proxy setup exited with code $LASTEXITCODE." }
 
     $smokeParameters = @{
@@ -40,9 +43,12 @@ try {
     $failure = $_
 } finally {
     try {
-        & $restore -Serial $Serial
-        if ($LASTEXITCODE -ne 0) { throw "Proxy cleanup exited with code $LASTEXITCODE." }
+        if (Test-Path -LiteralPath $sessionPath -PathType Leaf) {
+            & $restore -Serial $Serial -SessionPath $sessionPath -EvidenceDirectory (Join-Path $sessionDirectory 'cleanup')
+            if ($LASTEXITCODE -ne 0) { throw "Proxy cleanup exited with code $LASTEXITCODE." }
+        }
     } catch {
+        Write-Warning "Proxy cleanup requires attention; session: $sessionPath"
         if ($null -eq $failure) { $failure = $_ }
         else { Write-Error "Proxy cleanup also failed: $($_.Exception.Message)" -ErrorAction Continue }
     }

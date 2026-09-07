@@ -10,13 +10,13 @@
 
 ### 当前调度
 
-本轮录制工具更新见[守卫审计](ANDROID_RECORDING_GUARD_AUDIT_2026_09_07.md)：`android_recording_smoke.ps1`要求明确Serial、型号/代号一致且Pure Live已在前台；前台或连接异常时停止，不重选目标、不重放输入、不抢回应用。平台导航按实际标签逐次观察。下文国外代理自动化为历史入口说明，代理配置/清理事务尚待修订，当前暂不运行整套国外录制。
+本轮录制工具更新见[守卫审计](ANDROID_RECORDING_GUARD_AUDIT_2026_09_07.md)：`android_recording_smoke.ps1`要求明确Serial、型号/代号一致且Pure Live已在前台；前台或连接异常时停止，不重选目标、不重放输入、不抢回应用。平台导航按实际标签逐次观察。[代理事务](ANDROID_PROXY_TRANSACTION_AUDIT_2026_09_07.md)现已完成离线回归；国外录制前先独立验证本轮代理开启/恢复和session对账，不把旧入口说明当作当前手机已验收。
 
 用户已暂停三个任务轮转。本次完整验收使用 `tool/run_android_device_test_turn.ps1 -NoRotation -CommandLine '…'` 直接执行本项目的串行设备步骤，保留唤醒、常亮恢复、前台校验和失败清理。网络 ADB 在线先测 Android，离线改测 Windows；不等待其他任务交棒，也不操作其他应用。恢复共享实机安排时再使用下面的默认租约流程。此开关只改变调度，不代表绕过设备检查。
 
 多条在线 transport 时，包装器使用 `-Serial IP:PORT` 明确选择，或从当前进程 `PURELIVE_ADB_SERIAL` 读取默认值；显式参数优先。该编号经编码传给唤醒步骤，成功后再传给测试正文。清理只针对唤醒成功的同一编号，不跟随正文改写的环境变量；预检选择失败时不对旧环境目标执行常亮清理。离线回归命令为 `python -m unittest discover -s tool/tests -p test_android_device_test_turn.py`，只执行假的唤醒脚本，不调用 ADB。
 
-国外平台可在同一包装器中调用 `tool/android_foreign_recording_smoke.ps1 -Platform twitch -ExerciseStreamSelection`，完成画质/线路选择与短录，结束后恢复代理默认值。录制器独立选择录制画质，短录通过不代表它继承了播放器选择。
+国外平台可在同一包装器中调用 `tool/android_foreign_recording_smoke.ps1 -Platform twitch -ExerciseStreamSelection`；它创建独立session，完成画质/线路选择与短录后恢复两个原开关状态，只清理自己明确创建且未被替换的reverse。正常原状态均关闭时回到DIRECT。录制器独立选择录制画质，短录通过不代表它继承了播放器选择。
 
 同一台 Android 手机同时服务三个 Codex 任务。所有会读取或改变实机运行状态的测试按固定顺序串行：
 
@@ -71,8 +71,8 @@ Pure Live 的实机命令统一由仓库包装器进入 `purelive` lane：
 - 手机重启、全局 ADB 重置、LSPosed 重启、设备级数据清理不属于普通测试轮次。
 - 租约只解决设备互斥。取得轮次后仍先核对明确的 IP ADB serial 与前台包名；前台不是 Pure Live 时停止本轮的坐标输入。
 - K90 Pro 在 10 分钟后自动锁屏且没有密码。Pure Live 包装器会在取得 C 轮租约、执行任何真实设备命令之前统一调用 `tool/wake_android_device.ps1 -StayAwake`：优先选择唯一 IPv4 ADB transport，发送唤醒和 `dismiss-keyguard`，复核系统 Keyguard，并仅在当前测试租约内启用供电时常亮；`finally` 总会调用 `-ReleaseStayAwake` 恢复用户原有的 10 分钟锁屏策略。具体 UI/运行冒烟仍保留每次观察前的二次唤醒复核，因此长队列等待或无线 ADB 慢响应不会把锁屏页当成应用界面。
-- 国外平台只在 C 轮内临时运行 `tool/android_configure_proxy.ps1 -Mode LocalClash`：脚本先确认主机 `127.0.0.1:7897` 正在监听，再建立同端口 ADB reverse，按语义和有界滚动定位设置项，同时启用应用层与播放器代理。测试命令必须用 `try/finally` 配对调用 `tool/android_restore_proxy_defaults.ps1`；清理脚本复核两个开关均关闭并移除 reverse，日常状态始终回到 DIRECT。不得依赖旧设备坐标或把代理状态遗留给日常使用。
-- Twitch/Soop 的标准录制回归使用 `tool/android_foreign_recording_smoke.ps1`，由它负责上述代理启用与 `finally` 清理；该脚本本身仍须作为 C 轮包装器的 `-CommandLine` 执行。
+- 国外平台只在独占设备轮次使用代理脚本。`android_configure_proxy.ps1 -Mode LocalClash -Serial ... -SessionPath ...`先核对设备、前台和本机Clash监听；当前地址/端口字段须已配置为127.0.0.1及指定端口。前台必须是可识别的Pure Live首页或代理页，操作逐次读取XML；不自动抢回其他应用。配对调用`android_restore_proxy_defaults.ps1 -Serial ... -SessionPath ...`，记录包含实际端口、两个原开关状态及reverse所有权。无session的恢复调用只在已有目标前台关闭两个开关，不删除任何reverse。清理遇前台丢失或所有权歧义时保留cleanup-pending及路径，不报告成功；恢复后核验session状态和实际设备状态。
+- Twitch/Soop/Picarto 的标准录制回归使用 `tool/android_foreign_recording_smoke.ps1`，由它负责上述代理启用与 `finally` 清理；该脚本本身仍须作为 C 轮包装器的 `-CommandLine` 执行。
 - 新设备尚未建立网络 ADB transport 时，可仅在当前 PowerShell 进程临时设置 `PURELIVE_ADB_PAIR_ENDPOINT`、`PURELIVE_ADB_PAIR_CODE`，以及可选的 `PURELIVE_ADB_CONNECT_ENDPOINT`。唤醒脚本先完成一次配对、从 `_adb-tls-connect._tcp` 自动发现同一 IP 的连接端口，再继续唤醒检查；协调器状态与历史只保存脚本命令，不记录配对码。完成当前命令后立即清除这些临时环境变量。
 - 各任务不得在租约外执行 `adb kill-server`。测试器取得 C 轮后会确认进程级 ADB server；若命令明确返回“daemon 未连接且命令尚未送达”，只重启 server 并有界重试一次，不对离线、超时或语义失败盲目重放触控。
 - 命令成功、失败或抛出异常时都由包装器释放文件租约。测试失败也会交棒，避免后续任务长期排队。

@@ -66,6 +66,7 @@ try {
     & (Join-Path $PSScriptRoot 'test_subst_path.ps1')
     & (Join-Path $PSScriptRoot 'test_android_recording_platforms.ps1')
     & (Join-Path $PSScriptRoot 'test_android_recording_guard.ps1')
+    & (Join-Path $PSScriptRoot 'test_android_proxy_session.ps1')
     & (Join-Path $PSScriptRoot 'test_android_activity_state.ps1')
 
     python (Join-Path $PSScriptRoot 'validate_device_ui_map.py')

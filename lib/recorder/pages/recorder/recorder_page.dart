@@ -306,9 +306,11 @@ class _TaskCard extends GetView<RecorderController> {
       children: [
         Icon(icon, size: 13, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: AppTextStyles.t11.copyWith(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500),
+        Flexible(
+          child: Text(
+            label,
+            style: AppTextStyles.t11.copyWith(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500),
+          ),
         ),
       ],
     );
@@ -325,9 +327,11 @@ class _TaskCard extends GetView<RecorderController> {
         children: [
           Icon(icon, size: 14, color: c),
           const SizedBox(width: 5),
-          Text(
-            label,
-            style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.w600, color: c),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.w600, color: c),
+            ),
           ),
         ],
       ),
@@ -400,11 +404,12 @@ class _TaskCard extends GetView<RecorderController> {
     };
 
     if (isWorking.contains(task.status)) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
+      return Wrap(
+        alignment: WrapAlignment.end,
+        spacing: 6,
+        runSpacing: 4,
         children: [
           deleteButton(),
-          const SizedBox(width: 6),
           FilledButton(
             style: dangerStyle,
             onPressed: () => controller.stopTask(task),
@@ -415,17 +420,17 @@ class _TaskCard extends GetView<RecorderController> {
     }
 
     if (task.status == RecordStatus.queued) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
+      return Wrap(
+        alignment: WrapAlignment.end,
+        spacing: 6,
+        runSpacing: 4,
         children: [
           deleteButton(),
-          const SizedBox(width: 6),
           FilledButton(
             style: primaryStyle,
             onPressed: () => controller.forceStartTask(task),
             child: Text(i18n("recorder_start")),
           ),
-          const SizedBox(width: 6),
           OutlinedButton(style: outlineStyle, onPressed: () => controller.stopTask(task), child: Text(i18n("cancel"))),
         ],
       );
@@ -451,11 +456,12 @@ class _TaskCard extends GetView<RecorderController> {
           break;
       }
 
-      return Row(
-        mainAxisSize: MainAxisSize.min,
+      return Wrap(
+        alignment: WrapAlignment.end,
+        spacing: 6,
+        runSpacing: 4,
         children: [
           deleteButton(),
-          const SizedBox(width: 6),
           FilledButton(style: primaryStyle, onPressed: () => controller.forceStartTask(task), child: Text(text)),
         ],
       );
@@ -528,64 +534,72 @@ class _TaskCard extends GetView<RecorderController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildCoverImage(color),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          task.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.t16.copyWith(
-                            fontWeight: FontWeight.w700,
-                            height: 1.2,
-                            letterSpacing: 0.1,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final details = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w700, height: 1.2, letterSpacing: 0.1),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 12,
+                            backgroundImage: normalizeNetworkImageUrl(task.avatar).isNotEmpty
+                                ? NetworkImage(normalizeNetworkImageUrl(task.avatar))
+                                : null,
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 12,
-                              backgroundImage: normalizeNetworkImageUrl(task.avatar).isNotEmpty
-                                  ? NetworkImage(normalizeNetworkImageUrl(task.avatar))
-                                  : null,
-                            ),
-                            const SizedBox(width: 7),
-                            Expanded(
-                              child: Text(
-                                task.nick,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.t14.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
+                          const SizedBox(width: 7),
+                          Expanded(
+                            child: Text(
+                              task.nick,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.t14.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            _Tag(text: task.platform.toUpperCase(), icon: Remix.plant_fill, color: _platformColor()),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 14,
-                          runSpacing: 6,
-                          children: [
-                            _miniInfo(Icons.high_quality_rounded, task.selectedQuality ?? i18n("recorder_auto"), theme),
-                            if (task.selectedLine?.isNotEmpty == true)
-                              _miniInfo(Icons.alt_route_rounded, task.selectedLine!, theme),
-                            _miniInfo(audienceIcon, audienceText, theme),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 14,
+                        runSpacing: 6,
+                        children: [
+                          _Tag(text: task.platform.toUpperCase(), icon: Remix.plant_fill, color: _platformColor()),
+                          _miniInfo(Icons.high_quality_rounded, task.selectedQuality ?? i18n("recorder_auto"), theme),
+                          if (task.selectedLine?.isNotEmpty == true)
+                            _miniInfo(Icons.alt_route_rounded, task.selectedLine!, theme),
+                          _miniInfo(audienceIcon, audienceText, theme),
+                        ],
+                      ),
+                    ],
+                  );
+                  // Keep metadata readable instead of squeezing it beside a
+                  // fixed-width cover on phones or with enlarged text.
+                  final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+                  if (constraints.maxWidth < 480 * textScale) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [_buildCoverImage(color), const SizedBox(height: 12), details],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCoverImage(color),
+                      const SizedBox(width: 14),
+                      Expanded(child: details),
+                    ],
+                  );
+                },
               ),
               if (showRecordingStats) ...[
                 const SizedBox(height: 14),
@@ -671,20 +685,18 @@ class _TaskCard extends GetView<RecorderController> {
                 ),
               ],
               const SizedBox(height: 14),
-              Row(
-                children: [
-                  Icon(Icons.schedule_rounded, size: 14, color: theme.colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 5),
-                  Text(
-                    task.displayStartTime.toString().substring(5, 16),
-                    style: AppTextStyles.t12.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const Spacer(),
-                  _buildActionButton(),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    _miniInfo(Icons.schedule_rounded, task.displayStartTime.toString().substring(5, 16), theme),
+                    _buildActionButton(),
+                  ],
+                ),
               ),
             ],
           ),

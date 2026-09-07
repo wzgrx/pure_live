@@ -3,6 +3,33 @@ import 'package:ffmpeg_kit_extended_flutter/ffmpeg_kit_extended_flutter.dart' sh
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
 
 void main() {
+  test('live packet damage is latched separately from ordinary stop IO', () {
+    final session = FFmpegRecordSession(
+      taskId: 'picarto_fixture',
+      sessionId: 1,
+      session: _NativeSession(),
+      liveRecording: true,
+    );
+    session.appendDiagnostic('[in#0/hls] Error during demuxing: I/O error', maxLines: 1);
+    expect(session.hasMediaIntegrityError, true);
+    expect(session.hasInputPacketError, false);
+    session.appendDiagnostic('[mpegts] packet corrupt (stream = 1, dts = 3092510880), dropping it.', maxLines: 1);
+    session.appendDiagnostic('frame=661', maxLines: 1);
+    expect(session.diagnosticTail, 'frame=661');
+    expect(session.hasInputPacketError, true);
+    expect(
+      FFmpegRecordSession(
+        taskId: 'next',
+        sessionId: 2,
+        session: _NativeSession(),
+        liveRecording: true,
+      ).hasInputPacketError,
+      false,
+    );
+    expect(FFmpegMediaIntegrity.hasPacketError('Non-monotonic DTS corrected'), false);
+    expect(FFmpegMediaIntegrity.hasPacketError('PES packet size mismatch'), true);
+    expect(FFmpegMediaIntegrity.hasPacketError('error while decoding MB 59 40, bytestream -25'), true);
+  });
   test('integrity verdict survives bounded log eviction and stays session-local', () {
     FFmpegRecordSession create(int id) =>
         FFmpegRecordSession(taskId: 'fixture', sessionId: id, session: _NativeSession(), liveRecording: false);

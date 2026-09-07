@@ -247,6 +247,7 @@ class RecorderController extends GetxService {
           failed: isError,
           shouldRetry: shouldRetry,
           fastReconnect: fastReconnect,
+          inputIntegrityError: event.data['inputIntegrityError'] == true,
         );
         return;
       default:
@@ -367,6 +368,7 @@ class RecorderController extends GetxService {
     required bool failed,
     required bool shouldRetry,
     bool fastReconnect = false,
+    bool inputIntegrityError = false,
   }) async {
     final existing = _finalizationFutures[task.taskId];
     if (existing != null) return existing;
@@ -379,6 +381,7 @@ class RecorderController extends GetxService {
           failed: failed,
           shouldRetry: shouldRetry,
           fastReconnect: fastReconnect,
+          inputIntegrityError: inputIntegrityError,
         ).whenComplete(() {
           if (identical(_finalizationFutures[task.taskId], operation)) {
             _finalizationFutures.remove(task.taskId);
@@ -394,9 +397,10 @@ class RecorderController extends GetxService {
     required bool failed,
     required bool shouldRetry,
     required bool fastReconnect,
+    required bool inputIntegrityError,
   }) async {
     try {
-      await _queueCurrentAttempt(task);
+      await _queueCurrentAttempt(task, inputIntegrityError: inputIntegrityError);
       if (_isClosing) return;
       final stoppedByUser = manuallyStopped || task.wasStoppedByUser;
       final willReconnect = failed && shouldRetry && task.autoReconnect && !stoppedByUser;
@@ -422,7 +426,7 @@ class RecorderController extends GetxService {
       }
 
       if (!mergeSucceeded) {
-        task.markFailure(stage: 'merge', error: i18n('video_ffmpeg_failed'));
+        _markFinalizationFailure(task);
         task.status = RecordStatus.failed;
         updateTask(task);
         return;
@@ -464,7 +468,19 @@ class RecorderController extends GetxService {
     }
   }
 
-  Future<void> _queueCurrentAttempt(LiveRecordTask task, {bool allowLegacy = false}) async {
+  void _markFinalizationFailure(LiveRecordTask task) {
+    final damaged = task.pendingAttempts.any((attempt) => attempt.inputIntegrityError);
+    task.markFailure(
+      stage: damaged ? 'ffmpeg.inputIntegrity' : 'merge',
+      error: i18n(damaged ? 'recorder_input_integrity_failed' : 'video_ffmpeg_failed'),
+    );
+  }
+
+  Future<void> _queueCurrentAttempt(
+    LiveRecordTask task, {
+    bool allowLegacy = false,
+    bool inputIntegrityError = false,
+  }) async {
     final directoryPath = task.outputDir?.trim() ?? '';
     if (directoryPath.isEmpty) return;
     final filePrefix = task.recordingFilePrefix;
@@ -477,7 +493,11 @@ class RecorderController extends GetxService {
       return;
     }
     if (_isClosing || !_ownsTask(task)) return;
-    task.queuePendingAttempt(directoryPath: directoryPath, filePrefix: filePrefix);
+    task.queuePendingAttempt(
+      directoryPath: directoryPath,
+      filePrefix: filePrefix,
+      inputIntegrityError: inputIntegrityError,
+    );
     updateTask(task);
   }
 
@@ -1165,7 +1185,7 @@ class RecorderController extends GetxService {
       await settings.refreshCacheSize();
       if (_isClosing || !_ownsTask(task)) return;
       task.status = merged ? RecordStatus.stopped : RecordStatus.failed;
-      if (!merged) task.markFailure(stage: 'merge', error: i18n('video_ffmpeg_failed'));
+      if (!merged) _markFinalizationFailure(task);
     } else {
       task.status = RecordStatus.stopped;
     }
@@ -1462,6 +1482,7 @@ class RecorderController extends GetxService {
       final merged = await _finalizePendingAttempts(task, allowLegacy: true);
       if (_isClosing || !_ownsTask(task)) return;
       task.status = merged ? RecordStatus.stopped : RecordStatus.failed;
+      if (!merged) _markFinalizationFailure(task);
       updateTask(task);
       await settings.refreshCacheSize();
     } finally {

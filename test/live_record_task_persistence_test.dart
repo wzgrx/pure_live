@@ -4,6 +4,42 @@ import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/models/record_status.dart';
 
 void main() {
+  test('input packet damage survives pending-attempt persistence and duplicate order', () {
+    for (final reversed in [false, true]) {
+      final damaged = {'directoryPath': '/recording', 'filePrefix': 'attempt', 'inputIntegrityError': true};
+      final clean = {'directoryPath': '/recording', 'filePrefix': 'attempt'};
+      final task = LiveRecordTask.fromJson({
+        'roomId': 'fixture',
+        'platform': 'picarto',
+        'pendingAttempts': reversed ? [damaged, clean] : [clean, damaged],
+      });
+      task.queuePendingAttempt(directoryPath: '/recording', filePrefix: 'attempt');
+      final stored = task.toJson()['pendingAttempts'] as List;
+      expect(stored, hasLength(1));
+      expect(stored.single['inputIntegrityError'], true);
+      task.beginNewRecording();
+      expect((task.toJson()['pendingAttempts'] as List).single['inputIntegrityError'], true);
+    }
+  });
+  test('legacy attempts stay unflagged and damage never leaks to a different attempt', () {
+    final task = LiveRecordTask.fromJson({
+      'roomId': 'fixture',
+      'platform': 'picarto',
+      'schemaVersion': 7,
+      'pendingAttempts': [
+        {'directoryPath': '/recording', 'filePrefix': 'legacy'},
+      ],
+    });
+    expect(task.pendingAttempts.single.inputIntegrityError, false);
+    task.queuePendingAttempt(directoryPath: '/recording', filePrefix: 'damaged', inputIntegrityError: true);
+    task.queuePendingAttempt(directoryPath: '/recording', filePrefix: 'fresh');
+    expect(task.pendingAttempts.map((a) => a.inputIntegrityError), [false, true, false]);
+    expect(LiveRecordTask.fromJson(task.toJson()).pendingAttempts.map((a) => a.inputIntegrityError), [
+      false,
+      true,
+      false,
+    ]);
+  });
   test('record task schema survives numeric drift and prefers enum names', () {
     final task = LiveRecordTask.fromJson(<String, dynamic>{
       'taskId': 'douyin_1',
@@ -81,7 +117,7 @@ void main() {
     );
 
     final json = task.toJson();
-    expect(json['schemaVersion'], 7);
+    expect(json['schemaVersion'], 8);
     expect(json['lastErrorStage'], 'ffmpeg');
     expect(json['lastError'], contains('[stream-url]'));
     expect(json['lastError'], isNot(contains('secret')));

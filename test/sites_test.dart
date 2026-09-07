@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/core/interface/live_site.dart';
@@ -6,6 +9,19 @@ import 'package:pure_live/modules/search/search_capability.dart';
 import 'package:pure_live/modules/multiview/danmaku/multiview_danmaku_session.dart';
 
 void main() {
+  test('every registered platform has a user-visible label in both bundled locales', () async {
+    for (final locale in ['zh', 'en']) {
+      final labels = jsonDecode(await File('assets/translations/$locale.json').readAsString()) as Map;
+      for (final id in {Sites.allSite, ...Sites.supportedSiteIds}) {
+        final label = labels['site_$id'];
+        expect(label, isA<String>(), reason: '$locale site_$id');
+        expect((label as String).trim(), isNotEmpty);
+        expect(label, isNot('site_$id'));
+      }
+      expect(labels['site_picarto'], 'Picarto');
+      expect(labels['recorder_input_integrity_failed'], isA<String>());
+    }
+  });
   test('AcFun is navigable, recordable and searchable without constructing other adapters', () {
     expect(Sites.isSupported(' ACFUN '), isTrue);
     final site = Sites.of(' ACFUN ');

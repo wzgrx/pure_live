@@ -239,15 +239,27 @@ class LiveRecordTask {
     beginNewAttempt(now: startedAt);
   }
 
-  void queuePendingAttempt({required String directoryPath, required String filePrefix}) {
+  void queuePendingAttempt({
+    required String directoryPath,
+    required String filePrefix,
+    bool inputIntegrityError = false,
+  }) {
     final directory = directoryPath.trim();
     final prefix = filePrefix.trim();
     if (directory.isEmpty || prefix.isEmpty) return;
-    final duplicate = pendingAttempts.any(
+    final duplicate = pendingAttempts.indexWhere(
       (attempt) => attempt.directoryPath == directory && attempt.filePrefix == prefix,
     );
-    if (!duplicate) {
-      pendingAttempts.add(PendingRecordingAttempt(directoryPath: directory, filePrefix: prefix));
+    final attempt = PendingRecordingAttempt(
+      directoryPath: directory,
+      filePrefix: prefix,
+      inputIntegrityError: inputIntegrityError,
+    );
+    if (duplicate < 0) {
+      pendingAttempts.add(attempt);
+    } else if (inputIntegrityError && !pendingAttempts[duplicate].inputIntegrityError) {
+      // A later queue/restore pass may enrich the verdict, never erase damage.
+      pendingAttempts[duplicate] = attempt;
     }
   }
 
@@ -298,7 +310,7 @@ class LiveRecordTask {
   /// =========================
 
   Map<String, dynamic> toJson() => {
-    "schemaVersion": 7,
+    "schemaVersion": 8,
     "taskId": taskId,
     "roomId": roomId,
     "platform": platform,
@@ -523,13 +535,19 @@ class LiveRecordTask {
   static List<PendingRecordingAttempt> _pendingAttempts(dynamic value) {
     if (value is! List) return const <PendingRecordingAttempt>[];
     final attempts = <PendingRecordingAttempt>[];
-    final seen = <String>{};
+    final seen = <String, int>{};
     for (final item in value) {
       if (item is! Map) continue;
       final attempt = PendingRecordingAttempt.fromJson(Map<String, dynamic>.from(item));
       if (attempt == null) continue;
       final key = '${attempt.directoryPath}\u0000${attempt.filePrefix}';
-      if (seen.add(key)) attempts.add(attempt);
+      final duplicate = seen[key];
+      if (duplicate == null) {
+        seen[key] = attempts.length;
+        attempts.add(attempt);
+      } else if (attempt.inputIntegrityError) {
+        attempts[duplicate] = attempt;
+      }
     }
     return attempts;
   }
@@ -550,17 +568,33 @@ class LiveRecordTask {
 }
 
 class PendingRecordingAttempt {
-  const PendingRecordingAttempt({required this.directoryPath, required this.filePrefix});
+  const PendingRecordingAttempt({
+    required this.directoryPath,
+    required this.filePrefix,
+    this.inputIntegrityError = false,
+  });
 
   final String directoryPath;
   final String filePrefix;
+  // Capture evidence, not a claim that an unflagged bitstream was decoded.
+  // Retain it across retries/restarts so a later clean remux exit cannot delete
+  // source that the recording session already reported as damaged.
+  final bool inputIntegrityError;
 
-  Map<String, String> toJson() => <String, String>{'directoryPath': directoryPath, 'filePrefix': filePrefix};
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'directoryPath': directoryPath,
+    'filePrefix': filePrefix,
+    'inputIntegrityError': inputIntegrityError,
+  };
 
   static PendingRecordingAttempt? fromJson(Map<String, dynamic> json) {
     final directoryPath = json['directoryPath']?.toString().trim() ?? '';
     final filePrefix = json['filePrefix']?.toString().trim() ?? '';
     if (directoryPath.isEmpty || filePrefix.isEmpty) return null;
-    return PendingRecordingAttempt(directoryPath: directoryPath, filePrefix: filePrefix);
+    return PendingRecordingAttempt(
+      directoryPath: directoryPath,
+      filePrefix: filePrefix,
+      inputIntegrityError: LiveRecordTask._bool(json['inputIntegrityError']),
+    );
   }
 }

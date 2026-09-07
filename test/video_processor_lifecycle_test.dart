@@ -50,6 +50,32 @@ void main() {
     service = VideoProcessorService.forTesting(ffmpeg: native, completionTimeout: const Duration(milliseconds: 30));
   }
 
+  test('persisted capture damage blocks remux before native IO and retains original source', () async {
+    task.queuePendingAttempt(
+      directoryPath: directory.path,
+      filePrefix: task.recordingFilePrefix,
+      inputIntegrityError: true,
+    );
+    task = LiveRecordTask.fromJson(task.toJson());
+    conversion = service.convertToMp4(task: task, directoryPath: '${directory.path}/.');
+    expect(await conversion, false);
+    expect(native.startCalls, 0);
+    expect(await source.readAsBytes(), [1, 2, 3]);
+    expect(await directory.list().where((f) => f.path.endsWith('.mp4')).length, 0);
+    expect(task.pendingAttempts.single.inputIntegrityError, true);
+    expect(service.isProcessing(task.taskId), false);
+  });
+
+  test('damage on another attempt does not prevent exact healthy source finalization', () async {
+    task.queuePendingAttempt(directoryPath: directory.path, filePrefix: 'other', inputIntegrityError: true);
+    native.finish();
+    conversion = service.convertToMp4(task: task);
+    expect(await conversion, true);
+    expect(native.startCalls, 1);
+    expect(await source.exists(), false);
+    expect(task.pendingAttempts.single.inputIntegrityError, true);
+  });
+
   test('merge timeout covers the running native Future and cancels before cleanup', () async {
     useShortDeadline();
     conversion = service.convertToMp4(task: task);

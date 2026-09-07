@@ -83,6 +83,24 @@ void main() {
     native.events.add(FFmpegEvent(taskId: task.taskId, type: type, data: {'sessionId': session, ...data}));
   }
 
+  test('manual zero-code capture with packet damage retains TS and fails finalization', () async {
+    final tracker = metrics.add();
+    await Directory(task.outputDir!).create(recursive: true);
+    final segment = File('${task.outputDir}${Platform.pathSeparator}${task.recordingFilePrefix}_000000.ts');
+    await segment.writeAsBytes([1, 2, 3]);
+    emit(FFmpegEventType.startAck, 1);
+    await until(() => tracker.calls > 0 && tracker.active == 0);
+    emit(FFmpegEventType.complete, 1, {'code': 0, 'manualStop': true, 'inputIntegrityError': true});
+    await until(() => task.status == RecordStatus.failed);
+    expect(task.lastErrorStage, 'ffmpeg.inputintegrity');
+    expect(task.pendingAttempts.single.inputIntegrityError, true);
+    expect(await segment.readAsBytes(), [1, 2, 3]);
+    await recorder.stopTask(task);
+    expect(task.status, RecordStatus.failed, reason: 'a second stop must not erase pending integrity evidence');
+    expect(task.lastErrorStage, 'ffmpeg.inputintegrity');
+    expect(await segment.exists(), true);
+  });
+
   test('late old-session sampling cannot release the new session sampling lock', () async {
     final old = metrics.add()..holdNext();
     final current = metrics.add()..holdNext();
@@ -114,7 +132,7 @@ void main() {
     emit(FFmpegEventType.startAck, 1);
     await until(() => old.calls >= 1 && old.active == 0);
     old.holdNext();
-    emit(FFmpegEventType.complete, 1, {'manualStop': true});
+    emit(FFmpegEventType.complete, 1, {'manualStop': true, 'inputIntegrityError': true});
     await until(() => old.active == 1);
     emit(FFmpegEventType.startAck, 2);
     await until(() => current.calls >= 1 && task.fileSize == 20);

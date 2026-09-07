@@ -183,6 +183,7 @@ class FFmpegRecordSession {
   final List<String> _diagnosticLines = <String>[];
   var _diagnosticCharacters = 0;
   bool hasMediaIntegrityError = false;
+  bool hasInputPacketError = false;
 
   bool manualStop = false;
   bool leaseRefresh = false;
@@ -201,6 +202,7 @@ class FFmpegRecordSession {
     // over. Some native builds return zero despite a demux/mux error (-xerror
     // alone was insufficient in the 0.11.1 Windows source-retention probe).
     hasMediaIntegrityError = hasMediaIntegrityError || FFmpegMediaIntegrity.hasError(sanitized);
+    hasInputPacketError = hasInputPacketError || FFmpegMediaIntegrity.hasPacketError(sanitized);
     _diagnosticLines.add(sanitized);
     _diagnosticCharacters += sanitized.length;
     while (_diagnosticLines.length > maxLines || _diagnosticCharacters > maxCharacters) {
@@ -363,6 +365,11 @@ class FFmpegService {
           'code': code,
           'manualStop': manuallyStopped,
           'forcedCancel': session.forcedCancel,
+          // Stream-copy remux can return zero after capture dropped a damaged
+          // packet. Carry the capture verdict to the attempt's persistent
+          // source-retention policy, independently of manual stop/exit code.
+          'inputIntegrityError':
+              session.liveRecording && (session.hasInputPacketError || FFmpegMediaIntegrity.hasPacketError(rawLogs)),
           'inputDrained':
               (session.flvInputRelay?.finishRequested == true || session.inputRelay?.finishRequested == true) &&
               !session.forcedCancel,
@@ -590,6 +597,19 @@ class FFmpegInputDrain {
 /// Remuxing is still stream copy; this is not full codec bitstream validation.
 class FFmpegMediaIntegrity {
   const FFmpegMediaIntegrity._();
+
+  // A drained/cancelled live input can report a plain demux I/O error without
+  // damaging output. Only explicit packet/bitstream damage taints its source.
+  static bool hasPacketError(String message) {
+    final value = message.toLowerCase();
+    return const [
+      'packet corrupt (stream',
+      'corrupt input packet in stream',
+      'pes packet size mismatch',
+      'error while decoding',
+      'corrupt decoded frame',
+    ].any(value.contains);
+  }
 
   static bool hasError(String message) {
     final value = message.toLowerCase();

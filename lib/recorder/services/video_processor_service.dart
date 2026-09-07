@@ -95,6 +95,21 @@ class VideoProcessorService extends GetxService {
         return false;
       }
 
+      // The capture can log packet damage yet return zero on manual stop.
+      // Stream-copy remux does not decode that bitstream and can also return
+      // zero. Preserve the exact attempt instead of committing/deleting it.
+      // Check persisted provenance here as well as in controller flows, so
+      // interrupted recovery and direct conversion obey the same contract.
+      if (task.pendingAttempts.any(
+        (attempt) =>
+            p.equals(p.absolute(attempt.directoryPath), p.absolute(resolvedDirectoryPath)) &&
+            attempt.filePrefix == resolvedFilePrefix &&
+            attempt.inputIntegrityError,
+      )) {
+        _emitFailed(taskId, i18n('recorder_input_integrity_failed'));
+        return false;
+      }
+
       // Own a separate cache lease: the recorder's outer lifecycle may finish
       // before a native writer acknowledges timeout cancellation.
       if (Get.isRegistered<CacheService>()) {

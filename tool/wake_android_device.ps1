@@ -5,7 +5,9 @@ param(
     [string]$PairCode = $env:PURELIVE_ADB_PAIR_CODE,
     [string]$ConnectEndpoint = $env:PURELIVE_ADB_CONNECT_ENDPOINT,
     [switch]$StayAwake,
-    [switch]$ReleaseStayAwake
+    [switch]$ReleaseStayAwake,
+    [ValidateRange(0, 15)][int]$RestoreStayAwakeValue,
+    [ValidateRange(0, 15)][int]$AcquiredStayAwakeValue
 )
 
 $ErrorActionPreference = 'Stop'
@@ -102,17 +104,42 @@ function Invoke-TargetAdb([string[]]$Arguments) {
 if ($StayAwake -and $ReleaseStayAwake) {
     throw 'StayAwake and ReleaseStayAwake are mutually exclusive.'
 }
+# Identity precedes every input/settings mutation, including cleanup. A selected
+# transport is not proof that the expected phone is still behind that endpoint.
+$model = ((Invoke-TargetAdb -Arguments @('shell', 'getprop', 'ro.product.model')) -join "`n").Trim()
+$device = ((Invoke-TargetAdb -Arguments @('shell', 'getprop', 'ro.product.device')) -join "`n").Trim()
+if ($model -cne '25102RKBEC' -or $device -cne 'myron') {
+    throw "Android identity mismatch: model=$model device=$device"
+}
+
+function Get-StayAwakeValue {
+    $value = ((Invoke-TargetAdb -Arguments @('shell', 'settings', 'get', 'global', 'stay_on_while_plugged_in')) -join "`n").Trim()
+    if ($value -notmatch '^(?:[0-9]|1[0-5])$') { throw 'Unexpected stay-awake setting; preserving it.' }
+    [int]$value
+}
+
 if ($ReleaseStayAwake) {
-    Invoke-TargetAdb -Arguments @('shell', 'svc', 'power', 'stayon', 'false') | Out-Null
+    if (-not $PSBoundParameters.ContainsKey('RestoreStayAwakeValue') -or
+        -not $PSBoundParameters.ContainsKey('AcquiredStayAwakeValue')) {
+        throw 'Cleanup requires both the original and acquired stay-awake values.'
+    }
+    $current = Get-StayAwakeValue
+    if ($current -ne $RestoreStayAwakeValue) {
+        if ($current -ne $AcquiredStayAwakeValue) { throw 'Stay-awake setting changed outside this turn; preserving it.' }
+        Invoke-TargetAdb -Arguments @('shell', 'settings', 'put', 'global', 'stay_on_while_plugged_in', "$RestoreStayAwakeValue") | Out-Null
+    }
+    if ((Get-StayAwakeValue) -ne $RestoreStayAwakeValue) { throw 'Stay-awake restoration did not verify.' }
     [pscustomobject]@{
         Serial = $Serial
         Awake = $null
         KeyguardDismissed = $null
         StayAwake = $false
+        RestoredStayAwakeValue = $RestoreStayAwakeValue
     } | ConvertTo-Json -Compress
     exit 0
 }
 
+$originalStayAwakeValue = if ($StayAwake) { Get-StayAwakeValue } else { $null }
 Invoke-TargetAdb -Arguments @('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP') | Out-Null
 Invoke-TargetAdb -Arguments @('shell', 'wm', 'dismiss-keyguard') | Out-Null
 Start-Sleep -Milliseconds 250
@@ -137,9 +164,25 @@ $stillLocked = $finalPolicy -match '(?im)(?:mShowingLockscreen|mKeyguardShowing|
 if ($stillLocked) { throw "Android target remained keyguard-locked after wake: $Serial" }
 
 if ($StayAwake) {
-    # `true` maps to AC/USB/wireless power sources. The device-test wrapper
-    # always releases it in finally, preserving the user's 10-minute policy.
-    Invoke-TargetAdb -Arguments @('shell', 'svc', 'power', 'stayon', 'true') | Out-Null
+    if ((Get-StayAwakeValue) -ne $originalStayAwakeValue) {
+        throw 'Stay-awake setting changed during wake; preserving it.'
+    }
+    # Set an explicit bitmask so even an acknowledgement/readback failure has
+    # a known owned value. The wrapper restores the exact pre-turn bitmask.
+    $acquiredValue = 7
+    try {
+        Invoke-TargetAdb -Arguments @('shell', 'settings', 'put', 'global', 'stay_on_while_plugged_in', "$acquiredValue") | Out-Null
+        if ((Get-StayAwakeValue) -ne $acquiredValue) { throw 'Stay-awake acquisition did not verify.' }
+    } catch {
+        $acquireFailure = $_
+        try {
+            if ((Get-StayAwakeValue) -eq $acquiredValue) {
+                Invoke-TargetAdb -Arguments @('shell', 'settings', 'put', 'global', 'stay_on_while_plugged_in', "$originalStayAwakeValue") | Out-Null
+                if ((Get-StayAwakeValue) -ne $originalStayAwakeValue) { throw 'Acquisition rollback did not verify.' }
+            }
+        } catch { Write-Warning ('Stay-awake acquisition cleanup requires attention: ' + $_.Exception.Message) }
+        throw $acquireFailure
+    }
 }
 
 [pscustomobject]@{
@@ -147,4 +190,6 @@ if ($StayAwake) {
     Awake = $true
     KeyguardDismissed = $true
     StayAwake = [bool]$StayAwake
+    OriginalStayAwakeValue = $originalStayAwakeValue
+    AcquiredStayAwakeValue = if ($StayAwake) { $acquiredValue } else { $null }
 } | ConvertTo-Json -Compress

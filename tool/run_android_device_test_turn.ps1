@@ -67,7 +67,10 @@ try {
         # A failed/ambiguous discovery must not mutate a stale environment target.
         if (`$null -ne `$wakeState -and `$wakeState.StayAwake -and
             -not [string]::IsNullOrWhiteSpace([string]`$wakeState.Serial)) {
-            & '.\tool\wake_android_device.ps1' -ReleaseStayAwake -Serial ([string]`$wakeState.Serial)
+            if (`$null -eq `$wakeState.OriginalStayAwakeValue -or `$null -eq `$wakeState.AcquiredStayAwakeValue) {
+                throw 'Wake guard did not return stay-awake ownership values; preserving the setting.'
+            }
+            & '.\tool\wake_android_device.ps1' -ReleaseStayAwake -Serial ([string]`$wakeState.Serial) -RestoreStayAwakeValue ([int]`$wakeState.OriginalStayAwakeValue) -AcquiredStayAwakeValue ([int]`$wakeState.AcquiredStayAwakeValue)
             if (`$LASTEXITCODE -ne 0) { throw "Device wake guard cleanup exited with code `$LASTEXITCODE." }
         }
     } catch {

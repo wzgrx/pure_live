@@ -11,13 +11,14 @@ import unittest
 WRAPPER = Path(__file__).resolve().parents[1] / "run_android_device_test_turn.ps1"
 PWSH = shutil.which("pwsh")
 WAKE_FIXTURE = r"""
-param([string]$Serial, [switch]$StayAwake, [switch]$ReleaseStayAwake)
+param([string]$Serial, [switch]$StayAwake, [switch]$ReleaseStayAwake, [int]$RestoreStayAwakeValue, [int]$AcquiredStayAwakeValue)
 if ([string]::IsNullOrWhiteSpace($Serial) -and $env:FIXTURE_DEFAULT_SERIAL) { $Serial=$env:FIXTURE_DEFAULT_SERIAL }
+if ($ReleaseStayAwake -and ($RestoreStayAwakeValue -ne [int]$env:FIXTURE_ORIGINAL_STAYAWAKE -or $AcquiredStayAwakeValue -ne 7)) { throw 'Wrong stay-awake ownership passed to cleanup' }
 @{ serial=$Serial; release=[bool]$ReleaseStayAwake } | ConvertTo-Json -Compress |
     Add-Content -LiteralPath (Join-Path $PSScriptRoot '../calls.jsonl')
 if ($env:FIXTURE_WAKE_FAIL -eq '1' -and -not $ReleaseStayAwake) { exit 7 }
 if ([string]::IsNullOrWhiteSpace($Serial)) { throw 'Multiple fixture transports; explicit serial required' }
-@{ Serial=$Serial; StayAwake=[bool]$StayAwake } | ConvertTo-Json -Compress
+@{ Serial=$Serial; StayAwake=[bool]$StayAwake; OriginalStayAwakeValue=[int]$env:FIXTURE_ORIGINAL_STAYAWAKE; AcquiredStayAwakeValue=7 } | ConvertTo-Json -Compress
 exit 0
 """
 
@@ -26,7 +27,7 @@ exit 0
 class DeviceTurnTests(unittest.TestCase):
     def run_turn(self, *, environment_serial=None, explicit_serial=None,
                  wake_fail=False, command_fail=False, default_serial=None,
-                 mutate_body_serial=False):
+                 mutate_body_serial=False, original_stayawake=0):
         with tempfile.TemporaryDirectory(prefix="purelive-device-turn-") as directory:
             root = Path(directory)
             (root / "tool").mkdir()
@@ -37,6 +38,7 @@ class DeviceTurnTests(unittest.TestCase):
             env.pop("PURELIVE_ADB_SERIAL", None)
             if environment_serial is not None:
                 env["PURELIVE_ADB_SERIAL"] = environment_serial
+            env["FIXTURE_ORIGINAL_STAYAWAKE"] = str(original_stayawake)
             env["FIXTURE_WAKE_FAIL"] = "1" if wake_fail else "0"
             env["FIXTURE_DEFAULT_SERIAL"] = default_serial or ""
             body = "$env:PURELIVE_ADB_SERIAL | Set-Content -LiteralPath body.txt; "
@@ -94,6 +96,13 @@ class DeviceTurnTests(unittest.TestCase):
         code, calls, body = self.run_turn(environment_serial="192.0.2.10:5555", mutate_body_serial=True)
         self.assertEqual(code, 0)
         self.assertEqual(calls[-1], {"serial": body, "release": True})
+
+    def test_nonzero_original_stayawake_reaches_cleanup_on_success_and_failure(self):
+        for fail in (False, True):
+            with self.subTest(command_fail=fail):
+                code, calls, body = self.run_turn(explicit_serial="192.0.2.10:5555", command_fail=fail, original_stayawake=2)
+                self.assertEqual(code == 0, not fail)
+                self.assertEqual(calls[-1], {"serial": body, "release": True})
 
 
 if __name__ == "__main__":

@@ -10,6 +10,8 @@
 
 ### 当前调度
 
+最新[录制暂存候选与守卫](RECORDING_STAGED_ANDROID_CANDIDATE_2026_09_07.md)：c442380c Android Debug已构建但未安装。只读确认身份一致，前台为哔哩哔哩，待用户确认切换窗口；本次没有唤醒或输入。唤醒脚本已增加自身身份预检；常亮采用原位掩码精确恢复及读回核验，清理接收本轮原值/取得值，不再固定关闭。外部改值保留并报告失败。工具修订仅离线验证，下一轮继续先核对身份与前台；NoRotation保持。
+
 最新[Cookie候选Android复验](TWITCASTING_COOKIE_ANDROID_RETEST_2026_09_07.md)：手机当前为80b7431c，保留数据覆盖安装成功；首段401解除，但MP4尾部附近严格解码失败，转为本机确定性复现。12:47:25 UTC最终清理核验通过，无本包进程/活动唤醒锁，代理与reverse回到基线，常亮恢复。本轮新任务已取消；下一轮设备前先处理测试器对旧监控及失败force-stop的所有权缺口。历史轮次见下。
 
 最新[TwitCasting原生与会话审计](TWITCASTING_ANDROID_NATIVE_AUDIT_2026_09_07.md)：Android 1a18f353已保留数据覆盖安装，首段401导致短录FAIL，源码Cookie修订尚待新候选实机复验。11:55:25 UTC精确核验两个代理session恢复、reverse回到基线、本包进程/唤醒锁消失；测试监控已明确取消，原有监控保留，常亮恢复。手机当前未安装后续Cookie修复。NoRotation及用户远程边界保持。

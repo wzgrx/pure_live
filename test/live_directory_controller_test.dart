@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:pure_live/common/base/base_page_scroll_bone.dart';
+import 'package:pure_live/common/base/base_controller.dart';
 import 'package:pure_live/common/base/base_page_view.dart';
 import 'package:pure_live/common/base/live_directory_controller.dart';
 import 'package:pure_live/common/models/live_area.dart';
@@ -74,12 +76,66 @@ class _OfflineController extends _Controller {
   Future<bool> checkNetworkBeforeRequest() async => false;
 }
 
+// Exercise the production preflight implementation, including its state
+// writes. Only the asynchronous platform read is replaced on this host.
+class _PreflightController extends LiveDirectoryController {
+  _PreflightController({required super.directory});
+  final checks = <Completer<List<ConnectivityResult>?>>[];
+  final errors = <Object>[];
+  final finishes = <IndicatorResult>[];
+  @override
+  bool get usesDesktopPagination => false;
+  @override
+  Future<List<ConnectivityResult>?> readRequestConnectivity() {
+    final check = Completer<List<ConnectivityResult>?>();
+    checks.add(check);
+    return check.future;
+  }
+
+  @override
+  void handleError(Object error, {bool showPageError = false}) {
+    errors.add(error);
+    errorMsg.value = error.toString();
+    pageError.value = true;
+  }
+
+  @override
+  void finishRefreshControllers(IndicatorResult result) => finishes.add(result);
+}
+
+class _LegacyRetryController extends BasePageScrollAndStateBone<LiveRoom> {
+  int refreshes = 0;
+  int loads = 0;
+  @override
+  Future<void> refreshData() async {
+    refreshes++;
+  }
+
+  @override
+  Future<void> loadData() async {
+    loads++;
+  }
+
+  @override
+  Future<void> goToPage(int page) async {}
+  @override
+  void setPageSize(int? newSize) {}
+}
+
+Future<void> _until(bool Function() predicate) async {
+  for (var turn = 0; turn < 100; turn++) {
+    if (predicate()) return;
+    await Future<void>.delayed(Duration.zero);
+  }
+  fail('Expected asynchronous phase was not reached');
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  late Directory directory;
   setUpAll(() async {
-    directory = await Directory.systemTemp.createTemp('native-directory-');
-    Hive.init(directory.path);
+    // These are paging/UI tests, not persistence tests. File-backed writes
+    // scheduled by the real Get root otherwise outlive the widget fake clock.
+    await Hive.openBox<dynamic>('app_settings', bytes: Uint8List(0));
     await HivePrefUtil.init();
   });
   setUp(() async {
@@ -90,8 +146,306 @@ void main() {
   });
   tearDown(Get.reset);
   tearDownAll(() async {
-    await Hive.close();
-    await directory.delete(recursive: true);
+    await Hive.close().timeout(const Duration(seconds: 15));
+  });
+
+  test('legacy pagers retain refresh-based retry and their existing content presentation', () async {
+    final controller = _LegacyRetryController();
+    addTearDown(controller.onClose);
+    await controller.retryData();
+    expect(controller.refreshes, 1);
+    expect(controller.loads, 0);
+    expect(controller.retryActionLabel, 'retry');
+    expect(controller.showInlineError, isFalse);
+  });
+
+  test('current preflight applies mobile, dismissal, wifi and offline states', () async {
+    final source = _Source((page, _, _) async => _page(page, [1], more: false));
+    final controller = _PreflightController(directory: source);
+    addTearDown(controller.onClose);
+    final originalDismissal = BaseController.neverShowCellularBanner;
+    addTearDown(() => BaseController.neverShowCellularBanner = originalDismissal);
+    BaseController.neverShowCellularBanner = false;
+    var read = controller.checkNetworkBeforeRequest();
+    controller.checks.last.complete([ConnectivityResult.mobile]);
+    expect(await read, isTrue);
+    expect(controller.showCellularBanner.value, isTrue);
+    BaseController.neverShowCellularBanner = true;
+    read = controller.checkNetworkBeforeRequest();
+    controller.checks.last.complete([ConnectivityResult.mobile]);
+    expect(await read, isTrue);
+    expect(controller.showCellularBanner.value, isFalse);
+    read = controller.checkNetworkBeforeRequest();
+    controller.checks.last.complete([ConnectivityResult.wifi]);
+    expect(await read, isTrue);
+    expect(controller.showCellularBanner.value, isFalse);
+    read = controller.checkNetworkBeforeRequest();
+    controller.checks.last.complete([ConnectivityResult.none]);
+    expect(await read, isFalse);
+    expect(controller.errors, ['network_disconnected']);
+    expect(source.calls, isEmpty);
+  });
+
+  for (final close in [false, true]) {
+    test('plugin failure keeps fail-open behavior only for a current owner ($close)', () async {
+      final source = _Source((page, _, _) async => _page(page, [1], more: false));
+      final controller = _PreflightController(directory: source);
+      final read = controller.checkNetworkBeforeRequest();
+      if (close) {
+        controller.onClose();
+      } else {
+        addTearDown(controller.onClose);
+      }
+      controller.checks.single.completeError(StateError('plugin unavailable'));
+      expect(await read, !close);
+      expect(controller.errors, isEmpty);
+      expect(controller.showCellularBanner.value, isFalse);
+      if (close) {
+        expect(await controller.checkNetworkBeforeRequest(), isFalse);
+        expect(controller.checks, hasLength(1));
+        await controller.retryData();
+      }
+      expect(source.calls, isEmpty);
+    });
+  }
+
+  test('repeated retries share one pending native request', () async {
+    final response = Completer<LiveDirectoryPage>();
+    var call = 0;
+    final source = _Source((page, _, _) async {
+      if (call++ == 0) throw StateError('temporary');
+      return response.future;
+    });
+    final controller = _Controller(source);
+    addTearDown(controller.onClose);
+    await controller.loadData();
+    final one = controller.retryData();
+    final two = controller.retryData();
+    await _until(() => source.calls.length == 2);
+    response.complete(_page(1, [99], more: false));
+    await Future.wait([one, two]);
+    expect(source.calls, [1, 1]);
+    expect(controller.list.single.roomId, '99');
+    expect(controller.loadding.value, isFalse);
+  });
+
+  for (final result in [ConnectivityResult.none, ConnectivityResult.mobile]) {
+    test('closed directory ignores a late $result connectivity result', () async {
+      final source = _Source((page, _, _) async => _page(page, [1], more: false));
+      final controller = _PreflightController(directory: source);
+      final pending = controller.loadData();
+      expect(controller.checks, hasLength(1));
+      controller.onClose();
+      controller.checks.single.complete([result]);
+      await pending;
+      expect(controller.errors, isEmpty);
+      expect(controller.showCellularBanner.value, isFalse);
+      expect(controller.finishes, isEmpty);
+      expect(source.calls, isEmpty);
+    });
+  }
+
+  for (final replace in ['refresh', 'resize']) {
+    test('$replace owns preflight state before an old callback completes', () async {
+      final source = _Source((page, _, _) async => _page(page, [99], more: false));
+      final controller = _PreflightController(directory: source);
+      addTearDown(controller.onClose);
+      final old = controller.loadData();
+      late final Future<void> replacement;
+      if (replace == 'refresh') {
+        replacement = controller.refreshData();
+      } else {
+        controller.setPageSize(40);
+        replacement = controller.loadData();
+      }
+      controller.checks.first.complete([ConnectivityResult.mobile]);
+      await _until(() => controller.checks.length == 2);
+      final leakedBanner = controller.showCellularBanner.value;
+      controller.checks.last.complete([ConnectivityResult.wifi]);
+      await Future.wait([old, replacement]);
+      expect(leakedBanner, isFalse);
+      expect(controller.showCellularBanner.value, isFalse);
+      expect(controller.errors, isEmpty);
+      expect(source.calls, [1]);
+      expect(controller.list.single.roomId, '99');
+    });
+  }
+
+  for (final desktop in [false, true]) {
+    test('capacity notice survives cached repaging and retry starts a fresh snapshot ($desktop)', () async {
+      var refreshed = false;
+      final source = _Source(
+        (page, _, _) async =>
+            refreshed ? _page(page, [99], more: false) : _page(page, page == 1 ? _range(1, 20) : _range(21, 25)),
+      );
+      final controller = _Controller(source, desktop: desktop, maxBufferedItems: 22)..pageSize.value = 20;
+      addTearDown(controller.onClose);
+      await controller.loadData();
+      await controller.loadMoreData();
+      expect(controller.errorMsg.value, 'directory_cache_limit');
+      controller.setPageSize(10);
+      await controller.loadData();
+      expect(controller.errorMsg.value, 'directory_cache_limit');
+      expect(controller.pageError.value, isTrue);
+      expect(controller.totalCount.value, isNull);
+      await controller.loadMoreData();
+      expect(source.calls, [1, 2]);
+      expect(controller.errorMsg.value, 'directory_cache_limit');
+      refreshed = true;
+      await controller.retryData();
+      expect(source.calls, [1, 2, 1]);
+      expect(controller.list.single.roomId, '99');
+      expect(controller.pageError.value, isFalse);
+    });
+  }
+
+  test('retry retains a failed desktop jump rather than fetching native page one', () async {
+    var fail = true;
+    final source = _Source((page, _, _) async {
+      if (page == 2 && fail) throw StateError('temporary');
+      return _page(page, _range((page - 1) * 20 + 1, page * 20), more: page < 4);
+    });
+    final controller = _Controller(source, desktop: true)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    await controller.loadData();
+    await controller.goToPage(3);
+    expect(controller.currentPage, 1);
+    fail = false;
+    await controller.retryData();
+    expect(source.calls, [1, 2, 2, 3]);
+    expect(controller.currentPage, 3);
+    expect(controller.list.map((r) => r.roomId), _range(41, 60).map((i) => '$i'));
+  });
+
+  testWidgets('actual full-page retry resumes after empty-page budget, not page one', (tester) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final source = _Source((page, _, _) async => page < 3 ? _page(page, []) : _page(page, [99], more: false));
+    final controller = _Controller(source, maxRequestsPerLoad: 2)..pageSize.value = 20;
+    addTearDown(controller.onClose);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(Duration.zero);
+    });
+    await controller.loadData();
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(
+          body: BasePageView<LiveDirectoryController, LiveRoom>(
+            controller: controller,
+            showScrollToTopBtn: false,
+            contentBuilder: (_, rooms, scroll) =>
+                ListView(controller: scroll, children: [for (final r in rooms) Text('room:${r.roomId}')]),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('retry'), findsOneWidget);
+    await tester.tap(find.text('retry'));
+    await tester.pumpAndSettle();
+    expect(source.calls, [1, 2, 3]);
+    expect(find.text('room:99'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(Duration.zero);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('capacity is a visible notice above retained cards, with a working refresh action', (tester) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var refreshed = false;
+    final source = _Source((page, _, _) async => refreshed ? _page(page, [99], more: false) : _page(page, [page]));
+    final controller = _Controller(source, maxBufferedItems: 1)..pageSize.value = 2;
+    addTearDown(controller.onClose);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(Duration.zero);
+    });
+    await controller.loadData();
+    await tester.pumpWidget(
+      GetMaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: BasePageView<LiveDirectoryController, LiveRoom>(
+            controller: controller,
+            showScrollToTopBtn: false,
+            contentBuilder: (_, rooms, scroll) =>
+                ListView(controller: scroll, children: [for (final r in rooms) Text('room:${r.roomId}')]),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('room:1'), findsOneWidget);
+    expect(find.text('directory_cache_limit'), findsOneWidget);
+    const longMessage =
+        '目录缓存已达到上限，请刷新后继续浏览。 The directory cache is full; refresh to browse a new snapshot. '
+        '此前成功加载的内容仍然保留，当前提示应在窄屏和大字体下换行，恢复动作独立放置。';
+    controller.errorMsg.value = longMessage;
+    await tester.pumpAndSettle();
+    expect(find.text(longMessage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    refreshed = true;
+    await tester.tap(find.text('refresh'));
+    await tester.pumpAndSettle();
+    expect(find.text('room:99'), findsOneWidget);
+    expect(find.text('directory_cache_limit'), findsNothing);
+    expect(find.byType(MaterialBanner), findsNothing);
+    expect(source.calls, [1, 2, 1]);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(Duration.zero);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('inline retry resumes a failed native page without replacing successful cards', (tester) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var fail = true;
+    final source = _Source((page, _, _) async {
+      if (page == 1) return _page(1, [1]);
+      if (fail) throw StateError('temporary');
+      return _page(2, [2], more: false);
+    });
+    final controller = _Controller(source)..pageSize.value = 2;
+    addTearDown(controller.onClose);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(Duration.zero);
+    });
+    await controller.loadData();
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(
+          body: BasePageView<LiveDirectoryController, LiveRoom>(
+            controller: controller,
+            showScrollToTopBtn: false,
+            contentBuilder: (_, rooms, scroll) =>
+                ListView(controller: scroll, children: [for (final r in rooms) Text('room:${r.roomId}')]),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('room:1'), findsOneWidget);
+    expect(find.byType(MaterialBanner), findsOneWidget);
+    fail = false;
+    await tester.tap(find.text('retry'));
+    await tester.pumpAndSettle();
+    expect(source.calls, [1, 2, 2]);
+    expect(find.text('room:1'), findsOneWidget);
+    expect(find.text('room:2'), findsOneWidget);
+    expect(find.byType(MaterialBanner), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   _Source mixed() => _Source(
@@ -173,7 +527,7 @@ void main() {
     addTearDown(controller.onClose);
     await controller.loadData();
     await tester.pumpWidget(
-      MaterialApp(
+      GetMaterialApp(
         home: Scaffold(
           body: BasePageView<LiveDirectoryController, LiveRoom>(
             controller: controller,
@@ -186,12 +540,13 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     expect(find.text('room:1'), findsOneWidget);
     expect(find.text('room:2'), findsOneWidget);
     expect(find.text('FULL_PAGE_ERROR'), findsNothing);
     fail = false;
     await controller.loadMoreData();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('room:4'), findsOneWidget);
     expect(find.text('room:1'), findsOneWidget);
     expect(find.text('FULL_PAGE_ERROR'), findsNothing);

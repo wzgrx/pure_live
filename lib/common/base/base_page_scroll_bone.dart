@@ -178,6 +178,12 @@ abstract class BasePageScrollAndStateBone<T> extends BaseController {
   }
 
   Future<void> loadData();
+
+  /// Default retry retains the legacy refresh behavior. Native-cursor pagers
+  /// can resume the failed action without restarting already consumed pages.
+  Future<void> retryData() => refreshData();
+  String get retryActionLabel => i18n('retry');
+  bool get showInlineError => false;
   Future<void> refreshData();
   Future<void> goToPage(int page);
   void setPageSize(int? newSize);

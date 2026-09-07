@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:pure_live/common/index.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
@@ -13,25 +14,36 @@ class BaseController extends GetxController {
   var showCellularBanner = false.obs;
   static bool neverShowCellularBanner = false;
 
+  /// The native connectivity read is separate from committing visible state.
+  /// Desktop requests retain their existing no-preflight policy.
+  Future<List<ConnectivityResult>?> readRequestConnectivity() async {
+    if (PlatformUtils.isDesktop) return null;
+    return Connectivity().checkConnectivity();
+  }
+
+  /// Capture an ownership predicate before the asynchronous platform read.
+  /// Stateful pagers can include their generation, not just route lifetime.
+  bool Function() captureNetworkRequestOwnership() =>
+      () => !isClosed;
+
   Future<bool> checkNetworkBeforeRequest() async {
-    if (PlatformUtils.isDesktop) return true;
+    final ownsRequest = captureNetworkRequestOwnership();
+    if (!ownsRequest()) return false;
     try {
-      final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
+      final connectivityResult = await readRequestConnectivity();
+      if (!ownsRequest()) return false;
+      if (connectivityResult == null) return true;
       if (connectivityResult.contains(ConnectivityResult.none) || connectivityResult.isEmpty) {
         handleError("network_disconnected", showPageError: true);
         return false;
       }
-      if (connectivityResult.contains(ConnectivityResult.mobile)) {
-        if (!neverShowCellularBanner) {
-          showCellularBanner.value = true;
-        }
-      } else {
-        showCellularBanner.value = false;
-      }
+      showCellularBanner.value = connectivityResult.contains(ConnectivityResult.mobile) && !neverShowCellularBanner;
     } catch (_) {
-      return true;
+      // A current plugin failure retains the existing fail-open policy;
+      // a stale result must not admit another request or mutate the old view.
+      return ownsRequest();
     }
-    return true;
+    return ownsRequest();
   }
 
   void handleError(Object exception, {bool showPageError = false}) {

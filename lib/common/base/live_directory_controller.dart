@@ -27,12 +27,31 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
   bool _capacityReached = false;
   int _epoch = 0;
   int _visiblePage = 1;
+  int _lastRequestedPage = 1;
   bool _disposed = false;
   Future<void>? _activeLoad;
   Future<void>? _pendingRepage;
   CancelToken? _cancel;
 
   bool _owns(int epoch) => !_disposed && !isClosed && epoch == _epoch;
+
+  @override
+  bool Function() captureNetworkRequestOwnership() {
+    final epoch = _epoch;
+    return () => _owns(epoch);
+  }
+
+  @override
+  bool get showInlineError => true;
+
+  @override
+  String get retryActionLabel => i18n(_capacityReached ? 'refresh' : 'retry');
+
+  @override
+  Future<void> retryData() {
+    if (_disposed || isClosed) return Future.value();
+    return _pendingRepage ?? _activeLoad ?? (_capacityReached ? refreshData() : _startLoad(_lastRequestedPage));
+  }
 
   @override
   Future<void> refreshData() async {
@@ -93,6 +112,7 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
     if (_disposed || isClosed) return Future.value();
     final active = _activeLoad;
     if (active != null) return active;
+    _lastRequestedPage = targetPage;
     late final Future<void> operation;
     operation = _performLoad(targetPage, _epoch).whenComplete(() {
       if (identical(_activeLoad, operation)) _activeLoad = null;
@@ -161,7 +181,11 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
         requests++;
       }
       if (!_owns(epoch)) return;
-      if (_pool.length < targetEnd && _serverHasMore && !_capacityReached && failure == null) {
+      if (_capacityReached) {
+        // The buffer limit is still in effect when revisiting cached rows or
+        // changing UI page size. It is not a successful end-of-directory read.
+        failure = i18n('directory_cache_limit');
+      } else if (_pool.length < targetEnd && _serverHasMore && failure == null) {
         failure = i18n('directory_continue_loading');
       }
       // Errors and request budgets are retryable, not a fabricated end of the
@@ -182,7 +206,9 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
       if (failure != null) {
         // Keep the visible list mounted; BasePageView renders a full-page error
         // only when there are no usable cards. Retry resumes the failed page.
-        handleError(failure, showPageError: list.isEmpty);
+        // BasePageView retains an inline recovery action alongside usable
+        // cards, so cached navigation does not need repeated transient toasts.
+        handleError(failure, showPageError: true);
         finishRefreshControllers(IndicatorResult.fail);
       } else {
         finishRefreshControllers(canLoadMore.value ? IndicatorResult.success : IndicatorResult.noMore);
@@ -190,7 +216,7 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
     } catch (error) {
       if (_owns(epoch)) {
         currentPage = _visiblePage;
-        handleError(error, showPageError: list.isEmpty);
+        handleError(error, showPageError: true);
         finishRefreshControllers(IndicatorResult.fail);
       }
     } finally {

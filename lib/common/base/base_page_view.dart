@@ -126,6 +126,36 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
               }
               return const SizedBox.shrink();
             }),
+            if (controller.showInlineError)
+              Obx(() {
+                if (controller.list.isEmpty || !controller.pageError.value || controller.errorMsg.value.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                final colors = Theme.of(context).colorScheme;
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: MaterialBanner(
+                      backgroundColor: colors.errorContainer,
+                      leading: Icon(Icons.info_outline_rounded, color: colors.onErrorContainer),
+                      content: Text(
+                        controller.errorMsg.value,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: colors.onErrorContainer),
+                      ),
+                      forceActionsBelow: true,
+                      actions: [
+                        TextButton(
+                          onPressed: controller.loadding.value ? null : () => controller.retryData(),
+                          child: Text(controller.retryActionLabel),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraint) {
@@ -153,8 +183,8 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
                                 icon: Icons.wifi_off_rounded,
                                 title: i18n("network_error_title"),
                                 subtitle: controller.errorMsg.value,
-                                buttonText: i18n("retry"),
-                                onButtonPressed: () => controller.refreshData(),
+                                buttonText: controller.retryActionLabel,
+                                onButtonPressed: () => controller.retryData(),
                               );
                         return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
                       }

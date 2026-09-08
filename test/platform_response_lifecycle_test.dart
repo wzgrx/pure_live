@@ -10,11 +10,18 @@ import 'package:pure_live/core/site/huajiao/huajiao_api.dart';
 import 'package:pure_live/core/site/inke/inke_api.dart';
 import 'package:pure_live/core/site/kilakila/kilakila_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
+import 'package:pure_live/core/site/picarto/picarto_api.dart';
 import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 
 typedef _Read = Future<Object?> Function(CancelToken?);
 typedef _Case = ({String name, _Read read, String body, int cap});
 final _cases = <_Case>[
+  (
+    name: 'Picarto',
+    read: (c) => PicartoApi().read(Uri.parse('https://picarto.tv/fixture'), cancel: c),
+    body: 'fixture',
+    cap: 1024 * 1024,
+  ),
   (
     name: 'Inke',
     read: (c) => InkeApi().categories(cancel: c),
@@ -48,6 +55,7 @@ final _cases = <_Case>[
 ];
 
 String _kind(Object? error) => switch (error) {
+  PicartoException e => e.kind.name,
   InkeException e => e.kind.name,
   KilakilaException e => e.kind.name,
   MissevanException e => e.kind.name,
@@ -224,6 +232,86 @@ void main() {
       );
     });
   }
+
+  test('Picarto injected text enforces the production UTF8 byte limit', () async {
+    final body = jsonEncode({'fixture': '中' * 360000});
+    expect(body.length, lessThan(1024 * 1024));
+    final api = PicartoApi(request: (_, _) async => (status: 200, body: body));
+    await expectLater(api.read(Uri.parse('https://picarto.tv/fixture')).then<void>((_) {}), _failure('schema'));
+  });
+
+  test('Picarto direct object parsing enforces the UTF8 byte limit', () {
+    final body = jsonEncode({'fixture': '中' * 360000});
+    expect(body.length, lessThan(1024 * 1024));
+    expect(() {
+      PicartoApi.object(body);
+    }, _failure('schema'));
+  });
+
+  test('Picarto cancellation dominates a coincident typed request error', () async {
+    final caller = CancelToken();
+    final api = PicartoApi(
+      request: (_, _) async {
+        caller.cancel();
+        throw const PicartoException(PicartoFailure.schema);
+      },
+    );
+    await expectLater(api.read(Uri.parse('https://picarto.tv/fixture'), cancel: caller), _failure('cancelled'));
+  });
+
+  test('Picarto body preserves split UTF8 and exact cap, rejecting invalid and excess bytes', () async {
+    final bytes = utf8.encode('中文');
+    expect(await PicartoApi.readBody(Stream.fromIterable([bytes.sublist(0, 1), bytes.sublist(1)])), '中文');
+    expect(
+      (await PicartoApi.readBody(Stream.value(Uint8List(PicartoApi.responseLimit)))).length,
+      PicartoApi.responseLimit,
+    );
+    await expectLater(PicartoApi.readBody(Stream.value([255])), _failure('schema'));
+    await expectLater(PicartoApi.readBody(Stream.value(Uint8List(PicartoApi.responseLimit + 1))), _failure('schema'));
+  });
+
+  test('Picarto standalone body deadline closes a stalled source', () async {
+    var closed = false;
+    final source = StreamController<List<int>>(
+      onCancel: () {
+        closed = true;
+      },
+    );
+    await expectLater(
+      PicartoApi.readBody(source.stream, timeout: const Duration(milliseconds: 30)),
+      throwsA(isA<TimeoutException>()),
+    );
+    expect(closed, isTrue);
+    await source.close();
+  });
+
+  test('Picarto transport stream error releases its scope without cancelling the caller', () async {
+    final source = _Source();
+    final caller = CancelToken();
+    CancelToken? transport;
+    try {
+      await _withDio(
+        (options) async {
+          transport = options.cancelToken;
+          return source.body(200);
+        },
+        () async {
+          final check = expectLater(
+            PicartoApi().read(Uri.parse('https://picarto.tv/fixture'), cancel: caller),
+            _failure('transport'),
+          );
+          await source.listened.future;
+          source.controller.addError(StateError('fixture upstream error'));
+          await check;
+          expect(source.cancellations, 1);
+          expect(transport!.isCancelled, isTrue);
+          expect(caller.isCancelled, isFalse);
+        },
+      );
+    } finally {
+      await source.close();
+    }
+  });
 
   test('TwitCasting injected text and object parsing enforce UTF8 byte limits', () async {
     final body = jsonEncode({'fixture': List.filled(360000, '中').join()});

@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/common/http_client.dart';
+import 'package:pure_live/core/common/request_scope.dart';
 
 enum PicartoFailure { transport, access, rateLimited, service, notFound, schema, cancelled, qualityUnavailable }
 
@@ -22,30 +24,46 @@ class PicartoApi {
   PicartoApi({PicartoRequest? request}) : _request = request ?? _defaultRequest;
   static const origin = 'https://picarto.tv';
   static const apiOrigin = 'https://ptvintern.picarto.tv';
+  static const responseLimit = 1024 * 1024;
   static const playHeaders = <String, String>{'Referer': '$origin/', 'Origin': origin};
   final PicartoRequest _request;
 
-  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) async {
-    final result = await HttpClient.instance.dio.get<ResponseBody>(
-      uri.toString(),
-      options: Options(responseType: ResponseType.stream, headers: playHeaders, validateStatus: (_) => true),
-      cancelToken: cancel,
-    );
-    final response = result.data;
-    if (response == null) throw const PicartoException(PicartoFailure.schema);
-    if (result.statusCode != 200) {
-      await response.stream.listen((_) {}).cancel();
-      return (status: result.statusCode ?? 0, body: '');
-    }
+  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) =>
+      withRequestCancellation(cancel, (transport) async {
+        final result = await HttpClient.instance.dio.get<ResponseBody>(
+          uri.toString(),
+          options: Options(responseType: ResponseType.stream, headers: playHeaders, validateStatus: (_) => true),
+          cancelToken: transport,
+        );
+        final response = result.data;
+        if (response == null) throw const PicartoException(PicartoFailure.schema);
+        if (result.statusCode != 200) {
+          await response.stream.listen((_) {}).cancel();
+          return (status: result.statusCode ?? 0, body: '');
+        }
+        return (status: 200, body: await readBody(response.stream));
+      });
+
+  /// Bound total body consumption even while a slow source keeps sending data.
+  static Future<String> readBody(Stream<List<int>> stream, {Duration timeout = const Duration(seconds: 20)}) async {
+    final iterator = StreamIterator(stream);
     final bytes = BytesBuilder(copy: false);
-    await for (final chunk in response.stream.timeout(const Duration(seconds: 20))) {
-      if (bytes.length + chunk.length > 1024 * 1024) throw const PicartoException(PicartoFailure.schema);
-      bytes.add(chunk);
-    }
+    final watch = Stopwatch()..start();
     try {
-      return (status: 200, body: utf8.decode(bytes.takeBytes()));
+      while (true) {
+        final remaining = timeout - watch.elapsed;
+        if (remaining <= Duration.zero) throw TimeoutException('Picarto response deadline');
+        if (!await iterator.moveNext().timeout(remaining)) break;
+        final chunk = iterator.current;
+        if (bytes.length + chunk.length > responseLimit) throw const PicartoException(PicartoFailure.schema);
+        bytes.add(chunk);
+      }
+      return utf8.decode(bytes.takeBytes());
     } on FormatException {
       throw const PicartoException(PicartoFailure.schema);
+    } finally {
+      watch.stop();
+      await iterator.cancel();
     }
   }
 
@@ -54,10 +72,10 @@ class PicartoApi {
     late final ({int status, String body}) response;
     try {
       response = await _request(uri, cancel);
-    } on PicartoException {
-      rethrow;
-    } catch (_) {
-      throw PicartoException(cancel?.isCancelled == true ? PicartoFailure.cancelled : PicartoFailure.transport);
+    } catch (error) {
+      if (cancel?.isCancelled == true) throw const PicartoException(PicartoFailure.cancelled);
+      if (error is PicartoException) rethrow;
+      throw const PicartoException(PicartoFailure.transport);
     }
     if (cancel?.isCancelled ?? false) throw const PicartoException(PicartoFailure.cancelled);
     final failure = switch (response.status) {
@@ -69,13 +87,17 @@ class PicartoApi {
       _ => PicartoFailure.transport,
     };
     if (failure != null) throw PicartoException(failure);
-    if (response.body.length > 1024 * 1024) throw const PicartoException(PicartoFailure.schema);
+    if (response.body.length > responseLimit || utf8.encode(response.body).length > responseLimit) {
+      throw const PicartoException(PicartoFailure.schema);
+    }
     return response.body;
   }
 
   static Map<String, dynamic> object(Object? raw) {
     if (raw is String) {
-      if (raw.length > 1024 * 1024) throw const PicartoException(PicartoFailure.schema);
+      if (raw.length > responseLimit || utf8.encode(raw).length > responseLimit) {
+        throw const PicartoException(PicartoFailure.schema);
+      }
       try {
         raw = jsonDecode(raw);
       } catch (_) {

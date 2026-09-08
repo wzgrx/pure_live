@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart' as dio;
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/inke/inke_api.dart';
+import 'package:pure_live/core/site/kilakila/kilakila_api.dart';
+import 'package:pure_live/core/site/kilakila/kilakila_link.dart';
 
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/utils/live_short_link_session.dart';
@@ -12,7 +14,10 @@ import 'package:pure_live/modules/search/web_search_room_parser.dart';
 class LiveUrlTool {
   /// Extract complete HTTP URLs before inspecting host/path. This also avoids
   /// treating an embedded www address in an FTP URL as a second HTTP link.
-  static Iterable<Uri> sharedHttpUris(String text) sync* {
+  static Iterable<Uri> sharedHttpUris(String text) => sharedHttpUrls(text).map(Uri.parse);
+
+  // Preserve signed URL spelling before Uri normalizes percent escapes.
+  static Iterable<String> sharedHttpUrls(String text) sync* {
     final urls = RegExp(r'(?:[a-z][a-z0-9+.-]*://|www\.)[^\s<>]+', caseSensitive: false);
     for (final match in urls.allMatches(text)) {
       var candidate = match.group(0)!.replaceFirst(RegExp(r'''[.,!?;:)\]}。！？、，；：）》」』”’"']+$'''), '');
@@ -24,7 +29,7 @@ class LiveUrlTool {
           (uri.scheme != 'http' && uri.scheme != 'https')) {
         continue;
       }
-      yield uri;
+      yield candidate;
     }
   }
 
@@ -49,24 +54,27 @@ class LiveUrlTool {
       'picarto.tv',
       'twitcasting.tv',
     };
-    return sharedHttpUris(text).any(
-      (uri) =>
-          InkeApi.roomFromUri(uri) != null ||
+    return sharedHttpUrls(text).any((raw) {
+      if (KilakilaLink.parse(raw) != null) return true;
+      final uri = Uri.parse(raw);
+      return InkeApi.roomFromUri(uri) != null ||
           MissevanApi.roomFromUri(uri) != null ||
-          roots.any((root) => _hostIs(uri.host.toLowerCase(), root)),
-    );
+          roots.any((root) => _hostIs(uri.host.toLowerCase(), root));
+    });
   }
 
   static Future<List<String>> parseLiveUrl(
     String text, {
     dio.Dio Function()? clientFactory,
     dio.CancelToken? cancelToken,
+    KilakilaApi? kilakilaApi,
     Duration timeout = const Duration(seconds: 12),
   }) async {
     if (cancelToken?.isCancelled ?? false) return [];
     final session = LiveShortLinkSession(timeout: timeout, clientFactory: clientFactory);
+    final ownedCancel = dio.CancelToken();
     try {
-      final parsing = _parseLiveUrl(text, session);
+      final parsing = _parseLiveUrl(text, session, kilakilaApi ?? KilakilaApi(), ownedCancel);
       final result = cancelToken == null
           ? parsing
           : Future.any<List<String>>([parsing, cancelToken.whenCancel.then((_) => <String>[])]);
@@ -78,15 +86,29 @@ class LiveUrlTool {
         },
       );
     } finally {
+      ownedCancel.cancel();
       session.close();
     }
   }
 
-  static Future<List<String>> _parseLiveUrl(String text, LiveShortLinkSession session) async {
-    for (final uri in sharedHttpUris(text)) {
+  static Future<List<String>> _parseLiveUrl(
+    String text,
+    LiveShortLinkSession session,
+    KilakilaApi kilakilaApi,
+    dio.CancelToken cancel,
+  ) async {
+    for (final raw in sharedHttpUrls(text)) {
+      final uri = Uri.parse(raw);
       if (session.isClosed) return [];
       final host = uri.host.toLowerCase();
-      final realUrl = uri.toString();
+      final realUrl = raw;
+      final kilakila = KilakilaLink.parse(raw);
+      if (kilakila != null) {
+        if (kilakila.kind == KilakilaLinkKind.owner) return [kilakila.id, Sites.kilakilaSite];
+        final owner = await kilakilaApi.ownerFromLink(raw, cancel: cancel);
+        if (session.isClosed || cancel.isCancelled) return [];
+        return [owner.userId, Sites.kilakilaSite];
+      }
       late List<String> segments;
       try {
         segments = uri.pathSegments.where((part) => part.isNotEmpty).toList(growable: false);
@@ -98,7 +120,7 @@ class LiveUrlTool {
         final response = await session.get(uri);
         final location = LiveShortLinkSession.redirectTarget(uri, response);
         if (location == null) continue;
-        final target = await _parseLiveUrl(location.toString(), session);
+        final target = await _parseLiveUrl(location.toString(), session, kilakilaApi, cancel);
         if (target.isNotEmpty) return target;
         continue;
       }

@@ -3,6 +3,7 @@ import 'package:pure_live/core/site/picarto/picarto_api.dart';
 import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/inke/inke_api.dart';
+import 'package:pure_live/core/site/kilakila/kilakila_link.dart';
 
 class WebSearchRoomTarget {
   const WebSearchRoomTarget({required this.platform, required this.roomId});
@@ -40,6 +41,12 @@ class WebSearchRoomParser {
   };
 
   static WebSearchRoomTarget? parse(String rawUrl) {
+    // Broadcast shares need asynchronous owner lookup in LiveUrlTool. Only
+    // verified owner links can be mapped synchronously to a durable app ID.
+    final kilakila = KilakilaLink.parse(rawUrl.trim());
+    if (kilakila?.kind == KilakilaLinkKind.owner) {
+      return WebSearchRoomTarget(platform: Sites.kilakilaSite, roomId: kilakila!.id);
+    }
     final uri = Uri.tryParse(rawUrl.trim());
     if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return null;
     final missevan = MissevanApi.roomFromUri(uri);

@@ -31,11 +31,20 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 2);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'bilibili']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'bilibili', 'acfun', 'picarto', 'twitcasting', 'missevan', 'inke']);
-    expect(settings.siteCatalogMigration.value, 7);
+    expect(settings.hotAreasList, [
+      'huya',
+      'bilibili',
+      'acfun',
+      'picarto',
+      'twitcasting',
+      'missevan',
+      'inke',
+      'kilakila',
+    ]);
+    expect(settings.siteCatalogMigration.value, 8);
     settings.hotAreasList.remove('acfun');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'bilibili', 'picarto', 'twitcasting', 'missevan', 'inke']);
+    expect(settings.hotAreasList, ['huya', 'bilibili', 'picarto', 'twitcasting', 'missevan', 'inke', 'kilakila']);
   });
 
   test('online-count capability is explicit and backup normalization preserves an AcFun toggle', () {

@@ -12,7 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory folder;
   setUpAll(() async {
-    folder = await Directory.systemTemp.createTemp('inke-catalog-migration-');
+    folder = await Directory.systemTemp.createTemp('kilakila-catalog-migration-');
     Hive.init(folder.path);
     await HivePrefUtil.init();
   });
@@ -27,47 +27,47 @@ void main() {
     await folder.delete(recursive: true);
   });
 
-  test('version six adds Inke and subsequent platforms and disabling survives disk reopen', () async {
-    await HivePrefUtil.setInt('siteCatalogMigration', 6);
-    await HivePrefUtil.setStringList('hotAreasList', ['huya', 'missevan']);
+  test('version seven adds only Kilakila and disabling survives disk reopen', () async {
+    await HivePrefUtil.setInt('siteCatalogMigration', 7);
+    await HivePrefUtil.setStringList('hotAreasList', ['huya', 'inke']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'missevan', 'inke', 'kilakila']);
+    expect(settings.hotAreasList, ['huya', 'inke', 'kilakila']);
     expect(settings.siteCatalogMigration.value, 8);
-    settings.hotAreasList.remove('inke');
+    settings.hotAreasList.remove('kilakila');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'missevan', 'kilakila']);
+    expect(settings.hotAreasList, ['huya', 'inke']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
     final reopened = Get.put(FavoriteRoomController());
     expect(reopened.siteCatalogMigration.value, 8);
-    expect(reopened.hotAreasList, ['huya', 'missevan', 'kilakila']);
+    expect(reopened.hotAreasList, ['huya', 'inke']);
   });
 
-  test('backup normalization retains Inke order and does not duplicate it', () async {
+  test('backup normalization retains Kilakila order and does not duplicate it', () async {
     final settings = Get.put(FavoriteRoomController());
     settings.fromJson({
-      'hotAreasList': [' INKE ', 'huya', 'inke'],
-      'preferPlatform': ' INKE ',
+      'hotAreasList': [' KILAKILA ', 'huya', 'kilakila'],
+      'preferPlatform': ' KILAKILA ',
       'favoriteRooms': [],
       'favoriteAreas': [],
     });
-    expect(settings.hotAreasList, ['inke', 'huya']);
-    expect(settings.preferPlatform.value, 'inke');
+    expect(settings.hotAreasList, ['kilakila', 'huya']);
+    expect(settings.preferPlatform.value, 'kilakila');
     final json = settings.toJson();
-    expect(json['hotAreasList'], ['inke', 'huya']);
+    expect(json['hotAreasList'], ['kilakila', 'huya']);
   });
 
   test('actual search flow reports missing capability and does not fall back to web', () async {
     Get.put(SettingsService());
     final controller = SearchController();
     try {
-      controller.index.value = controller.sites.indexWhere((site) => site.id == 'inke') + 1;
+      controller.index.value = controller.sites.indexWhere((site) => site.id == 'kilakila') + 1;
       expect(controller.index.value, greaterThan(0));
       expect(controller.canOpenWebSearch, isFalse);
       expect(controller.capabilityText, 'search_coverage_unavailable');
-      expect(() => controller.buildSearchUrl('inke', 'example'), throwsStateError);
+      expect(() => controller.buildSearchUrl('kilakila', 'example'), throwsStateError);
       controller.searchController.text = 'example';
       await controller.doSearch();
       expect(controller.errorMessage.value, 'search_coverage_unavailable');

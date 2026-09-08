@@ -2,6 +2,7 @@ import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/danmaku/douyin_danmaku.dart';
 import 'package:pure_live/core/danmaku/huya_danmaku.dart';
 import 'package:pure_live/core/site/inke/inke_site.dart';
+import 'package:pure_live/core/site/kilakila/kilakila_site.dart';
 import 'package:pure_live/core/sites.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -34,6 +35,9 @@ class RoomExternalOpener {
     if (id == null) return null;
     final path = Uri.encodeComponent(id);
     switch (site) {
+      case Sites.kilakilaSite:
+        if (!RegExp(r'^[1-9][0-9]{0,31}$').hasMatch(id)) return null;
+        return RoomExternalTarget(web: KilakilaSite.ownerUrl(id));
       case Sites.yySite:
         if (!RegExp(r'^[0-9]+$').hasMatch(id)) return null;
         return RoomExternalTarget(web: 'https://www.yy.com/$path');

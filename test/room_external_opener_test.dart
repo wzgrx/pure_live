@@ -22,6 +22,7 @@ void main() {
     'acfun': 'https://live.acfun.cn/live/12345',
     'kuaishou': 'https://live.kuaishou.com/u/12345',
     'inke': 'https://www.inke.cn/',
+    'kilakila': 'https://live.hongrenshuo.com.cn/index/roomuser/uid/12345',
   };
 
   for (final entry in webTargets.entries) {

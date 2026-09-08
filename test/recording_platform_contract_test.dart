@@ -21,6 +21,7 @@ void main() {
         Sites.twitcastingSite,
         Sites.missevanSite,
         Sites.inkeSite,
+        Sites.kilakilaSite,
         Sites.iptvSite,
       ]),
     );

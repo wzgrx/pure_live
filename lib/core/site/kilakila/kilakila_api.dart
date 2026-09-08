@@ -79,8 +79,7 @@ class KilakilaOwnerSnapshot {
   final KilakilaRoomSnapshot? currentRoom;
 }
 
-/// Anonymous official website contracts. Deliberately not registered as a
-/// LiveSite until sharing and application integration have their own evidence.
+/// Anonymous official website contracts used by the UID-based LiveSite.
 /// Owner lookup and broadcast identity are separate from media resolution.
 /// No raw response/push-flow URL is retained in DTOs.
 class KilakilaApi {
@@ -231,7 +230,7 @@ class KilakilaApi {
       return null;
     }
     try {
-      // Opaque/signed links remain a separate, unimplemented contract. Never
+      // Opaque/signed links use the separate KilakilaLink codec. Never
       // accidentally treat the encoded payload as a durable numeric room ID.
       final query = uri.queryParametersAll;
       if (query.containsKey('_specific_parameter')) return null;

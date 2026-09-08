@@ -1,4 +1,5 @@
 import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/core/site/huajiao/huajiao_link.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
 import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
@@ -43,6 +44,10 @@ class WebSearchRoomParser {
   static WebSearchRoomTarget? parse(String rawUrl) {
     // Broadcast shares need asynchronous owner lookup in LiveUrlTool. Only
     // verified owner links can be mapped synchronously to a durable app ID.
+    final huajiao = HuajiaoLink.parse(rawUrl);
+    if (huajiao?.kind == HuajiaoLinkKind.owner) {
+      return WebSearchRoomTarget(platform: Sites.huajiaoSite, roomId: huajiao!.id);
+    }
     final kilakila = KilakilaLink.parse(rawUrl.trim());
     if (kilakila?.kind == KilakilaLinkKind.owner) {
       return WebSearchRoomTarget(platform: Sites.kilakilaSite, roomId: kilakila!.id);

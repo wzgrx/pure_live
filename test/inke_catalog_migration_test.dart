@@ -31,18 +31,18 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 6);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'missevan']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'missevan', 'inke', 'kilakila']);
-    expect(settings.siteCatalogMigration.value, 8);
+    expect(settings.hotAreasList, ['huya', 'missevan', 'inke', 'kilakila', 'huajiao']);
+    expect(settings.siteCatalogMigration.value, 9);
     settings.hotAreasList.remove('inke');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'missevan', 'kilakila']);
+    expect(settings.hotAreasList, ['huya', 'missevan', 'kilakila', 'huajiao']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
     final reopened = Get.put(FavoriteRoomController());
-    expect(reopened.siteCatalogMigration.value, 8);
-    expect(reopened.hotAreasList, ['huya', 'missevan', 'kilakila']);
+    expect(reopened.siteCatalogMigration.value, 9);
+    expect(reopened.hotAreasList, ['huya', 'missevan', 'kilakila', 'huajiao']);
   });
 
   test('backup normalization retains Inke order and does not duplicate it', () async {

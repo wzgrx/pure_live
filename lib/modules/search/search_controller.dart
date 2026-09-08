@@ -53,6 +53,8 @@ class SearchController extends GetxController {
   String buildSearchUrl(String platform, String keyword) {
     final q = Uri.encodeComponent(keyword);
     switch (platform) {
+      case Sites.huajiaoSite:
+        throw StateError('Huajiao search is not integrated');
       case Sites.kilakilaSite:
         throw StateError('Kilakila search is not integrated');
       case Sites.inkeSite:

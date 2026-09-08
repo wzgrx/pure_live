@@ -4,6 +4,7 @@ import 'package:pure_live/core/danmaku/huya_danmaku.dart';
 import 'package:pure_live/core/site/inke/inke_site.dart';
 import 'package:pure_live/core/site/kilakila/kilakila_site.dart';
 import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/core/site/huajiao/huajiao_link.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 enum RoomExternalOpenResult { opened, unavailable, failed, cancelled }
@@ -35,6 +36,9 @@ class RoomExternalOpener {
     if (id == null) return null;
     final path = Uri.encodeComponent(id);
     switch (site) {
+      case Sites.huajiaoSite:
+        if (!HuajiaoLink.validId(id)) return null;
+        return RoomExternalTarget(web: HuajiaoLink.ownerUrl(id));
       case Sites.kilakilaSite:
         if (!RegExp(r'^[1-9][0-9]{0,31}$').hasMatch(id)) return null;
         return RoomExternalTarget(web: KilakilaSite.ownerUrl(id));

@@ -2,6 +2,7 @@ import 'site/picarto/picarto_site.dart';
 import 'site/missevan/missevan_site.dart';
 import 'site/inke/inke_site.dart';
 import 'site/kilakila/kilakila_site.dart';
+import 'site/huajiao/huajiao_site.dart';
 import 'site/twitcasting/twitcasting_site.dart';
 import 'site/yy/yy_site.dart';
 import 'site/acfun/acfun_site.dart';
@@ -36,6 +37,7 @@ class Sites {
   static const String missevanSite = 'missevan';
   static const String inkeSite = 'inke';
   static const String kilakilaSite = 'kilakila';
+  static const String huajiaoSite = 'huajiao';
 
   static const Set<String> supportedSiteIds = {
     bilibiliSite,
@@ -53,6 +55,7 @@ class Sites {
     missevanSite,
     inkeSite,
     kilakilaSite,
+    huajiaoSite,
     iptvSite,
   };
 
@@ -74,6 +77,7 @@ class Sites {
     Site(id: missevanSite, name: i18n('site_missevan'), logo: 'assets/images/logo.png', liveSite: MissevanSite()),
     Site(id: inkeSite, name: i18n('site_inke'), logo: 'assets/images/logo.png', liveSite: InkeSite()),
     Site(id: kilakilaSite, name: i18n('site_kilakila'), logo: 'assets/images/logo.png', liveSite: KilakilaSite()),
+    Site(id: huajiaoSite, name: i18n('site_huajiao'), logo: 'assets/images/logo.png', liveSite: HuajiaoSite()),
     Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
   ];
 
@@ -139,6 +143,12 @@ class Sites {
         name: i18n('site_kilakila'),
         logo: 'assets/images/logo.png',
         liveSite: KilakilaSite(),
+      ),
+      huajiaoSite => Site(
+        id: huajiaoSite,
+        name: i18n('site_huajiao'),
+        logo: 'assets/images/logo.png',
+        liveSite: HuajiaoSite(),
       ),
       _ => throw StateError('Unsupported live site: $normalizedId'),
     };

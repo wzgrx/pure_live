@@ -40,11 +40,21 @@ void main() {
       'missevan',
       'inke',
       'kilakila',
+      'huajiao',
     ]);
-    expect(settings.siteCatalogMigration.value, 8);
+    expect(settings.siteCatalogMigration.value, 9);
     settings.hotAreasList.remove('acfun');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'bilibili', 'picarto', 'twitcasting', 'missevan', 'inke', 'kilakila']);
+    expect(settings.hotAreasList, [
+      'huya',
+      'bilibili',
+      'picarto',
+      'twitcasting',
+      'missevan',
+      'inke',
+      'kilakila',
+      'huajiao',
+    ]);
   });
 
   test('online-count capability is explicit and backup normalization preserves an AcFun toggle', () {

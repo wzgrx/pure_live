@@ -105,6 +105,11 @@ class LiveRoom {
       hasTotalViewers: false,
       onlineAvailability: AudienceOnlineAvailability.roomList,
     ),
+    'huajiao': AudiencePlatformCapability(
+      hasPopularity: true,
+      hasTotalViewers: false,
+      onlineAvailability: AudienceOnlineAvailability.unsupported,
+    ),
     'missevan': AudiencePlatformCapability(
       hasPopularity: true,
       hasTotalViewers: false,

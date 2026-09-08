@@ -46,13 +46,13 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 4);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'acfun']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan', 'inke', 'kilakila']);
-    expect(settings.siteCatalogMigration.value, 8);
+    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao']);
+    expect(settings.siteCatalogMigration.value, 9);
     settings.hotAreasList.remove('twitcasting');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'acfun', 'missevan', 'inke', 'kilakila']);
+    expect(settings.hotAreasList, ['huya', 'acfun', 'missevan', 'inke', 'kilakila', 'huajiao']);
     await Hive.box<dynamic>('app_settings').flush();
-    expect(HivePrefUtil.getStringList('hotAreasList'), ['huya', 'acfun', 'missevan', 'inke', 'kilakila']);
+    expect(HivePrefUtil.getStringList('hotAreasList'), ['huya', 'acfun', 'missevan', 'inke', 'kilakila', 'huajiao']);
   });
 
   test('audience upgrade adds only TwitCasting and respects subsequent disabling', () async {

@@ -32,14 +32,14 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 5);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'twitcasting']);
     final controller = Get.put(FavoriteRoomController());
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'missevan', 'inke', 'kilakila']);
-    expect(controller.siteCatalogMigration.value, 8);
+    expect(controller.hotAreasList, ['huya', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao']);
+    expect(controller.siteCatalogMigration.value, 9);
     controller.hotAreasList.remove('missevan');
     controller.onInit();
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila']);
+    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
-    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila']);
+    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao']);
   });
 
   test('heat-only platform never becomes a concurrent-viewer setting', () async {

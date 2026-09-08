@@ -1533,5 +1533,9 @@
     "directory_cache_limit": "目录已达到本地缓存上限，请刷新后继续浏览。",
     "directory_continue_loading": "已达到本次目录请求预算，请继续加载。",
     "cc_live_categories": "直播分类",
-    "cc_official_entries": "官方房间/专题"
+    "cc_official_entries": "官方房间/专题",
+    "site_huajiao": "花椒",
+    "huajiao_hot": "公开推荐",
+    "huajiao_original_stream": "原始流",
+    "huajiao_directory_scope": "官网公开推荐直播（视频）。搜索、弹幕及特殊房间尚未接入；热度不是在线人数。"
 }

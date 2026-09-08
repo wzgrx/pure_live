@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart' as dio;
+import 'package:pure_live/core/site/huajiao/huajiao_api.dart';
+import 'package:pure_live/core/site/huajiao/huajiao_link.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/inke/inke_api.dart';
 import 'package:pure_live/core/site/kilakila/kilakila_api.dart';
@@ -55,7 +57,7 @@ class LiveUrlTool {
       'twitcasting.tv',
     };
     return sharedHttpUrls(text).any((raw) {
-      if (KilakilaLink.parse(raw) != null) return true;
+      if (HuajiaoLink.parse(raw) != null || KilakilaLink.parse(raw) != null) return true;
       final uri = Uri.parse(raw);
       return InkeApi.roomFromUri(uri) != null ||
           MissevanApi.roomFromUri(uri) != null ||
@@ -68,13 +70,20 @@ class LiveUrlTool {
     dio.Dio Function()? clientFactory,
     dio.CancelToken? cancelToken,
     KilakilaApi? kilakilaApi,
+    HuajiaoApi? huajiaoApi,
     Duration timeout = const Duration(seconds: 12),
   }) async {
     if (cancelToken?.isCancelled ?? false) return [];
     final session = LiveShortLinkSession(timeout: timeout, clientFactory: clientFactory);
     final ownedCancel = dio.CancelToken();
     try {
-      final parsing = _parseLiveUrl(text, session, kilakilaApi ?? KilakilaApi(), ownedCancel);
+      final parsing = _parseLiveUrl(
+        text,
+        session,
+        kilakilaApi ?? KilakilaApi(),
+        huajiaoApi ?? HuajiaoApi(),
+        ownedCancel,
+      );
       final result = cancelToken == null
           ? parsing
           : Future.any<List<String>>([parsing, cancelToken.whenCancel.then((_) => <String>[])]);
@@ -95,6 +104,7 @@ class LiveUrlTool {
     String text,
     LiveShortLinkSession session,
     KilakilaApi kilakilaApi,
+    HuajiaoApi huajiaoApi,
     dio.CancelToken cancel,
   ) async {
     for (final raw in sharedHttpUrls(text)) {
@@ -102,6 +112,13 @@ class LiveUrlTool {
       if (session.isClosed) return [];
       final host = uri.host.toLowerCase();
       final realUrl = raw;
+      final huajiao = HuajiaoLink.parse(raw);
+      if (huajiao != null) {
+        if (huajiao.kind == HuajiaoLinkKind.owner) return [huajiao.id, Sites.huajiaoSite];
+        final ownerId = await huajiaoApi.broadcastOwnerId(huajiao.id, cancel: cancel);
+        if (session.isClosed || cancel.isCancelled) return [];
+        return [ownerId, Sites.huajiaoSite];
+      }
       final kilakila = KilakilaLink.parse(raw);
       if (kilakila != null) {
         if (kilakila.kind == KilakilaLinkKind.owner) return [kilakila.id, Sites.kilakilaSite];
@@ -120,7 +137,7 @@ class LiveUrlTool {
         final response = await session.get(uri);
         final location = LiveShortLinkSession.redirectTarget(uri, response);
         if (location == null) continue;
-        final target = await _parseLiveUrl(location.toString(), session, kilakilaApi, cancel);
+        final target = await _parseLiveUrl(location.toString(), session, kilakilaApi, huajiaoApi, cancel);
         if (target.isNotEmpty) return target;
         continue;
       }

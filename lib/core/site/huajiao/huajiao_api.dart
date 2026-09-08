@@ -235,15 +235,31 @@ class HuajiaoApi {
     return HuajiaoDirectory(feeds: feeds.values, nextOffset: next, hasMore: more);
   }
 
+  Future<Map<String, dynamic>> _broadcastData(String bid, CancelToken? cancel) => _get(h5Origin, 'api/getFeedInfo', {
+    'liveid': bid,
+    '_rate': 'xd',
+    'stype': 'm3u8',
+    'sid': '${DateTime.now().millisecondsSinceEpoch}',
+  }, cancel);
+
+  /// Share-link identity resolution is separate from permission to play media.
+  /// Never treat a broadcast ID itself as the durable owner ID.
+  Future<String> broadcastOwnerId(String liveId, {CancelToken? cancel}) async {
+    final bid = _id(liveId);
+    final data = await _broadcastData(bid, cancel);
+    final entry = _object(data['feed']);
+    final feed = _object(entry['feed']);
+    if (feed['relateid'] == null || entry['author'] == null) {
+      throw const HuajiaoException(HuajiaoFailure.mediaUnavailable);
+    }
+    if (_id(feed['relateid']) != bid) throw const HuajiaoException(HuajiaoFailure.identity);
+    return _id(_object(entry['author'])['uid']);
+  }
+
   Future<HuajiaoBroadcast> broadcast(String liveId, {String? expectedUserId, CancelToken? cancel}) async {
     final bid = _id(liveId);
     final uid = expectedUserId == null ? null : _id(expectedUserId);
-    final data = await _get(h5Origin, 'api/getFeedInfo', {
-      'liveid': bid,
-      '_rate': 'xd',
-      'stype': 'm3u8',
-      'sid': '${DateTime.now().millisecondsSinceEpoch}',
-    }, cancel);
+    final data = await _broadcastData(bid, cancel);
     final entry = _object(data['feed']);
     final rawFeed = _object(entry['feed']);
     // Observed missing-broadcast response contains only {point: ""}, not {}.

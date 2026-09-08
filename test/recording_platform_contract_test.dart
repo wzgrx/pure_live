@@ -22,6 +22,7 @@ void main() {
         Sites.missevanSite,
         Sites.inkeSite,
         Sites.kilakilaSite,
+        Sites.huajiaoSite,
         Sites.iptvSite,
       ]),
     );

@@ -35,6 +35,11 @@ class LiveSearchCapabilities {
       supportsPagination: false,
       supportsWebSearch: false,
     ),
+    Sites.huajiaoSite: LiveSearchCapability(
+      coverage: NativeSearchCoverage.unavailable,
+      supportsPagination: false,
+      supportsWebSearch: false,
+    ),
     Sites.kilakilaSite: LiveSearchCapability(
       coverage: NativeSearchCoverage.unavailable,
       supportsPagination: false,

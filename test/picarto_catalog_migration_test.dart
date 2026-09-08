@@ -43,11 +43,20 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 3);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'acfun']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'acfun', 'picarto', 'twitcasting', 'missevan', 'inke', 'kilakila']);
-    expect(settings.siteCatalogMigration.value, 8);
+    expect(settings.hotAreasList, [
+      'huya',
+      'acfun',
+      'picarto',
+      'twitcasting',
+      'missevan',
+      'inke',
+      'kilakila',
+      'huajiao',
+    ]);
+    expect(settings.siteCatalogMigration.value, 9);
     settings.hotAreasList.remove('picarto');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan', 'inke', 'kilakila']);
+    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao']);
     await Hive.box<dynamic>('app_settings').flush();
     expect(HivePrefUtil.getStringList('hotAreasList'), [
       'huya',
@@ -56,6 +65,7 @@ void main() {
       'missevan',
       'inke',
       'kilakila',
+      'huajiao',
     ]);
   });
 

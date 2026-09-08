@@ -1533,5 +1533,9 @@
     "directory_cache_limit": "The local directory cache is full. Refresh to start a new browsing session.",
     "directory_continue_loading": "This directory request budget was reached. Continue loading to resume.",
     "cc_live_categories": "Live categories",
-    "cc_official_entries": "Official rooms / events"
+    "cc_official_entries": "Official rooms / events",
+    "site_huajiao": "Huajiao",
+    "huajiao_hot": "Public recommendations",
+    "huajiao_original_stream": "Original stream",
+    "huajiao_directory_scope": "Official public video recommendations. Search, chat and special rooms are not integrated; heat is not a viewer count."
 }

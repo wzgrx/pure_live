@@ -8,6 +8,7 @@ import 'package:pure_live/modules/live_play/services/room_external_opener.dart';
 
 void main() {
   final webTargets = {
+    'huajiao': 'https://h.huajiao.com/site/profile_12345.html',
     'yy': 'https://www.yy.com/12345',
     'bilibili': 'https://live.bilibili.com/12345',
     'douyin': 'https://live.douyin.com/12345',

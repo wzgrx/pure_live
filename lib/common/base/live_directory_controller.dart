@@ -10,6 +10,7 @@ class _DirectoryBuffer {
   final rooms = <LiveRoom>[];
   final identities = <String>{};
   int nextPage = 1;
+  String? nextCursor;
   bool hasMore = true;
   bool capacityReached = false;
 }
@@ -169,7 +170,14 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
         final expectedPage = buffer.nextPage;
         late final LiveDirectoryPage response;
         try {
-          response = await directory.getDirectoryPage(page: expectedPage, category: category, cancel: token);
+          response = directory is LiveSiteCursorDirectoryPager
+              ? await (directory as LiveSiteCursorDirectoryPager).getDirectoryPageAtCursor(
+                  page: expectedPage,
+                  cursor: buffer.nextCursor,
+                  category: category,
+                  cancel: token,
+                )
+              : await directory.getDirectoryPage(page: expectedPage, category: category, cancel: token);
         } catch (error) {
           if (!_owns(epoch)) return;
           failure = error;
@@ -178,6 +186,15 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
         if (!_owns(epoch)) return;
         if (response.page != expectedPage || response.rooms.length > 1000) {
           failure = StateError('Directory pagination mismatch');
+          break;
+        }
+        if (directory is LiveSiteCursorDirectoryPager &&
+            response.hasMore &&
+            (response.nextCursor == null ||
+                response.nextCursor!.isEmpty ||
+                response.nextCursor == buffer.nextCursor ||
+                response.nextCursor!.length > 1024)) {
+          failure = StateError('Directory cursor did not advance');
           break;
         }
         var rows = response.rooms.toList();
@@ -198,6 +215,7 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
         buffer.rooms.addAll(fresh);
         buffer.identities.addAll(pageIdentities);
         buffer.nextPage++;
+        buffer.nextCursor = response.nextCursor;
         buffer.hasMore = response.hasMore;
         requests++;
       }

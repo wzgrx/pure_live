@@ -16,6 +16,12 @@ abstract interface class LiveSiteDirectoryPager {
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel});
 }
 
+/// A category-only native pager must not opt the unrelated recommendation
+/// feed into the same contract. Its pager requires a non-null category.
+abstract interface class LiveSiteCategoryDirectoryProvider {
+  LiveSiteDirectoryPager get categoryDirectory;
+}
+
 /// Optional, persistent explanation of a platform's visible directory scope.
 abstract interface class LiveDirectoryNotice {
   String get directoryNoticeKey;

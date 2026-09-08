@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
+
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/model/live_category.dart';
 import 'package:pure_live/core/common/core_log.dart';
@@ -11,8 +13,12 @@ import 'package:pure_live/core/danmaku/empty_danmaku.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/modules/live_play/controllers/player_controller.dart';
 import 'package:pure_live/core/utils/live_quality_label.dart';
+import 'package:pure_live/core/interface/live_directory.dart';
 
-class CCSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResolver {
+class CCSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LiveSiteCategoryDirectoryProvider {
+  @override
+  late final LiveSiteDirectoryPager categoryDirectory = _CCCategoryDirectory(this);
+
   @override
   String id = Sites.ccSite;
 
@@ -94,7 +100,12 @@ class CCSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResol
   }
 
   @override
-  Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
+  Future<List<LiveRoom>> getCategoryRooms(
+    LiveArea category, {
+    int page = 1,
+    int pageSize = 30,
+    CancelToken? cancel,
+  }) async {
     final game = category.areaId?.trim() ?? '';
     final platform = category.platform?.trim().toLowerCase() ?? '';
     if (!RegExp(r'^[1-9][0-9]{0,15}$').hasMatch(game) ||
@@ -112,6 +123,7 @@ class CCSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResol
       'https://cc.163.com/api/category/$game/',
       queryParameters: {'format': 'json', 'tag_id': 0, 'start': (page - 1) * pageSize, 'size': pageSize},
       header: {'user-agent': kUserAgent},
+      cancel: cancel,
     );
     if (result is! Map || result['gametype']?.toString() != game || result['lives'] is! List) {
       throw const FormatException('Invalid CC category response');
@@ -438,5 +450,22 @@ class CCSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResol
   Future<List<LiveSuperChatMessage>> getSuperChatMessage({required String roomId}) {
     //尚不支持
     return Future.value([]);
+  }
+}
+
+class _CCCategoryDirectory implements LiveSiteDirectoryPager {
+  _CCCategoryDirectory(this.site);
+  final CCSite site;
+  static const _nativePageSize = 30;
+
+  @override
+  Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
+    if (category == null) throw ArgumentError('CC category is required');
+    final rooms = await site.getCategoryRooms(category, page: page, pageSize: _nativePageSize, cancel: cancel);
+    // A stable request width keeps offsets independent of visible page size,
+    // exclusions and cached UI tails. The raw lives list is not filtered; a
+    // short page ends this snapshot, while malformed data remains retryable.
+    if (rooms.length > _nativePageSize) throw const FormatException('CC category exceeded requested page size');
+    return LiveDirectoryPage(rooms: rooms, page: page, hasMore: rooms.length == _nativePageSize);
   }
 }

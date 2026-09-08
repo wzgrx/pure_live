@@ -18,6 +18,12 @@ class AreaRoomsBinding extends Binding {
     if (directory is LiveSiteDirectoryPager) {
       return LiveDirectoryController(directory: directory as LiveSiteDirectoryPager, category: subCategory);
     }
+    if (directory is LiveSiteCategoryDirectoryProvider) {
+      return LiveDirectoryController(
+        directory: (directory as LiveSiteCategoryDirectoryProvider).categoryDirectory,
+        category: subCategory,
+      );
+    }
     if (site.id == Sites.kuaishouSite) {
       return AreaServerAllController(site, subCategory);
     }

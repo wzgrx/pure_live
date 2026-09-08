@@ -897,7 +897,9 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     final startTime = now.subtract(const Duration(days: _epgLookBackDays));
     final endTime = now.add(const Duration(days: _epgLookForwardDays));
 
-    return db.getProgrammes(epgChannelId: epgId, start: startTime, end: endTime);
+    final resolved = await db.resolveEpgChannelId(SettingsService.to.iptv.selectedSourceId.v, epgId);
+    if (resolved == null) return [];
+    return db.getProgrammes(epgChannelId: resolved, start: startTime, end: endTime);
   }
 
   void _logEpgLoadSuccess(int count) {

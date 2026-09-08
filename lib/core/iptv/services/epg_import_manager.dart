@@ -13,6 +13,7 @@ import 'package:pure_live/core/iptv/parsers/xmltv_parser.dart';
 import 'package:pure_live/common/global/app_path_manager.dart';
 import 'package:pure_live/core/iptv/parsers/json_epg_parser.dart';
 import 'package:pure_live/core/iptv/local/database.dart' as database;
+import 'package:pure_live/core/iptv/local/epg_channel_identity.dart';
 
 class EpgImportManager {
   EpgImportManager({Future<Directory> Function()? cacheDirectory})
@@ -270,7 +271,7 @@ class EpgImportManager {
     if (parsedResult.channels.isNotEmpty) {
       final channelCompanions = parsedResult.channels.map<database.EpgChannelsCompanion>((e) {
         return database.EpgChannelsCompanion.insert(
-          id: e.id,
+          id: epgChannelKey(sourceId, e.id),
           sourceId: sourceId, // 绑定正确的映射主键
           channelId: e.id,
           displayName: e.displayNames.isNotEmpty ? e.displayNames.first : e.id,
@@ -288,7 +289,7 @@ class EpgImportManager {
         chunk.add(
           database.EpgProgrammesCompanion.insert(
             sourceId: sourceId, // 绑定正确的映射主键
-            epgChannelId: e.channelId,
+            epgChannelId: epgChannelKey(sourceId, e.channelId),
             title: e.title,
             start: e.start,
             stop: e.stop,

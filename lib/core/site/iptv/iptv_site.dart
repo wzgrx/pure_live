@@ -69,10 +69,10 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
     final ch = await db.getChannelById(category.areaId!);
     if (ch == null) return [];
 
-    final mapping = await db.getMappingByChannelId(ch.id);
+    final epgId = await _resolveEpgChannelId(ch, SettingsService.to.iptv.selectedSourceId.v);
     EpgProgramme? nowProg;
-    if (mapping?.epgChannelId != null) {
-      final nowList = await db.getNowPlaying([mapping!.epgChannelId]);
+    if (epgId != null) {
+      final nowList = await db.getNowPlaying([epgId]);
       if (nowList.isNotEmpty) nowProg = nowList.first;
     }
 
@@ -90,7 +90,7 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
         platform: Sites.iptvSite,
         link: ch.streamUrl,
         data: ch.streamUrl,
-        epgId: mapping?.epgChannelId,
+        epgId: epgId,
         currentProgramme: nowProg?.title,
         currentProgrammeDescription: nowProg?.description,
       ),
@@ -127,85 +127,7 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
         );
       }
     }
-    String? finalEpgChannelId;
-    final String currentEpgSourceId = SettingsService.to.iptv.selectedSourceId.v;
-
-    if (currentEpgSourceId.isEmpty) {
-      return _buildLiveRoom(channel, null);
-    }
-
-    EpgMapping? existingMapping = await db.getMappingByChannelId(roomId);
-    if (existingMapping == null && channel.tvgId != null && channel.tvgId!.isNotEmpty) {
-      existingMapping = await db.getMappingByTvid(channel.tvgId!);
-    }
-    if (existingMapping != null && existingMapping.epgSourceId == currentEpgSourceId) {
-      finalEpgChannelId = existingMapping.epgChannelId;
-    } else {
-      final dbChannels = await db.getEpgChannelsForSource(currentEpgSourceId);
-
-      log(dbChannels.length.toString());
-      if (dbChannels.isNotEmpty) {
-        final cleanTvgId = channel.tvgId?.trim().toLowerCase();
-        if (cleanTvgId != null && cleanTvgId.isNotEmpty) {
-          final matchedTvg = dbChannels.firstWhereOrNull((dbCh) {
-            return dbCh.channelId.trim().toLowerCase() == cleanTvgId;
-          });
-          if (matchedTvg != null) {
-            finalEpgChannelId = matchedTvg.id;
-          }
-        }
-        if (finalEpgChannelId == null) {
-          final cleanRegex = RegExp(r'[^a-zA-Z0-9\u4e00-\u9fa5]');
-          final suffixRegex = RegExp(r'(综合|高清|超清|中央|电视台|频道|hd)', caseSensitive: false);
-
-          String targetClean = channel.name.trim().split(' ').first;
-          targetClean = targetClean.toLowerCase().replaceAll(cleanRegex, '');
-          targetClean = targetClean.replaceAll(suffixRegex, '').trim();
-
-          var matchedList = dbChannels.where((dbCh) {
-            String dbClean = dbCh.displayName.trim().split(' ').first;
-            dbClean = dbClean.toLowerCase().replaceAll(cleanRegex, '');
-            dbClean = dbClean.replaceAll(suffixRegex, '').trim();
-
-            return targetClean.contains(dbClean) || dbClean.contains(targetClean);
-          }).toList();
-
-          if (matchedList.isNotEmpty) {
-            matchedList.sort((a, b) {
-              String aClean = a.displayName
-                  .trim()
-                  .split(' ')
-                  .first
-                  .toLowerCase()
-                  .replaceAll(cleanRegex, '')
-                  .replaceAll(suffixRegex, '')
-                  .trim();
-              String bClean = b.displayName
-                  .trim()
-                  .split(' ')
-                  .first
-                  .toLowerCase()
-                  .replaceAll(cleanRegex, '')
-                  .replaceAll(suffixRegex, '')
-                  .trim();
-
-              final aPerfect = aClean == targetClean;
-              final bPerfect = bClean == targetClean;
-
-              if (aPerfect && !bPerfect) return -1;
-              if (bPerfect && !aPerfect) return 1;
-              if (aPerfect && bPerfect) return 0;
-
-              final scoreA = fuzzyMatch(channel.name, [a.displayName]);
-              final scoreB = fuzzyMatch(channel.name, [b.displayName]);
-              return scoreB.compareTo(scoreA);
-            });
-
-            finalEpgChannelId = matchedList.first.id;
-          }
-        }
-      }
-    }
+    final finalEpgChannelId = await _resolveEpgChannelId(channel, SettingsService.to.iptv.selectedSourceId.v);
 
     EpgProgramme? nowProg;
     if (finalEpgChannelId != null) {
@@ -214,6 +136,87 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
     }
 
     return _buildLiveRoom(channel, nowProg, epgId: finalEpgChannelId);
+  }
+
+  Future<String?> _resolveEpgChannelId(Channel channel, String currentEpgSourceId) async {
+    final db = Get.find<DbService>().db;
+    String? finalEpgChannelId;
+
+    if (currentEpgSourceId.isEmpty) {
+      return null;
+    }
+
+    EpgMapping? existingMapping = await db.getMappingByChannelId(channel.id, providerId: channel.providerId);
+    if (existingMapping != null && existingMapping.epgSourceId == currentEpgSourceId) {
+      final mapped = await db.resolveEpgChannelId(currentEpgSourceId, existingMapping.epgChannelId);
+      if (mapped != null || existingMapping.locked) return mapped;
+    }
+    final dbChannels = await db.getEpgChannelsForSource(currentEpgSourceId);
+
+    log(dbChannels.length.toString());
+    if (dbChannels.isNotEmpty) {
+      final cleanTvgId = channel.tvgId?.trim().toLowerCase();
+      if (cleanTvgId != null && cleanTvgId.isNotEmpty) {
+        final matchedTvg = dbChannels.firstWhereOrNull((dbCh) {
+          return dbCh.channelId.trim().toLowerCase() == cleanTvgId;
+        });
+        if (matchedTvg != null) {
+          finalEpgChannelId = matchedTvg.id;
+        }
+      }
+      if (finalEpgChannelId == null) {
+        final cleanRegex = RegExp(r'[^a-zA-Z0-9\u4e00-\u9fa5]');
+        final suffixRegex = RegExp(r'(综合|高清|超清|中央|电视台|频道|hd)', caseSensitive: false);
+
+        String targetClean = channel.name.trim().split(' ').first;
+        targetClean = targetClean.toLowerCase().replaceAll(cleanRegex, '');
+        targetClean = targetClean.replaceAll(suffixRegex, '').trim();
+
+        var matchedList = dbChannels.where((dbCh) {
+          String dbClean = dbCh.displayName.trim().split(' ').first;
+          dbClean = dbClean.toLowerCase().replaceAll(cleanRegex, '');
+          dbClean = dbClean.replaceAll(suffixRegex, '').trim();
+
+          return targetClean.contains(dbClean) || dbClean.contains(targetClean);
+        }).toList();
+
+        if (matchedList.isNotEmpty) {
+          matchedList.sort((a, b) {
+            String aClean = a.displayName
+                .trim()
+                .split(' ')
+                .first
+                .toLowerCase()
+                .replaceAll(cleanRegex, '')
+                .replaceAll(suffixRegex, '')
+                .trim();
+            String bClean = b.displayName
+                .trim()
+                .split(' ')
+                .first
+                .toLowerCase()
+                .replaceAll(cleanRegex, '')
+                .replaceAll(suffixRegex, '')
+                .trim();
+
+            final aPerfect = aClean == targetClean;
+            final bPerfect = bClean == targetClean;
+
+            if (aPerfect && !bPerfect) return -1;
+            if (bPerfect && !aPerfect) return 1;
+            if (aPerfect && bPerfect) return 0;
+
+            final scoreA = fuzzyMatch(channel.name, [a.displayName]);
+            final scoreB = fuzzyMatch(channel.name, [b.displayName]);
+            return scoreB.compareTo(scoreA);
+          });
+
+          finalEpgChannelId = matchedList.first.id;
+        }
+      }
+    }
+
+    return finalEpgChannelId;
   }
 
   @override

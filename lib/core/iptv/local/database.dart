@@ -1,5 +1,8 @@
 import 'dart:io';
+
 import 'tables.dart';
+import 'epg_channel_identity.dart';
+
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -34,12 +37,15 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
-    onUpgrade: (m, from, to) async {
+    onUpgrade: (m, from, to) => transaction(() async {
+      if (from > to) {
+        throw StateError('Database downgrade from $from to $to is not supported');
+      }
       if (from < 2) {
         await m.createTable(favoriteLists);
         await m.createTable(favoriteListChannels);
@@ -60,15 +66,109 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(providers, providers.isAutoUpdate);
         await m.addColumn(epgSources, epgSources.isAutoUpdate);
       }
-    },
+      if (from < 7) {
+        await _migrateEpgChannelIdentities();
+      }
+      // Commit the version with the data, before Drift repeats its version write.
+      // Otherwise an interrupted open could replay conversion of orphaned IDs.
+      await customStatement('PRAGMA user_version = $to');
+    }),
   );
-  Future<EpgMapping?> getMappingByChannelId(String channelId) {
-    return (select(epgMappings)..where((t) => t.channelId.equals(channelId))).getSingleOrNull();
+  Future<void> _migrateEpgChannelIdentities() async {
+    final oldChannels = await select(epgChannels).get();
+    final aliases = <(String, String), String>{};
+    for (final channel in oldChannels) {
+      aliases[(channel.sourceId, channel.id)] = epgChannelKey(channel.sourceId, channel.channelId);
+    }
+    for (final channel in oldChannels) {
+      aliases.putIfAbsent((
+        channel.sourceId,
+        channel.channelId,
+      ), () => epgChannelKey(channel.sourceId, channel.channelId));
+    }
+    // Old imports may already have overwritten a channel from another source.
+    // Keep that source's programmes and mappings even if its channel row is gone.
+    final references = await customSelect(
+      'SELECT source_id, epg_channel_id FROM epg_programmes '
+      'UNION SELECT epg_source_id, epg_channel_id FROM epg_mappings',
+    ).get();
+    for (final row in references) {
+      final source = row.read<String>('source_id');
+      final oldId = row.read<String>('epg_channel_id');
+      aliases.putIfAbsent((source, oldId), () => epgChannelKey(source, oldId));
+    }
+    // A snapshot lookup prevents one rewritten ID being rewritten again when an
+    // old feed ID happens to equal another channel's new framed ID.
+    await customStatement(
+      'CREATE TEMP TABLE epg_identity_v7 ('
+      'source_id TEXT NOT NULL, old_id TEXT NOT NULL, new_id TEXT NOT NULL, '
+      'PRIMARY KEY (source_id, old_id))',
+    );
+    await batch((b) {
+      for (final entry in aliases.entries) {
+        b.customStatement('INSERT INTO epg_identity_v7 VALUES (?, ?, ?)', [entry.key.$1, entry.key.$2, entry.value]);
+      }
+    });
+    await customStatement(
+      'UPDATE epg_programmes SET epg_channel_id = '
+      '(SELECT new_id FROM epg_identity_v7 WHERE source_id = epg_programmes.source_id '
+      'AND old_id = epg_programmes.epg_channel_id)',
+    );
+    await customStatement(
+      'UPDATE epg_mappings SET epg_channel_id = '
+      '(SELECT new_id FROM epg_identity_v7 WHERE source_id = epg_mappings.epg_source_id '
+      'AND old_id = epg_mappings.epg_channel_id)',
+    );
+
+    final globalAliases = <String, Set<String>>{};
+    for (final entry in aliases.entries) {
+      globalAliases.putIfAbsent(entry.key.$2, () => <String>{}).add(entry.value);
+    }
+    final mappings = await getAllMappings();
+    String? resolveScheduledReference(String oldId, String? playlistChannelId) {
+      final linked = mappings
+          .where((m) => m.channelId == playlistChannelId && aliases[(m.epgSourceId, oldId)] == m.epgChannelId)
+          .map((m) => m.epgChannelId)
+          .toSet();
+      if (linked.length == 1) return linked.single;
+      final global = globalAliases[oldId];
+      // A reminder has no source column. Keep an ambiguous legacy reference,
+      // rather than attaching an existing user action to an arbitrary source.
+      if (global != null && global.length == 1) return global.single;
+      return null;
+    }
+
+    for (final reminder in await select(epgReminders).get()) {
+      final id = resolveScheduledReference(reminder.epgChannelId, reminder.channelId);
+      if (id != null) {
+        await (update(
+          epgReminders,
+        )..where((t) => t.id.equals(reminder.id))).write(EpgRemindersCompanion(epgChannelId: Value(id)));
+      }
+    }
+    for (final recording in await select(scheduledRecordings).get()) {
+      final id = resolveScheduledReference(recording.epgChannelId, recording.channelId);
+      if (id != null) {
+        await (update(
+          scheduledRecordings,
+        )..where((t) => t.id.equals(recording.id))).write(ScheduledRecordingsCompanion(epgChannelId: Value(id)));
+      }
+    }
+    await delete(epgChannels).go();
+    await upsertEpgChannels(
+      oldChannels
+          .map((channel) => channel.copyWith(id: epgChannelKey(channel.sourceId, channel.channelId)).toCompanion(false))
+          .toList(),
+    );
+    await customStatement('DROP TABLE epg_identity_v7');
   }
 
-  Future<EpgMapping?> getMappingByTvid(String epgChannelId) {
-    return (select(epgMappings)..where((t) => t.epgChannelId.equals(epgChannelId))).getSingleOrNull();
+  Future<EpgMapping?> getMappingByChannelId(String channelId, {required String providerId}) {
+    return (select(
+      epgMappings,
+    )..where((t) => t.channelId.equals(channelId) & t.providerId.equals(providerId))).getSingleOrNull();
   }
+
   // --- Provider queries ---
 
   Future<List<Provider>> getAllProviders() => select(providers).get();
@@ -166,6 +266,17 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<EpgChannel>> getEpgChannelsForSource(String sourceId) =>
       (select(epgChannels)..where((t) => t.sourceId.equals(sourceId))).get();
+
+  /// Resolve a stored mapping or old room reference only inside its source.
+  Future<String?> resolveEpgChannelId(String sourceId, String reference) async {
+    final matches = await (select(
+      epgChannels,
+    )..where((t) => t.sourceId.equals(sourceId) & (t.id.equals(reference) | t.channelId.equals(reference)))).get();
+    for (final channel in matches) {
+      if (channel.id == reference) return channel.id;
+    }
+    return matches.length == 1 ? matches.single.id : null;
+  }
 
   Future<void> upsertEpgChannels(List<EpgChannelsCompanion> entries) async {
     await batch((b) {
@@ -335,9 +446,9 @@ class AppDatabase extends _$AppDatabase {
     return rows.map((row) => row.readTable(channels)).toList();
   }
 
-  Future<void> addChannelToList(String listId, String channelId) => into(
-    favoriteListChannels,
-  ).insertOnConflictUpdate(FavoriteListChannelsCompanion.insert(listId: listId, channelId: channelId));
+  Future<void> addChannelToList(String listId, String channelId) =>
+      into(favoriteListChannels)
+          .insertOnConflictUpdate(FavoriteListChannelsCompanion.insert(listId: listId, channelId: channelId));
 
   Future<void> removeChannelFromList(String listId, String channelId) =>
       (delete(favoriteListChannels)..where((t) => t.listId.equals(listId) & t.channelId.equals(channelId))).go();

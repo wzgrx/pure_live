@@ -1,5 +1,10 @@
 import 'dart:async';
 
+import 'package:drift/native.dart';
+import 'package:pure_live/core/iptv/local/database.dart';
+import 'package:pure_live/core/iptv/local/epg_channel_identity.dart';
+import 'package:pure_live/common/services/settings/iptv_settings_controller.dart';
+
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -113,6 +118,58 @@ void main() {
     expect(received, isEmpty);
     controller.dispose();
   });
+  test('video schedule resolves old room IDs only in the selected EPG source', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    final now = DateTime.now();
+    for (final source in ['A', 'B']) {
+      await db.upsertEpgSource(
+        EpgSourcesCompanion.insert(id: source, name: source, url: 'https://fixture/$source.xml'),
+      );
+      await db.upsertEpgChannels([
+        EpgChannelsCompanion.insert(
+          id: epgChannelKey(source, 'common'),
+          sourceId: source,
+          channelId: 'common',
+          displayName: 'Common',
+        ),
+      ]);
+      await db.insertProgrammes([
+        EpgProgrammesCompanion.insert(
+          sourceId: source,
+          epgChannelId: epgChannelKey(source, 'common'),
+          title: source,
+          start: now.subtract(const Duration(minutes: 1)),
+          stop: now.add(const Duration(minutes: 30)),
+        ),
+      ]);
+    }
+    final room = LiveRoom(platform: 'fixture', roomId: 'room');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: 'https://fixture/retained.flv'));
+    addTearDown(manager.disposeFixture);
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      dbService: DbService()..db = db,
+    );
+    await controller.initialization;
+    try {
+      SettingsService.to.iptv.selectedSourceId.value = 'B';
+      await controller.loadFullChannelSchedule('common');
+      expect(controller.currentChannelSchedule.map((p) => p.title), ['B']);
+      await controller.loadFullChannelSchedule(epgChannelKey('A', 'common'));
+      expect(controller.currentChannelSchedule, isEmpty);
+      await controller.loadFullChannelSchedule(epgChannelKey('B', 'common'));
+      expect(controller.currentChannelSchedule.map((p) => p.title), ['B']);
+      SettingsService.to.iptv.selectedSourceId.value = '';
+      await controller.loadFullChannelSchedule('common');
+      expect(controller.currentChannelSchedule, isEmpty);
+    } finally {
+      controller.dispose();
+    }
+  });
 }
 
 VideoController _controller({
@@ -120,6 +177,7 @@ VideoController _controller({
   required _FakePlayerManager manager,
   required bool reuseCurrentSession,
   required ValueChanged<PlaybackSourceCommitSnapshot> onSourceCommitted,
+  DbService? dbService,
 }) {
   return VideoController(
     room: room,
@@ -135,7 +193,7 @@ VideoController _controller({
     battery: _FakeBattery(),
     playerManager: manager,
     settingsService: SettingsService.to,
-    dbService: _FakeDbService(),
+    dbService: dbService ?? _FakeDbService(),
     livePlayController: _FakeLivePlayController(),
   );
 }
@@ -240,6 +298,8 @@ class _StubPlayer implements UnifiedPlayer {
 
 class _TestSettings extends SettingsService {
   @override
+  final iptv = _TestIptvSettings();
+  @override
   final app = _TestAppSettings();
   @override
   final danmaku = _TestDanmakuSettings();
@@ -339,6 +399,13 @@ class _FakeBattery implements Battery {
 class _FakeDbService extends DbService {}
 
 class _FakeLivePlayController implements LivePlayController {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _TestIptvSettings implements IptvSettingsController {
+  @override
+  final selectedSourceId = ''.obs;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

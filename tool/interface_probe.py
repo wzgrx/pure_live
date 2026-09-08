@@ -1332,52 +1332,29 @@ def cc_recommend_probe() -> None:
         raise ValueError("CC heat/concurrent audience fields missing")
 
 
-def cc_categories_probe() -> None:
-    """Accept either the legacy JSON list or CC's official Glive migration.
+def cc_category_rooms_probe() -> None:
+    """Check the current category feed, not a successful HTML migration page.
 
-    The application keeps the stable top-level category tabs when the legacy
-    endpoint redirects to HTML, so the probe verifies that the redirect target
-    is the official NetEase service rather than treating valid migration
-    behavior as malformed JSON.
+    This probes room pagination only. The separate Dashen catalogue and native
+    navigation need their own evidence; this result must not stand in for them.
     """
-    url = "https://cc.163.com/category/?format=json"
-    last_error: Exception | None = None
-    for attempt in range(1, 6):
-        try:
-            request = urllib.request.Request(
-                url,
-                headers={
-                    "User-Agent": USER_AGENT,
-                    "Accept": "application/json,text/plain,*/*",
-                    "Connection": "close",
-                },
-            )
-            with urllib.request.urlopen(request, timeout=20) as response:
-                payload = response.read().decode("utf-8", errors="replace")
-                response_url = response.geturl()
-                final_url = urllib.parse.urlsplit(response_url)
-                content_type = response.headers.get("Content-Type", "")
-            break
-        except Exception as error:  # noqa: BLE001 - bounded transient retry
-            last_error = error
-            if attempt < 5:
-                time.sleep(attempt)
-    else:
-        assert last_error is not None
-        raise last_error
-
-    try:
-        result = json.loads(payload.lstrip("\ufeff"))
-    except json.JSONDecodeError:
-        if final_url.hostname == "ds.163.com" and final_url.path.rstrip("/") == "/glive":
-            return
-        preview = payload[:80].replace("\r", " ").replace("\n", " ")
-        raise ValueError(
-            f"unexpected CC category response ({content_type}) at {response_url}: {preview!r}"
+    for start in (0, 2):
+        result = request_json(
+            "https://cc.163.com/api/category/3/",
+            {"format": "json", "tag_id": 0, "start": start, "size": 2},
         )
-
-    require_path(result, "game_list")
-
+        if not isinstance(result, dict) or str(result.get("gametype")) != "3":
+            raise ValueError("CC category feed identity mismatch")
+        rooms = result.get("lives")
+        if not isinstance(rooms, list) or len(rooms) > 2:
+            raise ValueError("CC category feed rows invalid")
+        for room in rooms:
+            identity = room.get("cuteid") if isinstance(room, dict) else None
+            if (not isinstance(identity, (str, int))
+                    or isinstance(identity, bool)
+                    or (isinstance(identity, int) and identity > 9007199254740991)
+                    or not re.fullmatch(r"[1-9][0-9]{0,31}", str(identity))):
+                raise ValueError("CC category feed room identity invalid")
 
 def soop_recommend_probe() -> None:
     rooms = require_path(
@@ -1457,7 +1434,7 @@ def main() -> int:
         ),
         ("kuaishou.home", kuaishou_home_probe),
         ("kuaishou.playback", kuaishou_playback_probe),
-        ("cc.categories", cc_categories_probe),
+        ("cc.category_rooms", cc_category_rooms_probe),
         ("cc.recommend", cc_recommend_probe),
         ("bilibili.popularity_rank", bilibili_recommend_probe),
         ("bilibili.playback", bilibili_playback_probe),

@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:async';
 import 'dart:convert';
+
 import 'package:path/path.dart' as p;
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' as drift;
@@ -15,6 +15,13 @@ import 'package:pure_live/core/iptv/parsers/json_epg_parser.dart';
 import 'package:pure_live/core/iptv/local/database.dart' as database;
 
 class EpgImportManager {
+  EpgImportManager({Future<Directory> Function()? cacheDirectory})
+    : _cacheDirectory = cacheDirectory ?? _defaultCacheDirectory;
+
+  final Future<Directory> Function() _cacheDirectory;
+
+  static Future<Directory> _defaultCacheDirectory() => AppPathManager().getDir(AppPathManager.dirIptvCache);
+
   /// 1. 本地文件浏览器选择导入
   Future<bool> importFromLocalPicker() async {
     final result = await FilePicker.pickFile(
@@ -37,25 +44,21 @@ class EpgImportManager {
     bool forceUpdate = false,
     bool showTips = true,
   }) async {
-    final dir = await AppPathManager().getDir(AppPathManager.dirIptvCache);
-
-    String cleanName = p.basename(sourceName);
-    while (p.extension(cleanName).isNotEmpty) {
-      cleanName = p.basenameWithoutExtension(cleanName);
-    }
-    sourceName = cleanName;
-
-    final lowercaseUrl = url.toLowerCase().trim();
-    final String ext = lowercaseUrl.endsWith('.json') ? '.json' : (lowercaseUrl.endsWith('.gz') ? '.gz' : '.xml');
-    final file = File(p.join(dir.path, 'download_epg_${FileUtils.generateUuid()}$ext'));
-
+    File? file;
     try {
+      final dir = await _cacheDirectory();
+      String cleanName = p.basename(sourceName);
+      while (p.extension(cleanName).isNotEmpty) {
+        cleanName = p.basenameWithoutExtension(cleanName);
+      }
+      sourceName = cleanName;
+      final ext = extensionForUrl(url);
+      file = File(p.join(dir.path, 'download_epg_${FileUtils.generateUuid()}$ext'));
       await HttpClient.instance.download(
         url,
         file.path,
         header: {
-          "user-agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
         },
       );
 
@@ -67,22 +70,39 @@ class EpgImportManager {
         showTips: showTips,
       );
 
-      if (await file.exists()) await file.delete();
       return success;
     } catch (e) {
       debugPrint("Network EPG Download Failure: $e");
       if (showTips) {
         ToastUtil.show(i18n("epg_import_failed"));
       }
-      if (await file.exists()) await file.delete();
       return false;
+    } finally {
+      if (file != null) {
+        // HttpClient.download owns a .part sibling until the rename succeeds.
+        // Clean only files allocated by this import; cleanup must not mask a commit.
+        for (final temporary in [file, File('${file.path}.part')]) {
+          try {
+            if (await temporary.exists()) await temporary.delete();
+          } catch (e) {
+            debugPrint('EPG temporary download cleanup failed: $e');
+          }
+        }
+      }
     }
+  }
+
+  static String extensionForUrl(String url) {
+    final path = Uri.tryParse(url.trim())?.path.toLowerCase() ?? '';
+    if (path.endsWith('.json')) return '.json';
+    if (path.endsWith('.gz')) return '.gz';
+    return '.xml';
   }
 
   /// 3. Web 文本字符串恢复导入
   Future<bool> importFromWebString(String fileString, String sourceName) async {
     try {
-      final dir = await AppPathManager().getDir(AppPathManager.dirIptvCache);
+      final dir = await _cacheDirectory();
       final String ext = fileString.trim().startsWith('{') ? '.json' : '.xml';
       final file = File(p.join(dir.path, 'web_epg_${FileUtils.generateUuid()}$ext'));
       await file.writeAsString(fileString);
@@ -132,14 +152,18 @@ class EpgImportManager {
       final cleanName = sourceName.trim().toLowerCase();
       final ext = p.extension(file.path).toLowerCase();
       final typeName = ext.replaceAll('.', '').toUpperCase();
-      String content;
-      if (ext == '.gz') {
-        final bytes = await file.readAsBytes();
-        final decoded = GZipDecoder().decodeBytes(bytes);
-        content = utf8.decode(decoded);
-      } else {
-        content = await file.readAsString(encoding: latin1);
-      }
+      final bytes = await file.readAsBytes();
+      final decoded = ext == '.gz' ? GZipDecoder().decodeBytes(bytes) : bytes;
+      // Preserve explicitly declared Latin-1 XML while decoding ordinary XML/JSON
+      // as strict UTF-8. Malformed bytes must fail before any saved data is deleted.
+      final declaration = latin1.decode(decoded.take(512).toList());
+      final isLatin1 =
+          ext != '.json' &&
+          RegExp(
+            r'''^\s*<\?xml\b[^>]*\bencoding\s*=\s*["'](?:iso-8859-1|latin1)["']''',
+            caseSensitive: false,
+          ).hasMatch(declaration);
+      final content = isLatin1 ? latin1.decode(decoded) : utf8.decode(decoded);
 
       dynamic parsedResult;
       if (ext == '.xml' || ext == '.gz') {
@@ -165,75 +189,43 @@ class EpgImportManager {
         finalSourceId = matchedList.first.id;
       }
 
-      if (!forceUpdate) {
-        if (matchedList.isNotEmpty) {
-          final completer = Completer<bool>();
-          Get.dialog(
-            AlertDialog(
+      if (!forceUpdate && matchedList.isNotEmpty) {
+        final confirmed = await Get.dialog<bool>(
+          Builder(
+            builder: (context) => AlertDialog(
+              scrollable: true,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Text(i18n("provider_name_exists_tip")),
               content: Text('"$sourceName"\n\n${i18n("replace_confirm_message").replaceAll("{}", typeName)}'),
               actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(Get.context!).pop();
-                    completer.complete(false);
-                  },
-                  child: Text(i18n("cancel")),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(Get.context!).pop();
-
-                    if (matchedList.length > 1) {
-                      for (int i = 1; i < matchedList.length; i++) {
-                        final duplicateItem = matchedList[i];
-                        await db.deleteEpgSourceCascading(duplicateItem.id);
-                      }
-                    }
-                    await db.deleteEpgProgrammesForSource(finalSourceId);
-                    await db.deleteEpgSourceCascading(finalSourceId);
-
-                    final success = await _executeDatabaseWrite(
-                      db: db,
-                      file: file,
-                      sourceId: finalSourceId,
-                      sourceName: sourceName,
-                      ext: ext,
-                      parsedResult: parsedResult,
-                      url: url,
-                    );
-                    completer.complete(success);
-                  },
-                  child: Text(i18n("confirm")),
-                ),
+                TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(i18n("cancel"))),
+                TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text(i18n("confirm"))),
               ],
             ),
-            barrierDismissible: false,
-          );
-          return await completer.future;
-        }
+          ),
+          barrierDismissible: false,
+        );
+        if (confirmed != true) return false;
       }
 
-      if (matchedList.isNotEmpty) {
-        if (matchedList.length > 1) {
-          for (int i = 1; i < matchedList.length; i++) {
-            await db.deleteEpgSourceCascading(matchedList[i].id);
-          }
+      // The transaction owns deletion, every programme batch and final pruning.
+      // Let errors escape its callback so Drift rolls back before reporting failure.
+      final success = await db.transaction(() async {
+        for (final duplicate in matchedList.skip(1)) {
+          await db.deleteEpgSourceCascading(duplicate.id);
         }
         await db.deleteEpgProgrammesForSource(finalSourceId);
-        await db.deleteEpgSourceCascading(finalSourceId);
-      }
-
-      final success = await _executeDatabaseWrite(
-        db: db,
-        file: file,
-        sourceId: finalSourceId,
-        sourceName: sourceName,
-        ext: ext,
-        parsedResult: parsedResult,
-        url: url,
-      );
+        await (db.delete(db.epgChannels)..where((t) => t.sourceId.equals(finalSourceId))).go();
+        await _executeDatabaseWrite(
+          db: db,
+          file: file,
+          sourceId: finalSourceId,
+          sourceName: sourceName,
+          parsedResult: parsedResult,
+          url: url,
+        );
+        return true;
+      });
 
       if (success) {
         if (showTips) ToastUtil.show(i18n("epg_import_success"));
@@ -248,16 +240,23 @@ class EpgImportManager {
     }
   }
 
-  Future<bool> _executeDatabaseWrite({
-    required dynamic db,
+  Future<void> _executeDatabaseWrite({
+    required database.AppDatabase db,
     required File file,
     required String sourceId,
     required String sourceName,
-    required String ext,
     required dynamic parsedResult,
     String url = '',
   }) async {
-    try {
+    // Updating only imported fields preserves switches, interval and creation time.
+    final updated = await (db.update(db.epgSources)..where((t) => t.id.equals(sourceId))).write(
+      database.EpgSourcesCompanion(
+        name: drift.Value(sourceName),
+        url: drift.Value(url.isNotEmpty ? url : file.path),
+        lastRefresh: drift.Value(DateTime.now()),
+      ),
+    );
+    if (updated == 0) {
       await db.upsertEpgSource(
         database.EpgSourcesCompanion.insert(
           id: sourceId,
@@ -266,60 +265,52 @@ class EpgImportManager {
           lastRefresh: drift.Value(DateTime.now()),
         ),
       );
-
-      if (parsedResult.channels.isNotEmpty) {
-        final channelCompanions = parsedResult.channels.map<database.EpgChannelsCompanion>((e) {
-          return database.EpgChannelsCompanion.insert(
-            id: e.id,
-            sourceId: sourceId, // 绑定正确的映射主键
-            channelId: e.id,
-            displayName: e.displayNames.isNotEmpty ? e.displayNames.first : e.id,
-            iconUrl: drift.Value(e.iconUrl),
-          );
-        }).toList();
-        await db.upsertEpgChannels(channelCompanions);
-      }
-
-      if (parsedResult.programmes.isNotEmpty) {
-        const int batchSize = 500;
-        List<database.EpgProgrammesCompanion> chunk = [];
-        for (var e in parsedResult.programmes) {
-          if (e.channelId.isEmpty || e.title.isEmpty) continue;
-          chunk.add(
-            database.EpgProgrammesCompanion.insert(
-              sourceId: sourceId, // 绑定正确的映射主键
-              epgChannelId: e.channelId,
-              title: e.title,
-              start: e.start,
-              stop: e.stop,
-              description: drift.Value(e.description),
-              subtitle: drift.Value(e.subtitle),
-              episodeNum: drift.Value(e.episodeNum),
-            ),
-          );
-
-          if (chunk.length >= batchSize) {
-            await db.transaction(() async {
-              await db.insertProgrammes(chunk);
-            });
-            chunk.clear();
-            await Future.delayed(Duration.zero);
-          }
-        }
-
-        if (chunk.isNotEmpty) {
-          await db.transaction(() async {
-            await db.insertProgrammes(chunk);
-          });
-          chunk.clear();
-        }
-      }
-
-      await db.pruneOldProgrammes(maxAge: const Duration(days: 2));
-      return true;
-    } catch (e) {
-      debugPrint("EPG Database Exec Commit Crash: $e");
-      return false;
     }
+
+    if (parsedResult.channels.isNotEmpty) {
+      final channelCompanions = parsedResult.channels.map<database.EpgChannelsCompanion>((e) {
+        return database.EpgChannelsCompanion.insert(
+          id: e.id,
+          sourceId: sourceId, // 绑定正确的映射主键
+          channelId: e.id,
+          displayName: e.displayNames.isNotEmpty ? e.displayNames.first : e.id,
+          iconUrl: drift.Value(e.iconUrl),
+        );
+      }).toList();
+      await db.upsertEpgChannels(channelCompanions);
+    }
+
+    if (parsedResult.programmes.isNotEmpty) {
+      const int batchSize = 500;
+      List<database.EpgProgrammesCompanion> chunk = [];
+      for (var e in parsedResult.programmes) {
+        if (e.channelId.isEmpty || e.title.isEmpty) continue;
+        chunk.add(
+          database.EpgProgrammesCompanion.insert(
+            sourceId: sourceId, // 绑定正确的映射主键
+            epgChannelId: e.channelId,
+            title: e.title,
+            start: e.start,
+            stop: e.stop,
+            description: drift.Value(e.description),
+            subtitle: drift.Value(e.subtitle),
+            episodeNum: drift.Value(e.episodeNum),
+          ),
+        );
+
+        if (chunk.length >= batchSize) {
+          await db.insertProgrammes(chunk);
+          chunk.clear();
+          await Future.delayed(Duration.zero);
+        }
+      }
+
+      if (chunk.isNotEmpty) {
+        await db.insertProgrammes(chunk);
+        chunk.clear();
+      }
+    }
+
+    await db.pruneOldProgrammes(maxAge: const Duration(days: 2));
   }
 }

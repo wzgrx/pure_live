@@ -19,12 +19,12 @@ class EpgSyncEngine {
 
   Future<bool> updateEpgCache(database.EpgSource source, {bool forceUpdate = false, bool showTips = false}) async {
     if (source.url.trim().isEmpty) return false;
+    File? tempFile;
     try {
       final tempDir = await getTemporaryDirectory();
-      final lowercaseUrl = source.url.toLowerCase();
-      final String ext = lowercaseUrl.endsWith('.json') ? '.json' : (lowercaseUrl.endsWith('.gz') ? '.gz' : '.xml');
+      final ext = EpgImportManager.extensionForUrl(source.url);
 
-      File tempFile = File(p.join(tempDir.path, 'sync_epg_${FileUtils.generateUuid()}$ext'));
+      tempFile = File(p.join(tempDir.path, 'sync_epg_${FileUtils.generateUuid()}$ext'));
 
       await HttpClient.instance.download(
         source.url,
@@ -40,10 +40,6 @@ class EpgSyncEngine {
         url: source.url,
         showTips: showTips,
       );
-
-      if (await tempFile.exists()) {
-        await tempFile.delete();
-      }
 
       if (showTips) {
         if (success) {
@@ -61,6 +57,16 @@ class EpgSyncEngine {
       }
 
       return false;
+    } finally {
+      if (tempFile != null) {
+        for (final temporary in [tempFile, File('${tempFile.path}.part')]) {
+          try {
+            if (await temporary.exists()) await temporary.delete();
+          } catch (e) {
+            debugPrint('EPG sync temporary cleanup failed: $e');
+          }
+        }
+      }
     }
   }
 

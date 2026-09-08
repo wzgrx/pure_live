@@ -94,6 +94,9 @@ try {
         Assert-PureLiveCommandSucceeded 'Locked dependency resolution'
     }
 
+    python -m unittest discover -s (Join-Path $PSScriptRoot 'tests') -p test_repository_secret_audit.py
+    Assert-PureLiveCommandSucceeded 'Repository secret audit regression tests'
+
     python (Join-Path $PSScriptRoot 'audit_repository.py') --output $repositoryAuditPath
     Assert-PureLiveCommandSucceeded 'Whole repository integrity audit'
 

@@ -30,6 +30,15 @@ CONFLICT_PATTERN = re.compile(r"^(?:<{7}(?: .*)?|={7}|>{7}(?: .*)?)$", re.MULTIL
 ACTION_PATTERN = re.compile(r"\buses:\s*([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([^\s#]+)")
 SHA40_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
 
+# This intentionally public, self-signed loopback fixture is not a credential.
+# Both exact path and exact bytes are required: changing/copying it, adding a
+# different test key, or appending another secret must still fail the gate.
+# Its isolated test trust and provenance are documented beside the fixture.
+PUBLIC_TLS_TEST_KEYS = {
+    "test/fixtures/tls/localhost-key.pem":
+        "b55b3743dda7dd512713f6efa4850d3a729486e9e2bff8cb4302738c192a5af8",
+}
+
 
 def git(*args: str) -> str:
     completed = subprocess.run(
@@ -106,6 +115,26 @@ def line_number(text: str, offset: int) -> int:
     return text.count("\n", 0, offset) + 1
 
 
+def secret_findings(
+    path: str, text: str, content_sha256: str | None = None,
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    errors: list[dict[str, object]] = []
+    public_fixtures: list[dict[str, object]] = []
+    for rule, pattern in SECRET_PATTERNS.items():
+        match = pattern.search(text)
+        if not match:
+            continue
+        if (rule == "private_key" and path in PUBLIC_TLS_TEST_KEYS
+                and content_sha256 == PUBLIC_TLS_TEST_KEYS[path]):
+            public_fixtures.append({
+                "rule": "reviewed_public_tls_test_key", "path": path,
+                "sha256": content_sha256,
+            })
+        else:
+            errors.append({"rule": rule, "path": path, "line": line_number(text, match.start())})
+    return errors, public_fixtures
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path)
@@ -156,10 +185,12 @@ def main() -> int:
                 "line": line_number(text, conflict.start()),
             })
 
-        for rule, pattern in SECRET_PATTERNS.items():
-            match = pattern.search(text)
-            if match:
-                errors.append({"rule": rule, "path": rel, "line": line_number(text, match.start())})
+        content_sha256 = (
+            hashlib.sha256(path.read_bytes()).hexdigest() if rel in PUBLIC_TLS_TEST_KEYS else None
+        )
+        secret_errors, public_fixtures = secret_findings(rel, text, content_sha256)
+        errors.extend(secret_errors)
+        warnings.extend(public_fixtures)
 
         if rel.startswith(".github/workflows/") and path.suffix in {".yml", ".yaml"}:
             for match in ACTION_PATTERN.finditer(text):

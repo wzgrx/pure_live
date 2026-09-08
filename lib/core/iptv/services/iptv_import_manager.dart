@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:path/path.dart' as p;
 import 'package:drift/drift.dart' as drift;
 import 'package:pure_live/common/index.dart';
@@ -376,68 +377,109 @@ class IptvImportManager {
 
   Future<void> runAutoEpgMapping({required String providerId}) async {
     await _mappingLock.synchronized(() async {
+      final db = Get.find<DbService>().db;
+      final selected = SettingsService.to.iptv.selectedSourceId;
+      final sourceId = selected.value;
+      if (sourceId.isEmpty) return;
+      bool sourceChanged = false;
+      // A synchronous listener also catches A -> B -> A during a database await.
+      final detach = selected.addListener(() => sourceChanged = true);
+      void checkSource() {
+        if (sourceChanged || selected.isDisposed || selected.value != sourceId) {
+          throw const _MappingSourceChanged();
+        }
+      }
+
       try {
-        final db = Get.find<DbService>().db;
-        final String currentEpgSourceId = SettingsService.to.iptv.selectedSourceId.v;
-        if (currentEpgSourceId.isEmpty) return;
-        final channels = await db.getChannelsForProvider(providerId);
-        final epgChannels = await db.getEpgChannelsForSource(currentEpgSourceId);
         await db.transaction(() async {
-          final clearQuery = db.delete(db.epgMappings);
-          clearQuery.where((t) => t.providerId.equals(providerId));
-          await clearQuery.go();
-        });
-
-        if (channels.isEmpty || epgChannels.isEmpty) return;
-
-        final cleanRegex = RegExp(r'[^a-zA-Z0-9\u4e00-\u9fa5]');
-        List<database.EpgMappingsCompanion> mappingBatch = [];
-
-        for (var ch in channels) {
-          String? matchedEpgChannelId;
-          final cleanTvgId = ch.tvgId?.trim().toLowerCase();
-          final cleanChId = ch.id.trim().toLowerCase();
-
-          final idMatch = epgChannels.firstWhereOrNull((dbCh) {
-            final targetEpgId = dbCh.channelId.trim().toLowerCase();
-            return (cleanTvgId != null && targetEpgId == cleanTvgId) || (targetEpgId == cleanChId);
-          });
-
-          if (idMatch != null) {
-            matchedEpgChannelId = idMatch.id;
-          } else {
-            final targetClean = ch.name.toLowerCase().replaceAll(cleanRegex, '');
-            final nameMatch = epgChannels.firstWhereOrNull((dbCh) {
-              final dbChClean = dbCh.displayName.toLowerCase().replaceAll(cleanRegex, '');
-              return targetClean.contains(dbChClean) || dbChClean.contains(targetClean);
-            });
-
-            if (nameMatch != null) {
-              matchedEpgChannelId = nameMatch.id;
-            }
-          }
-
-          if (matchedEpgChannelId != null) {
-            mappingBatch.add(
+          if (await db.getProviderById(providerId) == null) return;
+          final channels = await db.getChannelsForProvider(providerId);
+          final epgChannels = await db.getEpgChannelsForSource(sourceId);
+          checkSource();
+          // Missing data is not an instruction to remove saved user mappings.
+          if (channels.isEmpty || epgChannels.isEmpty) return;
+          final previous = await (db.select(db.epgMappings)..where((t) => t.providerId.equals(providerId))).get();
+          final byChannel = {for (final mapping in previous) mapping.channelId: mapping};
+          final index = _ImportEpgIndex(epgChannels);
+          final matched = <String>{};
+          final updates = <database.EpgMappingsCompanion>[];
+          for (final channel in channels) {
+            final old = byChannel[channel.id];
+            if (old != null && (old.locked || old.source != 'auto')) continue;
+            final epgId = index.match(channel);
+            if (epgId == null) continue;
+            matched.add(channel.id);
+            // Do not reset confidence or timestamps for an unchanged mapping.
+            if (old?.epgChannelId == epgId && old?.epgSourceId == sourceId) continue;
+            updates.add(
               database.EpgMappingsCompanion.insert(
-                channelId: ch.id,
+                channelId: channel.id,
                 providerId: providerId,
-                epgChannelId: matchedEpgChannelId,
-                epgSourceId: currentEpgSourceId,
+                epgChannelId: epgId,
+                epgSourceId: sourceId,
                 source: const drift.Value('auto'),
               ),
             );
           }
-        }
-        if (mappingBatch.isNotEmpty) {
-          await db.transaction(() async {
-            await db.upsertMappings(mappingBatch);
-          });
-          debugPrint("📊 [Auto Mapping] 成功在后台为该直播源生成了 ${mappingBatch.length} 条 EPG 映射记录！");
-        }
-      } catch (e) {
-        debugPrint("Auto Mapping runner process crashed: $e");
+          checkSource();
+          for (final old in previous) {
+            if (!old.locked && old.source == 'auto' && !matched.contains(old.channelId)) {
+              await db.deleteMapping(old.channelId, providerId);
+            }
+          }
+          if (updates.isNotEmpty) await db.upsertMappings(updates);
+          // Includes changes while SQLite was writing the candidate snapshot.
+          checkSource();
+        });
+      } on _MappingSourceChanged {
+        // Transaction rollback retains the last committed mapping snapshot.
+      } finally {
+        detach();
       }
     });
+  }
+}
+
+class _MappingSourceChanged implements Exception {
+  const _MappingSourceChanged();
+}
+
+/// Build exact indices once; ambiguous evidence never depends on row order.
+class _ImportEpgIndex {
+  _ImportEpgIndex(List<database.EpgChannel> channels) {
+    for (final channel in channels) {
+      final id = channel.channelId.trim().toLowerCase();
+      if (id.isNotEmpty) (_byId[id] ??= []).add(channel.id);
+      final name = _name(channel.displayName);
+      if (name.isNotEmpty) (_byName[name] ??= []).add(channel.id);
+    }
+  }
+
+  static final _clean = RegExp(r'[^a-zA-Z0-9\u4e00-\u9fa5]');
+  static String _name(String value) => value.toLowerCase().replaceAll(_clean, '');
+  final _byId = <String, List<String>>{};
+  final _byName = <String, List<String>>{};
+  final _nameMatches = <String, String?>{};
+  String? _unique(List<String> matches) => matches.length == 1 ? matches.single : null;
+
+  String? match(database.Channel channel) {
+    final tvgId = channel.tvgId?.trim().toLowerCase();
+    final byTvg = tvgId == null ? null : _byId[tvgId];
+    if (byTvg != null) return _unique(byTvg);
+    final byLegacyId = _byId[channel.id.trim().toLowerCase()];
+    if (byLegacyId != null) return _unique(byLegacyId);
+    final name = _name(channel.name);
+    if (name.isEmpty) return null;
+    if (_nameMatches.containsKey(name)) return _nameMatches[name];
+    final exact = _byName[name];
+    if (exact != null) return _nameMatches[name] = _unique(exact);
+    String? match;
+    for (final entry in _byName.entries) {
+      if (name.contains(entry.key) || entry.key.contains(name)) {
+        if (match != null || entry.value.length != 1) return _nameMatches[name] = null;
+        match = entry.value.single;
+      }
+    }
+    return _nameMatches[name] = match;
   }
 }

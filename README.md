@@ -46,7 +46,7 @@
 
 - **最新稳定版**：[v3.1.8](https://github.com/wzgrx/pure_live/releases/tag/v3.1.8)
 - **下一稳定版目标**：3.2.0，当前处于完整验收阶段，尚未发布。本轮只维护本仓库、不合并上游；优先源码审查、确定性回归和本地验证，手机操作按本轮明确安排执行，不把连接设备作为修复前置条件。进度、缺口与发布门禁见 [3.2.0 验收入口](docs/ACCEPTANCE_3_2_0.md)，开发包及旧版通过记录不等于最终版已通过。
-- **源码平台范围（未发布）**：目前 14 个直播站点 + IPTV。新增猫耳 FM 与映客应用入口；映客只覆盖官网有限精选和已验证公开 FLV，搜索/弹幕及 Android/Windows 原生验收仍待完成。注册数量不是完整支持数量，见[平台能力表](docs/PLATFORM_COMPATIBILITY.md)与[映客应用审计](docs/INKE_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。
+- **源码平台范围（未发布）**：目前 16 个直播站点 + IPTV。克拉克拉热门/萌星与花椒公开推荐已接入导航、UID 收藏及播放/录制解析；两者搜索、弹幕及 Android/Windows 原生验收仍待完成。注册数量不是完整支持数量，见[平台能力表](docs/PLATFORM_COMPATIBILITY.md)、[克拉克拉审计](docs/KILAKILA_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)与[花椒审计](docs/HUAJIAO_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。
 - **未发布的播放恢复加固**：已复现并修复等待新地址时仍替换已恢复连接、候选失败覆盖用户暂停、取消后转圈残留及提前错误回调逃逸。17 项新增案例纳入回归，详见[恢复事务审计](docs/PLAYBACK_RECOVERY_TRANSACTION_AUDIT_2026_09_05.md)；保持原生虎牙 FLV 健康连接，不增加定时重开。
 - **虎牙连续播放复核（源码未发布）**：原生 FLV 优先、健康连接不定时重开；后台续签不占播放器队列，恢复按活动 CDN/格式/凭据家族匹配，修复线路重排或过滤后按旧序号错选。1070 项回归与 42 项接口探测通过；上游与本地根因、修复边界见[线路身份审计](docs/HUYA_LINE_IDENTITY_AUDIT_2026_09_05.md)，既有原生采样见[后台续签审计](docs/HUYA_PREFETCH_OWNERSHIP_AUDIT_2026_09_05.md)。安装包、实际音画呈现与测试结果分开验收。
 - **加载动画资源修复（源码未发布）**：切换样式时销毁旧动画，恢复默认/未知样式时正确启动，颜色修改保留旋转相位。7 项定向回归通过，详见[加载生命周期审计](docs/LOADING_ANIMATION_LIFECYCLE_AUDIT_2026_09_05.md)；Windows 热门页空闲 CPU 的完整归因仍在核对，不将本次修复当作全局性能结论。

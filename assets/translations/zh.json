@@ -752,6 +752,8 @@
     "import_epg_source": "导入节目单源",
     "active_epg_source": "当前启用的 EPG 数据源",
     "please_select_epg_source": "点击选择一个节目单源",
+    "iptv_initial_load_failed": "读取 IPTV 配置失败。原有设置已保留，请重试。",
+    "iptv_default_epg_unavailable": "默认节目单来源尚未准备好。可以重试或手动导入来源。",
     "epg_sources_load_failed": "读取节目单来源失败，请重试。",
     "select_epg_source": "选择 EPG 数据源",
     "no_epg_sources_found": "未找到可用的 EPG 数据源，请先导入",

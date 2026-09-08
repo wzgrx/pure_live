@@ -751,6 +751,8 @@
     "import_epg_source": "Import EPG source",
     "active_epg_source": "Active EPG Source",
     "please_select_epg_source": "Tap to select an EPG source",
+    "iptv_initial_load_failed": "Could not load IPTV configuration. Existing settings are preserved. Please retry.",
+    "iptv_default_epg_unavailable": "The default EPG source is not ready. Retry or import a source manually.",
     "epg_sources_load_failed": "Could not load EPG sources. Please retry.",
     "select_epg_source": "Select EPG Source",
     "no_epg_sources_found": "No available EPG sources found. Please import one first.",

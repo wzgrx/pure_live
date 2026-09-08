@@ -27,6 +27,8 @@ void main() {
   late Map<String, dynamic> english;
   late _Settings settings;
   late _Database db;
+  Future<void> Function()? loadDefaults;
+  int defaultLoads = 0;
   final imports = <(bool, String, String, Completer<bool>)>[];
   setUpAll(() async {
     dir = await Directory.systemTemp.createTemp('iptv-settings-page-');
@@ -39,6 +41,8 @@ void main() {
   });
   setUp(() {
     imports.clear();
+    loadDefaults = null;
+    defaultLoads = 0;
     Get.testMode = true;
     settings = Get.put<SettingsService>(_Settings()) as _Settings;
     settings.iptv.customIptvUserAgent.v = 'Original-Agent';
@@ -66,6 +70,7 @@ void main() {
     Size size = const Size(360, 780),
     double scale = 1,
     String language = 'zh',
+    bool settle = true,
   }) async {
     final strings = language == 'en' ? english : translations;
     addTearDown(() async {
@@ -93,6 +98,10 @@ void main() {
               child: FlutterSmartDialog.init()(context, child),
             ),
             home: IptvPage(
+              loadDefaultEpg: () async {
+                defaultLoads++;
+                if (loadDefaults != null) await loadDefaults!();
+              },
               importFromNetwork: (epg, url, name) {
                 final pending = Completer<bool>();
                 imports.add((epg, url, name, pending));
@@ -103,7 +112,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   }
 
   Future<void> tap(WidgetTester tester, String key) async {
@@ -582,6 +595,147 @@ void main() {
       await tester.pumpAndSettle();
       expect(settings.iptv.selectedSourceId.v, 's19');
       expect(settings.iptv.selectedSourceName.v, 'Source 19 - long television programme guide name');
+      await finish(tester);
+    });
+  }
+  testWidgets('initial IPTV database failure is caught and offers a working retry', (tester) async {
+    db.readSources = () => Future.error(StateError('initial DB fixture failure'));
+    await open(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.text(translations['retry'] as String), findsOneWidget);
+    expect(defaultLoads, 0);
+    db.readSources = null;
+    await tap(tester, 'retry');
+    expect(find.text(translations['retry'] as String), findsNothing);
+    expect(defaultLoads, 0);
+    await finish(tester);
+  });
+  testWidgets('default EPG import exception is visible and remains retryable', (tester) async {
+    db.readSources = () async => [];
+    loadDefaults = () => Future.error(StateError('default fixture failure'));
+    await open(tester);
+    expect(tester.takeException(), isNull);
+    expect(defaultLoads, 1);
+    expect(find.text(translations['retry'] as String), findsOneWidget);
+    loadDefaults = () async {
+      db.readSources = null;
+    };
+    await tap(tester, 'retry');
+    expect(defaultLoads, 2);
+    expect(find.text(translations['retry'] as String), findsNothing);
+    await finish(tester);
+  });
+  testWidgets('default import with no resulting source is not a silent successful initialization', (tester) async {
+    db.readSources = () async => [];
+    await open(tester);
+    expect(defaultLoads, 1);
+    expect(find.text(translations['retry'] as String), findsOneWidget);
+    expect(settings.iptv.selectedSourceId.v, 'fixture');
+    await finish(tester);
+  });
+  testWidgets('page exit stops the next initialization query and default import', (tester) async {
+    final pending = Completer<List<EpgSource>>();
+    db.readSources = () => pending.future;
+    await open(tester, settle: false);
+    for (var frame = 0; frame < 10 && db.sourceReads == 0; frame++) {
+      await tester.pump();
+    }
+    expect(db.sourceReads, 1);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    pending.complete([]);
+    await tester.pumpAndSettle();
+    expect(db.providerReads, 0);
+    expect(defaultLoads, 0);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('initialization retry shares one read and does not overwrite an intervening selection', (tester) async {
+    db.readSources = () => Future.error(StateError('initial failure'));
+    await open(tester);
+    final pending = Completer<List<EpgSource>>();
+    db.readSources = () => pending.future;
+    final retry = tester
+        .widget<TextButton>(find.widgetWithText(TextButton, translations['retry'] as String))
+        .onPressed!;
+    final reads = db.sourceReads;
+    retry();
+    retry();
+    await tester.pump();
+    expect(db.sourceReads, reads + 1);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    settings.iptv.selectedSourceId.v = 'chosen-while-loading';
+    settings.iptv.selectedSourceName.v = 'New choice';
+    pending.complete([source('default', 'Default')]);
+    await tester.pumpAndSettle();
+    expect(settings.iptv.selectedSourceId.v, 'chosen-while-loading');
+    expect(settings.iptv.selectedSourceName.v, 'New choice');
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(defaultLoads, 0);
+    await finish(tester);
+  });
+  testWidgets('successful default load refreshes and selects a source only when selection is empty', (tester) async {
+    settings.iptv.selectedSourceId.v = '';
+    settings.iptv.selectedSourceName.v = '';
+    db.readSources = () async => [];
+    loadDefaults = () async {
+      db.readSources = () async => [source('ready', 'Ready source')];
+    };
+    await open(tester);
+    expect(defaultLoads, 1);
+    expect(settings.iptv.selectedSourceId.v, 'ready');
+    expect(settings.iptv.selectedSourceName.v, 'Ready source');
+    expect(find.text(translations['retry'] as String), findsNothing);
+    await finish(tester);
+  });
+  testWidgets('default load late failure after page disposal has no UI follow-up', (tester) async {
+    db.readSources = () async => [];
+    final pending = Completer<void>();
+    loadDefaults = () => pending.future;
+    await open(tester, settle: false);
+    for (var frame = 0; frame < 12 && defaultLoads == 0; frame++) {
+      await tester.pump();
+    }
+    expect(defaultLoads, 1);
+    final sourceReads = db.sourceReads;
+    final providerReads = db.providerReads;
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    pending.completeError(StateError('late import failure'));
+    await tester.pumpAndSettle();
+    expect(db.sourceReads, sourceReads);
+    expect(db.providerReads, providerReads);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('manual successful source import clears the default-source warning', (tester) async {
+    db.readSources = () async => [];
+    await open(tester);
+    expect(find.text(translations['iptv_default_epg_unavailable'] as String), findsOneWidget);
+    await openImport(tester, epg: true);
+    await enterImport(tester);
+    await tester.tap(find.text(translations['confirm'] as String));
+    await tester.pump();
+    db.readSources = null;
+    imports.single.$4.complete(true);
+    await tester.pumpAndSettle();
+    expect(find.text(translations['iptv_default_epg_unavailable'] as String), findsNothing);
+    expect(defaultLoads, 1);
+    await finish(tester);
+  });
+  for (final language in ['zh', 'en']) {
+    testWidgets('initialization error and retry fit large text in $language', (tester) async {
+      db.readSources = () => Future.error(StateError('fixture'));
+      await open(tester, size: const Size(320, 480), scale: 2, language: language);
+      final strings = language == 'en' ? english : translations;
+      expect(find.text(strings['iptv_initial_load_failed'] as String), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      db.readSources = null;
+      final retry = find.text(strings['retry'] as String);
+      await tester.ensureVisible(retry);
+      await tester.pumpAndSettle();
+      await tester.tap(retry);
+      await tester.pumpAndSettle();
+      expect(find.text(strings['iptv_initial_load_failed'] as String), findsNothing);
+      expect(settings.iptv.selectedSourceId.v, 'fixture');
       await finish(tester);
     });
   }

@@ -11,9 +11,10 @@ import 'package:pure_live/core/iptv/services/iptv_import_manager.dart';
 import 'package:pure_live/core/iptv/services/auto_sync_scheduler.dart';
 
 class IptvPage extends StatefulWidget {
-  const IptvPage({super.key, this.importFromNetwork});
+  const IptvPage({super.key, this.importFromNetwork, this.loadDefaultEpg});
 
   final Future<bool> Function(bool isEpg, String url, String name)? importFromNetwork;
+  final Future<void> Function()? loadDefaultEpg;
 
   @override
   State<IptvPage> createState() => _IptvPageState();
@@ -21,6 +22,8 @@ class IptvPage extends StatefulWidget {
 
 class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _initializing = false;
+  String? _initializationErrorKey;
   bool _sourceDialogOpen = false;
   bool _networkDialogOpen = false;
   bool _networkImporting = false;
@@ -47,10 +50,15 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
   Future<void> _refreshData() async {
     final db = Get.find<DbService>().db;
     final sources = await db.getAllEpgSources();
+    if (!mounted) return;
     final providers = await db.getAllProviders();
     if (!mounted) return;
     epgSources.value = sources;
     playlists.value = providers;
+    if (_initializationErrorKey != null &&
+        (_initializationErrorKey == 'iptv_initial_load_failed' || sources.isNotEmpty)) {
+      setState(() => _initializationErrorKey = null);
+    }
 
     if (epgSources.isNotEmpty && SettingsService.to.iptv.selectedSourceId.v.isEmpty) {
       final activeSource = epgSources.first;
@@ -60,15 +68,29 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
   }
 
   Future<void> _initializePageResources() async {
-    await _refreshData();
-    if (!mounted || epgSources.isNotEmpty) return;
+    if (_initializing || !mounted) return;
+    setState(() {
+      _initializing = true;
+      _initializationErrorKey = null;
+    });
+    var errorKey = 'iptv_initial_load_failed';
+    try {
+      await _refreshData();
+      if (!mounted || epgSources.isNotEmpty) return;
 
-    // Preserve the built-in EPG experience without performing a large network
-    // import on every ordinary application launch. The work begins only when
-    // the user opens IPTV settings and no EPG source exists yet.
-    await AutoSyncScheduler.instance.loadDefaultEpgResources();
-    if (!mounted) return;
-    await _refreshData();
+      // Defaults are still imported only at feature entry, not ordinary startup.
+      errorKey = 'iptv_default_epg_unavailable';
+      await (widget.loadDefaultEpg ?? AutoSyncScheduler.instance.loadDefaultEpgResources)();
+      if (!mounted) return;
+      await _refreshData();
+      if (mounted && epgSources.isEmpty) {
+        setState(() => _initializationErrorKey = errorKey);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _initializationErrorKey = errorKey);
+    } finally {
+      if (mounted) setState(() => _initializing = false);
+    }
   }
 
   Future<void> _showSourceSelectionDialog() async {
@@ -97,6 +119,25 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
         physics: const PureLiveScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
+          if (_initializing) ...[
+            LinearProgressIndicator(semanticsLabel: i18n('refresh_loading')),
+            const SizedBox(height: 12),
+          ],
+          if (_initializationErrorKey != null) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(i18n(_initializationErrorKey!)),
+                    TextButton(onPressed: _initializePageResources, child: Text(i18n('retry'))),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           context.buildGroupTitle(i18n("iptv_manage")),
           context.buildModernCard([
             context.buildTile(

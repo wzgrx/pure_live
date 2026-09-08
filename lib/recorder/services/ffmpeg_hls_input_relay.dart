@@ -150,8 +150,9 @@ class FFmpegHlsInputRelay {
     if (!force &&
         !drainOnStop &&
         sourceQueryPolicy == null &&
-        (!supportedHost || upstream.scheme.toLowerCase() != 'https'))
+        (!supportedHost || upstream.scheme.toLowerCase() != 'https')) {
       return null;
+    }
 
     final connections = CancellableHttpConnections();
     final client = HttpClient()

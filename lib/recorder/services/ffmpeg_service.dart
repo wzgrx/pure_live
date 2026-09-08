@@ -621,6 +621,8 @@ class FFmpegInputDrain {
 }
 
 /// Exact media-error diagnostics, not a blanket rejection of warnings.
+/// A pictureless access unit is a parser error even when native remux returns
+/// zero; preserve its source rather than committing/deleting on exit code alone.
 /// Remuxing is still stream copy; this is not full codec bitstream validation.
 class FFmpegMediaIntegrity {
   const FFmpegMediaIntegrity._();
@@ -633,6 +635,7 @@ class FFmpegMediaIntegrity {
       'packet corrupt (stream',
       'corrupt input packet in stream',
       'pes packet size mismatch',
+      'missing picture in access unit with size',
       'error while decoding',
       'corrupt decoded frame',
     ].any(value.contains);
@@ -644,6 +647,7 @@ class FFmpegMediaIntegrity {
       'packet corrupt (stream',
       'corrupt input packet in stream',
       'pes packet size mismatch',
+      'missing picture in access unit with size',
       'error writing trailer',
       'error muxing a packet',
       'error during demuxing',

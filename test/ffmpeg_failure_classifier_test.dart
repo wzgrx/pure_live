@@ -3,6 +3,28 @@ import 'package:ffmpeg_kit_extended_flutter/ffmpeg_kit_extended_flutter.dart' sh
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
 
 void main() {
+  test('missing picture access units are packet and output integrity failures', () {
+    for (final message in [
+      '[h264] missing picture in access unit with size 36',
+      '[HEVC] MISSING PICTURE IN ACCESS UNIT WITH SIZE 37',
+    ]) {
+      expect(FFmpegMediaIntegrity.hasError(message), true, reason: message);
+      expect(FFmpegMediaIntegrity.hasPacketError(message), true, reason: message);
+    }
+  });
+
+  test('missing picture verdict survives log eviction without contaminating next session', () {
+    final broken = FFmpegRecordSession(taskId: 'broken', sessionId: 1, session: _NativeSession(), liveRecording: true);
+    broken.appendDiagnostic('[h264] missing picture in access unit with size 36', maxLines: 1);
+    broken.appendDiagnostic('frame=256', maxLines: 1);
+    expect(broken.diagnosticTail, 'frame=256');
+    expect(broken.hasMediaIntegrityError, true);
+    expect(broken.terminalEvidence()['inputIntegrityError'], true);
+    final fresh = FFmpegRecordSession(taskId: 'fresh', sessionId: 2, session: _NativeSession(), liveRecording: true);
+    expect(fresh.hasMediaIntegrityError, false);
+    expect(fresh.terminalEvidence()['inputIntegrityError'], false);
+  });
+
   test('live packet damage is latched separately from ordinary stop IO', () {
     final session = FFmpegRecordSession(
       taskId: 'picarto_fixture',

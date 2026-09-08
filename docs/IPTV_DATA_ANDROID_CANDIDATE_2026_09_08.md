@@ -1,5 +1,7 @@
 # IPTV 数据链路累计 Android 候选（2026-09-08）
 
+后续验收输入已更新为[花椒与响应收尾累计候选 1d318bba](HUAJIAO_ANDROID_CANDIDATE_2026_09_08.md)，包含本页全部数据修订；本页 c97a61aa 归档保留。两者均未在该构建阶段安装手机，不借后续构建补写原生 PASS。
+
 ## 当前输入
 
 干净源码 `c97a61aa5fbc9f6eb92a2ecff5c5b0011d990982` 完成完整质量门禁、Android arm64 Debug 构建，以及独立签名/资源/归档核验。相对 [b68c81d1 候选](IPTV_ANDROID_CANDIDATE_AUDIT_2026_09_08.md)新增六批：

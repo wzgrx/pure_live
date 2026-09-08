@@ -10,6 +10,7 @@ This is an on-demand execution map. AGENTS.md contains session defaults; BUILD_P
 | Workflow/config/scripts | Changed configuration and callers | YAML/PowerShell/Python syntax plus relevant static policy checks; no live dispatch by default |
 | UI styling/text | Affected widget and constraints | Targeted layout check where behavior/overflow is at risk; no mechanical test for every label |
 | Parser/API contract | Real or sanitized response and parser callers | Positive/negative fixture tests; external probe only when necessary |
+| Platform registration or capability expansion | Registry, bundled locale labels, settings migration and shared consumers | `test/sites_test.dart` plus the affected adapter, migration, search and recording contracts; do not treat adapter-only tests as application coverage |
 | Player/lifecycle/recording | State/event sequence, ownership and disposal | Reproduction plus adjacent pause/exit/source-change regressions; native/device evidence when in scope |
 | Upstream merge | Frozen fork/upstream/base and all incoming changes | Full semantic audit required by UPSTREAM_REVIEW_POLICY.md, then affected regression |
 | Formal release | Clean source commit and completed repair batch | Full quality gate and platform-specific artifact/signing/publication verification |

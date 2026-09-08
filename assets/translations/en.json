@@ -1538,6 +1538,7 @@
     "huajiao_hot": "Public recommendations",
     "huajiao_original_stream": "Original stream",
     "huajiao_directory_scope": "Official public video recommendations. Search, chat and special rooms are not integrated; heat is not a viewer count.",
+    "site_openrec": "mellow-fan (OPENREC)",
     "openrec_directory_scope": "Public mellow-fan (formerly OPENREC) live streams. Import a channel or live share link to verify owner identity; renamed channels need revalidation. Search, chat and special modes remain pending. Network errors do not mean offline.",
     "openrec_public_directory": "Public live streams",
     "openrec_low_latency": "Low-latency source",

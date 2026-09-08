@@ -1538,6 +1538,7 @@
     "huajiao_hot": "公开推荐",
     "huajiao_original_stream": "原始流",
     "huajiao_directory_scope": "官网公开推荐直播（视频）。搜索、弹幕及特殊房间尚未接入；热度不是在线人数。",
+    "site_openrec": "mellow-fan (OPENREC)",
     "openrec_directory_scope": "mellow-fan（原 OPENREC）公开直播。请用频道或直播分享链接导入以核对主播身份；频道改名需重新核验。搜索、弹幕及特殊房间待接入；网络访问错误不代表下播。",
     "openrec_public_directory": "公开直播",
     "openrec_low_latency": "低延迟流",

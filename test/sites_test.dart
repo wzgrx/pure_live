@@ -19,6 +19,7 @@ void main() {
         expect(label, isNot('site_$id'));
       }
       expect(labels['site_picarto'], 'Picarto');
+      expect(labels['site_openrec'], 'mellow-fan (OPENREC)');
       expect(labels['recorder_input_integrity_failed'], isA<String>());
     }
   });

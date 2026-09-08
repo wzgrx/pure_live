@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:pure_live/core/common/http_client.dart';
+import 'package:pure_live/core/common/request_scope.dart';
 
 enum HuajiaoFailure {
   transport,
@@ -98,39 +99,27 @@ class HuajiaoApi {
   static const headers = {'User-Agent': 'Mozilla/5.0', 'Referer': '$h5Origin/', 'Origin': h5Origin};
   final HuajiaoRequest _request;
 
-  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) async {
-    // Dio 5.11.1's transformed stream does not propagate subscription.cancel
-    // to its upstream source. Own a request token so errors/limits/deadlines
-    // also terminate the adapter, without cancelling the caller's other work.
-    final transport = CancelToken();
-    final forwarding = cancel?.whenCancel.asStream().listen((_) {
-      if (!transport.isCancelled) transport.cancel();
-    });
-    try {
-      final response = await HttpClient.instance.dio.get<ResponseBody>(
-        uri.toString(),
-        cancelToken: transport,
-        options: Options(
-          responseType: ResponseType.stream,
-          followRedirects: false,
-          headers: headers,
-          receiveTimeout: const Duration(seconds: 20),
-          validateStatus: (_) => true,
-        ),
-      );
-      final body = response.data;
-      if (body == null) throw const HuajiaoException(HuajiaoFailure.schema);
-      if (response.statusCode != 200) {
-        await body.stream.listen((_) {}).cancel();
-        return (status: response.statusCode ?? 0, body: '');
-      }
-      return (status: 200, body: await readBody(body.stream));
-    } finally {
-      await forwarding?.cancel();
-      if (!transport.isCancelled) transport.cancel();
-      await transport.whenCancel;
-    }
-  }
+  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) =>
+      withRequestCancellation(cancel, (transport) async {
+        final response = await HttpClient.instance.dio.get<ResponseBody>(
+          uri.toString(),
+          cancelToken: transport,
+          options: Options(
+            responseType: ResponseType.stream,
+            followRedirects: false,
+            headers: headers,
+            receiveTimeout: const Duration(seconds: 20),
+            validateStatus: (_) => true,
+          ),
+        );
+        final body = response.data;
+        if (body == null) throw const HuajiaoException(HuajiaoFailure.schema);
+        if (response.statusCode != 200) {
+          await body.stream.listen((_) {}).cancel();
+          return (status: response.statusCode ?? 0, body: '');
+        }
+        return (status: 200, body: await readBody(body.stream));
+      });
 
   static Future<String> readBody(Stream<List<int>> stream, {Duration timeout = const Duration(seconds: 20)}) async {
     final iterator = StreamIterator(stream);

@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/common/http_client.dart';
+import 'package:pure_live/core/common/request_scope.dart';
 import 'package:pure_live/core/interface/live_directory.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 
@@ -36,25 +37,26 @@ class InkeApi {
   static const playHeaders = {'Referer': '$origin/', 'Origin': origin, 'User-Agent': 'Mozilla/5.0'};
   final InkeRequest _request;
 
-  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) async {
-    final response = await HttpClient.instance.dio.get<ResponseBody>(
-      uri.toString(),
-      cancelToken: cancel,
-      options: Options(
-        responseType: ResponseType.stream,
-        headers: playHeaders,
-        followRedirects: false,
-        validateStatus: (_) => true,
-      ),
-    );
-    final body = response.data;
-    if (body == null) throw const InkeException(InkeFailure.schema);
-    if (response.statusCode != 200) {
-      await body.stream.listen((_) {}).cancel();
-      return (status: response.statusCode ?? 0, body: '');
-    }
-    return (status: 200, body: await readBody(body.stream));
-  }
+  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) =>
+      withRequestCancellation(cancel, (transport) async {
+        final response = await HttpClient.instance.dio.get<ResponseBody>(
+          uri.toString(),
+          cancelToken: transport,
+          options: Options(
+            responseType: ResponseType.stream,
+            headers: playHeaders,
+            followRedirects: false,
+            validateStatus: (_) => true,
+          ),
+        );
+        final body = response.data;
+        if (body == null) throw const InkeException(InkeFailure.schema);
+        if (response.statusCode != 200) {
+          await body.stream.listen((_) {}).cancel();
+          return (status: response.statusCode ?? 0, body: '');
+        }
+        return (status: 200, body: await readBody(body.stream));
+      });
 
   static Future<String> readBody(Stream<List<int>> stream, {Duration timeout = const Duration(seconds: 20)}) async {
     final iterator = StreamIterator(stream);

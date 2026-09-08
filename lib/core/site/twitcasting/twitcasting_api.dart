@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -6,6 +7,7 @@ import 'package:html/parser.dart' as html;
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/common/http_client.dart';
+import 'package:pure_live/core/common/request_scope.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 
 enum TwitcastingFailure { transport, access, rateLimited, service, notFound, schema, cancelled, qualityUnavailable }
@@ -26,30 +28,46 @@ class TwitcastingApi {
   static const origin = 'https://twitcasting.tv';
   static const directoryOrigin = 'https://frontendapi.twitcasting.tv';
   static const directoryWindow = 60;
+  static const responseLimit = 1024 * 1024;
   static const playHeaders = <String, String>{'Referer': '$origin/', 'Origin': origin, 'User-Agent': 'Mozilla/5.0'};
   final TwitcastingRequest _request;
 
-  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) async {
-    final response = await HttpClient.instance.dio.get<ResponseBody>(
-      uri.toString(),
-      options: Options(responseType: ResponseType.stream, headers: playHeaders, validateStatus: (_) => true),
-      cancelToken: cancel,
-    );
-    final body = response.data;
-    if (body == null) throw const TwitcastingException(TwitcastingFailure.schema);
-    if (response.statusCode != 200) {
-      await body.stream.listen((_) {}).cancel();
-      return (status: response.statusCode ?? 0, body: '');
-    }
+  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) =>
+      withRequestCancellation(cancel, (transport) async {
+        final response = await HttpClient.instance.dio.get<ResponseBody>(
+          uri.toString(),
+          options: Options(responseType: ResponseType.stream, headers: playHeaders, validateStatus: (_) => true),
+          cancelToken: transport,
+        );
+        final body = response.data;
+        if (body == null) throw const TwitcastingException(TwitcastingFailure.schema);
+        if (response.statusCode != 200) {
+          await body.stream.listen((_) {}).cancel();
+          return (status: response.statusCode ?? 0, body: '');
+        }
+        return (status: 200, body: await readBody(body.stream));
+      });
+
+  /// Total deadline, not an inactivity timeout restarted by each chunk.
+  static Future<String> readBody(Stream<List<int>> stream, {Duration timeout = const Duration(seconds: 20)}) async {
+    final iterator = StreamIterator(stream);
     final bytes = BytesBuilder(copy: false);
-    await for (final chunk in body.stream.timeout(const Duration(seconds: 20))) {
-      if (bytes.length + chunk.length > 1024 * 1024) throw const TwitcastingException(TwitcastingFailure.schema);
-      bytes.add(chunk);
-    }
+    final watch = Stopwatch()..start();
     try {
-      return (status: 200, body: utf8.decode(bytes.takeBytes()));
+      while (true) {
+        final remaining = timeout - watch.elapsed;
+        if (remaining <= Duration.zero) throw TimeoutException('TwitCasting response deadline');
+        if (!await iterator.moveNext().timeout(remaining)) break;
+        final chunk = iterator.current;
+        if (bytes.length + chunk.length > responseLimit) throw const TwitcastingException(TwitcastingFailure.schema);
+        bytes.add(chunk);
+      }
+      return utf8.decode(bytes.takeBytes());
     } on FormatException {
       throw const TwitcastingException(TwitcastingFailure.schema);
+    } finally {
+      watch.stop();
+      await iterator.cancel();
     }
   }
 
@@ -58,12 +76,10 @@ class TwitcastingApi {
     late final ({int status, String body}) response;
     try {
       response = await _request(uri, cancel);
-    } on TwitcastingException {
-      rethrow;
-    } catch (_) {
-      throw TwitcastingException(
-        cancel?.isCancelled == true ? TwitcastingFailure.cancelled : TwitcastingFailure.transport,
-      );
+    } catch (error) {
+      if (cancel?.isCancelled == true) throw const TwitcastingException(TwitcastingFailure.cancelled);
+      if (error is TwitcastingException) rethrow;
+      throw const TwitcastingException(TwitcastingFailure.transport);
     }
     if (cancel?.isCancelled == true) throw const TwitcastingException(TwitcastingFailure.cancelled);
     final failure = switch (response.status) {
@@ -75,13 +91,17 @@ class TwitcastingApi {
       _ => TwitcastingFailure.transport,
     };
     if (failure != null) throw TwitcastingException(failure);
-    if (response.body.length > 1024 * 1024) throw const TwitcastingException(TwitcastingFailure.schema);
+    if (response.body.length > responseLimit || utf8.encode(response.body).length > responseLimit) {
+      throw const TwitcastingException(TwitcastingFailure.schema);
+    }
     return response.body;
   }
 
   static Map<String, dynamic> object(Object? raw) {
     if (raw is String) {
-      if (raw.length > 1024 * 1024) throw const TwitcastingException(TwitcastingFailure.schema);
+      if (raw.length > responseLimit || utf8.encode(raw).length > responseLimit) {
+        throw const TwitcastingException(TwitcastingFailure.schema);
+      }
       try {
         raw = jsonDecode(raw);
       } catch (_) {

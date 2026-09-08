@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/common/http_client.dart';
+import 'package:pure_live/core/common/request_scope.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 
 enum MissevanFailure { transport, access, rateLimited, service, notFound, schema, cancelled, qualityUnavailable }
@@ -30,25 +31,26 @@ class MissevanApi {
   static const playHeaders = <String, String>{'Referer': '$origin/', 'Origin': origin, 'User-Agent': 'Mozilla/5.0'};
   final MissevanRequest _request;
 
-  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) async {
-    final response = await HttpClient.instance.dio.get<ResponseBody>(
-      uri.toString(),
-      options: Options(
-        responseType: ResponseType.stream,
-        headers: playHeaders,
-        followRedirects: false,
-        validateStatus: (_) => true,
-      ),
-      cancelToken: cancel,
-    );
-    final body = response.data;
-    if (body == null) throw const MissevanException(MissevanFailure.schema);
-    if (response.statusCode != 200) {
-      await body.stream.listen((_) {}).cancel();
-      return (status: response.statusCode ?? 0, body: '');
-    }
-    return (status: 200, body: await readBody(body.stream));
-  }
+  static Future<({int status, String body})> _defaultRequest(Uri uri, CancelToken? cancel) =>
+      withRequestCancellation(cancel, (transport) async {
+        final response = await HttpClient.instance.dio.get<ResponseBody>(
+          uri.toString(),
+          options: Options(
+            responseType: ResponseType.stream,
+            headers: playHeaders,
+            followRedirects: false,
+            validateStatus: (_) => true,
+          ),
+          cancelToken: transport,
+        );
+        final body = response.data;
+        if (body == null) throw const MissevanException(MissevanFailure.schema);
+        if (response.statusCode != 200) {
+          await body.stream.listen((_) {}).cancel();
+          return (status: response.statusCode ?? 0, body: '');
+        }
+        return (status: 200, body: await readBody(body.stream));
+      });
 
   /// Both a byte ceiling and a total body deadline; a slow trickle of chunks
   /// cannot restart the timeout indefinitely. Always relinquishes the stream.

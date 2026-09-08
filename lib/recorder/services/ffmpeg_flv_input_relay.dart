@@ -26,8 +26,13 @@ class FFmpegFlvInputRelay {
   bool _accepted = false;
   bool _finishing = false;
   bool _closed = false;
+  bool _stopReady = false;
+  int _forwardedBytes = 0;
+  final _avcBoundary = FlvAvcAccessUnitBoundary();
 
   bool get finishRequested => _finishing;
+  bool get hasPendingAccessUnit => _avcBoundary.hasPendingAccessUnit;
+  int get forwardedBytes => _forwardedBytes;
   Uri get inputUri => Uri(scheme: 'http', host: '127.0.0.1', port: _server.port, path: '/$_secret/live.flv');
 
   static Future<FFmpegFlvInputRelay?> startForArguments(List<String> arguments) async {
@@ -132,13 +137,20 @@ class FFmpegFlvInputRelay {
       downstream.response.bufferOutput = false;
       final framer = FlvInputFramer();
       await for (final chunk in upstream) {
-        if (_finishing) break;
+        if (_stopReady || _closed) break;
         for (final packet in framer.add(chunk)) {
-          if (_finishing) break;
+          if (_stopReady || _closed) break;
+          _avcBoundary.observe(packet);
           downstream.response.add(packet);
+          _forwardedBytes += packet.length;
           sentHeader = true;
+          // Preserve every tag unchanged. If a forwarded AVC prefix already
+          // starts the next access unit, finish only after its picture arrives.
+          // The existing native stop deadline still bounds stalled lookahead.
+          if (_finishing && !_avcBoundary.hasPendingAccessUnit) _stopReady = true;
         }
         await downstream.response.flush();
+        if (_stopReady) break;
       }
       // An incomplete final upstream tag was never forwarded. Ordinary EOF is
       // handled by the recorder's existing recovery, not mistaken for offline.
@@ -160,11 +172,17 @@ class FFmpegFlvInputRelay {
     }
   }
 
-  /// End only upstream reading. Keep downstream alive until buffered complete
-  /// FLV tags are flushed and the HTTP end marker has reached the native input.
+  /// End at a complete tag AND a known AVC picture boundary. Prefix NALs
+  /// (SEI/SPS/PPS/AUD) after a picture belong to a following access unit in the
+  /// TS parser. Already-forwarded prefixes are never removed or rewritten.
+  /// A pending picture drains within FFmpegService's existing three-second
+  /// deadline; close/cancel still interrupts a stalled upstream immediately.
   Future<void> finish() async {
     _finishing = true;
-    _client.close(force: true);
+    if (!_avcBoundary.hasPendingAccessUnit) {
+      _stopReady = true;
+      _client.close(force: true);
+    }
     await _serving;
   }
 
@@ -235,5 +253,52 @@ class FlvInputFramer {
         yield packet;
       }
     }
+  }
+}
+
+/// Constant-memory observation of classic AVC FLV tags, not a codec decoder.
+/// The AVC length size is declared by the sequence header. Unknown codecs are
+/// unchanged, and malformed AVC never clears an already uncertain boundary.
+class FlvAvcAccessUnitBoundary {
+  int? _lengthSize;
+  bool _pending = false;
+  bool get hasPendingAccessUnit => _pending;
+
+  void observe(List<int> tag) {
+    if (tag.length < 20 || tag[0] != 9 || (tag[11] & 0x80) != 0 || (tag[11] & 15) != 7) return;
+    final end = tag.length - 4;
+    if (tag[12] == 0) {
+      // AVCDecoderConfigurationRecord: version and lengthSizeMinusOne.
+      _lengthSize = end >= 23 && tag[16] == 1 && (tag[20] & 0xfc) == 0xfc ? (tag[20] & 3) + 1 : null;
+      if (_lengthSize == 3) _lengthSize = null; // Reserved by AVC configuration.
+      return;
+    }
+    if (tag[12] != 1 || _lengthSize == null) return;
+    final size = _lengthSize!;
+    var offset = 16;
+    var pending = _pending;
+    while (offset < end) {
+      if (end - offset < size) {
+        _pending = true;
+        return;
+      }
+      var length = 0;
+      for (var i = 0; i < size; i++) {
+        length = (length << 8) | tag[offset + i];
+      }
+      offset += size;
+      if (length == 0 || length > end - offset) {
+        _pending = true;
+        return;
+      }
+      final type = tag[offset] & 31;
+      if (type == 1 || type == 2 || type == 5) {
+        pending = false;
+      } else if (type >= 6 && type <= 9) {
+        pending = true;
+      }
+      offset += length;
+    }
+    _pending = pending;
   }
 }

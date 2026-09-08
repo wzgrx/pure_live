@@ -15,6 +15,15 @@ void main() {
         flvInputRelay: flv,
       );
 
+  test('unfinished AVC picture is not a completed drain and taints source evidence', () {
+    final evidence = create(flv: _PendingAvcRelay()).terminalEvidence();
+    expect(evidence['inputFinishRequested'], true);
+    expect(evidence['flvAccessUnitPending'], true);
+    expect(evidence['inputDrained'], false);
+    expect(evidence['inputIntegrityError'], true);
+    expect(create(live: false, flv: _PendingAvcRelay()).terminalEvidence()['inputIntegrityError'], false);
+  });
+
   test('natural terminal evidence does not invent a stop or a drain', () {
     final evidence = create().terminalEvidence();
     expect(evidence, {
@@ -115,6 +124,15 @@ class _DiscardedRelay implements FFmpegHlsInputRelay {
 }
 
 class _NativeSession implements FFmpegSession {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _PendingAvcRelay implements FFmpegFlvInputRelay {
+  @override
+  bool get finishRequested => true;
+  @override
+  bool get hasPendingAccessUnit => true;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

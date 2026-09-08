@@ -189,8 +189,8 @@ class FFmpegRecordSession {
   void markStopRequested() => _stopWatch ??= Stopwatch()..start();
 
   /// One immutable snapshot for terminal events and all diagnostic sinks.
-  /// inputDrained means native ended after finish was requested without forced
-  /// cancel, not that every media packet decoded or every input byte arrived.
+  /// inputDrained means native ended after finish without forced cancel or a
+  /// known pending AVC picture. It is not full decoding or byte-delivery proof.
   Map<String, Object?> terminalEvidence({String fallbackLogs = ''}) {
     final finishRequested = flvInputRelay?.finishRequested == true || inputRelay?.finishRequested == true;
     final drainKind = flvInputRelay != null
@@ -211,10 +211,14 @@ class FFmpegRecordSession {
           : 0,
       'inputFinishRequested': finishRequested,
       'forcedCancel': forcedCancel,
-      'inputDrained': finishRequested && !forcedCancel,
+      'inputDrained': finishRequested && !forcedCancel && flvInputRelay?.hasPendingAccessUnit != true,
+      if (flvInputRelay != null) 'flvAccessUnitPending': flvInputRelay!.hasPendingAccessUnit,
       'inputTailDiscarded': liveRecording && inputRelay?.inputTailDiscarded == true,
       'inputIntegrityError':
-          liveRecording && (hasInputPacketError || FFmpegMediaIntegrity.hasPacketError(fallbackLogs)),
+          liveRecording &&
+          (hasInputPacketError ||
+              flvInputRelay?.hasPendingAccessUnit == true ||
+              FFmpegMediaIntegrity.hasPacketError(fallbackLogs)),
     });
   }
 

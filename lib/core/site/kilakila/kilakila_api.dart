@@ -67,12 +67,24 @@ class KilakilaDirectoryPage {
   final bool hasMore;
 }
 
+/// A public anchor page keyed by durable UID. A missing advertised broadcast
+/// differs from a failed request or an unrecognized broadcast state.
+class KilakilaOwnerSnapshot {
+  const KilakilaOwnerSnapshot({required this.userId, required this.nick, required this.avatar, this.currentRoom});
+  final String userId;
+  final String nick;
+  final String avatar;
+  final KilakilaRoomSnapshot? currentRoom;
+}
+
 /// Anonymous official website contracts. Deliberately not registered as a
-/// LiveSite until cross-broadcast identity, sharing and application integration
-/// have their own evidence. No raw response/push-flow URL is retained in DTOs.
+/// LiveSite until sharing and application integration have their own evidence.
+/// Owner lookup and broadcast identity are separate from media resolution.
+/// No raw response/push-flow URL is retained in DTOs.
 class KilakilaApi {
   KilakilaApi({KilakilaRequest? request}) : _request = request ?? _defaultRequest;
   static const origin = 'https://live.kilakila.cn';
+  static const ownerOrigin = 'https://live.hongrenshuo.com.cn';
   static const responseLimit = 1024 * 1024;
   static const playHeaders = {'Referer': '$origin/', 'User-Agent': 'Mozilla/5.0'};
   final KilakilaRequest _request;
@@ -126,10 +138,22 @@ class KilakilaApi {
     required bool wrapped,
     CancelToken? cancel,
   }) async {
+    var result = await _json(Uri.parse('$origin$path').replace(queryParameters: query), cancel);
+    if (wrapped) {
+      _businessCode(result['code']);
+      result = _object(_object(result['data'])['body']);
+    }
+    final header = _object(result['h']);
+    _businessCode(header['code'], roomDetail: !wrapped && path == '/LiveRoom/getRoomInfo');
+    if (header['success'] != true) throw const KilakilaException(KilakilaFailure.schema);
+    return result;
+  }
+
+  Future<Map<String, dynamic>> _json(Uri uri, CancelToken? cancel) async {
     if (cancel?.isCancelled == true) throw const KilakilaException(KilakilaFailure.cancelled);
     late final ({int status, String body}) response;
     try {
-      response = await _request(Uri.parse('$origin$path').replace(queryParameters: query), cancel);
+      response = await _request(uri, cancel);
     } catch (error) {
       if (cancel?.isCancelled == true) throw const KilakilaException(KilakilaFailure.cancelled);
       if (error is KilakilaException) rethrow;
@@ -149,15 +173,7 @@ class KilakilaApi {
       throw const KilakilaException(KilakilaFailure.schema);
     }
     try {
-      var result = _object(jsonDecode(response.body));
-      if (wrapped) {
-        _businessCode(result['code']);
-        result = _object(_object(result['data'])['body']);
-      }
-      final header = _object(result['h']);
-      _businessCode(header['code'], roomDetail: !wrapped && path == '/LiveRoom/getRoomInfo');
-      if (header['success'] != true) throw const KilakilaException(KilakilaFailure.schema);
-      return result;
+      return _object(jsonDecode(response.body));
     } on FormatException {
       throw const KilakilaException(KilakilaFailure.schema);
     }
@@ -221,6 +237,28 @@ class KilakilaApi {
         return id(uri.pathSegments.last);
       }
       if (uri.path == '/PcLive/index/detail' && query['id']?.length == 1) return id(query['id']!.single);
+    } on FormatException {
+      return null;
+    } on KilakilaException {
+      return null;
+    }
+    return null;
+  }
+
+  static String? numericOwnerFromUri(Uri uri) {
+    if (uri.scheme != 'https' ||
+        uri.host != 'live.hongrenshuo.com.cn' ||
+        uri.userInfo.isNotEmpty ||
+        uri.fragment.isNotEmpty ||
+        (uri.hasPort && uri.port != 443) ||
+        uri.hasQuery) {
+      return null;
+    }
+    try {
+      final parts = uri.pathSegments;
+      if (parts.length == 4 && parts[0] == 'index' && parts[1] == 'roomuser' && parts[2] == 'uid') {
+        return id(parts[3]);
+      }
     } on FormatException {
       return null;
     } on KilakilaException {
@@ -352,5 +390,49 @@ class KilakilaApi {
       throw const KilakilaException(KilakilaFailure.schema);
     }
     return _snapshot(room, _object(room['userInfo']), playback: playback);
+  }
+
+  Future<KilakilaOwnerSnapshot> owner(String userId, {CancelToken? cancel}) async {
+    final requested = id(userId);
+    final envelope = await _json(
+      Uri.parse('$ownerOrigin/Tg/personalH5').replace(queryParameters: {'uid': requested}),
+      cancel,
+    );
+    _businessCode(envelope['code']);
+    final body = _object(envelope['data']);
+    final user = _object(body['userResp']);
+    final card = _object(body['liveCard']);
+    final nick = _text(user['nickname']);
+    if (nick.isEmpty || (user.containsKey('id') && _id(user['id']) != requested)) {
+      throw const KilakilaException(KilakilaFailure.schema);
+    }
+    KilakilaRoomSnapshot? current;
+    // Observed empty cards contain only these routing defaults. Missing/null,
+    // partial room metadata and unknown card forms are not successful empties.
+    if (card.keys.every((key) => {'roomSourceType', 'recommendSource'}.contains(key))) {
+      for (final value in card.values) {
+        _nonnegative(value);
+      }
+    } else {
+      // userResp has no UID on this endpoint; the current card's own UID must
+      // match the requested anchor. Never derive identity from nickname/avatar.
+      if (_id(card['uid']) != requested) throw const KilakilaException(KilakilaFailure.schema);
+      current = _snapshot(card, {...user, 'id': requested});
+    }
+    return KilakilaOwnerSnapshot(
+      userId: requested,
+      nick: nick,
+      avatar: _picture(user['headPortraitUrl']),
+      currentRoom: current,
+    );
+  }
+
+  /// Re-resolve the anchor each time, then bind the current broadcast detail to
+  /// that same owner. No stale broadcast cache, directory scan or ID guessing.
+  Future<KilakilaRoomSnapshot?> detailForOwner(String userId, {bool playback = true, CancelToken? cancel}) async {
+    final profile = await owner(userId, cancel: cancel);
+    final current = profile.currentRoom;
+    if (current == null) return null;
+    return detail(current.roomId, expectedUserId: profile.userId, playback: playback, cancel: cancel);
   }
 }

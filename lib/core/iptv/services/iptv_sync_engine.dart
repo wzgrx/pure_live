@@ -10,63 +10,62 @@ import 'package:pure_live/core/iptv/local/database.dart' as database;
 import 'package:pure_live/core/iptv/services/iptv_import_manager.dart';
 
 class IptvSyncEngine {
-  static final IptvSyncEngine instance = IptvSyncEngine._internal();
-  IptvSyncEngine._internal();
+  static final IptvSyncEngine instance = IptvSyncEngine();
+  IptvSyncEngine({IptvImportManager? importManager, Future<Directory> Function()? temporaryDirectory})
+    : _iptvImportManager = importManager ?? IptvImportManager(),
+      _temporaryDirectory = temporaryDirectory ?? getTemporaryDirectory;
 
-  final _iptvImportManager = IptvImportManager();
+  final IptvImportManager _iptvImportManager;
+  final Future<Directory> Function() _temporaryDirectory;
 
   Future<bool> syncPlaylist(database.Provider provider, {bool showTips = false}) async {
-    if (provider.url == null || provider.url!.trim().isEmpty) return false;
-
-    File? tempFile;
+    Directory? temporary;
+    bool success = false;
     try {
-      final String rawStringContent = await HttpClient.instance.getText(provider.url!);
-      final String trimmedContent = rawStringContent.trim();
-
-      if (trimmedContent.isEmpty) {
-        return false;
+      final url = provider.url;
+      if (url == null || url.trim().isEmpty) return false;
+      final uri = Uri.tryParse(url);
+      final network = uri?.scheme == 'http' || uri?.scheme == 'https';
+      File file;
+      if (network) {
+        final content = await HttpClient.instance.getText(url);
+        final trimmed = content.trim();
+        if (trimmed.isEmpty) return false;
+        final ext = provider.type.startsWith('.') ? provider.type.toLowerCase() : '.${provider.type.toLowerCase()}';
+        if (!{'.m3u', '.m3u8', '.txt'}.contains(ext)) return false;
+        if (ext != '.txt' && !trimmed.startsWith('#EXTM3U')) return false;
+        if (ext == '.txt' && !trimmed.contains(',')) return false;
+        final root = await _temporaryDirectory();
+        await root.create(recursive: true);
+        temporary = await root.createTemp('iptv-sync-');
+        file = await File(p.join(temporary.path, 'input$ext')).writeAsString(content);
+      } else {
+        file = uri?.scheme == 'file' ? File.fromUri(uri!) : File(url);
       }
-
-      final String ext = provider.type.startsWith('.') ? provider.type : '.${provider.type}';
-
-      if (ext.toLowerCase() == '.m3u' || ext.toLowerCase() == '.m3u8') {
-        if (!trimmedContent.startsWith('#EXTM3U')) {
-          return false;
-        }
-      } else if (ext.toLowerCase() == '.txt') {
-        if (!trimmedContent.contains(',') && !trimmedContent.contains('#genre#')) {
-          return false;
-        }
-      }
-
-      await deletePlaylistsByName(provider.name);
-
-      final tempDir = await getTemporaryDirectory();
-      tempFile = File(p.join(tempDir.path, 'sync_${provider.id}$ext'));
-      await tempFile.writeAsString(rawStringContent);
-
-      final bool success = await _iptvImportManager.importIptvFile(
-        file: tempFile,
+      // The importer verifies this exact snapshot again; never delete by name
+      // or recreate a provider removed/edited while the network request ran.
+      success = await _iptvImportManager.importIptvFile(
+        file: file,
         providerName: provider.name,
+        expectedProvider: provider,
         isHot: provider.id == FileUtils.systemHotProviderId,
-        url: provider.url!,
+        url: network ? url : '',
         forceUpdate: true,
         showTips: false,
       );
-
-      if (await tempFile.exists()) {
-        await tempFile.delete();
-      }
-      if (showTips) {
-        ToastUtil.show(i18n('sync_success'));
-      }
       return success;
     } catch (e) {
-      debugPrint("❌ IPTV Sync Process Error (Network or IO Fails): $e");
-      if (tempFile != null && await tempFile.exists()) {
-        await tempFile.delete();
-      }
+      debugPrint('IPTV Sync Process Error: $e');
       return false;
+    } finally {
+      if (temporary != null) {
+        try {
+          await temporary.delete(recursive: true);
+        } catch (e) {
+          debugPrint('IPTV sync temporary cleanup failed: $e');
+        }
+      }
+      if (showTips) ToastUtil.show(i18n(success ? 'sync_success' : 'sync_failed'));
     }
   }
 

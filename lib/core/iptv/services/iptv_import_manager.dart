@@ -1,12 +1,16 @@
 import 'dart:io';
-import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
+import 'package:pure_live/core/iptv/models/channel.dart' as model;
+
+import 'playlist_channel_reconciler.dart';
+
 import 'package:drift/drift.dart' as drift;
 import 'package:pure_live/common/index.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:pure_live/core/common/log.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:pure_live/plugins/file_utils.dart';
 import 'package:pure_live/plugins/db_service.dart';
@@ -18,14 +22,19 @@ import 'package:pure_live/common/global/app_path_manager.dart';
 import 'package:pure_live/core/iptv/local/database.dart' as database;
 
 class IptvImportManager {
+  IptvImportManager({Future<Directory> Function()? cacheDirectory})
+    : _cacheDirectory = cacheDirectory ?? _defaultCacheDirectory;
+  final Future<Directory> Function() _cacheDirectory;
+  static Future<Directory> _defaultCacheDirectory() => AppPathManager().getDir(AppPathManager.dirIptvCache);
   static final _mappingLock = Lock();
+  static final _importLock = Lock();
 
   /// 1. 本地文件浏览器选择导入
   Future<bool> importFromLocalPicker() async {
     final result = await FilePicker.pickFile(
       dialogTitle: i18n("select_recover_file"),
       type: FileType.custom,
-      allowedExtensions: ['m3u', 'txt'],
+      allowedExtensions: ['m3u', 'm3u8', 'txt'],
     );
 
     if (result?.path == null) return false;
@@ -42,85 +51,39 @@ class IptvImportManager {
     bool showTips = true,
     bool isHot = false,
   }) async {
-    File? tempFile;
+    Directory? temporary;
     try {
-      final dir = await AppPathManager().getDir(AppPathManager.dirIptvCache);
-      final lowercaseUrl = url.toLowerCase().trim();
-      String detectedExtension = '.m3u';
-      if (lowercaseUrl.endsWith('.txt')) {
-        detectedExtension = '.txt';
-      }
-
-      final initialFilePath = p.join(dir.path, 'download_iptv_${FileUtils.generateUuid()}$detectedExtension');
-      tempFile = File(initialFilePath);
-      await HttpClient.instance.download(url, tempFile.path);
-      Log.d('Downloaded file: ${tempFile.path}');
-      if (!await tempFile.exists() || await tempFile.length() == 0) {
-        if (showTips) ToastUtil.show(i18n("unsupported_file_format"));
-        if (await tempFile.exists()) await tempFile.delete();
+      final cache = await _cacheDirectory();
+      await cache.create(recursive: true);
+      temporary = await cache.createTemp('iptv-download-');
+      final path = Uri.tryParse(url.trim())?.path.toLowerCase() ?? '';
+      var extension = path.endsWith('.txt') ? '.txt' : '.m3u';
+      var file = File(p.join(temporary.path, 'input$extension'));
+      await HttpClient.instance.download(url, file.path);
+      final content = (await _decode(await file.readAsBytes())).trim();
+      if (content.startsWith('#EXTM3U')) {
+        extension = '.m3u';
+      } else if (content.contains(',#genre#') || path.endsWith('.txt')) {
+        extension = '.txt';
+      } else if (!path.endsWith('.m3u') && !path.endsWith('.m3u8')) {
+        if (showTips) ToastUtil.show(i18n('unsupported_file_format'));
         return false;
       }
-      final lines = await tempFile
-          .openRead()
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .take(50) // Read up to 50 lines to inspect structure
-          .toList();
-
-      final headerSample = lines.join('\n').trim();
-      if (headerSample.isEmpty) {
-        if (showTips) ToastUtil.show(i18n("unsupported_file_format"));
-        if (await tempFile.exists()) await tempFile.delete();
-        return false;
-      }
-
-      // 4. Strict format detection check based on downloaded file content
-      String finalExtension = '.m3u';
-      if (headerSample.startsWith('#EXTM3U')) {
-        finalExtension = '.m3u';
-      } else if (headerSample.contains(',#genre#')) {
-        finalExtension = '.txt';
-      } else if (lowercaseUrl.endsWith('.txt')) {
-        finalExtension = '.txt';
-      } else if (lowercaseUrl.endsWith('.m3u') || lowercaseUrl.endsWith('.m3u8')) {
-        finalExtension = '.m3u';
-      } else {
-        if (showTips) ToastUtil.show(i18n("unsupported_file_format"));
-        if (await tempFile.exists()) await tempFile.delete();
-        return false;
-      }
-      if (detectedExtension != finalExtension) {
-        final correctedPath = p.setExtension(tempFile.path, finalExtension);
-        tempFile = await tempFile.rename(correctedPath);
-      }
-
-      // 6. Clean up the filename
-      String cleanName = p.basename(fileName);
-      while (p.extension(cleanName).isNotEmpty) {
-        cleanName = p.basenameWithoutExtension(cleanName);
-      }
-      fileName = cleanName;
-      final success = await importIptvFile(
-        file: tempFile,
-        providerName: fileName,
+      if (p.extension(file.path) != extension) file = await file.rename(p.setExtension(file.path, extension));
+      return await importIptvFile(
+        file: file,
+        providerName: _playlistName(fileName),
         url: url,
         forceUpdate: forceUpdate,
         showTips: showTips,
         isHot: isHot,
       );
-      if (await tempFile.exists()) await tempFile.delete();
-      return success;
     } catch (e) {
-      debugPrint("Network IPTV Download Failure: $e");
-      if (tempFile != null && await tempFile.exists()) {
-        try {
-          await tempFile.delete();
-        } catch (_) {}
-      }
-      if (showTips) {
-        ToastUtil.show(i18n('download_failed'));
-      }
+      debugPrint('Network IPTV Download Failure: $e');
+      if (showTips) ToastUtil.show(i18n('download_failed'));
       return false;
+    } finally {
+      await _cleanupTemporaryDirectory(temporary);
     }
   }
 
@@ -130,50 +93,56 @@ class IptvImportManager {
     bool forceUpdate = false,
     bool showTips = true,
   }) async {
+    Directory? temporary;
     try {
-      String extension = '.m3u';
-      final lowerName = fileName.toLowerCase();
-      final trimmedContent = fileString.trim();
-
-      if (trimmedContent.startsWith('#EXTM3U')) {
-        extension = '.m3u';
-      } else if (trimmedContent.startsWith('{') || trimmedContent.startsWith('[')) {
-        extension = '.json';
-      } else if (lowerName.contains('.txt') || trimmedContent.contains(',#genre#')) {
-        extension = '.txt';
-      } else {
-        final lastDotIndex = lowerName.lastIndexOf('.');
-        if (lastDotIndex != -1) {
-          final rawExt = lowerName.substring(lastDotIndex);
-          if (rawExt == '.m3u' || rawExt == '.m3u8' || rawExt == '.txt' || rawExt == '.json') {
-            extension = rawExt;
-          }
-        }
-      }
-
-      final dir = await AppPathManager().getDir(AppPathManager.dirIptvCache);
-      final file = File(p.join(dir.path, 'web_iptv_${FileUtils.generateUuid()}$extension'));
+      final extension = fileString.trim().startsWith('#EXTM3U')
+          ? '.m3u'
+          : fileName.toLowerCase().endsWith('.txt') || fileString.contains(',#genre#')
+          ? '.txt'
+          : '.m3u';
+      final cache = await _cacheDirectory();
+      await cache.create(recursive: true);
+      temporary = await cache.createTemp('iptv-web-');
+      final file = File(p.join(temporary.path, 'input$extension'));
       await file.writeAsString(fileString);
-
-      String cleanName = p.basename(fileName);
-      while (p.extension(cleanName).isNotEmpty) {
-        cleanName = p.basenameWithoutExtension(cleanName);
-      }
-      fileName = cleanName;
-
-      final success = await importIptvFile(
+      return await importIptvFile(
         file: file,
-        providerName: fileName,
+        providerName: _playlistName(fileName),
         forceUpdate: forceUpdate,
         showTips: showTips,
       );
-      if (await file.exists()) await file.delete();
-      return success;
     } catch (e) {
-      if (showTips) {
-        ToastUtil.show(i18n('subscription_download_or_parse_failed'));
-      }
+      debugPrint('Web IPTV Import Failure: $e');
+      if (showTips) ToastUtil.show(i18n('subscription_download_or_parse_failed'));
       return false;
+    } finally {
+      await _cleanupTemporaryDirectory(temporary);
+    }
+  }
+
+  static String _playlistName(String fileName) {
+    var name = p.basename(fileName);
+    while (p.extension(name).isNotEmpty) {
+      name = p.basenameWithoutExtension(name);
+    }
+    return name;
+  }
+
+  static Future<String> _decode(Uint8List bytes) async {
+    try {
+      return utf8.decode(bytes);
+    } on FormatException {
+      return CharsetConverter.decode('gbk', bytes);
+    }
+  }
+
+  static Future<void> _cleanupTemporaryDirectory(Directory? directory) async {
+    // The directory is the result of this call's createTemp, never a user path.
+    if (directory == null) return;
+    try {
+      await directory.delete(recursive: true);
+    } catch (e) {
+      debugPrint('IPTV temporary directory cleanup failed: $e');
     }
   }
 
@@ -188,7 +157,7 @@ class IptvImportManager {
 
       File file = await FileUtils.convertPhysicalFile(media.content!);
       final ext = p.extension(file.path).toLowerCase();
-      if (ext != '.m3u' && ext != '.txt') {
+      if (ext != '.m3u' && ext != '.m3u8' && ext != '.txt') {
         if (showTips) {
           ToastUtil.show(i18n("unsupported_file_format"));
         }
@@ -218,225 +187,282 @@ class IptvImportManager {
     String url = '',
     bool forceUpdate = false,
     bool showTips = true,
+    database.Provider? expectedProvider,
   }) async {
     try {
-      final cleanName = providerName.trim().toLowerCase();
       final ext = p.extension(file.path).toLowerCase();
-      final typeName = ext == '.txt' ? 'TXT' : 'M3U';
-
-      String content;
-      try {
-        final bytes = await file.readAsBytes();
-        if (bytes.length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) {
-          content = utf8.decode(bytes.sublist(3));
-        } else {
-          content = utf8.decode(bytes);
-        }
-      } catch (_) {
-        final bytes = await file.readAsBytes();
-        content = await CharsetConverter.decode("gbk", bytes);
-      }
-
-      String finalProviderId = isHot || providerName == 'hot'
-          ? FileUtils.systemHotProviderId
-          : FileUtils.generateUuid();
-      final parsedResult = ext == '.txt'
-          ? TxtParser().parse(content, providerId: finalProviderId)
-          : M3uParser().parse(content, providerId: finalProviderId);
-
-      if (parsedResult.channels.isEmpty) {
-        if (showTips) {
-          ToastUtil.show(i18n("unsupported_file_format"));
-        }
+      final cleanName = providerName.trim();
+      if (cleanName.isEmpty || !{'.m3u', '.m3u8', '.txt'}.contains(ext)) return false;
+      final bytes = await file.readAsBytes();
+      final content = await _decode(bytes);
+      // Parser IDs are transient. Reconciliation selects durable IDs at commit.
+      final parsed = ext == '.txt'
+          ? TxtParser().parse(content, providerId: '')
+          : M3uParser().parse(content, providerId: '');
+      if (parsed.channels.isEmpty) {
+        if (showTips) ToastUtil.show(i18n('unsupported_file_format'));
         return false;
       }
-      final db = Get.find<DbService>().db;
-      if (!isHot && !forceUpdate) {
-        final existing = await db.getAllProviders();
-        final matchedList = existing.where((p) => p.name.trim().toLowerCase() == cleanName).toList();
-        if (matchedList.isNotEmpty) {
-          final completer = Completer<bool>();
-          Get.dialog(
-            AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Text(i18n("provider_name_exists_tip")),
-              content: Text('"$providerName"\n\n${i18n("replace_confirm_message").replaceAll("{}", typeName)}'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(Get.context!).pop();
-                    completer.complete(false);
-                  },
-                  child: Text(i18n("cancel")),
+      bool cancelled = false;
+      final success = await _importLock.synchronized(() async {
+        final db = Get.find<DbService>().db;
+        database.Provider? existing;
+        final hot = isHot || providerName == 'hot';
+        if (expectedProvider != null) {
+          existing = await db.getProviderById(expectedProvider.id);
+          if (existing != expectedProvider) return false;
+        } else if (hot) {
+          existing = await db.getProviderById(FileUtils.systemHotProviderId);
+        } else {
+          final matches = (await db.getAllProviders())
+              .where(
+                (e) => e.id != FileUtils.systemHotProviderId && e.name.trim().toLowerCase() == cleanName.toLowerCase(),
+              )
+              .toList();
+          if (matches.length > 1) {
+            final byUrl = matches.where((e) => url.isNotEmpty && e.url == url).toList();
+            if (byUrl.length != 1) {
+              throw StateError('Multiple saved playlists share this name; select a source to refresh');
+            }
+            existing = byUrl.single;
+          } else if (matches.isNotEmpty) {
+            existing = matches.single;
+          }
+        }
+        if (existing != null && !hot && !forceUpdate) {
+          final confirmed = await Get.dialog<bool>(
+            Builder(
+              builder: (context) => AlertDialog(
+                scrollable: true,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: Text(i18n('provider_name_exists_tip')),
+                content: Text(
+                  '"$cleanName"\n\n${i18n("replace_confirm_message").replaceAll("{}", ext == '.txt' ? 'TXT' : 'M3U')}',
                 ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(Get.context!).pop();
-                    final targetId = matchedList.first.id;
-                    if (matchedList.length > 1) {
-                      for (int i = 1; i < matchedList.length; i++) {
-                        final duplicateItem = matchedList[i];
-                        await db.deleteProviderAndChannels(duplicateItem.id);
-                        await db.deleteMappingsByProviderId(duplicateItem.id);
-                      }
-                    }
-                    final success = await _saveToDatabase(
-                      file: file,
-                      ext: ext,
-                      providerId: targetId,
-                      providerName: providerName,
-                      isHot: isHot,
-                      url: url,
-                      channels: parsedResult.channels,
-                    );
-                    completer.complete(success);
-                  },
-                  child: Text(i18n("confirm")),
-                ),
-              ],
+                actions: [
+                  TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(i18n('cancel'))),
+                  TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text(i18n('confirm'))),
+                ],
+              ),
             ),
             barrierDismissible: false,
           );
-          return await completer.future;
+          if (confirmed != true) {
+            cancelled = true;
+            return false;
+          }
         }
-      }
-
-      final success = await _saveToDatabase(
-        file: file,
-        ext: ext,
-        providerId: finalProviderId,
-        providerName: providerName,
-        isHot: isHot,
-        url: url,
-        channels: parsedResult.channels,
-      );
-
-      if (success) {
-        if (showTips) ToastUtil.show(i18n("sync_success"));
-      } else {
-        if (showTips) ToastUtil.show(i18n("sync_failed"));
-      }
+        final providerId = existing?.id ?? (hot ? FileUtils.systemHotProviderId : const Uuid().v4());
+        await _saveToDatabase(
+          bytes: bytes,
+          ext: ext,
+          providerId: providerId,
+          providerName: cleanName,
+          url: url,
+          channels: parsed.channels,
+          expected: existing,
+        );
+        return true;
+      });
+      if (showTips && !cancelled) ToastUtil.show(i18n(success ? 'sync_success' : 'sync_failed'));
       return success;
     } catch (e) {
-      debugPrint("IPTV Import Error: $e");
-      if (showTips) {
-        ToastUtil.show('${i18n("sync_failed")}: ${e.toString()}');
-      }
+      debugPrint('IPTV Import Error: $e');
+      if (showTips) ToastUtil.show('${i18n("sync_failed")}: $e');
       return false;
     }
   }
 
-  Future<bool> _saveToDatabase({
-    required File file,
+  Future<void> _saveToDatabase({
+    required List<int> bytes,
     required String ext,
     required String providerId,
     required String providerName,
-    required bool isHot,
     required String url,
-    required List<dynamic> channels,
+    required List<model.Channel> channels,
+    required database.Provider? expected,
   }) async {
+    final db = Get.find<DbService>().db;
+    Directory? cache;
+    File? staged;
+    bool committed = false;
+    bool ownsStaged = false;
     try {
-      final dir = await AppPathManager().getDir(AppPathManager.dirIptvCache);
-      final savedFile = File(p.join(dir.path, '$providerId$ext'));
-      final db = Get.find<DbService>().db;
-
-      if (isHot && await savedFile.exists()) await savedFile.delete();
-      await file.copy(savedFile.path);
-      await db.deleteProviderAndChannels(providerId);
-      await db.upsertProvider(
-        database.ProvidersCompanion.insert(
-          id: providerId,
-          name: providerName.trim(),
-          type: ext.replaceAll('.', ''),
-          isAutoUpdate: drift.Value(url.isNotEmpty ? SettingsService.to.iptv.isAutoSyncEnabled.v : false),
-          url: drift.Value<String?>(url.isNotEmpty ? url : savedFile.path),
-        ),
-      );
-
-      await db.upsertChannels(
-        channels.map((e) {
-          return database.ChannelsCompanion.insert(
-            id: e.id,
-            providerId: providerId,
-            name: e.name,
-            streamUrl: e.streamUrl,
-            groupTitle: drift.Value(e.groupTitle),
-            tvgId: drift.Value(e.tvgId),
-            tvgName: drift.Value(e.tvgName),
-            tvgLogo: drift.Value(e.tvgLogo),
-          );
-        }).toList(),
-      );
-      await runAutoEpgMapping(providerId: providerId);
-      return true;
-    } catch (e) {
-      debugPrint("Database Write Error: $e");
-      return false;
-    }
-  }
-
-  Future<void> runAutoEpgMapping({required String providerId}) async {
-    await _mappingLock.synchronized(() async {
-      final db = Get.find<DbService>().db;
-      final selected = SettingsService.to.iptv.selectedSourceId;
-      final sourceId = selected.value;
-      if (sourceId.isEmpty) return;
-      bool sourceChanged = false;
-      // A synchronous listener also catches A -> B -> A during a database await.
-      final detach = selected.addListener(() => sourceChanged = true);
-      void checkSource() {
-        if (sourceChanged || selected.isDisposed || selected.value != sourceId) {
-          throw const _MappingSourceChanged();
-        }
+      // Network sources are re-fetchable. Only local sources need a durable file.
+      // Publish a new immutable file; never overwrite the active source's bytes.
+      if (url.isEmpty) {
+        cache = await _cacheDirectory();
+        await cache.create(recursive: true);
+        staged = File(p.join(cache.path, 'playlist_${const Uuid().v4()}$ext'));
+        await staged.create(exclusive: true);
+        ownsStaged = true;
+        await staged.writeAsBytes(bytes, flush: true);
       }
-
-      try {
-        await db.transaction(() async {
-          if (await db.getProviderById(providerId) == null) return;
-          final channels = await db.getChannelsForProvider(providerId);
-          final epgChannels = await db.getEpgChannelsForSource(sourceId);
-          checkSource();
-          // Missing data is not an instruction to remove saved user mappings.
-          if (channels.isEmpty || epgChannels.isEmpty) return;
-          final previous = await (db.select(db.epgMappings)..where((t) => t.providerId.equals(providerId))).get();
-          final byChannel = {for (final mapping in previous) mapping.channelId: mapping};
-          final index = _ImportEpgIndex(epgChannels);
-          final matched = <String>{};
-          final updates = <database.EpgMappingsCompanion>[];
-          for (final channel in channels) {
-            final old = byChannel[channel.id];
-            if (old != null && (old.locked || old.source != 'auto')) continue;
-            final epgId = index.match(channel);
-            if (epgId == null) continue;
-            matched.add(channel.id);
-            // Do not reset confidence or timestamps for an unchanged mapping.
-            if (old?.epgChannelId == epgId && old?.epgSourceId == sourceId) continue;
-            updates.add(
-              database.EpgMappingsCompanion.insert(
-                channelId: channel.id,
-                providerId: providerId,
-                epgChannelId: epgId,
-                epgSourceId: sourceId,
-                source: const drift.Value('auto'),
+      final sourceUrl = url.isEmpty ? staged!.path : url;
+      // Lock order is mapping -> database for both callers; never wait for the
+      // mapping lock while holding a database transaction owned by this import.
+      await _mappingLock.synchronized(
+        () => db.transaction(() async {
+          final current = await db.getProviderById(providerId);
+          if (current != expected) throw StateError('Saved playlist changed while import was pending');
+          final previous = await db.getChannelsForProvider(providerId);
+          final entries = reconcilePlaylistChannels(providerId: providerId, previous: previous, incoming: channels);
+          if (current == null) {
+            await db.upsertProvider(
+              database.ProvidersCompanion.insert(
+                id: providerId,
+                name: providerName,
+                type: ext.substring(1),
+                url: drift.Value(sourceUrl),
+                lastRefresh: drift.Value(DateTime.now()),
+                isAutoUpdate: drift.Value(url.isNotEmpty && SettingsService.to.iptv.isAutoSyncEnabled.value),
+              ),
+            );
+          } else {
+            await (db.update(db.providers)..where((t) => t.id.equals(providerId))).write(
+              database.ProvidersCompanion(
+                name: drift.Value(providerName),
+                type: drift.Value(ext.substring(1)),
+                url: drift.Value(sourceUrl),
+                lastRefresh: drift.Value(DateTime.now()),
               ),
             );
           }
-          checkSource();
-          for (final old in previous) {
-            if (!old.locked && old.source == 'auto' && !matched.contains(old.channelId)) {
-              await db.deleteMapping(old.channelId, providerId);
+          await db.upsertChannels(entries);
+          final retained = entries.map((e) => e.id.value).toSet();
+          await db.batch((batch) {
+            for (final old in previous.where((e) => !retained.contains(e.id))) {
+              batch.deleteWhere(db.epgMappings, (t) => t.channelId.equals(old.id) & t.providerId.equals(providerId));
+              batch.deleteWhere(db.favoriteListChannels, (t) => t.channelId.equals(old.id));
+              batch.deleteWhere(db.failoverGroupChannels, (t) => t.channelId.equals(old.id));
+              batch.deleteWhere(db.channels, (t) => t.id.equals(old.id) & t.providerId.equals(providerId));
             }
-          }
-          if (updates.isNotEmpty) await db.upsertMappings(updates);
-          // Includes changes while SQLite was writing the candidate snapshot.
-          checkSource();
-        });
-      } on _MappingSourceChanged {
-        // Transaction rollback retains the last committed mapping snapshot.
-      } finally {
-        detach();
+          });
+          await _rebuildEpgMappings(providerId: providerId);
+        }),
+      );
+      committed = true;
+      // Cleanup is best effort after commit. A cleanup error is not import failure.
+      if (expected?.url != null && expected!.url != sourceUrl) {
+        try {
+          cache ??= await _cacheDirectory();
+          await _deleteOwnedLocalFile(expected.url!, cache, legacyProviderId: expected.id, db: db);
+        } catch (e) {
+          debugPrint('Old playlist cache cleanup failed: $e');
+        }
       }
+    } finally {
+      if (!committed && ownsStaged && staged != null) {
+        try {
+          await staged.delete();
+        } catch (e) {
+          debugPrint('Uncommitted playlist cleanup failed: $e');
+        }
+      }
+    }
+  }
+
+  static String? _localPlaylistPath(String value) {
+    final uri = Uri.tryParse(value);
+    if (uri?.scheme == 'file') return File.fromUri(uri!).path;
+    if (uri != null && uri.hasScheme && !p.isAbsolute(value)) return null;
+    return value;
+  }
+
+  static Future<void> _deleteOwnedLocalFile(
+    String path,
+    Directory cache, {
+    required String legacyProviderId,
+    required database.AppDatabase db,
+  }) async {
+    final candidate = _localPlaylistPath(path);
+    if (candidate == null || !p.equals(p.dirname(p.absolute(candidate)), p.absolute(cache.path))) return;
+    final name = p.basename(candidate);
+    final versioned = RegExp(r'^playlist_[0-9a-f-]{36}\.(m3u8?|txt)$', caseSensitive: false).hasMatch(name);
+    final legacy =
+        RegExp(r'^[0-9a-f-]+$', caseSensitive: false).hasMatch(legacyProviderId) &&
+        {'.m3u', '.m3u8', '.txt'}.any((ext) => name == '$legacyProviderId$ext');
+    if (!versioned && !legacy) return;
+    if (await FileSystemEntity.type(candidate, followLinks: false) != FileSystemEntityType.file) return;
+    // Keep the DB reference snapshot stable through deletion. URI, separator,
+    // case and symlink aliases must not make a shared file look unreferenced.
+    await db.transaction(() async {
+      final resolved = await File(candidate).resolveSymbolicLinks();
+      for (final provider in await db.getAllProviders()) {
+        final reference = provider.url == null ? null : _localPlaylistPath(provider.url!);
+        if (reference == null) continue;
+        if (p.equals(p.absolute(reference), p.absolute(candidate))) return;
+        final type = await FileSystemEntity.type(reference, followLinks: false);
+        if (type != FileSystemEntityType.file && type != FileSystemEntityType.link) continue;
+        if (p.equals(await File(reference).resolveSymbolicLinks(), resolved)) return;
+      }
+      await File(candidate).delete();
     });
+  }
+
+  Future<void> runAutoEpgMapping({required String providerId}) =>
+      _mappingLock.synchronized(() => _rebuildEpgMappings(providerId: providerId));
+
+  Future<void> _rebuildEpgMappings({required String providerId}) async {
+    final db = Get.find<DbService>().db;
+    final selected = SettingsService.to.iptv.selectedSourceId;
+    final sourceId = selected.value;
+    if (sourceId.isEmpty) return;
+    bool sourceChanged = false;
+    // A synchronous listener also catches A -> B -> A during a database await.
+    final detach = selected.addListener(() => sourceChanged = true);
+    void checkSource() {
+      if (sourceChanged || selected.isDisposed || selected.value != sourceId) {
+        throw const _MappingSourceChanged();
+      }
+    }
+
+    try {
+      await db.transaction(() async {
+        if (await db.getProviderById(providerId) == null) return;
+        final channels = await db.getChannelsForProvider(providerId);
+        final epgChannels = await db.getEpgChannelsForSource(sourceId);
+        checkSource();
+        // Missing data is not an instruction to remove saved user mappings.
+        if (channels.isEmpty || epgChannels.isEmpty) return;
+        final previous = await (db.select(db.epgMappings)..where((t) => t.providerId.equals(providerId))).get();
+        final byChannel = {for (final mapping in previous) mapping.channelId: mapping};
+        final index = _ImportEpgIndex(epgChannels);
+        final matched = <String>{};
+        final updates = <database.EpgMappingsCompanion>[];
+        for (final channel in channels) {
+          final old = byChannel[channel.id];
+          if (old != null && (old.locked || old.source != 'auto')) continue;
+          final epgId = index.match(channel);
+          if (epgId == null) continue;
+          matched.add(channel.id);
+          // Do not reset confidence or timestamps for an unchanged mapping.
+          if (old?.epgChannelId == epgId && old?.epgSourceId == sourceId) continue;
+          updates.add(
+            database.EpgMappingsCompanion.insert(
+              channelId: channel.id,
+              providerId: providerId,
+              epgChannelId: epgId,
+              epgSourceId: sourceId,
+              source: const drift.Value('auto'),
+            ),
+          );
+        }
+        checkSource();
+        for (final old in previous) {
+          if (!old.locked && old.source == 'auto' && !matched.contains(old.channelId)) {
+            await db.deleteMapping(old.channelId, providerId);
+          }
+        }
+        if (updates.isNotEmpty) await db.upsertMappings(updates);
+        // Includes changes while SQLite was writing the candidate snapshot.
+        checkSource();
+      }, requireNew: true);
+    } on _MappingSourceChanged {
+      // Transaction rollback retains the last committed mapping snapshot.
+    } finally {
+      detach();
+    }
   }
 }
 

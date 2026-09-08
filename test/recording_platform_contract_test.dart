@@ -3,7 +3,7 @@ import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/sites.dart';
 
 void main() {
-  test('every built-in platform exposes strict playback-complete recording metadata', () {
+  test('every built-in platform declares a recording detail resolver', () {
     expect(
       Sites.supportedSiteIds,
       unorderedEquals(const [
@@ -18,6 +18,9 @@ void main() {
         Sites.yySite,
         Sites.acfunSite,
         Sites.picartoSite,
+        Sites.twitcastingSite,
+        Sites.missevanSite,
+        Sites.inkeSite,
         Sites.iptvSite,
       ]),
     );

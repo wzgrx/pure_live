@@ -337,12 +337,16 @@ class KilakilaApi {
     );
   }
 
-  static List<KilakilaRoomSnapshot> _directoryRooms(Object? data) {
+  static List<KilakilaRoomSnapshot> _directoryRooms(Object? data, {bool includeRisingStars = false}) {
     final result = <KilakilaRoomSnapshot>[];
     final seen = <String>{};
     for (final row in _rows(data)) {
       final type = _nonnegative(row['dataType']);
-      if (type != 8) continue;
+      // The official type=107 rising-star list uses dataType=2 for the same
+      // roomResq/userResp live-card shape. Keep this exception scoped to that
+      // timeline; every accepted row still goes through full identity/schema
+      // checks below. Do not infer media kind or live state from dataType.
+      if (type != 8 && !(includeRisingStars && type == 2)) continue;
       final room = _snapshot(_object(row['roomResq']), _object(row['userResp']));
       if (seen.add(room.roomId)) result.add(room);
     }
@@ -364,7 +368,7 @@ class KilakilaApi {
       throw const KilakilaException(KilakilaFailure.schema);
     }
     return KilakilaDirectoryPage(
-      rooms: _directoryRooms(body['data']),
+      rooms: _directoryRooms(body['data'], includeRisingStars: type == 107),
       page: page,
       hasMore: !(body['isLastPage'] as bool),
     );

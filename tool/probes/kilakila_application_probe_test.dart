@@ -28,6 +28,7 @@ void main() {
           final uid = page.rooms.firstWhere((r) => r.isLiveNow).roomId!;
           final categories = (await site.getCategores(1, 30)).single.children;
           final newcomers = await site.getDirectoryPage(category: categories.last);
+          expect(newcomers.rooms, isNotEmpty, reason: 'This probe requires an available rising-star live sample');
           final metadata = await site.getRoomDetailForRefresh(roomId: uid, platform: site.id);
           expect(metadata.roomId, uid);
           expect(metadata.data, isNull);

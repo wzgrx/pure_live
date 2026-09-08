@@ -45,6 +45,7 @@ void main() {
     settings.iptv.isAutoSyncEnabled.v = false;
     settings.iptv.autoSyncHoursInterval.v = 24;
     settings.iptv.selectedSourceId.v = 'fixture';
+    settings.iptv.selectedSourceName.v = 'Fixture';
     Get.put(ThemeSettingsController());
     db = _Database();
     final service = DbService();
@@ -410,6 +411,180 @@ void main() {
     expect(db.providerReads, reads);
     expect(tester.takeException(), isNull);
   });
+  Future<void> beginSourceSelection(WidgetTester tester, {String language = 'zh'}) async {
+    final strings = language == 'en' ? english : translations;
+    final entry = find.text(strings['active_epg_source'] as String);
+    if (entry.evaluate().isEmpty) await tester.scrollUntilVisible(entry, 150);
+    await tester.ensureVisible(entry);
+    await tester.pumpAndSettle();
+    await tester.tap(entry);
+    await tester.pump();
+  }
+
+  testWidgets('EPG chooser loads visibly and cancellation ignores a late result', (tester) async {
+    await open(tester);
+    final pending = Completer<List<EpgSource>>();
+    db.readSources = () => pending.future;
+    await beginSourceSelection(tester);
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.tap(find.text(translations['cancel'] as String));
+    await tester.pumpAndSettle();
+    pending.complete([]);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(settings.iptv.selectedSourceId.v, 'fixture');
+    await finish(tester);
+  });
+  testWidgets('EPG source read failure is not an empty list and offers retry', (tester) async {
+    await open(tester);
+    db.readSources = () => Future.error(StateError('fixture query failed'));
+    await beginSourceSelection(tester);
+    await tester.pumpAndSettle();
+    expect(find.text(translations['no_epg_sources_found'] as String), findsNothing);
+    expect(find.text(translations['retry'] as String), findsOneWidget);
+    db.readSources = () async => [];
+    await tap(tester, 'retry');
+    expect(find.text(translations['no_epg_sources_found'] as String), findsOneWidget);
+    await tap(tester, 'cancel');
+    await finish(tester);
+  });
+  testWidgets('disposed IPTV page does not open a chooser after a late read', (tester) async {
+    await open(tester);
+    final pending = Completer<List<EpgSource>>();
+    db.readSources = () => pending.future;
+    await beginSourceSelection(tester);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    pending.complete([]);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('EPG chooser title and close action fit large text on narrow screens', (tester) async {
+    await open(tester, size: const Size(320, 480), scale: 2);
+    await beginSourceSelection(tester);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(IptvPage), findsOneWidget);
+    await finish(tester);
+  });
+  EpgSource source(String id, String name) => EpgSource(
+    id: id,
+    name: name,
+    url: 'https://example.test/$id.xml',
+    enabled: true,
+    refreshIntervalHours: 24,
+    createdAt: DateTime(2026),
+    isAutoUpdate: false,
+  );
+  testWidgets('old chooser completion cannot replace a reopened chooser or persist a selection', (tester) async {
+    await open(tester);
+    settings.iptv.selectedSourceName.v = 'Keep selection';
+    final first = Completer<List<EpgSource>>();
+    db.readSources = () => first.future;
+    await beginSourceSelection(tester);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    final second = Completer<List<EpgSource>>();
+    db.readSources = () => second.future;
+    await beginSourceSelection(tester);
+    first.complete([source('old', 'Old result')]);
+    await tester.pump();
+    expect(find.text('Old result'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    second.complete([source('new', 'New result')]);
+    await tester.pumpAndSettle();
+    expect(find.text('New result'), findsOneWidget);
+    expect(settings.iptv.selectedSourceId.v, 'fixture');
+    expect(settings.iptv.selectedSourceName.v, 'Keep selection');
+    await tester.tap(find.text('New result'));
+    await tester.pumpAndSettle();
+    expect(settings.iptv.selectedSourceId.v, 'new');
+    expect(settings.iptv.selectedSourceName.v, 'New result');
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(IptvPage), findsOneWidget);
+    await finish(tester);
+  });
+  testWidgets('rapid source-entry callbacks open one dialog and start one read', (tester) async {
+    await open(tester);
+    final pending = Completer<List<EpgSource>>();
+    db.readSources = () => pending.future;
+    final entry = find.text(translations['active_epg_source'] as String);
+    await tester.scrollUntilVisible(entry, 150);
+    await tester.pumpAndSettle();
+    final action = tester.widget<InkWell>(find.ancestor(of: entry, matching: find.byType(InkWell)).first).onTap!;
+    final reads = db.sourceReads;
+    action();
+    action();
+    await tester.pump();
+    expect(db.sourceReads, reads + 1);
+    expect(find.byType(AlertDialog), findsOneWidget);
+    pending.complete([]);
+    await tester.pumpAndSettle();
+    await tap(tester, 'cancel');
+    await finish(tester);
+  });
+  testWidgets('retry is single-flight and error has a dedicated message', (tester) async {
+    await open(tester);
+    db.readSources = () => Future.error(StateError('fixture'));
+    await beginSourceSelection(tester);
+    await tester.pumpAndSettle();
+    expect(find.text(translations['epg_sources_load_failed'] as String), findsOneWidget);
+    final pending = Completer<List<EpgSource>>();
+    db.readSources = () => pending.future;
+    final callback = tester
+        .widget<TextButton>(find.widgetWithText(TextButton, translations['retry'] as String))
+        .onPressed!;
+    final reads = db.sourceReads;
+    callback();
+    callback();
+    await tester.pump();
+    expect(db.sourceReads, reads + 1);
+    pending.complete([]);
+    await tester.pumpAndSettle();
+    expect(find.text(translations['epg_sources_load_failed'] as String), findsNothing);
+    await tap(tester, 'cancel');
+    await finish(tester);
+  });
+  testWidgets('closing a loading chooser also contains a late read error', (tester) async {
+    await open(tester);
+    final pending = Completer<List<EpgSource>>();
+    db.readSources = () => pending.future;
+    await beginSourceSelection(tester);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    pending.completeError(StateError('late fixture failure'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    await finish(tester);
+  });
+  for (final language in ['zh', 'en']) {
+    testWidgets('long source lists and labels stay selectable with large text in $language', (tester) async {
+      await open(tester, size: const Size(320, 480), scale: 2, language: language);
+      db.readSources = () async =>
+          List.generate(20, (i) => source('s$i', 'Source $i - long television programme guide name'));
+      await beginSourceSelection(tester, language: language);
+      await tester.pumpAndSettle();
+      final dialog = find.byType(AlertDialog);
+      final list = find.descendant(of: dialog, matching: find.byType(ListView));
+      final scroll = find.descendant(of: list, matching: find.byType(Scrollable)).first;
+      final last = find.descendant(of: list, matching: find.text('Source 19 - long television programme guide name'));
+      // Twenty multi-line entries exceed 9,000 logical pixels at 2x text.
+      await tester.scrollUntilVisible(last, 180, scrollable: scroll, maxScrolls: 80);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(MediaQuery.textScalerOf(tester.element(last)).scale(10), 20);
+      await tester.tap(last);
+      await tester.pumpAndSettle();
+      expect(settings.iptv.selectedSourceId.v, 's19');
+      expect(settings.iptv.selectedSourceName.v, 'Source 19 - long television programme guide name');
+      await finish(tester);
+    });
+  }
 }
 
 class _Translations extends AssetLoader {
@@ -433,6 +608,8 @@ class _Settings extends SettingsService {
 
 class _Database extends AppDatabase {
   _Database() : super.forTesting(NativeDatabase.memory());
+  Future<List<EpgSource>> Function()? readSources;
+  int sourceReads = 0;
   bool failProviderRead = false;
   int providerReads = 0;
   @override
@@ -443,15 +620,19 @@ class _Database extends AppDatabase {
   }
 
   @override
-  Future<List<EpgSource>> getAllEpgSources() async => [
-    EpgSource(
-      id: 'fixture',
-      name: 'Fixture',
-      url: 'https://example.test/epg.xml',
-      enabled: true,
-      refreshIntervalHours: 24,
-      createdAt: DateTime(2026),
-      isAutoUpdate: false,
-    ),
-  ];
+  Future<List<EpgSource>> getAllEpgSources() async {
+    sourceReads++;
+    if (readSources != null) return readSources!();
+    return [
+      EpgSource(
+        id: 'fixture',
+        name: 'Fixture',
+        url: 'https://example.test/epg.xml',
+        enabled: true,
+        refreshIntervalHours: 24,
+        createdAt: DateTime(2026),
+        isAutoUpdate: false,
+      ),
+    ];
+  }
 }

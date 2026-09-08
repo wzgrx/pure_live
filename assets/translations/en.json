@@ -751,6 +751,7 @@
     "import_epg_source": "Import EPG source",
     "active_epg_source": "Active EPG Source",
     "please_select_epg_source": "Tap to select an EPG source",
+    "epg_sources_load_failed": "Could not load EPG sources. Please retry.",
     "select_epg_source": "Select EPG Source",
     "no_epg_sources_found": "No available EPG sources found. Please import one first.",
     "epg_source_updated": "EPG Source updated successfully",

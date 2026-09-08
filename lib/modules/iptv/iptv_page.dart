@@ -21,6 +21,7 @@ class IptvPage extends StatefulWidget {
 
 class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _sourceDialogOpen = false;
   bool _networkDialogOpen = false;
   bool _networkImporting = false;
 
@@ -70,126 +71,22 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
     await _refreshData();
   }
 
-  void _showSourceSelectionDialog() async {
-    final RxBool isDialogLoading = true.obs;
-    List<database.EpgSource> sources = [];
-    final screenSize = MediaQuery.of(context).size;
-    final double dialogWidth = screenSize.width > 600 ? 520.0 : screenSize.width * 0.90;
-
+  Future<void> _showSourceSelectionDialog() async {
+    if (_sourceDialogOpen) return;
+    _sourceDialogOpen = true;
     try {
       final db = Get.find<DbService>().db;
-      sources = await db.getAllEpgSources();
-    } catch (e) {
-      debugPrint("Dialog source fetch failure: $e");
+      final selected = await showDialog<database.EpgSource>(
+        context: context,
+        builder: (_) => _EpgSourceDialog(load: db.getAllEpgSources),
+      );
+      if (!mounted || selected == null) return;
+      SettingsService.to.iptv.selectedSourceId.v = selected.id;
+      SettingsService.to.iptv.selectedSourceName.v = selected.name;
+      ToastUtil.show(i18n("epg_source_switched"));
     } finally {
-      isDialogLoading.value = false;
+      _sourceDialogOpen = false;
     }
-
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        titlePadding: const EdgeInsets.only(left: 24, top: 16, right: 12, bottom: 8),
-        contentPadding: const EdgeInsets.only(left: 12, right: 12, bottom: 8),
-        actionsPadding: const EdgeInsets.only(right: 16, bottom: 12),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(i18n("select_epg_source"), style: AppTextStyles.t11.copyWith(fontWeight: FontWeight.bold)),
-            IconButton(icon: const Icon(Icons.close, size: 22), onPressed: () => Navigator.of(context).pop()),
-          ],
-        ),
-        content: SizedBox(
-          width: dialogWidth,
-          height: 400,
-          child: Obx(() {
-            if (isDialogLoading.value) {
-              return AppStatusView(type: AppStatusType.loading, title: "", subtitle: "");
-            }
-            if (sources.isEmpty) {
-              return Center(
-                child: Text(
-                  i18n("no_epg_sources_found"),
-                  style: AppTextStyles.t14.copyWith(color: Theme.of(context).hintColor),
-                ),
-              );
-            }
-
-            return ListView.separated(
-              physics: const PureLiveScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: sources.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 4),
-              itemBuilder: (context, index) {
-                final source = sources[index];
-
-                return Obx(() {
-                  final isSelected = SettingsService.to.iptv.selectedSourceId.v == source.id;
-
-                  return Card(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.25)
-                        : Colors.transparent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () {
-                        SettingsService.to.iptv.selectedSourceId.v = source.id;
-                        final selectedSource = sources.firstWhereOrNull((s) => s.id == source.id);
-                        if (selectedSource != null) {
-                          SettingsService.to.iptv.selectedSourceName.v = selectedSource.name;
-                        }
-                        Navigator.of(context).pop();
-                        ToastUtil.show(i18n("epg_source_switched"));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Icon(
-                                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).unselectedWidgetColor,
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    source.name,
-                                    style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      source.url,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(color: Theme.of(context).hintColor),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                });
-              },
-            );
-          }),
-        ),
-        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n("cancel")))],
-      ),
-      barrierDismissible: true,
-    );
   }
 
   @override
@@ -757,6 +654,143 @@ class _NetworkImportDialogState extends State<_NetworkImportDialog> {
         TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n(_submitting ? 'close' : 'cancel'))),
         TextButton(onPressed: _submitting ? null : _submit, child: Text(i18n('confirm'))),
       ],
+    );
+  }
+}
+
+class _EpgSourceDialog extends StatefulWidget {
+  const _EpgSourceDialog({required this.load});
+  final Future<List<database.EpgSource>> Function() load;
+  @override
+  State<_EpgSourceDialog> createState() => _EpgSourceDialogState();
+}
+
+class _EpgSourceDialogState extends State<_EpgSourceDialog> {
+  bool _loading = false;
+  bool _failed = false;
+  List<database.EpgSource> _sources = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _failed = false;
+    });
+    try {
+      final sources = List<database.EpgSource>.unmodifiable(await widget.load());
+      if (!mounted) return;
+      setState(() {
+        _sources = sources;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _failed = true;
+        _loading = false;
+      });
+    }
+  }
+
+  Widget _content(BuildContext context) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_failed || _sources.isEmpty) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(i18n(_failed ? 'epg_sources_load_failed' : 'no_epg_sources_found')),
+            if (_failed) TextButton(onPressed: _load, child: Text(i18n('retry'))),
+          ],
+        ),
+      );
+    }
+    return ListView.separated(
+      physics: const PureLiveScrollPhysics(),
+      itemCount: _sources.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 4),
+      itemBuilder: (context, index) {
+        final source = _sources[index];
+        return Obx(() {
+          final selected = SettingsService.to.iptv.selectedSourceId.v == source.id;
+          return Card(
+            color: selected
+                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.25)
+                : Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(source),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                      color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).unselectedWidgetColor,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(source.name, style: TextStyle(fontWeight: selected ? FontWeight.w600 : FontWeight.w500)),
+                          const SizedBox(height: 4),
+                          Text(
+                            source.url,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Theme.of(context).hintColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => AlertDialog(
+        scrollable: false,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titlePadding: const EdgeInsets.only(left: 24, top: 16, right: 12, bottom: 8),
+        contentPadding: const EdgeInsets.only(left: 12, right: 12, bottom: 8),
+        actionsPadding: const EdgeInsets.only(right: 16, bottom: 12),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(i18n('select_epg_source'), style: AppTextStyles.t11.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            IconButton(
+              tooltip: i18n('close'),
+              icon: const Icon(Icons.close, size: 22),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 520,
+          height: (constraints.maxHeight * 0.6).clamp(100.0, 400.0),
+          child: _content(context),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel')))],
+      ),
     );
   }
 }

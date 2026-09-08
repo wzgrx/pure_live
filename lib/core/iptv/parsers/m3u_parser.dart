@@ -6,69 +6,73 @@ import 'package:pure_live/core/iptv/parsers/playlist_parse_result.dart';
 /// Supports:
 /// - Standard M3U (#EXTM3U / #EXTINF)
 /// - M3U Plus extended attributes (tvg-id, tvg-name, tvg-logo, group-title, etc.)
-/// - Xtream Codes style attributes (tvg-chno, tvg-shift)
+/// - Channel numbering through tvg-chno
 /// - Multiple URL formats (HTTP, HTTPS, RTMP, RTSP, UDP)
-/// - Auto extract EPG url from header
+/// - EXTGRP inheritance and explicit group-title reset
 class M3uParser {
-  static const String _extM3U = '#EXTM3U';
   static const String _extInf = '#EXTINF:';
   static const String _extGrp = '#EXTGRP:';
 
   static String? lastEpgUrl;
 
+  static final _header = RegExp(r'^#EXTM3U(?:\s|$)');
+
   PlaylistParseResult parse(String content, {required String providerId}) {
-    final lines = content.split(RegExp(r'\r?\n'));
+    final lines = content.split(RegExp(r'\r\n?|\n'));
     final channels = <Channel>[];
     final errors = <String>[];
-    if (lines.isEmpty) {
-      errors.add('Playlist content is empty');
-    } else {
-      final firstLine = lines.first.trim();
-      if (!firstLine.startsWith(_extM3U)) {
-        errors.add('Missing #EXTM3U header');
+    bool sawContent = false;
+    _M3uMetadata? pending;
+    int pendingLine = 0;
+    String? directiveGroup;
+
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty) continue;
+      if (!sawContent) {
+        sawContent = true;
+        if (!_header.hasMatch(line)) errors.add('Line ${i + 1}: Missing #EXTM3U header');
       }
-    }
-
-    String? currentExtInf;
-    int lineIndex = 0;
-
-    for (var line in lines) {
-      lineIndex++;
-      final trimLine = line.trim();
-      if (trimLine.isEmpty || trimLine == _extM3U) continue;
-      if (trimLine.startsWith('$_extM3U ')) continue;
-
-      if (trimLine.startsWith(_extInf)) {
-        currentExtInf = trimLine;
+      if (_header.hasMatch(line)) continue;
+      if (line.startsWith(_extInf)) {
+        if (pending != null) errors.add('Line $pendingLine: Missing stream URL');
+        pending = null;
+        pendingLine = i + 1;
+        try {
+          pending = _parseMetadata(line.substring(_extInf.length));
+          // A group-title belongs to this entry and ends EXTGRP inheritance.
+          if (pending.attributes.containsKey('group-title')) directiveGroup = null;
+        } on FormatException catch (e) {
+          errors.add('Line $pendingLine: ${e.message}');
+        }
         continue;
       }
-      // 兼容分组标签
-      if (trimLine.startsWith(_extGrp)) continue;
-      // 跳过其他注释行
-      if (trimLine.startsWith('#')) continue;
-
-      // 解析流地址
-      if (currentExtInf != null) {
+      if (line.startsWith(_extGrp)) {
+        directiveGroup = _emptyToNull(line.substring(_extGrp.length).trim());
+        continue;
+      }
+      // Unknown extension directives are not stream URLs.
+      if (line.startsWith('#')) continue;
+      if (pending != null) {
         try {
-          final channel = _parseEntry(currentExtInf, trimLine, providerId);
-          if (channel != null) channels.add(channel);
-        } catch (e) {
-          errors.add('Line $lineIndex: ${e.toString()}');
+          channels.add(_parseEntry(pending, line, providerId, directiveGroup));
+        } on FormatException catch (e) {
+          errors.add('Line ${i + 1}: ${e.message}');
         }
-        currentExtInf = null;
+        pending = null;
       }
     }
-
+    if (pending != null) errors.add('Line $pendingLine: Missing stream URL');
+    if (!sawContent) errors.add('Playlist content is empty');
     return PlaylistParseResult(channels: channels, errors: errors);
   }
 
-  Channel? _parseEntry(String extInf, String url, String providerId) {
-    if (url.isEmpty || !_isValidStreamUrl(url)) return null;
-
-    final attrs = _parseAttributes(extInf);
-    final displayName = _parseDisplayName(extInf);
-    final name = displayName.isNotEmpty ? displayName : attrs['tvg-name'];
-    if (name == null || name.isEmpty) return null;
+  Channel _parseEntry(_M3uMetadata metadata, String url, String providerId, String? directiveGroup) {
+    if (!_isValidStreamUrl(url)) throw const FormatException('Invalid or unsupported stream URL');
+    final attrs = {...metadata.attributes};
+    if (!attrs.containsKey('group-title') && directiveGroup != null) attrs['group-title'] = directiveGroup;
+    final name = metadata.displayName.isNotEmpty ? metadata.displayName : attrs['tvg-name'];
+    if (name == null || name.isEmpty) throw const FormatException('Missing channel name');
 
     // 生成唯一频道ID
     final tvgId = attrs['tvg-id'];
@@ -103,31 +107,59 @@ class M3uParser {
     );
   }
 
-  /// 增强属性解析：支持双引号/单引号/无引号
-  static Map<String, String> _parseAttributes(String content) {
-    final Map<String, String> attributes = {};
-
-    // Regular expression to match key="value" or key=value patterns
-    final RegExp attrRegex = RegExp(r'(\S+?)=["\u0027]?([^"\u0027]+)["\u0027]?(?:\s|$)');
-
-    for (final match in attrRegex.allMatches(content)) {
-      if (match.groupCount >= 2) {
-        final key = match.group(1)?.toLowerCase();
-        final value = match.group(2);
-        if (key != null && value != null) {
-          attributes[key] = value.trim();
-        }
+  /// Read one attribute at a time, stopping at the first comma outside a
+  /// quoted value. Display text is never scanned as metadata. Quoted values
+  /// may contain commas and the opposite quote; unquoted values end at space.
+  static _M3uMetadata _parseMetadata(String content) {
+    final attributes = <String, String>{};
+    int i = 0;
+    while (i < content.length) {
+      while (i < content.length && _space(content.codeUnitAt(i))) {
+        i++;
       }
+      if (i == content.length) break;
+      if (content[i] == ',') return _M3uMetadata(attributes, content.substring(i + 1).trim());
+      final keyStart = i;
+      while (i < content.length && !_space(content.codeUnitAt(i)) && content[i] != '=' && content[i] != ',') {
+        i++;
+      }
+      final key = content.substring(keyStart, i).toLowerCase();
+      while (i < content.length && _space(content.codeUnitAt(i))) {
+        i++;
+      }
+      // Skip duration and unknown bare tokens without losing the next key.
+      if (i == content.length || content[i] != '=') continue;
+      if (key.isEmpty) throw const FormatException('Missing attribute key');
+      i++;
+      while (i < content.length && _space(content.codeUnitAt(i))) {
+        i++;
+      }
+      String value;
+      if (i < content.length && (content[i] == '"' || content[i] == "'")) {
+        final quote = content[i++];
+        final start = i;
+        while (i < content.length && content[i] != quote) {
+          i++;
+        }
+        if (i == content.length) throw const FormatException('Unclosed attribute quote');
+        value = content.substring(start, i++);
+        if (i < content.length && !_space(content.codeUnitAt(i)) && content[i] != ',') {
+          throw const FormatException('Missing separator after quoted attribute');
+        }
+      } else {
+        final start = i;
+        while (i < content.length && !_space(content.codeUnitAt(i)) && content[i] != ',') {
+          i++;
+        }
+        value = content.substring(start, i);
+      }
+      attributes[key] = value.trim();
     }
-
-    return attributes;
+    // Retain the existing tvg-name fallback for a missing display delimiter.
+    return _M3uMetadata(attributes, '');
   }
 
-  /// 截取逗号后的频道名称
-  String _parseDisplayName(String extInf) {
-    final commaIndex = extInf.lastIndexOf(',');
-    return commaIndex == -1 ? '' : extInf.substring(commaIndex + 1).trim();
-  }
+  static bool _space(int c) => c == 32 || (c >= 9 && c <= 13);
 
   /// 自动判断流类型：直播/电影/剧集
   StreamType _inferStreamType(Map<String, String> attrs, String url) {
@@ -157,6 +189,12 @@ class M3uParser {
   String? _emptyToNull(String? value) {
     return (value == null || value.isEmpty) ? null : value;
   }
+}
+
+class _M3uMetadata {
+  const _M3uMetadata(this.attributes, this.displayName);
+  final Map<String, String> attributes;
+  final String displayName;
 }
 
 /// 解析结果实体

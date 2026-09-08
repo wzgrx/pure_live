@@ -69,6 +69,76 @@ void main() {
   Future<void> failWrites() => db.customStatement(
     "CREATE TRIGGER fail_channel BEFORE INSERT ON channels WHEN NEW.name = 'FAIL' BEGIN SELECT RAISE(ABORT, 'playlist fixture failure'); END",
   );
+  for (final brokenTail in [
+    '#EXTINF:-1,Missing URL\n',
+    '#EXTINF:-1 tvg-name="Unclosed,Lost\nhttps://fixture/lost\n',
+    '#EXTINF:-1,Lost\nnot-a-url\n',
+  ]) {
+    test('M3U partial parse failure preserves saved database and cache: $brokenTail', () async {
+      expect(await import(await input(_m3u())), isTrue);
+      final before = await snapshot();
+      final savedFile = File((await db.getAllProviders()).single.url!);
+      final oldBytes = await savedFile.readAsBytes();
+      expect(await import(await input(_m3u(url: 'https://fixture/new') + brokenTail)), isFalse);
+      await reopen();
+      expect(await snapshot(), before);
+      expect(await savedFile.readAsBytes(), oldBytes);
+      expect(await cache.list().length, 1);
+    });
+  }
+  test('unique URL fallback never crosses conflicting TVG identities', () async {
+    expect(await import(await input('#EXTM3U\n#EXTINF:-1 tvg-id="old",Old\nhttps://fixture/live\n')), isTrue);
+    final old = (await db.select(db.channels).get()).single;
+    expect(await import(await input('#EXTM3U\n#EXTINF:-1 tvg-id="new",New\nhttps://fixture/live\n')), isTrue);
+    final updated = (await db.select(db.channels).get()).single;
+    expect(updated.id, isNot(old.id));
+    expect(updated.tvgId, 'new');
+  });
+  test('shared stream URL never guesses IDs for multiple renamed channels', () async {
+    expect(
+      await import(
+        await input('#EXTM3U\n#EXTINF:-1,Old A\nhttps://fixture/live\n#EXTINF:-1,Old B\nhttps://fixture/live\n'),
+      ),
+      isTrue,
+    );
+    final before = await snapshot();
+    final old = File((await db.getAllProviders()).single.url!);
+    final bytes = await old.readAsBytes();
+    expect(
+      await import(
+        await input('#EXTM3U\n#EXTINF:-1,New A\nhttps://fixture/live\n#EXTINF:-1,New B\nhttps://fixture/live\n'),
+      ),
+      isFalse,
+    );
+    await reopen();
+    expect(await snapshot(), before);
+    expect(await old.readAsBytes(), bytes);
+  });
+
+  test('M3U parser upgrade preserves legacy truncated names by unique stream identity', () async {
+    expect(await import(await input('#EXTM3U\n#EXTINF:-1,World\nhttps://fixture/live\n')), isTrue);
+    final old = (await db.select(db.channels).get()).single;
+    await (db.update(db.channels)..where((t) => t.id.equals(old.id))).write(
+      const ChannelsCompanion(favorite: drift.Value(true), hidden: drift.Value(true)),
+    );
+    expect(await import(await input('#EXTM3U\n#EXTINF:-1 tvg-id="news",News, World\nhttps://fixture/live\n')), isTrue);
+    await reopen();
+    final updated = (await db.select(db.channels).get()).single;
+    expect(updated.id, old.id);
+    expect(updated.name, 'News, World');
+    expect(updated.tvgId, 'news');
+    expect(updated.favorite, isTrue);
+    expect(updated.hidden, isTrue);
+  });
+
+  test('M3U final metadata and comma display name reach the database intact', () async {
+    expect(await import(await input('#EXTM3U\n#EXTINF:-1 tvg-id="news",News, World\nhttps://fixture/live\n')), isTrue);
+    await reopen();
+    final channel = (await db.select(db.channels).get()).single;
+    expect(channel.tvgId, 'news');
+    expect(channel.name, 'News, World');
+  });
+
   test('forced same-name refresh updates one provider instead of creating a duplicate', () async {
     expect(await import(await input(_m3u())), isTrue);
     final old = (await db.getAllProviders()).single;

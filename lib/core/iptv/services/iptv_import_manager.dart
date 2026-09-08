@@ -199,6 +199,11 @@ class IptvImportManager {
       final parsed = ext == '.txt'
           ? TxtParser().parse(content, providerId: '')
           : M3uParser().parse(content, providerId: '');
+      // A partial parse is not a complete replacement snapshot. Keep the old
+      // playlist if a stanza was truncated or rejected instead of pruning it.
+      if (parsed.hasErrors) {
+        throw FormatException('Playlist parse failed: ${parsed.errors.first}');
+      }
       if (parsed.channels.isEmpty) {
         if (showTips) ToastUtil.show(i18n('unsupported_file_format'));
         return false;

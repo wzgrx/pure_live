@@ -6,7 +6,8 @@ import 'package:pure_live/core/iptv/local/database.dart' as db;
 import 'package:pure_live/core/iptv/models/channel.dart' as model;
 
 /// Preserve durable IDs by unambiguous feed identity, never String.hashCode.
-/// Exact stream matches run before URL-independent matches for rotating tokens.
+/// Combined stream/name matches precede URL-independent matches for rotating
+/// tokens; a unique unchanged URL is the last resort for corrected feed names.
 List<db.ChannelsCompanion> reconcilePlaylistChannels({
   required String providerId,
   required List<db.Channel> previous,
@@ -31,7 +32,7 @@ List<db.ChannelsCompanion> reconcilePlaylistChannels({
   final channels = unique.values.toList();
   final matched = <int, db.Channel>{};
   final used = <String>{};
-  for (var phase = 0; phase < 7; phase++) {
+  for (var phase = 0; phase < 8; phase++) {
     final oldKeys = <String, List<db.Channel>>{};
     final newKeys = <String, List<int>>{};
     for (final old in previous) {
@@ -60,18 +61,21 @@ List<db.ChannelsCompanion> reconcilePlaylistChannels({
   // Index remaining candidates rather than doing another quadratic scan.
   final remainingTvg = <String>{};
   final remainingNames = <String, Set<String>>{};
+  final remainingUrls = <String, Set<String>>{};
   for (final old in previous) {
     if (used.contains(old.id)) continue;
     final tvg = _normalize(old.tvgId);
     if (tvg.isNotEmpty) remainingTvg.add(tvg);
     (remainingNames[_normalize(old.name)] ??= {}).add(tvg);
+    (remainingUrls[old.streamUrl.trim()] ??= {}).add(tvg);
   }
   for (var i = 0; i < channels.length; i++) {
     if (matched.containsKey(i)) continue;
     final t = _normalize(channels[i].tvgId);
     final names = remainingNames[_normalize(channels[i].name)];
-    if ((t.isNotEmpty && remainingTvg.contains(t)) ||
-        (names != null && (t.isEmpty || names.contains('') || names.contains(t)))) {
+    final urls = remainingUrls[channels[i].streamUrl.trim()];
+    bool plausible(Set<String>? values) => values != null && (t.isEmpty || values.contains('') || values.contains(t));
+    if ((t.isNotEmpty && remainingTvg.contains(t)) || plausible(names) || plausible(urls)) {
       throw StateError('Ambiguous playlist channel identities; previous playlist preserved');
     }
   }
@@ -89,7 +93,8 @@ String? _key(int phase, String name, String? tvgId, String url, String? group) {
     3 => n.isEmpty ? null : jsonEncode([n, u]),
     4 => t.isEmpty ? null : t,
     5 => n.isEmpty ? null : jsonEncode([n, g]),
-    _ => n.isEmpty ? null : n,
+    6 => n.isEmpty ? null : n,
+    _ => u.isEmpty ? null : u,
   };
 }
 

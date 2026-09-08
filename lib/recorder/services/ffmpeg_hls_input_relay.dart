@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pure_live/core/common/log.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 
 import 'hls_session_cookies.dart';
 import 'hls_media_spool.dart';
@@ -32,7 +33,9 @@ class FFmpegHlsInputRelay {
     required this._secret,
     required this.drainOnStop,
     required this._createStagingDirectory,
+    required HlsSourceQueryPolicy? sourceQueryPolicy,
   }) {
+    _sourceQueryPolicy = sourceQueryPolicy;
     _resources['root'] = upstream;
   }
 
@@ -75,6 +78,7 @@ class FFmpegHlsInputRelay {
   final bool drainOnStop;
   final Future<Directory> Function() _createStagingDirectory;
   final HlsSessionCookies _cookies = HlsSessionCookies();
+  HlsSourceQueryPolicy? _sourceQueryPolicy;
   final Map<String, Uri> _resources = <String, Uri>{};
   final Map<String, String> _resourceIds = <String, String>{};
   final Map<String, String> _manifests = <String, String>{};
@@ -124,17 +128,30 @@ class FFmpegHlsInputRelay {
     Iterable<String> source, {
     bool force = false,
     bool drainOnStop = false,
+    // Explicit selected-source capability, never inferred from a query name.
+    HlsSourceQueryPolicy? sourceQueryPolicy,
     // Tests supply an isolated owned directory or controlled storage failure.
     Future<Directory> Function()? createStagingDirectory,
   }) async {
     final arguments = List<String>.of(source);
     final inputIndex = arguments.indexOf('-i');
-    if (inputIndex < 0 || inputIndex + 1 >= arguments.length) return null;
+    if (inputIndex < 0 || inputIndex + 1 >= arguments.length) {
+      if (sourceQueryPolicy != null) throw const FormatException('Missing policy-bound HLS input');
+      return null;
+    }
 
     final upstream = Uri.tryParse(arguments[inputIndex + 1].trim());
+    if (sourceQueryPolicy != null &&
+        (upstream == null || !_isHlsUri(upstream) || !sourceQueryPolicy.matchesSource(upstream))) {
+      throw const FormatException('HLS query policy does not match selected input');
+    }
     if (upstream == null || !_isHlsUri(upstream)) return null;
     final supportedHost = !kIsWeb && (Platform.isAndroid || Platform.isLinux);
-    if (!force && !drainOnStop && (!supportedHost || upstream.scheme.toLowerCase() != 'https')) return null;
+    if (!force &&
+        !drainOnStop &&
+        sourceQueryPolicy == null &&
+        (!supportedHost || upstream.scheme.toLowerCase() != 'https'))
+      return null;
 
     final connections = CancellableHttpConnections();
     final client = HttpClient()
@@ -153,6 +170,7 @@ class FFmpegHlsInputRelay {
       secret: _newSecret(),
       drainOnStop: drainOnStop,
       createStagingDirectory: createStagingDirectory ?? _defaultStagingDirectory,
+      sourceQueryPolicy: sourceQueryPolicy,
     );
     relay._subscription = server.listen(relay._acceptRequest, onError: relay._handleServerError);
     return relay;
@@ -202,6 +220,7 @@ class FFmpegHlsInputRelay {
     _finishTimer?.cancel();
     _stopFetching();
     _cookies.clear();
+    _sourceQueryPolicy = null;
     _client.close(force: true);
     await _server.close(force: true);
     await _subscription?.cancel();
@@ -355,7 +374,7 @@ class FFmpegHlsInputRelay {
   }
 
   Future<(HttpClientResponse, Uri)> _openUpstream(String method, Uri upstream, {String? range}) async {
-    var uri = upstream;
+    var uri = _sourceQueryPolicy?.apply(upstream) ?? upstream;
     final originalOrigin = _resources['root']!.origin;
     // Process each redirect ourselves: HttpClient does not retain Set-Cookie
     // from intermediate responses. Re-evaluate sensitive headers at every hop.
@@ -412,7 +431,8 @@ class FFmpegHlsInputRelay {
       if (!const {301, 302, 303, 307, 308}.contains(response.statusCode) || location == null) {
         return (response, uri);
       }
-      final next = uri.resolve(location);
+      final resolved = uri.resolve(location);
+      final next = _sourceQueryPolicy?.apply(resolved) ?? resolved;
       if (redirects >= 5 ||
           !const {'http', 'https'}.contains(next.scheme) ||
           next.userInfo.isNotEmpty ||

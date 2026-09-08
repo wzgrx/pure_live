@@ -3,15 +3,37 @@ import 'dart:async';
 
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/plugins/utils.dart';
+import 'package:pure_live/core/site/cc/cc_catalog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// APP页面跳转封装
 /// * 需要参数的页面都应使用此类
 /// * 如不需要参数，可以使用Get.toNamed
 class AppNavigator {
   static bool _openingLiveRoom = false;
+  static bool _openingOfficialCategory = false;
 
   /// 跳转至分类详情
-  static void toCategoryDetail({required Site site, required LiveArea category}) {
+  static Future<void> toCategoryDetail({required Site site, required LiveArea category}) async {
+    if (CCCatalog.isOfficialEntry(category)) {
+      if (_openingOfficialCategory) return;
+      final uri = site.id == Sites.ccSite ? CCCatalog.officialEntryUri(category) : null;
+      if (uri == null) {
+        ToastUtil.show(i18n('external_browser_not_opened'));
+        return;
+      }
+      _openingOfficialCategory = true;
+      try {
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+          ToastUtil.show(i18n('external_browser_not_opened'));
+        }
+      } catch (_) {
+        ToastUtil.show(i18n('external_browser_not_opened'));
+      } finally {
+        _openingOfficialCategory = false;
+      }
+      return;
+    }
     Get.toNamed(RoutePath.kAreaRooms, arguments: [site, category]);
   }
 

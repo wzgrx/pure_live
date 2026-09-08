@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/model/live_category.dart';
-import 'package:pure_live/core/common/core_log.dart';
+import 'package:pure_live/core/site/cc/cc_catalog.dart';
 import 'package:pure_live/model/live_anchor_item.dart';
 import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/model/live_play_quality.dart';
@@ -32,71 +30,26 @@ class CCSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoomResol
 
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
-    try {
-      final payload = await HttpClient.instance.getText(
-        "https://cc.163.com/category/",
-        queryParameters: {"format": "json"},
-        header: {"user-agent": kUserAgent},
-      );
-      return parseCategoryPayload(payload);
-    } catch (error) {
-      // CC now redirects this legacy JSON endpoint to the official
-      // `ds.163.com/glive` HTML application in some regions. Category
-      // navigation must remain usable while the platform migrates the API.
-      CoreLog.error(error);
-      return defaultCategories();
-    }
-  }
-
-  static List<LiveCategory> defaultCategories() => [
-    LiveCategory(id: "1", name: "全部", children: []),
-    LiveCategory(id: "2", name: "端游", children: []),
-    LiveCategory(id: "4", name: "手游", children: []),
-    LiveCategory(id: "5", name: "其他", children: []),
-  ];
-
-  /// Parses the legacy CC category payload without allowing an HTML redirect,
-  /// empty response, or a partially migrated schema to break the whole page.
-  static List<LiveCategory> parseCategoryPayload(String payload) {
-    final categories = defaultCategories();
-    try {
-      final result = jsonDecode(payload);
-      if (result is! Map || result['game_list'] is! List) return categories;
-      final allGames = List<dynamic>.from(result['game_list'] as List);
-      for (var item in categories) {
-        var games = allGames;
-        if (item.id == "2") {
-          games = games.where((x) => x["game_tag"] == "pc_game").toList();
-        } else if (item.id == "4") {
-          games = games.where((x) => x["game_tag"] == "mobile_game").toList();
-        } else if (item.id == "5") {
-          games = games.where((x) => x["game_tag"] == "other").toList();
-        }
-        item.children.addAll(_getSubCategories(item, games));
-      }
-    } catch (_) {
-      // Keep the stable top-level categories. The recommendation feed still
-      // provides rooms even when CC withdraws the legacy game-list payload.
-    }
-    return categories;
-  }
-
-  static List<LiveArea> _getSubCategories(LiveCategory liveCategory, List<dynamic> result) {
-    final subs = <LiveArea>[];
-    for (var item in result) {
-      if (item is! Map) continue;
-      var gid = item["gametype"].toString();
-      var subCategory = LiveArea(
-        areaId: gid,
-        areaName: item["gamename"] ?? '',
-        areaType: liveCategory.id,
-        platform: Sites.ccSite,
-        areaPic: item["img"],
-        typeName: liveCategory.name,
-      );
-      subs.add(subCategory);
-    }
-    return subs;
+    // The legacy category endpoint now serves the Dashen HTML application.
+    // Fetch its public metadata and live-entry configuration, not an HTML
+    // fallback or a guessed static list of games.
+    final headers = {'user-agent': kUserAgent, 'referer': 'https://ds.163.com/glive/', 'origin': 'https://ds.163.com'};
+    final games = await HttpClient.instance.getJson(
+      'https://inf.ds.163.com/v1/web/game-center/basic/base-info-list/by-type',
+      queryParameters: {'gameType': 'NETEASE'},
+      header: headers,
+    );
+    final configuration = await HttpClient.instance.postJson(
+      'https://inf-act.ds.163.com/v1/act-web/pageConf/commonAppConfig',
+      data: {'id': CCCatalog.configurationId},
+      header: headers,
+    );
+    return CCCatalog.parse(
+      games,
+      configuration,
+      categoryLabel: i18n('cc_live_categories'),
+      officialLabel: i18n('cc_official_entries'),
+    );
   }
 
   @override

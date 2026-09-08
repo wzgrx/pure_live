@@ -16,6 +16,9 @@ class AreasListController extends ServerAllPageController<LiveArea> {
   bool get isFlatten => site.id == Sites.douyinSite;
 
   @override
+  bool get showInlineError => site.id == Sites.ccSite;
+
+  @override
   int get localItemCount => _getCurrentTabAllChildren().length;
 
   AreasListController(this.site);
@@ -23,8 +26,17 @@ class AreasListController extends ServerAllPageController<LiveArea> {
   @override
   Future<List<LiveArea>> fetchAllServerData() async {
     var result = await site.liveSite.getCategores(1, 1000);
+    // Read the latest selection after the request; a tab click while loading
+    // belongs to the user, not to the request's earlier snapshot.
+    final selectedId = tabIndex.value >= 0 && tabIndex.value < categories.length ? categories[tabIndex.value].id : null;
     var channels = result.map((e) => AppLiveCategory.fromLiveCategory(e)).toList();
     AreaPicMapper.updateAreaListMaps(channels);
+
+    // A refreshed taxonomy may remove or reorder a parent (for example CC's
+    // four legacy tabs becoming live categories plus official entry points).
+    // Keep identity where possible; an obsolete index must not hide valid rows.
+    final selectedIndex = channels.indexWhere((category) => category.id == selectedId);
+    tabIndex.value = selectedIndex < 0 ? 0 : selectedIndex;
 
     _serverRawBackup.clear();
 

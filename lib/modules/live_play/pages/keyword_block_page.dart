@@ -168,9 +168,17 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
               theme,
               text: values[index],
               icon: users ? Icons.person_off_rounded : Icons.filter_alt_off_rounded,
-              onRemove: () => users
-                  ? settingsService.fav.removeBlockedDanmakuUser(index)
-                  : settingsService.fav.removeShieldList(index),
+              onRemove: () {
+                final favorites = settingsService.fav;
+                // Resolve the rendered value against current preferences, not a stale index.
+                final current = users ? favorites.blockedDanmakuUsers : favorites.shieldList;
+                final currentIndex = current.indexOf(values[index]);
+                if (users) {
+                  favorites.removeBlockedDanmakuUser(currentIndex);
+                } else {
+                  favorites.removeShieldList(currentIndex);
+                }
+              },
             ),
           ),
         ],
@@ -272,27 +280,32 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
                 ),
-                child: Text(
-                  display,
-                  style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.bold, color: digitColor),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    display,
+                    style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.bold, color: digitColor),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-
           const SizedBox(height: 4),
 
           Transform.translate(

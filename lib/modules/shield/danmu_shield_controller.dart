@@ -16,8 +16,9 @@ class DanmuShieldController extends GetxController {
 
   Color get themeColor => HexColor(SettingsService.to.theme.themeColorSwitch.v);
 
-  void remove(int itemIndex) {
-    SettingsService.to.fav.removeShieldList(itemIndex);
+  void remove(String keyword) {
+    final favorites = SettingsService.to.fav;
+    favorites.removeShieldList(favorites.shieldList.indexOf(keyword));
   }
 
   @override

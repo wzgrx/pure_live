@@ -74,15 +74,12 @@ class DanmuShieldPage extends GetView<DanmuShieldController> {
             return Wrap(
               runSpacing: 10,
               spacing: 10,
-              children: list.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-
+              children: list.map((item) {
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(10),
-                    onTap: () => controller.remove(index),
+                    onTap: () => controller.remove(item),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
@@ -93,7 +90,9 @@ class DanmuShieldPage extends GetView<DanmuShieldController> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(item, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                          Flexible(
+                            child: Text(item, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                          ),
                           const SizedBox(width: 6),
                           Icon(Remix.close_line, size: 14, color: theme.colorScheme.primary.withValues(alpha: 0.6)),
                         ],

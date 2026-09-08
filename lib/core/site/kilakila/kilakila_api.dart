@@ -5,6 +5,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:pure_live/core/common/http_client.dart';
 
+import 'kilakila_link.dart';
+
 enum KilakilaFailure {
   transport,
   access,
@@ -434,5 +436,16 @@ class KilakilaApi {
     final current = profile.currentRoom;
     if (current == null) return null;
     return detail(current.roomId, expectedUserId: profile.userId, playback: playback, cancel: cancel);
+  }
+
+  /// Convert a supported public link to the anchor identity before persisting
+  /// a favorite. A historical broadcast that cannot identify its owner remains
+  /// an explicit error, rather than a guessed UID or a fake offline favorite.
+  Future<KilakilaOwnerSnapshot> ownerFromLink(String value, {CancelToken? cancel}) async {
+    final link = KilakilaLink.parse(value);
+    if (link == null) throw const KilakilaException(KilakilaFailure.schema);
+    if (link.kind == KilakilaLinkKind.owner) return owner(link.id, cancel: cancel);
+    final broadcast = await detail(link.id, playback: false, cancel: cancel);
+    return owner(broadcast.userId, cancel: cancel);
   }
 }

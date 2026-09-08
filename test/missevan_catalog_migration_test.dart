@@ -32,21 +32,28 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 5);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'twitcasting']);
     final controller = Get.put(FavoriteRoomController());
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao']);
-    expect(controller.siteCatalogMigration.value, 9);
+    expect(controller.hotAreasList, ['huya', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao', 'openrec']);
+    expect(controller.siteCatalogMigration.value, 10);
     controller.hotAreasList.remove('missevan');
     controller.onInit();
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao']);
+    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao', 'openrec']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
-    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao']);
+    expect(Get.put(FavoriteRoomController()).hotAreasList, [
+      'huya',
+      'twitcasting',
+      'inke',
+      'kilakila',
+      'huajiao',
+      'openrec',
+    ]);
   });
 
   test('heat-only platform never becomes a concurrent-viewer setting', () async {
     await HivePrefUtil.setInt('audienceMetricMigration', 5);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final controller = Get.put(AppSettingsController());
-    expect(controller.realOnlinePlatforms, ['twitch']);
+    expect(controller.realOnlinePlatforms, ['twitch', 'openrec']);
     expect(AppSettingsController.normalizeRealOnlinePlatforms(['missevan', 'twitch']), ['twitch']);
   });
 

@@ -23,6 +23,7 @@ void main() {
         Sites.inkeSite,
         Sites.kilakilaSite,
         Sites.huajiaoSite,
+        Sites.openrecSite,
         Sites.iptvSite,
       ]),
     );

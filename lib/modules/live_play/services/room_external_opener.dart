@@ -1,3 +1,5 @@
+import 'package:pure_live/core/site/openrec/openrec_link.dart';
+import 'package:pure_live/core/site/openrec/openrec_api.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/danmaku/douyin_danmaku.dart';
 import 'package:pure_live/core/danmaku/huya_danmaku.dart';
@@ -36,6 +38,12 @@ class RoomExternalOpener {
     if (id == null) return null;
     final path = Uri.encodeComponent(id);
     switch (site) {
+      case Sites.openrecSite:
+        try {
+          return RoomExternalTarget(web: OpenrecRoomKey.parse(id).url);
+        } on OpenrecException {
+          return null;
+        }
       case Sites.huajiaoSite:
         if (!HuajiaoLink.validId(id)) return null;
         return RoomExternalTarget(web: HuajiaoLink.ownerUrl(id));

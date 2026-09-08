@@ -162,7 +162,7 @@ class OpenrecApi {
     }
   }
 
-  Future<Object?> _get(String path, Map<String, String> query, CancelToken? cancel) async {
+  Future<String> _read(Uri uri, CancelToken? cancel) async {
     void checkCancelled() {
       if (cancel?.isCancelled == true) throw const OpenrecException(OpenrecFailure.cancelled);
     }
@@ -170,10 +170,7 @@ class OpenrecApi {
     checkCancelled();
     late final ({int status, String body}) response;
     try {
-      response = await _request(
-        Uri.parse('$origin/external/api/v5/$path').replace(queryParameters: query.isEmpty ? null : query),
-        cancel,
-      );
+      response = await _request(uri, cancel);
     } catch (error) {
       checkCancelled();
       if (error is OpenrecException) rethrow;
@@ -193,12 +190,22 @@ class OpenrecApi {
     if (response.body.length > responseLimit || utf8.encode(response.body).length > responseLimit) {
       throw const OpenrecException(OpenrecFailure.schema);
     }
+    return response.body;
+  }
+
+  Future<Object?> _get(String path, Map<String, String> query, CancelToken? cancel) async {
+    final body = await _read(
+      Uri.parse('$origin/external/api/v5/$path').replace(queryParameters: query.isEmpty ? null : query),
+      cancel,
+    );
     try {
-      return jsonDecode(response.body);
+      return jsonDecode(body);
     } on FormatException {
       throw const OpenrecException(OpenrecFailure.schema);
     }
   }
+
+  Future<String> manifest(String url, {CancelToken? cancel}) async => _read(Uri.parse(mediaUrl(url)), cancel);
 
   Future<OpenrecDirectory> directory({int page = 1, int limit = 30, CancelToken? cancel}) async {
     if (page < 1 || page > 1000000 || limit < 1 || limit > 30) throw const OpenrecException(OpenrecFailure.schema);
@@ -295,7 +302,7 @@ class OpenrecApi {
     for (final entry in const {'url': 'hls', 'url_ull': 'low-latency-hls', 'url_public': 'public-hls'}.entries) {
       final value = media[entry.key];
       if (value == null || value == '') continue;
-      final url = _mediaUrl(value);
+      final url = mediaUrl(value);
       if (seen.add(url)) sources.add(OpenrecMedia(entry.value, url));
     }
     // No trial, archive, audio-only or URL rewriting fallback.
@@ -406,7 +413,7 @@ class OpenrecApi {
     return uri != null && _trusted(uri) ? value : '';
   }
 
-  static String _mediaUrl(Object? value) {
+  static String mediaUrl(Object? value) {
     if (value is! String || value.length > 8192 || value.contains(RegExp(r'\s'))) {
       throw const OpenrecException(OpenrecFailure.schema);
     }

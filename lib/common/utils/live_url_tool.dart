@@ -1,3 +1,5 @@
+import 'package:pure_live/core/site/openrec/openrec_api.dart';
+import 'package:pure_live/core/site/openrec/openrec_link.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:pure_live/core/site/huajiao/huajiao_api.dart';
 import 'package:pure_live/core/site/huajiao/huajiao_link.dart';
@@ -57,7 +59,9 @@ class LiveUrlTool {
       'twitcasting.tv',
     };
     return sharedHttpUrls(text).any((raw) {
-      if (HuajiaoLink.parse(raw) != null || KilakilaLink.parse(raw) != null) return true;
+      if (OpenrecLink.parse(raw) != null || HuajiaoLink.parse(raw) != null || KilakilaLink.parse(raw) != null) {
+        return true;
+      }
       final uri = Uri.parse(raw);
       return InkeApi.roomFromUri(uri) != null ||
           MissevanApi.roomFromUri(uri) != null ||
@@ -71,6 +75,7 @@ class LiveUrlTool {
     dio.CancelToken? cancelToken,
     KilakilaApi? kilakilaApi,
     HuajiaoApi? huajiaoApi,
+    OpenrecApi? openrecApi,
     Duration timeout = const Duration(seconds: 12),
   }) async {
     if (cancelToken?.isCancelled ?? false) return [];
@@ -82,6 +87,7 @@ class LiveUrlTool {
         session,
         kilakilaApi ?? KilakilaApi(),
         huajiaoApi ?? HuajiaoApi(),
+        openrecApi ?? OpenrecApi(),
         ownedCancel,
       );
       final result = cancelToken == null
@@ -105,6 +111,7 @@ class LiveUrlTool {
     LiveShortLinkSession session,
     KilakilaApi kilakilaApi,
     HuajiaoApi huajiaoApi,
+    OpenrecApi openrecApi,
     dio.CancelToken cancel,
   ) async {
     for (final raw in sharedHttpUrls(text)) {
@@ -112,6 +119,19 @@ class LiveUrlTool {
       if (session.isClosed) return [];
       final host = uri.host.toLowerCase();
       final realUrl = raw;
+      final openrec = OpenrecLink.parse(raw);
+      if (openrec != null) {
+        late final OpenrecRoomKey key;
+        if (openrec.kind == OpenrecLinkKind.channel) {
+          final owner = await openrecApi.channel(openrec.id, cancel: cancel);
+          key = OpenrecRoomKey.create(owner.id, owner.numericId);
+        } else {
+          final movie = await openrecApi.movie(openrec.id, cancel: cancel);
+          key = OpenrecRoomKey.create(movie.channelId, movie.numericChannelId);
+        }
+        if (session.isClosed || cancel.isCancelled) return [];
+        return [key.value, Sites.openrecSite];
+      }
       final huajiao = HuajiaoLink.parse(raw);
       if (huajiao != null) {
         if (huajiao.kind == HuajiaoLinkKind.owner) return [huajiao.id, Sites.huajiaoSite];
@@ -137,7 +157,7 @@ class LiveUrlTool {
         final response = await session.get(uri);
         final location = LiveShortLinkSession.redirectTarget(uri, response);
         if (location == null) continue;
-        final target = await _parseLiveUrl(location.toString(), session, kilakilaApi, huajiaoApi, cancel);
+        final target = await _parseLiveUrl(location.toString(), session, kilakilaApi, huajiaoApi, openrecApi, cancel);
         if (target.isNotEmpty) return target;
         continue;
       }

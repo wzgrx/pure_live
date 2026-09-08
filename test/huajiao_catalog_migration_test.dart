@@ -27,22 +27,22 @@ void main() {
     await folder.delete(recursive: true);
   });
 
-  test('version eight adds only Huajiao and disabling survives disk reopen', () async {
+  test('version eight adds Huajiao and subsequent catalog entries and disabling survives disk reopen', () async {
     await HivePrefUtil.setInt('siteCatalogMigration', 8);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'inke']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'inke', 'huajiao']);
-    expect(settings.siteCatalogMigration.value, 9);
+    expect(settings.hotAreasList, ['huya', 'inke', 'huajiao', 'openrec']);
+    expect(settings.siteCatalogMigration.value, 10);
     settings.hotAreasList.remove('huajiao');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'inke']);
+    expect(settings.hotAreasList, ['huya', 'inke', 'openrec']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
     final reopened = Get.put(FavoriteRoomController());
-    expect(reopened.siteCatalogMigration.value, 9);
-    expect(reopened.hotAreasList, ['huya', 'inke']);
+    expect(reopened.siteCatalogMigration.value, 10);
+    expect(reopened.hotAreasList, ['huya', 'inke', 'openrec']);
   });
 
   test('backup normalization retains Huajiao order and does not duplicate it', () async {

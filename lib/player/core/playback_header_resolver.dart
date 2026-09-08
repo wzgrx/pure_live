@@ -1,3 +1,4 @@
+import 'package:pure_live/core/site/openrec/openrec_api.dart';
 import 'package:pure_live/common/services/settings_service.dart';
 import 'package:pure_live/core/site/bilibili/bilibili_site.dart';
 import 'package:pure_live/core/site/douyin/douyin_site.dart';
@@ -139,6 +140,9 @@ class PlaybackHeaderResolver {
         break;
       case Sites.missevanSite:
         headers = MissevanApi.playHeaders;
+        break;
+      case Sites.openrecSite:
+        headers = OpenrecApi.headers;
         break;
       case Sites.huajiaoSite:
         headers = HuajiaoApi.headers;

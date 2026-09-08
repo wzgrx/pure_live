@@ -46,24 +46,41 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 4);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'acfun']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao']);
-    expect(settings.siteCatalogMigration.value, 9);
+    expect(settings.hotAreasList, [
+      'huya',
+      'acfun',
+      'twitcasting',
+      'missevan',
+      'inke',
+      'kilakila',
+      'huajiao',
+      'openrec',
+    ]);
+    expect(settings.siteCatalogMigration.value, 10);
     settings.hotAreasList.remove('twitcasting');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'acfun', 'missevan', 'inke', 'kilakila', 'huajiao']);
+    expect(settings.hotAreasList, ['huya', 'acfun', 'missevan', 'inke', 'kilakila', 'huajiao', 'openrec']);
     await Hive.box<dynamic>('app_settings').flush();
-    expect(HivePrefUtil.getStringList('hotAreasList'), ['huya', 'acfun', 'missevan', 'inke', 'kilakila', 'huajiao']);
+    expect(HivePrefUtil.getStringList('hotAreasList'), [
+      'huya',
+      'acfun',
+      'missevan',
+      'inke',
+      'kilakila',
+      'huajiao',
+      'openrec',
+    ]);
   });
 
   test('audience upgrade adds only TwitCasting and respects subsequent disabling', () async {
     await HivePrefUtil.setInt('audienceMetricMigration', 4);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final settings = Get.put(AppSettingsController());
-    expect(settings.realOnlinePlatforms, ['twitch', 'twitcasting']);
-    expect(settings.audienceMetricMigration.value, 5);
+    expect(settings.realOnlinePlatforms, ['twitch', 'twitcasting', 'openrec']);
+    expect(settings.audienceMetricMigration.value, 6);
     settings.setRealOnlineEnabledFor('twitcasting', false);
     settings.onInit();
-    expect(settings.realOnlinePlatforms, ['twitch']);
+    expect(settings.realOnlinePlatforms, ['twitch', 'openrec']);
     expect(AppSettingsController.normalizeRealOnlinePlatforms([' TWITCASTING ', 'huya']), ['twitcasting']);
   });
 }

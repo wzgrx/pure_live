@@ -20,3 +20,14 @@ on the sample channel.
 The service returned two rows for a request with `limit=1`; the API treats the
 requested count only as a hint. Only an empty raw page ends pagination, not the
 post-filter card count or a comparison with the requested limit.
+
+## HLS captures
+
+`master.m3u8`, `public-master.m3u8`, `low-latency-master.m3u8` and
+`media-playlist.m3u8` retain the captured tag/attribute structure and relative
+versus absolute references from the same September 8 UTC public sample.
+Signed stream paths and sequence names are replaced. Ordinary/public/low-latency
+masters declare 5/1/1 variants; the media list is rolling, not ENDLIST/VOD.
+Tests that add alternate audio, encryption, malformed tags or simultaneous
+broadcasts are synthetic mutations, not claims that the sample exhibited them.
+See [application integration](../../../docs/OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md).

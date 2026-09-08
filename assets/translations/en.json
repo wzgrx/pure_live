@@ -1537,5 +1537,14 @@
     "site_huajiao": "Huajiao",
     "huajiao_hot": "Public recommendations",
     "huajiao_original_stream": "Original stream",
-    "huajiao_directory_scope": "Official public video recommendations. Search, chat and special rooms are not integrated; heat is not a viewer count."
+    "huajiao_directory_scope": "Official public video recommendations. Search, chat and special rooms are not integrated; heat is not a viewer count.",
+    "openrec_directory_scope": "Public mellow-fan (formerly OPENREC) live streams. Import a channel or live share link to verify owner identity; renamed channels need revalidation. Search, chat and special modes remain pending. Network errors do not mean offline.",
+    "openrec_public_directory": "Public live streams",
+    "openrec_low_latency": "Low-latency source",
+    "openrec_public_source": "Public source",
+    "openrec_restricted": "This stream has access restrictions; its viewing mode is not integrated yet.",
+    "openrec_multiple_broadcasts": "This channel has multiple current broadcasts. Check the original site; none is selected automatically.",
+    "openrec_partial_sources": "Some sources are temporarily unavailable. Only successfully parsed qualities are listed.",
+    "openrec_hls_auto": "HLS Auto",
+    "audience_openrec_detail": "Directory and room metadata expose public concurrent viewers. Hidden counts stay unknown; cumulative views are not substituted."
 }

@@ -52,11 +52,21 @@ void main() {
       'inke',
       'kilakila',
       'huajiao',
+      'openrec',
     ]);
-    expect(settings.siteCatalogMigration.value, 9);
+    expect(settings.siteCatalogMigration.value, 10);
     settings.hotAreasList.remove('picarto');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'acfun', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao']);
+    expect(settings.hotAreasList, [
+      'huya',
+      'acfun',
+      'twitcasting',
+      'missevan',
+      'inke',
+      'kilakila',
+      'huajiao',
+      'openrec',
+    ]);
     await Hive.box<dynamic>('app_settings').flush();
     expect(HivePrefUtil.getStringList('hotAreasList'), [
       'huya',
@@ -66,6 +76,7 @@ void main() {
       'inke',
       'kilakila',
       'huajiao',
+      'openrec',
     ]);
   });
 
@@ -73,11 +84,11 @@ void main() {
     await HivePrefUtil.setInt('audienceMetricMigration', 3);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final settings = Get.put(AppSettingsController());
-    expect(settings.realOnlinePlatforms, ['twitch', 'picarto', 'twitcasting']);
-    expect(settings.audienceMetricMigration.value, 5);
+    expect(settings.realOnlinePlatforms, ['twitch', 'picarto', 'twitcasting', 'openrec']);
+    expect(settings.audienceMetricMigration.value, 6);
     settings.setRealOnlineEnabledFor('picarto', false);
     settings.onInit();
-    expect(settings.realOnlinePlatforms, ['twitch', 'twitcasting']);
+    expect(settings.realOnlinePlatforms, ['twitch', 'twitcasting', 'openrec']);
     expect(AppSettingsController.normalizeRealOnlinePlatforms([' PICARTO ', 'huya']), ['picarto']);
   });
 }

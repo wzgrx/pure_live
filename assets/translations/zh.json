@@ -1537,5 +1537,14 @@
     "site_huajiao": "花椒",
     "huajiao_hot": "公开推荐",
     "huajiao_original_stream": "原始流",
-    "huajiao_directory_scope": "官网公开推荐直播（视频）。搜索、弹幕及特殊房间尚未接入；热度不是在线人数。"
+    "huajiao_directory_scope": "官网公开推荐直播（视频）。搜索、弹幕及特殊房间尚未接入；热度不是在线人数。",
+    "openrec_directory_scope": "mellow-fan（原 OPENREC）公开直播。请用频道或直播分享链接导入以核对主播身份；频道改名需重新核验。搜索、弹幕及特殊房间待接入；网络访问错误不代表下播。",
+    "openrec_public_directory": "公开直播",
+    "openrec_low_latency": "低延迟流",
+    "openrec_public_source": "公开流",
+    "openrec_restricted": "此直播有访问限制，尚未接入相应观看方式。",
+    "openrec_multiple_broadcasts": "此频道有多个当前直播，请在原站确认；当前不自动选择其中一个。",
+    "openrec_partial_sources": "部分源暂时不可用，当前仅列出已成功解析的画质。",
+    "openrec_hls_auto": "HLS 自动",
+    "audience_openrec_detail": "公开目录与详情提供在线人数；隐藏人数保持未知，不用累计观看替代。"
 }

@@ -1,0 +1,87 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:pure_live/common/models/live_room.dart';
+import 'package:pure_live/common/services/settings/app_settings_controller.dart';
+import 'package:pure_live/common/services/settings/favorite_room_controller.dart';
+import 'package:pure_live/common/services/settings_service.dart';
+import 'package:pure_live/common/utils/hive_pref_util.dart';
+import 'package:pure_live/get/get.dart';
+import 'package:pure_live/modules/search/search_controller.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late Directory folder;
+  setUpAll(() async {
+    folder = await Directory.systemTemp.createTemp('openrec-catalog-');
+    Hive.init(folder.path);
+    await HivePrefUtil.init();
+  });
+  setUp(() async {
+    Get.testMode = true;
+    Get.reset();
+    await HivePrefUtil.clear();
+  });
+  tearDown(Get.reset);
+  tearDownAll(() async {
+    await Hive.close();
+    expect(folder.absolute.path.startsWith(Directory.systemTemp.absolute.path), isTrue);
+    await folder.delete(recursive: true);
+  });
+  test('catalog nine and audience five append only Openrec; disabled choices survive reopening', () async {
+    await HivePrefUtil.setInt('siteCatalogMigration', 9);
+    await HivePrefUtil.setStringList('hotAreasList', ['huya']);
+    await HivePrefUtil.setInt('audienceMetricMigration', 5);
+    await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
+    final favorites = Get.put(FavoriteRoomController());
+    final app = Get.put(AppSettingsController());
+    expect(favorites.hotAreasList, ['huya', 'openrec']);
+    expect(favorites.siteCatalogMigration.value, 10);
+    expect(app.realOnlinePlatforms, ['twitch', 'openrec']);
+    expect(app.audienceMetricMigration.value, 6);
+    favorites.hotAreasList.remove('openrec');
+    app.setRealOnlineEnabledFor('openrec', false);
+    await Hive.box<dynamic>('app_settings').flush();
+    Get.reset();
+    await Hive.close();
+    await HivePrefUtil.init();
+    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya']);
+    expect(Get.put(AppSettingsController()).realOnlinePlatforms, ['twitch']);
+  });
+  test('backup preserves pinned owner case, numeric ID, tags and platform order', () {
+    final favorites = Get.put(FavoriteRoomController());
+    favorites.fromJson({
+      'hotAreasList': [' OPENREC ', 'huya', 'openrec'],
+      'preferPlatform': ' OPENREC ',
+      'favoriteRooms': [
+        (LiveRoom(roomId: 'Fixture_Owner@100', userId: '100', platform: 'openrec')..tagIds = ['fixture']).toJson(),
+      ],
+      'favoriteAreas': [],
+    });
+    expect(favorites.hotAreasList, ['openrec', 'huya']);
+    expect(favorites.preferPlatform.value, 'openrec');
+    final result = favorites.toJson();
+    final restored = LiveRoom.fromJson((result['favoriteRooms'] as List).single);
+    expect(restored.roomId, 'Fixture_Owner@100');
+    expect(restored.userId, '100');
+    expect(restored.tagIds, ['fixture']);
+  });
+  test('real search flow explains missing capability and makes no web request', () async {
+    Get.put(SettingsService());
+    final controller = SearchController();
+    try {
+      controller.index.value = controller.sites.indexWhere((s) => s.id == 'openrec') + 1;
+      expect(controller.index.value, greaterThan(0));
+      expect(controller.canOpenWebSearch, isFalse);
+      expect(() => controller.buildSearchUrl('openrec', 'fixture'), throwsStateError);
+      controller.searchController.text = 'fixture';
+      await controller.doSearch();
+      expect(controller.errorMessage.value, 'search_coverage_unavailable');
+      expect(controller.loading.value, isFalse);
+      expect(controller.hasMore.value, isFalse);
+    } finally {
+      controller.onClose();
+    }
+  });
+}

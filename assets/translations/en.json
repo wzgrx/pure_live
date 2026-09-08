@@ -745,6 +745,7 @@
     "webview2_open_error": "Cannot open URL, please go to Microsoft website manually.",
     "install_tip": "If a security warning appears, please select 'Allow this time' or 'Trust this source' to proceed with the installation.",
     "epg_settings": "EPG Guide Settings",
+    "import_epg_source": "Import EPG source",
     "active_epg_source": "Active EPG Source",
     "please_select_epg_source": "Tap to select an EPG source",
     "select_epg_source": "Select EPG Source",

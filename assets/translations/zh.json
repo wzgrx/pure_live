@@ -746,6 +746,7 @@
     "webview2_open_error": "无法打开下载链接，请手动前往微软官网下载",
     "install_tip": "如果系统提示安全警告，请选择“本次允许”或“信任该来源”以继续安装更新。",
     "epg_settings": "EPG 电视节目单设置",
+    "import_epg_source": "导入节目单源",
     "active_epg_source": "当前启用的 EPG 数据源",
     "please_select_epg_source": "点击选择一个节目单源",
     "select_epg_source": "选择 EPG 数据源",

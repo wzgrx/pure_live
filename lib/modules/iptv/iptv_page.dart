@@ -12,7 +12,9 @@ import 'package:pure_live/core/iptv/services/iptv_import_manager.dart';
 import 'package:pure_live/core/iptv/services/auto_sync_scheduler.dart';
 
 class IptvPage extends StatefulWidget {
-  const IptvPage({super.key});
+  const IptvPage({super.key, this.importFromNetwork});
+
+  final Future<bool> Function(bool isEpg, String url, String name)? importFromNetwork;
 
   @override
   State<IptvPage> createState() => _IptvPageState();
@@ -20,6 +22,8 @@ class IptvPage extends StatefulWidget {
 
 class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _networkDialogOpen = false;
+  bool _networkImporting = false;
 
   final RxList<database.Provider> playlists = <database.Provider>[].obs;
   final RxList<database.EpgSource> epgSources = <database.EpgSource>[].obs;
@@ -42,8 +46,11 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
 
   Future<void> _refreshData() async {
     final db = Get.find<DbService>().db;
-    epgSources.value = await db.getAllEpgSources();
-    playlists.value = await db.getAllProviders();
+    final sources = await db.getAllEpgSources();
+    final providers = await db.getAllProviders();
+    if (!mounted) return;
+    epgSources.value = sources;
+    playlists.value = providers;
 
     if (epgSources.isNotEmpty && SettingsService.to.iptv.selectedSourceId.v.isEmpty) {
       final activeSource = epgSources.first;
@@ -353,6 +360,7 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
       builder: (BuildContext context) {
         final theme = Theme.of(context);
         return AlertDialog(
+          scrollable: true,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -407,6 +415,7 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
       builder: (BuildContext context) {
         final theme = Theme.of(context);
         return AlertDialog(
+          scrollable: true,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -455,85 +464,43 @@ class _IptvPageState extends State<IptvPage> with SingleTickerProviderStateMixin
     );
   }
 
-  Future<String?> showEditTextDialog({required bool isEpg}) async {
-    final TextEditingController urlEditingController = TextEditingController();
-    final TextEditingController textEditingController = TextEditingController();
-
+  Future<void> showEditTextDialog({required bool isEpg}) async {
+    if (_networkDialogOpen) return;
+    if (_networkImporting) {
+      ToastUtil.show(i18n("iptv_import_in_progress"));
+      return;
+    }
+    _networkDialogOpen = true;
     try {
-      return await Get.dialog<String?>(
-        AlertDialog(
-          title: Text(i18n("enter_download_url")),
-          content: SizedBox(
-            width: 400.0,
-            height: 300.0,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: urlEditingController,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.all(12),
-                      hintText: i18n("download_url"),
-                    ),
-                    autofocus: true,
-                  ),
-                  spacer(12.0),
-                  TextField(
-                    controller: textEditingController,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.all(12),
-                      hintText: i18n("file_name"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(Get.context!).pop(), child: Text(i18n("cancel"))),
-            TextButton(
-              onPressed: () async {
-                final urlText = urlEditingController.text.trim();
-                final fileNameText = textEditingController.text.trim();
-
-                if (urlText.isEmpty) {
-                  ToastUtil.show(i18n("enter_download_link"));
-                  return;
-                }
-                if (!FileUtils.isValidUrl(urlText)) {
-                  ToastUtil.show(i18n("invalid_download_link"));
-                  return;
-                }
-                if (fileNameText.isEmpty) {
-                  ToastUtil.show(i18n("enter_file_name"));
-                  return;
-                }
-
-                bool isSuccess = false;
-
-                if (isEpg) {
-                  isSuccess = await EpgImportManager().importFromNetworkUrl(urlText, fileNameText);
-                } else {
-                  isSuccess = await IptvImportManager().importFromNetworkUrl(urlText, fileNameText);
-                }
-
-                if (isSuccess) {
-                  Navigator.of(Get.context!).pop();
-                  await _refreshData();
-                }
-              },
-              child: Text(i18n("confirm")),
-            ),
-          ],
-        ),
+      await showDialog<bool>(
+        context: context,
         barrierDismissible: false,
+        builder: (_) => _NetworkImportDialog(
+          submit: (url, name) async {
+            if (_networkImporting) return false;
+            _networkImporting = true;
+            try {
+              final success = widget.importFromNetwork != null
+                  ? await widget.importFromNetwork!(isEpg, url, name)
+                  : isEpg
+                  ? await EpgImportManager().importFromNetworkUrl(url, name)
+                  : await IptvImportManager().importFromNetworkUrl(url, name);
+              if (success && mounted) {
+                try {
+                  await _refreshData();
+                } catch (_) {
+                  if (mounted) ToastUtil.show(i18n('iptv_import_refresh_failed'));
+                }
+              }
+              return success;
+            } finally {
+              _networkImporting = false;
+            }
+          },
+        ),
       );
     } finally {
-      urlEditingController.dispose();
-      textEditingController.dispose();
+      _networkDialogOpen = false;
     }
   }
 }
@@ -676,6 +643,121 @@ class _UserAgentDialogState extends State<_UserAgentDialog> {
           ],
         );
       },
+    );
+  }
+}
+
+class _NetworkImportDialog extends StatefulWidget {
+  const _NetworkImportDialog({required this.submit});
+  final Future<bool> Function(String url, String name) submit;
+  @override
+  State<_NetworkImportDialog> createState() => _NetworkImportDialogState();
+}
+
+class _NetworkImportDialogState extends State<_NetworkImportDialog> {
+  final _url = TextEditingController();
+  final _name = TextEditingController();
+  bool _submitting = false;
+  String? _errorKey;
+
+  @override
+  void dispose() {
+    _url.dispose();
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_submitting) return;
+    final url = _url.text.trim();
+    final name = _name.text.trim();
+    final validation = url.isEmpty
+        ? 'enter_download_link'
+        : !FileUtils.isValidUrl(url)
+        ? 'invalid_download_link'
+        : name.isEmpty
+        ? 'enter_file_name'
+        : null;
+    if (validation != null) {
+      setState(() => _errorKey = validation);
+      return;
+    }
+    setState(() {
+      _submitting = true;
+      _errorKey = null;
+    });
+    final route = ModalRoute.of(context)!;
+    final navigator = Navigator.of(context);
+    var succeeded = false;
+    try {
+      succeeded = await widget.submit(url, name);
+    } catch (_) {
+      // Keep the editable draft and expose a generic failure, not server credentials.
+    }
+    if (!mounted) return;
+    if (succeeded) {
+      // A newer route may cover this dialog while its request completes.
+      // Finish only our own route, never pop that newer UI using global context.
+      if (route.isCurrent) {
+        navigator.pop(true);
+      } else if (route.isActive) {
+        navigator.removeRoute(route, true);
+      }
+    } else {
+      setState(() {
+        _submitting = false;
+        _errorKey = 'network_import_failed';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      scrollable: true,
+      title: Text(i18n('enter_download_url')),
+      content: SizedBox(
+        width: 400,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _url,
+              readOnly: _submitting,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.all(12),
+                hintText: i18n('download_url'),
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _name,
+              readOnly: _submitting,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.all(12),
+                hintText: i18n('file_name'),
+              ),
+            ),
+            if (_errorKey != null) ...[
+              const SizedBox(height: 12),
+              Text(i18n(_errorKey!), style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ],
+            if (_submitting) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(),
+              const SizedBox(height: 8),
+              Text(i18n('iptv_import_close_hint')),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n(_submitting ? 'close' : 'cancel'))),
+        TextButton(onPressed: _submitting ? null : _submit, child: Text(i18n('confirm'))),
+      ],
     );
   }
 }

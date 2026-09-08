@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -26,6 +27,7 @@ void main() {
   late Map<String, dynamic> english;
   late _Settings settings;
   late _Database db;
+  final imports = <(bool, String, String, Completer<bool>)>[];
   setUpAll(() async {
     dir = await Directory.systemTemp.createTemp('iptv-settings-page-');
     SharedPreferences.setMockInitialValues({});
@@ -36,6 +38,7 @@ void main() {
     english = jsonDecode(await File('assets/translations/en.json').readAsString()) as Map<String, dynamic>;
   });
   setUp(() {
+    imports.clear();
     Get.testMode = true;
     settings = Get.put<SettingsService>(_Settings()) as _Settings;
     settings.iptv.customIptvUserAgent.v = 'Original-Agent';
@@ -88,7 +91,13 @@ void main() {
               data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
               child: FlutterSmartDialog.init()(context, child),
             ),
-            home: const IptvPage(),
+            home: IptvPage(
+              importFromNetwork: (epg, url, name) {
+                final pending = Completer<bool>();
+                imports.add((epg, url, name, pending));
+                return pending.future;
+              },
+            ),
           ),
         ),
       ),
@@ -100,6 +109,7 @@ void main() {
     final f = find.text(translations[key] as String);
     if (f.evaluate().isEmpty) await tester.scrollUntilVisible(f, 150);
     await tester.ensureVisible(f);
+    await tester.pumpAndSettle();
     await tester.tap(f);
     await tester.pumpAndSettle();
   }
@@ -242,6 +252,164 @@ void main() {
       await finish(tester);
     });
   }
+  Future<void> openImport(WidgetTester tester, {bool epg = false}) async {
+    await tap(tester, epg ? 'import_epg_source' : 'import_playlist');
+    await tap(tester, 'network_import');
+  }
+
+  Future<void> enterImport(WidgetTester tester) async {
+    await tester.enterText(find.byType(TextField).at(0), '  https://example.test/list.m3u  ');
+    await tester.enterText(find.byType(TextField).at(1), '  Network fixture  ');
+  }
+
+  testWidgets('network import focused cancellation retains route-owned controllers', (tester) async {
+    await open(tester);
+    await openImport(tester);
+    await enterImport(tester);
+    await tap(tester, 'cancel');
+    expect(find.byType(TextField), findsNothing);
+    expect(imports, isEmpty);
+    await finish(tester);
+  });
+  testWidgets('network import fits small large-text window', (tester) async {
+    await open(tester, size: const Size(320, 480), scale: 2);
+    await openImport(tester);
+    expect(tester.takeException(), isNull);
+    await tap(tester, 'cancel');
+    await finish(tester);
+  });
+  testWidgets('pending import accepts only one submission and failure preserves draft for retry', (tester) async {
+    await open(tester);
+    await openImport(tester);
+    await enterImport(tester);
+    final button = find.text(translations['confirm'] as String);
+    await tester.tap(button);
+    await tester.pump();
+    await tester.tap(button);
+    await tester.pump();
+    final count = imports.length;
+    for (final entry in imports) {
+      entry.$4.complete(false);
+    }
+    await tester.pumpAndSettle();
+    expect(count, 1);
+    expect(find.byType(TextField), findsNWidgets(2));
+    expect(tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text, '  Network fixture  ');
+    await tester.tap(button);
+    await tester.pump();
+    expect(imports, hasLength(2));
+    imports.last.$4.complete(true);
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byType(IptvPage), findsOneWidget);
+    await finish(tester);
+  });
+  testWidgets('closing pending import does not pop a later dialog and blocks duplicate import', (tester) async {
+    await open(tester);
+    await openImport(tester);
+    await enterImport(tester);
+    await tester.tap(find.text(translations['confirm'] as String));
+    await tester.pump();
+    expect(find.text(translations['iptv_import_close_hint'] as String), findsOneWidget);
+    await tester.tap(find.text(translations['close'] as String));
+    await tester.pumpAndSettle();
+    await openImport(tester);
+    expect(find.byType(TextField), findsNothing);
+    expect(imports, hasLength(1));
+    await tap(tester, 'custom_ua_title');
+    await tester.enterText(find.byType(TextField), 'unrelated draft');
+    imports.single.$4.complete(true);
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'unrelated draft');
+    await tap(tester, 'cancel');
+    await openImport(tester);
+    expect(find.byType(TextField), findsNWidgets(2));
+    await tap(tester, 'cancel');
+    await finish(tester);
+  });
+  testWidgets('success under a newer route removes only the owned import dialog', (tester) async {
+    await open(tester);
+    await openImport(tester);
+    await enterImport(tester);
+    await tester.tap(find.text(translations['confirm'] as String));
+    await tester.pump();
+    final navigator = Navigator.of(tester.element(find.byType(AlertDialog)));
+    unawaited(navigator.push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('Newer route')))));
+    await tester.pumpAndSettle();
+    imports.single.$4.complete(true);
+    await tester.pumpAndSettle();
+    expect(find.text('Newer route'), findsOneWidget);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(IptvPage), findsOneWidget);
+    await finish(tester);
+  });
+  testWidgets('thrown import failure releases the gate and retains a usable draft', (tester) async {
+    await open(tester);
+    await openImport(tester, epg: true);
+    await enterImport(tester);
+    await tester.tap(find.text(translations['confirm'] as String));
+    await tester.pump();
+    expect(imports.single.$1, isTrue);
+    expect(imports.single.$2, 'https://example.test/list.m3u');
+    expect(imports.single.$3, 'Network fixture');
+    imports.single.$4.completeError(StateError('fixture failure'));
+    await tester.pumpAndSettle();
+    expect(find.text(translations['network_import_failed'] as String), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField).at(0)).readOnly, isFalse);
+    await tester.tap(find.text(translations['confirm'] as String));
+    await tester.pump();
+    imports.last.$4.complete(true);
+    await tester.pumpAndSettle();
+    expect(imports, hasLength(2));
+    expect(find.byType(AlertDialog), findsNothing);
+    await finish(tester);
+  });
+  testWidgets('invalid or missing import fields create no request and keep both drafts', (tester) async {
+    await open(tester);
+    await openImport(tester);
+    await tap(tester, 'confirm');
+    expect(find.text(translations['enter_download_link'] as String), findsOneWidget);
+    await tester.enterText(find.byType(TextField).at(0), 'not a URL');
+    await tap(tester, 'confirm');
+    expect(find.text(translations['invalid_download_link'] as String), findsOneWidget);
+    await tester.enterText(find.byType(TextField).at(0), 'https://example.test/list.xml');
+    await tap(tester, 'confirm');
+    expect(find.text(translations['enter_file_name'] as String), findsOneWidget);
+    expect(imports, isEmpty);
+    await tap(tester, 'cancel');
+    await finish(tester);
+  });
+  testWidgets('completed import is not relabelled failed when only refreshing the list fails', (tester) async {
+    await open(tester);
+    await openImport(tester);
+    await enterImport(tester);
+    await tester.tap(find.text(translations['confirm'] as String));
+    await tester.pump();
+    db.failProviderRead = true;
+    imports.single.$4.complete(true);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(imports, hasLength(1));
+    expect(find.text(translations['network_import_failed'] as String), findsNothing);
+    await finish(tester);
+  });
+  testWidgets('leaving the page before import completion does not refresh disposed UI', (tester) async {
+    await open(tester);
+    await openImport(tester);
+    await enterImport(tester);
+    await tester.tap(find.text(translations['confirm'] as String));
+    await tester.pump();
+    final reads = db.providerReads;
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    imports.single.$4.complete(true);
+    await tester.pumpAndSettle();
+    expect(db.providerReads, reads);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _Translations extends AssetLoader {
@@ -265,8 +433,15 @@ class _Settings extends SettingsService {
 
 class _Database extends AppDatabase {
   _Database() : super.forTesting(NativeDatabase.memory());
+  bool failProviderRead = false;
+  int providerReads = 0;
   @override
-  Future<List<Provider>> getAllProviders() async => [];
+  Future<List<Provider>> getAllProviders() async {
+    providerReads++;
+    if (failProviderRead) throw StateError('fixture read failed');
+    return [];
+  }
+
   @override
   Future<List<EpgSource>> getAllEpgSources() async => [
     EpgSource(

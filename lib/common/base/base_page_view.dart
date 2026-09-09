@@ -55,181 +55,133 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
 
     double bottomPadding = isDesktop ? (customDesktopBottomPadding ?? 70) : (customMobileBottomPadding ?? 20);
 
-    return Stack(
-      children: [
-        Column(
-          children: [
-            if (controller.pageNotice case final notice?)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                child: Text(notice, style: Theme.of(context).textTheme.bodySmall),
-              ),
-            Obx(() {
-              if (controller.showCellularBanner.value && controller.list.isNotEmpty) {
-                return Container(
-                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15), width: 1),
+    return LayoutBuilder(
+      builder: (context, pageConstraints) => Stack(
+        children: [
+          Column(
+            children: [
+              // The caller may own a tabbed/nested scroll view. Keep its
+              // controller and refresh boundary intact, while reserving at
+              // least half the viewport for content when notices grow.
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: pageConstraints.maxHeight / 2),
+                child: SingleChildScrollView(
+                  key: const ValueKey('base-page-notices'),
+                  primary: false,
+                  physics: const PureLiveBoundedScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (controller.pageNotice case final notice?)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+                          child: Text(notice, style: Theme.of(context).textTheme.bodySmall),
+                        ),
+                      _buildCellularBanner(context),
+                      if (controller.showInlineError)
+                        Obx(() {
+                          if (controller.list.isEmpty ||
+                              !controller.pageError.value ||
+                              controller.errorMsg.value.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          final colors = Theme.of(context).colorScheme;
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                            child: Semantics(
+                              liveRegion: true,
+                              child: MaterialBanner(
+                                backgroundColor: colors.errorContainer,
+                                leading: Icon(Icons.info_outline_rounded, color: colors.onErrorContainer),
+                                content: Text(
+                                  controller.errorMsg.value,
+                                  style: TextStyle(color: colors.onErrorContainer),
+                                ),
+                                forceActionsBelow: true,
+                                actions: [
+                                  TextButton(
+                                    onPressed: controller.loadding.value ? null : () => controller.retryData(),
+                                    child: Text(controller.retryActionLabel),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                    ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.signal_cellular_alt_rounded,
-                              color: Theme.of(context).colorScheme.primary,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              i18n("cellular_warning_msg"),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.primary,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            onPressed: () {
-                              BaseController.neverShowCellularBanner = true;
-                              controller.showCellularBanner.value = false;
-                            },
-                            child: Text(
-                              i18n("never_show"),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                ),
+              ),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraint) {
+                    controller.checkAndNotifyLayoutChange(isDesktop);
+                    return Obx(() {
+                      if (controller.list.isEmpty) {
+                        if (controller.notLogin.value) {
+                          final view = notLoginBuilder != null
+                              ? notLoginBuilder!(context)
+                              : AppStatusView(
+                                  type: AppStatusType.error,
+                                  icon: Icons.account_circle_outlined,
+                                  title: i18n("login_required_title"),
+                                  subtitle: i18n("login_required_subtitle"),
+                                  buttonText: i18n("go_to_login"),
+                                  onButtonPressed: () => Get.toNamed(RoutePath.kSettingsAccount),
+                                );
+                          return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
+                        }
+                        if (controller.pageError.value) {
+                          final view = errorBuilder != null
+                              ? errorBuilder!(context, controller.errorMsg.value)
+                              : AppStatusView(
+                                  type: AppStatusType.error,
+                                  icon: Icons.wifi_off_rounded,
+                                  title: i18n("network_error_title"),
+                                  subtitle: controller.errorMsg.value,
+                                  buttonText: controller.retryActionLabel,
+                                  onButtonPressed: () => controller.retryData(),
+                                );
+                          return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
+                        }
+                        if (controller.pageEmpty.value && !preserveContentWhenEmpty) {
+                          final view = emptyBuilder != null
+                              ? emptyBuilder!(context)
+                              : AppStatusView(type: AppStatusType.empty, title: i18n('no_data'), subtitle: '');
+                          return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
+                        }
+                        if (preserveContentWhenEmpty && controller.totalCount.value != null) {
+                          return buildActualContent(context, isDesktop);
+                        }
+                        return AppStatusView(type: AppStatusType.loading, title: i18n('refresh_loading'), subtitle: '');
+                      }
+                      return buildActualContent(context, isDesktop);
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          if (showBtn) Positioned(right: 16, bottom: bottomPadding, child: buildFloatingButtons(context)),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Obx(() {
+              if (controller.list.isNotEmpty && controller.loadding.value) {
+                return SizedBox(
+                  height: 2.5,
+                  child: LinearProgressIndicator(
+                    backgroundColor: Colors.transparent,
+                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                   ),
                 );
               }
               return const SizedBox.shrink();
             }),
-            if (controller.showInlineError)
-              Obx(() {
-                if (controller.list.isEmpty || !controller.pageError.value || controller.errorMsg.value.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                final colors = Theme.of(context).colorScheme;
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                  child: Semantics(
-                    liveRegion: true,
-                    child: MaterialBanner(
-                      backgroundColor: colors.errorContainer,
-                      leading: Icon(Icons.info_outline_rounded, color: colors.onErrorContainer),
-                      content: Text(
-                        controller.errorMsg.value,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: colors.onErrorContainer),
-                      ),
-                      forceActionsBelow: true,
-                      actions: [
-                        TextButton(
-                          onPressed: controller.loadding.value ? null : () => controller.retryData(),
-                          child: Text(controller.retryActionLabel),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraint) {
-                  controller.checkAndNotifyLayoutChange(isDesktop);
-                  return Obx(() {
-                    if (controller.list.isEmpty) {
-                      if (controller.notLogin.value) {
-                        final view = notLoginBuilder != null
-                            ? notLoginBuilder!(context)
-                            : AppStatusView(
-                                type: AppStatusType.error,
-                                icon: Icons.account_circle_outlined,
-                                title: i18n("login_required_title"),
-                                subtitle: i18n("login_required_subtitle"),
-                                buttonText: i18n("go_to_login"),
-                                onButtonPressed: () => Get.toNamed(RoutePath.kSettingsAccount),
-                              );
-                        return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
-                      }
-                      if (controller.pageError.value) {
-                        final view = errorBuilder != null
-                            ? errorBuilder!(context, controller.errorMsg.value)
-                            : AppStatusView(
-                                type: AppStatusType.error,
-                                icon: Icons.wifi_off_rounded,
-                                title: i18n("network_error_title"),
-                                subtitle: controller.errorMsg.value,
-                                buttonText: controller.retryActionLabel,
-                                onButtonPressed: () => controller.retryData(),
-                              );
-                        return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
-                      }
-                      if (controller.pageEmpty.value && !preserveContentWhenEmpty) {
-                        final view = emptyBuilder != null
-                            ? emptyBuilder!(context)
-                            : AppStatusView(type: AppStatusType.empty, title: i18n('no_data'), subtitle: '');
-                        return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
-                      }
-                      if (preserveContentWhenEmpty && controller.totalCount.value != null) {
-                        return buildActualContent(context, isDesktop);
-                      }
-                      return AppStatusView(type: AppStatusType.loading, title: i18n('refresh_loading'), subtitle: '');
-                    }
-                    return buildActualContent(context, isDesktop);
-                  });
-                },
-              ),
-            ),
-          ],
-        ),
-        if (showBtn) Positioned(right: 16, bottom: bottomPadding, child: buildFloatingButtons(context)),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Obx(() {
-            if (controller.list.isNotEmpty && controller.loadding.value) {
-              return SizedBox(
-                height: 2.5,
-                child: LinearProgressIndicator(
-                  backgroundColor: Colors.transparent,
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -240,19 +192,79 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
     C controller,
     Widget statusView,
   ) {
+    Widget buildScrollable(ScrollPhysics physics) => SingleChildScrollView(
+      key: const ValueKey('base-page-status'),
+      primary: false,
+      physics: physics,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: constraint.maxHeight * (isDesktop || !enableRefresh ? 1 : 0.8)),
+        child: Center(child: statusView),
+      ),
+    );
     if (isDesktop || !enableRefresh) {
-      return Center(child: statusView);
+      return buildScrollable(const PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics()));
     }
     final indicators = appRefreshIndicators(context, maxWidth: constraint.maxWidth);
-    return EasyRefresh(
+    return EasyRefresh.builder(
       header: indicators.header,
       footer: indicators.footer,
       controller: controller.easyRefreshController,
+      triggerAxis: Axis.vertical,
       onRefresh: () => controller.refreshData(),
-      child: ListView(
-        physics: const PureLiveScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-        children: [SizedBox(height: constraint.maxHeight * 0.8, child: statusView)],
-      ),
+      // This scrollable must use the refresh owner's physics; otherwise its
+      // explicit overscroll policy consumes the drag before refresh is armed.
+      childBuilder: (context, physics) => buildScrollable(physics),
     );
+  }
+
+  Widget _buildCellularBanner(BuildContext context) {
+    return Obx(() {
+      if (!controller.showCellularBanner.value || controller.list.isEmpty) return const SizedBox.shrink();
+      final colors = Theme.of(context).colorScheme;
+      return Container(
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: colors.primaryContainer.withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: colors.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+                  child: Icon(Icons.signal_cellular_alt_rounded, color: colors.primary, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    i18n('cellular_warning_msg'),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: colors.onSurfaceVariant,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            TextButton(
+              onPressed: () {
+                BaseController.neverShowCellularBanner = true;
+                controller.showCellularBanner.value = false;
+              },
+              child: Text(i18n('never_show'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

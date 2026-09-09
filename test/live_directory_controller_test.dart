@@ -712,6 +712,13 @@ void main() {
     expect(find.text(longMessage), findsOneWidget);
     expect(tester.takeException(), isNull);
     refreshed = true;
+    // Long notices now preserve their full text in a bounded header viewport.
+    // Scroll its action into view rather than relying on a three-line ellipsis.
+    for (var i = 0; i < 12 && find.text('refresh').hitTestable().evaluate().isEmpty; i++) {
+      await tester.drag(find.byKey(const ValueKey('base-page-notices')), const Offset(0, -80));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('refresh').hitTestable(), findsOneWidget);
     await tester.tap(find.text('refresh'));
     await tester.pumpAndSettle();
     expect(find.text('room:99'), findsOneWidget);

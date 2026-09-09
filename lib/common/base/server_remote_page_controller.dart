@@ -7,6 +7,7 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
   int _virtualNetworkPage = 1;
   Future<void>? _activeLoad;
   bool _refreshPending = false;
+  int? _pendingPageSize;
 
   ServerRemotePageController() : super();
 
@@ -16,8 +17,9 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
   Future<void> refreshData() async {
     if (isClosed) return;
     _refreshPending = true;
-    final active = _activeLoad;
-    if (active != null) await active;
+    while (_activeLoad != null && !isClosed) {
+      await _activeLoad;
+    }
     if (!_refreshPending || isClosed) return;
     _refreshPending = false;
     currentPage = 1;
@@ -37,7 +39,21 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
 
   @override
   void setPageSize(int? newSize) {
-    if (isClosed || newSize == null || pageSize.value == newSize) return;
+    if (isClosed || newSize == null || newSize < 1) return;
+    // Keep request dimensions stable until its snapshot is committed. A later
+    // selection replaces the pending intent, including selecting the old size.
+    _pendingPageSize = newSize;
+    unawaited(_applyPendingPageSize());
+  }
+
+  Future<void> _applyPendingPageSize() async {
+    while (_activeLoad != null && !isClosed) {
+      await _activeLoad;
+    }
+    if (isClosed) return;
+    final newSize = _pendingPageSize;
+    _pendingPageSize = null;
+    if (newSize == null || pageSize.value == newSize) return;
     if (!usesDesktopPagination) {
       pageSize.value = newSize;
       return;
@@ -57,7 +73,7 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
 
     _pageCache.clear();
 
-    _adaptiveRebuildAndFetchMore(allHistoryItems);
+    await _startLoad(rebuildHistory: allHistoryItems);
   }
 
   Future<void> _adaptiveRebuildAndFetchMore(List<T> historyPool) async {
@@ -130,14 +146,19 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
   @override
   Future<void> loadMoreData() async {
     if (isClosed) return;
+    final active = _activeLoad;
+    if (active != null) return active;
     await super.loadMoreData();
   }
 
-  Future<void> _startLoad({bool replaceMobileSnapshot = false}) {
+  Future<void> _startLoad({bool replaceMobileSnapshot = false, List<T>? rebuildHistory}) {
     final active = _activeLoad;
     if (active != null) return active;
     late final Future<void> operation;
-    operation = _performLoad(replaceMobileSnapshot: replaceMobileSnapshot).whenComplete(() {
+    final work = rebuildHistory == null
+        ? _performLoad(replaceMobileSnapshot: replaceMobileSnapshot)
+        : _adaptiveRebuildAndFetchMore(rebuildHistory);
+    operation = work.whenComplete(() {
       if (identical(_activeLoad, operation)) _activeLoad = null;
     });
     _activeLoad = operation;

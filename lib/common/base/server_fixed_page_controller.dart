@@ -8,6 +8,7 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
   final Map<int, List<T>> _slicedSmallCache = {};
   Future<void>? _activeLoad;
   bool _refreshPending = false;
+  int? _pendingPageSize;
 
   ServerFixedPageController({required this.fixedServerPageSize}) : super();
 
@@ -17,8 +18,9 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
   Future<void> refreshData() async {
     if (isClosed) return;
     _refreshPending = true;
-    final active = _activeLoad;
-    if (active != null) await active;
+    while (_activeLoad != null && !isClosed) {
+      await _activeLoad;
+    }
     if (!_refreshPending || isClosed) return;
     _refreshPending = false;
     _bigPageCache.clear();
@@ -37,7 +39,21 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
 
   @override
   void setPageSize(int? newSize) {
-    if (isClosed || newSize == null || pageSize.value == newSize) return;
+    if (isClosed || newSize == null || newSize < 1) return;
+    // Keep request dimensions stable until its snapshot is committed. A later
+    // selection replaces the pending intent, including selecting the old size.
+    _pendingPageSize = newSize;
+    unawaited(_applyPendingPageSize());
+  }
+
+  Future<void> _applyPendingPageSize() async {
+    while (_activeLoad != null && !isClosed) {
+      await _activeLoad;
+    }
+    if (isClosed) return;
+    final newSize = _pendingPageSize;
+    _pendingPageSize = null;
+    if (newSize == null || pageSize.value == newSize) return;
     if (!usesDesktopPagination) {
       pageSize.value = newSize;
       return;
@@ -46,7 +62,7 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
     pageSize.value = newSize;
     currentPage = (currentFirstItemIndex ~/ newSize) + 1;
     _slicedSmallCache.clear();
-    loadData();
+    await _startLoad();
   }
 
   @override
@@ -60,6 +76,8 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
   @override
   Future<void> loadMoreData() async {
     if (isClosed) return;
+    final active = _activeLoad;
+    if (active != null) return active;
     await super.loadMoreData();
   }
 

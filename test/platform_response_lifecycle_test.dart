@@ -12,10 +12,17 @@ import 'package:pure_live/core/site/kilakila/kilakila_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
 import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
+import 'package:pure_live/core/site/zhanqi/zhanqi_api.dart';
 
 typedef _Read = Future<Object?> Function(CancelToken?);
 typedef _Case = ({String name, _Read read, String body, int cap});
 final _cases = <_Case>[
+  (
+    name: 'Zhanqi',
+    read: (c) => ZhanqiApi().directory(cancel: c),
+    body: '{"code":0,"data":{"cnt":0,"rooms":[]}}',
+    cap: ZhanqiApi.responseLimit,
+  ),
   (
     name: 'Picarto',
     read: (c) => PicartoApi().read(Uri.parse('https://picarto.tv/fixture'), cancel: c),
@@ -61,6 +68,7 @@ String _kind(Object? error) => switch (error) {
   MissevanException e => e.kind.name,
   TwitcastingException e => e.kind.name,
   HuajiaoException e => e.kind.name,
+  ZhanqiException e => e.kind.name,
   _ => '${error.runtimeType}',
 };
 Matcher _failure(String kind) => throwsA(predicate<Object>((e) => _kind(e) == kind, kind));

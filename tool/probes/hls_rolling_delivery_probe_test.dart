@@ -22,11 +22,13 @@ import 'package:pure_live/recorder/services/hls_upstream_client.dart';
 import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
 
 part 'hls_scheduled_delivery_probe.dart';
+part 'hls_start_boundary_probe.dart';
 
 typedef _Scenario = ({String name, int budget, int bodyMs, int headerMs, int runSeconds});
 
 void main() {
   _registerScheduledDeliveryProbe();
+  _registerStartBoundaryProbe();
   test('whole-media accounting excludes empty HTTP failures and unfinished bodies', () {
     final traces = <Map<String, Object?>>[
       {'upstreamStatus': 200, 'bodyCompleteMs': 12000},
@@ -189,9 +191,17 @@ Future<Map<String, Object?>> _capture(
   Directory root, {
   bool scheduled = false,
   bool productionPrefetch = false,
+  ({int video, int audio})? fixedCounts,
+  int? liveStartIndex,
+  bool distinctSequences = false,
 }) async {
   final output = await Directory(p.join(root.path, config.name)).create();
-  final origin = await _RollingOrigin.start(fixture, config);
+  final origin = await _RollingOrigin.start(
+    fixture,
+    config,
+    fixedCounts: fixedCounts,
+    distinctSequences: distinctSequences,
+  );
   final native = FFmpegManager.to;
   final diagnostics = HlsRelayDiagnostics();
   final taskId = 'rolling_${config.name}';
@@ -222,7 +232,9 @@ Future<Map<String, Object?>> _capture(
     'rwTimeout': config.budget,
     'bodyDelayMs': config.bodyMs,
     'headerDelayMs': config.headerMs,
-    'windowDurationSeconds': 6,
+    'windowDurationSeconds': fixedCounts == null ? 6 : null,
+    if (fixedCounts != null) 'fixedCounts': {'video': fixedCounts.video, 'audio': fixedCounts.audio},
+    'distinctSequences': distinctSequences,
   };
   try {
     if (scheduled) prefetch = await _ScheduledRelay.start(origin.input, output, config.budget);
@@ -234,7 +246,10 @@ Future<Map<String, Object?>> _capture(
       rwTimeout: config.budget,
       threadQueueSize: 512,
       filePrefix: 'capture',
-    );
+    ).toList();
+    if (liveStartIndex != null) {
+      arguments.insertAll(arguments.indexOf('-i'), ['-live_start_index', '$liveStartIndex']);
+    }
     execution = native.start(
       taskId: taskId,
       arguments: arguments,
@@ -246,6 +261,9 @@ Future<Map<String, Object?>> _capture(
     await Future<void>.delayed(Duration(seconds: config.runSeconds));
     // Persist only this numeric native argument, never the full command/URLs.
     final nativeCommand = native.getSession(taskId)?.session.getCommand() ?? '';
+    report['nativeStartIndex'] = int.tryParse(
+      RegExp(r'-live_start_index\s+(-?\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
+    );
     report['nativeReadTimeoutMicros'] = int.tryParse(
       RegExp(r'-rw_timeout\s+(\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
     );
@@ -381,11 +399,13 @@ List<Map<String, Object?>> _completedMedia(List<Map<String, Object?>> requests) 
     .toList();
 
 class _RollingOrigin {
-  _RollingOrigin(this.server, this.files, this.playlists, this.config);
+  _RollingOrigin(this.server, this.files, this.playlists, this.config, this.fixedCounts, this.distinctSequences);
   final HttpServer server;
   final Map<String, File> files;
   final Map<String, List<_Segment>> playlists;
   final _Scenario config;
+  final ({int video, int audio})? fixedCounts;
+  final bool distinctSequences;
   final clock = Stopwatch();
   final ended = Completer<void>();
   final requests = <Map<String, Object?>>[];
@@ -394,7 +414,12 @@ class _RollingOrigin {
   Uri get input => Uri.parse('http://127.0.0.1:${server.port}/master.m3u8');
   double get edge => 6.1 + clock.elapsedMilliseconds / 1000;
 
-  static Future<_RollingOrigin> start(Directory fixture, _Scenario config) async {
+  static Future<_RollingOrigin> start(
+    Directory fixture,
+    _Scenario config, {
+    ({int video, int audio})? fixedCounts,
+    bool distinctSequences = false,
+  }) async {
     final files = <String, File>{};
     await for (final file in fixture.list(recursive: true, followLinks: false)) {
       if (file is File) files['/${p.relative(file.path, from: fixture.path).replaceAll('\\', '/')}'] = file;
@@ -420,7 +445,7 @@ class _RollingOrigin {
       playlists[key] = segments;
     }
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    final origin = _RollingOrigin(server, files, playlists, config);
+    final origin = _RollingOrigin(server, files, playlists, config, fixedCounts, distinctSequences);
     origin.subscription = server.listen((request) {
       if (!origin.clock.isRunning) origin.clock.start();
       late Future<void> work;
@@ -431,6 +456,12 @@ class _RollingOrigin {
   }
 
   List<_Segment> window(List<_Segment> segments) {
+    final counts = fixedCounts;
+    if (counts != null) {
+      final count = segments.first.path.startsWith('/variant_0/') ? counts.video : counts.audio;
+      if (count < 3 || count > 8) throw StateError('Invalid fixed start-boundary fixture');
+      return segments.take(count).toList();
+    }
     final now = edge;
     return segments
         .where((segment) => segment.start + segment.duration <= now && segment.start + segment.duration > now - 6)
@@ -458,11 +489,12 @@ class _RollingOrigin {
         request.response.statusCode = 404;
       } else if (playlist != null) {
         final current = window(playlist);
-        row['sequence'] = current.first.index;
         final variant = request.uri.path.contains('variant_0') ? 0 : 1;
+        final firstSequence = current.first.index + (distinctSequences ? (variant + 1) * 1000 : 0);
+        row['sequence'] = firstSequence;
         final content = StringBuffer(
           '#EXTM3U\n#EXT-X-VERSION:7\n#EXT-X-TARGETDURATION:2\n'
-          '#EXT-X-MEDIA-SEQUENCE:${current.first.index}\n#EXT-X-MAP:URI="init_$variant.mp4"\n',
+          '#EXT-X-MEDIA-SEQUENCE:$firstSequence\n#EXT-X-MAP:URI="init_$variant.mp4"\n',
         );
         for (final segment in current) {
           final pdt = DateTime.utc(2026, 9, 9).add(Duration(microseconds: (segment.start * 1000000).round()));

@@ -22,6 +22,8 @@ import 'package:pure_live/recorder/services/ffmpeg_header_factory.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 
+import 'tting_hls_admission_summary.dart';
+
 Iterable<Uri> _references(String manifest) sync* {
   for (final line in const LineSplitter().convert(manifest)) {
     if (line.trim().isEmpty) continue;
@@ -132,11 +134,13 @@ void main() {
             final headers = await PlaybackHeaderResolver.resolve(platform: site.id, roomId: channelId);
             expect(await FFmpegHeaderFactory.build(platform: site.id, roomId: channelId), headers);
             expect(headers.containsKey('x-site-code'), isFalse);
+            final qualitySources = <String>{};
             for (final quality in qualities) {
               report['stage'] = 'quality-${quality.selectionId}-relay';
               final resolution = await site.resolvePlayUrls(detail: detail, quality: quality);
               expect(resolution.urls, hasLength(1));
               final source = resolution.urls.single;
+              qualitySources.add(source);
               final policy = resolution.sourceQueryPolicies[source]!;
               expect(policy.matchesSource(Uri.parse(source)), isTrue);
               expect(site.getPlayUrlInvalidAt(source)!.isAfter(DateTime.now().toUtc()), isTrue);
@@ -154,6 +158,7 @@ void main() {
                 'initializationMap': false,
                 'localReferenceCount': 0,
                 'cleanupComplete': false,
+                'prefetchMetadataQualification': <Map<String, Object?>>[],
               };
               (report['qualityManifests'] as List).add(counts);
               try {
@@ -167,6 +172,7 @@ void main() {
                   expect(manifest.startsWith('#EXTM3U'), isTrue);
                   expect(manifest.contains('token='), isFalse, reason: 'Relay should hide remote source signatures');
                   counts['manifestCount'] = seen.length;
+                  (counts['prefetchMetadataQualification'] as List).add(ttingHlsAdmissionSummary(manifest, next));
                   if (manifest.contains('#EXTINF:')) {
                     expect(manifest.contains('#EXT-X-ENDLIST'), isFalse, reason: 'Expected a current rolling stream');
                     counts['rollingMediaCount'] = (counts['rollingMediaCount'] as int) + 1;
@@ -196,6 +202,7 @@ void main() {
                 counts['cleanupComplete'] = true;
               }
             }
+            report['uniqueQualitySourceCount'] = qualitySources.length;
             report['stage'] = 'recording-and-renewal';
             final quality = qualities.first;
             final recorded = await StreamResolverService().resolveStream(

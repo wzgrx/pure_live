@@ -24,6 +24,7 @@ import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
 part 'hls_scheduled_delivery_probe.dart';
 part 'hls_start_boundary_probe.dart';
 part 'hls_refresh_coverage_probe.dart';
+part 'hls_shortest_boundary_probe.dart';
 
 typedef _Scenario = ({String name, int budget, int bodyMs, int headerMs, int runSeconds});
 
@@ -31,6 +32,7 @@ void main() {
   _registerScheduledDeliveryProbe();
   _registerStartBoundaryProbe();
   _registerRefreshCoverageProbe();
+  _registerShortestBoundaryProbe();
   test('whole-media accounting excludes empty HTTP failures and unfinished bodies', () {
     final traces = <Map<String, Object?>>[
       {'upstreamStatus': 200, 'bodyCompleteMs': 12000},
@@ -199,6 +201,8 @@ Future<Map<String, Object?>> _capture(
   bool sourceStartHint = false,
   bool distinctSequences = false,
   String? failRefreshBeforeStop,
+  bool shortestOutput = false,
+  bool audioEnded = false,
 }) async {
   final output = await Directory(p.join(root.path, config.name)).create();
   final origin = await _RollingOrigin.start(
@@ -207,13 +211,21 @@ Future<Map<String, Object?>> _capture(
     fixedCounts: fixedCounts,
     distinctSequences: distinctSequences,
     sourceStartHint: sourceStartHint,
+    audioEnded: audioEnded,
   );
   final native = FFmpegManager.to;
   final diagnostics = HlsRelayDiagnostics();
   final taskId = 'rolling_${config.name}';
   final events = <Map<String, Object?>>[];
+  FFmpegHlsInputRelay? relay;
+  String? observedNativeCommand;
   final subscription = native.stream.listen((event) {
     if (event.taskId == taskId && events.length < 512) {
+      // A controlled output policy may finish before the exposure checkpoint.
+      // Retain this session's evidence while it is still registered.
+      final session = native.getSession(taskId);
+      relay ??= session?.inputRelay;
+      observedNativeCommand ??= session?.session.getCommand();
       events.add({
         'type': event.type.name,
         'atMs': diagnostics.elapsedMilliseconds,
@@ -231,7 +243,6 @@ Future<Map<String, Object?>> _capture(
     }
   });
   Future<void>? execution;
-  FFmpegHlsInputRelay? relay;
   _ScheduledRelay? prefetch;
   final report = <String, Object?>{
     'case': config.name,
@@ -241,6 +252,7 @@ Future<Map<String, Object?>> _capture(
     'windowDurationSeconds': fixedCounts == null ? 6 : null,
     if (fixedCounts != null) 'fixedCounts': {'video': fixedCounts.video, 'audio': fixedCounts.audio},
     'distinctSequences': distinctSequences,
+    'audioEnded': audioEnded,
   };
   try {
     if (scheduled) prefetch = await _ScheduledRelay.start(origin.input, output, config.budget);
@@ -258,6 +270,9 @@ Future<Map<String, Object?>> _capture(
     }
     if (preferStartHint != null) {
       arguments.insertAll(arguments.indexOf('-i'), ['-prefer_x_start', '$preferStartHint']);
+    }
+    if (shortestOutput) {
+      arguments.insertAll(arguments.length - 1, ['-shortest', '-shortest_buf_duration', '10']);
     }
     execution = native.start(
       taskId: taskId,
@@ -280,7 +295,8 @@ Future<Map<String, Object?>> _capture(
       report['refreshFailuresBeforeStop'] = failures;
     }
     // Persist only this numeric native argument, never the full command/URLs.
-    final nativeCommand = native.getSession(taskId)?.session.getCommand() ?? '';
+    final nativeCommand = native.getSession(taskId)?.session.getCommand() ?? observedNativeCommand ?? '';
+    report['nativeShortest'] = RegExp(r'(?:^|\s)-shortest(?:\s|$)').hasMatch(nativeCommand);
     report['nativeStartIndex'] = int.tryParse(
       RegExp(r'-live_start_index\s+(-?\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
     );
@@ -290,7 +306,7 @@ Future<Map<String, Object?>> _capture(
     report['nativeReadTimeoutMicros'] = int.tryParse(
       RegExp(r'-rw_timeout\s+(\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
     );
-    relay = native.getSession(taskId)?.inputRelay;
+    relay ??= native.getSession(taskId)?.inputRelay;
     if (productionPrefetch) {
       report['prefetch'] = {
         // ignore: invalid_use_of_visible_for_testing_member
@@ -302,7 +318,9 @@ Future<Map<String, Object?>> _capture(
     }
     report['stopRequestedMs'] = diagnostics.elapsedMilliseconds;
     prefetch?.freeze();
-    if (native.isRunning(taskId)) await native.stop(taskId);
+    final stopIssued = native.isRunning(taskId);
+    report['stopIssued'] = stopIssued;
+    if (stopIssued) await native.stop(taskId);
     await execution.timeout(const Duration(seconds: 20));
     await relay?.close();
     report['stoppedMs'] = diagnostics.elapsedMilliseconds;
@@ -430,6 +448,7 @@ class _RollingOrigin {
     this.fixedCounts,
     this.distinctSequences,
     this.sourceStartHint,
+    this.audioEnded,
   );
   final HttpServer server;
   final Map<String, File> files;
@@ -438,6 +457,7 @@ class _RollingOrigin {
   final ({int video, int audio})? fixedCounts;
   final bool distinctSequences;
   final bool sourceStartHint;
+  final bool audioEnded;
   String? refreshFailure;
   final clock = Stopwatch();
   final ended = Completer<void>();
@@ -453,6 +473,7 @@ class _RollingOrigin {
     ({int video, int audio})? fixedCounts,
     bool distinctSequences = false,
     bool sourceStartHint = false,
+    bool audioEnded = false,
   }) async {
     final files = <String, File>{};
     await for (final file in fixture.list(recursive: true, followLinks: false)) {
@@ -479,7 +500,16 @@ class _RollingOrigin {
       playlists[key] = segments;
     }
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    final origin = _RollingOrigin(server, files, playlists, config, fixedCounts, distinctSequences, sourceStartHint);
+    final origin = _RollingOrigin(
+      server,
+      files,
+      playlists,
+      config,
+      fixedCounts,
+      distinctSequences,
+      sourceStartHint,
+      audioEnded,
+    );
     origin.subscription = server.listen((request) {
       if (!origin.clock.isRunning) origin.clock.start();
       late Future<void> work;
@@ -549,6 +579,7 @@ class _RollingOrigin {
             '#EXT-X-PROGRAM-DATE-TIME:${pdt.toIso8601String()}\n#EXTINF:${segment.duration},\n${p.basename(segment.path)}\n',
           );
         }
+        if (variant == 1 && audioEnded) content.write('#EXT-X-ENDLIST\n');
         request.response.headers.contentType = ContentType('application', 'vnd.apple.mpegurl');
         request.response.write(content);
       } else {

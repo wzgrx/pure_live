@@ -70,6 +70,27 @@ void main() {
     await until(() => native.starts == 1 && resolver.calls == 2);
   }
 
+  for (final source in [
+    (url: 'https://cdn.example/live/master.m3u8?token=fixture', policy: true),
+    (url: 'https://cdn.example/live/media.m3u8', policy: false),
+    (url: _nativeUrl, policy: false),
+  ]) {
+    test('ordinary recording requests selected HLS retention on start and user restart: $source', () async {
+      resolver.url = source.url;
+      resolver.withPolicy = source.policy;
+      await start();
+      expect(native.prefetchOptions, [true]);
+      await recorder.stopTask(task);
+      expect(task.wasStoppedByUser, isTrue);
+      await until(() => recorder.scheduler.runningCount == 0);
+      expect(await recorder.startTask(task), isTrue);
+      await until(() => native.starts == 2);
+      expect(native.prefetchOptions, [true, true]);
+      expect(native.liveOptions, [true, true]);
+      expect(native.urls, everyElement(startsWith(source.url)));
+    });
+  }
+
   test('healthy native WUP FLV prefetches without cancelling the current capture', () async {
     await start();
     await Future<void>.delayed(const Duration(milliseconds: 650));
@@ -88,6 +109,7 @@ void main() {
     native.finish(task.taskId, eof: true);
     await until(() => native.starts == 2, timeout: const Duration(seconds: 4));
     expect(native.policies.last?.matchesSource(Uri.parse(native.urls.last)), isTrue);
+    expect(native.prefetchOptions, [true, true]);
     expect(native.policies.first?.matchesSource(Uri.parse(native.urls.last)), isFalse);
     expect(task.toJson().keys, isNot(contains('sourceQueryPolicy')));
   });
@@ -219,6 +241,8 @@ class _Resolver extends StreamResolverService {
 
 class _Native implements FFmpegManager {
   final policies = <HlsSourceQueryPolicy?>[];
+  final prefetchOptions = <bool>[];
+  final liveOptions = <bool>[];
   final events = StreamController<FFmpegEvent>.broadcast(sync: true);
   final urls = <String>[];
   Completer<void>? execution;
@@ -242,6 +266,8 @@ class _Native implements FFmpegManager {
     bool hlsPrefetch = false,
   }) async {
     policies.add(sourceQueryPolicy);
+    prefetchOptions.add(hlsPrefetch);
+    liveOptions.add(liveRecording);
     final done = Completer<void>();
     execution = done;
     final id = ++starts;

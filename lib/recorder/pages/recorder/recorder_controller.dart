@@ -886,6 +886,11 @@ class RecorderController extends GetxService {
         taskId: task.taskId,
         arguments: arguments,
         liveRecording: true,
+        // Every live attempt (including renewal/reconnect) uses bounded HLS
+        // retention when the selected feeds can be admitted atomically. The
+        // relay keeps unsupported playlists on its original path; FLV is not
+        // an HLS input. Offline finalization does not use this entry point.
+        hlsPrefetch: true,
         sourceQueryPolicy: resolved.sourceQueryPolicy,
       );
       if (identical(_pendingRecorderLeases[task.taskId], pendingLease)) {

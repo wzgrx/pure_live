@@ -91,6 +91,33 @@ void main() {
     expect(service.policy, same(policy));
     expect(service.arguments, same(args));
     expect(service.live, isTrue);
+    expect(service.prefetch, isFalse);
+  });
+
+  test('manager forwards explicit retention and diagnostics without enabling offline jobs', () async {
+    final service = _Service();
+    final manager = FFmpegManager.forTesting(service);
+    final diagnostics = HlsRelayDiagnostics();
+    final args = ['-i', '$source', 'output.ts'];
+    for (final enabled in [true, false]) {
+      await manager.start(
+        taskId: 'live',
+        arguments: args,
+        liveRecording: true,
+        sourceQueryPolicy: policy,
+        hlsPrefetch: enabled,
+        hlsDiagnostics: diagnostics,
+      );
+      expect(service.prefetch, enabled);
+      expect(service.diagnostics, same(diagnostics));
+      expect(service.policy, same(policy));
+      expect(service.arguments, same(args));
+    }
+    await manager.start(taskId: 'merge', arguments: ['-i', 'input.ts', 'output.mp4']);
+    expect(service.live, isFalse);
+    expect(service.prefetch, isFalse);
+    expect(service.policy, isNull);
+    expect(service.diagnostics, isNull);
   });
 
   for (final cursor in [false, true]) {
@@ -235,6 +262,8 @@ class _Service implements FFmpegService {
   HlsSourceQueryPolicy? policy;
   List<String>? arguments;
   bool? live;
+  bool? prefetch;
+  HlsRelayDiagnostics? diagnostics;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
   @override
@@ -246,9 +275,13 @@ class _Service implements FFmpegService {
     required void Function(FFmpegEvent event) onEvent,
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
+    bool hlsPrefetch = false,
   }) async {
     policy = sourceQueryPolicy;
     this.arguments = arguments;
     live = liveRecording;
+    prefetch = hlsPrefetch;
+    diagnostics = hlsDiagnostics;
   }
 }

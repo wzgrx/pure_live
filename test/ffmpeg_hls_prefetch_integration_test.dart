@@ -20,6 +20,49 @@ List<Uri> mediaUris(String text) => const LineSplitter()
     .toList();
 
 void main() {
+  test('requesting HLS retention leaves FLV and local finalization inputs untouched', () async {
+    for (final source in ['http://127.0.0.1:1/live.flv', 'file:///tmp/input.ts']) {
+      final arguments = ['-i', source, 'output.ts'];
+      final original = List<String>.of(arguments);
+      expect(await FFmpegHlsInputRelay.startForArguments(arguments, drainOnStop: true, enablePrefetch: true), isNull);
+      expect(arguments, original);
+    }
+  });
+
+  test('non-live relay never prefetches even when retention is requested', () async {
+    var mediaRequests = 0;
+    final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final sub = origin.listen((request) async {
+      if (request.uri.path.endsWith('.m3u8')) {
+        request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nbody.ts\n#EXT-X-ENDLIST\n');
+      } else {
+        mediaRequests++;
+        request.response.add([1, 2, 3]);
+      }
+      await request.response.close();
+    });
+    final relay = (await FFmpegHlsInputRelay.startForArguments(
+      ['-i', 'http://127.0.0.1:${origin.port}/root.m3u8'],
+      force: true,
+      enablePrefetch: true,
+    ))!;
+    final client = HttpClient();
+    try {
+      final text = utf8.decode((await get(client, relay.inputUri)).$2);
+      expect(relay.prefetchEnabled, isFalse);
+      expect(relay.prefetchFeedCount, 0);
+      expect(mediaRequests, 0);
+      expect((await get(client, mediaUris(text).single)).$2, [1, 2, 3]);
+      expect(mediaRequests, 1);
+    } finally {
+      client.close(force: true);
+      await relay.close();
+      await origin.close(force: true);
+      await sub.cancel();
+    }
+    expect(relay.prefetchBodyCount, 0);
+  });
+
   for (final failure in ['http', 'parse', 'retention']) {
     test('prefetch refresh diagnostics distinguish $failure without retaining source data', () async {
       final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);

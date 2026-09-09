@@ -19,6 +19,7 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
   TabController? _tabController;
   Worker? _listWorker;
   final Map<String, ScrollController> _categoryScrollControllers = {};
+  final Set<ScrollController> _retiredScrollControllers = {};
 
   ScrollController _scrollControllerFor(String categoryId) =>
       _categoryScrollControllers.putIfAbsent(categoryId, () => createPureLiveScrollController());
@@ -36,52 +37,72 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
   void _createTabController() {
     if (widget.isFlatten) return;
     final list = widget.controller.categories;
-    if (list.isEmpty) return;
-
-    if (_tabController != null && _tabController!.length == list.length) {
-      return;
+    final recreateTabs = _tabController?.length != list.length;
+    if (recreateTabs || list.isEmpty) {
+      _tabController?.removeListener(_handleInternalTabChange);
+      _tabController?.dispose();
+      _tabController = null;
     }
 
-    if (_tabController != null) {
-      _tabController!.removeListener(_handleInternalTabChange);
-      _tabController!.dispose();
+    if (list.isEmpty) {
+      widget.controller.bindActiveScrollController(null);
+    } else {
+      int initialIndex = widget.controller.tabIndex.value;
+      if (initialIndex < 0 || initialIndex >= list.length) initialIndex = 0;
+      if (_tabController == null) {
+        _tabController = TabController(
+          length: list.length,
+          vsync: this,
+          initialIndex: initialIndex,
+          animationDuration: pureLiveTabTransitionDuration,
+        );
+        _tabController!.addListener(_handleInternalTabChange);
+      }
+      // Equal lengths do not imply equal category identities. Rebind even
+      // when the tab animation controller can be reused.
+      widget.controller.bindActiveScrollController(_scrollControllerFor(list[initialIndex].id));
     }
+    _retireRemovedCategories(list.map((category) => category.id).toSet());
 
-    int initialIndex = widget.controller.tabIndex.value;
-    if (initialIndex >= list.length) initialIndex = 0;
+    if (mounted && (recreateTabs || list.isEmpty)) setState(() {});
+  }
 
-    _tabController = TabController(
-      length: list.length,
-      vsync: this,
-      initialIndex: initialIndex,
-      animationDuration: pureLiveTabTransitionDuration,
-    );
-    _tabController!.addListener(_handleInternalTabChange);
-    widget.controller.bindActiveScrollController(_scrollControllerFor(list[initialIndex].id));
-
-    if (mounted) setState(() {});
+  void _retireRemovedCategories(Set<String> retainedIds) {
+    final removedIds = _categoryScrollControllers.keys.where((id) => !retainedIds.contains(id)).toList();
+    if (removedIds.isEmpty) return;
+    final removed = removedIds.map((id) => _categoryScrollControllers.remove(id)!).toList();
+    _retiredScrollControllers.addAll(removed);
+    // The old PageView children detach during the next layout. Release their
+    // controllers afterwards, rather than disposing a still-mounted position.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final controller in removed) {
+        if (_retiredScrollControllers.remove(controller)) controller.dispose();
+      }
+    });
   }
 
   void _handleInternalTabChange() {
     if (_tabController == null || _tabController!.indexIsChanging) return;
     final animationValue = _tabController!.animation?.value ?? _tabController!.index.toDouble();
     if ((animationValue - _tabController!.index).abs() > 0.001) return;
-    if (widget.controller.tabIndex.value != _tabController!.index) {
+    final target = _tabController!.index;
+    final categories = widget.controller.categories;
+    if (target < 0 || target >= categories.length) return;
+    widget.controller.bindActiveScrollController(_scrollControllerFor(categories[target].id));
+    if (widget.controller.tabIndex.value != target) {
       // Category data is already local. Commit only after the horizontal
       // gesture settles, and bind the destination's dedicated controller so
       // offsets never leak between PageView children.
-      final target = _tabController!.index;
-      final categories = widget.controller.categories;
-      if (target >= 0 && target < categories.length) {
-        widget.controller.bindActiveScrollController(_scrollControllerFor(categories[target].id));
-      }
-      widget.controller.selectCategory(_tabController!.index);
+      widget.controller.selectCategory(target);
     }
   }
 
   void _handleExternalIndexChange() {
     if (_tabController == null) return;
     final targetIndex = widget.controller.tabIndex.value;
+    final categories = widget.controller.categories;
+    if (targetIndex < 0 || targetIndex >= categories.length) return;
+    widget.controller.bindActiveScrollController(_scrollControllerFor(categories[targetIndex].id));
     if (_tabController!.index != targetIndex && targetIndex < _tabController!.length) {
       _tabController!.animateTo(targetIndex);
     }
@@ -102,6 +123,10 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
       controller.dispose();
     }
     _categoryScrollControllers.clear();
+    for (final controller in _retiredScrollControllers) {
+      controller.dispose();
+    }
+    _retiredScrollControllers.clear();
     super.dispose();
   }
 

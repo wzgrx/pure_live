@@ -15,11 +15,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class _Site extends LiveSite {
   int requests = 0;
+  List<(String, int)> catalog = [('First', 40), ('Empty', 0), ('Last', 2)];
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
     requests++;
     return [
-      for (final (id, count) in [('First', 40), ('Empty', 0), ('Last', 2)])
+      for (final (id, count) in catalog)
         LiveCategory(
           id: id,
           name: id,
@@ -45,8 +46,8 @@ class _Loader extends AssetLoader {
       jsonDecode(File('$path/${locale.languageCode}.json').readAsStringSync()) as Map<String, dynamic>;
 }
 
-Future<(_Controller, _Site)> _mount(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(400, 640);
+Future<(_Controller, _Site)> _mount(WidgetTester tester, {Size size = const Size(400, 640)}) async {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -152,6 +153,103 @@ void main() {
     expect(identical(controller.scrollController, firstController), true);
     expect(controller.scrollController.offset, 300);
     expect(controller.scrollController.positions, hasLength(1));
+    expect(tester.takeException(), null);
+  });
+
+  for (final width in [400.0, 900.0]) {
+    testWidgets('$width external selection binds paging actions to the visible category', (tester) async {
+      final (controller, site) = await _mount(tester, size: Size(width, 640));
+      final first = controller.scrollController;
+      controller.selectCategory(2);
+      await tester.pumpAndSettle();
+      final grid = tester.widget<GridView>(find.byKey(const PageStorageKey('area_grid_fixture_Last')));
+      expect(identical(controller.scrollController, grid.controller), true);
+      expect(identical(controller.scrollController, first), false);
+      expect(controller.scrollController.positions, hasLength(1));
+      expect(site.requests, 1);
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('$width same-count replacement retires old category scroll ownership', (tester) async {
+      final (controller, site) = await _mount(tester, size: Size(width, 640));
+      final old = controller.scrollController;
+      site.catalog = [('New', 40), ('Empty', 0), ('Last', 2)];
+      await controller.refreshData();
+      await tester.pumpAndSettle();
+      final grid = tester.widget<GridView>(find.byKey(const PageStorageKey('area_grid_fixture_New')));
+      expect(identical(controller.scrollController, grid.controller), true);
+      expect(identical(controller.scrollController, old), false);
+      expect(() => old.addListener(() {}), throwsFlutterError);
+      expect(tester.takeException(), null);
+    });
+  }
+
+  testWidgets('reordering taxonomy retains selected identity and scroll controller', (tester) async {
+    final (controller, site) = await _mount(tester);
+    final first = controller.scrollController;
+    first.jumpTo(300);
+    await tester.pumpAndSettle();
+    site.catalog = [('Last', 2), ('Empty', 0), ('First', 40)];
+    await controller.refreshData();
+    await tester.pumpAndSettle();
+    expect(controller.tabIndex.value, 2);
+    expect(tester.widget<TabBarView>(find.byType(TabBarView)).controller!.index, 2);
+    final grid = tester.widget<GridView>(find.byKey(const PageStorageKey('area_grid_fixture_First')).hitTestable());
+    expect(identical(grid.controller, first), true);
+    expect(identical(controller.scrollController, first), true);
+    expect(controller.scrollController.offset, 300);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('empty taxonomy releases old controllers and later installs new pages', (tester) async {
+    final (controller, site) = await _mount(tester);
+    final old = controller.scrollController;
+    site.catalog = [];
+    await controller.refreshData();
+    await tester.pumpAndSettle();
+    expect(find.byType(TabBarView), findsNothing);
+    expect(identical(controller.scrollController, old), false);
+    expect(() => old.addListener(() {}), throwsFlutterError);
+    site.catalog = [('Restored', 40)];
+    await controller.refreshData();
+    await tester.pumpAndSettle();
+    expect(controller.tabIndex.value, 0);
+    final grid = tester.widget<GridView>(find.byKey(const PageStorageKey('area_grid_fixture_Restored')));
+    expect(identical(controller.scrollController, grid.controller), true);
+    expect(controller.scrollController.positions, hasLength(1));
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('successive taxonomy replacements retire controllers only after children detach', (tester) async {
+    final (controller, site) = await _mount(tester);
+    final obsolete = <ScrollController>[];
+    for (var generation = 0; generation < 4; generation++) {
+      obsolete.add(controller.scrollController);
+      site.catalog = [for (var index = 0; index <= generation; index++) ('Generation-$generation-$index', 40)];
+      await controller.refreshData();
+      // No frame between snapshots: the old visible grid is still mounted.
+      expect(obsolete.first.hasClients, true);
+    }
+    await tester.pumpAndSettle();
+    expect(tester.widget<TabBarView>(find.byType(TabBarView)).controller!.length, 4);
+    expect(controller.scrollController.positions, hasLength(1));
+    for (final old in obsolete) {
+      expect(() => old.addListener(() {}), throwsFlutterError);
+    }
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('route disposal drains pending retirements without disposing twice', (tester) async {
+    final (controller, site) = await _mount(tester);
+    final old = controller.scrollController;
+    site.catalog = [('Replacement', 40)];
+    await controller.refreshData();
+    final replacement = controller.scrollController;
+    expect(old.hasClients, true);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    expect(() => old.addListener(() {}), throwsFlutterError);
+    expect(() => replacement.addListener(() {}), throwsFlutterError);
     expect(tester.takeException(), null);
   });
 }

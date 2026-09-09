@@ -6,6 +6,7 @@ import 'package:ffmpeg_kit_extended_flutter/ffmpeg_kit_extended_flutter.dart' hi
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pure_live/core/common/log.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:pure_live/plugins/locale_helper.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
@@ -274,6 +275,7 @@ class FFmpegService {
     required List<String> arguments,
     required void Function(FFmpegEvent event) onEvent,
     bool liveRecording = false,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
   }) async {
     await _ensureInitialized();
     if (_sessions.containsKey(taskId)) {
@@ -284,7 +286,11 @@ class FFmpegService {
     // Pass the exact argument vector to FFI. Re-parsing a shell-like command
     // string was platform-dependent and could corrupt signed URLs, header CRLF
     // blocks or Android storage paths before FFmpeg saw them.
-    final inputRelay = await FFmpegHlsInputRelay.startForArguments(arguments, drainOnStop: liveRecording);
+    final inputRelay = await FFmpegHlsInputRelay.startForArguments(
+      arguments,
+      drainOnStop: liveRecording,
+      sourceQueryPolicy: sourceQueryPolicy,
+    );
     final flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
     final inputArguments =
         flvInputRelay?.replaceFirstInput(arguments) ?? inputRelay?.replaceFirstInput(arguments) ?? arguments;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/get/get.dart';
@@ -76,6 +77,18 @@ void main() {
     expect(native.starts, 1);
     expect(task.status, RecordStatus.running);
     expect(resolver.calls, 2, reason: 'credential maintenance must not poll or spin');
+  });
+
+  test('recorder passes the exact selected source policy to each native attempt', () async {
+    resolver.url = 'https://cdn.example/live/master.m3u8?token=fixture';
+    resolver.withPolicy = true;
+    await start();
+    expect(native.policies.single?.matchesSource(Uri.parse(native.urls.single)), isTrue);
+    native.finish(task.taskId, eof: true);
+    await until(() => native.starts == 2, timeout: const Duration(seconds: 4));
+    expect(native.policies.last?.matchesSource(Uri.parse(native.urls.last)), isTrue);
+    expect(native.policies.first?.matchesSource(Uri.parse(native.urls.last)), isFalse);
+    expect(task.toJson().keys, isNot(contains('sourceQueryPolicy')));
   });
 
   test('native credential prefetch failure leaves healthy media running', () async {
@@ -167,6 +180,7 @@ class _Settings extends RecordSettingsController {
 }
 
 class _Resolver extends StreamResolverService {
+  bool withPolicy = false;
   String url = _nativeUrl;
   int calls = 0;
   bool failPrefetch = false;
@@ -178,6 +192,9 @@ class _Resolver extends StreamResolverService {
     qualityCursorId: 'fixture',
     lineIndex: 0,
     candidateUrls: [url],
+    sourceQueryPolicy: withPolicy
+        ? HlsSourceQueryPolicy.fromSource(Uri.parse('$url${url.contains('?') ? '&' : '?'}lease=$index'))
+        : null,
     refreshAt: DateTime.now().toUtc().add(index == 0 ? const Duration(milliseconds: 400) : const Duration(minutes: 4)),
     invalidAt: DateTime.now().toUtc().add(
       expiredPrefetch && index == 1 ? const Duration(seconds: -1) : const Duration(minutes: 5),
@@ -200,6 +217,7 @@ class _Resolver extends StreamResolverService {
 }
 
 class _Native implements FFmpegManager {
+  final policies = <HlsSourceQueryPolicy?>[];
   final events = StreamController<FFmpegEvent>.broadcast(sync: true);
   final urls = <String>[];
   Completer<void>? execution;
@@ -214,7 +232,13 @@ class _Native implements FFmpegManager {
   @override
   bool isRunning(String taskId) => session != null;
   @override
-  Future<void> start({required String taskId, required List<String> arguments, bool liveRecording = false}) async {
+  Future<void> start({
+    required String taskId,
+    required List<String> arguments,
+    bool liveRecording = false,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
+  }) async {
+    policies.add(sourceQueryPolicy);
     final done = Completer<void>();
     execution = done;
     final id = ++starts;

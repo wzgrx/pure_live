@@ -5,6 +5,7 @@ import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/common/models/live_message.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 
 /// The stream URLs returned for one requested quality together with the
 /// quality that the platform actually applied.
@@ -20,10 +21,51 @@ import 'package:pure_live/core/interface/live_danmaku.dart';
 /// [LivePlayQuality.selectionId] for platforms whose URL response has no
 /// separate acknowledgement.
 class LivePlayUrlResolution {
-  const LivePlayUrlResolution({required this.urls, this.appliedQualityData, this.qualityUnconfirmed = false});
+  const LivePlayUrlResolution({required this.urls, this.appliedQualityData, this.qualityUnconfirmed = false})
+    : sourceQueryPolicies = const {};
+
+  LivePlayUrlResolution._({
+    required this.urls,
+    required this.sourceQueryPolicies,
+    this.appliedQualityData,
+    this.qualityUnconfirmed = false,
+  });
+
+  /// Policy-bearing sources are copied and validated together. Keys identify
+  /// exact signed URLs, never only CDN positions or quality labels.
+  factory LivePlayUrlResolution.withSourcePolicies({
+    required List<String> urls,
+    required Map<String, HlsSourceQueryPolicy> sourceQueryPolicies,
+    Object? appliedQualityData,
+    bool qualityUnconfirmed = false,
+  }) {
+    final normalized = normalizeResolvedPlayUrls(urls);
+    final policies = <String, HlsSourceQueryPolicy>{};
+    for (final entry in sourceQueryPolicies.entries) {
+      final uri = Uri.tryParse(entry.key);
+      if (!normalized.contains(entry.key) || uri == null || !entry.value.matchesSource(uri)) {
+        throw const FormatException('Source query policy does not match resolved URLs');
+      }
+      policies[entry.key] = entry.value;
+    }
+    return LivePlayUrlResolution._(
+      urls: normalized,
+      sourceQueryPolicies: Map.unmodifiable(policies),
+      appliedQualityData: appliedQualityData,
+      qualityUnconfirmed: qualityUnconfirmed,
+    );
+  }
+
+  LivePlayUrlResolution normalized() => LivePlayUrlResolution.withSourcePolicies(
+    urls: urls,
+    sourceQueryPolicies: sourceQueryPolicies,
+    appliedQualityData: appliedQualityData,
+    qualityUnconfirmed: qualityUnconfirmed,
+  );
 
   final List<String> urls;
   final Object? appliedQualityData;
+  final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
 
   /// An adapter expected an acknowledgement but the response did not contain a
   /// usable one. False preserves the legacy contract for platforms with no ack.
@@ -214,11 +256,7 @@ extension LiveSitePlayUrlResolution on LiveSite {
 
       final resolution = await resolver.resolvePlayUrlsRaw(detail: detail, quality: quality);
 
-      return LivePlayUrlResolution(
-        urls: normalizeResolvedPlayUrls(resolution.urls),
-        appliedQualityData: resolution.appliedQualityData,
-        qualityUnconfirmed: resolution.qualityUnconfirmed,
-      );
+      return resolution.normalized();
     }
 
     return LivePlayUrlResolution(
@@ -237,11 +275,7 @@ extension LiveSitePlayUrlResolution on LiveSite {
         detail: detail,
         quality: quality,
       );
-      return LivePlayUrlResolution(
-        urls: normalizeResolvedPlayUrls(resolution.urls),
-        appliedQualityData: resolution.appliedQualityData,
-        qualityUnconfirmed: resolution.qualityUnconfirmed,
-      );
+      return resolution.normalized();
     }
     return resolvePlayUrls(detail: detail, quality: quality);
   }

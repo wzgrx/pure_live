@@ -873,7 +873,12 @@ class RecorderController extends GetxService {
       );
       if (token.isCancelled) return;
 
-      await ffmpeg.start(taskId: task.taskId, arguments: arguments, liveRecording: true);
+      await ffmpeg.start(
+        taskId: task.taskId,
+        arguments: arguments,
+        liveRecording: true,
+        sourceQueryPolicy: resolved.sourceQueryPolicy,
+      );
       if (identical(_pendingRecorderLeases[task.taskId], pendingLease)) {
         _pendingRecorderLeases.remove(task.taskId);
       }

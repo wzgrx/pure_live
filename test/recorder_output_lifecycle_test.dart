@@ -1,4 +1,7 @@
 import 'dart:async';
+
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -366,7 +369,12 @@ class _EventManager implements FFmpegManager {
   @override
   bool isRunning(String taskId) => running;
   @override
-  Future<void> start({required String taskId, required List<String> arguments, bool liveRecording = false}) async {
+  Future<void> start({
+    required String taskId,
+    required List<String> arguments,
+    bool liveRecording = false,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
+  }) async {
     running = true;
     try {
       await execution?.future;

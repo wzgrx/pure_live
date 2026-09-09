@@ -2,6 +2,7 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 
 enum StreamErrorType { roomNotFound, notLive, noQuality, cdnFailed, networkError, loginExpired, banned, unknown }
 
@@ -33,6 +34,7 @@ class ResolvedRecordStream {
     required this.candidateUrls,
     this.refreshAt,
     this.invalidAt,
+    this.sourceQueryPolicy,
   });
 
   final String url;
@@ -54,6 +56,7 @@ class ResolvedRecordStream {
   /// Last safe instant for opening this exact URL, when the adapter can derive
   /// one. It is retained for diagnostics and future bounded retry decisions.
   final DateTime? invalidAt;
+  final HlsSourceQueryPolicy? sourceQueryPolicy;
 
   String get lineLabel => '线路${lineIndex + 1}';
 }
@@ -336,6 +339,7 @@ class StreamResolverService extends GetxService {
       requestedQualityId: requestedQuality.selectionId.toString(),
       appliedQuality: appliedQuality,
       urls: validUrls,
+      sourceQueryPolicies: resolution.sourceQueryPolicies,
       refreshTimes: validUrls.map((url) => leaseMetadata?.getPlayUrlRefreshAt(url)?.toUtc()).toList(growable: false),
       invalidTimes: validUrls.map((url) => leaseMetadata?.getPlayUrlInvalidAt(url)?.toUtc()).toList(growable: false),
       lineIndexes: lineIndex == null
@@ -369,6 +373,7 @@ class _ResolvedQuality {
     required this.lineIndexes,
     required this.refreshTimes,
     required this.invalidTimes,
+    required this.sourceQueryPolicies,
   });
 
   final String requestedQualityId;
@@ -377,6 +382,7 @@ class _ResolvedQuality {
   final List<int> lineIndexes;
   final List<DateTime?> refreshTimes;
   final List<DateTime?> invalidTimes;
+  final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
 
   ResolvedRecordStream select(int position) {
     final normalizedPosition = position.clamp(0, urls.length - 1);
@@ -388,6 +394,7 @@ class _ResolvedQuality {
       candidateUrls: List<String>.unmodifiable([...urls.skip(normalizedPosition), ...urls.take(normalizedPosition)]),
       refreshAt: refreshTimes[normalizedPosition],
       invalidAt: invalidTimes[normalizedPosition],
+      sourceQueryPolicy: sourceQueryPolicies[urls[normalizedPosition]],
     );
   }
 }

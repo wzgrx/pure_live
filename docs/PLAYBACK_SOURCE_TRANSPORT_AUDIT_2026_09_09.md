@@ -44,7 +44,7 @@ MediaKit 的 SourceEventFence 继续核对真实 native loopback URL；软件解
 
 ## 剩余、交付与回滚
 
-1. 优先补实际 PlayerController → manager 的取消确认测试，核对暖切取消后 opener 的 void 完成与路由 fallback 提交是否一致，再检查刷新 resolver 的保留；当前只有 manager 级取消证据。
+1. 后续 [切源确认审计](STREAM_COMMIT_RECEIPT_AUDIT_2026_09_09.md) 已补实际 PlayerController → manager 的取消确认与刷新所有权修复，新增 8 项、五文件 198/198；仍是确定性替身证据，不是 native 验收。
 2. 多画面的统一解析、每格 relay 生命周期和媒体代理；再完成 TTing API/状态/身份、设置/双语/用户入口与平台注册。
 3. Android/Windows native 的真实代理、TLS、画面声音、软解回退、后台/浮窗/多画面与录制验收，仍按候选及设备边界执行。
 

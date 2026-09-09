@@ -79,6 +79,9 @@ final class HlsMediaSnapshot {
     this.source,
     this.targetDuration,
     this.ended,
+    this.version,
+    this.independentSegments,
+    this.playlistType,
     List<HlsSegmentDescriptor> segments,
     Set<String> unhandledTags,
   ) : segments = List.unmodifiable(segments),
@@ -86,6 +89,9 @@ final class HlsMediaSnapshot {
   final Uri source;
   final int targetDuration;
   final bool ended;
+  final int version;
+  final bool independentSegments;
+  final String? playlistType;
   final List<HlsSegmentDescriptor> segments;
   final Set<String> unhandledTags;
 
@@ -103,6 +109,9 @@ final class HlsMediaSnapshot {
     var discontinuity = 0;
     int? target;
     var ended = false;
+    var version = 1;
+    var independent = false;
+    String? playlistType;
     var gap = false;
     var sawDiscontinuity = false;
     var explicitTime = false;
@@ -184,6 +193,9 @@ final class HlsMediaSnapshot {
         case '#EXT-X-MAP':
           final attributes = _attributes(value);
           if (attributes['URI'] == null) throw const FormatException('Missing initialization URI');
+          if (attributes.keys.any((key) => key != 'URI' && key != 'BYTERANGE')) {
+            unhandled.add('#EXT-X-MAP:attributes');
+          }
           final uri = _resolve(source, attributes['URI']!);
           final textRange = attributes['BYTERANGE'];
           // Do not invent an offset for a map with an omitted, ambiguous base.
@@ -197,9 +209,13 @@ final class HlsMediaSnapshot {
         case '#EXT-X-ENDLIST':
           ended = true;
         case '#EXT-X-VERSION':
-          if (_unsigned(value) == 0) throw const FormatException('Invalid HLS version');
+          version = _unsigned(value);
+          if (version == 0) throw const FormatException('Invalid HLS version');
+        case '#EXT-X-PLAYLIST-TYPE':
+          if (value != 'EVENT' && value != 'VOD') throw const FormatException('Invalid playlist type');
+          playlistType = value;
         case '#EXT-X-INDEPENDENT-SEGMENTS':
-          break;
+          independent = true;
         default:
           if (line.startsWith('#')) {
             if (line.startsWith('#EXT')) unhandled.add(tag);
@@ -242,7 +258,7 @@ final class HlsMediaSnapshot {
     if (segments.any((segment) => segment.duration.round() > target!)) {
       throw const FormatException('Segment exceeds target duration');
     }
-    return HlsMediaSnapshot._(source, target, ended, segments, unhandled);
+    return HlsMediaSnapshot._(source, target, ended, version, independent, playlistType, segments, unhandled);
   }
 }
 
@@ -263,6 +279,12 @@ final class HlsRetainedWindow {
   int _latestFirst = -1;
   bool _ended = false;
   int? _targetDuration;
+  int _version = 1;
+  bool _independentSegments = false;
+  String? _playlistType;
+  int get targetDuration => _targetDuration ?? 1;
+  int get version => _version;
+  bool get independentSegments => _independentSegments;
   bool get ended => _ended;
   int get retainedBytes => _segments.fold(0, (sum, segment) => sum + segment.retainedBytes);
 
@@ -273,12 +295,19 @@ final class HlsRetainedWindow {
     if (_targetDuration != null && _targetDuration != snapshot.targetDuration) {
       throw const FormatException('Target duration changed within a source generation');
     }
+    if (_targetDuration != null &&
+        (_independentSegments != snapshot.independentSegments || _playlistType != snapshot.playlistType)) {
+      throw const FormatException('Playlist contract changed within a source generation');
+    }
     final incoming = snapshot.segments;
     if (incoming.isEmpty) {
       if (_segments.isNotEmpty || (_ended && !snapshot.ended)) {
         throw const FormatException('Empty refresh of a retained window');
       }
       _targetDuration = snapshot.targetDuration;
+      if (snapshot.version > _version) _version = snapshot.version;
+      _independentSegments = snapshot.independentSegments;
+      _playlistType = snapshot.playlistType;
       _ended = snapshot.ended;
       return const [];
     }
@@ -316,9 +345,15 @@ final class HlsRetainedWindow {
       bytes -= segment.retainedBytes;
       evicted.add(segment);
     }
+    if (snapshot.playlistType == 'VOD' && evicted.isNotEmpty) {
+      throw const FormatException('VOD exceeds retained window capacity');
+    }
     _segments = List.unmodifiable(values);
     _latestFirst = incoming.first.sequence;
     _targetDuration = snapshot.targetDuration;
+    if (snapshot.version > _version) _version = snapshot.version;
+    _independentSegments = snapshot.independentSegments;
+    _playlistType = snapshot.playlistType;
     _ended = snapshot.ended;
     return List.unmodifiable(evicted);
   }

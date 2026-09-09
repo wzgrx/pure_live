@@ -144,7 +144,7 @@ final class HlsPrefetchScheduler {
       !uri.hasFragment &&
       uri.toString().length <= 65536;
 
-  String publish(String id, Uri Function(HlsPrefetchResource resource) localUri) {
+  String publish(String id, Uri Function(HlsPrefetchResource resource) localUri, {bool startAtFirst = false}) {
     final feed = _feeds[id];
     if (_closed || feed == null) throw StateError('Selected HLS feed is unavailable');
     if (_finishing) return feed.finishedManifest!;
@@ -159,6 +159,7 @@ final class HlsPrefetchScheduler {
       segmentUri: (segment) => map(HlsPrefetchResource.media(id, segment)),
       initializationUri: (initialization) => map(HlsPrefetchResource.initialization(initialization)),
       keyUri: (key) => map(HlsPrefetchResource.key(key)),
+      startAtFirst: startAtFirst,
     );
     feed.published = [feed.window.segments, if (feed.published.isNotEmpty) feed.published.first];
     feed.lastManifest = text;

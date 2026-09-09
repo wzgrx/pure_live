@@ -22,10 +22,61 @@ void _registerStartBoundaryProbe() {
       try {
         await HttpOverrides.runWithHttpOverrides(() async {
           for (final variant in [
-            (name: 'equal-default', video: 3, audio: 3, index: null, distinct: false),
-            (name: 'shared-unequal-default', video: 3, audio: 4, index: null, distinct: false),
-            (name: 'distinct-unequal-default', video: 3, audio: 4, index: null, distinct: true),
-            (name: 'distinct-unequal-zero', video: 3, audio: 4, index: 0, distinct: true),
+            (name: 'equal-default', video: 3, audio: 3, index: null, distinct: false, hint: 0, sourceHint: false),
+            (
+              name: 'shared-unequal-default',
+              video: 3,
+              audio: 4,
+              index: null,
+              distinct: false,
+              hint: 0,
+              sourceHint: false,
+            ),
+            (
+              name: 'distinct-unequal-default',
+              video: 3,
+              audio: 4,
+              index: null,
+              distinct: true,
+              hint: 0,
+              sourceHint: false,
+            ),
+            (
+              name: 'distinct-unequal-zero',
+              video: 3,
+              audio: 4,
+              index: 0,
+              distinct: true,
+              hint: null,
+              sourceHint: false,
+            ),
+            (
+              name: 'distinct-selected-hint',
+              video: 3,
+              audio: 4,
+              index: null,
+              distinct: true,
+              hint: null,
+              sourceHint: false,
+            ),
+            (
+              name: 'distinct-unselected-hint',
+              video: 3,
+              audio: 4,
+              index: null,
+              distinct: true,
+              hint: null,
+              sourceHint: true,
+            ),
+            (
+              name: 'distinct-explicit-hint',
+              video: 3,
+              audio: 4,
+              index: null,
+              distinct: true,
+              hint: 1,
+              sourceHint: true,
+            ),
           ]) {
             final report = await _capture(
               (name: variant.name, budget: 5, bodyMs: 0, headerMs: 0, runSeconds: 4),
@@ -34,6 +85,8 @@ void _registerStartBoundaryProbe() {
               productionPrefetch: true,
               fixedCounts: (video: variant.video, audio: variant.audio),
               liveStartIndex: variant.index,
+              preferStartHint: variant.hint,
+              sourceStartHint: variant.sourceHint,
               distinctSequences: variant.distinct,
             );
             reports.add(report);
@@ -41,10 +94,11 @@ void _registerStartBoundaryProbe() {
                 jsonDecode(await File(p.join(root.path, variant.name, 'hls-timeline.json')).readAsString()) as Map;
             report['nativeFirstSequences'] = _nativeFirstSequences(snapshot);
             expect(snapshot['prefetchRefreshFailures'], isEmpty);
-            expect((report['prefetch'] as Map)['feeds'], 2);
+            expect((report['prefetch'] as Map)['feeds'], variant.sourceHint ? 0 : 2);
             expect((report['prefetchAfterClose'] as Map)['entries'], 0);
             expect((report['prefetchAfterClose'] as Map)['bytes'], 0);
             expect(report['nativeStartIndex'], variant.index);
+            expect(report['nativePreferStartHint'], variant.hint ?? (variant.index == null ? 1 : null));
             final terminal = (report['events'] as List).last as Map;
             expect(terminal['type'], 'complete');
             expect(terminal['code'], 0);
@@ -69,10 +123,20 @@ void _registerStartBoundaryProbe() {
         expect(reports[1]['nativeFirstSequences'], {'video': 1, 'audio': 1});
         expect(reports[2]['nativeFirstSequences'], {'video': 1000, 'audio': 2001});
         expect(reports[3]['nativeFirstSequences'], {'video': 1000, 'audio': 2000});
+        expect(reports[4]['nativeFirstSequences'], {'video': 1000, 'audio': 2000});
+        expect(reports[5]['nativeFirstSequences'], {'video': 1000, 'audio': 2001});
+        expect(reports[6]['nativeFirstSequences'], {'video': 1000, 'audio': 2000});
         expect(startDifference(0).abs(), lessThan(0.05));
         expect(startDifference(1).abs(), lessThan(0.05));
         expect(startDifference(2), inExclusiveRange(1.9, 2.1));
         expect(startDifference(3).abs(), lessThan(0.05));
+        expect(startDifference(4).abs(), lessThan(0.05));
+        expect(startDifference(5), inExclusiveRange(1.9, 2.1));
+        expect(startDifference(6).abs(), lessThan(0.05));
+        for (final type in ['video', 'audio']) {
+          expect(track(4, type), track(3, type));
+          expect(track(5, type), track(2, type));
+        }
         expect(track(3, 'audio')['packets'] as int, greaterThan(track(2, 'audio')['packets'] as int));
         expect(track(3, 'video')['packets'], track(2, 'video')['packets']);
         expect(track(1, 'video')['packets'] as int, lessThan(track(2, 'video')['packets'] as int));

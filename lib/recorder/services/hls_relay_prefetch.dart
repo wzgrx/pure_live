@@ -92,7 +92,7 @@ extension _HlsRelayPrefetch on FFmpegHlsInputRelay {
         final resourceId = Uri.parse(local).pathSegments.last.split('.').first;
         _prefetchResources[resourceId] = resource;
         return Uri.parse(local);
-      });
+      }, startAtFirst: _automaticStartHint);
     } on StateError {
       await FFmpegHlsInputRelay._replyStatus(request, _prefetchFailures['manifest:${_resources[id]}'] ?? 502);
       return;

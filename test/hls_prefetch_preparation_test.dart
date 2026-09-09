@@ -61,6 +61,71 @@ final class Origin {
 }
 
 void main() {
+  for (final config in [
+    (enabled: true, sourceHint: false, override: <String>[], automatic: true),
+    (enabled: false, sourceHint: false, override: <String>[], automatic: false),
+    (enabled: true, sourceHint: true, override: <String>[], automatic: true),
+    (enabled: true, sourceHint: true, override: ['-prefer_x_start', '1'], automatic: false),
+    (enabled: true, sourceHint: true, override: ['-prefer_x_start', '0'], automatic: false),
+    (enabled: true, sourceHint: true, override: ['-live_start_index', '2'], automatic: false),
+    (enabled: true, sourceHint: false, override: ['-live_start_index', '1'], automatic: false),
+  ]) {
+    test('start hint is selected-only and preserves explicit/native fallback intent: $config', () async {
+      var bodies = 0;
+      final origin = await Origin.start((request) async {
+        if (request.uri.path.endsWith('.m3u8')) {
+          request.response.write(media(request.uri.path, 0, ended: true));
+          if (config.sourceHint) request.response.write('#EXT-X-START:TIME-OFFSET=2\n');
+        } else {
+          bodies++;
+          request.response.write('body');
+        }
+      });
+      final args = [...config.override, '-i', 'http://127.0.0.1:${origin.server.port}/video.m3u8'];
+      final relay = (await FFmpegHlsInputRelay.startForArguments(
+        args,
+        drainOnStop: true,
+        enablePrefetch: config.enabled,
+      ))!;
+      final client = HttpClient();
+      try {
+        final rewrittenArgs = relay.replaceFirstInput(args);
+        if (config.automatic) {
+          expect(rewrittenArgs, contains('-prefer_x_start'));
+          expect(rewrittenArgs[rewrittenArgs.indexOf('-prefer_x_start') + 1], '1');
+          expect(rewrittenArgs, isNot(contains('-live_start_index')));
+        } else {
+          for (final option in ['-prefer_x_start', '-live_start_index']) {
+            expect(rewrittenArgs.contains(option), config.override.contains(option));
+            if (config.override.contains(option)) {
+              expect(
+                rewrittenArgs[rewrittenArgs.indexOf(option) + 1],
+                config.override[config.override.indexOf(option) + 1],
+              );
+            }
+          }
+        }
+        final text = (await fetch(client, relay.inputUri)).$2;
+        final selected = config.enabled && !config.sourceHint;
+        expect(relay.prefetchFeedCount, selected ? 1 : 0);
+        if (config.automatic && selected) {
+          expect(text, contains('#EXT-X-START:TIME-OFFSET=0,PRECISE=NO'));
+        } else if (config.sourceHint && !config.automatic) {
+          expect(text, contains('#EXT-X-START:TIME-OFFSET=2'));
+        } else {
+          expect(text, isNot(contains('#EXT-X-START:')));
+        }
+        if (!selected) expect(bodies, 0);
+        await relay.finish();
+        expect((await fetch(client, relay.inputUri)).$2, text);
+      } finally {
+        client.close(force: true);
+        await relay.close();
+        await origin.close();
+      }
+      expect(relay.prefetchBodyCount, 0);
+    });
+  }
   for (final ending in ['failed-peer', 'finish', 'close']) {
     test('initial two-feed reads are cancelled and awaited on $ending without admitting late media', () async {
       final release = Completer<void>();

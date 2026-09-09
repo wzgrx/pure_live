@@ -13,6 +13,7 @@ String renderHlsRetainedManifest(
   Uri Function(HlsKeyDescriptor key)? keyUri,
   int? throughSequence,
   bool finish = false,
+  bool startAtFirst = false,
   int maximumBytes = 8 * 1024 * 1024,
 }) {
   if (maximumBytes < 1 || maximumBytes > 8 * 1024 * 1024) {
@@ -49,6 +50,7 @@ String renderHlsRetainedManifest(
   // Non-I-frame MAP requires version 6. Keeping a higher declared version
   // avoids weakening other supported feature contracts during retention.
   line('#EXT-X-VERSION:${window.version < 6 ? 6 : window.version}');
+  if (startAtFirst && segments.isNotEmpty) line('#EXT-X-START:TIME-OFFSET=0,PRECISE=NO');
   line('#EXT-X-TARGETDURATION:${window.targetDuration}');
   line('#EXT-X-MEDIA-SEQUENCE:${segments.isEmpty ? 0 : segments.first.sequence}');
   line('#EXT-X-DISCONTINUITY-SEQUENCE:${segments.isEmpty ? 0 : segments.first.discontinuity}');

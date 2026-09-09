@@ -97,6 +97,7 @@ class FFmpegHlsInputRelay {
   final String _secret;
   final bool drainOnStop;
   final bool prefetchEnabled;
+  bool _automaticStartHint = false;
   HlsPrefetchScheduler? _prefetch;
   Future<void>? _prefetchPreparation;
   Future<void>? _prefetchDrain;
@@ -261,6 +262,14 @@ class FFmpegHlsInputRelay {
           }
         }
         if (!replaced) arguments.insertAll(inputIndex, ['-rw_timeout', localTimeout]);
+      }
+      final beforeInput = arguments.take(arguments.indexOf('-i'));
+      if (prefetchEnabled && !beforeInput.contains('-live_start_index') && !beforeInput.contains('-prefer_x_start')) {
+        // Admission occurs on the first GET, after native arguments are fixed.
+        // Enable hints, not a global zero index: only selected media publishes
+        // our zero-offset hint. Caller-specified native policy stays explicit.
+        _automaticStartHint = true;
+        arguments.insertAll(arguments.indexOf('-i'), ['-prefer_x_start', '1']);
       }
     }
     return List<String>.unmodifiable(arguments);
@@ -581,6 +590,10 @@ class FFmpegHlsInputRelay {
     for (final rawLine in const LineSplitter().convert(source)) {
       final line = rawLine.endsWith('\r') ? rawLine.substring(0, rawLine.length - 1) : rawLine;
       final trimmed = line.trim();
+      // Native's default ignores source START hints. When we introduce hint
+      // support for selected caches, keep unselected/legacy sources at that
+      // same default instead of accidentally honoring their DVR seek hint.
+      if (_automaticStartHint && trimmed.startsWith('#EXT-X-START:')) continue;
       if (trimmed.isEmpty) {
         output.add('');
       } else if (trimmed.startsWith('#')) {

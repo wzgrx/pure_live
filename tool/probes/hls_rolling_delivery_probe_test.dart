@@ -193,6 +193,8 @@ Future<Map<String, Object?>> _capture(
   bool productionPrefetch = false,
   ({int video, int audio})? fixedCounts,
   int? liveStartIndex,
+  int? preferStartHint,
+  bool sourceStartHint = false,
   bool distinctSequences = false,
 }) async {
   final output = await Directory(p.join(root.path, config.name)).create();
@@ -201,6 +203,7 @@ Future<Map<String, Object?>> _capture(
     config,
     fixedCounts: fixedCounts,
     distinctSequences: distinctSequences,
+    sourceStartHint: sourceStartHint,
   );
   final native = FFmpegManager.to;
   final diagnostics = HlsRelayDiagnostics();
@@ -250,6 +253,9 @@ Future<Map<String, Object?>> _capture(
     if (liveStartIndex != null) {
       arguments.insertAll(arguments.indexOf('-i'), ['-live_start_index', '$liveStartIndex']);
     }
+    if (preferStartHint != null) {
+      arguments.insertAll(arguments.indexOf('-i'), ['-prefer_x_start', '$preferStartHint']);
+    }
     execution = native.start(
       taskId: taskId,
       arguments: arguments,
@@ -263,6 +269,9 @@ Future<Map<String, Object?>> _capture(
     final nativeCommand = native.getSession(taskId)?.session.getCommand() ?? '';
     report['nativeStartIndex'] = int.tryParse(
       RegExp(r'-live_start_index\s+(-?\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
+    );
+    report['nativePreferStartHint'] = int.tryParse(
+      RegExp(r'-prefer_x_start\s+(\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
     );
     report['nativeReadTimeoutMicros'] = int.tryParse(
       RegExp(r'-rw_timeout\s+(\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
@@ -399,13 +408,22 @@ List<Map<String, Object?>> _completedMedia(List<Map<String, Object?>> requests) 
     .toList();
 
 class _RollingOrigin {
-  _RollingOrigin(this.server, this.files, this.playlists, this.config, this.fixedCounts, this.distinctSequences);
+  _RollingOrigin(
+    this.server,
+    this.files,
+    this.playlists,
+    this.config,
+    this.fixedCounts,
+    this.distinctSequences,
+    this.sourceStartHint,
+  );
   final HttpServer server;
   final Map<String, File> files;
   final Map<String, List<_Segment>> playlists;
   final _Scenario config;
   final ({int video, int audio})? fixedCounts;
   final bool distinctSequences;
+  final bool sourceStartHint;
   final clock = Stopwatch();
   final ended = Completer<void>();
   final requests = <Map<String, Object?>>[];
@@ -419,6 +437,7 @@ class _RollingOrigin {
     _Scenario config, {
     ({int video, int audio})? fixedCounts,
     bool distinctSequences = false,
+    bool sourceStartHint = false,
   }) async {
     final files = <String, File>{};
     await for (final file in fixture.list(recursive: true, followLinks: false)) {
@@ -445,7 +464,7 @@ class _RollingOrigin {
       playlists[key] = segments;
     }
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    final origin = _RollingOrigin(server, files, playlists, config, fixedCounts, distinctSequences);
+    final origin = _RollingOrigin(server, files, playlists, config, fixedCounts, distinctSequences, sourceStartHint);
     origin.subscription = server.listen((request) {
       if (!origin.clock.isRunning) origin.clock.start();
       late Future<void> work;
@@ -496,6 +515,7 @@ class _RollingOrigin {
           '#EXTM3U\n#EXT-X-VERSION:7\n#EXT-X-TARGETDURATION:2\n'
           '#EXT-X-MEDIA-SEQUENCE:$firstSequence\n#EXT-X-MAP:URI="init_$variant.mp4"\n',
         );
+        if (sourceStartHint) content.write('#EXT-X-START:TIME-OFFSET=0,PRECISE=NO\n');
         for (final segment in current) {
           final pdt = DateTime.utc(2026, 9, 9).add(Duration(microseconds: (segment.start * 1000000).round()));
           content.write(

@@ -8,11 +8,13 @@ class HlsMediaSpool {
     required this.createDirectory,
     this.memoryLimit = 2 * 1024 * 1024,
     this.byteLimit = 128 * 1024 * 1024,
+    this.reusable = false,
   });
 
   final Future<Directory> Function() createDirectory;
   final int memoryLimit;
   final int byteLimit;
+  final bool reusable;
   final BytesBuilder _memory = BytesBuilder();
   Directory? _directory;
   File? _file;
@@ -54,7 +56,7 @@ class HlsMediaSpool {
 
   Stream<List<int>> read() {
     if (!_sealed || _disposed) throw StateError('Only a complete HLS body may be published');
-    return _file?.openRead() ?? Stream<List<int>>.value(_memory.takeBytes());
+    return _file?.openRead() ?? Stream<List<int>>.value(reusable ? _memory.toBytes() : _memory.takeBytes());
   }
 
   Future<void> dispose() async {

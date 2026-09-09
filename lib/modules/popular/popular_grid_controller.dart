@@ -36,28 +36,19 @@ class PopularLocalReactiveController extends LocalReactivePageController<LiveRoo
   final Site site;
   PopularLocalReactiveController(this.site) {
     onExternalRefresh = () async {
-      await loadData();
+      final rooms = await getLocalRawData();
+      if (isClosed) return;
+      updateLocalReactivePool(rooms);
     };
   }
 
   @override
-  Future<void> loadData() async {
-    loadding.value = true;
-    pageEmpty.value = false;
-    try {
-      final rooms = await getLocalRawData();
-      updateLocalReactivePool(rooms);
-    } catch (e) {
-      handleError(e, showPageError: list.isEmpty);
-      pageEmpty.value = list.isEmpty;
-      finishRefreshControllers(IndicatorResult.fail);
-    } finally {
-      loadding.value = false;
-    }
-  }
+  Future<void> loadData() => loadExternalSnapshot();
 
   Future<List<LiveRoom>> getLocalRawData() async {
+    if (isClosed) return [];
     final rooms = await site.liveSite.getRecommendRooms(page: 1, pageSize: pageSize.value);
+    if (isClosed) return [];
     return site.id == Sites.iptvSite ? rooms : _rankForCurrentSettings(rooms);
   }
 

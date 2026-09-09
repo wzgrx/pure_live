@@ -23,12 +23,14 @@ import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
 
 part 'hls_scheduled_delivery_probe.dart';
 part 'hls_start_boundary_probe.dart';
+part 'hls_refresh_coverage_probe.dart';
 
 typedef _Scenario = ({String name, int budget, int bodyMs, int headerMs, int runSeconds});
 
 void main() {
   _registerScheduledDeliveryProbe();
   _registerStartBoundaryProbe();
+  _registerRefreshCoverageProbe();
   test('whole-media accounting excludes empty HTTP failures and unfinished bodies', () {
     final traces = <Map<String, Object?>>[
       {'upstreamStatus': 200, 'bodyCompleteMs': 12000},
@@ -196,6 +198,7 @@ Future<Map<String, Object?>> _capture(
   int? preferStartHint,
   bool sourceStartHint = false,
   bool distinctSequences = false,
+  String? failRefreshBeforeStop,
 }) async {
   final output = await Directory(p.join(root.path, config.name)).create();
   final origin = await _RollingOrigin.start(
@@ -265,6 +268,17 @@ Future<Map<String, Object?>> _capture(
     );
     // Fixed controlled exposure, not a claim of healthy live coverage.
     await Future<void>.delayed(Duration(seconds: config.runSeconds));
+    if (failRefreshBeforeStop != null) {
+      origin.refreshFailure = failRefreshBeforeStop;
+      final wait = Stopwatch()..start();
+      while ((diagnostics.snapshot()['prefetchRefreshFailures']! as List).isEmpty &&
+          wait.elapsed < const Duration(seconds: 3)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      final failures = diagnostics.snapshot()['prefetchRefreshFailures']! as List;
+      expect(failures, hasLength(1));
+      report['refreshFailuresBeforeStop'] = failures;
+    }
     // Persist only this numeric native argument, never the full command/URLs.
     final nativeCommand = native.getSession(taskId)?.session.getCommand() ?? '';
     report['nativeStartIndex'] = int.tryParse(
@@ -424,6 +438,7 @@ class _RollingOrigin {
   final ({int video, int audio})? fixedCounts;
   final bool distinctSequences;
   final bool sourceStartHint;
+  String? refreshFailure;
   final clock = Stopwatch();
   final ended = Completer<void>();
   final requests = <Map<String, Object?>>[];
@@ -507,9 +522,21 @@ class _RollingOrigin {
       if (file == null) {
         request.response.statusCode = 404;
       } else if (playlist != null) {
+        final failure = request.uri.path.contains('variant_0') ? refreshFailure : null;
+        if (failure == 'http') {
+          request.response.statusCode = 503;
+          row['injectedFailure'] = failure;
+          await request.response.close();
+          row['closedMs'] = clock.elapsedMilliseconds;
+          return;
+        }
         final current = window(playlist);
         final variant = request.uri.path.contains('variant_0') ? 0 : 1;
-        final firstSequence = current.first.index + (distinctSequences ? (variant + 1) * 1000 : 0);
+        final firstSequence =
+            current.first.index +
+            (distinctSequences ? (variant + 1) * 1000 : 0) +
+            (failure == 'sequence-gap' ? 100 : 0);
+        if (failure != null) row['injectedFailure'] = failure;
         row['sequence'] = firstSequence;
         final content = StringBuffer(
           '#EXTM3U\n#EXT-X-VERSION:7\n#EXT-X-TARGETDURATION:2\n'

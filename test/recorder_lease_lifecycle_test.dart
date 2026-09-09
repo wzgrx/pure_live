@@ -239,6 +239,7 @@ class _Native implements FFmpegManager {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    bool hlsPrefetch = false,
   }) async {
     policies.add(sourceQueryPolicy);
     final done = Completer<void>();

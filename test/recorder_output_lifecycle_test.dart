@@ -416,6 +416,7 @@ class _EventManager implements FFmpegManager {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    bool hlsPrefetch = false,
   }) async {
     running = true;
     try {

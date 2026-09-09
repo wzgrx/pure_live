@@ -302,6 +302,10 @@ final class HlsPrefetchScheduler {
       // stale manifest. Recording retry/source-refresh policy stays upstream.
       if (!_closed && !_finishing) {
         feed.failed = true;
+        // This feed will never refresh again. Surface the loss of continuous
+        // coverage now, even when native stops before requesting its next
+        // playlist. Draining already published bodies cannot clear this latch.
+        _markGap();
         try {
           onRefreshFailure?.call(feed.id, stage, error);
         } on Object {

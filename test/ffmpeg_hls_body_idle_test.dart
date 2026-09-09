@@ -39,6 +39,37 @@ void main() {
     expect(fixture.relay.inputTailDiscarded, false);
     await _until(() => fixture.relay.stagingBodyCount == 0);
   });
+
+  test('continuous trickle has a finite response deadline even while every read makes progress', () async {
+    final fixture = await _Fixture.create(continuous: true, chunks: 64);
+    addTearDown(fixture.close);
+    final response = await (await fixture.client.getUrl(await fixture.media()))
+        .close()
+        .timeout(const Duration(seconds: 4));
+    expect(response.statusCode, HttpStatus.gatewayTimeout);
+    expect(await response.fold<int>(0, (n, bytes) => n + bytes.length), 0);
+    await fixture.disconnected.future.timeout(const Duration(seconds: 3));
+    await _until(() => fixture.relay.stagingBodyCount == 0);
+    expect(fixture.relay.inputTailDiscarded, false);
+  });
+
+  for (final redirects in [0, 5]) {
+    test('response budget covers ${redirects == 0 ? 'idle headers' : 'cumulative redirects'}', () async {
+      final fixture = await _Fixture.create(
+        headerDelay: Duration(milliseconds: redirects == 0 ? 1100 : 350),
+        redirects: redirects,
+      );
+      addTearDown(fixture.close);
+      final response = await (await fixture.client.getUrl(fixture.relay.inputUri))
+          .close()
+          .timeout(const Duration(seconds: 4));
+      expect(response.statusCode, HttpStatus.gatewayTimeout);
+      expect(await response.fold<int>(0, (n, bytes) => n + bytes.length), 0);
+      await fixture.disconnected.future.timeout(const Duration(seconds: 3));
+      fixture.healthy = true;
+      expect(await fixture.text(await fixture.media()), 'healthy');
+    });
+  }
 }
 
 Future<void> _until(bool Function() condition) async {
@@ -50,12 +81,16 @@ Future<void> _until(bool Function() condition) async {
 }
 
 class _Fixture {
-  _Fixture(this.stallManifest, this.continuous);
+  _Fixture(this.stallManifest, this.continuous, this.chunks, this.headerDelay, this.redirects);
   final bool stallManifest;
   final bool continuous;
+  final int chunks;
+  final Duration headerDelay;
+  final int redirects;
   final client = HttpClient();
   final disconnected = Completer<void>();
   final sockets = <Socket>{};
+  final closedByServer = <Socket>{};
   final handlers = <Future<void>>{};
   final bodyWatch = Stopwatch();
   late ServerSocket origin;
@@ -65,8 +100,14 @@ class _Fixture {
   bool healthy = false;
   int allocations = 0;
 
-  static Future<_Fixture> create({bool stallManifest = false, bool continuous = false}) async {
-    final fixture = _Fixture(stallManifest, continuous);
+  static Future<_Fixture> create({
+    bool stallManifest = false,
+    bool continuous = false,
+    int chunks = 8,
+    Duration headerDelay = Duration.zero,
+    int redirects = 0,
+  }) async {
+    final fixture = _Fixture(stallManifest, continuous, chunks, headerDelay, redirects);
     fixture.root = await Directory.systemTemp.createTemp('hls-body-idle-');
     fixture.origin = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     fixture.subscription = fixture.origin.listen(fixture.accept);
@@ -101,14 +142,18 @@ class _Fixture {
         if (!headers.contains('\r\n\r\n')) return;
         served = true;
         final path = headers.split(' ')[1];
-        stalled = !healthy && (path.endsWith('.m3u8') ? stallManifest : !continuous);
+        stalled = !healthy && (Uri.parse(path).path.endsWith('.m3u8') ? stallManifest : !continuous);
         late Future<void> work;
         work = serve(socket, path, stalled).whenComplete(() => handlers.remove(work));
         handlers.add(work);
       },
       onError: (Object _) {},
       onDone: () {
-        if (stalled && !disconnected.isCompleted) disconnected.complete();
+        if (!closedByServer.contains(socket) &&
+            (stalled || continuous || headerDelay > Duration.zero) &&
+            !disconnected.isCompleted) {
+          disconnected.complete();
+        }
         sockets.remove(socket);
         socket.destroy();
       },
@@ -117,17 +162,29 @@ class _Fixture {
 
   Future<void> serve(Socket socket, String path, bool stalled) async {
     try {
-      final manifest = path.endsWith('.m3u8');
+      final manifest = Uri.parse(path).path.endsWith('.m3u8');
+      if (!healthy && headerDelay > Duration.zero) await Future<void>.delayed(headerDelay);
+      if (!sockets.contains(socket)) return;
+      final step = int.tryParse(Uri.parse(path).queryParameters['step'] ?? '') ?? 0;
+      if (!healthy && step < redirects) {
+        socket.write(
+          'HTTP/1.1 302 Found\r\nConnection: close\r\nLocation: /live.m3u8?step=${step + 1}\r\nContent-Length: 0\r\n\r\n',
+        );
+        await socket.flush();
+        closedByServer.add(socket);
+        await socket.close();
+        return;
+      }
       final text = manifest ? '#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nbody.m4s\n' : 'healthy';
       final body = stalled && !manifest ? Uint8List(3 * 1024 * 1024) : utf8.encode(text);
       final drip = continuous && !manifest && !healthy;
       socket.write(
-        'HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: ${drip ? 8 : body.length + (stalled ? 1 : 0)}\r\n\r\n',
+        'HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: ${drip ? chunks : body.length + (stalled ? 1 : 0)}\r\n\r\n',
       );
       if (drip) {
         bodyWatch.start();
-        for (var i = 0; i < 8; i++) {
-          socket.write('$i');
+        for (var i = 0; i < chunks && sockets.contains(socket); i++) {
+          socket.add([48 + i % 10]);
           await socket.flush();
           await Future<void>.delayed(const Duration(milliseconds: 120));
         }
@@ -136,7 +193,10 @@ class _Fixture {
         socket.add(body);
         await socket.flush();
       }
-      if (!stalled) await socket.close();
+      if (!stalled) {
+        closedByServer.add(socket);
+        await socket.close();
+      }
     } on Object {
       // Peer cancellation is observed independently by the read-side onDone.
     }

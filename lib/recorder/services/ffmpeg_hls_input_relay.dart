@@ -268,6 +268,7 @@ class FFmpegHlsInputRelay {
 
     _activeResources.update(resourceId, (count) => count + 1, ifAbsent: () => 1);
     final trace = diagnostics?._begin(resourceId, request.method);
+    final budget = drainOnStop ? _HlsResponseBudget(_bodyIdleTimeout) : null;
     var outcome = 'completed';
     try {
       final cached = _manifests[resourceId];
@@ -286,6 +287,7 @@ class FFmpegHlsInputRelay {
       final (upstreamResponse, finalUri) = await _openUpstream(
         request.method,
         upstream,
+        budget: budget,
         range: _isHlsUri(upstream) || _manifests.containsKey(resourceId) ? null : range,
       );
       request.response.statusCode = upstreamResponse.statusCode;
@@ -296,14 +298,18 @@ class FFmpegHlsInputRelay {
       _copyResponseHeader(upstreamResponse, request.response, HttpHeaders.contentRangeHeader);
 
       if (request.method == 'HEAD') {
-        await upstreamResponse.drain<void>();
+        if (budget == null) {
+          await upstreamResponse.drain<void>();
+        } else {
+          await _discardResponse(upstreamResponse, budget);
+        }
         await request.response.close();
         trace?.delivered();
         return;
       }
 
       if (upstreamResponse.statusCode == HttpStatus.ok && _isManifest(finalUri, contentType)) {
-        final bytes = await _readManifest(upstreamResponse, trace);
+        final bytes = await _readManifest(upstreamResponse, trace, budget);
         if (_closed) return;
         final manifest = utf8.decode(bytes, allowMalformed: true);
         // Stop may arrive while a refresh is in flight. Do not extend the
@@ -319,7 +325,14 @@ class FFmpegHlsInputRelay {
 
       final length = upstreamResponse.contentLength;
       if (drainOnStop && const {HttpStatus.ok, HttpStatus.partialContent}.contains(upstreamResponse.statusCode)) {
-        await _publishCompleteBody(request, upstreamResponse, trace);
+        await _publishCompleteBody(request, upstreamResponse, trace, budget);
+        return;
+      }
+      if (budget != null) {
+        // Native needs the HTTP error status, not an unbounded CDN error body.
+        await _discardResponse(upstreamResponse, budget);
+        await _replyStatus(request, upstreamResponse.statusCode);
+        trace?.delivered();
         return;
       }
       if (length >= 0) request.response.contentLength = length;
@@ -373,7 +386,12 @@ class FFmpegHlsInputRelay {
     }
   }
 
-  Future<void> _publishCompleteBody(HttpRequest request, HttpClientResponse upstream, _HlsRequestTrace? trace) async {
+  Future<void> _publishCompleteBody(
+    HttpRequest request,
+    HttpClientResponse upstream,
+    _HlsRequestTrace? trace,
+    _HlsResponseBudget? budget,
+  ) async {
     final iterator = StreamIterator<List<int>>(upstream);
     final body = HlsMediaSpool(createDirectory: _createStagingDirectory);
     var stopped = _fetchStopped;
@@ -392,7 +410,7 @@ class FFmpegHlsInputRelay {
       }
       if (stopped) throw const _HlsFetchStopped();
       _fetchAborters.add(abort);
-      while (await _nextBodyChunk(iterator)) {
+      while (await _nextBodyChunk(iterator, budget)) {
         if (stopped) throw const _HlsFetchStopped();
         trace?.chunk(iterator.current);
         await body.add(iterator.current);
@@ -405,6 +423,7 @@ class FFmpegHlsInputRelay {
             : upstream.contentLength,
       );
       if (stopped) throw const _HlsFetchStopped();
+      budget?.check();
       _fetchAborters.remove(abort);
       request.response.contentLength = body.length;
       request.response.bufferOutput = false;
@@ -430,7 +449,12 @@ class FFmpegHlsInputRelay {
     return root.createTemp('purelive-hls-media-');
   }
 
-  Future<(HttpClientResponse, Uri)> _openUpstream(String method, Uri upstream, {String? range}) async {
+  Future<(HttpClientResponse, Uri)> _openUpstream(
+    String method,
+    Uri upstream, {
+    String? range,
+    _HlsResponseBudget? budget,
+  }) async {
     var uri = _sourceQueryPolicy?.apply(upstream) ?? upstream;
     final originalOrigin = _resources['root']!.origin;
     // Process each redirect ourselves: HttpClient does not retain Set-Cookie
@@ -440,6 +464,7 @@ class FFmpegHlsInputRelay {
       if (_fetchStopped) throw const _HlsFetchStopped();
       late HttpClientRequest request;
       try {
+        budget?.check();
         request = await _client.openUrl(method, uri);
       } on Object {
         if (_fetchStopped) throw const _HlsFetchStopped();
@@ -448,6 +473,12 @@ class FFmpegHlsInputRelay {
       if (_fetchStopped) {
         request.abort();
         throw const _HlsFetchStopped();
+      }
+      try {
+        budget?.check();
+      } on TimeoutException {
+        request.abort();
+        rethrow;
       }
       request.followRedirects = false;
       String? initialCookie;
@@ -469,13 +500,15 @@ class FFmpegHlsInputRelay {
       _fetchAborters.add(abort);
       late HttpClientResponse response;
       try {
-        response = await request.close().timeout(
-          const Duration(seconds: 20),
-          onTimeout: () {
-            request.abort();
-            throw TimeoutException('HLS upstream headers timed out');
-          },
-        );
+        response = budget == null
+            ? await request.close().timeout(
+                const Duration(seconds: 20),
+                onTimeout: () {
+                  request.abort();
+                  throw TimeoutException('HLS upstream headers timed out');
+                },
+              )
+            : await budget.wait(request.close, abort: request.abort);
       } finally {
         _fetchAborters.remove(abort);
       }
@@ -503,13 +536,17 @@ class FFmpegHlsInputRelay {
       }
       _fetchAborters.add(abort);
       try {
-        await response.drain<void>().timeout(
-          const Duration(seconds: 20),
-          onTimeout: () {
-            request.abort();
-            throw TimeoutException('HLS redirect body timed out');
-          },
-        );
+        if (budget == null) {
+          await response.drain<void>().timeout(
+            const Duration(seconds: 20),
+            onTimeout: () {
+              request.abort();
+              throw TimeoutException('HLS redirect body timed out');
+            },
+          );
+        } else {
+          await _discardResponse(response, budget);
+        }
       } finally {
         _fetchAborters.remove(abort);
       }
@@ -667,17 +704,38 @@ class FFmpegHlsInputRelay {
     return Duration(microseconds: microseconds);
   }
 
-  Future<bool> _nextBodyChunk(StreamIterator<List<int>> iterator) async {
+  Future<bool> _nextBodyChunk(StreamIterator<List<int>> iterator, _HlsResponseBudget? budget) async {
     if (!drainOnStop) return iterator.moveNext();
     try {
       // The body is invisible to the native socket until completely staged.
       // Observe upstream idleness here, rather than mistaking the whole
       // transfer duration for inactivity. Disk backpressure is not network
       // idle time. Both callers cancel their iterator in finally on timeout.
-      return await iterator.moveNext().timeout(_bodyIdleTimeout);
+      return await budget!.wait(iterator.moveNext);
     } on TimeoutException {
       if (_fetchStopped) throw const _HlsFetchStopped();
       rethrow;
+    }
+  }
+
+  Future<void> _discardResponse(HttpClientResponse response, _HlsResponseBudget budget) async {
+    final iterator = StreamIterator<List<int>>(response);
+    var stopped = _fetchStopped;
+    void abort() {
+      stopped = true;
+      unawaited(iterator.cancel().catchError((Object _) {}));
+    }
+
+    _fetchAborters.add(abort);
+    try {
+      if (stopped) throw const _HlsFetchStopped();
+      while (await _nextBodyChunk(iterator, budget)) {
+        if (stopped) throw const _HlsFetchStopped();
+      }
+      if (stopped) throw const _HlsFetchStopped();
+    } finally {
+      _fetchAborters.remove(abort);
+      await iterator.cancel();
     }
   }
 
@@ -702,7 +760,11 @@ class FFmpegHlsInputRelay {
     return base64UrlEncode(bytes).replaceAll('=', '');
   }
 
-  Future<Uint8List> _readManifest(HttpClientResponse response, _HlsRequestTrace? trace) async {
+  Future<Uint8List> _readManifest(
+    HttpClientResponse response,
+    _HlsRequestTrace? trace,
+    _HlsResponseBudget? budget,
+  ) async {
     final builder = BytesBuilder(copy: false);
     var length = 0;
     final iterator = StreamIterator<List<int>>(response);
@@ -715,7 +777,7 @@ class FFmpegHlsInputRelay {
     _fetchAborters.add(abort);
     try {
       if (stopped) throw const _HlsFetchStopped();
-      while (await _nextBodyChunk(iterator)) {
+      while (await _nextBodyChunk(iterator, budget)) {
         if (stopped) throw const _HlsFetchStopped();
         final chunk = iterator.current;
         trace?.chunk(chunk);
@@ -760,4 +822,31 @@ class FFmpegHlsInputRelay {
 
 class _HlsFetchStopped implements Exception {
   const _HlsFetchStopped();
+}
+
+/// Application policy for receiving a complete HLS response, not an FFmpeg
+/// protocol promise. A response gets at most four idle intervals in total,
+/// shared across redirect headers/bodies and final manifest/media staging.
+/// Pending connection creation still belongs to HttpClient's connection timeout;
+/// check before/after it, without abandoning a late request or pooled socket.
+class _HlsResponseBudget {
+  _HlsResponseBudget(this.idle);
+  final Duration idle;
+  final Stopwatch clock = Stopwatch()..start();
+  Duration get remaining => idle * 4 - clock.elapsed;
+
+  void check() {
+    if (remaining <= Duration.zero) throw TimeoutException('HLS complete response deadline exceeded');
+  }
+
+  Future<T> wait<T>(Future<T> Function() action, {void Function()? abort}) async {
+    try {
+      check();
+      final left = remaining;
+      return await action().timeout(left < idle ? left : idle);
+    } on TimeoutException {
+      abort?.call();
+      rethrow;
+    }
+  }
 }

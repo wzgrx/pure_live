@@ -12,6 +12,7 @@ import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'hls_session_cookies.dart';
 import 'hls_media_spool.dart';
 import 'hls_body_reader.dart';
+import 'hls_upstream_client.dart';
 import 'cancellable_http_connections.dart';
 import 'recorder_proxy_routing.dart';
 
@@ -41,7 +42,13 @@ class FFmpegHlsInputRelay {
     required this.diagnostics,
   }) {
     _bodyIdleTimeout = bodyIdleTimeout;
-    _sourceQueryPolicy = sourceQueryPolicy;
+    _upstream = HlsUpstreamClient(
+      client: _client,
+      source: upstream,
+      headers: _headers,
+      cookies: _cookies,
+      queryPolicy: sourceQueryPolicy,
+    );
     _resources['root'] = upstream;
   }
 
@@ -87,7 +94,7 @@ class FFmpegHlsInputRelay {
   final HlsRelayDiagnostics? diagnostics;
   final Future<Directory> Function() _createStagingDirectory;
   final HlsSessionCookies _cookies = HlsSessionCookies();
-  HlsSourceQueryPolicy? _sourceQueryPolicy;
+  late final HlsUpstreamClient _upstream;
   final Map<String, Uri> _resources = <String, Uri>{};
   final Map<String, String> _resourceIds = <String, String>{};
   final Map<String, String> _manifests = <String, String>{};
@@ -237,6 +244,7 @@ class FFmpegHlsInputRelay {
 
   void _stopFetching() {
     _fetchStopped = true;
+    _upstream.stop();
     for (final abort in _fetchAborters.toList()) {
       abort();
     }
@@ -261,12 +269,12 @@ class FFmpegHlsInputRelay {
     _finishTimer?.cancel();
     _stopFetching();
     _cookies.clear();
-    _sourceQueryPolicy = null;
     _client.close(force: true);
     await _server.close(force: true);
     await _subscription?.cancel();
     await Future.wait(_handlers.toList());
     await _connections.settled;
+    _upstream.clear();
     _resources.clear();
     _resourceIds.clear();
     _manifests.clear();
@@ -388,7 +396,7 @@ class FFmpegHlsInputRelay {
       await _replyStatus(request, HttpStatus.gatewayTimeout);
     } on Object catch (error) {
       outcome = 'failed';
-      if (!_closed) Log.w('FFmpeg HLS relay request failed for ${upstream.host}: $error');
+      if (!_closed) Log.w('FFmpeg HLS relay request failed for ${upstream.host}: ${error.runtimeType}');
       await _replyStatus(request, HttpStatus.badGateway);
     } finally {
       if (trace != null) {
@@ -475,102 +483,10 @@ class FFmpegHlsInputRelay {
     String? range,
     HlsResponseBudget? budget,
   }) async {
-    var uri = _sourceQueryPolicy?.apply(upstream) ?? upstream;
-    final originalOrigin = _resources['root']!.origin;
-    // Process each redirect ourselves: HttpClient does not retain Set-Cookie
-    // from intermediate responses. Re-evaluate sensitive headers at every hop.
-    for (var redirects = 0; ; redirects++) {
-      if (_closed) throw StateError('HLS relay is closed');
-      if (_fetchStopped) throw const _HlsFetchStopped();
-      late HttpClientRequest request;
-      try {
-        budget?.check();
-        request = await _client.openUrl(method, uri);
-      } on Object {
-        if (_fetchStopped) throw const _HlsFetchStopped();
-        rethrow;
-      }
-      if (_fetchStopped) {
-        request.abort();
-        throw const _HlsFetchStopped();
-      }
-      try {
-        budget?.check();
-      } on TimeoutException {
-        request.abort();
-        rethrow;
-      }
-      request.followRedirects = false;
-      String? initialCookie;
-      for (final entry in _headers.entries) {
-        final name = entry.key.toLowerCase();
-        if (name == HttpHeaders.cookieHeader) {
-          if (uri.origin == originalOrigin) initialCookie = entry.value;
-          continue;
-        }
-        if (name == HttpHeaders.authorizationHeader && uri.origin != originalOrigin) continue;
-        request.headers.set(entry.key, entry.value, preserveHeaderCase: true);
-      }
-      final cookie = _cookies.headerFor(uri, initialHeader: initialCookie);
-      if (cookie != null) request.headers.set(HttpHeaders.cookieHeader, cookie);
-      if (!_isHlsUri(uri) && range != null && range.isNotEmpty) {
-        request.headers.set(HttpHeaders.rangeHeader, range);
-      }
-      void abort() => request.abort(const _HlsFetchStopped());
-      _fetchAborters.add(abort);
-      late HttpClientResponse response;
-      try {
-        response = budget == null
-            ? await request.close().timeout(
-                const Duration(seconds: 20),
-                onTimeout: () {
-                  request.abort();
-                  throw TimeoutException('HLS upstream headers timed out');
-                },
-              )
-            : await budget.wait(request.close, abort: request.abort);
-      } finally {
-        _fetchAborters.remove(abort);
-      }
-      if (_closed) {
-        request.abort();
-        throw StateError('HLS relay is closed');
-      }
-      _cookies.receive(uri, response.headers[HttpHeaders.setCookieHeader] ?? const []);
-      final location = response.headers.value(HttpHeaders.locationHeader);
-      if (!const {301, 302, 303, 307, 308}.contains(response.statusCode) || location == null) {
-        return (response, uri);
-      }
-      final resolved = uri.resolve(location);
-      final next = _sourceQueryPolicy?.apply(resolved) ?? resolved;
-      if (redirects >= 5 ||
-          !const {'http', 'https'}.contains(next.scheme) ||
-          next.userInfo.isNotEmpty ||
-          (uri.scheme == 'https' && next.scheme != 'https')) {
-        request.abort();
-        throw const HttpException('HLS redirect rejected or limit exceeded');
-      }
-      if (_fetchStopped) {
-        request.abort();
-        throw const _HlsFetchStopped();
-      }
-      _fetchAborters.add(abort);
-      try {
-        if (budget == null) {
-          await response.drain<void>().timeout(
-            const Duration(seconds: 20),
-            onTimeout: () {
-              request.abort();
-              throw TimeoutException('HLS redirect body timed out');
-            },
-          );
-        } else {
-          await _discardResponse(response, budget);
-        }
-      } finally {
-        _fetchAborters.remove(abort);
-      }
-      uri = next;
+    try {
+      return await _upstream.open(method, upstream, range: range, budget: budget);
+    } on HlsUpstreamStopped {
+      throw const _HlsFetchStopped();
     }
   }
 

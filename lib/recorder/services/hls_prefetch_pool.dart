@@ -4,15 +4,17 @@ import 'dart:io';
 
 import 'hls_media_spool.dart';
 import 'hls_body_reader.dart';
+import 'hls_http_body_metadata.dart';
 
 /// The loader owns connect/header deadlines and registers request cancellation.
 /// The pool awaits it even after retirement; it never abandons a live Future.
 typedef HlsPrefetchLoader = Future<HlsPrefetchResponse> Function(HlsPrefetchCancellation cancellation);
 
 final class HlsPrefetchResponse {
-  const HlsPrefetchResponse(this.body, {this.expectedLength = -1});
+  const HlsPrefetchResponse(this.body, {this.expectedLength = -1, this.metadata});
   final Stream<List<int>> body;
   final int expectedLength;
+  final HlsHttpBodyMetadata? metadata;
 }
 
 enum HlsPrefetchFailure { cancelled, download, capacity, timedOut }
@@ -66,6 +68,7 @@ final class HlsPrefetchTicket {
   bool _disposing = false;
   int _readers = 0;
   int _bytes = 0;
+  HlsHttpBodyMetadata? _metadata;
 }
 
 /// One bounded pool per recording source generation. Queued, downloading,
@@ -157,7 +160,7 @@ final class HlsPrefetchPool {
     }
     entry._readers++;
     _readers++;
-    return HlsPrefetchLease._(entry._body, () {
+    return HlsPrefetchLease._(entry._body, entry._metadata, () {
       entry._readers--;
       _readers--;
       _maybeDispose(entry);
@@ -215,6 +218,9 @@ final class HlsPrefetchPool {
       entry._cancellation.throwIfCancelled();
       budget.check();
       if (response.expectedLength < -1) throw const FormatException('Invalid HLS response length');
+      if (response.metadata != null && response.metadata!.expectedLength != response.expectedLength) {
+        throw const FormatException('HLS response metadata differs from its body contract');
+      }
       if (response.expectedLength > maximumBodyBytes) throw const _HlsPrefetchCapacity();
       while (await budget.wait(iterator.moveNext)) {
         entry._cancellation.throwIfCancelled();
@@ -230,6 +236,7 @@ final class HlsPrefetchPool {
       entry._cancellation.throwIfCancelled();
       await entry._body.seal(expectedLength: response.expectedLength);
       budget.check();
+      entry._metadata = response.metadata;
     } finally {
       detach();
       await iterator.cancel();
@@ -286,7 +293,8 @@ final class HlsPrefetchPool {
 /// A lease pins the whole spool, including during a slow local response write.
 /// Releasing during a write waits for that actual write to complete or fail.
 final class HlsPrefetchLease {
-  HlsPrefetchLease._(this._body, this._onRelease);
+  HlsPrefetchLease._(this._body, this.metadata, this._onRelease);
+  final HlsHttpBodyMetadata? metadata;
   final HlsMediaSpool _body;
   final void Function() _onRelease;
   final Completer<void> _released = Completer<void>();

@@ -6,9 +6,12 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:pure_live/recorder/services/hls_body_reader.dart';
 import 'package:pure_live/recorder/services/hls_prefetch_pool.dart';
 import 'package:pure_live/recorder/services/hls_retained_manifest.dart';
 import 'package:pure_live/recorder/services/hls_retained_window.dart';
+import 'package:pure_live/recorder/services/hls_session_cookies.dart';
+import 'package:pure_live/recorder/services/hls_upstream_client.dart';
 
 void main() {
   test(
@@ -29,6 +32,12 @@ void main() {
       final pool = HlsPrefetchPool(createDirectory: () => root.createTemp('spool-'));
       final tasks = <Future<void>>{};
       final originBase = Uri.parse('http://127.0.0.1:${origin.port}/');
+      final transport = HlsUpstreamClient(
+        client: client,
+        source: originBase.resolve('master.m3u8'),
+        headers: {},
+        cookies: HlsSessionCookies(),
+      );
       final localBase = Uri.parse('http://127.0.0.1:${local.port}/');
       final sourceManifests = <String, String>{};
       final outputManifests = <String, String>{};
@@ -95,6 +104,7 @@ void main() {
           }
           try {
             served.add(request.uri.path);
+            expect(lease.metadata!.statusCode, 200);
             request.response.contentLength = lease.length;
             await lease.writeTo(request.response);
             await request.response.close();
@@ -132,22 +142,16 @@ void main() {
         for (final path in paths) {
           final uri = originBase.resolve(path);
           tickets.add(
-            pool.prefetch(uri.toString(), (cancel) async {
-              final request = await client.getUrl(uri);
-              final detach = cancel.onCancel(request.abort);
-              try {
-                cancel.throwIfCancelled();
-                final response = await request.close();
-                return HlsPrefetchResponse(response, expectedLength: response.contentLength);
-              } finally {
-                detach();
-              }
-            })!,
+            pool.prefetch(
+              uri.toString(),
+              (cancel) => transport.loadMedia(uri, cancel, budget: HlsResponseBudget(pool.bodyIdleTimeout)),
+            )!,
           );
         }
         expect(await Future.wait(tickets.map((t) => t.ready)), everyElement(true));
         expect(pool.ownedEntries, 8);
         final countAtClose = originRequests;
+        transport.stop();
         client.close(force: true);
         await origin.close(force: true);
         originClosed = true;
@@ -186,11 +190,13 @@ void main() {
         // ignore: avoid_print
         print('Retained publication evidence: ${root.path}');
       } finally {
+        transport.stop();
         client.close(force: true);
         if (!originClosed) await origin.close(force: true);
         await local.close(force: true);
         await Future.wait(tasks.toList());
         await pool.close();
+        transport.clear();
       }
       expect(pool.retainedBytes, 0);
       expect(pool.ownedEntries, 0);

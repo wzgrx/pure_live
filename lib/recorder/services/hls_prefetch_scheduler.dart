@@ -108,7 +108,9 @@ final class HlsPrefetchScheduler {
 
   String publish(String id, Uri Function(HlsPrefetchResource resource) localUri) {
     final feed = _feeds[id];
-    if (_closed || feed == null || feed.failed) throw StateError('Selected HLS feed is unavailable');
+    if (_closed || feed == null) throw StateError('Selected HLS feed is unavailable');
+    if (_finishing) return feed.finishedManifest!;
+    if (feed.failed) throw StateError('Selected HLS feed is unavailable');
     Uri map(HlsPrefetchResource resource) {
       return localUri(resource);
     }
@@ -121,6 +123,7 @@ final class HlsPrefetchScheduler {
       keyUri: (key) => map(HlsPrefetchResource.key(key)),
     );
     feed.published = [feed.window.segments, if (feed.published.isNotEmpty) feed.published.first];
+    feed.lastManifest = text;
     _prune();
     return text;
   }
@@ -138,7 +141,7 @@ final class HlsPrefetchScheduler {
           if (!await entry.$2.ready.timeout(left) || _closed) return null;
           return pool.acquire(key);
         }
-        if (_stopped || !requiredKeys.contains(key)) return null;
+        if (_finishing || _stopped || !requiredKeys.contains(key)) return null;
         await _changed.future.timeout(left);
       } on TimeoutException {
         return null;
@@ -163,11 +166,33 @@ final class HlsPrefetchScheduler {
   }
 
   void freeze() {
+    if (_finishing) return;
     _finishing = true;
     for (final feed in _feeds.values) {
       feed.timer?.cancel();
       feed.refreshCancellation?.cancel();
+      // Snapshot the actual offered URI mapping, not newer background metadata.
+      // No callback is invoked after stop, including for a never-published feed.
+      final cached = feed.lastManifest;
+      feed.finishedManifest = cached == null
+          ? '#EXTM3U\n#EXT-X-TARGETDURATION:${feed.window.targetDuration}\n#EXT-X-ENDLIST\n'
+          : RegExp(r'^#EXT-X-ENDLIST$', multiLine: true).hasMatch(cached)
+          ? cached
+          : '${cached.trimRight()}\n#EXT-X-ENDLIST\n';
+      if (feed.published.isNotEmpty) {
+        feed.wanted = {
+          for (final resource in _dependencies(
+            feed.id,
+            feed.published.first.where((segment) => segment.sequence >= feed.delivered - 1),
+          ))
+            resource.key: resource,
+        };
+      }
     }
+    _prune();
+    // A missing item can never be admitted after freeze; wake its existing
+    // acquire waiter rather than making it consume a full network deadline.
+    _notify();
   }
 
   /// End unpublished downloads, retaining complete cached bodies for drain.
@@ -352,6 +377,8 @@ final class _Feed {
   final HlsRetainedWindow window;
   Map<String, HlsPrefetchResource> wanted = {};
   List<List<HlsSegmentDescriptor>> published = [];
+  String? lastManifest;
+  String? finishedManifest;
   int delivered = -1;
   bool failed = false;
   Timer? timer;

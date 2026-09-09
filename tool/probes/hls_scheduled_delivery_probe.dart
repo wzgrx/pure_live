@@ -211,7 +211,7 @@ final class _ScheduledRelay {
     finishing = true;
     scheduler.freeze();
     for (final path in manifests.keys.toList()) {
-      if (!manifests[path]!.contains('#EXT-X-ENDLIST')) manifests[path] = '${manifests[path]}#EXT-X-ENDLIST\n';
+      manifests[path] = scheduler.publish(path, localUri);
     }
     drainTimer = Timer(const Duration(seconds: 2), () {
       scheduler.stopFetching();

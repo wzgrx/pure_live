@@ -35,6 +35,58 @@ Future<List<int>> read(HlsPrefetchLease lease) async {
 }
 
 void main() {
+  test('freeze wakes an acquisition that has no admitted download', () async {
+    final pool = cache(entries: 2, concurrent: 2);
+    final pending = StreamController<List<int>>();
+    final scheduler = HlsPrefetchScheduler(
+      pool: pool,
+      fetchSnapshot: (_, _) => throw StateError('Ended feed refreshed'),
+      loadResource: (_, _) async => HlsPrefetchResponse(pending.stream),
+    );
+    try {
+      scheduler.select('video', source, snapshot(0, 2, ended: true));
+      final second = HlsPrefetchResource.media('video', snapshot(1, 1).segments.single);
+      final acquiring = scheduler.acquire(second.key);
+      scheduler.freeze();
+      expect(await acquiring.timeout(const Duration(milliseconds: 200)), isNull);
+    } finally {
+      await scheduler.close();
+      await pending.close();
+    }
+  });
+  test('freeze publishes only the last offered generation and retires unpublished downloads', () async {
+    final pool = cache();
+    final scheduler = HlsPrefetchScheduler(
+      pool: pool,
+      pollInterval: const Duration(milliseconds: 10),
+      fetchSnapshot: (_, _) async => snapshot(1, 3),
+      loadResource: (r, _) async => HlsPrefetchResponse(Stream.value([r.sequence!])),
+    );
+    try {
+      scheduler.select('video', source, snapshot(0, 3));
+      final published = scheduler.publish('video', (r) => r.uri);
+      final newResource = HlsPrefetchResource.media('video', snapshot(3, 1).segments.single);
+      // Admission of sequence 3 proves the refresh merged, without publishing it.
+      HlsPrefetchLease? refreshed;
+      final clock = Stopwatch()..start();
+      while (refreshed == null && clock.elapsed < const Duration(seconds: 2)) {
+        refreshed = pool.acquire(newResource.key);
+        if (refreshed == null) await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(refreshed, isNotNull);
+      await refreshed!.release();
+      scheduler.freeze();
+      final ended = scheduler.publish('video', (_) => throw StateError('Stop remapped a new resource'));
+      expect(ended, '${published.trimRight()}\n#EXT-X-ENDLIST\n');
+      expect(ended, isNot(contains('3.m4s')));
+      expect(scheduler.requiredKeys, isNot(contains(newResource.key)));
+      expect(await scheduler.acquire(newResource.key), isNull);
+      expect(scheduler.publish('video', (r) => r.uri), ended);
+    } finally {
+      await scheduler.close();
+    }
+    expect(pool.ownedEntries, 0);
+  });
   test('first long feed reserves capacity for another feed; delivered prefix enables bounded continuation', () async {
     final pool = cache(entries: 8, concurrent: 8);
     final requests = <String>[];

@@ -74,6 +74,7 @@ final class HlsPrefetchScheduler {
   bool _closed = false;
   bool _gap = false;
   Future<void>? _closing;
+  Future<bool>? _draining;
   int _nextFeed = 0;
   Completer<void> _changed = Completer<void>();
 
@@ -226,6 +227,39 @@ final class HlsPrefetchScheduler {
     // A missing item can never be admitted after freeze; wake its existing
     // acquire waiter rather than making it consume a full network deadline.
     _notify();
+  }
+
+  /// Settle only already admitted dependencies from the last offered media
+  /// generations. Freeze prevents refresh/admission; completion stops transport
+  /// immediately rather than sleeping for the entire finite shutdown allowance.
+  /// A successful result describes complete cache bodies, not native delivery.
+  Future<bool> drainPublished({required Duration timeout}) {
+    if (timeout <= Duration.zero || timeout > const Duration(seconds: 20)) {
+      throw ArgumentError('Invalid HLS published download drain timeout');
+    }
+    return _draining ??= _drainPublished(timeout);
+  }
+
+  Future<bool> _drainPublished(Duration timeout) async {
+    freeze();
+    final keys = <String>{};
+    for (final feed in _feeds.values) {
+      if (feed.published.isEmpty) continue;
+      keys.addAll(
+        _dependencies(feed.id, feed.published.first.where((s) => s.sequence > feed.delivered)).map((r) => r.key),
+      );
+    }
+    try {
+      final ready = await Future.wait([for (final key in keys) _items[key]?.$2.ready ?? Future<bool>.value(false)])
+          .timeout(timeout);
+      return ready.every((value) => value);
+    } on TimeoutException {
+      return false;
+    } finally {
+      // Timed-out waits refer only to tickets still owned by the pool. Retire
+      // their actual requests; close continues to await their final disposal.
+      stopFetching();
+    }
   }
 
   /// End unpublished downloads, retaining complete cached bodies for drain.

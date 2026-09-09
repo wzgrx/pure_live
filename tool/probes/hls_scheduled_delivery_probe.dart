@@ -1,7 +1,7 @@
 part of 'hls_rolling_delivery_probe_test.dart';
 
-// Experimental HTTP adapter before the unchanged production relay/manager.
-// This verifies sustained native delivery, not default production activation.
+// Select direct production prefetch or the historical experimental adapter.
+// Both remain opt-in probes, not default application activation.
 void _registerScheduledDeliveryProbe() {
   final production = Platform.environment['PURELIVE_HLS_PRODUCTION_PREFETCH_PROBE'] == '1';
   test(
@@ -43,6 +43,7 @@ void _registerScheduledDeliveryProbe() {
           expect(prefetch['feeds'], 2);
           if (production) {
             expect(prefetch['entriesAtStop'] as int, lessThanOrEqualTo(32));
+            expect(terminal['inputTailDiscarded'], false);
           } else {
             expect(prefetch['coverageIncomplete'], false);
             expect(prefetch['peakEntries'] as int, lessThanOrEqualTo(32));
@@ -53,6 +54,13 @@ void _registerScheduledDeliveryProbe() {
           expect((report['prefetchAfterClose'] as Map)['bytes'], 0);
           final inspection = report['inspection'] as Map;
           expect(inspection['exitCode'], 0);
+          if (production) {
+            final tracks = inspection['tracks'] as List;
+            final video = tracks.singleWhere((t) => (t as Map)['type'] == 'video') as Map;
+            final audio = tracks.singleWhere((t) => (t as Map)['type'] == 'audio') as Map;
+            expect(((video['firstPts'] as num) - (audio['firstPts'] as num)).abs(), lessThan(0.05));
+            expect(((video['lastPts'] as num) - (audio['lastPts'] as num)).abs(), lessThan(0.05));
+          }
           for (final track in inspection['tracks'] as List) {
             expect(track['packets'] as int, greaterThan(500));
             expect(track['maxStep'] as double, lessThan(0.05));

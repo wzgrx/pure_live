@@ -35,6 +35,115 @@ Future<List<int>> read(HlsPrefetchLease lease) async {
 }
 
 void main() {
+  test('published drain finishes on sealed bodies, preserves reads and is idempotent', () async {
+    final pool = cache();
+    final pending = StreamController<List<int>>();
+    final entered = Completer<void>();
+    pending.onListen = entered.complete;
+    final scheduler = HlsPrefetchScheduler(
+      pool: pool,
+      fetchSnapshot: (_, _) => throw StateError('Ended feed refreshed'),
+      loadResource: (_, _) async => HlsPrefetchResponse(pending.stream),
+    );
+    try {
+      scheduler.select('video', source, snapshot(0, 1, ended: true));
+      final offered = scheduler.publish('video', (r) => r.uri);
+      final draining = scheduler.drainPublished(timeout: const Duration(seconds: 20));
+      expect(identical(draining, scheduler.drainPublished(timeout: const Duration(seconds: 20))), true);
+      await entered.future;
+      var completed = false;
+      unawaited(draining.then((_) => completed = true));
+      await Future<void>.delayed(Duration.zero);
+      expect(completed, false);
+      pending.add([1, 2]);
+      await pending.close();
+      expect(await draining.timeout(const Duration(seconds: 1)), true);
+      expect(scheduler.publish('video', (_) => throw StateError('Frozen URI remapped')), offered);
+      final resource = HlsPrefetchResource.media('video', snapshot(0, 1).segments.single);
+      expect(await read((await scheduler.acquire(resource.key))!), [1, 2]);
+    } finally {
+      await scheduler.close();
+      await pending.close();
+    }
+    expect(pool.ownedEntries, 0);
+  });
+  test('published drain deadline cancels actual loader and close still owns its late response', () async {
+    final pool = cache();
+    final entered = Completer<void>();
+    final cancelled = Completer<void>();
+    final late = Completer<HlsPrefetchResponse>();
+    final scheduler = HlsPrefetchScheduler(
+      pool: pool,
+      fetchSnapshot: (_, _) => throw StateError('Ended feed refreshed'),
+      loadResource: (_, token) {
+        token.onCancel(cancelled.complete);
+        entered.complete();
+        return late.future;
+      },
+    );
+    try {
+      scheduler.select('video', source, snapshot(0, 1, ended: true));
+      scheduler.publish('video', (r) => r.uri);
+      await entered.future;
+      expect(await scheduler.drainPublished(timeout: const Duration(milliseconds: 20)), false);
+      await cancelled.future.timeout(const Duration(seconds: 1));
+      var closed = false;
+      final closing = scheduler.close().then((_) => closed = true);
+      await Future<void>.delayed(Duration.zero);
+      expect(closed, false);
+      late.complete(HlsPrefetchResponse(Stream.value([1])));
+      await closing.timeout(const Duration(seconds: 1));
+    } finally {
+      if (!late.isCompleted) late.complete(const HlsPrefetchResponse(Stream.empty()));
+      await scheduler.close();
+    }
+    expect(pool.ownedEntries, 0);
+    expect(pool.retainedBytes, 0);
+  });
+  test('published drain reports missing admission without starting another download', () async {
+    final pool = cache(entries: 2, concurrent: 2);
+    final pending = StreamController<List<int>>();
+    var loads = 0;
+    final scheduler = HlsPrefetchScheduler(
+      pool: pool,
+      fetchSnapshot: (_, _) => throw StateError('Ended feed refreshed'),
+      loadResource: (_, _) async {
+        loads++;
+        return HlsPrefetchResponse(pending.stream);
+      },
+    );
+    try {
+      scheduler.select('video', source, snapshot(0, 2, ended: true));
+      scheduler.publish('video', (r) => r.uri);
+      final draining = scheduler.drainPublished(timeout: const Duration(seconds: 1));
+      pending.add([1]);
+      await pending.close();
+      expect(await draining, false);
+      expect(loads, 1);
+    } finally {
+      await scheduler.close();
+      await pending.close();
+    }
+  });
+  test('never offered feed does not hold published drain open', () async {
+    final pool = cache();
+    final pending = StreamController<List<int>>();
+    final scheduler = HlsPrefetchScheduler(
+      pool: pool,
+      fetchSnapshot: (_, _) => throw StateError('Ended feed refreshed'),
+      loadResource: (_, _) async => HlsPrefetchResponse(pending.stream),
+    );
+    try {
+      scheduler.select('video', source, snapshot(0, 1, ended: true));
+      expect(
+        await scheduler.drainPublished(timeout: const Duration(seconds: 20)).timeout(const Duration(seconds: 1)),
+        true,
+      );
+    } finally {
+      await scheduler.close();
+      await pending.close();
+    }
+  });
   test('freeze wakes an acquisition that has no admitted download', () async {
     final pool = cache(entries: 2, concurrent: 2);
     final pending = StreamController<List<int>>();

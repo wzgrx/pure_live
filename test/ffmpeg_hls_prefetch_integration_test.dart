@@ -20,6 +20,64 @@ List<Uri> mediaUris(String text) => const LineSplitter()
     .toList();
 
 void main() {
+  for (final delayedHeaders in [false, true]) {
+    test('stop preserves published media completing beyond target duration; headers=$delayedHeaders', () async {
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final jobs = <Future<void>>{};
+      final sub = origin.listen((request) {
+        late Future<void> job;
+        job = () async {
+          try {
+            if (request.uri.path.endsWith('.m3u8')) {
+              request.response.write('#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nbody.ts\n#EXT-X-ENDLIST\n');
+            } else {
+              request.response.contentLength = 2;
+              if (!delayedHeaders) {
+                request.response.add([1]);
+                await request.response.flush();
+              }
+              entered.complete();
+              await release.future;
+              request.response.add(delayedHeaders ? [1, 2] : [2]);
+            }
+            await request.response.close();
+          } on Object {
+            /* Only this fixture's held request may end during teardown. */
+          }
+        }().whenComplete(() => jobs.remove(job));
+        jobs.add(job);
+      });
+      final relay = (await FFmpegHlsInputRelay.startForArguments(
+        ['-i', 'http://127.0.0.1:${origin.port}/root.m3u8'],
+        drainOnStop: true,
+        enablePrefetch: true,
+      ))!;
+      final client = HttpClient();
+      try {
+        final manifest = utf8.decode((await get(client, relay.inputUri)).$2);
+        final body = get(client, mediaUris(manifest).single);
+        await entered.future.timeout(const Duration(seconds: 3));
+        await relay.finish();
+        await Future<void>.delayed(const Duration(milliseconds: 1200));
+        release.complete();
+        final response = await body.timeout(const Duration(seconds: 3));
+        expect(response.$1, 200);
+        expect(response.$2, [1, 2]);
+        expect(relay.inputTailDiscarded, false);
+      } finally {
+        if (!release.isCompleted) release.complete();
+        client.close(force: true);
+        await relay.close();
+        await origin.close(force: true);
+        await sub.cancel();
+        await Future.wait(jobs.toList());
+      }
+      expect(relay.prefetchBodyCount, 0);
+      expect(relay.prefetchBytes, 0);
+    });
+  }
   test('late concurrent root response cannot replace an already selected master generation', () async {
     const master = '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1\nvideo.m3u8\n';
     final firstEntered = Completer<void>();

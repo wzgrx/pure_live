@@ -99,6 +99,7 @@ class FFmpegHlsInputRelay {
   final bool prefetchEnabled;
   HlsPrefetchScheduler? _prefetch;
   Future<void>? _prefetchPreparation;
+  Future<void>? _prefetchDrain;
   HlsPrefetchCancellation? _preparingCancellation;
   final Set<String> _prefetchFeeds = {};
   final Map<String, HlsPrefetchResource> _prefetchResources = {};
@@ -145,7 +146,15 @@ class FFmpegHlsInputRelay {
 
   // Native HLS reloads on the playlist's target duration. Do not impose FLV's
   // shorter drain budget and cancel before a healthy playlist can be reloaded.
-  Duration get drainTimeout => Duration(seconds: (2 * _targetSeconds + 2).clamp(3, 20));
+  Duration get drainTimeout =>
+      Duration(seconds: (2 * _targetSeconds + 2).clamp(3, 20)) +
+      (_prefetch == null ? Duration.zero : _prefetchDownloadGrace);
+
+  // Preserve admitted published bodies within their existing network budgets,
+  // with a separate hard 20s shutdown ceiling. Native still has its original
+  // playlist reload/flush allowance after this bounded download phase.
+  Duration get _prefetchDownloadGrace =>
+      Duration(milliseconds: HlsResponseBudget.totalFor(_bodyIdleTimeout).inMilliseconds.clamp(1, 20000));
 
   @visibleForTesting
   int get resourceCount => _resources.length;
@@ -258,14 +267,21 @@ class FFmpegHlsInputRelay {
   }
 
   /// Freeze each media playlist at the last published generation with ENDLIST.
-  /// Give in-flight downloads one target duration to complete, then retire
-  /// unpublished responses. Already published bodies always remain whole.
+  /// Legacy inputs get one target duration. Prefetched inputs settle the fixed
+  /// set of already offered dependencies within a bounded download phase.
   Future<void> finish() async {
     if (!drainOnStop || _finishing || _closed) return;
     _finishing = true;
     _preparingCancellation?.cancel();
-    _prefetch?.freeze();
-    _finishTimer = Timer(Duration(seconds: _targetSeconds.clamp(1, 10)), _stopFetching);
+    final prefetch = _prefetch;
+    if (prefetch == null) {
+      _finishTimer = Timer(Duration(seconds: _targetSeconds.clamp(1, 10)), _stopFetching);
+    } else {
+      _prefetchDrain = prefetch.drainPublished(timeout: _prefetchDownloadGrace).then((complete) {
+        if (!complete && !_closed) _inputTailDiscarded = true;
+        _stopFetching();
+      });
+    }
   }
 
   void _stopFetching() {
@@ -301,6 +317,7 @@ class FFmpegHlsInputRelay {
     await _server.close(force: true);
     await _subscription?.cancel();
     await Future.wait(_handlers.toList());
+    await _prefetchDrain;
     await _prefetch?.close();
     await _connections.settled;
     _upstream.clear();

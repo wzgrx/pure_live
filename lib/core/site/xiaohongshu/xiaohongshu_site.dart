@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/common/models/live_room.dart';
+import 'package:pure_live/common/utils/live_short_link_session.dart';
 import 'package:pure_live/core/danmaku/empty_danmaku.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/interface/live_directory.dart';
@@ -20,8 +21,9 @@ class XiaohongshuSite extends LiveSite
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
         LivePlayRecoveryResolver {
-  XiaohongshuSite({XiaohongshuApi? api}) : _api = api ?? XiaohongshuApi();
+  XiaohongshuSite({XiaohongshuApi? api, this.shortLinkClientFactory}) : _api = api ?? XiaohongshuApi();
   final XiaohongshuApi _api;
+  final Dio Function()? shortLinkClientFactory;
   @override
   String get id => 'xiaohongshu';
   @override
@@ -99,7 +101,14 @@ class XiaohongshuSite extends LiveSite
   @override
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) async {
     if (page != 1) return [];
-    final roomId = XiaohongshuLink.parse(keyword);
+    const timeout = Duration(seconds: 12);
+    final session = LiveShortLinkSession(timeout: timeout, clientFactory: shortLinkClientFactory);
+    final String? roomId;
+    try {
+      roomId = await XiaohongshuLink.resolve(keyword, session: session).timeout(timeout, onTimeout: () => null);
+    } finally {
+      session.close();
+    }
     if (roomId == null) return [];
     try {
       return [await getRoomDetailForRefresh(roomId: roomId, platform: id)];

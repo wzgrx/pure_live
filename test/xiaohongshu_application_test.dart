@@ -127,6 +127,10 @@ void main() {
     roomId,
     'https://www.xiaohongshu.com/livestream/$roomId',
     'http://www.xiaohongshu.com/livestream/$roomId/?share=fixture',
+    'https://xiaohongshu.com/livestream/$roomId',
+    'https://www.xiaohongshu.com/hina/livestream/$roomId',
+    'https://www.xiaohongshu.com/hina/livestream/$roomId/123',
+    'https://www.xiaohongshu.com/livestream/dynpath9oMyTyTC/$roomId',
   ]) {
     test('exact lookup preserves broadcast identity: $input', () async {
       final f = _Fixture();
@@ -319,10 +323,8 @@ void main() {
     );
   });
   for (final url in [
-    'https://xiaohongshu.com/livestream/$roomId',
     'https://www.xiaohongshu.com.evil.test/livestream/$roomId',
     'https://www.xiaohongshu.com/user/profile/$roomId',
-    'https://www.xiaohongshu.com/hina/livestream/$roomId',
     'https://www.xiaohongshu.com/livestream/1/../$roomId',
     'https://www.xiaohongshu.com/livestream/%35$roomId',
     'https://www.xiaohongshu.com:8787/livestream/$roomId',

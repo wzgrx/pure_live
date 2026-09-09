@@ -26,8 +26,20 @@ class LiveUrlTool {
   static Iterable<String> sharedHttpUrls(String text) sync* {
     final urls = RegExp(r'(?:[a-z][a-z0-9+.-]*://|www\.)[^\s<>]+', caseSensitive: false);
     for (final match in urls.allMatches(text)) {
-      var candidate = match.group(0)!.replaceFirst(RegExp(r'''[.,!?;:)\]}。！？、，；：）》」』”’"']+$'''), '');
+      var candidate = match.group(0)!;
       if (candidate.toLowerCase().startsWith('www.')) candidate = 'https://$candidate';
+      // XHS share text appends Chinese prose punctuation without whitespace.
+      // Keep percent-encoded punctuation and other platforms' URL spelling.
+      if ({'xhslink.com', 'www.xiaohongshu.com', 'xiaohongshu.com'}.contains(Uri.tryParse(candidate)?.host)) {
+        candidate = candidate.split(RegExp(r'[，。！？、；：）》」』”’]')).first;
+        candidate = candidate.replaceFirst(RegExp(r'''[,!?;:)\]}"']+$'''), '');
+        // A terminal dot path component is URL structure, not prose punctuation.
+        if (!candidate.endsWith('/.') && !candidate.endsWith('/..')) {
+          candidate = candidate.replaceFirst(RegExp(r'\.+$'), '');
+        }
+      } else {
+        candidate = candidate.replaceFirst(RegExp(r'''[.,!?;:)\]}。！？、，；：）》」』”’"']+$'''), '');
+      }
       final uri = Uri.tryParse(candidate);
       if (uri == null ||
           uri.userInfo.isNotEmpty ||
@@ -62,6 +74,7 @@ class LiveUrlTool {
     };
     return sharedHttpUrls(text).any((raw) {
       if (XiaohongshuLink.parse(raw) != null ||
+          XiaohongshuLink.shortUri(raw) != null ||
           TtingLink.parse(raw) != null ||
           OpenrecLink.parse(raw) != null ||
           HuajiaoLink.parse(raw) != null ||
@@ -125,7 +138,7 @@ class LiveUrlTool {
       if (session.isClosed) return [];
       final host = uri.host.toLowerCase();
       final realUrl = raw;
-      final xiaohongshu = XiaohongshuLink.parse(raw);
+      final xiaohongshu = await XiaohongshuLink.resolve(raw, session: session);
       if (xiaohongshu != null) return [xiaohongshu, Sites.xiaohongshuSite];
       final tting = TtingLink.parse(raw);
       if (tting != null) return ['$tting', Sites.ttingSite];

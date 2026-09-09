@@ -40,8 +40,13 @@ class _Site extends LiveSite {
 
 class _Controller extends AreasListController {
   _Controller(super.site);
+  Future<bool>? pendingConnectivity;
+  int connectivityReads = 0;
   @override
-  Future<bool> checkNetworkBeforeRequest() async => true;
+  Future<bool> checkNetworkBeforeRequest() async {
+    connectivityReads++;
+    return pendingConnectivity == null ? true : await pendingConnectivity!;
+  }
 }
 
 class _Loader extends AssetLoader {
@@ -311,6 +316,104 @@ void main() {
     expect(controller.loadding.value, false);
     expect(find.byType(LinearProgressIndicator), findsNothing);
     expect(controller.tabIndex.value, 1);
+    expect(tester.takeException(), null);
+  });
+
+  for (final width in [400.0, 900.0]) {
+    for (final retained in [true, false]) {
+      testWidgets('$width tapped category retained=$retained when taxonomy arrives before animation settles', (
+        tester,
+      ) async {
+        final (controller, site) = await _mount(tester, size: Size(width, 640));
+        final gate = Completer<void>();
+        site.pending = gate.future;
+        final refresh = controller.refreshData();
+        await tester.pump();
+        try {
+          expect(controller.loadding.value, true);
+          await tester.tap(find.text('Last'));
+          await tester.pump(const Duration(milliseconds: 40));
+          final tabs = tester.widget<TabBarView>(find.byType(TabBarView)).controller!;
+          expect(tabs.index, 2);
+          expect(tabs.indexIsChanging, true);
+          site.catalog = retained ? [('Last', 2), ('Empty', 0), ('First', 40)] : [('Replacement', 2), ('First', 40)];
+        } finally {
+          gate.complete();
+          await refresh;
+          await tester.pumpAndSettle();
+        }
+        final expectedId = retained ? 'Last' : 'Replacement';
+        expect(controller.categories[controller.tabIndex.value].id, expectedId);
+        expect(controller.list.map((area) => area.areaId), ['$expectedId-0', '$expectedId-1']);
+        expect(site.requests, 2);
+        expect(tester.takeException(), null);
+      });
+    }
+  }
+
+  testWidgets('switching cached categories does not finish an outstanding pull refresh', (tester) async {
+    final (controller, site) = await _mount(tester);
+    final gate = Completer<void>();
+    site.pending = gate.future;
+    try {
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(GridView).hitTestable()));
+      for (var i = 0; i < 6; i++) {
+        await gesture.moveBy(const Offset(0, 70));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 500));
+      for (var i = 0; i < 60 && site.requests < 2; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(site.requests, 2);
+      expect(controller.easyRefreshController.headerState?.mode, IndicatorMode.processing);
+      controller.selectCategory(1);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(controller.loadding.value, true);
+      expect(controller.easyRefreshController.headerState?.mode, IndicatorMode.processing);
+    } finally {
+      gate.complete();
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+    }
+    expect(controller.loadding.value, false);
+    expect(controller.easyRefreshController.headerState?.mode, IndicatorMode.inactive);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('cached selection preserves pull ownership during connectivity preflight', (tester) async {
+    final (controller, site) = await _mount(tester);
+    final gate = Completer<bool>();
+    controller.pendingConnectivity = gate.future;
+    try {
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(GridView).hitTestable()));
+      for (var i = 0; i < 6; i++) {
+        await gesture.moveBy(const Offset(0, 70));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await gesture.up();
+      for (var i = 0; i < 100 && controller.connectivityReads < 2; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(controller.connectivityReads, 2);
+      expect(site.requests, 1);
+      expect(controller.loadding.value, false);
+      expect(controller.hasActiveLoad, true);
+      expect(controller.easyRefreshController.headerState?.mode, IndicatorMode.processing);
+      controller.selectCategory(1);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(controller.easyRefreshController.headerState?.mode, IndicatorMode.processing);
+    } finally {
+      gate.complete(true);
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+    }
+    expect(site.requests, 2);
+    expect(controller.hasActiveLoad, false);
+    expect(controller.easyRefreshController.headerState?.mode, IndicatorMode.inactive);
     expect(tester.takeException(), null);
   });
 }

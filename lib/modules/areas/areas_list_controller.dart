@@ -75,11 +75,16 @@ class AreasListController extends ServerAllPageController<LiveArea> {
     if (isFlatten || index < 0 || index >= categories.length || tabIndex.value == index) return;
     tabIndex.value = index;
     currentPage = 1;
-    processLocalPaging();
+    processLocalPaging(finishRefresh: !hasActiveLoad);
   }
 
   @override
-  void processLocalPaging() {
+  void processLocalPaging({bool finishRefresh = true}) {
+    // Selecting cached rows is not completion of a pending server snapshot.
+    void finish(IndicatorResult result) {
+      if (finishRefresh) finishRefreshControllers(result);
+    }
+
     if (isFlatten) {
       final allItems = _flattenRawAllData;
       totalCount.value = allItems.length;
@@ -88,7 +93,7 @@ class AreasListController extends ServerAllPageController<LiveArea> {
         list.clear();
         canLoadMore.value = false;
         pageEmpty.value = true;
-        finishRefreshControllers(IndicatorResult.noMore);
+        finish(IndicatorResult.noMore);
         return;
       }
 
@@ -106,7 +111,7 @@ class AreasListController extends ServerAllPageController<LiveArea> {
         list.assignAll(newData);
         canLoadMore.value = endIndex < allItems.length;
         pageEmpty.value = list.isEmpty;
-        finishRefreshControllers(canLoadMore.value ? IndicatorResult.success : IndicatorResult.noMore);
+        finish(canLoadMore.value ? IndicatorResult.success : IndicatorResult.noMore);
         if (currentPage == 1) {
           scrollToTopImmediate();
         }
@@ -114,7 +119,7 @@ class AreasListController extends ServerAllPageController<LiveArea> {
         list.assignAll(allItems);
         canLoadMore.value = false;
         pageEmpty.value = list.isEmpty;
-        finishRefreshControllers(IndicatorResult.noMore);
+        finish(IndicatorResult.noMore);
       }
       return;
     }
@@ -124,7 +129,7 @@ class AreasListController extends ServerAllPageController<LiveArea> {
       list.clear();
       canLoadMore.value = false;
       pageEmpty.value = true;
-      finishRefreshControllers(IndicatorResult.noMore);
+      finish(IndicatorResult.noMore);
       return;
     }
 
@@ -140,7 +145,7 @@ class AreasListController extends ServerAllPageController<LiveArea> {
         currentCategory.children.clear();
         categories.refresh();
       }
-      finishRefreshControllers(IndicatorResult.noMore);
+      finish(IndicatorResult.noMore);
       return;
     }
 
@@ -166,13 +171,13 @@ class AreasListController extends ServerAllPageController<LiveArea> {
       if (currentPage == 1) {
         scrollToTopImmediate();
       }
-      finishRefreshControllers(canLoadMore.value ? IndicatorResult.success : IndicatorResult.noMore);
+      finish(canLoadMore.value ? IndicatorResult.success : IndicatorResult.noMore);
       categories.refresh();
     } else {
       list.assignAll(allItems);
       canLoadMore.value = false;
       pageEmpty.value = list.isEmpty;
-      finishRefreshControllers(IndicatorResult.noMore);
+      finish(IndicatorResult.noMore);
     }
   }
 }

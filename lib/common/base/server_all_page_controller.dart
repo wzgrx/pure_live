@@ -7,6 +7,10 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
   Future<void>? _activeLoad;
   bool _refreshPending = false;
 
+  /// Includes the connectivity preflight before the visible loading flag is
+  /// set. Local projections must not complete this operation's indicator.
+  bool get hasActiveLoad => _activeLoad != null;
+
   Future<List<T>> fetchAllServerData();
 
   /// Size of the active local catalogue. Tabbed controllers can project a

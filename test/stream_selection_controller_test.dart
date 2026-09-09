@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/interface/live_site.dart';
@@ -16,6 +18,116 @@ import 'package:pure_live/modules/live_play/widgets/video_player/video_controlle
 import 'package:pure_live/player/core/player_manager.dart';
 
 void main() {
+  test('resolved policies reach native-open metadata and survive a local line switch', () async {
+    final room = LiveRoom(roomId: 'policy', platform: 'test');
+    final host = _SelectionHost(room);
+    final site = _PolicySelectionSite();
+    final opened = <PlaybackSourceQualitySelection>[];
+    final controller = PlayerController(
+      host,
+      streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt, selection) async {
+        opened.add(selection!);
+        expect(selection.sourceQueryPolicies[url]!.matchesSource(Uri.parse(url)), isTrue);
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: site));
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
+      isTrue,
+    );
+    final policies = host.state.value.player.sourceQueryPolicies;
+    expect(policies, hasLength(2));
+    expect(opened.single.sourceQueryPolicies, policies);
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 1, lineIndex: 1),
+      isTrue,
+    );
+    expect(site.calls, 1, reason: 'local line changes retain the same source cohort');
+    expect(opened.last.sourceQueryPolicies, policies);
+    expect(host.state.value.player.sourceQueryPolicies, policies);
+  });
+
+  for (final failsAfterOpen in [false, true]) {
+    test('failed source transaction restores previous policy map (afterOpen=$failsAfterOpen)', () async {
+      final room = LiveRoom(roomId: 'policy', platform: 'test');
+      final host = failsAfterOpen ? _ThrowingRoomHost(room) : _SelectionHost(room);
+      const old = 'https://old.example/master.m3u8?token=old';
+      final oldPolicy = HlsSourceQueryPolicy.fromSource(Uri.parse(old));
+      host.updatePlayer(playUrls: const [old], sourceQueryPolicies: {old: oldPolicy});
+      final controller = PlayerController(
+        host,
+        streamSourceOpener: (url, urls, headers, room, audioOnly, resolver, refreshAt, selection) async {
+          expect(selection!.sourceQueryPolicies, hasLength(2));
+          if (!failsAfterOpen) throw StateError('fixture native open failed');
+        },
+      )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _PolicySelectionSite()));
+      expect(
+        await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
+        isFalse,
+      );
+      expect(host.state.value.player.sourceQueryPolicies, {old: oldPolicy});
+      expect(host.state.value.player.playUrls, const [old]);
+    });
+  }
+
+  test('fresh resolver policies commit atomically and a later legacy result clears them', () async {
+    final room = LiveRoom(roomId: 'policy', platform: 'test');
+    final host = _SelectionHost(room);
+    final site = _PolicyRecoverySite();
+    PlaybackSourceResolver? resolver;
+    final controller = PlayerController(
+      host,
+      streamSourceOpener: (url, urls, headers, room, audioOnly, nextResolver, refreshAt, selection) async {
+        resolver = nextResolver;
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: site));
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 0),
+      isTrue,
+    );
+    expect(resolver, isNull, reason: 'selecting the already active line is an intentional no-op');
+    expect(site.calls, 0);
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 1),
+      isTrue,
+    );
+    expect(resolver, isNotNull);
+    final before = host.state.value.player;
+    final refreshed = await resolver!(const PlaybackSourceRefreshRequest(currentLineIndex: 0, advanceLine: false));
+    expect(host.state.value.player, same(before));
+    expect(refreshed.selection!.sourceQueryPolicies.keys, refreshed.urls);
+    expect(refreshed.selection!.sourceQueryPolicies.keys, isNot(before.sourceQueryPolicies.keys));
+    controller.applySourceCommit(_sourceCommit(room, refreshed, revision: 1));
+    expect(host.state.value.player.sourceQueryPolicies, refreshed.selection!.sourceQueryPolicies);
+    controller.applySourceCommit(
+      _sourceCommit(
+        room,
+        PlaybackSourceRefreshResult(
+          urls: before.playUrls,
+          preferredLineIndex: 0,
+          selection: PlaybackSourceQualitySelection(
+            qualities: before.qualites,
+            currentQuality: 0,
+            sourceQueryPolicies: before.sourceQueryPolicies,
+          ),
+        ),
+        revision: 1,
+      ),
+    );
+    expect(
+      host.state.value.player.sourceQueryPolicies,
+      refreshed.selection!.sourceQueryPolicies,
+      reason: 'stale commit cannot restore an old capability',
+    );
+    controller.applySourceCommit(
+      _sourceCommit(
+        room,
+        const PlaybackSourceRefreshResult(urls: ['https://direct.example/live.flv'], preferredLineIndex: 0),
+        revision: 2,
+      ),
+    );
+    expect(host.state.value.player.sourceQueryPolicies, isEmpty);
+  });
+
   test('selection policy clamps stale quality and line indices', () {
     expect(
       resolveStreamSelection(qualityCount: 3, playUrlCount: 2, requestedQualityIndex: 9, requestedLineIndex: 7),
@@ -544,6 +656,31 @@ class _SelectionLiveSite extends LiveSite {
   }
 }
 
+class _PolicySelectionSite extends LiveSite implements LivePlayUrlResolver {
+  int calls = 0;
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
+    final generation = ++calls;
+    final urls = [
+      for (final line in ['one', 'two']) 'https://cdn.example/$line/master.m3u8?token=g$generation',
+    ];
+    return LivePlayUrlResolution.withSourcePolicies(
+      urls: urls,
+      sourceQueryPolicies: {for (final url in urls) url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+      appliedQualityData: quality.selectionId,
+    );
+  }
+}
+
+class _PolicyRecoverySite extends _PolicySelectionSite implements LivePlayRecoveryResolver {
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) => resolvePlayUrlsRaw(detail: detail, quality: quality);
+}
+
 class _AcknowledgedSelectionSite extends LiveSite implements LivePlayUrlResolver {
   _AcknowledgedSelectionSite({this.appliedId, this.unconfirmed = false});
   Object? appliedId;
@@ -703,6 +840,7 @@ class _SelectionHost implements PlayerSessionHost {
     List<LivePlayQuality>? qualites,
     int? currentQuality,
     List<String>? playUrls,
+    Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,
@@ -717,6 +855,7 @@ class _SelectionHost implements PlayerSessionHost {
         qualites: qualites,
         currentQuality: currentQuality,
         playUrls: playUrls,
+        sourceQueryPolicies: sourceQueryPolicies,
         currentLineIndex: currentLineIndex,
         isCurrentRoomAudioOnly: isCurrentRoomAudioOnly,
         hasUseDefaultResolution: hasUseDefaultResolution,

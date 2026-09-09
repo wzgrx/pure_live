@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
@@ -109,14 +111,29 @@ void main() {
     final selections = <PlaybackSourceQualitySelection>[
       PlaybackSourceQualitySelection(
         qualities: <LivePlayQuality>[LivePlayQuality(quality: '初始', id: 0)],
+        sourceQueryPolicies: {
+          'https://cdn.example/generation-0.m3u8?token=g0': HlsSourceQueryPolicy.fromSource(
+            Uri.parse('https://cdn.example/generation-0.m3u8?token=g0'),
+          ),
+        },
         currentQuality: 0,
       ),
       PlaybackSourceQualitySelection(
         qualities: <LivePlayQuality>[LivePlayQuality(quality: '确认一', id: 1)],
+        sourceQueryPolicies: {
+          'https://cdn.example/generation-1.m3u8?token=g1': HlsSourceQueryPolicy.fromSource(
+            Uri.parse('https://cdn.example/generation-1.m3u8?token=g1'),
+          ),
+        },
         currentQuality: 0,
       ),
       PlaybackSourceQualitySelection(
         qualities: <LivePlayQuality>[LivePlayQuality(quality: '确认二', id: 2)],
+        sourceQueryPolicies: {
+          'https://cdn.example/generation-2.m3u8?token=g2': HlsSourceQueryPolicy.fromSource(
+            Uri.parse('https://cdn.example/generation-2.m3u8?token=g2'),
+          ),
+        },
         currentQuality: 0,
       ),
     ];
@@ -126,8 +143,8 @@ void main() {
 
     try {
       await manager.play(
-        'https://cdn.example/generation-0.flv',
-        const ['https://cdn.example/generation-0.flv'],
+        'https://cdn.example/generation-0.m3u8?token=g0',
+        const ['https://cdn.example/generation-0.m3u8?token=g0'],
         const {},
         room: room,
         sourceSelection: selections[0],
@@ -135,7 +152,7 @@ void main() {
           requests.add(request);
           final generation = requests.length;
           return PlaybackSourceRefreshResult(
-            urls: <String>['https://cdn.example/generation-$generation.flv'],
+            urls: <String>['https://cdn.example/generation-$generation.m3u8?token=g$generation'],
             preferredLineIndex: 0,
             selection: selections[generation],
           );
@@ -144,7 +161,7 @@ void main() {
 
       player.emitError(PlayerException(message: 'first expiry', type: PlayerErrorType.network));
       var deadline = DateTime.now().add(const Duration(seconds: 1));
-      while (manager.currentSourceCommit?.currentUrl != 'https://cdn.example/generation-1.flv' &&
+      while (manager.currentSourceCommit?.currentUrl != 'https://cdn.example/generation-1.m3u8?token=g1' &&
           DateTime.now().isBefore(deadline)) {
         await Future<void>.delayed(const Duration(milliseconds: 5));
       }
@@ -154,7 +171,7 @@ void main() {
 
       player.emitError(PlayerException(message: 'second expiry', type: PlayerErrorType.network));
       deadline = DateTime.now().add(const Duration(seconds: 1));
-      while (manager.currentSourceCommit?.currentUrl != 'https://cdn.example/generation-2.flv' &&
+      while (manager.currentSourceCommit?.currentUrl != 'https://cdn.example/generation-2.m3u8?token=g2' &&
           DateTime.now().isBefore(deadline)) {
         await Future<void>.delayed(const Duration(milliseconds: 5));
       }
@@ -168,6 +185,17 @@ void main() {
       );
       expect(manager.currentSourceCommit?.selection, same(selections[2]));
       expect(commits.map((event) => event.selection).toList(), selections);
+      for (final commit in commits) {
+        expect(commit.selection!.sourceQueryPolicies.keys, [commit.currentUrl]);
+        expect(
+          commit.selection!.sourceQueryPolicies[commit.currentUrl]!.matchesSource(Uri.parse(commit.currentUrl)),
+          isTrue,
+        );
+      }
+      final policyBeforePause = manager.currentSourceCommit!.selection!.sourceQueryPolicies;
+      await manager.pause();
+      await manager.resume();
+      expect(manager.currentSourceCommit!.selection!.sourceQueryPolicies, same(policyBeforePause));
     } finally {
       await subscription.cancel();
       await manager.dispose();

@@ -11,6 +11,7 @@ import 'package:pure_live/player/core/player_manager.dart';
 import 'package:pure_live/player/models/player_exception.dart';
 import 'package:pure_live/player/models/player_error_type.dart';
 import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
 import 'package:pure_live/modules/live_play/states/load_type.dart';
 import 'package:pure_live/common/utils/latest_async_value_queue.dart';
@@ -133,6 +134,7 @@ abstract interface class PlayerSessionHost {
     List<LivePlayQuality>? qualites,
     int? currentQuality,
     List<String>? playUrls,
+    Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,
@@ -260,6 +262,7 @@ class PlayerController extends GetxController {
         urls: urls,
         preferredLineIndex: preferredIndex,
         selection: PlaybackSourceQualitySelection(
+          sourceQueryPolicies: resolution.sourceQueryPolicies,
           qualities: _qualityChoicesWithConfirmation(choices, requestedIndex, resolution),
           currentQuality: resolveAppliedQualityIndex(
             qualities: choices,
@@ -296,6 +299,7 @@ class PlayerController extends GetxController {
       qualites: selection?.qualities,
       currentQuality: selection?.currentQuality,
       playUrls: commit.urls,
+      sourceQueryPolicies: selection?.sourceQueryPolicies ?? const {},
       currentLineIndex: commit.currentLineIndex,
     );
     _main.updateRoom(success: true, isLoading: false, loadError: null);
@@ -348,6 +352,7 @@ class PlayerController extends GetxController {
       ),
       sourceRefreshAt: _getSourceRefreshAt(site: site, url: playerState.playUrlSafe),
       sourceSelection: PlaybackSourceQualitySelection(
+        sourceQueryPolicies: playerState.sourceQueryPolicies,
         qualities: playerState.qualites,
         currentQuality: playerState.currentQuality,
       ),
@@ -382,6 +387,7 @@ class PlayerController extends GetxController {
       qualites: qualities,
       currentQuality: currentQuality,
       playUrls: playUrls,
+      sourceQueryPolicies: session.sourceQueryPolicies,
       currentLineIndex: currentLineIndex,
       isCurrentRoomAudioOnly: manager.desiredAudioOnlyMode,
       hasUseDefaultResolution: session.hasUseDefaultResolution,
@@ -405,7 +411,11 @@ class PlayerController extends GetxController {
         site: currentSite,
         url: session.dataSource.isNotEmpty ? session.dataSource : (playUrls.isEmpty ? '' : playUrls[currentLineIndex]),
       ),
-      sourceSelection: PlaybackSourceQualitySelection(qualities: qualities, currentQuality: currentQuality),
+      sourceSelection: PlaybackSourceQualitySelection(
+        qualities: qualities,
+        currentQuality: currentQuality,
+        sourceQueryPolicies: session.sourceQueryPolicies,
+      ),
       onSourceCommitted: applySourceCommit,
       onAudioOnlyChanged: _main.setCurrentRoomAudioOnlyFromUser,
     );
@@ -502,6 +512,7 @@ class PlayerController extends GetxController {
     _main.updatePlayer(
       qualites: _qualityChoicesWithConfirmation(playerState.qualites, playerState.currentQuality, resolution),
       playUrls: List<String>.unmodifiable(resolution.urls),
+      sourceQueryPolicies: resolution.sourceQueryPolicies,
       currentQuality: appliedQuality,
       currentLineIndex: lineIndex,
     );
@@ -555,8 +566,9 @@ class PlayerController extends GetxController {
           ? await site.liveSite.resolvePlayUrlsForRecovery(detail: room, quality: requestedQualityValue)
           : type == ReloadDataType.changeQuality
           ? await site.liveSite.resolvePlayUrls(detail: room, quality: requestedQualityValue)
-          : LivePlayUrlResolution(
+          : LivePlayUrlResolution.withSourcePolicies(
               urls: List<String>.from(before.playUrls),
+              sourceQueryPolicies: before.sourceQueryPolicies,
               appliedQualityData: before.qualites[before.currentQuality].selectionId,
               qualityUnconfirmed: before.qualitySafe.isPlaybackUnconfirmed,
             );
@@ -609,7 +621,11 @@ class PlayerController extends GetxController {
         _state.player.isCurrentRoomAudioOnly,
         _buildSourceResolver(site: site, room: room, quality: before.qualites[selection.qualityIndex]),
         _getSourceRefreshAt(site: site, url: immutableUrls[selection.lineIndex]),
-        PlaybackSourceQualitySelection(qualities: committedChoices, currentQuality: selection.qualityIndex),
+        PlaybackSourceQualitySelection(
+          qualities: committedChoices,
+          currentQuality: selection.qualityIndex,
+          sourceQueryPolicies: resolution.sourceQueryPolicies,
+        ),
       );
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
       if (_lastSourceCommitRevision == sourceCommitBeforeOpen) {
@@ -617,6 +633,7 @@ class PlayerController extends GetxController {
           qualites: committedChoices,
           currentQuality: selection.qualityIndex,
           playUrls: immutableUrls,
+          sourceQueryPolicies: resolution.sourceQueryPolicies,
           currentLineIndex: selection.lineIndex,
           hasUseDefaultResolution: true,
         );
@@ -637,6 +654,7 @@ class PlayerController extends GetxController {
             qualites: before.qualites,
             currentQuality: before.currentQuality,
             playUrls: before.playUrls,
+            sourceQueryPolicies: before.sourceQueryPolicies,
             currentLineIndex: before.currentLineIndex,
             hasUseDefaultResolution: before.hasUseDefaultResolution,
           );

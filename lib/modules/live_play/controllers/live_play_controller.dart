@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'dart:async';
+
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'dart:developer' as developer;
 
 import 'package:flutter/scheduler.dart';
@@ -116,6 +119,7 @@ class LivePlayController extends GetxController
         qualites: restored?.qualities ?? const <LivePlayQuality>[],
         currentQuality: restored?.currentQuality ?? 0,
         playUrls: restored?.playUrls ?? const <String>[],
+        sourceQueryPolicies: restored?.sourceQueryPolicies ?? const {},
         currentLineIndex: restored?.currentLineIndex ?? 0,
         isCurrentRoomAudioOnly: initialAudioOnly,
         hasUseDefaultResolution: restored?.hasUseDefaultResolution ?? false,
@@ -414,6 +418,7 @@ class LivePlayController extends GetxController
     List<LivePlayQuality>? qualites,
     int? currentQuality,
     List<String>? playUrls,
+    Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,
@@ -432,6 +437,7 @@ class LivePlayController extends GetxController
         qualites: qualites,
         currentQuality: currentQuality,
         playUrls: playUrls,
+        sourceQueryPolicies: sourceQueryPolicies,
         currentLineIndex: currentLineIndex,
         isCurrentRoomAudioOnly: isCurrentRoomAudioOnly,
         hasUseDefaultResolution: hasUseDefaultResolution,
@@ -945,6 +951,7 @@ class LivePlayController extends GetxController
               qualities: List<LivePlayQuality>.unmodifiable(current.player.qualites),
               currentQuality: current.player.currentQuality,
               playUrls: List<String>.unmodifiable(current.player.playUrls),
+              sourceQueryPolicies: Map<String, HlsSourceQueryPolicy>.unmodifiable(current.player.sourceQueryPolicies),
               currentLineIndex: current.player.currentLineIndex,
               headers: Map<String, String>.unmodifiable(current.player.videoController?.headers ?? const {}),
               isAudioOnly: manager.desiredAudioOnlyMode,

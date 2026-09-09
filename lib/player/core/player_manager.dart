@@ -3,6 +3,8 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as math;
 
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'line_fallback_manager.dart';
 import 'live_stream_geometry_hint.dart';
 import 'portrait_stream_support.dart';
@@ -70,18 +72,36 @@ class PlaybackSourceRefreshRequest {
 
 @immutable
 class PlaybackSourceQualitySelection {
-  factory PlaybackSourceQualitySelection({required List<LivePlayQuality> qualities, required int currentQuality}) {
+  factory PlaybackSourceQualitySelection({
+    required List<LivePlayQuality> qualities,
+    required int currentQuality,
+    Map<String, HlsSourceQueryPolicy> sourceQueryPolicies = const {},
+  }) {
     final immutableQualities = List<LivePlayQuality>.unmodifiable(qualities);
     if (immutableQualities.isEmpty) {
       throw ArgumentError.value(qualities, 'qualities', 'must contain the committed quality');
     }
-    return PlaybackSourceQualitySelection._(immutableQualities, currentQuality.clamp(0, immutableQualities.length - 1));
+    for (final entry in sourceQueryPolicies.entries) {
+      final source = Uri.tryParse(entry.key);
+      if (source == null || !entry.value.matchesSource(source)) {
+        throw const FormatException('Source query policy does not match its source key');
+      }
+    }
+    return PlaybackSourceQualitySelection._(
+      immutableQualities,
+      currentQuality.clamp(0, immutableQualities.length - 1),
+      Map<String, HlsSourceQueryPolicy>.unmodifiable(sourceQueryPolicies),
+    );
   }
 
-  const PlaybackSourceQualitySelection._(this.qualities, this.currentQuality);
+  const PlaybackSourceQualitySelection._(this.qualities, this.currentQuality, this.sourceQueryPolicies);
 
   final List<LivePlayQuality> qualities;
   final int currentQuality;
+
+  /// In-memory capabilities of this resolved source cohort, keyed by exact
+  /// remote URL, not by quality or by a token parameter shared across sources.
+  final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
 
   LivePlayQuality get quality => qualities[currentQuality];
 }
@@ -524,6 +544,7 @@ class PlayerManager {
       qualities: <LivePlayQuality>[LivePlayQuality(quality: '原画')],
       currentQuality: 0,
       playUrls: urls.isEmpty && currentUrl.isNotEmpty ? <String>[currentUrl] : urls,
+      sourceQueryPolicies: _sourceSelectionForCurrentCohort()?.sourceQueryPolicies ?? const {},
       currentLineIndex: urls.isEmpty ? 0 : urls.indexOf(currentUrl).clamp(0, urls.length - 1),
       headers: Map<String, String>.unmodifiable(_currentHeaders),
       isAudioOnly: _requestedAudioOnly,
@@ -654,6 +675,7 @@ class PlayerManager {
       qualities: selection?.qualities,
       currentQuality: selection?.currentQuality,
       playUrls: commit.urls,
+      sourceQueryPolicies: selection?.sourceQueryPolicies ?? const {},
       currentLineIndex: commit.currentLineIndex,
       headers: commit.headers,
       // Audio-only is an in-place player mode and can change without a source
@@ -675,6 +697,7 @@ class PlayerManager {
       final transportSnapshot = session.copyWith(
         dataSource: currentUrl,
         playUrls: List<String>.unmodifiable(urls),
+        sourceQueryPolicies: _sourceSelectionForCurrentCohort()?.sourceQueryPolicies ?? const {},
         headers: Map<String, String>.unmodifiable(_currentHeaders.isEmpty ? session.headers : _currentHeaders),
         isAudioOnly: _requestedAudioOnly,
       );
@@ -4489,6 +4512,7 @@ class RoomSessionSnapshot {
     required this.qualities,
     required this.currentQuality,
     required this.playUrls,
+    this.sourceQueryPolicies = const {},
     required this.currentLineIndex,
     required this.headers,
     required this.isAudioOnly,
@@ -4501,6 +4525,7 @@ class RoomSessionSnapshot {
   final List<LivePlayQuality> qualities;
   final int currentQuality;
   final List<String> playUrls;
+  final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
   final int currentLineIndex;
   final Map<String, String> headers;
   final bool isAudioOnly;
@@ -4513,6 +4538,7 @@ class RoomSessionSnapshot {
     List<LivePlayQuality>? qualities,
     int? currentQuality,
     List<String>? playUrls,
+    Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
     int? currentLineIndex,
     Map<String, String>? headers,
     bool? isAudioOnly,
@@ -4525,6 +4551,9 @@ class RoomSessionSnapshot {
       qualities: qualities ?? this.qualities,
       currentQuality: currentQuality ?? this.currentQuality,
       playUrls: playUrls ?? this.playUrls,
+      sourceQueryPolicies: Map<String, HlsSourceQueryPolicy>.unmodifiable(
+        sourceQueryPolicies ?? (playUrls == null ? this.sourceQueryPolicies : const {}),
+      ),
       currentLineIndex: currentLineIndex ?? this.currentLineIndex,
       headers: headers ?? this.headers,
       isAudioOnly: isAudioOnly ?? this.isAudioOnly,

@@ -1,3 +1,5 @@
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'dart:async';
 
 import 'package:floating/floating.dart';
@@ -1023,6 +1025,11 @@ void main() {
     );
 
     final recoveredSelection = PlaybackSourceQualitySelection(
+      sourceQueryPolicies: {
+        'https://example.invalid/recovered.m3u8?token=recovered': HlsSourceQueryPolicy.fromSource(
+          Uri.parse('https://example.invalid/recovered.m3u8?token=recovered'),
+        ),
+      },
       qualities: <LivePlayQuality>[
         LivePlayQuality(quality: '蓝光'),
         LivePlayQuality(quality: '原画'),
@@ -1030,8 +1037,8 @@ void main() {
       currentQuality: 1,
     );
     await manager.play(
-      'https://example.invalid/recovered.flv',
-      const <String>['https://example.invalid/recovered.flv', 'https://backup.invalid/recovered.flv'],
+      'https://example.invalid/recovered.m3u8?token=recovered',
+      const <String>['https://example.invalid/recovered.m3u8?token=recovered', 'https://backup.invalid/recovered.flv'],
       const <String, String>{'referer': 'https://example.invalid/recovered'},
       room: room,
       sourceSelection: recoveredSelection,
@@ -1045,7 +1052,9 @@ void main() {
     expect(resumed, isNotNull);
     expect(resumed!.qualities.map((item) => item.quality), <String>['蓝光', '原画']);
     expect(resumed.currentQuality, 1);
-    expect(resumed.dataSource, 'https://example.invalid/recovered.flv');
+    expect(resumed.sourceQueryPolicies, recoveredSelection.sourceQueryPolicies);
+    expect(() => resumed.sourceQueryPolicies.clear(), throwsUnsupportedError);
+    expect(resumed.dataSource, 'https://example.invalid/recovered.m3u8?token=recovered');
     expect(resumed.playUrls, hasLength(2));
     expect(resumed.headers, containsPair('referer', 'https://example.invalid/recovered'));
     expect(resumed.isAudioOnly, isTrue, reason: 'in-place audio mode is newer than the source commit snapshot');

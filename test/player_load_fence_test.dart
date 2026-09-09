@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/interface/live_site.dart';
@@ -73,6 +75,7 @@ class _TestPlayerHost implements PlayerSessionHost {
     List<LivePlayQuality>? qualites,
     int? currentQuality,
     List<String>? playUrls,
+    Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,

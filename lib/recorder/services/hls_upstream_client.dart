@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
 
@@ -121,7 +123,16 @@ final class HlsUpstreamClient {
           throw const HttpException('HLS redirect rejected or limit exceeded');
         }
         final reader = HlsBodyReader(response);
+        // HttpClientRequest.abort may no longer end a response already handed
+        // to its reader. Own redirect-body cancellation separately from headers.
+        void cancelRedirectBody() {
+          unawaited(reader.cancel().catchError((Object _) {}));
+        }
+
+        _aborters.add(cancelRedirectBody);
+        final detachBody = cancellation?.onCancel(cancelRedirectBody);
         try {
+          _check(cancellation, budget);
           if (budget == null) {
             Future<void> drain() async {
               while (await reader.moveNext()) {
@@ -142,6 +153,8 @@ final class HlsUpstreamClient {
             }
           }
         } finally {
+          detachBody?.call();
+          _aborters.remove(cancelRedirectBody);
           await reader.cancel();
         }
         _check(cancellation, budget);
@@ -156,6 +169,35 @@ final class HlsUpstreamClient {
         detach?.call();
         _aborters.remove(abort);
       }
+    }
+  }
+
+  Future<HlsMediaSnapshot> loadSnapshot(
+    Uri uri,
+    HlsPrefetchCancellation cancellation, {
+    required HlsResponseBudget budget,
+  }) async {
+    final (response, finalUri) = await open('GET', uri, budget: budget, cancellation: cancellation);
+    final reader = HlsBodyReader(response);
+    final detach = cancellation.onCancel(() {
+      unawaited(reader.cancel().catchError((Object _) {}));
+    });
+    try {
+      _check(cancellation, budget);
+      if (response.statusCode != HttpStatus.ok) throw const HttpException('HLS media manifest request failed');
+      final body = BytesBuilder(copy: false);
+      while (await budget.wait(reader.moveNext)) {
+        _check(cancellation, budget);
+        if (body.length + reader.current.length > 4 * 1024 * 1024) {
+          throw const FormatException('HLS media snapshot exceeds body budget');
+        }
+        body.add(reader.current);
+      }
+      _check(cancellation, budget);
+      return HlsMediaSnapshot.parse(utf8.decode(body.takeBytes()), finalUri);
+    } finally {
+      detach();
+      await reader.cancel();
     }
   }
 

@@ -8,6 +8,9 @@ import 'hls_retained_window.dart';
 String renderHlsRetainedManifest(
   HlsRetainedWindow window, {
   required Uri Function(Uri upstream) localUri,
+  Uri Function(HlsSegmentDescriptor segment)? segmentUri,
+  Uri Function(HlsMapDescriptor initialization)? initializationUri,
+  Uri Function(HlsKeyDescriptor key)? keyUri,
   int? throughSequence,
   bool finish = false,
   int maximumBytes = 8 * 1024 * 1024,
@@ -28,8 +31,8 @@ String renderHlsRetainedManifest(
     output.writeln(value);
   }
 
-  String resource(Uri upstream) {
-    final uri = localUri(upstream);
+  String resource(Uri upstream, [Uri? mapped]) {
+    final uri = mapped ?? localUri(upstream);
     final value = uri.toString();
     if (!const {'http', 'https'}.contains(uri.scheme) ||
         uri.host.isEmpty ||
@@ -64,7 +67,7 @@ String renderHlsRetainedManifest(
         if (!const {'METHOD', 'URI', 'IV', 'KEYFORMAT', 'KEYFORMATVERSIONS'}.contains(name)) {
           throw const FormatException('Unsupported key attribute in retained publication');
         }
-        final value = name == 'URI' ? resource(key.uri!) : entry.value;
+        final value = name == 'URI' ? resource(key.uri!, keyUri?.call(key)) : entry.value;
         if (value.contains(RegExp('["\r\n]'))) throw const FormatException('Invalid key attribute');
         if ((name == 'METHOD' && !RegExp(r'^[A-Z0-9-]+$').hasMatch(value)) ||
             (name == 'IV' && !RegExp(r'^0[xX][0-9a-fA-F]{1,32}$').hasMatch(value))) {
@@ -96,7 +99,7 @@ String renderHlsRetainedManifest(
       keys(initialization.keys);
       final range = initialization.range;
       line(
-        '#EXT-X-MAP:URI="${resource(initialization.uri)}"'
+        '#EXT-X-MAP:URI="${resource(initialization.uri, initializationUri?.call(initialization))}"'
         '${range == null ? '' : ',BYTERANGE="${range.identity}"'}',
       );
       map = initialization;
@@ -112,7 +115,7 @@ String renderHlsRetainedManifest(
     line(segment.extinf);
     if (segment.range != null) line('#EXT-X-BYTERANGE:${segment.range!.identity}');
     if (segment.gap) line('#EXT-X-GAP');
-    line(resource(segment.uri));
+    line(resource(segment.uri, segmentUri?.call(segment)));
     previous = segment;
   }
   if (finish || (window.ended && (throughSequence == null || throughSequence == all.last.sequence))) {

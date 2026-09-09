@@ -36,7 +36,7 @@ final class HlsPrefetchCancellation {
     return () => _hooks.remove(hook);
   }
 
-  void _cancel() {
+  void cancel() {
     if (_cancelled) return;
     _cancelled = true;
     for (final hook in _hooks.toList()) {
@@ -60,6 +60,8 @@ final class HlsPrefetchTicket {
   final Completer<bool> _ready = Completer<bool>();
   final Completer<void> _disposed = Completer<void>();
   Future<bool> get ready => _ready.future;
+  bool get isReady => _complete && !_retired;
+  Future<void> get disposed => _disposed.future;
   HlsPrefetchFailure? _failure;
   HlsPrefetchFailure? get failure => _failure;
   bool _loading = false;
@@ -88,7 +90,7 @@ final class HlsPrefetchPool {
     if (bodyIdleTimeout <= Duration.zero ||
         bodyIdleTimeout > const Duration(minutes: 1) ||
         maximumEntries < 1 ||
-        maximumEntries > 8 ||
+        maximumEntries > 32 ||
         maximumConcurrent < 1 ||
         maximumConcurrent > maximumEntries ||
         maximumReaders < 1 ||
@@ -249,7 +251,7 @@ final class HlsPrefetchPool {
     if (identical(_entries[entry.key], entry)) _entries.remove(entry.key);
     _queue.remove(entry);
     entry._failure ??= entry._complete ? null : HlsPrefetchFailure.cancelled;
-    entry._cancellation._cancel();
+    entry._cancellation.cancel();
     if (!entry._ready.isCompleted) entry._ready.complete(false);
     _maybeDispose(entry);
   }

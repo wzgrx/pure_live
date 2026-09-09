@@ -277,6 +277,7 @@ final class HlsRetainedWindow {
   List<HlsSegmentDescriptor> _segments = const [];
   List<HlsSegmentDescriptor> get segments => _segments;
   int _latestFirst = -1;
+  int _retiredBefore = 0;
   bool _ended = false;
   int? _targetDuration;
   int _version = 1;
@@ -287,6 +288,16 @@ final class HlsRetainedWindow {
   bool get independentSegments => _independentSegments;
   bool get ended => _ended;
   int get retainedBytes => _segments.fold(0, (sum, segment) => sum + segment.retainedBytes);
+
+  /// The owner keeps published generations and active body leases separately.
+  /// Older origin overlap must not reintroduce this explicitly retired prefix.
+  void retireBefore(int sequence) {
+    if (sequence < 0) throw ArgumentError.value(sequence);
+    if (_segments.isNotEmpty && sequence > _segments.last.sequence) throw ArgumentError.value(sequence);
+    if (sequence <= _retiredBefore) return;
+    _retiredBefore = sequence;
+    _segments = List.unmodifiable(_segments.where((s) => s.sequence >= sequence));
+  }
 
   List<HlsSegmentDescriptor> merge(HlsMediaSnapshot snapshot) {
     if (snapshot.source != source || snapshot.unhandledTags.isNotEmpty) {
@@ -318,6 +329,7 @@ final class HlsRetainedWindow {
     }
     final merged = {for (final segment in _segments) segment.sequence: segment};
     for (final segment in incoming) {
+      if (segment.sequence < _retiredBefore) continue;
       final existing = merged[segment.sequence];
       if (existing != null &&
           (existing.identity != segment.identity ||

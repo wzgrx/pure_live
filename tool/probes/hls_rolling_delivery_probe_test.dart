@@ -13,11 +13,19 @@ import 'package:pure_live/get/get.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_command_builder.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
+import 'package:pure_live/recorder/services/hls_body_reader.dart';
+import 'package:pure_live/recorder/services/hls_prefetch_pool.dart';
+import 'package:pure_live/recorder/services/hls_prefetch_scheduler.dart';
+import 'package:pure_live/recorder/services/hls_session_cookies.dart';
+import 'package:pure_live/recorder/services/hls_upstream_client.dart';
 import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
+
+part 'hls_scheduled_delivery_probe.dart';
 
 typedef _Scenario = ({String name, int budget, int bodyMs, int headerMs, int runSeconds});
 
 void main() {
+  _registerScheduledDeliveryProbe();
   test('whole-media accounting excludes empty HTTP failures and unfinished bodies', () {
     final traces = <Map<String, Object?>>[
       {'upstreamStatus': 200, 'bodyCompleteMs': 12000},
@@ -174,7 +182,12 @@ void main() {
   );
 }
 
-Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Directory root) async {
+Future<Map<String, Object?>> _capture(
+  _Scenario config,
+  Directory fixture,
+  Directory root, {
+  bool scheduled = false,
+}) async {
   final output = await Directory(p.join(root.path, config.name)).create();
   final origin = await _RollingOrigin.start(fixture, config);
   final native = FFmpegManager.to;
@@ -201,6 +214,7 @@ Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Direc
   });
   Future<void>? execution;
   FFmpegHlsInputRelay? relay;
+  _ScheduledRelay? prefetch;
   final report = <String, Object?>{
     'case': config.name,
     'rwTimeout': config.budget,
@@ -209,8 +223,9 @@ Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Direc
     'windowDurationSeconds': 6,
   };
   try {
+    if (scheduled) prefetch = await _ScheduledRelay.start(origin.input, output, config.budget);
     final arguments = FFmpegCommandBuilder.buildRecordArguments(
-      url: origin.input.toString(),
+      url: (prefetch?.input ?? origin.input).toString(),
       outputDir: output.path,
       segmentTime: 86400,
       preferBestStream: true,
@@ -228,6 +243,7 @@ Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Direc
     );
     relay = native.getSession(taskId)?.inputRelay;
     report['stopRequestedMs'] = diagnostics.elapsedMilliseconds;
+    prefetch?.freeze();
     if (native.isRunning(taskId)) await native.stop(taskId);
     await execution.timeout(const Duration(seconds: 20));
     await relay?.close();
@@ -308,6 +324,11 @@ Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Direc
     } finally {
       await relay?.close();
       await subscription.cancel();
+      if (prefetch != null) {
+        report['prefetch'] = prefetch.snapshot();
+        await prefetch.close();
+        report['prefetchAfterClose'] = prefetch.snapshot();
+      }
       await origin.close();
       await File(p.join(output.path, 'hls-timeline.json')).writeAsString(jsonEncode(diagnostics.snapshot()));
       await File(p.join(output.path, 'origin.json')).writeAsString(jsonEncode(origin.requests));

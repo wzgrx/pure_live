@@ -144,7 +144,7 @@ void main() {
       }
     });
   }
-  for (final phase in ['headers', 'redirect-body', 'media-body', 'bad-range']) {
+  for (final phase in ['headers', 'redirect-body', 'media-body', 'bad-range', 'snapshot-body']) {
     test('retiring $phase closes its real TCP but preserves another download and shared client', () async {
       final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
       final sockets = <Socket>[];
@@ -187,18 +187,27 @@ void main() {
       });
       final client = HttpClient()..connectionTimeout = idle;
       final base = Uri.parse('http://127.0.0.1:${server.port}/root.m3u8');
-      final upstream = HlsUpstreamClient(client: client, source: base, headers: {}, cookies: HlsSessionCookies());
+      final redirectReading = Completer<void>();
+      final upstream = HlsUpstreamClient(
+        client: phase == 'redirect-body' ? _ObserveRedirectClient(client, redirectReading) : client,
+        source: base,
+        headers: {},
+        cookies: HlsSessionCookies(),
+      );
       final cache = pool();
       try {
-        final bad = cache.prefetch(
-          'hang',
-          (cancel) => upstream.loadMedia(
+        final bad = cache.prefetch('hang', (cancel) async {
+          if (phase == 'snapshot-body') {
+            await upstream.loadSnapshot(base.resolve('/hang'), cancel, budget: HlsResponseBudget(idle));
+            throw StateError('Cancelled snapshot unexpectedly completed');
+          }
+          return upstream.loadMedia(
             base.resolve('/hang'),
             cancel,
             budget: HlsResponseBudget(idle),
             range: phase == 'bad-range' ? const HlsSegmentRange(10, 3) : null,
-          ),
-        )!;
+          );
+        })!;
         final good = cache.prefetch(
           'good',
           (cancel) => upstream.loadMedia(base.resolve('/good'), cancel, budget: HlsResponseBudget(idle)),
@@ -206,6 +215,9 @@ void main() {
         await started.future.timeout(idle);
         expect(await good.ready, true);
         expect(await bytes(cache.acquire('good')!), ascii.encode('abc'));
+        // Observe actual subscription rather than relying on a scheduling delay
+        // or cancelling while response headers are still in flight.
+        if (phase == 'redirect-body') await redirectReading.future.timeout(idle);
         if (phase == 'bad-range') {
           expect(await bad.ready, false);
           expect(bad.failure, HlsPrefetchFailure.download);
@@ -258,4 +270,61 @@ void main() {
       await stream.close();
     }
   });
+}
+
+final class _ObserveRedirectClient implements HttpClient {
+  _ObserveRedirectClient(this.inner, this.reading);
+  final HttpClient inner;
+  final Completer<void> reading;
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri uri) async =>
+      _ObserveRedirectRequest(await inner.openUrl(method, uri), reading);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+final class _ObserveRedirectRequest implements HttpClientRequest {
+  _ObserveRedirectRequest(this.inner, this.reading);
+  final HttpClientRequest inner;
+  final Completer<void> reading;
+  @override
+  HttpHeaders get headers => inner.headers;
+  @override
+  set followRedirects(bool value) => inner.followRedirects = value;
+  @override
+  Future<HttpClientResponse> get done => inner.done;
+  @override
+  void abort([Object? exception, StackTrace? stackTrace]) => inner.abort(exception, stackTrace);
+  @override
+  Future<HttpClientResponse> close() async {
+    final response = await inner.close();
+    return response.statusCode == 302 ? _ObserveRedirectResponse(response, reading) : response;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+final class _ObserveRedirectResponse extends Stream<List<int>> implements HttpClientResponse {
+  _ObserveRedirectResponse(this.inner, this.reading);
+  final HttpClientResponse inner;
+  final Completer<void> reading;
+  @override
+  int get statusCode => inner.statusCode;
+  @override
+  HttpHeaders get headers => inner.headers;
+  @override
+  StreamSubscription<List<int>> listen(
+    void Function(List<int>)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    final subscription = inner.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    if (!reading.isCompleted) reading.complete();
+    return subscription;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

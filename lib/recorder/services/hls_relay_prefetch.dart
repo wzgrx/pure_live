@@ -11,13 +11,28 @@ extension _HlsRelayPrefetch on FFmpegHlsInputRelay {
       if (plan == null) {
         selections.add((id: 'root', source: _resources['root']!, snapshot: HlsMediaSnapshot.parse(master, source)));
       } else {
-        for (final uri in plan.sources) {
-          final snapshot = await _upstream.loadSnapshot(uri, cancellation, budget: HlsResponseBudget(_bodyIdleTimeout));
-          cancellation.throwIfCancelled();
+        // The plan contains at most two already selected feeds. Serial initial
+        // reads age the first short live window while waiting for the second.
+        // Share cancellation and await every loader, including a cancelled peer,
+        // before admitting the whole set or returning to the original path.
+        Future<HlsMediaSnapshot> load(Uri uri) async {
+          try {
+            return await _upstream.loadSnapshot(uri, cancellation, budget: HlsResponseBudget(_bodyIdleTimeout));
+          } on Object {
+            cancellation.cancel();
+            rethrow;
+          }
+        }
+
+        final snapshots = await Future.wait(plan.sources.map(load));
+        cancellation.throwIfCancelled();
+        // Future.wait preserves selection order even if audio finishes first.
+        for (var i = 0; i < plan.sources.length; i++) {
+          final uri = plan.sources[i];
           final local = _localResource(uri, {});
           if (local == null) throw const FormatException('Invalid selected source');
           final id = Uri.parse(local).pathSegments.last.split('.').first;
-          selections.add((id: id, source: uri, snapshot: snapshot));
+          selections.add((id: id, source: uri, snapshot: snapshots[i]));
         }
       }
       if (_closed || _finishing || cancellation.isCancelled) return;

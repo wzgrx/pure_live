@@ -31,6 +31,8 @@ import 'package:pure_live/recorder/services/recording_output_metrics.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
 
+import 'media_packet_timeline.dart';
+
 void main() {
   test(
     'TTing production resolver, native segment growth, stop, MP4 commit and independent decode',
@@ -302,6 +304,24 @@ void main() {
             final format = metadata['format'] as Map<String, dynamic>;
             final duration = double.parse(format['duration'] as String);
             final streams = (metadata['streams'] as List).cast<Map<String, dynamic>>();
+            // Retain packet-clock evidence before the duration acceptance gate.
+            // An outer duration failure must not hide whether the excess is a
+            // single-track tail, a presentation hole, or a decode-order reversal.
+            final packetInspection = await _runOwned(ffprobe, [
+              '-v',
+              'error',
+              '-show_packets',
+              '-show_streams',
+              '-show_entries',
+              'packet=stream_index,pts_time,dts_time,duration_time:stream=index,codec_type',
+              '-of',
+              'json',
+              mp4,
+            ], timeout: const Duration(seconds: 15));
+            expect(packetInspection.exitCode, 0);
+            expect((packetInspection.stderr as String).trim(), isEmpty);
+            final packetTimeline = inspectMediaPacketTimeline(jsonDecode(packetInspection.stdout as String) as Map);
+            await File(p.join(output.path, 'packet-timeline.json')).writeAsString(jsonEncode(packetTimeline));
             expect(duration, greaterThan(15));
             expect(duration, lessThan(40));
             expect(streams.any((stream) => stream['codec_type'] == 'audio'), isTrue);
@@ -369,6 +389,7 @@ void main() {
               'finalizedMetricMatchesFile': true,
               'output': mp4,
               'durationSeconds': duration,
+              'packetTimeline': packetTimeline,
               'growthSamples': samples,
               'nativeStopped': true,
               'registeredProductionResolver': true,

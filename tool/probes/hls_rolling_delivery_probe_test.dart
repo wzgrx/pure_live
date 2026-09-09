@@ -21,6 +21,8 @@ import 'package:pure_live/recorder/services/hls_session_cookies.dart';
 import 'package:pure_live/recorder/services/hls_upstream_client.dart';
 import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
 
+import 'media_packet_timeline.dart';
+
 part 'hls_scheduled_delivery_probe.dart';
 part 'hls_start_boundary_probe.dart';
 part 'hls_refresh_coverage_probe.dart';
@@ -640,7 +642,7 @@ Future<Map<String, Object?>> _inspect(File input, Directory output) async {
     '-show_packets',
     '-show_streams',
     '-show_entries',
-    'packet=stream_index,pts_time',
+    'packet=stream_index,pts_time,dts_time,duration_time:stream=index,codec_type',
     '-of',
     'json',
     input.path,
@@ -666,8 +668,7 @@ Future<Map<String, Object?>> _inspect(File input, Directory output) async {
     final report = <String, Object?>{'exitCode': result[0], 'stderr': result[2]};
     if (result[0] == 0) {
       final json = jsonDecode(result[1] as String) as Map;
-      final packets = json['packets'] as List;
-      report['tracks'] = [for (final stream in json['streams'] as List) _track(stream as Map, packets)];
+      report.addAll(inspectMediaPacketTimeline(json));
     }
     return report;
   } finally {
@@ -676,26 +677,6 @@ Future<Map<String, Object?>> _inspect(File input, Directory output) async {
       await process.exitCode.timeout(const Duration(seconds: 5));
     }
   }
-}
-
-Map<String, Object?> _track(Map stream, List packets) {
-  final times =
-      packets
-          .where((packet) => packet['stream_index'] == stream['index'] && packet['pts_time'] is String)
-          .map((packet) => double.parse(packet['pts_time'] as String))
-          .toList()
-        ..sort();
-  double gap = 0;
-  for (var i = 1; i < times.length; i++) {
-    if (times[i] - times[i - 1] > gap) gap = times[i] - times[i - 1];
-  }
-  return {
-    'type': stream['codec_type'],
-    'packets': times.length,
-    'firstPts': times.firstOrNull,
-    'lastPts': times.lastOrNull,
-    'maxStep': gap,
-  };
 }
 
 // This experiment isolates requests before stop. Direct-input cancellation has

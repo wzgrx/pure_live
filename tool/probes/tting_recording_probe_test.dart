@@ -61,6 +61,8 @@ void main() {
       StreamSubscription<VideoProcessEvent>? mergeEvents;
       var stage = 'official-metadata';
       final hlsDiagnostics = HlsRelayDiagnostics();
+      final eventTimeline = <Map<String, Object?>>[];
+      int? nativeReadTimeoutMicros;
       FFmpegHlsInputRelay? diagnosticRelay;
       try {
         await HttpOverrides.runWithHttpOverrides(() async {
@@ -107,12 +109,25 @@ void main() {
             await manager.initialize();
             final version = FFmpegKitExtended.getFFmpegVersion();
             final observed = <String>[];
-            final eventTimeline = <Map<String, Object>>[];
             events = manager.stream.listen((event) {
               if (event.taskId == current.taskId) {
                 observed.add(event.type.name);
                 if (eventTimeline.length < 512) {
-                  eventTimeline.add({'type': event.type.name, 'diagnosticsMs': hlsDiagnostics.elapsedMilliseconds});
+                  eventTimeline.add({
+                    'type': event.type.name,
+                    'diagnosticsMs': hlsDiagnostics.elapsedMilliseconds,
+                    for (final key in [
+                      'code',
+                      'sessionId',
+                      'manualStop',
+                      'inputCoverageIncomplete',
+                      'inputTailDiscarded',
+                      'inputIntegrityError',
+                      'inputDrained',
+                      'forcedCancel',
+                    ])
+                      if (event.data.containsKey(key)) key: event.data[key],
+                  });
                 }
               }
             });
@@ -178,6 +193,9 @@ void main() {
             expect(startError, isNull, reason: 'Native recording must open the selected production input.');
             expect(ended, isFalse, reason: 'The live input must remain active until the explicit stop.');
             final session = manager.getSession(current.taskId);
+            nativeReadTimeoutMicros = int.tryParse(
+              RegExp(r'-rw_timeout\s+(\d+)').firstMatch(session?.session.getCommand() ?? '')?.group(1) ?? '',
+            );
             diagnosticRelay = session?.inputRelay;
             current.recordedSeconds = session?.recordedSeconds ?? 0;
             stage = 'native-stop';
@@ -186,6 +204,13 @@ void main() {
             expect(manager.isRunning(current.taskId), isFalse);
             expect(observed, contains(FFmpegEventType.started.name));
             expect(observed, contains(FFmpegEventType.complete.name));
+            final terminal = eventTimeline.lastWhere(
+              (event) => event['type'] == 'complete' || event['type'] == 'error',
+            );
+            current.inputCoverageIncomplete = terminal['inputCoverageIncomplete'] == true;
+            current.inputTailDiscarded = terminal['inputTailDiscarded'] == true;
+            expect(terminal['inputIntegrityError'], false, reason: 'Do not merge a known damaged capture.');
+            expect(nativeReadTimeoutMicros, 60000000);
             final segments = await const RecordingOutputMetrics().measure(
               directoryPath: output.path,
               filePrefix: current.recordingFilePrefix,
@@ -295,6 +320,9 @@ void main() {
               'requestedHeight': 720,
               'nativeHeight': video['height'],
               'firstBytesMs': firstBytesMs,
+              'inputCoverageIncomplete': current.inputCoverageIncomplete,
+              'inputTailDiscarded': current.inputTailDiscarded,
+              'nativeReadTimeoutMicros': nativeReadTimeoutMicros,
               'captureTargetReached': captureTargetReached,
               'trackStartTimes': streams
                   .map((s) => {'type': s['codec_type'], 'startTime': s['start_time'], 'duration': s['duration']})
@@ -360,6 +388,8 @@ void main() {
         } finally {
           await diagnosticRelay?.close();
           await File(p.join(output.path, 'hls-timeline.json')).writeAsString(jsonEncode(hlsDiagnostics.snapshot()));
+          await File(p.join(output.path, 'native-evidence.json'))
+              .writeAsString(jsonEncode({'nativeReadTimeoutMicros': nativeReadTimeoutMicros, 'events': eventTimeline}));
         }
         await events?.cancel();
         await mergeEvents?.cancel();

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
 class FFmpegManager {
   FFmpegManager._internal() : _ffmpeg = FFmpegService.to;
@@ -44,6 +45,7 @@ class FFmpegManager {
     required List<String> arguments,
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
   }) async {
     await initialize();
 
@@ -52,6 +54,7 @@ class FFmpegManager {
       arguments: arguments,
       liveRecording: liveRecording,
       sourceQueryPolicy: sourceQueryPolicy,
+      hlsDiagnostics: hlsDiagnostics,
       onEvent: (event) {
         if (!_eventController.isClosed) {
           _eventController.add(event);

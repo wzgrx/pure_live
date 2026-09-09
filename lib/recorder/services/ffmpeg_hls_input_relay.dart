@@ -14,6 +14,8 @@ import 'hls_media_spool.dart';
 import 'cancellable_http_connections.dart';
 import 'recorder_proxy_routing.dart';
 
+part 'hls_relay_diagnostics.dart';
+
 /// Relays HLS resources over an app-private loopback server, verifying upstream
 /// HTTPS and allowing recording inputs to end without cancelling output IO.
 ///
@@ -34,6 +36,7 @@ class FFmpegHlsInputRelay {
     required this.drainOnStop,
     required this._createStagingDirectory,
     required HlsSourceQueryPolicy? sourceQueryPolicy,
+    required this.diagnostics,
   }) {
     _sourceQueryPolicy = sourceQueryPolicy;
     _resources['root'] = upstream;
@@ -76,6 +79,7 @@ class FFmpegHlsInputRelay {
   final Map<String, String> _headers;
   final String _secret;
   final bool drainOnStop;
+  final HlsRelayDiagnostics? diagnostics;
   final Future<Directory> Function() _createStagingDirectory;
   final HlsSessionCookies _cookies = HlsSessionCookies();
   HlsSourceQueryPolicy? _sourceQueryPolicy;
@@ -134,6 +138,7 @@ class FFmpegHlsInputRelay {
     String Function(Uri)? findProxy,
     // Tests supply an isolated owned directory or controlled storage failure.
     Future<Directory> Function()? createStagingDirectory,
+    HlsRelayDiagnostics? diagnostics,
   }) async {
     final arguments = List<String>.of(source);
     final inputIndex = arguments.indexOf('-i');
@@ -182,6 +187,7 @@ class FFmpegHlsInputRelay {
       drainOnStop: drainOnStop,
       createStagingDirectory: createStagingDirectory ?? _defaultStagingDirectory,
       sourceQueryPolicy: sourceQueryPolicy,
+      diagnostics: diagnostics,
     );
     relay._subscription = server.listen(relay._acceptRequest, onError: relay._handleServerError);
     return relay;
@@ -257,10 +263,15 @@ class FFmpegHlsInputRelay {
     }
 
     _activeResources.update(resourceId, (count) => count + 1, ifAbsent: () => 1);
+    final trace = diagnostics?._begin(resourceId, request.method);
+    var outcome = 'completed';
     try {
       final cached = _manifests[resourceId];
       if (_finishing && (cached != null || _isHlsUri(upstream))) {
-        await _replyManifest(request, _endedManifest(cached));
+        final ended = _endedManifest(cached);
+        trace?.offeredManifest(ended, 'cached-stop');
+        await _replyManifest(request, ended);
+        trace?.delivered();
         return;
       }
       final range = request.headers.value(HttpHeaders.rangeHeader);
@@ -274,6 +285,7 @@ class FFmpegHlsInputRelay {
         range: _isHlsUri(upstream) || _manifests.containsKey(resourceId) ? null : range,
       );
       request.response.statusCode = upstreamResponse.statusCode;
+      trace?.receivedHeaders(upstreamResponse.statusCode);
       final contentType = upstreamResponse.headers.contentType;
       if (contentType != null) request.response.headers.contentType = contentType;
       _copyResponseHeader(upstreamResponse, request.response, HttpHeaders.acceptRangesHeader);
@@ -282,44 +294,71 @@ class FFmpegHlsInputRelay {
       if (request.method == 'HEAD') {
         await upstreamResponse.drain<void>();
         await request.response.close();
+        trace?.delivered();
         return;
       }
 
       if (upstreamResponse.statusCode == HttpStatus.ok && _isManifest(finalUri, contentType)) {
-        final bytes = await _readManifest(upstreamResponse);
+        final bytes = await _readManifest(upstreamResponse, trace);
         if (_closed) return;
         final manifest = utf8.decode(bytes, allowMalformed: true);
         // Stop may arrive while a refresh is in flight. Do not extend the
         // recording by publishing its newer generation after the stop intent.
         final previous = _manifests[resourceId];
         final rewritten = _finishing && previous != null ? previous : _rewriteManifest(manifest, finalUri, resourceId);
-        await _replyManifest(request, _finishing ? _endedManifest(rewritten) : rewritten);
+        final offered = _finishing ? _endedManifest(rewritten) : rewritten;
+        trace?.offeredManifest(offered, _finishing && previous != null ? 'previous-stop' : 'upstream');
+        await _replyManifest(request, offered);
+        trace?.delivered();
         return;
       }
 
       final length = upstreamResponse.contentLength;
       if (drainOnStop && const {HttpStatus.ok, HttpStatus.partialContent}.contains(upstreamResponse.statusCode)) {
-        await _publishCompleteBody(request, upstreamResponse);
+        await _publishCompleteBody(request, upstreamResponse, trace);
         return;
       }
       if (length >= 0) request.response.contentLength = length;
       request.response.bufferOutput = false;
-      await upstreamResponse.pipe(request.response);
+      if (trace == null) {
+        await upstreamResponse.pipe(request.response);
+      } else {
+        await upstreamResponse
+            .map((chunk) {
+              trace.chunk(chunk);
+              return chunk;
+            })
+            .pipe(request.response);
+        // For streaming responses completion includes the local writer.
+        trace.completeBody();
+        trace.delivered();
+      }
     } on _HlsFetchStopped {
+      outcome = 'stopped';
       final cached = _manifests[resourceId];
       if (cached != null || _isHlsUri(upstream)) {
-        await _replyManifest(request, _endedManifest(cached));
+        final ended = _endedManifest(cached);
+        trace?.offeredManifest(ended, 'cached-stop');
+        await _replyManifest(request, ended);
+        trace?.delivered();
       } else {
         // A missing whole tail fragment is not a corrupt partially delivered one.
         if (_finishing && !_closed) _inputTailDiscarded = true;
         await _replyStatus(request, HttpStatus.gone);
       }
     } on TimeoutException {
+      outcome = 'timedOut';
       await _replyStatus(request, HttpStatus.gatewayTimeout);
     } on Object catch (error) {
+      outcome = 'failed';
       if (!_closed) Log.w('FFmpeg HLS relay request failed for ${upstream.host}: $error');
       await _replyStatus(request, HttpStatus.badGateway);
     } finally {
+      if (trace != null) {
+        trace.finishedMs = trace.clock.elapsedMilliseconds;
+        trace.localStatus = request.response.statusCode;
+        trace.outcome = outcome;
+      }
       final count = _activeResources[resourceId] ?? 1;
       if (count <= 1) {
         _activeResources.remove(resourceId);
@@ -330,7 +369,7 @@ class FFmpegHlsInputRelay {
     }
   }
 
-  Future<void> _publishCompleteBody(HttpRequest request, HttpClientResponse upstream) async {
+  Future<void> _publishCompleteBody(HttpRequest request, HttpClientResponse upstream, _HlsRequestTrace? trace) async {
     final iterator = StreamIterator<List<int>>(upstream);
     final body = HlsMediaSpool(createDirectory: _createStagingDirectory);
     var stopped = _fetchStopped;
@@ -351,9 +390,11 @@ class FFmpegHlsInputRelay {
       _fetchAborters.add(abort);
       while (await iterator.moveNext()) {
         if (stopped) throw const _HlsFetchStopped();
+        trace?.chunk(iterator.current);
         await body.add(iterator.current);
       }
       if (stopped) throw const _HlsFetchStopped();
+      trace?.completeBody();
       await body.seal(
         expectedLength: upstream.compressionState == HttpClientResponseCompressionState.decompressed
             ? -1
@@ -365,6 +406,7 @@ class FFmpegHlsInputRelay {
       request.response.bufferOutput = false;
       await request.response.addStream(body.read());
       await request.response.close();
+      trace?.delivered();
     } finally {
       _fetchAborters.remove(abort);
       try {
@@ -630,7 +672,7 @@ class FFmpegHlsInputRelay {
     return base64UrlEncode(bytes).replaceAll('=', '');
   }
 
-  Future<Uint8List> _readManifest(HttpClientResponse response) async {
+  Future<Uint8List> _readManifest(HttpClientResponse response, _HlsRequestTrace? trace) async {
     final builder = BytesBuilder(copy: false);
     var length = 0;
     final iterator = StreamIterator<List<int>>(response);
@@ -646,11 +688,13 @@ class FFmpegHlsInputRelay {
       while (await iterator.moveNext()) {
         if (stopped) throw const _HlsFetchStopped();
         final chunk = iterator.current;
+        trace?.chunk(chunk);
         length += chunk.length;
         if (length > _maximumManifestBytes) throw const FormatException('HLS manifest exceeds the relay limit');
         builder.add(chunk);
       }
       if (stopped) throw const _HlsFetchStopped();
+      trace?.completeBody();
       return builder.takeBytes();
     } finally {
       _fetchAborters.remove(abort);

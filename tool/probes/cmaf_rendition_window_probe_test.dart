@@ -12,6 +12,7 @@ import 'package:pure_live/get/get.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_command_builder.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
 String _window(String source, int skip) {
   final lines = const LineSplitter().convert(source).toList();
@@ -119,6 +120,7 @@ void main() {
               }
             });
             Future<void>? execution;
+            final hlsDiagnostics = HlsRelayDiagnostics();
             try {
               final args = FFmpegCommandBuilder.buildRecordArguments(
                 url: 'http://127.0.0.1:${origin.port}/master.m3u8',
@@ -129,7 +131,12 @@ void main() {
                 threadQueueSize: 512,
                 filePrefix: 'capture',
               );
-              execution = native.start(taskId: taskId, arguments: args, liveRecording: true);
+              execution = native.start(
+                taskId: taskId,
+                arguments: args,
+                liveRecording: true,
+                hlsDiagnostics: hlsDiagnostics,
+              );
               await execution.timeout(const Duration(seconds: 45));
               expect(native.isRunning(taskId), isFalse);
               final captured = await directory.list().where((file) => p.extension(file.path) == '.ts').toList();
@@ -158,6 +165,26 @@ void main() {
                 maxSteps[stream['codec_type'] as String] = maxStep;
               }
               final gap = starts['video']! - starts['audio']!;
+              final hlsTimeline = hlsDiagnostics.snapshot();
+              final traces = (hlsTimeline['requests'] as List).cast<Map<String, Object?>>();
+              expect(traces.first['resourceId'], 'root', reason: 'Diagnostics must attach before native execution.');
+              expect(hlsTimeline['omittedRequests'], 0);
+              final master = traces.first['manifest'] as Map;
+              final children = master['children'] as List;
+              final videoId = children.singleWhere((child) => child['role'] == 'variant')['resourceId'];
+              final audioId = children.singleWhere((child) => child['role'] == 'audio')['resourceId'];
+              final videoTrace = traces.firstWhere((trace) => trace['resourceId'] == videoId);
+              final audioTrace = traces.firstWhere((trace) => trace['resourceId'] == audioId);
+              expect((videoTrace['manifest'] as Map)['segmentCount'], 12 - config.skipVideo);
+              expect((videoTrace['manifest'] as Map)['mediaSequence'], config.skipVideo);
+              expect((audioTrace['manifest'] as Map)['mediaSequence'], 0);
+              if (config.delayMs > 0) {
+                expect(
+                  (videoTrace['headersMs'] as int) - (videoTrace['startedMs'] as int),
+                  greaterThanOrEqualTo(config.delayMs),
+                );
+              }
+              await File(p.join(directory.path, 'hls-timeline.json')).writeAsString(jsonEncode(hlsTimeline));
               final report = <String, Object?>{
                 'case': config.name,
                 'network': 'loopback-only',

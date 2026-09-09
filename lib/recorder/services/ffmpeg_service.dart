@@ -276,6 +276,7 @@ class FFmpegService {
     required void Function(FFmpegEvent event) onEvent,
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
   }) async {
     await _ensureInitialized();
     if (_sessions.containsKey(taskId)) {
@@ -290,6 +291,7 @@ class FFmpegService {
       arguments,
       drainOnStop: liveRecording,
       sourceQueryPolicy: sourceQueryPolicy,
+      diagnostics: hlsDiagnostics,
     );
     final flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
     final inputArguments =

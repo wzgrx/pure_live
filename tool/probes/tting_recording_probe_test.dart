@@ -26,6 +26,7 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
 import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/services/ffmpeg_header_factory.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/recording_output_metrics.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
@@ -59,6 +60,8 @@ void main() {
       StreamSubscription<Object?>? events;
       StreamSubscription<VideoProcessEvent>? mergeEvents;
       var stage = 'official-metadata';
+      final hlsDiagnostics = HlsRelayDiagnostics();
+      FFmpegHlsInputRelay? diagnosticRelay;
       try {
         await HttpOverrides.runWithHttpOverrides(() async {
           final previous = app_http.HttpClient.instance.dio;
@@ -104,8 +107,14 @@ void main() {
             await manager.initialize();
             final version = FFmpegKitExtended.getFFmpegVersion();
             final observed = <String>[];
+            final eventTimeline = <Map<String, Object>>[];
             events = manager.stream.listen((event) {
-              if (event.taskId == current.taskId) observed.add(event.type.name);
+              if (event.taskId == current.taskId) {
+                observed.add(event.type.name);
+                if (eventTimeline.length < 512) {
+                  eventTimeline.add({'type': event.type.name, 'diagnosticsMs': hlsDiagnostics.elapsedMilliseconds});
+                }
+              }
             });
             final tracker = const RecordingOutputMetrics().track(
               directoryPath: output.path,
@@ -121,6 +130,7 @@ void main() {
                   arguments: arguments,
                   liveRecording: true,
                   sourceQueryPolicy: source.sourceQueryPolicy,
+                  hlsDiagnostics: hlsDiagnostics,
                 )
                 .then<void>(
                   (_) {
@@ -145,6 +155,7 @@ void main() {
               if (snapshot.bytes > 0) firstBytesMs ??= captureClock.elapsedMilliseconds;
               captureSamples.add({
                 'elapsedMs': captureClock.elapsedMilliseconds,
+                'diagnosticsMs': hlsDiagnostics.elapsedMilliseconds,
                 'bytes': snapshot.bytes,
                 'segments': snapshot.segmentCount,
                 'recordedSeconds': recordedSeconds,
@@ -161,11 +172,13 @@ void main() {
                 'firstBytesMs': firstBytesMs,
                 'targetReached': captureTargetReached,
                 'nativeEvents': observed,
+                'nativeEventTimeline': eventTimeline,
               }),
             );
             expect(startError, isNull, reason: 'Native recording must open the selected production input.');
             expect(ended, isFalse, reason: 'The live input must remain active until the explicit stop.');
             final session = manager.getSession(current.taskId);
+            diagnosticRelay = session?.inputRelay;
             current.recordedSeconds = session?.recordedSeconds ?? 0;
             stage = 'native-stop';
             await manager.stop(current.taskId);
@@ -340,8 +353,14 @@ void main() {
         );
         fail('TTing recording probe failed at $stage (${error.runtimeType})');
       } finally {
-        if (task != null && manager.isRunning(task!.taskId)) await manager.stop(task!.taskId);
-        await recording?.timeout(const Duration(seconds: 15));
+        diagnosticRelay ??= task == null ? null : manager.getSession(task!.taskId)?.inputRelay;
+        try {
+          if (task != null && manager.isRunning(task!.taskId)) await manager.stop(task!.taskId);
+          await recording?.timeout(const Duration(seconds: 15));
+        } finally {
+          await diagnosticRelay?.close();
+          await File(p.join(output.path, 'hls-timeline.json')).writeAsString(jsonEncode(hlsDiagnostics.snapshot()));
+        }
         await events?.cancel();
         await mergeEvents?.cancel();
         Get.reset();

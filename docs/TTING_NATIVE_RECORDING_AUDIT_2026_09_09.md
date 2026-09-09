@@ -1,5 +1,7 @@
 # TTing/FLEX Windows 原生短录审计（2026-09-09）
 
+后续[逐包时间线与 CMAF 对照](TTING_CMAF_TIMELINE_AUDIT_2026_09_09.md)确认晚起点/内部空档在原始 TS 中已存在；本地对照通过但实际采集根因仍待结构化时序取证。下文保留本批失败与离线解码的原始结论。
+
 探针实现 `50b06c8eec4a0fced17cfffd82931c55b31acb4c`，应用基线 `b1cca6b3b50d5c843ce5226ed5dc9912b05c43e5`。继 [生产列表链路](TTING_PRODUCTION_RELAY_AUDIT_2026_09_09.md)，本批增加 opt-in 原生录制探针 `tool/probes/tting_recording_probe_test.dart`。测试使用注册 TtingSite、真实 Dio、StreamResolverService、生产 FFmpegManager/HLS relay 和 VideoProcessorService；不是 curl 下载后直接拼接，也不是 UI 自动化或已发布 Windows 包验收。
 
 ## 请求与录制输入

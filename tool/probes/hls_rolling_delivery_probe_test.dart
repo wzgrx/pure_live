@@ -28,6 +28,78 @@ void main() {
     ];
     expect(_completedMedia(traces), traces.take(2));
   });
+  test('request overlap ignores rejected and unfinished media', () {
+    expect(
+      _requestOverlap([
+        {'path': '/variant_0/segment_000.m4s', 'requestMs': 0, 'closedMs': 12000, 'bytes': 10},
+        {'path': '/variant_0/segment_001.m4s', 'requestMs': 1, 'expiredAtRequest': true},
+        {'path': '/variant_0/segment_002.m4s', 'requestMs': 13000},
+      ])['overlapped'],
+      false,
+    );
+    expect(
+      _requestOverlap([
+        {'path': '/variant_0/segment_000.m4s', 'requestMs': 0, 'closedMs': 12000, 'bytes': 10},
+        {'path': '/variant_0/segment_001.m4s', 'requestMs': 10, 'closedMs': 12010, 'bytes': 10},
+      ])['overlapped'],
+      true,
+    );
+  });
+  test(
+    'native request overlap distinguishes early headers from complete staging',
+    () async {
+      final fixture = Directory(Platform.environment['PURELIVE_ROLLING_HLS_FIXTURE']!);
+      final root = await Directory(
+        p.join(
+          Platform.environment['PURELIVE_RECORDING_PROBE_OUTPUT']!,
+          'scheduling-${DateTime.now().microsecondsSinceEpoch}',
+        ),
+      ).create(recursive: true);
+      Hive.init((await Directory(p.join(root.path, 'hive')).create()).path);
+      await HivePrefUtil.init();
+      Get.testMode = true;
+      Get.put(LogController());
+      configureRecorderProxyRouting((_) => 'DIRECT');
+      final reports = <Map<String, Object?>>[];
+      try {
+        await HttpOverrides.runWithHttpOverrides(() async {
+          for (final config in [
+            (name: 'direct-body-multiple', relay: false, multiple: 1, header: false),
+            (name: 'direct-body-single', relay: false, multiple: 0, header: false),
+            (name: 'direct-headers-multiple', relay: false, multiple: 1, header: true),
+            (name: 'relay-body-multiple', relay: true, multiple: 1, header: false),
+          ]) {
+            reports.add(
+              await _captureScheduling(
+                fixture,
+                root,
+                name: config.name,
+                useRelay: config.relay,
+                multiple: config.multiple,
+                delayHeaders: config.header,
+              ),
+            );
+          }
+        }, _RealNetwork());
+        expect(reports.map((r) => (r['overlap'] as Map)['overlapped']), [true, false, false, false]);
+        for (final report in reports) {
+          expect(report['nativeReadTimeoutMicros'], 60000000);
+          expect(report['nativeHttpMultiple'], report['httpMultiple']);
+          expect((report['overlap'] as Map)['completeVideoRequests'] as int, greaterThanOrEqualTo(2));
+        }
+      } finally {
+        await File(p.join(root.path, 'summary.json'))
+            .writeAsString(const JsonEncoder.withIndent('  ').convert(reports));
+        // ignore: avoid_print
+        print(jsonEncode(reports));
+        configureRecorderProxyRouting(null);
+        Get.reset();
+        await Hive.close();
+      }
+    },
+    skip: Platform.environment['PURELIVE_HLS_SCHEDULING_PROBE'] != '1',
+    timeout: const Timeout(Duration(minutes: 5)),
+  );
   test(
     'rolling CMAF separates read budget from sustained delivery deficit',
     () async {
@@ -456,5 +528,120 @@ Map<String, Object?> _track(Map stream, List packets) {
     'firstPts': times.firstOrNull,
     'lastPts': times.lastOrNull,
     'maxStep': gap,
+  };
+}
+
+// This experiment isolates requests before stop. Direct-input cancellation has
+// no whole-body protection: its output is diagnostic, never a recording PASS.
+Future<Map<String, Object?>> _captureScheduling(
+  Directory fixture,
+  Directory root, {
+  required String name,
+  required bool useRelay,
+  required int multiple,
+  required bool delayHeaders,
+}) async {
+  final output = await Directory(p.join(root.path, name)).create();
+  final origin = await _RollingOrigin.start(fixture, (
+    name: name,
+    budget: 10,
+    bodyMs: delayHeaders ? 0 : 12000,
+    headerMs: delayHeaders ? 12000 : 0,
+    runSeconds: 34,
+  ));
+  final manager = FFmpegManager.to;
+  final events = <Map<String, Object?>>[];
+  final subscription = manager.stream.listen((event) {
+    if (event.taskId == name && events.length < 512) {
+      events.add({
+        'type': event.type.name,
+        'atMs': origin.clock.elapsedMilliseconds,
+        for (final key in ['code', 'manualStop', 'forcedCancel', 'inputDrained', 'inputIntegrityError'])
+          if (event.data.containsKey(key)) key: event.data[key],
+      });
+    }
+  });
+  Future<void>? execution;
+  FFmpegHlsInputRelay? relay;
+  final report = <String, Object?>{
+    'case': name,
+    'useRelay': useRelay,
+    'httpMultiple': multiple,
+    'bodyDelayMs': delayHeaders ? 0 : 12000,
+    'headerDelayMs': delayHeaders ? 12000 : 0,
+    'scope': 'pre-stop request scheduling, not output integrity or complete live coverage',
+  };
+  try {
+    final arguments = FFmpegCommandBuilder.buildRecordArguments(
+      url: origin.input.toString(),
+      outputDir: output.path,
+      segmentTime: 86400,
+      preferBestStream: true,
+      rwTimeout: useRelay ? 10 : 60,
+      threadQueueSize: 512,
+      filePrefix: 'diagnostic',
+    ).toList();
+    arguments.insertAll(arguments.indexOf('-i'), ['-http_multiple', '$multiple']);
+    execution = manager.start(taskId: name, arguments: arguments, liveRecording: useRelay);
+    await Future<void>.delayed(const Duration(seconds: 34));
+    final session = manager.getSession(name);
+    relay = session?.inputRelay;
+    report['actualRelay'] = relay != null;
+    final command = session?.session.getCommand() ?? '';
+    report['nativeReadTimeoutMicros'] = int.tryParse(
+      RegExp(r'-rw_timeout\s+(\d+)').firstMatch(command)?.group(1) ?? '',
+    );
+    report['nativeHttpMultiple'] = int.tryParse(RegExp(r'-http_multiple\s+(\d+)').firstMatch(command)?.group(1) ?? '');
+    report['stopRequestedMs'] = origin.clock.elapsedMilliseconds;
+    final beforeStop = [for (final request in origin.requests) Map<String, Object?>.of(request)];
+    report['overlap'] = _requestOverlap(beforeStop);
+    await File(p.join(output.path, 'origin-before-stop.json')).writeAsString(jsonEncode(beforeStop));
+    expect(relay != null, useRelay);
+  } finally {
+    relay ??= manager.getSession(name)?.inputRelay;
+    try {
+      if (manager.isRunning(name)) await manager.stop(name);
+      await execution?.timeout(const Duration(seconds: 20));
+    } finally {
+      await relay?.close();
+      report['stoppedMs'] = origin.clock.elapsedMilliseconds;
+      await subscription.cancel();
+      await origin.close();
+      report['events'] = events;
+      await File(p.join(output.path, 'origin.json')).writeAsString(jsonEncode(origin.requests));
+      await File(p.join(output.path, 'result.json')).writeAsString(const JsonEncoder.withIndent('  ').convert(report));
+    }
+  }
+  return report;
+}
+
+Map<String, Object?> _requestOverlap(List<Map<String, Object?>> traces) {
+  final complete =
+      traces
+          .where(
+            (r) =>
+                (r['path'] as String).startsWith('/variant_0/') &&
+                (r['path'] as String).endsWith('.m4s') &&
+                r['expiredAtRequest'] != true &&
+                r['closedMs'] is int &&
+                r['bytes'] is int &&
+                (r['bytes'] as int) > 0,
+          )
+          .toList()
+        ..sort((a, b) => (a['requestMs'] as int).compareTo(b['requestMs'] as int));
+  var overlapped = false;
+  for (var i = 1; i < complete.length; i++) {
+    if ((complete[i]['requestMs'] as int) < (complete[i - 1]['closedMs'] as int)) overlapped = true;
+  }
+  return {
+    'overlapped': overlapped,
+    'completeVideoRequests': complete.length,
+    'completeVideoPaths': [for (final r in complete) r['path']],
+    'completeVideoRequestMs': [for (final r in complete) r['requestMs']],
+    'completeVideoClosedMs': [for (final r in complete) r['closedMs']],
+    'completeVideoBytes': complete.fold<int>(0, (sum, r) => sum + (r['bytes'] as int)),
+    'expiredVideoRequests': traces
+        .where((r) => (r['path'] as String).startsWith('/variant_0/') && r['expiredAtRequest'] == true)
+        .length,
   };
 }

@@ -130,8 +130,10 @@ abstract class LocalReactivePageController<T> extends BasePageScrollAndStateBone
   }
 
   Future<void> _applyPendingPageSize() async {
-    while (_activeExternalRefresh != null && !isClosed) {
-      await _activeExternalRefresh;
+    // Derived local pages may own a separate transaction (favourite room
+    // verification, for example), not the base external-snapshot callback.
+    while (activePageOperation != null && !isClosed) {
+      await activePageOperation;
     }
     if (isClosed) return;
     final newSize = _pendingPageSize;

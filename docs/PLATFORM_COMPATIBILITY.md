@@ -5,7 +5,7 @@
 ## 当前平台能力
 
 2026-09-09 按 `lib/core/sites.dart` 核对：当前源码注册 **18 个直播站点 + IPTV，共19个适配器**。这是源码注册数量，不是已发布包或完整验收数量。
-OPENREC / mellow-fan 已接入复合频道身份、公开目录与 HLS 质量；其当前生产整链可达性与原生验收仍有缺口，见[应用审计](OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)。TTingLive / FLEX TV 已接入有限首页目录、精确频道查询及按源 token 策略；应用回归 201/201，最新生产注册适配器与 24 份 HLS 列表链路通过，但媒体分片、解码和完整录制尚未验收，见[应用审计](TTING_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)及[生产链路审计](TTING_PRODUCTION_RELAY_AUDIT_2026_09_09.md)。
+OPENREC / mellow-fan 已接入复合频道身份、公开目录与 HLS 质量；其当前生产整链可达性与原生验收仍有缺口，见[应用审计](OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)。TTingLive / FLEX TV 已接入有限首页目录、精确频道查询及按源 token 策略；应用回归 201/201，最新生产注册适配器与 24 份 HLS 列表链路通过，后续 Windows 原生短录两次采集目标失败；保留片段的合并/完整解码通过，但起始延迟及音视频时间覆盖仍待修，完整录制未通过，见[应用审计](TTING_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)、[生产链路审计](TTING_PRODUCTION_RELAY_AUDIT_2026_09_09.md)及[原生短录审计](TTING_NATIVE_RECORDING_AUDIT_2026_09_09.md)。
 克拉克拉与花椒已接入公开目录、UID 收藏及播放/录制解析；两者搜索、弹幕与 Android/Windows 原生验收仍待完成，见[克拉克拉应用审计](KILAKILA_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)、[萌星目录修订](KILAKILA_RISING_STAR_AUDIT_2026_09_08.md)及[花椒应用审计](HUAJIAO_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。花椒空页仍有 more 时沿原生游标有界继续，游标按页面和刷新批次隔离，不用结果条数代替结束信号。
 当前 [Android 候选 bee143e2](OPENREC_PICARTO_ANDROID_CANDIDATE_2026_09_09.md) 已包含克拉克拉、花椒、OPENREC 和 Picarto 响应收尾修订；完整门禁/打包通过，尚未安装，后续 TTing 和源策略输入链未入包。Windows f3de664a 未随本批更新，原生能力证据仍按各平台分列。
 猫耳和映客已应用接入；猫耳 Windows 原生短录有独立证据，映客当前只到公开接口和生产地址解析，见[映客应用审计](INKE_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。
@@ -78,7 +78,7 @@ TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入�
 | Picarto | HLS 分辨率/fps/编解码与音视频组 | 同档线路合并；恢复重新读详情及列表；外置音轨保留主列表并标 HLS Auto |
 | TwitCasting | `high` / `medium` / `low` | 保留平台档名，不推断分辨率；匹配当前 movie 的 HLS，恢复保持请求档位，明确下播忽略陈旧地址 |
 | OPENREC / mellow-fan | HLS 源族、分辨率、帧率 | 重新核对频道与当前广播；按解析列表匹配质量，外置音轨保留 master |
-| TTingLive / FLEX TV | API `resolution`（0 为 Auto） | ncp / ncp_llh 源保留精确 URL token 策略；过期/recovery 重读频道与 stream，按 owner 和请求画质匹配；实际解码质量尚待验收 |
+| TTingLive / FLEX TV | API `resolution`（0 为 Auto） | ncp / ncp_llh 源保留精确 URL token 策略；过期/recovery 重读频道与 stream，按 owner 和请求画质匹配；已核验保留成品 720p 解码；实时采集、音视频覆盖及其他画质仍待验收 |
 
 横屏“清晰度与播放线路”面板根据画质数、线路数和可用高度计算整体尺寸。一个画质/一条线路时收紧面板；常见四画质使用均衡 `2×2`；项目多时只让按钮网格滚动，不用固定比例制造空白。按钮区域是主要视觉，标题、留白和重复的当前值标签均已压缩。
 

@@ -1,3 +1,4 @@
+import 'package:pure_live/core/site/tting/tting_link.dart';
 import 'package:pure_live/core/site/openrec/openrec_link.dart';
 import 'package:pure_live/core/site/openrec/openrec_api.dart';
 import 'package:pure_live/common/models/live_room.dart';
@@ -38,6 +39,9 @@ class RoomExternalOpener {
     if (id == null) return null;
     final path = Uri.encodeComponent(id);
     switch (site) {
+      case Sites.ttingSite:
+        final channel = TtingLink.parse(id);
+        return channel == null ? null : RoomExternalTarget(web: TtingLink.url(channel));
       case Sites.openrecSite:
         try {
           return RoomExternalTarget(web: OpenrecRoomKey.parse(id).url);

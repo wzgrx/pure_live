@@ -32,11 +32,20 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 5);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'twitcasting']);
     final controller = Get.put(FavoriteRoomController());
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'missevan', 'inke', 'kilakila', 'huajiao', 'openrec']);
-    expect(controller.siteCatalogMigration.value, 10);
+    expect(controller.hotAreasList, [
+      'huya',
+      'twitcasting',
+      'missevan',
+      'inke',
+      'kilakila',
+      'huajiao',
+      'openrec',
+      'ttinglive',
+    ]);
+    expect(controller.siteCatalogMigration.value, 11);
     controller.hotAreasList.remove('missevan');
     controller.onInit();
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao', 'openrec']);
+    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao', 'openrec', 'ttinglive']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     expect(Get.put(FavoriteRoomController()).hotAreasList, [
@@ -46,6 +55,7 @@ void main() {
       'kilakila',
       'huajiao',
       'openrec',
+      'ttinglive',
     ]);
   });
 
@@ -53,7 +63,7 @@ void main() {
     await HivePrefUtil.setInt('audienceMetricMigration', 5);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final controller = Get.put(AppSettingsController());
-    expect(controller.realOnlinePlatforms, ['twitch', 'openrec']);
+    expect(controller.realOnlinePlatforms, ['twitch', 'openrec', 'ttinglive']);
     expect(AppSettingsController.normalizeRealOnlinePlatforms(['missevan', 'twitch']), ['twitch']);
   });
 

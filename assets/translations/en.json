@@ -1547,5 +1547,12 @@
     "openrec_multiple_broadcasts": "This channel has multiple current broadcasts. Check the original site; none is selected automatically.",
     "openrec_partial_sources": "Some sources are temporarily unavailable. Only successfully parsed qualities are listed.",
     "openrec_hls_auto": "HLS Auto",
-    "audience_openrec_detail": "Directory and room metadata expose public concurrent viewers. Hidden counts stay unknown; cumulative views are not substituted."
+    "audience_openrec_detail": "Directory and room metadata expose public concurrent viewers. Hidden counts stay unknown; cumulative views are not substituted.",
+    "site_ttinglive": "FLEX TV (TTingLive)",
+    "tting_directory_scope": "Public homepage snapshot only, not the full site directory. Restricted rooms are excluded.",
+    "tting_public_directory": "Public homepage live",
+    "tting_restricted": "This channel is marked restricted; public playback is unavailable",
+    "tting_auto": "Auto",
+    "search_coverage_channel_lookup": "{site} supports exact channel IDs or channel live URLs, including offline channels; nickname and keyword search are not integrated.",
+    "audience_ttinglive_detail": "The homepage directory exposes current viewers. Channel details and favorite refreshes omit this field; missing counts stay unknown."
 }

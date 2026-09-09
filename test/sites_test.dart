@@ -20,6 +20,7 @@ void main() {
       }
       expect(labels['site_picarto'], 'Picarto');
       expect(labels['site_openrec'], 'mellow-fan (OPENREC)');
+      expect(labels['site_ttinglive'], 'FLEX TV (TTingLive)');
       expect(labels['recorder_input_integrity_failed'], isA<String>());
     }
   });

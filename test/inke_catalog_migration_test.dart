@@ -31,18 +31,18 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 6);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'missevan']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'missevan', 'inke', 'kilakila', 'huajiao', 'openrec']);
-    expect(settings.siteCatalogMigration.value, 10);
+    expect(settings.hotAreasList, ['huya', 'missevan', 'inke', 'kilakila', 'huajiao', 'openrec', 'ttinglive']);
+    expect(settings.siteCatalogMigration.value, 11);
     settings.hotAreasList.remove('inke');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'missevan', 'kilakila', 'huajiao', 'openrec']);
+    expect(settings.hotAreasList, ['huya', 'missevan', 'kilakila', 'huajiao', 'openrec', 'ttinglive']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
     final reopened = Get.put(FavoriteRoomController());
-    expect(reopened.siteCatalogMigration.value, 10);
-    expect(reopened.hotAreasList, ['huya', 'missevan', 'kilakila', 'huajiao', 'openrec']);
+    expect(reopened.siteCatalogMigration.value, 11);
+    expect(reopened.hotAreasList, ['huya', 'missevan', 'kilakila', 'huajiao', 'openrec', 'ttinglive']);
   });
 
   test('backup normalization retains Inke order and does not duplicate it', () async {

@@ -103,6 +103,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(SettingsService.to.app.isRealOnlineEnabledFor('openrec'), isFalse);
     expect(tester.widget<SwitchListTile>(openrec).value, isFalse);
+    final tting = find.byKey(const ValueKey('audience-platform-ttinglive'));
+    await tester.ensureVisible(tting);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(tting).value, isTrue);
+    await tester.tap(tting);
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.app.isRealOnlineEnabledFor('ttinglive'), isFalse);
+    expect(tester.widget<SwitchListTile>(tting).value, isFalse);
     expect(tester.takeException(), isNull);
   });
 }
@@ -136,6 +144,7 @@ class _AudienceAssetLoader extends AssetLoader {
     'audience_picarto_detail': '在线人数与累计观看分列',
     'audience_twitcasting_detail': '目录提供在线值，详情暂缺该值',
     'audience_openrec_detail': '公开在线人数与累计值分开，隐藏时保持未知',
+    'audience_ttinglive_detail': '目录提供当前观看数，频道详情不提供',
     'audience_metric_fallback_desc': '各平台字段口径会单独标注。',
   };
 }

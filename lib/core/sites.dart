@@ -1,3 +1,4 @@
+import 'site/tting/tting_site.dart';
 import 'site/openrec/openrec_site.dart';
 import 'site/picarto/picarto_site.dart';
 import 'site/missevan/missevan_site.dart';
@@ -40,6 +41,7 @@ class Sites {
   static const String kilakilaSite = 'kilakila';
   static const String huajiaoSite = 'huajiao';
   static const String openrecSite = 'openrec';
+  static const String ttingSite = 'ttinglive';
 
   static const Set<String> supportedSiteIds = {
     bilibiliSite,
@@ -59,6 +61,7 @@ class Sites {
     kilakilaSite,
     huajiaoSite,
     openrecSite,
+    ttingSite,
     iptvSite,
   };
 
@@ -82,6 +85,7 @@ class Sites {
     Site(id: kilakilaSite, name: i18n('site_kilakila'), logo: 'assets/images/logo.png', liveSite: KilakilaSite()),
     Site(id: huajiaoSite, name: i18n('site_huajiao'), logo: 'assets/images/logo.png', liveSite: HuajiaoSite()),
     Site(id: openrecSite, name: 'mellow-fan (OPENREC)', logo: 'assets/images/logo.png', liveSite: OpenrecSite()),
+    Site(id: ttingSite, name: 'FLEX TV (TTingLive)', logo: 'assets/images/logo.png', liveSite: TtingSite()),
     Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
   ];
 
@@ -159,6 +163,12 @@ class Sites {
         name: 'mellow-fan (OPENREC)',
         logo: 'assets/images/logo.png',
         liveSite: OpenrecSite(),
+      ),
+      ttingSite => Site(
+        id: ttingSite,
+        name: 'FLEX TV (TTingLive)',
+        logo: 'assets/images/logo.png',
+        liveSite: TtingSite(),
       ),
       _ => throw StateError('Unsupported live site: $normalizedId'),
     };

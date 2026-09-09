@@ -17,6 +17,7 @@ class AudienceMetricSettingsPage extends StatelessWidget {
     (id: 'picarto', name: 'Picarto', detailKey: 'audience_picarto_detail'),
     (id: 'twitcasting', name: 'TwitCasting', detailKey: 'audience_twitcasting_detail'),
     (id: 'openrec', name: 'mellow-fan (OPENREC)', detailKey: 'audience_openrec_detail'),
+    (id: 'ttinglive', name: 'FLEX TV (TTingLive)', detailKey: 'audience_ttinglive_detail'),
     (id: 'acfun', name: 'AcFun', detailKey: 'audience_acfun_detail'),
   ];
 

@@ -1,6 +1,6 @@
 import 'package:pure_live/core/sites.dart';
 
-enum NativeSearchCoverage { liveOnly, liveAndOffline, localChannels, webOnly, unavailable }
+enum NativeSearchCoverage { liveOnly, liveAndOffline, channelLookup, localChannels, webOnly, unavailable }
 
 class LiveSearchCapability {
   const LiveSearchCapability({required this.coverage, required this.supportsPagination, this.supportsWebSearch = true});
@@ -11,13 +11,19 @@ class LiveSearchCapability {
 
   bool get supportsNativeSearch =>
       coverage != NativeSearchCoverage.webOnly && coverage != NativeSearchCoverage.unavailable;
-  bool get mayIncludeOffline => coverage == NativeSearchCoverage.liveAndOffline;
+  bool get mayIncludeOffline =>
+      coverage == NativeSearchCoverage.liveAndOffline || coverage == NativeSearchCoverage.channelLookup;
 }
 
 class LiveSearchCapabilities {
   const LiveSearchCapabilities._();
 
   static const Map<String, LiveSearchCapability> _byPlatform = {
+    Sites.ttingSite: LiveSearchCapability(
+      coverage: NativeSearchCoverage.channelLookup,
+      supportsPagination: false,
+      supportsWebSearch: false,
+    ),
     Sites.bilibiliSite: LiveSearchCapability(coverage: NativeSearchCoverage.liveAndOffline, supportsPagination: true),
     Sites.douyuSite: LiveSearchCapability(coverage: NativeSearchCoverage.liveAndOffline, supportsPagination: true),
     Sites.huyaSite: LiveSearchCapability(coverage: NativeSearchCoverage.liveOnly, supportsPagination: true),

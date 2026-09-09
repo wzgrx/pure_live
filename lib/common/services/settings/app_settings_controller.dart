@@ -17,6 +17,7 @@ class AppSettingsController extends GetxController {
     Sites.picartoSite,
     Sites.twitcastingSite,
     Sites.openrecSite,
+    Sites.ttingSite,
   ];
 
   Worker? _refreshRateModeWorker;
@@ -93,6 +94,10 @@ class AppSettingsController extends GetxController {
     if (audienceMetricMigration.v < 6) {
       if (!realOnlinePlatforms.contains(Sites.openrecSite)) realOnlinePlatforms.add(Sites.openrecSite);
       audienceMetricMigration.v = 6;
+    }
+    if (audienceMetricMigration.v < 7) {
+      if (!realOnlinePlatforms.contains(Sites.ttingSite)) realOnlinePlatforms.add(Sites.ttingSite);
+      audienceMetricMigration.v = 7;
     }
     _removeUnsupportedOnlinePlatforms();
     if (Platform.isAndroid || Platform.isWindows) {

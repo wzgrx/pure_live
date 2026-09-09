@@ -1,3 +1,4 @@
+import 'package:pure_live/core/site/tting/tting_link.dart';
 import 'package:pure_live/core/site/openrec/openrec_api.dart';
 import 'package:pure_live/core/site/openrec/openrec_link.dart';
 import 'package:dio/dio.dart' as dio;
@@ -59,7 +60,10 @@ class LiveUrlTool {
       'twitcasting.tv',
     };
     return sharedHttpUrls(text).any((raw) {
-      if (OpenrecLink.parse(raw) != null || HuajiaoLink.parse(raw) != null || KilakilaLink.parse(raw) != null) {
+      if (TtingLink.parse(raw) != null ||
+          OpenrecLink.parse(raw) != null ||
+          HuajiaoLink.parse(raw) != null ||
+          KilakilaLink.parse(raw) != null) {
         return true;
       }
       final uri = Uri.parse(raw);
@@ -119,6 +123,8 @@ class LiveUrlTool {
       if (session.isClosed) return [];
       final host = uri.host.toLowerCase();
       final realUrl = raw;
+      final tting = TtingLink.parse(raw);
+      if (tting != null) return ['$tting', Sites.ttingSite];
       final openrec = OpenrecLink.parse(raw);
       if (openrec != null) {
         late final OpenrecRoomKey key;

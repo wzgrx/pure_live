@@ -53,6 +53,8 @@ class SearchController extends GetxController {
   String buildSearchUrl(String platform, String keyword) {
     final q = Uri.encodeComponent(keyword);
     switch (platform) {
+      case Sites.ttingSite:
+        throw StateError('TTing supports exact channel lookup, not web keyword search');
       case Sites.openrecSite:
         throw StateError('Openrec search is not integrated');
       case Sites.huajiaoSite:
@@ -280,6 +282,7 @@ class SearchController extends GetxController {
       final capability = LiveSearchCapabilities.forPlatform(site.id);
       if (site.id == Sites.acfunSite) return i18n('search_coverage_acfun');
       return switch (capability.coverage) {
+        NativeSearchCoverage.channelLookup => i18n('search_coverage_channel_lookup', args: {'site': site.name}),
         NativeSearchCoverage.liveAndOffline => i18n('search_coverage_live_and_offline', args: {'site': site.name}),
         NativeSearchCoverage.liveOnly => i18n('search_coverage_live_only', args: {'site': site.name}),
         NativeSearchCoverage.localChannels => i18n('search_coverage_local', args: {'site': site.name}),
@@ -303,9 +306,15 @@ class SearchController extends GetxController {
           : (nativeCount == sites.length ? 'search_coverage_all_native' : 'search_coverage_native_partial'),
       args: {'native': '$nativeCount', 'total': '${sites.length}', 'sites': webOnlySites},
     );
-    return unavailableSites.isEmpty
-        ? summary
-        : '$summary ${i18n('search_coverage_unavailable', args: {'site': unavailableSites})}';
+    final lookupSites = sites
+        .where((site) => LiveSearchCapabilities.forPlatform(site.id).coverage == NativeSearchCoverage.channelLookup)
+        .map((site) => site.name)
+        .join('、');
+    return [
+      summary,
+      if (unavailableSites.isNotEmpty) i18n('search_coverage_unavailable', args: {'site': unavailableSites}),
+      if (lookupSites.isNotEmpty) i18n('search_coverage_channel_lookup', args: {'site': lookupSites}),
+    ].join(' ');
   }
 
   int _compareAudience(LiveRoom left, LiveRoom right) {

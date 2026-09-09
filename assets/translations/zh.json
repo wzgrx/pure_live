@@ -1547,5 +1547,12 @@
     "openrec_multiple_broadcasts": "此频道有多个当前直播，请在原站确认；当前不自动选择其中一个。",
     "openrec_partial_sources": "部分源暂时不可用，当前仅列出已成功解析的画质。",
     "openrec_hls_auto": "HLS 自动",
-    "audience_openrec_detail": "公开目录与详情提供在线人数；隐藏人数保持未知，不用累计观看替代。"
+    "audience_openrec_detail": "公开目录与详情提供在线人数；隐藏人数保持未知，不用累计观看替代。",
+    "site_ttinglive": "FLEX TV (TTingLive)",
+    "tting_directory_scope": "仅展示平台首页公开直播快照，并非全站目录；受限房间不在此列表中。",
+    "tting_public_directory": "首页公开直播",
+    "tting_restricted": "此频道标记为受限，公开播放尚不可用",
+    "tting_auto": "自动",
+    "search_coverage_channel_lookup": "{site} 仅支持精确频道号或频道直播链接，可查询未开播频道；暂不支持昵称和关键词搜索。",
+    "audience_ttinglive_detail": "首页目录提供当前观看数；频道详情与收藏刷新没有该字段，缺失值保持未知。"
 }

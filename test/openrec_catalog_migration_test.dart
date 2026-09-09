@@ -29,25 +29,25 @@ void main() {
     expect(folder.absolute.path.startsWith(Directory.systemTemp.absolute.path), isTrue);
     await folder.delete(recursive: true);
   });
-  test('catalog nine and audience five append only Openrec; disabled choices survive reopening', () async {
+  test('catalog nine and audience five append Openrec and TTing; disabled choices survive reopening', () async {
     await HivePrefUtil.setInt('siteCatalogMigration', 9);
     await HivePrefUtil.setStringList('hotAreasList', ['huya']);
     await HivePrefUtil.setInt('audienceMetricMigration', 5);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final favorites = Get.put(FavoriteRoomController());
     final app = Get.put(AppSettingsController());
-    expect(favorites.hotAreasList, ['huya', 'openrec']);
-    expect(favorites.siteCatalogMigration.value, 10);
-    expect(app.realOnlinePlatforms, ['twitch', 'openrec']);
-    expect(app.audienceMetricMigration.value, 6);
+    expect(favorites.hotAreasList, ['huya', 'openrec', 'ttinglive']);
+    expect(favorites.siteCatalogMigration.value, 11);
+    expect(app.realOnlinePlatforms, ['twitch', 'openrec', 'ttinglive']);
+    expect(app.audienceMetricMigration.value, 7);
     favorites.hotAreasList.remove('openrec');
     app.setRealOnlineEnabledFor('openrec', false);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
-    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya']);
-    expect(Get.put(AppSettingsController()).realOnlinePlatforms, ['twitch']);
+    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'ttinglive']);
+    expect(Get.put(AppSettingsController()).realOnlinePlatforms, ['twitch', 'ttinglive']);
   });
   test('backup preserves pinned owner case, numeric ID, tags and platform order', () {
     final favorites = Get.put(FavoriteRoomController());

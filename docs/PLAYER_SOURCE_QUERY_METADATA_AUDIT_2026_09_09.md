@@ -2,6 +2,8 @@
 
 实现提交 `9e8aeaf12f8ae4a056165d7458632bb1f830aa04`。
 
+后续 [主播放器 HLS 输入与连接所有权审计](PLAYBACK_SOURCE_TRANSPORT_AUDIT_2026_09_09.md) 已接入实际输入边界、独立媒体代理与远端 decoder identity，230 项定向测试及严格分析通过。路由取消集成、多画面、平台注册和原生实机验收仍未完成；下文保留元数据批次的历史边界。
+
 基线 `ea5c0d0b7c02f8f7a22b639c4bbd6a7144bcf1dc`。本批延续 [录制接线](RECORD_SOURCE_QUERY_METADATA_AUDIT_2026_09_09.md)，仅完成主播放器的内存元数据链；**尚未把原生输入换为 relay，也没有新增实机通过项**。这是新增平台所需的能力扩展，不把普通 HLS 的标准 query 解析归为上游 Bug。没有同步或合并上游。
 
 ## 第一处缺口与接线

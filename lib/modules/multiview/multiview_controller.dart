@@ -89,6 +89,16 @@ class MultiviewController extends GetxController {
   static Future<MultiviewStreamSource> _defaultStreamResolver(LiveRoom room, {required bool preferLowest}) async {
     final platform = room.platform!;
     final site = Sites.of(platform);
+    return resolveStreamForSite(room, site: site, preferLowest: preferLowest);
+  }
+
+  @visibleForTesting
+  static Future<MultiviewStreamSource> resolveStreamForSite(
+    LiveRoom room, {
+    required Site site,
+    required bool preferLowest,
+  }) async {
+    final platform = room.platform!;
 
     // Multiview must not use the UI-oriented fallback lookup for platforms
     // that expose a strict playback-complete resolver. The fallback can turn
@@ -115,30 +125,38 @@ class MultiviewController extends GetxController {
 
     // 默认最高档（列表首项）；小格自动降质联动开启时小格取最低档（末项）。
     final qualityIndex = preferLowest ? qualities.length - 1 : 0;
-    final urls = await site.liveSite.getPlayUrls(detail: detail, quality: qualities[qualityIndex]);
-    if (urls.isEmpty) {
-      throw StateError('multiview: no play urls for $platform/${room.roomId}');
-    }
-
-    final headers = await PlayerController.resolvePlaybackHeaders(site: site, room: detail);
-
-    // 换档加载器：同房间各清晰度通用同一组 headers；URL 取空视为解析失败。
-    // 返回源携带完整线路列表（lineIndex 归 0），由控制器按当前线路校正。
     Future<MultiviewStreamSource> loadQuality(LivePlayQuality quality) async {
-      final nextUrls = await site.liveSite.getPlayUrls(detail: detail, quality: quality);
+      final resolution = await site.liveSite.resolvePlayUrls(detail: detail, quality: quality);
+      final nextUrls = resolution.urls;
       if (nextUrls.isEmpty) {
         throw StateError('multiview: no play urls for $platform/${room.roomId} @ ${quality.quality}');
       }
-      return MultiviewStreamSource(url: nextUrls.first, headers: headers, lines: nextUrls);
+      final applied = resolveAppliedPlayQuality(qualities: qualities, requested: quality, resolution: resolution);
+      final choices = List<LivePlayQuality>.unmodifiable([
+        for (final choice in qualities)
+          choice.selectionId == applied.selectionId ? applied : choice.withPlaybackUnconfirmed(false),
+      ]);
+      final appliedIndex = choices.indexWhere((choice) => choice.selectionId == applied.selectionId);
+      final headers = await PlayerController.resolvePlaybackHeaders(site: site, room: detail);
+      return MultiviewStreamSource(
+        url: nextUrls.first,
+        headers: Map.unmodifiable(headers),
+        lines: List.unmodifiable(nextUrls),
+        qualities: choices,
+        qualityIndex: appliedIndex < 0 ? qualityIndex : appliedIndex,
+        sourceQueryPolicies: resolution.sourceQueryPolicies,
+      );
     }
 
+    final initial = await loadQuality(qualities[qualityIndex]);
     return MultiviewStreamSource(
-      url: urls.first,
-      headers: headers,
-      qualities: qualities,
-      qualityIndex: qualityIndex,
+      url: initial.url,
+      headers: initial.headers,
+      qualities: initial.qualities,
+      qualityIndex: initial.qualityIndex,
       qualityLoader: loadQuality,
-      lines: urls,
+      lines: initial.lines,
+      sourceQueryPolicies: initial.sourceQueryPolicies,
     );
   }
 
@@ -463,6 +481,7 @@ class MultiviewController extends GetxController {
     if (previousHandle != null) {
       await _teardown(previousHandle);
     }
+    if (_isStale(cellIndex, epoch)) return;
 
     _updateCell(
       cellIndex,
@@ -509,9 +528,16 @@ class MultiviewController extends GetxController {
 
     final target = _resolveRenderTarget(layout.value);
     final handle = _playerFactory(renderWidth: target.width.toInt(), renderHeight: target.height.toInt());
+    // Publish ownership before async start so remove/close can retire a relay
+    // whose factory or native initialization is still pending.
+    _players[cellIndex] = handle;
 
     try {
-      await handle.start(url: source.url, headers: source.headers);
+      await handle.start(
+        url: source.url,
+        headers: source.headers,
+        sourceQueryPolicy: source.sourceQueryPolicies[source.url],
+      );
     } catch (error, stackTrace) {
       developer.log(
         'MultiviewController: start playback failed for ${room.platform}/${room.roomId}',
@@ -519,7 +545,10 @@ class MultiviewController extends GetxController {
         error: error,
         stackTrace: stackTrace,
       );
-      await _teardown(handle);
+      if (cellIndex < _players.length && identical(_players[cellIndex], handle)) {
+        _players[cellIndex] = null;
+        await _teardown(handle);
+      }
       _failCell(cellIndex, epoch, MultiviewCellErrorKind.startFailure, error.toString());
       return;
     }
@@ -538,14 +567,17 @@ class MultiviewController extends GetxController {
       );
     }
     if (_isStale(cellIndex, epoch)) {
-      await _teardown(handle);
+      if (cellIndex < _players.length && identical(_players[cellIndex], handle)) {
+        _players[cellIndex] = null;
+        await _teardown(handle);
+      }
       return;
     }
 
     _players[cellIndex] = handle;
     _playingSubs[cellIndex]?.cancel();
     _playingSubs[cellIndex] = handle.playingStream.listen((playing) {
-      if (!_isStale(cellIndex, epoch) && cellIndex < playingFlags.length) {
+      if (cellIndex < _players.length && identical(_players[cellIndex], handle) && cellIndex < playingFlags.length) {
         playingFlags[cellIndex] = playing;
       }
     });
@@ -561,6 +593,7 @@ class MultiviewController extends GetxController {
         headers: source.headers,
         lines: source.lines,
         lineIndex: source.lineIndex,
+        sourceQueryPolicies: source.sourceQueryPolicies,
       ),
     );
     // focus 布局下向非大格分配房间时，新流保持静音起播、不抢声源，
@@ -620,7 +653,7 @@ class MultiviewController extends GetxController {
     final openUrl = hasLines ? next.lines[keepLine] : next.url;
 
     try {
-      await handle.open(url: openUrl, headers: next.headers);
+      await handle.open(url: openUrl, headers: next.headers, sourceQueryPolicy: next.sourceQueryPolicies[openUrl]);
     } catch (error, stackTrace) {
       developer.log(
         'MultiviewController: quality switch open failed for cell $cellIndex',
@@ -636,7 +669,10 @@ class MultiviewController extends GetxController {
     _updateCell(
       cellIndex,
       cells[cellIndex].copyWith(
-        qualityIndex: qualityIndex,
+        qualities: next.qualities.isEmpty ? null : next.qualities,
+        qualityIndex: next.qualities.isEmpty ? qualityIndex : next.qualityIndex,
+        headers: next.headers,
+        sourceQueryPolicies: next.sourceQueryPolicies,
         lines: hasLines ? next.lines : null,
         lineIndex: hasLines ? keepLine : null,
       ),
@@ -667,7 +703,11 @@ class MultiviewController extends GetxController {
 
     final epoch = ++_cellEpochs[cellIndex];
     try {
-      await handle.open(url: state.lines[lineIndex], headers: state.headers);
+      await handle.open(
+        url: state.lines[lineIndex],
+        headers: state.headers,
+        sourceQueryPolicy: state.sourceQueryPolicies[state.lines[lineIndex]],
+      );
     } catch (error, stackTrace) {
       developer.log(
         'MultiviewController: line switch open failed for cell $cellIndex',

@@ -1,4 +1,10 @@
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+
 import 'dart:async';
+
+import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/player/core/playback_source_transport.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -14,7 +20,7 @@ import 'package:pure_live/modules/multiview/multiview_controller.dart';
 /// 所有操作按「名称:动作」写入共享日志，用于断言释放顺序与静音互斥。
 /// 音量模型与真实实现一致：会话音量（sessionVolume）与静音标志（muted）
 /// 相互独立，[volume] 暴露实际输出音量（muted ? 0 : sessionVolume）。
-class _RecordingPlayer implements MultiviewCellPlayerHandle {
+class _RecordingPlayer implements MultiviewCellPlayerHandle, MultiviewNativeInputRouting {
   _RecordingPlayer(this._log, this.name);
 
   final List<String> _log;
@@ -36,6 +42,11 @@ class _RecordingPlayer implements MultiviewCellPlayerHandle {
   int startCalls = 0;
   int openCalls = 0;
   int resumeCalls = 0;
+  final inputs = <(String, Map<String, String>, HlsSourceQueryPolicy?, bool)>[];
+  bool privateInput = false;
+  Completer<void>? openGate;
+  @override
+  void setPrivateInput(bool value) => privateInput = value;
   Object? startError;
 
   /// 非空时 pause 挂起直至门闩完成，模拟慢速原生释放。
@@ -67,9 +78,14 @@ class _RecordingPlayer implements MultiviewCellPlayerHandle {
   }
 
   @override
-  Future<void> start({required String url, required Map<String, String> headers}) async {
+  Future<void> start({
+    required String url,
+    required Map<String, String> headers,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
+  }) async {
     _log.add('$name:start');
     startCalls++;
+    inputs.add((url, headers, sourceQueryPolicy, privateInput));
     // 契约：一律静音起播。
     muted = true;
     volume = 0.0;
@@ -79,9 +95,15 @@ class _RecordingPlayer implements MultiviewCellPlayerHandle {
   }
 
   @override
-  Future<void> open({required String url, required Map<String, String> headers}) async {
+  Future<void> open({
+    required String url,
+    required Map<String, String> headers,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
+  }) async {
     _log.add('$name:open:$url');
     openCalls++;
+    inputs.add((url, headers, sourceQueryPolicy, privateInput));
+    if (openGate != null) await openGate!.future;
     _setPlaying(true);
   }
 
@@ -264,6 +286,247 @@ LiveRoom _room(String id) => LiveRoom(
 );
 
 void main() {
+  test('default multiview resolution retains source policies and acknowledged quality', () async {
+    final liveSite = _PolicyMultiviewSite();
+    final source = await MultiviewController.resolveStreamForSite(
+      _room('policy'),
+      site: Site(id: 'bilibili', name: 'Test', logo: '', liveSite: liveSite),
+      preferLowest: false,
+    );
+    expect(source.qualityIndex, 1);
+    expect(source.qualities[1].isPlaybackUnconfirmed, isFalse);
+    expect(source.sourceQueryPolicies.keys, source.lines);
+    expect(source.sourceQueryPolicies[source.url]!.matchesSource(Uri.parse(source.url)), isTrue);
+    final next = await source.qualityLoader!(source.qualities[0]);
+    expect(next.qualityIndex, 1);
+    expect(next.sourceQueryPolicies.keys, next.lines);
+    expect(next.url, isNot(source.url));
+    expect(liveSite.legacyCalls, 0);
+  });
+
+  test('quality commits rotating headers and policy before later line changes', () async {
+    final harness = _Harness();
+    final controller = harness.controller;
+    try {
+      await controller.assignRoom(0, _room('metadata'));
+      final state = controller.cells[0];
+      const urls = ['https://cdn.example/a/master.m3u8?token=new', 'https://cdn.example/b/master.m3u8?token=new'];
+      final policies = {for (final url in urls) url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))};
+      controller.cells[0] = state.copyWith(
+        qualityLoader: (_) async => MultiviewStreamSource(
+          url: urls.first,
+          headers: const {'Authorization': 'fixture-new'},
+          lines: urls,
+          sourceQueryPolicies: policies,
+          qualities: state.qualities,
+          qualityIndex: 1,
+        ),
+      );
+      await controller.setCellQuality(0, 1);
+      await controller.setCellLine(0, 1);
+      final input = harness.players.single.inputs.last;
+      expect(input.$1, urls[1]);
+      expect(input.$2, const {'Authorization': 'fixture-new'});
+      expect(input.$3, same(policies[urls[1]]));
+      harness.players.single._setPlaying(false);
+      await harness.pump();
+      expect(controller.playingFlags[0], isFalse);
+      expect(controller.cells[0].copyWith(lines: const ['https://new']).sourceQueryPolicies, isEmpty);
+      expect(controller.cells[0].copyWith(clearQuality: true).sourceQueryPolicies, isEmpty);
+    } finally {
+      await controller.disposeAll();
+    }
+  });
+
+  test('real cell owner isolates leases and passes only private URLs and empty headers to backend', () async {
+    const first = 'https://cdn.example/a/master.m3u8?token=a';
+    const second = 'https://cdn.example/b/master.m3u8?token=b';
+    final backends = [_RecordingPlayer([], 'a'), _RecordingPlayer([], 'b')];
+    final closes = <String>[];
+    final cells = [
+      for (final backend in backends)
+        MultiviewCellPlayer(
+          renderWidth: 640,
+          renderHeight: 360,
+          backend: backend,
+          createInput: (url, headers, policy) async {
+            expect(headers, const {'Authorization': 'fixture'});
+            expect(policy.matchesSource(Uri.parse(url)), isTrue);
+            return PlaybackInputLease(
+              Uri.parse('http://127.0.0.1:19001/${Uri.parse(url).pathSegments.first}/root.m3u8'),
+              () async {
+                closes.add(url);
+              },
+            );
+          },
+        ),
+    ];
+    try {
+      for (var i = 0; i < 2; i++) {
+        final url = i == 0 ? first : second;
+        await cells[i].start(
+          url: url,
+          headers: const {'Authorization': 'fixture'},
+          sourceQueryPolicy: HlsSourceQueryPolicy.fromSource(Uri.parse(url)),
+        );
+        expect(backends[i].inputs.single.$2, isEmpty);
+        expect(backends[i].inputs.single.$4, isTrue);
+      }
+      await cells[0].pause();
+      expect(closes, isEmpty);
+      await cells[0].open(url: 'https://cdn.example/direct.flv', headers: const {});
+      expect(backends[0].inputs.last.$4, isFalse);
+      expect(backends[0].isPlaying, isFalse);
+      expect(closes, [first]);
+      await cells[0].disposePlayer();
+      expect(closes, [first]);
+      expect(cells[1].isPlaying, isTrue);
+    } finally {
+      for (final cell in cells) {
+        await cell.disposePlayer();
+      }
+    }
+    expect(closes, [first, second]);
+  });
+
+  test('close during input factory retires its late lease without native start', () async {
+    const url = 'https://cdn.example/a/master.m3u8?token=a';
+    final backend = _RecordingPlayer([], 'late');
+    final started = Completer<void>();
+    final factory = Completer<PlaybackInputLease>();
+    var closes = 0;
+    final cell = MultiviewCellPlayer(
+      renderWidth: 640,
+      renderHeight: 360,
+      backend: backend,
+      createInput: (_, _, _) {
+        started.complete();
+        return factory.future;
+      },
+    );
+    final opening = cell.start(
+      url: url,
+      headers: const {},
+      sourceQueryPolicy: HlsSourceQueryPolicy.fromSource(Uri.parse(url)),
+    );
+    final rejected = expectLater(opening, throwsStateError);
+    await started.future;
+    await cell.disposePlayer();
+    factory.complete(
+      PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/late'), () async {
+        closes++;
+      }),
+    );
+    await rejected;
+    expect(backend.startCalls, 0);
+    expect(closes, 1);
+  });
+
+  test('pause during native open remains paused after completion', () async {
+    final backend = _RecordingPlayer([], 'paused');
+    final cell = MultiviewCellPlayer(renderWidth: 640, renderHeight: 360, backend: backend);
+    await cell.start(url: 'https://cdn.example/old.flv', headers: const {});
+    backend.openGate = Completer<void>();
+    final opening = cell.open(url: 'https://cdn.example/new.flv', headers: const {});
+    await Future<void>.delayed(Duration.zero);
+    await cell.pause();
+    backend.openGate!.complete();
+    await opening;
+    expect(cell.isPlaying, isFalse);
+    await cell.disposePlayer();
+  });
+
+  test('removing a resolving cell retires its real input owner before the factory returns', () async {
+    const url = 'https://cdn.example/pending/master.m3u8?token=fixture';
+    final started = Completer<void>();
+    final input = Completer<PlaybackInputLease>();
+    var closes = 0;
+    final backend = _RecordingPlayer([], 'removed');
+    final controller = MultiviewController(
+      playerFactory: ({required renderWidth, required renderHeight}) => MultiviewCellPlayer(
+        renderWidth: renderWidth,
+        renderHeight: renderHeight,
+        backend: backend,
+        createInput: (_, _, _) {
+          started.complete();
+          return input.future;
+        },
+      ),
+      streamResolver: (room, {required preferLowest}) async => MultiviewStreamSource(
+        url: url,
+        headers: const {},
+        lines: const [url],
+        sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+      ),
+      pauseGlobalPlayback: () async {},
+      roomVolumeLoader: (_) => 1,
+      roomVolumeSaver: (_, _) async {},
+      danmakuEngineFactory: (_) => _FakeDanmaku([], 'none'),
+    );
+    final assigning = controller.assignRoom(0, _room('pending'));
+    try {
+      await started.future.timeout(const Duration(seconds: 2));
+      controller.removeCell(0);
+      await Future<void>.delayed(Duration.zero);
+      input.complete(
+        PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/pending'), () async {
+          closes++;
+        }),
+      );
+      await assigning;
+      expect(controller.cells[0].status, MultiviewCellStatus.empty);
+      expect(backend.startCalls, 0);
+      expect(closes, 1);
+    } finally {
+      if (!input.isCompleted) {
+        input.complete(
+          PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/pending'), () async {
+            closes++;
+          }),
+        );
+      }
+      await assigning;
+      await controller.disposeAll();
+    }
+  });
+
+  test('cell source replacement keeps native opens serialized and retires the prior lease', () async {
+    const old = 'https://cdn.example/old/master.m3u8?token=old';
+    const next = 'https://cdn.example/next/master.m3u8?token=next';
+    final backend = _RecordingPlayer([], 'serial');
+    final closes = <String>[];
+    final cell = MultiviewCellPlayer(
+      renderWidth: 640,
+      renderHeight: 360,
+      backend: backend,
+      createInput: (url, _, _) async =>
+          PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/${Uri.parse(url).pathSegments.first}'), () async {
+            closes.add(url);
+          }),
+    );
+    try {
+      await cell.start(url: old, headers: const {}, sourceQueryPolicy: HlsSourceQueryPolicy.fromSource(Uri.parse(old)));
+      backend.openGate = Completer<void>();
+      final first = cell.open(
+        url: next,
+        headers: const {},
+        sourceQueryPolicy: HlsSourceQueryPolicy.fromSource(Uri.parse(next)),
+      );
+      await Future<void>.delayed(Duration.zero);
+      final second = cell.open(url: 'https://cdn.example/final.flv', headers: const {});
+      expect(backend.openCalls, 1);
+      backend.openGate!.complete();
+      await first;
+      await second;
+      expect(backend.openCalls, 2);
+      expect(backend.inputs.last.$1, 'https://cdn.example/final.flv');
+      expect(closes, [old, next]);
+    } finally {
+      if (backend.openGate?.isCompleted == false) backend.openGate!.complete();
+      await cell.disposePlayer();
+    }
+  });
+
   test('offline and failed multiview cells remain picker targets', () {
     expect(isMultiviewCellAssignable(MultiviewCellStatus.empty), isTrue);
     expect(isMultiviewCellAssignable(MultiviewCellStatus.offline), isTrue);
@@ -1049,4 +1312,31 @@ void main() {
       expect(harness.log.last, contains('流畅?line=1'));
     });
   });
+}
+
+class _PolicyMultiviewSite extends LiveSite implements LivePlayUrlResolver {
+  int calls = 0;
+  int legacyCalls = 0;
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId, required String platform}) async => _room(roomId);
+  @override
+  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoom detail}) async => [
+    LivePlayQuality(quality: 'Original', id: 0),
+    LivePlayQuality(quality: 'HD', id: 1),
+  ];
+  @override
+  Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async {
+    legacyCalls++;
+    throw StateError('legacy resolution loses metadata');
+  }
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
+    final url = 'https://cdn.example/channel/master.m3u8?token=g${++calls}';
+    return LivePlayUrlResolution.withSourcePolicies(
+      urls: [url],
+      appliedQualityData: 1,
+      sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+    );
+  }
 }

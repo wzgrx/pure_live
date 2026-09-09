@@ -1,3 +1,4 @@
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 import 'package:pure_live/common/index.dart';
@@ -127,6 +128,7 @@ class MultiviewStreamSource {
     this.qualityLoader,
     this.lines = const <String>[],
     this.lineIndex = 0,
+    this.sourceQueryPolicies = const <String, HlsSourceQueryPolicy>{},
   });
 
   /// 可直接交给播放内核的媒体地址。
@@ -149,6 +151,8 @@ class MultiviewStreamSource {
 
   /// 当前线路下标；lines 非空时 [url] 恒等于 lines[lineIndex]。
   final int lineIndex;
+
+  final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
 }
 
 /// multiview 单格的不可变状态快照。
@@ -169,6 +173,7 @@ class MultiviewCellState {
     this.headers = const <String, String>{},
     this.lines = const <String>[],
     this.lineIndex = 0,
+    this.sourceQueryPolicies = const <String, HlsSourceQueryPolicy>{},
   });
 
   /// 该格在当前布局中的固定下标（0 起）。
@@ -210,6 +215,8 @@ class MultiviewCellState {
   /// 当前线路下标；lines 非空时画面即 lines[lineIndex]。
   final int lineIndex;
 
+  final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
+
   /// 构造一个空白格状态。
   factory MultiviewCellState.empty(int index) => MultiviewCellState(index: index);
 
@@ -229,6 +236,7 @@ class MultiviewCellState {
     Map<String, String>? headers,
     List<String>? lines,
     int? lineIndex,
+    Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
   }) {
     return MultiviewCellState(
       index: index,
@@ -243,6 +251,11 @@ class MultiviewCellState {
       headers: clearQuality ? const <String, String>{} : (headers ?? this.headers),
       lines: clearQuality ? const <String>[] : (lines ?? this.lines),
       lineIndex: clearQuality ? 0 : (lineIndex ?? this.lineIndex),
+      sourceQueryPolicies: Map.unmodifiable(
+        clearQuality
+            ? <String, HlsSourceQueryPolicy>{}
+            : (sourceQueryPolicies ?? (lines == null ? this.sourceQueryPolicies : <String, HlsSourceQueryPolicy>{})),
+      ),
     );
   }
 }

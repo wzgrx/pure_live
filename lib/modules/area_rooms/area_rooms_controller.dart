@@ -12,13 +12,16 @@ class AreaServerAllController extends ServerAllPageController<LiveRoom> {
 
   @override
   Future<List<LiveRoom>> fetchAllServerData() async {
+    if (isClosed) return [];
     try {
       final result = await site.liveSite.getCategoryRooms(subCategory, page: currentPage);
+      if (isClosed) return [];
       for (var element in result) {
         element.area = subCategory.areaName;
       }
       return result;
     } catch (e) {
+      if (isClosed) return [];
       if (e.toString().contains("-352") ||
           (e.toString().contains("NoSuchMethodError") && e.toString().contains("'[]'"))) {
         notLogin.value = true;

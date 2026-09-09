@@ -80,7 +80,10 @@ class PopularServerAllController extends ServerAllPageController<LiveRoom> {
 
   @override
   Future<List<LiveRoom>> fetchAllServerData() async {
-    return _rankForCurrentSettings(await site.liveSite.getRecommendRooms(page: currentPage, pageSize: pageSize.value));
+    if (isClosed) return [];
+    final rooms = await site.liveSite.getRecommendRooms(page: currentPage, pageSize: pageSize.value);
+    if (isClosed) return [];
+    return _rankForCurrentSettings(rooms);
   }
 }
 

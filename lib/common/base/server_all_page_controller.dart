@@ -19,6 +19,7 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
 
   @override
   Future<void> refreshData() async {
+    if (isClosed) return;
     _refreshPending = true;
     final active = _activeLoad;
     if (active != null) await active;
@@ -31,7 +32,7 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
 
   @override
   Future<void> goToPage(int page) async {
-    if (_activeLoad != null || page < 1 || _rawAllData == null) return;
+    if (isClosed || _activeLoad != null || page < 1 || _rawAllData == null) return;
     if (!usesDesktopPagination) return;
     final maxPage = (localItemCount / pageSize.value).ceil();
     if (page > maxPage) return;
@@ -41,7 +42,7 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
 
   @override
   void setPageSize(int? newSize) {
-    if (newSize == null || pageSize.value == newSize || _rawAllData == null) return;
+    if (isClosed || newSize == null || pageSize.value == newSize || _rawAllData == null) return;
     if (!usesDesktopPagination) {
       pageSize.value = newSize;
       return;
@@ -56,7 +57,14 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
   Future<void> loadData() async {
     final active = _activeLoad;
     if (active != null) return active;
+    if (isClosed) return;
     return _startLoad();
+  }
+
+  @override
+  Future<void> loadMoreData() async {
+    if (isClosed) return;
+    await super.loadMoreData();
   }
 
   Future<void> _startLoad() {
@@ -77,6 +85,7 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
     }
 
     final bool isNetworkSafe = await checkNetworkBeforeRequest();
+    if (isClosed) return;
     if (!isNetworkSafe) {
       finishRefreshControllers(IndicatorResult.fail);
       return;
@@ -89,19 +98,26 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
       notLogin.value = false;
       pageLoadding.value = true;
 
-      _rawAllData = await fetchAllServerData();
+      final result = await fetchAllServerData();
+      // The Future has no cancellation contract. Observe its terminal result,
+      // but never publish into a route whose controllers have been disposed.
+      if (isClosed) return;
+      _rawAllData = result;
       processLocalPaging();
     } catch (e) {
+      if (isClosed) return;
       handleError(e, showPageError: list.isEmpty);
       finishRefreshControllers(IndicatorResult.fail);
     } finally {
-      loadding.value = false;
-      pageLoadding.value = false;
+      if (!isClosed) {
+        loadding.value = false;
+        pageLoadding.value = false;
+      }
     }
   }
 
   void processLocalPaging() {
-    if (_rawAllData == null) return;
+    if (isClosed || _rawAllData == null) return;
     final allItems = _rawAllData!;
     totalCount.value = allItems.length;
 

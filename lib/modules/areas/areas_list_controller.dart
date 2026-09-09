@@ -25,7 +25,9 @@ class AreasListController extends ServerAllPageController<LiveArea> {
 
   @override
   Future<List<LiveArea>> fetchAllServerData() async {
+    if (isClosed) return [];
     var result = await site.liveSite.getCategores(1, 1000);
+    if (isClosed) return [];
     // Read the latest selection after the request; a tab click while loading
     // belongs to the user, not to the request's earlier snapshot.
     final selectedId = tabIndex.value >= 0 && tabIndex.value < categories.length ? categories[tabIndex.value].id : null;
@@ -72,7 +74,7 @@ class AreasListController extends ServerAllPageController<LiveArea> {
   /// reactive frames. Category contents are local at this point, so update the
   /// active slice synchronously and keep the finger-to-page transition linear.
   void selectCategory(int index) {
-    if (isFlatten || index < 0 || index >= categories.length || tabIndex.value == index) return;
+    if (isClosed || isFlatten || index < 0 || index >= categories.length || tabIndex.value == index) return;
     tabIndex.value = index;
     currentPage = 1;
     processLocalPaging(finishRefresh: !hasActiveLoad);
@@ -80,6 +82,7 @@ class AreasListController extends ServerAllPageController<LiveArea> {
 
   @override
   void processLocalPaging({bool finishRefresh = true}) {
+    if (isClosed) return;
     // Selecting cached rows is not completion of a pending server snapshot.
     void finish(IndicatorResult result) {
       if (finishRefresh) finishRefreshControllers(result);

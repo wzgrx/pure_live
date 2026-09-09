@@ -11,6 +11,9 @@ abstract class ServerAllPageController<T> extends BasePageScrollAndStateBone<T> 
   /// set. Local projections must not complete this operation's indicator.
   bool get hasActiveLoad => _activeLoad != null;
 
+  @override
+  Future<void>? get activePageOperation => _activeLoad;
+
   Future<List<T>> fetchAllServerData();
 
   /// Size of the active local catalogue. Tabbed controllers can project a

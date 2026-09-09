@@ -45,6 +45,9 @@ class LiveDirectoryController extends BasePageScrollAndStateBone<LiveRoom> {
   bool get _capacityReached => (_refreshBuffer ?? _buffer).capacityReached;
 
   @override
+  Future<void>? get activePageOperation => _pendingRepage ?? _activeLoad;
+
+  @override
   bool Function() captureNetworkRequestOwnership() {
     final epoch = _epoch;
     return () => _owns(epoch);

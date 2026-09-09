@@ -29,6 +29,8 @@ abstract class BasePageScrollAndStateBone<T> extends BaseController {
   final showBackToBottom = true.obs;
 
   bool? _lastIsDesktop;
+  bool? _pendingIsDesktop;
+  int _layoutVersion = 0;
   Timer? _layoutRefreshTimer;
 
   BasePageScrollAndStateBone() {
@@ -57,26 +59,46 @@ abstract class BasePageScrollAndStateBone<T> extends BaseController {
     _syncScrollFlags();
   }
 
+  /// Async pagers expose their current operation, including connectivity and
+  /// re-paging, so layout commits cannot change its dimensions mid-response.
+  /// Synchronous local projections have no operation to await.
+  Future<void>? get activePageOperation => null;
+
   void checkAndNotifyLayoutChange(bool isDesktop) {
-    if (_lastIsDesktop == isDesktop) return;
-    final previousIsDesktop = _lastIsDesktop;
+    if (isClosed || (_pendingIsDesktop ?? _lastIsDesktop) == isDesktop) return;
+    final version = ++_layoutVersion;
+    _layoutRefreshTimer?.cancel();
+    _pendingIsDesktop = isDesktop == _lastIsDesktop ? null : isDesktop;
+    if (_pendingIsDesktop == null) return;
+
+    // Keep the existing breakpoint debounce, but defer the state transition
+    // itself as well as the refresh. Crossing back cancels the whole intent.
+    _layoutRefreshTimer = Timer(const Duration(milliseconds: 120), () => unawaited(_commitLayout(version)));
+  }
+
+  Future<void> _commitLayout(int version) async {
+    while (!isClosed && version == _layoutVersion) {
+      final active = activePageOperation;
+      if (active == null) break;
+      await active;
+    }
+    if (isClosed || version != _layoutVersion) return;
+    final isDesktop = _pendingIsDesktop;
+    if (isDesktop == null) return;
+    _pendingIsDesktop = null;
+    final previousSize = pageSize.value;
     _lastIsDesktop = isDesktop;
 
     if (isDesktop) {
       pageSize.value = SettingsService.to.page.defaultPageSize.v;
-      final int currentFirstItemIndex = (currentPage - 1) * 20;
+      final int currentFirstItemIndex = (currentPage - 1) * previousSize;
       currentPage = (currentFirstItemIndex ~/ pageSize.value) + 1;
     } else {
       pageSize.value = 20;
       currentPage = 1;
     }
 
-    // The first layout observation only configures paging.  A real breakpoint
-    // transition is coalesced and refreshed after layout settles, rather than
-    // mutating the data source during a widget build.
-    if (previousIsDesktop == null) return;
-    _layoutRefreshTimer?.cancel();
-    _layoutRefreshTimer = Timer(const Duration(milliseconds: 120), () => unawaited(refreshData()));
+    await refreshData();
   }
 
   bool get usesDesktopPagination => _lastIsDesktop ?? Get.width > 680 && !PlatformUtils.isMobile;
@@ -114,6 +136,8 @@ abstract class BasePageScrollAndStateBone<T> extends BaseController {
 
   @override
   void onClose() {
+    _layoutVersion++;
+    _pendingIsDesktop = null;
     _layoutRefreshTimer?.cancel();
     scrollController.removeListener(_scrollListener);
     _boundScrollController = null;

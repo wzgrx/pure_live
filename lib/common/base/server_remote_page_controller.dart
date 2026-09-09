@@ -14,6 +14,9 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
   Future<List<T>> fetchNetworkData(int page, int pageSize);
 
   @override
+  Future<void>? get activePageOperation => _activeLoad;
+
+  @override
   Future<void> refreshData() async {
     if (isClosed) return;
     _refreshPending = true;

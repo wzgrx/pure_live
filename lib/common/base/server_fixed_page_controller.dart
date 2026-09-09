@@ -15,6 +15,9 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
   Future<List<T>> fetchFixedNetworkData(int bigPage, int fixedSize);
 
   @override
+  Future<void>? get activePageOperation => _activeLoad;
+
+  @override
   Future<void> refreshData() async {
     if (isClosed) return;
     _refreshPending = true;

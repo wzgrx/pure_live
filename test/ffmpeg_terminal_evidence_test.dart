@@ -24,6 +24,58 @@ void main() {
     expect(create(live: false, flv: _PendingAvcRelay()).terminalEvidence()['inputIntegrityError'], false);
   });
 
+  for (final message in [
+    '[in#0/hls @ 0001] skipping 4 segments ahead, expired from playlists',
+    '[hls @ 0001] segment 0 of playlist 1 failed too many times, skipping',
+  ]) {
+    test('active HLS gap is latched independently of packet damage: $message', () {
+      final session = create();
+      session.appendDiagnostic(message);
+      final before = session.terminalEvidence();
+      for (var i = 0; i < 10; i++) {
+        session.appendDiagnostic('normal progress $i', maxLines: 2, maxCharacters: 100);
+      }
+      session.manualStop = true;
+      session.markStopRequested();
+      expect(session.diagnosticTail, isNot(contains(message)));
+      expect(session.terminalEvidence()['inputCoverageIncomplete'], true);
+      expect(before['inputCoverageIncomplete'], true);
+      expect(session.terminalEvidence()['inputIntegrityError'], false);
+      expect(session.terminalEvidence()['inputTailDiscarded'], false);
+      expect(create().terminalEvidence()['inputCoverageIncomplete'], false);
+    });
+  }
+
+  test('stop, lease drain, conversion and unrelated warnings do not invent active gaps', () {
+    const loss = 'skipping 4 segments ahead, expired from playlists';
+    for (final session in [
+      create()..manualStop = true,
+      create()..leaseRefresh = true,
+      create()..markStopRequested(),
+      create(live: false),
+    ]) {
+      session.appendDiagnostic(loss);
+      expect(session.terminalEvidence(fallbackLogs: loss)['inputCoverageIncomplete'], false);
+    }
+    final session = create();
+    for (final message in [
+      'found duplicated moov atom. skipped it',
+      'error during demuxing: I/O error',
+      'skipping 0 segments ahead, expired from playlists',
+      'failed to open segment 4',
+      'PES packet size mismatch',
+    ]) {
+      session.appendDiagnostic(message);
+    }
+    expect(session.terminalEvidence()['inputCoverageIncomplete'], false);
+    expect(session.terminalEvidence()['inputIntegrityError'], true);
+    expect(
+      create().terminalEvidence(fallbackLogs: loss)['inputCoverageIncomplete'],
+      false,
+      reason: 'Untimed terminal text cannot distinguish active loss from intentional drain.',
+    );
+  });
+
   test('natural terminal evidence does not invent a stop or a drain', () {
     final evidence = create().terminalEvidence();
     expect(evidence, {
@@ -37,6 +89,7 @@ void main() {
       'forcedCancel': false,
       'inputDrained': false,
       'inputTailDiscarded': false,
+      'inputCoverageIncomplete': false,
       'inputIntegrityError': false,
     });
     expect(() => evidence['manualStop'] = true, throwsUnsupportedError);

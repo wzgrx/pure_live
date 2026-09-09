@@ -18,6 +18,7 @@ import 'package:pure_live/recorder/models/record_status.dart';
 import 'package:pure_live/recorder/pages/record_settings/record_settings_controller.dart';
 import 'package:pure_live/recorder/pages/recorder/recorder_controller.dart';
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/cache_service.dart';
 import 'package:pure_live/recorder/services/recording_output_metrics.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
@@ -122,6 +123,40 @@ void main() {
     expect(task.inputTailDiscarded, true);
   });
 
+  test('coverage warning is fenced, persisted, and never fabricates start or failure', () async {
+    final first = metrics.add();
+    emit(FFmpegEventType.startAck, 1);
+    await until(() => first.calls > 0 && first.active == 0);
+    emit(FFmpegEventType.inputCoverage, 99, {'inputCoverageIncomplete': true});
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(task.inputCoverageIncomplete, false);
+    emit(FFmpegEventType.inputCoverage, 1, {'inputCoverageIncomplete': true});
+    await until(() => task.inputCoverageIncomplete);
+    expect(task.status, RecordStatus.preparing);
+    expect(task.fileSize, 0);
+    expect(task.lastError, isNull);
+    expect(LiveRecordTask.fromJson(task.toJson()).inputCoverageIncomplete, true);
+    emit(FFmpegEventType.complete, 1, {'manualStop': true, 'inputCoverageIncomplete': false});
+    await until(() => task.status == RecordStatus.stopped);
+    final second = metrics.add();
+    emit(FFmpegEventType.startAck, 2);
+    await until(() => second.calls > 0 && second.active == 0);
+    emit(FFmpegEventType.complete, 2, {'manualStop': true, 'inputCoverageIncomplete': false});
+    await until(() => task.status == RecordStatus.stopped);
+    expect(task.inputCoverageIncomplete, true);
+    expect(task.lastError, isNull);
+  });
+
+  test('terminal-only gap evidence survives even without an earlier warning event', () async {
+    final tracker = metrics.add();
+    emit(FFmpegEventType.startAck, 1);
+    await until(() => tracker.calls > 0 && tracker.active == 0);
+    emit(FFmpegEventType.complete, 1, {'manualStop': true, 'inputCoverageIncomplete': true});
+    await until(() => task.status == RecordStatus.stopped);
+    expect(task.inputCoverageIncomplete, true);
+    expect(task.lastError, isNull);
+  });
+
   test('late old-session sampling cannot release the new session sampling lock', () async {
     final old = metrics.add()..holdNext();
     final current = metrics.add()..holdNext();
@@ -153,7 +188,12 @@ void main() {
     emit(FFmpegEventType.startAck, 1);
     await until(() => old.calls >= 1 && old.active == 0);
     old.holdNext();
-    emit(FFmpegEventType.complete, 1, {'manualStop': true, 'inputIntegrityError': true, 'inputTailDiscarded': true});
+    emit(FFmpegEventType.complete, 1, {
+      'manualStop': true,
+      'inputIntegrityError': true,
+      'inputTailDiscarded': true,
+      'inputCoverageIncomplete': true,
+    });
     await until(() => old.active == 1);
     emit(FFmpegEventType.startAck, 2);
     await until(() => current.calls >= 1 && task.fileSize == 20);
@@ -165,6 +205,7 @@ void main() {
     expect(task.status, RecordStatus.running);
     expect(task.fileSize, 333, reason: 'new native progress must still own this task');
     expect(task.inputTailDiscarded, false, reason: 'a stale terminal event must not contaminate the new session');
+    expect(task.inputCoverageIncomplete, false);
   });
 
   test('terminal handling waits for an active sample and takes a final fresh snapshot', () async {
@@ -374,6 +415,7 @@ class _EventManager implements FFmpegManager {
     required List<String> arguments,
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
   }) async {
     running = true;
     try {

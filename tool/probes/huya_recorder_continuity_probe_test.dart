@@ -10,6 +10,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:path/path.dart' as p;
 import 'package:pure_live/common/services/settings/log_controller.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:pure_live/core/site/huya/huya_site.dart';
 import 'package:pure_live/core/site/huya/huya_transport_policy.dart';
 import 'package:pure_live/get/get.dart';
@@ -24,6 +25,7 @@ import 'package:pure_live/recorder/pages/record_settings/record_settings_control
 import 'package:pure_live/recorder/pages/recorder/recorder_controller.dart';
 import 'package:pure_live/recorder/services/cache_service.dart';
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
 
@@ -286,9 +288,21 @@ class _RetainingManager implements FFmpegManager {
     return event;
   });
   @override
-  Future<void> start({required String taskId, required List<String> arguments, bool liveRecording = false}) {
+  Future<void> start({
+    required String taskId,
+    required List<String> arguments,
+    bool liveRecording = false,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
+  }) {
     starts++;
-    return delegate.start(taskId: taskId, arguments: arguments, liveRecording: liveRecording);
+    return delegate.start(
+      taskId: taskId,
+      arguments: arguments,
+      liveRecording: liveRecording,
+      sourceQueryPolicy: sourceQueryPolicy,
+      hlsDiagnostics: hlsDiagnostics,
+    );
   }
 
   @override

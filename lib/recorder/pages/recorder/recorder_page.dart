@@ -658,10 +658,12 @@ class _TaskCard extends GetView<RecorderController> {
                   ),
                 ),
               ],
-              if (task.inputTailDiscarded) ...[
+              if (task.inputTailDiscarded || task.inputCoverageIncomplete) ...[
                 const SizedBox(height: 12),
                 Container(
-                  key: const ValueKey('recorder-input-tail-warning'),
+                  key: ValueKey(
+                    task.inputCoverageIncomplete ? 'recorder-input-coverage-warning' : 'recorder-input-tail-warning',
+                  ),
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
@@ -675,7 +677,10 @@ class _TaskCard extends GetView<RecorderController> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          i18n('recorder_input_tail_discarded'),
+                          [
+                            if (task.inputCoverageIncomplete) i18n('recorder_input_coverage_incomplete'),
+                            if (task.inputTailDiscarded) i18n('recorder_input_tail_discarded'),
+                          ].join('\n'),
                           style: AppTextStyles.t12.copyWith(color: theme.colorScheme.onTertiaryContainer, height: 1.3),
                         ),
                       ),

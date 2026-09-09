@@ -710,6 +710,7 @@
     "recorder_transport_failed": "The recorder could not connect to this live CDN. It will refresh the URL and try the next route or quality.",
     "recorder_input_integrity_failed": "The recording input contains damaged packets. Original segments were retained without automatic remuxing or deletion. Inspect the files before deciding whether to record again.",
     "recorder_input_tail_discarded": "Some input was not fully received when stopping and was skipped. The recording may be missing content.",
+    "recorder_input_coverage_incomplete": "Missing or expired live segments were skipped during recording. Content is incomplete; valid captured segments can still be kept and merged.",
     "recorder_input_format_failed": "The recorder could not identify this route's media format. It will try the next route or quality.",
     "recorder_decoder_failed": "The recorder could not process this route's codec. It will try the next route or quality.",
     "unknown_error": "Recording error: An unknown exception occurred, raw log: \"{error_log}\"",

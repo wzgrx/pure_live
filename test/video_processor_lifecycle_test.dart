@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:pure_live/common/models/live_room.dart';
+import 'package:pure_live/core/common/hls_source_query_policy.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
@@ -69,6 +71,7 @@ void main() {
 
   test('damage on another attempt does not prevent exact healthy source finalization', () async {
     task.inputTailDiscarded = true;
+    task.inputCoverageIncomplete = true;
     task.queuePendingAttempt(directoryPath: directory.path, filePrefix: 'other', inputIntegrityError: true);
     native.finish();
     conversion = service.convertToMp4(task: task);
@@ -77,6 +80,7 @@ void main() {
     expect(await source.exists(), false);
     expect(task.pendingAttempts.single.inputIntegrityError, true);
     expect(task.inputTailDiscarded, true, reason: 'successful remux must not erase missing-input provenance');
+    expect(task.inputCoverageIncomplete, true);
   });
 
   test('merge timeout covers the running native Future and cancels before cleanup', () async {
@@ -265,7 +269,13 @@ class _NativeLifecycleFixture implements FFmpegManager {
   @override
   bool isRunning(String taskId) => running;
   @override
-  Future<void> start({required String taskId, required List<String> arguments, bool liveRecording = false}) async {
+  Future<void> start({
+    required String taskId,
+    required List<String> arguments,
+    bool liveRecording = false,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
+  }) async {
     this.arguments = arguments;
     startCalls++;
     nativeTaskId = taskId;

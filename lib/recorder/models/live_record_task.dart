@@ -115,6 +115,10 @@ class LiveRecordTask {
   /// Distinct from packet damage: complete saved segments may still be usable.
   bool inputTailDiscarded;
 
+  /// An explicit native missing-segment report was observed before drain.
+  /// False means no observed signal, not a proof of complete media coverage.
+  bool inputCoverageIncomplete;
+
   bool wasStoppedByUser;
 
   LiveRecordTask({
@@ -160,6 +164,7 @@ class LiveRecordTask {
     this.lastError,
     this.lastErrorStage,
     this.inputTailDiscarded = false,
+    this.inputCoverageIncomplete = false,
   }) : pendingAttempts = List<PendingRecordingAttempt>.of(pendingAttempts);
 
   /// =========================
@@ -237,6 +242,7 @@ class LiveRecordTask {
   void beginNewRecording({DateTime? now}) {
     final startedAt = now ?? DateTime.now();
     inputTailDiscarded = false;
+    inputCoverageIncomplete = false;
     recordedSeconds = 0;
     fileSize = 0;
     recordingStartedAt = startedAt;
@@ -367,6 +373,7 @@ class LiveRecordTask {
     "lastError": lastError,
     "lastErrorStage": lastErrorStage,
     "inputTailDiscarded": inputTailDiscarded,
+    "inputCoverageIncomplete": inputCoverageIncomplete,
     "wasStoppedByUser": wasStoppedByUser,
   };
 
@@ -458,6 +465,7 @@ class LiveRecordTask {
       lastError: _diagnostic(json["lastError"]),
       lastErrorStage: _stage(json["lastErrorStage"]),
       inputTailDiscarded: _bool(json["inputTailDiscarded"]),
+      inputCoverageIncomplete: _bool(json["inputCoverageIncomplete"]),
       wasStoppedByUser: _bool(json["wasStoppedByUser"]),
     );
   }

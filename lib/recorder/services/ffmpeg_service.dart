@@ -185,6 +185,14 @@ class FFmpegRecordSession {
   var _diagnosticCharacters = 0;
   bool hasMediaIntegrityError = false;
   bool hasInputPacketError = false;
+  bool hasInputCoverageGap = false;
+  // Explicit HLS loss reports only: generic I/O, packet damage, or a skipped
+  // duplicate moov are not evidence of missing media intervals.
+  static final _missingHlsSegment = RegExp(
+    r'(?:^|\])\s*(?:skipping [1-9]\d* segments ahead, expired from playlists|segment \d+ of playlist \d+ failed too many times, skipping)(?:\s|$)',
+    multiLine: true,
+    caseSensitive: false,
+  );
   Stopwatch? _stopWatch;
 
   void markStopRequested() => _stopWatch ??= Stopwatch()..start();
@@ -215,6 +223,7 @@ class FFmpegRecordSession {
       'inputDrained': finishRequested && !forcedCancel && flvInputRelay?.hasPendingAccessUnit != true,
       if (flvInputRelay != null) 'flvAccessUnitPending': flvInputRelay!.hasPendingAccessUnit,
       'inputTailDiscarded': liveRecording && inputRelay?.inputTailDiscarded == true,
+      'inputCoverageIncomplete': liveRecording && hasInputCoverageGap,
       'inputIntegrityError':
           liveRecording &&
           (hasInputPacketError ||
@@ -241,6 +250,12 @@ class FFmpegRecordSession {
     // alone was insufficient in the 0.11.1 Windows source-retention probe).
     hasMediaIntegrityError = hasMediaIntegrityError || FFmpegMediaIntegrity.hasError(sanitized);
     hasInputPacketError = hasInputPacketError || FFmpegMediaIntegrity.hasPacketError(sanitized);
+    // Stop/lease draining may intentionally retire an unpublished tail. Do not
+    // reinterpret those late messages as loss during active capture. Do not
+    // infer this from terminal fallback text, whose timing is no longer known.
+    if (liveRecording && !manualStop && !leaseRefresh && _stopWatch == null) {
+      hasInputCoverageGap = hasInputCoverageGap || _missingHlsSegment.hasMatch(sanitized);
+    }
     _diagnosticLines.add(sanitized);
     _diagnosticCharacters += sanitized.length;
     while (_diagnosticLines.length > maxLines || _diagnosticCharacters > maxCharacters) {
@@ -317,7 +332,18 @@ class FFmpegService {
 
     nativeSession.setLogCallback((entry) {
       if (!identical(_sessions[taskId], session)) return;
+      final hadGap = session.hasInputCoverageGap;
       session.appendDiagnostic(entry.message);
+      if (!hadGap && session.hasInputCoverageGap) {
+        _safeEmit(
+          onEvent,
+          FFmpegEvent(
+            taskId: taskId,
+            type: FFmpegEventType.inputCoverage,
+            data: {'sessionId': session.sessionId, 'inputCoverageIncomplete': true},
+          ),
+        );
+      }
     });
 
     nativeSession.setStatisticsCallback((statistics) {

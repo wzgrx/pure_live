@@ -187,6 +187,14 @@ class RecorderController extends GetxService {
         }
         updateTask(task, persist: _shouldPersistOutput(event.taskId));
         return;
+      case FFmpegEventType.inputCoverage:
+        if (!_isCurrentSession(event.taskId, sessionId) || event.data['inputCoverageIncomplete'] != true) return;
+        if (!task.inputCoverageIncomplete) {
+          task.inputCoverageIncomplete = true;
+          // Input evidence is not media start/progress, a stop, or a retry.
+          updateTask(task);
+        }
+        return;
       case FFmpegEventType.error:
       case FFmpegEventType.complete:
         if (!_isCurrentSession(event.taskId, sessionId)) return;
@@ -213,6 +221,7 @@ class RecorderController extends GetxService {
         // Keep it through successful remux/reconnection; missing input is not
         // equivalent to damaged packets and does not block healthy segment use.
         task.inputTailDiscarded = task.inputTailDiscarded || event.data['inputTailDiscarded'] == true;
+        task.inputCoverageIncomplete = task.inputCoverageIncomplete || event.data['inputCoverageIncomplete'] == true;
         final manuallyStopped = event.data['manualStop'] == true || task.wasStoppedByUser;
         final isError = event.type == FFmpegEventType.error;
         final errorCode = (event.data['code'] as num?)?.toInt() ?? 0;

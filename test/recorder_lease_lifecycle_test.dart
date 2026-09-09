@@ -17,6 +17,7 @@ import 'package:pure_live/recorder/pages/record_settings/record_settings_control
 import 'package:pure_live/recorder/pages/recorder/recorder_controller.dart';
 import 'package:pure_live/recorder/services/cache_service.dart';
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 
 const _nativeUrl = 'https://al.flv.huya.com/fixture.flv?ctype=huya_pc_exe&t=100';
@@ -237,6 +238,7 @@ class _Native implements FFmpegManager {
     required List<String> arguments,
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
   }) async {
     policies.add(sourceQueryPolicy);
     final done = Completer<void>();

@@ -4,6 +4,18 @@ import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/models/record_status.dart';
 
 void main() {
+  test('observed input gaps persist across retries and clear only for a new recording', () {
+    final task = LiveRecordTask.fromJson({'roomId': 'fixture', 'platform': 'picarto'});
+    expect(task.inputCoverageIncomplete, false);
+    task.inputCoverageIncomplete = true;
+    task.clearFailure();
+    task.beginNewAttempt();
+    final restored = LiveRecordTask.fromJson(task.toJson());
+    expect(restored.inputCoverageIncomplete, true);
+    expect(restored.inputTailDiscarded, false);
+    restored.beginNewRecording();
+    expect(LiveRecordTask.fromJson(restored.toJson()).inputCoverageIncomplete, false);
+  });
   test('discarded input survives restore and retry but resets for a new recording', () {
     final task = LiveRecordTask.fromJson({'roomId': 'fixture', 'platform': 'picarto'});
     expect(task.inputTailDiscarded, false);

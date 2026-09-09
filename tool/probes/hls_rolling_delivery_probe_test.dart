@@ -57,9 +57,13 @@ void main() {
         }, _RealNetwork());
         final baseline = reports.first;
         expect(baseline['started'], true);
+        expect(baseline['inputCoverageIncomplete'], false);
+        expect(baseline['coverageWarningCount'], 0);
         expect(baseline['outputBytes'] as int, greaterThan(0));
         expect((baseline['inspection'] as Map)['exitCode'], 0);
         for (final report in reports.skip(1)) {
+          expect(report['inputCoverageIncomplete'], true);
+          expect(report['coverageWarningCount'], 1);
           expect(report['completedUpstreamVideoRequests'] as int, greaterThanOrEqualTo(1));
           expect(report['windowDurationSeconds'], 6);
           expect(report['minimumWholeBodyMs'] as int, greaterThanOrEqualTo(12000));
@@ -103,6 +107,14 @@ Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Direc
         'atMs': diagnostics.elapsedMilliseconds,
         'code': event.data['code'],
         'manualStop': event.data['manualStop'],
+        for (final key in [
+          'inputCoverageIncomplete',
+          'inputTailDiscarded',
+          'inputIntegrityError',
+          'inputDrained',
+          'forcedCancel',
+        ])
+          if (event.data.containsKey(key)) key: event.data[key],
       });
     }
   });
@@ -136,6 +148,9 @@ Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Direc
     report['stoppedMs'] = diagnostics.elapsedMilliseconds;
     report['started'] = events.any((event) => event['type'] == 'started');
     report['events'] = events;
+    final terminal = events.lastWhere((event) => event['type'] == 'complete' || event['type'] == 'error');
+    report['inputCoverageIncomplete'] = terminal['inputCoverageIncomplete'];
+    report['coverageWarningCount'] = events.where((event) => event['type'] == 'inputCoverage').length;
     final snapshot = diagnostics.snapshot();
     final traces = (snapshot['requests'] as List).cast<Map<String, Object?>>();
     report['requestCount'] = traces.length;

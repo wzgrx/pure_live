@@ -1,1 +1,1 @@
-enum FFmpegEventType { startAck, started, progress, error, complete, heartbeat }
+enum FFmpegEventType { startAck, started, progress, error, complete, heartbeat, inputCoverage }

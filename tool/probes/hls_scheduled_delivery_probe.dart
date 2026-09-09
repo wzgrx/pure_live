@@ -154,6 +154,7 @@ final class _ScheduledRelay {
   }
 
   Future<void> select(String path) async {
+    if (scheduler.hasFeed(path)) return;
     final uri = origin.resolve(path);
     final initial = await transport.loadSnapshot(uri, HlsPrefetchCancellation(), budget: responseBudget());
     if (!scheduler.select(path, uri, initial)) throw StateError('Fixture rendition unsupported');
@@ -165,9 +166,34 @@ final class _ScheduledRelay {
     try {
       final path = request.uri.path;
       if (path == '/master.m3u8') {
-        final (response, _) = await transport.open('GET', origin, budget: responseBudget());
+        final readBudget = responseBudget();
+        final (response, _) = await transport.open('GET', origin, budget: readBudget);
+        final reader = HlsBodyReader(response);
+        final data = <int>[];
+        try {
+          while (await readBudget.wait(reader.moveNext)) {
+            if (data.length + reader.current.length > 4 * 1024 * 1024) throw const FormatException('Master size limit');
+            data.addAll(reader.current);
+          }
+        } finally {
+          await reader.cancel();
+        }
+        final text = utf8.decode(data);
+        if (scheduler.feedCount == 0) {
+          final plan = HlsPrefetchPlan.fromMaster(text, origin);
+          if (plan == null) throw StateError('Fixture master not unambiguous');
+          final candidates = <HlsPrefetchSelection>[];
+          for (final uri in plan.sources) {
+            candidates.add((
+              id: uri.path,
+              source: uri,
+              snapshot: await transport.loadSnapshot(uri, HlsPrefetchCancellation(), budget: responseBudget()),
+            ));
+          }
+          if (!scheduler.selectAll(candidates)) throw StateError('Fixture A/V set not supported atomically');
+        }
         request.response.headers.contentType = ContentType('application', 'vnd.apple.mpegurl');
-        await request.response.addStream(response);
+        request.response.write(text);
       } else if (path == '/variant_0/index.m3u8' || path == '/variant_1/index.m3u8') {
         await selections.putIfAbsent(path, () => select(path));
         final text = finishing ? manifests[path]! : scheduler.publish(path, localUri);

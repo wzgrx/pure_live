@@ -15,6 +15,7 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/hls_body_reader.dart';
 import 'package:pure_live/recorder/services/hls_prefetch_pool.dart';
+import 'package:pure_live/recorder/services/hls_prefetch_plan.dart';
 import 'package:pure_live/recorder/services/hls_prefetch_scheduler.dart';
 import 'package:pure_live/recorder/services/hls_session_cookies.dart';
 import 'package:pure_live/recorder/services/hls_upstream_client.dart';

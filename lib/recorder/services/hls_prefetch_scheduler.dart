@@ -7,6 +7,8 @@ import 'hls_retained_window.dart';
 
 enum HlsPrefetchResourceKind { media, initialization, key }
 
+typedef HlsPrefetchSelection = ({String id, Uri source, HlsMediaSnapshot snapshot});
+
 final class HlsPrefetchResource {
   HlsPrefetchResource._(this.key, this.uri, this.range, this.kind, [this.feedId, this.sequence]);
   factory HlsPrefetchResource.media(String feedId, HlsSegmentDescriptor segment) => HlsPrefetchResource._(
@@ -89,22 +91,50 @@ final class HlsPrefetchScheduler {
 
   /// Unsupported inputs remain with the caller's original path. No network is
   /// started until the complete initial metadata/render contract is accepted.
-  bool select(String id, Uri fetchSource, HlsMediaSnapshot initial) {
-    if (_closed || _finishing || _feeds.containsKey(id) || _feeds.length >= maximumFeeds) return false;
-    final window = HlsRetainedWindow(initial.source, maximumSegments: maximumSegments);
+  bool select(String id, Uri fetchSource, HlsMediaSnapshot initial) =>
+      selectAll([(id: id, source: fetchSource, snapshot: initial)]);
+
+  /// Validate the whole selected A/V set before allocating any downloader or
+  /// refresh timer. A rejected member must leave existing selection untouched.
+  bool selectAll(Iterable<HlsPrefetchSelection> selections) {
+    if (_closed || _finishing) return false;
+    final pending = <String, _Feed>{};
     try {
-      window.merge(initial);
-      renderHlsRetainedManifest(window, localUri: (uri) => uri);
+      for (final selection in selections) {
+        if (pending.length + _feeds.length >= maximumFeeds ||
+            selection.id.isEmpty ||
+            selection.id.length > 256 ||
+            pending.containsKey(selection.id) ||
+            _feeds.containsKey(selection.id) ||
+            !_validSource(selection.source) ||
+            !_validSource(selection.snapshot.source)) {
+          return false;
+        }
+        final window = HlsRetainedWindow(selection.snapshot.source, maximumSegments: maximumSegments);
+        window.merge(selection.snapshot);
+        renderHlsRetainedManifest(window, localUri: (uri) => uri);
+        final feed = _Feed(selection.id, selection.source, window);
+        _rebuild(feed);
+        pending[selection.id] = feed;
+      }
     } on FormatException {
       return false;
     }
-    final feed = _Feed(id, fetchSource, window);
-    _feeds[id] = feed;
-    _rebuild(feed);
+    if (pending.isEmpty || _closed || _finishing) return false;
+    _feeds.addAll(pending);
     _pump();
-    _schedule(feed);
+    for (final feed in pending.values) {
+      _schedule(feed);
+    }
     return true;
   }
+
+  static bool _validSource(Uri uri) =>
+      const {'http', 'https'}.contains(uri.scheme) &&
+      uri.host.isNotEmpty &&
+      uri.userInfo.isEmpty &&
+      !uri.hasFragment &&
+      uri.toString().length <= 65536;
 
   String publish(String id, Uri Function(HlsPrefetchResource resource) localUri) {
     final feed = _feeds[id];

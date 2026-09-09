@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 part 'hls_date_range.dart';
 part 'hls_low_latency.dart';
 
@@ -99,6 +101,7 @@ final class HlsMediaSnapshot {
     Set<String> unhandledTags,
     List<HlsDateRange> dateRanges,
     this.lowLatency,
+    this.reloadFingerprint,
   ) : segments = List.unmodifiable(segments),
       unhandledTags = Set.unmodifiable(unhandledTags),
       dateRanges = List.unmodifiable(dateRanges);
@@ -116,9 +119,17 @@ final class HlsMediaSnapshot {
   final List<HlsDateRange> dateRanges;
   final HlsLowLatencyInfo lowLatency;
 
+  /// Fixed-size wire-content identity for reload cadence, not retained media
+  /// identity. Comments and metadata changes still make a playlist changed.
+  final String reloadFingerprint;
+
   static HlsMediaSnapshot parse(String text, Uri source, {int maximumSegments = 512}) {
     if (maximumSegments < 1 || maximumSegments > 4096) throw ArgumentError.value(maximumSegments);
-    if (text.length > 4 * 1024 * 1024 || utf8.encode(text).length > 4 * 1024 * 1024) {
+    if (text.length > 4 * 1024 * 1024) {
+      throw const FormatException('HLS snapshot exceeds text limit');
+    }
+    final encoded = utf8.encode(text);
+    if (encoded.length > 4 * 1024 * 1024) {
       throw const FormatException('HLS snapshot exceeds text limit');
     }
     if (!const {'http', 'https'}.contains(source.scheme) || source.host.isEmpty) {
@@ -348,6 +359,7 @@ final class HlsMediaSnapshot {
       unhandled,
       dateRanges,
       lowLatency.finish(segments, ended, target, unhandled),
+      sha256.convert(encoded).toString(),
     );
   }
 }

@@ -121,7 +121,7 @@ final class HlsPrefetchScheduler {
         // too small; silently dropping its first segments is not selection.
         if (window.merge(selection.snapshot).isNotEmpty) return false;
         renderHlsRetainedManifest(window, localUri: (uri) => uri);
-        final feed = _Feed(selection.id, selection.source, window);
+        final feed = _Feed(selection.id, selection.source, window, selection.snapshot.reloadFingerprint);
         _rebuild(feed);
         pending[selection.id] = feed;
       }
@@ -279,12 +279,17 @@ final class HlsPrefetchScheduler {
 
   void _schedule(_Feed feed) {
     if (_closed || _finishing || feed.failed || feed.window.ended) return;
-    final interval = pollInterval ?? Duration(milliseconds: (feed.window.targetDuration * 500).clamp(500, 30000));
-    feed.timer = Timer(interval, () => _own(_refresh(feed)));
+    // RFC 8216 6.3.4: first/changed loads use a full target, unchanged
+    // loads a half target. Count time already spent loading, not another
+    // full sleep after a slow successful response. Never overlap reloads.
+    final interval = pollInterval ?? Duration(milliseconds: feed.window.targetDuration * (feed.unchanged ? 500 : 1000));
+    final remaining = interval - feed.reloadClock.elapsed;
+    feed.timer = Timer(remaining > Duration.zero ? remaining : Duration.zero, () => _own(_refresh(feed)));
   }
 
   Future<void> _refresh(_Feed feed) async {
     if (_closed || _finishing || feed.failed) return;
+    feed.reloadClock.reset();
     final cancellation = HlsPrefetchCancellation();
     feed.refreshCancellation = cancellation;
     var stage = HlsPrefetchRefreshStage.snapshot;
@@ -293,6 +298,8 @@ final class HlsPrefetchScheduler {
       if (_closed || _finishing || cancellation.isCancelled) return;
       stage = HlsPrefetchRefreshStage.retention;
       final evicted = feed.window.merge(snapshot);
+      feed.unchanged = snapshot.reloadFingerprint == feed.lastSnapshotFingerprint;
+      feed.lastSnapshotFingerprint = snapshot.reloadFingerprint;
       if (evicted.any((s) => s.sequence > feed.delivered)) _markGap();
       _rebuild(feed);
       _prune();
@@ -456,10 +463,15 @@ final class HlsPrefetchScheduler {
 }
 
 final class _Feed {
-  _Feed(this.id, this.source, this.window);
+  _Feed(this.id, this.source, this.window, this.lastSnapshotFingerprint);
   final String id;
   final Uri source;
   final HlsRetainedWindow window;
+  // The initial loader's start time is not available for every selection.
+  // Selection time is conservative; subsequent loads have exact start times.
+  final reloadClock = Stopwatch()..start();
+  String lastSnapshotFingerprint;
+  bool unchanged = false;
   Map<String, HlsPrefetchResource> wanted = {};
   List<List<HlsSegmentDescriptor>> published = [];
   String? lastManifest;

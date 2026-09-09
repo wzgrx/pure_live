@@ -18,6 +18,9 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
   /// Keeps [contentBuilder] mounted after an empty snapshot has been
   /// published. Tabbed pages use this so landing on one empty tab does not
   /// dispose the surrounding TabBarView and strand the horizontal gesture.
+  /// Later failures use the bounded notice region, retaining both the cached
+  /// navigation and the caller's recovery actions. Initial failures still
+  /// use the full-page status until a snapshot has been published.
   final bool preserveContentWhenEmpty;
   final bool? showScrollToTopBtn;
   final bool showPageSizeSelector;
@@ -78,6 +81,25 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
                           child: Text(notice, style: Theme.of(context).textTheme.bodySmall),
                         ),
                       _buildCellularBanner(context),
+                      if (preserveContentWhenEmpty)
+                        Obx(() {
+                          if (controller.list.isNotEmpty || controller.totalCount.value == null) {
+                            return const SizedBox.shrink();
+                          }
+                          final Widget status;
+                          if (controller.notLogin.value) {
+                            status = _buildLoginStatus(context);
+                          } else if (controller.pageError.value) {
+                            status = _buildErrorStatus(context);
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                          return Semantics(
+                            key: const ValueKey('base-page-retained-recovery'),
+                            liveRegion: true,
+                            child: status,
+                          );
+                        }),
                       if (controller.showInlineError)
                         Obx(() {
                           if (controller.list.isEmpty ||
@@ -118,40 +140,32 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
                     controller.checkAndNotifyLayoutChange(isDesktop);
                     return Obx(() {
                       if (controller.list.isEmpty) {
+                        if (preserveContentWhenEmpty && controller.totalCount.value != null) {
+                          return buildActualContent(context, isDesktop);
+                        }
                         if (controller.notLogin.value) {
-                          final view = notLoginBuilder != null
-                              ? notLoginBuilder!(context)
-                              : AppStatusView(
-                                  type: AppStatusType.error,
-                                  icon: Icons.account_circle_outlined,
-                                  title: i18n("login_required_title"),
-                                  subtitle: i18n("login_required_subtitle"),
-                                  buttonText: i18n("go_to_login"),
-                                  onButtonPressed: () => Get.toNamed(RoutePath.kSettingsAccount),
-                                );
-                          return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
+                          return _buildScrollableStatus(
+                            context,
+                            isDesktop,
+                            constraint,
+                            controller,
+                            _buildLoginStatus(context),
+                          );
                         }
                         if (controller.pageError.value) {
-                          final view = errorBuilder != null
-                              ? errorBuilder!(context, controller.errorMsg.value)
-                              : AppStatusView(
-                                  type: AppStatusType.error,
-                                  icon: Icons.wifi_off_rounded,
-                                  title: i18n("network_error_title"),
-                                  subtitle: controller.errorMsg.value,
-                                  buttonText: controller.retryActionLabel,
-                                  onButtonPressed: () => controller.retryData(),
-                                );
-                          return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
+                          return _buildScrollableStatus(
+                            context,
+                            isDesktop,
+                            constraint,
+                            controller,
+                            _buildErrorStatus(context),
+                          );
                         }
                         if (controller.pageEmpty.value && !preserveContentWhenEmpty) {
                           final view = emptyBuilder != null
                               ? emptyBuilder!(context)
                               : AppStatusView(type: AppStatusType.empty, title: i18n('no_data'), subtitle: '');
                           return _buildScrollableStatus(context, isDesktop, constraint, controller, view);
-                        }
-                        if (preserveContentWhenEmpty && controller.totalCount.value != null) {
-                          return buildActualContent(context, isDesktop);
                         }
                         return AppStatusView(type: AppStatusType.loading, title: i18n('refresh_loading'), subtitle: '');
                       }
@@ -168,7 +182,9 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
             left: 0,
             right: 0,
             child: Obx(() {
-              if (controller.list.isNotEmpty && controller.loadding.value) {
+              final hasVisibleContent =
+                  controller.list.isNotEmpty || (preserveContentWhenEmpty && controller.totalCount.value != null);
+              if (hasVisibleContent && controller.loadding.value) {
                 return SizedBox(
                   height: 2.5,
                   child: LinearProgressIndicator(
@@ -184,6 +200,28 @@ class BasePageView<C extends BasePageScrollAndStateBone<T>, T> extends Stateless
       ),
     );
   }
+
+  Widget _buildLoginStatus(BuildContext context) =>
+      notLoginBuilder?.call(context) ??
+      AppStatusView(
+        type: AppStatusType.error,
+        icon: Icons.account_circle_outlined,
+        title: i18n("login_required_title"),
+        subtitle: i18n("login_required_subtitle"),
+        buttonText: i18n("go_to_login"),
+        onButtonPressed: () => Get.toNamed(RoutePath.kSettingsAccount),
+      );
+
+  Widget _buildErrorStatus(BuildContext context) =>
+      errorBuilder?.call(context, controller.errorMsg.value) ??
+      AppStatusView(
+        type: AppStatusType.error,
+        icon: Icons.wifi_off_rounded,
+        title: i18n("network_error_title"),
+        subtitle: controller.errorMsg.value,
+        buttonText: controller.retryActionLabel,
+        onButtonPressed: () => controller.retryData(),
+      );
 
   Widget _buildScrollableStatus(
     BuildContext context,

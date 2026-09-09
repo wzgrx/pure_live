@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -15,10 +16,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class _Site extends LiveSite {
   int requests = 0;
+  Object? failure;
+  Future<void>? pending;
   List<(String, int)> catalog = [('First', 40), ('Empty', 0), ('Last', 2)];
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
     requests++;
+    if (pending case final wait?) await wait;
+    if (failure case final error?) throw error;
     return [
       for (final (id, count) in catalog)
         LiveCategory(
@@ -250,6 +255,62 @@ void main() {
     await tester.pump();
     expect(() => old.addListener(() {}), throwsFlutterError);
     expect(() => replacement.addListener(() {}), throwsFlutterError);
+    expect(tester.takeException(), null);
+  });
+
+  for (final failure in ['network_disconnected', 'LoginRequired']) {
+    testWidgets('empty category keeps navigation after $failure and recovers', (tester) async {
+      final (controller, site) = await _mount(tester);
+      await tester.drag(find.byType(TabBarView), const Offset(-380, 0));
+      await tester.pumpAndSettle();
+      final emptyController = controller.scrollController;
+      site.failure = failure;
+      await _pull(tester, find.byKey(const PageStorageKey('area_empty_fixture_Empty')));
+      expect(find.byType(TabBarView), findsOneWidget);
+      expect(identical(controller.scrollController, emptyController), true);
+      expect(controller.scrollController.positions, hasLength(1));
+      expect(find.byType(AppStatusView), findsWidgets);
+      // The failed refresh must not trap horizontal navigation in this tab.
+      await tester.drag(find.byType(TabBarView), const Offset(-380, 0));
+      await tester.pumpAndSettle();
+      expect(controller.tabIndex.value, 2);
+      site.failure = null;
+      await _pull(tester, find.byType(GridView).hitTestable());
+      expect(site.requests, 3);
+      expect(controller.pageError.value, false);
+      expect(controller.notLogin.value, false);
+      expect(controller.tabIndex.value, 2);
+      expect(tester.takeException(), null);
+    });
+  }
+
+  testWidgets('retry from retained empty error exposes pending work until the response arrives', (tester) async {
+    final (controller, site) = await _mount(tester);
+    controller.selectCategory(1);
+    await tester.pumpAndSettle();
+    site.failure = 'network_disconnected';
+    await controller.refreshData();
+    await tester.pumpAndSettle();
+    final retry = find.text(controller.retryActionLabel);
+    await tester.ensureVisible(retry);
+    await tester.pumpAndSettle();
+    final gate = Completer<void>();
+    site.failure = null;
+    site.pending = gate.future;
+    await tester.tap(retry);
+    await tester.pump();
+    try {
+      expect(site.requests, 3);
+      expect(controller.loadding.value, true);
+      expect(find.byType(TabBarView), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    } finally {
+      gate.complete();
+      await tester.pumpAndSettle();
+    }
+    expect(controller.loadding.value, false);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(controller.tabIndex.value, 1);
     expect(tester.takeException(), null);
   });
 }

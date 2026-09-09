@@ -69,6 +69,10 @@ Future<_Controller> _mount(
   bool refresh = true,
   bool paging = true,
   bool preserveEmpty = false,
+  bool wrapRefresh = true,
+  bool hasSnapshot = true,
+  WidgetBuilder? notLoginBuilder,
+  Widget Function(BuildContext, String)? errorBuilder,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -107,7 +111,7 @@ Future<_Controller> _mount(
                   Get.put(SettingsService(), permanent: true);
                   c = _Controller(notice: headers);
                   c.canLoadMore.value = true;
-                  c.totalCount.value = 100;
+                  c.totalCount.value = hasSnapshot ? 100 : null;
                   c.errorMsg.value = List.filled(4, i18n('network_disconnected_msg')).join(' ');
                   if (state == 'content') {
                     c.list.assignAll(List.generate(30, (i) => i));
@@ -124,6 +128,9 @@ Future<_Controller> _mount(
                   enableRefresh: refresh,
                   enableLoadMore: paging,
                   preserveContentWhenEmpty: preserveEmpty,
+                  wrapMobileRefresh: wrapRefresh,
+                  notLoginBuilder: notLoginBuilder,
+                  errorBuilder: errorBuilder,
                   showScrollToTopBtn: false,
                   showPageSizeSelector: true,
                   pageSizeOptions: const [20, 40, 80],
@@ -306,4 +313,84 @@ void main() {
     expect(tester.getSize(find.byKey(const ValueKey('retained-list'))).height, 320);
     expect(tester.takeException(), null);
   });
+
+  for (final lang in ['zh', 'en']) {
+    for (final width in [320.0, 900.0]) {
+      for (final failure in ['error', 'login']) {
+        testWidgets('$lang $width retained empty page exposes $failure without replacing content', (tester) async {
+          final c = await _mount(
+            tester,
+            lang: lang,
+            size: Size(width, 320),
+            headers: false,
+            state: 'empty',
+            preserveEmpty: true,
+          );
+          final position = c.scrollController.position;
+          c.pageError.value = failure == 'error';
+          c.notLogin.value = failure == 'login';
+          await tester.pumpAndSettle();
+          expect(find.byKey(const ValueKey('retained-list')), findsOneWidget);
+          expect(identical(c.scrollController.position, position), true);
+          final notices = find.byKey(const ValueKey('base-page-notices'));
+          expect(tester.getSize(notices).height, lessThanOrEqualTo(160));
+          final label = failure == 'error' ? c.retryActionLabel : i18n('go_to_login');
+          await _reveal(tester, notices, find.text(label));
+          if (failure == 'error') {
+            await tester.tap(find.text(label));
+            expect(c.retries, 1);
+          }
+          c.pageError.value = false;
+          c.notLogin.value = false;
+          await tester.pumpAndSettle();
+          expect(tester.getSize(notices).height, 0);
+          expect(identical(c.scrollController.position, position), true);
+          expect(c.scrollController.positions, hasLength(1));
+          expect(tester.takeException(), null);
+        });
+      }
+    }
+  }
+  for (final failure in ['error', 'login']) {
+    testWidgets('$failure without a successful snapshot keeps the full-page status', (tester) async {
+      await _mount(
+        tester,
+        lang: 'en',
+        size: const Size(320, 320),
+        headers: false,
+        state: failure,
+        preserveEmpty: true,
+        hasSnapshot: false,
+      );
+      expect(find.byKey(const ValueKey('retained-list')), findsNothing);
+      expect(find.byKey(const ValueKey('base-page-status')), findsOneWidget);
+      expect(tester.takeException(), null);
+    });
+    testWidgets('retained $failure honors the caller status builder and action', (tester) async {
+      var actions = 0;
+      String? receivedError;
+      Widget custom(BuildContext _) => TextButton(onPressed: () => actions++, child: const Text('CUSTOM ACTION'));
+      final c = await _mount(
+        tester,
+        lang: 'en',
+        size: const Size(320, 320),
+        headers: false,
+        state: failure,
+        preserveEmpty: true,
+        wrapRefresh: false,
+        notLoginBuilder: custom,
+        errorBuilder: (context, message) {
+          receivedError = message;
+          return custom(context);
+        },
+      );
+      expect(find.byKey(const ValueKey('retained-list')), findsOneWidget);
+      expect(find.byType(EasyRefresh), findsNothing, reason: 'the nested caller retains refresh ownership');
+      if (failure == 'error') expect(receivedError, c.errorMsg.value);
+      await tester.tap(find.text('CUSTOM ACTION'));
+      expect(actions, 1);
+      expect(c.scrollController.positions, hasLength(1));
+      expect(tester.takeException(), null);
+    });
+  }
 }

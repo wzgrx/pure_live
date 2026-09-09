@@ -12,11 +12,19 @@ import 'package:pure_live/core/site/kilakila/kilakila_api.dart';
 import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
 import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
+import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_api.dart';
+import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_share.dart';
 import 'package:pure_live/core/site/zhanqi/zhanqi_api.dart';
 
 typedef _Read = Future<Object?> Function(CancelToken?);
 typedef _Case = ({String name, _Read read, String body, int cap});
 final _cases = <_Case>[
+  (
+    name: 'Xiaohongshu',
+    read: (c) => XiaohongshuApi().room('123', cancel: c),
+    body: '<script>window.__INITIAL_STATE__={"liveStream":{"pageStatus":"success","liveStatus":"end","roomData":{"roomInfo":{"status":3},"hostInfo":{}}}}</script>',
+    cap: XiaohongshuShare.responseLimit,
+  ),
   (
     name: 'Zhanqi',
     read: (c) => ZhanqiApi().directory(cancel: c),
@@ -69,6 +77,7 @@ String _kind(Object? error) => switch (error) {
   TwitcastingException e => e.kind.name,
   HuajiaoException e => e.kind.name,
   ZhanqiException e => e.kind.name,
+  XiaohongshuException e => e.kind.name,
   _ => '${error.runtimeType}',
 };
 Matcher _failure(String kind) => throwsA(predicate<Object>((e) => _kind(e) == kind, kind));

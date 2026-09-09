@@ -32,6 +32,7 @@ import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
 
 import 'media_packet_timeline.dart';
+import 'hls_capture_contract.dart';
 
 void main() {
   test(
@@ -304,26 +305,26 @@ void main() {
             final format = metadata['format'] as Map<String, dynamic>;
             final duration = double.parse(format['duration'] as String);
             final streams = (metadata['streams'] as List).cast<Map<String, dynamic>>();
-            // Retain packet-clock evidence before the duration acceptance gate.
-            // An outer duration failure must not hide whether the excess is a
-            // single-track tail, a presentation hole, or a decode-order reversal.
-            final packetInspection = await _runOwned(ffprobe, [
-              '-v',
-              'error',
-              '-show_packets',
-              '-show_streams',
-              '-show_entries',
-              'packet=stream_index,pts_time,dts_time,duration_time:stream=index,codec_type',
-              '-of',
-              'json',
-              mp4,
-            ], timeout: const Duration(seconds: 15));
-            expect(packetInspection.exitCode, 0);
-            expect((packetInspection.stderr as String).trim(), isEmpty);
-            final packetTimeline = inspectMediaPacketTimeline(jsonDecode(packetInspection.stdout as String) as Map);
+            final packetTimeline = await _packetTimeline(ffprobe, mp4);
             await File(p.join(output.path, 'packet-timeline.json')).writeAsString(jsonEncode(packetTimeline));
+            final sourceTimelines = <Map>[];
+            final sourceFiles = await retained.list().where((e) => e is File && p.extension(e.path) == '.ts').toList();
+            expect(sourceFiles.length, inInclusiveRange(1, 32));
+            for (final sourceFile in sourceFiles) {
+              sourceTimelines.add(await _packetTimeline(ffprobe, sourceFile.path));
+            }
+            final contentContract = auditHlsCaptureContract(
+              diagnostics: hlsDiagnostics.snapshot(),
+              terminal: terminal,
+              outputTimeline: packetTimeline,
+              sourceTimelines: sourceTimelines,
+            );
+            await File(p.join(output.path, 'content-contract.json')).writeAsString(jsonEncode(contentContract));
             expect(duration, greaterThan(15));
-            expect(duration, lessThan(40));
+            // A 30-second capture target may finish an already offered HLS
+            // prefix longer than 40 seconds. Check what was actually offered,
+            // delivered and retained instead of accepting arbitrary truncation.
+            expect(contentContract['status'], 'passed', reason: jsonEncode(contentContract));
             expect(streams.any((stream) => stream['codec_type'] == 'audio'), isTrue);
             final video = streams.singleWhere((stream) => stream['codec_type'] == 'video');
             expect(video['width'], selectedWidth, reason: 'Native width must match the selected production master.');
@@ -390,6 +391,7 @@ void main() {
               'output': mp4,
               'durationSeconds': duration,
               'packetTimeline': packetTimeline,
+              'contentContract': contentContract,
               'growthSamples': samples,
               'nativeStopped': true,
               'registeredProductionResolver': true,
@@ -468,6 +470,23 @@ void main() {
 }
 
 class _RealNetwork extends HttpOverrides {}
+
+Future<Map<String, Object?>> _packetTimeline(String ffprobe, String path) async {
+  final result = await _runOwned(ffprobe, [
+    '-v',
+    'error',
+    '-show_packets',
+    '-show_streams',
+    '-show_entries',
+    'packet=stream_index,pts_time,dts_time,duration_time:stream=index,codec_type',
+    '-of',
+    'json',
+    path,
+  ], timeout: const Duration(seconds: 15));
+  expect(result.exitCode, 0);
+  expect((result.stderr as String).trim(), isEmpty);
+  return inspectMediaPacketTimeline(jsonDecode(result.stdout as String) as Map);
+}
 
 Future<ProcessResult> _runOwned(String executable, List<String> arguments, {required Duration timeout}) async {
   final process = await Process.start(executable, arguments);

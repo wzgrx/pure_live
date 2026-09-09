@@ -86,6 +86,10 @@ final class HlsPrefetchScheduler {
   int get feedCount => _feeds.length;
   int get resourceRecordCount => _items.length;
   bool hasFeed(String id) => _feeds.containsKey(id);
+  Map<String, Object?> describeDownload(String key) => {
+    'admitted': _items.containsKey(key),
+    'ticket': _items[key]?.$2.diagnosticsSnapshot(),
+  };
   Set<String> get requiredKeys => {
     for (final feed in _feeds.values) ...feed.wanted.keys,
     for (final feed in _feeds.values)

@@ -10,9 +10,29 @@ final class HlsRelayDiagnostics {
   final Stopwatch _clock = Stopwatch()..start();
   final List<_HlsRequestTrace> _requests = [];
   final List<Map<String, Object?>> _prefetchRefreshFailures = [];
+  final List<Map<String, Object?>> _prefetchDownloadCheckpoints = [];
   int _omittedRequests = 0;
 
   int get elapsedMilliseconds => _clock.elapsedMilliseconds;
+
+  void _prefetchDownloads(String phase, Iterable<Map<String, Object?>> rows) {
+    if (_prefetchDownloadCheckpoints.length >= 2) return;
+    final kept = <Map<String, Object?>>[];
+    var omitted = 0;
+    for (final row in rows) {
+      if (kept.length < 128) {
+        kept.add(row);
+      } else {
+        omitted++;
+      }
+    }
+    _prefetchDownloadCheckpoints.add({
+      'phase': phase,
+      'atMs': elapsedMilliseconds,
+      'resources': kept,
+      'omittedResources': omitted,
+    });
+  }
 
   void _prefetchRefreshFailed(String id, HlsPrefetchRefreshStage stage, Object error) {
     // One terminal event per selected feed, at most two feeds per generation.
@@ -70,6 +90,7 @@ final class HlsRelayDiagnostics {
     'omittedRequests': _omittedRequests,
     'requests': [for (final request in _requests) request.snapshot()],
     'prefetchRefreshFailures': [for (final failure in _prefetchRefreshFailures) Map<String, Object?>.of(failure)],
+    'prefetchDownloadCheckpoints': jsonDecode(jsonEncode(_prefetchDownloadCheckpoints)),
   };
 }
 

@@ -52,7 +52,7 @@ final class HlsPrefetchCancellation {
 }
 
 final class HlsPrefetchTicket {
-  HlsPrefetchTicket._(this.key, this._loader, this._body);
+  HlsPrefetchTicket._(this.key, this._loader, this._body, this._trace);
   final String key;
   final HlsPrefetchLoader _loader;
   final HlsMediaSpool _body;
@@ -71,6 +71,50 @@ final class HlsPrefetchTicket {
   int _readers = 0;
   int _bytes = 0;
   HlsHttpBodyMetadata? _metadata;
+  final _PrefetchTrace? _trace;
+
+  /// Detached numeric/enum evidence, deliberately excluding the request key.
+  /// Times use this ticket's admission clock, not the relay request clock.
+  Map<String, Object?>? diagnosticsSnapshot() => _trace == null
+      ? null
+      : {
+          ..._trace.snapshot(),
+          'ready': isReady,
+          'retired': _retired,
+          'disposed': _disposed.isCompleted,
+          'failure': _failure?.name,
+        };
+}
+
+final class _PrefetchTrace {
+  final clock = Stopwatch()..start();
+  String phase = 'queued';
+  int? loadStartedMs;
+  int? headersMs;
+  int? firstBodyMs;
+  int? lastBodyMs;
+  int? sealedMs;
+  int? retiredMs;
+  String? retiredPhase;
+  int? expectedBytes;
+  int receivedBytes = 0;
+  int stagedBytes = 0;
+
+  Map<String, Object?> snapshot() => {
+    'clock': 'milliseconds-since-ticket-admission',
+    'ageMs': clock.elapsedMilliseconds,
+    'phase': phase,
+    'loadStartedMs': loadStartedMs,
+    'headersMs': headersMs,
+    'firstBodyMs': firstBodyMs,
+    'lastBodyMs': lastBodyMs,
+    'sealedMs': sealedMs,
+    'retiredMs': retiredMs,
+    'retiredPhase': retiredPhase,
+    'expectedBytes': expectedBytes,
+    'receivedBytes': receivedBytes,
+    'stagedBytes': stagedBytes,
+  };
 }
 
 /// One bounded pool per recording source generation. Queued, downloading,
@@ -86,6 +130,7 @@ final class HlsPrefetchPool {
     this.maximumBodyBytes = 128 * 1024 * 1024,
     this.memoryBytesPerBody = 2 * 1024 * 1024,
     this.bodyIdleTimeout = const Duration(seconds: 15),
+    this.enableDiagnostics = false,
   }) {
     if (bodyIdleTimeout <= Duration.zero ||
         bodyIdleTimeout > const Duration(minutes: 1) ||
@@ -113,6 +158,7 @@ final class HlsPrefetchPool {
   final int maximumBodyBytes;
   final int memoryBytesPerBody;
   final Duration bodyIdleTimeout;
+  final bool enableDiagnostics;
   final Map<String, HlsPrefetchTicket> _entries = {};
   final Set<HlsPrefetchTicket> _owned = {};
   final ListQueue<HlsPrefetchTicket> _queue = ListQueue();
@@ -142,6 +188,7 @@ final class HlsPrefetchPool {
         byteLimit: maximumBodyBytes,
         reusable: true,
       ),
+      enableDiagnostics ? _PrefetchTrace() : null,
     );
     _entries[key] = entry;
     _owned.add(entry);
@@ -180,6 +227,8 @@ final class HlsPrefetchPool {
   void _pump() {
     while (!_closed && !_cleanupFailed && _active < maximumConcurrent && _queue.isNotEmpty) {
       final entry = _queue.removeFirst();
+      entry._trace?.phase = 'loading';
+      entry._trace?.loadStartedMs = entry._trace.clock.elapsedMilliseconds;
       entry._loading = true;
       _active++;
       unawaited(_run(entry));
@@ -191,6 +240,7 @@ final class HlsPrefetchPool {
       await _receive(entry);
       entry._cancellation.throwIfCancelled();
       entry._complete = true;
+      entry._trace?.phase = 'ready';
       entry._ready.complete(true);
     } on Object catch (error) {
       entry._failure = entry._cancellation.isCancelled
@@ -212,6 +262,9 @@ final class HlsPrefetchPool {
   Future<void> _receive(HlsPrefetchTicket entry) async {
     final budget = HlsResponseBudget(bodyIdleTimeout);
     final response = await entry._loader(entry._cancellation);
+    entry._trace?.phase = 'body';
+    entry._trace?.headersMs = entry._trace.clock.elapsedMilliseconds;
+    entry._trace?.expectedBytes = response.expectedLength;
     final iterator = HlsBodyReader(response.body);
     final detach = entry._cancellation.onCancel(() {
       unawaited(iterator.cancel().catchError((Object _) {}));
@@ -227,16 +280,27 @@ final class HlsPrefetchPool {
       while (await budget.wait(iterator.moveNext)) {
         entry._cancellation.throwIfCancelled();
         final chunk = iterator.current;
+        final trace = entry._trace;
+        if (trace != null && chunk.isNotEmpty) {
+          trace.firstBodyMs ??= trace.clock.elapsedMilliseconds;
+          trace.lastBodyMs = trace.clock.elapsedMilliseconds;
+          trace.receivedBytes += chunk.length;
+        }
         if (chunk.length > maximumBytes - _bytes || chunk.length > maximumBodyBytes - entry._bytes) {
           throw const _HlsPrefetchCapacity();
         }
         // Reserve before asynchronous disk IO; simultaneous receives share it.
         _bytes += chunk.length;
         entry._bytes += chunk.length;
+        entry._trace?.phase = 'staging';
         await entry._body.add(chunk);
+        if (trace != null) trace.stagedBytes += chunk.length;
+        entry._trace?.phase = 'body';
       }
       entry._cancellation.throwIfCancelled();
+      entry._trace?.phase = 'sealing';
       await entry._body.seal(expectedLength: response.expectedLength);
+      entry._trace?.sealedMs = entry._trace.clock.elapsedMilliseconds;
       budget.check();
       entry._metadata = response.metadata;
     } finally {
@@ -248,6 +312,10 @@ final class HlsPrefetchPool {
   void _retire(HlsPrefetchTicket entry) {
     if (entry._retired) return;
     entry._retired = true;
+    entry._trace?.retiredPhase = entry._trace.phase;
+    entry._trace?.retiredMs = entry._trace.clock.elapsedMilliseconds;
+    // A retired loader may still settle later. Keep its monotonic clock valid
+    // for that response/disposal; Stopwatch has no scheduled timer to release.
     if (identical(_entries[entry.key], entry)) _entries.remove(entry.key);
     _queue.remove(entry);
     entry._failure ??= entry._complete ? null : HlsPrefetchFailure.cancelled;

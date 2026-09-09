@@ -1,6 +1,28 @@
 part of 'ffmpeg_hls_input_relay.dart';
 
 extension _HlsRelayPrefetch on FFmpegHlsInputRelay {
+  void _diagnosePrefetchDownloads(String phase) {
+    final observer = diagnostics;
+    final prefetch = _prefetch;
+    if (observer == null || prefetch == null) return;
+    try {
+      observer._prefetchDownloads(
+        phase,
+        _prefetchResources.entries.map(
+          (entry) => {
+            'resourceId': entry.key,
+            'kind': entry.value.kind.name,
+            'feedId': entry.value.feedId,
+            'sequence': entry.value.sequence,
+            ...prefetch.describeDownload(entry.value.key),
+          },
+        ),
+      );
+    } on Object {
+      /* Observation must not affect drain, cancellation or file ownership. */
+    }
+  }
+
   Future<void> _preparePrefetch(String master, Uri source) async {
     final cancellation = HlsPrefetchCancellation();
     _preparingCancellation = cancellation;
@@ -42,6 +64,7 @@ extension _HlsRelayPrefetch on FFmpegHlsInputRelay {
         maximumConcurrent: 16,
         memoryBytesPerBody: 512 * 1024,
         bodyIdleTimeout: _bodyIdleTimeout,
+        enableDiagnostics: diagnostics != null,
       );
       candidate = HlsPrefetchScheduler(
         pool: pool,

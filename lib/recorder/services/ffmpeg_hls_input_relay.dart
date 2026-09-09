@@ -286,7 +286,9 @@ class FFmpegHlsInputRelay {
     if (prefetch == null) {
       _finishTimer = Timer(Duration(seconds: _targetSeconds.clamp(1, 10)), _stopFetching);
     } else {
+      _diagnosePrefetchDownloads('stop-requested');
       _prefetchDrain = prefetch.drainPublished(timeout: _prefetchDownloadGrace).then((complete) {
+        _diagnosePrefetchDownloads('downloads-ended');
         if (!complete && !_closed) _inputTailDiscarded = true;
         _stopFetching();
       });

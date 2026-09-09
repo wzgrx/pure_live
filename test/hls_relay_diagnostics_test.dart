@@ -6,6 +6,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
 void main() {
+  test('unrewritten non-HTTP references never become diagnostic resource IDs', () async {
+    const marker = 'privatesecret';
+    final fixture = await _Fixture.start((request) async {
+      request.response.write(
+        '#EXTM3U\n#EXT-X-TARGETDURATION:2\n'
+        '#EXT-X-KEY:METHOD=AES-128,URI="ftp://127.0.0.1/path/$marker"\n'
+        '#EXTINF:2,\nftp://127.0.0.1/path/$marker\n',
+      );
+      await request.response.close();
+    });
+    try {
+      // Observation neither rewrites nor attempts to fetch unsupported inputs.
+      expect(await fixture.text(fixture.relay.inputUri), contains(marker));
+      await fixture.relay.close();
+      final snapshot = fixture.diagnostics.snapshot();
+      expect(jsonEncode(snapshot), isNot(contains(marker)));
+      final window = _requests(snapshot).single['manifest'] as Map;
+      expect((window['segments'] as List).single['resourceId'], isNull);
+      expect(window['children'], isEmpty);
+    } finally {
+      await fixture.close();
+    }
+  });
+
   test('master roles and media windows correlate only through opaque IDs', () async {
     const secret = 'PRIVATE_signed_cookie_title';
     final fixture = await _Fixture.start((request) async {

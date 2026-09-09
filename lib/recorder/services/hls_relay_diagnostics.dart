@@ -98,7 +98,7 @@ final class _HlsRequestTrace {
 Map<String, Object?> _manifestWindow(String source) {
   String? idOf(String value) {
     final uri = Uri.tryParse(value);
-    if (uri == null || uri.host != '127.0.0.1' || uri.pathSegments.length != 2) return null;
+    if (uri == null || uri.scheme != 'http' || uri.host != '127.0.0.1' || uri.pathSegments.length != 2) return null;
     final id = uri.pathSegments.last.split('.').first;
     return RegExp(r'^(root|[0-9a-z]{1,16})$').hasMatch(id) ? id : null;
   }

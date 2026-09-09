@@ -3,6 +3,7 @@ part of 'hls_rolling_delivery_probe_test.dart';
 // Experimental HTTP adapter before the unchanged production relay/manager.
 // This verifies sustained native delivery, not default production activation.
 void _registerScheduledDeliveryProbe() {
+  final production = Platform.environment['PURELIVE_HLS_PRODUCTION_PREFETCH_PROBE'] == '1';
   test(
     'independent prefetch sustains original 12s bodies and headers in the 6s native window',
     () async {
@@ -25,7 +26,7 @@ void _registerScheduledDeliveryProbe() {
             (name: 'scheduled-body-15', budget: 15, bodyMs: 12000, headerMs: 0, runSeconds: 34),
             (name: 'scheduled-headers-15', budget: 15, bodyMs: 0, headerMs: 12000, runSeconds: 34),
           ]) {
-            reports.add(await _capture(config, fixture, root, scheduled: true));
+            reports.add(await _capture(config, fixture, root, scheduled: !production, productionPrefetch: production));
           }
         }, _RealNetwork());
         for (final report in reports) {
@@ -40,9 +41,13 @@ void _registerScheduledDeliveryProbe() {
           expect(terminal['inputIntegrityError'], false);
           final prefetch = report['prefetch'] as Map;
           expect(prefetch['feeds'], 2);
-          expect(prefetch['coverageIncomplete'], false);
-          expect(prefetch['peakEntries'] as int, lessThanOrEqualTo(32));
-          expect(prefetch['peakDownloads'] as int, lessThanOrEqualTo(16));
+          if (production) {
+            expect(prefetch['entriesAtStop'] as int, lessThanOrEqualTo(32));
+          } else {
+            expect(prefetch['coverageIncomplete'], false);
+            expect(prefetch['peakEntries'] as int, lessThanOrEqualTo(32));
+            expect(prefetch['peakDownloads'] as int, lessThanOrEqualTo(16));
+          }
           expect(prefetch['refreshBeforeFirstVideoComplete'], true);
           expect((report['prefetchAfterClose'] as Map)['entries'], 0);
           expect((report['prefetchAfterClose'] as Map)['bytes'], 0);

@@ -111,7 +111,10 @@ final class HlsPrefetchScheduler {
           return false;
         }
         final window = HlsRetainedWindow(selection.snapshot.source, maximumSegments: maximumSegments);
-        window.merge(selection.snapshot);
+        // Admission must preserve the initial prefix, including finite media.
+        // The caller can retain its original path when the bounded window is
+        // too small; silently dropping its first segments is not selection.
+        if (window.merge(selection.snapshot).isNotEmpty) return false;
         renderHlsRetainedManifest(window, localUri: (uri) => uri);
         final feed = _Feed(selection.id, selection.source, window);
         _rebuild(feed);

@@ -184,7 +184,7 @@ final class HlsUpstreamClient {
     });
     try {
       _check(cancellation, budget);
-      if (response.statusCode != HttpStatus.ok) throw const HttpException('HLS media manifest request failed');
+      if (response.statusCode != HttpStatus.ok) throw HlsUpstreamResponseException(response.statusCode);
       final body = BytesBuilder(copy: false);
       while (await budget.wait(reader.moveNext)) {
         _check(cancellation, budget);
@@ -219,6 +219,9 @@ final class HlsUpstreamClient {
     );
     try {
       _check(cancellation, budget);
+      if (!const {HttpStatus.ok, HttpStatus.partialContent}.contains(response.statusCode)) {
+        throw HlsUpstreamResponseException(response.statusCode);
+      }
       final metadata = HlsHttpBodyMetadata.fromResponse(response, requestedRange: range);
       return HlsPrefetchResponse(response, expectedLength: metadata.expectedLength, metadata: metadata);
     } on Object {
@@ -232,4 +235,9 @@ final class HlsUpstreamClient {
 
 final class HlsUpstreamStopped implements Exception {
   const HlsUpstreamStopped();
+}
+
+final class HlsUpstreamResponseException implements Exception {
+  const HlsUpstreamResponseException(this.statusCode);
+  final int statusCode;
 }

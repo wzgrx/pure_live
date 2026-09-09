@@ -292,6 +292,7 @@ class FFmpegService {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    bool hlsPrefetch = false,
   }) async {
     await _ensureInitialized();
     if (_sessions.containsKey(taskId)) {
@@ -307,6 +308,7 @@ class FFmpegService {
       drainOnStop: liveRecording,
       sourceQueryPolicy: sourceQueryPolicy,
       diagnostics: hlsDiagnostics,
+      enablePrefetch: hlsPrefetch,
     );
     final flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
     final inputArguments =
@@ -329,6 +331,26 @@ class FFmpegService {
       flvInputRelay: flvInputRelay,
     );
     _sessions[taskId] = session;
+
+    inputRelay?.onCoverageIncomplete = () {
+      if (!identical(_sessions[taskId], session) ||
+          !liveRecording ||
+          session.manualStop ||
+          session.leaseRefresh ||
+          session._stopWatch != null ||
+          session.hasInputCoverageGap) {
+        return;
+      }
+      session.hasInputCoverageGap = true;
+      _safeEmit(
+        onEvent,
+        FFmpegEvent(
+          taskId: taskId,
+          type: FFmpegEventType.inputCoverage,
+          data: {'sessionId': session.sessionId, 'inputCoverageIncomplete': true},
+        ),
+      );
+    };
 
     nativeSession.setLogCallback((entry) {
       if (!identical(_sessions[taskId], session)) return;

@@ -188,6 +188,7 @@ Future<Map<String, Object?>> _capture(
   Directory fixture,
   Directory root, {
   bool scheduled = false,
+  bool productionPrefetch = false,
 }) async {
   final output = await Directory(p.join(root.path, config.name)).create();
   final origin = await _RollingOrigin.start(fixture, config);
@@ -234,7 +235,13 @@ Future<Map<String, Object?>> _capture(
       threadQueueSize: 512,
       filePrefix: 'capture',
     );
-    execution = native.start(taskId: taskId, arguments: arguments, liveRecording: true, hlsDiagnostics: diagnostics);
+    execution = native.start(
+      taskId: taskId,
+      arguments: arguments,
+      liveRecording: true,
+      hlsDiagnostics: diagnostics,
+      hlsPrefetch: productionPrefetch,
+    );
     // Fixed controlled exposure, not a claim of healthy live coverage.
     await Future<void>.delayed(Duration(seconds: config.runSeconds));
     // Persist only this numeric native argument, never the full command/URLs.
@@ -243,12 +250,40 @@ Future<Map<String, Object?>> _capture(
       RegExp(r'-rw_timeout\s+(\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
     );
     relay = native.getSession(taskId)?.inputRelay;
+    if (productionPrefetch) {
+      report['prefetch'] = {
+        // ignore: invalid_use_of_visible_for_testing_member
+        'feeds': relay?.prefetchFeedCount,
+        // ignore: invalid_use_of_visible_for_testing_member
+        'entriesAtStop': relay?.prefetchBodyCount,
+        'scope': 'production relay, no experimental HTTP adapter',
+      };
+    }
     report['stopRequestedMs'] = diagnostics.elapsedMilliseconds;
     prefetch?.freeze();
     if (native.isRunning(taskId)) await native.stop(taskId);
     await execution.timeout(const Duration(seconds: 20));
     await relay?.close();
     report['stoppedMs'] = diagnostics.elapsedMilliseconds;
+    if (productionPrefetch) {
+      report['prefetchAfterClose'] = {
+        // ignore: invalid_use_of_visible_for_testing_member
+        'feeds': relay?.prefetchFeedCount,
+        // ignore: invalid_use_of_visible_for_testing_member
+        'entries': relay?.prefetchBodyCount,
+        // ignore: invalid_use_of_visible_for_testing_member
+        'bytes': relay?.prefetchBytes,
+      };
+      final firstVideo = origin.requests.firstWhere(
+        (r) => r['path'] == '/variant_0/segment_000.m4s' && r['closedMs'] != null,
+      );
+      (report['prefetch'] as Map)['refreshBeforeFirstVideoComplete'] = origin.requests.any(
+        (r) =>
+            r['path'] == '/variant_0/index.m3u8' &&
+            (r['requestMs'] as int) > (firstVideo['requestMs'] as int) &&
+            (r['requestMs'] as int) < (firstVideo['closedMs'] as int),
+      );
+    }
     report['started'] = events.any((event) => event['type'] == 'started');
     report['events'] = events;
     final terminal = events.lastWhere((event) => event['type'] == 'complete' || event['type'] == 'error');

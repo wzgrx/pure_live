@@ -13,10 +13,15 @@ import 'hls_session_cookies.dart';
 import 'hls_media_spool.dart';
 import 'hls_body_reader.dart';
 import 'hls_upstream_client.dart';
+import 'hls_prefetch_pool.dart';
+import 'hls_prefetch_scheduler.dart';
+import 'hls_prefetch_plan.dart';
+import 'hls_retained_window.dart';
 import 'cancellable_http_connections.dart';
 import 'recorder_proxy_routing.dart';
 
 part 'hls_relay_diagnostics.dart';
+part 'hls_relay_prefetch.dart';
 
 /// Relays HLS resources over an app-private loopback server, verifying upstream
 /// HTTPS and allowing recording inputs to end without cancelling output IO.
@@ -40,6 +45,7 @@ class FFmpegHlsInputRelay {
     required this._createStagingDirectory,
     required HlsSourceQueryPolicy? sourceQueryPolicy,
     required this.diagnostics,
+    required this.prefetchEnabled,
   }) {
     _bodyIdleTimeout = bodyIdleTimeout;
     _upstream = HlsUpstreamClient(
@@ -90,6 +96,22 @@ class FFmpegHlsInputRelay {
   final Map<String, String> _headers;
   final String _secret;
   final bool drainOnStop;
+  final bool prefetchEnabled;
+  HlsPrefetchScheduler? _prefetch;
+  Future<void>? _prefetchPreparation;
+  HlsPrefetchCancellation? _preparingCancellation;
+  final Set<String> _prefetchFeeds = {};
+  final Map<String, HlsPrefetchResource> _prefetchResources = {};
+  final Map<String, int> _prefetchFailures = {};
+  final Map<String, String> _resourceKeys = {};
+  void Function()? onCoverageIncomplete;
+
+  @visibleForTesting
+  int get prefetchFeedCount => _prefetch?.feedCount ?? 0;
+  @visibleForTesting
+  int get prefetchBodyCount => _prefetch?.pool.ownedEntries ?? 0;
+  @visibleForTesting
+  int get prefetchBytes => _prefetch?.pool.retainedBytes ?? 0;
   late final Duration _bodyIdleTimeout;
   final HlsRelayDiagnostics? diagnostics;
   final Future<Directory> Function() _createStagingDirectory;
@@ -151,6 +173,7 @@ class FFmpegHlsInputRelay {
     // Tests supply an isolated owned directory or controlled storage failure.
     Future<Directory> Function()? createStagingDirectory,
     HlsRelayDiagnostics? diagnostics,
+    bool enablePrefetch = false,
   }) async {
     final arguments = List<String>.of(source);
     final inputIndex = arguments.indexOf('-i');
@@ -201,6 +224,7 @@ class FFmpegHlsInputRelay {
       createStagingDirectory: createStagingDirectory ?? _defaultStagingDirectory,
       sourceQueryPolicy: sourceQueryPolicy,
       diagnostics: diagnostics,
+      prefetchEnabled: enablePrefetch && drainOnStop,
     );
     relay._subscription = server.listen(relay._acceptRequest, onError: relay._handleServerError);
     return relay;
@@ -239,11 +263,15 @@ class FFmpegHlsInputRelay {
   Future<void> finish() async {
     if (!drainOnStop || _finishing || _closed) return;
     _finishing = true;
+    _preparingCancellation?.cancel();
+    _prefetch?.freeze();
     _finishTimer = Timer(Duration(seconds: _targetSeconds.clamp(1, 10)), _stopFetching);
   }
 
   void _stopFetching() {
     _fetchStopped = true;
+    _preparingCancellation?.cancel();
+    _prefetch?.stopFetching();
     _upstream.stop();
     for (final abort in _fetchAborters.toList()) {
       abort();
@@ -273,12 +301,18 @@ class FFmpegHlsInputRelay {
     await _server.close(force: true);
     await _subscription?.cancel();
     await Future.wait(_handlers.toList());
+    await _prefetch?.close();
     await _connections.settled;
     _upstream.clear();
     _resources.clear();
     _resourceIds.clear();
     _manifests.clear();
     _manifestReferences.clear();
+    _resourceKeys.clear();
+    _prefetchResources.clear();
+    _prefetchFeeds.clear();
+    _prefetchFailures.clear();
+    onCoverageIncomplete = null;
   }
 
   Future<void> _handleRequest(HttpRequest request) async {
@@ -308,6 +342,22 @@ class FFmpegHlsInputRelay {
         return;
       }
       final range = request.headers.value(HttpHeaders.rangeHeader);
+      if (_prefetch != null) {
+        if (_prefetchFeeds.contains(resourceId)) {
+          await _servePrefetchManifest(request, resourceId, trace);
+        } else if (_prefetchResources.containsKey(resourceId)) {
+          await _servePrefetchBody(request, _prefetchResources[resourceId]!, range, trace);
+        } else if (resourceId == 'root' && cached != null) {
+          trace?.offeredManifest(cached, 'selected-master');
+          await _replyManifest(request, cached);
+          trace?.delivered();
+        } else {
+          // A selected generation has one media pool. Do not create a parallel
+          // legacy spool budget for unselected/comment-only resource IDs.
+          await _replyStatus(request, HttpStatus.gone);
+        }
+        return;
+      }
       // FFmpeg probes even playlists with Range: bytes=0-. A CDN may return
       // 206, which is not a complete rewritten manifest response: forwarding
       // its relative segment paths makes FFmpeg request unknown loopback IDs.
@@ -340,6 +390,23 @@ class FFmpegHlsInputRelay {
         final bytes = await _readManifest(upstreamResponse, trace, budget);
         if (_closed) return;
         final manifest = utf8.decode(bytes, allowMalformed: true);
+        if (resourceId == 'root' && prefetchEnabled && !_finishing) {
+          await (_prefetchPreparation ??= _preparePrefetch(manifest, finalUri));
+          if (_prefetchFeeds.contains(resourceId) && !_finishing && !_closed) {
+            await _servePrefetchManifest(request, resourceId, trace);
+            return;
+          }
+        }
+        // A root response opened before selection may finish after another
+        // request committed the master. Keep that selected generation intact.
+        final selectedMaster = _manifests[resourceId];
+        if (resourceId == 'root' && _prefetch != null && selectedMaster != null) {
+          final offered = _finishing ? _endedManifest(selectedMaster) : selectedMaster;
+          trace?.offeredManifest(offered, 'selected-master');
+          await _replyManifest(request, offered);
+          trace?.delivered();
+          return;
+        }
         // Stop may arrive while a refresh is in flight. Do not extend the
         // recording by publishing its newer generation after the stop intent.
         final previous = _manifests[resourceId];
@@ -512,6 +579,10 @@ class FFmpegHlsInputRelay {
     }
     final value = output.join('\n');
     final rewritten = hadTrailingNewline ? '$value\n' : value;
+    return _rememberManifest(rewritten, source, manifestId, referenced);
+  }
+
+  String _rememberManifest(String rewritten, String source, String manifestId, Set<String> referenced) {
     // Per-response cap plus aggregate cap bound malicious/oversized trees.
     final retainedCharacters = _manifests.entries
         .where((entry) => entry.key != manifestId)
@@ -530,12 +601,13 @@ class FFmpegHlsInputRelay {
     return rewritten;
   }
 
-  String? _localResource(Uri upstream, Set<String> referenced) {
+  String? _localResource(Uri upstream, Set<String> referenced, {String? identity}) {
     if (!const <String>{'http', 'https'}.contains(upstream.scheme.toLowerCase())) return null;
-    final key = upstream.toString();
+    final key = identity == null ? upstream.toString() : 'prefetch:$identity';
     final id = _resourceIds.putIfAbsent(key, () {
       final value = (++_nextResourceId).toRadixString(36);
       _resources[value] = upstream;
+      _resourceKeys[value] = key;
       return value;
     });
     referenced.add(id);
@@ -551,7 +623,14 @@ class FFmpegHlsInputRelay {
   void _pruneResources() {
     if (_closed) return;
     final reachable = <String>{};
-    final pending = <String>['root', ..._activeResources.keys];
+    final required = _prefetch?.requiredKeys ?? <String>{};
+    final pending = <String>[
+      'root',
+      ..._activeResources.keys,
+      ..._prefetchFeeds,
+      for (final entry in _prefetchResources.entries)
+        if (required.contains(entry.value.key)) entry.key,
+    ];
     while (pending.isNotEmpty) {
       final id = pending.removeLast();
       if (!reachable.add(id)) continue;
@@ -560,11 +639,14 @@ class FFmpegHlsInputRelay {
       }
     }
     for (final id in _resources.keys.where((id) => !reachable.contains(id)).toList()) {
-      final uri = _resources.remove(id);
-      if (uri != null) _resourceIds.remove(uri.toString());
+      _resources.remove(id);
+      final key = _resourceKeys.remove(id);
+      if (key != null) _resourceIds.remove(key);
+      _prefetchResources.remove(id);
       _manifests.remove(id);
       _manifestReferences.remove(id);
     }
+    _prefetchFailures.removeWhere((key, _) => !key.startsWith('manifest:') && !required.contains(key));
   }
 
   static String _endedManifest(String? cached) {

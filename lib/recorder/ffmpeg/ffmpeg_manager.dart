@@ -46,6 +46,7 @@ class FFmpegManager {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    bool hlsPrefetch = false,
   }) async {
     await initialize();
 
@@ -55,6 +56,7 @@ class FFmpegManager {
       liveRecording: liveRecording,
       sourceQueryPolicy: sourceQueryPolicy,
       hlsDiagnostics: hlsDiagnostics,
+      hlsPrefetch: hlsPrefetch,
       onEvent: (event) {
         if (!_eventController.isClosed) {
           _eventController.add(event);

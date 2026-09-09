@@ -55,3 +55,20 @@ TTing探针现会读取MP4和最多32个保留TS的包摘要，保存 `content-c
 新合同已通过离线正反控制，并已接入正式探针；尚未重新执行接线后的API→录制→合并→新合同→解码整条外部流程。下一步补齐该集成证据，再继续未闭环平台/界面验收；不是为取绿结果重复旧实录。源内容身份与感知A/V同步仍是更高层证据，单个失败ticket的20秒边界风险仍单独记账。
 
 回滚可撤回 `0a84b309` 恢复旧探针，生产行为不变。无手机、MT、Root/LSP、版本、构建、发布或上游合并；宏观仍20 PASS/32 RUN/10 NOT RUN，即42组未闭环，全平台3.2.0门禁保持。
+
+## 接线后的真实完整链路（同日增量）
+
+在干净 `9571295f` 上核对上一轮三文件测试 SHA、六文件生产诊断 SHA 与固定 FFmpegKit/ffprobe/ffmpeg 后，只执行一次当前生产 API→选中720档→原生录制→手动排空→MP4提交→新合同→严格全解码。结果 **1/1 PASS，另一个历史转存 opt-in跳过**；这补齐上节当时尚缺的外部接线证据，不改写历史失败。
+
+- 本机 Windows FFmpegKit，API与录制上游经Clash7897，loopback直连；原生输出720×1280 H.264 + AAC，与本次选中源一致。仍由探针显式 `hlsPrefetch: true`，应用默认false、GUI和Android包没有变化。
+- 首字节16.049秒，采样48.115秒时4段/原生进度34秒达到采集目标；停止后5段TS合计29,395,492 B，排空6.785秒。native code0、manualStop/drained=true，forcedCancel/tailDiscarded/coverageIncomplete/integrityError全false。
+- 79条local请求、0条HTTP失败、0条省略。视频19500–19523共24片/48秒，音频19657–19680共24片/47.616秒，全体完成交付。音频起点比视频早0.512秒，由源PDT决定；视频末端比音频晚0.896秒，未做裁切。
+- MP4时长48.517333秒、28,416,617 B；视频1440包、音频2232包与五份源TS总数一致。两轨包区间无内部空档或DTS倒退；源与成品的约5.333毫秒末端差落在既定固定50毫秒预算内，合同passed、无失败或缺失证据。
+- 成品全文件 `-xerror -fps_mode passthrough -enc_time_base demux` 解码退出0、stderr为空；文件提交后源目录TS删除、finalizer释放，探针保留的五份源TS副本仍在。没有把成品解码当作源payload身份或感知唇音同步验收。
+- native日志仍含停止时的 demux I/O error 及 FFmpegKit scheduler/pthread_join提示；本次依据显式手动终态、全分片交付、包时间线和独立全解码判定，不把日志片段删除或等同活动期缺片已修复。旧18440单ticket超时仍保留失败账。
+
+证据目录：`local-artifacts/hls-capture-contract-20260910/real-recording/TTing 录制 1788976023498414`，含 `summary.json`、`content-contract.json`、`packet-timeline.json`、`hls-timeline.json`、`native-evidence.json`、`capture-samples.json` 与 `decode-diagnostics.json`。同根 `integrated-input-hashes.json` 固定本次成品、源副本和诊断文件；MP4 SHA256：`D22646994527FEAD57CABA5FB00BDBBC14A848CE9816C126F511CEF56D78E567`。
+
+资源记录 `20260909T174810243Z-hls-capture-contract-native-integrated.json`：80.784秒，采样峰值CPU8.46%、工作集5,233,573,888 B，结束活跃重型进程0。复用已通过的41项定向与严格分析，没有因纯证据增量重复执行。
+
+该结果映射历史 W3-05 的Windows原生HLS短录/提交子项，**W3-05仍RUN**：未覆盖当前候选UI、Android、长时/续签及全平台。下一步审查并接通真实录制控制器的默认策略和相邻回归，让已验证的预取能力进入用户实际录制路径；不是再次重复同一显式开启探针。全目标保持，当前注册18直播站点+IPTV，另9组参考平台尚待接入，历史42组未闭环也不代表整个剩余范围。

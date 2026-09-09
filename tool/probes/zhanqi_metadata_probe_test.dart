@@ -65,6 +65,10 @@ void main() {
           expect(room.code, selected.code);
           expect(room.roomId, selected.roomId);
           expect(room.ownerId, selected.ownerId);
+          if (room.reportedLive == true) {
+            expect(room.playerLayout, isNotNull);
+            expect(room.declaredStream, isNull);
+          }
           for (final row in report['http'] as List<Map<String, Object?>>) {
             expect(row['redirectsDisabled'], isTrue);
             expect(row['refererMatches'], isTrue);
@@ -76,6 +80,10 @@ void main() {
             'reportedStatus': room.reportedStatus,
             'reportedLive': room.reportedLive,
             'hasDeclaredStream': room.declaredStream != null,
+            'hasPlayerLayout': room.playerLayout != null,
+            'enabledQualityIndices': room.playerLayout?.enabledQualityIndices,
+            'playerCells': room.playerLayout?.cells.length,
+            'sourceIdentityGroups': room.playerLayout?.sourceGroups.length,
           });
         } on ZhanqiException catch (error) {
           report['failure'] = error.kind.name;

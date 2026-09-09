@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/core/common/request_scope.dart';
+import 'package:pure_live/core/site/zhanqi/zhanqi_player_layout.dart';
 
 enum ZhanqiFailure { transport, access, missing, rateLimited, service, api, schema, identity, cancelled }
 
@@ -30,6 +31,7 @@ class ZhanqiRoomSnapshot {
     required this.reportedStatus,
     required this.reportedOnline,
     this.declaredStream,
+    this.playerLayout,
   });
   final String code;
   final String roomId;
@@ -42,6 +44,7 @@ class ZhanqiRoomSnapshot {
   // Preserve the raw field's numeric value; concurrency has not been verified.
   final int? reportedOnline;
   final Uri? declaredStream;
+  final ZhanqiPlayerLayout? playerLayout;
   bool? get reportedLive => switch (reportedStatus) {
     '4' => true,
     '0' => false,
@@ -214,7 +217,7 @@ class ZhanqiApi {
     if (page < 1 || page > 10000 || size < 1 || size > 100) throw const ZhanqiException(ZhanqiFailure.schema);
   }
 
-  static ZhanqiRoomSnapshot _snapshot(Map<String, dynamic> data, {Uri? stream}) {
+  static ZhanqiRoomSnapshot _snapshot(Map<String, dynamic> data, {Uri? stream, ZhanqiPlayerLayout? layout}) {
     final status = _text(data['status']);
     if (!RegExp(r'^[0-9]{1,3}$').hasMatch(status)) throw const ZhanqiException(ZhanqiFailure.schema);
     final online = data['online'];
@@ -237,6 +240,7 @@ class ZhanqiApi {
       reportedStatus: status,
       reportedOnline: count,
       declaredStream: stream,
+      playerLayout: layout,
     );
   }
 
@@ -282,6 +286,25 @@ class ZhanqiApi {
       throw const ZhanqiException(ZhanqiFailure.identity);
     }
     if (flash['Status'] is! int || flash['Status'] != 4) throw const ZhanqiException(ZhanqiFailure.schema);
+    // The current H5 player uses nonempty h5Cdns before cdns and does not use
+    // VideoLevels in that path. Malformed current config must not silently fall
+    // back to a stale HLS declaration from the legacy reference adapter.
+    final h5 = _optionalText(flash['h5Cdns']);
+    final current = h5?.isNotEmpty == true ? h5 : _optionalText(flash['cdns']);
+    if (current != null && current.isNotEmpty) {
+      try {
+        final layout = ZhanqiPlayerLayout.parseEncoded(
+          current,
+          expectedRoomId: snapshot.roomId,
+          expectedVideoId: _idVideo(data['videoId']),
+        );
+        return _snapshot(data, layout: layout);
+      } on ZhanqiLayoutException catch (error) {
+        throw ZhanqiException(
+          error.kind == ZhanqiLayoutFailure.identity ? ZhanqiFailure.identity : ZhanqiFailure.schema,
+        );
+      }
+    }
     final encoded = _text(flash['VideoLevels']);
     if (encoded.length > 16384) throw const ZhanqiException(ZhanqiFailure.schema);
     try {
@@ -301,5 +324,10 @@ class ZhanqiApi {
     } on FormatException {
       throw const ZhanqiException(ZhanqiFailure.schema);
     }
+  }
+
+  static String _idVideo(Object? value) {
+    if (value is! String) throw const ZhanqiException(ZhanqiFailure.identity);
+    return value;
   }
 }

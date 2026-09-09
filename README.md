@@ -31,7 +31,7 @@
 
 > 纯粹直播（Pure Live）是一款开源的第三方多平台直播聚合播放器，使用 Flutter 构建，支持 Android、Android TV、Windows、Linux、macOS 和 iOS 等平台。
 
-> 本维护分支持续同步 [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live)，并维护本机优先构建、正式签名、接口探测、Windows 数据迁移及高刷新率优化。
+> 本维护分支基于 [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live)，维护本机优先构建、正式签名、接口探测、Windows 数据迁移及高刷新率优化。上游变更按独立审查流程处理；当前 3.2.0 验收阶段不合并上游。
 
 ## 维护分支说明（请先阅读）
 
@@ -46,8 +46,8 @@
 
 - **最新稳定版**：[v3.1.8](https://github.com/wzgrx/pure_live/releases/tag/v3.1.8)
 - **下一稳定版目标**：3.2.0，当前处于完整验收阶段，尚未发布。本轮只维护本仓库、不合并上游；优先源码审查、确定性回归和本地验证，手机操作按本轮明确安排执行，不把连接设备作为修复前置条件。进度、缺口与发布门禁见 [3.2.0 验收入口](docs/ACCEPTANCE_3_2_0.md)，开发包及旧版通过记录不等于最终版已通过。
-- **源码平台范围（未发布）**：目前 16 个直播站点 + IPTV。克拉克拉热门/萌星与花椒公开推荐已接入导航、UID 收藏及播放/录制解析；两者搜索、弹幕及 Android/Windows 原生验收仍待完成。注册数量不是完整支持数量，见[平台能力表](docs/PLATFORM_COMPATIBILITY.md)、[克拉克拉审计](docs/KILAKILA_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)与[花椒审计](docs/HUAJIAO_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。
-- **当前 Android 验收候选（未发布）**：1d318bba 已包含花椒、响应收尾与累计 IPTV 数据修订，通过 2418 项完整测试、42 项公共接口及 arm64 Debug 产物检查；尚未安装，实际播放/录制、数据迁移和双端验收继续。见[候选审计与前置条件](docs/HUAJIAO_ANDROID_CANDIDATE_2026_09_08.md)。
+- **源码平台范围（未发布）**：目前 18 个直播站点 + IPTV，共 19 个适配器。新增 OPENREC / mellow-fan 与 TTingLive / FLEX TV；目录、搜索、弹幕和原生证据各自分列，注册不等于完整支持。见[平台能力表](docs/PLATFORM_COMPATIBILITY.md)、[OPENREC 应用审计](docs/OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)与[TTing 应用审计](docs/TTING_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)。其余 9 组参考平台和已接入平台的完整能力仍待验收。
+- **当前 Android 验收候选（未发布）**：bee143e2 已包含 OPENREC、Picarto 响应收尾及此前累计修订，通过 2492 项完整测试、42 项公共接口（9 个既有平台）及 arm64 Debug 产物检查；尚未安装。它不含后续 TTing、源策略输入链和弹幕界面修订，见[候选审计与前置条件](docs/OPENREC_PICARTO_ANDROID_CANDIDATE_2026_09_09.md)。Windows 候选仍为 f3de664a；两者不是当前全部源码的最终验收包。
 - **未发布的播放恢复加固**：已复现并修复等待新地址时仍替换已恢复连接、候选失败覆盖用户暂停、取消后转圈残留及提前错误回调逃逸。17 项新增案例纳入回归，详见[恢复事务审计](docs/PLAYBACK_RECOVERY_TRANSACTION_AUDIT_2026_09_05.md)；保持原生虎牙 FLV 健康连接，不增加定时重开。
 - **虎牙连续播放复核（源码未发布）**：原生 FLV 优先、健康连接不定时重开；后台续签不占播放器队列，恢复按活动 CDN/格式/凭据家族匹配，修复线路重排或过滤后按旧序号错选。1070 项回归与 42 项接口探测通过；上游与本地根因、修复边界见[线路身份审计](docs/HUYA_LINE_IDENTITY_AUDIT_2026_09_05.md)，既有原生采样见[后台续签审计](docs/HUYA_PREFETCH_OWNERSHIP_AUDIT_2026_09_05.md)。安装包、实际音画呈现与测试结果分开验收。
 - **加载动画资源修复（源码未发布）**：切换样式时销毁旧动画，恢复默认/未知样式时正确启动，颜色修改保留旋转相位。7 项定向回归通过，详见[加载生命周期审计](docs/LOADING_ANIMATION_LIFECYCLE_AUDIT_2026_09_05.md)；Windows 热门页空闲 CPU 的完整归因仍在核对，不将本次修复当作全局性能结论。
@@ -55,7 +55,7 @@
 - **录制实时统计与退出加固（源码未发布）**：已复现旧会话采样锁串扰、旧终止回调覆盖新会话、最后文件大小遗漏、关闭后任务与目录保护遗留；以会话所有权与生命周期栅栏修复，不增加轮询频率。详见[录制输出所有权审计](docs/RECORDER_OUTPUT_OWNERSHIP_AUDIT_2026_09_05.md)。
 - **录制启动与检测加固（源码未发布）**：停止、移除或退出后丢弃迟到的房间检测结果；启动只恢复未完成待录任务，保留已停止/完成/失败历史。启动恢复开关独立可见，自动检测关闭时只检查一次，详见[录制轮询与启动审计](docs/RECORDER_POLL_OWNERSHIP_AUDIT_2026_09_05.md)。
 - **录制操作顺序加固（源码未发布）**：存储权限返回不再恢复已取消的开始动作；新录制等待旧停止及文件恢复真正完成，快速开始/停止/删除不会互相覆盖状态。详见[录制用户意图审计](docs/RECORDER_USER_INTENT_AUDIT_2026_09_05.md)。
-- **当前构建版本**：Android / Windows `3.1.8+4121`（同一冻结源码、分平台串行构建）
+- **当前源码版本号**：`3.1.8+4121`。候选包按各自源码 SHA 与验证记录识别，同一版本号不代表包含相同修订；3.2.0 只在完整目标验收后发布。
 - **音频事件加固（源码未发布）**：旧房间的耳机/中断事件、通知动作和停止收尾按播放器与源代次隔离；当前房间事件不等待旧房间暂停收尾，duck 恢复保留用户音量和静音。131 项定向回归通过，详见[音频绑定审计](docs/AUDIO_SESSION_OWNERSHIP_AUDIT_2026_09_05.md)。不将此证据当作历史 PiP 黑屏已复验通过。
 - **Android 系统要求**：Android 8.0 / API 26 及以上（与当前 FFmpegKit 原生录制依赖一致）
 - **v3.0.0 上游源码基线**：`liuchuancong/pure_live@e808dcae`；完整记录见 `docs/STAGE_UPDATE_3_0_0.md`
@@ -87,6 +87,8 @@ Pure Live 聚合多个第三方直播平台，并支持自定义直播源：
 - **自定义 M3U / M3U8 直播源**
 
 支持按照平台、分区等条件进行筛选，也可以隐藏不关注的平台。
+
+**未发布开发源码另有** AcFun、Picarto、TwitCasting、猫耳 FM、映客、克拉克拉、花椒、OPENREC / mellow-fan、TTingLive / FLEX TV。上面的既有平台列表与本段源码范围分别看待；各入口、原生证据和未完成能力以[平台能力表](docs/PLATFORM_COMPATIBILITY.md)为准，不把测试数量或可返回媒体地址当成完整观看/录制通过。
 
 ### 自定义直播源
 

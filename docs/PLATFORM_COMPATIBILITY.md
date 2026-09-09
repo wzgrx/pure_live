@@ -4,9 +4,10 @@
 
 ## 当前平台能力
 
-2026-09-08 按 `lib/core/sites.dart` 核对：当前源码注册 **16 个直播站点 + IPTV，共17个适配器**。这是源码注册数量，不是已发布包或完整验收数量。
+2026-09-09 按 `lib/core/sites.dart` 核对：当前源码注册 **18 个直播站点 + IPTV，共19个适配器**。这是源码注册数量，不是已发布包或完整验收数量。
+OPENREC / mellow-fan 已接入复合频道身份、公开目录与 HLS 质量；其当前生产整链可达性与原生验收仍有缺口，见[应用审计](OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)。TTingLive / FLEX TV 已接入有限首页目录、精确频道查询及按源 token 策略；应用回归 201/201，最新生产注册适配器与 24 份 HLS 列表链路通过，但媒体分片、解码和完整录制尚未验收，见[应用审计](TTING_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)及[生产链路审计](TTING_PRODUCTION_RELAY_AUDIT_2026_09_09.md)。
 克拉克拉与花椒已接入公开目录、UID 收藏及播放/录制解析；两者搜索、弹幕与 Android/Windows 原生验收仍待完成，见[克拉克拉应用审计](KILAKILA_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)、[萌星目录修订](KILAKILA_RISING_STAR_AUDIT_2026_09_08.md)及[花椒应用审计](HUAJIAO_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。花椒空页仍有 more 时沿原生游标有界继续，游标按页面和刷新批次隔离，不用结果条数代替结束信号。
-当前 [Android 候选 1d318bba](HUAJIAO_ANDROID_CANDIDATE_2026_09_08.md) 已包含两者及响应收尾修订；完整门禁/打包通过，尚未安装。Windows f3de664a 未随本批更新，原生能力证据仍按各平台分列。
+当前 [Android 候选 bee143e2](OPENREC_PICARTO_ANDROID_CANDIDATE_2026_09_09.md) 已包含克拉克拉、花椒、OPENREC 和 Picarto 响应收尾修订；完整门禁/打包通过，尚未安装，后续 TTing 和源策略输入链未入包。Windows f3de664a 未随本批更新，原生能力证据仍按各平台分列。
 猫耳和映客已应用接入；猫耳 Windows 原生短录有独立证据，映客当前只到公开接口和生产地址解析，见[映客应用审计](INKE_APPLICATION_INTEGRATION_AUDIT_2026_09_08.md)。
 Picarto 已进入 Android 候选并取得部分原生证据，见 [接入审计](PICARTO_ADAPTER_AUDIT_2026_09_07.md)及[停止/清理补证](ANDROID_PROXY_OCCLUSION_AUDIT_2026_09_07.md)。
 TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入与恢复；Android 80b7431c已覆盖安装并解除首段401，low出现实际画面，但短录文件严格解码仍失败，见[修复候选复验](TWITCASTING_COOKIE_ANDROID_RETEST_2026_09_07.md)。首次high/首帧、完整文件与长录仍待验收；当前 Windows f3de664a 候选已包含源码，但没有本平台对应的新原生验收。
@@ -36,6 +37,8 @@ TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入�
 | 映客 | 官网有限精选及服务端频道，页面持续说明非全站列表 | 当前未接入，无虚构网页搜索入口 | 当前未接入 | 未取得人数，保持未知；主播等级不作观众数 |
 | 克拉克拉 | 官方热门/萌星，type 0/107 原生分页 | 当前未接入 | 当前未接入 | `watchNumber` 未证实为并发人数，保持未知 |
 | 花椒 | 官方 H5 公开视频推荐，保留原生游标 | 当前未接入，无虚构网页搜索入口 | 当前未接入 | `current_heat` 为热度，不作在线人数 |
+| OPENREC / mellow-fan | 公开广播列表，频道聚合与多场歧义提示 | 当前未接入，无虚构网页搜索入口 | 当前未接入 | 公开并发人数；隐藏或多场歧义时保持未知 |
+| TTingLive / FLEX TV | 有限首页公开直播快照，不宣称全站分类 | 精确频道号或频道直播链接，含未开播；不支持昵称/关键词 | 当前未接入 | 主目录 `playerCount`；详情和收藏刷新缺值时保持未知 |
 | IPTV | 本地导入频道分组 | 本地频道查询 | 无远端弹幕服务 | 不虚构观看人数 |
 
 > “热度”是平台排序/活跃度指标，不等同于唯一在线用户数。界面会按平台字段分别显示“热度”“在线”或“累计观看”，避免把不同含义的数据统一标成在线人数。
@@ -74,6 +77,8 @@ TwitCasting 新增公开目录、顶栏分类、详情/HLS三档、录制输入�
 | AcFun | representation 解析所得稳定 ID | 同档多个有效 URL 合并；续签重新读取详情，按 ID 找回对应画质 |
 | Picarto | HLS 分辨率/fps/编解码与音视频组 | 同档线路合并；恢复重新读详情及列表；外置音轨保留主列表并标 HLS Auto |
 | TwitCasting | `high` / `medium` / `low` | 保留平台档名，不推断分辨率；匹配当前 movie 的 HLS，恢复保持请求档位，明确下播忽略陈旧地址 |
+| OPENREC / mellow-fan | HLS 源族、分辨率、帧率 | 重新核对频道与当前广播；按解析列表匹配质量，外置音轨保留 master |
+| TTingLive / FLEX TV | API `resolution`（0 为 Auto） | ncp / ncp_llh 源保留精确 URL token 策略；过期/recovery 重读频道与 stream，按 owner 和请求画质匹配；实际解码质量尚待验收 |
 
 横屏“清晰度与播放线路”面板根据画质数、线路数和可用高度计算整体尺寸。一个画质/一条线路时收紧面板；常见四画质使用均衡 `2×2`；项目多时只让按钮网格滚动，不用固定比例制造空白。按钮区域是主要视觉，标题、留白和重复的当前值标签均已压缩。
 

@@ -11,6 +11,7 @@ import 'package:pure_live/core/common/hls_source_query_policy.dart';
 
 import 'hls_session_cookies.dart';
 import 'hls_media_spool.dart';
+import 'hls_body_reader.dart';
 import 'cancellable_http_connections.dart';
 import 'recorder_proxy_routing.dart';
 
@@ -209,7 +210,7 @@ class FFmpegHlsInputRelay {
         // connection may finish after the response deadline; allow its owned
         // connection timeout and 5s local scheduling margin, never infinity.
         final localTimeout =
-            (_HlsResponseBudget.totalFor(_bodyIdleTimeout) + _connectionTimeout + const Duration(seconds: 5))
+            (HlsResponseBudget.totalFor(_bodyIdleTimeout) + _connectionTimeout + const Duration(seconds: 5))
                 .inMicroseconds
                 .toString();
         var replaced = false;
@@ -287,7 +288,7 @@ class FFmpegHlsInputRelay {
 
     _activeResources.update(resourceId, (count) => count + 1, ifAbsent: () => 1);
     final trace = diagnostics?._begin(resourceId, request.method);
-    final budget = drainOnStop ? _HlsResponseBudget(_bodyIdleTimeout) : null;
+    final budget = drainOnStop ? HlsResponseBudget(_bodyIdleTimeout) : null;
     var outcome = 'completed';
     try {
       final cached = _manifests[resourceId];
@@ -409,9 +410,9 @@ class FFmpegHlsInputRelay {
     HttpRequest request,
     HttpClientResponse upstream,
     _HlsRequestTrace? trace,
-    _HlsResponseBudget? budget,
+    HlsResponseBudget? budget,
   ) async {
-    final iterator = StreamIterator<List<int>>(upstream);
+    final iterator = HlsBodyReader(upstream);
     final body = HlsMediaSpool(createDirectory: _createStagingDirectory);
     var stopped = _fetchStopped;
     void abort() {
@@ -472,7 +473,7 @@ class FFmpegHlsInputRelay {
     String method,
     Uri upstream, {
     String? range,
-    _HlsResponseBudget? budget,
+    HlsResponseBudget? budget,
   }) async {
     var uri = _sourceQueryPolicy?.apply(upstream) ?? upstream;
     final originalOrigin = _resources['root']!.origin;
@@ -723,7 +724,7 @@ class FFmpegHlsInputRelay {
     return Duration(microseconds: microseconds);
   }
 
-  Future<bool> _nextBodyChunk(StreamIterator<List<int>> iterator, _HlsResponseBudget? budget) async {
+  Future<bool> _nextBodyChunk(StreamIterator<List<int>> iterator, HlsResponseBudget? budget) async {
     if (!drainOnStop) return iterator.moveNext();
     try {
       // The body is invisible to the native socket until completely staged.
@@ -737,8 +738,8 @@ class FFmpegHlsInputRelay {
     }
   }
 
-  Future<void> _discardResponse(HttpClientResponse response, _HlsResponseBudget budget) async {
-    final iterator = StreamIterator<List<int>>(response);
+  Future<void> _discardResponse(HttpClientResponse response, HlsResponseBudget budget) async {
+    final iterator = HlsBodyReader(response);
     var stopped = _fetchStopped;
     void abort() {
       stopped = true;
@@ -782,11 +783,11 @@ class FFmpegHlsInputRelay {
   Future<Uint8List> _readManifest(
     HttpClientResponse response,
     _HlsRequestTrace? trace,
-    _HlsResponseBudget? budget,
+    HlsResponseBudget? budget,
   ) async {
     final builder = BytesBuilder(copy: false);
     var length = 0;
-    final iterator = StreamIterator<List<int>>(response);
+    final iterator = HlsBodyReader(response);
     var stopped = _fetchStopped;
     void abort() {
       stopped = true;
@@ -841,32 +842,4 @@ class FFmpegHlsInputRelay {
 
 class _HlsFetchStopped implements Exception {
   const _HlsFetchStopped();
-}
-
-/// Application policy for receiving a complete HLS response, not an FFmpeg
-/// protocol promise. A response gets at most four idle intervals in total,
-/// shared across redirect headers/bodies and final manifest/media staging.
-/// Pending connection creation still belongs to HttpClient's connection timeout;
-/// check before/after it, without abandoning a late request or pooled socket.
-class _HlsResponseBudget {
-  _HlsResponseBudget(this.idle);
-  final Duration idle;
-  final Stopwatch clock = Stopwatch()..start();
-  static Duration totalFor(Duration idle) => idle * 4;
-  Duration get remaining => totalFor(idle) - clock.elapsed;
-
-  void check() {
-    if (remaining <= Duration.zero) throw TimeoutException('HLS complete response deadline exceeded');
-  }
-
-  Future<T> wait<T>(Future<T> Function() action, {void Function()? abort}) async {
-    try {
-      check();
-      final left = remaining;
-      return await action().timeout(left < idle ? left : idle);
-    } on TimeoutException {
-      abort?.call();
-      rethrow;
-    }
-  }
 }

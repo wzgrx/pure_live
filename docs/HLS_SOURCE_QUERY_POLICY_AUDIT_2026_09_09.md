@@ -1,5 +1,7 @@
 # HLS 源级 token 传递能力审计（2026-09-09）
 
+后续 [录制元数据接线审计](RECORD_SOURCE_QUERY_METADATA_AUDIT_2026_09_09.md) 已将策略沿公共解析、录制选择和 FFmpeg 调用链传递，105 项定向回归及严格分析通过；播放器/多画面接线和 TTing 注册仍未完成。下文保留本批低层能力提交时的边界。
+
 ## 定位：平台接入的运输层能力，不是已注册的平台
 
 基线 `43a424a3ad998ec95742073b9641ab5704d5b11f`。本批依据 [TTing/FLEX 公开合同](TTING_PUBLIC_CONTRACT_AUDIT_2026_09_09.md) 实现显式、单源绑定的 HLS token 请求策略，并接入已有 `FFmpegHlsInputRelay` 的上游请求/重定向边界。

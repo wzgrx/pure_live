@@ -14,6 +14,7 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
 
   @override
   Future<void> refreshData() async {
+    if (isClosed) return;
     _refreshPending = true;
     final active = _activeLoad;
     if (active != null) await active;
@@ -27,7 +28,7 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
 
   @override
   Future<void> goToPage(int page) async {
-    if (_activeLoad != null || page < 1) return;
+    if (isClosed || _activeLoad != null || page < 1) return;
     if (!usesDesktopPagination) return;
     if (page > currentPage && !canLoadMore.value && !_pageCache.containsKey(page)) return;
     currentPage = page;
@@ -36,7 +37,7 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
 
   @override
   void setPageSize(int? newSize) {
-    if (newSize == null || pageSize.value == newSize) return;
+    if (isClosed || newSize == null || pageSize.value == newSize) return;
     if (!usesDesktopPagination) {
       pageSize.value = newSize;
       return;
@@ -60,12 +61,13 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
   }
 
   Future<void> _adaptiveRebuildAndFetchMore(List<T> historyPool) async {
-    if (loadding.value) return;
+    if (isClosed || loadding.value) return;
 
     final int targetTotalItemsNeeded = currentPage * pageSize.value;
 
     if (historyPool.length < targetTotalItemsNeeded && canLoadMore.value) {
       final bool isNetworkSafe = await checkNetworkBeforeRequest();
+      if (isClosed) return;
       if (!isNetworkSafe) {
         finishRefreshControllers(IndicatorResult.fail);
         return;
@@ -79,6 +81,7 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
         while (historyPool.length < targetTotalItemsNeeded && requestCount < 20 && noProgressCount < 2) {
           final int missingCount = targetTotalItemsNeeded - historyPool.length;
           final result = await fetchNetworkData(_virtualNetworkPage, missingCount);
+          if (isClosed) return;
           requestCount++;
 
           if (result.isEmpty) break;
@@ -92,9 +95,10 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
           _virtualNetworkPage++;
         }
       } catch (e) {
+        if (isClosed) return;
         handleError(e, showPageError: list.isEmpty);
       } finally {
-        loadding.value = false;
+        if (!isClosed) loadding.value = false;
       }
     }
 
@@ -119,7 +123,14 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
   Future<void> loadData() async {
     final active = _activeLoad;
     if (active != null) return active;
+    if (isClosed) return;
     return _startLoad();
+  }
+
+  @override
+  Future<void> loadMoreData() async {
+    if (isClosed) return;
+    await super.loadMoreData();
   }
 
   Future<void> _startLoad({bool replaceMobileSnapshot = false}) {
@@ -147,6 +158,7 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
     }
 
     final bool isNetworkSafe = await checkNetworkBeforeRequest();
+    if (isClosed) return;
     if (!isNetworkSafe) {
       finishRefreshControllers(IndicatorResult.fail);
       return;
@@ -171,7 +183,9 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
         late final List<T> result;
         try {
           result = await fetchNetworkData(_virtualNetworkPage, neededCount);
+          if (isClosed) return;
         } catch (_) {
+          if (isClosed) return;
           // A later cursor/page is allowed to fail without erasing items that
           // the same transaction has already fetched successfully. This is
           // common with APIs that protect deeper pagination more aggressively
@@ -217,12 +231,15 @@ abstract class ServerRemotePageController<T> extends BasePageScrollAndStateBone<
         finishRefreshControllers(canLoadMore.value ? IndicatorResult.success : IndicatorResult.noMore);
       }
     } catch (e) {
+      if (isClosed) return;
       currentPage = previousPageSnapshot;
       handleError(e, showPageError: list.isEmpty);
       finishRefreshControllers(IndicatorResult.fail);
     } finally {
-      loadding.value = false;
-      pageLoadding.value = false;
+      if (!isClosed) {
+        loadding.value = false;
+        pageLoadding.value = false;
+      }
     }
   }
 }

@@ -15,6 +15,7 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
 
   @override
   Future<void> refreshData() async {
+    if (isClosed) return;
     _refreshPending = true;
     final active = _activeLoad;
     if (active != null) await active;
@@ -28,7 +29,7 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
 
   @override
   Future<void> goToPage(int page) async {
-    if (_activeLoad != null || page < 1) return;
+    if (isClosed || _activeLoad != null || page < 1) return;
     if (!usesDesktopPagination) return;
     currentPage = page;
     await loadData();
@@ -36,7 +37,7 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
 
   @override
   void setPageSize(int? newSize) {
-    if (newSize == null || pageSize.value == newSize) return;
+    if (isClosed || newSize == null || pageSize.value == newSize) return;
     if (!usesDesktopPagination) {
       pageSize.value = newSize;
       return;
@@ -52,7 +53,14 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
   Future<void> loadData() async {
     final active = _activeLoad;
     if (active != null) return active;
+    if (isClosed) return;
     return _startLoad();
+  }
+
+  @override
+  Future<void> loadMoreData() async {
+    if (isClosed) return;
+    await super.loadMoreData();
   }
 
   Future<void> _startLoad({bool replaceMobileSnapshot = false}) {
@@ -80,6 +88,7 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
     }
 
     final bool isNetworkSafe = await checkNetworkBeforeRequest();
+    if (isClosed) return;
     if (!isNetworkSafe) {
       finishRefreshControllers(IndicatorResult.fail);
       return;
@@ -109,7 +118,9 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
         } else {
           try {
             bigPageData = await fetchFixedNetworkData(serverBigPage, fixedServerPageSize);
+            if (isClosed) return;
           } catch (_) {
+            if (isClosed) return;
             // Keep an already assembled partial client page when only a later
             // server page fails. Throwing here would replace valid cards with
             // a full-page error even though the first request succeeded.
@@ -158,12 +169,15 @@ abstract class ServerFixedPageController<T> extends BasePageScrollAndStateBone<T
         finishRefreshControllers(canLoadMore.value ? IndicatorResult.success : IndicatorResult.noMore);
       }
     } catch (e) {
+      if (isClosed) return;
       currentPage = previousPageSnapshot;
       handleError(e, showPageError: list.isEmpty);
       finishRefreshControllers(IndicatorResult.fail);
     } finally {
-      loadding.value = false;
-      pageLoadding.value = false;
+      if (!isClosed) {
+        loadding.value = false;
+        pageLoadding.value = false;
+      }
     }
   }
 }

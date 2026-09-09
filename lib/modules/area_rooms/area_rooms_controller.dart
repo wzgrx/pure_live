@@ -41,6 +41,7 @@ class AreaServerFixedController extends ServerFixedPageController<LiveRoom> {
 
   @override
   Future<List<LiveRoom>> fetchFixedNetworkData(int bigPage, int fixedSize) async {
+    if (isClosed) return [];
     try {
       final result = await site.liveSite.getCategoryRooms(
         subCategory,
@@ -49,11 +50,13 @@ class AreaServerFixedController extends ServerFixedPageController<LiveRoom> {
         // the full bounded window once before this controller slices it.
         pageSize: site.id == Sites.twitcastingSite ? fixedSize : 30,
       );
+      if (isClosed) return [];
       for (var element in result) {
         element.area = subCategory.areaName;
       }
       return result;
     } catch (e) {
+      if (isClosed) return [];
       if (e.toString().contains("-352") ||
           (e.toString().contains("NoSuchMethodError") && e.toString().contains("'[]'"))) {
         notLogin.value = true;
@@ -71,13 +74,16 @@ class AreaServerRemoteController extends ServerRemotePageController<LiveRoom> {
 
   @override
   Future<List<LiveRoom>> fetchNetworkData(int page, int pageSize) async {
+    if (isClosed) return [];
     try {
       final result = await site.liveSite.getCategoryRooms(subCategory, page: page);
+      if (isClosed) return [];
       for (var element in result) {
         element.area = subCategory.areaName;
       }
       return result;
     } catch (e) {
+      if (isClosed) return [];
       if (e.toString().contains("-352") ||
           (e.toString().contains("NoSuchMethodError") && e.toString().contains("'[]'"))) {
         notLogin.value = true;

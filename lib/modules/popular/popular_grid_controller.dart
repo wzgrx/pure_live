@@ -94,7 +94,10 @@ class PopularServerFixedController extends ServerFixedPageController<LiveRoom> {
 
   @override
   Future<List<LiveRoom>> fetchFixedNetworkData(int bigPage, int fixedSize) async {
-    return _rankForCurrentSettings(await site.liveSite.getRecommendRooms(page: bigPage, pageSize: fixedSize));
+    if (isClosed) return [];
+    final rooms = await site.liveSite.getRecommendRooms(page: bigPage, pageSize: fixedSize);
+    if (isClosed) return [];
+    return _rankForCurrentSettings(rooms);
   }
 }
 
@@ -104,6 +107,9 @@ class PopularServerRemoteController extends ServerRemotePageController<LiveRoom>
 
   @override
   Future<List<LiveRoom>> fetchNetworkData(int page, int pageSize) async {
-    return _rankForCurrentSettings(await site.liveSite.getRecommendRooms(page: page, pageSize: pageSize));
+    if (isClosed) return [];
+    final rooms = await site.liveSite.getRecommendRooms(page: page, pageSize: pageSize);
+    if (isClosed) return [];
+    return _rankForCurrentSettings(rooms);
   }
 }

@@ -56,11 +56,22 @@ void main() {
       'huajiao',
       'openrec',
       'ttinglive',
+      'xiaohongshu',
     ]);
-    expect(settings.siteCatalogMigration.value, 11);
+    expect(settings.siteCatalogMigration.value, 12);
     settings.hotAreasList.remove('twitcasting');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'acfun', 'missevan', 'inke', 'kilakila', 'huajiao', 'openrec', 'ttinglive']);
+    expect(settings.hotAreasList, [
+      'huya',
+      'acfun',
+      'missevan',
+      'inke',
+      'kilakila',
+      'huajiao',
+      'openrec',
+      'ttinglive',
+      'xiaohongshu',
+    ]);
     await Hive.box<dynamic>('app_settings').flush();
     expect(HivePrefUtil.getStringList('hotAreasList'), [
       'huya',
@@ -71,6 +82,7 @@ void main() {
       'huajiao',
       'openrec',
       'ttinglive',
+      'xiaohongshu',
     ]);
   });
 

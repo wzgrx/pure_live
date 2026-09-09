@@ -41,11 +41,21 @@ void main() {
       'huajiao',
       'openrec',
       'ttinglive',
+      'xiaohongshu',
     ]);
-    expect(controller.siteCatalogMigration.value, 11);
+    expect(controller.siteCatalogMigration.value, 12);
     controller.hotAreasList.remove('missevan');
     controller.onInit();
-    expect(controller.hotAreasList, ['huya', 'twitcasting', 'inke', 'kilakila', 'huajiao', 'openrec', 'ttinglive']);
+    expect(controller.hotAreasList, [
+      'huya',
+      'twitcasting',
+      'inke',
+      'kilakila',
+      'huajiao',
+      'openrec',
+      'ttinglive',
+      'xiaohongshu',
+    ]);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     expect(Get.put(FavoriteRoomController()).hotAreasList, [
@@ -56,6 +66,7 @@ void main() {
       'huajiao',
       'openrec',
       'ttinglive',
+      'xiaohongshu',
     ]);
   });
 

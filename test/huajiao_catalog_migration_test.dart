@@ -31,18 +31,18 @@ void main() {
     await HivePrefUtil.setInt('siteCatalogMigration', 8);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'inke']);
     final settings = Get.put(FavoriteRoomController());
-    expect(settings.hotAreasList, ['huya', 'inke', 'huajiao', 'openrec', 'ttinglive']);
-    expect(settings.siteCatalogMigration.value, 11);
+    expect(settings.hotAreasList, ['huya', 'inke', 'huajiao', 'openrec', 'ttinglive', 'xiaohongshu']);
+    expect(settings.siteCatalogMigration.value, 12);
     settings.hotAreasList.remove('huajiao');
     settings.onInit();
-    expect(settings.hotAreasList, ['huya', 'inke', 'openrec', 'ttinglive']);
+    expect(settings.hotAreasList, ['huya', 'inke', 'openrec', 'ttinglive', 'xiaohongshu']);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
     final reopened = Get.put(FavoriteRoomController());
-    expect(reopened.siteCatalogMigration.value, 11);
-    expect(reopened.hotAreasList, ['huya', 'inke', 'openrec', 'ttinglive']);
+    expect(reopened.siteCatalogMigration.value, 12);
+    expect(reopened.hotAreasList, ['huya', 'inke', 'openrec', 'ttinglive', 'xiaohongshu']);
   });
 
   test('backup normalization retains Huajiao order and does not duplicate it', () async {

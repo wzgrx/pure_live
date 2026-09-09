@@ -53,6 +53,8 @@ class SearchController extends GetxController {
   String buildSearchUrl(String platform, String keyword) {
     final q = Uri.encodeComponent(keyword);
     switch (platform) {
+      case Sites.xiaohongshuSite:
+        throw StateError('Xiaohongshu supports exact broadcast-room lookup, not web keyword search');
       case Sites.ttingSite:
         throw StateError('TTing supports exact channel lookup, not web keyword search');
       case Sites.openrecSite:
@@ -282,6 +284,7 @@ class SearchController extends GetxController {
       final capability = LiveSearchCapabilities.forPlatform(site.id);
       if (site.id == Sites.acfunSite) return i18n('search_coverage_acfun');
       return switch (capability.coverage) {
+        NativeSearchCoverage.roomLookup => i18n('search_coverage_room_lookup', args: {'site': site.name}),
         NativeSearchCoverage.channelLookup => i18n('search_coverage_channel_lookup', args: {'site': site.name}),
         NativeSearchCoverage.liveAndOffline => i18n('search_coverage_live_and_offline', args: {'site': site.name}),
         NativeSearchCoverage.liveOnly => i18n('search_coverage_live_only', args: {'site': site.name}),
@@ -310,10 +313,15 @@ class SearchController extends GetxController {
         .where((site) => LiveSearchCapabilities.forPlatform(site.id).coverage == NativeSearchCoverage.channelLookup)
         .map((site) => site.name)
         .join('、');
+    final roomLookupSites = sites
+        .where((site) => LiveSearchCapabilities.forPlatform(site.id).coverage == NativeSearchCoverage.roomLookup)
+        .map((site) => site.name)
+        .join('、');
     return [
       summary,
       if (unavailableSites.isNotEmpty) i18n('search_coverage_unavailable', args: {'site': unavailableSites}),
       if (lookupSites.isNotEmpty) i18n('search_coverage_channel_lookup', args: {'site': lookupSites}),
+      if (roomLookupSites.isNotEmpty) i18n('search_coverage_room_lookup', args: {'site': roomLookupSites}),
     ].join(' ');
   }
 

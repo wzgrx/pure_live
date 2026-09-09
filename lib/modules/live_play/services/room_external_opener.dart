@@ -1,4 +1,5 @@
 import 'package:pure_live/core/site/tting/tting_link.dart';
+import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_link.dart';
 import 'package:pure_live/core/site/openrec/openrec_link.dart';
 import 'package:pure_live/core/site/openrec/openrec_api.dart';
 import 'package:pure_live/common/models/live_room.dart';
@@ -39,6 +40,9 @@ class RoomExternalOpener {
     if (id == null) return null;
     final path = Uri.encodeComponent(id);
     switch (site) {
+      case Sites.xiaohongshuSite:
+        final broadcast = XiaohongshuLink.parse(id);
+        return broadcast == null ? null : RoomExternalTarget(web: XiaohongshuLink.url(broadcast));
       case Sites.ttingSite:
         final channel = TtingLink.parse(id);
         return channel == null ? null : RoomExternalTarget(web: TtingLink.url(channel));

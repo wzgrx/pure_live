@@ -2,7 +2,19 @@ import 'dart:convert';
 
 import 'package:html/parser.dart' as html;
 
-enum XiaohongshuFailure { transport, access, missing, rateLimited, service, api, schema, identity, cancelled }
+enum XiaohongshuFailure {
+  transport,
+  access,
+  missing,
+  rateLimited,
+  service,
+  api,
+  schema,
+  identity,
+  cancelled,
+  notLive,
+  mediaUnavailable,
+}
 
 class XiaohongshuException implements Exception {
   const XiaohongshuException(this.kind);

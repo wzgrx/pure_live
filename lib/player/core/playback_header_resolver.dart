@@ -1,4 +1,5 @@
 import 'package:pure_live/core/site/tting/tting_api.dart';
+import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_api.dart';
 import 'package:pure_live/core/site/openrec/openrec_api.dart';
 import 'package:pure_live/common/services/settings_service.dart';
 import 'package:pure_live/core/site/bilibili/bilibili_site.dart';
@@ -147,6 +148,9 @@ class PlaybackHeaderResolver {
         break;
       case Sites.ttingSite:
         headers = TtingApi.playHeaders;
+        break;
+      case Sites.xiaohongshuSite:
+        headers = XiaohongshuApi.headers;
         break;
       case Sites.huajiaoSite:
         headers = HuajiaoApi.headers;

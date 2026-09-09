@@ -33,7 +33,7 @@
 
 两个慢传输 15 秒场景的产物 video PTS 为 1.421033—5.387700、audio 为 1.400000—5.389333；相邻包最大步长分别约 0.033334/0.021334 秒。**连续输出 PTS、约 21 ms 的首轨起点差、started 或 code=0，都不证明直播内容完整。** 本批未做逐包载荷映射或完整解码，也未证明哪一个 FFmpeg 时间戳选项单独造成时间范围收缩；不要据此盲目调整 dts_delta_threshold 或补帧。
 
-日志中出现 expired/skipping 片段以及停止时的 410/I/O 信息；正常控制也保留原生停止日志。三个慢场景停止都未强制取消，完成输入排空仍允许舍弃尾部，沿用已有语义。当前 inputIntegrityError 专指已识别的包损坏，不等价于输入时段完整。
+日志中出现 expired/skipping 片段以及停止时的 410/I/O 信息；正常控制也保留原生停止日志。三个慢场景从停止请求到结束的实测时间分别为 2.012、2.427、2.309 秒。此次事件 JSON 未单独保存 forcedCancel/inputDrained 字段，不把耗时本身当成这些字段的直接证明；排空与尾部舍弃仍按已有语义分别解释。当前 inputIntegrityError 专指已识别的包损坏，不等价于输入时段完整。
 
 ## 验证账目与首轮修正
 
@@ -48,6 +48,8 @@
 首轮原生断言错误是把 HTTP 410 的空响应也计入“已完整接收的视频”，将最小值算为 1 ms。修订仅把上游 200/206 且 bodyCompleteMs 已存在的媒体纳入统计；新增独立测试排除 410、503 和未完成的 206。原首轮源码/哈希、日志、四组原件和离线重计结果均独立保存，未修改生产传输来满足夹具。最终复验重用已校验哈希的同一套媒体，三个慢场景真实输入/输出结论与首轮一致。
 
 所有重型命令经 build_resource_guard 串行执行。总耗时包含等待其他项目 Gradle 测试的排队；曾按原 exec 句柄等待，未终止/重启其他进程或为静默重复启动本任务，也未在排队/运行中编辑源码。第二份记录的 3 个活跃重型进程属于观察到的环境状态，不写成全部退出。
+
+记录边界：check.log 是 PowerShell transcript，保存了排队和阶段记录，但没有完整收录原生子进程 stdout。原生终态文本见本任务工具输出；长期离线核验以各场景结构化 JSON、原件和 build-records 为准，不把 transcript 当作完整 FFmpeg 日志。
 
 本地证据：`local-artifacts/hls-rolling-20260909/check.ps1`、check.log、fixture-hashes.json、source-hashes.json、first-analysis-*、first-native-*、first-native-filtered-recount.json、final-artifact-index.json，以及各场景 origin.json/hls-timeline.json/result.json/packets.json/TS。最终工作内容只有探针和文档，没有新应用包。
 

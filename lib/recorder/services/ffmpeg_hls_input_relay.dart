@@ -45,6 +45,7 @@ class FFmpegHlsInputRelay {
   }
 
   static const int _maximumManifestBytes = 4 * 1024 * 1024;
+  static const Duration _connectionTimeout = Duration(seconds: 15);
   static final RegExp _hlsPath = RegExp(r'\.m3u8$', caseSensitive: false);
   static final RegExp _uriAttribute = RegExp(r'URI="([^"]+)"', caseSensitive: false);
   static const Set<String> _allowedMediaExtensions = <String>{
@@ -168,7 +169,7 @@ class FFmpegHlsInputRelay {
     final client = HttpClient()
       ..connectionFactory = connections.connect
       ..findProxy = findProxy ?? resolveRecorderProxyDirective
-      ..connectionTimeout = const Duration(seconds: 15)
+      ..connectionTimeout = _connectionTimeout
       ..idleTimeout = const Duration(seconds: 20)
       ..autoUncompress = true;
     final HttpServer server;
@@ -202,6 +203,24 @@ class FFmpegHlsInputRelay {
     final inputIndex = arguments.indexOf('-i');
     if (inputIndex >= 0 && inputIndex + 1 < arguments.length) {
       arguments[inputIndex + 1] = inputUri.toString();
+      if (drainOnStop) {
+        // This socket waits for a whole response, not individual upstream
+        // packets. Keep upstream idle enforcement in the relay. One pending
+        // connection may finish after the response deadline; allow its owned
+        // connection timeout and 5s local scheduling margin, never infinity.
+        final localTimeout =
+            (_HlsResponseBudget.totalFor(_bodyIdleTimeout) + _connectionTimeout + const Duration(seconds: 5))
+                .inMicroseconds
+                .toString();
+        var replaced = false;
+        for (var i = 0; i < inputIndex - 1; i++) {
+          if (arguments[i] == '-rw_timeout') {
+            arguments[++i] = localTimeout;
+            replaced = true;
+          }
+        }
+        if (!replaced) arguments.insertAll(inputIndex, ['-rw_timeout', localTimeout]);
+      }
     }
     return List<String>.unmodifiable(arguments);
   }
@@ -833,7 +852,8 @@ class _HlsResponseBudget {
   _HlsResponseBudget(this.idle);
   final Duration idle;
   final Stopwatch clock = Stopwatch()..start();
-  Duration get remaining => idle * 4 - clock.elapsed;
+  static Duration totalFor(Duration idle) => idle * 4;
+  Duration get remaining => totalFor(idle) - clock.elapsed;
 
   void check() {
     if (remaining <= Duration.zero) throw TimeoutException('HLS complete response deadline exceeded');

@@ -68,11 +68,20 @@ void main() {
           expect(report['windowDurationSeconds'], 6);
           expect(report['minimumWholeBodyMs'] as int, greaterThanOrEqualTo(12000));
         }
-        // The 10s local read budget expires before the continuously arriving
-        // upstream body is published; 15s permits that same 12s transfer.
-        expect(reports[1]['refreshBeforeFirstVideoComplete'], true);
+        // Upstream idle budget no longer doubles as the whole-body loopback
+        // wait. Both now receive the same continuously arriving 12s response.
+        expect(reports[1]['refreshBeforeFirstVideoComplete'], false);
+        expect(reports[1]['started'], true);
+        expect(reports[1]['outputBytes'] as int, greaterThan(0));
         expect(reports[2]['refreshBeforeFirstVideoComplete'], false);
         expect(reports[3]['refreshBeforeFirstVideoComplete'], false);
+        for (final report in reports) {
+          expect(report['nativeReadTimeoutMicros'], ((report['rwTimeout'] as int) * 4 + 20) * 1000000);
+          final terminal = (report['events'] as List).last as Map;
+          expect(terminal['forcedCancel'], false);
+          expect(terminal['inputDrained'], true);
+          expect(terminal['inputIntegrityError'], false);
+        }
         expect(
           reports[2]['receivedVideoSequenceGaps'],
           true,
@@ -140,6 +149,11 @@ Future<Map<String, Object?>> _capture(_Scenario config, Directory fixture, Direc
     execution = native.start(taskId: taskId, arguments: arguments, liveRecording: true, hlsDiagnostics: diagnostics);
     // Fixed controlled exposure, not a claim of healthy live coverage.
     await Future<void>.delayed(Duration(seconds: config.runSeconds));
+    // Persist only this numeric native argument, never the full command/URLs.
+    final nativeCommand = native.getSession(taskId)?.session.getCommand() ?? '';
+    report['nativeReadTimeoutMicros'] = int.tryParse(
+      RegExp(r'-rw_timeout\s+(\d+)').firstMatch(nativeCommand)?.group(1) ?? '',
+    );
     relay = native.getSession(taskId)?.inputRelay;
     report['stopRequestedMs'] = diagnostics.elapsedMilliseconds;
     if (native.isRunning(taskId)) await native.stop(taskId);

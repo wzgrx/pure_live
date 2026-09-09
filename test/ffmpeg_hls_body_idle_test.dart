@@ -7,6 +7,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 
 void main() {
+  for (final recording in [true, false]) {
+    test('only recording rewrites the loopback input budget; output options and original args remain intact', () async {
+      const source = [
+        '-rw_timeout',
+        '10000000',
+        '-rw_timeout',
+        '15000000',
+        '-i',
+        'http://127.0.0.1:1/live.m3u8',
+        '-rw_timeout',
+        '1',
+        'out.ts',
+      ];
+      final relay = (await FFmpegHlsInputRelay.startForArguments(source, force: true, drainOnStop: recording))!;
+      addTearDown(relay.close);
+      expect(relay.replaceFirstInput(source), [
+        '-rw_timeout',
+        recording ? '80000000' : '10000000',
+        '-rw_timeout',
+        recording ? '80000000' : '15000000',
+        '-i',
+        relay.inputUri.toString(),
+        '-rw_timeout',
+        '1',
+        'out.ts',
+      ]);
+      expect(source[1], '10000000');
+      expect(source[5], 'http://127.0.0.1:1/live.m3u8');
+    });
+  }
+  test('recording without a supplied timeout installs a bounded loopback default', () async {
+    const source = ['-i', 'http://127.0.0.1:1/live.m3u8', 'out.ts'];
+    final relay = (await FFmpegHlsInputRelay.startForArguments(source, drainOnStop: true))!;
+    addTearDown(relay.close);
+    expect(relay.replaceFirstInput(source), ['-rw_timeout', '80000000', '-i', relay.inputUri.toString(), 'out.ts']);
+  });
   for (final manifest in [false, true]) {
     test('recording retires a stalled ${manifest ? 'manifest' : 'spilled media'} body without stop', () async {
       final fixture = await _Fixture.create(stallManifest: manifest);

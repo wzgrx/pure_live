@@ -1,6 +1,6 @@
 # TTingLive / FLEX TV 当前公开合同取证（2026-09-09）
 
-后续源码进展见 [HLS 源级参数策略审计](HLS_SOURCE_QUERY_POLICY_AUDIT_2026_09_09.md)：显式单源 token 策略与低层 relay 合同已实现并通过 67 项定向回归；应用接线、TTing API/注册及原生验收仍待继续，下文保留当次公开取证边界。
+后续源码进展见 [HLS 源级参数策略审计](HLS_SOURCE_QUERY_POLICY_AUDIT_2026_09_09.md)、[多画面接线](MULTIVIEW_SOURCE_INPUT_AUDIT_2026_09_09.md) 和 [TTing API 数据层](TTING_API_AUDIT_2026_09_09.md)。主播放器/录制/多画面已接入源策略，API 数据层新增 ncp/ncp_llh 合同并通过最终 46 项回归；LiveSite/注册及原生验收仍待继续，下文保留当次公开取证边界。
 
 ## 结论与边界
 

@@ -335,6 +335,14 @@ class SearchController extends GetxController {
     );
   }
 
+  bool get canSearchNatively {
+    if (index.v == 0) {
+      return sites.any((site) => LiveSearchCapabilities.forPlatform(site.id).supportsNativeSearch);
+    }
+    if (index.v < 0 || index.v > sites.length) return false;
+    return LiveSearchCapabilities.forPlatform(sites[index.v - 1].id).supportsNativeSearch;
+  }
+
   bool get canOpenWebSearch {
     if (index.v <= 0 || index.v > sites.length) return false;
     return LiveSearchCapabilities.forPlatform(sites[index.v - 1].id).supportsWebSearch;

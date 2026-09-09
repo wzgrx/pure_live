@@ -36,6 +36,7 @@ Map<String, Object?> ttingHlsAdmissionSummary(String text, Uri source) {
     });
   }
   result['kind'] = 'media';
+  var stage = 'snapshot';
   try {
     final snapshot = HlsMediaSnapshot.parse(text, source);
     result.addAll({
@@ -43,17 +44,24 @@ Map<String, Object?> ttingHlsAdmissionSummary(String text, Uri source) {
       'segmentCount': snapshot.segments.length,
       'targetDuration': snapshot.targetDuration,
       'version': snapshot.version,
+      'pendingPartialCount': snapshot.lowLatency.pendingParts.length,
+      'preloadHintCount': snapshot.lowLatency.preloadHints.length,
+      'renditionReportCount': snapshot.lowLatency.renditionReports.length,
       'unhandledTags':
           snapshot.unhandledTags.where((tag) => RegExp(r'^#EXT[A-Z0-9-]{0,64}$').hasMatch(tag)).take(64).toList()
             ..sort(),
     });
     final window = HlsRetainedWindow(source);
+    stage = 'retention';
     final evicted = window.merge(snapshot);
+    stage = 'publication';
     renderHlsRetainedManifest(window, localUri: (uri) => uri);
     result['retentionAccepted'] = evicted.isEmpty;
+    if (snapshot.lowLatency.partTarget != null && evicted.isEmpty) result['recordingMode'] = 'complete-parent-media';
   } on FormatException {
     result.putIfAbsent('snapshotParsed', () => false);
     result['retentionAccepted'] = false;
+    result['failureStage'] = stage;
   }
   return result;
 }

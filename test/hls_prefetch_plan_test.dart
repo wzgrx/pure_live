@@ -11,7 +11,7 @@ const master =
 final base = Uri.parse('https://fixture.invalid/live/master.m3u8');
 HlsMediaSnapshot media(Uri source, {bool supported = true}) => HlsMediaSnapshot.parse(
   '#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2,\nbody.ts\n#EXT-X-ENDLIST\n'
-  '${supported ? '' : '#EXT-X-PART:DURATION=0.2,URI="p.ts"\n'}',
+  '${supported ? '' : '#EXT-X-UNSUPPORTED-FIXTURE\n'}',
   source,
 );
 

@@ -22,17 +22,21 @@ void main() {
     expect(jsonEncode(summary), isNot(contains(secret)));
     expect(jsonEncode(summary), isNot(contains('fixture.invalid')));
   });
-  test('unknown LL-HLS tags explain rejection without downloading a partial resource', () {
+  test('LL-HLS metadata admits complete parents without exposing partial resource names', () {
     final summary = ttingHlsAdmissionSummary(
       '#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXT-X-PART-INF:PART-TARGET=0.5\n'
+      '#EXT-X-SERVER-CONTROL:PART-HOLD-BACK=1.5\n'
       '#EXTINF:2,\nsegment.m4s\n#EXT-X-PART:DURATION=0.5,URI="secret-part.m4s"\n'
       '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="secret-next.m4s"\n',
       source,
     );
     expect(summary['snapshotParsed'], true);
-    expect(summary['retentionAccepted'], false);
+    expect(summary['retentionAccepted'], true);
     expect(summary['partialSegmentCount'], 1);
-    expect(summary['unhandledTags'], ['#EXT-X-PART', '#EXT-X-PART-INF', '#EXT-X-PRELOAD-HINT']);
+    expect(summary['pendingPartialCount'], 1);
+    expect(summary['preloadHintCount'], 1);
+    expect(summary['recordingMode'], 'complete-parent-media');
+    expect(summary['unhandledTags'], isEmpty);
     expect(jsonEncode(summary), isNot(contains('secret-')));
   });
   test('supported media and ambiguous malformed inputs have distinct results', () {

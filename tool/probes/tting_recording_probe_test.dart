@@ -100,7 +100,7 @@ void main() {
               outputDir: output.path,
               segmentTime: 10,
               preferBestStream: true,
-              rwTimeout: 10,
+              rwTimeout: 15,
               threadQueueSize: 512,
               filePrefix: current.recordingFilePrefix,
               headers: headers,
@@ -146,6 +146,7 @@ void main() {
                   liveRecording: true,
                   sourceQueryPolicy: source.sourceQueryPolicy,
                   hlsDiagnostics: hlsDiagnostics,
+                  hlsPrefetch: true,
                 )
                 .then<void>(
                   (_) {
@@ -197,6 +198,26 @@ void main() {
               RegExp(r'-rw_timeout\s+(\d+)').firstMatch(session?.session.getCommand() ?? '')?.group(1) ?? '',
             );
             diagnosticRelay = session?.inputRelay;
+            // The opt-in probe lives outside test/ but observes only its own relay.
+            // ignore: invalid_use_of_visible_for_testing_member
+            final selectedFeedCount = diagnosticRelay?.prefetchFeedCount ?? 0;
+            expect(selectedFeedCount, 2, reason: 'The selected video and audio must use the production prefetch path.');
+            // Read only the already-selected local master, not another source
+            // or a second native consumer. Its RESOLUTION defines both axes.
+            final metadataClient = HttpClient()..findProxy = (_) => 'DIRECT';
+            late int selectedWidth;
+            late int selectedHeight;
+            try {
+              final response = await (await metadataClient.getUrl(diagnosticRelay!.inputUri)).close();
+              expect(response.statusCode, 200);
+              final master = await response.transform(utf8.decoder).join().timeout(const Duration(seconds: 5));
+              final dimensions = RegExp(r'RESOLUTION=(\d+)x(\d+)').allMatches(master).toList();
+              expect(dimensions, hasLength(1));
+              selectedWidth = int.parse(dimensions.single.group(1)!);
+              selectedHeight = int.parse(dimensions.single.group(2)!);
+            } finally {
+              metadataClient.close(force: true);
+            }
             current.recordedSeconds = session?.recordedSeconds ?? 0;
             stage = 'native-stop';
             await manager.stop(current.taskId);
@@ -210,7 +231,13 @@ void main() {
             current.inputCoverageIncomplete = terminal['inputCoverageIncomplete'] == true;
             current.inputTailDiscarded = terminal['inputTailDiscarded'] == true;
             expect(terminal['inputIntegrityError'], false, reason: 'Do not merge a known damaged capture.');
-            expect(nativeReadTimeoutMicros, 60000000);
+            expect(nativeReadTimeoutMicros, 80000000);
+            expect(
+              current.inputCoverageIncomplete,
+              false,
+              reason: 'All offered complete-parent coverage must be retained.',
+            );
+            expect(current.inputTailDiscarded, false, reason: 'Published complete parents must drain at stop.');
             final segments = await const RecordingOutputMetrics().measure(
               directoryPath: output.path,
               filePrefix: current.recordingFilePrefix,
@@ -279,7 +306,8 @@ void main() {
             expect(duration, lessThan(40));
             expect(streams.any((stream) => stream['codec_type'] == 'audio'), isTrue);
             final video = streams.singleWhere((stream) => stream['codec_type'] == 'video');
-            expect(video['height'], 720, reason: 'Native output must match the requested 720p quality.');
+            expect(video['width'], selectedWidth, reason: 'Native width must match the selected production master.');
+            expect(video['height'], selectedHeight, reason: 'Native height must match the selected production master.');
             expect(upstreamProxyRequests, greaterThan(0));
             stage = 'independent-decode';
             final decode = await _runOwned(ffmpeg!, [
@@ -317,7 +345,11 @@ void main() {
               'nativeEvents': observed,
               'sourceLeaseCurrentAtOpen': true,
               'sourceQueryPolicyPassedToNativeManager': true,
-              'requestedHeight': 720,
+              'selectedWidth': selectedWidth,
+              'selectedHeight': selectedHeight,
+              'prefetchFeedCount': selectedFeedCount,
+              'recordingMode': 'complete-parent-media',
+              'nativeWidth': video['width'],
               'nativeHeight': video['height'],
               'firstBytesMs': firstBytesMs,
               'inputCoverageIncomplete': current.inputCoverageIncomplete,

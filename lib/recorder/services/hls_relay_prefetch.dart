@@ -53,6 +53,7 @@ extension _HlsRelayPrefetch on FFmpegHlsInputRelay {
           }
         },
         onCoverageGap: () => onCoverageIncomplete?.call(),
+        onRefreshFailure: diagnostics?._prefetchRefreshFailed,
       );
       if (!candidate.selectAll(selections)) return;
       _prefetch = candidate;

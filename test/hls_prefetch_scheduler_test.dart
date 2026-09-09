@@ -35,6 +35,42 @@ Future<List<int>> read(HlsPrefetchLease lease) async {
 }
 
 void main() {
+  for (final mergeFailure in [false, true]) {
+    test('refresh failure observer is isolated; retention=$mergeFailure', () async {
+      final pool = cache();
+      final observed = Completer<HlsPrefetchRefreshStage>();
+      var refreshes = 0;
+      final scheduler = HlsPrefetchScheduler(
+        pool: pool,
+        pollInterval: const Duration(milliseconds: 10),
+        fetchSnapshot: (_, _) async {
+          refreshes++;
+          if (!mergeFailure) throw const HandshakeException('private transport context');
+          return HlsMediaSnapshot.parse(playlist(0, 1).replaceFirst('TARGETDURATION:1', 'TARGETDURATION:2'), source);
+        },
+        loadResource: (_, _) async => HlsPrefetchResponse(Stream.value([1])),
+        onRefreshFailure: (id, stage, error) {
+          expect(id, 'video');
+          expect(error, mergeFailure ? isA<FormatException>() : isA<HandshakeException>());
+          observed.complete(stage);
+          throw StateError('Observer must not change scheduling');
+        },
+      );
+      try {
+        expect(scheduler.select('video', source, snapshot(0, 1)), true);
+        expect(
+          await observed.future.timeout(const Duration(seconds: 1)),
+          mergeFailure ? HlsPrefetchRefreshStage.retention : HlsPrefetchRefreshStage.snapshot,
+        );
+        expect(() => scheduler.publish('video', (r) => r.uri), throwsStateError);
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        expect(refreshes, 1);
+      } finally {
+        await scheduler.close();
+      }
+      expect(pool.ownedEntries, 0);
+    });
+  }
   test('published drain finishes on sealed bodies, preserves reads and is idempotent', () async {
     final pool = cache();
     final pending = StreamController<List<int>>();

@@ -7,6 +7,8 @@ import 'hls_retained_window.dart';
 
 enum HlsPrefetchResourceKind { media, initialization, key }
 
+enum HlsPrefetchRefreshStage { snapshot, retention }
+
 typedef HlsPrefetchSelection = ({String id, Uri source, HlsMediaSnapshot snapshot});
 
 final class HlsPrefetchResource {
@@ -45,6 +47,7 @@ final class HlsPrefetchScheduler {
     required this.loadResource,
     this.onCoverageGap,
     this.onDownloadResult,
+    this.onRefreshFailure,
     this.pollInterval,
     this.maximumFeeds = 2,
     this.maximumSegments = 64,
@@ -63,6 +66,7 @@ final class HlsPrefetchScheduler {
   loadResource;
   final void Function()? onCoverageGap;
   final void Function(HlsPrefetchResource resource, bool ready)? onDownloadResult;
+  final void Function(String feedId, HlsPrefetchRefreshStage stage, Object error)? onRefreshFailure;
   final Duration? pollInterval;
   final int maximumFeeds;
   final int maximumSegments;
@@ -282,18 +286,27 @@ final class HlsPrefetchScheduler {
     if (_closed || _finishing || feed.failed) return;
     final cancellation = HlsPrefetchCancellation();
     feed.refreshCancellation = cancellation;
+    var stage = HlsPrefetchRefreshStage.snapshot;
     try {
       final snapshot = await fetchSnapshot(feed.source, cancellation);
       if (_closed || _finishing || cancellation.isCancelled) return;
+      stage = HlsPrefetchRefreshStage.retention;
       final evicted = feed.window.merge(snapshot);
       if (evicted.any((s) => s.sequence > feed.delivered)) _markGap();
       _rebuild(feed);
       _prune();
       _pump();
-    } on Object {
+    } on Object catch (error) {
       // A failed refresh is exposed to the caller, not an endlessly repeated
       // stale manifest. Recording retry/source-refresh policy stays upstream.
-      if (!_closed && !_finishing) feed.failed = true;
+      if (!_closed && !_finishing) {
+        feed.failed = true;
+        try {
+          onRefreshFailure?.call(feed.id, stage, error);
+        } on Object {
+          /* Observation only: never retry or hide a failed feed. */
+        }
+      }
     } finally {
       feed.refreshCancellation = null;
       _schedule(feed);

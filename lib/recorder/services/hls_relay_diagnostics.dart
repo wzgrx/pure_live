@@ -9,9 +9,48 @@ final class HlsRelayDiagnostics {
   final int maximumRequests;
   final Stopwatch _clock = Stopwatch()..start();
   final List<_HlsRequestTrace> _requests = [];
+  final List<Map<String, Object?>> _prefetchRefreshFailures = [];
   int _omittedRequests = 0;
 
   int get elapsedMilliseconds => _clock.elapsedMilliseconds;
+
+  void _prefetchRefreshFailed(String id, HlsPrefetchRefreshStage stage, Object error) {
+    // One terminal event per selected feed, at most two feeds per generation.
+    // Keep only opaque local IDs and fixed categories, never error.toString().
+    if (_prefetchRefreshFailures.length >= 2 || !RegExp(r'^(root|[0-9a-z]{1,16})$').hasMatch(id)) return;
+    final kind = switch (error) {
+      HlsUpstreamResponseException() => 'http',
+      HandshakeException() => 'tls',
+      SocketException() => 'socket',
+      TimeoutException() => 'timeout',
+      FormatException() => 'format',
+      StateError() => 'state',
+      _ => 'other',
+    };
+    _prefetchRefreshFailures.add({
+      'resourceId': id,
+      'atMs': elapsedMilliseconds,
+      'stage': stage.name,
+      'kind': kind,
+      if (error is HlsUpstreamResponseException) 'upstreamStatus': error.statusCode,
+      if (error is FormatException)
+        'contract': switch (error.message) {
+          'Snapshot identity or tag contract differs' => 'snapshot-identity-or-tags',
+          'Target duration changed within a source generation' => 'target-changed',
+          'Playlist contract changed within a source generation' => 'playlist-contract-changed',
+          'Partial target duration changed within a source generation' => 'part-target-changed',
+          'Stale or reopened HLS window' => 'stale-or-reopened',
+          'Conflicting HLS segment identity' => 'segment-identity',
+          'Missing HLS sequence interval' => 'sequence-gap',
+          'Partial segment and parent metadata conflict' => 'part-parent-context',
+          'Published parent is shorter than its earlier parts' => 'parent-duration',
+          'Unfinished parent was skipped' => 'pending-parent-skipped',
+          'Unfinished partial prefix disappeared' => 'pending-prefix-disappeared',
+          'Unfinished partial identity changed' => 'pending-identity',
+          _ => 'other',
+        },
+    });
+  }
 
   _HlsRequestTrace? _begin(String resourceId, String method) {
     if (_requests.length >= maximumRequests) {
@@ -30,6 +69,7 @@ final class HlsRelayDiagnostics {
     'maximumRequests': maximumRequests,
     'omittedRequests': _omittedRequests,
     'requests': [for (final request in _requests) request.snapshot()],
+    'prefetchRefreshFailures': [for (final failure in _prefetchRefreshFailures) Map<String, Object?>.of(failure)],
   };
 }
 

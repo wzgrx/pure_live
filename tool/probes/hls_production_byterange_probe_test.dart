@@ -12,6 +12,7 @@ void main() {
     'production ranged MAP and implicit media offsets preserve native packets after origin removal',
     () async {
       final withDateRanges = Platform.environment['PURELIVE_HLS_DATERANGE_PROBE'] == '1';
+      final withLowLatency = Platform.environment['PURELIVE_HLS_LL_RECORDING_PROBE'] == '1';
       final fixture = Directory(Platform.environment['PURELIVE_ROLLING_HLS_FIXTURE']!);
       final output = await Directory(
         p.join(
@@ -48,6 +49,11 @@ void main() {
           );
         }
         final expected = <String>['bytes=13-${12 + initialization.length}'];
+        if (withLowLatency) {
+          ranged.write(
+            '#EXT-X-PART-INF:PART-TARGET=1.1\n#EXT-X-SERVER-CONTROL:PART-HOLD-BACK=3.3,CAN-BLOCK-RELOAD=YES\n',
+          );
+        }
         for (var i = 0; i < pairs.length; i++) {
           final pair = pairs[i];
           final name = pair.group(2)!;
@@ -55,6 +61,12 @@ void main() {
           bodies['/direct/$prefix/$name'] = bytes;
           direct.write('${pair.group(1)}\n$name\n');
           final offset = combined.length;
+          if (withLowLatency) {
+            final duration = double.parse(pair.group(1)!.substring('#EXTINF:'.length).split(',').first) / 2;
+            for (var part = 0; part < 2; part++) {
+              ranged.write('#EXT-X-PART:DURATION=$duration,URI="unused-$i-$part.m4s",INDEPENDENT=YES\n');
+            }
+          }
           // First media offset is explicit, subsequent ranges are implicit.
           ranged.write('${pair.group(1)}\n#EXT-X-BYTERANGE:${bytes.length}${i == 0 ? '@$offset' : ''}\nbundle.mp4\n');
           expected.add('bytes=$offset-${offset + bytes.length - 1}');
@@ -170,6 +182,11 @@ void main() {
         final localBodies = <Uri>{};
         for (final child in children) {
           final playlist = await text(child);
+          if (withLowLatency) {
+            expect(playlist, isNot(contains('#EXT-X-PART')));
+            expect(playlist, isNot(contains('#EXT-X-SERVER-CONTROL')));
+            expect(playlist, isNot(contains('unused-')));
+          }
           if (withDateRanges) {
             expect(RegExp(r'^#EXT-X-DATERANGE:', multiLine: true).allMatches(playlist), hasLength(1));
             expect(playlist, contains('DURATION=6'));
@@ -231,6 +248,7 @@ void main() {
           jsonEncode({
             'originRemovedBeforeCachedNativeReads': true,
             'dateRangesPreserved': withDateRanges,
+            'lowLatencyCompleteParents': withLowLatency,
             'cachedNativePasses': 2,
             'packetCount': (direct['packets'] as List).length,
             'localBodies': localBodies.length,

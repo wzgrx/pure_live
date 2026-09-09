@@ -20,6 +20,140 @@ List<Uri> mediaUris(String text) => const LineSplitter()
     .toList();
 
 void main() {
+  for (final failure in ['http', 'parse', 'retention']) {
+    test('prefetch refresh diagnostics distinguish $failure without retaining source data', () async {
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      var manifests = 0;
+      final jobs = <Future<void>>{};
+      final sub = origin.listen((request) {
+        late Future<void> job;
+        job = () async {
+          if (request.uri.path == '/private-source.m3u8') {
+            manifests++;
+            if (manifests > 1 && failure == 'http') {
+              request.response.statusCode = 503;
+              request.response.write('private upstream detail');
+            } else if (manifests > 1 && failure == 'parse') {
+              request.response.write('private malformed payload');
+            } else {
+              request.response.write(
+                '#EXTM3U\n#EXT-X-TARGETDURATION:${manifests > 1 ? 2 : 1}\n#EXTINF:1,\nprivate-body.ts\n',
+              );
+            }
+          } else {
+            request.response.add([1]);
+          }
+          await request.response.close();
+        }().whenComplete(() => jobs.remove(job));
+        jobs.add(job);
+      });
+      final diagnostics = HlsRelayDiagnostics();
+      final relay = (await FFmpegHlsInputRelay.startForArguments(
+        ['-i', 'http://127.0.0.1:${origin.port}/private-source.m3u8?private-token=SECRET'],
+        drainOnStop: true,
+        enablePrefetch: true,
+        diagnostics: diagnostics,
+      ))!;
+      final client = HttpClient();
+      try {
+        expect((await get(client, relay.inputUri)).$1, 200);
+        expect(relay.prefetchFeedCount, 1);
+        final deadline = Stopwatch()..start();
+        while ((diagnostics.snapshot()['prefetchRefreshFailures']! as List).isEmpty &&
+            deadline.elapsed < const Duration(seconds: 3)) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        final events = diagnostics.snapshot()['prefetchRefreshFailures']! as List;
+        expect(events, hasLength(1));
+        final event = events.single as Map;
+        expect(event['resourceId'], 'root');
+        expect(event['stage'], failure == 'retention' ? 'retention' : 'snapshot');
+        expect(event['kind'], failure == 'http' ? 'http' : 'format');
+        if (failure == 'http') expect(event['upstreamStatus'], 503);
+        if (failure == 'retention') expect(event['contract'], 'target-changed');
+        expect((await get(client, relay.inputUri)).$1, failure == 'http' ? 503 : 502);
+        expect(manifests, 2);
+        final encoded = jsonEncode(diagnostics.snapshot());
+        for (final secret in ['private', 'SECRET', '127.0.0.1']) {
+          expect(encoded, isNot(contains(secret)));
+        }
+        event['kind'] = 'modified';
+        expect((diagnostics.snapshot()['prefetchRefreshFailures']! as List).single['kind'], isNot('modified'));
+      } finally {
+        client.close(force: true);
+        await relay.close();
+        await origin.close(force: true);
+        await sub.cancel();
+        await Future.wait(jobs.toList());
+      }
+      expect(relay.prefetchBodyCount, 0);
+    });
+  }
+  test(
+    'production LL recording promotes full parents and never downloads advertised parts, hints or other renditions',
+    () async {
+      var advanced = false;
+      final paths = <String>[];
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final jobs = <Future<void>>{};
+      final sub = origin.listen((request) {
+        late Future<void> job;
+        job = () async {
+          paths.add(request.uri.path);
+          if (request.uri.path == '/root.m3u8') {
+            request.response.write(
+              '#EXTM3U\n#EXT-X-TARGETDURATION:1\n'
+              '#EXT-X-PART-INF:PART-TARGET=0.5\n#EXT-X-SERVER-CONTROL:PART-HOLD-BACK=1.5,CAN-BLOCK-RELOAD=YES\n'
+              '#EXTINF:1,\ns0.m4s\n${advanced ? '#EXTINF:1,\ns1.m4s\n' : ''}'
+              '#EXT-X-PART:DURATION=0.5,URI="part-${advanced ? 2 : 1}.m4s"\n'
+              '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="hint.m4s"\n'
+              '#EXT-X-RENDITION-REPORT:URI="other.m3u8"\n',
+            );
+          } else if (request.uri.path == '/s0.m4s' || request.uri.path == '/s1.m4s') {
+            request.response.add([request.uri.path == '/s0.m4s' ? 0 : 1]);
+          } else {
+            request.response.statusCode = 404;
+          }
+          await request.response.close();
+        }().whenComplete(() => jobs.remove(job));
+        jobs.add(job);
+      });
+      final relay = (await FFmpegHlsInputRelay.startForArguments(
+        ['-i', 'http://127.0.0.1:${origin.port}/root.m3u8'],
+        drainOnStop: true,
+        enablePrefetch: true,
+      ))!;
+      final client = HttpClient();
+      try {
+        var text = utf8.decode((await get(client, relay.inputUri)).$2);
+        expect(relay.prefetchFeedCount, 1);
+        expect(mediaUris(text), hasLength(1));
+        expect((await get(client, mediaUris(text).single)).$2, [0]);
+        advanced = true;
+        final clock = Stopwatch()..start();
+        while (mediaUris(text).length < 2 && clock.elapsed < const Duration(seconds: 5)) {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          text = utf8.decode((await get(client, relay.inputUri)).$2);
+        }
+        expect(mediaUris(text), hasLength(2));
+        expect((await get(client, mediaUris(text).last)).$2, [1]);
+        expect(text, isNot(contains('#EXT-X-PART')));
+        expect(text, isNot(contains('#EXT-X-SERVER-CONTROL')));
+        await relay.finish();
+        expect(utf8.decode((await get(client, relay.inputUri)).$2), '$text#EXT-X-ENDLIST\n');
+        expect(paths.every((path) => const {'/root.m3u8', '/s0.m4s', '/s1.m4s'}.contains(path)), true);
+        expect(paths.where((p) => p == '/s0.m4s'), hasLength(1));
+        expect(paths.where((p) => p == '/s1.m4s'), hasLength(1));
+      } finally {
+        client.close(force: true);
+        await relay.close();
+        await origin.close(force: true);
+        await sub.cancel();
+        await Future.wait(jobs.toList());
+      }
+      expect(relay.prefetchBodyCount, 0);
+    },
+  );
   for (final interstitial in [false, true]) {
     test('DATERANGE metadata uses selected cache only; interstitial=$interstitial', () async {
       const tag = '#EXT-X-DATERANGE:ID="event",START-DATE="2026-09-09T00:00:00Z",X-NOTE="one,two"';

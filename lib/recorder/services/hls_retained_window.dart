@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 part 'hls_date_range.dart';
+part 'hls_low_latency.dart';
 
 /// Immutable request identity. Implicit ranges are resolved at parse time so
 /// retiring the preceding segment never changes which bytes are requested.
@@ -97,6 +98,7 @@ final class HlsMediaSnapshot {
     List<HlsSegmentDescriptor> segments,
     Set<String> unhandledTags,
     List<HlsDateRange> dateRanges,
+    this.lowLatency,
   ) : segments = List.unmodifiable(segments),
       unhandledTags = Set.unmodifiable(unhandledTags),
       dateRanges = List.unmodifiable(dateRanges);
@@ -112,6 +114,7 @@ final class HlsMediaSnapshot {
   /// Attribute updates in wire order. START-DATE may come from an older
   /// snapshot; only the owning window can validate a consolidated range.
   final List<HlsDateRange> dateRanges;
+  final HlsLowLatencyInfo lowLatency;
 
   static HlsMediaSnapshot parse(String text, Uri source, {int maximumSegments = 512}) {
     if (maximumSegments < 1 || maximumSegments > 4096) throw ArgumentError.value(maximumSegments);
@@ -146,12 +149,17 @@ final class HlsMediaSnapshot {
     final singletons = <String>{};
     final unhandled = <String>{};
     final dateRanges = <HlsDateRange>[];
+    final lowLatency = _LowLatencyBuilder();
     var sawProgramTime = false;
     for (final raw in lines.skip(1)) {
       final line = raw.trim();
       if (line.isEmpty) continue;
       final tag = line.split(':').first;
       final value = line.contains(':') ? line.substring(line.indexOf(':') + 1) : '';
+      if (lowLatency.hasPartsFor(sequence) &&
+          const {'#EXT-X-KEY', '#EXT-X-MAP', '#EXT-X-DISCONTINUITY', '#EXT-X-PROGRAM-DATE-TIME'}.contains(tag)) {
+        throw const FormatException('Parent metadata appears after its first partial segment');
+      }
       if (const {'#EXT-X-STREAM-INF', '#EXT-X-MEDIA', '#EXT-X-I-FRAME-STREAM-INF', '#EXT-X-SKIP'}.contains(tag)) {
         throw const FormatException('Master or delta input is not a complete media snapshot');
       }
@@ -162,19 +170,43 @@ final class HlsMediaSnapshot {
         '#EXT-X-VERSION',
         '#EXT-X-ENDLIST',
         '#EXT-X-PLAYLIST-TYPE',
+        '#EXT-X-PART-INF',
+        '#EXT-X-SERVER-CONTROL',
       }.contains(tag)) {
         if (!singletons.add(tag)) throw const FormatException('Duplicate playlist property');
       }
       switch (tag) {
         case '#EXT-X-MEDIA-SEQUENCE':
-          if (segments.isNotEmpty) throw const FormatException('Late media sequence');
+          if (segments.isNotEmpty || lowLatency.parts.isNotEmpty) throw const FormatException('Late media sequence');
           sequence = _unsigned(value);
         case '#EXT-X-DISCONTINUITY-SEQUENCE':
-          if (segments.isNotEmpty || sawDiscontinuity) throw const FormatException('Late discontinuity sequence');
+          if (segments.isNotEmpty || sawDiscontinuity || lowLatency.parts.isNotEmpty) {
+            throw const FormatException('Late discontinuity sequence');
+          }
           discontinuity = _unsigned(value);
         case '#EXT-X-TARGETDURATION':
           target = _unsigned(value);
           if (target == 0 || target > 86400) throw const FormatException('Invalid target duration');
+        case '#EXT-X-PART-INF':
+          lowLatency.partTarget = _llDecimal(_llAttributes(value, {'PART-TARGET'})['PART-TARGET']);
+        case '#EXT-X-SERVER-CONTROL':
+          lowLatency.control = HlsServerControl._parse(value);
+        case '#EXT-X-PART':
+          if (ended) throw const FormatException('Partial media follows ENDLIST');
+          lowLatency.addPart(
+            value,
+            source,
+            sequence,
+            discontinuity,
+            initialization,
+            keys.values.toList(),
+            time,
+            timeFloor,
+          );
+        case '#EXT-X-PRELOAD-HINT':
+          lowLatency.addHint(value, source);
+        case '#EXT-X-RENDITION-REPORT':
+          lowLatency.addReport(value, source);
         case '#EXT-X-DISCONTINUITY':
           discontinuity = _checkedAdd(discontinuity, 1);
           sawDiscontinuity = true;
@@ -284,6 +316,7 @@ final class HlsMediaSnapshot {
           if (segment.retainedBytes > 64 * 1024) {
             throw const FormatException('Segment dependency metadata exceeds limit');
           }
+          lowLatency.validateParent(segment);
           segments.add(segment);
           previous = segment;
           sequence = _checkedAdd(sequence, 1);
@@ -314,6 +347,7 @@ final class HlsMediaSnapshot {
       segments,
       unhandled,
       dateRanges,
+      lowLatency.finish(segments, ended, target, unhandled),
     );
   }
 }
@@ -334,6 +368,9 @@ final class HlsRetainedWindow {
   List<HlsSegmentDescriptor> get segments => _segments;
   List<HlsDateRange> _dateRanges = const [];
   List<HlsDateRange> get dateRanges => _dateRanges;
+  List<HlsPartialSegment> _pendingParts = const [];
+  List<HlsPartialSegment> get pendingParts => _pendingParts;
+  double? _partTarget;
   // Once timed history has been pruned, a later backwards clock mapping must
   // fail rather than publish segments whose event metadata was discarded.
   BigInt? _dateRangeFloor;
@@ -350,7 +387,8 @@ final class HlsRetainedWindow {
   bool get ended => _ended;
   int get retainedBytes =>
       _segments.fold<int>(0, (sum, segment) => sum + segment.retainedBytes) +
-      _dateRanges.fold<int>(0, (sum, range) => sum + range.retainedBytes);
+      _dateRanges.fold<int>(0, (sum, range) => sum + range.retainedBytes) +
+      _pendingParts.fold<int>(0, (sum, part) => sum + part.retainedBytes);
 
   /// The owner keeps published generations and active body leases separately.
   /// Older origin overlap must not reintroduce this explicitly retired prefix.
@@ -377,6 +415,13 @@ final class HlsRetainedWindow {
       throw const FormatException('Playlist contract changed within a source generation');
     }
     final incoming = snapshot.segments;
+    if (_partTarget != null &&
+        snapshot.lowLatency.partTarget != null &&
+        _partTarget != snapshot.lowLatency.partTarget) {
+      throw const FormatException('Partial target duration changed within a source generation');
+    }
+    final pendingParts = _nextPendingParts(_pendingParts, snapshot);
+    final pendingBytes = pendingParts.fold<int>(0, (sum, part) => sum + part.retainedBytes);
     if (_dateRangeFloor != null &&
         incoming.any(
           (s) =>
@@ -387,7 +432,7 @@ final class HlsRetainedWindow {
     }
     final ranges = _mergeDateRanges(_dateRanges, snapshot.dateRanges);
     if (incoming.isEmpty) {
-      if (_segments.isNotEmpty || ranges.isNotEmpty || (_ended && !snapshot.ended)) {
+      if (_segments.isNotEmpty || ranges.isNotEmpty || pendingParts.isNotEmpty || (_ended && !snapshot.ended)) {
         throw const FormatException('Empty refresh of a retained window');
       }
       _targetDuration = snapshot.targetDuration;
@@ -430,7 +475,8 @@ final class HlsRetainedWindow {
     if (pruned.$2 != null) floor = pruned.$2;
     var bytes =
         values.fold<int>(0, (sum, segment) => sum + segment.retainedBytes) +
-        pruned.$1.fold<int>(0, (sum, range) => sum + range.retainedBytes);
+        pruned.$1.fold<int>(0, (sum, range) => sum + range.retainedBytes) +
+        pendingBytes;
     final evicted = <HlsSegmentDescriptor>[];
     while (values.length > maximumSegments || bytes > maximumBytes) {
       if (values.length <= 1) throw const FormatException('Date ranges exceed retention metadata budget');
@@ -450,6 +496,8 @@ final class HlsRetainedWindow {
     }
     _segments = List.unmodifiable(values);
     _dateRanges = pruned.$1;
+    _pendingParts = pendingParts;
+    _partTarget ??= snapshot.lowLatency.partTarget;
     _dateRangeFloor = floor;
     _latestFirst = incoming.first.sequence;
     _targetDuration = snapshot.targetDuration;

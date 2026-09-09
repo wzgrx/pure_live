@@ -1133,22 +1133,58 @@ class PlayerManager {
     final intentRevision = _playbackIntentRevision;
     return _enqueuePlayerLifecycle(() async {
       if (!_isPlaybackCommandCurrent(intentRevision)) return;
-      _sourceRefreshResolver = sourceResolver;
-      _sourceRefreshAttempts = 0;
-      _prefetchedSourceRefresh = null;
-      _sourceRefreshAttemptResetTimer?.cancel();
-      _sourceRefreshAttemptResetTimer = null;
-      await _playResolvedSourceInternal(
-        url,
-        playUrls,
-        headers,
-        room: room,
-        audioOnly: audioOnly,
-        allowWarmSwap: true,
-        sourceRefreshAt: sourceRefreshAt,
-        sourceSelection: sourceSelection,
-        replaceSourceSelection: true,
-      );
+      final retainedCommit = _currentSourceCommit;
+      final retainedResolver = _sourceRefreshResolver;
+      var retainedAttempts = _sourceRefreshAttempts;
+      var retainedPrefetch = _prefetchedSourceRefresh;
+      var replacedRefreshOwner = false;
+      void replaceRefreshOwner() {
+        if (!replacedRefreshOwner) {
+          retainedAttempts = _sourceRefreshAttempts;
+          retainedPrefetch = _prefetchedSourceRefresh;
+        }
+        replacedRefreshOwner = true;
+        _sourceRefreshResolver = sourceResolver;
+        _sourceRefreshAttempts = 0;
+        _prefetchedSourceRefresh = null;
+        _sourceRefreshAttemptResetTimer?.cancel();
+        _sourceRefreshAttemptResetTimer = null;
+      }
+
+      try {
+        await _playResolvedSourceInternal(
+          url,
+          playUrls,
+          headers,
+          room: room,
+          audioOnly: audioOnly,
+          allowWarmSwap: true,
+          sourceRefreshAt: sourceRefreshAt,
+          sourceSelection: sourceSelection,
+          replaceSourceSelection: true,
+          beforeSourceReplacement: replaceRefreshOwner,
+        );
+      } finally {
+        final current = _currentSourceCommit;
+        // Warm preparation keeps the old signer/cache/budget. If installation
+        // later rolls back, restore those owners only for the retained source;
+        // close, destructive open and a newer commit must never resurrect them.
+        if (replacedRefreshOwner &&
+            retainedCommit != null &&
+            current != null &&
+            current.revision == retainedCommit.revision &&
+            current.currentUrl == retainedCommit.currentUrl &&
+            current.room == retainedCommit.room &&
+            isSourceCommitCurrent(current)) {
+          _sourceRefreshResolver = retainedResolver;
+          _sourceRefreshAttempts = retainedAttempts;
+          _prefetchedSourceRefresh = retainedPrefetch;
+          if (_playbackRequested && _playbackSuspensions.isEmpty && _currentPlayer != null) {
+            _scheduleSourceRefreshAttemptReset(_currentPlayer!, _sessionId);
+            _scheduleProactiveSourceRefresh(_currentPlayer!, _sessionId);
+          }
+        }
+      }
     });
   }
 
@@ -1164,6 +1200,7 @@ class PlayerManager {
     bool replaceSourceSelection = false,
     bool forceTransportRestart = false,
     bool Function()? isStillRequired,
+    void Function()? beforeSourceReplacement,
   }) async {
     if (isStillRequired?.call() == false) return;
     final canWarmSwap =
@@ -1186,10 +1223,12 @@ class PlayerManager {
           sourceSelection: sourceSelection,
           replaceSourceSelection: replaceSourceSelection,
           isStillRequired: isStillRequired,
+          beforeSourceReplacement: beforeSourceReplacement,
         )) {
       return;
     }
     if (isStillRequired?.call() == false) return;
+    beforeSourceReplacement?.call();
     _proactiveSourceRefreshTimer?.cancel();
     _proactiveSourceRefreshTimer = null;
     _currentSourceRefreshAt = _effectiveSourceRefreshAt(sourceRefreshAt, url: url);
@@ -1835,6 +1874,7 @@ class PlayerManager {
     PlaybackSourceQualitySelection? sourceSelection,
     bool replaceSourceSelection = false,
     bool Function()? isStillRequired,
+    void Function()? beforeSourceReplacement,
   }) async {
     final oldPlayer = _currentPlayer;
     final engine = _runtimeEngine;
@@ -1933,6 +1973,7 @@ class PlayerManager {
       if (!mayCommit()) return true;
       if (candidateError != null) throw candidateError!;
 
+      beforeSourceReplacement?.call();
       final newSessionId = ++_sessionId;
       _currentPlayer = candidate;
       _runtimeEngine = engine;

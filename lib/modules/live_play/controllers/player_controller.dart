@@ -144,13 +144,13 @@ abstract interface class PlayerSessionHost {
 }
 
 class PlayerController extends GetxController {
-  PlayerController(this._main, {StreamSourceOpener? streamSourceOpener})
-    : _streamSourceOpener = streamSourceOpener ?? _openGlobalStream {
+  PlayerController(this._main, {this._streamSourceOpener, this._streamPlayerManager}) {
     _audioModeTransitions = LatestAsyncValueQueue<bool>(_applyCurrentRoomAudioOnly);
   }
 
   final PlayerSessionHost _main;
-  final StreamSourceOpener _streamSourceOpener;
+  final StreamSourceOpener? _streamSourceOpener;
+  final PlayerManager? _streamPlayerManager;
   late final LatestAsyncValueQueue<bool> _audioModeTransitions;
   late Site currentSite;
   int _loadEpoch = 0;
@@ -158,7 +158,7 @@ class PlayerController extends GetxController {
   int _lastSourceCommitRevision = 0;
   final RxBool isStreamSwitching = false.obs;
 
-  static Future<void> _openGlobalStream(
+  Future<void> _openGlobalStream(
     String url,
     List<String> playUrls,
     Map<String, String> headers,
@@ -167,24 +167,36 @@ class PlayerController extends GetxController {
     PlaybackSourceResolver? sourceResolver,
     DateTime? sourceRefreshAt,
     PlaybackSourceQualitySelection? sourceSelection,
-  ) {
-    final manager = GlobalPlayerService.instance.player;
-    return manager
-        .play(
-          url,
-          playUrls,
-          headers,
-          room: room,
-          audioOnly: audioOnly,
-          sourceResolver: sourceResolver,
-          sourceRefreshAt: sourceRefreshAt,
-          sourceSelection: sourceSelection,
-        )
-        .then((_) {
-          if (manager.hasError.value) {
-            throw PlayerException(message: 'Selected stream failed to open', type: PlayerErrorType.source);
-          }
-        });
+  ) async {
+    final manager = _streamPlayerManager ?? GlobalPlayerService.instance.player;
+    final beforeRevision = manager.currentSourceCommit?.revision ?? 0;
+    await manager.play(
+      url,
+      playUrls,
+      headers,
+      room: room,
+      audioOnly: audioOnly,
+      sourceResolver: sourceResolver,
+      sourceRefreshAt: sourceRefreshAt,
+      sourceSelection: sourceSelection,
+    );
+    if (manager.hasError.value) {
+      throw PlayerException(message: 'Selected stream failed to open', type: PlayerErrorType.source);
+    }
+    final commit = manager.currentSourceCommit;
+    // A consumed pause/exit is normal lifecycle completion, not a source
+    // receipt. Recovery may instead commit a different URL/quality: use that
+    // canonical result rather than comparing it with the requested URL.
+    if (commit == null ||
+        commit.revision <= beforeRevision ||
+        !manager.isSourceCommitCurrent(commit) ||
+        commit.room.roomId != room.roomId ||
+        commit.room.platform != room.platform) {
+      throw const _StreamSelectionCancelled();
+    }
+    // The broadcast listener may not have delivered yet. Applying the same
+    // validated receipt here is synchronous and revision-deduplicated.
+    applySourceCommit(commit);
   }
 
   LivePlayState get _state => _main.state.value;
@@ -280,8 +292,8 @@ class PlayerController extends GetxController {
     };
   }
 
-  /// Only called by the route's listener after the manager validates that this
-  /// immutable snapshot still owns the native source. Resolver completion is
+  /// Called after the manager validates that this immutable snapshot still
+  /// owns the native source, by the route listener or open receipt. Resolver completion is
   /// not a commit, so it never updates these visible selection fields.
   void applySourceCommit(PlaybackSourceCommitSnapshot commit) {
     final room = currentRoom;
@@ -613,7 +625,7 @@ class PlayerController extends GetxController {
       final immutableUrls = List<String>.unmodifiable(urls);
       final committedChoices = _qualityChoicesWithConfirmation(before.qualites, requestedQuality, resolution);
       final sourceCommitBeforeOpen = _lastSourceCommitRevision;
-      await _streamSourceOpener(
+      await (_streamSourceOpener ?? _openGlobalStream)(
         immutableUrls[selection.lineIndex],
         immutableUrls,
         Map<String, String>.unmodifiable(headers),
@@ -659,13 +671,15 @@ class PlayerController extends GetxController {
             hasUseDefaultResolution: before.hasUseDefaultResolution,
           );
         }
-        developer.log(
-          'Stream selection failed (${error.runtimeType})',
-          name: 'PlayerController',
-          error: error,
-          stackTrace: stackTrace,
-        );
-        ToastUtil.show(i18n('read_video_failed'));
+        if (error is! _StreamSelectionCancelled) {
+          developer.log(
+            'Stream selection failed (${error.runtimeType})',
+            name: 'PlayerController',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          ToastUtil.show(i18n('read_video_failed'));
+        }
       }
       return false;
     } finally {
@@ -718,4 +732,8 @@ class PlayerController extends GetxController {
     invalidateLoad();
     super.onClose();
   }
+}
+
+class _StreamSelectionCancelled implements Exception {
+  const _StreamSelectionCancelled();
 }

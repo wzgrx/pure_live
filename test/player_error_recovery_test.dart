@@ -2,6 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
+import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/sites.dart';
+import 'package:pure_live/modules/live_play/controllers/player_controller.dart';
+import 'package:pure_live/modules/live_play/states/live_play_state.dart';
+import 'package:pure_live/modules/live_play/states/load_type.dart';
+import 'package:pure_live/modules/live_play/states/player_state.dart' as ui;
+import 'package:pure_live/modules/live_play/states/room_state.dart';
+import 'package:pure_live/modules/live_play/widgets/video_player/video_controller.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +37,191 @@ void main() {
   });
 
   tearDown(Get.reset);
+
+  for (final outcome in ['commit', 'pause', 'close']) {
+    test('route native receipt preserves the committed selection on $outcome', () async {
+      const old = 'https://cdn.example/old/master.m3u8?token=old';
+      const next = 'https://cdn.example/new/master.m3u8?token=new';
+      final room = LiveRoom(roomId: 'route-receipt', platform: 'test');
+      final host = _ReceiptHost(room, old);
+      final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final started = Completer<void>();
+      final opening = Completer<void>();
+      final candidate = _RecoveryFakePlayer(
+        PlayerEngine.mediaKit,
+        (_) => null,
+        openBarrier: opening.future,
+        onOpenSource: () => started.complete(),
+      );
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: active},
+        playerCreator: (_) => creations++ == 0 ? active : candidate,
+        sourceInputFactory: (_, _, _) async =>
+            PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/fixture/root.m3u8'), () async {}),
+      )..configureDefaultEngine(PlayerEngine.mediaKit);
+      final controller = PlayerController(host, streamPlayerManager: manager)
+        ..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _ReceiptSite(next)));
+      Future<bool>? switching;
+      Future<void>? closing;
+      try {
+        await manager.play(
+          old,
+          const [old],
+          const {},
+          room: room,
+          sourceSelection: PlaybackSourceQualitySelection(
+            qualities: host.state.value.player.qualites,
+            currentQuality: 0,
+            sourceQueryPolicies: host.state.value.player.sourceQueryPolicies,
+          ),
+        );
+        controller.applySourceCommit(manager.currentSourceCommit!);
+        final before = host.state.value.player;
+        switching = controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0);
+        await started.future.timeout(const Duration(seconds: 2));
+        expect(host.state.value.player.currentQuality, 0);
+        if (outcome == 'pause') await manager.pause();
+        if (outcome == 'close') closing = manager.close();
+        opening.complete();
+        final committed = await switching;
+        if (closing != null) await closing;
+        expect(committed, outcome == 'commit');
+        final after = host.state.value.player;
+        expect(after.currentQuality, outcome == 'commit' ? 1 : before.currentQuality);
+        expect(after.playUrls, outcome == 'commit' ? [next] : before.playUrls);
+        expect(after.currentLineIndex, 0);
+        expect(after.sourceQueryPolicies.keys, outcome == 'commit' ? [next] : before.sourceQueryPolicies.keys);
+        expect(controller.isStreamSwitching.value, isFalse);
+        expect(
+          manager.currentSourceCommit?.currentUrl,
+          outcome == 'close'
+              ? null
+              : outcome == 'commit'
+              ? next
+              : old,
+        );
+        if (outcome == 'pause') expect(active.isPlayingNow, isFalse);
+      } finally {
+        if (!opening.isCompleted) opening.complete();
+        if (switching != null) await switching;
+        if (closing != null) await closing;
+        controller.onClose();
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
+
+  for (final outcome in ['pause-with-resolver', 'pause-with-null', 'commit-with-resolver', 'rollback-with-resolver']) {
+    test('retained source refresh owner follows $outcome', () async {
+      const old = 'https://cdn.example/old.flv';
+      const next = 'https://cdn.example/new.flv';
+      final room = LiveRoom(roomId: 'refresh-owner', platform: 'test');
+      final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final opening = Completer<void>();
+      final started = Completer<void>();
+      final candidate = outcome == 'rollback-with-resolver'
+          ? _BindingFailureFakePlayer(opening.future, () => started.complete())
+          : _RecoveryFakePlayer(
+              PlayerEngine.mediaKit,
+              (_) => null,
+              openBarrier: opening.future,
+              onOpenSource: () => started.complete(),
+            );
+      var creations = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: active},
+        playerCreator: (_) => creations++ == 0 ? active : candidate,
+        transientLiveRetryDelays: const [],
+      )..configureDefaultEngine(PlayerEngine.mediaKit);
+      final invoked = Completer<String>();
+      final resolved = Completer<PlaybackSourceRefreshResult>();
+      PlaybackSourceResolver resolver(String owner) => (request) {
+        if (!invoked.isCompleted) invoked.complete(owner);
+        return resolved.future;
+      };
+      Future<void>? switching;
+      try {
+        await manager.play(old, const [old], const {}, room: room, sourceResolver: resolver('old'));
+        switching = manager.play(
+          next,
+          const [next],
+          const {},
+          room: room,
+          sourceResolver: outcome == 'pause-with-null' ? null : resolver('new'),
+        );
+        await started.future.timeout(const Duration(seconds: 2));
+        final paused = outcome.startsWith('pause');
+        if (paused) await manager.pause();
+        opening.complete();
+        await switching;
+        final retained = outcome != 'commit-with-resolver';
+        expect(manager.currentSourceCommit!.currentUrl, retained ? old : next);
+        if (paused) await manager.resume();
+        (manager.currentPlayer! as _RecoveryFakePlayer).emitError(
+          PlayerException(message: 'fixture source failure', type: PlayerErrorType.source),
+        );
+        expect(await invoked.future.timeout(const Duration(seconds: 2)), retained ? 'old' : 'new');
+      } finally {
+        if (!opening.isCompleted) opening.complete();
+        if (switching != null) await switching;
+        await manager.pause();
+        if (!resolved.isCompleted) {
+          resolved.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+        }
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
+
+  test('warming keeps proactive credentials bound to the still-active source', () async {
+    const old = 'https://cdn.example/active.flv';
+    const next = 'https://cdn.example/candidate.flv';
+    final room = LiveRoom(roomId: 'pending-refresh-owner', platform: 'test');
+    final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final opening = Completer<void>();
+    final started = Completer<void>();
+    final candidate = _RecoveryFakePlayer(
+      PlayerEngine.mediaKit,
+      (_) => null,
+      openBarrier: opening.future,
+      onOpenSource: () => started.complete(),
+    );
+    var creations = 0;
+    final manager = _manager({
+      PlayerEngine.mediaKit: active,
+    }, playerCreator: (_) => creations++ == 0 ? active : candidate)..configureDefaultEngine(PlayerEngine.mediaKit);
+    final invoked = Completer<String>();
+    final resolved = Completer<PlaybackSourceRefreshResult>();
+    PlaybackSourceResolver resolver(String owner) => (request) {
+      expect(request.currentUrl, old);
+      if (!invoked.isCompleted) invoked.complete(owner);
+      return resolved.future;
+    };
+    Future<void>? switching;
+    try {
+      await manager.play(
+        old,
+        const [old],
+        const {},
+        room: room,
+        sourceRefreshAt: DateTime.now().toUtc(),
+        sourceResolver: resolver('old'),
+      );
+      switching = manager.play(next, const [next], const {}, room: room, sourceResolver: resolver('new'));
+      await started.future.timeout(const Duration(seconds: 2));
+      expect(await invoked.future.timeout(const Duration(seconds: 3)), 'old');
+      expect(manager.currentSourceCommit!.currentUrl, old);
+    } finally {
+      await manager.pause();
+      if (!resolved.isCompleted) {
+        resolved.complete(const PlaybackSourceRefreshResult(urls: [], preferredLineIndex: 0));
+      }
+      if (!opening.isCompleted) opening.complete();
+      if (switching != null) await switching;
+      await manager.dispose();
+    }
+  }, skip: !Platform.isWindows);
 
   for (final dispose in [false, true]) {
     test(
@@ -3276,4 +3469,95 @@ class _AudioDecoderRecoveryFakePlayer extends _RecoveryFakePlayer implements Dec
     softwareFallbackRequests++;
     return true;
   }
+}
+
+class _ReceiptHost implements PlayerSessionHost {
+  _ReceiptHost(LiveRoom room, String url)
+    : state = LivePlayState(
+        room: RoomState(detail: room, success: true, isLiving: true),
+        player: ui.PlayerState(
+          qualites: [
+            LivePlayQuality(quality: '高清'),
+            LivePlayQuality(quality: '原画'),
+          ],
+          currentQuality: 0,
+          playUrls: [url],
+          sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+          currentLineIndex: 0,
+        ),
+      ).obs;
+
+  @override
+  final Rx<LivePlayState> state;
+
+  @override
+  bool get isClosed => false;
+
+  @override
+  Future<void> setCurrentRoomAudioOnlyFromUser(bool value) async {}
+
+  @override
+  void updatePlayer({
+    VideoController? videoController,
+    bool clearVideoController = false,
+    List<LivePlayQuality>? qualites,
+    int? currentQuality,
+    List<String>? playUrls,
+    Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
+    int? currentLineIndex,
+    bool? isCurrentRoomAudioOnly,
+    bool? hasUseDefaultResolution,
+  }) {
+    state.value = state.value.copyWith(
+      player: state.value.player.copyWith(
+        videoController: ui.resolveVideoControllerUpdate(
+          current: state.value.player.videoController,
+          next: videoController,
+          clear: clearVideoController,
+        ),
+        qualites: qualites,
+        currentQuality: currentQuality,
+        playUrls: playUrls,
+        sourceQueryPolicies: sourceQueryPolicies,
+        currentLineIndex: currentLineIndex,
+        isCurrentRoomAudioOnly: isCurrentRoomAudioOnly,
+        hasUseDefaultResolution: hasUseDefaultResolution,
+      ),
+    );
+  }
+
+  @override
+  void updateRoom({LiveRoom? detail, bool? isLiving, bool? success, bool? isLoading, String? loadError}) {
+    state.value = state.value.copyWith(
+      room: state.value.room.copyWith(
+        detail: detail,
+        isLiving: isLiving,
+        success: success,
+        isLoading: isLoading,
+        loadError: loadError,
+      ),
+    );
+  }
+}
+
+class _ReceiptSite extends LiveSite implements LivePlayUrlResolver {
+  _ReceiptSite(this.url);
+  final String url;
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution.withSourcePolicies(
+    urls: [url],
+    sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+    appliedQualityData: quality.selectionId,
+  );
+}
+
+class _BindingFailureFakePlayer extends _RecoveryFakePlayer {
+  _BindingFailureFakePlayer(Future<void> barrier, void Function() started)
+    : super(PlayerEngine.mediaKit, (_) => null, openBarrier: barrier, onOpenSource: started);
+
+  @override
+  Stream<PlayerState> get onStateChanged => throw StateError('fixture candidate binding failed');
 }

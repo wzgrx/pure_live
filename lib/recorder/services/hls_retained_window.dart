@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+part 'hls_date_range.dart';
+
 /// Immutable request identity. Implicit ranges are resolved at parse time so
 /// retiring the preceding segment never changes which bytes are requested.
 final class HlsSegmentRange {
@@ -44,9 +46,11 @@ final class HlsSegmentDescriptor {
     required this.initialization,
     required List<HlsKeyDescriptor> keys,
     required this.programTime,
+    DateTime? programTimeFloor,
     required this.explicitProgramTime,
     required this.gap,
-  }) : keys = List.unmodifiable(keys);
+  }) : keys = List.unmodifiable(keys),
+       _programTimeFloor = programTimeFloor ?? programTime;
   final int sequence;
   final int discontinuity;
   final Uri uri;
@@ -56,6 +60,9 @@ final class HlsSegmentDescriptor {
   final HlsMapDescriptor? initialization;
   final List<HlsKeyDescriptor> keys;
   final DateTime? programTime;
+  // Conservative microsecond lower bound derived from decimal EXTINF text.
+  // The rounded display time must not retire sub-microsecond event metadata.
+  final DateTime? _programTimeFloor;
   final bool explicitProgramTime;
   final bool gap;
   String get identity => jsonEncode([
@@ -68,7 +75,12 @@ final class HlsSegmentDescriptor {
     (keys.map((k) => k.identity).toList()..sort()),
     gap,
   ]);
-  int get retainedBytes => utf8.encode('$identity$extinf${programTime?.toIso8601String() ?? ''}').length;
+  int get retainedBytes => utf8
+      .encode(
+        '$identity$extinf${programTime?.toIso8601String() ?? ''}'
+        '${_programTimeFloor?.toIso8601String() ?? ''}',
+      )
+      .length;
 }
 
 /// Extraction for a future recording prefetch owner, not a playback parser or
@@ -84,8 +96,10 @@ final class HlsMediaSnapshot {
     this.playlistType,
     List<HlsSegmentDescriptor> segments,
     Set<String> unhandledTags,
+    List<HlsDateRange> dateRanges,
   ) : segments = List.unmodifiable(segments),
-      unhandledTags = Set.unmodifiable(unhandledTags);
+      unhandledTags = Set.unmodifiable(unhandledTags),
+      dateRanges = List.unmodifiable(dateRanges);
   final Uri source;
   final int targetDuration;
   final bool ended;
@@ -94,6 +108,10 @@ final class HlsMediaSnapshot {
   final String? playlistType;
   final List<HlsSegmentDescriptor> segments;
   final Set<String> unhandledTags;
+
+  /// Attribute updates in wire order. START-DATE may come from an older
+  /// snapshot; only the owning window can validate a consolidated range.
+  final List<HlsDateRange> dateRanges;
 
   static HlsMediaSnapshot parse(String text, Uri source, {int maximumSegments = 512}) {
     if (maximumSegments < 1 || maximumSegments > 4096) throw ArgumentError.value(maximumSegments);
@@ -116,7 +134,9 @@ final class HlsMediaSnapshot {
     var sawDiscontinuity = false;
     var explicitTime = false;
     DateTime? time;
+    DateTime? timeFloor;
     double? duration;
+    int? durationFloorMicros;
     String? extinf;
     String? rangeText;
     HlsMapDescriptor? initialization;
@@ -125,6 +145,8 @@ final class HlsMediaSnapshot {
     final segments = <HlsSegmentDescriptor>[];
     final singletons = <String>{};
     final unhandled = <String>{};
+    final dateRanges = <HlsDateRange>[];
+    var sawProgramTime = false;
     for (final raw in lines.skip(1)) {
       final line = raw.trim();
       if (line.isEmpty) continue;
@@ -158,10 +180,26 @@ final class HlsMediaSnapshot {
           sawDiscontinuity = true;
           // An explicit anchor already encountered applies to the upcoming
           // segment too; only an inferred time is invalidated by this tag.
-          if (!explicitTime) time = null;
+          if (!explicitTime) {
+            time = null;
+            timeFloor = null;
+          }
         case '#EXT-X-PROGRAM-DATE-TIME':
           time = _programTime(value);
+          timeFloor = time;
           explicitTime = true;
+          sawProgramTime = true;
+        case '#EXT-X-DATERANGE':
+          if (dateRanges.length >= 512) throw const FormatException('Too many date range updates');
+          final range = HlsDateRange._parse(value);
+          dateRanges.add(range);
+          // Asset playback needs its own resource ownership and timeline plan.
+          // Retaining ordinary metadata is not an interstitial implementation.
+          if (range.attribute('CLASS') == 'com.apple.hls.interstitial' ||
+              range.attributes.containsKey('X-ASSET-URI') ||
+              range.attributes.containsKey('X-ASSET-LIST')) {
+            unhandled.add('#EXT-X-DATERANGE:interstitial');
+          }
         case '#EXTINF':
           if (duration != null) throw const FormatException('Missing segment URI');
           final durationText = value.split(',').first;
@@ -172,6 +210,10 @@ final class HlsMediaSnapshot {
           if (duration == null || !duration.isFinite || duration <= 0 || duration > 86400) {
             throw const FormatException('Invalid segment duration');
           }
+          final decimal = durationText.split('.');
+          durationFloorMicros =
+              int.parse(decimal.first) * 1000000 +
+              int.parse((decimal.length == 1 ? '' : decimal.last).padRight(6, '0').substring(0, 6));
           extinf = line;
         case '#EXT-X-BYTERANGE':
           if (rangeText != null) throw const FormatException('Duplicate segment range');
@@ -235,6 +277,7 @@ final class HlsMediaSnapshot {
             initialization: initialization,
             keys: keys.values.toList(),
             programTime: time,
+            programTimeFloor: timeFloor,
             explicitProgramTime: explicitTime,
             gap: gap,
           );
@@ -245,7 +288,9 @@ final class HlsMediaSnapshot {
           previous = segment;
           sequence = _checkedAdd(sequence, 1);
           time = time?.add(Duration(microseconds: (duration * 1000000).round()));
+          timeFloor = timeFloor?.add(Duration(microseconds: durationFloorMicros!));
           duration = null;
+          durationFloorMicros = null;
           extinf = null;
           rangeText = null;
           gap = false;
@@ -258,7 +303,18 @@ final class HlsMediaSnapshot {
     if (segments.any((segment) => segment.duration.round() > target!)) {
       throw const FormatException('Segment exceeds target duration');
     }
-    return HlsMediaSnapshot._(source, target, ended, version, independent, playlistType, segments, unhandled);
+    if (dateRanges.isNotEmpty && !sawProgramTime) throw const FormatException('Date ranges require program time');
+    return HlsMediaSnapshot._(
+      source,
+      target,
+      ended,
+      version,
+      independent,
+      playlistType,
+      segments,
+      unhandled,
+      dateRanges,
+    );
   }
 }
 
@@ -276,6 +332,11 @@ final class HlsRetainedWindow {
   final int maximumBytes;
   List<HlsSegmentDescriptor> _segments = const [];
   List<HlsSegmentDescriptor> get segments => _segments;
+  List<HlsDateRange> _dateRanges = const [];
+  List<HlsDateRange> get dateRanges => _dateRanges;
+  // Once timed history has been pruned, a later backwards clock mapping must
+  // fail rather than publish segments whose event metadata was discarded.
+  BigInt? _dateRangeFloor;
   int _latestFirst = -1;
   int _retiredBefore = 0;
   bool _ended = false;
@@ -287,7 +348,9 @@ final class HlsRetainedWindow {
   int get version => _version;
   bool get independentSegments => _independentSegments;
   bool get ended => _ended;
-  int get retainedBytes => _segments.fold(0, (sum, segment) => sum + segment.retainedBytes);
+  int get retainedBytes =>
+      _segments.fold<int>(0, (sum, segment) => sum + segment.retainedBytes) +
+      _dateRanges.fold<int>(0, (sum, range) => sum + range.retainedBytes);
 
   /// The owner keeps published generations and active body leases separately.
   /// Older origin overlap must not reintroduce this explicitly retired prefix.
@@ -297,6 +360,9 @@ final class HlsRetainedWindow {
     if (sequence <= _retiredBefore) return;
     _retiredBefore = sequence;
     _segments = List.unmodifiable(_segments.where((s) => s.sequence >= sequence));
+    final pruned = _pruneDateRanges(_dateRanges, _segments);
+    _dateRanges = pruned.$1;
+    if (pruned.$2 != null) _dateRangeFloor = pruned.$2;
   }
 
   List<HlsSegmentDescriptor> merge(HlsMediaSnapshot snapshot) {
@@ -311,8 +377,17 @@ final class HlsRetainedWindow {
       throw const FormatException('Playlist contract changed within a source generation');
     }
     final incoming = snapshot.segments;
+    if (_dateRangeFloor != null &&
+        incoming.any(
+          (s) =>
+              s.sequence >= _retiredBefore &&
+              (s._programTimeFloor == null || _nanoseconds(s._programTimeFloor) < _dateRangeFloor!),
+        )) {
+      throw const FormatException('Program time crosses retired date range history');
+    }
+    final ranges = _mergeDateRanges(_dateRanges, snapshot.dateRanges);
     if (incoming.isEmpty) {
-      if (_segments.isNotEmpty || (_ended && !snapshot.ended)) {
+      if (_segments.isNotEmpty || ranges.isNotEmpty || (_ended && !snapshot.ended)) {
         throw const FormatException('Empty refresh of a retained window');
       }
       _targetDuration = snapshot.targetDuration;
@@ -350,17 +425,32 @@ final class HlsRetainedWindow {
     if (values.any((segment) => segment.retainedBytes > maximumBytes)) {
       throw const FormatException('A segment exceeds retention metadata budget');
     }
-    var bytes = values.fold<int>(0, (sum, segment) => sum + segment.retainedBytes);
+    var pruned = _pruneDateRanges(ranges, values);
+    var floor = _dateRangeFloor;
+    if (pruned.$2 != null) floor = pruned.$2;
+    var bytes =
+        values.fold<int>(0, (sum, segment) => sum + segment.retainedBytes) +
+        pruned.$1.fold<int>(0, (sum, range) => sum + range.retainedBytes);
     final evicted = <HlsSegmentDescriptor>[];
     while (values.length > maximumSegments || bytes > maximumBytes) {
+      if (values.length <= 1) throw const FormatException('Date ranges exceed retention metadata budget');
       final segment = values.removeAt(0);
       bytes -= segment.retainedBytes;
       evicted.add(segment);
+      final next = _pruneDateRanges(pruned.$1, values);
+      bytes -=
+          pruned.$1.fold<int>(0, (sum, r) => sum + r.retainedBytes) -
+          next.$1.fold<int>(0, (sum, r) => sum + r.retainedBytes);
+      pruned = next;
+      if (pruned.$2 != null) floor = pruned.$2;
     }
+    if (pruned.$1.length > 256) throw const FormatException('Too many retained date ranges');
     if (snapshot.playlistType == 'VOD' && evicted.isNotEmpty) {
       throw const FormatException('VOD exceeds retained window capacity');
     }
     _segments = List.unmodifiable(values);
+    _dateRanges = pruned.$1;
+    _dateRangeFloor = floor;
     _latestFirst = incoming.first.sequence;
     _targetDuration = snapshot.targetDuration;
     if (snapshot.version > _version) _version = snapshot.version;

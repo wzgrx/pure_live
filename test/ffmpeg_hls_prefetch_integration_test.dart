@@ -20,6 +20,69 @@ List<Uri> mediaUris(String text) => const LineSplitter()
     .toList();
 
 void main() {
+  for (final interstitial in [false, true]) {
+    test('DATERANGE metadata uses selected cache only; interstitial=$interstitial', () async {
+      const tag = '#EXT-X-DATERANGE:ID="event",START-DATE="2026-09-09T00:00:00Z",X-NOTE="one,two"';
+      var bodies = 0;
+      final paths = <String>[];
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final jobs = <Future<void>>{};
+      final sub = origin.listen((request) {
+        late Future<void> job;
+        job = () async {
+          paths.add(request.uri.path);
+          if (request.uri.path == '/root.m3u8') {
+            request.response.write(
+              '#EXTM3U\n#EXT-X-TARGETDURATION:1\n'
+              '#EXT-X-PROGRAM-DATE-TIME:2026-09-09T00:00:00Z\n'
+              '$tag${interstitial ? ',CLASS="com.apple.hls.interstitial",X-ASSET-URI="asset.m3u8"' : ''}\n'
+              '#EXTINF:1,\nbody.ts\n#EXT-X-DATERANGE:ID="event",DURATION=1\n#EXT-X-ENDLIST\n',
+            );
+          } else if (request.uri.path == '/body.ts') {
+            bodies++;
+            request.response.add([1, 2, 3]);
+          } else {
+            request.response.statusCode = 404;
+          }
+          await request.response.close();
+        }().whenComplete(() => jobs.remove(job));
+        jobs.add(job);
+      });
+      final relay = (await FFmpegHlsInputRelay.startForArguments(
+        ['-i', 'http://127.0.0.1:${origin.port}/root.m3u8'],
+        drainOnStop: true,
+        enablePrefetch: true,
+      ))!;
+      final client = HttpClient();
+      try {
+        final root = await get(client, relay.inputUri);
+        expect(root.$1, 200);
+        final text = utf8.decode(root.$2);
+        expect(relay.prefetchFeedCount, interstitial ? 0 : 1);
+        expect(text, contains(tag));
+        if (!interstitial) {
+          expect(RegExp(r'^#EXT-X-DATERANGE:', multiLine: true).allMatches(text), hasLength(1));
+          expect(text, contains('DURATION=1'));
+          final uri = mediaUris(text).single;
+          expect((await get(client, uri)).$2, [1, 2, 3]);
+          await relay.finish();
+          expect(utf8.decode((await get(client, relay.inputUri)).$2), text);
+          expect((await get(client, uri)).$2, [1, 2, 3]);
+          expect(bodies, 1);
+        } else {
+          expect(bodies, 0);
+        }
+        expect(paths, isNot(contains('/asset.m3u8')));
+      } finally {
+        client.close(force: true);
+        await relay.close();
+        await origin.close(force: true);
+        await sub.cancel();
+        await Future.wait(jobs.toList());
+      }
+      expect(relay.prefetchBodyCount, 0);
+    });
+  }
   for (final delayedHeaders in [false, true]) {
     test('stop preserves published media completing beyond target duration; headers=$delayedHeaders', () async {
       final entered = Completer<void>();

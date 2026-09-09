@@ -11,6 +11,7 @@ void main() {
   test(
     'production ranged MAP and implicit media offsets preserve native packets after origin removal',
     () async {
+      final withDateRanges = Platform.environment['PURELIVE_HLS_DATERANGE_PROBE'] == '1';
       final fixture = Directory(Platform.environment['PURELIVE_ROLLING_HLS_FIXTURE']!);
       final output = await Directory(
         p.join(
@@ -39,6 +40,13 @@ void main() {
           '#EXTM3U\n#EXT-X-VERSION:7\n#EXT-X-TARGETDURATION:2\n'
           '#EXT-X-MAP:URI="bundle.mp4",BYTERANGE="${initialization.length}@13"\n',
         );
+        if (withDateRanges) {
+          ranged.write(
+            '#EXT-X-PROGRAM-DATE-TIME:2026-09-09T00:00:00Z\n'
+            '#EXT-X-DATERANGE:ID="event-$track",START-DATE="2026-09-09T00:00:00Z",'
+            'PLANNED-DURATION=4,X-NOTE="native,metadata",SCTE35-OUT=0xFC12\n',
+          );
+        }
         final expected = <String>['bytes=13-${12 + initialization.length}'];
         for (var i = 0; i < pairs.length; i++) {
           final pair = pairs[i];
@@ -53,6 +61,7 @@ void main() {
           combined.addAll(bytes);
         }
         direct.write('#EXT-X-ENDLIST\n');
+        if (withDateRanges) ranged.write('#EXT-X-DATERANGE:ID="event-$track",DURATION=6\n');
         ranged.write('#EXT-X-ENDLIST\n');
         manifests['/direct/$prefix/index.m3u8'] = direct.toString();
         manifests['/range/$prefix/index.m3u8'] = ranged.toString();
@@ -161,6 +170,12 @@ void main() {
         final localBodies = <Uri>{};
         for (final child in children) {
           final playlist = await text(child);
+          if (withDateRanges) {
+            expect(RegExp(r'^#EXT-X-DATERANGE:', multiLine: true).allMatches(playlist), hasLength(1));
+            expect(playlist, contains('DURATION=6'));
+            expect(playlist, contains('X-NOTE="native,metadata"'));
+            await File(p.join(output.path, 'published-${localBodies.length}.m3u8')).writeAsString(playlist);
+          }
           localBodies.addAll([
             for (final match in RegExp(r'URI="([^"]+)"').allMatches(playlist)) Uri.parse(match.group(1)!),
             for (final line in const LineSplitter().convert(playlist))
@@ -215,6 +230,7 @@ void main() {
         await File(p.join(output.path, 'evidence.json')).writeAsString(
           jsonEncode({
             'originRemovedBeforeCachedNativeReads': true,
+            'dateRangesPreserved': withDateRanges,
             'cachedNativePasses': 2,
             'packetCount': (direct['packets'] as List).length,
             'localBodies': localBodies.length,

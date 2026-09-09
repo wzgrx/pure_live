@@ -53,6 +53,14 @@ String renderHlsRetainedManifest(
   line('#EXT-X-MEDIA-SEQUENCE:${segments.isEmpty ? 0 : segments.first.sequence}');
   line('#EXT-X-DISCONTINUITY-SEQUENCE:${segments.isEmpty ? 0 : segments.first.discontinuity}');
   if (window.independentSegments) line('#EXT-X-INDEPENDENT-SEGMENTS');
+  if (window.dateRanges.isNotEmpty) {
+    if (!segments.any((segment) => segment.programTime != null)) {
+      throw const FormatException('Published date ranges require a program time anchor');
+    }
+    for (final range in window.dateRanges) {
+      line(range.manifestLine);
+    }
+  }
   // Render a normal media playlist, not EVENT: a bounded retained prefix can
   // eventually be removed. ENDLIST still carries the actual terminal state.
   var currentKeys = <HlsKeyDescriptor>[];

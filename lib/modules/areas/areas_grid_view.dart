@@ -163,6 +163,8 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
           Expanded(
             child: BasePageView<AreasListController, LiveArea>(
               controller: widget.controller,
+              // An empty category must not dispose the surrounding horizontal pages.
+              preserveContentWhenEmpty: true,
               enableRefresh: true,
               enableLoadMore: true,
               customMobileBottomPadding: 85,
@@ -190,13 +192,29 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
                             ? displayList
                             : category.children;
                         if (finalData.isEmpty) {
-                          return EmptyView(
-                            icon: Remix.apps_2_line,
-                            title: i18n("empty_areas_title"),
-                            subtitle: i18n("empty_areas_subtitle"),
+                          return LayoutBuilder(
+                            builder: (context, constraints) => SingleChildScrollView(
+                              key: PageStorageKey('area_empty_${widget.tag}_${category.id}'),
+                              controller: _scrollControllerFor(category.id),
+                              // Inherit EasyRefresh physics, like the populated grid.
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                                child: Center(
+                                  child: EmptyView(
+                                    icon: Remix.apps_2_line,
+                                    title: i18n("empty_areas_title"),
+                                    subtitle: i18n("empty_areas_subtitle"),
+                                  ),
+                                ),
+                              ),
+                            ),
                           );
                         }
-                        return buildFlattenAreasView(finalData, _scrollControllerFor(category.id));
+                        return buildFlattenAreasView(
+                          finalData,
+                          _scrollControllerFor(category.id),
+                          scrollKey: PageStorageKey('area_grid_${widget.tag}_${category.id}'),
+                        );
                       },
                     );
                   }).toList(),
@@ -209,7 +227,7 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
     });
   }
 
-  Widget buildFlattenAreasView(List<LiveArea> childrenList, ScrollController scrollController) {
+  Widget buildFlattenAreasView(List<LiveArea> childrenList, ScrollController scrollController, {Key? scrollKey}) {
     return LayoutBuilder(
       builder: (context, constraint) {
         final width = constraint.maxWidth;
@@ -218,6 +236,7 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
         final itemWidth = (width - 12 - spacing * (crossAxisCount - 1)) / crossAxisCount;
 
         return GridView.builder(
+          key: scrollKey,
           padding: const EdgeInsets.fromLTRB(6, 6, 6, 80),
           controller: scrollController,
           scrollCacheExtent: ScrollCacheExtent.pixels(width > 680 ? 480 : 320),

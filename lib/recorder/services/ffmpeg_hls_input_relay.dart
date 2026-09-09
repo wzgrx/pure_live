@@ -34,10 +34,12 @@ class FFmpegHlsInputRelay {
     required this._headers,
     required this._secret,
     required this.drainOnStop,
+    required Duration bodyIdleTimeout,
     required this._createStagingDirectory,
     required HlsSourceQueryPolicy? sourceQueryPolicy,
     required this.diagnostics,
   }) {
+    _bodyIdleTimeout = bodyIdleTimeout;
     _sourceQueryPolicy = sourceQueryPolicy;
     _resources['root'] = upstream;
   }
@@ -79,6 +81,7 @@ class FFmpegHlsInputRelay {
   final Map<String, String> _headers;
   final String _secret;
   final bool drainOnStop;
+  late final Duration _bodyIdleTimeout;
   final HlsRelayDiagnostics? diagnostics;
   final Future<Directory> Function() _createStagingDirectory;
   final HlsSessionCookies _cookies = HlsSessionCookies();
@@ -185,6 +188,7 @@ class FFmpegHlsInputRelay {
       headers: _readInputHeaders(arguments, inputIndex),
       secret: _newSecret(),
       drainOnStop: drainOnStop,
+      bodyIdleTimeout: _readBodyIdleTimeout(arguments, inputIndex),
       createStagingDirectory: createStagingDirectory ?? _defaultStagingDirectory,
       sourceQueryPolicy: sourceQueryPolicy,
       diagnostics: diagnostics,
@@ -388,7 +392,7 @@ class FFmpegHlsInputRelay {
       }
       if (stopped) throw const _HlsFetchStopped();
       _fetchAborters.add(abort);
-      while (await iterator.moveNext()) {
+      while (await _nextBodyChunk(iterator)) {
         if (stopped) throw const _HlsFetchStopped();
         trace?.chunk(iterator.current);
         await body.add(iterator.current);
@@ -651,6 +655,32 @@ class FFmpegHlsInputRelay {
     return Map<String, String>.unmodifiable(headers);
   }
 
+  static Duration _readBodyIdleTimeout(List<String> arguments, int inputIndex) {
+    // Production command construction supplies a positive input rw_timeout.
+    // Only inspect this input's options; later output options are unrelated.
+    var microseconds = const Duration(seconds: 15).inMicroseconds;
+    for (var index = 0; index < inputIndex - 1; index++) {
+      if (arguments[index] != '-rw_timeout') continue;
+      final value = int.tryParse(arguments[index + 1]);
+      if (value != null && value > 0) microseconds = value.clamp(1, 2147483647);
+    }
+    return Duration(microseconds: microseconds);
+  }
+
+  Future<bool> _nextBodyChunk(StreamIterator<List<int>> iterator) async {
+    if (!drainOnStop) return iterator.moveNext();
+    try {
+      // The body is invisible to the native socket until completely staged.
+      // Observe upstream idleness here, rather than mistaking the whole
+      // transfer duration for inactivity. Disk backpressure is not network
+      // idle time. Both callers cancel their iterator in finally on timeout.
+      return await iterator.moveNext().timeout(_bodyIdleTimeout);
+    } on TimeoutException {
+      if (_fetchStopped) throw const _HlsFetchStopped();
+      rethrow;
+    }
+  }
+
   static bool _isHopByHopHeader(String name) {
     return const <String>{
       'connection',
@@ -685,7 +715,7 @@ class FFmpegHlsInputRelay {
     _fetchAborters.add(abort);
     try {
       if (stopped) throw const _HlsFetchStopped();
-      while (await iterator.moveNext()) {
+      while (await _nextBodyChunk(iterator)) {
         if (stopped) throw const _HlsFetchStopped();
         final chunk = iterator.current;
         trace?.chunk(chunk);

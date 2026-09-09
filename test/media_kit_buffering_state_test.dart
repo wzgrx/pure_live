@@ -10,6 +10,8 @@ import 'package:pure_live/player/core/line_fallback_manager.dart';
 import 'package:pure_live/player/core/player_manager.dart';
 import 'package:pure_live/player/models/player_engine.dart';
 import 'package:pure_live/player/models/player_state.dart';
+import 'package:pure_live/player/models/player_error_type.dart';
+import 'package:pure_live/player/models/player_exception.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,33 @@ void main() {
     Get.put(GlobalPlayerState());
   });
   tearDown(Get.reset);
+
+  test('real adapter keeps software recovery bound to remote identity across relay replacements', () async {
+    final player = _ControlledPlayer();
+    final adapter = MediaKitAdapter.headlessForTest(player, preferredHardwareDecoder: 'auto-safe');
+    final error = PlayerException(message: 'fixture codec failure', type: PlayerErrorType.codec);
+    try {
+      adapter.setPrivateInput(true, sourceIdentity: 'https://cdn.example/one.m3u8?token=fixture');
+      await adapter.setDataSource('http://127.0.0.1:19000/first/root.m3u8', const [], const {});
+      expect(await adapter.prepareSoftwareDecoderFallback(error), isTrue);
+      adapter.setPrivateInput(true, sourceIdentity: 'https://cdn.example/one.m3u8?token=fixture');
+      await adapter.setDataSource('http://127.0.0.1:19001/replacement/root.m3u8', const [], const {});
+      expect(
+        await adapter.prepareSoftwareDecoderFallback(error),
+        isFalse,
+        reason: 'a new local URI is not a new decoder source',
+      );
+      adapter.setPrivateInput(true, sourceIdentity: 'https://cdn.example/two.m3u8?token=other');
+      await adapter.setDataSource('http://127.0.0.1:19002/new/root.m3u8', const [], const {});
+      expect(await adapter.prepareSoftwareDecoderFallback(error), isTrue);
+      // Routing metadata is consumed once; an unmanaged direct open gets its
+      // own identity instead of inheriting the preceding private source.
+      await adapter.setDataSource('https://cdn.example/direct.flv', const [], const {});
+      expect(await adapter.prepareSoftwareDecoderFallback(error), isTrue);
+    } finally {
+      await adapter.hardDispose();
+    }
+  });
 
   for (final event in ['playing', 'video-tail', 'audio-tail']) {
     test('real adapter retains native buffering after $event until buffering ends', () async {

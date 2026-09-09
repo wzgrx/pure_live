@@ -130,6 +130,8 @@ class FFmpegHlsInputRelay {
     bool drainOnStop = false,
     // Explicit selected-source capability, never inferred from a query name.
     HlsSourceQueryPolicy? sourceQueryPolicy,
+    // Playback uses the media proxy; recording retains its existing app proxy.
+    String Function(Uri)? findProxy,
     // Tests supply an isolated owned directory or controlled storage failure.
     Future<Directory> Function()? createStagingDirectory,
   }) async {
@@ -157,11 +159,19 @@ class FFmpegHlsInputRelay {
     final connections = CancellableHttpConnections();
     final client = HttpClient()
       ..connectionFactory = connections.connect
-      ..findProxy = resolveRecorderProxyDirective
+      ..findProxy = findProxy ?? resolveRecorderProxyDirective
       ..connectionTimeout = const Duration(seconds: 15)
       ..idleTimeout = const Duration(seconds: 20)
       ..autoUncompress = true;
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0, shared: false);
+    final HttpServer server;
+    try {
+      server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0, shared: false);
+    } catch (_) {
+      client.close(force: true);
+      connections.cancel();
+      await connections.settled;
+      rethrow;
+    }
     final relay = FFmpegHlsInputRelay._(
       server: server,
       client: client,

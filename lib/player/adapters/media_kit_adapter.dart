@@ -20,6 +20,7 @@ import 'package:pure_live/player/utils/video_output_size_policy.dart';
 import 'package:pure_live/player/interface/media_kit_player_accessor.dart';
 import 'package:pure_live/player/core/player_error_classifier.dart';
 import 'package:pure_live/player/core/source_event_fence.dart';
+import 'package:pure_live/player/core/playback_proxy_policy.dart';
 
 @visibleForTesting
 ({int width, int height})? resolveMediaKitDisplaySize(VideoParams params) {
@@ -36,19 +37,30 @@ class MediaKitAdapter
         MediaKitPlayerAccessor,
         VideoFitAwarePlayer,
         SourceTransitionAwarePlayer,
+        PrivateInputAwarePlayer,
         DecoderRecoveryAwarePlayer,
         VideoFrameProgressAwarePlayer {
   MediaKitAdapter() {
     _audioModeTransitions = LatestAsyncValueQueue<bool>(_applyAudioOnly);
   }
 
+  bool _privateInput = false;
+  String? _nextSourceIdentity;
+  String? _currentSourceIdentity;
+  @override
+  void setPrivateInput(bool value, {String? sourceIdentity}) {
+    _privateInput = value;
+    _nextSourceIdentity = sourceIdentity;
+  }
+
   /// Exercises the real source lifecycle and subscriptions without a renderer.
   /// The supplied player owns its event contract; widget/native rendering is
   /// intentionally outside this deterministic adapter-test entry point.
   @visibleForTesting
-  factory MediaKitAdapter.headlessForTest(Player player) {
+  factory MediaKitAdapter.headlessForTest(Player player, {String preferredHardwareDecoder = 'no'}) {
     return MediaKitAdapter()
       .._player = player
+      .._preferredHardwareDecoder = preferredHardwareDecoder
       .._initialized = true;
   }
 
@@ -95,11 +107,9 @@ class MediaKitAdapter
       await native.setProperty('ao', 'alsa');
     }
 
-    if (SettingsService.to.proxy.enableProxy.v && SettingsService.to.proxy.proxyHost.v.isNotEmpty) {
-      final proxyUrl = "http://${SettingsService.to.proxy.proxyHost.v}:${SettingsService.to.proxy.proxyPort.v}";
-
-      await native.setProperty('http-proxy', proxyUrl);
-    }
+    // Multiview also calls this shared initializer. Keep its media routing;
+    // the main adapter applies it again per source, bypassing private input.
+    await native.setProperty('http-proxy', PlaybackProxyPolicy.currentNativeUrl(privateInput: false));
 
     if (PlatformUtils.isMacOS) {
       await native.setProperty('hwdec', 'no');
@@ -475,7 +485,7 @@ class MediaKitAdapter
 
   @override
   Future<bool> prepareSoftwareDecoderFallback(PlayerException error) async {
-    final url = _currentUrl;
+    final url = _currentSourceIdentity;
     if (_disposed ||
         _isAudioOnly ||
         error.type != PlayerErrorType.codec ||
@@ -510,6 +520,11 @@ class MediaKitAdapter
     bool audioOnly = false,
   }) async {
     if (_disposed) return;
+    final privateInput = _privateInput;
+    final sourceIdentity = _nextSourceIdentity ?? url;
+    _privateInput = false;
+    _nextSourceIdentity = null;
+    _currentSourceIdentity = sourceIdentity;
     // An explicit manager play is a new source generation even if the URL is
     // textually identical. Decoder recovery, manual retry and signed CDN URLs
     // may all reopen the same string with different native policy. Skipping
@@ -535,7 +550,14 @@ class MediaKitAdapter
       await _bindListeners(sourceGeneration: sourceGeneration, force: true);
       if (_disposed || sourceGeneration != _sourceFence.generation) return;
 
-      await _applyDecoderPolicyForSource(url);
+      await _applyDecoderPolicyForSource(sourceIdentity);
+
+      if (_player.platform is NativePlayer) {
+        await (_player.platform as dynamic).setProperty(
+          'http-proxy',
+          PlaybackProxyPolicy.currentNativeUrl(privateInput: privateInput),
+        );
+      }
 
       await _player.open(Media(url, httpHeaders: headers), play: true);
 
@@ -1143,6 +1165,9 @@ class MediaKitAdapter
     } catch (_) {}
 
     _softwareDecoderFallbackUrl = null;
+    _currentSourceIdentity = null;
+    _nextSourceIdentity = null;
+    _privateInput = false;
 
     await Future.wait([
       _stateSubject.close(),

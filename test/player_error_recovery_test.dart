@@ -12,6 +12,7 @@ import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/player/core/engine_fallback_manager.dart';
 import 'package:pure_live/player/core/line_fallback_manager.dart';
 import 'package:pure_live/player/core/player_manager.dart';
+import 'package:pure_live/player/core/playback_source_transport.dart';
 import 'package:pure_live/player/core/portrait_stream_support.dart';
 import 'package:pure_live/player/interface/unified_player_interface.dart';
 import 'package:pure_live/player/models/player_engine.dart';
@@ -28,6 +29,240 @@ void main() {
   });
 
   tearDown(Get.reset);
+
+  for (final dispose in [false, true]) {
+    test(
+      '${dispose ? 'dispose' : 'close dispatch'} retires pending input creation before it can start native playback',
+      () async {
+        const url = 'https://cdn.example/late/master.m3u8?token=fixture';
+        final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+        final started = Completer<void>();
+        final creating = Completer<PlaybackInputLease>();
+        var closes = 0;
+        final manager = _manager(
+          {PlayerEngine.mediaKit: player},
+          sourceInputFactory: (_, _, _) {
+            started.complete();
+            return creating.future;
+          },
+        )..configureDefaultEngine(PlayerEngine.mediaKit);
+        final playing = manager.play(
+          url,
+          const [url],
+          const {},
+          room: LiveRoom(roomId: 'late', platform: 'test'),
+          sourceSelection: PlaybackSourceQualitySelection(
+            qualities: [LivePlayQuality(quality: 'Original')],
+            currentQuality: 0,
+            sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+          ),
+        );
+        try {
+          await started.future.timeout(const Duration(seconds: 2));
+          final closing = dispose ? manager.dispose() : manager.close();
+          creating.complete(
+            PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/late/root.m3u8'), () async {
+              closes++;
+            }),
+          );
+          await playing;
+          await closing;
+          expect(player.openedUrls, isEmpty);
+          expect(closes, 1);
+          expect(manager.currentSourceCommit, isNull);
+        } finally {
+          if (!creating.isCompleted) creating.completeError(StateError('fixture cleanup'));
+          await playing;
+          await manager.dispose();
+        }
+      },
+    );
+  }
+
+  for (final cancel in [false, true]) {
+    test('Windows warm input uses candidate policy and closes only its owner (pause=$cancel)', () async {
+      const old = 'https://cdn.example/old/master.m3u8?token=old';
+      const next = 'https://cdn.example/new/master.m3u8?token=new';
+      final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final opening = Completer<void>();
+      final started = Completer<void>();
+      final candidate = _RecoveryFakePlayer(
+        PlayerEngine.mediaKit,
+        (_) => null,
+        emitPlaying: false,
+        openBarrier: opening.future,
+        onOpenSource: () => started.complete(),
+      );
+      var creations = 0;
+      final closes = <int>[];
+      final sources = <String>[];
+      final manager = _manager(
+        {PlayerEngine.mediaKit: active},
+        playerCreator: (_) => creations++ == 0 ? active : candidate,
+        sourceInputFactory: (url, _, policy) async {
+          expect(policy.matchesSource(Uri.parse(url)), isTrue);
+          sources.add(url);
+          final index = closes.length;
+          closes.add(0);
+          return PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/$index/root.m3u8'), () async {
+            closes[index]++;
+          });
+        },
+      )..configureDefaultEngine(PlayerEngine.mediaKit);
+      final room = LiveRoom(roomId: 'warm-input', platform: 'test');
+      PlaybackSourceQualitySelection selection(String url) => PlaybackSourceQualitySelection(
+        qualities: [LivePlayQuality(quality: 'Original')],
+        currentQuality: 0,
+        sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+      );
+      try {
+        await manager.play(old, const [old], const {}, room: room, sourceSelection: selection(old));
+        final switching = manager.play(next, const [next], const {}, room: room, sourceSelection: selection(next));
+        await started.future.timeout(const Duration(seconds: 2));
+        expect(sources, [old, next]);
+        expect(closes, [0, 0]);
+        if (cancel) await manager.pause();
+        candidate.emitUnexpectedPlaying(true);
+        opening.complete();
+        await switching;
+        expect(manager.currentPlayer, same(cancel ? active : candidate));
+        expect(manager.currentSourceCommit!.currentUrl, cancel ? old : next);
+        expect(closes, cancel ? [0, 1] : [1, 0]);
+      } finally {
+        if (!opening.isCompleted) opening.complete();
+        await manager.dispose();
+      }
+      expect(closes, [1, 1]);
+    }, skip: !Platform.isWindows);
+  }
+
+  test('manager owns scoped native input while commits, pause and audio retain remote source identity', () async {
+    const url = 'https://cdn.example/scoped/master.m3u8?token=fixture';
+    final policy = HlsSourceQueryPolicy.fromSource(Uri.parse(url));
+    final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    var closes = 0;
+    final manager = _manager(
+      {PlayerEngine.mediaKit: player},
+      sourceInputFactory: (source, headers, actualPolicy) async {
+        expect(source, url);
+        expect(actualPolicy, same(policy));
+        expect(headers, {'Cookie': 'fixture=yes'});
+        return PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/private/root.m3u8'), () async {
+          closes++;
+        });
+      },
+    )..configureDefaultEngine(PlayerEngine.mediaKit);
+    try {
+      await manager.play(
+        url,
+        const [url, 'https://backup.example/direct.flv'],
+        const {'Cookie': 'fixture=yes'},
+        room: LiveRoom(roomId: 'input', platform: 'test'),
+        sourceSelection: PlaybackSourceQualitySelection(
+          qualities: [LivePlayQuality(quality: 'Original')],
+          currentQuality: 0,
+          sourceQueryPolicies: {url: policy},
+        ),
+      );
+      expect(player.openedUrls.single, 'http://127.0.0.1:19001/private/root.m3u8');
+      expect(player.openedChoices.single, [player.openedUrls.single]);
+      expect(player.openedHeaders.single, isEmpty);
+      expect(player.openedPrivateInputs.single, isTrue);
+      expect(player.openedSourceIdentities.single, url);
+      expect(manager.currentSourceCommit!.currentUrl, url);
+      expect(manager.currentSourceCommit!.urls, const [url, 'https://backup.example/direct.flv']);
+      await manager.pause();
+      await manager.resume();
+      await manager.setAudioOnlyMode(true);
+      expect(player.openedUrls, hasLength(1));
+      expect(closes, 0);
+      await manager.play(
+        'https://direct.example/next.flv',
+        const ['https://direct.example/next.flv'],
+        const {},
+        room: LiveRoom(roomId: 'direct', platform: 'test'),
+      );
+      expect(player.openedPrivateInputs.last, isFalse);
+      expect(closes, 1);
+    } finally {
+      await manager.dispose();
+    }
+    expect(closes, 1);
+  });
+
+  for (final soft in [false, true]) {
+    test('manager ${soft ? 'soft stop' : 'hard disposal'} closes the selected relay exactly once', () async {
+      const url = 'https://cdn.example/stop/master.m3u8?token=fixture';
+      final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      var closes = 0;
+      final manager = _manager(
+        {PlayerEngine.mediaKit: player},
+        sourceInputFactory: (_, _, _) async =>
+            PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/private/root.m3u8'), () async {
+              closes++;
+            }),
+      )..configureDefaultEngine(PlayerEngine.mediaKit);
+      await manager.play(
+        url,
+        const [url],
+        const {},
+        room: LiveRoom(roomId: 'stop', platform: 'test'),
+        sourceSelection: PlaybackSourceQualitySelection(
+          qualities: [LivePlayQuality(quality: 'Original')],
+          currentQuality: 0,
+          sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
+        ),
+      );
+      if (soft) await manager.softStop();
+      await manager.dispose();
+      expect(closes, 1);
+    });
+  }
+
+  test('engine fallback closes timed-out input and opens the next engine with the same remote policy', () async {
+    const url = 'https://cdn.example/fallback/master.m3u8?token=fixture';
+    final barrier = Completer<void>();
+    final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, openBarrier: barrier.future);
+    final fijk = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);
+    final closes = <int>[];
+    final policy = HlsSourceQueryPolicy.fromSource(Uri.parse(url));
+    final manager = _manager(
+      {PlayerEngine.mediaKit: mediaKit, PlayerEngine.fijk: fijk},
+      sourceOpenTimeout: const Duration(milliseconds: 30),
+      sourceInputFactory: (source, _, actualPolicy) async {
+        expect(source, url);
+        expect(actualPolicy, same(policy));
+        final index = closes.length;
+        closes.add(0);
+        return PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/input$index/root.m3u8'), () async {
+          closes[index]++;
+        });
+      },
+    )..configureDefaultEngine(PlayerEngine.mediaKit);
+    try {
+      await manager.play(
+        url,
+        const [url],
+        const {},
+        room: LiveRoom(roomId: 'timeout', platform: 'test'),
+        sourceSelection: PlaybackSourceQualitySelection(
+          qualities: [LivePlayQuality(quality: 'Original')],
+          currentQuality: 0,
+          sourceQueryPolicies: {url: policy},
+        ),
+      );
+      expect(manager.currentEngine, PlayerEngine.fijk);
+      expect(manager.currentSourceCommit!.currentUrl, url);
+      expect(closes, [1, 0]);
+      barrier.complete();
+      await Future<void>.delayed(Duration.zero);
+      expect(closes, [1, 0], reason: 'late native completion must not close the replacement input');
+    } finally {
+      if (!barrier.isCompleted) barrier.complete();
+      await manager.dispose();
+    }
+    expect(closes, [1, 1]);
+  });
 
   test('source commit snapshot is published only after a successful native open', () async {
     final player = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
@@ -2757,9 +2992,11 @@ PlayerManager _manager(
   Duration windowsHuyaProactiveRefreshInterval = const Duration(seconds: 40),
   List<Duration> transientLiveRetryDelays = const <Duration>[Duration(milliseconds: 750), Duration(seconds: 2)],
   UnifiedPlayerCreator? playerCreator,
+  PlaybackInputFactory? sourceInputFactory,
 }) {
   return PlayerManager(
     playerCreator: playerCreator ?? (engine) => players[engine]!,
+    sourceInputFactory: sourceInputFactory,
     fallbackManager: EngineFallbackManager(
       defaultEngine: players.containsKey(PlayerEngine.mediaKit) ? PlayerEngine.mediaKit : players.keys.first,
       supportedEngines: players.keys.toList(growable: false),
@@ -2780,7 +3017,19 @@ PlayerManager _manager(
   );
 }
 
-class _RecoveryFakePlayer implements UnifiedPlayer {
+class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer {
+  bool _privateInput = false;
+  final openedPrivateInputs = <bool>[];
+  final openedSourceIdentities = <String?>[];
+  String? _sourceIdentity;
+  final openedHeaders = <Map<String, String>>[];
+  final openedChoices = <List<String>>[];
+  @override
+  void setPrivateInput(bool value, {String? sourceIdentity}) {
+    _privateInput = value;
+    _sourceIdentity = sourceIdentity;
+  }
+
   _RecoveryFakePlayer(
     this.engine,
     this.failureForUrl, {
@@ -2864,6 +3113,10 @@ class _RecoveryFakePlayer implements UnifiedPlayer {
     bool audioOnly = false,
   }) async {
     openedUrls.add(url);
+    openedPrivateInputs.add(_privateInput);
+    openedSourceIdentities.add(_sourceIdentity);
+    openedHeaders.add(Map.of(headers));
+    openedChoices.add(List.of(playUrls));
     onOpenSource?.call();
     if (openBarrier != null) await openBarrier;
     if (hangWhileOpening) await Completer<void>().future;

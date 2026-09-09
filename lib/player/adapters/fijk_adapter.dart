@@ -13,8 +13,18 @@ import '../interface/unified_player_interface.dart';
 import 'package:pure_live/player/utils/fijk_helper.dart';
 import 'package:pure_live/player/models/player_engine.dart';
 import 'package:pure_live/player/interface/fijk_player_accessor.dart';
+import 'package:pure_live/player/core/playback_proxy_policy.dart';
 
-class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePlayer, SourceTransitionAwarePlayer {
+class FijkAdapter
+    implements
+        UnifiedPlayer,
+        FijkPlayerAccessor,
+        VideoFitAwarePlayer,
+        SourceTransitionAwarePlayer,
+        PrivateInputAwarePlayer {
+  bool _privateInput = false;
+  @override
+  void setPrivateInput(bool value, {String? sourceIdentity}) => _privateInput = value;
   late final FijkPlayer _player;
 
   bool _initialized = false;
@@ -202,13 +212,12 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
     }
   }
 
-  Future<void> _setupProxy() async {
-    if (SettingsService.to.proxy.enableProxy.v) {
-      final String proxyUrl = "http://${SettingsService.to.proxy.proxyHost.v}:${SettingsService.to.proxy.proxyPort.v}";
-      await _player.setOption(FijkOption.formatCategory, "http_proxy", proxyUrl);
-    } else {
-      await _player.setOption(FijkOption.formatCategory, "http_proxy", "");
-    }
+  Future<void> _setupProxy({required bool privateInput}) async {
+    await _player.setOption(
+      FijkOption.formatCategory,
+      "http_proxy",
+      PlaybackProxyPolicy.currentNativeUrl(privateInput: privateInput),
+    );
   }
 
   @override
@@ -252,13 +261,15 @@ class FijkAdapter implements UnifiedPlayer, FijkPlayerAccessor, VideoFitAwarePla
     LiveRoom? room,
     bool audioOnly = false,
   }) async {
+    final privateInput = _privateInput;
+    _privateInput = false;
     _consumeSourceTransition();
     try {
       _isAudioOnly = audioOnly;
       if (_player.state != FijkState.idle) {
         await _player.reset();
       }
-      await _setupProxy();
+      await _setupProxy(privateInput: privateInput);
       await FijkHelper.setFijkOption(_player, enableCodec: SettingsService.to.player.enableCodec.v, headers: headers);
 
       // Native prepare can enter FijkState.error before the Future completes.

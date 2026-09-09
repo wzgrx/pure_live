@@ -97,6 +97,15 @@ abstract interface class SourceTransitionAwarePlayer {
   void beginSourceTransition();
 }
 
+/// The source manager supplies an app-owned loopback input. Native proxy
+/// settings must be bypassed for that input, and restored on the next remote
+/// open. Adapters without a configurable native proxy need no implementation.
+abstract interface class PrivateInputAwarePlayer {
+  /// Applies to the next open. Canonical identity keeps decoder recovery bound
+  /// to the remote source even when a replacement relay uses another local URI.
+  void setPrivateInput(bool value, {String? sourceIdentity});
+}
+
 /// Optional capability for a native player that can retry the current source
 /// with software video decoding before the manager allocates another engine.
 ///

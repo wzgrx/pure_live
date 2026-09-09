@@ -5,6 +5,8 @@ import 'dart:math' as math;
 
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
 
+import 'playback_source_transport.dart';
+
 import 'line_fallback_manager.dart';
 import 'live_stream_geometry_hint.dart';
 import 'portrait_stream_support.dart';
@@ -245,6 +247,8 @@ class PlayerManager {
   PlaybackSourceQualitySelection? _sourceCohortSelection;
   LiveRoom? _sourceCohortRoom;
   String? _sourceCohortUrl;
+  final Map<UnifiedPlayer, PlaybackSourceTransport> _sourceTransports = Map.identity();
+  final PlaybackInputFactory? _sourceInputFactory;
 
   PlayerManager({
     required this.fallbackManager,
@@ -268,6 +272,7 @@ class PlayerManager {
     this.enableActiveContentProbe = false,
     this.audioModeVideoWarmRetention,
     UnifiedPlayerCreator? playerCreator,
+    this._sourceInputFactory,
     Floating? androidFloating,
     bool Function()? useHardStopOnExit,
     this._audioModeServiceSync,
@@ -1114,8 +1119,8 @@ class PlayerManager {
     _playbackIntentEstablished = true;
     _playbackIntentRevision++;
     final roomChanged = room != currentFloatRoom;
-    _currentSourceCommit = null;
     if (roomChanged) {
+      _currentSourceCommit = null;
       _pendingRoomReentry = null;
       _appFloatingSession = null;
     }
@@ -1221,6 +1226,10 @@ class PlayerManager {
     final mySessionId = ++_sessionId;
     final sourceIntentRevision = _playbackIntentRevision;
     final committedSelection = replaceSourceSelection ? sourceSelection : _sourceSelectionForCurrentCohort();
+    // A warm candidate leaves the previous source intact until commit. Only
+    // destructive opening reaches this point; a cancelled warm candidate must
+    // not erase the still-active source snapshot (including its policy).
+    _currentSourceCommit = null;
 
     final roomChanged = room != currentFloatRoom;
     if (roomChanged) {
@@ -1310,7 +1319,15 @@ class PlayerManager {
 
     try {
       _stateSubject.add(PlayerState.preparing);
-      await _openPlayerSource(player, targetUrl, targetPlayUrls, headers, room: room, audioOnly: audioOnly);
+      await _openPlayerSource(
+        player,
+        targetUrl,
+        targetPlayUrls,
+        headers,
+        room: room,
+        audioOnly: audioOnly,
+        sourceQueryPolicy: committedSelection?.sourceQueryPolicies[targetUrl],
+      );
       if (!_isSessionValid(mySessionId)) return;
       _nativeAudioOnly = audioOnly;
       _armSourceReadyDeadline(player, mySessionId);
@@ -1687,6 +1704,7 @@ class PlayerManager {
           Map<String, String>.from(_currentHeaders),
           room: currentFloatRoom,
           audioOnly: targetAudioOnly,
+          sourceQueryPolicy: sourceSelection?.sourceQueryPolicies[sourceUrl],
         );
         if (!_isSessionValid(sessionId) || isStillRequired?.call() == false) {
           await _safeDestroyPlayer(candidate);
@@ -1886,6 +1904,7 @@ class PlayerManager {
         Map<String, String>.from(headers),
         room: room,
         audioOnly: audioOnly,
+        sourceQueryPolicy: committedSelection?.sourceQueryPolicies[url],
       );
       final warmTimeout = sourceReadyTimeout > Duration.zero ? sourceReadyTimeout : const Duration(seconds: 8);
       final readyError = await ready.future.timeout(warmTimeout);
@@ -2030,6 +2049,7 @@ class PlayerManager {
       // transport and releasing demux/decoder buffers while retaining the
       // initialized native Player and D3D renderer for the next hand-off.
       await player.softStop();
+      await _closeSourceTransport(player);
     } catch (error, stackTrace) {
       log('Retiring Windows warm standby failed: $error', name: 'PlayerManager', error: error, stackTrace: stackTrace);
       await _safeDestroyPlayer(player);
@@ -2065,27 +2085,70 @@ class PlayerManager {
     Map<String, String> headers, {
     required LiveRoom? room,
     required bool audioOnly,
+    required HlsSourceQueryPolicy? sourceQueryPolicy,
   }) async {
-    final sourceOpen = player.setDataSource(url, playUrls, headers, room: room, audioOnly: audioOnly);
-    if (sourceOpenTimeout <= Duration.zero) {
-      await sourceOpen;
-      return;
-    }
-    await sourceOpen.timeout(
-      sourceOpenTimeout,
-      onTimeout: () {
-        throw PlayerException(
-          message: 'Native player did not finish opening the source before the deadline',
-          type: PlayerErrorType.initialization,
-          code: 'source_open_timeout',
-        );
+    final transport = _sourceTransports.putIfAbsent(
+      player,
+      () => PlaybackSourceTransport(createInput: _sourceInputFactory),
+    );
+    final sourceOpen = transport.open(
+      url: url,
+      urls: playUrls,
+      headers: headers,
+      policy: sourceQueryPolicy,
+      nativeOpen: (input, inputs, inputHeaders, privateInput) {
+        if (player is PrivateInputAwarePlayer) {
+          (player as PrivateInputAwarePlayer).setPrivateInput(privateInput, sourceIdentity: url);
+        }
+        return player.setDataSource(input, inputs, inputHeaders, room: room, audioOnly: audioOnly);
       },
     );
+    try {
+      if (sourceOpenTimeout <= Duration.zero) {
+        await sourceOpen;
+        return;
+      }
+      await sourceOpen.timeout(
+        sourceOpenTimeout,
+        onTimeout: () {
+          throw PlayerException(
+            message: 'Native player did not finish opening the source before the deadline',
+            type: PlayerErrorType.initialization,
+            code: 'source_open_timeout',
+          );
+        },
+      );
+    } catch (_) {
+      await transport.cancelPending();
+      rethrow;
+    }
+  }
+
+  Future<void> _closeSourceTransport(UnifiedPlayer player) async {
+    await _sourceTransports.remove(player)?.close();
+  }
+
+  void _cancelPendingSourceInputs() {
+    for (final transport in _sourceTransports.values) {
+      unawaited(
+        transport.cancelPending().catchError((Object error, StackTrace stackTrace) {
+          log('Pending source input cleanup failed', name: 'PlayerManager', error: error, stackTrace: stackTrace);
+        }),
+      );
+    }
+  }
+
+  Future<void> _disposePlayerWithTransport(UnifiedPlayer player) async {
+    try {
+      await _closeSourceTransport(player);
+    } finally {
+      await player.hardDispose();
+    }
   }
 
   Future<void> _safeDestroyPlayer(UnifiedPlayer player) async {
     try {
-      await player.hardDispose();
+      await _disposePlayerWithTransport(player);
     } catch (e, s) {
       log("destroy player error: $e", stackTrace: s);
     }
@@ -3205,6 +3268,7 @@ class PlayerManager {
     _playbackIntentRevision++;
     _sessionId++;
     _clearSourceCommitState();
+    _cancelPendingSourceInputs();
     _playbackSuspensions.clear();
     _cancelContinuityRecovery();
     _cancelVideoFrameStallRecovery();
@@ -3294,7 +3358,9 @@ class PlayerManager {
         return;
       }
       await _disposeWindowsWarmStandby();
-      await _currentPlayer?.softStop();
+      final player = _currentPlayer;
+      await player?.softStop();
+      if (player != null) await _closeSourceTransport(player);
       _stateSubject.add(PlayerState.idle);
       _playingSubject.add(false);
     } catch (e) {
@@ -3327,7 +3393,7 @@ class PlayerManager {
     final player = _currentPlayer;
 
     if (player != null) {
-      await player.hardDispose();
+      await _disposePlayerWithTransport(player);
     }
     _currentPlayer = null;
     _runtimeEngine = null;
@@ -4235,6 +4301,7 @@ class PlayerManager {
     _stopAndroidPipObservation();
     if (_usesAndroidPip) isInPip.value = false;
     _disposed = true;
+    _cancelPendingSourceInputs();
     _playbackRequested = false;
     _playbackSuspensions.clear();
     _cancelContinuityRecovery();

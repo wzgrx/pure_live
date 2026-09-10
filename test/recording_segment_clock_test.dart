@@ -5,11 +5,50 @@ import 'package:path/path.dart' as p;
 import 'package:pure_live/recorder/services/recording_segment_clock.dart';
 
 void main() {
+  test('clock output reservation rejects same-process and retained-output collisions without truncation', () async {
+    final dir = await Directory.systemTemp.createTemp('clock-output-reservation-');
+    addTearDown(() => dir.delete(recursive: true));
+    final journal = File(p.join(dir.path, RecordingSegmentClock.journalName('attempt')));
+    final args = ['-segment_list', journal.path, p.join(dir.path, RecordingSegmentClock.segmentPattern('attempt'))];
+    final first = (await RecordingClockReservation.acquire(args))!;
+    addTearDown(first.release);
+    await expectLater(RecordingClockReservation.acquire(args), throwsStateError);
+    first.release();
+    final second = (await RecordingClockReservation.acquire(args))!;
+    addTearDown(second.release);
+    first.release(); // An old duplicate cleanup must not release the new owner.
+    await expectLater(RecordingClockReservation.acquire(args), throwsStateError);
+    second.release();
+    await journal.writeAsString('retained');
+    await expectLater(RecordingClockReservation.acquire(args), throwsA(isA<FileSystemException>()));
+    expect(await journal.readAsString(), 'retained');
+    await journal.delete();
+    for (final name in [
+      RecordingSegmentClock.segmentName('attempt', 0),
+      RecordingSegmentClock.segmentName('attempt', 3),
+      'attempt_000003.ts',
+    ]) {
+      final source = await File(p.join(dir.path, name)).writeAsBytes([1, 2]);
+      await expectLater(RecordingClockReservation.acquire(args), throwsA(isA<FileSystemException>()));
+      expect(await source.readAsBytes(), [1, 2]);
+      await source.delete();
+    }
+    (await RecordingClockReservation.acquire(args))!.release();
+  });
+  test('clock reservation leaves legacy arguments alone and rejects a mismatched journal path', () async {
+    expect(await RecordingClockReservation.acquire(['-i', 'input', 'attempt_%06d.ts']), null);
+    await expectLater(
+      RecordingClockReservation.acquire(['-segment_list', 'other.csv', 'attempt_%06d.clock-v1.ts']),
+      throwsFormatException,
+    );
+    await expectLater(RecordingClockReservation.acquire(['attempt_%06d.clock-v1.ts']), throwsFormatException);
+  });
   const prefix = 'attempt-001';
-  const good = 'attempt-001_000000.ts,0.000000,12.300000\nattempt-001_000001.ts,12.300000,13.200000\n';
+  const good =
+      'attempt-001_000000.clock-v1.ts,0.000000,12.300000\nattempt-001_000001.clock-v1.ts,12.300000,13.200000\n';
   final paths = [
     for (var i = 0; i < 2; i++)
-      p.join(Directory.systemTemp.path, 'clock fixture', '${prefix}_${i.toString().padLeft(6, '0')}.ts'),
+      p.join(Directory.systemTemp.path, 'clock fixture', '${prefix}_${i.toString().padLeft(6, '0')}.clock-v1.ts'),
   ];
   test('observed journal keeps reference clock and explicit zero inpoints', () {
     final clock = RecordingSegmentClock.parse(good, prefix: prefix, segments: paths);
@@ -36,7 +75,7 @@ void main() {
   });
   test('single stopped segment needs no fabricated terminal duration', () {
     final clock = RecordingSegmentClock.parse(
-      'attempt-001_000000.ts,0,0.04\n',
+      'attempt-001_000000.clock-v1.ts,0,0.04\n',
       prefix: prefix,
       segments: [paths.first],
     );
@@ -48,8 +87,8 @@ void main() {
     '$good\n',
     good.replaceAll(prefix, 'other'),
     good.replaceFirst('000000', '000001'),
-    good.replaceFirst('attempt-001_000000.ts', '../attempt-001_000000.ts'),
-    good.replaceFirst('attempt-001_000000.ts', '"attempt-001_000000.ts"'),
+    good.replaceFirst('attempt-001_000000.clock-v1.ts', '../attempt-001_000000.clock-v1.ts'),
+    good.replaceFirst('attempt-001_000000.clock-v1.ts', '"attempt-001_000000.clock-v1.ts"'),
     good.replaceFirst('0.000000', '-1.000000'),
     good.replaceFirst('0.000000', '1.000000'),
     good.replaceFirst('12.300000', '0.000000'),
@@ -58,7 +97,7 @@ void main() {
     good.replaceAll('12.300000', '1e3'),
     good.replaceAll('12.300000', '12.3000001'),
     good.replaceAll('12.300000', '9007199254.740992'),
-    good.replaceFirst('000001.ts,12.300000', '000001.ts,0.000000'),
+    good.replaceFirst('000001.clock-v1.ts,12.300000', '000001.clock-v1.ts,0.000000'),
   ]) {
     test('rejects malformed or foreign journal ${invalid.hashCode}', () {
       expect(() => RecordingSegmentClock.parse(invalid, prefix: prefix, segments: paths), throwsFormatException);

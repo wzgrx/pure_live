@@ -9,6 +9,7 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
 import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/services/cache_service.dart';
+import 'package:pure_live/recorder/services/recording_segment_clock.dart';
 
 class VideoProcessorService extends GetxService {
   VideoProcessorService._internal() : _ffmpeg = FFmpegManager.to, _completionTimeoutOverride = null;
@@ -70,6 +71,7 @@ class VideoProcessorService extends GetxService {
     StreamSubscription<FFmpegEvent>? subscription;
     File? listFile;
     File? partialFile;
+    File? clockJournal;
     Future<void>? execution;
     CacheService? directoryOwner;
     String? protectedDirectory;
@@ -132,7 +134,11 @@ class VideoProcessorService extends GetxService {
       await for (final entity in tsDirectory.list(followLinks: false)) {
         if (entity is! File || p.extension(entity.path).toLowerCase() != '.ts') continue;
         try {
-          if (await entity.length() <= 0) continue;
+          // An empty clock-v1 tail is still evidence of an unfinished attempt.
+          // Keep it in the snapshot so journal validation cannot silently drop it.
+          if (await entity.length() <= 0 && !entity.path.toLowerCase().endsWith(RecordingSegmentClock.segmentSuffix)) {
+            continue;
+          }
           legacySegments.add(entity);
         } on FileSystemException {
           // Segment rotation can race with the directory snapshot.
@@ -151,6 +157,34 @@ class VideoProcessorService extends GetxService {
         _emitFailed(taskId, i18n('video_ts_empty'));
         return false;
       }
+      final journal = File(p.join(tsDirectory.path, RecordingSegmentClock.journalName(resolvedFilePrefix)));
+      final usesClock =
+          segments.any((file) => file.path.toLowerCase().endsWith(RecordingSegmentClock.segmentSuffix)) ||
+          await journal.exists();
+      String manifest;
+      if (usesClock) {
+        try {
+          // A missing/partial/foreign journal and a mixed old/new TS snapshot
+          // all fail before native IO. Never infer a duration or drop a tail.
+          for (final segment in segments) {
+            if (await segment.length() <= 0) throw const FormatException('Recording clock empty segment');
+          }
+          final clock = await RecordingSegmentClock.read(journal, prefix: resolvedFilePrefix, segments: segments);
+          manifest = clock.toConcatManifest();
+          clockJournal = journal;
+        } on FileSystemException {
+          _emitFailed(taskId, i18n('recorder_segment_clock_failed'));
+          return false;
+        } on FormatException catch (error) {
+          log('Recording clock validation failed for $taskId: ${error.message}');
+          _emitFailed(taskId, i18n('recorder_segment_clock_failed'));
+          return false;
+        }
+      } else {
+        // Legacy timestamps already contain per-child normalization. Applying
+        // the new zero-inpoint contract would shift those old recordings again.
+        manifest = buildConcatManifest(segments.map((segment) => p.absolute(segment.path)));
+      }
       var inputBytes = 0;
       for (final segment in segments) {
         try {
@@ -166,10 +200,7 @@ class VideoProcessorService extends GetxService {
       _emit(VideoProcessEvent(taskId: taskId, type: VideoProcessEventType.started));
 
       listFile = File(p.join(tsDirectory.path, '.$resolvedFilePrefix.ffconcat'));
-      await listFile.writeAsString(
-        buildConcatManifest(segments.map((segment) => p.absolute(segment.path))),
-        flush: true,
-      );
+      await listFile.writeAsString(manifest, flush: true);
       if (operation.cancelled) return false;
 
       final outputFile = await _uniqueOutputFile(tsDirectory, resolvedFilePrefix);
@@ -263,7 +294,13 @@ class VideoProcessorService extends GetxService {
       operation.commitStarted = true;
       await partialFile.rename(outputFile.path);
       partialFile = null;
-      if (deleteSourceTs) await _deleteFiles(segments, taskId);
+      if (deleteSourceTs) {
+        final removedAllSegments = await _deleteFiles(segments, taskId);
+        // Retain metadata too if a locked TS remains, enabling exact recovery.
+        if (clockJournal != null && removedAllSegments) {
+          await _deleteFiles([clockJournal], taskId);
+        }
+      }
 
       _emit(
         VideoProcessEvent(
@@ -328,9 +365,13 @@ class VideoProcessorService extends GetxService {
     bool allowLegacySegments = false,
   }) {
     final all = candidates.toList(growable: false);
-    final prefix = '${filePrefix}_';
-    final matching = all.where((file) => p.basename(file.path).startsWith(prefix)).toList(growable: false);
-    return matching.isNotEmpty ? matching : (allowLegacySegments ? all : const <File>[]);
+    final matcher = RegExp('^${RegExp.escape(filePrefix)}_\\d{6,}(?:\\.clock-v1)?\\.ts\$', caseSensitive: false);
+    final matching = all.where((file) => matcher.hasMatch(p.basename(file.path))).toList(growable: false);
+    if (matching.isNotEmpty) return matching;
+    // Explicit strftime migration must not borrow another clock-v1 attempt.
+    return allowLegacySegments
+        ? all.where((file) => !file.path.toLowerCase().endsWith(RecordingSegmentClock.segmentSuffix)).toList()
+        : const <File>[];
   }
 
   static String buildConcatManifest(Iterable<String> paths) {
@@ -380,15 +421,18 @@ class VideoProcessorService extends GetxService {
     return Duration(seconds: timeoutSeconds);
   }
 
-  Future<void> _deleteFiles(List<File> files, String taskId) async {
+  Future<bool> _deleteFiles(List<File> files, String taskId) async {
     log('$taskId: ${i18n("video_delete_temp_files")}');
+    var removedAll = true;
     for (final file in files) {
       try {
         if (await file.exists()) await file.delete();
       } on FileSystemException {
         // Output is already committed; a locked segment can be cleaned later.
+        removedAll = false;
       }
     }
+    return removedAll;
   }
 
   void _emit(VideoProcessEvent event) {

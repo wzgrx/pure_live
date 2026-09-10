@@ -6,6 +6,8 @@ import 'package:path/path.dart' as p;
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
+import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
+import 'package:pure_live/recorder/services/recording_segment_clock.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
@@ -18,6 +20,7 @@ void main() {
   late Directory directory;
   late LiveRecordTask task;
   late File source;
+  late File journal;
   late _NativeLifecycleFixture native;
   late VideoProcessorService service;
   late CacheService cache;
@@ -29,7 +32,10 @@ void main() {
     cache = Get.put(CacheService(configuredPathResolver: () => null, defaultDirectoryResolver: () async => directory));
     task = LiveRecordTask.fromRoom(LiveRoom(platform: 'acfun', roomId: '123', nick: 'fixture'))
       ..outputDir = directory.path;
-    source = await File(p.join(directory.path, '${task.recordingFilePrefix}_000000.ts')).writeAsBytes([1, 2, 3]);
+    source = await File(p.join(directory.path, RecordingSegmentClock.segmentName(task.recordingFilePrefix, 0)))
+        .writeAsBytes([1, 2, 3]);
+    journal = await File(p.join(directory.path, RecordingSegmentClock.journalName(task.recordingFilePrefix)))
+        .writeAsString('${p.basename(source.path)},0.000000,9.750000\n');
     native = _NativeLifecycleFixture();
     // Ordinary lifecycle cases follow explicit native signals, not a 30 ms
     // race against real temporary-file I/O under the full suite's load.
@@ -51,6 +57,96 @@ void main() {
   void useShortDeadline() {
     service.onClose();
     service = VideoProcessorService.forTesting(ffmpeg: native, completionTimeout: const Duration(milliseconds: 30));
+  }
+
+  test('clock-v1 production merge uses next start rather than previous end and preserves other attempts', () async {
+    final second = await File(p.join(directory.path, RecordingSegmentClock.segmentName(task.recordingFilePrefix, 1)))
+        .writeAsBytes([4, 5]);
+    await journal.writeAsString(
+      '${p.basename(source.path)},0.000000,9.750000\n${p.basename(second.path)},10.125000,11.000000\n',
+    );
+    final foreign = await File(
+      p.join(directory.path, RecordingSegmentClock.segmentName('${task.recordingFilePrefix}_other', 0)),
+    ).writeAsBytes([9]);
+    final foreignJournal = await File(
+      p.join(directory.path, RecordingSegmentClock.journalName('${task.recordingFilePrefix}_other')),
+    ).writeAsString('foreign');
+    native.finish();
+    conversion = service.convertToMp4(task: task);
+    expect(await conversion, true);
+    expect(native.manifest, contains('duration 10.125000\n'));
+    expect('inpoint 0'.allMatches(native.manifest!), hasLength(2));
+    expect(native.manifest, isNot(contains('_other')));
+    expect(await source.exists(), false);
+    expect(await second.exists(), false);
+    expect(await journal.exists(), false);
+    expect(await foreign.readAsBytes(), [9]);
+    expect(await foreignJournal.readAsString(), 'foreign');
+  });
+
+  test('retained-source finalization keeps both journal and TS after MP4 commit', () async {
+    final before = await journal.readAsString();
+    native.finish();
+    conversion = service.convertToMp4(task: task, deleteSourceTs: false);
+    expect(await conversion, true);
+    expect(await source.readAsBytes(), [1, 2, 3]);
+    expect(await journal.readAsString(), before);
+    expect(native.manifest, contains('inpoint 0\n'));
+    expect(native.manifest, isNot(contains('duration ')));
+  });
+
+  test('legacy prefixed recording remains readable without applying clock-v1 inpoints', () async {
+    source = await source.rename(p.join(directory.path, '${task.recordingFilePrefix}_000000.ts'));
+    await journal.delete();
+    native.finish();
+    conversion = service.convertToMp4(task: task);
+    expect(await conversion, true);
+    expect(native.manifest, isNot(contains('inpoint ')));
+    expect(native.manifest, isNot(contains('duration ')));
+    expect(await source.exists(), false);
+  });
+
+  for (final defect in [
+    'missing-journal',
+    'unfinished-row',
+    'wrong-attempt',
+    'extra-row',
+    'mixed-profile',
+    'empty-tail',
+  ]) {
+    test('clock-v1 $defect stops before native IO and retains all evidence', () async {
+      switch (defect) {
+        case 'missing-journal':
+          await journal.delete();
+        case 'unfinished-row':
+          await journal.writeAsString((await journal.readAsString()).trimRight());
+        case 'wrong-attempt':
+          await journal.writeAsString('other_000000.clock-v1.ts,0,9.75\n');
+        case 'extra-row':
+          await journal.writeAsString(
+            '${await journal.readAsString()}${RecordingSegmentClock.segmentName(task.recordingFilePrefix, 1)},10,11\n',
+          );
+        case 'mixed-profile':
+          await File(p.join(directory.path, '${task.recordingFilePrefix}_000001.ts')).writeAsBytes([4]);
+        case 'empty-tail':
+          await File(p.join(directory.path, RecordingSegmentClock.segmentName(task.recordingFilePrefix, 1)))
+              .writeAsBytes([]);
+      }
+      final before = await directory
+          .list()
+          .where((file) => file is File)
+          .cast<File>()
+          .asyncMap((file) async => (file.path, await file.readAsBytes()))
+          .toList();
+      conversion = service.convertToMp4(task: task, allowLegacySegments: true);
+      expect(await conversion, false);
+      expect(native.startCalls, 0);
+      expect(service.isProcessing(task.taskId), false);
+      for (final (path, bytes) in before) {
+        expect(await File(path).readAsBytes(), bytes);
+      }
+      expect(await directory.list().where((file) => file.path.endsWith('.mp4')).length, 0);
+    });
   }
 
   test('persisted capture damage blocks remux before native IO and retains original source', () async {
@@ -104,6 +200,7 @@ void main() {
     expect(native.running, isFalse);
     expect(service.isProcessing(task.taskId), isFalse);
     expect(await source.exists(), isTrue);
+    expect(await journal.exists(), isTrue);
     expect(await File(native.output!).exists(), isFalse);
   });
 
@@ -131,6 +228,7 @@ void main() {
     expect(native.startCalls, 0);
     expect(await conversion!.timeout(const Duration(seconds: 1)), isFalse);
     expect(await source.exists(), isTrue);
+    expect(await journal.exists(), isTrue);
     expect(service.isProcessing(task.taskId), isFalse);
   });
 
@@ -154,6 +252,7 @@ void main() {
     expect(cache.isDirectoryProtected(directory.path), isTrue);
     await cache.clearAll();
     expect(await source.exists(), isTrue);
+    expect(await journal.exists(), isTrue);
     expect(await File(native.output!).exists(), isTrue);
     expect(await service.convertToMp4(task: task), isFalse);
     expect(native.startCalls, 1);
@@ -162,6 +261,7 @@ void main() {
     expect(service.isProcessing(task.taskId), isFalse);
     expect(await File(native.output!).exists(), isFalse);
     expect(await source.exists(), isTrue);
+    expect(await journal.exists(), isTrue);
     expect(cache.isDirectoryProtected(directory.path), isFalse);
   });
 
@@ -178,6 +278,7 @@ void main() {
     expect(native.stopCalls, 1);
     expect(service.isProcessing(task.taskId), isFalse);
     expect(await source.exists(), isTrue);
+    expect(await journal.exists(), isTrue);
   });
 
   test('natural completion commits the output without overwriting an older MP4', () async {
@@ -190,6 +291,7 @@ void main() {
     expect(await oldOutput.readAsBytes(), [9]);
     expect(await File(p.join(directory.path, '${task.recordingFilePrefix}-1.mp4')).readAsBytes(), [1, 2, 3, 4]);
     expect(await source.exists(), isFalse);
+    expect(await journal.exists(), isFalse);
     expect(native.stopCalls, 0);
     expect(service.isProcessing(task.taskId), isFalse);
   });
@@ -201,6 +303,7 @@ void main() {
     expect(await conversion!, isFalse);
     await _waitForMergeRelease(service, task.taskId);
     expect(await source.exists(), isTrue);
+    expect(await journal.exists(), isTrue);
     expect(await File(native.output!).exists(), isFalse);
     expect(native.stopCalls, 1);
     expect(service.isProcessing(task.taskId), isFalse);
@@ -214,6 +317,7 @@ void main() {
     expect(await conversion!, isFalse);
     await _waitForMergeRelease(service, task.taskId);
     expect(await source.exists(), isTrue);
+    expect(await journal.exists(), isTrue);
     expect(await File(native.output!).exists(), isFalse);
     expect(service.isProcessing(task.taskId), isFalse);
   });
@@ -263,6 +367,7 @@ class _NativeLifecycleFixture implements FFmpegManager {
   int stopCalls = 0;
   String? output;
   List<String> arguments = [];
+  String? manifest;
   String? nativeTaskId;
   @override
   Stream<FFmpegEvent> get stream => events.stream;
@@ -275,6 +380,7 @@ class _NativeLifecycleFixture implements FFmpegManager {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    FlvRelayDiagnostics? flvDiagnostics,
     bool hlsPrefetch = false,
   }) async {
     this.arguments = arguments;
@@ -282,6 +388,7 @@ class _NativeLifecycleFixture implements FFmpegManager {
     nativeTaskId = taskId;
     await startGate?.future;
     running = true;
+    manifest = await File(arguments[arguments.indexOf('-i') + 1]).readAsString();
     output = arguments.last;
     await File(output!).writeAsBytes([1, 2, 3, 4]);
     events.add(FFmpegEvent(taskId: taskId, type: FFmpegEventType.startAck));

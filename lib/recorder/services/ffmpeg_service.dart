@@ -17,6 +17,7 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 import 'package:pure_live/recorder/services/ffmpeg_tls_trust_store.dart';
+import 'package:pure_live/recorder/services/recording_segment_clock.dart';
 
 /// Converts FFmpegKit's progress timestamp into a live-session duration.
 ///
@@ -366,6 +367,7 @@ class FFmpegService {
     FFmpegHlsInputRelay? inputRelay;
     FFmpegFlvInputRelay? flvInputRelay;
     OwnedRecordInput? ownedInput;
+    RecordingClockReservation? clockOutput;
     try {
       await _ensureInitialized();
       request.check();
@@ -395,6 +397,7 @@ class FFmpegService {
             flvInputRelay?.replaceFirstInput(arguments) ?? inputRelay?.replaceFirstInput(arguments) ?? arguments;
       }
       if (inputArguments.isEmpty) throw ArgumentError('FFmpeg arguments must not be empty');
+      clockOutput = await RecordingClockReservation.acquire(arguments);
       final effectiveArguments = FFmpegTlsTrustStore.injectCaFile(inputArguments, caFile: _trustedCaFile);
       request.check();
       if (ownedInput?.isClosed == true) throw StateError('Recording input ended before native open');
@@ -417,6 +420,7 @@ class FFmpegService {
           if (flvInputRelay != null) Future.sync(flvInputRelay.close),
         ]);
       } finally {
+        clockOutput?.release();
         if (identical(_starts[taskId], request)) _starts.remove(taskId);
         if (!request.done.isCompleted) request.done.complete();
       }

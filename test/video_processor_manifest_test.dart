@@ -4,6 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
 
 void main() {
+  test('segment selection isolates overlapping prefixes and never borrows clock-v1 for legacy recovery', () {
+    final files = [
+      File('attempt_000000.clock-v1.ts'),
+      File('attempt_other_000000.clock-v1.ts'),
+      File('other_000000.clock-v1.ts'),
+    ];
+    expect(VideoProcessorService.selectAttemptSegments(candidates: files, filePrefix: 'attempt'), [files.first]);
+    expect(
+      VideoProcessorService.selectAttemptSegments(candidates: files, filePrefix: 'missing', allowLegacySegments: true),
+      isEmpty,
+    );
+  });
   test('merge timeout scales beyond the old five-second failure window', () {
     expect(VideoProcessorService.mergeTimeout(inputBytes: 1024, recordedSeconds: 1), const Duration(seconds: 30));
     expect(

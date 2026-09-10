@@ -20,7 +20,7 @@ void main() {
         rwTimeout: 15,
         threadQueueSize: 1024,
       );
-      expect(_valueAfter(arguments, '-segment_format_options'), 'flush_packets=1');
+      expect(_valueAfter(arguments, '-segment_format_options'), 'flush_packets=1:avoid_negative_ts=disabled');
       expect(arguments.where((value) => value == '-segment_format_options'), hasLength(1));
       expect(arguments.indexOf('-segment_format_options'), greaterThan(arguments.indexOf('-i')));
       expect(arguments.indexOf('-segment_format_options'), lessThan(arguments.length - 2));
@@ -47,7 +47,11 @@ void main() {
     expect(_valuesAfter(arguments, '-map'), <String>['0:v:0?', '0:a:0?']);
     expect(_valueAfter(arguments, '-user_agent'), 'Pure Live Test UA');
     expect(_valueAfter(arguments, '-headers'), 'referer: https://example.test/room/1\r\n');
-    expect(arguments.last, '$outputDir${Platform.pathSeparator}session-001_%06d.ts');
+    expect(arguments.last, '$outputDir${Platform.pathSeparator}session-001_%06d.clock-v1.ts');
+    expect(_valueAfter(arguments, '-segment_list'), '$outputDir${Platform.pathSeparator}session-001.clock-v1.csv');
+    expect(_valueAfter(arguments, '-segment_list_type'), 'csv');
+    expect(_valueAfter(arguments, '-avoid_negative_ts'), 'make_non_negative');
+    expect(_valueAfter(arguments, '-reset_timestamps'), '1');
     expect(_valueAfter(arguments, '-reconnect_on_network_error'), '1');
     expect(_valueAfter(arguments, '-reconnect_on_http_error'), '5xx');
     expect(_valueAfter(arguments, '-dts_delta_threshold'), '2');

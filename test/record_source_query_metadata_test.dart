@@ -11,6 +11,7 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
+import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
 
 void main() {
@@ -276,6 +277,7 @@ class _Service implements FFmpegService {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    FlvRelayDiagnostics? flvDiagnostics,
     bool hlsPrefetch = false,
   }) async {
     policy = sourceQueryPolicy;

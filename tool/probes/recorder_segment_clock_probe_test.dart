@@ -1,5 +1,5 @@
-// Opt-in synthetic native regression. Candidate parameters stay in this probe
-// until their behavior is established; the production recorder is not patched.
+// Opt-in synthetic native regression of the production clock-v1 path.
+// Single/legacy reference arguments are explicitly frozen to the old profile.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -16,6 +16,8 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
 import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
+import 'package:pure_live/recorder/services/recording_segment_clock.dart';
+import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 
 import 'frame_hash_timeline.dart';
 
@@ -62,11 +64,17 @@ void main() {
               threadQueueSize: 512,
               filePrefix: task.recordingFilePrefix,
             ).toList();
-            final journal = File(p.join(dir.path, 'segments.csv'));
-            if (variant == 'candidate') {
-              report['stage'] = '$variant-merge';
-              args[args.indexOf('-segment_format_options') + 1] = 'flush_packets=1:avoid_negative_ts=disabled';
-              args.insertAll(args.length - 1, ['-segment_list', journal.path, '-segment_list_type', 'csv']);
+            final journal = File(p.join(dir.path, RecordingSegmentClock.journalName(task.recordingFilePrefix)));
+            if (variant != 'candidate') {
+              // Preserve the prior muxing contract; changing the production
+              // builder must not silently turn the regression baseline green.
+              args[args.indexOf('-segment_format_options') + 1] = 'flush_packets=1';
+              args[args.length - 1] = args.last.replaceFirst('.clock-v1.ts', '.ts');
+              for (final option in ['-segment_list', '-segment_list_type']) {
+                final index = args.indexOf(option);
+                expect(index, greaterThanOrEqualTo(0));
+                args.removeRange(index, index + 2);
+              }
             }
             // A finite local fixture ends normally. The live service deliberately
             // reports an unsolicited EOF as a recoverable error even at code 0;
@@ -82,57 +90,23 @@ void main() {
             final target = File(p.join(dir.path, '${task.recordingFilePrefix}.mp4'));
             final evidence = <String, Object?>{'segments': segments.length, 'nativeRecord': record, 'arguments': args};
             variants[variant] = evidence;
-            if (variant == 'candidate') {
-              // The generator uses simple controlled basenames. General journal
-              // validation belongs in the future production parser, not here.
-              final rows = (await journal.readAsLines())
-                  .where((s) => s.trim().isNotEmpty)
-                  .map((s) => s.split(','))
-                  .toList();
-              expect(rows, hasLength(segments.length));
-              final manifest = StringBuffer('ffconcat version 1.0\n');
-              for (var i = 0; i < rows.length; i++) {
-                expect(rows[i], hasLength(3));
-                expect(rows[i][0], p.basename(segments[i].path));
-                final escaped = segments[i].absolute.path.replaceAll('\\', '/').replaceAll("'", r"'\''");
-                manifest.writeln("file '$escaped'\ninpoint 0");
-                if (i + 1 < rows.length) {
-                  final duration = double.parse(rows[i + 1][1]) - double.parse(rows[i][1]);
-                  expect(duration, greaterThan(0));
-                  manifest.writeln('duration ${duration.toStringAsFixed(6)}');
-                }
+            report['stage'] = '$variant-merge';
+            final mergeEvents = <Map<String, Object?>>[];
+            final subscription = manager.stream.listen((event) {
+              if (event.taskId == 'merge_${task.taskId}_${task.recordingFilePrefix}' &&
+                  [FFmpegEventType.complete, FFmpegEventType.error].contains(event.type)) {
+                mergeEvents.add({'type': event.type.name, 'code': event.data['code']});
               }
-              evidence['journal'] = rows;
-              final list = File(p.join(dir.path, 'candidate.ffconcat'));
-              await list.writeAsString(manifest.toString());
-              final id = '${task.taskId}-merge';
-              ownedIds.add(id);
-              evidence['nativeMerge'] = await _native(manager, id, [
-                '-hide_banner',
-                '-loglevel',
-                'warning',
-                '-xerror',
-                '-f',
-                'concat',
-                '-safe',
-                '0',
-                '-i',
-                list.path,
-                '-map',
-                '0:v?',
-                '-map',
-                '0:a?',
-                '-c',
-                'copy',
-                '-movflags',
-                '+faststart',
-                '-f',
-                'mp4',
-                target.path,
-              ]);
-            } else {
-              report['stage'] = '$variant-merge';
+            });
+            try {
               expect(await VideoProcessorService.to.convertToMp4(task: task, deleteSourceTs: false), true);
+              expect(mergeEvents, hasLength(1));
+              expect(mergeEvents.single, {'type': 'complete', 'code': 0});
+              evidence['nativeMerge'] = mergeEvents.single;
+              evidence['productionFinalizer'] = true;
+              if (variant == 'candidate') evidence['journal'] = await journal.readAsString();
+            } finally {
+              await subscription.cancel();
             }
             expect(await target.length(), greaterThan(0));
             report['stage'] = '$variant-decode';
@@ -191,6 +165,12 @@ void main() {
       timeout: const Timeout(Duration(minutes: 6)),
     );
   }
+  test(
+    'production clock survives manual FLV drain across multiple segments',
+    () => HttpOverrides.runWithHttpOverrides(_manualStopClock, _DirectClockHttp()),
+    skip: Platform.environment['PURELIVE_CLOCK_PROBE'] != '1',
+    timeout: const Timeout(Duration(minutes: 3)),
+  );
 }
 
 Future<Map<String, Object?>> _native(FFmpegManager manager, String id, List<String> args, {bool live = false}) async {
@@ -278,4 +258,168 @@ Future<Map<String, FrameHashTimeline>> _decode(File input, Directory output, Str
     }
   }
   return results;
+}
+
+Future<void> _manualStopClock() async {
+  final base = Platform.environment['PURELIVE_CLOCK_PROBE_ROOT']!;
+  final bytes = await File(p.join(base, 'fixtures', 'av_cfr.flv')).readAsBytes();
+  final root = await Directory(p.join(base, 'runs', 'manual-stop-${DateTime.now().microsecondsSinceEpoch}'))
+      .create(recursive: true);
+  Hive.init(p.join(root.path, 'settings'));
+  await HivePrefUtil.init();
+  Get.testMode = true;
+  Get.put(LogController());
+  final manager = FFmpegManager.to;
+  final directory = await Directory(p.join(root.path, 'recording')).create();
+  final task = LiveRecordTask.fromRoom(LiveRoom(platform: 'clockfixture', roomId: 'manual-stop'))
+    ..outputDir = directory.path
+    ..recordedSeconds = 26;
+  final report = <String, Object?>{'fixture': 'manual-stop', 'contract': 'failed', 'stage': 'start'};
+  final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+  final release = Completer<void>();
+  final serverSubscription = origin.listen((request) async {
+    try {
+      request.response.bufferOutput = false;
+      request.response.add(bytes);
+      await request.response.flush();
+      // No upstream EOF: the user stop must finish the actual production relay.
+      await release.future;
+      await request.response.close();
+    } on Object {
+      /* Owned reader closed during stop. */
+    }
+  });
+  final diagnostics = FlvRelayDiagnostics(maxCaptureBytes: 4 * 1024 * 1024);
+  final terminal = <String, Object?>{};
+  final events = manager.stream.listen((event) {
+    if (event.taskId == task.taskId && [FFmpegEventType.complete, FFmpegEventType.error].contains(event.type)) {
+      terminal.addAll({
+        'type': event.type.name,
+        for (final key in [
+          'code',
+          'manualStop',
+          'forcedCancel',
+          'inputDrained',
+          'inputIntegrityError',
+          'inputCoverageIncomplete',
+        ])
+          if (event.data.containsKey(key)) key: event.data[key],
+      });
+    }
+  });
+  Future<void>? execution;
+  Object? executionError;
+  try {
+    final args = FFmpegCommandBuilder.buildRecordArguments(
+      url: 'http://127.0.0.1:${origin.port}/fixture.flv',
+      outputDir: directory.path,
+      segmentTime: 10,
+      preferBestStream: true,
+      rwTimeout: 15,
+      threadQueueSize: 512,
+      filePrefix: task.recordingFilePrefix,
+    );
+    report['arguments'] = args;
+    execution = manager
+        .start(taskId: task.taskId, arguments: args, liveRecording: true, flvDiagnostics: diagnostics)
+        .catchError((Object error) {
+          executionError = error;
+        });
+    final waiting = Stopwatch()..start();
+    while (diagnostics.submittedBytes != bytes.length || manager.getSession(task.taskId)?.mediaStarted != true) {
+      if (executionError != null) throw StateError('Manual clock start failed: $executionError');
+      if (waiting.elapsed > const Duration(seconds: 25)) {
+        throw TimeoutException('Manual clock fixture was not consumed');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    report['stage'] = 'manual-stop';
+    final stopping = Stopwatch()..start();
+    await manager.stop(task.taskId).timeout(const Duration(seconds: 15));
+    await execution.timeout(const Duration(seconds: 15));
+    if (executionError != null) throw StateError('Manual clock execution failed: $executionError');
+    await Future<void>.delayed(Duration.zero);
+    report['terminal'] = terminal;
+    report['stopMilliseconds'] = stopping.elapsedMilliseconds;
+    expect(terminal['type'], 'complete');
+    expect(terminal['code'], 0);
+    expect(terminal['manualStop'], true);
+    expect(terminal['forcedCancel'], false);
+    expect(terminal['inputDrained'], true);
+    expect(terminal['inputIntegrityError'], false);
+    expect(diagnostics.truncated, false);
+    expect(diagnostics.capturedBytes, bytes);
+    final captured = await File(p.join(root.path, 'submitted.flv')).writeAsBytes(diagnostics.capturedBytes);
+    final segments = await directory
+        .list()
+        .where((file) => file is File && file.path.endsWith('.clock-v1.ts'))
+        .toList();
+    expect(segments.length, greaterThanOrEqualTo(3));
+    report['segments'] = segments.length;
+    report['journal'] = await File(p.join(directory.path, RecordingSegmentClock.journalName(task.recordingFilePrefix)))
+        .readAsString();
+    report['stage'] = 'production-merge';
+    expect(await VideoProcessorService.to.convertToMp4(task: task, deleteSourceTs: false), true);
+    final actual = File(p.join(directory.path, '${task.recordingFilePrefix}.mp4'));
+    final referenceDirectory = await Directory(p.join(root.path, 'single')).create();
+    final reference = LiveRecordTask.fromRoom(LiveRoom(platform: 'clockfixture', roomId: 'manual-reference'))
+      ..outputDir = referenceDirectory.path
+      ..recordedSeconds = 26;
+    report['referenceNative'] = await _native(
+      manager,
+      reference.taskId,
+      FFmpegCommandBuilder.buildRecordArguments(
+        url: captured.path,
+        outputDir: referenceDirectory.path,
+        segmentTime: 86400,
+        preferBestStream: true,
+        rwTimeout: 15,
+        threadQueueSize: 512,
+        filePrefix: reference.recordingFilePrefix,
+      ),
+    );
+    expect(await VideoProcessorService.to.convertToMp4(task: reference, deleteSourceTs: false), true);
+    final single = await _decode(
+      File(p.join(referenceDirectory.path, '${reference.recordingFilePrefix}.mp4')),
+      root,
+      'single',
+      ['video', 'audio'],
+    );
+    final candidate = await _decode(actual, root, 'candidate', ['video', 'audio']);
+    final source = await _decode(captured, root, 'source', ['video', 'audio']);
+    final comparisons = <String, Object?>{};
+    report['comparisons'] = comparisons;
+    report['stage'] = 'comparison-gates';
+    for (final kind in ['video', 'audio']) {
+      final fromSource = source[kind]!.compare(single[kind]!);
+      final compared = single[kind]!.compare(candidate[kind]!);
+      comparisons[kind] = {'sourceToSingle': fromSource, 'singleToCandidate': compared};
+      expect(fromSource['orderedContentEqual'], true);
+      expect(compared['orderedContentEqual'], true);
+      expect(compared['offsetSpreadSeconds'] as double, lessThanOrEqualTo(kind == 'video' ? 2 / 90000 : 2 / 44100));
+    }
+    report['contract'] = 'passed';
+  } catch (error) {
+    report['error'] = error.toString();
+    rethrow;
+  } finally {
+    if (!release.isCompleted) release.complete();
+    for (final id in [task.taskId, 'clockfixture_manual-reference']) {
+      if (manager.isRunning(id)) await manager.stop(id).timeout(const Duration(seconds: 30));
+    }
+    await origin.close(force: true);
+    await serverSubscription.cancel();
+    await events.cancel();
+    await execution?.timeout(const Duration(seconds: 30));
+    await File(p.join(root.path, 'summary.json')).writeAsString(const JsonEncoder.withIndent('  ').convert(report));
+    // ignore: avoid_print
+    print(jsonEncode(report));
+    Get.reset();
+    await Hive.close();
+  }
+}
+
+class _DirectClockHttp extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) => super.createHttpClient(context)..findProxy = (_) => 'DIRECT';
 }

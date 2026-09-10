@@ -9,8 +9,22 @@ class RecordingSegmentClock {
   RecordingSegmentClock._(this.paths, this.starts);
   static const maxBytes = 8 * 1024 * 1024;
   static const maxSegments = 100000;
+  // The profile is in every TS name so a missing journal is never mistaken
+  // for a legacy recording and merged with the old, shifted clock semantics.
+  static const segmentSuffix = '.clock-v1.ts';
   final List<String> paths;
   final List<int> starts;
+
+  static String segmentPattern(String prefix) {
+    _prefix(prefix);
+    return '${prefix}_%06d$segmentSuffix';
+  }
+
+  static String segmentName(String prefix, int index) {
+    _prefix(prefix);
+    if (index < 0 || index >= maxSegments) throw const FormatException('Recording clock segment index');
+    return '${prefix}_${index.toString().padLeft(6, '0')}$segmentSuffix';
+  }
 
   static String journalName(String prefix) {
     _prefix(prefix);
@@ -47,7 +61,7 @@ class RecordingSegmentClock {
     final paths = <String>[];
     for (var i = 0; i < rows.length; i++) {
       final fields = rows[i].split(',');
-      final expected = '${prefix}_${i.toString().padLeft(6, '0')}.ts';
+      final expected = segmentName(prefix, i);
       if (fields.length != 3 || fields[0] != expected || p.basename(segments[i]) != expected) {
         throw const FormatException('Recording clock segment identity or order');
       }
@@ -86,5 +100,54 @@ class RecordingSegmentClock {
       }
     }
     return manifest.toString();
+  }
+}
+
+/// Owns a new clock-v1 output across asynchronous native initialization and
+/// execution. FFmpeg's -n does not protect its auxiliary segment-list file.
+/// This prevents same-process collisions and rejects existing on-disk output.
+class RecordingClockReservation {
+  RecordingClockReservation._(this._key);
+  static final _active = <String>{};
+  final String _key;
+  bool _released = false;
+
+  static Future<RecordingClockReservation?> acquire(List<String> arguments) async {
+    if (arguments.isEmpty || !arguments.last.endsWith('_%06d${RecordingSegmentClock.segmentSuffix}')) return null;
+    final output = p.normalize(p.absolute(arguments.last));
+    final basename = p.basename(output);
+    final prefix = basename.substring(0, basename.length - '_%06d${RecordingSegmentClock.segmentSuffix}'.length);
+    final journal = p.join(p.dirname(output), RecordingSegmentClock.journalName(prefix));
+    final index = arguments.indexOf('-segment_list');
+    if (index < 0 ||
+        index + 1 >= arguments.length ||
+        !p.equals(p.normalize(p.absolute(arguments[index + 1])), journal)) {
+      throw const FormatException('Recording clock journal output identity');
+    }
+    final key = Platform.isWindows ? journal.toLowerCase() : journal;
+    if (!_active.add(key)) throw StateError('Recording clock output is already active');
+    try {
+      if (await FileSystemEntity.type(journal, followLinks: false) != FileSystemEntityType.notFound) {
+        throw const FileSystemException('Recording clock output already exists');
+      }
+      // Partial cleanup/recovery may leave only a non-zero segment. Check both
+      // profiles before FFmpeg can create/truncate the auxiliary CSV.
+      final matcher = RegExp('^${RegExp.escape(prefix)}_\\d{6,}(?:\\.clock-v1)?\\.ts\$', caseSensitive: false);
+      await for (final entity in Directory(p.dirname(output)).list(followLinks: false)) {
+        if (matcher.hasMatch(p.basename(entity.path))) {
+          throw const FileSystemException('Recording clock segment already exists');
+        }
+      }
+      return RecordingClockReservation._(key);
+    } catch (_) {
+      _active.remove(key);
+      rethrow;
+    }
+  }
+
+  void release() {
+    if (_released) return;
+    _released = true;
+    _active.remove(_key);
   }
 }

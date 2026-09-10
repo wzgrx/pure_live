@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:pure_live/recorder/services/recording_segment_clock.dart';
+
 class FFmpegCommandBuilder {
   static const String _protocolWhitelist = 'httpproxy,udp,rtp,rtsp,rtmp,rtmps,srt,tcp,tls,data,file,http,https,crypto';
 
@@ -95,11 +97,12 @@ class FFmpegCommandBuilder {
     final userAgent = normalizedHeaders.remove('user-agent');
     final headerString = _buildHeader(normalizedHeaders);
     final prefix = _safeFilePrefix(filePrefix ?? _timestampPrefix(DateTime.now()));
-    final normalizedOutputPath = '$outputDir${Platform.pathSeparator}${prefix}_%06d.ts';
+    final normalizedOutputPath = '$outputDir${Platform.pathSeparator}${RecordingSegmentClock.segmentPattern(prefix)}';
+    final journalPath = '$outputDir${Platform.pathSeparator}${RecordingSegmentClock.journalName(prefix)}';
 
     final args = <String>[
-      // Unique prefixes make overwriting a previous recording unnecessary.
-      // `-n` turns an unexpected collision into a visible local error.
+      // Keep no-overwrite intent. Segment muxers open child outputs separately;
+      // FFmpegService also reserves/checks the complete clock-v1 output prefix.
       '-n',
       '-hide_banner',
       '-loglevel',
@@ -148,7 +151,13 @@ class FFmpegCommandBuilder {
       // a partial 512 KiB AVIO prefix when cancellation prevents trailer flush.
       // This protects already muxed packets; input-integrity checks still apply.
       '-segment_format_options',
-      'flush_packets=1',
+      // Only the outer muxer normalizes the clock. A second per-child shift
+      // breaks reconstruction from the segment list's reference timestamps.
+      'flush_packets=1:avoid_negative_ts=disabled',
+      '-segment_list',
+      journalPath,
+      '-segment_list_type',
+      'csv',
       '-segment_time',
       segmentTime.clamp(10, 86400).toString(),
       '-segment_start_number',

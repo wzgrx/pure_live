@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
+import 'package:pure_live/recorder/services/recording_segment_clock.dart';
 
 class RecordingOutputSnapshot {
   const RecordingOutputSnapshot({required this.bytes, required this.segmentCount, this.latestModified});
@@ -60,12 +61,13 @@ class RecordingOutputMetrics {
 
     var bytes = 0;
     var segmentCount = 0;
+    final matcher = RegExp('^${RegExp.escape(normalizedPrefix)}_\\d{6,}(?:\\.clock-v1)?\\.ts\$', caseSensitive: false);
     DateTime? latestModified;
     try {
       await for (final entity in directory.list(followLinks: false)) {
         if (entity is! File) continue;
         final name = p.basename(entity.path);
-        if (!name.startsWith('${normalizedPrefix}_') || !name.toLowerCase().endsWith('.ts')) continue;
+        if (!matcher.hasMatch(name)) continue;
         try {
           final stat = await entity.stat();
           bytes += stat.size;
@@ -124,7 +126,7 @@ class RecordingOutputMetrics {
   }
 }
 
-/// Incremental tracker for FFmpeg's deterministic `%06d.ts` segment output.
+/// Incremental tracker for current and legacy deterministic segment output.
 /// It stats only the active segment and, on rotation, the next sequential
 /// file. Long recordings therefore remain O(1) per UI sample instead of
 /// rescanning every historical segment once per second.
@@ -138,6 +140,7 @@ class RecordingOutputTracker {
   var _currentIndex = 0;
   var _firstIndex = 0;
   var _finalizedBytes = 0;
+  bool _clockProfile = true;
   RecordingOutputSnapshot _lastSnapshot = RecordingOutputSnapshot.empty;
 
   Future<RecordingOutputSnapshot> sample() async {
@@ -176,15 +179,19 @@ class RecordingOutputTracker {
   Future<bool> _locateFirstExistingSegment() async {
     final directory = Directory(_directoryPath);
     if (!await directory.exists()) return false;
-    final matcher = RegExp('^${RegExp.escape(_filePrefix)}_(\\d{6})\\.ts\$', caseSensitive: false);
+    final matcher = RegExp('^${RegExp.escape(_filePrefix)}_(\\d{6,})(\\.clock-v1)?\\.ts\$', caseSensitive: false);
     int? firstIndex;
+    var clockProfile = true;
     try {
       await for (final entity in directory.list(followLinks: false)) {
         if (entity is! File) continue;
         final match = matcher.firstMatch(p.basename(entity.path));
         if (match == null) continue;
         final index = int.tryParse(match.group(1)!);
-        if (index != null && (firstIndex == null || index < firstIndex)) firstIndex = index;
+        if (index != null && (firstIndex == null || index < firstIndex)) {
+          firstIndex = index;
+          clockProfile = match.group(2) != null;
+        }
       }
     } on FileSystemException {
       return false;
@@ -192,11 +199,15 @@ class RecordingOutputTracker {
     if (firstIndex == null) return false;
     _currentIndex = firstIndex;
     _firstIndex = firstIndex;
+    _clockProfile = clockProfile;
     return true;
   }
 
   String _segmentPath(int index) {
     final suffix = index.toString().padLeft(6, '0');
-    return p.join(_directoryPath, '${_filePrefix}_$suffix.ts');
+    return p.join(
+      _directoryPath,
+      '${_filePrefix}_$suffix${_clockProfile ? RecordingSegmentClock.segmentSuffix : '.ts'}',
+    );
   }
 }

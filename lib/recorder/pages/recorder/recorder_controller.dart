@@ -9,7 +9,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:path/path.dart' as p;
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/core/interface/live_site.dart';
@@ -569,11 +568,16 @@ class RecorderController extends GetxService {
     if (resolvedDirectoryPath == null || resolvedDirectoryPath.trim().isEmpty) return false;
     final directory = Directory(resolvedDirectoryPath);
     if (!await directory.exists()) return false;
-    final prefix = '${resolvedFilePrefix}_';
     try {
       await for (final entity in directory.list(followLinks: false)) {
         if (entity is! File || !entity.path.toLowerCase().endsWith('.ts')) continue;
-        if (!allowLegacy && !p.basename(entity.path).startsWith(prefix)) continue;
+        if (VideoProcessorService.selectAttemptSegments(
+          candidates: [entity],
+          filePrefix: resolvedFilePrefix,
+          allowLegacySegments: allowLegacy,
+        ).isEmpty) {
+          continue;
+        }
         if (await entity.length() > 0) return true;
       }
     } on FileSystemException {

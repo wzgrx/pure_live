@@ -722,6 +722,7 @@
     "invalid_stream_format": "Recording failed: The input stream URL format is invalid and cannot be opened.",
     "recorder_input_open_failed": "The recorder could not open this live CDN route. It will refresh the URL and try the next route or quality.",
     "recorder_transport_failed": "The recorder could not connect to this live CDN. It will refresh the URL and try the next route or quality.",
+  "recorder_segment_clock_failed": "Recording timestamps are missing or inconsistent. Source segments were retained; finalization stopped.",
     "recorder_input_integrity_failed": "The recording input contains damaged packets. Original segments were retained without automatic remuxing or deletion. Inspect the files before deciding whether to record again.",
     "recorder_input_tail_discarded": "Some input was not fully received when stopping and was skipped. The recording may be missing content.",
     "recorder_input_coverage_incomplete": "Missing or expired live segments were skipped during recording. Content is incomplete; valid captured segments can still be kept and merged.",

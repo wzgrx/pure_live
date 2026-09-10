@@ -4,6 +4,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/recorder/services/recording_output_metrics.dart';
 
 void main() {
+  for (final start in [0, 3]) {
+    test('clock-v1 tracker discovers index $start and continues sequentially without counting metadata', () async {
+      final directory = await Directory.systemTemp.createTemp('clock-v1-metrics-');
+      addTearDown(() => directory.delete(recursive: true));
+      File segment(int index) =>
+          File('${directory.path}${Platform.pathSeparator}attempt_${index.toString().padLeft(6, '0')}.clock-v1.ts');
+      final tracker = const RecordingOutputMetrics().track(directoryPath: directory.path, filePrefix: 'attempt');
+      expect((await tracker.sample()).bytes, 0);
+      await segment(start).writeAsBytes(List.filled(100, 1));
+      expect((await tracker.sample()).bytes, 100);
+      await segment(start + 1).writeAsBytes(List.filled(20, 2));
+      expect((await tracker.sample()).bytes, 120);
+      await segment(start + 1).writeAsBytes(List.filled(30, 2));
+      final snapshot = await tracker.sample();
+      expect(snapshot.bytes, 130);
+      expect(snapshot.segmentCount, 2);
+      await File('${directory.path}${Platform.pathSeparator}attempt.clock-v1.csv').writeAsString('metadata');
+      await File('${directory.path}${Platform.pathSeparator}attempt_other_000000.clock-v1.ts')
+          .writeAsBytes(List.filled(99, 9));
+      final measured = await const RecordingOutputMetrics().measure(
+        directoryPath: directory.path,
+        filePrefix: 'attempt',
+      );
+      expect(measured.bytes, 130);
+      expect(measured.segmentCount, 2);
+    });
+  }
   test('attempt progress remains monotonic across signed URL refreshes', () {
     const firstRetry = RecordingAttemptProgress(baseBytes: 8 * 1024 * 1024, baseSeconds: 7);
 

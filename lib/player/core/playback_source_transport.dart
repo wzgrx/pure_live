@@ -60,6 +60,10 @@ class PlaybackSourceTransport {
   final Set<PlaybackInputLease> _pending = {};
   final Set<PlaybackInputLease> _retiring = {};
   PlaybackInputLease? _active;
+
+  /// Remote session closure can invalidate a committed input before a user
+  /// resumes. Consumers reacquire their recipe instead of replaying its URI.
+  bool get activeInputIsUsable => !_closed && (_active?.isUsable ?? false);
   int _generation = 0;
   bool _closed = false;
   Future<void>? _closing;

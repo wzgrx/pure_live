@@ -1,3 +1,5 @@
+import 'package:pure_live/player/core/live_input_playback_binding.dart';
+
 import 'dart:async';
 import 'dart:developer' as developer;
 
@@ -97,6 +99,7 @@ class MultiviewController extends GetxController {
     LiveRoom room, {
     required Site site,
     required bool preferLowest,
+    LiveInputPlaybackBinder bindOwnedInput = bindLiveInputForPlayback,
   }) async {
     final platform = room.platform!;
 
@@ -128,7 +131,7 @@ class MultiviewController extends GetxController {
     Future<MultiviewStreamSource> loadQuality(LivePlayQuality quality) async {
       final resolution = await site.liveSite.resolvePlayUrls(detail: detail, quality: quality);
       final nextUrls = resolution.urls;
-      if (nextUrls.isEmpty) {
+      if (!resolution.hasSources) {
         throw StateError('multiview: no play urls for $platform/${room.roomId} @ ${quality.quality}');
       }
       final applied = resolveAppliedPlayQuality(qualities: qualities, requested: quality, resolution: resolution);
@@ -137,6 +140,14 @@ class MultiviewController extends GetxController {
           choice.selectionId == applied.selectionId ? applied : choice.withPlaybackUnconfirmed(false),
       ]);
       final appliedIndex = choices.indexWhere((choice) => choice.selectionId == applied.selectionId);
+      final recipe = resolution.inputRecipe;
+      if (recipe != null) {
+        return MultiviewStreamSource.owned(
+          source: bindOwnedInput(recipe),
+          qualities: choices,
+          qualityIndex: appliedIndex < 0 ? qualityIndex : appliedIndex,
+        );
+      }
       final headers = await PlayerController.resolvePlaybackHeaders(site: site, room: detail);
       return MultiviewStreamSource(
         url: nextUrls.first,
@@ -149,6 +160,15 @@ class MultiviewController extends GetxController {
     }
 
     final initial = await loadQuality(qualities[qualityIndex]);
+    final owned = initial.ownedSource;
+    if (owned != null) {
+      return MultiviewStreamSource.owned(
+        source: owned,
+        qualities: initial.qualities,
+        qualityIndex: initial.qualityIndex,
+        qualityLoader: loadQuality,
+      );
+    }
     return MultiviewStreamSource(
       url: initial.url,
       headers: initial.headers,
@@ -158,6 +178,26 @@ class MultiviewController extends GetxController {
       lines: initial.lines,
       sourceQueryPolicies: initial.sourceQueryPolicies,
     );
+  }
+
+  static Future<void> _openCellSource(
+    MultiviewCellPlayerHandle handle,
+    MultiviewStreamSource source, {
+    required bool start,
+    String? url,
+  }) {
+    final owned = source.ownedSource;
+    if (owned != null) {
+      if (handle is! MultiviewOwnedInputHandle) {
+        throw StateError('Multiview backend has no owned-input entry point');
+      }
+      final consumer = handle as MultiviewOwnedInputHandle;
+      return start ? consumer.startOwned(owned) : consumer.openOwned(owned);
+    }
+    final selected = url ?? source.url;
+    return start
+        ? handle.start(url: selected, headers: source.headers, sourceQueryPolicy: source.sourceQueryPolicies[selected])
+        : handle.open(url: selected, headers: source.headers, sourceQueryPolicy: source.sourceQueryPolicies[selected]);
   }
 
   /// 生产环境弹幕引擎工厂：复用站点适配器的 getDanmaku()。
@@ -533,11 +573,7 @@ class MultiviewController extends GetxController {
     _players[cellIndex] = handle;
 
     try {
-      await handle.start(
-        url: source.url,
-        headers: source.headers,
-        sourceQueryPolicy: source.sourceQueryPolicies[source.url],
-      );
+      await _openCellSource(handle, source, start: true);
     } catch (error, stackTrace) {
       developer.log(
         'MultiviewController: start playback failed for ${room.platform}/${room.roomId}',
@@ -587,6 +623,7 @@ class MultiviewController extends GetxController {
       cells[cellIndex].copyWith(
         status: MultiviewCellStatus.playing,
         videoController: handle.videoController,
+        ownedSource: source.ownedSource,
         qualities: source.qualities,
         qualityIndex: source.qualityIndex,
         qualityLoader: source.qualityLoader,
@@ -649,11 +686,19 @@ class MultiviewController extends GetxController {
     // 换清晰度尽量保持当前线路：新档位线路数不足时回退首线路；
     // 加载器未提供线路列表时维持原状（兼容假实现/旧解析器）。
     final hasLines = next.lines.isNotEmpty;
-    final keepLine = hasLines ? (state.lineIndex < next.lines.length ? state.lineIndex : 0) : state.lineIndex;
+    final owned = next.ownedSource != null;
+    final resetLines = owned || state.ownedSource != null;
+    final keepLine = owned
+        ? 0
+        : hasLines
+        ? (state.lineIndex < next.lines.length ? state.lineIndex : 0)
+        : resetLines
+        ? 0
+        : state.lineIndex;
     final openUrl = hasLines ? next.lines[keepLine] : next.url;
 
     try {
-      await handle.open(url: openUrl, headers: next.headers, sourceQueryPolicy: next.sourceQueryPolicies[openUrl]);
+      await _openCellSource(handle, next, start: false, url: openUrl);
     } catch (error, stackTrace) {
       developer.log(
         'MultiviewController: quality switch open failed for cell $cellIndex',
@@ -669,12 +714,18 @@ class MultiviewController extends GetxController {
     _updateCell(
       cellIndex,
       cells[cellIndex].copyWith(
+        ownedSource: next.ownedSource,
+        clearOwnedSource: !owned,
         qualities: next.qualities.isEmpty ? null : next.qualities,
         qualityIndex: next.qualities.isEmpty ? qualityIndex : next.qualityIndex,
         headers: next.headers,
         sourceQueryPolicies: next.sourceQueryPolicies,
-        lines: hasLines ? next.lines : null,
-        lineIndex: hasLines ? keepLine : null,
+        lines: hasLines
+            ? next.lines
+            : resetLines
+            ? const []
+            : null,
+        lineIndex: hasLines || resetLines ? keepLine : null,
       ),
     );
   }
@@ -736,12 +787,26 @@ class MultiviewController extends GetxController {
     if (cellIndex >= playingFlags.length) {
       throw StateError('multiview: playing flag missing for cell $cellIndex');
     }
-    if (handle.isPlaying) {
-      await handle.pause();
-      playingFlags[cellIndex] = false;
-    } else {
-      await handle.resume();
-      playingFlags[cellIndex] = true;
+    final epoch = _cellEpochs[cellIndex];
+    bool current() => !_isStale(cellIndex, epoch) && identical(_players[cellIndex], handle);
+    try {
+      if (handle.isPlaying) {
+        await handle.pause();
+      } else {
+        // A closed owned session may require fresh network acquisition here.
+        await handle.resume();
+      }
+      if (current()) playingFlags[cellIndex] = handle.isPlaying;
+    } catch (error, stackTrace) {
+      if (!current()) return;
+      developer.log(
+        'Multiview playback intent failed',
+        name: 'MultiviewController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      playingFlags[cellIndex] = handle.isPlaying;
+      _failCell(cellIndex, epoch, MultiviewCellErrorKind.startFailure, error.toString());
     }
   }
 
@@ -874,6 +939,9 @@ class MultiviewController extends GetxController {
         );
       }
     }
+    // Slots removed earlier may still own a creating seat or draining input.
+    // Joining them is part of page teardown, even though their UI is empty.
+    await Future.wait([for (final pending in _retiringPlayers.values.toList()) pending.catchError((Object _) {})]);
   }
 
   @override
@@ -941,13 +1009,29 @@ class MultiviewController extends GetxController {
     return handle;
   }
 
-  Future<void> _teardown(MultiviewCellPlayerHandle handle) async {
-    try {
-      await handle.pause();
-    } finally {
-      await handle.disposePlayer();
+  final Map<MultiviewCellPlayerHandle, Future<void>> _retiringPlayers = Map.identity();
+
+  Future<void> _teardown(MultiviewCellPlayerHandle handle) => _retiringPlayers.putIfAbsent(handle, () {
+    Future<void> retire() async {
+      try {
+        await handle.pause();
+      } finally {
+        await handle.disposePlayer();
+      }
     }
-  }
+
+    final work = retire().whenComplete(() {
+      _retiringPlayers.remove(handle);
+    });
+    // removeCell is synchronous. Observe failures from its background cleanup
+    // without concealing them from a caller that explicitly awaits teardown.
+    unawaited(
+      work.catchError((Object error, StackTrace stack) {
+        developer.log('Multiview cell cleanup failed', name: 'MultiviewController', error: error, stackTrace: stack);
+      }),
+    );
+    return work;
+  });
 
   /// 第一个播放中的格下标；没有则返回 null。
   int? _findPlayingCell() {

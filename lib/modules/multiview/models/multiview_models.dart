@@ -1,3 +1,4 @@
+import 'package:pure_live/player/core/playback_source.dart';
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -129,7 +130,23 @@ class MultiviewStreamSource {
     this.lines = const <String>[],
     this.lineIndex = 0,
     this.sourceQueryPolicies = const <String, HlsSourceQueryPolicy>{},
-  });
+  }) : ownedSource = null;
+
+  const MultiviewStreamSource.owned({
+    required OwnedPlaybackSource source,
+    this.qualities = const <LivePlayQuality>[],
+    this.qualityIndex = 0,
+    this.qualityLoader,
+  }) : ownedSource = source,
+       url = '',
+       headers = const {},
+       lines = const [],
+       lineIndex = 0,
+       sourceQueryPolicies = const {};
+
+  /// A public factory; the private URI stays inside the per-cell transport.
+  final OwnedPlaybackSource? ownedSource;
+  int get lineCount => ownedSource == null ? lines.length : 1;
 
   /// 可直接交给播放内核的媒体地址。
   final String url;
@@ -174,6 +191,7 @@ class MultiviewCellState {
     this.lines = const <String>[],
     this.lineIndex = 0,
     this.sourceQueryPolicies = const <String, HlsSourceQueryPolicy>{},
+    this.ownedSource,
   });
 
   /// 该格在当前布局中的固定下标（0 起）。
@@ -217,6 +235,9 @@ class MultiviewCellState {
 
   final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
 
+  final OwnedPlaybackSource? ownedSource;
+  int get lineCount => ownedSource == null ? lines.length : 1;
+
   /// 构造一个空白格状态。
   factory MultiviewCellState.empty(int index) => MultiviewCellState(index: index);
 
@@ -237,9 +258,12 @@ class MultiviewCellState {
     List<String>? lines,
     int? lineIndex,
     Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
+    OwnedPlaybackSource? ownedSource,
+    bool clearOwnedSource = false,
   }) {
     return MultiviewCellState(
       index: index,
+      ownedSource: clearQuality || clearOwnedSource ? null : ownedSource ?? (lines == null ? this.ownedSource : null),
       room: clearRoom ? null : (room ?? this.room),
       status: status ?? this.status,
       errorKind: clearError ? null : (errorKind ?? this.errorKind),

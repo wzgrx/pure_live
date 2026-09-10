@@ -6,6 +6,7 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
+import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 
 class FFmpegManager {
   FFmpegManager._internal() : _ffmpeg = FFmpegService.to;
@@ -48,6 +49,7 @@ class FFmpegManager {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    FlvRelayDiagnostics? flvDiagnostics,
     bool hlsPrefetch = false,
   }) async {
     // The service reserves the attempt before initializing. Waiting here would
@@ -58,6 +60,7 @@ class FFmpegManager {
       liveRecording: liveRecording,
       sourceQueryPolicy: sourceQueryPolicy,
       hlsDiagnostics: hlsDiagnostics,
+      flvDiagnostics: flvDiagnostics,
       hlsPrefetch: hlsPrefetch,
       onEvent: (event) {
         if (!_eventController.isClosed) {

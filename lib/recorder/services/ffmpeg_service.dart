@@ -317,6 +317,7 @@ class FFmpegService {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    FlvRelayDiagnostics? flvDiagnostics,
     bool hlsPrefetch = false,
   }) => _start(
     taskId: taskId,
@@ -325,6 +326,7 @@ class FFmpegService {
     liveRecording: liveRecording,
     sourceQueryPolicy: sourceQueryPolicy,
     hlsDiagnostics: hlsDiagnostics,
+    flvDiagnostics: flvDiagnostics,
     hlsPrefetch: hlsPrefetch,
   );
 
@@ -349,6 +351,7 @@ class FFmpegService {
     required bool liveRecording,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    FlvRelayDiagnostics? flvDiagnostics,
     bool hlsPrefetch = false,
     OwnedRecordSource? ownedSource,
     RecordArgumentsBuilder? buildArguments,
@@ -384,7 +387,9 @@ class FFmpegService {
           enablePrefetch: hlsPrefetch,
         );
         request.check();
-        flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
+        flvInputRelay = liveRecording
+            ? await FFmpegFlvInputRelay.startForArguments(arguments, diagnostics: flvDiagnostics)
+            : null;
         request.check();
         inputArguments =
             flvInputRelay?.replaceFirstInput(arguments) ?? inputRelay?.replaceFirstInput(arguments) ?? arguments;

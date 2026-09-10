@@ -6,6 +6,47 @@ import 'dart:typed_data';
 
 import 'recorder_proxy_routing.dart';
 
+/// Explicit, attempt-local evidence only. Normal recording allocates no capture.
+/// Bytes are copied after submission to the native reader, before socket flush;
+/// they prove relay input, not delivery, decoding or source completeness.
+class FlvRelayDiagnostics {
+  FlvRelayDiagnostics({required this.maxCaptureBytes}) {
+    if (maxCaptureBytes < 0 || maxCaptureBytes > 64 * 1024 * 1024) {
+      throw RangeError.range(maxCaptureBytes, 0, 64 * 1024 * 1024, 'maxCaptureBytes');
+    }
+  }
+
+  final int maxCaptureBytes;
+  final _capture = BytesBuilder();
+  bool _attached = false;
+  bool _truncated = false;
+  int _submittedBytes = 0;
+  int _submittedPackets = 0;
+
+  int get submittedBytes => _submittedBytes;
+  int get submittedPackets => _submittedPackets;
+  bool get truncated => _truncated;
+  Uint8List get capturedBytes => _capture.toBytes();
+
+  void _attach() {
+    if (_attached) throw StateError('FLV diagnostics already belong to an attempt');
+    _attached = true;
+  }
+
+  void _observe(Uint8List packet) {
+    _submittedBytes += packet.length;
+    _submittedPackets++;
+    // Keep only complete header/tag records; reaching the budget never changes
+    // forwarding, backpressure, timestamps or the recording stop condition.
+    if (_truncated) return;
+    if (packet.length > maxCaptureBytes - _capture.length) {
+      _truncated = true;
+      return;
+    }
+    _capture.add(packet);
+  }
+}
+
 /// Recorder-only FLV input with an explicit, packet-aligned end of input.
 ///
 /// Cancelling FFmpegKit 0.11.1 interrupts output IO as well as input IO, so
@@ -13,13 +54,14 @@ import 'recorder_proxy_routing.dart';
 /// its muxer without setting the native cancellation flag. Media is copied,
 /// never decoded/transcoded, and backpressure bounds the pending data.
 class FFmpegFlvInputRelay {
-  FFmpegFlvInputRelay._(this._server, this._client, this._upstream, this._headers, this._secret);
+  FFmpegFlvInputRelay._(this._server, this._client, this._upstream, this._headers, this._secret, this._diagnostics);
 
   final HttpServer _server;
   final HttpClient _client;
   final Uri _upstream;
   final Map<String, String> _headers;
   final String _secret;
+  final FlvRelayDiagnostics? _diagnostics;
   StreamSubscription<HttpRequest>? _requests;
   Future<void>? _serving;
   Future<void>? _closing;
@@ -35,7 +77,10 @@ class FFmpegFlvInputRelay {
   int get forwardedBytes => _forwardedBytes;
   Uri get inputUri => Uri(scheme: 'http', host: '127.0.0.1', port: _server.port, path: '/$_secret/live.flv');
 
-  static Future<FFmpegFlvInputRelay?> startForArguments(List<String> arguments) async {
+  static Future<FFmpegFlvInputRelay?> startForArguments(
+    List<String> arguments, {
+    FlvRelayDiagnostics? diagnostics,
+  }) async {
     final index = arguments.indexOf('-i');
     if (index < 0 || index + 1 >= arguments.length) return null;
     final upstream = Uri.tryParse(arguments[index + 1]);
@@ -44,6 +89,7 @@ class FFmpegFlvInputRelay {
         !upstream.path.toLowerCase().endsWith('.flv')) {
       return null;
     }
+    diagnostics?._attach();
     final headers = <String, String>{};
     for (var i = 0; i + 1 < index; i++) {
       if (arguments[i] == '-user_agent') headers['user-agent'] = arguments[i + 1];
@@ -78,7 +124,7 @@ class FFmpegFlvInputRelay {
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0, shared: false);
       final random = Random.secure();
       final secret = base64UrlEncode(List.generate(18, (_) => random.nextInt(256))).replaceAll('=', '');
-      final relay = FFmpegFlvInputRelay._(server, client, upstream, headers, secret);
+      final relay = FFmpegFlvInputRelay._(server, client, upstream, headers, secret, diagnostics);
       relay._requests = server.listen((request) {
         if (request.method != 'GET' || request.uri.path != relay.inputUri.path || relay._closed) {
           unawaited(_reject(request, HttpStatus.notFound));
@@ -143,6 +189,7 @@ class FFmpegFlvInputRelay {
           _avcBoundary.observe(packet);
           downstream.response.add(packet);
           _forwardedBytes += packet.length;
+          _diagnostics?._observe(packet);
           sentHeader = true;
           // Preserve every tag unchanged. If a forwarded AVC prefix already
           // starts the next access unit, finish only after its picture arrives.

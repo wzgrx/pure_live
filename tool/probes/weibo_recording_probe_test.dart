@@ -20,6 +20,7 @@ import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
 import 'package:pure_live/recorder/models/live_record_task.dart';
 import 'package:pure_live/recorder/services/ffmpeg_header_factory.dart';
+import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
 import 'package:pure_live/recorder/services/recording_output_metrics.dart';
 import 'package:pure_live/recorder/services/video_processor_service.dart';
@@ -44,6 +45,8 @@ void main() {
         return 'DIRECT';
       });
       final manager = FFmpegManager.to;
+      final inputEvidence = FlvRelayDiagnostics(maxCaptureBytes: 32 * 1024 * 1024);
+      final evidenceDir = await Directory(p.join(output.path, 'input-evidence')).create();
       LiveRecordTask? task;
       Future<void>? recording;
       final events = <Map<String, Object?>>[];
@@ -119,7 +122,7 @@ void main() {
             final arguments = FFmpegCommandBuilder.buildRecordArguments(
               url: resolution.urls.first,
               outputDir: output.path,
-              segmentTime: 4,
+              segmentTime: 10,
               preferBestStream: true,
               rwTimeout: 15,
               threadQueueSize: 512,
@@ -131,7 +134,7 @@ void main() {
             var ended = false;
             Object? startError;
             recording = manager
-                .start(taskId: current.taskId, arguments: arguments, liveRecording: true)
+                .start(taskId: current.taskId, arguments: arguments, liveRecording: true, flvDiagnostics: inputEvidence)
                 .then<void>(
                   (_) {
                     ended = true;
@@ -198,6 +201,25 @@ void main() {
             expect(before.bytes, greaterThan(10000));
             current.fileSize = before.bytes;
             expect(samples.map((s) => s['bytes']).where((b) => b! > 0).toSet().length, greaterThanOrEqualTo(3));
+            // Snapshot this stopped attempt before the production finalizer
+            // removes TS files. No second network stream and no altered input.
+            final source = File(p.join(evidenceDir.path, 'submitted.flv'));
+            await source.writeAsBytes(inputEvidence.capturedBytes, flush: true);
+            expect(inputEvidence.truncated, false);
+            expect(inputEvidence.submittedBytes, greaterThan(0));
+            expect(await source.length(), inputEvidence.submittedBytes);
+            final segments = VideoProcessorService.selectAttemptSegments(
+              candidates: (await output.list(followLinks: false).toList()).whereType<File>().where(
+                (file) => p.extension(file.path) == '.ts',
+              ),
+              filePrefix: current.recordingFilePrefix,
+            )..sort((a, b) => a.path.compareTo(b.path));
+            expect(segments, hasLength(before.segmentCount));
+            expect(before.bytes, lessThanOrEqualTo(64 * 1024 * 1024));
+            for (final segment in segments) {
+              await segment.copy(p.join(evidenceDir.path, p.basename(segment.path)));
+            }
+            report['retainedSegmentCount'] = segments.length;
             report['stage'] = 'production-finalize';
             expect(await VideoProcessorService.to.convertToMp4(task: current), true);
             expect(VideoProcessorService.to.isProcessing(current.taskId), false);
@@ -238,17 +260,11 @@ void main() {
                 .toList();
             final timeline = inspectMediaPacketTimeline(packetData);
             report['timeline'] = timeline;
-            final tracks = (timeline['tracks'] as List).cast<Map>();
-            expect(tracks.where((t) => t['type'] == 'audio'), hasLength(1));
-            expect(tracks.where((t) => t['type'] == 'video'), hasLength(1));
-            for (final track in tracks) {
-              expect(track['completePresentationTimestamps'], true);
-              expect(track['observedDtsRegressions'], 0);
-              expect(track['knownInternalGapCount'], 0);
-            }
-            expect((timeline['av'] as Map)['commonCoveredSeconds'] as num, greaterThanOrEqualTo(10));
+            // Collect the same-attempt input/segment evidence and complete
+            // decode before applying timeline gates; a gap must not hide them.
+            report['inputEvidence'] = await _inspectInputs(evidenceDir);
             report['stage'] = 'full-decode';
-            await _run(Platform.environment['PURELIVE_FFMPEG']!, [
+            final decode = await _runResult(Platform.environment['PURELIVE_FFMPEG']!, [
               '-v',
               'error',
               '-threads',
@@ -264,6 +280,21 @@ void main() {
               'null',
               '-',
             ]);
+            await File(p.join(output.path, 'decode.stderr')).writeAsString(decode.stderr);
+            report['fullDecode'] = decode.code == 0;
+            report['fullDecodeStderrEmpty'] = decode.stderr.trim().isEmpty;
+            report['stage'] = 'packet-and-decode-gates';
+            expect(decode.code, 0);
+            expect(decode.stderr.trim(), isEmpty);
+            final tracks = (timeline['tracks'] as List).cast<Map>();
+            expect(tracks.where((t) => t['type'] == 'audio'), hasLength(1));
+            expect(tracks.where((t) => t['type'] == 'video'), hasLength(1));
+            for (final track in tracks) {
+              expect(track['completePresentationTimestamps'], true);
+              expect(track['observedDtsRegressions'], 0);
+              expect(track['knownInternalGapCount'], 0);
+            }
+            expect((timeline['av'] as Map)['commonCoveredSeconds'] as num, greaterThanOrEqualTo(10));
             report.addAll({
               'contract': 'passed',
               'stage': 'complete',
@@ -294,6 +325,13 @@ void main() {
           await recording?.timeout(const Duration(seconds: 15));
         } finally {
           await subscription.cancel();
+          await File(p.join(evidenceDir.path, 'submitted.flv')).writeAsBytes(inputEvidence.capturedBytes);
+          report['relayEvidence'] = {
+            'submittedBytes': inputEvidence.submittedBytes,
+            'submittedPackets': inputEvidence.submittedPackets,
+            'captureTruncated': inputEvidence.truncated,
+            'scope': 'submitted-header-and-tags-not-socket-delivery-or-source-completeness',
+          };
           report['nativeEvents'] = events;
           report['apiRequests'] = requests;
           await File(p.join(output.path, 'summary.json'))
@@ -314,6 +352,43 @@ void main() {
 class _RealNetwork extends HttpOverrides {}
 
 Future<String> _run(String exe, List<String> args) async {
+  final result = await _runResult(exe, args);
+  expect(result.code, 0);
+  expect(result.stderr.trim(), isEmpty);
+  return result.stdout;
+}
+
+Future<List<Map<String, Object?>>> _inspectInputs(Directory directory) async {
+  final results = <Map<String, Object?>>[];
+  final files = (await directory.list(followLinks: false).toList()).whereType<File>().toList()
+    ..sort((a, b) => a.path.compareTo(b.path));
+  for (final file in files) {
+    if (!['.flv', '.ts'].contains(p.extension(file.path))) continue;
+    final result = await _runResult(Platform.environment['PURELIVE_FFPROBE']!, [
+      '-v',
+      'error',
+      '-show_packets',
+      '-show_streams',
+      '-show_entries',
+      'packet=stream_index,pts_time,dts_time,duration_time:stream=index,codec_type,codec_name,width,height',
+      '-of',
+      'json',
+      file.path,
+    ]);
+    await File('${file.path}.packets.json').writeAsString(result.stdout);
+    await File('${file.path}.probe.stderr').writeAsString(result.stderr);
+    results.add({
+      'file': p.basename(file.path),
+      'bytes': await file.length(),
+      'probeExitCode': result.code,
+      'probeStderrEmpty': result.stderr.trim().isEmpty,
+      if (result.code == 0) 'timeline': inspectMediaPacketTimeline(jsonDecode(result.stdout) as Map),
+    });
+  }
+  return results;
+}
+
+Future<({int code, String stdout, String stderr})> _runResult(String exe, List<String> args) async {
   final process = await Process.start(exe, args);
   var ended = false;
   Future<String> collect(Stream<List<int>> source) async {
@@ -329,9 +404,7 @@ Future<String> _run(String exe, List<String> args) async {
     final result = await Future.wait<Object>([process.exitCode, collect(process.stdout), collect(process.stderr)])
         .timeout(const Duration(seconds: 30));
     ended = true;
-    expect(result[0], 0);
-    expect((result[2] as String).trim(), isEmpty);
-    return result[1] as String;
+    return (code: result[0] as int, stdout: result[1] as String, stderr: result[2] as String);
   } finally {
     if (!ended) {
       process.kill();

@@ -62,14 +62,29 @@ class NiconicoApi {
     }
   }
 
-  Future<NiconicoWatch> room(String roomId, {CancelToken? cancel}) =>
+  Future<NiconicoWatch> room(String roomId, {CancelToken? cancel}) => _load((transport) async {
+    NiconicoWatch.validateProgramId(roomId);
+    final body = await _requestBody(Uri.parse('$origin/watch/$roomId'), transport);
+    return NiconicoWatch.parsePage(body, programId: roomId);
+  }, cancel);
+
+  /// Bounded public listing transport. The two observed endpoints use different
+  /// envelopes and fixed page sizes; their parsers live in NiconicoDirectory.
+  Future<String> listing({required String path, required Map<String, String> query, CancelToken? cancel}) =>
+      _load((transport) {
+        if (!const {'/front/api/pages/recent/v1/programs', '/front/api/pages/search/v1/programs'}.contains(path)) {
+          throw const NiconicoException(NiconicoFailure.schema);
+        }
+        return _requestBody(Uri.parse('$origin$path').replace(queryParameters: query), transport);
+      }, cancel);
+
+  Future<T> _load<T>(Future<T> Function(CancelToken) work, CancelToken? cancel) =>
       withRequestCancellation(cancel, (transport) async {
         if (transport.isCancelled) throw const NiconicoException(NiconicoFailure.cancelled);
-        NiconicoWatch.validateProgramId(roomId);
         try {
-          return await Future.any<NiconicoWatch>([
-            _room(roomId, transport),
-            transport.whenCancel.then<NiconicoWatch>((_) => throw const NiconicoException(NiconicoFailure.cancelled)),
+          return await Future.any<T>([
+            work(transport),
+            transport.whenCancel.then<T>((_) => throw const NiconicoException(NiconicoFailure.cancelled)),
           ]).timeout(deadline);
         } on TimeoutException {
           throw const NiconicoException(NiconicoFailure.transport);
@@ -80,8 +95,8 @@ class NiconicoApi {
         }
       });
 
-  Future<NiconicoWatch> _room(String roomId, CancelToken transport) async {
-    final response = await _request(Uri.parse('$origin/watch/$roomId'), transport);
+  Future<String> _requestBody(Uri uri, CancelToken transport) async {
+    final response = await _request(uri, transport);
     if (transport.isCancelled) throw const NiconicoException(NiconicoFailure.cancelled);
     final failure = switch (response.status) {
       200 => null,
@@ -92,6 +107,6 @@ class NiconicoApi {
       _ => NiconicoFailure.transport,
     };
     if (failure != null) throw NiconicoException(failure);
-    return NiconicoWatch.parsePage(response.body, programId: roomId);
+    return response.body;
   }
 }

@@ -1,3 +1,7 @@
+import 'package:dio/dio.dart';
+import 'package:pure_live/common/models/live_area.dart';
+import 'package:pure_live/core/interface/live_directory.dart';
+import 'package:pure_live/model/live_category.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/danmaku/empty_danmaku.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
@@ -6,6 +10,7 @@ import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/plugins/locale_helper.dart';
 
 import 'niconico_api.dart';
+import 'niconico_directory.dart';
 import 'niconico_input_recipe.dart';
 import 'niconico_quality_catalog.dart';
 import 'niconico_watch.dart';
@@ -17,18 +22,22 @@ class _Choice {
   Map<String, Object> toJson() => {'programId': programId, ...quality.toJson()};
 }
 
-/// Program-specific playback adapter. Directory/navigation registration is a
-/// separate acceptance stage; this class never persists a watch bootstrap.
+/// Anonymous program directory and playback. Registry/navigation acceptance is
+/// a separate stage; this class never persists a watch bootstrap.
 class NiconicoSite extends LiveSite
     implements
+        LiveSiteDirectoryPager,
+        LiveDirectoryNotice,
         LiveSiteRoomRefresher,
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
         LivePlayRecoveryResolver,
         LivePlayUrlCursorResolver {
-  NiconicoSite({NiconicoApi? api, NiconicoQualityCatalog? catalog})
+  NiconicoSite({NiconicoApi? api, NiconicoQualityCatalog? catalog, NiconicoDirectory? directory})
     : _api = api ?? NiconicoApi(),
+      _directory = directory ?? NiconicoDirectory(api: api),
       _catalog = catalog ?? NiconicoQualityCatalog(api: api);
+  final NiconicoDirectory _directory;
   final NiconicoApi _api;
   final NiconicoQualityCatalog _catalog;
   @override
@@ -37,6 +46,68 @@ class NiconicoSite extends LiveSite
   String get name => 'niconico';
   @override
   LiveDanmaku getDanmaku() => EmptyDanmaku();
+
+  @override
+  String get directoryNoticeKey => 'niconico_directory_scope';
+
+  @override
+  Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
+    NiconicoDirectory.validatePage(page);
+    _pageSize(pageSize);
+    return page == 1
+        ? [
+            LiveCategory(
+              id: id,
+              name: name,
+              children: [
+                for (final tab in NiconicoDirectory.categories)
+                  LiveArea(
+                    platform: id,
+                    areaType: 'recent',
+                    areaId: tab,
+                    areaName: i18n('niconico_category_$tab'),
+                    typeName: name,
+                  ),
+              ],
+            ),
+          ]
+        : [];
+  }
+
+  @override
+  Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) {
+    if (category != null &&
+        (category.platform != id ||
+            category.areaType != 'recent' ||
+            !NiconicoDirectory.categories.contains(category.areaId))) {
+      throw const NiconicoException(NiconicoFailure.schema);
+    }
+    return _directory.recent(page: page, tab: category?.areaId ?? 'common', cancel: cancel);
+  }
+
+  static void _pageSize(int pageSize) {
+    if (pageSize < 1 || pageSize > 100) throw const NiconicoException(NiconicoFailure.schema);
+  }
+
+  // Legacy APIs preserve native page boundaries (70 recent / 40 search).
+  // Directory consumers use LiveSiteDirectoryPager for authoritative hasMore.
+  @override
+  Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
+    _pageSize(pageSize);
+    return (await getDirectoryPage(page: page)).rooms;
+  }
+
+  @override
+  Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
+    _pageSize(pageSize);
+    return (await getDirectoryPage(page: page, category: category)).rooms;
+  }
+
+  @override
+  Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) async {
+    _pageSize(pageSize);
+    return (await _directory.search(keyword, page: page)).rooms;
+  }
 
   String _identity(String roomId, String platform) {
     if (platform != id) throw const NiconicoException(NiconicoFailure.identity);

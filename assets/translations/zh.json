@@ -1127,7 +1127,7 @@
     "action_unban": "解禁上传",
     "action_delete_account": "删除账号",
     "confirm_title": "操作确认",
-    "confirm_content": "确定对 {} 执行【{}】操作吗？",
+    "confirm_content": "确定对 {target} 执行【{action}】操作吗？",
     "delete_confirm_content": "确定永久删除 {} 用户账号？删除后数据无法恢复",
     "operation_denied": "权限不足，禁止操作",
     "load_failed": "数据加载失败",

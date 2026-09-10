@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,14 +73,23 @@ Future<void> _invoke(dynamic state, String action, UserItem user) => switch (act
   _ => state.unbanUserUpload(user),
 };
 
-void _test(String name, Future<void> Function(WidgetTester, _Controller, _Actions, ValueNotifier<bool>) body) {
+void _test(
+  String name,
+  Future<void> Function(WidgetTester, _Controller, _Actions, ValueNotifier<bool>) body, {
+  String language = 'zh',
+  Size size = const Size(400, 800),
+  double textScale = 1,
+  String email = 'u@example.invalid',
+  String role = 'user',
+  bool canUpload = true,
+}) {
   testWidgets(name, (tester) async {
     Get.testMode = true;
     Get.reset();
     Get.put(SettingsService(), permanent: true);
     FirebaseManager.roleWeights = {'admin': 0, 'manager': 1, 'user': 2};
     tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(400, 800);
+    tester.view.physicalSize = size;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final visible = ValueNotifier(true);
@@ -88,9 +98,9 @@ void _test(String name, Future<void> Function(WidgetTester, _Controller, _Action
     try {
       await tester.pumpWidget(
         EasyLocalization(
-          supportedLocales: const [Locale('zh')],
-          startLocale: const Locale('zh'),
-          fallbackLocale: const Locale('zh'),
+          supportedLocales: [Locale(language)],
+          startLocale: Locale(language),
+          fallbackLocale: Locale(language),
           saveLocale: false,
           path: 'assets/translations',
           assetLoader: const _Loader(),
@@ -99,12 +109,16 @@ void _test(String name, Future<void> Function(WidgetTester, _Controller, _Action
               locale: context.locale,
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+                child: child!,
+              ),
               home: Builder(
                 builder: (_) {
                   if (c == null) {
                     c = _Controller();
                     Get.put<UserServerRemoteController>(c!);
-                    c!.list.assignAll([UserItem(uid: 'u', email: 'u@example.invalid', role: 'user', canUpload: true)]);
+                    c!.list.assignAll([UserItem(uid: 'u', email: email, role: role, canUpload: canUpload)]);
                     c!.totalCount.value = 1;
                   }
                   return ValueListenableBuilder<bool>(
@@ -148,6 +162,115 @@ void main() {
     await HivePrefUtil.init();
   });
   tearDownAll(Hive.close);
+
+  for (final language in ['zh', 'en']) {
+    _test(
+      '$language short header remains searchable before and after keyboard insets',
+      (tester, c, actions, visible) async {
+        addTearDown(tester.view.resetViewInsets);
+        final field = find.byType(TextField);
+        await tester.ensureVisible(field);
+        await tester.pumpAndSettle();
+        await tester.tap(field);
+        await tester.enterText(field, 'alice');
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(c.searchKeyword, 'alice');
+        tester.view.viewInsets = const FakeViewPadding(bottom: 120);
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(field);
+        await tester.pumpAndSettle();
+        await tester.enterText(field, 'bob');
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(c.searchKeyword, 'bob');
+        expect(tester.takeException(), isNull);
+        expect(actions.calls, isEmpty);
+      },
+      language: language,
+      size: const Size(640, 360),
+      textScale: 2,
+    );
+
+    _test(
+      '$language manager badge and restoration actions fit a narrow large-text viewport',
+      (tester, c, actions, visible) async {
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        for (final key in ['action_demote', 'action_unban']) {
+          final label = find.text(i18n(key));
+          await tester.ensureVisible(label);
+          await tester.pumpAndSettle();
+          expect(tester.renderObject<RenderParagraph>(label).didExceedMaxLines, isFalse);
+          await tester.tap(label);
+          await tester.pumpAndSettle();
+          expect(find.byType(AlertDialog), findsOneWidget);
+          await tester.tap(find.text(i18n('cancel')));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        }
+        expect(actions.calls, isEmpty);
+      },
+      language: language,
+      size: const Size(320, 640),
+      textScale: 2,
+      role: 'manager',
+      canUpload: false,
+    );
+
+    for (final action in ['promote', 'demote', 'ban', 'unban']) {
+      _test(
+        '$language $action confirmation identifies both action and target exactly',
+        (tester, c, actions, visible) async {
+          final label = i18n('action_$action');
+          await tester.tap(find.text(label));
+          await tester.pumpAndSettle();
+          final dialog = tester.widget<AlertDialog>(find.byType(AlertDialog));
+          final content = (dialog.content! as Text).data!;
+          final email = c.list.single.email;
+          expect(content, contains(label));
+          expect(content, contains(email));
+          expect(content.split(email), hasLength(2));
+          Get.back(result: false);
+          await tester.pumpAndSettle();
+          expect(actions.calls, isEmpty);
+        },
+        language: language,
+        role: action == 'demote' ? 'manager' : 'user',
+        canUpload: action != 'unban',
+        email: 'u{action}{target}[]@example.invalid',
+      );
+    }
+
+    for (final size in [const Size(320, 640), const Size(640, 360), const Size(1200, 800)]) {
+      for (final scale in [1.0, 2.0]) {
+        _test(
+          '$language $size text $scale keeps management labels and confirmations reachable',
+          (tester, c, actions, visible) async {
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            for (final key in ['action_promote', 'action_delete_account', 'action_ban']) {
+              final label = find.text(i18n(key));
+              await tester.ensureVisible(label);
+              await tester.pumpAndSettle();
+              final paragraph = tester.renderObject<RenderParagraph>(label);
+              expect(paragraph.didExceedMaxLines, isFalse, reason: 'action label must be complete: $key');
+              expect(tester.takeException(), isNull);
+              await tester.tap(label);
+              await tester.pumpAndSettle();
+              expect(find.byType(AlertDialog), findsOneWidget);
+              expect(tester.takeException(), isNull);
+              await tester.tap(find.text(i18n('cancel')));
+              await tester.pumpAndSettle();
+            }
+            expect(actions.calls, isEmpty);
+          },
+          language: language,
+          size: size,
+          textScale: scale,
+          email: 'very.long.user.name.for.confirmation@example.invalid',
+        );
+      }
+    }
+  }
 
   for (final action in ['delete', 'promote', 'demote', 'ban', 'unban']) {
     _test('$action late write failure after exit is handled without refresh', (tester, c, actions, visible) async {

@@ -38,6 +38,7 @@ class _UserManagerState extends State<UserManager> {
   }
 
   final TextEditingController searchController = TextEditingController();
+  final ScrollController _headerScrollController = ScrollController();
 
   @override
   void initState() {
@@ -49,6 +50,7 @@ class _UserManagerState extends State<UserManager> {
   @override
   void dispose() {
     searchController.dispose();
+    _headerScrollController.dispose();
     if (_ownsController) {
       if (Get.isRegistered<UserServerRemoteController>() &&
           identical(Get.find<UserServerRemoteController>(), controller)) {
@@ -147,9 +149,11 @@ class _UserManagerState extends State<UserManager> {
   }
 
   Future<bool> _showConfirm(String actionName, String targetEmail) async {
-    String formattedContent = i18n('confirm_content').replaceAll('{}', targetEmail).replaceAll('[{}]', '[$actionName]');
+    // Insert the target last so braces in an address stay literal text.
+    final formattedContent = i18n('confirm_content', args: {'action': actionName, 'target': targetEmail});
     return await Get.dialog<bool>(
           AlertDialog(
+            scrollable: true,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Text(i18n('confirm_title')),
             content: Text(formattedContent),
@@ -188,36 +192,57 @@ class _UserManagerState extends State<UserManager> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(i18n('manage_users'))),
-      body: Column(
-        children: [
-          Obx(
-            () => Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: _buildStatsCard(
-                theme,
-                controller.adminCount.value,
-                controller.managerCount.value,
-                controller.userCount.value,
+      body: LayoutBuilder(
+        builder: (context, constraints) => Column(
+          children: [
+            // Keep the directory usable in short windows and with large text.
+            // Statistics and search remain reachable in their own bounded header.
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: constraints.maxHeight / 2),
+              child: Scrollbar(
+                controller: _headerScrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  key: const ValueKey('user-management-header'),
+                  primary: false,
+                  controller: _headerScrollController,
+                  physics: const PureLiveBoundedScrollPhysics(),
+                  child: Column(
+                    children: [
+                      Obx(
+                        () => Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          child: _buildStatsCard(
+                            theme,
+                            controller.adminCount.value,
+                            controller.managerCount.value,
+                            controller.userCount.value,
+                          ),
+                        ),
+                      ),
+                      Padding(padding: const EdgeInsets.fromLTRB(16, 20, 16, 12), child: _buildSearchField(theme)),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-          Padding(padding: const EdgeInsets.fromLTRB(16, 20, 16, 12), child: _buildSearchField(theme)),
-          Expanded(
-            child: BasePageView<UserServerRemoteController, UserItem>(
-              controller: controller,
-              enableRefresh: true,
-              enableLoadMore: true,
-              emptyBuilder: (ctx) =>
-                  AppStatusView(type: AppStatusType.empty, icon: Remix.user_3_line, title: i18n('no_data')),
-              showScrollToTopBtn: SettingsService.to.page.showScrollToTopBtn.v,
-              showPageSizeSelector: SettingsService.to.page.showPageSizeSelector.v,
-              pageSizeOptions: SettingsService.to.page.pageSizeOptions,
-              contentBuilder: (context, userList, scrollController) {
-                return _buildListUserCard(userList, scrollController);
-              },
+            Expanded(
+              child: BasePageView<UserServerRemoteController, UserItem>(
+                controller: controller,
+                enableRefresh: true,
+                enableLoadMore: true,
+                emptyBuilder: (ctx) =>
+                    AppStatusView(type: AppStatusType.empty, icon: Remix.user_3_line, title: i18n('no_data')),
+                showScrollToTopBtn: SettingsService.to.page.showScrollToTopBtn.v,
+                showPageSizeSelector: SettingsService.to.page.showPageSizeSelector.v,
+                pageSizeOptions: SettingsService.to.page.pageSizeOptions,
+                contentBuilder: (context, userList, scrollController) {
+                  return _buildListUserCard(userList, scrollController);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -248,35 +273,38 @@ class _UserManagerState extends State<UserManager> {
   }
 
   Widget _buildStatItem(ThemeData theme, String title, String value, IconData icon, Color color) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
-          child: Icon(icon, size: 20, color: color),
-        ),
-        const SizedBox(height: 8),
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: value,
-                style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
-              ),
-            ],
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
+            child: Icon(icon, size: 20, color: color),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          title,
-          style: AppTextStyles.t11.copyWith(
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-            fontWeight: FontWeight.w500,
+          const SizedBox(height: 8),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: value,
+                  style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.t11.copyWith(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -350,10 +378,11 @@ class _UserManagerState extends State<UserManager> {
                               style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(height: 6),
-                            Row(
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
                               children: [
                                 _buildBadge(roleText, roleColor),
-                                const SizedBox(width: 6),
                                 if (user.role != 'admin')
                                   _buildBadge(
                                     user.canUpload ? i18n('status_normal') : i18n('status_banned'),
@@ -369,9 +398,20 @@ class _UserManagerState extends State<UserManager> {
                   const SizedBox(height: 16),
                   LayoutBuilder(
                     builder: (ctx, constraints) {
-                      bool compact = constraints.maxWidth <= 680;
-                      List<Widget> btns = _buildActionButtons(user, theme);
-                      return compact ? Column(children: [Row(children: btns)]) : Row(children: btns);
+                      final buttons = _buildActionButtons(user, theme);
+                      if (buttons.isEmpty) return const SizedBox.shrink();
+                      const spacing = 10.0;
+                      final minWidth = 140 * MediaQuery.textScalerOf(ctx).scale(14) / 14;
+                      final columns = ((constraints.maxWidth + spacing) / (minWidth + spacing)).floor().clamp(
+                        1,
+                        buttons.length,
+                      );
+                      final width = (constraints.maxWidth - spacing * (columns - 1)) / columns;
+                      return Wrap(
+                        spacing: spacing,
+                        runSpacing: spacing,
+                        children: [for (final button in buttons) SizedBox(width: width, child: button)],
+                      );
                     },
                   ),
                 ],
@@ -420,110 +460,57 @@ class _UserManagerState extends State<UserManager> {
   }
 
   List<Widget> _buildActionButtons(UserItem user, ThemeData theme) {
-    List<Widget> list = [];
-    int weight = FirebaseManager.roleWeights[user.role] ?? 2;
-    if (weight == 0) return list;
+    final weight = FirebaseManager.roleWeights[user.role] ?? 2;
+    if (weight == 0) return [];
 
-    if (controller.isSuperAdmin) {
-      if (user.role == 'user') {
-        list.add(
-          Expanded(
-            child: _buildActionBtn(
-              theme,
-              user: user,
-              icon: Remix.user_star_line,
-              label: i18n('action_promote'),
-              color: Colors.teal,
-              onTap: () async {
-                bool ok = await _showConfirm(i18n('action_promote'), user.email);
-                if (ok) await promoteToManager(user);
-              },
-            ),
-          ),
+    Widget confirmedAction(IconData icon, String key, Color color, Future<void> Function(UserItem) action) =>
+        _buildActionBtn(
+          theme,
+          user: user,
+          icon: icon,
+          label: i18n(key),
+          color: color,
+          onTap: () async {
+            if (await _showConfirm(i18n(key), user.email)) await action(user);
+          },
         );
-      } else if (user.role == 'manager') {
-        list.add(
-          Expanded(
-            child: _buildActionBtn(
-              theme,
-              user: user,
-              icon: Remix.user_received_line,
-              label: i18n('action_demote'),
-              color: Colors.orange,
-              onTap: () async {
-                bool ok = await _showConfirm(i18n('action_demote'), user.email);
-                if (ok) await demoteManager(user);
-              },
-            ),
-          ),
-        );
-      }
-      list.add(const SizedBox(width: 10));
-      list.add(
-        Expanded(
-          child: _buildActionBtn(
-            theme,
-            user: user,
-            icon: Remix.delete_bin_6_line,
-            label: i18n('action_delete_account'),
-            color: theme.colorScheme.error,
-            onTap: () async {
-              bool ok =
-                  await Get.dialog<bool>(
-                    AlertDialog(
-                      title: Text(i18n('confirm_title')),
-                      content: Text(i18n('delete_confirm_content').replaceAll('{}', user.email)),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(Get.context!, false), child: Text(i18n('cancel'))),
-                        TextButton(onPressed: () => Navigator.pop(Get.context!, true), child: Text(i18n('confirm'))),
-                      ],
-                    ),
-                  ) ??
-                  false;
-              if (ok) await deleteUserComplete(user);
-            },
-          ),
+
+    return [
+      if (controller.isSuperAdmin) ...[
+        if (user.role == 'user')
+          confirmedAction(Remix.user_star_line, 'action_promote', Colors.teal, promoteToManager)
+        else if (user.role == 'manager')
+          confirmedAction(Remix.user_received_line, 'action_demote', Colors.orange, demoteManager),
+        _buildActionBtn(
+          theme,
+          user: user,
+          icon: Remix.delete_bin_6_line,
+          label: i18n('action_delete_account'),
+          color: theme.colorScheme.error,
+          onTap: () async {
+            final ok =
+                await Get.dialog<bool>(
+                  AlertDialog(
+                    scrollable: true,
+                    title: Text(i18n('confirm_title')),
+                    content: Text(i18n('delete_confirm_content').replaceAll('{}', user.email)),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(Get.context!, false), child: Text(i18n('cancel'))),
+                      TextButton(onPressed: () => Navigator.pop(Get.context!, true), child: Text(i18n('confirm'))),
+                    ],
+                  ),
+                ) ??
+                false;
+            if (ok) await deleteUserComplete(user);
+          },
         ),
-      );
-    }
-
-    if (user.role == 'user' || controller.isSuperAdmin) {
-      if (list.isNotEmpty) list.add(const SizedBox(width: 10));
-      if (user.canUpload) {
-        list.add(
-          Expanded(
-            child: _buildActionBtn(
-              theme,
-              user: user,
-              icon: Remix.close_circle_line,
-              label: i18n('action_ban'),
-              color: theme.colorScheme.error,
-              onTap: () async {
-                bool ok = await _showConfirm(i18n('action_ban'), user.email);
-                if (ok) await banUserUpload(user);
-              },
-            ),
-          ),
-        );
-      } else {
-        list.add(
-          Expanded(
-            child: _buildActionBtn(
-              theme,
-              user: user,
-              icon: Remix.check_line,
-              label: i18n('action_unban'),
-              color: Colors.green,
-              onTap: () async {
-                bool ok = await _showConfirm(i18n('action_unban'), user.email);
-                if (ok) await unbanUserUpload(user);
-              },
-            ),
-          ),
-        );
-      }
-    }
-    return list;
+      ],
+      if (user.role == 'user' || controller.isSuperAdmin)
+        if (user.canUpload)
+          confirmedAction(Remix.close_circle_line, 'action_ban', theme.colorScheme.error, banUserUpload)
+        else
+          confirmedAction(Remix.check_line, 'action_unban', Colors.green, unbanUserUpload),
+    ];
   }
 
   Widget _buildActionBtn(
@@ -547,7 +534,8 @@ class _UserManagerState extends State<UserManager> {
             // Keep this tap target active to consume taps instead of opening the parent card.
             onTap: () => _runUserAction(user, onTap),
             child: Container(
-              height: 46,
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               alignment: Alignment.center,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -557,7 +545,7 @@ class _UserManagerState extends State<UserManager> {
                   Flexible(
                     child: Text(
                       label,
-                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: color, fontWeight: FontWeight.w600),
                     ),
                   ),

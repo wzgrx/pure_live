@@ -1127,7 +1127,7 @@
     "action_unban": "Unban Upload",
     "action_delete_account": "Delete Account",
     "confirm_title": "Confirm",
-    "confirm_content": "Confirm to [{}] for {} ?",
+    "confirm_content": "Confirm [{action}] for {target}?",
     "delete_confirm_content": "Permanently delete {}? Data cannot be restored.",
     "operation_denied": "Permission denied",
     "load_failed": "Load failed",

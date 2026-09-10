@@ -599,6 +599,8 @@ class PlayerManager {
       _appFloatingPrepared || isFloating.value || _floatingCleanup != null || _floatingResourceDisposers.isNotEmpty;
   bool get isCompactModeActive => isInPip.value || isPipPreparing.value || isFloating.value || _appFloatingPrepared;
 
+  bool ownsVideoController(VideoController controller) => identical(_videoController, controller);
+
   void attachVideoController(VideoController controller) {
     _videoController = controller;
   }

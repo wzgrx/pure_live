@@ -1,3 +1,4 @@
+import 'package:volume_controller/volume_controller.dart';
 import 'package:pure_live/player/core/playback_source.dart';
 
 import 'dart:async';
@@ -42,6 +43,222 @@ void main() {
   tearDown(() {
     Get.reset();
     Get.testMode = false;
+  });
+
+  VideoController volumeController(_SystemVolume volume, {String id = 'volume', _FakePlayerManager? sharedManager}) {
+    final room = LiveRoom(platform: 'fixture', roomId: id);
+    final manager = sharedManager ?? _FakePlayerManager(room, null);
+    addTearDown(manager.disposeFixture);
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: false,
+      onSourceCommitted: (_) {},
+      systemVolumeController: volume,
+    );
+    addTearDown(controller.dispose);
+    addTearDown(volume.events.close);
+    return controller;
+  }
+
+  test('system volume delayed initial read after disposal never writes the device', () async {
+    final volume = _SystemVolume()..readReply = Completer<double>();
+    final controller = volumeController(volume);
+    await volume.readStarted.future;
+    controller.dispose();
+    volume.readReply!.complete(0.8);
+    await controller.initialization;
+    expect(volume.writes, isEmpty);
+  });
+
+  test('system volume initial snapshot does not overwrite the saved room preference', () async {
+    SettingsService.to.vol.roomVolumes = {'room_vol_fixture_volume': 0.25};
+    final volume = _SystemVolume()..readReply = Completer<double>();
+    final controller = volumeController(volume);
+    await volume.readStarted.future;
+    if (volume.fetchInitial) volume.events.add(0.8);
+    volume.readReply!.complete(0.8);
+    await controller.initialization;
+    expect(volume.writes, [0.25]);
+    expect(controller.room.getSavedVolume(), 0.25);
+  });
+
+  test('system volume external event updates the visible value and saved preference', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    volume.events.add(0.65);
+    expect(controller.currentVolume.value, 0.65);
+    expect(controller.room.getSavedVolume(), 0.65);
+  });
+
+  test('system volume late setter completion after disposal never publishes UI or preferences', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    final saved = controller.room.getSavedVolume();
+    final visible = controller.currentVolume.value;
+    volume.writeReply = Completer<void>();
+    final setting = controller.setVolume(0.3);
+    controller.dispose();
+    volume.writeReply!.complete();
+    await setting;
+    expect(controller.currentVolume.value, visible);
+    expect(controller.room.getSavedVolume(), saved);
+  });
+
+  test('system volume retired room does not restore volume or replay after a newer room attaches', () async {
+    SettingsService.to.vol.roomVolumes = {'room_vol_fixture_old': 0.2, 'room_vol_fixture_new': 0.6};
+    final gate = Completer<double>();
+    final volume = _SystemVolume()..readReply = gate;
+    final manager = _FakePlayerManager(LiveRoom(platform: 'fixture', roomId: 'old'), null);
+    final old = volumeController(volume, id: 'old', sharedManager: manager);
+    await volume.readStarted.future;
+    volume.readReply = null;
+    final next = volumeController(volume, id: 'new', sharedManager: manager);
+    await next.initialization;
+    gate.complete(0.8);
+    await old.initialization;
+    expect(volume.writes, [0.6]);
+    expect(manager.playCalls, 1);
+    expect(manager.currentFloatRoom, next.room);
+    volume.events.add(0.7);
+    expect(old.room.getSavedVolume(), 0.2);
+    expect(next.currentVolume.value, 0.7);
+    old.dispose();
+    expect(manager.ownsVideoController(next), isTrue);
+  });
+
+  test('system volume user event while initial read waits outranks the saved restore', () async {
+    SettingsService.to.vol.roomVolumes = {'room_vol_fixture_volume': 0.2};
+    final volume = _SystemVolume()..readReply = Completer<double>();
+    final controller = volumeController(volume);
+    await volume.readStarted.future;
+    volume.events.add(0.45);
+    volume.readReply!.complete(0.8);
+    await controller.initialization;
+    expect(volume.writes, isEmpty);
+    expect(controller.currentVolume.value, 0.45);
+    expect(controller.room.getSavedVolume(), 0.45);
+  });
+
+  test('system volume quantized native event outranks its pending setter completion', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    volume.writeReply = Completer<void>();
+    final setting = controller.setVolume(0.3);
+    volume.events.add(0.267);
+    volume.writeReply!.complete();
+    await setting;
+    expect(controller.currentVolume.value, 0.267);
+    expect(controller.room.getSavedVolume(), 0.267);
+  });
+
+  test('system volume already-muted device stays muted without erasing room preference', () async {
+    SettingsService.to.vol.roomVolumes = {'room_vol_fixture_volume': 0.25};
+    final volume = _SystemVolume()..initialValue = 0;
+    final controller = volumeController(volume);
+    await controller.initialization;
+    expect(volume.writes, isEmpty);
+    expect(controller.currentVolume.value, 0);
+    expect(controller.room.getSavedVolume(), 0.25);
+  });
+
+  test('system volume global mute still applies to an audible device', () async {
+    SettingsService.to.vol.globalVolumeMute.value = true;
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    expect(volume.writes, [0]);
+    expect(controller.currentVolume.value, 0);
+  });
+
+  test('system volume rejects invalid events and ignores controls after disposal', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    volume.writes.clear();
+    volume.events.add(double.nan);
+    await controller.setVolume(double.infinity);
+    expect(controller.currentVolume.value, 1);
+    expect(volume.writes, isEmpty);
+    controller.dispose();
+    await controller.setVolume(0.3);
+    controller.updateVolumn(0.3);
+    expect(await controller.volume(), isNull);
+    expect(volume.writes, isEmpty);
+    expect(controller.showVolume.value, isFalse);
+  });
+
+  test('system volume failed initial read does not prevent source dispatch', () async {
+    final volume = _SystemVolume()..readError = StateError('platform read failed');
+    final manager = _FakePlayerManager(LiveRoom(platform: 'fixture', roomId: 'volume'), null);
+    final controller = volumeController(volume, sharedManager: manager);
+    await controller.initialization;
+    expect(
+      manager.playCalls,
+      1,
+      reason: 'Volume preflight must finish before source dispatch; decoding is not simulated.',
+    );
+    expect(volume.writes, isEmpty);
+    expect(await controller.volume(), 1);
+  });
+
+  test('system volume stalled initial read is bounded and its late result never writes', () async {
+    final volume = _SystemVolume()..readReply = Completer<double>();
+    final manager = _FakePlayerManager(LiveRoom(platform: 'fixture', roomId: 'volume'), null);
+    final controller = volumeController(volume, sharedManager: manager);
+    await controller.initialization.timeout(const Duration(seconds: 4));
+    expect(
+      manager.playCalls,
+      1,
+      reason: 'Volume preflight must finish before source dispatch; decoding is not simulated.',
+    );
+    volume.readReply!.complete(0.8);
+    await Future<void>.delayed(Duration.zero);
+    expect(volume.writes, isEmpty);
+  });
+
+  test('system volume older setter completion cannot overwrite a newer selection', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    final firstReply = Completer<void>();
+    volume.writeReply = firstReply;
+    final first = controller.setVolume(0.2);
+    final secondReply = Completer<void>();
+    volume.writeReply = secondReply;
+    final second = controller.setVolume(0.6);
+    secondReply.complete();
+    await second;
+    firstReply.complete();
+    await first;
+    expect(controller.currentVolume.value, 0.6);
+    expect(controller.room.getSavedVolume(), 0.6);
+  });
+
+  test('system volume in-flight query returns no value after its owner exits', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    volume.readReply = Completer<double>();
+    final read = controller.volume();
+    controller.dispose();
+    volume.readReply!.complete(0.3);
+    expect(await read, isNull);
+  });
+
+  test('system volume observation error is contained and a later event remains usable', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    volume.events.addError(StateError('platform observer failed'), StackTrace.current);
+    volume.events.add(0.55);
+    expect(controller.currentVolume.value, 0.55);
+    await controller.setVolume(4);
+    expect(volume.writes.last, 1);
+    expect(controller.currentVolume.value, 1);
   });
 
   for (final reuse in [false, true]) {
@@ -220,6 +437,7 @@ VideoController _controller({
   required ValueChanged<PlaybackSourceCommitSnapshot> onSourceCommitted,
   DbService? dbService,
   OwnedPlaybackSource? ownedSource,
+  VolumeController? systemVolumeController,
 }) {
   return VideoController(
     room: room,
@@ -234,6 +452,7 @@ VideoController _controller({
     reuseCurrentSession: reuseCurrentSession,
     onSourceCommitted: onSourceCommitted,
     battery: _FakeBattery(),
+    systemVolumeController: systemVolumeController,
     playerManager: manager,
     settingsService: SettingsService.to,
     dbService: dbService ?? _FakeDbService(),
@@ -467,6 +686,40 @@ class _FakeLivePlayController implements LivePlayController {
 class _TestIptvSettings implements IptvSettingsController {
   @override
   final selectedSourceId = ''.obs;
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _SystemVolume implements VolumeController {
+  final events = StreamController<double>.broadcast(sync: true);
+  final readStarted = Completer<void>();
+  Completer<double>? readReply;
+  Completer<void>? writeReply;
+  final writes = <double>[];
+  bool fetchInitial = false;
+  double initialValue = 0.8;
+  Object? readError;
+  @override
+  bool showSystemUI = true;
+  @override
+  Future<double> getVolume() {
+    if (!readStarted.isCompleted) readStarted.complete();
+    if (readError != null) return Future.error(readError!);
+    return readReply?.future ?? Future.value(initialValue);
+  }
+
+  @override
+  Future<void> setVolume(double value) async {
+    writes.add(value);
+    await writeReply?.future;
+  }
+
+  @override
+  StreamSubscription<double> addListener(Function(double)? onData, {bool fetchInitialVolume = true}) {
+    fetchInitial = fetchInitialVolume;
+    return events.stream.listen(onData);
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

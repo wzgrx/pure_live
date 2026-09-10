@@ -359,6 +359,11 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
 
   // 控制器
   late final VolumeController _volumeController;
+  final VolumeController? _injectedVolumeController;
+  static const _volumeOperationTimeout = Duration(seconds: 2);
+  int _volumeRevision = 0;
+  bool get _usesSystemVolume => PlatformHelper.supportsVolumeController || _injectedVolumeController != null;
+  bool get _ownsVolume => !_isDisposed && _playerManager.ownsVideoController(this);
   late final BarrageController danmakuController;
   late final BarrageController pipDanmakuController;
   late final DanmakuManager _danmakuManager;
@@ -403,12 +408,14 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     this.onAudioOnlyChanged,
     BoxFit fitMode = BoxFit.contain,
     Battery? battery,
+    VolumeController? systemVolumeController,
     PlayerManager? playerManager,
     SettingsService? settingsService,
     DbService? dbService,
     LivePlayController? livePlayController,
   }) : audioOnlyState = isAudioOnly.obs,
        _battery = battery ?? Battery(),
+       _injectedVolumeController = systemVolumeController,
        _playerManager = playerManager ?? GlobalPlayerService.instance.player,
        _settingsService = settingsService ?? SettingsService.to,
        _dbService = dbService ?? Get.find<DbService>(),
@@ -453,7 +460,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     initPlayerListener();
 
     await _initVolumeController();
-    if (_isDisposed) return;
+    if (!_ownsVolume) return;
 
     if (reuseCurrentSession) {
       if (_playerManager.currentPlayer == null || _playerManager.currentFloatRoom != room) {
@@ -481,16 +488,26 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   Future<void> _initVolumeController() async {
-    if (!PlatformHelper.supportsVolumeController) return;
-
-    _volumeController = VolumeController.instance;
+    if (!_usesSystemVolume || !_ownsVolume) return;
+    _volumeController = _injectedVolumeController ?? VolumeController.instance;
     _volumeController.showSystemUI = false;
-    registerVolumeListener();
-
-    final currentVolume = await _volumeController.getVolume();
-    if (currentVolume > 0.001) {
-      final targetVolume = room.getSavedVolume();
-      await _volumeController.setVolume(targetVolume);
+    // Snapshot the preference before subscribing. The plugin's initial system
+    // snapshot is not a user's change and must not replace that preference.
+    final targetVolume = room.getSavedVolume();
+    try {
+      registerVolumeListener();
+      final revision = _volumeRevision;
+      final observed = await _volumeController.getVolume().timeout(_volumeOperationTimeout);
+      if (!_ownsVolume || revision != _volumeRevision || !observed.isFinite) return;
+      if (observed > 0.001) {
+        await setVolume(targetVolume);
+      } else {
+        // Respect an already-muted device without erasing this room's preference.
+        currentVolume.value = observed.clamp(0.0, 1.0);
+      }
+    } catch (error, stack) {
+      // An optional volume plugin must not prevent the room from opening.
+      log('Initialize system volume failed', name: 'VideoController.Volume', error: error, stackTrace: stack);
     }
   }
 
@@ -703,13 +720,22 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
 
   // 音量管理
   void registerVolumeListener() {
+    if (!_ownsVolume) return;
     final volumeSub = _volumeController.addListener((volume) {
-      room.saveCurrentVolume(volume);
-    }, fetchInitialVolume: true);
+      if (!_ownsVolume || !volume.isFinite) return;
+      _volumeRevision++;
+      final resolved = volume.clamp(0.0, 1.0).toDouble();
+      currentVolume.value = resolved;
+      unawaited(room.saveCurrentVolume(resolved));
+    }, fetchInitialVolume: false);
+    volumeSub.onError((Object error, StackTrace stack) {
+      log('Observe system volume failed', name: 'VideoController.Volume', error: error, stackTrace: stack);
+    });
     _addSubscription(volumeSub);
   }
 
   void updateVolumn(double volume) {
+    if (!_ownsVolume) return;
     _hideVolumeTimer?.cancel();
     showVolume.value = true;
     _hideVolumeTimer = Timer(_volumeHideDelay, () {
@@ -719,21 +745,38 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   Future<double?> volume() async {
-    if (PlatformHelper.isDesktop) {
-      return room.getSavedVolume();
+    if (!_ownsVolume) return null;
+    if (!_usesSystemVolume) return room.getSavedVolume();
+    final revision = _volumeRevision;
+    try {
+      final observed = await _volumeController.getVolume().timeout(_volumeOperationTimeout);
+      if (!_ownsVolume) return null;
+      if (revision != _volumeRevision || !observed.isFinite) return currentVolume.value;
+      return observed.clamp(0.0, 1.0).toDouble();
+    } catch (error, stack) {
+      log('Read system volume failed', name: 'VideoController.Volume', error: error, stackTrace: stack);
+      return _ownsVolume ? currentVolume.value : null;
     }
-    return await _volumeController.getVolume();
   }
 
   Future<void> setVolume(double value) async {
+    if (!_ownsVolume || !value.isFinite) return;
+    final revision = ++_volumeRevision;
     final resolved = value.clamp(0.0, 1.0).toDouble();
-    if (PlatformHelper.isDesktop) {
-      await _playerManager.setVolume(resolved);
-    } else {
-      await _volumeController.setVolume(resolved);
+    try {
+      if (_usesSystemVolume) {
+        await _volumeController.setVolume(resolved).timeout(_volumeOperationTimeout);
+      } else {
+        await _playerManager.setVolume(resolved).timeout(_volumeOperationTimeout);
+      }
+      // A system event can report the actual, quantized device level before
+      // the setter completes. Never replace that event or a newer room's state.
+      if (!_ownsVolume || revision != _volumeRevision) return;
+      currentVolume.value = resolved;
+      await room.saveCurrentVolume(resolved);
+    } catch (error, stack) {
+      log('Set volume failed', name: 'VideoController.Volume', error: error, stackTrace: stack);
     }
-    currentVolume.value = resolved;
-    await room.saveCurrentVolume(resolved);
   }
 
   // 亮度管理

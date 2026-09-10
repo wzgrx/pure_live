@@ -62,7 +62,8 @@ class VideoKeyboardShortcuts extends StatelessWidget {
         if (controller != null)
           const SingleActivator(LogicalKeyboardKey.arrowUp): () async {
             double? volume = await controller.volume();
-            volume = (volume ?? 1.0) + 0.05;
+            if (volume == null) return;
+            volume = volume + 0.05;
             volume = volume.clamp(0.0, 1.0);
             controller.setVolume(volume);
             controller.updateVolumn(volume);
@@ -70,7 +71,8 @@ class VideoKeyboardShortcuts extends StatelessWidget {
         if (controller != null)
           const SingleActivator(LogicalKeyboardKey.arrowDown): () async {
             double? volume = await controller.volume();
-            volume = (volume ?? 1.0) - 0.05;
+            if (volume == null) return;
+            volume = volume - 0.05;
             volume = volume.clamp(0.0, 1.0);
             controller.setVolume(volume);
             controller.updateVolumn(volume);

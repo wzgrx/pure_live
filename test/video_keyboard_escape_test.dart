@@ -27,7 +27,38 @@ class _PresentationController implements VideoController {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _RetiredVolumeController extends _PresentationController {
+  int volumeWrites = 0;
+  int volumeOverlays = 0;
+  @override
+  Future<double?> volume() async => null;
+  @override
+  Future<void> setVolume(double value) async {
+    volumeWrites++;
+  }
+
+  @override
+  void updateVolumn(double value) {
+    volumeOverlays++;
+  }
+}
+
 void main() {
+  testWidgets('volume arrows ignore a retired controller read instead of defaulting to maximum', (tester) async {
+    final controller = _RetiredVolumeController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: VideoKeyboardShortcuts(controller: controller, child: const SizedBox.expand()),
+      ),
+    );
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.volumeWrites, 0);
+    expect(controller.volumeOverlays, 0);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
   for (final withSmartDialog in [false, true]) {
     testWidgets('native desktop route keeps Escape after fullscreen reparent (smart=$withSmartDialog)', (tester) async {
       Get.testMode = true;

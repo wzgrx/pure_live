@@ -14,6 +14,24 @@ BigoStudioStatus _studio(Map<String, dynamic> json) =>
     BigoApi.parseStudioStatus(json, siteId: 'fixture_101', expectedOwnerId: 101);
 
 void main() {
+  test('September 10 directory fixture retains separate int64 broadcast identities', () {
+    final rows = BigoApi.parseDirectory(_json('recommendations'));
+    expect(rows.map((row) => row.siteId), ['fixture_0', 'fixture_1']);
+    expect(rows.map((row) => row.ownerId), [100, 101]);
+    expect(rows.map((row) => row.broadcastId), ['7000000000000000001', '7000000000000000002']);
+    expect(rows.map((row) => row.nickname), ['样本 0', '样本 1']);
+  });
+  test('September 10 login fixture correlates owner before classifying the gate', () {
+    final json = _json('login-gate');
+    final status = BigoApi.parseStudioStatus(json, siteId: 'fixture_0', expectedOwnerId: 100);
+    expect(status.access, BigoAccess.loginRequired);
+    expect(status.reportedAlive, isNull);
+    expect(status.canonicalSiteId, 'fixture_0');
+    expect(
+      () => BigoApi.parseStudioStatus(json, siteId: 'fixture_0', expectedOwnerId: 101),
+      _failure(BigoFailure.identity),
+    );
+  });
   test('real directory envelope retains public ID, owner, int64 broadcast and viewer value separately', () {
     final rows = BigoApi.parseDirectory(_json('directory'));
     final room = rows.single;

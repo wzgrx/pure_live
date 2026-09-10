@@ -15,4 +15,11 @@ No live media contract, complete source list, recording or native playback is
 claimed by these fixtures. API implementation is not yet registered as a LiveSite.
 Raw responses, official JS and hashes stay in ignored local artifacts.
 
+September 10 revalidation adds `recommendations.json` (two rows of the observed
+twenty-row snapshot) and `login-gate.json` (one observed studio gate). Public IDs,
+owners, broadcast IDs, names and image URLs are synthetic replacements; client IP
+and image signatures are removed. Envelope types and gate flags retain the
+captured shape. These fixtures revalidate the existing metadata implementation,
+not a new integration or successful media response.
+
 The public directory also returned null cover_m on 2 of 20 rows. A null cover remains unknown; a non-string non-null cover is malformed. The unit regression mutates only this optional field.

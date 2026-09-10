@@ -9,8 +9,7 @@ final class HlsMasterSelection {
   final Uri? audio;
 
   static HlsMasterSelection fromMaster(String text, {required Uri source, required Uri video, Uri? audio}) {
-    final selected = HlsMasterPlaylist.parse(source, text)._select(video, audio);
-    return HlsMasterSelection._(source, video, selected.$2?.uri);
+    return HlsMasterPlaylist.parse(source, text).select(video: video, audio: audio);
   }
 
   String rewrite(Uri source, String text) {
@@ -166,6 +165,12 @@ final class HlsMasterPlaylist {
       }
     }
     return HlsMasterPlaylist._(source, prefix, variants, audio);
+  }
+
+  /// Select from an already parsed master when inspecting all offered variants.
+  HlsMasterSelection select({required Uri video, Uri? audio}) {
+    final selected = _select(video, audio);
+    return HlsMasterSelection._(source, video, selected.$2?.uri);
   }
 
   (HlsMasterVariant, ({Uri uri, String line, String group})?) _select(Uri video, Uri? selectedAudio) {

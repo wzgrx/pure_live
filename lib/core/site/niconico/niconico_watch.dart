@@ -40,6 +40,8 @@ class NiconicoWatch {
     required this.access,
     required this.reportedWatchCount,
     required this.webSocketUri,
+    this.cover,
+    this.avatar,
   });
 
   static const responseLimit = 2 * 1024 * 1024;
@@ -51,6 +53,8 @@ class NiconicoWatch {
   // Cumulative platform watch count, not concurrent viewers.
   final int? reportedWatchCount;
   final Uri? webSocketUri;
+  final String? cover;
+  final String? avatar;
 
   static String validateProgramId(String id) {
     if (!RegExp(r'^lv[1-9][0-9]{0,17}$').hasMatch(id)) {
@@ -145,7 +149,36 @@ class NiconicoWatch {
       access: access,
       reportedWatchCount: count as int?,
       webSocketUri: socket,
+      cover: _screenshot(program['screenshot']) ?? _cover(program['thumbnail']),
+      avatar: _avatar(_object(program['supplier'])['icons']),
     );
+  }
+
+  static String? _screenshot(Object? value) {
+    if (value is! Map || value['urlSet'] is! Map) return null;
+    final urls = value['urlSet'] as Map;
+    return _image(urls['middle']) ?? _image(urls['large']) ?? _image(urls['small']);
+  }
+
+  static String? _avatar(Object? value) => value is Map ? _image(value['uri150x150']) : null;
+
+  static String? _cover(Object? value) {
+    if (value is! Map) return null;
+    final huge = value['huge'];
+    return _image(huge is Map ? huge['s640x360'] : null) ?? _image(value['large']) ?? _image(value['small']);
+  }
+
+  // Optional artwork is presentation-only. Drop malformed or unrelated links
+  // without discarding otherwise valid live/access metadata.
+  static String? _image(Object? value) {
+    if (value is! String || value.length > 8192) return null;
+    final uri = Uri.tryParse(value);
+    if (uri == null || uri.scheme != 'https' || uri.userInfo.isNotEmpty || uri.hasPort || uri.hasFragment) return null;
+    if (!(uri.host.endsWith('.nimg.jp') || uri.host.endsWith('.nicovideo.jp'))) return null;
+    // Uri normalizes an explicit default :443 port away; check raw authority.
+    final origin = 'https://${uri.host}';
+    if (value != origin && !value.startsWith('$origin/') && !value.startsWith('$origin?')) return null;
+    return value;
   }
 
   static Map<String, dynamic> _object(Object? value) {

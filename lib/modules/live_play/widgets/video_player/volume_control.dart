@@ -24,8 +24,9 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
   bool _isMouseInBar = false;
   Timer? _hideTimer;
   StreamSubscription? _volumeListener;
-  StreamSubscription? _mobileVolWorker;
-  StreamSubscription? _desktopVolWorker;
+  StreamSubscription? _platformVolWorker;
+  int _controllerGeneration = 0;
+  int _valueRevision = 0;
   StreamSubscription? _controllerVolumeSub;
   static const double _barHeight = 150.0;
   static const double _barWidth = 44.0;
@@ -35,16 +36,27 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
   @override
   void initState() {
     super.initState();
-    initVolume();
     _listenGlobalVolume();
+    _bindController();
+  }
+
+  @override
+  void didUpdateWidget(covariant OverlayVolumeControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (identical(oldWidget.controller, controller)) return;
+    _hideTimer?.cancel();
+    _removeOverlay(owner: oldWidget.controller);
+    _isMouseInIcon = false;
+    _bindController();
   }
 
   @override
   void dispose() {
+    _controllerGeneration++;
+    _valueRevision++;
     _hideTimer?.cancel();
     _volumeListener?.cancel();
-    _mobileVolWorker?.cancel();
-    _desktopVolWorker?.cancel();
+    _platformVolWorker?.cancel();
     _controllerVolumeSub?.cancel();
     _removeOverlay();
     super.dispose();
@@ -53,25 +65,49 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
   void _listenGlobalVolume() {
     final v = SettingsService.to.vol;
     _volumeListener = v.globalVolumeMute.stream.listen((_) => _updateVolumeFromGlobal());
-    _mobileVolWorker = v.defaultMobileVolume.stream.listen((_) => _updateVolumeFromGlobal());
-    _desktopVolWorker = v.defaultDesktopVolume.stream.listen((_) => _updateVolumeFromGlobal());
-    _controllerVolumeSub = controller.currentVolume.stream.listen((value) {
-      if (!mounted || (_volume - value).abs() < 0.001) return;
-      setState(() {
-        _volume = value;
-        if (value > 0) _lastVolume = value;
-      });
-      _overlayEntry?.markNeedsBuild();
+    final platformDefault = PlatformUtils.isMobile ? v.defaultMobileVolume : v.defaultDesktopVolume;
+    _platformVolWorker = platformDefault.stream.listen((_) => _updateVolumeFromGlobal());
+  }
+
+  bool _owns(VideoController owner, int generation) =>
+      mounted && generation == _controllerGeneration && identical(controller, owner);
+
+  void _bindController() {
+    _controllerVolumeSub?.cancel();
+    final owner = controller;
+    final generation = ++_controllerGeneration;
+    _valueRevision++;
+    final initial = owner.currentVolume.value;
+    _volume = initial.isFinite ? initial.clamp(0.0, 1.0) : 0.5;
+    _lastVolume = _volume > 0 ? _volume : 0.5;
+    _controllerVolumeSub = owner.currentVolume.stream.listen((value) {
+      if (!_owns(owner, generation) || !value.isFinite) return;
+      // Even an equal-valued event supersedes a pending initial query.
+      _valueRevision++;
+      _displayVolume(value);
     });
+    unawaited(initVolume(owner, generation));
+  }
+
+  void _displayVolume(double value) {
+    final resolved = value.clamp(0.0, 1.0).toDouble();
+    setState(() {
+      _volume = resolved;
+      if (resolved > 0) _lastVolume = resolved;
+    });
+    _overlayEntry?.markNeedsBuild();
   }
 
   void _updateVolumeFromGlobal() {
+    if (!mounted) return;
     final v = SettingsService.to.vol;
+    final raw = PlatformUtils.isMobile ? v.defaultMobileVolume.v : v.defaultDesktopVolume.v;
+    if (!raw.isFinite) return;
+    final platformVolume = raw.clamp(0.0, 1.0).toDouble();
+    _valueRevision++;
     setState(() {
-      double platformVolume = PlatformUtils.isMobile ? v.defaultMobileVolume.v : v.defaultDesktopVolume.v;
-
       if (v.globalVolumeMute.v) {
-        _lastVolume = _volume;
+        if (_volume > 0) _lastVolume = _volume;
         _volume = 0.0;
       } else {
         _volume = platformVolume;
@@ -83,16 +119,20 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
     _overlayEntry?.markNeedsBuild();
   }
 
-  Future<void> initVolume() async {
-    final volume = await controller.volume();
-    if (!context.mounted) return;
-    setState(() {
-      _volume = volume ?? 0.5;
-      if (_volume > 0) _lastVolume = _volume;
-    });
+  Future<void> initVolume(VideoController owner, int generation) async {
+    final revision = _valueRevision;
+    try {
+      final volume = await owner.volume();
+      if (!_owns(owner, generation) || revision != _valueRevision || volume == null || !volume.isFinite) return;
+      _displayVolume(volume);
+    } catch (error) {
+      // Keep the bound controller's current value if its optional query fails.
+      debugPrint('Volume overlay initial read failed: $error');
+    }
   }
 
   void _handleToggleMute() {
+    _valueRevision++;
     setState(() {
       if (_volume > 0) {
         _lastVolume = _volume;
@@ -107,6 +147,8 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
 
   void _showVolumeBar() {
     if (_overlayEntry != null || !mounted) return;
+    final owner = controller;
+    final generation = _controllerGeneration;
 
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
@@ -120,12 +162,14 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
           offset: const Offset(0, 5),
           child: MouseRegion(
             onEnter: (_) {
+              if (!_owns(owner, generation)) return;
               _isMouseInBar = true;
-              controller.stopHideController();
+              owner.stopHideController();
             },
             onExit: (_) {
+              if (!_owns(owner, generation)) return;
               _isMouseInBar = false;
-              controller.enableController();
+              owner.enableController();
               _startHideTimer();
             },
             child: _buildVolumeBarUI(),
@@ -146,9 +190,14 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
     });
   }
 
-  void _removeOverlay() {
+  void _removeOverlay({VideoController? owner}) {
     _overlayEntry?.remove();
+    _overlayEntry?.dispose();
     _overlayEntry = null;
+    if (_isMouseInBar) {
+      (owner ?? controller).enableController();
+      _isMouseInBar = false;
+    }
   }
 
   Widget _buildVolumeBarUI() {
@@ -218,6 +267,7 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
     final deltaRatio = -details.delta.dy / trackHeight;
     final newVolume = (_volume + deltaRatio).clamp(0.0, 1.0);
     if (newVolume != _volume) {
+      _valueRevision++;
       setState(() {
         _volume = newVolume;
         if (_volume > 0) _lastVolume = _volume;

@@ -4,6 +4,7 @@ import 'package:pure_live/core/site/niconico/niconico_watch.dart';
 import 'package:pure_live/recorder/services/niconico_hls_input.dart';
 
 import 'playback_proxy_policy.dart';
+import 'playback_source.dart';
 import 'playback_source_transport.dart';
 
 typedef NiconicoPlaybackInputOpener = Future<NiconicoHlsInput> Function(
@@ -39,6 +40,11 @@ class NiconicoPlaybackInput {
   final NiconicoApi _api;
   final String Function(Uri)? _findProxy;
   final NiconicoPlaybackInputOpener _openInput;
+
+  late final OwnedPlaybackSource source = OwnedPlaybackSource(
+    identity: 'niconico:$programId:${resolution ?? 'auto'}:${bandwidth ?? 'auto'}',
+    createInput: open,
+  );
 
   Future<PlaybackInputLease> open(CancelToken cancel) async {
     if (cancel.isCancelled) throw cancel.cancelError!;

@@ -11,11 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/services/settings/log_controller.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/core/common/http_client.dart';
+import 'package:pure_live/core/common/hls_master_selection.dart';
 import 'package:pure_live/core/common/web_socket_util.dart';
 import 'package:pure_live/core/site/niconico/niconico_api.dart';
 import 'package:pure_live/core/site/niconico/niconico_session.dart';
 import 'package:pure_live/core/site/niconico/niconico_stream.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
+import 'package:pure_live/recorder/services/hls_body_reader.dart';
 
 import 'niconico_capture_contract.dart';
 
@@ -57,6 +59,19 @@ void main() {
           grant = owned.current;
           final source = grant.uri;
           report['cookiesAtStart'] = grant.retainedCookieCount;
+          HlsMasterSelection? selection;
+          final resolution = env['PURELIVE_NICONICO_SELECTED_RESOLUTION'];
+          if (resolution != null) {
+            report['stage'] = 'explicit-selection';
+            final text = await _master(owned);
+            final master = HlsMasterPlaylist.parse(source, text);
+            final variants = master.variants
+                .where((variant) => variant.attributes['RESOLUTION'] == resolution)
+                .toList();
+            if (variants.length != 1) throw StateError('Requested resolution is not unambiguous');
+            selection = HlsMasterSelection.fromMaster(text, source: source, video: variants.single.uri);
+            report['selectedResolution'] = resolution;
+          }
           report['stage'] = 'relay';
           relay = (await FFmpegHlsInputRelay.startForArguments(
             ['-rw_timeout', '20000000', '-i', source.toString()],
@@ -78,6 +93,9 @@ void main() {
             },
             findProxy: (_) => 'PROXY 127.0.0.1:7897',
             diagnostics: diagnostics,
+            masterSelection: selection,
+            drainOnStop: selection != null,
+            enablePrefetch: selection != null,
           ))!;
           final ownedRelay = relay;
           final seatCleanup = owned.done.then((_) => ownedRelay.close());
@@ -87,7 +105,7 @@ void main() {
           report['stage'] = 'record';
           await _run(
             env['PURELIVE_FFMPEG']!,
-            [
+            relay.replaceFirstInput([
               '-hide_banner',
               '-v',
               'verbose',
@@ -97,7 +115,7 @@ void main() {
               '-rw_timeout',
               '25000000',
               '-i',
-              relay.inputUri.toString(),
+              source.toString(),
               '-t',
               '6',
               '-map',
@@ -107,12 +125,18 @@ void main() {
               '-c',
               'copy',
               output,
-            ],
+            ]),
             directory,
             'record',
             const Duration(seconds: 90),
           );
           report['captureBytes'] = await io.File(output).length();
+          // ignore: invalid_use_of_visible_for_testing_member
+          report['prefetchFeeds'] = relay.prefetchFeedCount;
+          if (selection != null) {
+            // ignore: invalid_use_of_visible_for_testing_member
+            expect(relay.prefetchFeedCount, 2, reason: 'explicit pair must actually be admitted');
+          }
           report['stage'] = 'inspect';
           final metadata = jsonDecode(
             await _run(
@@ -208,6 +232,43 @@ void main() {
 }
 
 class _RealNetwork extends io.HttpOverrides {}
+
+Future<String> _master(NiconicoSession session) async {
+  final source = session.current.uri;
+  final client = io.HttpClient()
+    ..connectionTimeout = const Duration(seconds: 10)
+    ..findProxy = (_) => 'PROXY 127.0.0.1:7897';
+  io.HttpClientRequest? request;
+  HlsBodyReader? reader;
+  final budget = HlsResponseBudget(const Duration(seconds: 5));
+  try {
+    request = await client.getUrl(source);
+    final owned = request;
+    unawaited(owned.done.then<void>((_) {}, onError: (Object _, StackTrace _) {}));
+    budget.check();
+    if (session.current.uri != source) throw StateError('Master source changed');
+    owned.followRedirects = false;
+    final cookie = session.current.cookieHeaderFor(source);
+    if (cookie != null) owned.headers.set(io.HttpHeaders.cookieHeader, cookie);
+    final response = await budget.wait(owned.close, abort: owned.abort);
+    reader = HlsBodyReader(response);
+    if (response.statusCode != 200) throw StateError('Master response rejected');
+    final bytes = <int>[];
+    while (await budget.wait(reader.moveNext)) {
+      final chunk = reader.current;
+      if (bytes.length + chunk.length > 4 * 1024 * 1024) throw StateError('Master byte budget');
+      bytes.addAll(chunk);
+    }
+    return utf8.decode(bytes);
+  } finally {
+    request?.abort();
+    try {
+      await reader?.cancel();
+    } finally {
+      client.close(force: true);
+    }
+  }
+}
 
 class _QuietLogController extends GetxController implements LogController {
   @override

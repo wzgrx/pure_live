@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pure_live/core/common/log.dart';
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
+import 'package:pure_live/core/common/hls_master_selection.dart';
 
 import 'hls_session_cookies.dart';
 import 'hls_media_spool.dart';
@@ -45,6 +46,7 @@ class FFmpegHlsInputRelay {
     required this._createStagingDirectory,
     required HlsSourceQueryPolicy? sourceQueryPolicy,
     required String? Function(Uri)? requestCookies,
+    required this._masterSelection,
     required this.diagnostics,
     required this.prefetchEnabled,
   }) {
@@ -121,6 +123,7 @@ class FFmpegHlsInputRelay {
   final Future<Directory> Function() _createStagingDirectory;
   final HlsSessionCookies _cookies = HlsSessionCookies();
   late final HlsUpstreamClient _upstream;
+  HlsMasterSelection? _masterSelection;
   final Map<String, Uri> _resources = <String, Uri>{};
   final Map<String, String> _resourceIds = <String, String>{};
   final Map<String, String> _manifests = <String, String>{};
@@ -184,6 +187,8 @@ class FFmpegHlsInputRelay {
     // including redirects and prefetch. Null means no cookie, not a fallback.
     // Caller owns session lifetime and closes this relay when the session ends.
     String? Function(Uri)? requestCookies,
+    // Caller-selected exact video/audio pair. Never infer a quality from order.
+    HlsMasterSelection? masterSelection,
     // Playback uses the media proxy; recording retains its existing app proxy.
     String Function(Uri)? findProxy,
     // Tests supply an isolated owned directory or controlled storage failure.
@@ -194,19 +199,22 @@ class FFmpegHlsInputRelay {
     final arguments = List<String>.of(source);
     final inputIndex = arguments.indexOf('-i');
     if (inputIndex < 0 || inputIndex + 1 >= arguments.length) {
-      if (sourceQueryPolicy != null || requestCookies != null) {
+      if (sourceQueryPolicy != null || requestCookies != null || masterSelection != null) {
         throw const FormatException('Missing policy-bound HLS input');
       }
       return null;
     }
 
     final upstream = Uri.tryParse(arguments[inputIndex + 1].trim());
+    if (masterSelection != null && upstream != masterSelection.source) {
+      throw const FormatException('Selected HLS master does not match input');
+    }
     if (sourceQueryPolicy != null &&
         (upstream == null || !_isHlsUri(upstream) || !sourceQueryPolicy.matchesSource(upstream))) {
       throw const FormatException('HLS query policy does not match selected input');
     }
     if (upstream == null || !_isHlsUri(upstream)) {
-      if (requestCookies != null) throw const FormatException('Missing runtime-cookie HLS input');
+      if (requestCookies != null || masterSelection != null) throw const FormatException('Missing runtime HLS input');
       return null;
     }
     final supportedHost = !kIsWeb && (Platform.isAndroid || Platform.isLinux);
@@ -214,6 +222,7 @@ class FFmpegHlsInputRelay {
         !drainOnStop &&
         sourceQueryPolicy == null &&
         requestCookies == null &&
+        masterSelection == null &&
         (!supportedHost || upstream.scheme.toLowerCase() != 'https')) {
       return null;
     }
@@ -246,6 +255,7 @@ class FFmpegHlsInputRelay {
       createStagingDirectory: createStagingDirectory ?? _defaultStagingDirectory,
       sourceQueryPolicy: sourceQueryPolicy,
       requestCookies: requestCookies,
+      masterSelection: masterSelection,
       diagnostics: diagnostics,
       prefetchEnabled: enablePrefetch && drainOnStop,
     );
@@ -345,6 +355,7 @@ class FFmpegHlsInputRelay {
     await _prefetch?.close();
     await _connections.settled;
     _upstream.clear();
+    _masterSelection = null;
     _resources.clear();
     _resourceIds.clear();
     _manifests.clear();
@@ -430,7 +441,10 @@ class FFmpegHlsInputRelay {
       if (upstreamResponse.statusCode == HttpStatus.ok && _isManifest(finalUri, contentType)) {
         final bytes = await _readManifest(upstreamResponse, trace, budget);
         if (_closed) return;
-        final manifest = utf8.decode(bytes, allowMalformed: true);
+        var manifest = utf8.decode(bytes, allowMalformed: _masterSelection == null);
+        if (resourceId == 'root' && _masterSelection != null) {
+          manifest = _masterSelection!.rewrite(finalUri, manifest);
+        }
         if (resourceId == 'root' && prefetchEnabled && !_finishing) {
           await (_prefetchPreparation ??= _preparePrefetch(manifest, finalUri));
           if (_prefetchFeeds.contains(resourceId) && !_finishing && !_closed) {

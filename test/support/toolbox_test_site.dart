@@ -30,3 +30,16 @@ class ToolBoxTestSite extends LiveSite {
     return urlReply ?? Future.value(urls);
   }
 }
+
+/// Exercises the richer resolver independently of its legacy URL fallback.
+class ToolBoxResolvedTestSite extends ToolBoxTestSite implements LivePlayUrlResolver {
+  LivePlayUrlResolution resolution = const LivePlayUrlResolution(urls: []);
+  Future<LivePlayUrlResolution>? resolutionReply;
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) {
+    calls.add('resolve');
+    requestedQuality = quality;
+    return resolutionReply ?? Future.value(resolution);
+  }
+}

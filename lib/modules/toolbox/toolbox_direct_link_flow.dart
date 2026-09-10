@@ -32,7 +32,14 @@ class ToolBoxDirectLinkFlow {
     // User choices have no timer. Only network/platform operations are timed.
     final quality = await scope.wait(() => chooseQuality(qualities), timed: false);
     if (quality == null || !qualities.contains(quality)) return;
-    final urls = normalizeResolvedPlayUrls(await scope.wait(() => site.getPlayUrls(detail: detail, quality: quality)));
+    final resolution = await scope.wait(() => site.resolvePlayUrls(detail: detail, quality: quality));
+    // Owned inputs are playable, but their private relay URI belongs to an
+    // in-app session. Do not acquire a seat or export a native-only address.
+    if (resolution.inputRecipe != null) {
+      notify('toolbox_session_source');
+      return;
+    }
+    final urls = resolution.urls;
     if (urls.isEmpty) {
       notify('toolbox_get_url_failed');
       return;

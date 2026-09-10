@@ -593,6 +593,7 @@
     "toolbox_get_parse": "Parse Link",
     "toolbox_copy_failed": "Copy failed. Please try again.",
     "toolbox_get_url_failed": "Failed to get direct link",
+    "toolbox_session_source": "This stream requires an in-app session. Use in-app playback or recording instead of direct-link export or casting.",
     "toolbox_input_hint": "Paste platform link here...",
     "toolbox_line": "Line {index}",
     "toolbox_link_jump": "Open Link",

@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/site/niconico/niconico_input_recipe.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/model/live_play_quality.dart';
@@ -43,6 +45,92 @@ void main() {
     notify: notices.add,
   );
 
+  ToolBoxResolvedTestSite resolvedSite() {
+    final value = ToolBoxResolvedTestSite();
+    site = value;
+    return value;
+  }
+
+  for (final cast in [false, true]) {
+    test('owned input reports session requirement without exporting for cast=$cast', () async {
+      final resolved = resolvedSite();
+      resolved.resolution = LivePlayUrlResolution.owned(
+        input: NiconicoInputRecipe(programId: 'lv123', resolution: null),
+      );
+      var choices = 0;
+      final exports = <String>[];
+      await flow.run(
+        room: site.room,
+        scope: scope,
+        chooseQuality: (items) async => items.last,
+        chooseLine: (items) async {
+          choices++;
+          return items.first;
+        },
+        notify: notices.add,
+        useUrl: cast
+            ? (url) async {
+                exports.add(url);
+              }
+            : null,
+      );
+      expect(site.calls, ['detail', 'qualities', 'resolve']);
+      expect(site.requestedQuality, same(site.qualities.last));
+      expect(choices, 0);
+      expect(copies, isEmpty);
+      expect(exports, isEmpty);
+      expect(notices, ['toolbox_session_source']);
+    });
+  }
+  test('rich URL resolver wins over legacy URLs and normalizes choices', () async {
+    final resolved = resolvedSite();
+    resolved.resolution = const LivePlayUrlResolution(urls: [' https://rich.example/a ', '', 'https://rich.example/a']);
+    await run();
+    expect(site.calls, ['detail', 'qualities', 'resolve']);
+    expect(copies, ['https://rich.example/a']);
+    expect(notices, ['toolbox_copy_success']);
+  });
+  test('empty rich result stays a URL failure rather than exporting legacy fallback', () async {
+    resolvedSite();
+    await run();
+    expect(notices, ['toolbox_get_url_failed']);
+    expect(copies, isEmpty);
+  });
+  test('cancelling quality choice never requests a rich resolution', () async {
+    resolvedSite();
+    qualityChoice = (_) async => null;
+    await run();
+    expect(site.calls, ['detail', 'qualities']);
+    expect(notices, isEmpty);
+  });
+  test('rich resolver error is propagated without exporting legacy fallback', () async {
+    final resolved = resolvedSite();
+    final pending = Completer<LivePlayUrlResolution>();
+    resolved.resolutionReply = pending.future;
+    final action = run();
+    final observed = expectLater(action, throwsStateError);
+    await Future<void>.delayed(Duration.zero);
+    pending.completeError(StateError('fixture transport failure'));
+    await observed;
+    expect(copies, isEmpty);
+    expect(notices, isEmpty);
+  });
+  for (final timeout in [false, true]) {
+    test('late owned resolution after ${timeout ? 'timeout' : 'cancel'} has no side effects', () async {
+      final resolved = resolvedSite();
+      final pending = Completer<LivePlayUrlResolution>();
+      resolved.resolutionReply = pending.future;
+      final action = run();
+      final observed = expectLater(action, throwsA(timeout ? isA<TimeoutException>() : isA<ToolBoxActionCancelled>()));
+      await Future<void>.delayed(Duration.zero);
+      if (!timeout) scope.cancel();
+      await observed;
+      pending.complete(LivePlayUrlResolution.owned(input: NiconicoInputRecipe(programId: 'lv123', resolution: null)));
+      await Future<void>.delayed(Duration.zero);
+      expect(copies, isEmpty);
+      expect(notices, isEmpty);
+    });
+  }
   test('success follows the selected quality and acknowledges actual copy completion', () async {
     final pending = Completer<void>();
     copyReply = pending.future;

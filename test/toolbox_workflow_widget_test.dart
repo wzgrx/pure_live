@@ -1,4 +1,8 @@
 import 'dart:async';
+
+import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/site/niconico/niconico_input_recipe.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -133,6 +137,24 @@ void main() {
 
   Finder choices() => find.descendant(of: find.byType(SimpleDialog), matching: find.byType(ListTile));
 
+  for (final locale in ['zh', 'en']) {
+    testWidgets('$locale toolbox restores controls for session-only input', (tester) async {
+      site = ToolBoxResolvedTestSite()
+        ..resolution = LivePlayUrlResolution.owned(input: NiconicoInputRecipe(programId: 'lv123', resolution: null));
+      await open(tester, locale: locale, narrow: true);
+      await start(tester, locale: locale);
+      await tester.tap(choices().first);
+      await frame(tester);
+      expect(controller.isBusy, isFalse);
+      expect(find.byType(SimpleDialog), findsNothing);
+      expect(find.byType(ToolBoxPage), findsOneWidget);
+      expect(controller.getUrlController.text, 'https://live.bilibili.com/123');
+      expect(site.calls, ['detail', 'qualities', 'resolve']);
+      expect(copied, isEmpty);
+      expect(notices, ['toolbox_session_source']);
+      expect(tester.takeException(), isNull);
+    });
+  }
   testWidgets('quality and line choices preserve input and wait for clipboard acknowledgement', (tester) async {
     await open(tester);
     await start(tester);

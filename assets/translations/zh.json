@@ -593,6 +593,7 @@
     "toolbox_get_parse": "获取解析",
     "toolbox_copy_failed": "复制失败，请重试",
     "toolbox_get_url_failed": "读取直链失败",
+    "toolbox_session_source": "该直播源需要应用内会话，请在应用内播放或录制，而非复制直链或投屏。",
     "toolbox_input_hint": "请在此处粘贴平台链接...",
     "toolbox_line": "线路{index}",
     "toolbox_link_jump": "链接跳转",

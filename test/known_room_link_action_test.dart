@@ -1,4 +1,8 @@
 import 'dart:async';
+
+import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/site/niconico/niconico_input_recipe.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -132,6 +136,31 @@ void main() {
           isCurrentRoom: () => currentRoom,
           notify: notices.add,
         );
+
+  for (final locale in ['zh', 'en']) {
+    for (final cast in [false, true]) {
+      testWidgets('$locale session-only ${cast ? 'cast' : 'copy'} closes with a capability notice', (tester) async {
+        final resolved = ToolBoxResolvedTestSite()
+          ..resolution = LivePlayUrlResolution.owned(input: NiconicoInputRecipe(programId: 'lv123', resolution: null));
+        site = resolved;
+        await open(tester, locale: locale, narrow: true);
+        var done = false;
+        unawaited(run(cast: cast).then((_) => done = true));
+        await frame(tester);
+        await tester.tap(find.widgetWithText(ListTile, 'HD'));
+        await frame(tester);
+        expect(done, isTrue);
+        expect(find.byType(SimpleDialog), findsNothing);
+        expect(find.text('Player fixture'), findsOneWidget);
+        expect(site.calls, ['detail', 'qualities', 'resolve']);
+        expect(copied, isEmpty);
+        expect(casted, isEmpty);
+        expect(notices, ['toolbox_session_source']);
+        expect((locale == 'zh' ? translations : english)['toolbox_session_source'], isA<String>());
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
   for (final cast in [false, true]) {
     testWidgets('known-room ${cast ? 'cross-action' : 'copy'} requests are single-flight', (tester) async {
       final pending = Completer<LiveRoom>();

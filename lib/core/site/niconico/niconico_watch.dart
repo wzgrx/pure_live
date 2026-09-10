@@ -130,7 +130,7 @@ class NiconicoWatch {
           uri.userInfo.isNotEmpty ||
           uri.hasPort ||
           uri.hasFragment ||
-          !RegExp(r'^/unama/wsapi/v2/watch/[1-9][0-9]*$').hasMatch(uri.path) ||
+          !RegExp(r'^/(?:unama/)?wsapi/v2/watch/[1-9][0-9]*$').hasMatch(uri.path) ||
           !raw.startsWith('wss://a.live2.nicovideo.jp${uri.path}?') ||
           uri.queryParametersAll.values.any((values) => values.length != 1)) {
         throw const NiconicoException(NiconicoFailure.schema);

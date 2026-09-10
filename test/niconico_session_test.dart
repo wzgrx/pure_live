@@ -48,6 +48,41 @@ class Harness {
 }
 
 void main() {
+  sessionTest('official-program path opens the same owned seat protocol', (tester) async {
+    final data = fixture('live');
+    data['site']['relive']['webSocketUrl'] =
+        'wss://a.live2.nicovideo.jp/wsapi/v2/watch/124619065117?audience_token=fixture';
+    final official = NiconicoWatch.parseData(data, programId: 'lv100');
+    final h = Harness();
+    final result = NiconicoSession.open(official, connector: h.connector);
+    await tester.pump();
+    h.grant();
+    await tester.pump();
+    final session = await result;
+    expect(h.channel.outgoing.sent.first['type'], 'startWatching');
+    await tester.close(session);
+    await h.finish();
+  });
+  for (final directive in ['DIRECT', 'PROXY localhost:7898']) {
+    sessionTest('per-owner route $directive overrides globals without mutating them', (tester) async {
+      configureWebSocketProxyRouting((_) => 'PROXY localhost:7897');
+      final h = Harness();
+      NiconicoSession? session;
+      try {
+        final result = NiconicoSession.open(watch(), connector: h.connector, findProxy: (_) => directive);
+        await tester.pump();
+        h.grant();
+        await tester.pump();
+        session = await result;
+        expect(h.client == null, directive == 'DIRECT');
+        expect(resolveWebSocketProxyDirective(Uri.parse('https://example.test')), 'PROXY localhost:7897');
+      } finally {
+        if (session != null) await tester.close(session);
+        configureWebSocketProxyRouting(null);
+        await h.finish();
+      }
+    });
+  }
   sessionTest('startup owns one seat; periodic keepSeat and ping have no comment side effect', (tester) async {
     final h = Harness();
     final session = await h.start(tester);

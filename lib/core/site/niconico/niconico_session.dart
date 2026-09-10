@@ -13,9 +13,17 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// Callers observe [done], reacquire metadata if appropriate, and explicitly
 /// close on exit. Playback and recording must not share ownership of a seat.
 class NiconicoSession {
-  NiconicoSession._(this._uri, this._connector, this.startupTimeout, this.silenceTimeout, this.closeTimeout);
+  NiconicoSession._(
+    this._uri,
+    this._connector,
+    this._findProxy,
+    this.startupTimeout,
+    this.silenceTimeout,
+    this.closeTimeout,
+  );
   final Uri _uri;
   final WebSocketConnector _connector;
+  final String Function(Uri) _findProxy;
   final Duration startupTimeout;
   final Duration silenceTimeout;
   final Duration closeTimeout;
@@ -55,6 +63,7 @@ class NiconicoSession {
     NiconicoWatch watch, {
     CancelToken? cancel,
     WebSocketConnector connector = _connect,
+    String Function(Uri)? findProxy,
     Duration startupTimeout = const Duration(seconds: 20),
     Duration silenceTimeout = const Duration(seconds: 90),
     Duration closeTimeout = const Duration(seconds: 2),
@@ -69,13 +78,20 @@ class NiconicoSession {
         uri.userInfo.isNotEmpty ||
         uri.hasPort ||
         uri.hasFragment ||
-        !RegExp(r'^/unama/wsapi/v2/watch/[1-9][0-9]*$').hasMatch(uri.path)) {
+        !RegExp(r'^/(?:unama/)?wsapi/v2/watch/[1-9][0-9]*$').hasMatch(uri.path)) {
       throw const NiconicoException(NiconicoFailure.schema);
     }
     if (startupTimeout <= Duration.zero || silenceTimeout <= Duration.zero || closeTimeout <= Duration.zero) {
       throw ArgumentError('Session timeouts must be positive');
     }
-    final session = NiconicoSession._(uri, connector, startupTimeout, silenceTimeout, closeTimeout);
+    final session = NiconicoSession._(
+      uri,
+      connector,
+      findProxy ?? resolveWebSocketProxyDirective,
+      startupTimeout,
+      silenceTimeout,
+      closeTimeout,
+    );
     session._cancellation = cancel?.whenCancel.asStream().listen((_) => session._end(NiconicoFailure.cancelled));
     session._startupTimer = Timer(startupTimeout, () => session._end(NiconicoFailure.transport));
     unawaited(session._handshake());
@@ -107,8 +123,9 @@ class NiconicoSession {
   Future<void> _handshake() async {
     io.HttpClient? client;
     try {
-      if (resolveWebSocketProxyDirective(_uri) != 'DIRECT') {
-        client = io.HttpClient()..findProxy = resolveWebSocketProxyDirective;
+      final directive = _findProxy(_uri);
+      if (directive != 'DIRECT') {
+        client = io.HttpClient()..findProxy = (_) => directive;
         _httpClient = client;
       }
       final channel = _connector(

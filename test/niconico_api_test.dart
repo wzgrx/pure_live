@@ -14,6 +14,14 @@ String page(Map<String, dynamic> data) =>
 Matcher failure(NiconicoFailure kind) => throwsA(isA<NiconicoException>().having((e) => e.kind, 'kind', kind));
 
 void main() {
+  test('observed official-program websocket path is retained without inventing unama prefix', () {
+    final data = fixture();
+    data['site']['relive']['webSocketUrl'] =
+        'wss://a.live2.nicovideo.jp/wsapi/v2/watch/124619065117?audience_token=fixture';
+    final result = NiconicoWatch.parsePage(page(data), programId: 'lv100');
+    expect(result.webSocketUri!.path, '/wsapi/v2/watch/124619065117');
+    expect(result.webSocketUri!.queryParameters, {'audience_token': 'fixture', 'frontend_id': '9'});
+  });
   test('HTML attribute decoding preserves identity and bootstrap, not a media URL', () {
     final data = fixture();
     data['program']['title'] = '配信 "quoted" & <tag>';
@@ -106,6 +114,10 @@ void main() {
     });
   }
   for (final socket in [
+    'wss://a.live2.nicovideo.jp/other/wsapi/v2/watch/123?t=x',
+    'wss://a.live2.nicovideo.jp/wsapi/v2/watch/123/../124?t=x',
+    'wss://a.live2.nicovideo.jp/wsapi/v2/watch/123?t=x&t=y',
+    'wss://a.live2.nicovideo.jp:443/wsapi/v2/watch/123?t=x',
     '',
     'https://a.live2.nicovideo.jp/unama/wsapi/v2/watch/123?t=x',
     'wss://a.live2.nicovideo.jp.evil.test/unama/wsapi/v2/watch/123?t=x',

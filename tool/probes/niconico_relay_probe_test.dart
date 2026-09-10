@@ -11,13 +11,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/services/settings/log_controller.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/core/common/http_client.dart';
-import 'package:pure_live/core/common/hls_master_selection.dart';
-import 'package:pure_live/core/common/web_socket_util.dart';
 import 'package:pure_live/core/site/niconico/niconico_api.dart';
-import 'package:pure_live/core/site/niconico/niconico_session.dart';
-import 'package:pure_live/core/site/niconico/niconico_stream.dart';
+import 'package:pure_live/core/site/niconico/niconico_watch.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
-import 'package:pure_live/recorder/services/hls_body_reader.dart';
+import 'package:pure_live/recorder/services/niconico_hls_input.dart';
 
 import 'niconico_capture_contract.dart';
 
@@ -44,68 +41,31 @@ void main() {
           ..httpClientAdapter = IOHttpClientAdapter(
             createHttpClient: () => io.HttpClient()..findProxy = (_) => 'PROXY 127.0.0.1:7897',
           );
-        NiconicoSession? session;
-        NiconicoStream? grant;
-        FFmpegHlsInputRelay? relay;
-        final requests = <String, int>{};
+        NiconicoHlsInput? input;
         final diagnostics = HlsRelayDiagnostics();
         HttpClient.instance.dio = dio;
-        configureWebSocketProxyRouting((_) => 'PROXY 127.0.0.1:7897');
         try {
           final watch = await NiconicoApi().room(env['PURELIVE_NICONICO_PROGRAM']!);
+          report['watchStatus'] = watch.status.name;
+          report['watchAccess'] = watch.access.name;
           report['stage'] = 'session';
-          final owned = await NiconicoSession.open(watch);
-          session = owned;
-          grant = owned.current;
-          final source = grant.uri;
-          report['cookiesAtStart'] = grant.retainedCookieCount;
-          HlsMasterSelection? selection;
           final resolution = env['PURELIVE_NICONICO_SELECTED_RESOLUTION'];
-          if (resolution != null) {
-            report['stage'] = 'explicit-selection';
-            final text = await _master(owned);
-            final master = HlsMasterPlaylist.parse(source, text);
-            final variants = master.variants
-                .where((variant) => variant.attributes['RESOLUTION'] == resolution)
-                .toList();
-            if (variants.length != 1) throw StateError('Requested resolution is not unambiguous');
-            selection = HlsMasterSelection.fromMaster(text, source: source, video: variants.single.uri);
-            report['selectedResolution'] = resolution;
-          }
-          report['stage'] = 'relay';
-          relay = (await FFmpegHlsInputRelay.startForArguments(
-            ['-rw_timeout', '20000000', '-i', source.toString()],
-            requestCookies: (uri) {
-              final current = owned.current;
-              // A changed root requires consumer reacquisition, not old cached
-              // playlists with a new session's credentials. Same-root refresh is OK.
-              if (current.uri != source) throw StateError('Stream source changed');
-              final cookie = current.cookieHeaderFor(uri);
-              final kind = uri.path.startsWith('/hls/keys/')
-                  ? 'keys'
-                  : uri.path.startsWith('/hls/segments/')
-                  ? 'segments'
-                  : uri.path.startsWith('/hls/playlists/')
-                  ? 'playlists'
-                  : 'other';
-              requests.update('$kind:${cookie != null}', (n) => n + 1, ifAbsent: () => 1);
-              return cookie;
-            },
+          final owned = await NiconicoHlsInput.open(
+            watch,
+            resolution: resolution,
+            recording: resolution != null,
             findProxy: (_) => 'PROXY 127.0.0.1:7897',
             diagnostics: diagnostics,
-            masterSelection: selection,
-            drainOnStop: selection != null,
-            enablePrefetch: selection != null,
-          ))!;
-          final ownedRelay = relay;
-          final seatCleanup = owned.done.then((_) => ownedRelay.close());
-          // Observe immediate failures even while the native process is running.
-          unawaited(seatCleanup.catchError((Object _) {}));
+          );
+          input = owned;
+          report['cookiesAtStart'] = owned.retainedCookieCount;
+          report['selectedResolution'] = resolution;
+          report['productionInputOwner'] = true;
           final output = '${directory.path}/capture.mp4';
           report['stage'] = 'record';
           await _run(
             env['PURELIVE_FFMPEG']!,
-            relay.replaceFirstInput([
+            owned.replaceFirstInput([
               '-hide_banner',
               '-v',
               'verbose',
@@ -115,7 +75,7 @@ void main() {
               '-rw_timeout',
               '25000000',
               '-i',
-              source.toString(),
+              owned.inputUri.toString(),
               '-t',
               '6',
               '-map',
@@ -132,10 +92,10 @@ void main() {
           );
           report['captureBytes'] = await io.File(output).length();
           // ignore: invalid_use_of_visible_for_testing_member
-          report['prefetchFeeds'] = relay.prefetchFeedCount;
-          if (selection != null) {
+          report['prefetchFeeds'] = owned.prefetchFeedCount;
+          if (resolution != null) {
             // ignore: invalid_use_of_visible_for_testing_member
-            expect(relay.prefetchFeedCount, 2, reason: 'explicit pair must actually be admitted');
+            expect(owned.prefetchFeedCount, 2, reason: 'explicit pair must actually be admitted');
           }
           report['stage'] = 'inspect';
           final metadata = jsonDecode(
@@ -193,36 +153,32 @@ void main() {
           report['stage'] = 'duration';
           expect(contract['passed'], true, reason: '${contract['failures']}');
           report['result'] = 'passed';
-          await relay.close();
           await owned.close();
-          await seatCleanup;
         } catch (error) {
           report['result'] = 'failed';
           report['failureType'] = error.runtimeType.toString();
+          if (error is NiconicoException) report['failureKind'] = error.kind.name;
           fail('Niconico relay probe failed at ${report['stage']} (${report['failureType']})');
         } finally {
           try {
-            await relay?.close();
+            await input?.close();
           } finally {
-            await session?.close();
             HttpClient.instance.dio = previous;
             dio.close(force: true);
-            configureWebSocketProxyRouting(null);
-            report['requests'] = requests;
             await io.File('${directory.path}/relay.json').writeAsString(jsonEncode(diagnostics.snapshot()));
-            report['sessionClosed'] = session?.isClosed;
-            report['cleanupSucceeded'] = session?.cleanupSucceeded;
-            report['retainedCookies'] = grant?.retainedCookieCount;
+            report['sessionClosed'] = input?.isClosed;
+            report['cleanupSucceeded'] = input?.cleanupSucceeded;
+            report['retainedCookies'] = input?.retainedCookieCount;
             // This opt-in test lives under tool/probes rather than test/.
             // ignore: invalid_use_of_visible_for_testing_member
-            report['relayResources'] = relay?.resourceCount;
+            report['relayResources'] = input?.resourceCount;
             // ignore: invalid_use_of_visible_for_testing_member
-            if (session?.cleanupSucceeded != true || (relay?.resourceCount ?? 0) != 0) report['result'] = 'failed';
+            if (input?.cleanupSucceeded != true || (input?.resourceCount ?? 0) != 0) report['result'] = 'failed';
             await io.File('${directory.path}/report.json').writeAsString(jsonEncode(report));
             // ignore: avoid_print
             print(jsonEncode(report));
           }
-          if (session != null) expect(session.cleanupSucceeded, true);
+          if (input != null) expect(input.cleanupSucceeded, true);
         }
       }, _RealNetwork());
     },
@@ -232,43 +188,6 @@ void main() {
 }
 
 class _RealNetwork extends io.HttpOverrides {}
-
-Future<String> _master(NiconicoSession session) async {
-  final source = session.current.uri;
-  final client = io.HttpClient()
-    ..connectionTimeout = const Duration(seconds: 10)
-    ..findProxy = (_) => 'PROXY 127.0.0.1:7897';
-  io.HttpClientRequest? request;
-  HlsBodyReader? reader;
-  final budget = HlsResponseBudget(const Duration(seconds: 5));
-  try {
-    request = await client.getUrl(source);
-    final owned = request;
-    unawaited(owned.done.then<void>((_) {}, onError: (Object _, StackTrace _) {}));
-    budget.check();
-    if (session.current.uri != source) throw StateError('Master source changed');
-    owned.followRedirects = false;
-    final cookie = session.current.cookieHeaderFor(source);
-    if (cookie != null) owned.headers.set(io.HttpHeaders.cookieHeader, cookie);
-    final response = await budget.wait(owned.close, abort: owned.abort);
-    reader = HlsBodyReader(response);
-    if (response.statusCode != 200) throw StateError('Master response rejected');
-    final bytes = <int>[];
-    while (await budget.wait(reader.moveNext)) {
-      final chunk = reader.current;
-      if (bytes.length + chunk.length > 4 * 1024 * 1024) throw StateError('Master byte budget');
-      bytes.addAll(chunk);
-    }
-    return utf8.decode(bytes);
-  } finally {
-    request?.abort();
-    try {
-      await reader?.cancel();
-    } finally {
-      client.close(force: true);
-    }
-  }
-}
 
 class _QuietLogController extends GetxController implements LogController {
   @override

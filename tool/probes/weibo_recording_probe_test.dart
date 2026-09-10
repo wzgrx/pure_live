@@ -1,0 +1,341 @@
+// Opt-in actual WeiboSite -> production recorder manager -> finalizer. Registry,
+// controller UI, Android and long-running acceptance remain separate stages.
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:path/path.dart' as p;
+import 'package:pure_live/common/services/settings/log_controller.dart';
+import 'package:pure_live/common/utils/hive_pref_util.dart';
+import 'package:pure_live/core/common/http_client.dart' as app_http;
+import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/core/site/weibo/weibo_site.dart';
+import 'package:pure_live/get/get.dart';
+import 'package:pure_live/recorder/ffmpeg/ffmpeg_command_builder.dart';
+import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
+import 'package:pure_live/recorder/ffmpeg/ffmpeg_types.dart';
+import 'package:pure_live/recorder/models/live_record_task.dart';
+import 'package:pure_live/recorder/services/ffmpeg_header_factory.dart';
+import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
+import 'package:pure_live/recorder/services/recording_output_metrics.dart';
+import 'package:pure_live/recorder/services/video_processor_service.dart';
+
+import 'media_packet_timeline.dart';
+
+void main() {
+  test(
+    'Weibo production adapter records, drains, finalizes and completely decodes public media',
+    () async {
+      final base = Platform.environment['PURELIVE_RECORDING_PROBE_OUTPUT']!;
+      final output = await Directory(p.join(base, 'weibo-${DateTime.now().microsecondsSinceEpoch}'))
+          .create(recursive: true);
+      final settings = await Directory(p.join(output.path, 'isolated-settings')).create();
+      Hive.init(settings.path);
+      await HivePrefUtil.init();
+      Get.testMode = true;
+      Get.put(LogController());
+      var routeCalls = 0;
+      configureRecorderProxyRouting((_) {
+        routeCalls++;
+        return 'DIRECT';
+      });
+      final manager = FFmpegManager.to;
+      LiveRecordTask? task;
+      Future<void>? recording;
+      final events = <Map<String, Object?>>[];
+      final requests = <Map<String, Object?>>[];
+      final report = <String, Object?>{
+        'utc': DateTime.now().toUtc().toIso8601String(),
+        'contract': 'failed',
+        'stage': 'directory',
+        'registered': false,
+        'route': 'DIRECT',
+        'deviceUi': false,
+      };
+      final subscription = manager.stream.listen((e) {
+        if (e.taskId != task?.taskId ||
+            ![
+              FFmpegEventType.startAck,
+              FFmpegEventType.started,
+              FFmpegEventType.complete,
+              FFmpegEventType.error,
+            ].contains(e.type)) {
+          return;
+        }
+        events.add({
+          'type': e.type.name,
+          for (final key in [
+            'code',
+            'manualStop',
+            'inputDrained',
+            'forcedCancel',
+            'inputTailDiscarded',
+            'inputCoverageIncomplete',
+            'inputIntegrityError',
+          ])
+            if (e.data.containsKey(key)) key: e.data[key],
+        });
+      });
+      try {
+        await HttpOverrides.runWithHttpOverrides(() async {
+          final previous = app_http.HttpClient.instance.dio;
+          final dio = Dio(
+            BaseOptions(connectTimeout: const Duration(seconds: 15)),
+          )..httpClientAdapter = IOHttpClientAdapter(createHttpClient: () => HttpClient()..findProxy = (_) => 'DIRECT');
+          dio.interceptors.add(
+            InterceptorsWrapper(
+              onResponse: (r, h) {
+                requests.add({
+                  'kind': r.requestOptions.uri.path.contains('pc_recommend') ? 'directory' : 'detail',
+                  'status': r.statusCode,
+                });
+                h.next(r);
+              },
+            ),
+          );
+          app_http.HttpClient.instance.dio = dio;
+          try {
+            final site = WeiboSite();
+            final directory = await site.getDirectoryPage();
+            expect(directory.rooms, isNotEmpty);
+            report['directoryCards'] = directory.rooms.length;
+            final candidate = directory.rooms.first;
+            report['stage'] = 'detail';
+            final detail = await site.getRoomDetailForRecording(roomId: candidate.roomId!, platform: site.id);
+            expect(detail.userId, candidate.userId);
+            expect(detail.isLiveNow, true);
+            final quality = (await site.getPlayQualites(detail: detail)).single;
+            report['stage'] = 'fresh-resolution';
+            final resolution = await site.resolvePlayUrls(detail: detail, quality: quality);
+            expect(resolution.urls, isNotEmpty);
+            expect(resolution.appliedQualityData, 'original');
+            report['declaredMediaExtension'] = p.extension(Uri.parse(resolution.urls.first).path).toLowerCase();
+            final current = task = LiveRecordTask.fromRoom(detail)..outputDir = output.path;
+            final headers = await FFmpegHeaderFactory.build(platform: site.id, roomId: detail.roomId!);
+            final arguments = FFmpegCommandBuilder.buildRecordArguments(
+              url: resolution.urls.first,
+              outputDir: output.path,
+              segmentTime: 4,
+              preferBestStream: true,
+              rwTimeout: 15,
+              threadQueueSize: 512,
+              filePrefix: current.recordingFilePrefix,
+              headers: headers,
+            );
+            report['stage'] = 'native-start';
+            await manager.initialize();
+            var ended = false;
+            Object? startError;
+            recording = manager
+                .start(taskId: current.taskId, arguments: arguments, liveRecording: true)
+                .then<void>(
+                  (_) {
+                    ended = true;
+                  },
+                  onError: (Object e) {
+                    startError = e;
+                    ended = true;
+                  },
+                );
+            final tracker = const RecordingOutputMetrics().track(
+              directoryPath: output.path,
+              filePrefix: current.recordingFilePrefix,
+            );
+            final samples = <Map<String, int>>[];
+            final clock = Stopwatch()..start();
+            var reached = false;
+            while (clock.elapsed < const Duration(seconds: 60) && !ended) {
+              await Future<void>.delayed(const Duration(milliseconds: 500));
+              final snapshot = await tracker.sample();
+              final seconds = manager.getSession(current.taskId)?.recordedSeconds ?? 0;
+              samples.add({
+                'elapsedMs': clock.elapsedMilliseconds,
+                'bytes': snapshot.bytes,
+                'segments': snapshot.segmentCount,
+                'mediaSeconds': seconds,
+              });
+              if (seconds >= 12 && snapshot.segmentCount >= 2) {
+                reached = true;
+                break;
+              }
+            }
+            clock.stop();
+            report['captureSamples'] = samples;
+            report['targetReached'] = reached;
+            expect(startError, isNull);
+            expect(ended, false);
+            expect(reached, true);
+            final session = manager.getSession(current.taskId)!;
+            current.recordedSeconds = session.recordedSeconds;
+            report['stage'] = 'manual-stop';
+            await manager.stop(current.taskId).timeout(const Duration(seconds: 30));
+            await recording!.timeout(const Duration(seconds: 10));
+            expect(manager.isRunning(current.taskId), false);
+            await Future<void>.delayed(Duration.zero);
+            final terminal = events.lastWhere((e) => e['type'] == 'complete' || e['type'] == 'error');
+            expect(terminal['code'], 0);
+            expect(terminal['manualStop'], true);
+            expect(terminal['inputDrained'], true);
+            for (final key in [
+              'forcedCancel',
+              'inputTailDiscarded',
+              'inputCoverageIncomplete',
+              'inputIntegrityError',
+            ]) {
+              expect(terminal[key], false, reason: key);
+            }
+            current.inputTailDiscarded = false;
+            current.inputCoverageIncomplete = false;
+            final before = await const RecordingOutputMetrics().measure(
+              directoryPath: output.path,
+              filePrefix: current.recordingFilePrefix,
+            );
+            expect(before.segmentCount, greaterThanOrEqualTo(2));
+            expect(before.bytes, greaterThan(10000));
+            current.fileSize = before.bytes;
+            expect(samples.map((s) => s['bytes']).where((b) => b! > 0).toSet().length, greaterThanOrEqualTo(3));
+            report['stage'] = 'production-finalize';
+            expect(await VideoProcessorService.to.convertToMp4(task: current), true);
+            expect(VideoProcessorService.to.isProcessing(current.taskId), false);
+            final finalMetrics = await const RecordingOutputMetrics().measureFinalized(
+              directoryPath: output.path,
+              filePrefix: current.recordingFilePrefix,
+            );
+            final mp4 = p.join(output.path, '${current.recordingFilePrefix}.mp4');
+            expect(await File(mp4).length(), finalMetrics.bytes);
+            expect(
+              (await const RecordingOutputMetrics().measure(
+                directoryPath: output.path,
+                filePrefix: current.recordingFilePrefix,
+              )).segmentCount,
+              0,
+            );
+            report['stage'] = 'packet-inspection';
+            final packets = await _run(Platform.environment['PURELIVE_FFPROBE']!, [
+              '-v',
+              'error',
+              '-show_packets',
+              '-show_streams',
+              '-show_entries',
+              'packet=stream_index,pts_time,dts_time,duration_time:stream=index,codec_type,codec_name,width,height',
+              '-of',
+              'json',
+              mp4,
+            ]);
+            await File(p.join(output.path, 'packets.json')).writeAsString(packets);
+            final packetData = jsonDecode(packets) as Map;
+            report['streams'] = (packetData['streams'] as List)
+                .map(
+                  (s) => {
+                    for (final key in ['codec_type', 'codec_name', 'width', 'height'])
+                      if ((s as Map).containsKey(key)) key: s[key],
+                  },
+                )
+                .toList();
+            final timeline = inspectMediaPacketTimeline(packetData);
+            report['timeline'] = timeline;
+            final tracks = (timeline['tracks'] as List).cast<Map>();
+            expect(tracks.where((t) => t['type'] == 'audio'), hasLength(1));
+            expect(tracks.where((t) => t['type'] == 'video'), hasLength(1));
+            for (final track in tracks) {
+              expect(track['completePresentationTimestamps'], true);
+              expect(track['observedDtsRegressions'], 0);
+              expect(track['knownInternalGapCount'], 0);
+            }
+            expect((timeline['av'] as Map)['commonCoveredSeconds'] as num, greaterThanOrEqualTo(10));
+            report['stage'] = 'full-decode';
+            await _run(Platform.environment['PURELIVE_FFMPEG']!, [
+              '-v',
+              'error',
+              '-threads',
+              '4',
+              '-i',
+              mp4,
+              '-xerror',
+              '-fps_mode',
+              'passthrough',
+              '-enc_time_base',
+              'demux',
+              '-f',
+              'null',
+              '-',
+            ]);
+            report.addAll({
+              'contract': 'passed',
+              'stage': 'complete',
+              'output': mp4,
+              'bytes': finalMetrics.bytes,
+              'sourceSegments': before.segmentCount,
+              'nativeStopped': true,
+              'fullDecode': true,
+              'fullDecodeStderrEmpty': true,
+              'finalizerReleased': true,
+              'mediaRouteCalls': routeCalls,
+              'apiRequestCount': requests.length,
+            });
+          } finally {
+            app_http.HttpClient.instance.dio = previous;
+            dio.close(force: true);
+          }
+        }, _RealNetwork());
+      } catch (e) {
+        report['failureType'] = e.runtimeType.toString();
+        if (e is TestFailure) report['invariant'] = e.message?.replaceAll(RegExp(r'https?://[^\s]+'), '[url]');
+        rethrow;
+      } finally {
+        try {
+          if (task != null && manager.isRunning(task!.taskId)) {
+            await manager.stop(task!.taskId).timeout(const Duration(seconds: 30));
+          }
+          await recording?.timeout(const Duration(seconds: 15));
+        } finally {
+          await subscription.cancel();
+          report['nativeEvents'] = events;
+          report['apiRequests'] = requests;
+          await File(p.join(output.path, 'summary.json'))
+              .writeAsString(const JsonEncoder.withIndent('  ').convert(report));
+          // ignore: avoid_print
+          print(jsonEncode(report));
+          Get.reset();
+          await Hive.close();
+          configureRecorderProxyRouting(null);
+        }
+      }
+    },
+    skip: Platform.environment['PURELIVE_WEIBO_RECORDING_PROBE'] != '1',
+    timeout: const Timeout(Duration(minutes: 4)),
+  );
+}
+
+class _RealNetwork extends HttpOverrides {}
+
+Future<String> _run(String exe, List<String> args) async {
+  final process = await Process.start(exe, args);
+  var ended = false;
+  Future<String> collect(Stream<List<int>> source) async {
+    final bytes = <int>[];
+    await for (final b in source) {
+      if (bytes.length + b.length > 4 * 1024 * 1024) throw StateError('inspection output limit');
+      bytes.addAll(b);
+    }
+    return utf8.decode(bytes);
+  }
+
+  try {
+    final result = await Future.wait<Object>([process.exitCode, collect(process.stdout), collect(process.stderr)])
+        .timeout(const Duration(seconds: 30));
+    ended = true;
+    expect(result[0], 0);
+    expect((result[2] as String).trim(), isEmpty);
+    return result[1] as String;
+  } finally {
+    if (!ended) {
+      process.kill();
+      await process.exitCode.timeout(const Duration(seconds: 5));
+    }
+  }
+}

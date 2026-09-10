@@ -6,7 +6,20 @@ import 'package:dio/dio.dart';
 import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/core/common/request_scope.dart';
 
-enum WeiboFailure { transport, access, missing, rateLimited, service, api, schema, identity, cancelled }
+enum WeiboFailure {
+  transport,
+  access,
+  missing,
+  rateLimited,
+  service,
+  api,
+  schema,
+  identity,
+  cancelled,
+  notLive,
+  mediaUnavailable,
+  unknownState,
+}
 
 enum WeiboAccess { public, restricted, disabled }
 

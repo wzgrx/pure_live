@@ -1576,5 +1576,11 @@
   "xiaohongshu_directory_scope": "A public live directory is not integrated. Search a broadcast room ID or import an official /livestream/ share link. Favorites track that room, not the broadcaster across new broadcasts.",
   "xiaohongshu_display_viewers": "Platform display count: {value} (not verified concurrent viewers)",
   "xiaohongshu_restricted": "Access conditions apply or are unconfirmed. No public full-stream source is available for this room.",
-  "xiaohongshu_room_scope": "This follows the broadcast room ID. Import a new share link if the broadcaster starts in a different room."
+  "xiaohongshu_room_scope": "This follows the broadcast room ID. Import a new share link if the broadcaster starts in a different room.",
+  "site_weibo": "Weibo Live",
+  "weibo_public_directory": "Public recommendations",
+  "weibo_directory_scope": "An official public recommendation snapshot only. Cards omit live status and viewer counts. Use an exact broadcast ID or official live URL; nickname search is not integrated.",
+  "weibo_room_scope": "Favorites track this broadcast, not the broadcaster account. Import a new live link for a new broadcast.",
+  "weibo_restricted": "Access is restricted or playback is disabled. No public live source is available.",
+  "weibo_original_stream": "Original stream"
 }

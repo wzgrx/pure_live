@@ -153,7 +153,12 @@ class FFmpegCommandBuilder {
       '-segment_format_options',
       // Only the outer muxer normalizes the clock. A second per-child shift
       // breaks reconstruction from the segment list's reference timestamps.
-      'flush_packets=1:avoid_negative_ts=disabled',
+      // AVIO flushing alone still groups audio frames into PES packets, losing
+      // interior timestamp anchors when segmentation changes group boundaries.
+      // Zero child mux delay keeps each timestamped audio packet's anchor.
+      // Retain MPEG-TS's former 2 * 700 ms offset explicitly: without this
+      // preroll, concat's inpoint 0 discards leading negative DTS in later TS.
+      'flush_packets=1:avoid_negative_ts=disabled:max_delay=0:output_ts_offset=1.4',
       '-segment_list',
       journalPath,
       '-segment_list_type',

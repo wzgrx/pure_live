@@ -20,13 +20,20 @@ void main() {
         rwTimeout: 15,
         threadQueueSize: 1024,
       );
-      expect(_valueAfter(arguments, '-segment_format_options'), 'flush_packets=1:avoid_negative_ts=disabled');
+      expect(
+        _valueAfter(arguments, '-segment_format_options'),
+        'flush_packets=1:avoid_negative_ts=disabled:max_delay=0:output_ts_offset=1.4',
+      );
       expect(arguments.where((value) => value == '-segment_format_options'), hasLength(1));
       expect(arguments.indexOf('-segment_format_options'), greaterThan(arguments.indexOf('-i')));
       expect(arguments.indexOf('-segment_format_options'), lessThan(arguments.length - 2));
       expect(_valueAfter(arguments, '-segment_format'), 'mpegts');
       expect(_valueAfter(arguments, '-c'), 'copy');
       expect(arguments, isNot(contains('-flush_packets')));
+      // These belong to the child output, not input network demuxing. A zero
+      // mux delay without the explicit preroll loses boundary audio/B-frames.
+      expect(arguments, isNot(contains('-max_delay')));
+      expect(arguments, isNot(contains('-output_ts_offset')));
     }
   });
 

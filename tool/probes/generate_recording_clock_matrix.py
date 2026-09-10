@@ -13,6 +13,41 @@ import subprocess
 from datetime import datetime, timezone
 
 
+def jitter_aac_timestamps(data):
+    """Change only AAC raw-packet FLV timestamps; keep payloads/tag layout intact."""
+    if len(data) > 64 * 1024 * 1024 or len(data) < 13 or data[:3] != b"FLV":
+        raise ValueError("FLV fixture header or budget")
+    offset = int.from_bytes(data[5:9], "big")
+    if offset < 9 or offset + 4 > len(data) or data[offset:offset + 4] != b"\0\0\0\0":
+        raise ValueError("FLV fixture initial offset")
+    result = bytearray(data)
+    offset += 4
+    count = 0
+    previous = -1
+    adjustments = (0, 4, -3, 2, -2, 5, -4)
+    while offset < len(data):
+        if offset + 15 > len(data):
+            raise ValueError("FLV fixture truncated tag")
+        size = int.from_bytes(data[offset + 1:offset + 4], "big")
+        end = offset + 11 + size
+        if end + 4 > len(data) or int.from_bytes(data[end:end + 4], "big") != 11 + size:
+            raise ValueError("FLV fixture tag size")
+        payload = data[offset + 11:end]
+        if data[offset] == 8 and len(payload) >= 2 and payload[0] >> 4 == 10 and payload[1] == 1:
+            timestamp = int.from_bytes(data[offset + 4:offset + 7], "big") | data[offset + 7] << 24
+            timestamp += adjustments[count % len(adjustments)]
+            if not previous < timestamp <= 0xffffffff:
+                raise ValueError("FLV fixture non-monotonic jitter")
+            result[offset + 4:offset + 7] = (timestamp & 0xffffff).to_bytes(3, "big")
+            result[offset + 7] = timestamp >> 24
+            previous = timestamp
+            count += 1
+        offset = end + 4
+    if not count:
+        raise ValueError("FLV fixture has no raw AAC packets")
+    return bytes(result), count
+
+
 def digest(path):
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -118,6 +153,28 @@ def main():
             raise RuntimeError("Synthetic generation failed: " + name)
         add_case(name, target, ["hevc" if hevc else "h264", "aac"] + (["aac"] if dual else []),
                  {"command": command, "exitCode": result.returncode, "stderrBytes": len(result.stderr)})
+    # AAC frames become very small during silence. This defeats a misleading
+    # PES-size-only workaround: each timestamp must survive even below 170 B.
+    clean = root / "aac-jitter-silence-clean.flv"
+    target = root / "aac-jitter-silence.flv"
+    if clean.exists() or target.exists():
+        raise RuntimeError("Partial jitter fixture exists; retain it and use a new output directory")
+    command = [args.ffmpeg, "-v", "error", "-n", "-f", "lavfi", "-i",
+               "testsrc2=size=160x96:rate=20:duration=26", "-f", "lavfi", "-i",
+               "sine=frequency=997:sample_rate=48000:duration=26", "-map", "0:v:0", "-map", "1:a:0",
+               "-c:v", "libx264", "-preset", "ultrafast", "-threads", "4", "-crf", "23", "-bf", "3", "-g", "61",
+               "-x264-params", "keyint=61:min-keyint=61:scenecut=0:b-adapt=0:open-gop=0",
+               "-af", "volume=if(between(t\\,9\\,14)\\,0\\,1):eval=frame",
+               "-c:a", "aac", "-b:a", "96k", "-ac:a", "1", "-t", "26", "-f", "flv", str(clean)]
+    result = subprocess.run(command, capture_output=True, timeout=90)
+    (root / "aac-jitter-silence.stderr").write_bytes(result.stderr)
+    if result.returncode:
+        raise RuntimeError("Synthetic jitter generation failed")
+    changed, packets = jitter_aac_timestamps(clean.read_bytes())
+    target.write_bytes(changed)
+    add_case("aac-jitter-silence", target, ["h264", "aac"],
+             {"command": command, "exitCode": result.returncode, "cleanSha256": digest(clean),
+              "timestampJitterMs": [0, 4, -3, 2, -2, 5, -4], "modifiedAacPackets": packets})
     report["runtimeHashes"] = {name: digest(pathlib.Path(getattr(args, name))) for name in ("ffmpeg", "ffprobe")}
     manifest_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"manifest": str(manifest_path), "cases": [case["id"] for case in report["cases"]]}))

@@ -1,5 +1,6 @@
 // Opt-in synthetic native regression of the production clock-v1 path.
-// Single/legacy reference arguments are explicitly frozen to the old profile.
+// Old single/legacy controls stay frozen; production single isolates the added
+// cost of segmentation from a deliberate change to timestamp preservation.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -49,7 +50,7 @@ void main() {
           results['source'] = await decodeClockMedia(input, output, 'source', media);
           final variants = <String, Object?>{};
           report['variants'] = variants;
-          for (final variant in ['single', 'legacy', 'candidate']) {
+          for (final variant in ['single', 'legacy', 'productionSingle', 'candidate']) {
             report['stage'] = '$variant-record';
             final dir = await Directory(p.join(output.path, variant)).create();
             final task = LiveRecordTask.fromRoom(LiveRoom(platform: 'clockfixture', roomId: '$fixture-$variant'))
@@ -59,14 +60,14 @@ void main() {
             final args = FFmpegCommandBuilder.buildRecordArguments(
               url: input.absolute.path,
               outputDir: dir.path,
-              segmentTime: variant == 'single' ? 86400 : 10,
+              segmentTime: variant == 'single' || variant == 'productionSingle' ? 86400 : 10,
               preferBestStream: true,
               rwTimeout: 15,
               threadQueueSize: 512,
               filePrefix: task.recordingFilePrefix,
             ).toList();
             final journal = File(p.join(dir.path, RecordingSegmentClock.journalName(task.recordingFilePrefix)));
-            if (variant != 'candidate') {
+            if (variant == 'single' || variant == 'legacy') {
               // Preserve the prior muxing contract; changing the production
               // builder must not silently turn the regression baseline green.
               args[args.indexOf('-segment_format_options') + 1] = 'flush_packets=1';
@@ -87,7 +88,7 @@ void main() {
                     .where((f) => p.extension(f.path) == '.ts')
                     .toList()
                   ..sort((a, b) => a.path.compareTo(b.path));
-            expect(segments.length, variant == 'single' ? 1 : greaterThanOrEqualTo(3));
+            expect(segments.length, variant == 'single' || variant == 'productionSingle' ? 1 : greaterThanOrEqualTo(3));
             final target = File(p.join(dir.path, '${task.recordingFilePrefix}.mp4'));
             final evidence = <String, Object?>{'segments': segments.length, 'nativeRecord': record, 'arguments': args};
             variants[variant] = evidence;
@@ -123,6 +124,8 @@ void main() {
               'sourceToCandidate': results['source']![kind]!.compare(results['candidate']![kind]!),
               'singleToLegacy': reference.compare(results['legacy']![kind]!),
               'singleToCandidate': reference.compare(results['candidate']![kind]!),
+              'sourceToProductionSingle': results['source']![kind]!.compare(results['productionSingle']![kind]!),
+              'productionSingleToCandidate': results['productionSingle']![kind]!.compare(results['candidate']![kind]!),
             };
           }
           // Keep all variants' observations before any clock verdict fails.
@@ -131,11 +134,11 @@ void main() {
             for (final comparison in checks.values.cast<Map>()) {
               expect(comparison['orderedContentEqual'], true, reason: '$fixture/$kind');
             }
-            final candidate = checks['singleToCandidate'] as Map;
+            final candidate = checks['productionSingleToCandidate'] as Map;
             expect(
               candidate['offsetSpreadSeconds'] as double,
               lessThanOrEqualTo(kind == 'video' ? 2 / 90000 : 2 / 44100),
-              reason: '$fixture/$kind candidate vs single',
+              reason: '$fixture/$kind candidate vs same-profile single',
             );
           }
           if (fixture == 'av_cfr') {

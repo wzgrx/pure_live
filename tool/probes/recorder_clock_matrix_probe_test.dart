@@ -22,7 +22,14 @@ import 'frame_hash_timeline.dart';
 import 'recording_clock_probe_support.dart';
 
 void main() {
-  for (final name in ['weibo-retained', 'hevc-aac48-stereo', 'hevc10-aac48', 'h264-dual-audio', 'h264-ts-wrap']) {
+  for (final name in [
+    'weibo-retained',
+    'hevc-aac48-stereo',
+    'hevc10-aac48',
+    'h264-dual-audio',
+    'h264-ts-wrap',
+    'aac-jitter-silence',
+  ]) {
     test(
       'production clock matrix: $name',
       () async {
@@ -62,7 +69,7 @@ void main() {
         report['variants'] = variants;
         try {
           results['source'] = await decodeClockMedia(input, root, 'source', labels, pixelFormats: pixels);
-          for (final variant in ['single', 'legacy', 'production']) {
+          for (final variant in ['single', 'legacy', 'clockV1', 'productionSingle', 'production']) {
             final directory = await Directory(p.join(root.path, variant)).create();
             final task = LiveRecordTask.fromRoom(LiveRoom(platform: 'clockmatrix', roomId: '$name-$variant'))
               ..outputDir = directory.path
@@ -73,19 +80,22 @@ void main() {
             final args = FFmpegCommandBuilder.buildRecordArguments(
               url: input.path,
               outputDir: directory.path,
-              segmentTime: variant == 'single' ? 86400 : 10,
+              segmentTime: variant == 'single' || variant == 'productionSingle' ? 86400 : 10,
               preferBestStream: false,
               rwTimeout: 15,
               threadQueueSize: 512,
               filePrefix: prefix,
             ).toList();
-            if (variant != 'production') {
+            if (variant == 'single' || variant == 'legacy') {
               args[args.indexOf('-segment_format_options') + 1] = 'flush_packets=1';
               args[args.length - 1] = args.last.replaceFirst('.clock-v1.ts', '.ts');
               for (final option in ['-segment_list', '-segment_list_type']) {
                 final index = args.indexOf(option);
                 args.removeRange(index, index + 2);
               }
+            } else if (variant == 'clockV1') {
+              // Keep the pre-PES-fix control executable, including its journal.
+              args[args.indexOf('-segment_format_options') + 1] = 'flush_packets=1:avoid_negative_ts=disabled';
             }
             final evidence = <String, Object?>{'arguments': args};
             variants[variant] = evidence;
@@ -99,7 +109,9 @@ void main() {
             )..sort((left, right) => left.path.compareTo(right.path));
             expect(
               segments.length,
-              variant == 'single' ? 1 : greaterThanOrEqualTo(specification['minimumSegments'] as int),
+              variant == 'single' || variant == 'productionSingle'
+                  ? 1
+                  : greaterThanOrEqualTo(specification['minimumSegments'] as int),
             );
             final journal = File(p.join(directory.path, RecordingSegmentClock.journalName(prefix)));
             final archive = await Directory(p.join(directory.path, 'retained')).create();
@@ -170,6 +182,11 @@ void main() {
               'sourceToProduction': source.compare(results['production']![label]!),
               'singleToLegacy': single.compare(results['legacy']![label]!),
               'singleToProduction': single.compare(results['production']![label]!),
+              'singleToClockV1': single.compare(results['clockV1']![label]!),
+              'sourceToProductionSingle': source.compare(results['productionSingle']![label]!),
+              'productionSingleToProduction': results['productionSingle']![label]!.compare(
+                results['production']![label]!,
+              ),
             };
           }
           for (final track in tracks) {
@@ -178,17 +195,27 @@ void main() {
             for (final comparison in checks.values.cast<Map>()) {
               expect(comparison['orderedContentEqual'], true, reason: '$name/$label content');
             }
-            final production = checks['singleToProduction'] as Map;
+            final production = checks['productionSingleToProduction'] as Map;
             final rate = track['kind'] == 'video' ? 90000 : track['sampleRate'] as int;
             expect(
               production['offsetSpreadSeconds'] as double,
               lessThanOrEqualTo(2 / rate),
               reason: '$name/$label exact clock',
             );
+            if (track['kind'] == 'audio' && (name == 'weibo-retained' || name == 'aac-jitter-silence')) {
+              // The old single already changes source cadence through PES
+              // interpolation. Keep that control and require closer fidelity,
+              // rather than manufacturing its lossy timestamps in new output.
+              final oldSource = checks['sourceToSingle'] as Map;
+              final newSource = checks['sourceToProduction'] as Map;
+              expect(newSource['offsetSpreadSeconds'] as double, lessThan(oldSource['offsetSpreadSeconds'] as double));
+            }
           }
           if (specification['legacyRepro'] == true) {
             final old = comparisons['video_0']!['singleToLegacy'] as Map;
             expect(old['offsetSpreadSeconds'] as double, greaterThan(0.01));
+            final prePacket = comparisons['audio_0']!['singleToClockV1'] as Map;
+            expect(prePacket['offsetSpreadSeconds'] as double, greaterThan(2 / 44100));
           }
           report['contract'] = 'passed';
         } catch (error) {

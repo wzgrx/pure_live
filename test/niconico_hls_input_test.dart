@@ -96,6 +96,12 @@ class Seat implements NiconicoSession {
 }
 
 class Relay implements FFmpegHlsInputRelay {
+  @override
+  bool get finishRequested => finishes > 0;
+  @override
+  bool inputTailDiscarded = false;
+  @override
+  void Function()? onCoverageIncomplete;
   int closes = 0;
   int finishes = 0;
   final closeStarted = Completer<void>();
@@ -179,6 +185,27 @@ class Harness {
 }
 
 void main() {
+  test('recording owner forwards coverage and retains terminal drain evidence after teardown', () async {
+    final h = Harness();
+    final input = await h.open();
+    var gaps = 0;
+    input.onCoverageIncomplete = () => gaps++;
+    final late = h.relay.onCoverageIncomplete!;
+    late();
+    expect(gaps, 1);
+    await input.finish();
+    h.relay.inputTailDiscarded = true;
+    expect(input.finishRequested, true);
+    expect(input.drainTimeout, const Duration(seconds: 5));
+    await input.close();
+    expect(input.finishRequested, true);
+    expect(input.inputTailDiscarded, true);
+    expect(input.drainTimeout, const Duration(seconds: 5));
+    late();
+    expect(gaps, 1);
+    expect(input.cleanupSucceeded, true);
+  });
+
   for (final choice in [
     ('800x450', 1080800, 'normal.m3u8', 'audio192.m3u8'),
     ('512x288', 412800, 'low.m3u8', 'audio96.m3u8'),

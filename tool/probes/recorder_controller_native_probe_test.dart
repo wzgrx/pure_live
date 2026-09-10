@@ -1,3 +1,7 @@
+import 'package:pure_live/core/interface/live_input_recipe.dart';
+import 'package:pure_live/recorder/services/owned_record_input.dart';
+import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
+
 // Opt-in loopback native acceptance through the real user recording controller.
 // Only the source resolver and storage root are fixtures; capture, sampling,
 // user stop, finalization, metrics and task persistence use production code.
@@ -31,6 +35,7 @@ void main() {
   test(
     'user controller captures, stops, commits, releases and restarts with native HLS retention',
     () async {
+      final ownedMode = Platform.environment['PURELIVE_OWNED_RECORD_INPUT_PROBE'] == '1';
       final fixture = Directory(Platform.environment['PURELIVE_ROLLING_HLS_FIXTURE']!);
       final output = await Directory(
         p.join(
@@ -105,8 +110,9 @@ void main() {
           });
           try {
             final cache = Get.put(CacheService(defaultDirectoryResolver: () async => root));
-            final resolver =
-                Get.put<StreamResolverService>(_Resolver('http://127.0.0.1:${origin.port}/master.m3u8')) as _Resolver;
+            final resolver = Get.put<StreamResolverService>(
+              _Resolver('http://127.0.0.1:${origin.port}/master.m3u8', owned: ownedMode),
+            ) as _Resolver;
             final settings = RecordSettingsController()..segmentTime.value = 2;
             final recorder = Get.put<RecorderController>(
               // This opt-in test lives in tool/probes rather than test/.
@@ -114,6 +120,18 @@ void main() {
               RecorderController.forTesting(
                 settings: settings,
                 ffmpeg: manager,
+                inputRecordingBinder: (recipe) => OwnedRecordSource(
+                  identity: recipe.identity,
+                  createInput: (cancel) async {
+                    if (cancel.isCancelled) throw cancel.cancelError!;
+                    final relay = (await FFmpegHlsInputRelay.startForArguments(
+                      ['-i', 'http://127.0.0.1:${origin.port}/master.m3u8'],
+                      drainOnStop: true,
+                      enablePrefetch: true,
+                    ))!;
+                    return _OwnedRelay(relay);
+                  },
+                ),
                 // ignore: invalid_use_of_visible_for_testing_member
                 scheduler: FFmpegScheduler.forTesting(),
                 outputSampleInterval: const Duration(milliseconds: 100),
@@ -142,7 +160,13 @@ void main() {
                     manager.getSession(current.taskId)!.recordedSeconds >= 4 &&
                     current.fileSize > 0,
               );
-              final relay = manager.getSession(current.taskId)!.inputRelay!;
+              final session = manager.getSession(current.taskId)!;
+              final owned = session.ownedInput as _OwnedRelay?;
+              final relay = ownedMode ? owned!.relay : session.inputRelay!;
+              if (ownedMode) {
+                expect(current.currentUrl, isNull);
+                expect(current.toJson().toString(), isNot(contains('http://127.0.0.1:')));
+              }
               expect(relay.prefetchEnabled, isTrue);
               // ignore: invalid_use_of_visible_for_testing_member
               expect(relay.prefetchFeedCount, 2);
@@ -162,6 +186,10 @@ void main() {
               expect(recorder.runningCount, 0);
               expect(recorder.queuedCount, 0);
               expect(manager.isRunning(current.taskId), isFalse);
+              if (ownedMode) {
+                expect(owned!.isClosed, true);
+                expect(owned.closes, 1);
+              }
               expect(VideoProcessorService.to.isProcessing(current.taskId), isFalse);
               expect(cache.isDirectoryProtected(current.outputDir!), isFalse);
               // ignore: invalid_use_of_visible_for_testing_member
@@ -237,6 +265,7 @@ void main() {
               jsonEncode({
                 'status': 'passed',
                 'scope': 'real-controller-native-loopback-not-gui-android-or-long-duration',
+                'ownedInput': ownedMode,
                 'attempts': reports,
                 'events': events,
                 'requests': requests,
@@ -278,7 +307,8 @@ void main() {
 class _Network extends HttpOverrides {}
 
 class _Resolver extends StreamResolverService {
-  _Resolver(this.url);
+  _Resolver(this.url, {this.owned = false});
+  final bool owned;
   final String url;
   int calls = 0;
   @override
@@ -291,6 +321,13 @@ class _Resolver extends StreamResolverService {
     bool renewCurrent = false,
   }) async {
     calls++;
+    if (owned) {
+      return ResolvedRecordStream.owned(
+        input: const _Recipe(),
+        quality: LivePlayQuality(quality: 'fixture', id: 'fixture'),
+        qualityCursorId: 'fixture',
+      );
+    }
     return ResolvedRecordStream(
       url: url,
       quality: LivePlayQuality(quality: 'fixture', id: 'fixture'),
@@ -333,5 +370,39 @@ Future<String> _run(String exe, List<String> arguments) async {
       process.kill();
       await process.exitCode.timeout(const Duration(seconds: 5));
     }
+  }
+}
+
+class _Recipe implements LiveInputRecipe {
+  const _Recipe();
+  @override
+  String get identity => 'loopback-recording-fixture';
+}
+
+class _OwnedRelay implements OwnedRecordInput {
+  _OwnedRelay(this.relay);
+  final FFmpegHlsInputRelay relay;
+  int closes = 0;
+  @override
+  bool isClosed = false;
+  @override
+  Uri get inputUri => relay.inputUri;
+  @override
+  Duration get drainTimeout => relay.drainTimeout;
+  @override
+  bool get finishRequested => relay.finishRequested;
+  @override
+  bool get inputTailDiscarded => relay.inputTailDiscarded;
+  @override
+  set onCoverageIncomplete(void Function()? listener) => relay.onCoverageIncomplete = listener;
+  @override
+  List<String> replaceFirstInput(Iterable<String> arguments) => relay.replaceFirstInput(arguments);
+  @override
+  Future<void> finish() => relay.finish();
+  @override
+  Future<void> close() async {
+    closes++;
+    isClosed = true;
+    await relay.close();
   }
 }

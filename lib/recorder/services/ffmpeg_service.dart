@@ -1,3 +1,7 @@
+import 'package:dio/dio.dart';
+
+import 'owned_record_input.dart';
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as math;
@@ -169,6 +173,7 @@ class FFmpegRecordSession {
     required this.liveRecording,
     this.inputRelay,
     this.flvInputRelay,
+    this.ownedInput,
   });
 
   final String taskId;
@@ -177,6 +182,7 @@ class FFmpegRecordSession {
   final bool liveRecording;
   final FFmpegHlsInputRelay? inputRelay;
   final FFmpegFlvInputRelay? flvInputRelay;
+  final OwnedRecordInput? ownedInput;
   Future<void>? stopRequest;
   bool forcedCancel = false;
   final DateTime createdAt = DateTime.now();
@@ -201,10 +207,13 @@ class FFmpegRecordSession {
   /// inputDrained means native ended after finish without forced cancel or a
   /// known pending AVC picture. It is not full decoding or byte-delivery proof.
   Map<String, Object?> terminalEvidence({String fallbackLogs = ''}) {
-    final finishRequested = flvInputRelay?.finishRequested == true || inputRelay?.finishRequested == true;
+    final finishRequested =
+        flvInputRelay?.finishRequested == true ||
+        inputRelay?.finishRequested == true ||
+        ownedInput?.finishRequested == true;
     final drainKind = flvInputRelay != null
         ? 'flv'
-        : inputRelay?.drainOnStop == true
+        : inputRelay?.drainOnStop == true || ownedInput != null
         ? 'hls'
         : 'none';
     return Map.unmodifiable({
@@ -216,13 +225,14 @@ class FFmpegRecordSession {
       'inputDrainBudgetMs': drainKind == 'flv'
           ? 3000
           : drainKind == 'hls'
-          ? inputRelay!.drainTimeout.inMilliseconds
+          ? (ownedInput?.drainTimeout ?? inputRelay!.drainTimeout).inMilliseconds
           : 0,
       'inputFinishRequested': finishRequested,
       'forcedCancel': forcedCancel,
       'inputDrained': finishRequested && !forcedCancel && flvInputRelay?.hasPendingAccessUnit != true,
       if (flvInputRelay != null) 'flvAccessUnitPending': flvInputRelay!.hasPendingAccessUnit,
-      'inputTailDiscarded': liveRecording && inputRelay?.inputTailDiscarded == true,
+      'inputTailDiscarded':
+          liveRecording && (ownedInput?.inputTailDiscarded == true || inputRelay?.inputTailDiscarded == true),
       'inputCoverageIncomplete': liveRecording && hasInputCoverageGap,
       'inputIntegrityError':
           liveRecording &&
@@ -267,7 +277,22 @@ class FFmpegRecordSession {
 }
 
 class FFmpegService {
-  FFmpegService._internal();
+  FFmpegService._internal()
+    : _initializeOverride = null,
+      _createSession = FFmpegKit.createSessionFromArguments,
+      _cancelSession = FFmpegKit.cancel;
+
+  @visibleForTesting
+  FFmpegService.forTesting({
+    required Future<void> Function() initialize,
+    required this._createSession,
+    required this._cancelSession,
+  }) : _initializeOverride = initialize;
+
+  final Future<void> Function()? _initializeOverride;
+  final FFmpegSession Function(List<String>) _createSession;
+  final void Function(FFmpegSession) _cancelSession;
+  final Map<String, _RecordStartRequest> _starts = {};
 
   static final FFmpegService _instance = FFmpegService._internal();
   static FFmpegService get to => _instance;
@@ -293,30 +318,119 @@ class FFmpegService {
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
     bool hlsPrefetch = false,
+  }) => _start(
+    taskId: taskId,
+    arguments: arguments,
+    onEvent: onEvent,
+    liveRecording: liveRecording,
+    sourceQueryPolicy: sourceQueryPolicy,
+    hlsDiagnostics: hlsDiagnostics,
+    hlsPrefetch: hlsPrefetch,
+  );
+
+  Future<void> startOwned({
+    required String taskId,
+    required OwnedRecordSource source,
+    required RecordArgumentsBuilder buildArguments,
+    required void Function(FFmpegEvent event) onEvent,
+  }) => _start(
+    taskId: taskId,
+    arguments: const [],
+    onEvent: onEvent,
+    liveRecording: true,
+    ownedSource: source,
+    buildArguments: buildArguments,
+  );
+
+  Future<void> _start({
+    required String taskId,
+    required List<String> arguments,
+    required void Function(FFmpegEvent event) onEvent,
+    required bool liveRecording,
+    HlsSourceQueryPolicy? sourceQueryPolicy,
+    HlsRelayDiagnostics? hlsDiagnostics,
+    bool hlsPrefetch = false,
+    OwnedRecordSource? ownedSource,
+    RecordArgumentsBuilder? buildArguments,
   }) async {
-    await _ensureInitialized();
-    if (_sessions.containsKey(taskId)) {
+    // Reserve before initialization or remote allocation; stop and duplicate
+    // start observe the same owner even before a native session exists.
+    if (_starts.containsKey(taskId) || _sessions.containsKey(taskId)) {
       throw StateError('FFmpeg task is already active: $taskId');
     }
+    final request = _RecordStartRequest();
+    _starts[taskId] = request;
+    FFmpegHlsInputRelay? inputRelay;
+    FFmpegFlvInputRelay? flvInputRelay;
+    OwnedRecordInput? ownedInput;
+    try {
+      await _ensureInitialized();
+      request.check();
+      late final List<String> inputArguments;
+      if (ownedSource != null) {
+        ownedInput = await ownedSource.createInput(request.cancel);
+        request.check();
+        if (ownedInput.isClosed) throw StateError('Recording input ended before native open');
+        // Build against the actual private input, never a dummy URL or identity.
+        arguments = buildArguments!(ownedInput.inputUri);
+        inputArguments = ownedInput.replaceFirstInput(arguments);
+      } else {
+        if (arguments.isEmpty) throw ArgumentError('FFmpeg arguments must not be empty');
+        inputRelay = await FFmpegHlsInputRelay.startForArguments(
+          arguments,
+          drainOnStop: liveRecording,
+          sourceQueryPolicy: sourceQueryPolicy,
+          diagnostics: hlsDiagnostics,
+          enablePrefetch: hlsPrefetch,
+        );
+        request.check();
+        flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
+        request.check();
+        inputArguments =
+            flvInputRelay?.replaceFirstInput(arguments) ?? inputRelay?.replaceFirstInput(arguments) ?? arguments;
+      }
+      if (inputArguments.isEmpty) throw ArgumentError('FFmpeg arguments must not be empty');
+      final effectiveArguments = FFmpegTlsTrustStore.injectCaFile(inputArguments, caFile: _trustedCaFile);
+      request.check();
+      if (ownedInput?.isClosed == true) throw StateError('Recording input ended before native open');
+      request.nativeStarted = true;
+      await _execute(
+        taskId: taskId,
+        arguments: arguments,
+        effectiveArguments: effectiveArguments,
+        onEvent: onEvent,
+        liveRecording: liveRecording,
+        inputRelay: inputRelay,
+        flvInputRelay: flvInputRelay,
+        ownedInput: ownedInput,
+      );
+    } finally {
+      try {
+        await Future.wait<void>([
+          if (ownedInput != null) Future.sync(ownedInput.close),
+          if (inputRelay != null) Future.sync(inputRelay.close),
+          if (flvInputRelay != null) Future.sync(flvInputRelay.close),
+        ]);
+      } finally {
+        if (identical(_starts[taskId], request)) _starts.remove(taskId);
+        if (!request.done.isCompleted) request.done.complete();
+      }
+    }
+  }
 
-    if (arguments.isEmpty) throw ArgumentError.value(arguments, 'arguments', 'FFmpeg arguments must not be empty');
-    // Pass the exact argument vector to FFI. Re-parsing a shell-like command
-    // string was platform-dependent and could corrupt signed URLs, header CRLF
-    // blocks or Android storage paths before FFmpeg saw them.
-    final inputRelay = await FFmpegHlsInputRelay.startForArguments(
-      arguments,
-      drainOnStop: liveRecording,
-      sourceQueryPolicy: sourceQueryPolicy,
-      diagnostics: hlsDiagnostics,
-      enablePrefetch: hlsPrefetch,
-    );
-    final flvInputRelay = liveRecording ? await FFmpegFlvInputRelay.startForArguments(arguments) : null;
-    final inputArguments =
-        flvInputRelay?.replaceFirstInput(arguments) ?? inputRelay?.replaceFirstInput(arguments) ?? arguments;
-    final effectiveArguments = FFmpegTlsTrustStore.injectCaFile(inputArguments, caFile: _trustedCaFile);
+  Future<void> _execute({
+    required String taskId,
+    required List<String> arguments,
+    required List<String> effectiveArguments,
+    required void Function(FFmpegEvent event) onEvent,
+    required bool liveRecording,
+    FFmpegHlsInputRelay? inputRelay,
+    FFmpegFlvInputRelay? flvInputRelay,
+    OwnedRecordInput? ownedInput,
+  }) async {
     late final FFmpegSession nativeSession;
     try {
-      nativeSession = FFmpegKit.createSessionFromArguments(effectiveArguments);
+      nativeSession = _createSession(effectiveArguments);
     } catch (_) {
       await inputRelay?.close();
       await flvInputRelay?.close();
@@ -329,10 +443,11 @@ class FFmpegService {
       liveRecording: liveRecording,
       inputRelay: inputRelay,
       flvInputRelay: flvInputRelay,
+      ownedInput: ownedInput,
     );
     _sessions[taskId] = session;
 
-    inputRelay?.onCoverageIncomplete = () {
+    void onCoverageIncomplete() {
       if (!identical(_sessions[taskId], session) ||
           !liveRecording ||
           session.manualStop ||
@@ -350,7 +465,10 @@ class FFmpegService {
           data: {'sessionId': session.sessionId, 'inputCoverageIncomplete': true},
         ),
       );
-    };
+    }
+
+    inputRelay?.onCoverageIncomplete = onCoverageIncomplete;
+    ownedInput?.onCoverageIncomplete = onCoverageIncomplete;
 
     nativeSession.setLogCallback((entry) {
       if (!identical(_sessions[taskId], session)) return;
@@ -544,10 +662,12 @@ class FFmpegService {
     final inFlight = _initializing;
     if (inFlight != null) return inFlight;
 
-    final future = Future.wait<void>([
-      FFmpegKitExtended.initialize(),
-      FFmpegTlsTrustStore.ensureReady().then<void>((path) => _trustedCaFile = path),
-    ]);
+    final future = _initializeOverride != null
+        ? _initializeOverride()
+        : Future.wait<void>([
+            FFmpegKitExtended.initialize(),
+            FFmpegTlsTrustStore.ensureReady().then<void>((path) => _trustedCaFile = path),
+          ]);
     _initializing = future;
     try {
       await future;
@@ -558,11 +678,18 @@ class FFmpegService {
   }
 
   Future<void> stop(String taskId) async {
+    final request = _starts[taskId];
     final session = _sessions[taskId];
-    if (session == null) return;
-    session.manualStop = true;
-    log('FFmpeg stop => $taskId (${session.sessionId})');
-    await _requestSessionStop(session);
+    if (session != null) {
+      session.manualStop = true;
+      log('FFmpeg stop => $taskId (${session.sessionId})');
+      await _requestSessionStop(session);
+    } else if (request != null && !request.nativeStarted) {
+      request.cancel.cancel('Recording stopped during input creation');
+    }
+    // Native termination and input cleanup are distinct. Late allocations and
+    // asynchronous seat/relay cleanup must settle before releasing the attempt.
+    if (request != null) await request.done.future;
   }
 
   /// Ends the current native input at a platform lease boundary. This is not a
@@ -578,8 +705,16 @@ class FFmpegService {
 
   Future<void> _requestSessionStop(FFmpegRecordSession session) => session.stopRequest ??= () async {
     session.markStopRequested();
+    final owned = session.ownedInput;
     final relay = session.flvInputRelay;
-    if (relay != null) {
+    if (owned != null) {
+      final drained = await FFmpegInputDrain.tryFinish(
+        finishInput: owned.finish,
+        completion: session.completion.future,
+        deadline: owned.drainTimeout,
+      );
+      if (drained) return;
+    } else if (relay != null) {
       final drained = await FFmpegInputDrain.tryFinish(
         finishInput: relay.finish,
         completion: session.completion.future,
@@ -596,7 +731,7 @@ class FFmpegService {
     }
     if (session.completion.isCompleted) return;
     session.forcedCancel = true;
-    FFmpegKit.cancel(session.session);
+    _cancelSession(session.session);
     try {
       await session.completion.future.timeout(const Duration(seconds: 10));
     } on TimeoutException {
@@ -605,7 +740,7 @@ class FFmpegService {
   }();
 
   FFmpegRecordSession? getSession(String taskId) => _sessions[taskId];
-  bool isRunning(String taskId) => _sessions.containsKey(taskId);
+  bool isRunning(String taskId) => _starts.containsKey(taskId) || _sessions.containsKey(taskId);
 
   static void _safeEmit(void Function(FFmpegEvent event) onEvent, FFmpegEvent event) {
     try {
@@ -712,5 +847,14 @@ class FFmpegMediaIntegrity {
       'error muxing a packet',
       'error during demuxing',
     ].any(value.contains);
+  }
+}
+
+class _RecordStartRequest {
+  final cancel = CancelToken();
+  final done = Completer<void>();
+  bool nativeStarted = false;
+  void check() {
+    if (cancel.isCancelled) throw cancel.cancelError!;
   }
 }

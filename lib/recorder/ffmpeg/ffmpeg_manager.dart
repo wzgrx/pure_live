@@ -1,3 +1,5 @@
+import 'package:pure_live/recorder/services/owned_record_input.dart';
+
 import 'dart:async';
 
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_event.dart';
@@ -48,8 +50,8 @@ class FFmpegManager {
     HlsRelayDiagnostics? hlsDiagnostics,
     bool hlsPrefetch = false,
   }) async {
-    await initialize();
-
+    // The service reserves the attempt before initializing. Waiting here would
+    // leave a stop request with no owner and allow a late start after user exit.
     await _ffmpeg.start(
       taskId: taskId,
       arguments: arguments,
@@ -65,10 +67,20 @@ class FFmpegManager {
     );
   }
 
-  Future<void> stop(String taskId) async {
-    await initialize();
-    await _ffmpeg.stop(taskId);
-  }
+  Future<void> startOwned({
+    required String taskId,
+    required OwnedRecordSource source,
+    required RecordArgumentsBuilder buildArguments,
+  }) => _ffmpeg.startOwned(
+    taskId: taskId,
+    source: source,
+    buildArguments: buildArguments,
+    onEvent: (event) {
+      if (!_eventController.isClosed) _eventController.add(event);
+    },
+  );
+
+  Future<void> stop(String taskId) => _ffmpeg.stop(taskId);
 
   Future<void> refreshLease(String taskId) async {
     await initialize();

@@ -1,3 +1,4 @@
+import 'package:pure_live/core/interface/live_input_recipe.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/model/live_play_quality.dart';
@@ -35,9 +36,23 @@ class ResolvedRecordStream {
     this.refreshAt,
     this.invalidAt,
     this.sourceQueryPolicy,
-  });
+  }) : inputRecipe = null;
 
+  const ResolvedRecordStream.owned({
+    required LiveInputRecipe input,
+    required this.quality,
+    required this.qualityCursorId,
+  }) : inputRecipe = input,
+       url = '',
+       lineIndex = 0,
+       candidateUrls = const [],
+       refreshAt = null,
+       invalidAt = null,
+       sourceQueryPolicy = null;
+
+  /// Empty only for an owned input; never pass this compatibility view to FFmpeg.
   final String url;
+  final LiveInputRecipe? inputRecipe;
   final LivePlayQuality quality;
 
   /// Identifier of the quality request that produced [url]. This is kept
@@ -176,10 +191,10 @@ class StreamResolverService extends GetxService {
               requestedQuality: orderedQualities[previousQualityIndex],
               lineIndex: usesLineCursor ? (previousLineIndex ?? 0).clamp(0, 1 << 20).toInt() : null,
             );
-            if (renewed.urls.isNotEmpty) {
+            if (renewed.hasSources) {
               final sameLinePosition = usesLineCursor
                   ? 0
-                  : (previousLineIndex ?? 0).clamp(0, renewed.urls.length - 1).toInt();
+                  : (previousLineIndex ?? 0).clamp(0, renewed.sourceCount - 1).toInt();
               return renewed.select(sameLinePosition);
             }
           } catch (error) {
@@ -198,10 +213,10 @@ class StreamResolverService extends GetxService {
             requestedQuality: orderedQualities[previousQualityIndex],
             lineIndex: usesLineCursor ? nextLine : null,
           );
-          if (usesLineCursor && previousResolution.urls.isNotEmpty) {
+          if (usesLineCursor && previousResolution.hasSources) {
             return previousResolution.select(0);
           }
-          if (!usesLineCursor && nextLine >= 0 && nextLine < previousResolution.urls.length) {
+          if (!usesLineCursor && nextLine >= 0 && nextLine < previousResolution.sourceCount) {
             return previousResolution.select(nextLine);
           }
         } catch (error) {
@@ -221,7 +236,7 @@ class StreamResolverService extends GetxService {
             requestedQuality: orderedQualities[qualityIndex],
             lineIndex: usesLineCursor ? 0 : null,
           );
-          if (resolved.urls.isNotEmpty) return resolved.select(0);
+          if (resolved.hasSources) return resolved.select(0);
         } catch (error) {
           lastError = error;
         }
@@ -238,7 +253,7 @@ class StreamResolverService extends GetxService {
                   lineIndex: 0,
                 )
               : previousResolution;
-          if (wrapped?.urls.isNotEmpty == true) return wrapped!.select(0);
+          if (wrapped?.hasSources == true) return wrapped!.select(0);
         } catch (error) {
           lastError = error;
         }
@@ -338,6 +353,9 @@ class StreamResolverService extends GetxService {
     return _ResolvedQuality(
       requestedQualityId: requestedQuality.selectionId.toString(),
       appliedQuality: appliedQuality,
+      // Cursor adapters have exactly one logical owned line. A request beyond
+      // line zero exhausts it even if an adapter returns the same recipe again.
+      inputRecipe: lineIndex == null || lineIndex == 0 ? resolution.inputRecipe : null,
       urls: validUrls,
       sourceQueryPolicies: resolution.sourceQueryPolicies,
       refreshTimes: validUrls.map((url) => leaseMetadata?.getPlayUrlRefreshAt(url)?.toUtc()).toList(growable: false),
@@ -367,6 +385,7 @@ class StreamResolverService extends GetxService {
 
 class _ResolvedQuality {
   const _ResolvedQuality({
+    this.inputRecipe,
     required this.requestedQualityId,
     required this.appliedQuality,
     required this.urls,
@@ -376,6 +395,9 @@ class _ResolvedQuality {
     required this.sourceQueryPolicies,
   });
 
+  final LiveInputRecipe? inputRecipe;
+  int get sourceCount => inputRecipe == null ? urls.length : 1;
+  bool get hasSources => sourceCount > 0;
   final String requestedQualityId;
   final LivePlayQuality appliedQuality;
   final List<String> urls;
@@ -385,6 +407,10 @@ class _ResolvedQuality {
   final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
 
   ResolvedRecordStream select(int position) {
+    final input = inputRecipe;
+    if (input != null) {
+      return ResolvedRecordStream.owned(input: input, quality: appliedQuality, qualityCursorId: requestedQualityId);
+    }
     final normalizedPosition = position.clamp(0, urls.length - 1);
     return ResolvedRecordStream(
       url: urls[normalizedPosition],

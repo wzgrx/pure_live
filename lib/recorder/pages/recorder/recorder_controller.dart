@@ -1,3 +1,4 @@
+import 'package:pure_live/recorder/services/live_input_recording_binding.dart';
 import 'package:pure_live/common/utils/play_quality_label.dart';
 
 import 'dart:async';
@@ -38,6 +39,7 @@ class RecorderController extends GetxService {
       ffmpeg = FFmpegManager.to,
       scheduler = FFmpegScheduler.instance,
       _siteResolver = _defaultSiteResolver,
+      _inputRecordingBinder = bindLiveInputForRecording,
       _pollTimeout = const Duration(seconds: 20),
       _outputSampleInterval = const Duration(seconds: 1);
 
@@ -47,6 +49,7 @@ class RecorderController extends GetxService {
     required this.ffmpeg,
     required this.scheduler,
     this._siteResolver = _defaultSiteResolver,
+    this._inputRecordingBinder = bindLiveInputForRecording,
     this._pollTimeout = const Duration(seconds: 20),
     this._outputMetrics = const RecordingOutputMetrics(),
     this._outputSampleInterval = const Duration(seconds: 1),
@@ -61,6 +64,7 @@ class RecorderController extends GetxService {
   final FFmpegManager ffmpeg;
   final FFmpegScheduler scheduler;
   final RecorderLiveSiteResolver _siteResolver;
+  final LiveInputRecordingBinder _inputRecordingBinder;
   final Duration _pollTimeout;
   static LiveSite _defaultSiteResolver(String platform) => Sites.of(platform).liveSite;
   final Duration _outputSampleInterval;
@@ -855,11 +859,15 @@ class RecorderController extends GetxService {
       directoryOwner.protectDirectory(directory.path);
       if (token.isCancelled) return;
 
-      final headers = await FFmpegHeaderFactory.build(platform: task.platform, roomId: task.roomId);
+      final recipe = resolved.inputRecipe;
+      final ownedSource = recipe == null ? null : _inputRecordingBinder(recipe);
+      final headers = ownedSource == null
+          ? await FFmpegHeaderFactory.build(platform: task.platform, roomId: task.roomId)
+          : const <String, String>{};
       if (token.isCancelled) return;
 
       task
-        ..currentUrl = resolved.url
+        ..currentUrl = ownedSource == null ? resolved.url : null
         ..selectedQuality = resolved.quality.playbackLabel
         ..selectedQualityId = resolved.qualityCursorId
         ..selectedLineIndex = resolved.lineIndex
@@ -867,32 +875,48 @@ class RecorderController extends GetxService {
         ..outputDir = directory.path;
       updateTask(task);
 
-      final pendingLease = _PendingRecorderLease(sourceUrl: resolved.url, stream: resolved);
-      _pendingRecorderLeases[task.taskId] = pendingLease;
+      final pendingLease = ownedSource == null
+          ? _PendingRecorderLease(sourceUrl: resolved.url, stream: resolved)
+          : null;
+      if (pendingLease != null) _pendingRecorderLeases[task.taskId] = pendingLease;
 
-      final arguments = FFmpegCommandBuilder.buildRecordArguments(
+      // Freeze output settings before remote acquisition. The deferred builder
+      // owns values, not a mutable route/task or a fabricated input URL.
+      final outputDir = directory.path;
+      final segmentTime = settings.segmentTime.value;
+      final preferBestStream = settings.preferBestStream.value;
+      final rwTimeout = settings.rwTimeout.value;
+      final threadQueueSize = settings.threadQueueSize.value;
+      final filePrefix = task.recordingFilePrefix;
+      List<String> buildArguments(String url) => FFmpegCommandBuilder.buildRecordArguments(
         headers: headers,
-        url: resolved.url,
-        outputDir: directory.path,
-        segmentTime: settings.segmentTime.value,
-        preferBestStream: settings.preferBestStream.value,
-        rwTimeout: settings.rwTimeout.value,
-        threadQueueSize: settings.threadQueueSize.value,
-        filePrefix: task.recordingFilePrefix,
+        url: url,
+        outputDir: outputDir,
+        segmentTime: segmentTime,
+        preferBestStream: preferBestStream,
+        rwTimeout: rwTimeout,
+        threadQueueSize: threadQueueSize,
+        filePrefix: filePrefix,
       );
       if (token.isCancelled) return;
 
-      await ffmpeg.start(
-        taskId: task.taskId,
-        arguments: arguments,
-        liveRecording: true,
-        // Every live attempt (including renewal/reconnect) uses bounded HLS
-        // retention when the selected feeds can be admitted atomically. The
-        // relay keeps unsupported playlists on its original path; FLV is not
-        // an HLS input. Offline finalization does not use this entry point.
-        hlsPrefetch: true,
-        sourceQueryPolicy: resolved.sourceQueryPolicy,
-      );
+      if (ownedSource != null) {
+        await ffmpeg.startOwned(
+          taskId: task.taskId,
+          source: ownedSource,
+          buildArguments: (input) => buildArguments(input.toString()),
+        );
+      } else {
+        await ffmpeg.start(
+          taskId: task.taskId,
+          arguments: buildArguments(resolved.url),
+          liveRecording: true,
+          // Every live URL attempt uses bounded HLS retention when the feeds
+          // can be admitted atomically; owned inputs bring their own relay.
+          hlsPrefetch: true,
+          sourceQueryPolicy: resolved.sourceQueryPolicy,
+        );
+      }
       if (identical(_pendingRecorderLeases[task.taskId], pendingLease)) {
         _pendingRecorderLeases.remove(task.taskId);
       }

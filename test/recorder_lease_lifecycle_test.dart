@@ -1,3 +1,6 @@
+import 'package:pure_live/core/site/niconico/niconico_input_recipe.dart';
+import 'package:pure_live/recorder/services/owned_record_input.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -90,6 +93,24 @@ void main() {
       expect(native.urls, everyElement(startsWith(source.url)));
     });
   }
+
+  test('owned recording reaches typed manager entry and keeps private input out of persisted task', () async {
+    resolver.owned = true;
+    expect(await recorder.startTask(task), isTrue);
+    await until(() => native.starts == 1);
+    expect(native.ownedIdentities, ['niconico:lv100:800x450:1080800']);
+    expect(native.urls, ['http://127.0.0.1:19001/owned/root.m3u8']);
+    expect(native.policies, [null]);
+    expect(task.currentUrl, isNull);
+    expect(task.selectedLineIndex, 0);
+    expect(task.selectedQualityId, 'fixture');
+    expect(task.toJson().toString(), isNot(contains('19001')));
+    expect(task.toJson().keys, isNot(contains('inputRecipe')));
+    await recorder.stopTask(task);
+    await until(() => recorder.scheduler.runningCount == 0);
+    expect(resolver.calls, 1, reason: 'owned inputs must not schedule signed-URL prefetch');
+    expect(task.wasStoppedByUser, true);
+  });
 
   test('healthy native WUP FLV prefetches without cancelling the current capture', () async {
     await start();
@@ -203,26 +224,35 @@ class _Settings extends RecordSettingsController {
 }
 
 class _Resolver extends StreamResolverService {
+  bool owned = false;
   bool withPolicy = false;
   String url = _nativeUrl;
   int calls = 0;
   bool failPrefetch = false;
   bool expiredPrefetch = false;
   Completer<ResolvedRecordStream>? pending;
-  ResolvedRecordStream stream(int index) => ResolvedRecordStream(
-    url: '$url${url.contains('?') ? '&' : '?'}lease=$index',
-    quality: LivePlayQuality(quality: 'fixture', id: 'fixture'),
-    qualityCursorId: 'fixture',
-    lineIndex: 0,
-    candidateUrls: [url],
-    sourceQueryPolicy: withPolicy
-        ? HlsSourceQueryPolicy.fromSource(Uri.parse('$url${url.contains('?') ? '&' : '?'}lease=$index'))
-        : null,
-    refreshAt: DateTime.now().toUtc().add(index == 0 ? const Duration(milliseconds: 400) : const Duration(minutes: 4)),
-    invalidAt: DateTime.now().toUtc().add(
-      expiredPrefetch && index == 1 ? const Duration(seconds: -1) : const Duration(minutes: 5),
-    ),
-  );
+  ResolvedRecordStream stream(int index) => owned
+      ? ResolvedRecordStream.owned(
+          input: NiconicoInputRecipe(programId: 'lv100', resolution: '800x450', bandwidth: 1080800),
+          quality: LivePlayQuality(quality: 'fixture', id: 'fixture'),
+          qualityCursorId: 'fixture',
+        )
+      : ResolvedRecordStream(
+          url: '$url${url.contains('?') ? '&' : '?'}lease=$index',
+          quality: LivePlayQuality(quality: 'fixture', id: 'fixture'),
+          qualityCursorId: 'fixture',
+          lineIndex: 0,
+          candidateUrls: [url],
+          sourceQueryPolicy: withPolicy
+              ? HlsSourceQueryPolicy.fromSource(Uri.parse('$url${url.contains('?') ? '&' : '?'}lease=$index'))
+              : null,
+          refreshAt: DateTime.now().toUtc().add(
+            index == 0 ? const Duration(milliseconds: 400) : const Duration(minutes: 4),
+          ),
+          invalidAt: DateTime.now().toUtc().add(
+            expiredPrefetch && index == 1 ? const Duration(seconds: -1) : const Duration(minutes: 5),
+          ),
+        );
   @override
   Future<ResolvedRecordStream> resolveStream({
     required String roomId,
@@ -240,6 +270,19 @@ class _Resolver extends StreamResolverService {
 }
 
 class _Native implements FFmpegManager {
+  final ownedIdentities = <String>[];
+  @override
+  Future<void> startOwned({
+    required String taskId,
+    required OwnedRecordSource source,
+    required RecordArgumentsBuilder buildArguments,
+  }) {
+    ownedIdentities.add(source.identity);
+    final arguments = buildArguments(Uri.parse('http://127.0.0.1:19001/owned/root.m3u8'));
+    expect(arguments, isNot(contains('-headers')));
+    return start(taskId: taskId, arguments: arguments, liveRecording: true);
+  }
+
   final policies = <HlsSourceQueryPolicy?>[];
   final prefetchOptions = <bool>[];
   final liveOptions = <bool>[];

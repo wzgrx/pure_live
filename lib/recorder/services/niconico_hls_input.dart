@@ -9,6 +9,7 @@ import 'package:pure_live/core/site/niconico/niconico_session.dart';
 import 'package:pure_live/core/site/niconico/niconico_stream.dart';
 import 'package:pure_live/core/site/niconico/niconico_watch.dart';
 
+import 'owned_record_input.dart';
 import 'cancellable_http_connections.dart';
 import 'ffmpeg_hls_input_relay.dart';
 import 'hls_body_reader.dart';
@@ -35,7 +36,7 @@ typedef NiconicoRelayFactory = Future<FFmpegHlsInputRelay> Function(
 /// One consumer's seat, current grant, master pre-read and private HLS relay.
 /// Never persist this object or share it between playback and recording. A new
 /// media root terminates the lease; the consumer must reacquire watch metadata.
-class NiconicoHlsInput {
+class NiconicoHlsInput implements OwnedRecordInput {
   NiconicoHlsInput._();
   final _cancel = CancelToken();
   final _done = Completer<NiconicoFailure?>();
@@ -56,6 +57,18 @@ class NiconicoHlsInput {
   int _closedKeepAlives = 0;
   NiconicoFailure? _failure;
 
+  bool _finished = false;
+  bool _tailDiscarded = false;
+  Duration _lastDrainTimeout = Duration.zero;
+  void Function()? _coverageListener;
+
+  @override
+  set onCoverageIncomplete(void Function()? listener) => _coverageListener = listener;
+  @override
+  bool get finishRequested => _relay?.finishRequested ?? _finished;
+  @override
+  bool get inputTailDiscarded => _relay?.inputTailDiscarded ?? _tailDiscarded;
+  @override
   bool get isClosed => _closed;
   bool get cleanupSucceeded => _cleanupSucceeded;
   Future<NiconicoFailure?> get done => _done.future;
@@ -68,22 +81,23 @@ class NiconicoHlsInput {
   // ignore: invalid_use_of_visible_for_testing_member
   int get prefetchFeedCount => _relay?.prefetchFeedCount ?? 0;
 
+  @override
   Uri get inputUri {
     _check();
     return _relay!.inputUri;
   }
 
-  Duration get drainTimeout {
-    _check();
-    return _relay!.drainTimeout;
-  }
+  @override
+  Duration get drainTimeout => _relay?.drainTimeout ?? _lastDrainTimeout;
 
+  @override
   List<String> replaceFirstInput(Iterable<String> arguments) {
     _check();
     return _relay!.replaceFirstInput(arguments);
   }
 
   // A graceful recorder drain still needs a live seat until native completion.
+  @override
   Future<void> finish() {
     _check();
     return _relay!.finish();
@@ -180,6 +194,7 @@ class NiconicoHlsInput {
     }
     _check();
     _relay = await createRelay(_source!, _cookies, selection);
+    _relay!.onCoverageIncomplete = () => _coverageListener?.call();
     _check();
   }
 
@@ -205,6 +220,7 @@ class NiconicoHlsInput {
     unawaited(close().catchError((Object _) {}));
   }
 
+  @override
   Future<void> close() {
     if (_closing != null) return _closing!;
     _closed = true;
@@ -255,6 +271,10 @@ class NiconicoHlsInput {
     // Only sanitized counters survive teardown, not signed roots/bootstrap URLs.
     // ignore: invalid_use_of_visible_for_testing_member
     _closedResourceCount = _relay?.resourceCount ?? 0;
+    _finished = _relay?.finishRequested ?? _finished;
+    _tailDiscarded = _relay?.inputTailDiscarded ?? _tailDiscarded;
+    _lastDrainTimeout = _relay?.drainTimeout ?? _lastDrainTimeout;
+    _coverageListener = null;
     _source = null;
     _grant = null;
     _seat = null;

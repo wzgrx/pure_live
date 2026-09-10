@@ -1,14 +1,15 @@
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pure_live/modules/auth/user_management_actions.dart';
 import 'package:pure_live/modules/auth/models/user_item.dart';
 import 'package:pure_live/modules/auth/utils/firebase_manager.dart';
 import 'package:pure_live/modules/auth/user_server_remote_controller.dart';
 import 'package:pure_live/modules/auth/components/user_detail_main_page.dart';
 
 class UserManager extends StatefulWidget {
-  const UserManager({super.key});
+  const UserManager({super.key, this.actions = const UserManagementActions()});
+  final UserManagementActions actions;
 
   @override
   State<UserManager> createState() => _UserManagerState();
@@ -17,7 +18,24 @@ class UserManager extends StatefulWidget {
 class _UserManagerState extends State<UserManager> {
   late final bool _ownsController;
 
-  UserServerRemoteController get controller => Get.find<UserServerRemoteController>();
+  late final UserServerRemoteController controller;
+  final Set<String> _busyUsers = {};
+
+  bool get _canPresent => mounted && !controller.isClosed;
+
+  Future<void> _runUserAction(UserItem user, Future<void> Function() action) async {
+    if (!_canPresent || _busyUsers.contains(user.uid)) return;
+    setState(() => _busyUsers.add(user.uid));
+    try {
+      await action();
+    } finally {
+      if (mounted) {
+        setState(() => _busyUsers.remove(user.uid));
+      } else {
+        _busyUsers.remove(user.uid);
+      }
+    }
+  }
 
   final TextEditingController searchController = TextEditingController();
 
@@ -25,19 +43,25 @@ class _UserManagerState extends State<UserManager> {
   void initState() {
     super.initState();
     _ownsController = !Get.isRegistered<UserServerRemoteController>();
-    if (_ownsController) Get.put(UserServerRemoteController());
+    controller = _ownsController ? Get.put(UserServerRemoteController()) : Get.find<UserServerRemoteController>();
   }
 
   @override
   void dispose() {
     searchController.dispose();
     if (_ownsController) {
-      Get.delete<UserServerRemoteController>(force: true);
+      if (Get.isRegistered<UserServerRemoteController>() &&
+          identical(Get.find<UserServerRemoteController>(), controller)) {
+        Get.delete<UserServerRemoteController>(force: true);
+      } else {
+        controller.onDelete();
+      }
     }
     super.dispose();
   }
 
   Future<void> deleteUserComplete(UserItem user) async {
+    if (!_canPresent) return;
     if (!controller.isSuperAdmin) {
       ToastUtil.show(i18n('operation_denied'));
       return;
@@ -48,36 +72,35 @@ class _UserManagerState extends State<UserManager> {
       return;
     }
     try {
-      if (targetWeight == 1) {
-        await FirebaseFirestore.instance.collection('permissions').doc(user.uid).delete();
-      }
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
+      await widget.actions.deleteUser(user.uid, deletePermission: targetWeight == 1);
+      if (!_canPresent) return;
       ToastUtil.show(i18n('delete_success'));
       await controller.refreshData();
     } catch (e) {
+      if (!_canPresent) return;
       ToastUtil.show(i18n('delete_failed'));
     }
   }
 
   Future<void> promoteToManager(UserItem user) async {
+    if (!_canPresent) return;
     if (!controller.isSuperAdmin) {
       ToastUtil.show(i18n('operation_denied'));
       return;
     }
     try {
-      await FirebaseFirestore.instance.collection('permissions').doc(user.uid).set({
-        'canUpload': true,
-        'role': 'manager',
-        'email': user.email,
-      });
+      await widget.actions.promote(user.uid, user.email);
+      if (!_canPresent) return;
       ToastUtil.show(i18n('add_success'));
       await controller.refreshData();
     } catch (e) {
+      if (!_canPresent) return;
       ToastUtil.show(i18n('add_failed'));
     }
   }
 
   Future<void> demoteManager(UserItem user) async {
+    if (!_canPresent) return;
     if (!controller.isSuperAdmin) {
       ToastUtil.show(i18n('operation_denied'));
       return;
@@ -87,34 +110,38 @@ class _UserManagerState extends State<UserManager> {
       return;
     }
     try {
-      await FirebaseFirestore.instance.collection('permissions').doc(user.uid).delete();
+      await widget.actions.demote(user.uid);
+      if (!_canPresent) return;
       ToastUtil.show(i18n('delete_success'));
       await controller.refreshData();
     } catch (e) {
+      if (!_canPresent) return;
       ToastUtil.show(i18n('delete_failed'));
     }
   }
 
   Future<void> banUserUpload(UserItem user) async {
+    if (!_canPresent) return;
     try {
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'canUpload': false,
-      }, SetOptions(merge: true));
+      await widget.actions.setUpload(user.uid, false);
+      if (!_canPresent) return;
       ToastUtil.show(i18n('ban_success'));
       await controller.refreshData();
     } catch (e) {
+      if (!_canPresent) return;
       ToastUtil.show(i18n('ban_failed'));
     }
   }
 
   Future<void> unbanUserUpload(UserItem user) async {
+    if (!_canPresent) return;
     try {
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'canUpload': true,
-      }, SetOptions(merge: true));
+      await widget.actions.setUpload(user.uid, true);
+      if (!_canPresent) return;
       ToastUtil.show(i18n('unban_success'));
       await controller.refreshData();
     } catch (e) {
+      if (!_canPresent) return;
       ToastUtil.show(i18n('unban_failed'));
     }
   }
@@ -403,6 +430,7 @@ class _UserManagerState extends State<UserManager> {
           Expanded(
             child: _buildActionBtn(
               theme,
+              user: user,
               icon: Remix.user_star_line,
               label: i18n('action_promote'),
               color: Colors.teal,
@@ -418,6 +446,7 @@ class _UserManagerState extends State<UserManager> {
           Expanded(
             child: _buildActionBtn(
               theme,
+              user: user,
               icon: Remix.user_received_line,
               label: i18n('action_demote'),
               color: Colors.orange,
@@ -434,6 +463,7 @@ class _UserManagerState extends State<UserManager> {
         Expanded(
           child: _buildActionBtn(
             theme,
+            user: user,
             icon: Remix.delete_bin_6_line,
             label: i18n('action_delete_account'),
             color: theme.colorScheme.error,
@@ -464,6 +494,7 @@ class _UserManagerState extends State<UserManager> {
           Expanded(
             child: _buildActionBtn(
               theme,
+              user: user,
               icon: Remix.close_circle_line,
               label: i18n('action_ban'),
               color: theme.colorScheme.error,
@@ -479,6 +510,7 @@ class _UserManagerState extends State<UserManager> {
           Expanded(
             child: _buildActionBtn(
               theme,
+              user: user,
               icon: Remix.check_line,
               label: i18n('action_unban'),
               color: Colors.green,
@@ -499,30 +531,39 @@ class _UserManagerState extends State<UserManager> {
     required IconData icon,
     required String label,
     required Color color,
-    required VoidCallback onTap,
+    required UserItem user,
+    required Future<void> Function() onTap,
   }) {
-    return Material(
-      color: color.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Container(
-          height: 46,
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: color, fontWeight: FontWeight.w600),
-                ),
+    final busy = _busyUsers.contains(user.uid);
+    return Semantics(
+      enabled: !busy,
+      child: Opacity(
+        opacity: busy ? 0.45 : 1,
+        child: Material(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            // Keep this tap target active to consume taps instead of opening the parent card.
+            onTap: () => _runUserAction(user, onTap),
+            child: Container(
+              height: 46,
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 16, color: color),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: color, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

@@ -22,7 +22,7 @@ void main() {
   test(
     'Niconico owned session through production relay records and decodes audio/video',
     () async {
-      Get.put<LogController>(_QuietLogController());
+      Get.put<LogController>(QuietNiconicoProbeLogController());
       addTearDown(() => Get.delete<LogController>(force: true));
       final env = io.Platform.environment;
       final directory = io.Directory(env['PURELIVE_NICONICO_RELAY_OUTPUT']!);
@@ -63,7 +63,7 @@ void main() {
           report['productionInputOwner'] = true;
           final output = '${directory.path}/capture.mp4';
           report['stage'] = 'record';
-          await _run(
+          await runNiconicoNativeStage(
             env['PURELIVE_FFMPEG']!,
             owned.replaceFirstInput([
               '-hide_banner',
@@ -99,7 +99,7 @@ void main() {
           }
           report['stage'] = 'inspect';
           final metadata = jsonDecode(
-            await _run(
+            await runNiconicoNativeStage(
               env['PURELIVE_FFPROBE']!,
               ['-v', 'error', '-show_packets', '-show_streams', '-show_format', '-of', 'json', output],
               directory,
@@ -125,7 +125,7 @@ void main() {
               )
               .toList();
           report['stage'] = 'decode';
-          await _run(
+          await runNiconicoNativeStage(
             env['PURELIVE_FFMPEG']!,
             [
               '-hide_banner',
@@ -189,7 +189,7 @@ void main() {
 
 class _RealNetwork extends io.HttpOverrides {}
 
-class _QuietLogController extends GetxController implements LogController {
+class QuietNiconicoProbeLogController extends GetxController implements LogController {
   @override
   // ignore: must_call_super
   Future<void> onInit() async {}
@@ -199,7 +199,7 @@ class _QuietLogController extends GetxController implements LogController {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-Future<String> _run(
+Future<String> runNiconicoNativeStage(
   String executable,
   List<String> args,
   io.Directory directory,

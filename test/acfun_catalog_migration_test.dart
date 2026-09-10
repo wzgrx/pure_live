@@ -44,8 +44,9 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
-    expect(settings.siteCatalogMigration.value, 12);
+    expect(settings.siteCatalogMigration.value, 13);
     settings.hotAreasList.remove('acfun');
     settings.onInit();
     expect(settings.hotAreasList, [
@@ -60,6 +61,7 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
   });
 

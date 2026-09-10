@@ -1571,6 +1571,7 @@
     "search_coverage_channel_lookup": "{site} 仅支持精确频道号或频道直播链接，可查询未开播频道；暂不支持昵称和关键词搜索。",
     "audience_ttinglive_detail": "首页目录提供当前观看数；频道详情与收藏刷新没有该字段，缺失值保持未知。",
   "search_coverage_room_lookup": "{site} 当前仅支持直播房间号或官网直播链接查询，可返回已结束的房间；昵称搜索与跨场次主播跟随尚未接入。",
+  "site_niconico": "niconico",
   "site_xiaohongshu": "小红书",
   "xiaohongshu_directory_scope": "暂无已接入的公开直播目录。请在搜索页输入直播房间号，或导入官网 /livestream/ 分享链接；收藏仅跟踪该直播房间，不代表跨场次跟随主播。",
   "xiaohongshu_display_viewers": "平台展示观看值：{value}（非已验证的实时在线人数）",

@@ -1,3 +1,4 @@
+import 'package:pure_live/core/site/niconico/niconico_link.dart';
 import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/core/site/huajiao/huajiao_link.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
@@ -42,6 +43,8 @@ class WebSearchRoomParser {
   };
 
   static WebSearchRoomTarget? parse(String rawUrl) {
+    final niconico = NiconicoLink.parse(rawUrl);
+    if (niconico != null) return WebSearchRoomTarget(platform: Sites.niconicoSite, roomId: niconico);
     // Broadcast shares need asynchronous owner lookup in LiveUrlTool. Only
     // verified owner links can be mapped synchronously to a durable app ID.
     final huajiao = HuajiaoLink.parse(rawUrl);

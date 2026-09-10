@@ -26,6 +26,7 @@ void main() {
         Sites.openrecSite,
         Sites.ttingSite,
         Sites.xiaohongshuSite,
+        Sites.niconicoSite,
         Sites.iptvSite,
       ]),
     );

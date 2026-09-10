@@ -1571,6 +1571,7 @@
     "search_coverage_channel_lookup": "{site} supports exact channel IDs or channel live URLs, including offline channels; nickname and keyword search are not integrated.",
     "audience_ttinglive_detail": "The homepage directory exposes current viewers. Channel details and favorite refreshes omit this field; missing counts stay unknown.",
   "search_coverage_room_lookup": "{site} currently supports exact broadcast room IDs or official live links, including ended rooms. Nickname search and following broadcasters across new broadcasts are not integrated.",
+  "site_niconico": "niconico",
   "site_xiaohongshu": "Xiaohongshu",
   "xiaohongshu_directory_scope": "A public live directory is not integrated. Search a broadcast room ID or import an official /livestream/ share link. Favorites track that room, not the broadcaster across new broadcasts.",
   "xiaohongshu_display_viewers": "Platform display count: {value} (not verified concurrent viewers)",

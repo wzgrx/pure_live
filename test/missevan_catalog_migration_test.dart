@@ -42,8 +42,9 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
-    expect(controller.siteCatalogMigration.value, 12);
+    expect(controller.siteCatalogMigration.value, 13);
     controller.hotAreasList.remove('missevan');
     controller.onInit();
     expect(controller.hotAreasList, [
@@ -55,6 +56,7 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
@@ -67,6 +69,7 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
   });
 

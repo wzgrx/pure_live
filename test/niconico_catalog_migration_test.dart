@@ -12,7 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory folder;
   setUpAll(() async {
-    folder = await Directory.systemTemp.createTemp('xiaohongshu-catalog-');
+    folder = await Directory.systemTemp.createTemp('niconico-catalog-');
     Hive.init(folder.path);
     await HivePrefUtil.init();
   });
@@ -27,41 +27,41 @@ void main() {
     expect(folder.absolute.path.startsWith(Directory.systemTemp.absolute.path), true);
     await folder.delete(recursive: true);
   });
-  test('catalog eleven adds only XHS once, preserving hidden sites and audience settings', () async {
-    await HivePrefUtil.setInt('siteCatalogMigration', 11);
+  test('catalog twelve adds only niconico once, preserving hidden sites and audience settings', () async {
+    await HivePrefUtil.setInt('siteCatalogMigration', 12);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'ttinglive']);
     await HivePrefUtil.setInt('audienceMetricMigration', 7);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final favorites = Get.put(FavoriteRoomController());
     final app = Get.put(AppSettingsController());
-    expect(favorites.hotAreasList, ['huya', 'ttinglive', 'xiaohongshu', 'niconico']);
+    expect(favorites.hotAreasList, ['huya', 'ttinglive', 'niconico']);
     expect(favorites.siteCatalogMigration.value, 13);
     expect(app.realOnlinePlatforms, ['twitch']);
     expect(app.audienceMetricMigration.value, 7);
-    favorites.hotAreasList.remove('xiaohongshu');
+    favorites.hotAreasList.remove('niconico');
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
-    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'ttinglive', 'niconico']);
+    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'ttinglive']);
     expect(Get.put(AppSettingsController()).realOnlinePlatforms, ['twitch']);
   });
   test('backup preserves exact broadcast string and tags without inventing owner identity', () {
     final favorites = Get.put(FavoriteRoomController());
     favorites.fromJson({
-      'hotAreasList': [' XIAOHONGSHU ', 'huya', 'xiaohongshu'],
-      'preferPlatform': ' XIAOHONGSHU ',
+      'hotAreasList': [' NICONICO ', 'huya', 'niconico'],
+      'preferPlatform': ' NICONICO ',
       'favoriteRooms': [
-        (LiveRoom(platform: 'xiaohongshu', roomId: '570429070963278308')..tagIds = ['fixture']).toJson(),
+        (LiveRoom(platform: 'niconico', roomId: 'lv100')..tagIds = ['fixture']).toJson(),
       ],
       'favoriteAreas': [],
     });
-    expect(favorites.hotAreasList, ['xiaohongshu', 'huya']);
-    expect(favorites.preferPlatform.value, 'xiaohongshu');
+    expect(favorites.hotAreasList, ['niconico', 'huya']);
+    expect(favorites.preferPlatform.value, 'niconico');
     final restored = LiveRoom.fromJson((favorites.toJson()['favoriteRooms'] as List).single);
-    expect(restored.roomId, '570429070963278308');
+    expect(restored.roomId, 'lv100');
     expect(restored.userId, anyOf(isNull, isEmpty));
     expect(restored.tagIds, ['fixture']);
-    expect(AppSettingsController.normalizeRealOnlinePlatforms(['xiaohongshu', 'twitch']), ['twitch']);
+    expect(AppSettingsController.normalizeRealOnlinePlatforms(['niconico', 'twitch']), ['twitch']);
   });
 }

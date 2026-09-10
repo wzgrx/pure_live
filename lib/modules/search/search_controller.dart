@@ -53,6 +53,8 @@ class SearchController extends GetxController {
   String buildSearchUrl(String platform, String keyword) {
     final q = Uri.encodeComponent(keyword);
     switch (platform) {
+      case Sites.niconicoSite:
+        return 'https://live.nicovideo.jp/search?keyword=$q&status=onair';
       case Sites.xiaohongshuSite:
         throw StateError('Xiaohongshu supports exact broadcast-room lookup, not web keyword search');
       case Sites.ttingSite:

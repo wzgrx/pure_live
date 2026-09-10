@@ -57,8 +57,9 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
-    expect(settings.siteCatalogMigration.value, 12);
+    expect(settings.siteCatalogMigration.value, 13);
     settings.hotAreasList.remove('twitcasting');
     settings.onInit();
     expect(settings.hotAreasList, [
@@ -71,6 +72,7 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
     await Hive.box<dynamic>('app_settings').flush();
     expect(HivePrefUtil.getStringList('hotAreasList'), [
@@ -83,6 +85,7 @@ void main() {
       'openrec',
       'ttinglive',
       'xiaohongshu',
+      'niconico',
     ]);
   });
 

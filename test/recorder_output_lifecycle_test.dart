@@ -1,3 +1,5 @@
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
+
 import 'dart:async';
 
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
@@ -464,6 +466,7 @@ class _Resolver extends StreamResolverService {
     String? previousQualityId,
     int? previousLineIndex,
     bool renewCurrent = false,
+    LiveQualityDiscoveryScope? discoveryScope,
   }) async => ResolvedRecordStream(
     url: 'https://fixture.invalid/live.flv',
     quality: LivePlayQuality(quality: 'fixture', id: 'fixture'),

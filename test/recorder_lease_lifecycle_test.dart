@@ -1,3 +1,11 @@
+import 'package:dio/dio.dart';
+import 'package:pure_live/common/models/live_room.dart';
+import 'package:pure_live/core/site/niconico/niconico_site.dart';
+
+import 'niconico_quality_catalog_test.dart' as catalog;
+import 'niconico_hls_input_test.dart' as fixture;
+
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
 import 'package:pure_live/core/site/niconico/niconico_input_recipe.dart';
 import 'package:pure_live/recorder/services/owned_record_input.dart';
 
@@ -71,6 +79,55 @@ void main() {
   Future<void> start() async {
     expect(await recorder.startTask(task), isTrue);
     await until(() => native.starts == 1 && resolver.calls == 2);
+  }
+
+  for (final phase in ['task', 'prefetch', 'shutdown']) {
+    test('$phase cancellation reaches discovery and retains owner until seat cleanup', () async {
+      final h = catalog.Harness();
+      final owner = fixture.Seat()..closeGate = Completer<void>();
+      h.factory = (_, _, _) async => owner;
+      final started = Completer<CancelToken>();
+      h.reader = (_, _, cancel, _) async {
+        started.complete(cancel);
+        await cancel.whenCancel;
+        throw StateError('cancelled transport');
+      };
+      final site = NiconicoSite(api: h.api, catalog: h.catalog());
+      resolver.hook = (index, scope) async {
+        expect(scope, isNotNull);
+        if (phase != 'task' && index == 0) return resolver.stream(index);
+        if (phase == 'task') {
+          return StreamResolverService(siteResolver: (_) => site)
+              .resolveStream(roomId: 'lv100', platform: 'niconico', preferredQuality: 'highest', discoveryScope: scope);
+        }
+        await scope!.discover(site, LiveRoom(roomId: 'lv100', platform: 'niconico', liveStatus: LiveStatus.live));
+        return resolver.stream(index);
+      };
+      expect(await recorder.startTask(task), true);
+      final cancel = await started.future;
+      Future<void>? stopping;
+      var stopped = false;
+      try {
+        if (phase == 'shutdown') {
+          Get.delete<RecorderController>(force: true);
+        } else {
+          stopping = recorder.stopTask(task).then((_) => stopped = true);
+        }
+        await owner.closeStarted.future.timeout(const Duration(seconds: 2));
+        expect(cancel.isCancelled, true);
+        expect(stopped, false);
+        expect(native.starts, phase == 'task' ? 0 : 1);
+        if (phase == 'task') expect(recorder.scheduler.runningCount, 1);
+      } finally {
+        owner.closeGate!.complete();
+        await stopping;
+        await until(() => recorder.scheduler.runningCount == 0);
+      }
+      expect(owner.closes, 1);
+      expect(owner.grant.retainedCookieCount, 0);
+      expect(resolver.calls, phase == 'task' ? 1 : 2);
+      if (phase != 'shutdown') expect(task.status, RecordStatus.stopped);
+    });
   }
 
   for (final source in [
@@ -224,6 +281,7 @@ class _Settings extends RecordSettingsController {
 }
 
 class _Resolver extends StreamResolverService {
+  Future<ResolvedRecordStream> Function(int, LiveQualityDiscoveryScope?)? hook;
   bool owned = false;
   bool withPolicy = false;
   String url = _nativeUrl;
@@ -261,8 +319,10 @@ class _Resolver extends StreamResolverService {
     String? previousQualityId,
     int? previousLineIndex,
     bool renewCurrent = false,
+    LiveQualityDiscoveryScope? discoveryScope,
   }) async {
     final index = calls++;
+    if (hook != null) return hook!(index, discoveryScope);
     if (index == 1 && failPrefetch) throw StateError('fixture network failure');
     if (index == 1 && pending != null) return pending!.future;
     return stream(index);

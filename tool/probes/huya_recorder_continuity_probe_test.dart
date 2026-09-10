@@ -1,3 +1,5 @@
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
+
 // Opt-in Windows native recording through the production RecorderController.
 // Preserve stopped TS before the normal MP4 finalizer removes it, so container
 // and bitstream validity can be compared. No signed URL or cookie is persisted.
@@ -245,9 +247,12 @@ class _OfficialResolver extends StreamResolverService {
     String? previousQualityId,
     int? previousLineIndex,
     bool renewCurrent = false,
+    LiveQualityDiscoveryScope? discoveryScope,
   }) async {
+    discoveryScope?.checkActive();
     calls++;
     final url = await site.getPlayUrl(line, 0);
+    discoveryScope?.checkActive();
     if (!HuyaTransportPolicy.hasNativeFlvCredential(url)) throw StateError('native WUP source was not selected');
     return ResolvedRecordStream(
       url: url,
@@ -294,6 +299,7 @@ class _RetainingManager implements FFmpegManager {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    bool hlsPrefetch = false,
   }) {
     starts++;
     return delegate.start(
@@ -302,6 +308,7 @@ class _RetainingManager implements FFmpegManager {
       liveRecording: liveRecording,
       sourceQueryPolicy: sourceQueryPolicy,
       hlsDiagnostics: hlsDiagnostics,
+      hlsPrefetch: hlsPrefetch,
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
 import 'package:pure_live/core/interface/live_input_recipe.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/interface/live_site.dart';
@@ -106,7 +107,9 @@ class StreamResolverService extends GetxService {
     String? previousQualityId,
     int? previousLineIndex,
     bool renewCurrent = false,
+    LiveQualityDiscoveryScope? discoveryScope,
   }) async {
+    discoveryScope?.checkActive();
     final normalizedPlatform = platform.trim().toLowerCase();
     final normalizedRoomId = roomId.trim();
     if (normalizedRoomId.isEmpty) {
@@ -131,12 +134,14 @@ class StreamResolverService extends GetxService {
               )
             : await site.getRoomDetail(roomId: normalizedRoomId, platform: normalizedPlatform);
       } catch (error) {
+        discoveryScope?.checkActive();
         // UI room loaders commonly preserve the previous card on request
         // failure. Recording uses a strict capability so a transient metadata
         // error enters bounded retry instead of becoming a false offline stop.
         throw StreamException(type: StreamErrorType.networkError, message: '${i18n('stream_get_room_failed')}: $error');
       }
 
+      discoveryScope?.checkActive();
       if (detail.effectiveLiveStatus == LiveStatus.banned) {
         throw StreamException(type: StreamErrorType.banned, message: i18n('stream_room_banned'), retryable: false);
       }
@@ -150,10 +155,14 @@ class StreamResolverService extends GetxService {
 
       late final List<LivePlayQuality> qualities;
       try {
-        qualities = await site.getPlayQualites(detail: detail);
+        qualities = discoveryScope == null
+            ? await site.discoverPlayQualities(detail: detail)
+            : await discoveryScope.discover(site, detail);
       } on StreamException {
+        discoveryScope?.checkActive();
         rethrow;
       } catch (error) {
+        discoveryScope?.checkActive();
         throw StreamException(
           type: StreamErrorType.networkError,
           message: '${i18n('stream_get_quality_failed')}: $error',
@@ -185,6 +194,7 @@ class StreamResolverService extends GetxService {
         if (renewCurrent) {
           try {
             final renewed = await _resolveQuality(
+              discoveryScope: discoveryScope,
               site: site,
               detail: detail,
               orderedQualities: orderedQualities,
@@ -198,6 +208,7 @@ class StreamResolverService extends GetxService {
               return renewed.select(sameLinePosition);
             }
           } catch (error) {
+            discoveryScope?.checkActive();
             // Renewal prefers the current quality/CDN so codecs and output
             // remain stable. If that exact route vanished, continue through
             // the ordinary bounded line/quality fallback below.
@@ -207,6 +218,7 @@ class StreamResolverService extends GetxService {
         try {
           final nextLine = (previousLineIndex ?? -1) + 1;
           previousResolution = await _resolveQuality(
+            discoveryScope: discoveryScope,
             site: site,
             detail: detail,
             orderedQualities: orderedQualities,
@@ -220,6 +232,7 @@ class StreamResolverService extends GetxService {
             return previousResolution.select(nextLine);
           }
         } catch (error) {
+          discoveryScope?.checkActive();
           lastError = error;
         }
       }
@@ -230,6 +243,7 @@ class StreamResolverService extends GetxService {
         final qualityIndex = (startQualityIndex + offset) % orderedQualities.length;
         try {
           final resolved = await _resolveQuality(
+            discoveryScope: discoveryScope,
             site: site,
             detail: detail,
             orderedQualities: orderedQualities,
@@ -238,6 +252,7 @@ class StreamResolverService extends GetxService {
           );
           if (resolved.hasSources) return resolved.select(0);
         } catch (error) {
+          discoveryScope?.checkActive();
           lastError = error;
         }
       }
@@ -246,6 +261,7 @@ class StreamResolverService extends GetxService {
         try {
           final wrapped = usesLineCursor
               ? await _resolveQuality(
+                  discoveryScope: discoveryScope,
                   site: site,
                   detail: detail,
                   orderedQualities: orderedQualities,
@@ -255,6 +271,7 @@ class StreamResolverService extends GetxService {
               : previousResolution;
           if (wrapped?.hasSources == true) return wrapped!.select(0);
         } catch (error) {
+          discoveryScope?.checkActive();
           lastError = error;
         }
       }
@@ -264,8 +281,10 @@ class StreamResolverService extends GetxService {
         message: lastError == null ? i18n('stream_all_cdn_failed') : '${i18n('stream_all_cdn_failed')}: $lastError',
       );
     } on StreamException {
+      discoveryScope?.checkActive();
       rethrow;
     } catch (error) {
+      discoveryScope?.checkActive();
       throw StreamException(type: StreamErrorType.unknown, message: error.toString());
     }
   }
@@ -330,7 +349,9 @@ class StreamResolverService extends GetxService {
     required List<LivePlayQuality> orderedQualities,
     required LivePlayQuality requestedQuality,
     int? lineIndex,
+    LiveQualityDiscoveryScope? discoveryScope,
   }) async {
+    discoveryScope?.checkActive();
     final resolution = site is LivePlayUrlCursorResolver && lineIndex != null
         ? await (site as LivePlayUrlCursorResolver).resolvePlayUrlAtRaw(
             detail: detail,
@@ -338,6 +359,7 @@ class StreamResolverService extends GetxService {
             lineIndex: lineIndex,
           )
         : await site.resolvePlayUrls(detail: detail, quality: requestedQuality);
+    discoveryScope?.checkActive();
     final seen = <String>{};
     final validUrls = resolution.urls
         .map((url) => url.trim())

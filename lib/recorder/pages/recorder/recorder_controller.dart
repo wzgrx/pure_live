@@ -1,3 +1,4 @@
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
 import 'package:pure_live/recorder/services/live_input_recording_binding.dart';
 import 'package:pure_live/common/utils/play_quality_label.dart';
 
@@ -815,9 +816,15 @@ class RecorderController extends GetxService {
     _lifecycleCompleters[task.taskId] = lifecycle;
     String? protectedDirectory;
     CacheService? directoryOwner;
+    final discovery = LiveQualityDiscoveryScope();
     token.onCancel = () async {
+      discovery.cancel();
       final hadActiveSession = ffmpeg.isRunning(task.taskId) || VideoProcessorService.to.isProcessing(task.taskId);
-      await Future.wait(<Future<void>>[ffmpeg.stop(task.taskId), VideoProcessorService.to.cancel(task.taskId)]);
+      await Future.wait(<Future<void>>[
+        discovery.close(),
+        ffmpeg.stop(task.taskId),
+        VideoProcessorService.to.cancel(task.taskId),
+      ]);
       // A finished native writer can still have a terminal sample or a
       // dispatched finalizer. Cancellation must not release its directory
       // and scheduler slot before those phases have drained.
@@ -846,6 +853,7 @@ class RecorderController extends GetxService {
               previousQualityId: previousQualityId,
               previousLineIndex: previousLineIndex,
               renewCurrent: renewCurrent,
+              discoveryScope: discovery,
             );
       if (token.isCancelled) return;
 
@@ -952,6 +960,7 @@ class RecorderController extends GetxService {
       }
       _completeLifecycle(task.taskId);
     } finally {
+      await discovery.close();
       final pendingLease = _pendingRecorderLeases[task.taskId];
       if (pendingLease?.sourceUrl == task.currentUrl) {
         _pendingRecorderLeases.remove(task.taskId);
@@ -1088,6 +1097,7 @@ class RecorderController extends GetxService {
         previousQualityId: task.selectedQualityId,
         previousLineIndex: task.selectedLineIndex,
         renewCurrent: true,
+        discoveryScope: request.discovery,
       );
       if (!identical(_leasePrefetchRequests[task.taskId], request) ||
           !_ownsRecorderLease(task, sourceUrl: sourceUrl, sessionId: sessionId)) {
@@ -1106,6 +1116,7 @@ class RecorderController extends GetxService {
         stackTrace: stackTrace,
       );
     } finally {
+      await request.discovery.close();
       if (identical(_leasePrefetchRequests[task.taskId], request)) {
         _leasePrefetchRequests.remove(task.taskId);
         if (HuyaTransportPolicy.hasNativeFlvCredential(sourceUrl)) {
@@ -1126,7 +1137,22 @@ class RecorderController extends GetxService {
   void _cancelRecorderLeaseTimers(String taskId) {
     _leasePrefetchTimers.remove(taskId)?.cancel();
     _leaseRotationTimers.remove(taskId)?.cancel();
-    _leasePrefetchRequests.remove(taskId);
+    final request = _leasePrefetchRequests.remove(taskId);
+    if (request != null) _retirePrefetchDiscovery(taskId, request.discovery);
+  }
+
+  final Map<String, Set<Future<void>>> _retiringPrefetchDiscoveries = {};
+
+  void _retirePrefetchDiscovery(String taskId, LiveQualityDiscoveryScope discovery) {
+    final pending = _retiringPrefetchDiscoveries.putIfAbsent(taskId, () => {});
+    late final Future<void> work;
+    work = discovery.close().whenComplete(() {
+      pending.remove(work);
+      if (pending.isEmpty && identical(_retiringPrefetchDiscoveries[taskId], pending)) {
+        _retiringPrefetchDiscoveries.remove(taskId);
+      }
+    });
+    pending.add(work);
   }
 
   void _cancelRecorderLease(String taskId) {
@@ -1215,6 +1241,7 @@ class RecorderController extends GetxService {
     // cancel has a bounded wait and may return while a native writer is still
     // draining. Do not clear monitoring or allow a new start on that signal.
     await scheduler.waitForTask(task.taskId);
+    await Future.wait(_retiringPrefetchDiscoveries[task.taskId]?.toList() ?? <Future<void>>[]);
     if (_isClosing || !_ownsTask(task)) return;
     await _interruptedRecoveries[task.taskId]?.future;
     if (_isClosing || !_ownsTask(task)) return;
@@ -1575,6 +1602,9 @@ class RecorderController extends GetxService {
     }
     _leasePrefetchTimers.clear();
     _leaseRotationTimers.clear();
+    for (final entry in _leasePrefetchRequests.entries) {
+      _retirePrefetchDiscovery(entry.key, entry.value.discovery);
+    }
     _leasePrefetchRequests.clear();
     _prefetchedRecorderLeases.clear();
     _pendingRecorderLeases.clear();
@@ -1596,6 +1626,7 @@ class RecorderController extends GetxService {
         // clearAll has a bounded cancel wait, not a native completion guarantee.
         await Future.wait(backgroundLeases.map((lease) => scheduler.waitForTask(lease.task.taskId)));
         await Future.wait(_finalizationFutures.values.toList());
+        await Future.wait(_retiringPrefetchDiscoveries.values.expand((pending) => pending).toList());
         for (final lease in backgroundLeases) {
           await _releaseBackgroundLease(lease);
         }
@@ -1690,7 +1721,9 @@ class _PrefetchedRecorderLease {
   final ResolvedRecordStream stream;
 }
 
-class _RecorderLeasePrefetch {}
+class _RecorderLeasePrefetch {
+  final discovery = LiveQualityDiscoveryScope();
+}
 
 class _PendingRecorderLease {
   const _PendingRecorderLease({required this.sourceUrl, required this.stream});

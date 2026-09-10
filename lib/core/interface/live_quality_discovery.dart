@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/model/live_play_quality.dart';
@@ -22,5 +24,38 @@ extension LiveSiteQualityDiscovery on LiveSite {
     // result must not become the next stage of a new playback operation.
     if (cancel?.isCancelled == true) throw cancel!.cancelError!;
     return result;
+  }
+}
+
+/// One consumer's discovery lifetime, independent from metadata/URL requests
+/// and native player ownership. Closing joins only capability-owned cleanup.
+class LiveQualityDiscoveryScope {
+  final cancelToken = CancelToken();
+  final Set<Future<void>> _pending = {};
+  Future<void>? _closing;
+
+  void checkActive() {
+    if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+  }
+
+  Future<List<LivePlayQuality>> discover(LiveSite site, LiveRoom detail) async {
+    checkActive();
+    final cleanup = Completer<void>();
+    if (site is LiveQualityDiscovery) _pending.add(cleanup.future);
+    try {
+      return await site.discoverPlayQualities(detail: detail, cancel: cancelToken);
+    } finally {
+      _pending.remove(cleanup.future);
+      cleanup.complete();
+    }
+  }
+
+  void cancel() {
+    if (!cancelToken.isCancelled) cancelToken.cancel();
+  }
+
+  Future<void> close() {
+    cancel();
+    return _closing ??= Future.wait(_pending.toList()).then((_) {});
   }
 }

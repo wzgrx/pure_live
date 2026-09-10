@@ -21,6 +21,7 @@ final class HlsUpstreamClient {
     required Map<String, String> headers,
     required this.cookies,
     HlsSourceQueryPolicy? queryPolicy,
+    this._requestCookies,
   }) : _origin = source.origin,
        _headers = Map.of(headers),
        _policy = queryPolicy {
@@ -33,6 +34,10 @@ final class HlsUpstreamClient {
   final String _origin;
   final Map<String, String> _headers;
   HlsSourceQueryPolicy? _policy;
+  // An owned runtime grant is authoritative, including null (no cookie).
+  // Never merge it with captured command headers or response cookies: those
+  // could resurrect credentials after expiry/replacement in the live session.
+  String? Function(Uri)? _requestCookies;
   final Set<void Function()> _aborters = {};
   bool _stopped = false;
 
@@ -48,6 +53,7 @@ final class HlsUpstreamClient {
     stop();
     _headers.clear();
     _policy = null;
+    _requestCookies = null;
   }
 
   void _check(HlsPrefetchCancellation? cancellation, HlsResponseBudget? budget) {
@@ -94,7 +100,10 @@ final class HlsUpstreamClient {
           if (name == HttpHeaders.authorizationHeader && uri.origin != _origin) continue;
           request.headers.set(entry.key, entry.value, preserveHeaderCase: true);
         }
-        final cookie = cookies.headerFor(uri, initialHeader: initialCookie);
+        final provider = _requestCookies;
+        // Resolve after openUrl, immediately before transmission, and again on
+        // every redirect. The owner scopes to actual URI and may throw on revoke.
+        final cookie = provider == null ? cookies.headerFor(uri, initialHeader: initialCookie) : provider(uri);
         if (cookie != null) request.headers.set(HttpHeaders.cookieHeader, cookie);
         if (!_isPlaylist(uri) && range != null && range.isNotEmpty) {
           request.headers.set(HttpHeaders.rangeHeader, range);
@@ -109,7 +118,7 @@ final class HlsUpstreamClient {
               )
             : await budget.wait(request.close, abort: request.abort);
         _check(cancellation, budget);
-        cookies.receive(uri, response.headers[HttpHeaders.setCookieHeader] ?? const []);
+        if (provider == null) cookies.receive(uri, response.headers[HttpHeaders.setCookieHeader] ?? const []);
         final location = response.headers.value(HttpHeaders.locationHeader);
         if (!const {301, 302, 303, 307, 308}.contains(response.statusCode) || location == null) {
           return (response, uri);

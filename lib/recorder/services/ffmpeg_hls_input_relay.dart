@@ -44,6 +44,7 @@ class FFmpegHlsInputRelay {
     required Duration bodyIdleTimeout,
     required this._createStagingDirectory,
     required HlsSourceQueryPolicy? sourceQueryPolicy,
+    required String? Function(Uri)? requestCookies,
     required this.diagnostics,
     required this.prefetchEnabled,
   }) {
@@ -54,6 +55,7 @@ class FFmpegHlsInputRelay {
       headers: _headers,
       cookies: _cookies,
       queryPolicy: sourceQueryPolicy,
+      requestCookies: requestCookies,
     );
     _resources['root'] = upstream;
   }
@@ -178,6 +180,10 @@ class FFmpegHlsInputRelay {
     bool drainOnStop = false,
     // Explicit selected-source capability, never inferred from a query name.
     HlsSourceQueryPolicy? sourceQueryPolicy,
+    // Authoritative live cookie grant; called for every actual upstream URI,
+    // including redirects and prefetch. Null means no cookie, not a fallback.
+    // Caller owns session lifetime and closes this relay when the session ends.
+    String? Function(Uri)? requestCookies,
     // Playback uses the media proxy; recording retains its existing app proxy.
     String Function(Uri)? findProxy,
     // Tests supply an isolated owned directory or controlled storage failure.
@@ -188,7 +194,9 @@ class FFmpegHlsInputRelay {
     final arguments = List<String>.of(source);
     final inputIndex = arguments.indexOf('-i');
     if (inputIndex < 0 || inputIndex + 1 >= arguments.length) {
-      if (sourceQueryPolicy != null) throw const FormatException('Missing policy-bound HLS input');
+      if (sourceQueryPolicy != null || requestCookies != null) {
+        throw const FormatException('Missing policy-bound HLS input');
+      }
       return null;
     }
 
@@ -197,11 +205,15 @@ class FFmpegHlsInputRelay {
         (upstream == null || !_isHlsUri(upstream) || !sourceQueryPolicy.matchesSource(upstream))) {
       throw const FormatException('HLS query policy does not match selected input');
     }
-    if (upstream == null || !_isHlsUri(upstream)) return null;
+    if (upstream == null || !_isHlsUri(upstream)) {
+      if (requestCookies != null) throw const FormatException('Missing runtime-cookie HLS input');
+      return null;
+    }
     final supportedHost = !kIsWeb && (Platform.isAndroid || Platform.isLinux);
     if (!force &&
         !drainOnStop &&
         sourceQueryPolicy == null &&
+        requestCookies == null &&
         (!supportedHost || upstream.scheme.toLowerCase() != 'https')) {
       return null;
     }
@@ -233,6 +245,7 @@ class FFmpegHlsInputRelay {
       bodyIdleTimeout: _readBodyIdleTimeout(arguments, inputIndex),
       createStagingDirectory: createStagingDirectory ?? _defaultStagingDirectory,
       sourceQueryPolicy: sourceQueryPolicy,
+      requestCookies: requestCookies,
       diagnostics: diagnostics,
       prefetchEnabled: enablePrefetch && drainOnStop,
     );

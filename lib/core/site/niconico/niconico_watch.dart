@@ -2,7 +2,20 @@ import 'dart:convert';
 
 import 'package:html/parser.dart' as html;
 
-enum NiconicoFailure { transport, access, missing, rateLimited, service, schema, identity, cancelled }
+enum NiconicoFailure {
+  transport,
+  access,
+  missing,
+  rateLimited,
+  service,
+  schema,
+  identity,
+  cancelled,
+  notLive,
+  sessionClosed,
+  sessionError,
+  cleanup,
+}
 
 class NiconicoException implements Exception {
   const NiconicoException(this.kind);

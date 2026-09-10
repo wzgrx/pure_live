@@ -6,6 +6,17 @@ String fixture(List<int> pts, {List<int>? content}) =>
     '#tb 0: 1/1000\n${[for (var i = 0; i < pts.length; i++) '0, ${pts[i]}, ${pts[i]}, 50, 100, ${(content?[i] ?? i).toRadixString(16).padLeft(32, '0')}'].join('\n')}\n';
 
 void main() {
+  test('two audio samples remain exactly two samples at a long timestamp', () {
+    final source = FrameHashTimeline.parse(fixture([1120000, 1121024, 1122048]).replaceFirst('1/1000', '1/44100'));
+    final limit = source.compare(
+      FrameHashTimeline.parse(fixture([1119999, 1121024, 1122049]).replaceFirst('1/1000', '1/44100')),
+    );
+    expect(limit['offsetSpreadSeconds'], 2 / 44100);
+    final over = source.compare(
+      FrameHashTimeline.parse(fixture([1119999, 1121024, 1122050]).replaceFirst('1/1000', '1/44100')),
+    );
+    expect(over['offsetSpreadSeconds'] as double, greaterThan(2 / 44100));
+  });
   test('constant start offset is separate from a seam step', () {
     final source = FrameHashTimeline.parse(fixture([0, 50, 100, 150]));
     final normal = source.compare(FrameHashTimeline.parse(fixture([500, 550, 600, 650])));

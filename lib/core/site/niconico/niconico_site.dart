@@ -1,3 +1,4 @@
+import 'package:pure_live/core/interface/live_search.dart';
 import 'package:pure_live/core/interface/live_quality_discovery.dart';
 import 'package:dio/dio.dart';
 import 'package:pure_live/common/models/live_area.dart';
@@ -30,6 +31,7 @@ class NiconicoSite extends LiveSite
         LiveSiteDirectoryPager,
         LiveDirectoryNotice,
         LiveQualityDiscovery,
+        LiveCancellableSearch,
         LiveSiteRoomRefresher,
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
@@ -106,9 +108,19 @@ class NiconicoSite extends LiveSite
   }
 
   @override
-  Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) async {
+  Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) =>
+      searchRoomsCancellable(keyword, page: page, pageSize: pageSize);
+
+  @override
+  Future<List<LiveRoom>> searchRoomsCancellable(
+    String keyword, {
+    int page = 1,
+    int pageSize = 30,
+    CancelToken? cancel,
+  }) async {
+    if (cancel?.isCancelled == true) throw cancel!.cancelError!;
     _pageSize(pageSize);
-    return (await _directory.search(keyword, page: page)).rooms;
+    return (await _directory.search(keyword, page: page, cancel: cancel)).rooms;
   }
 
   String _identity(String roomId, String platform) {

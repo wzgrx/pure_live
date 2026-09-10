@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+import 'package:pure_live/core/common/request_scope.dart';
+import 'package:pure_live/core/interface/live_search.dart';
+
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/modules/search/search_capability.dart';
 import 'package:pure_live/modules/search/search_ranking.dart';
@@ -9,7 +13,9 @@ import 'package:url_launcher/url_launcher.dart';
 const Duration liveSearchRequestTimeout = Duration(seconds: 12);
 
 class SearchController extends GetxController {
-  SearchController() : sites = List<Site>.unmodifiable(Sites().availableSites()) {
+  SearchController({List<Site>? searchSites, this.requestTimeout = liveSearchRequestTimeout})
+    : sites = List<Site>.unmodifiable(searchSites ?? Sites().availableSites()) {
+    if (requestTimeout <= Duration.zero) throw ArgumentError.value(requestTimeout, 'requestTimeout');
     scrollController.addListener(_handleSearchScroll);
   }
 
@@ -19,6 +25,18 @@ class SearchController extends GetxController {
   /// one snapshot prevents the tab labels, selected index and paginated
   /// adapter state (notably Twitch cursors) from drifting apart mid-search.
   final List<Site> sites;
+  final Duration requestTimeout;
+  CancelToken? _searchCancel;
+  bool _closed = false;
+  bool get _active => !_closed && !isClosed;
+  bool _isCurrent(int generation) => _active && generation == _searchGeneration;
+
+  void _invalidateSearch() {
+    _searchGeneration++;
+    _searchCancel?.cancel();
+    _searchCancel = null;
+  }
+
   var index = 0.obs;
   final results = <LiveRoom>[].obs;
   final loading = false.obs;
@@ -38,10 +56,28 @@ class SearchController extends GetxController {
   final Map<String, bool> _hasMoreByPlatform = {};
   final List<Worker> _audienceWorkers = [];
   void selectPlatform(int requestedIndex) {
+    if (!_active) return;
     final selectedIndex = requestedIndex.clamp(0, sites.length).toInt();
     if (selectedIndex == index.v) return;
+    _invalidateSearch();
     index.value = selectedIndex;
-    if (searched.v) doSearch();
+    if (!searched.v) return;
+    if (searchController.text.trim().isNotEmpty) {
+      doSearch();
+      return;
+    }
+    // An empty draft must not leave old-platform results under a new tab.
+    _activeKeyword = '';
+    _currentPage = 0;
+    _rawResults.clear();
+    _hasMoreByPlatform.clear();
+    results.clear();
+    loading.v = false;
+    loadingMore.v = false;
+    pendingSiteCount.v = 0;
+    hasMore.v = false;
+    searched.v = false;
+    errorMessage.v = '';
   }
 
   void _handleSearchScroll() {
@@ -128,6 +164,7 @@ class SearchController extends GetxController {
   }
 
   Future<void> doSearch() async {
+    if (!_active) return;
     final keyword = searchController.text.trim();
     if (keyword.isEmpty) {
       ToastUtil.show(i18n("please_input_keyword"));
@@ -135,7 +172,9 @@ class SearchController extends GetxController {
     }
     FocusManager.instance.primaryFocus?.unfocus();
     if (scrollController.hasClients) scrollController.jumpTo(0);
-    final generation = ++_searchGeneration;
+    _invalidateSearch();
+    final generation = _searchGeneration;
+    _searchCancel = CancelToken();
     _activeKeyword = keyword;
     _currentPage = 0;
     loading.v = true;
@@ -152,7 +191,7 @@ class SearchController extends GetxController {
   }
 
   Future<void> loadMore() async {
-    if (loading.v || loadingMore.v || !hasMore.v || _activeKeyword.isEmpty) return;
+    if (!_active || loading.v || loadingMore.v || !hasMore.v || _activeKeyword.isEmpty) return;
     final generation = _searchGeneration;
     loadingMore.v = true;
     await _searchPage(keyword: _activeKeyword, page: _currentPage + 1, generation: generation, append: true);
@@ -177,7 +216,7 @@ class SearchController extends GetxController {
     }).toList();
 
     if (searchableSites.isEmpty) {
-      if (generation != _searchGeneration) return;
+      if (!_isCurrent(generation)) return;
       if (selectedSites.length == 1 &&
           !LiveSearchCapabilities.forPlatform(selectedSites.single.id).supportsNativeSearch) {
         final capability = LiveSearchCapabilities.forPlatform(selectedSites.single.id);
@@ -197,27 +236,17 @@ class SearchController extends GetxController {
     pendingSiteCount.v = searchableSites.length;
     final failures = <String>[];
     var completed = 0;
+    final cancel = _searchCancel!;
     final batchStream = Stream<_SiteSearchBatch>.fromFutures(
-      searchableSites.map((site) async {
-        try {
-          final rooms = await site.liveSite
-              .searchRooms(keyword, page: page, pageSize: 20)
-              .timeout(liveSearchRequestTimeout);
-          return _SiteSearchBatch(site: site, rooms: rooms);
-        } on TimeoutException catch (error) {
-          debugPrint('Native search timed out for ${site.id}: $error');
-          return _SiteSearchBatch(site: site, rooms: const [], failed: true);
-        } catch (error) {
-          debugPrint('Native search failed for ${site.id}: $error');
-          return _SiteSearchBatch(site: site, rooms: const [], failed: true);
-        }
-      }),
+      searchableSites.map((site) => _searchSite(site, keyword, page, cancel)),
     );
 
     // Render completed platforms immediately instead of holding the whole
     // result grid behind the slowest network request.
     await for (final batch in batchStream) {
-      if (generation != _searchGeneration) return;
+      // Drain cancelled batches as well, so this operation settles after all
+      // cancellation-aware provider futures; never write a retired generation.
+      if (!_isCurrent(generation)) continue;
       final capability = LiveSearchCapabilities.forPlatform(batch.site.id);
       final beforeCount = _rawResults.length;
       for (final room in batch.rooms) {
@@ -235,7 +264,7 @@ class SearchController extends GetxController {
       }
     }
 
-    if (generation != _searchGeneration) return;
+    if (!_isCurrent(generation)) return;
     _currentPage = page;
     hasMore.v = selectedSites.any((site) => _hasMoreByPlatform[site.id] ?? false);
     if (failures.isNotEmpty) {
@@ -248,6 +277,41 @@ class SearchController extends GetxController {
     pendingSiteCount.v = 0;
   }
 
+  Future<_SiteSearchBatch> _searchSite(Site site, String keyword, int page, CancelToken cancel) async {
+    try {
+      final rooms = await withRequestCancellation(cancel, (transport) async {
+        if (transport.isCancelled) throw transport.cancelError!;
+        var expired = false;
+        final timer = Timer(requestTimeout, () {
+          expired = true;
+          transport.cancel();
+        });
+        try {
+          final work = site.liveSite.searchRoomsWithCancellation(keyword, page: page, pageSize: 20, cancel: transport);
+          // Legacy APIs have no transport cancellation contract. Stop waiting
+          // for them without claiming their underlying HTTP has been stopped.
+          final result = site.liveSite is LiveCancellableSearch
+              ? await work
+              : await Future.any<List<LiveRoom>>([
+                  work,
+                  transport.whenCancel.then<List<LiveRoom>>((_) => throw transport.cancelError!),
+                ]);
+          if (transport.isCancelled) throw transport.cancelError!;
+          return result;
+        } catch (_) {
+          if (expired && !cancel.isCancelled) throw TimeoutException('Native search deadline', requestTimeout);
+          rethrow;
+        } finally {
+          timer.cancel();
+        }
+      });
+      return _SiteSearchBatch(site: site, rooms: rooms);
+    } catch (error) {
+      if (!cancel.isCancelled) debugPrint('Native search failed for ${site.id}: $error');
+      return _SiteSearchBatch(site: site, rooms: const [], failed: true);
+    }
+  }
+
   String _roomKey(LiveRoom room) {
     final platform = room.platform?.trim().toLowerCase() ?? 'unknown';
     final roomId = room.roomId?.trim() ?? '';
@@ -258,6 +322,7 @@ class SearchController extends GetxController {
   bool get hasFilteredOfflineResults => _rawResults.isNotEmpty && results.isEmpty && !includeOffline.v;
 
   void _applyFiltersAndSort() {
+    if (!_active) return;
     final platformOrder = sites.map((site) => site.id).toList();
     results.assignAll(
       LiveSearchRanking.apply(
@@ -271,11 +336,13 @@ class SearchController extends GetxController {
   }
 
   void setIncludeOffline(bool value) {
+    if (!_active) return;
     includeOffline.v = value;
     _applyFiltersAndSort();
   }
 
   void setSortMode(LiveSearchSortMode value) {
+    if (!_active) return;
     sortMode.v = value;
     _applyFiltersAndSort();
   }
@@ -351,6 +418,7 @@ class SearchController extends GetxController {
   }
 
   Future<void> openWebSearch() async {
+    if (!_active) return;
     if (index.v == 0) {
       ToastUtil.show(i18n('select_platform_for_web_search'));
       return;
@@ -369,7 +437,7 @@ class SearchController extends GetxController {
     final url = buildSearchUrl(site.id, keyword);
     if (Platform.isLinux) {
       final opened = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-      if (!opened) ToastUtil.show(i18n('external_browser_not_opened'));
+      if (_active && !opened) ToastUtil.show(i18n('external_browser_not_opened'));
       return;
     }
     if (Platform.isWindows && !_isWebView2Available) {
@@ -380,6 +448,7 @@ class SearchController extends GetxController {
   }
 
   void showWebView2MissingDialog() {
+    if (!_active) return;
     Get.dialog(
       Builder(
         builder: (BuildContext dialogContext) {
@@ -424,8 +493,10 @@ class SearchController extends GetxController {
     _audienceWorkers.add(ever(SettingsService.to.app.preferRealOnlineCounts, (_) => _applyFiltersAndSort()));
     _audienceWorkers.add(ever(SettingsService.to.app.realOnlinePlatforms, (_) => _applyFiltersAndSort()));
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (Platform.isWindows) {
-        _isWebView2Available = await isWebView2Installed();
+      if (_active && Platform.isWindows) {
+        final available = await isWebView2Installed();
+        if (!_active) return;
+        _isWebView2Available = available;
         if (!_isWebView2Available) {
           showWebView2MissingDialog();
         }
@@ -435,7 +506,9 @@ class SearchController extends GetxController {
 
   @override
   void onClose() {
-    _searchGeneration++;
+    if (_closed) return;
+    _closed = true;
+    _invalidateSearch();
     scrollController
       ..removeListener(_handleSearchScroll)
       ..dispose();

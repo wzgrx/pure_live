@@ -402,8 +402,21 @@ void main() {
         return mediaKitCreations++ == 0 ? initialPlayer : candidate;
       },
     );
+    addTearDown(manager.dispose);
     await manager.initialize(engine: PlayerEngine.mediaKit);
+    // A fallback belongs to an active source; switching before any play intent
+    // now correctly retires the candidate instead of installing an idle engine.
+    await manager.play(
+      'https://example.invalid/previous.flv',
+      const <String>['https://example.invalid/previous.flv'],
+      const <String, String>{},
+      room: LiveRoom(roomId: 'previous-room', platform: 'test'),
+    );
     await manager.switchEngine(PlayerEngine.fijk, isManual: false);
+    expect(manager.currentPlayer, same(fallbackPlayer));
+    expect(manager.currentEngine, PlayerEngine.fijk);
+    expect(fallbackPlayer.openedUrls, <String>['https://example.invalid/previous.flv']);
+    expect(initialPlayer.hardDisposeCalls, 1);
 
     await manager.play(
       'https://example.invalid/next.flv',
@@ -415,7 +428,10 @@ void main() {
     expect(manager.currentPlayer, same(candidate));
     expect(candidate.setDataSourceCalls, 1);
     expect(candidate.openedUrls, <String>['https://example.invalid/next.flv']);
-    expect(fallbackPlayer.setDataSourceCalls, 0);
+    expect(fallbackPlayer.setDataSourceCalls, 1);
+    expect(fallbackPlayer.openedUrls, <String>['https://example.invalid/previous.flv']);
+    expect(initialPlayer.openedUrls, <String>['https://example.invalid/previous.flv']);
+    expect(manager.currentEngine, PlayerEngine.mediaKit);
     expect(initialPlayer.hardDisposeCalls, 1);
     expect(fallbackPlayer.hardDisposeCalls, 1);
     await manager.dispose();

@@ -20,6 +20,7 @@ import 'package:pure_live/recorder/services/recording_segment_clock.dart';
 import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 
 import 'frame_hash_timeline.dart';
+import 'recording_clock_probe_support.dart';
 
 void main() {
   for (final fixture in ['av_cfr', 'av_vfr', 'video_only', 'audio_only']) {
@@ -45,7 +46,7 @@ void main() {
         final media = [if (fixture != 'audio_only') 'video', if (fixture != 'video_only') 'audio'];
         final ownedIds = <String>[];
         try {
-          results['source'] = await _decode(input, output, 'source', media);
+          results['source'] = await decodeClockMedia(input, output, 'source', media);
           final variants = <String, Object?>{};
           report['variants'] = variants;
           for (final variant in ['single', 'legacy', 'candidate']) {
@@ -79,7 +80,7 @@ void main() {
             // A finite local fixture ends normally. The live service deliberately
             // reports an unsolicited EOF as a recoverable error even at code 0;
             // that network recovery contract is separate from this muxing test.
-            final record = await _native(manager, task.taskId, args);
+            final record = await runClockNative(manager, task.taskId, args);
             final segments =
                 (await dir.list(followLinks: false).toList())
                     .whereType<File>()
@@ -110,7 +111,7 @@ void main() {
             }
             expect(await target.length(), greaterThan(0));
             report['stage'] = '$variant-decode';
-            results[variant] = await _decode(target, output, variant, media);
+            results[variant] = await decodeClockMedia(target, output, variant, media);
           }
           final comparisons = <String, Object?>{};
           report['stage'] = 'comparison-gates';
@@ -171,93 +172,6 @@ void main() {
     skip: Platform.environment['PURELIVE_CLOCK_PROBE'] != '1',
     timeout: const Timeout(Duration(minutes: 3)),
   );
-}
-
-Future<Map<String, Object?>> _native(FFmpegManager manager, String id, List<String> args, {bool live = false}) async {
-  final evidence = <String, Object?>{};
-  final ended = Completer<void>();
-  final subscription = manager.stream.listen((event) {
-    if (event.taskId == id && [FFmpegEventType.complete, FFmpegEventType.error].contains(event.type)) {
-      evidence.addAll({
-        'type': event.type.name,
-        for (final key in ['code', 'manualStop', 'forcedCancel', 'inputIntegrityError', 'inputCoverageIncomplete'])
-          if (event.data.containsKey(key)) key: event.data[key],
-      });
-      if (!ended.isCompleted) ended.complete();
-    }
-  });
-  try {
-    await manager.start(taskId: id, arguments: args, liveRecording: live).timeout(const Duration(seconds: 60));
-    await ended.future.timeout(const Duration(seconds: 5));
-    expect(evidence['type'], 'complete');
-    expect(evidence['code'], 0);
-    expect(manager.isRunning(id), false);
-    return evidence;
-  } finally {
-    if (manager.isRunning(id)) await manager.stop(id).timeout(const Duration(seconds: 30));
-    await subscription.cancel();
-  }
-}
-
-Future<Map<String, FrameHashTimeline>> _decode(File input, Directory output, String label, List<String> media) async {
-  final results = <String, FrameHashTimeline>{};
-  for (final kind in media) {
-    final process = await Process.start(Platform.environment['PURELIVE_FFMPEG']!, [
-      '-v',
-      'error',
-      '-threads',
-      '4',
-      '-i',
-      input.path,
-      '-map',
-      kind == 'video' ? '0:v:0' : '0:a:0',
-      '-xerror',
-      if (kind == 'video') ...[
-        '-c:v',
-        'rawvideo',
-        '-pix_fmt',
-        'yuv420p',
-        '-fps_mode',
-        'passthrough',
-      ] else ...[
-        '-c:a',
-        'pcm_s16le',
-      ],
-      '-threads',
-      '4',
-      '-enc_time_base',
-      'demux',
-      '-f',
-      'framemd5',
-      '-',
-    ]);
-    var ended = false;
-    Future<String> collect(Stream<List<int>> stream) async {
-      final bytes = <int>[];
-      await for (final chunk in stream) {
-        if (bytes.length + chunk.length > 4 * 1024 * 1024) throw StateError('Decode evidence budget');
-        bytes.addAll(chunk);
-      }
-      return utf8.decode(bytes);
-    }
-
-    try {
-      final decoded = await Future.wait<Object>([process.exitCode, collect(process.stdout), collect(process.stderr)])
-          .timeout(const Duration(seconds: 30));
-      ended = true;
-      await File(p.join(output.path, '$label-$kind.framemd5')).writeAsString(decoded[1] as String);
-      await File(p.join(output.path, '$label-$kind.stderr')).writeAsString(decoded[2] as String);
-      expect(decoded[0], 0);
-      expect((decoded[2] as String).trim(), isEmpty);
-      results[kind] = FrameHashTimeline.parse(decoded[1] as String);
-    } finally {
-      if (!ended) {
-        process.kill();
-        await process.exitCode.timeout(const Duration(seconds: 5));
-      }
-    }
-  }
-  return results;
 }
 
 Future<void> _manualStopClock() async {
@@ -365,7 +279,7 @@ Future<void> _manualStopClock() async {
     final reference = LiveRecordTask.fromRoom(LiveRoom(platform: 'clockfixture', roomId: 'manual-reference'))
       ..outputDir = referenceDirectory.path
       ..recordedSeconds = 26;
-    report['referenceNative'] = await _native(
+    report['referenceNative'] = await runClockNative(
       manager,
       reference.taskId,
       FFmpegCommandBuilder.buildRecordArguments(
@@ -379,14 +293,14 @@ Future<void> _manualStopClock() async {
       ),
     );
     expect(await VideoProcessorService.to.convertToMp4(task: reference, deleteSourceTs: false), true);
-    final single = await _decode(
+    final single = await decodeClockMedia(
       File(p.join(referenceDirectory.path, '${reference.recordingFilePrefix}.mp4')),
       root,
       'single',
       ['video', 'audio'],
     );
-    final candidate = await _decode(actual, root, 'candidate', ['video', 'audio']);
-    final source = await _decode(captured, root, 'source', ['video', 'audio']);
+    final candidate = await decodeClockMedia(actual, root, 'candidate', ['video', 'audio']);
+    final source = await decodeClockMedia(captured, root, 'source', ['video', 'audio']);
     final comparisons = <String, Object?>{};
     report['comparisons'] = comparisons;
     report['stage'] = 'comparison-gates';

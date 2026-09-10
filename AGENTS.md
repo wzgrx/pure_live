@@ -34,6 +34,7 @@ Read [BUILD_POLICY.md](BUILD_POLICY.md) before heavy commands. Use [docs/AGENT_W
 - Completed bug-fix batches retain `bugfix-android-release-default` under BUILD_POLICY.md: one Android patch/build release per batch. Analysis-only or explicitly deferred delivery stays within that scope. Ordinary docs work does not trigger a version bump.
 - Secrets and signing keys stay outside Git. APK/source/signature/hash/version checks remain required for publication. No force-push or deletion of unrelated branches/artifacts.
 - Source synchronization is separate from package publication. After each completed change batch passes its relevant checks, commit and push the authorized current branch to `origin`, then verify the remote head. Do not accumulate local-only commits while waiting for 3.2.0 or full native acceptance. Preserve unpublished work on a failed push, inspect divergence, and never force-push to resolve it. A successful source push is not a release or full acceptance claim.
+- Synchronize unfinished diagnostic checkpoints when requested too: record the exact passing checks, known failures and next step in the commit/documentation. Preserve failing evidence and strict gates; distinguish a diagnostic checkpoint from a validated fix instead of withholding source until every acceptance item passes.
 
 ## Device and collaboration boundaries
 

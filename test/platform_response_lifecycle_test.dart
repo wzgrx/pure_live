@@ -15,10 +15,17 @@ import 'package:pure_live/core/site/twitcasting/twitcasting_api.dart';
 import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_api.dart';
 import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_share.dart';
 import 'package:pure_live/core/site/zhanqi/zhanqi_api.dart';
+import 'package:pure_live/core/site/weibo/weibo_api.dart';
 
 typedef _Read = Future<Object?> Function(CancelToken?);
 typedef _Case = ({String name, _Read read, String body, int cap});
 final _cases = <_Case>[
+  (
+    name: 'Weibo',
+    read: (c) => WeiboApi().directory(cancel: c),
+    body: '{"code":100000,"error_code":0,"data":{"data":[]}}',
+    cap: WeiboApi.responseLimit,
+  ),
   (
     name: 'Xiaohongshu',
     read: (c) => XiaohongshuApi().room('123', cancel: c),
@@ -78,6 +85,7 @@ String _kind(Object? error) => switch (error) {
   HuajiaoException e => e.kind.name,
   ZhanqiException e => e.kind.name,
   XiaohongshuException e => e.kind.name,
+  WeiboException e => e.kind.name,
   _ => '${error.runtimeType}',
 };
 Matcher _failure(String kind) => throwsA(predicate<Object>((e) => _kind(e) == kind, kind));

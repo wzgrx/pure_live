@@ -36,8 +36,8 @@ void main() {
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final favorites = Get.put(FavoriteRoomController());
     final app = Get.put(AppSettingsController());
-    expect(favorites.hotAreasList, ['huya', 'openrec', 'ttinglive', 'xiaohongshu', 'niconico']);
-    expect(favorites.siteCatalogMigration.value, 13);
+    expect(favorites.hotAreasList, ['huya', 'openrec', 'ttinglive', 'xiaohongshu', 'niconico', 'weibo']);
+    expect(favorites.siteCatalogMigration.value, 14);
     expect(app.realOnlinePlatforms, ['twitch', 'openrec', 'ttinglive']);
     expect(app.audienceMetricMigration.value, 7);
     favorites.hotAreasList.remove('openrec');
@@ -46,7 +46,7 @@ void main() {
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
-    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'ttinglive', 'xiaohongshu', 'niconico']);
+    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'ttinglive', 'xiaohongshu', 'niconico', 'weibo']);
     expect(Get.put(AppSettingsController()).realOnlinePlatforms, ['twitch', 'ttinglive']);
   });
   test('backup preserves pinned owner case, numeric ID, tags and platform order', () {

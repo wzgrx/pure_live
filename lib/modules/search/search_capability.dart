@@ -21,6 +21,11 @@ class LiveSearchCapabilities {
   const LiveSearchCapabilities._();
 
   static const Map<String, LiveSearchCapability> _byPlatform = {
+    Sites.weiboSite: LiveSearchCapability(
+      coverage: NativeSearchCoverage.roomLookup,
+      supportsPagination: false,
+      supportsWebSearch: false,
+    ),
     Sites.niconicoSite: LiveSearchCapability(coverage: NativeSearchCoverage.liveOnly, supportsPagination: true),
     Sites.xiaohongshuSite: LiveSearchCapability(
       coverage: NativeSearchCoverage.roomLookup,

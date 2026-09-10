@@ -43,8 +43,9 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
-    expect(controller.siteCatalogMigration.value, 13);
+    expect(controller.siteCatalogMigration.value, 14);
     controller.hotAreasList.remove('missevan');
     controller.onInit();
     expect(controller.hotAreasList, [
@@ -57,6 +58,7 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
@@ -70,6 +72,7 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
   });
 

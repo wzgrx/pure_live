@@ -29,25 +29,57 @@ class PopularGridView extends StatelessWidget {
           ),
           contentBuilder: (context, list, scrollController) {
             final spacing = SettingsService.to.theme.crossAxisSpacing.v;
-            final itemWidth = (width - 12 - spacing * (crossAxisCount - 1)) / crossAxisCount;
-            return GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+            final rows = (list.length + crossAxisCount - 1) ~/ crossAxisCount;
+            // RoomCard owns its text metrics. A fixed 72-pixel caption area
+            // clips scaled text; lazy natural-height rows retain the columns
+            // without guessing font heights or suppressing accessibility scale.
+            return CustomScrollView(
               controller: scrollController,
               scrollCacheExtent: ScrollCacheExtent.pixels(width > 680 ? 480 : 320),
-              addAutomaticKeepAlives: false,
-              addRepaintBoundaries: true,
+              semanticChildCount: list.length,
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: spacing,
-                mainAxisSpacing: SettingsService.to.theme.mainAxisSpacing.v,
-                mainAxisExtent: itemWidth * 9 / 16 + 72,
-              ),
-              itemCount: list.length,
-              itemBuilder: (context, index) {
-                final room = list[index];
-                return RoomCard(key: ValueKey('${room.platform}:${room.roomId}'), room: room, dense: true);
-              },
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, row) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: row + 1 < rows ? SettingsService.to.theme.mainAxisSpacing.v : 0,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var column = 0; column < crossAxisCount; column++) ...[
+                              if (column > 0) SizedBox(width: spacing),
+                              Expanded(
+                                child: row * crossAxisCount + column < list.length
+                                    ? RepaintBoundary(
+                                        child: IndexedSemantics(
+                                          index: row * crossAxisCount + column,
+                                          child: RoomCard(
+                                            key: ValueKey(
+                                              '${list[row * crossAxisCount + column].platform}:${list[row * crossAxisCount + column].roomId}',
+                                            ),
+                                            room: list[row * crossAxisCount + column],
+                                            dense: true,
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      childCount: rows,
+                      addAutomaticKeepAlives: false,
+                      addRepaintBoundaries: false,
+                      addSemanticIndexes: false,
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         );

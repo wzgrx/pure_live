@@ -89,6 +89,8 @@ class SearchController extends GetxController {
   String buildSearchUrl(String platform, String keyword) {
     final q = Uri.encodeComponent(keyword);
     switch (platform) {
+      case Sites.weiboSite:
+        throw StateError('Weibo supports exact broadcast lookup, not web keyword search');
       case Sites.niconicoSite:
         return 'https://live.nicovideo.jp/search?keyword=$q&status=onair';
       case Sites.xiaohongshuSite:

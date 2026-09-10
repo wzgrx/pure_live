@@ -1,4 +1,5 @@
 import 'package:pure_live/core/site/niconico/niconico_link.dart';
+import 'package:pure_live/core/site/weibo/weibo_link.dart';
 import 'package:pure_live/core/sites.dart';
 import 'package:pure_live/core/site/huajiao/huajiao_link.dart';
 import 'package:pure_live/core/site/picarto/picarto_api.dart';
@@ -57,6 +58,10 @@ class WebSearchRoomParser {
     }
     final uri = Uri.tryParse(rawUrl.trim());
     if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) return null;
+    // Bare composite IDs belong to exact search, not web navigation. Preserve
+    // the raw URL for the adapter's structural dot-segment checks.
+    final weibo = WeiboLink.parse(rawUrl);
+    if (weibo != null) return WebSearchRoomTarget(platform: Sites.weiboSite, roomId: weibo);
     final missevan = MissevanApi.roomFromUri(uri);
     final inke = InkeApi.roomFromUri(uri);
     if (inke != null) return WebSearchRoomTarget(platform: Sites.inkeSite, roomId: inke);

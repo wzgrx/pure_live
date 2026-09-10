@@ -41,8 +41,9 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
-    expect(settings.siteCatalogMigration.value, 13);
+    expect(settings.siteCatalogMigration.value, 14);
     settings.hotAreasList.remove('inke');
     settings.onInit();
     expect(settings.hotAreasList, [
@@ -54,13 +55,14 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
     final reopened = Get.put(FavoriteRoomController());
-    expect(reopened.siteCatalogMigration.value, 13);
+    expect(reopened.siteCatalogMigration.value, 14);
     expect(reopened.hotAreasList, [
       'huya',
       'missevan',
@@ -70,6 +72,7 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
   });
 

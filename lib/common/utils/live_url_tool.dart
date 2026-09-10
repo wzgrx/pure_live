@@ -1,4 +1,5 @@
 import 'package:pure_live/core/site/niconico/niconico_link.dart';
+import 'package:pure_live/core/site/weibo/weibo_link.dart';
 import 'package:pure_live/core/site/tting/tting_link.dart';
 import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_link.dart';
 import 'package:pure_live/core/site/openrec/openrec_api.dart';
@@ -80,7 +81,8 @@ class LiveUrlTool {
       'twitcasting.tv',
     };
     return sharedHttpUrls(text).any((raw) {
-      if (NiconicoLink.parse(raw) != null ||
+      if (WeiboLink.parse(raw) != null ||
+          NiconicoLink.parse(raw) != null ||
           XiaohongshuLink.parse(raw) != null ||
           XiaohongshuLink.shortUri(raw) != null ||
           TtingLink.parse(raw) != null ||

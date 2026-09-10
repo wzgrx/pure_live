@@ -1,4 +1,6 @@
 import 'package:pure_live/core/site/niconico/niconico_link.dart';
+import 'package:pure_live/core/site/weibo/weibo_api.dart';
+import 'package:pure_live/core/site/weibo/weibo_link.dart';
 import 'package:pure_live/core/site/niconico/niconico_watch.dart';
 import 'package:pure_live/core/site/tting/tting_link.dart';
 import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_link.dart';
@@ -42,6 +44,12 @@ class RoomExternalOpener {
     if (id == null) return null;
     final path = Uri.encodeComponent(id);
     switch (site) {
+      case Sites.weiboSite:
+        try {
+          return RoomExternalTarget(web: WeiboLink.url(id));
+        } on WeiboException {
+          return null;
+        }
       case Sites.niconicoSite:
         try {
           return RoomExternalTarget(web: NiconicoLink.url(id));

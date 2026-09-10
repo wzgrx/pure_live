@@ -8,11 +8,13 @@ import 'package:pure_live/common/services/settings/favorite_room_controller.dart
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/get/get.dart';
 
+const _id = '1022:2321325000000000000000';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory folder;
   setUpAll(() async {
-    folder = await Directory.systemTemp.createTemp('niconico-catalog-');
+    folder = await Directory.systemTemp.createTemp('weibo-catalog-');
     Hive.init(folder.path);
     await HivePrefUtil.init();
   });
@@ -24,44 +26,60 @@ void main() {
   tearDown(Get.reset);
   tearDownAll(() async {
     await Hive.close();
-    expect(folder.absolute.path.startsWith(Directory.systemTemp.absolute.path), true);
+    expect(folder.absolute.path.startsWith('${Directory.systemTemp.absolute.path}${Platform.pathSeparator}'), isTrue);
     await folder.delete(recursive: true);
   });
-  test('catalog twelve adds niconico and later Weibo once, preserving hidden sites and audience settings', () async {
-    await HivePrefUtil.setInt('siteCatalogMigration', 12);
+
+  test('catalog thirteen adds only Weibo once and persists a later hide across a real Hive reopen', () async {
+    await HivePrefUtil.setInt('siteCatalogMigration', 13);
     await HivePrefUtil.setStringList('hotAreasList', ['huya', 'ttinglive']);
     await HivePrefUtil.setInt('audienceMetricMigration', 7);
     await HivePrefUtil.setStringList('realOnlinePlatforms', ['twitch']);
     final favorites = Get.put(FavoriteRoomController());
     final app = Get.put(AppSettingsController());
-    expect(favorites.hotAreasList, ['huya', 'ttinglive', 'niconico', 'weibo']);
+    expect(favorites.hotAreasList, ['huya', 'ttinglive', 'weibo']);
     expect(favorites.siteCatalogMigration.value, 14);
     expect(app.realOnlinePlatforms, ['twitch']);
     expect(app.audienceMetricMigration.value, 7);
-    favorites.hotAreasList.remove('niconico');
+    favorites.hotAreasList.remove('weibo');
     await Hive.box<dynamic>('app_settings').flush();
     Get.reset();
     await Hive.close();
     await HivePrefUtil.init();
-    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'ttinglive', 'weibo']);
+    expect(Get.put(FavoriteRoomController()).hotAreasList, ['huya', 'ttinglive']);
     expect(Get.put(AppSettingsController()).realOnlinePlatforms, ['twitch']);
   });
-  test('backup preserves exact broadcast string and tags without inventing owner identity', () {
+
+  test('current catalog preserves an explicitly empty selected-site list', () async {
+    await HivePrefUtil.setInt('siteCatalogMigration', 14);
+    await HivePrefUtil.setStringList('hotAreasList', []);
+    final favorites = Get.put(FavoriteRoomController());
+    expect(favorites.hotAreasList, isEmpty);
+    expect(favorites.siteCatalogMigration.value, 14);
+  });
+
+  test('backup preserves selected sites, separate broadcast/owner identities and tags', () {
     final favorites = Get.put(FavoriteRoomController());
     favorites.fromJson({
-      'hotAreasList': [' NICONICO ', 'huya', 'niconico'],
-      'preferPlatform': ' NICONICO ',
+      'hotAreasList': [' WEIBO ', 'huya', 'weibo'],
+      'preferPlatform': ' WEIBO ',
       'favoriteRooms': [
-        (LiveRoom(platform: 'niconico', roomId: 'lv100')..tagIds = ['fixture']).toJson(),
+        (LiveRoom(platform: 'weibo', roomId: _id, userId: '101')..tagIds = ['fixture']).toJson(),
       ],
       'favoriteAreas': [],
     });
-    expect(favorites.hotAreasList, ['niconico', 'huya']);
-    expect(favorites.preferPlatform.value, 'niconico');
+    expect(favorites.hotAreasList, ['weibo', 'huya']);
+    expect(favorites.preferPlatform.value, 'weibo');
     final restored = LiveRoom.fromJson((favorites.toJson()['favoriteRooms'] as List).single);
-    expect(restored.roomId, 'lv100');
-    expect(restored.userId, anyOf(isNull, isEmpty));
+    expect(restored.roomId, _id);
+    expect(restored.userId, '101');
     expect(restored.tagIds, ['fixture']);
-    expect(AppSettingsController.normalizeRealOnlinePlatforms(['niconico', 'twitch']), ['twitch']);
+    expect(AppSettingsController.normalizeRealOnlinePlatforms(['weibo', 'twitch']), ['twitch']);
+    favorites.fromJson({
+      'hotAreasList': ['huya'],
+      'favoriteRooms': [],
+      'favoriteAreas': [],
+    });
+    expect(favorites.hotAreasList, ['huya']);
   });
 }

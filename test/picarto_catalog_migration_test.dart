@@ -56,8 +56,9 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
-    expect(settings.siteCatalogMigration.value, 13);
+    expect(settings.siteCatalogMigration.value, 14);
     settings.hotAreasList.remove('picarto');
     settings.onInit();
     expect(settings.hotAreasList, [
@@ -72,6 +73,7 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
     await Hive.box<dynamic>('app_settings').flush();
     expect(HivePrefUtil.getStringList('hotAreasList'), [
@@ -86,6 +88,7 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
   });
 

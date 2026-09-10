@@ -1,4 +1,5 @@
 import 'site/niconico/niconico_site.dart';
+import 'site/weibo/weibo_site.dart';
 import 'site/tting/tting_site.dart';
 import 'site/xiaohongshu/xiaohongshu_site.dart';
 import 'site/openrec/openrec_site.dart';
@@ -24,6 +25,7 @@ import 'package:pure_live/core/site/kuaishou/kuaishou_site.dart';
 import 'package:pure_live/core/site/bilibili/bilibili_site.dart';
 
 class Sites {
+  static const String weiboSite = 'weibo';
   static const String niconicoSite = 'niconico';
   static const String allSite = "all";
   static const String bilibiliSite = "bilibili";
@@ -48,6 +50,7 @@ class Sites {
   static const String xiaohongshuSite = 'xiaohongshu';
 
   static const Set<String> supportedSiteIds = {
+    weiboSite,
     niconicoSite,
     bilibiliSite,
     douyuSite,
@@ -99,6 +102,7 @@ class Sites {
       liveSite: XiaohongshuSite(),
     ),
     Site(id: niconicoSite, name: 'niconico', logo: 'assets/images/logo.png', liveSite: NiconicoSite()),
+    Site(id: weiboSite, name: i18n('site_weibo'), logo: 'assets/images/logo.png', liveSite: WeiboSite()),
     Site(id: iptvSite, name: i18n("site_iptv"), logo: "assets/images/logo.png", liveSite: IptvSite()),
   ];
 
@@ -109,6 +113,7 @@ class Sites {
     // list scan allocated nine adapters per card and also discarded platform
     // session caches immediately afterwards.
     return switch (normalizedId) {
+      weiboSite => Site(id: weiboSite, name: i18n('site_weibo'), logo: 'assets/images/logo.png', liveSite: WeiboSite()),
       niconicoSite => Site(
         id: niconicoSite,
         name: 'niconico',

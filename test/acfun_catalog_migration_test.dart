@@ -45,8 +45,9 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
-    expect(settings.siteCatalogMigration.value, 13);
+    expect(settings.siteCatalogMigration.value, 14);
     settings.hotAreasList.remove('acfun');
     settings.onInit();
     expect(settings.hotAreasList, [
@@ -62,6 +63,7 @@ void main() {
       'ttinglive',
       'xiaohongshu',
       'niconico',
+      'weibo',
     ]);
   });
 

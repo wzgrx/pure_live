@@ -7,6 +7,8 @@ import 'package:pure_live/common/models/live_message.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
 
+import 'live_input_recipe.dart';
+
 /// The stream URLs returned for one requested quality together with the
 /// quality that the platform actually applied.
 ///
@@ -22,14 +24,24 @@ import 'package:pure_live/core/common/hls_source_query_policy.dart';
 /// separate acknowledgement.
 class LivePlayUrlResolution {
   const LivePlayUrlResolution({required this.urls, this.appliedQualityData, this.qualityUnconfirmed = false})
-    : sourceQueryPolicies = const {};
+    : sourceQueryPolicies = const {},
+      inputRecipe = null;
+
+  /// An owned input is a real source but has no exportable media URL.
+  const LivePlayUrlResolution.owned({
+    required LiveInputRecipe input,
+    this.appliedQualityData,
+    this.qualityUnconfirmed = false,
+  }) : inputRecipe = input,
+       urls = const [],
+       sourceQueryPolicies = const {};
 
   LivePlayUrlResolution._({
     required this.urls,
     required this.sourceQueryPolicies,
     this.appliedQualityData,
     this.qualityUnconfirmed = false,
-  });
+  }) : inputRecipe = null;
 
   /// Policy-bearing sources are copied and validated together. Keys identify
   /// exact signed URLs, never only CDN positions or quality labels.
@@ -56,14 +68,19 @@ class LivePlayUrlResolution {
     );
   }
 
-  LivePlayUrlResolution normalized() => LivePlayUrlResolution.withSourcePolicies(
-    urls: urls,
-    sourceQueryPolicies: sourceQueryPolicies,
-    appliedQualityData: appliedQualityData,
-    qualityUnconfirmed: qualityUnconfirmed,
-  );
+  LivePlayUrlResolution normalized() => inputRecipe != null
+      ? this
+      : LivePlayUrlResolution.withSourcePolicies(
+          urls: urls,
+          sourceQueryPolicies: sourceQueryPolicies,
+          appliedQualityData: appliedQualityData,
+          qualityUnconfirmed: qualityUnconfirmed,
+        );
 
   final List<String> urls;
+  final LiveInputRecipe? inputRecipe;
+  int get lineCount => inputRecipe == null ? urls.length : 1;
+  bool get hasSources => lineCount > 0;
   final Object? appliedQualityData;
   final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
 

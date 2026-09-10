@@ -12,11 +12,11 @@ class LineSelector extends StatelessWidget {
     return Obx(() {
       final state = controller.state.value;
 
-      if (!state.room.success || state.player.playUrls.isEmpty) {
+      if (!state.room.success || !state.player.hasPlaybackSource) {
         return const SizedBox.shrink();
       }
 
-      final currentIndex = state.player.currentLineIndex.clamp(0, state.player.playUrls.length - 1);
+      final currentIndex = state.player.currentLineIndex.clamp(0, state.player.lineCount - 1);
       final switching = controller.playerController.isStreamSwitching.value;
 
       final currentLineName = i18n("toolbox_line", args: {"index": (currentIndex + 1).toString()});
@@ -59,7 +59,7 @@ class LineSelector extends StatelessWidget {
           await controller.setResolution(ReloadDataType.changeLine, state.player.currentQuality, newLineIndex);
         },
         itemBuilder: (context) {
-          return List.generate(state.player.playUrls.length, (index) {
+          return List.generate(state.player.lineCount, (index) {
             final isSelected = index == currentIndex;
 
             return PopupMenuItem<int>(

@@ -1,3 +1,6 @@
+import 'package:pure_live/core/interface/live_input_recipe.dart';
+import 'package:pure_live/player/core/playback_source.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -37,6 +40,78 @@ void main() {
   });
 
   tearDown(Get.reset);
+
+  for (final outcome in ['commit', 'pause', 'close']) {
+    test('owned route receipt follows actual manager transaction on $outcome', () async {
+      final room = LiveRoom(roomId: 'owned-receipt', platform: 'test');
+      final host = _ReceiptHost(room, 'https://cdn.example/old/master.m3u8?token=old');
+      var oldClosed = 0;
+      var nextClosed = 0;
+      final original = OwnedPlaybackSource(
+        identity: 'old',
+        createInput: (_) async => PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/old/root.m3u8'), () async {
+          oldClosed++;
+        }),
+      );
+      final started = Completer<void>();
+      final creating = Completer<void>();
+      final next = OwnedPlaybackSource(
+        identity: 'next',
+        createInput: (_) async {
+          started.complete();
+          await creating.future;
+          return PlaybackInputLease(Uri.parse('http://127.0.0.1:19001/next/root.m3u8'), () async {
+            nextClosed++;
+          });
+        },
+      );
+      final active = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      final candidate = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+      var creates = 0;
+      final manager = _manager({
+        PlayerEngine.mediaKit: active,
+      }, playerCreator: (_) => creates++ == 0 ? active : candidate)..configureDefaultEngine(PlayerEngine.mediaKit);
+      final controller = PlayerController(host, streamPlayerManager: manager, inputPlaybackBinder: (_) => next)
+        ..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _OwnedReceiptSite()));
+      Future<bool>? switching;
+      Future<void>? closing;
+      try {
+        await manager.playSource(
+          original,
+          room: room,
+          sourceSelection: PlaybackSourceQualitySelection(
+            qualities: host.state.value.player.qualites,
+            currentQuality: 0,
+          ),
+        );
+        controller.applySourceCommit(manager.currentSourceCommit!);
+        switching = controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 3);
+        await started.future;
+        expect(host.state.value.player.ownedSource, same(original));
+        expect(host.state.value.player.currentQuality, 0);
+        if (outcome == 'pause') await manager.pause();
+        if (outcome == 'close') closing = manager.close();
+        creating.complete();
+        expect(await switching, outcome == 'commit');
+        if (closing != null) await closing;
+        final after = host.state.value.player;
+        expect(after.ownedSource, same(outcome == 'commit' ? next : original));
+        expect(after.currentQuality, outcome == 'commit' ? 1 : 0);
+        expect(after.playUrls, isEmpty);
+        expect(after.playUrlSafe, isEmpty);
+        expect(after.lineCount, 1);
+        expect(oldClosed, outcome == 'pause' ? 0 : 1);
+        expect(nextClosed, outcome == 'commit' ? 0 : 1);
+        expect(candidate.openedUrls, outcome == 'commit' ? ['http://127.0.0.1:19001/next/root.m3u8'] : isEmpty);
+      } finally {
+        if (!creating.isCompleted) creating.complete();
+        if (switching != null) await switching;
+        if (closing != null) await closing;
+        controller.onClose();
+        await manager.dispose();
+      }
+    }, skip: !Platform.isWindows);
+  }
 
   for (final outcome in ['commit', 'pause', 'close']) {
     test('route native receipt preserves the committed selection on $outcome', () async {
@@ -3504,6 +3579,8 @@ class _ReceiptHost implements PlayerSessionHost {
     int? currentQuality,
     List<String>? playUrls,
     Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
+    OwnedPlaybackSource? ownedSource,
+    bool clearOwnedSource = false,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,
@@ -3519,6 +3596,8 @@ class _ReceiptHost implements PlayerSessionHost {
         currentQuality: currentQuality,
         playUrls: playUrls,
         sourceQueryPolicies: sourceQueryPolicies,
+        ownedSource: ownedSource,
+        clearOwnedSource: clearOwnedSource,
         currentLineIndex: currentLineIndex,
         isCurrentRoomAudioOnly: isCurrentRoomAudioOnly,
         hasUseDefaultResolution: hasUseDefaultResolution,
@@ -3560,4 +3639,18 @@ class _BindingFailureFakePlayer extends _RecoveryFakePlayer {
 
   @override
   Stream<PlayerState> get onStateChanged => throw StateError('fixture candidate binding failed');
+}
+
+class _OwnedReceiptRecipe implements LiveInputRecipe {
+  const _OwnedReceiptRecipe();
+  @override
+  String get identity => 'next';
+}
+
+class _OwnedReceiptSite extends LiveSite implements LivePlayUrlResolver {
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution.owned(input: const _OwnedReceiptRecipe(), appliedQualityData: quality.selectionId);
 }

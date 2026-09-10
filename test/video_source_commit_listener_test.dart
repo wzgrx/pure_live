@@ -1,3 +1,5 @@
+import 'package:pure_live/player/core/playback_source.dart';
+
 import 'dart:async';
 
 import 'package:drift/native.dart';
@@ -41,6 +43,45 @@ void main() {
     Get.reset();
     Get.testMode = false;
   });
+
+  for (final reuse in [false, true]) {
+    test('VideoController owned source dispatch/reentry (reuse=$reuse) uses no media placeholder', () async {
+      final room = LiveRoom(platform: 'fixture', roomId: 'room');
+      final source = OwnedPlaybackSource(
+        identity: 'owned',
+        createInput: (_) => throw StateError('dispatch-only fixture'),
+      );
+      final commit = PlaybackSourceCommitSnapshot(
+        revision: 1,
+        sessionId: 1,
+        intentRevision: 1,
+        room: room,
+        urls: const [],
+        source: source,
+        currentLineIndex: 0,
+        headers: const {},
+        audioOnly: false,
+        selection: null,
+      );
+      final manager = _FakePlayerManager(room, reuse ? commit : null);
+      addTearDown(manager.disposeFixture);
+      final received = <PlaybackSourceCommitSnapshot>[];
+      final controller = _controller(
+        room: room,
+        manager: manager,
+        reuseCurrentSession: reuse,
+        ownedSource: source,
+        onSourceCommitted: received.add,
+      );
+      await controller.initialization;
+      expect(manager.playCalls, 0);
+      expect(manager.ownedCalls, reuse ? isEmpty : [same(source)]);
+      expect(received, reuse ? [same(commit)] : isEmpty);
+      expect(controller.datasource, isEmpty);
+      expect(controller.playUrs, isEmpty);
+      controller.dispose();
+    });
+  }
 
   test('retained VideoController replays and follows only canonical room source commits', () async {
     final room = LiveRoom(platform: 'fixture', roomId: 'room');
@@ -178,12 +219,14 @@ VideoController _controller({
   required bool reuseCurrentSession,
   required ValueChanged<PlaybackSourceCommitSnapshot> onSourceCommitted,
   DbService? dbService,
+  OwnedPlaybackSource? ownedSource,
 }) {
   return VideoController(
     room: room,
-    datasource: 'https://fixture/requested.flv',
+    datasource: ownedSource == null ? 'https://fixture/requested.flv' : '',
+    ownedSource: ownedSource,
     headers: const <String, String>{},
-    playUrs: const <String>['https://fixture/requested.flv'],
+    playUrs: ownedSource == null ? const <String>['https://fixture/requested.flv'] : const [],
     qualiteName: 'fixture',
     currentLineIndex: 0,
     currentQuality: 0,
@@ -240,6 +283,7 @@ class _FakePlayerManager extends PlayerManager {
   final bool emitCurrentOnListen;
   PlaybackSourceCommitSnapshot? current;
   int playCalls = 0;
+  final ownedCalls = <PlaybackSource>[];
   bool _fixtureDisposed = false;
 
   void emit(PlaybackSourceCommitSnapshot snapshot) => _commits.add(snapshot);
@@ -280,6 +324,23 @@ class _FakePlayerManager extends PlayerManager {
     PlaybackSourceQualitySelection? sourceSelection,
   }) async {
     playCalls++;
+    currentFloatRoom = room;
+  }
+
+  @override
+  Future<void> playSource(
+    PlaybackSource source, {
+    List<String> playUrls = const [],
+    Map<String, String> headers = const {},
+    LiveRoom? room,
+    bool audioOnly = false,
+    PlaybackSourceResolver? sourceResolver,
+    DateTime? sourceRefreshAt,
+    PlaybackSourceQualitySelection? sourceSelection,
+  }) async {
+    expect(playUrls, isEmpty);
+    expect(headers, isEmpty);
+    ownedCalls.add(source);
     currentFloatRoom = room;
   }
 

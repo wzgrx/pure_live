@@ -1,3 +1,5 @@
+import 'package:pure_live/player/core/playback_source.dart';
+
 import 'dart:io';
 import 'dart:async';
 import 'dart:developer';
@@ -294,6 +296,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   final PlaybackSourceResolver? sourceResolver;
   final DateTime? sourceRefreshAt;
   final PlaybackSourceQualitySelection? sourceSelection;
+  final OwnedPlaybackSource? ownedSource;
   final ValueChanged<PlaybackSourceCommitSnapshot>? onSourceCommitted;
   int _lastSourceCommitRevision = 0;
   bool _acceptSourceCommits = false;
@@ -392,6 +395,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     this.sourceResolver,
     this.sourceRefreshAt,
     this.sourceSelection,
+    this.ownedSource,
     this.onSourceCommitted,
     this.reuseCurrentSession = false,
     this.allowScreenKeepOn = false,
@@ -495,6 +499,18 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     // native work. Only from this point may a newly constructed route consume
     // events; its volume initialization must not replay the old same-room URL.
     _acceptSourceCommits = true;
+    final owned = ownedSource;
+    if (owned != null) {
+      await _playerManager.playSource(
+        owned,
+        room: room,
+        audioOnly: isAudioOnly,
+        sourceResolver: sourceResolver,
+        sourceRefreshAt: sourceRefreshAt,
+        sourceSelection: sourceSelection,
+      );
+      return;
+    }
     await _playerManager.play(
       datasource,
       playUrs,

@@ -1,3 +1,6 @@
+import 'package:pure_live/core/interface/live_input_recipe.dart';
+import 'package:pure_live/player/core/playback_source.dart';
+
 import 'dart:async';
 
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
@@ -18,6 +21,142 @@ import 'package:pure_live/modules/live_play/widgets/video_player/video_controlle
 import 'package:pure_live/player/core/player_manager.dart';
 
 void main() {
+  test('owned resolution switches quality with one logical line and no exported URL', () async {
+    final room = LiveRoom(roomId: 'owned-route', platform: 'test');
+    final host = _SelectionHost(room);
+    final site = _OwnedSelectionSite();
+    final opened = <OwnedPlaybackSource>[];
+    var legacyCalls = 0;
+    final controller = PlayerController(
+      host,
+      inputPlaybackBinder: _bindOwnedFixture,
+      ownedStreamSourceOpener: (source, room, audio, resolver, selection) async {
+        opened.add(source);
+        expect(selection.currentQuality, opened.length == 1 ? 1 : 0);
+        expect(selection.sourceQueryPolicies, isEmpty);
+      },
+      streamSourceOpener: (_, _, _, _, _, _, _, _) async {
+        legacyCalls++;
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: site));
+    addTearDown(controller.onClose);
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 99),
+      true,
+    );
+    final after = host.state.value.player;
+    expect(after.ownedSource, same(opened.single));
+    expect(after.playUrls, isEmpty);
+    expect(after.playUrlSafe, isEmpty);
+    expect(after.lineCount, 1);
+    expect(after.hasPlaybackSource, true);
+    expect(after.currentLineIndex, 0);
+    expect(after.currentQuality, 1);
+    expect(legacyCalls, 0);
+    // Two empty export lists do not mean two owned quality recipes are equal.
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 0, lineIndex: 0),
+      true,
+    );
+    expect(host.state.value.player.currentQuality, 0);
+    expect(host.state.value.player.ownedSource, isNot(same(opened.first)));
+  });
+
+  test('failed owned native open preserves previous owned quality and recipe', () async {
+    final room = LiveRoom(roomId: 'owned-rollback', platform: 'test');
+    final host = _SelectionHost(room);
+    final original = _bindOwnedFixture(const _InputRecipe('original'));
+    host.updatePlayer(playUrls: const [], ownedSource: original);
+    final controller = PlayerController(
+      host,
+      inputPlaybackBinder: _bindOwnedFixture,
+      ownedStreamSourceOpener: (_, _, _, _, _) async {
+        throw StateError('owned fixture failure');
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: _OwnedSelectionSite()));
+    addTearDown(controller.onClose);
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
+      false,
+    );
+    expect(host.state.value.player.ownedSource, same(original));
+    expect(host.state.value.player.currentQuality, 0);
+    expect(host.state.value.player.playUrls, isEmpty);
+  });
+
+  test('late owned resolution is discarded before binding or native dispatch', () async {
+    final room = LiveRoom(roomId: 'owned-late', platform: 'test');
+    final host = _SelectionHost(room);
+    host.updatePlayer(playUrls: const [], ownedSource: _bindOwnedFixture(const _InputRecipe('original')));
+    final pending = Completer<LivePlayUrlResolution>();
+    final started = Completer<void>();
+    final site = _OwnedSelectionSite()
+      ..resolve = (quality) {
+        if (quality.quality == '原画') {
+          started.complete();
+          return pending.future;
+        }
+        return Future.value(
+          LivePlayUrlResolution.owned(input: const _InputRecipe('latest'), appliedQualityData: quality.selectionId),
+        );
+      };
+    final bound = <String>[];
+    final opened = <String>[];
+    final controller = PlayerController(
+      host,
+      inputPlaybackBinder: (recipe) {
+        bound.add(recipe.identity);
+        return _bindOwnedFixture(recipe);
+      },
+      ownedStreamSourceOpener: (source, _, _, _, _) async {
+        opened.add(source.identity);
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: site));
+    addTearDown(controller.onClose);
+    final first = controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0);
+    await started.future;
+    final latest = controller.switchStreamSelection(type: ReloadDataType.changeLine, qualityIndex: 0, lineIndex: 0);
+    expect(await latest, true);
+    pending.complete(
+      LivePlayUrlResolution.owned(
+        input: const _InputRecipe('old'),
+        appliedQualityData: host.state.value.player.qualites[1].selectionId,
+      ),
+    );
+    expect(await first, false);
+    expect(bound, ['latest']);
+    expect(opened, ['latest']);
+    expect(host.state.value.player.ownedSource!.identity, 'latest');
+  });
+
+  test('owned recovery closure survives route close and binds the active acknowledged quality', () async {
+    final room = LiveRoom(roomId: 'owned-recovery', platform: 'test');
+    final host = _SelectionHost(room);
+    final site = _OwnedRecoverySite();
+    PlaybackSourceResolver? resolver;
+    final controller = PlayerController(
+      host,
+      inputPlaybackBinder: _bindOwnedFixture,
+      ownedStreamSourceOpener: (_, _, _, r, _) async {
+        resolver = r;
+      },
+    )..initSite(Site(id: 'test', name: 'Test', logo: '', liveSite: site));
+    expect(
+      await controller.switchStreamSelection(type: ReloadDataType.changeQuality, qualityIndex: 1, lineIndex: 0),
+      true,
+    );
+    controller.onClose();
+    final requested = host.state.value.player.qualites[0];
+    final result = await resolver!(
+      PlaybackSourceRefreshRequest(currentLineIndex: 9, advanceLine: true, currentQuality: requested),
+    );
+    expect(result.hasSources, true);
+    expect(result.urls, isEmpty);
+    expect(result.ownedSource!.identity, requested.selectionId.toString());
+    expect(result.preferredLineIndex, 0);
+    expect(result.selection!.quality.selectionId, requested.selectionId);
+  });
+
   test('resolved policies reach native-open metadata and survive a local line switch', () async {
     final room = LiveRoom(roomId: 'policy', platform: 'test');
     final host = _SelectionHost(room);
@@ -841,6 +980,8 @@ class _SelectionHost implements PlayerSessionHost {
     int? currentQuality,
     List<String>? playUrls,
     Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
+    OwnedPlaybackSource? ownedSource,
+    bool clearOwnedSource = false,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,
@@ -856,6 +997,8 @@ class _SelectionHost implements PlayerSessionHost {
         currentQuality: currentQuality,
         playUrls: playUrls,
         sourceQueryPolicies: sourceQueryPolicies,
+        ownedSource: ownedSource,
+        clearOwnedSource: clearOwnedSource,
         currentLineIndex: currentLineIndex,
         isCurrentRoomAudioOnly: isCurrentRoomAudioOnly,
         hasUseDefaultResolution: hasUseDefaultResolution,
@@ -892,4 +1035,37 @@ class _OpenedStream {
   final List<String> urls;
   final LiveRoom room;
   final bool audioOnly;
+}
+
+class _InputRecipe implements LiveInputRecipe {
+  const _InputRecipe(this.identity);
+  @override
+  final String identity;
+}
+
+OwnedPlaybackSource _bindOwnedFixture(LiveInputRecipe recipe) => OwnedPlaybackSource(
+  identity: recipe.identity,
+  createInput: (_) => throw StateError('fixture must use injected native boundary'),
+);
+
+class _OwnedSelectionSite extends LiveSite implements LivePlayUrlResolver {
+  Future<LivePlayUrlResolution> Function(LivePlayQuality)? resolve;
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => resolve == null
+      ? LivePlayUrlResolution.owned(
+          input: _InputRecipe(quality.selectionId.toString()),
+          appliedQualityData: quality.selectionId,
+        )
+      : await resolve!(quality);
+}
+
+class _OwnedRecoverySite extends _OwnedSelectionSite implements LivePlayRecoveryResolver {
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) => resolvePlayUrlsRaw(detail: detail, quality: quality);
 }

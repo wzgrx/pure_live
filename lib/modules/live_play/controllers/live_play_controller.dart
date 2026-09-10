@@ -1,3 +1,5 @@
+import 'package:pure_live/player/core/playback_source.dart';
+
 import 'dart:io';
 import 'dart:async';
 
@@ -120,6 +122,7 @@ class LivePlayController extends GetxController
         currentQuality: restored?.currentQuality ?? 0,
         playUrls: restored?.playUrls ?? const <String>[],
         sourceQueryPolicies: restored?.sourceQueryPolicies ?? const {},
+        ownedSource: restored?.ownedSource,
         currentLineIndex: restored?.currentLineIndex ?? 0,
         isCurrentRoomAudioOnly: initialAudioOnly,
         hasUseDefaultResolution: restored?.hasUseDefaultResolution ?? false,
@@ -419,6 +422,8 @@ class LivePlayController extends GetxController
     int? currentQuality,
     List<String>? playUrls,
     Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
+    OwnedPlaybackSource? ownedSource,
+    bool clearOwnedSource = false,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,
@@ -438,6 +443,8 @@ class LivePlayController extends GetxController
         currentQuality: currentQuality,
         playUrls: playUrls,
         sourceQueryPolicies: sourceQueryPolicies,
+        ownedSource: ownedSource,
+        clearOwnedSource: clearOwnedSource,
         currentLineIndex: currentLineIndex,
         isCurrentRoomAudioOnly: isCurrentRoomAudioOnly,
         hasUseDefaultResolution: hasUseDefaultResolution,
@@ -768,8 +775,8 @@ class LivePlayController extends GetxController
   }
 
   void _handleCurrentLineAndQuality(ReloadDataType reloadDataType, int line, bool isReCalculate) {
-    if (reloadDataType == ReloadDataType.changeLine && isReCalculate && state.value.player.playUrls.isNotEmpty) {
-      final newLineIndex = (state.value.player.currentLineIndex + 1) % state.value.player.playUrls.length;
+    if (reloadDataType == ReloadDataType.changeLine && isReCalculate && state.value.player.hasPlaybackSource) {
+      final newLineIndex = (state.value.player.currentLineIndex + 1) % state.value.player.lineCount;
       updatePlayer(currentLineIndex: newLineIndex);
     }
   }
@@ -952,6 +959,7 @@ class LivePlayController extends GetxController
               currentQuality: current.player.currentQuality,
               playUrls: List<String>.unmodifiable(current.player.playUrls),
               sourceQueryPolicies: Map<String, HlsSourceQueryPolicy>.unmodifiable(current.player.sourceQueryPolicies),
+              ownedSource: current.player.ownedSource,
               currentLineIndex: current.player.currentLineIndex,
               headers: Map<String, String>.unmodifiable(current.player.videoController?.headers ?? const {}),
               isAudioOnly: manager.desiredAudioOnlyMode,

@@ -1294,7 +1294,7 @@ class LineSelectorButton extends StatelessWidget {
                 child: Obx(
                   () => ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    itemCount: controller.livePlayController.state.value.player.playUrls.length,
+                    itemCount: controller.livePlayController.state.value.player.lineCount,
                     itemBuilder: (context, index) {
                       final isSelected = index == controller.livePlayController.state.value.player.currentLineIndex;
                       return Padding(
@@ -1355,7 +1355,7 @@ class LineSelectorButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.livePlayController.state.value.player.playUrls.isEmpty) return const SizedBox.shrink();
+      if (!controller.livePlayController.state.value.player.hasPlaybackSource) return const SizedBox.shrink();
       final bool isMobile =
           Theme.of(context).platform == TargetPlatform.android || Theme.of(context).platform == TargetPlatform.iOS;
 
@@ -1364,8 +1364,7 @@ class LineSelectorButton extends StatelessWidget {
       }
 
       const double itemHeight = 40.0;
-      final double totalMenuHeight =
-          (controller.livePlayController.state.value.player.playUrls.length * itemHeight) + 32;
+      final double totalMenuHeight = (controller.livePlayController.state.value.player.lineCount * itemHeight) + 32;
       return PopupMenuButton<int>(
         position: PopupMenuPosition.over,
         offset: Offset(30, -totalMenuHeight),
@@ -1393,20 +1392,19 @@ class LineSelectorButton extends StatelessWidget {
           side: const BorderSide(color: Colors.white10),
         ),
         child: _buildButtonChild(),
-        itemBuilder: (context) =>
-            List.generate(controller.livePlayController.state.value.player.playUrls.length, (index) {
-              final isSelected = index == controller.livePlayController.state.value.player.currentLineIndex;
-              return PopupMenuItem(
-                value: index,
-                height: itemHeight,
-                child: Center(
-                  child: Text(
-                    i18n("toolbox_line", args: {"index": (index + 1).toString()}),
-                    style: AppTextStyles.t13.copyWith(color: isSelected ? Get.theme.colorScheme.primary : Colors.white),
-                  ),
-                ),
-              );
-            }),
+        itemBuilder: (context) => List.generate(controller.livePlayController.state.value.player.lineCount, (index) {
+          final isSelected = index == controller.livePlayController.state.value.player.currentLineIndex;
+          return PopupMenuItem(
+            value: index,
+            height: itemHeight,
+            child: Center(
+              child: Text(
+                i18n("toolbox_line", args: {"index": (index + 1).toString()}),
+                style: AppTextStyles.t13.copyWith(color: isSelected ? Get.theme.colorScheme.primary : Colors.white),
+              ),
+            ),
+          );
+        }),
       );
     });
   }
@@ -1620,7 +1618,7 @@ class FullscreenStreamSelectorButton extends StatelessWidget {
           final panelLayout = resolveStreamSelectorPanelLayout(
             maximumDialogSize: layout.size,
             qualityCount: state.qualites.length,
-            lineCount: state.playUrls.length,
+            lineCount: state.lineCount,
             splitContent: layout.splitContent,
           );
           final qualityPane = _StreamChoicePane(
@@ -1640,7 +1638,7 @@ class FullscreenStreamSelectorButton extends StatelessWidget {
             key: const ValueKey('stream-line-pane'),
             icon: Icons.alt_route_rounded,
             title: i18n('select_line'),
-            itemCount: state.playUrls.length,
+            itemCount: state.lineCount,
             selectedIndex: state.currentLineIndex,
             labelBuilder: (index) => i18n('toolbox_line', args: {'index': (index + 1).toString()}),
             onSelected: switching
@@ -1752,7 +1750,7 @@ class FullscreenStreamSelectorButton extends StatelessWidget {
     return Obx(() {
       final live = controller.livePlayController;
       final state = live.state.value.player;
-      if (!live.state.value.room.success || state.qualites.isEmpty || state.playUrls.isEmpty) {
+      if (!live.state.value.room.success || state.qualites.isEmpty || !state.hasPlaybackSource) {
         return const SizedBox.shrink();
       }
       final switching = live.playerController.isStreamSwitching.value;

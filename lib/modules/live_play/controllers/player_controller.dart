@@ -1,3 +1,5 @@
+import 'package:pure_live/player/core/live_input_playback_binding.dart';
+import 'package:pure_live/player/core/playback_source.dart';
 import 'package:pure_live/common/utils/play_quality_label.dart';
 
 import 'dart:developer' as developer;
@@ -27,6 +29,14 @@ typedef StreamSourceOpener = Future<void> Function(
   PlaybackSourceResolver? sourceResolver,
   DateTime? sourceRefreshAt,
   PlaybackSourceQualitySelection? sourceSelection,
+);
+
+typedef OwnedStreamSourceOpener = Future<void> Function(
+  OwnedPlaybackSource source,
+  LiveRoom room,
+  bool audioOnly,
+  PlaybackSourceResolver? resolver,
+  PlaybackSourceQualitySelection selection,
 );
 
 @immutable
@@ -135,6 +145,8 @@ abstract interface class PlayerSessionHost {
     int? currentQuality,
     List<String>? playUrls,
     Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
+    OwnedPlaybackSource? ownedSource,
+    bool clearOwnedSource = false,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,
@@ -144,12 +156,20 @@ abstract interface class PlayerSessionHost {
 }
 
 class PlayerController extends GetxController {
-  PlayerController(this._main, {this._streamSourceOpener, this._streamPlayerManager}) {
+  PlayerController(
+    this._main, {
+    this._streamSourceOpener,
+    this._streamPlayerManager,
+    this._ownedStreamSourceOpener,
+    LiveInputPlaybackBinder? inputPlaybackBinder,
+  }) : _inputPlaybackBinder = inputPlaybackBinder ?? bindLiveInputForPlayback {
     _audioModeTransitions = LatestAsyncValueQueue<bool>(_applyCurrentRoomAudioOnly);
   }
 
   final PlayerSessionHost _main;
   final StreamSourceOpener? _streamSourceOpener;
+  final OwnedStreamSourceOpener? _ownedStreamSourceOpener;
+  final LiveInputPlaybackBinder _inputPlaybackBinder;
   final PlayerManager? _streamPlayerManager;
   late final LatestAsyncValueQueue<bool> _audioModeTransitions;
   late Site currentSite;
@@ -180,6 +200,29 @@ class PlayerController extends GetxController {
       sourceRefreshAt: sourceRefreshAt,
       sourceSelection: sourceSelection,
     );
+    _applyOpenReceipt(manager, beforeRevision, room);
+  }
+
+  Future<void> _openOwnedGlobalStream(
+    OwnedPlaybackSource source,
+    LiveRoom room,
+    bool audioOnly,
+    PlaybackSourceResolver? resolver,
+    PlaybackSourceQualitySelection selection,
+  ) async {
+    final manager = _streamPlayerManager ?? GlobalPlayerService.instance.player;
+    final beforeRevision = manager.currentSourceCommit?.revision ?? 0;
+    await manager.playSource(
+      source,
+      room: room,
+      audioOnly: audioOnly,
+      sourceResolver: resolver,
+      sourceSelection: selection,
+    );
+    _applyOpenReceipt(manager, beforeRevision, room);
+  }
+
+  void _applyOpenReceipt(PlayerManager manager, int beforeRevision, LiveRoom room) {
     if (manager.hasError.value) {
       throw PlayerException(message: 'Selected stream failed to open', type: PlayerErrorType.source);
     }
@@ -235,6 +278,7 @@ class PlayerController extends GetxController {
     required LivePlayQuality quality,
   }) {
     final liveSite = site.liveSite;
+    final bindInput = _inputPlaybackBinder;
     if (liveSite is! LivePlayRecoveryResolver) return null;
     final initialChoices = List<LivePlayQuality>.unmodifiable(
       _state.player.qualites.isEmpty ? <LivePlayQuality>[quality] : _state.player.qualites,
@@ -258,6 +302,20 @@ class PlayerController extends GetxController {
       }
       final resolution = await liveSite.resolvePlayUrlsForRecovery(detail: room, quality: requested);
       final urls = resolution.urls;
+      final input = resolution.inputRecipe;
+      if (input != null) {
+        return PlaybackSourceRefreshResult.owned(
+          source: bindInput(input),
+          selection: PlaybackSourceQualitySelection(
+            qualities: _qualityChoicesWithConfirmation(choices, requestedIndex, resolution),
+            currentQuality: resolveAppliedQualityIndex(
+              qualities: choices,
+              requestedIndex: requestedIndex,
+              appliedQualityData: resolution.appliedQualityData,
+            ),
+          ),
+        );
+      }
       if (urls.isEmpty) {
         return const PlaybackSourceRefreshResult(urls: <String>[], preferredLineIndex: 0);
       }
@@ -311,6 +369,7 @@ class PlayerController extends GetxController {
       qualites: selection?.qualities,
       currentQuality: selection?.currentQuality,
       playUrls: commit.urls,
+      ownedSource: commit.source is OwnedPlaybackSource ? commit.source as OwnedPlaybackSource : null,
       sourceQueryPolicies: selection?.sourceQueryPolicies ?? const {},
       currentLineIndex: commit.currentLineIndex,
     );
@@ -332,9 +391,11 @@ class PlayerController extends GetxController {
     if (room == null) return null;
     final site = expectedSite ?? currentSite;
 
-    final headers = await getHeaders(expectedSite: site, expectedRoom: room);
-    if (loadEpoch != null && !_isLoadCurrent(loadEpoch, room, site)) return null;
     final playerState = _state.player;
+    final headers = playerState.ownedSource == null
+        ? await getHeaders(expectedSite: site, expectedRoom: room)
+        : const <String, String>{};
+    if (loadEpoch != null && !_isLoadCurrent(loadEpoch, room, site)) return null;
 
     // Refresh/line changes replace the route-scoped controller.  The previous
     // implementation only overwrote the Rx field, leaving its barrage engine,
@@ -351,6 +412,7 @@ class PlayerController extends GetxController {
       room: room,
       playUrs: playerState.playUrls,
       datasource: playerState.playUrlSafe,
+      ownedSource: playerState.ownedSource,
       allowScreenKeepOn: SettingsService.to.app.enableScreenKeepOn.v,
       headers: headers,
       qualiteName: playerState.qualitySafe.playbackLabel,
@@ -362,7 +424,9 @@ class PlayerController extends GetxController {
         room: room,
         quality: playerState.qualites[playerState.currentQuality.clamp(0, playerState.qualites.length - 1)],
       ),
-      sourceRefreshAt: _getSourceRefreshAt(site: site, url: playerState.playUrlSafe),
+      sourceRefreshAt: playerState.ownedSource == null
+          ? _getSourceRefreshAt(site: site, url: playerState.playUrlSafe)
+          : null,
       sourceSelection: PlaybackSourceQualitySelection(
         sourceQueryPolicies: playerState.sourceQueryPolicies,
         qualities: playerState.qualites,
@@ -400,6 +464,7 @@ class PlayerController extends GetxController {
       currentQuality: currentQuality,
       playUrls: playUrls,
       sourceQueryPolicies: session.sourceQueryPolicies,
+      ownedSource: session.ownedSource,
       currentLineIndex: currentLineIndex,
       isCurrentRoomAudioOnly: manager.desiredAudioOnlyMode,
       hasUseDefaultResolution: session.hasUseDefaultResolution,
@@ -407,6 +472,7 @@ class PlayerController extends GetxController {
 
     final videoController = VideoController(
       room: session.room,
+      ownedSource: session.ownedSource,
       playUrs: playUrls,
       datasource: session.dataSource.isNotEmpty
           ? session.dataSource
@@ -419,10 +485,14 @@ class PlayerController extends GetxController {
       isAudioOnly: manager.desiredAudioOnlyMode,
       reuseCurrentSession: true,
       sourceResolver: _buildSourceResolver(site: currentSite, room: session.room, quality: qualities[currentQuality]),
-      sourceRefreshAt: _getSourceRefreshAt(
-        site: currentSite,
-        url: session.dataSource.isNotEmpty ? session.dataSource : (playUrls.isEmpty ? '' : playUrls[currentLineIndex]),
-      ),
+      sourceRefreshAt: session.ownedSource == null
+          ? _getSourceRefreshAt(
+              site: currentSite,
+              url: session.dataSource.isNotEmpty
+                  ? session.dataSource
+                  : (playUrls.isEmpty ? '' : playUrls[currentLineIndex]),
+            )
+          : null,
       sourceSelection: PlaybackSourceQualitySelection(
         qualities: qualities,
         currentQuality: currentQuality,
@@ -509,7 +579,7 @@ class PlayerController extends GetxController {
     );
     if (!_isLoadCurrent(loadEpoch, room, site)) return;
 
-    if (resolution.urls.isEmpty) {
+    if (!resolution.hasSources) {
       ToastUtil.show(i18n('cannot_read_play_url'));
       _main.updateRoom(success: false);
       return;
@@ -520,10 +590,12 @@ class PlayerController extends GetxController {
       requestedIndex: playerState.currentQuality,
       appliedQualityData: resolution.appliedQualityData,
     );
-    final lineIndex = playerState.currentLineIndex.clamp(0, resolution.urls.length - 1);
+    final lineIndex = playerState.currentLineIndex.clamp(0, resolution.lineCount - 1);
+    final owned = resolution.inputRecipe == null ? null : _inputPlaybackBinder(resolution.inputRecipe!);
     _main.updatePlayer(
       qualites: _qualityChoicesWithConfirmation(playerState.qualites, playerState.currentQuality, resolution),
       playUrls: List<String>.unmodifiable(resolution.urls),
+      ownedSource: owned,
       sourceQueryPolicies: resolution.sourceQueryPolicies,
       currentQuality: appliedQuality,
       currentLineIndex: lineIndex,
@@ -554,7 +626,7 @@ class PlayerController extends GetxController {
     final room = currentRoom;
     final site = currentSite;
     final before = _state.player;
-    if (room == null || before.qualites.isEmpty || before.playUrls.isEmpty) return false;
+    if (room == null || before.qualites.isEmpty || !before.hasPlaybackSource) return false;
 
     final requestedQuality = type == ReloadDataType.changeLine
         ? before.currentQuality.clamp(0, before.qualites.length - 1)
@@ -576,7 +648,7 @@ class PlayerController extends GetxController {
       final refreshSignedSource = site.liveSite is LivePlayRecoveryResolver;
       final resolution = refreshSignedSource
           ? await site.liveSite.resolvePlayUrlsForRecovery(detail: room, quality: requestedQualityValue)
-          : type == ReloadDataType.changeQuality
+          : type == ReloadDataType.changeQuality || before.ownedSource != null
           ? await site.liveSite.resolvePlayUrls(detail: room, quality: requestedQualityValue)
           : LivePlayUrlResolution.withSourcePolicies(
               urls: List<String>.from(before.playUrls),
@@ -586,7 +658,7 @@ class PlayerController extends GetxController {
             );
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
       final urls = resolution.urls;
-      if (urls.isEmpty) {
+      if (!resolution.hasSources) {
         ToastUtil.show(i18n('cannot_read_play_url'));
         return false;
       }
@@ -604,20 +676,25 @@ class PlayerController extends GetxController {
 
       final selection = resolveStreamSelection(
         qualityCount: before.qualites.length,
-        playUrlCount: urls.length,
+        playUrlCount: resolution.lineCount,
         requestedQualityIndex: appliedQuality,
         requestedLineIndex: lineIndex,
       );
       if (!selection.isValid) return false;
       if (type == ReloadDataType.changeQuality &&
           selection.qualityIndex != before.currentQuality &&
+          before.ownedSource == null &&
+          resolution.inputRecipe == null &&
           hasSameStreamChoices(before.playUrls, urls)) {
         ToastUtil.show(i18n('quality_stream_unchanged'));
         return false;
       }
 
-      final cachedHeaders = before.videoController?.headers;
-      final headers = cachedHeaders == null || cachedHeaders.isEmpty
+      final owned = resolution.inputRecipe == null ? null : _inputPlaybackBinder(resolution.inputRecipe!);
+      final cachedHeaders = before.ownedSource == null ? before.videoController?.headers : null;
+      final headers = owned != null
+          ? const <String, String>{}
+          : cachedHeaders == null || cachedHeaders.isEmpty
           ? await getHeaders(expectedSite: site, expectedRoom: room)
           : Map<String, String>.from(cachedHeaders);
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
@@ -625,26 +702,39 @@ class PlayerController extends GetxController {
       final immutableUrls = List<String>.unmodifiable(urls);
       final committedChoices = _qualityChoicesWithConfirmation(before.qualites, requestedQuality, resolution);
       final sourceCommitBeforeOpen = _lastSourceCommitRevision;
-      await (_streamSourceOpener ?? _openGlobalStream)(
-        immutableUrls[selection.lineIndex],
-        immutableUrls,
-        Map<String, String>.unmodifiable(headers),
-        room,
-        _state.player.isCurrentRoomAudioOnly,
-        _buildSourceResolver(site: site, room: room, quality: before.qualites[selection.qualityIndex]),
-        _getSourceRefreshAt(site: site, url: immutableUrls[selection.lineIndex]),
-        PlaybackSourceQualitySelection(
-          qualities: committedChoices,
-          currentQuality: selection.qualityIndex,
-          sourceQueryPolicies: resolution.sourceQueryPolicies,
-        ),
+      final sourceSelection = PlaybackSourceQualitySelection(
+        qualities: committedChoices,
+        currentQuality: selection.qualityIndex,
+        sourceQueryPolicies: resolution.sourceQueryPolicies,
       );
+      final resolver = _buildSourceResolver(site: site, room: room, quality: before.qualites[selection.qualityIndex]);
+      if (owned != null) {
+        await (_ownedStreamSourceOpener ?? _openOwnedGlobalStream)(
+          owned,
+          room,
+          _state.player.isCurrentRoomAudioOnly,
+          resolver,
+          sourceSelection,
+        );
+      } else {
+        await (_streamSourceOpener ?? _openGlobalStream)(
+          immutableUrls[selection.lineIndex],
+          immutableUrls,
+          Map<String, String>.unmodifiable(headers),
+          room,
+          _state.player.isCurrentRoomAudioOnly,
+          resolver,
+          _getSourceRefreshAt(site: site, url: immutableUrls[selection.lineIndex]),
+          sourceSelection,
+        );
+      }
       if (!_isLoadCurrent(loadEpoch, room, site) || selectionEpoch != _streamSelectionEpoch) return false;
       if (_lastSourceCommitRevision == sourceCommitBeforeOpen) {
         _main.updatePlayer(
           qualites: committedChoices,
           currentQuality: selection.qualityIndex,
           playUrls: immutableUrls,
+          ownedSource: owned,
           sourceQueryPolicies: resolution.sourceQueryPolicies,
           currentLineIndex: selection.lineIndex,
           hasUseDefaultResolution: true,
@@ -666,6 +756,7 @@ class PlayerController extends GetxController {
             qualites: before.qualites,
             currentQuality: before.currentQuality,
             playUrls: before.playUrls,
+            ownedSource: before.ownedSource,
             sourceQueryPolicies: before.sourceQueryPolicies,
             currentLineIndex: before.currentLineIndex,
             hasUseDefaultResolution: before.hasUseDefaultResolution,

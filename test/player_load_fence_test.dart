@@ -1,3 +1,5 @@
+import 'package:pure_live/player/core/playback_source.dart';
+
 import 'dart:async';
 
 import 'package:pure_live/core/common/hls_source_query_policy.dart';
@@ -76,6 +78,8 @@ class _TestPlayerHost implements PlayerSessionHost {
     int? currentQuality,
     List<String>? playUrls,
     Map<String, HlsSourceQueryPolicy>? sourceQueryPolicies,
+    OwnedPlaybackSource? ownedSource,
+    bool clearOwnedSource = false,
     int? currentLineIndex,
     bool? isCurrentRoomAudioOnly,
     bool? hasUseDefaultResolution,

@@ -29,9 +29,15 @@ class LiveUrlTool {
     for (final match in urls.allMatches(text)) {
       var candidate = match.group(0)!;
       if (candidate.toLowerCase().startsWith('www.')) candidate = 'https://$candidate';
-      // XHS share text appends Chinese prose punctuation without whitespace.
+      // XHS and Weibo shares append Chinese prose without whitespace.
       // Keep percent-encoded punctuation and other platforms' URL spelling.
-      if ({'xhslink.com', 'www.xiaohongshu.com', 'xiaohongshu.com'}.contains(Uri.tryParse(candidate)?.host)) {
+      if ({
+        'xhslink.com',
+        'www.xiaohongshu.com',
+        'xiaohongshu.com',
+        'weibo.com',
+        'www.weibo.com',
+      }.contains(Uri.tryParse(candidate)?.host)) {
         candidate = candidate.split(RegExp(r'[，。！？、；：）》」』”’]')).first;
         candidate = candidate.replaceFirst(RegExp(r'''[,!?;:)\]}"']+$'''), '');
         // A terminal dot path component is URL structure, not prose punctuation.

@@ -226,9 +226,20 @@ class Sites {
 
 class Site {
   final String id;
-  final String name;
+  final String _fallbackName;
   final String logo;
   final LiveSite liveSite;
 
-  Site({required this.id, required this.liveSite, required this.logo, required this.name});
+  Site({required this.id, required this.liveSite, required this.logo, required String name}) : _fallbackName = name;
+
+  /// Resolve registry labels when they are painted instead of freezing the
+  /// locale that happened to be active when an adapter was constructed.
+  /// Popular and search controllers deliberately retain their [Site]
+  /// instances so pagination/session state stays stable; the label must still
+  /// follow an in-app language change without rebuilding those adapters.
+  String get name {
+    final normalizedId = id.trim().toLowerCase();
+    if (normalizedId != Sites.allSite && !Sites.isSupported(normalizedId)) return _fallbackName;
+    return i18nOr('site_$normalizedId', _fallbackName);
+  }
 }

@@ -29,7 +29,7 @@ void main() {
   tearDown(Get.reset);
   tearDownAll(Hive.close);
 
-  for (final width in [320.0, 680.0, 960.0, 1320.0]) {
+  for (final width in [320.0, 680.0, 960.0, 1000.0, 1320.0]) {
     for (final scale in [1.0, 2.0, 3.0]) {
       testWidgets('popular rows retain lazy cards, final partial row and columns at $width / scale $scale', (
         tester,

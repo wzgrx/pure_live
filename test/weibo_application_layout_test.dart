@@ -18,6 +18,8 @@ import 'package:pure_live/get/get.dart';
 import 'package:pure_live/modules/popular/popular_grid_view.dart';
 import 'package:pure_live/modules/search/search_controller.dart' as search;
 import 'package:pure_live/modules/search/search_page.dart';
+import 'package:pure_live/player/global_player_service.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/weibo_application_fixture.dart';
@@ -51,14 +53,20 @@ void _setView(WidgetTester tester, Size size) {
   addTearDown(tester.view.resetDevicePixelRatio);
 }
 
-Future<void> _mount(WidgetTester tester, String lang, Size size, Widget home) async {
+Future<void> _mount(
+  WidgetTester tester,
+  String lang,
+  Size size,
+  Widget home, {
+  List<GetPage<dynamic>>? getPages,
+}) async {
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
   await tester.pumpWidget(
     EasyLocalization(
-      supportedLocales: [Locale(lang)],
+      supportedLocales: const [Locale('en'), Locale('zh')],
       startLocale: Locale(lang),
       fallbackLocale: Locale(lang),
       saveLocale: false,
@@ -74,7 +82,9 @@ Future<void> _mount(WidgetTester tester, String lang, Size size, Widget home) as
             data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(2)),
             child: child!,
           ),
-          home: home,
+          home: getPages == null ? home : null,
+          initialRoute: getPages == null ? null : '/',
+          getPages: getPages == null ? null : [GetPage(name: '/', page: () => home), ...getPages],
         ),
       ),
     ),
@@ -92,6 +102,7 @@ void main() {
     await EasyLocalization.ensureInitialized();
     await Hive.openBox<dynamic>('app_settings', bytes: Uint8List(0));
     await HivePrefUtil.init();
+    await GlobalPlayerService.instance.initialize();
   });
   setUp(() async {
     Get.testMode = true;
@@ -100,7 +111,67 @@ void main() {
     Get.put(SettingsService(), permanent: true);
   });
   tearDown(Get.reset);
-  tearDownAll(Hive.close);
+  tearDownAll(() async {
+    await GlobalPlayerService.instance.dispose();
+    await Hive.close();
+  });
+
+  testWidgets('cached platform labels follow an in-app locale change without rebuilding adapters', (tester) async {
+    _setView(tester, const Size(960, 720));
+    List<Site>? cachedSites;
+    Future<void>? localeChange;
+    final zhLabels = jsonDecode(File('assets/translations/zh.json').readAsStringSync()) as Map;
+    final enLabels = jsonDecode(File('assets/translations/en.json').readAsStringSync()) as Map;
+    await _mount(
+      tester,
+      'zh',
+      const Size(960, 720),
+      Builder(
+        builder: (context) {
+          final sites = cachedSites ??= [
+            ...Sites.supportSites,
+            Site(id: 'fixture-custom', liveSite: WeiboSite(), logo: '', name: 'Fixture Custom'),
+          ];
+          return Scaffold(
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (final site in sites) Text(site.name, key: ValueKey('cached-platform-label:${site.id}')),
+                  FilledButton(
+                    onPressed: () => localeChange = SettingsService.to.theme.changeLanguage('English', context),
+                    child: const Text('switch-locale'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    final original = cachedSites;
+    for (final site in original!) {
+      final expected = site.id == 'fixture-custom' ? 'Fixture Custom' : zhLabels['site_${site.id}'] as String;
+      expect(find.text(expected), findsOneWidget, reason: 'zh ${site.id}');
+    }
+    await tester.ensureVisible(find.text('switch-locale'));
+    await tester.pumpAndSettle();
+    expect(find.text('switch-locale').hitTestable(), findsOneWidget);
+    // Get.updateLocale performs a framework reassemble. Start and await the
+    // whole user action in the real async zone so its warm-up frame cannot
+    // outlive the fake-zone tap guard.
+    await tester.runAsync(() async {
+      await tester.tap(find.text('switch-locale'));
+      expect(localeChange, isNotNull);
+      await localeChange!.timeout(const Duration(seconds: 10));
+    });
+    await tester.pumpAndSettle();
+    expect(cachedSites, same(original));
+    for (final site in original) {
+      final expected = site.id == 'fixture-custom' ? 'Fixture Custom' : enLabels['site_${site.id}'] as String;
+      expect(find.text(expected), findsOneWidget, reason: 'en ${site.id}');
+    }
+    expect(tester.takeException(), isNull);
+  });
 
   for (final lang in ['zh', 'en']) {
     for (final size in [const Size(320, 640), const Size(960, 720)]) {
@@ -130,7 +201,20 @@ void main() {
         final c = _Search(f.site);
         Get.put<search.SearchController>(c);
         c.index.value = 1;
-        await _mount(tester, lang, size, const SearchPage());
+        await _mount(
+          tester,
+          lang,
+          size,
+          const SearchPage(),
+          getPages: [
+            GetPage(
+              name: RoutePath.kLivePlay,
+              page: () => const Scaffold(body: SizedBox(key: ValueKey('weibo-live-route-target'))),
+            ),
+          ],
+        );
+        final labels = jsonDecode(File('assets/translations/$lang.json').readAsStringSync()) as Map;
+        expect(find.text(labels['site_weibo'] as String), findsOneWidget);
         await tester.enterText(find.byType(TextField), weiboFixtureId);
         // Start the UI action in the real async zone too: merely awaiting a
         // fake-zone Dio request from runAsync leaves its scheduled work stuck.
@@ -140,7 +224,6 @@ void main() {
           await c.activeSearch!.timeout(const Duration(seconds: 10));
         });
         await tester.pumpAndSettle();
-        final labels = jsonDecode(File('assets/translations/$lang.json').readAsStringSync()) as Map;
         expect(find.text(c.capabilityText), findsOneWidget);
         expect(find.text(labels['continue_web_search'] as String), findsNothing);
         final card = find.byKey(const ValueKey('weibo:$weiboFixtureId'));
@@ -154,6 +237,15 @@ void main() {
         expect(c.hasMore.value, isFalse);
         expect(f.detailCalls, 1);
         expect(tester.takeException(), isNull);
+        await tester.tap(card);
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('weibo-live-route-target')), findsOneWidget);
+        final routedRoom = Get.arguments as LiveRoom;
+        expect(routedRoom.platform, Sites.weiboSite);
+        expect(routedRoom.roomId, weiboFixtureId);
+        expect(Get.parameters['site'], Sites.weiboSite);
+        Get.back<void>();
+        await tester.pumpAndSettle();
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump();
       });

@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
 import 'package:pure_live/player/core/live_input_playback_binding.dart';
 import 'package:pure_live/player/core/playback_source.dart';
 import 'package:pure_live/common/utils/play_quality_label.dart';
@@ -174,6 +178,9 @@ class PlayerController extends GetxController {
   late final LatestAsyncValueQueue<bool> _audioModeTransitions;
   late Site currentSite;
   int _loadEpoch = 0;
+  bool _closed = false;
+  CancelToken? _qualityCancel;
+  final Set<Future<void>> _qualityRequests = {};
   int _streamSelectionEpoch = 0;
   int _lastSourceCommitRevision = 0;
   final RxBool isStreamSwitching = false.obs;
@@ -246,14 +253,21 @@ class PlayerController extends GetxController {
   LiveRoom? get currentRoom => _state.room.detail;
 
   void initSite(Site site) {
+    invalidateLoad();
     currentSite = site;
   }
 
-  void invalidateLoad() => _loadEpoch++;
+  void invalidateLoad() {
+    _loadEpoch++;
+    _qualityCancel?.cancel();
+    _qualityCancel = null;
+  }
 
   bool _isLoadCurrent(int epoch, LiveRoom room, Site site) {
     final current = currentRoom;
-    return !_main.isClosed &&
+    return !_closed &&
+        !isClosed &&
+        !_main.isClosed &&
         epoch == _loadEpoch &&
         currentSite.id == site.id &&
         current?.roomId == room.roomId &&
@@ -505,14 +519,30 @@ class PlayerController extends GetxController {
     return videoController;
   }
 
+  Future<List<LivePlayQuality>> _discoverQualities(Site site, LiveRoom room, CancelToken cancel) async {
+    final cleanup = Completer<void>();
+    if (site.liveSite is LiveQualityDiscovery) _qualityRequests.add(cleanup.future);
+    try {
+      return await site.liveSite.discoverPlayQualities(detail: room, cancel: cancel);
+    } finally {
+      if (identical(_qualityCancel, cancel)) _qualityCancel = null;
+      _qualityRequests.remove(cleanup.future);
+      cleanup.complete();
+    }
+  }
+
   Future<void> getPlayQualites() async {
-    final loadEpoch = ++_loadEpoch;
+    if (_closed || isClosed || _main.isClosed) return;
+    invalidateLoad();
+    final loadEpoch = _loadEpoch;
     final room = currentRoom;
     final site = currentSite;
     if (room == null) return;
+    final cancel = CancelToken();
+    _qualityCancel = cancel;
 
     try {
-      final playQualites = normalizePlayQualities(await site.liveSite.getPlayQualites(detail: room));
+      final playQualites = normalizePlayQualities(await _discoverQualities(site, room, cancel));
       if (!_isLoadCurrent(loadEpoch, room, site)) return;
 
       if (playQualites.isEmpty) {
@@ -639,7 +669,8 @@ class PlayerController extends GetxController {
     }
 
     final selectionEpoch = ++_streamSelectionEpoch;
-    final loadEpoch = ++_loadEpoch;
+    invalidateLoad();
+    final loadEpoch = _loadEpoch;
     final sourceCommitBeforeSelection = _lastSourceCommitRevision;
     isStreamSwitching.value = true;
 
@@ -810,14 +841,24 @@ class PlayerController extends GetxController {
 
   Future<void> destroyPlayer() async {
     invalidateLoad();
+    // Capture native ownership before waiting for discovery cleanup. A later
+    // room may attach another controller while this old request is draining.
     final controller = _state.player.videoController;
-    await controller?.destory();
-    controller?.dispose();
-    _main.updatePlayer(clearVideoController: true);
+    final cleanup = Future.wait(_qualityRequests.toList());
+    try {
+      await controller?.destory();
+      controller?.dispose();
+      if (identical(_state.player.videoController, controller)) {
+        _main.updatePlayer(clearVideoController: true);
+      }
+    } finally {
+      await cleanup;
+    }
   }
 
   @override
   void onClose() {
+    _closed = true;
     _streamSelectionEpoch++;
     isStreamSwitching.value = false;
     invalidateLoad();

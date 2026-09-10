@@ -1,3 +1,4 @@
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
 import 'package:dio/dio.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/core/interface/live_directory.dart';
@@ -28,6 +29,7 @@ class NiconicoSite extends LiveSite
     implements
         LiveSiteDirectoryPager,
         LiveDirectoryNotice,
+        LiveQualityDiscovery,
         LiveSiteRoomRefresher,
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
@@ -155,10 +157,14 @@ class NiconicoSite extends LiveSite
       (await _detail(roomId, platform)).isLiveNow;
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoom detail}) async {
+  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoom detail}) => discoverPlayQualitiesRaw(detail: detail);
+
+  @override
+  Future<List<LivePlayQuality>> discoverPlayQualitiesRaw({required LiveRoom detail, CancelToken? cancel}) async {
+    if (cancel?.isCancelled == true) throw cancel!.cancelError!;
     final programId = _identity(detail.roomId ?? '', detail.platform ?? '');
     if (detail.isExplicitlyOfflineNow) return const [];
-    final choices = await _catalog.load(programId);
+    final choices = await _catalog.load(programId, cancel: cancel);
     return List.unmodifiable([
       for (final choice in choices)
         LivePlayQuality(id: choice.id, quality: choice.label, data: _Choice(programId, choice)),

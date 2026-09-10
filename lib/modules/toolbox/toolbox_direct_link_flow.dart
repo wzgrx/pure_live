@@ -1,3 +1,4 @@
+import 'package:pure_live/core/interface/live_quality_discovery.dart';
 import 'package:flutter/services.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/core/interface/live_site.dart';
@@ -24,7 +25,9 @@ class ToolBoxDirectLinkFlow {
     scope.checkActive();
     final site = _siteFor(room.platform!);
     final detail = await scope.wait(() => site.getRoomDetail(roomId: room.roomId!, platform: room.platform!));
-    final qualities = await scope.wait(() => site.getPlayQualites(detail: detail));
+    final qualities = site is LiveQualityDiscovery
+        ? await scope.waitCancellable((cancel) => site.discoverPlayQualities(detail: detail, cancel: cancel))
+        : await scope.wait(() => site.discoverPlayQualities(detail: detail, cancel: scope.cancelToken));
     if (qualities.isEmpty) {
       notify('toolbox_quality_failed');
       return;

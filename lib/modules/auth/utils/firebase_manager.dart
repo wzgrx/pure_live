@@ -74,8 +74,8 @@ class FirebaseManager {
     }
   }
 
-  void signOut() {
-    auth.signOut();
+  Future<void> signOut() async {
+    await auth.signOut();
     try {
       final AuthController authController = Get.find<AuthController>();
 
@@ -86,7 +86,11 @@ class FirebaseManager {
     } catch (e) {
       developer.log('❌ 退出登录时状态同步清空失败: $e');
     }
-    Navigator.of(Get.context!).pop();
+    final context = Get.context;
+    if (context != null && context.mounted) {
+      final navigator = Navigator.of(context);
+      if (navigator.canPop()) navigator.pop();
+    }
   }
 
   Future<bool> loadUploadConfig() async {

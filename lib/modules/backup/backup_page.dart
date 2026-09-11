@@ -60,7 +60,9 @@ class _BackupPageState extends State<BackupPage> {
                         color: auth.isInitSuccess ? null : Theme.of(context).colorScheme.error,
                         size: 22,
                       ),
-                isLong: !auth.isInitSuccess,
+                isLong: true,
+                stackTrailingOnNarrow: auth.isConnecting,
+                showNavigationChevronWhenStacked: false,
                 subtitleColor: auth.isInitSuccess ? null : Theme.of(context).colorScheme.error.withValues(alpha: 0.8),
                 title: auth.isConnecting
                     ? i18n('firebase_connecting_title')
@@ -112,6 +114,7 @@ class _BackupPageState extends State<BackupPage> {
                 icon: Remix.cloud_line,
                 title: i18n("webdav"),
                 subtitle: i18n("backup_to_webdav"),
+                isLong: true,
                 onTap: () => Get.toNamed(RoutePath.kWebDavPage),
               ),
               if (Platform.isAndroid || Platform.isIOS)
@@ -119,6 +122,7 @@ class _BackupPageState extends State<BackupPage> {
                   icon: Remix.qr_code_line,
                   title: i18n("sync_tv_data"),
                   subtitle: i18n("sync_tv_data_subtitle"),
+                  isLong: true,
                   onTap: () => Get.to(() => const ScanCodePage()),
                 ),
             ]),
@@ -129,6 +133,7 @@ class _BackupPageState extends State<BackupPage> {
                 icon: Remix.file_download_line,
                 title: i18n("create_backup"),
                 subtitle: i18n("create_backup_subtitle"),
+                isLong: true,
                 onTap: () async {
                   // The export flow chooses a directory and remembers the first
                   // successful choice; no separate first-run settings step.
@@ -139,6 +144,7 @@ class _BackupPageState extends State<BackupPage> {
                 icon: Remix.file_upload_line,
                 title: i18n("recover_backup"),
                 subtitle: i18n("recover_backup_subtitle"),
+                isLong: true,
                 onTap: () => BackupRecoveryService().recoverSettingsFromFile(),
               ),
             ]),
@@ -149,6 +155,7 @@ class _BackupPageState extends State<BackupPage> {
                 icon: Remix.folder_open_line,
                 title: i18n("backup_directory"),
                 subtitle: backupDirectory.isEmpty ? i18n('please_set_backup_directory') : backupDirectory,
+                isLong: true,
                 onTap: () async {
                   await BackupRecoveryService().updateBackupDirectory();
                 },
@@ -161,6 +168,9 @@ class _BackupPageState extends State<BackupPage> {
                 icon: Remix.file_text_line,
                 title: i18n("enable_local_log"),
                 subtitle: i18n("enable_local_log_desc"),
+                isLong: true,
+                stackTrailingOnNarrow: true,
+                showNavigationChevronWhenStacked: false,
                 trailing: Switch(
                   value: logController.storedEnableLog.v,
                   onChanged: (val) => logController.storedEnableLog.v = val,
@@ -177,6 +187,7 @@ class _BackupPageState extends State<BackupPage> {
                   icon: Remix.global_line,
                   title: i18n("view_logs_in_browser"),
                   subtitle: urlStr,
+                  isLong: true,
                   trailing: const Icon(Remix.arrow_right_s_line),
                   onTap: () async {
                     final Uri uri = Uri.parse(urlStr);
@@ -191,6 +202,7 @@ class _BackupPageState extends State<BackupPage> {
                 icon: Remix.folder_open_line,
                 title: i18n("open_log_dir"),
                 subtitle: i18n("open_log_dir_desc"),
+                isLong: true,
                 onTap: _openLogDirectory,
               ),
             ]),

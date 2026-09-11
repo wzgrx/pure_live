@@ -96,6 +96,10 @@ class BackupController extends GetxController {
     'tags': {'tags', 'roomTagsMap'},
   };
 
+  static int countConfigSections(Map<String, dynamic> data) {
+    return _sectionKeys.keys.where(data.containsKey).length;
+  }
+
   static void validateBackupIdentity(Map<String, dynamic> data) {
     final version = data['backupVersion'];
     if (version != null && (version is! int || version < 1)) {

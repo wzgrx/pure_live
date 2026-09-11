@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:remixicon/remixicon.dart';
-import 'package:pure_live/common/index.dart';
+
 import 'package:flutter_json/flutter_json.dart';
+import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/services/settings/backup_controller.dart';
+import 'package:remixicon/remixicon.dart';
 
 class LocalConfigPreviewPage extends StatefulWidget {
   const LocalConfigPreviewPage({super.key});
@@ -26,31 +27,24 @@ class _LocalConfigPreviewPageState extends State<LocalConfigPreviewPage> {
     _loadLocalConfig();
   }
 
-  Future<void> _loadLocalConfig() async {
+  void _loadLocalConfig() {
     try {
-      final backupCtrl = BackupController.to;
-      final data = backupCtrl.exportAllSettings();
+      final data = BackupController.to.exportAllSettings();
       final favoriteData = data['favorite'] as Map<String, dynamic>? ?? {};
       final favoriteRooms = favoriteData['favoriteRooms'] as List? ?? [];
-      _favoriteCount = favoriteRooms.length;
-
       final historyData = data['history'] as Map<String, dynamic>? ?? {};
       final historyList = historyData['historyRooms'] ?? historyData['historyList'] ?? [];
-      _historyCount = historyList is List ? historyList.length : 0;
-
       final tagData = data['tags'] as Map<String, dynamic>? ?? {};
       final tagList = tagData['tags'] as List? ?? [];
-      _tagCount = tagList.length;
 
-      setState(() {
-        _configData = json.decode(json.encode(data)) as Map<String, dynamic>;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMsg = e.toString();
-        _isLoading = false;
-      });
+      _favoriteCount = favoriteRooms.length;
+      _historyCount = historyList is List ? historyList.length : 0;
+      _tagCount = tagList.length;
+      _configData = json.decode(json.encode(data)) as Map<String, dynamic>;
+    } catch (error) {
+      _errorMsg = error.toString();
+    } finally {
+      _isLoading = false;
     }
   }
 
@@ -74,284 +68,214 @@ class _LocalConfigPreviewPageState extends State<LocalConfigPreviewPage> {
       );
     }
 
-    final backupVer = _configData['backupVersion'] ?? 0;
+    final backupVersion = _configData['backupVersion'] ?? 0;
+    final moduleCount = BackupController.countConfigSections(_configData);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceContainerLowest,
       appBar: AppBar(
-        title: Text(i18n('local_config_preview'), style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          i18n('local_config_preview'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         elevation: 0,
         scrolledUnderElevation: 1,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isCompact = MediaQuery.of(context).size.width <= 680;
-
-              if (isCompact) {
-                return Container(
-                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 0.5),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: theme.colorScheme.primaryContainer,
-                            child: Icon(Remix.settings_3_line, color: theme.colorScheme.onPrimaryContainer, size: 18),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  i18n('local_backup_config'),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.secondaryContainer,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    'backup v$backupVer',
-                                    style: AppTextStyles.t11.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSecondaryContainer,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 12),
-                        height: 0.5,
-                        color: theme.dividerColor.withValues(alpha: 0.2),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildCompactMeta(
-                              Remix.heart_3_line,
-                              i18n('favorites'),
-                              '$_favoriteCount',
-                              theme,
-                              isPrimaryColor: true,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildCompactMeta(
-                              Remix.history_line,
-                              i18n('history'),
-                              '$_historyCount',
-                              theme,
-                              isPrimaryColor: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildCompactMeta(
-                              Remix.price_tag_3_line,
-                              i18n('tags'),
-                              '$_tagCount',
-                              theme,
-                              isPrimaryColor: true,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildCompactMeta(
-                              Remix.file_list_3_line,
-                              i18n('config_modules'),
-                              '${_configData.length - 1}',
-                              theme,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return Container(
-                margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 0.5),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: theme.colorScheme.primaryContainer,
-                            child: Icon(Remix.settings_3_line, color: theme.colorScheme.onPrimaryContainer, size: 18),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  i18n('local_backup_config'),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.secondaryContainer,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    'backup v$backupVer',
-                                    style: AppTextStyles.t11.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSecondaryContainer,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 12),
-                      width: 0.5,
-                      height: 64,
-                      color: theme.dividerColor.withValues(alpha: 0.2),
-                    ),
-                    Expanded(
-                      flex: 6,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildCompactMeta(
-                                  Remix.heart_3_line,
-                                  i18n('favorites'),
-                                  '$_favoriteCount',
-                                  theme,
-                                  isPrimaryColor: true,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _buildCompactMeta(
-                                  Remix.history_line,
-                                  i18n('history'),
-                                  '$_historyCount',
-                                  theme,
-                                  isPrimaryColor: true,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildCompactMeta(
-                                  Remix.price_tag_3_line,
-                                  i18n('tags'),
-                                  '$_tagCount',
-                                  theme,
-                                  isPrimaryColor: true,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _buildCompactMeta(
-                                  Remix.file_list_3_line,
-                                  i18n('config_modules'),
-                                  '${_configData.length - 1}',
-                                  theme,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            child: context.buildGroupTitle(i18n('config_raw_preview')),
-          ),
-          // Json预览区域
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.shadowColor.withValues(alpha: 0.03),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3), width: 0.5),
+      body: LayoutBuilder(
+        builder: (context, viewportConstraints) {
+          final rawPreviewHeight = (viewportConstraints.maxHeight * 0.7).clamp(320.0, 720.0).toDouble();
+          return CustomScrollView(
+            key: const ValueKey('local-config-scroll-view'),
+            physics: const PureLiveScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: _buildSummaryCard(context, theme: theme, backupVersion: backupVersion, moduleCount: moduleCount),
               ),
-              child: JsonWidget(json: _configData, initialExpandDepth: 2),
-            ),
-          ),
-        ],
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: context.buildGroupTitle(i18n('local_config_raw_preview')),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: rawPreviewHeight,
+                  child: Container(
+                    key: const ValueKey('local-config-raw-preview'),
+                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.shadowColor.withValues(alpha: 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3), width: 0.5),
+                    ),
+                    child: JsonWidget(json: _configData, initialExpandDepth: 2),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildCompactMeta(IconData icon, String label, String value, ThemeData theme, {bool isPrimaryColor = false}) {
+  Widget _buildSummaryCard(
+    BuildContext context, {
+    required ThemeData theme,
+    required Object backupVersion,
+    required int moduleCount,
+  }) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columnCount = textScale > 1.5
+            ? 1
+            : constraints.maxWidth >= 900
+            ? 4
+            : constraints.maxWidth >= 520
+            ? 2
+            : 1;
+        const spacing = 8.0;
+
+        final items = [
+          _buildMeta(
+            key: 'favorites',
+            icon: Remix.heart_3_line,
+            label: i18n('favorites'),
+            value: '$_favoriteCount',
+            theme: theme,
+            isPrimaryColor: true,
+          ),
+          _buildMeta(
+            key: 'history',
+            icon: Remix.history_line,
+            label: i18n('history'),
+            value: '$_historyCount',
+            theme: theme,
+            isPrimaryColor: true,
+          ),
+          _buildMeta(
+            key: 'tags',
+            icon: Remix.price_tag_3_line,
+            label: i18n('tags'),
+            value: '$_tagCount',
+            theme: theme,
+            isPrimaryColor: true,
+          ),
+          _buildMeta(
+            key: 'modules',
+            icon: Remix.file_list_3_line,
+            label: i18n('config_modules'),
+            value: '$moduleCount',
+            theme: theme,
+          ),
+        ];
+
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 0.5),
+          ),
+          child: LayoutBuilder(
+            builder: (context, contentConstraints) {
+              final itemWidth = (contentConstraints.maxWidth - spacing * (columnCount - 1)) / columnCount;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        child: Icon(Remix.settings_3_line, color: theme.colorScheme.onPrimaryContainer, size: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              i18n('local_backup_config'),
+                              style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.secondaryContainer,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                child: Text(
+                                  'backup v$backupVersion',
+                                  style: AppTextStyles.t11.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSecondaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    height: 0.5,
+                    color: theme.dividerColor.withValues(alpha: 0.2),
+                  ),
+                  Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: items.map((item) => SizedBox(width: itemWidth, child: item)).toList(growable: false),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMeta({
+    required String key,
+    required IconData icon,
+    required String label,
+    required String value,
+    required ThemeData theme,
+    bool isPrimaryColor = false,
+  }) {
+    final color = isPrimaryColor ? theme.colorScheme.primary : theme.colorScheme.onSurface;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      key: ValueKey('local-config-meta-$key'),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerLow, borderRadius: BorderRadius.circular(10)),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 12, color: isPrimaryColor ? theme.colorScheme.primary : theme.hintColor),
-          const SizedBox(width: 6),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon, size: 16, color: isPrimaryColor ? theme.colorScheme.primary : theme.hintColor),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,19 +283,10 @@ class _LocalConfigPreviewPageState extends State<LocalConfigPreviewPage> {
               children: [
                 Text(
                   value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.t11.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isPrimaryColor ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                  ),
+                  style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.bold, color: color),
                 ),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.t11.copyWith(color: theme.hintColor, height: 1.1),
-                ),
+                const SizedBox(height: 2),
+                Text(label, style: AppTextStyles.t11.copyWith(color: theme.hintColor, height: 1.2)),
               ],
             ),
           ),

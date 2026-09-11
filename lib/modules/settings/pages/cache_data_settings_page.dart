@@ -14,8 +14,72 @@ class _CacheDataSettingsPageState extends State<CacheDataSettingsPage> {
   @override
   void initState() {
     super.initState();
-    unawaited(SettingsService.to.cache.getCacheSize());
+    unawaited(_refreshCacheSize(showFailure: false));
   }
+
+  void _showCacheMessage(String message, {bool failed = false}) {
+    if (!mounted) return;
+    Get.snackbar(failed ? i18n('error') : i18n('done'), message, snackPosition: SnackPosition.bottom);
+  }
+
+  Future<void> _refreshThumbnails() async {
+    try {
+      await SettingsService.to.cache.refreshImageCache();
+      _showCacheMessage(i18n('thumbnails_refreshed'));
+    } catch (_) {
+      _showCacheMessage(i18n('cache_operation_failed'), failed: true);
+    }
+  }
+
+  Future<void> _refreshCacheSize({bool showFailure = true}) async {
+    try {
+      if (showFailure) {
+        await SettingsService.to.cache.handleManualRefresh();
+      } else {
+        await SettingsService.to.cache.getCacheSize();
+      }
+    } catch (_) {
+      if (showFailure) _showCacheMessage(i18n('cache_operation_failed'), failed: true);
+    }
+  }
+
+  Future<void> _confirmClearCache(ThemeData theme) async {
+    final pageContext = context;
+    final ok = await showDialog<bool>(
+      context: pageContext,
+      builder: (dialogContext) => AlertDialog(
+        scrollable: true,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+        title: Text(i18n('confirm_clear_local_cache')),
+        content: Text(i18n('confirm_clear_local_cache_desc')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: Text(i18n('cancel'))),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(i18n('clear'), style: TextStyle(color: theme.colorScheme.error)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+
+    try {
+      final result = await SettingsService.to.cache.clearCache();
+      if (result.succeeded) {
+        _showCacheMessage(i18n('cache_cleared'));
+      } else {
+        _showCacheMessage(
+          i18n('cache_clear_incomplete', args: {'size': result.remainingSizeMB.toStringAsFixed(2)}),
+          failed: true,
+        );
+      }
+    } catch (_) {
+      _showCacheMessage(i18n('cache_operation_failed'), failed: true);
+    }
+  }
+
+  Widget _progressIndicator(Color color) =>
+      SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2, color: color));
 
   @override
   Widget build(BuildContext context) {
@@ -32,62 +96,57 @@ class _CacheDataSettingsPageState extends State<CacheDataSettingsPage> {
             Obx(() {
               final size = SettingsService.to.cache.cacheSizeMB.value;
               final turns = SettingsService.to.cache.refreshTurns.value;
+              final busy = SettingsService.to.cache.isBusy;
               return context.buildTile(
                 icon: Remix.database_2_line,
                 title: i18n("current_cache_size"),
                 subtitle: "",
-                onTap: () => SettingsService.to.cache.handleManualRefresh(),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
+                onTap: busy ? null : _refreshCacheSize,
+                stackTrailingOnNarrow: true,
+                trailing: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       "${size.toStringAsFixed(2)} MB",
                       style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(width: 8),
-                    AnimatedRotation(
-                      turns: turns,
-                      duration: const Duration(milliseconds: 600),
-                      curve: Curves.easeInOutCubic,
-                      child: Icon(Remix.refresh_line, size: 16, color: theme.hintColor.withValues(alpha: 0.6)),
-                    ),
+                    if (SettingsService.to.cache.isScanning.value)
+                      _progressIndicator(theme.colorScheme.primary)
+                    else
+                      AnimatedRotation(
+                        turns: turns,
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeInOutCubic,
+                        child: Icon(Remix.refresh_line, size: 16, color: theme.hintColor.withValues(alpha: 0.6)),
+                      ),
                   ],
                 ),
               );
             }),
-            context.buildTile(
-              icon: Remix.image_2_line,
-              title: i18n('refresh_thumbnails'),
-              subtitle: i18n('refresh_thumbnails_desc'),
-              trailing: const Icon(Icons.refresh_rounded),
-              onTap: () async {
-                await SettingsService.to.cache.refreshImageCache();
-                Get.snackbar(i18n('done'), i18n('thumbnails_refreshed'), snackPosition: SnackPosition.bottom);
-              },
+            Obx(
+              () => context.buildTile(
+                icon: Remix.image_2_line,
+                title: i18n('refresh_thumbnails'),
+                subtitle: i18n('refresh_thumbnails_desc'),
+                trailing: SettingsService.to.cache.isRefreshingImages.value
+                    ? _progressIndicator(theme.colorScheme.primary)
+                    : const Icon(Icons.refresh_rounded),
+                onTap: SettingsService.to.cache.isBusy ? null : _refreshThumbnails,
+              ),
             ),
-            context.buildTile(
-              icon: Remix.delete_bin_6_line,
-              title: i18n("clear_all_cache"),
-              subtitle: i18n("clear_all_cache_meida_desc"),
-              onTap: () async {
-                final ok = await Get.dialog<bool>(
-                  AlertDialog(
-                    title: Text(i18n("confirm_clear_cache")),
-                    content: Text(i18n("confirm_clear_meida_desc")),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(Get.context!, false), child: Text(i18n("cancel"))),
-                      TextButton(
-                        onPressed: () => Navigator.pop(Get.context!, true),
-                        child: Text(i18n("clear"), style: TextStyle(color: theme.colorScheme.error)),
-                      ),
-                    ],
-                  ),
-                );
-                if (ok == true) {
-                  await SettingsService.to.cache.clearCache();
-                  Get.snackbar(i18n("done"), i18n("cache_cleared"), snackPosition: SnackPosition.bottom);
-                }
-              },
+            Obx(
+              () => context.buildTile(
+                icon: Remix.delete_bin_6_line,
+                title: i18n('clear_local_cache'),
+                subtitle: i18n('clear_local_cache_desc'),
+                isLong: true,
+                trailing: SettingsService.to.cache.isClearing.value
+                    ? _progressIndicator(theme.colorScheme.error)
+                    : Icon(Remix.delete_bin_6_line, color: theme.colorScheme.error),
+                onTap: SettingsService.to.cache.isBusy ? null : () => _confirmClearCache(theme),
+              ),
             ),
           ]),
           const SizedBox(height: 32),

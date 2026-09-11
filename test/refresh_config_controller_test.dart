@@ -40,5 +40,25 @@ void main() {
         RefreshConfigController.maxAllowedConcurrentRefresh,
       );
     });
+
+    test('keeps refresh timers inside the supported operating window', () {
+      expect(RefreshConfigController.normalizeRefreshInterval(-1), RefreshConfigController.minRefreshInterval);
+      expect(RefreshConfigController.normalizeRefreshInterval(90), 90);
+      expect(RefreshConfigController.normalizeRefreshInterval(999), RefreshConfigController.maxRefreshInterval);
+
+      final parsed = RefreshConfigController.parseConfig({'autoRefreshInterval': 0, 'thumbnailRefreshInterval': 999});
+      expect(parsed['autoRefreshInterval'], RefreshConfigController.minRefreshInterval);
+      expect(parsed['thumbnailRefreshInterval'], RefreshConfigController.maxRefreshInterval);
+    });
+
+    test('normalizes legacy refresh intervals while preserving unrelated fields', () {
+      final config = RefreshConfigController.extractConfig({
+        'refresh': {'autoRefreshFavorite': true, 'autoRefreshInterval': -30, 'thumbnailRefreshInterval': 10000},
+      });
+
+      expect(config['autoRefreshFavorite'], isTrue);
+      expect(config['autoRefreshInterval'], RefreshConfigController.minRefreshInterval);
+      expect(config['thumbnailRefreshInterval'], RefreshConfigController.maxRefreshInterval);
+    });
   });
 }

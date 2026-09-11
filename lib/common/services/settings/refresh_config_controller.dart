@@ -3,8 +3,15 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/services/medels/refresh_config_model.dart';
 
 class RefreshConfigController extends GetxController {
+  static const int defaultRefreshInterval = 30;
+  static const int minRefreshInterval = 5;
+  static const int maxRefreshInterval = 360;
   static const int defaultMaxConcurrentRefresh = 4;
   static const int maxAllowedConcurrentRefresh = 20;
+
+  static int normalizeRefreshInterval(int value) {
+    return value.clamp(minRefreshInterval, maxRefreshInterval);
+  }
 
   static int normalizeMaxConcurrentRefresh(Object? value) {
     final parsed = value is num ? value.toInt() : int.tryParse(value?.toString() ?? '');
@@ -17,10 +24,10 @@ class RefreshConfigController extends GetxController {
   // not survive indefinitely; users who prefer no foreground traffic can still
   // disable this independently from periodic refresh.
   final refreshFavoriteOnResume = hiveBool('refreshFavoriteOnResume', true);
-  final RxInt autoRefreshInterval = hiveInt('autoRefreshInterval', 30);
+  final RxInt autoRefreshInterval = hiveInt('autoRefreshInterval', defaultRefreshInterval);
   final RxInt maxConcurrentRefresh = hiveInt('maxConcurrentRefresh', defaultMaxConcurrentRefresh);
   final RxBool autoRefreshThumbnails = hiveBool('autoRefreshThumbnails', false);
-  final RxInt thumbnailRefreshInterval = hiveInt('thumbnailRefreshInterval', 30);
+  final RxInt thumbnailRefreshInterval = hiveInt('thumbnailRefreshInterval', defaultRefreshInterval);
 
   final _configStream = BehaviorSubject<RefreshConfig>();
   Stream<RefreshConfig> get configChanges => _configStream.stream;
@@ -29,7 +36,9 @@ class RefreshConfigController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    autoRefreshInterval.value = normalizeRefreshInterval(autoRefreshInterval.value);
     maxConcurrentRefresh.value = normalizeMaxConcurrentRefresh(maxConcurrentRefresh.value);
+    thumbnailRefreshInterval.value = normalizeRefreshInterval(thumbnailRefreshInterval.value);
     _emitConfig();
     _configWorker = everAll([
       autoRefreshFavorite,
@@ -70,10 +79,12 @@ class RefreshConfigController extends GetxController {
     return {
       'autoRefreshFavorite': (json['autoRefreshFavorite'] ?? false) as bool,
       'refreshFavoriteOnResume': (json['refreshFavoriteOnResume'] ?? true) as bool,
-      'autoRefreshInterval': (json['autoRefreshInterval'] ?? 30) as int,
+      'autoRefreshInterval': normalizeRefreshInterval((json['autoRefreshInterval'] ?? defaultRefreshInterval) as int),
       'maxConcurrentRefresh': normalizeMaxConcurrentRefresh(json['maxConcurrentRefresh']),
       'autoRefreshThumbnails': (json['autoRefreshThumbnails'] ?? false) as bool,
-      'thumbnailRefreshInterval': (json['thumbnailRefreshInterval'] ?? 30) as int,
+      'thumbnailRefreshInterval': normalizeRefreshInterval(
+        (json['thumbnailRefreshInterval'] ?? defaultRefreshInterval) as int,
+      ),
     };
   }
 
@@ -99,10 +110,14 @@ class RefreshConfigController extends GetxController {
     return {
       'autoRefreshFavorite': refresh['autoRefreshFavorite'] ?? false,
       'refreshFavoriteOnResume': refresh['refreshFavoriteOnResume'] ?? true,
-      'autoRefreshInterval': refresh['autoRefreshInterval'] ?? 30,
+      'autoRefreshInterval': normalizeRefreshInterval(
+        (refresh['autoRefreshInterval'] ?? defaultRefreshInterval) as int,
+      ),
       'maxConcurrentRefresh': normalizeMaxConcurrentRefresh(refresh['maxConcurrentRefresh']),
       'autoRefreshThumbnails': refresh['autoRefreshThumbnails'] ?? false,
-      'thumbnailRefreshInterval': refresh['thumbnailRefreshInterval'] ?? 30,
+      'thumbnailRefreshInterval': normalizeRefreshInterval(
+        (refresh['thumbnailRefreshInterval'] ?? defaultRefreshInterval) as int,
+      ),
     };
   }
 

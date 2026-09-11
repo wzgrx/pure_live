@@ -106,7 +106,6 @@ class RefreshSettingsPage extends GetView<RefreshConfigController> {
       builder: (dialogContext) {
         return _RefreshRadioDialog(
           title: i18n("auto_refresh_interval"),
-          maxHeightFactor: 0.45,
           value: controller.autoRefreshInterval.value,
           items: intervals,
         );
@@ -130,7 +129,6 @@ class RefreshSettingsPage extends GetView<RefreshConfigController> {
         return _RefreshRadioDialog(
           title: i18n("max_concurrent_refresh"),
           hint: i18n('max_concurrent_refresh_hint'),
-          maxHeightFactor: 0.5,
           value: controller.maxConcurrentRefresh.value,
           items: values,
         );
@@ -159,7 +157,6 @@ class RefreshSettingsPage extends GetView<RefreshConfigController> {
       builder: (dialogContext) {
         return _RefreshRadioDialog(
           title: i18n('thumbnail_refresh_interval'),
-          maxHeightFactor: 0.45,
           value: controller.thumbnailRefreshInterval.value,
           items: intervals,
         );
@@ -175,72 +172,43 @@ class RefreshSettingsPage extends GetView<RefreshConfigController> {
 class _RefreshRadioDialog extends StatelessWidget {
   final String title;
   final String? hint;
-  final double maxHeightFactor;
   final int value;
   final Map<int, String> items;
 
-  const _RefreshRadioDialog({
-    required this.title,
-    required this.maxHeightFactor,
-    required this.value,
-    required this.items,
-    this.hint,
-  });
+  const _RefreshRadioDialog({required this.title, required this.value, required this.items, this.hint});
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double dialogWidth = screenWidth > 600 ? 400 : screenWidth - 32;
-    final double maxHeight = screenHeight * maxHeightFactor;
-
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: screenWidth > 600 ? 280 : 0,
-          maxWidth: dialogWidth,
-          maxHeight: screenHeight * 0.8,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 20, bottom: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+    return AlertDialog(
+      scrollable: true,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      title: Text(title),
+      contentPadding: const EdgeInsets.only(top: 8, bottom: 8),
+      content: RadioGroup<int>(
+        groupValue: value,
+        onChanged: (selectedValue) {
+          if (selectedValue == null) {
+            return;
+          }
+          Navigator.of(context).pop(selectedValue);
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (hint != null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                child: Text(hint!, style: Theme.of(context).textTheme.bodySmall),
               ),
-              if (hint != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                  child: Text(hint!, style: Theme.of(context).textTheme.bodySmall),
-                ),
-              SizedBox(
-                height: maxHeight,
-                child: RadioGroup<int>(
-                  groupValue: value,
-                  onChanged: (selectedValue) {
-                    if (selectedValue == null) {
-                      return;
-                    }
-                    Navigator.of(context).pop(selectedValue);
-                  },
-                  child: ListView(
-                    physics: const PureLiveScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    children: items.entries.map((entry) {
-                      return RadioListTile<int>(
-                        title: Text(entry.value),
-                        value: entry.key,
-                        activeColor: Theme.of(context).colorScheme.primary,
-                      );
-                    }).toList(),
-                  ),
-                ),
+            ...items.entries.map(
+              (entry) => RadioListTile<int>(
+                title: Text(entry.value),
+                value: entry.key,
+                activeColor: Theme.of(context).colorScheme.primary,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

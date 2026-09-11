@@ -1,4 +1,5 @@
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/services/settings/cookie_value.dart';
 
 class DouyinCookieController extends GetxController {
   final TextEditingController cookieController = TextEditingController();
@@ -10,8 +11,9 @@ class DouyinCookieController extends GetxController {
   }
 
   void setCookie(String cookie) {
-    cookieController.text = cookie;
-    SettingsService.to.cookieManager.douyinCookie.v = cookie;
+    final normalized = normalizeAccountCookie(cookie);
+    cookieController.text = normalized;
+    SettingsService.to.cookieManager.douyinCookie.v = normalized;
   }
 
   @override

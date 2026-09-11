@@ -1,4 +1,5 @@
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/services/settings/cookie_value.dart';
 
 class HuyaCookieController extends GetxController {
   final TextEditingController cookieController = TextEditingController();
@@ -10,8 +11,9 @@ class HuyaCookieController extends GetxController {
   }
 
   void setCookie(String cookie) {
-    cookieController.text = cookie;
-    SettingsService.to.cookieManager.huyaCookie.v = cookie;
+    final normalized = normalizeAccountCookie(cookie);
+    cookieController.text = normalized;
+    SettingsService.to.cookieManager.huyaCookie.v = normalized;
   }
 
   @override

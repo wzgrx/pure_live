@@ -155,6 +155,7 @@ extension AppLayoutFactory on BuildContext {
     Widget? trailing,
     bool isLong = false,
     bool stackTrailingOnNarrow = false,
+    bool showNavigationChevronWhenStacked = true,
   }) {
     final theme = Theme.of(this);
 
@@ -240,7 +241,7 @@ extension AppLayoutFactory on BuildContext {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [titleWidget, ?subtitleWidget, const SizedBox(height: 8), trailing],
           ),
-          trailing: onTap != null
+          trailing: onTap != null && showNavigationChevronWhenStacked
               ? Icon(Icons.chevron_right_rounded, color: theme.hintColor.withValues(alpha: 0.4), size: 20)
               : null,
           onTap: onTap,
@@ -271,9 +272,12 @@ extension AppLayoutFactory on BuildContext {
       iconColor: iconColor,
       subtitleColor: subtitleColor,
       isLong: isLong,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      stackTrailingOnNarrow: true,
+      showNavigationChevronWhenStacked: false,
+      trailing: Wrap(
+        spacing: 4,
+        runSpacing: 2,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
             displayValue,
@@ -282,7 +286,6 @@ extension AppLayoutFactory on BuildContext {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(width: 4),
           Icon(Icons.chevron_right_rounded, color: theme.hintColor.withValues(alpha: 0.4), size: 20),
         ],
       ),
@@ -302,62 +305,36 @@ extension AppLayoutFactory on BuildContext {
         final innerTheme = Theme.of(dialogContext);
 
         return AlertDialog(
+          scrollable: true,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8),
           contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           title: Text(title, style: AppTextStyles.t18.copyWith(fontWeight: FontWeight.bold)),
-          content: Container(
-            width: double.maxFinite,
-            constraints: const BoxConstraints(maxWidth: 340, maxHeight: 400),
-            child: SingleChildScrollView(
-              child: RadioGroup<T>(
-                groupValue: value,
-                onChanged: (T? newValue) {
-                  if (newValue != null) {
-                    Navigator.of(dialogContext).pop();
-                    onChanged.call(newValue);
-                  }
-                },
-                child: buildModernCard(
-                  valueMap.keys.map<Widget>((e) {
-                    final itemRawText = valueMap[e] ?? "$e";
-                    final itemDisplayText = itemRawText.tr;
-                    final bool isSelected = (e == value);
-
-                    return Material(
-                      color: Colors.transparent,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 8),
-                          Radio<T>(value: e, activeColor: innerTheme.colorScheme.primary),
-                          Expanded(
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {
-                                Navigator.of(dialogContext).pop();
-                                onChanged.call(e);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
-                                child: Text(
-                                  itemDisplayText,
-                                  style: AppTextStyles.t15.copyWith(
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                    color: isSelected
-                                        ? innerTheme.colorScheme.primary
-                                        : innerTheme.textTheme.bodyLarge?.color,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
+          content: RadioGroup<T>(
+            groupValue: value,
+            onChanged: (T? newValue) {
+              if (newValue != null) {
+                Navigator.of(dialogContext).pop();
+                onChanged.call(newValue);
+              }
+            },
+            child: buildModernCard(
+              valueMap.entries.map<Widget>((entry) {
+                final itemDisplayText = (entry.value).tr;
+                final isSelected = entry.key == value;
+                return RadioListTile<T>(
+                  value: entry.key,
+                  activeColor: innerTheme.colorScheme.primary,
+                  title: Text(
+                    itemDisplayText,
+                    style: AppTextStyles.t15.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected ? innerTheme.colorScheme.primary : innerTheme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ),
         );

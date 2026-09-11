@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/services/settings/player_settings_controller.dart';
+import 'package:pure_live/core/common/proxy_routing.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
 import 'package:pure_live/player/models/player_engine.dart';
@@ -42,6 +44,7 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
                   i18n(activeI18nKey),
                   style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                 ),
+                stackTrailingOnNarrow: true,
               );
             }),
             Obx(() {
@@ -65,6 +68,7 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                stackTrailingOnNarrow: true,
               );
             }),
             context.buildSwitchTile(
@@ -122,65 +126,18 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
             children: [
               Icon(Remix.equalizer_line, size: 18, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
-              Text(
-                i18n("mpv_advanced_settings"),
-                style: AppTextStyles.t16Bold.copyWith(color: theme.colorScheme.primary),
+              Expanded(
+                child: Text(
+                  i18n("mpv_advanced_settings"),
+                  style: AppTextStyles.t16Bold.copyWith(color: theme.colorScheme.primary),
+                ),
               ),
             ],
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            children: [
-              Expanded(
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      i18n("mpv_warning_text"),
-                      style: AppTextStyles.t12.copyWith(color: theme.hintColor.withValues(alpha: 0.65)),
-                    ),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(4),
-                      onTap: () => launchUrlString("https://mpv.io"),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                        child: Text(
-                          i18n("mpv_official_docs"),
-                          style: AppTextStyles.t12.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () => SettingsService.to.player.resetMpvPlayerSettings(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Remix.refresh_line, size: 14, color: Colors.red),
-                      const SizedBox(width: 4),
-                      Text(
-                        i18n("reset"),
-                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: _buildMpvWarningAndReset(context, theme),
         ),
         context.buildModernCard([
           context.buildSwitchTile(
@@ -217,6 +174,73 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
           ),
         ]),
       ],
+    );
+  }
+
+  Widget _buildMpvWarningAndReset(BuildContext context, ThemeData theme) {
+    final warning = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
+      children: [
+        Text(
+          i18n("mpv_warning_text"),
+          style: AppTextStyles.t12.copyWith(color: theme.hintColor.withValues(alpha: 0.65)),
+        ),
+        InkWell(
+          borderRadius: BorderRadius.circular(4),
+          onTap: () => launchUrlString("https://mpv.io"),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            child: Text(
+              i18n("mpv_official_docs"),
+              style: AppTextStyles.t12.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+    final reset = InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => SettingsService.to.player.resetMpvPlayerSettings(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Remix.refresh_line, size: 14, color: Colors.red),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                i18n("reset"),
+                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stack = constraints.maxWidth < 420 || MediaQuery.textScalerOf(context).scale(13) > 18;
+        if (stack) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [warning, const SizedBox(height: 12), reset],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: warning),
+            const SizedBox(width: 12),
+            reset,
+          ],
+        );
+      },
     );
   }
 
@@ -277,58 +301,106 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
 
   // 代理设置弹窗（替换为统一SwitchTile）
   void showProxySettingsDialog() {
-    final hostController = TextEditingController(text: SettingsService.to.proxy.proxyHost.v);
-    final portController = TextEditingController(text: SettingsService.to.proxy.proxyPort.v.toString());
+    showDialog(context: Get.context!, builder: (context) => const _PlayerProxySettingsDialog());
+  }
+}
 
-    showDialog(
-      context: Get.context!,
-      builder: (context) => AlertDialog(
-        title: Text(i18n("proxy_settings")),
-        content: Obx(
-          () => SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                context.buildSwitchTile(
-                  icon: Remix.shield_keyhole_line,
-                  title: i18n("enable_player_proxy"),
-                  value: SettingsService.to.proxy.enableProxy,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: hostController,
-                  enabled: SettingsService.to.proxy.enableProxy.v,
-                  decoration: InputDecoration(
-                    labelText: i18n("proxy_host"),
-                    prefixIcon: const Icon(Remix.global_line, size: 20),
-                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                  ),
-                  onChanged: (value) => SettingsService.to.proxy.proxyHost.v = value,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: portController,
-                  enabled: SettingsService.to.proxy.enableProxy.v,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: i18n("proxy_port"),
-                    prefixIcon: const Icon(Remix.links_line, size: 20),
-                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-                  ),
-                  onChanged: (value) {
-                    int? port = int.tryParse(value);
-                    if (port != null) SettingsService.to.proxy.proxyPort.v = port;
-                  },
-                ),
-              ],
+final TextInputFormatter _playerProxyHostInputFormatter = TextInputFormatter.withFunction((oldValue, newValue) {
+  final normalized = normalizeProxyHost(newValue.text);
+  if (normalized == newValue.text) return newValue;
+  return TextEditingValue(
+    text: normalized,
+    selection: TextSelection.collapsed(offset: normalized.length),
+    composing: TextRange.empty,
+  );
+});
+
+class _PlayerProxySettingsDialog extends StatefulWidget {
+  const _PlayerProxySettingsDialog();
+
+  @override
+  State<_PlayerProxySettingsDialog> createState() => _PlayerProxySettingsDialogState();
+}
+
+class _PlayerProxySettingsDialogState extends State<_PlayerProxySettingsDialog> {
+  final proxy = SettingsService.to.proxy;
+  late final TextEditingController _hostController;
+  late final TextEditingController _portController;
+  bool _portInvalid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hostController = TextEditingController(text: proxy.proxyHost.v);
+    _portController = TextEditingController(text: proxy.proxyPort.v.toString());
+    _portInvalid = parseProxyPortInput(_portController.text) == null;
+  }
+
+  @override
+  void dispose() {
+    _hostController.dispose();
+    _portController.dispose();
+    super.dispose();
+  }
+
+  void _updatePort(String rawValue) {
+    final port = parseProxyPortInput(rawValue);
+    final invalid = port == null;
+    if (_portInvalid != invalid) setState(() => _portInvalid = invalid);
+    if (port != null) proxy.proxyPort.v = port;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      scrollable: true,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      title: Text(i18n("proxy_settings")),
+      content: Obx(
+        () => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            context.buildSwitchTile(
+              icon: Remix.shield_keyhole_line,
+              title: i18n("enable_player_proxy"),
+              value: proxy.enableProxy,
             ),
-          ),
+            const SizedBox(height: 12),
+            TextField(
+              key: const ValueKey('player-proxy-dialog-host'),
+              controller: _hostController,
+              enabled: proxy.enableProxy.v,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              enableSuggestions: false,
+              inputFormatters: [_playerProxyHostInputFormatter],
+              decoration: InputDecoration(
+                labelText: i18n("proxy_host"),
+                prefixIcon: const Icon(Remix.global_line, size: 20),
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+              ),
+              onChanged: (value) => proxy.proxyHost.v = normalizeProxyHost(value),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              key: const ValueKey('player-proxy-dialog-port'),
+              controller: _portController,
+              enabled: proxy.enableProxy.v,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                labelText: i18n("proxy_port"),
+                prefixIcon: const Icon(Remix.links_line, size: 20),
+                errorText: _portInvalid ? i18n('proxy_port_invalid') : null,
+                errorMaxLines: 3,
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+              ),
+              onChanged: _updatePort,
+            ),
+          ],
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n("confirm")))],
       ),
-    ).whenComplete(() {
-      hostController.dispose();
-      portController.dispose();
-    });
+      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n("confirm")))],
+    );
   }
 }

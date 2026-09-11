@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/utils/compact_danmaku_metrics.dart';
 import 'package:pure_live/modules/settings/widgets/app_color_picker_dialog.dart';
 import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
@@ -547,8 +548,13 @@ class _PipDanmakuPreviewState extends State<PipDanmakuPreview> with SingleTicker
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final scale = autoScale ? (constraints.maxWidth / 350).clamp(0.65, 1.0).toDouble() : 1.0;
-                  final fontSize = configuredFontSize * scale;
+                  final metrics = CompactDanmakuMetrics.resolve(
+                    width: constraints.maxWidth,
+                    autoScale: autoScale,
+                    configuredFontSize: configuredFontSize,
+                    configuredSpeed: speed,
+                  );
+                  final fontSize = metrics.fontSize;
                   final areaHeight = constraints.maxHeight * area;
                   final previewText = i18n('pip_danmaku_preview_text');
                   final painters = List<TextPainter>.generate(
@@ -588,7 +594,9 @@ class _PipDanmakuPreviewState extends State<PipDanmakuPreview> with SingleTicker
                                   painters: painters,
                                   fontSize: fontSize,
                                   fontWeight: fontWeight,
-                                  speed: speed,
+                                  speed: metrics.baseSpeed,
+                                  trackHeight: metrics.trackHeight,
+                                  overlapSafeGap: metrics.overlapSafeGap,
                                   emitInterval: emitInterval,
                                 ),
                               );
@@ -625,6 +633,8 @@ class _PipDanmakuPreviewPainter extends CustomPainter {
     required this.fontSize,
     required this.fontWeight,
     required this.speed,
+    required this.trackHeight,
+    required this.overlapSafeGap,
     required this.emitInterval,
   });
 
@@ -633,22 +643,23 @@ class _PipDanmakuPreviewPainter extends CustomPainter {
   final double fontSize;
   final int fontWeight;
   final double speed;
+  final double trackHeight;
+  final double overlapSafeGap;
   final double emitInterval;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
-    final laneHeight = math.max(fontSize * 1.55, 18.0);
-    final laneCount = math.max(1, (size.height / laneHeight).floor());
+    final laneCount = math.max(1, (size.height / trackHeight).floor());
     final elapsedSeconds = progress * 12;
 
     for (var index = 0; index < painters.length; index++) {
       final painter = painters[index];
-      final travel = size.width + painter.width + 24;
-      final phaseDistance = index * math.max(speed * emitInterval, painter.width * 0.7);
+      final travel = size.width + painter.width + overlapSafeGap;
+      final phaseDistance = index * math.max(speed * emitInterval, painter.width + overlapSafeGap);
       final travelled = elapsedSeconds * speed + phaseDistance;
       final x = size.width - (travelled % travel);
-      final y = (index % laneCount) * laneHeight + math.max(0, (laneHeight - painter.height) / 2);
+      final y = (index % laneCount) * trackHeight + math.max(0, (trackHeight - painter.height) / 2);
       painter.paint(canvas, Offset(x, y));
     }
   }
@@ -659,6 +670,8 @@ class _PipDanmakuPreviewPainter extends CustomPainter {
         oldDelegate.painters != painters ||
         oldDelegate.fontSize != fontSize ||
         oldDelegate.speed != speed ||
+        oldDelegate.trackHeight != trackHeight ||
+        oldDelegate.overlapSafeGap != overlapSafeGap ||
         oldDelegate.emitInterval != emitInterval;
   }
 }

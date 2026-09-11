@@ -138,6 +138,53 @@ void main() {
     painter = _previewPainter(tester);
     expect((painter.painters.first.text as TextSpan).text, isNot(contains('🎉')));
   });
+
+  testWidgets('auto scale keeps preview motion aligned with the compact renderer', (tester) async {
+    SettingsService.to.danmaku.pipDanmakuSpeed.value = 120;
+
+    await tester.pumpWidget(
+      EasyLocalization(
+        supportedLocales: const [Locale('zh')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('zh'),
+        assetLoader: const _TestAssetLoader(),
+        child: Builder(
+          builder: (context) => GetMaterialApp(
+            locale: context.locale,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            home: const Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(width: 280, child: PipDanmakuPreview()),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    dynamic painter = _previewPainter(tester);
+    expect(painter.fontSize, closeTo(9.6, 0.01));
+    expect(
+      painter.speed,
+      closeTo(96, 0.01),
+      reason: 'the live compact overlay scales both font size and base speed at 280/350 width',
+    );
+    expect(painter.trackHeight, closeTo(19.6, 0.01));
+    expect(painter.overlapSafeGap, closeTo(16, 0.01));
+
+    SettingsService.to.danmaku.pipDanmakuAutoScale.value = false;
+    await tester.pump();
+
+    painter = _previewPainter(tester);
+    expect(painter.fontSize, closeTo(12, 0.01));
+    expect(painter.speed, closeTo(120, 0.01));
+    expect(painter.trackHeight, closeTo(22, 0.01));
+    expect(painter.overlapSafeGap, closeTo(18, 0.01));
+  });
 }
 
 class _TestAssetLoader extends AssetLoader {

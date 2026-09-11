@@ -154,6 +154,7 @@ extension AppLayoutFactory on BuildContext {
     Color? subtitleColor,
     Widget? trailing,
     bool isLong = false,
+    bool stackTrailingOnNarrow = false,
   }) {
     final theme = Theme.of(this);
 
@@ -185,24 +186,27 @@ extension AppLayoutFactory on BuildContext {
       );
     }
 
-    return ListTile(
+    final titleWidget = Text(title, style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600));
+    final subtitleWidget = subtitle != null && subtitle.isNotEmpty
+        ? Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              subtitle,
+              style: AppTextStyles.t12.copyWith(color: subtitleColor ?? theme.hintColor.withValues(alpha: 0.75)),
+              maxLines: isLong ? null : 1,
+              overflow: isLong ? TextOverflow.visible : TextOverflow.ellipsis,
+            ),
+          )
+        : null;
+
+    Widget standardTile() => ListTile(
       horizontalTitleGap: 12,
       minLeadingWidth: 0,
       minVerticalPadding: 0,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: leadingWidget,
-      title: Text(title, style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600)),
-      subtitle: subtitle != null && subtitle.isNotEmpty
-          ? Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                subtitle,
-                style: AppTextStyles.t12.copyWith(color: subtitleColor ?? theme.hintColor.withValues(alpha: 0.75)),
-                maxLines: isLong ? null : 1,
-                overflow: isLong ? TextOverflow.visible : TextOverflow.ellipsis,
-              ),
-            )
-          : null,
+      title: titleWidget,
+      subtitle: subtitleWidget,
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -218,6 +222,30 @@ extension AppLayoutFactory on BuildContext {
         ],
       ),
       onTap: onTap,
+    );
+
+    if (!stackTrailingOnNarrow || trailing == null) return standardTile();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        if (constraints.maxWidth >= 360 && textScale <= 1.5) return standardTile();
+        return ListTile(
+          horizontalTitleGap: 12,
+          minLeadingWidth: 0,
+          minVerticalPadding: 0,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: leadingWidget,
+          title: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [titleWidget, ?subtitleWidget, const SizedBox(height: 8), trailing],
+          ),
+          trailing: onTap != null
+              ? Icon(Icons.chevron_right_rounded, color: theme.hintColor.withValues(alpha: 0.4), size: 20)
+              : null,
+          onTap: onTap,
+        );
+      },
     );
   }
 
@@ -363,25 +391,55 @@ extension AppLayoutFactory on BuildContext {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(title, style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w600)),
-                    Container(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final titleStyle = AppTextStyles.t16.copyWith(fontWeight: FontWeight.w600);
+                    final valueStyle = AppTextStyles.t13.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    );
+                    final scaler = MediaQuery.textScalerOf(context);
+                    final titlePainter = TextPainter(
+                      text: TextSpan(text: title, style: titleStyle),
+                      textDirection: Directionality.of(context),
+                      textScaler: scaler,
+                      maxLines: 1,
+                    )..layout();
+                    final valuePainter = TextPainter(
+                      text: TextSpan(text: displayValue, style: valueStyle),
+                      textDirection: Directionality.of(context),
+                      textScaler: scaler,
+                      maxLines: 1,
+                    )..layout();
+                    final valueBadge = Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
-                        displayValue,
-                        style: AppTextStyles.t13.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ],
+                      child: Text(displayValue, style: valueStyle),
+                    );
+                    final useRow = titlePainter.width + valuePainter.width + 28 <= constraints.maxWidth;
+                    if (useRow) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: Text(title, style: titleStyle)),
+                          const SizedBox(width: 12),
+                          valueBadge,
+                        ],
+                      );
+                    }
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: titleStyle),
+                        const SizedBox(height: 6),
+                        valueBadge,
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 2),
                 Transform.translate(

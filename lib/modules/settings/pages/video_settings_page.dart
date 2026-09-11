@@ -77,9 +77,10 @@ class VideoSettingsPage extends GetView<SettingsService> {
                 subtitle: i18n("prefer_resolution_subtitle"),
                 onTap: showPreferResolutionSelectorDialog,
                 trailing: Text(
-                  SettingsService.to.player.preferResolution.v,
+                  _preferredResolutionLabel(SettingsService.to.player.preferResolution.v),
                   style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                 ),
+                stackTrailingOnNarrow: true,
               ),
             ),
             Obx(
@@ -87,11 +88,12 @@ class VideoSettingsPage extends GetView<SettingsService> {
                 icon: Remix.signal_tower_line,
                 title: i18n("mobile_quality"),
                 subtitle: i18n("mobile_quality_subtitle"),
-                onTap: showpreferResolutionCellularSelectorDialog,
+                onTap: showPreferResolutionCellularSelectorDialog,
                 trailing: Text(
-                  SettingsService.to.player.preferResolutionCellular.v,
+                  _preferredResolutionLabel(SettingsService.to.player.preferResolutionCellular.v),
                   style: AppTextStyles.t13.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                 ),
+                stackTrailingOnNarrow: true,
               ),
             ),
           ]),
@@ -344,90 +346,70 @@ class VideoSettingsPage extends GetView<SettingsService> {
   }
 
   void showPreferResolutionSelectorDialog() {
-    showDialog(
-      context: Get.context!,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text(i18n("prefer_resolution")),
-          children: [
-            RadioGroup<String>(
-              groupValue: SettingsService.to.player.preferResolution.v,
-              onChanged: (String? value) {
-                if (value != null) {
-                  SettingsService.to.player.changePreferResolution(value);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 0, bottom: 10, left: 16, right: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: PlayerConsts.resolutions.map<Widget>((name) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Radio<String>(value: name, activeColor: Theme.of(context).colorScheme.primary),
-                        GestureDetector(
-                          onTap: () {
-                            SettingsService.to.player.changePreferResolution(name);
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(name),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+    _showPreferredResolutionSelectorDialog(
+      title: i18n('prefer_resolution'),
+      selected: SettingsService.to.player.preferResolution.v,
+      onSelected: SettingsService.to.player.changePreferResolution,
     );
   }
 
-  void showpreferResolutionCellularSelectorDialog() {
-    showDialog(
-      context: Get.context!,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text(i18n("prefer_resolution_cellular")),
-          children: [
-            RadioGroup<String>(
-              groupValue: SettingsService.to.player.preferResolutionCellular.v,
-              onChanged: (String? value) {
-                if (value != null) {
-                  SettingsService.to.player.changePreferResolutionCellular(value);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 0, bottom: 10, left: 16, right: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: PlayerConsts.resolutions.map<Widget>((name) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Radio<String>(value: name, activeColor: Theme.of(context).colorScheme.primary),
-                        GestureDetector(
-                          onTap: () {
-                            SettingsService.to.player.changePreferResolutionCellular(name);
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(name),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+  void showPreferResolutionCellularSelectorDialog() {
+    _showPreferredResolutionSelectorDialog(
+      title: i18n('prefer_resolution_cellular'),
+      selected: SettingsService.to.player.preferResolutionCellular.v,
+      onSelected: SettingsService.to.player.changePreferResolutionCellular,
     );
   }
+
+  void _showPreferredResolutionSelectorDialog({
+    required String title,
+    required String selected,
+    required ValueChanged<String> onSelected,
+  }) {
+    showDialog<void>(
+      context: Get.context!,
+      builder: (dialogContext) => AlertDialog(
+        scrollable: true,
+        title: Text(title),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        content: RadioGroup<String>(
+          groupValue: selected,
+          onChanged: (value) {
+            if (value == null) return;
+            onSelected(value);
+            Navigator.of(dialogContext).pop();
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: PlayerConsts.resolutions
+                .map(
+                  (value) => SimpleDialogOption(
+                    onPressed: () {
+                      onSelected(value);
+                      Navigator.of(dialogContext).pop();
+                    },
+                    child: Row(
+                      children: [
+                        Radio<String>(value: value, activeColor: Theme.of(dialogContext).colorScheme.primary),
+                        const SizedBox(width: 4),
+                        Expanded(child: Text(_preferredResolutionLabel(value))),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _preferredResolutionLabel(String value) => switch (value) {
+    '原画' => i18n('prefer_resolution_option_original'),
+    '蓝光8M' => i18n('prefer_resolution_option_blu_ray_8m'),
+    '蓝光4M' => i18n('prefer_resolution_option_blu_ray_4m'),
+    '超清' => i18n('prefer_resolution_option_super_hd'),
+    '流畅' => i18n('prefer_resolution_option_smooth'),
+    _ => value,
+  };
 }

@@ -93,6 +93,7 @@ class WebScoketUtils {
   final Iterable<String>? protocols;
   final Duration? inactivityTimeout;
   final Duration reconnectBaseDelay;
+  final Duration shutdownTimeout;
   final WebSocketConnector connector;
 
   WebScoketUtils({
@@ -109,6 +110,7 @@ class WebScoketUtils {
     this.protocols,
     this.inactivityTimeout,
     this.reconnectBaseDelay = const Duration(seconds: 1),
+    this.shutdownTimeout = const Duration(seconds: 2),
     this.connector = _connectIoWebSocket,
     List<String>? serverUrls,
   }) : serverUrls = _uniqueEndpoints(url, backupUrl, serverUrls);
@@ -124,6 +126,8 @@ class WebScoketUtils {
   int _generation = 0;
   bool _manualClose = false;
   bool _connecting = false;
+  Completer<void>? _connectAbort;
+  Completer<void>? _connectDone;
   DateTime? _lastMessageAt;
 
   static List<String> _uniqueEndpoints(String primary, String? backup, List<String>? candidates) {
@@ -136,20 +140,29 @@ class WebScoketUtils {
   }
 
   Future<void> connect({bool retry = false}) async {
-    if (_connecting || serverUrls.isEmpty) return;
+    if (_connecting) {
+      await _connectDone?.future;
+      return;
+    }
+    if (serverUrls.isEmpty) return;
     _manualClose = false;
     _connecting = true;
     final generation = ++_generation;
-
-    reconnectTimer?.cancel();
-    reconnectTimer = null;
-    await _disposeSocket();
-
-    if (retry && serverUrls.length > 1) {
-      _endpointIndex = (_endpointIndex + 1) % serverUrls.length;
-    }
+    final abort = Completer<void>();
+    final done = Completer<void>();
+    _connectAbort = abort;
+    _connectDone = done;
 
     try {
+      reconnectTimer?.cancel();
+      reconnectTimer = null;
+      await _disposeSocket();
+      if (abort.isCompleted || _manualClose || generation != _generation) return;
+
+      if (retry && serverUrls.length > 1) {
+        _endpointIndex = (_endpointIndex + 1) % serverUrls.length;
+      }
+
       final endpoint = serverUrls[_endpointIndex % serverUrls.length];
       final customClient = _createWebSocketHttpClient(Uri.parse(endpoint));
       final channel = connector(
@@ -161,15 +174,20 @@ class WebScoketUtils {
       );
       webSocket = channel;
       try {
-        await channel.ready;
+        await Future.any<void>([channel.ready, abort.future]);
       } finally {
         // The HTTP client is only needed for the upgrade handshake. Closing it
         // gracefully releases idle proxy connections without terminating the
         // detached WebSocket transport.
-        customClient?.close(force: false);
+        customClient?.close(force: abort.isCompleted);
       }
-      if (_manualClose || generation != _generation) {
-        await channel.sink.close();
+      if (abort.isCompleted || _manualClose || generation != _generation) {
+        // `close()` may already have detached and started closing this channel.
+        // Only the remaining owner should request the sink close.
+        if (identical(webSocket, channel)) {
+          webSocket = null;
+          unawaited(_closeSocket(channel));
+        }
         return;
       }
       _ready(channel, generation);
@@ -178,10 +196,12 @@ class WebScoketUtils {
         _scheduleReconnect(error.toString());
       }
     } finally {
-      // A manual close increments the generation while channel.ready is still
-      // pending. Leaving this flag set in that path permanently blocks a later
-      // connection attempt on the same helper.
-      _connecting = false;
+      if (identical(_connectAbort, abort)) _connectAbort = null;
+      if (identical(_connectDone, done)) {
+        _connectDone = null;
+        _connecting = false;
+      }
+      if (!done.isCompleted) done.complete();
     }
   }
 
@@ -280,16 +300,38 @@ class WebScoketUtils {
     }
   }
 
-  Future<void> _disposeSocket() async {
-    await streamSubscription?.cancel();
+  Future<void> _disposeSocket({bool awaitSocketClose = true}) async {
+    final subscription = streamSubscription;
     streamSubscription = null;
+    try {
+      await subscription?.cancel().timeout(shutdownTimeout);
+    } catch (_) {}
     heartBeatTimer?.cancel();
     heartBeatTimer = null;
     final socket = webSocket;
     webSocket = null;
     _lastMessageAt = null;
+    if (socket == null) return;
+    final closeFuture = _closeSocket(socket);
+    if (awaitSocketClose) {
+      try {
+        await closeFuture.timeout(shutdownTimeout);
+      } on TimeoutException {
+        // The close future remains observed by `_closeSocket`; release the
+        // room operation after the bounded graceful-shutdown window.
+      }
+    } else {
+      // `WebSocketSink.close` may wait for an HTTP upgrade which has not
+      // completed yet. The connect-abort signal owns that attempt; keeping
+      // room teardown behind the graceful close would recreate the stalled
+      // handshake leak this path is meant to stop.
+      unawaited(closeFuture);
+    }
+  }
+
+  Future<void> _closeSocket(WebSocketChannel socket) async {
     try {
-      await socket?.sink.close();
+      await socket.sink.close();
     } catch (_) {}
   }
 
@@ -299,7 +341,11 @@ class WebScoketUtils {
     status = SocketStatus.closed;
     reconnectTimer?.cancel();
     reconnectTimer = null;
-    await _disposeSocket();
+    final pendingConnect = _connectDone?.future;
+    final abort = _connectAbort;
+    if (abort != null && !abort.isCompleted) abort.complete();
+    await _disposeSocket(awaitSocketClose: pendingConnect == null);
+    await pendingConnect;
   }
 
   void reconnect() {

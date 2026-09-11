@@ -125,13 +125,126 @@ void main() {
     expect(failures, ['WebSocket closed (code=1008): policy']);
     await socket.close();
   });
+
+  test('manual close aborts a stalled handshake and permits a clean connection attempt', () async {
+    final stalledReady = Completer<void>();
+    final endpoints = <String>[];
+    final channels = <_FakeWebSocketChannel>[];
+    final socket = WebScoketUtils(
+      url: 'wss://primary.example/ws',
+      heartBeatTime: 0,
+      connector: (endpoint, {connectTimeout, protocols, headers, customClient}) {
+        endpoints.add(endpoint);
+        final channel = _FakeWebSocketChannel(ready: channels.isEmpty ? stalledReady.future : null);
+        channels.add(channel);
+        return channel;
+      },
+    );
+    addTearDown(() async {
+      if (!stalledReady.isCompleted) stalledReady.complete();
+      await socket.close();
+    });
+
+    final stalledConnection = socket.connect();
+    await Future<void>.delayed(Duration.zero);
+    await socket.close().timeout(const Duration(milliseconds: 100));
+    await stalledConnection.timeout(const Duration(milliseconds: 100));
+
+    await socket.connect().timeout(const Duration(milliseconds: 100));
+    expect(endpoints, ['wss://primary.example/ws', 'wss://primary.example/ws']);
+    expect(channels.first.outgoing.closed, isTrue);
+    expect(channels.first.outgoing.closeCalls, 1);
+    expect(socket.status, SocketStatus.connected);
+  });
+
+  test('duplicate connect callers join the active handshake until it is closed', () async {
+    final stalledReady = Completer<void>();
+    var connectorCalls = 0;
+    final socket = WebScoketUtils(
+      url: 'wss://primary.example/ws',
+      heartBeatTime: 0,
+      connector: (endpoint, {connectTimeout, protocols, headers, customClient}) {
+        connectorCalls++;
+        return _FakeWebSocketChannel(ready: stalledReady.future);
+      },
+    );
+    addTearDown(() {
+      if (!stalledReady.isCompleted) stalledReady.complete();
+    });
+
+    final first = socket.connect();
+    final duplicate = socket.connect();
+    var duplicateCompleted = false;
+    unawaited(duplicate.whenComplete(() => duplicateCompleted = true));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(connectorCalls, 1);
+    expect(duplicateCompleted, isFalse);
+
+    await socket.close();
+    await Future.wait([first, duplicate]);
+    expect(duplicateCompleted, isTrue);
+  });
+
+  test('real IO handshake can be abandoned before the peer upgrades the connection', () async {
+    final accepted = Completer<Socket>();
+    Socket? peer;
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final serverSubscription = server.listen((client) {
+      peer = client;
+      if (!accepted.isCompleted) accepted.complete(client);
+    });
+    final socket = WebScoketUtils(
+      url: 'ws://${InternetAddress.loopbackIPv4.address}:${server.port}/stall',
+      heartBeatTime: 0,
+    );
+    addTearDown(() async {
+      await socket.close();
+      peer?.destroy();
+      await serverSubscription.cancel();
+      await server.close();
+    });
+
+    final connection = socket.connect();
+    await accepted.future.timeout(const Duration(seconds: 2));
+    await socket.close().timeout(const Duration(seconds: 2));
+    await connection.timeout(const Duration(seconds: 2));
+
+    expect(socket.status, SocketStatus.closed);
+  });
+
+  test('an established socket with a stalled close acknowledgement has bounded teardown', () async {
+    final closeGate = Completer<void>();
+    late _FakeWebSocketChannel channel;
+    final socket = WebScoketUtils(
+      url: 'wss://primary.example/ws',
+      heartBeatTime: 0,
+      shutdownTimeout: const Duration(milliseconds: 20),
+      connector: (endpoint, {connectTimeout, protocols, headers, customClient}) {
+        channel = _FakeWebSocketChannel(closeGate: closeGate);
+        return channel;
+      },
+    );
+    addTearDown(() {
+      if (!closeGate.isCompleted) closeGate.complete();
+    });
+
+    await socket.connect();
+    await socket.close().timeout(const Duration(milliseconds: 100));
+
+    expect(channel.outgoing.closed, isTrue);
+    expect(socket.status, SocketStatus.closed);
+  });
 }
 
 class _FakeWebSocketChannel implements WebSocketChannel {
-  _FakeWebSocketChannel({this.closeCode, this.closeReason});
+  _FakeWebSocketChannel({this.closeCode, this.closeReason, Future<void>? ready, Completer<void>? closeGate})
+    : _ready = ready ?? Future<void>.value(),
+      outgoing = _FakeWebSocketSink(closeGate: closeGate);
 
   final StreamController<dynamic> incoming = StreamController<dynamic>();
-  final _FakeWebSocketSink outgoing = _FakeWebSocketSink();
+  final _FakeWebSocketSink outgoing;
+  final Future<void> _ready;
 
   @override
   Stream<dynamic> get stream => incoming.stream;
@@ -140,7 +253,7 @@ class _FakeWebSocketChannel implements WebSocketChannel {
   WebSocketSink get sink => outgoing;
 
   @override
-  Future<void> get ready => Future<void>.value();
+  Future<void> get ready => _ready;
 
   @override
   String? get protocol => null;
@@ -156,9 +269,13 @@ class _FakeWebSocketChannel implements WebSocketChannel {
 }
 
 class _FakeWebSocketSink implements WebSocketSink {
+  _FakeWebSocketSink({this.closeGate});
+
+  final Completer<void>? closeGate;
   final List<dynamic> sent = <dynamic>[];
   final Completer<void> _done = Completer<void>();
   bool closed = false;
+  int closeCalls = 0;
 
   @override
   void add(dynamic data) {
@@ -168,7 +285,12 @@ class _FakeWebSocketSink implements WebSocketSink {
 
   @override
   Future<void> close([int? closeCode, String? closeReason]) async {
+    closeCalls++;
     closed = true;
+    if (closeGate != null) {
+      await closeGate!.future;
+      return;
+    }
     if (!_done.isCompleted) _done.complete();
   }
 

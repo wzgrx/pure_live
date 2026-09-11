@@ -1,5 +1,6 @@
 {
     "about": "关于",
+    "account_verifying": "正在核验账号…",
     "add": "添加",
     "app_legalese": "© 2026 PureLive 开源项目。本程序为纯本地客户端应用，直接请求媒体平台官方公开接口，项目本身不存储、不制作、不分发任何音视频资源。本程序登录及云同步功能由第三方基础设施服务商 Firebase 提供。开发者郑重承诺，本程序本身不收集、不处理且不留存任何用户个人隐私信息。所有运行、配置及同步数据均由用户自行留存与控制，数据所有权及隐私权益完全归属于用户。用户需自行承担使用本测试工具所产生的相关法律责任。",
     "app_name": "纯粹直播",
@@ -30,6 +31,7 @@
     "basic_config": "基础配置",
     "bilibili_login": "哔哩哔哩账号登录",
     "bilibili_login_expired": "哔哩哔哩登录已失效，请重新登录",
+    "bilibili_logout_cleanup_failed": "本地账号已退出，浏览器 Cookie 清理需要再次尝试",
     "bilibili_user_info_failed": "获取哔哩哔哩用户信息失败，可前往账号管理重试",
     "block_list": "屏蔽管理",
     "boot_start": "开机启动",

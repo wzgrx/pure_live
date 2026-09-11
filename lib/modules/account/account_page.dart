@@ -25,7 +25,11 @@ class AccountPage extends GetView<AccountController> {
                 context,
                 logo: 'assets/images/bilibili_2.png',
                 title: i18n("site_bilibili"),
-                subtitle: isLogined ? accountName : i18n("not_logged_in"),
+                subtitle: isLogined
+                    ? accountName.trim().isEmpty
+                          ? i18n('account_verifying')
+                          : accountName
+                    : i18n("not_logged_in"),
                 isLogined: isLogined,
                 onTap: () => isLogined ? _showLogoutDialog(context) : controller.bilibiliTap(),
               );

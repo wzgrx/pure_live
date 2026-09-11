@@ -25,10 +25,11 @@ class BiliBiliWebLoginController extends GetxController {
       var cookies = await cookieManager.getCookies(url: uri);
       var cookieStr = cookies.map((e) => "${e.name}=${e.value}").join(";");
       BiliBiliAccountService.instance.setCookie(cookieStr);
-      await BiliBiliAccountService.instance.loadUserInfo();
+      final loggedIn = await BiliBiliAccountService.instance.loadUserInfo();
+      if (!loggedIn || isClosed) return;
       showWebView.value = false;
       await Future.delayed(const Duration(milliseconds: 500));
-      Navigator.of(Get.context!).pop(true);
+      if (!isClosed) Get.back(result: true);
     }
   }
 }

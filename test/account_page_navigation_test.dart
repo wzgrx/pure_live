@@ -22,6 +22,7 @@ void main() {
   late Directory hiveDirectory;
   late Map<String, dynamic> english;
   late CookieSettingsController cookies;
+  late _TestBilibiliAccountService bilibili;
 
   setUpAll(() async {
     hiveDirectory = await Directory.systemTemp.createTemp('pure-live-account-navigation-test-');
@@ -38,7 +39,8 @@ void main() {
     await HivePrefUtil.clear();
     cookies = CookieSettingsController();
     Get.put<SettingsService>(_TestSettingsService(cookies));
-    Get.put<BiliBiliAccountService>(_TestBilibiliAccountService());
+    bilibili = _TestBilibiliAccountService();
+    Get.put<BiliBiliAccountService>(bilibili);
     Get.put<AccountController>(_TestAccountController());
   });
 
@@ -66,6 +68,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('canonical-douyin-cookie')), findsOneWidget);
     expect(find.byKey(const ValueKey('legacy-douyu-cookie')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('configured Bilibili account exposes a visible verification state before identity returns', (
+    tester,
+  ) async {
+    bilibili.logined.value = true;
+    bilibili.name.value = '';
+    await _pumpAccountPage(tester, english);
+    expect(find.text('Verifying account…'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/common/services/settings/bilibili_account_service.dart';
@@ -71,8 +72,8 @@ class BiliBiliQRLoginController extends GetxController {
         if (cookies.isNotEmpty) {
           var cookieStr = cookies.join(";");
           BiliBiliAccountService.instance.setCookie(cookieStr);
-          await BiliBiliAccountService.instance.loadUserInfo();
-          Navigator.of(Get.context!).pop();
+          final loggedIn = await BiliBiliAccountService.instance.loadUserInfo();
+          if (loggedIn && !isClosed) Get.back(result: true);
         }
       } else if (code == 86038) {
         qrStatus.value = QRStatus.expired;

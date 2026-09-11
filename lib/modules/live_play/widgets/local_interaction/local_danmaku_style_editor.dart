@@ -663,10 +663,14 @@ class _StyleSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 17, color: colors.primary),
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 17, color: colors.primary),
+        ),
         const SizedBox(width: 6),
-        Text(label, style: Theme.of(context).textTheme.titleSmall),
+        Expanded(child: Text(label, style: Theme.of(context).textTheme.titleSmall)),
       ],
     );
   }
@@ -775,11 +779,47 @@ class _StyleSlider extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Expanded(child: Text(label)),
-            Text(valueLabel, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final labelStyle = DefaultTextStyle.of(context).style;
+            final valueStyle = labelStyle.copyWith(color: Theme.of(context).colorScheme.primary);
+            final scaler = MediaQuery.textScalerOf(context);
+            final direction = Directionality.of(context);
+            final labelPainter = TextPainter(
+              text: TextSpan(text: label, style: labelStyle),
+              textDirection: direction,
+              textScaler: scaler,
+              maxLines: 1,
+            )..layout();
+            final valuePainter = TextPainter(
+              text: TextSpan(text: valueLabel, style: valueStyle),
+              textDirection: direction,
+              textScaler: scaler,
+              maxLines: 1,
+            )..layout();
+            final useRow = labelPainter.width + valuePainter.width + 12 <= constraints.maxWidth;
+            labelPainter.dispose();
+            valuePainter.dispose();
+
+            if (useRow) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: Text(label, style: labelStyle)),
+                  const SizedBox(width: 12),
+                  Text(valueLabel, style: valueStyle),
+                ],
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: labelStyle),
+                const SizedBox(height: 2),
+                Text(valueLabel, style: valueStyle),
+              ],
+            );
+          },
         ),
         SizedBox(
           height: dense ? 32 : 40,

@@ -70,6 +70,9 @@ void main() {
       expect(douyin.map((gift) => gift.id), contains('douyin_carnival'));
       expect(bilibili.map((gift) => gift.id).toSet(), isNot(douyin.map((gift) => gift.id).toSet()));
       expect(LocalInteractionController.platformBadgeKey(Sites.huyaSite), 'local_badge_huya');
+      expect(LocalInteractionController.platformBadgeKey(' HUYA '), 'local_badge_huya');
+      expect(LocalInteractionController.packForPlatform(' YY ').id, Sites.yySite);
+      expect(LocalInteractionController.giftsForPlatform(' BILIBILI ').map((gift) => gift.id), contains('bili_voyage'));
       expect(twitch.map((gift) => gift.id), contains('twitch_hype_train'));
       expect(LocalInteractionController.platformBadgeKey(Sites.twitchSite), 'local_badge_twitch');
       expect(soop.map((gift) => gift.id), contains('soop_signature_balloon'));

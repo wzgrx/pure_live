@@ -32,6 +32,7 @@ class _LocalInteractionSettingsPageState extends State<LocalInteractionSettingsP
     return Scaffold(
       appBar: AppBar(title: Text(i18n('local_interaction_settings'))),
       body: ListView(
+        key: const ValueKey('local-interaction-settings-scroll'),
         physics: const PureLiveScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
@@ -66,6 +67,7 @@ class _LocalInteractionSettingsPageState extends State<LocalInteractionSettingsP
                           children: LocalInteractionController.platformPacks
                               .map(
                                 (pack) => ChoiceChip(
+                                  key: ValueKey('local-platform-pack-${pack.id}'),
                                   avatar: Text(pack.badge),
                                   label: Text(pack.name),
                                   selected: controller.previewPlatform.v == pack.id,
@@ -180,6 +182,7 @@ class _LocalInteractionSettingsPageState extends State<LocalInteractionSettingsP
                         const SizedBox(height: 10),
                         Wrap(
                           spacing: 8,
+                          runSpacing: 8,
                           children: const [500, 2000, 10000]
                               .map(
                                 (value) =>

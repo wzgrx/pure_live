@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/services/settings/player_settings_controller.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
 import 'package:pure_live/player/models/player_engine.dart';
@@ -13,6 +15,8 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final availablePlayerKeys = availableVideoPlayerKeysForPlatform(defaultTargetPlatform);
+    final canSwitchPlayer = availablePlayerKeys.length > 1;
 
     return Scaffold(
       appBar: AppBar(title: Text(i18n("player_kernel_settings"))),
@@ -23,14 +27,17 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
           context.buildGroupTitle(i18n("core_kernel_settings")),
           context.buildModernCard([
             Obx(() {
-              String activeKey = SettingsService.to.player.videoPlayerKey.v;
+              final activeKey = normalizeVideoPlayerKeyForPlatform(
+                SettingsService.to.player.videoPlayerKey.v,
+                defaultTargetPlatform,
+              );
               String activeI18nKey = PlayerConsts.names[activeKey] ?? PlayerConsts.names[PlayerConsts.defaultKey]!;
 
               return context.buildTile(
                 icon: Remix.toggle_line,
                 title: i18n("kernel_switch"),
-                subtitle: i18n("kernel_switch_subtitle"),
-                onTap: showVideoSetDialog,
+                subtitle: i18n(canSwitchPlayer ? "kernel_switch_subtitle" : "kernel_fixed_subtitle"),
+                onTap: canSwitchPlayer ? showVideoSetDialog : null,
                 trailing: Text(
                   i18n(activeI18nKey),
                   style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
@@ -38,7 +45,10 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
               );
             }),
             Obx(() {
-              String activeKey = SettingsService.to.player.videoPlayerKey.v;
+              final activeKey = normalizeVideoPlayerKeyForPlatform(
+                SettingsService.to.player.videoPlayerKey.v,
+                defaultTargetPlatform,
+              );
               if (PlayerConsts.engines[activeKey] == PlayerEngine.exo) {
                 return const SizedBox.shrink();
               }
@@ -78,7 +88,10 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
             ),
           ]),
           Obx(() {
-            String activeKey = SettingsService.to.player.videoPlayerKey.v;
+            final activeKey = normalizeVideoPlayerKeyForPlatform(
+              SettingsService.to.player.videoPlayerKey.v,
+              defaultTargetPlatform,
+            );
             if (PlayerConsts.engines[activeKey] != PlayerEngine.mediaKit) {
               return const SizedBox.shrink();
             }
@@ -209,9 +222,8 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
 
   // 播放器选择弹窗
   void showVideoSetDialog() {
-    List<String> playerList = PlatformUtils.isMobile
-        ? PlayerConsts.names.values.toList()
-        : [PlayerConsts.names['mpv']!];
+    final playerKeys = availableVideoPlayerKeysForPlatform(defaultTargetPlatform);
+    if (playerKeys.length <= 1) return;
 
     showDialog(
       context: Get.context!,
@@ -220,12 +232,10 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
           title: Text(i18n("change_player")),
           children: [
             Obx(() {
-              String activeKey = SettingsService.to.player.videoPlayerKey.v;
-              String activeI18nKey = PlayerConsts.names[activeKey] ?? playerList.first;
-
-              if (!playerList.contains(activeI18nKey)) {
-                activeKey = PlayerConsts.getKeyByI18nKey(playerList.first);
-              }
+              final activeKey = normalizeVideoPlayerKeyForPlatform(
+                SettingsService.to.player.videoPlayerKey.v,
+                defaultTargetPlatform,
+              );
 
               return RadioGroup<String>(
                 groupValue: activeKey,
@@ -238,8 +248,8 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: playerList.map<Widget>((i18nKey) {
-                    final String itemKey = PlayerConsts.getKeyByI18nKey(i18nKey);
+                  children: playerKeys.map<Widget>((itemKey) {
+                    final i18nKey = PlayerConsts.names[itemKey]!;
                     return ListTile(
                       leading: Radio<String>(value: itemKey, activeColor: Theme.of(context).colorScheme.primary),
                       title: Text(i18n(i18nKey), style: AppTextStyles.t15),

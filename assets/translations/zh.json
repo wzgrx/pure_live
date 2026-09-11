@@ -301,6 +301,7 @@
     "issue_feedback": "问题反馈",
     "kernel_switch": "内核切换",
     "kernel_switch_subtitle": "不同内核影响解码性能与兼容性",
+    "kernel_fixed_subtitle": "当前平台仅提供集成式 MPV 内核",
     "keyword_added_count": "已添加{count}个关键词",
     "keywords_count": "已添加{count}个关键词（点击移除）",
     "license": "开源许可证",

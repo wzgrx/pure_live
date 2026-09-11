@@ -26,6 +26,7 @@ import 'package:pure_live/recorder/models/record_status.dart';
 import 'package:pure_live/recorder/pages/record_settings/record_settings_controller.dart';
 import 'package:pure_live/recorder/pages/recorder/recorder_controller.dart';
 import 'package:pure_live/recorder/services/cache_service.dart';
+import 'package:pure_live/recorder/services/ffmpeg_flv_input_relay.dart';
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
 import 'package:pure_live/recorder/services/ffmpeg_hls_input_relay.dart';
 import 'package:pure_live/recorder/services/stream_resolver_service.dart';
@@ -299,6 +300,7 @@ class _RetainingManager implements FFmpegManager {
     bool liveRecording = false,
     HlsSourceQueryPolicy? sourceQueryPolicy,
     HlsRelayDiagnostics? hlsDiagnostics,
+    FlvRelayDiagnostics? flvDiagnostics,
     bool hlsPrefetch = false,
   }) {
     starts++;
@@ -308,6 +310,7 @@ class _RetainingManager implements FFmpegManager {
       liveRecording: liveRecording,
       sourceQueryPolicy: sourceQueryPolicy,
       hlsDiagnostics: hlsDiagnostics,
+      flvDiagnostics: flvDiagnostics,
       hlsPrefetch: hlsPrefetch,
     );
   }

@@ -1365,8 +1365,7 @@ class PlayerManager {
     if (_currentPlayer == null || _runtimeEngine == null) {
       if (_defaultEngine == null) {
         final String savedKey = SettingsService.to.player.videoPlayerKey.v;
-
-        final String validKey = PlayerConsts.engines.containsKey(savedKey) ? savedKey : PlayerConsts.defaultKey;
+        final String validKey = normalizeVideoPlayerKeyForPlatform(savedKey, defaultTargetPlatform);
 
         _defaultEngine = PlayerConsts.engines[validKey]!;
       }

@@ -10,6 +10,26 @@ void main() {
       expect(defaultVideoPlayerKeyForPlatform(TargetPlatform.windows), 'mpv');
     });
 
+    test('normalizes an old desktop IJK selection in imported and parsed settings', () {
+      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      final imported = PlayerSettingsController.extractConfig({
+        'player': <String, dynamic>{'videoPlayerKey': 'ijk'},
+      });
+      final parsed = PlayerSettingsController.parseConfig(<String, dynamic>{'videoPlayerKey': 'ijk'});
+
+      expect(imported['videoPlayerKey'], 'mpv');
+      expect(parsed['videoPlayerKey'], 'mpv');
+    });
+
+    test('keeps supported mobile engines and replaces unknown selections with the platform default', () {
+      expect(normalizeVideoPlayerKeyForPlatform('ijk', TargetPlatform.android), 'ijk');
+      expect(normalizeVideoPlayerKeyForPlatform('missing', TargetPlatform.android), 'mpv');
+      expect(normalizeVideoPlayerKeyForPlatform('missing', TargetPlatform.iOS), 'ijk');
+      expect(availableVideoPlayerKeysForPlatform(TargetPlatform.windows), const <String>['mpv']);
+    });
+
     test('retires the legacy global audio-only default', () {
       final config = PlayerSettingsController.extractConfig({
         'player': <String, dynamic>{'audioOnly': true, 'floatPlay': true},

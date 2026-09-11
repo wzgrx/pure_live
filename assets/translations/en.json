@@ -300,6 +300,7 @@
     "issue_feedback": "Issue Feedback",
     "kernel_switch": "Player Engine",
     "kernel_switch_subtitle": "Different engines affect performance",
+    "kernel_fixed_subtitle": "This platform uses the integrated MPV engine.",
     "keyword_added_count": "Added {count} keywords",
     "keywords_count": "{count} keywords added (tap to remove)",
     "license": "License",

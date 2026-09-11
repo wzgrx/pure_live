@@ -9,6 +9,18 @@ import 'package:pure_live/player/utils/player_consts.dart';
 @visibleForTesting
 String defaultVideoPlayerKeyForPlatform(TargetPlatform platform) => platform == TargetPlatform.iOS ? 'ijk' : 'mpv';
 
+List<String> availableVideoPlayerKeysForPlatform(TargetPlatform platform) =>
+    platform == TargetPlatform.android || platform == TargetPlatform.iOS
+    ? PlayerConsts.engines.keys.toList(growable: false)
+    : const <String>['mpv'];
+
+String normalizeVideoPlayerKeyForPlatform(String key, TargetPlatform platform) {
+  final availableKeys = availableVideoPlayerKeysForPlatform(platform);
+  if (availableKeys.contains(key)) return key;
+  final fallback = defaultVideoPlayerKeyForPlatform(platform);
+  return availableKeys.contains(fallback) ? fallback : availableKeys.first;
+}
+
 String get _defaultVideoPlayerKey => defaultVideoPlayerKeyForPlatform(defaultTargetPlatform);
 
 class PlayerSettingsController extends GetxController {
@@ -77,6 +89,8 @@ class PlayerSettingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final normalizedPlayerKey = normalizeVideoPlayerKeyForPlatform(videoPlayerKey.v, defaultTargetPlatform);
+    if (videoPlayerKey.v != normalizedPlayerKey) videoPlayerKey.v = normalizedPlayerKey;
     _loadPortraitRoomOverrides(_portraitRoomOverridesRaw.v);
   }
 
@@ -214,7 +228,10 @@ class PlayerSettingsController extends GetxController {
     return {
       'portraitRoomOverrides': parsePortraitRoomOverrides(json['portraitRoomOverrides'] ?? '{}'),
       'videoFitIndex': typed<int>(json['videoFitIndex'] ?? 0),
-      'videoPlayerKey': typed<String>(json['videoPlayerKey'] ?? _defaultVideoPlayerKey),
+      'videoPlayerKey': normalizeVideoPlayerKeyForPlatform(
+        typed<String>(json['videoPlayerKey'] ?? _defaultVideoPlayerKey),
+        defaultTargetPlatform,
+      ),
       'preferResolution': typed<String>(json['preferResolution'] ?? PlayerConsts.resolutions.first),
       'preferResolutionCellular': typed<String>(json['preferResolutionCellular'] ?? PlayerConsts.resolutions.first),
       'enableCodec': typed<bool>(json['enableCodec'] ?? true),
@@ -290,7 +307,10 @@ class PlayerSettingsController extends GetxController {
     final player = rootConfig?['player'] as Map<String, dynamic>? ?? {};
     return {
       'videoFitIndex': player['videoFitIndex'] ?? 0,
-      'videoPlayerKey': player['videoPlayerKey'] ?? _defaultVideoPlayerKey,
+      'videoPlayerKey': normalizeVideoPlayerKeyForPlatform(
+        (player['videoPlayerKey'] ?? _defaultVideoPlayerKey) as String,
+        defaultTargetPlatform,
+      ),
       'preferResolution': player['preferResolution'] ?? PlayerConsts.resolutions.first,
       'preferResolutionCellular': player['preferResolutionCellular'] ?? PlayerConsts.resolutions.first,
       'enableCodec': player['enableCodec'] ?? true,

@@ -4,21 +4,28 @@ import 'package:pure_live/common/services/settings/app_settings_controller.dart'
 class AudienceMetricSettingsPage extends StatelessWidget {
   const AudienceMetricSettingsPage({super.key});
 
-  static const _platforms = <({String id, String name, String detailKey})>[
-    (id: 'bilibili', name: '哔哩哔哩', detailKey: 'audience_bilibili_detail'),
-    (id: 'douyu', name: '斗鱼', detailKey: 'audience_douyu_detail'),
-    (id: 'huya', name: '虎牙', detailKey: 'audience_huya_detail'),
-    (id: 'douyin', name: '抖音', detailKey: 'audience_douyin_detail'),
-    (id: 'kuaishou', name: '快手', detailKey: 'audience_kuaishou_detail'),
-    (id: 'cc', name: '网易 CC', detailKey: 'audience_cc_detail'),
-    (id: 'twitch', name: 'Twitch', detailKey: 'audience_twitch_detail'),
-    (id: 'soop', name: 'SOOP', detailKey: 'audience_soop_detail'),
-    (id: 'yy', name: 'YY Live', detailKey: 'audience_yy_detail'),
-    (id: 'picarto', name: 'Picarto', detailKey: 'audience_picarto_detail'),
-    (id: 'twitcasting', name: 'TwitCasting', detailKey: 'audience_twitcasting_detail'),
-    (id: 'openrec', name: 'mellow-fan (OPENREC)', detailKey: 'audience_openrec_detail'),
-    (id: 'ttinglive', name: 'FLEX TV (TTingLive)', detailKey: 'audience_ttinglive_detail'),
-    (id: 'acfun', name: 'AcFun', detailKey: 'audience_acfun_detail'),
+  static const _platforms = <({String id, String labelKey, String detailKey})>[
+    (id: 'bilibili', labelKey: 'site_bilibili', detailKey: 'audience_bilibili_detail'),
+    (id: 'douyu', labelKey: 'site_douyu', detailKey: 'audience_douyu_detail'),
+    (id: 'huya', labelKey: 'site_huya', detailKey: 'audience_huya_detail'),
+    (id: 'douyin', labelKey: 'site_douyin', detailKey: 'audience_douyin_detail'),
+    (id: 'kuaishou', labelKey: 'site_kuaishou', detailKey: 'audience_kuaishou_detail'),
+    (id: 'cc', labelKey: 'site_cc', detailKey: 'audience_cc_detail'),
+    (id: 'twitch', labelKey: 'site_twitch', detailKey: 'audience_twitch_detail'),
+    (id: 'soop', labelKey: 'site_soop', detailKey: 'audience_soop_detail'),
+    (id: 'yy', labelKey: 'site_yy', detailKey: 'audience_yy_detail'),
+    (id: 'acfun', labelKey: 'site_acfun', detailKey: 'audience_acfun_detail'),
+    (id: 'picarto', labelKey: 'site_picarto', detailKey: 'audience_picarto_detail'),
+    (id: 'twitcasting', labelKey: 'site_twitcasting', detailKey: 'audience_twitcasting_detail'),
+    (id: 'missevan', labelKey: 'site_missevan', detailKey: 'audience_missevan_detail'),
+    (id: 'inke', labelKey: 'site_inke', detailKey: 'audience_inke_detail'),
+    (id: 'kilakila', labelKey: 'site_kilakila', detailKey: 'audience_kilakila_detail'),
+    (id: 'huajiao', labelKey: 'site_huajiao', detailKey: 'audience_huajiao_detail'),
+    (id: 'openrec', labelKey: 'site_openrec', detailKey: 'audience_openrec_detail'),
+    (id: 'ttinglive', labelKey: 'site_ttinglive', detailKey: 'audience_ttinglive_detail'),
+    (id: 'xiaohongshu', labelKey: 'site_xiaohongshu', detailKey: 'audience_xiaohongshu_detail'),
+    (id: 'niconico', labelKey: 'site_niconico', detailKey: 'audience_niconico_detail'),
+    (id: 'weibo', labelKey: 'site_weibo', detailKey: 'audience_weibo_detail'),
   ];
 
   @override
@@ -40,15 +47,17 @@ class AudienceMetricSettingsPage extends StatelessWidget {
                 },
                 child: Column(
                   children: [
-                    RadioListTile<bool>(
+                    const _AudienceModeTile(
+                      key: ValueKey('audience-mode-heat'),
                       value: false,
-                      title: Text(i18n('audience_mode_heat')),
-                      subtitle: Text(i18n('audience_mode_heat_desc')),
+                      titleKey: 'audience_mode_heat',
+                      detailKey: 'audience_mode_heat_desc',
                     ),
-                    RadioListTile<bool>(
+                    const _AudienceModeTile(
+                      key: ValueKey('audience-mode-online'),
                       value: true,
-                      title: Text(i18n('audience_mode_online')),
-                      subtitle: Text(i18n('audience_mode_online_desc')),
+                      titleKey: 'audience_mode_online',
+                      detailKey: 'audience_mode_online_desc',
                     ),
                   ],
                 ),
@@ -64,7 +73,12 @@ class AudienceMetricSettingsPage extends StatelessWidget {
           context.buildGroupTitle(i18n('audience_online_platforms')),
           context.buildModernCard([
             for (final platform in _platforms)
-              _AudiencePlatformTile(id: platform.id, name: platform.name, detailKey: platform.detailKey, app: app),
+              _AudiencePlatformTile(
+                id: platform.id,
+                labelKey: platform.labelKey,
+                detailKey: platform.detailKey,
+                app: app,
+              ),
           ]),
           const SizedBox(height: 12),
           Padding(
@@ -78,11 +92,39 @@ class AudienceMetricSettingsPage extends StatelessWidget {
   }
 }
 
+class _AudienceModeTile extends StatelessWidget {
+  const _AudienceModeTile({super.key, required this.value, required this.titleKey, required this.detailKey});
+
+  final bool value;
+  final String titleKey;
+  final String detailKey;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final title = Text(i18n(titleKey));
+      final detail = Text(i18n(detailKey));
+      final stackText = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.5;
+      return RadioListTile<bool>(
+        value: value,
+        title: stackText
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [title, const SizedBox(height: 4), detail],
+              )
+            : title,
+        subtitle: stackText ? null : detail,
+      );
+    },
+  );
+}
+
 class _AudiencePlatformTile extends StatelessWidget {
-  const _AudiencePlatformTile({required this.id, required this.name, required this.detailKey, required this.app});
+  const _AudiencePlatformTile({required this.id, required this.labelKey, required this.detailKey, required this.app});
 
   final String id;
-  final String name;
+  final String labelKey;
   final String detailKey;
   final AppSettingsController app;
 
@@ -94,17 +136,28 @@ class _AudiencePlatformTile extends StatelessWidget {
         ? i18n(capability.onlineAvailableInRoomLists ? 'audience_source_room_list' : 'audience_source_room_realtime')
         : i18n('audience_source_not_exposed');
 
-    Widget tile({required bool value, ValueChanged<bool>? onChanged}) {
-      return SwitchListTile(
-        key: ValueKey('audience-platform-$id'),
-        secondary: Icon(supported ? Icons.people_alt_rounded : Icons.whatshot_rounded),
-        title: Text(name),
-        subtitle: Text('$sourceLabel\n${i18n(detailKey)}'),
-        isThreeLine: true,
-        value: value,
-        onChanged: onChanged,
-      );
-    }
+    Widget tile({required bool value, ValueChanged<bool>? onChanged}) => LayoutBuilder(
+      builder: (context, constraints) {
+        final title = Text(i18n(labelKey), key: ValueKey('audience-platform-title-$id'));
+        final detail = Text('$sourceLabel\n${i18n(detailKey)}', key: ValueKey('audience-platform-detail-$id'));
+        final stackText = constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.5;
+        return SwitchListTile(
+          key: ValueKey('audience-platform-$id'),
+          secondary: Icon(supported ? Icons.people_alt_rounded : Icons.whatshot_rounded),
+          title: stackText
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [title, const SizedBox(height: 4), detail],
+                )
+              : title,
+          subtitle: stackText ? null : detail,
+          isThreeLine: !stackText,
+          value: value,
+          onChanged: onChanged,
+        );
+      },
+    );
 
     // Unsupported rows are deliberately not wrapped in Obx. An Obx builder
     // without an Rx read is rejected by GetX and previously left this whole

@@ -1258,6 +1258,7 @@
     "enable_player_proxy_desc": "控制 media_kit / mpv 播放器内核拉取直播源视频流时的网络设置",
     "proxy_address_label": "代理地址",
     "proxy_port_label": "端口",
+    "proxy_port_invalid": "请输入 1 到 65535 之间的端口",
     "android_desc": "适用于 Android 移动端系统",
     "windows_desc": "适用于 Windows 桌面操作系统",
     "macos_desc": "适用于 macOS 桌面操作系统",

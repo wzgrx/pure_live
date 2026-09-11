@@ -27,6 +27,8 @@ class _NetworkProxySettingsPageState extends State<NetworkProxySettingsPage> {
   late final TextEditingController _appPortController;
   late final TextEditingController _playerHostController;
   late final TextEditingController _playerPortController;
+  bool _appPortInvalid = false;
+  bool _playerPortInvalid = false;
 
   @override
   void initState() {
@@ -35,6 +37,8 @@ class _NetworkProxySettingsPageState extends State<NetworkProxySettingsPage> {
     _appPortController = TextEditingController(text: proxyCtrl.appProxyPort.v.toString());
     _playerHostController = TextEditingController(text: proxyCtrl.proxyHost.v);
     _playerPortController = TextEditingController(text: proxyCtrl.proxyPort.v.toString());
+    _appPortInvalid = parseProxyPortInput(_appPortController.text) == null;
+    _playerPortInvalid = parseProxyPortInput(_playerPortController.text) == null;
   }
 
   @override
@@ -44,6 +48,83 @@ class _NetworkProxySettingsPageState extends State<NetworkProxySettingsPage> {
     _playerHostController.dispose();
     _playerPortController.dispose();
     super.dispose();
+  }
+
+  void _updatePort(String rawValue, {required bool isAppProxy}) {
+    final port = parseProxyPortInput(rawValue);
+    final invalid = port == null;
+    if (isAppProxy) {
+      if (_appPortInvalid != invalid) setState(() => _appPortInvalid = invalid);
+      if (port != null) proxyCtrl.appProxyPort.v = port;
+      return;
+    }
+    if (_playerPortInvalid != invalid) setState(() => _playerPortInvalid = invalid);
+    if (port != null) proxyCtrl.proxyPort.v = port;
+  }
+
+  Widget _buildEndpointFields({
+    required String keyPrefix,
+    required TextEditingController hostController,
+    required TextEditingController portController,
+    required bool portInvalid,
+    required ValueChanged<String> onHostChanged,
+    required ValueChanged<String> onPortChanged,
+    required String portHint,
+  }) {
+    final hostField = TextField(
+      key: ValueKey('$keyPrefix-host'),
+      controller: hostController,
+      keyboardType: TextInputType.url,
+      autocorrect: false,
+      enableSuggestions: false,
+      inputFormatters: [_proxyHostInputFormatter],
+      decoration: InputDecoration(
+        labelText: i18n('proxy_address_label'),
+        hintText: '127.0.0.1',
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
+      onChanged: onHostChanged,
+    );
+    final portField = TextField(
+      key: ValueKey('$keyPrefix-port'),
+      controller: portController,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      decoration: InputDecoration(
+        labelText: i18n('proxy_port_label'),
+        hintText: portHint,
+        errorText: portInvalid ? i18n('proxy_port_invalid') : null,
+        errorMaxLines: 3,
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
+      onChanged: onPortChanged,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final mediaQuery = MediaQuery.of(context);
+          final stackFields = constraints.maxWidth < 420 || mediaQuery.textScaler.scale(13) > 18;
+          if (stackFields) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [hostField, const SizedBox(height: 12), portField],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 3, child: hostField),
+              const SizedBox(width: 12),
+              Expanded(flex: 2, child: portField),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -67,48 +148,14 @@ class _NetworkProxySettingsPageState extends State<NetworkProxySettingsPage> {
                 onChanged: (val) => proxyCtrl.enableAppProxy.v = val,
               ),
               if (proxyCtrl.enableAppProxy.v) ...[
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: TextField(
-                          controller: _appHostController,
-                          keyboardType: TextInputType.url,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          inputFormatters: [_proxyHostInputFormatter],
-                          decoration: InputDecoration(
-                            labelText: i18n("proxy_address_label"),
-                            hintText: "127.0.0.1",
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                          onChanged: (val) => proxyCtrl.appProxyHost.v = normalizeProxyHost(val),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: _appPortController,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          decoration: InputDecoration(
-                            labelText: i18n("proxy_port_label"),
-                            hintText: "7890",
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                          onChanged: (val) {
-                            final intPort = int.tryParse(val) ?? 1080;
-                            proxyCtrl.appProxyPort.v = intPort;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                _buildEndpointFields(
+                  keyPrefix: 'app-proxy',
+                  hostController: _appHostController,
+                  portController: _appPortController,
+                  portInvalid: _appPortInvalid,
+                  onHostChanged: (value) => proxyCtrl.appProxyHost.v = normalizeProxyHost(value),
+                  onPortChanged: (value) => _updatePort(value, isAppProxy: true),
+                  portHint: '7890',
                 ),
               ],
             ]),
@@ -124,48 +171,14 @@ class _NetworkProxySettingsPageState extends State<NetworkProxySettingsPage> {
                 onChanged: (val) => proxyCtrl.enableProxy.v = val,
               ),
               if (proxyCtrl.enableProxy.v) ...[
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: TextField(
-                          controller: _playerHostController,
-                          keyboardType: TextInputType.url,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          inputFormatters: [_proxyHostInputFormatter],
-                          decoration: InputDecoration(
-                            labelText: i18n("proxy_address_label"),
-                            hintText: "127.0.0.1",
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                          onChanged: (val) => proxyCtrl.proxyHost.v = normalizeProxyHost(val),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: _playerPortController,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          decoration: InputDecoration(
-                            labelText: i18n("proxy_port_label"),
-                            hintText: "1080",
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                          onChanged: (val) {
-                            final intPort = int.tryParse(val) ?? 1080;
-                            proxyCtrl.proxyPort.v = intPort;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                _buildEndpointFields(
+                  keyPrefix: 'player-proxy',
+                  hostController: _playerHostController,
+                  portController: _playerPortController,
+                  portInvalid: _playerPortInvalid,
+                  onHostChanged: (value) => proxyCtrl.proxyHost.v = normalizeProxyHost(value),
+                  onPortChanged: (value) => _updatePort(value, isAppProxy: false),
+                  portHint: '1080',
                 ),
               ],
             ]),

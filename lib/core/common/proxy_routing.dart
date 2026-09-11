@@ -15,6 +15,16 @@ String normalizeProxyHost(String value) {
       .replaceAll(RegExp(r'\s+'), '');
 }
 
+/// Returns a usable TCP port while an auto-saved settings field is edited.
+///
+/// An empty, partial or out-of-range value stays in the text field for the
+/// user to finish, but must not replace the last working proxy endpoint.
+int? parseProxyPortInput(String value) {
+  final port = int.tryParse(value.trim());
+  if (port == null || port < 1 || port > 65535) return null;
+  return port;
+}
+
 /// Builds the directive accepted by `dart:io`'s `HttpClient.findProxy`.
 ///
 /// Invalid or incomplete values deliberately remain direct. This keeps a

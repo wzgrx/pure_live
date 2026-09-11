@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
@@ -71,6 +72,8 @@ class AppSettingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final normalizedMenus = normalizeMenuIds(savedMenuIds.v);
+    if (!listEquals(savedMenuIds.v, normalizedMenus)) savedMenuIds.v = normalizedMenus;
     if (audienceMetricMigration.v < 1) {
       if (!realOnlinePlatforms.contains('twitch')) realOnlinePlatforms.add('twitch');
       audienceMetricMigration.v = 1;
@@ -137,6 +140,16 @@ class AppSettingsController extends GetxController {
         .toList();
   }
 
+  static List<String> normalizeMenuIds(Iterable<String> menuIds) {
+    final supported = HomeMenu.values.map((menu) => menu.id).toSet();
+    final normalized = <String>[];
+    for (final rawId in menuIds) {
+      final id = rawId.trim().toLowerCase();
+      if (supported.contains(id) && !normalized.contains(id)) normalized.add(id);
+    }
+    return normalized.isEmpty ? [HomeMenu.favorites.id] : normalized;
+  }
+
   @override
   void onClose() {
     _refreshRateModeWorker?.dispose();
@@ -145,7 +158,7 @@ class AppSettingsController extends GetxController {
   }
 
   void toggleMenuVisibility(HomeMenu menu, bool visible) {
-    final current = List<String>.from(savedMenuIds.v);
+    final current = normalizeMenuIds(savedMenuIds.v);
     if (visible) {
       if (!current.contains(menu.id)) current.add(menu.id);
     } else {
@@ -220,7 +233,7 @@ class AppSettingsController extends GetxController {
         List<String>.from(json['realOnlinePlatforms'] ?? defaultRealOnlinePlatforms),
       ),
       'savedMenuIds': typed<List<String>>(
-        List<String>.from(json['savedMenuIds'] ?? HomeMenu.values.map((e) => e.id).toList()),
+        normalizeMenuIds(List<String>.from(json['savedMenuIds'] ?? HomeMenu.values.map((e) => e.id).toList())),
       ),
       'enableMultiView': typed<bool>(json['enableMultiView'] ?? true),
       'enableNewWindowPlay': typed<bool>(json['enableNewWindowPlay'] ?? true),
@@ -269,7 +282,9 @@ class AppSettingsController extends GetxController {
       'realOnlinePlatforms': normalizeRealOnlinePlatforms(
         List<String>.from(app['realOnlinePlatforms'] ?? defaultRealOnlinePlatforms),
       ),
-      'savedMenuIds': List<String>.from(app['savedMenuIds'] ?? []),
+      'savedMenuIds': normalizeMenuIds(
+        List<String>.from(app['savedMenuIds'] ?? HomeMenu.values.map((menu) => menu.id).toList()),
+      ),
       'enableMultiView': app['enableMultiView'] ?? true,
       'enableNewWindowPlay': app['enableNewWindowPlay'] ?? true,
     };

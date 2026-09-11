@@ -86,5 +86,26 @@ void main() {
         'soop',
       ]);
     });
+
+    test('normalizes navigation ids and keeps one usable fallback tab', () {
+      expect(AppSettingsController.normalizeMenuIds([' popular ', 'missing', 'favorites', 'popular']), [
+        'popular',
+        'favorites',
+      ]);
+      expect(AppSettingsController.normalizeMenuIds(const []), ['favorites']);
+
+      final parsed = AppSettingsController.parseConfig({
+        'savedMenuIds': [' areas ', 'missing', 'areas'],
+      });
+      expect(parsed['savedMenuIds'], ['areas']);
+      expect(AppSettingsController.parseConfig({'savedMenuIds': const []})['savedMenuIds'], ['favorites']);
+
+      final config = AppSettingsController.extractConfig({
+        'app': {
+          'savedMenuIds': ['record', 'unknown', 'record', 'areas'],
+        },
+      });
+      expect(config['savedMenuIds'], ['record', 'areas']);
+    });
   });
 }

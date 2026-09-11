@@ -11,6 +11,7 @@ import 'package:pure_live/modules/search/search_ranking.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const Duration liveSearchRequestTimeout = Duration(seconds: 12);
+const int maxConsecutiveStagnantSearchPages = 2;
 
 class SearchController extends GetxController {
   SearchController({List<Site>? searchSites, this.requestTimeout = liveSearchRequestTimeout})
@@ -54,6 +55,7 @@ class SearchController extends GetxController {
   String _activeKeyword = '';
   final Map<String, LiveRoom> _rawResults = {};
   final Map<String, bool> _hasMoreByPlatform = {};
+  final Map<String, int> _stagnantPagesByPlatform = {};
   final List<Worker> _audienceWorkers = [];
   void selectPlatform(int requestedIndex) {
     if (!_active) return;
@@ -71,6 +73,7 @@ class SearchController extends GetxController {
     _currentPage = 0;
     _rawResults.clear();
     _hasMoreByPlatform.clear();
+    _stagnantPagesByPlatform.clear();
     results.clear();
     loading.v = false;
     loadingMore.v = false;
@@ -187,6 +190,7 @@ class SearchController extends GetxController {
     errorMessage.v = '';
     _rawResults.clear();
     _hasMoreByPlatform.clear();
+    _stagnantPagesByPlatform.clear();
     results.clear();
 
     await _searchPage(keyword: keyword, page: 1, generation: generation, append: false);
@@ -210,6 +214,7 @@ class SearchController extends GetxController {
       for (final site in selectedSites) {
         final capability = LiveSearchCapabilities.forPlatform(site.id);
         _hasMoreByPlatform[site.id] = capability.supportsNativeSearch;
+        _stagnantPagesByPlatform[site.id] = 0;
       }
     }
     final searchableSites = selectedSites.where((site) {
@@ -256,8 +261,12 @@ class SearchController extends GetxController {
       }
       final addedCount = _rawResults.length - beforeCount;
       if (batch.failed) failures.add(batch.site.name);
-      _hasMoreByPlatform[batch.site.id] =
-          !batch.failed && capability.supportsPagination && batch.rooms.isNotEmpty && addedCount > 0;
+      _hasMoreByPlatform[batch.site.id] = _canLoadAnotherPage(
+        site: batch.site,
+        capability: capability,
+        batch: batch,
+        addedCount: addedCount,
+      );
       completed++;
       pendingSiteCount.v = searchableSites.length - completed;
       _applyFiltersAndSort();
@@ -277,6 +286,29 @@ class SearchController extends GetxController {
     loading.v = false;
     loadingMore.v = false;
     pendingSiteCount.v = 0;
+  }
+
+  bool _canLoadAnotherPage({
+    required Site site,
+    required LiveSearchCapability capability,
+    required _SiteSearchBatch batch,
+    required int addedCount,
+  }) {
+    if (!capability.supportsPagination || batch.failed || batch.rooms.isEmpty) {
+      _stagnantPagesByPlatform.remove(site.id);
+      return false;
+    }
+    if (addedCount > 0) {
+      _stagnantPagesByPlatform[site.id] = 0;
+      return true;
+    }
+
+    // Search endpoints commonly overlap their page boundary by one response.
+    // Preserve a bounded chance to reach the next unique page, while stopping
+    // sticky endpoints that repeat the same payload forever.
+    final stagnantPages = (_stagnantPagesByPlatform[site.id] ?? 0) + 1;
+    _stagnantPagesByPlatform[site.id] = stagnantPages;
+    return stagnantPages < maxConsecutiveStagnantSearchPages;
   }
 
   Future<_SiteSearchBatch> _searchSite(Site site, String keyword, int page, CancelToken cancel) async {

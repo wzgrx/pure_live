@@ -193,6 +193,11 @@ void main() {
     expect(fastCalls, [1, 2]);
     expect(slowCalls, [1, 2]);
     expect(c.results, hasLength(2));
+    expect(c.hasMore.value, isTrue);
+    await c.loadMore();
+    expect(fastCalls, [1, 2, 3]);
+    expect(slowCalls, [1, 2]);
+    expect(c.results, hasLength(2));
     expect(c.hasMore.value, isFalse);
     expect(c.loadingMore.value, isFalse);
   });
@@ -303,6 +308,88 @@ void main() {
     expect(token.isCancelled, isTrue);
     expect(c.results.single.roomId, 'new');
     expect(c.loadingMore.value, isFalse);
+  });
+
+  test('one overlapping page does not hide a later unique search page', () async {
+    final calls = <int>[];
+    final c = _controller([
+      _site(
+        _Legacy((_, page) async {
+          calls.add(page);
+          return switch (page) {
+            1 => [_room('one'), _room('two')],
+            2 => [_room('two')],
+            3 => [_room('three')],
+            _ => [],
+          };
+        }),
+      ),
+    ]);
+    c.index.value = 1;
+
+    await c.doSearch();
+    await c.loadMore();
+    expect(calls, [1, 2]);
+    expect(c.results.map((room) => room.roomId), containsAll(['one', 'two']));
+    expect(c.hasMore.value, isTrue);
+
+    await c.loadMore();
+    expect(calls, [1, 2, 3]);
+    expect(c.results.map((room) => room.roomId), containsAll(['one', 'two', 'three']));
+    expect(c.hasMore.value, isTrue);
+
+    await c.loadMore();
+    expect(calls, [1, 2, 3, 4]);
+    expect(c.hasMore.value, isFalse);
+  });
+
+  test('two consecutive stagnant pages stop a sticky pagination endpoint', () async {
+    final calls = <int>[];
+    final c = _controller([
+      _site(
+        _Legacy((_, page) async {
+          calls.add(page);
+          return [_room('sticky')];
+        }),
+      ),
+    ]);
+    c.index.value = 1;
+
+    await c.doSearch();
+    await c.loadMore();
+    expect(c.hasMore.value, isTrue);
+    await c.loadMore();
+    expect(c.hasMore.value, isFalse);
+    await c.loadMore();
+
+    expect(calls, [1, 2, 3]);
+    expect(c.results.single.roomId, 'sticky');
+  });
+
+  test('a replacement keyword receives a fresh stagnant-page budget', () async {
+    final calls = <String>[];
+    final c = _controller([
+      _site(
+        _Legacy((keyword, page) async {
+          calls.add('$keyword:$page');
+          return [_room('$keyword-result')];
+        }),
+      ),
+    ]);
+    c.index.value = 1;
+
+    await c.doSearch();
+    await c.loadMore();
+    await c.loadMore();
+    expect(c.hasMore.value, isFalse);
+
+    c.searchController.text = 'new';
+    await c.doSearch();
+    await c.loadMore();
+
+    expect(calls, ['old:1', 'old:2', 'old:3', 'new:1', 'new:2']);
+    expect(c.hasMore.value, isTrue);
+    expect(c.results.single.roomId, 'new-result');
   });
 
   test('closed controller actions allocate nothing and close is idempotent', () async {

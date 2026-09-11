@@ -1,34 +1,34 @@
 import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserFullModel {
   final String email;
-  final Timestamp createdAt;
+  final DateTime? createdAt;
   final String? updateAt;
   final String? version;
   final UserConfigModel? config;
+  final Map<String, dynamic> backupMap;
 
-  UserFullModel({required this.email, required this.createdAt, this.updateAt, this.version, this.config});
+  UserFullModel({
+    required this.email,
+    required this.createdAt,
+    this.updateAt,
+    this.version,
+    this.config,
+    this.backupMap = const {},
+  });
 
   factory UserFullModel.fromFirestore(Map<String, dynamic> data) {
-    UserConfigModel? parsedConfig;
-
-    if (data['config'] != null) {
-      Map<String, dynamic> configMap = {};
-      if (data['config'] is String) {
-        configMap = json.decode(data['config']) as Map<String, dynamic>;
-      } else if (data['config'] is Map) {
-        configMap = Map<String, dynamic>.from(data['config']);
-      }
-      parsedConfig = UserConfigModel.fromBackupMap(configMap);
-    }
+    final configMap = _configMap(data['config']);
 
     return UserFullModel(
-      email: data['email'] ?? '',
-      createdAt: data['created_at'] ?? Timestamp.now(),
-      updateAt: data['update_at'],
-      version: data['version'],
-      config: parsedConfig,
+      email: _stringOrNull(data['email']) ?? '',
+      createdAt: _dateTimeOrNull(data['created_at']) ?? _dateTimeOrNull(data['createdAt']),
+      updateAt: _stringOrNull(data['update_at']),
+      version: _stringOrNull(data['version']),
+      config: configMap == null ? null : UserConfigModel.fromBackupMap(configMap),
+      backupMap: configMap ?? const {},
     );
   }
 }
@@ -78,25 +78,25 @@ class UserConfigModel {
 
   factory UserConfigModel.fromBackupMap(Map<String, dynamic> map) {
     return UserConfigModel(
-      backupVersion: map['backupVersion'] ?? 1,
-      app: Map<String, dynamic>.from(map['app'] ?? {}),
-      theme: Map<String, dynamic>.from(map['theme'] ?? {}),
-      font: Map<String, dynamic>.from(map['font'] ?? {}),
-      player: Map<String, dynamic>.from(map['player'] ?? {}),
-      danmaku: Map<String, dynamic>.from(map['danmaku'] ?? {}),
-      volume: Map<String, dynamic>.from(map['volume'] ?? {}),
-      favorite: Map<String, dynamic>.from(map['favorite'] ?? {}),
-      history: Map<String, dynamic>.from(map['history'] ?? {}),
-      webdav: Map<String, dynamic>.from(map['webdav'] ?? {}),
-      iptv: Map<String, dynamic>.from(map['iptv'] ?? {}),
-      cookie: Map<String, dynamic>.from(map['cookie'] ?? {}),
-      proxy: Map<String, dynamic>.from(map['proxy'] ?? {}),
-      windowSize: Map<String, dynamic>.from(map['windowSize'] ?? {}),
-      exit: Map<String, dynamic>.from(map['exit'] ?? {}),
-      startup: Map<String, dynamic>.from(map['startup'] ?? {}),
-      tags: Map<String, dynamic>.from(map['tags'] ?? {}),
-      refresh: Map<String, dynamic>.from(map['refresh'] ?? {}),
-      page: Map<String, dynamic>.from(map['page'] ?? {}),
+      backupVersion: _backupVersion(map['backupVersion']),
+      app: _mapSection(map['app']),
+      theme: _mapSection(map['theme']),
+      font: _mapSection(map['font']),
+      player: _mapSection(map['player']),
+      danmaku: _mapSection(map['danmaku']),
+      volume: _mapSection(map['volume']),
+      favorite: _mapSection(map['favorite']),
+      history: _mapSection(map['history']),
+      webdav: _mapSection(map['webdav']),
+      iptv: _mapSection(map['iptv']),
+      cookie: _mapSection(map['cookie']),
+      proxy: _mapSection(map['proxy']),
+      windowSize: _mapSection(map['windowSize']),
+      exit: _mapSection(map['exit']),
+      startup: _mapSection(map['startup']),
+      tags: _mapSection(map['tags']),
+      refresh: _mapSection(map['refresh']),
+      page: _mapSection(map['page']),
     );
   }
 
@@ -125,7 +125,69 @@ class UserConfigModel {
   }
 
   static UserConfigModel fromRawJsonString(String rawStr) {
-    final decode = json.decode(rawStr) as Map<String, dynamic>;
-    return UserConfigModel.fromBackupMap(decode);
+    final configMap = _configMap(rawStr);
+    if (configMap == null) {
+      throw const FormatException('Backup configuration must be a JSON object.');
+    }
+    return UserConfigModel.fromBackupMap(configMap);
   }
+}
+
+String? _stringOrNull(Object? value) {
+  if (value is! String) return null;
+  final normalized = value.trim();
+  return normalized.isEmpty ? null : normalized;
+}
+
+DateTime? _dateTimeOrNull(Object? value) {
+  if (value is Timestamp) return value.toDate();
+  if (value is DateTime) return value;
+  if (value is int) {
+    try {
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    } on RangeError {
+      return null;
+    }
+  }
+  if (value is String) return DateTime.tryParse(value.trim());
+  return null;
+}
+
+Map<String, dynamic>? _configMap(Object? value) {
+  Object? decoded = value;
+  if (value is String) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) return null;
+    try {
+      decoded = jsonDecode(normalized);
+    } on FormatException {
+      return null;
+    }
+  }
+  if (decoded is! Map) return null;
+
+  final result = <String, dynamic>{};
+  for (final entry in decoded.entries) {
+    if (entry.key is String) result[entry.key as String] = entry.value;
+  }
+  return result;
+}
+
+Map<String, dynamic> _mapSection(Object? value) {
+  if (value is! Map) return {};
+  final result = <String, dynamic>{};
+  for (final entry in value.entries) {
+    if (entry.key is String) result[entry.key as String] = entry.value;
+  }
+  return result;
+}
+
+int _backupVersion(Object? value) {
+  final parsed = switch (value) {
+    int number => number,
+    num number => number.toInt(),
+    String text => int.tryParse(text.trim()),
+    _ => null,
+  };
+  return parsed == null || parsed < 1 ? 1 : parsed;
 }

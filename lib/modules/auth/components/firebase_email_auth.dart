@@ -346,7 +346,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
         if (credential.user != null) {
           final Map<String, dynamic> userData = {
             'email': _emailController.text.trim(),
-            'createdAt': FieldValue.serverTimestamp(),
+            'created_at': FieldValue.serverTimestamp(),
           };
           _metadataControllers.forEach((field, controller) {
             userData[field.key] = controller.text;

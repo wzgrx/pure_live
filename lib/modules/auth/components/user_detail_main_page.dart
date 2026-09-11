@@ -1,106 +1,136 @@
-import 'dart:convert';
-import 'package:remixicon/remixicon.dart';
-import 'package:pure_live/common/index.dart';
-import 'package:flutter_json/flutter_json.dart';
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_json/flutter_json.dart';
+import 'package:pure_live/common/index.dart';
 import 'package:pure_live/modules/auth/models/user_config_model.dart';
+import 'package:remixicon/remixicon.dart';
+
+class FirebaseUserConfigDocumentLoader {
+  const FirebaseUserConfigDocumentLoader();
+
+  Future<Map<String, dynamic>?> load(String documentId) async {
+    final snapshot = await FirebaseFirestore.instance.collection('users').doc(documentId).get();
+    return snapshot.exists ? snapshot.data() : null;
+  }
+}
 
 class UserDetailConfigMainPage extends StatefulWidget {
   final String documentId;
-  const UserDetailConfigMainPage({super.key, required this.documentId});
+  final FirebaseUserConfigDocumentLoader loader;
+
+  const UserDetailConfigMainPage({
+    super.key,
+    required this.documentId,
+    this.loader = const FirebaseUserConfigDocumentLoader(),
+  });
 
   @override
   State<UserDetailConfigMainPage> createState() => _UserDetailConfigMainPageState();
 }
 
+enum _ProfileLoadError { notFound, requestFailed }
+
 class _UserDetailConfigMainPageState extends State<UserDetailConfigMainPage> {
   UserFullModel? _userModel;
   bool _isLoading = true;
-  String _errorMsg = '';
-  Map<String, dynamic> _parsedBackupMap = {};
-
+  _ProfileLoadError? _loadError;
+  Map<String, dynamic> _parsedBackupMap = const {};
   int _favoriteCount = 0;
   int _historyCount = 0;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    unawaited(_loadUserData(showLoading: false));
   }
 
-  Future<void> _loadUserData() async {
+  @override
+  void didUpdateWidget(covariant UserDetailConfigMainPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.documentId != widget.documentId || oldWidget.loader != widget.loader) {
+      unawaited(_loadUserData());
+    }
+  }
+
+  @override
+  void dispose() {
+    _loadGeneration++;
+    super.dispose();
+  }
+
+  Future<void> _loadUserData({bool showLoading = true}) async {
+    final generation = ++_loadGeneration;
+    final documentId = widget.documentId.trim();
+
+    if (showLoading && mounted) {
+      setState(() {
+        _isLoading = true;
+        _loadError = null;
+      });
+    }
+
+    if (documentId.isEmpty) {
+      _publishError(generation, _ProfileLoadError.notFound);
+      return;
+    }
+
     try {
-      final docSnap = await FirebaseFirestore.instance.collection('users').doc(widget.documentId).get();
-
-      if (!docSnap.exists) {
-        throw Exception(i18n('user_not_found'));
-      }
-
-      final data = docSnap.data();
+      final data = await widget.loader.load(documentId);
       if (data == null) {
-        throw Exception('Document data is null');
+        _publishError(generation, _ProfileLoadError.notFound);
+        return;
       }
 
       final model = UserFullModel.fromFirestore(data);
+      final backupMap = model.backupMap;
+      final favoriteCount = _listCount(backupMap, 'favorite', const ['favoriteRooms']);
+      final historyCount = _listCount(backupMap, 'history', const ['historyRooms', 'historyList']);
 
-      Map<String, dynamic> configMap = {};
-      final configData = data['config'];
-      if (configData is String && configData.isNotEmpty) {
-        final decoded = json.decode(configData);
-        if (decoded is Map<String, dynamic>) {
-          configMap = decoded;
-        }
-      }
-
-      final favoriteData = configMap['favorite'] as Map<String, dynamic>?;
-      final roomsList = favoriteData?['favoriteRooms'] as List? ?? [];
-
-      final historyData = configMap['history'] as Map<String, dynamic>?;
-      final historyList = historyData?['historyRooms'] ?? historyData?['historyList'];
-
-      if (!mounted) return;
-
+      if (!_isCurrent(generation)) return;
       setState(() {
         _userModel = model;
-        _parsedBackupMap = configMap;
-        _favoriteCount = roomsList.length;
-        _historyCount = (historyList is List) ? historyList.length : 0;
+        _parsedBackupMap = backupMap;
+        _favoriteCount = favoriteCount;
+        _historyCount = historyCount;
+        _loadError = null;
         _isLoading = false;
       });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _errorMsg = e.toString();
-        _isLoading = false;
-      });
+    } catch (error) {
+      debugPrint('[FirebaseUserConfig] Failed to load $documentId: $error');
+      _publishError(generation, _ProfileLoadError.requestFailed);
     }
+  }
+
+  void _publishError(int generation, _ProfileLoadError error) {
+    if (!_isCurrent(generation)) return;
+    setState(() {
+      _userModel = null;
+      _parsedBackupMap = const {};
+      _favoriteCount = 0;
+      _historyCount = 0;
+      _loadError = error;
+      _isLoading = false;
+    });
+  }
+
+  bool _isCurrent(int generation) => mounted && generation == _loadGeneration;
+
+  int _listCount(Map<String, dynamic> backupMap, String sectionName, List<String> listKeys) {
+    final section = backupMap[sectionName];
+    if (section is! Map) return 0;
+    for (final key in listKeys) {
+      final value = section[key];
+      if (value is List) return value.length;
+    }
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: Center(child: AppStatusView(type: AppStatusType.loading)),
-      );
-    }
-
-    if (_errorMsg.isNotEmpty) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: Center(
-          child: AppStatusView(type: AppStatusType.error, title: _errorMsg),
-        ),
-      );
-    }
-
-    final createDt = _userModel!.createdAt.toDate();
-    final createTimeStr = DateFormat('yyyy-MM-dd HH:mm:ss').format(createDt);
-    final syncTimeStr = _userModel!.updateAt ?? i18n('never_sync');
-    final verText = _userModel!.version != null ? 'v${_userModel!.version}' : i18n('unknown_version');
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceContainerLowest,
@@ -109,231 +139,51 @@ class _UserDetailConfigMainPageState extends State<UserDetailConfigMainPage> {
         elevation: 0,
         scrolledUnderElevation: 1,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isCompact = MediaQuery.of(context).size.width <= 680;
+      body: _buildBody(theme),
+    );
+  }
 
-              if (isCompact) {
-                return Container(
-                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 0.5),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: theme.colorScheme.primaryContainer,
-                            child: Icon(
-                              Remix.user_settings_line,
-                              color: theme.colorScheme.onPrimaryContainer,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _userModel!.email,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.secondaryContainer,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        verText,
-                                        style: AppTextStyles.t11.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: theme.colorScheme.onSecondaryContainer,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 12),
-                        height: 0.5,
-                        color: theme.dividerColor.withValues(alpha: 0.2),
-                      ),
-                      _buildCompactMeta(Remix.time_line, i18n('created_time'), createTimeStr, theme),
-                      const SizedBox(height: 10),
-                      _buildCompactMeta(Remix.refresh_line, i18n('sync_time'), syncTimeStr, theme),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildCompactMeta(
-                              Remix.heart_3_line,
-                              i18n('favorites'),
-                              '$_favoriteCount',
-                              theme,
-                              isPrimaryColor: true,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildCompactMeta(
-                              Remix.history_line,
-                              i18n('history'),
-                              '$_historyCount',
-                              theme,
-                              isPrimaryColor: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }
+  Widget _buildBody(ThemeData theme) {
+    if (_isLoading) {
+      return _buildScrollableStatus(AppStatusView(type: AppStatusType.loading));
+    }
 
-              return Container(
-                margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 0.5),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: theme.colorScheme.primaryContainer,
-                            child: Icon(
-                              Remix.user_settings_line,
-                              color: theme.colorScheme.onPrimaryContainer,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _userModel!.email,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.secondaryContainer,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        verText,
-                                        style: AppTextStyles.t11.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: theme.colorScheme.onSecondaryContainer,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 12),
-                      width: 0.5,
-                      height: 64,
-                      color: theme.dividerColor.withValues(alpha: 0.2),
-                    ),
-                    Expanded(
-                      flex: 6,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildCompactMeta(Remix.time_line, i18n('created_time'), createTimeStr, theme),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _buildCompactMeta(
-                                  Remix.heart_3_line,
-                                  i18n('favorites'),
-                                  '$_favoriteCount',
-                                  theme,
-                                  isPrimaryColor: true,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildCompactMeta(Remix.refresh_line, i18n('sync_time'), syncTimeStr, theme),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: _buildCompactMeta(
-                                  Remix.history_line,
-                                  i18n('history'),
-                                  '$_historyCount',
-                                  theme,
-                                  isPrimaryColor: true,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+    final loadError = _loadError;
+    if (loadError != null) {
+      final notFound = loadError == _ProfileLoadError.notFound;
+      return _buildScrollableStatus(
+        AppStatusView(
+          type: AppStatusType.error,
+          title: i18n(notFound ? 'user_not_found' : 'firebase_profile_load_failed'),
+          subtitle: i18n(notFound ? 'firebase_profile_not_found_subtitle' : 'firebase_profile_load_failed_subtitle'),
+          buttonText: notFound ? null : i18n('retry'),
+          onButtonPressed: notFound ? null : () => unawaited(_loadUserData()),
+        ),
+      );
+    }
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            child: context.buildGroupTitle(i18n('config_raw_preview')),
-          ),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+    final model = _userModel!;
+    final createTimeStr = model.createdAt == null
+        ? i18n('firebase_profile_unknown_time')
+        : DateFormat('yyyy-MM-dd HH:mm:ss').format(model.createdAt!);
+    final syncTimeStr = model.updateAt ?? i18n('never_sync');
+    final verText = model.version == null ? i18n('unknown_version') : 'v${model.version}';
+    final email = model.email.isEmpty ? i18n('firebase_profile_unknown_email') : model.email;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rawPreviewHeight = constraints.maxHeight < 520 ? 280.0 : constraints.maxHeight * 0.58;
+        return ListView(
+          padding: const EdgeInsets.only(bottom: 20),
+          children: [
+            _buildProfileCard(theme, email, verText, createTimeStr, syncTimeStr),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: context.buildGroupTitle(i18n('config_raw_preview')),
+            ),
+            Container(
+              height: rawPreviewHeight,
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
@@ -347,23 +197,155 @@ class _UserDetailConfigMainPageState extends State<UserDetailConfigMainPage> {
                 ],
                 border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3), width: 0.5),
               ),
-              child: _parsedBackupMap.isEmpty
-                  ? Center(child: AppStatusView(type: AppStatusType.empty))
-                  : JsonWidget(json: _parsedBackupMap, initialExpandDepth: 2),
+              child: _buildRawPreview(),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildScrollableStatus(Widget status) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = MediaQuery.textScalerOf(context).scale(1);
+        final contentHeight = constraints.maxHeight > 260 * scale ? constraints.maxHeight : 260 * scale;
+        return SingleChildScrollView(
+          child: SizedBox(width: constraints.maxWidth, height: contentHeight, child: status),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileCard(ThemeData theme, String email, String version, String createdTime, String syncTime) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.15), width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: theme.colorScheme.primaryContainer,
+                child: Icon(Remix.user_settings_line, color: theme.colorScheme.onPrimaryContainer, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(email, style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 6),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        child: Text(
+                          version,
+                          style: AppTextStyles.t11.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSecondaryContainer,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            height: 0.5,
+            color: theme.dividerColor.withValues(alpha: 0.2),
+          ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final textScale = MediaQuery.textScalerOf(context).scale(1);
+              final stackItems = constraints.maxWidth < 600 || textScale > 1.5;
+              final itemWidth = stackItems ? constraints.maxWidth : (constraints.maxWidth - 8) / 2;
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  SizedBox(
+                    width: itemWidth,
+                    child: _buildMeta(Remix.time_line, i18n('created_time'), createdTime, theme),
+                  ),
+                  SizedBox(width: itemWidth, child: _buildMeta(Remix.refresh_line, i18n('sync_time'), syncTime, theme)),
+                  SizedBox(
+                    width: itemWidth,
+                    child: _buildMeta(
+                      Remix.heart_3_line,
+                      i18n('favorites'),
+                      '$_favoriteCount',
+                      theme,
+                      isPrimaryColor: true,
+                    ),
+                  ),
+                  SizedBox(
+                    width: itemWidth,
+                    child: _buildMeta(
+                      Remix.history_line,
+                      i18n('history'),
+                      '$_historyCount',
+                      theme,
+                      isPrimaryColor: true,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCompactMeta(IconData icon, String label, String value, ThemeData theme, {bool isPrimaryColor = false}) {
+  Widget _buildRawPreview() {
+    if (_parsedBackupMap.isEmpty) {
+      return Center(child: Text(i18n('no_data'), textAlign: TextAlign.center));
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = MediaQuery.textScalerOf(context).scale(1);
+        final contentWidth = constraints.maxWidth > 220 * scale ? constraints.maxWidth : 220 * scale;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: contentWidth,
+            height: constraints.maxHeight,
+            child: JsonWidget(json: _parsedBackupMap, initialExpandDepth: 2),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMeta(IconData icon, String label, String value, ThemeData theme, {bool isPrimaryColor = false}) {
+    final foreground = isPrimaryColor ? theme.colorScheme.primary : theme.colorScheme.onSurface;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
       decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerLow, borderRadius: BorderRadius.circular(10)),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 12, color: isPrimaryColor ? theme.colorScheme.primary : theme.hintColor),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon, size: 12, color: isPrimaryColor ? theme.colorScheme.primary : theme.hintColor),
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Column(
@@ -372,19 +354,10 @@ class _UserDetailConfigMainPageState extends State<UserDetailConfigMainPage> {
               children: [
                 Text(
                   value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.t11.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isPrimaryColor ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                  ),
+                  style: AppTextStyles.t11.copyWith(fontWeight: FontWeight.bold, color: foreground),
                 ),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.t11.copyWith(color: theme.hintColor, height: 1.1),
-                ),
+                const SizedBox(height: 1),
+                Text(label, style: AppTextStyles.t11.copyWith(color: theme.hintColor, height: 1.1)),
               ],
             ),
           ),

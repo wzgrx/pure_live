@@ -12,6 +12,22 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:pure_live/modules/auth/auth_controller.dart';
 import 'package:pure_live/common/services/settings/backup_controller.dart';
 
+Map<String, dynamic> buildFirebaseConfigUploadData({
+  required String config,
+  required String email,
+  required String version,
+  required String updateAt,
+  required bool hasCanonicalCreatedAt,
+  Object? legacyCreatedAt,
+  required Object newCreatedAt,
+}) {
+  final payload = <String, dynamic>{'config': config, 'email': email, 'version': version, 'update_at': updateAt};
+  if (!hasCanonicalCreatedAt) {
+    payload['created_at'] = legacyCreatedAt ?? newCreatedAt;
+  }
+  return payload;
+}
+
 class FirebaseManager {
   static late FirebaseManager _instance;
   static const String customScheme = 'purelive';
@@ -173,13 +189,21 @@ class FirebaseManager {
     final formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
     try {
-      await firestore.collection('users').doc(userId).set({
-        'config': backupData,
-        'email': secureUser.email ?? '',
-        'version': VersionUtil.version,
-        'update_at': formattedTime,
-        'created_at': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      final userReference = firestore.collection('users').doc(userId);
+      await firestore.runTransaction((transaction) async {
+        final existingDocument = await transaction.get(userReference);
+        final existingData = existingDocument.data();
+        final payload = buildFirebaseConfigUploadData(
+          config: backupData,
+          email: secureUser.email ?? '',
+          version: VersionUtil.version,
+          updateAt: formattedTime,
+          hasCanonicalCreatedAt: existingData?.containsKey('created_at') ?? false,
+          legacyCreatedAt: existingData?['createdAt'],
+          newCreatedAt: FieldValue.serverTimestamp(),
+        );
+        transaction.set(userReference, payload, SetOptions(merge: true));
+      });
 
       ToastUtil.show(i18n('webdav_upload_success'));
     } catch (e) {

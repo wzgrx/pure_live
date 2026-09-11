@@ -90,9 +90,9 @@ typedef MultiviewCellPlayerFactory = MultiviewCellPlayerHandle Function({
 /// 单格播放器持有者（非 widget）。
 ///
 /// 自持独立的 media_kit Player + VideoController，绕开全局单实例的
-/// PlayerManager/GlobalPlayerService/PlayerPool。每格渲染分辨率在构造时
-/// 由控制器按当前布局计算并固定，避免 Windows 共享渲染线程下多实例
-/// 相互争抢全分辨率输出。
+/// PlayerManager/GlobalPlayerService/PlayerPool。每格在构造时使用控制器按
+/// 当前布局计算的初始分辨率，Windows 挂载后由视图按实际 cell viewport
+/// 继续协商，避免共享渲染线程下多实例争抢全分辨率输出或大格沿用小纹理。
 class _MediaKitCellPlayer implements MultiviewCellPlayerHandle, MultiviewNativeInputRouting {
   _MediaKitCellPlayer({required this.renderWidth, required this.renderHeight});
   bool _disposed = false;
@@ -117,10 +117,10 @@ class _MediaKitCellPlayer implements MultiviewCellPlayerHandle, MultiviewNativeI
     _checkLive();
   }
 
-  /// 固定的渲染输出宽度（物理像素），来自布局均分结果。
+  /// 初始渲染输出宽度（物理像素），来自布局均分结果。
   final int renderWidth;
 
-  /// 固定的渲染输出高度（物理像素），来自布局均分结果。
+  /// 初始渲染输出高度（物理像素），来自布局均分结果。
   final int renderHeight;
 
   Player? _player;

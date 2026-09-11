@@ -46,8 +46,7 @@ typedef MultiviewRoomVolumeSaver = Future<void> Function(LiveRoom room, double v
 /// - 所有释放（removeCell/setLayout 缩容/disposeAll）走同一条
 ///   「pause → 销毁渲染控制器 → 销毁播放内核」路径。
 ///
-/// Remaining enhancement: layout-change render-target renegotiation and
-/// optional session persistence.
+/// Remaining enhancement: optional session persistence.
 class MultiviewController extends GetxController {
   MultiviewController({
     MultiviewCellPlayerFactory? playerFactory,
@@ -437,8 +436,8 @@ class MultiviewController extends GetxController {
   /// 切换布局。
   ///
   /// 缩容时按同一条释放路径销毁多余格；保留前 N 格的播放状态不重建。
-  /// 扩容时追加空白格。已有格不重设渲染分辨率（TODO: 布局切换后重设，
-  /// 当前接受暂时模糊）。
+  /// 扩容时追加空白格。Windows 已有格由视图层按实际 cell viewport
+  /// 防抖重设渲染目标，无需重建播放器或重新解析直播源。
   Future<void> setLayout(MultiviewLayout newLayout) async {
     if (newLayout == layout.value) return;
     final capacity = newLayout.capacity;
@@ -1103,7 +1102,7 @@ class MultiviewController extends GetxController {
     cells[cellIndex] = state;
   }
 
-  /// 按当前布局把屏幕物理像素均分，得到每格固定渲染分辨率。
+  /// 按当前布局把屏幕物理像素均分，得到播放器创建时的初始渲染分辨率。
   Size _resolveRenderTarget(MultiviewLayout l) {
     final screen = _probeScreenMetrics();
     // ponytail: 无窗口树（纯 Dart 测试/极早期调用）退回 720p 基线，

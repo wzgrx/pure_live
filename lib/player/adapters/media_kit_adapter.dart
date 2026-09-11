@@ -16,7 +16,7 @@ import 'package:pure_live/player/models/player_engine.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
 import 'package:pure_live/player/utils/live_buffer_policy.dart';
 import 'package:pure_live/common/utils/latest_async_value_queue.dart';
-import 'package:pure_live/player/utils/video_output_size_policy.dart';
+import 'package:pure_live/player/widgets/video_output_viewport_sizer.dart';
 import 'package:pure_live/player/interface/media_kit_player_accessor.dart';
 import 'package:pure_live/player/core/player_error_classifier.dart';
 import 'package:pure_live/player/core/source_event_fence.dart';
@@ -963,10 +963,11 @@ class MediaKitAdapter
       resumeUponEnteringForegroundMode: false,
     );
     if (!PlatformUtils.isWindows) return video;
-    return _WindowsViewportSizedVideo(
-      controller: _controller,
+    return VideoOutputViewportSizer(
+      outputIdentity: _controller,
       sourceWidth: _widthSubject,
       sourceHeight: _heightSubject,
+      onResize: (width, height, force) => _controller.setSize(width: width, height: height, force: force),
       child: video,
     );
   }
@@ -1243,148 +1244,4 @@ class _NativeDiagnostic {
   final String message;
   final String? prefix;
   final int generation;
-}
-
-/// Keeps the Windows BGRA texture close to the visible physical viewport.
-/// Resizing is debounced so dragging a window does not recreate the texture on
-/// every pointer event.
-class _WindowsViewportSizedVideo extends StatefulWidget {
-  const _WindowsViewportSizedVideo({
-    required this.controller,
-    required this.sourceWidth,
-    required this.sourceHeight,
-    required this.child,
-  });
-
-  final VideoController controller;
-  final Stream<int?> sourceWidth;
-  final Stream<int?> sourceHeight;
-  final Widget child;
-
-  @override
-  State<_WindowsViewportSizedVideo> createState() => _WindowsViewportSizedVideoState();
-}
-
-class _WindowsViewportSizedVideoState extends State<_WindowsViewportSizedVideo> {
-  static const _resizeDebounce = Duration(milliseconds: 180);
-
-  StreamSubscription<int?>? _widthSubscription;
-  StreamSubscription<int?>? _heightSubscription;
-  Timer? _resizeTimer;
-  int? _sourceWidth;
-  int? _sourceHeight;
-  Size? _logicalViewport;
-  double _devicePixelRatio = 1;
-  Size? _requestedSize;
-  bool _hasPublishedViewport = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _bindSourceDimensions();
-  }
-
-  @override
-  void didUpdateWidget(covariant _WindowsViewportSizedVideo oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.sourceWidth, widget.sourceWidth) ||
-        !identical(oldWidget.sourceHeight, widget.sourceHeight)) {
-      unawaited(_cancelSourceSubscriptions());
-      _bindSourceDimensions();
-    }
-    if (!identical(oldWidget.controller, widget.controller)) {
-      _requestedSize = null;
-      _hasPublishedViewport = false;
-      _scheduleResize();
-    }
-  }
-
-  void _bindSourceDimensions() {
-    _widthSubscription = widget.sourceWidth.distinct().listen((value) {
-      _sourceWidth = value;
-      _scheduleResize();
-    });
-    _heightSubscription = widget.sourceHeight.distinct().listen((value) {
-      _sourceHeight = value;
-      _scheduleResize();
-    });
-  }
-
-  Future<void> _cancelSourceSubscriptions() async {
-    // Capture before awaiting. didUpdateWidget immediately binds the new
-    // streams; reading the fields again after the first await could cancel the
-    // replacement height subscription and drop the replacement width handle.
-    final widthSubscription = _widthSubscription;
-    final heightSubscription = _heightSubscription;
-    _widthSubscription = null;
-    _heightSubscription = null;
-    await Future.wait<void>([
-      if (widthSubscription != null) widthSubscription.cancel(),
-      if (heightSubscription != null) heightSubscription.cancel(),
-    ]);
-  }
-
-  void _scheduleResize() {
-    final viewport = _logicalViewport;
-    if (viewport == null) return;
-    final target = calculateVideoOutputSize(
-      logicalViewport: viewport,
-      devicePixelRatio: _devicePixelRatio,
-      sourceWidth: _sourceWidth,
-      sourceHeight: _sourceHeight,
-    );
-    if (target.isEmpty || target == _requestedSize) return;
-
-    _resizeTimer?.cancel();
-    _resizeTimer = Timer(_resizeDebounce, () async {
-      if (!mounted) return;
-      final controller = widget.controller;
-      final force = !_hasPublishedViewport;
-      try {
-        await controller.setSize(
-          width: target.width.toInt(),
-          height: target.height.toInt(),
-          // StableVideoLayer deliberately unmounts the Windows Texture while a
-          // covering route is present. On the first layout after reattachment,
-          // reassert the viewport even when NativeVideoController cached the
-          // same numbers before detachment. Size equality is not proof that the
-          // current Flutter presentation owns a usable native output.
-          force: force,
-        );
-        if (!mounted || !identical(controller, widget.controller)) return;
-        _requestedSize = target;
-        _hasPublishedViewport = true;
-      } catch (_) {
-        if (identical(controller, widget.controller)) {
-          _requestedSize = null;
-          _hasPublishedViewport = false;
-        }
-        // The controller can be disposed while a room/window transition is
-        // completing. The next mounted video session will publish its size.
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _resizeTimer?.cancel();
-    unawaited(_cancelSourceSubscriptions());
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final viewport = Size(constraints.maxWidth, constraints.maxHeight);
-        final pixelRatio = MediaQuery.devicePixelRatioOf(context);
-        if (_logicalViewport != viewport || _devicePixelRatio != pixelRatio) {
-          _logicalViewport = viewport;
-          _devicePixelRatio = pixelRatio;
-          _scheduleResize();
-        }
-        return widget.child;
-      },
-    );
-  }
 }

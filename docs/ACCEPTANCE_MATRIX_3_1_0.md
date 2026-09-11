@@ -72,7 +72,7 @@
 | A3-05 | RUN | `tool/android_recording_smoke.ps1 -ExerciseStreamSelection` 现把“仅打开菜单”提升为真实选择、提交后稳定及错误态门禁。K90 Pro / cycle 212～216 已在最终 Debug APK 分别完成虎牙 `蓝光30M→流畅`/`线路1→线路2`、斗鱼 `原画1080P60→超清`、快手 `蓝光 质臻→超清`、Bilibili `线路1→线路2`、抖音 `高清→标清`/`线路1→线路2`，每次切换后继续稳定播放并完成 H.264 + AAC 短录；单一档位/线路按平台实际能力记为不适用。确定性回归另覆盖稳定平台 ID、服务端实际档位回写、相同 URL 拒绝假切换、快速点击 latest-wins、失败原子回滚和新线路数钳制；Android 原生播放器尚不具备 Windows 离屏首帧接管能力，网易 CC、Twitch、SOOP、YY 的实际切换继续逐项采样。首个证据 `local-artifacts/diagnostics/android-recording-smoke-20260905T044047480/summary.json`，其余逐轮证据见 Android 审计 |
 | A3-06 | NR | 播放意外暂停、buffering、EOF、签名过期均有界恢复；用户暂停不被自动恢复 |
 | A3-07 | RUN | 虎牙普通视频在其他应用前台时连续后台播放 10 分钟，21/21 媒体状态均为 `PLAYING`；PSS/RSS 呈波动平台，CPU 平均 2.24%、最高 5%，结束后媒体会话与 Wake Lock 释放。横竖屏、PiP、纯音频和锁屏组合仍按矩阵继续 |
-| A3-08 | RUN | 多画面真全屏显式退出表面已完成聚焦 Widget 回归：安全区 44×44 按钮、系统留白剥离、退出回调和按钮外格子点击隔离均通过。v3.1.3 Windows Release 便携包已验证按钮与 `Escape` 均从 `1536×960` 真全屏恢复到 `1276×718` 普通窗口；Android 16 正式 APK 已覆盖安装、冷启动正常，系统返回/方向恢复与真实多路播放连续性仍待不打扰用户前台操作时复验 |
+| A3-08 | RUN | 多画面真全屏显式退出表面已完成聚焦 Widget 回归：安全区 44×44 按钮、系统留白剥离、退出回调和按钮外格子点击隔离均通过。v3.1.3 Windows Release 便携包已验证按钮与 `Escape` 均从 `1536×960` 真全屏恢复到 `1276×718` 普通窗口。源码现让 Windows 每格按真实 viewport/DPR/源尺寸防抖协商输出，布局切换、窗口缩放及带 GlobalKey 的聚焦晋升会交换大/小纹理目标而不重建播放器；见 `docs/MULTIVIEW_RENDER_TARGET_AUDIT_2026_09_11.md`。Android 16 正式 APK 已覆盖安装、冷启动正常，系统返回/方向恢复与双端真实多路清晰度、资源和连续性继续复验 |
 
 ### A4 弹幕与本地互动
 

@@ -31,6 +31,8 @@
 
 niconico Site 的目录/搜索/分享/导航和平台注册、真实网络长录、多画面原生窗口/手机验收继续；自然结束后的自动恢复尚未实现，本轮只接入用户主动恢复；长时间多路性能仍待原生场景验证。19 站点 + IPTV、8 组未注册，历史 62 组中 42 组未闭环保持。
 
+后续 Windows 每格在布局切换、聚焦晋升和窗口缩放时的渲染目标协商见 [`MULTIVIEW_RENDER_TARGET_AUDIT_2026_09_11.md`](MULTIVIEW_RENDER_TARGET_AUDIT_2026_09_11.md)；该修订保留本批逐格输入和播放器所有权。
+
 本轮未操作手机、安装、构建或发布。Android 仍 `152cf151` Debug（61 场景 not-run），Windows 仍 `2fb471d3`，均不包含本轮。完成全目标验收后才进入 3.2.0 正式发布。
 
 回滚撤回本批三个 multiview 文件、transport 的只读有效性 getter 及本批测试/审计，保留已完成的主播放器和录制器 owned input 实现。没有全局 Root/LSP、ADB 或设备配置变更。

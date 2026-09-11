@@ -9,7 +9,7 @@ import 'package:pure_live/model/live_play_quality.dart';
 ///
 /// 每个布局隐含固定的行列划分，用于把屏幕物理像素均分给每个格子，
 /// 作为该格 media_kit 渲染输出（VideoControllerConfiguration.width/height）
-/// 的固定分辨率依据。注意行列划分只服务于渲染分辨率计算，
+/// 的初始分辨率依据。注意行列划分只服务于初始渲染分辨率计算，
 /// focus 布局的视觉排布（左大右小列）由 UI 层决定。
 enum MultiviewLayout {
   /// 单画面（1 行 x 1 列）。
@@ -23,10 +23,8 @@ enum MultiviewLayout {
 
   /// 一大多小（1 大 + 3 小）。
   ///
-  /// 渲染分辨率复用 quad 的 2x2 均分数学：大格上采样、小格下采样的
-  /// 画质取舍已接受。
-  // TODO: 晋升大画面时重设该格渲染分辨率（VideoController.setSize），
-  // 大格按整屏均分、小格按剩余区域均分，消除上采样模糊。
+  /// 新播放器的初始渲染分辨率复用 quad 的 2x2 均分数学；Windows 视图
+  /// 挂载后会按大格/小格的实际物理 viewport 重设输出，晋升时同步交换。
   focus;
 
   /// 当前布局可容纳的格子数量。

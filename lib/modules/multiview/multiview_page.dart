@@ -16,6 +16,7 @@ import 'package:pure_live/modules/multiview/multiview_controller.dart';
 import 'package:pure_live/modules/multiview/widgets/multiview_fullscreen_surface.dart';
 import 'package:pure_live/modules/multiview/widgets/multiview_room_picker.dart';
 import 'package:pure_live/player/utils/fullscreen.dart';
+import 'package:pure_live/player/widgets/video_output_viewport_sizer.dart';
 
 /// 页面显示状态机：normal（完整界面）→ immersive（隐藏工具条与侧板，
 /// 留悬浮恢复钮）→ fullscreen（仅保留安全区内的退出钮）。
@@ -927,17 +928,27 @@ class _MultiviewCellView extends StatelessWidget {
   Widget _buildContent(ThemeData theme) {
     final videoController = state.videoController;
     if (state.status == MultiviewCellStatus.playing && videoController != null) {
+      final video = Video(
+        controller: videoController,
+        controls: NoVideoControls,
+        // multiview 页面自持每格生命周期，禁用 Video 内置的后台暂停策略，
+        // 与主播放器 LivePlay 的单一生命周期权威原则保持一致。
+        pauseUponEnteringBackgroundMode: false,
+        resumeUponEnteringForegroundMode: false,
+      );
+      final videoSurface = PlatformUtils.isWindows
+          ? VideoOutputViewportSizer(
+              outputIdentity: videoController,
+              sourceWidth: videoController.player.stream.width,
+              sourceHeight: videoController.player.stream.height,
+              onResize: (width, height, force) => videoController.setSize(width: width, height: height, force: force),
+              child: video,
+            )
+          : video;
       return Stack(
         fit: StackFit.expand,
         children: [
-          Video(
-            controller: videoController,
-            controls: NoVideoControls,
-            // multiview 页面自持每格生命周期，禁用 Video 内置的后台暂停策略，
-            // 与主播放器 LivePlay 的单一生命周期权威原则保持一致。
-            pauseUponEnteringBackgroundMode: false,
-            resumeUponEnteringForegroundMode: false,
-          ),
+          videoSurface,
           // 弹幕层：仅大画面渲染；IgnorePointer 保证不遮挡格子手势。
           if (showDanmaku)
             Positioned.fill(

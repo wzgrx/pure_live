@@ -11,11 +11,7 @@ import 'package:pure_live/modules/version/version_controller.dart';
 
 typedef VersionDownloadHandler = Future<void> Function(String url, {String? fileName});
 
-Uri? versionDownloadUri(String rawUrl) {
-  final uri = Uri.tryParse(rawUrl.trim());
-  if (uri == null || !uri.hasAuthority || (uri.scheme != 'https' && uri.scheme != 'http')) return null;
-  return uri;
-}
+Uri? versionDownloadUri(String rawUrl) => updateDownloadUri(rawUrl);
 
 class VersionPage extends GetView<VersionController> {
   const VersionPage({super.key, this.downloadRelease});

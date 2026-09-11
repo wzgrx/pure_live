@@ -3,6 +3,16 @@ import 'dart:io';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/widgets/download_apk_dialog.dart';
 
+Uri? updateDownloadUri(String rawUrl) {
+  final uri = Uri.tryParse(rawUrl.trim());
+  if (uri == null || !uri.hasAuthority || (uri.scheme != 'https' && uri.scheme != 'http')) return null;
+  return uri;
+}
+
+bool requiresInstallPackagesPermission({required bool isAndroid, required String fileName}) {
+  return isAndroid && fileName.toLowerCase().endsWith('.apk');
+}
+
 Future<bool> requestStorageInstallPermission() async {
   if (await Permission.requestInstallPackages.isDenied) {
     final status = Permission.requestInstallPackages.request();
@@ -25,15 +35,23 @@ final List<String> mirrors = [
 ];
 
 List<String> getMirrorUrls(String apkUrl, {bool githubOriginOnly = false}) {
-  if (apkUrl.trim().isEmpty) return const [];
-  if (githubOriginOnly) return [apkUrl];
-  final mirrorsUrl = mirrors.map((e) => '$e$apkUrl').toList();
-  mirrorsUrl.add(apkUrl);
+  final uri = updateDownloadUri(apkUrl);
+  if (uri == null) return const [];
+  final normalizedUrl = uri.toString();
+  if (githubOriginOnly) return [normalizedUrl];
+  final mirrorsUrl = mirrors.map((e) => '$e$normalizedUrl').toList();
+  mirrorsUrl.add(normalizedUrl);
   return mirrorsUrl.toSet().toList(growable: false);
 }
 
 Future<void> downloadAndInstallApk(String apkUrl, {String? fileName}) async {
-  if (Platform.isAndroid) {
+  final uri = updateDownloadUri(apkUrl);
+  if (uri == null) {
+    ToastUtil.show(i18n('download_failed'));
+    return;
+  }
+  final resolvedFileName = safeDownloadFileName(uri.toString(), suggestedName: fileName);
+  if (requiresInstallPackagesPermission(isAndroid: Platform.isAndroid, fileName: resolvedFileName)) {
     try {
       final hasInstallPermission = await requestStorageInstallPermission();
       if (!hasInstallPermission) {
@@ -45,9 +63,17 @@ Future<void> downloadAndInstallApk(String apkUrl, {String? fileName}) async {
       ToastUtil.show('${i18n("request_install_permission_failed")}${e.toString()}');
     }
   }
-  ToastUtil.show(i18n("downloading_apk", args: {"version": VersionUtil.latestVersion}));
+  ToastUtil.show(
+    fileName == null
+        ? i18n('downloading_apk', args: {'version': VersionUtil.latestVersion})
+        : i18n('downloading_app', args: {'app': resolvedFileName}),
+  );
   Get.dialog(
-    DownloadApkDialog(apkUrl: apkUrl, version: VersionUtil.latestVersion, fileName: fileName),
+    DownloadApkDialog(
+      apkUrl: uri.toString(),
+      version: VersionUtil.latestVersion,
+      fileName: fileName == null ? null : resolvedFileName,
+    ),
     barrierDismissible: false,
   );
 }

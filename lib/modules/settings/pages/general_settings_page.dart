@@ -168,54 +168,66 @@ class GeneralSettingsPage extends GetView<SettingsService> {
   void _showRefreshRateModeDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) => SimpleDialog(
+      builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(i18n('refresh_rate_mode')),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
-            child: Text(i18n('refresh_rate_mode_hint'), style: Theme.of(dialogContext).textTheme.bodySmall),
-          ),
-          Obx(
-            () => RadioGroup<AppRefreshRateMode>(
-              groupValue: SettingsService.to.app.refreshRateMode,
-              onChanged: (mode) {
-                if (mode == null) return;
-                SettingsService.to.app.setRefreshRateMode(mode);
-                Navigator.pop(dialogContext);
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: AppRefreshRateMode.values
-                    .map(
-                      (mode) => RadioListTile<AppRefreshRateMode>(
-                        value: mode,
-                        title: Row(
-                          children: [
-                            Expanded(child: Text(_refreshRateModeLabel(mode))),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: Theme.of(dialogContext).colorScheme.secondaryContainer,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                _refreshRateEnergyLabel(mode),
-                                style: Theme.of(dialogContext).textTheme.labelSmall,
-                              ),
-                            ),
-                          ],
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 3),
-                          child: Text(_refreshRateModeDescription(mode)),
-                        ),
-                      ),
-                    )
-                    .toList(),
+        contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
+        content: SizedBox(
+          width: 360,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
+                child: Text(i18n('refresh_rate_mode_hint'), style: Theme.of(dialogContext).textTheme.bodySmall),
               ),
-            ),
+              Obx(
+                () => RadioGroup<AppRefreshRateMode>(
+                  groupValue: SettingsService.to.app.refreshRateMode,
+                  onChanged: (mode) {
+                    if (mode == null) return;
+                    SettingsService.to.app.setRefreshRateMode(mode);
+                    Navigator.pop(dialogContext);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: AppRefreshRateMode.values
+                        .map(
+                          (mode) => RadioListTile<AppRefreshRateMode>(
+                            value: mode,
+                            title: Wrap(
+                              alignment: WrapAlignment.spaceBetween,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8,
+                              runSpacing: 4,
+                              children: [
+                                Text(_refreshRateModeLabel(mode)),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(dialogContext).colorScheme.secondaryContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    _refreshRateEnergyLabel(mode),
+                                    style: Theme.of(dialogContext).textTheme.labelSmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 3),
+                              child: Text(_refreshRateModeDescription(mode)),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

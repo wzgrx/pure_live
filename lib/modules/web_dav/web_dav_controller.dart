@@ -266,14 +266,27 @@ class WebDavPageController extends GetxController {
   }
 
   void onFileTap(webdav.File file) {
-    if (file.isDir ?? false) {
-      final newPath = buildPath(file.name!);
-      dirPath.value = newPath;
-      isFromBreadcrumb.value = false;
-      updateBreadcrumbParts();
-      triggerBreadcrumbScroll();
-      loadFiles();
+    if (file.isDir != true) return;
+    final newPath = _directoryPathFor(file);
+    if (newPath == null) return;
+    dirPath.value = newPath;
+    isFromBreadcrumb.value = false;
+    updateBreadcrumbParts();
+    triggerBreadcrumbScroll();
+    loadFiles();
+  }
+
+  String? _directoryPathFor(webdav.File file) {
+    final serverPath = file.path?.trim();
+    if (serverPath != null && serverPath.isNotEmpty && !serverPath.contains(RegExp(r'[\\?#]'))) {
+      final normalized = serverPath.replaceAll(RegExp(r'/+'), '/');
+      final candidate = normalized.startsWith('/') ? normalized : buildPath(normalized);
+      final absolute = candidate.replaceAll(RegExp(r'/+'), '/');
+      return absolute.endsWith('/') ? absolute : '$absolute/';
     }
+    final name = file.name?.trim();
+    if (name == null || name.isEmpty || name.contains(RegExp(r'[/\\?#]'))) return null;
+    return buildPath(name);
   }
 
   /// 上传配置到 WebDAV（走新备份系统）

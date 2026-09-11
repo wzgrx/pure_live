@@ -150,9 +150,26 @@ void main() {
     expect(service.reads, isEmpty);
     expect(Get.find<WebDavController>().currentWebDavConfig.v, raw);
     await tester.ensureVisible(find.text('创建新配置'));
+    await tester.pumpAndSettle();
     await openCreateDialog(tester);
     expect(find.byType(TextFormField), findsNWidgets(4));
     await tester.tap(find.text('取消'));
+    await finish(tester);
+  });
+
+  testWidgets('orphan setup remains scrollable and actionable at narrow very-large text', (tester) async {
+    final raw = jsonEncode(
+      const WebDAVConfig(name: 'orphan', address: 'https://example.test', username: '', password: '').toJson(),
+    );
+    reloadStoredSelection(raw, []);
+    await openPage(tester, size: const Size(320, 480), textScale: 3);
+
+    final create = find.text('创建新配置');
+    await tester.ensureVisible(create);
+    await tester.pumpAndSettle();
+    expect(create.hitTestable(), findsOneWidget);
+    expect(find.text(translations['webdav_saved_selection_invalid']), findsOneWidget);
+    expect(tester.takeException(), isNull);
     await finish(tester);
   });
 
@@ -321,6 +338,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('fixture failure'), findsNothing);
     expect(find.text('暂无数据'), findsOneWidget);
+    await finish(tester);
+  });
+
+  testWidgets('long directory error keeps retry reachable at narrow very-large text', (tester) async {
+    await openPage(tester, size: const Size(320, 480), textScale: 3);
+    selectConfig();
+    service.reads.single.completeError(
+      StateError(List.filled(10, 'fixture directory connection timed out').join(' · ')),
+    );
+    await tester.pumpAndSettle();
+
+    final retry = find.text('重试');
+    await tester.ensureVisible(retry);
+    await tester.pumpAndSettle();
+    expect(retry.hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(retry);
+    await tester.pump();
+    service.reads.last.complete([]);
+    await tester.pumpAndSettle();
     await finish(tester);
   });
 

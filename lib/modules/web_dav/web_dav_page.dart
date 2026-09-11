@@ -35,14 +35,22 @@ class _WebDavPageState extends State<WebDavPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Theme.of(Get.context!).colorScheme.surface,
-      body: CustomScrollView(
-        physics: const PureLiveScrollPhysics(),
-        slivers: [
-          _buildAppBar(),
-          _buildNavigationBar(),
-          SliverToBoxAdapter(child: _buildFileActionStatus()),
-          _buildBodyContent(),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final minimumStateHeight = (constraints.maxHeight - kToolbarHeight - 50)
+              .clamp(0.0, double.infinity)
+              .toDouble();
+          return CustomScrollView(
+            key: const ValueKey('webdav-page-scroll'),
+            physics: const PureLiveScrollPhysics(),
+            slivers: [
+              _buildAppBar(),
+              _buildNavigationBar(),
+              SliverToBoxAdapter(child: _buildFileActionStatus()),
+              _buildBodyContent(minimumStateHeight),
+            ],
+          );
+        },
       ),
       endDrawer: _buildDrawer(),
       floatingActionButton: Obx(
@@ -246,61 +254,59 @@ class _WebDavPageState extends State<WebDavPage> {
     );
   }
 
-  Widget _buildBodyContent() {
+  Widget _buildBodyContent(double minimumStateHeight) {
     return Obx(() {
       if (controller.configs.isEmpty) {
-        return SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.add_circle_outline, size: 48),
-                const SizedBox(height: 16),
-                ..._configurationIssueKeyWidgets(),
-                Text(i18n("webdav_no_config_create_first")),
-                TextButton(onPressed: () => _showConfigDialog(), child: Text(i18n("webdav_create_new_config"))),
-              ],
-            ),
+        return _buildStateSurface(
+          minimumHeight: minimumStateHeight,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.add_circle_outline, size: 48),
+              const SizedBox(height: 16),
+              ..._configurationIssueKeyWidgets(),
+              Text(i18n("webdav_no_config_create_first"), textAlign: TextAlign.center),
+              TextButton(onPressed: () => _showConfigDialog(), child: Text(i18n("webdav_create_new_config"))),
+            ],
           ),
         );
       }
 
       if (controller.currentConfig.value == null) {
-        return SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.cloud_queue, size: 48),
-                const SizedBox(height: 16),
-                ..._configurationIssueKeyWidgets(),
-                Text(i18n("webdav_select_config_from_sidebar")),
-                TextButton(
-                  onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-                  child: Text(i18n("webdav_open_config_list")),
-                ),
-              ],
-            ),
+        return _buildStateSurface(
+          minimumHeight: minimumStateHeight,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.cloud_queue, size: 48),
+              const SizedBox(height: 16),
+              ..._configurationIssueKeyWidgets(),
+              Text(i18n("webdav_select_config_from_sidebar"), textAlign: TextAlign.center),
+              TextButton(
+                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                child: Text(i18n("webdav_open_config_list")),
+              ),
+            ],
           ),
         );
       }
 
       if (controller.errorMessage.value.isNotEmpty) {
-        return _buildErrorPage(controller.errorMessage.value);
+        return _buildErrorPage(controller.errorMessage.value, minimumStateHeight);
       }
 
       if (controller.isLoading.value) {
-        return const SliverFillRemaining(
-          child: AppStatusView(type: AppStatusType.loading, title: "", subtitle: ""),
+        return _buildStateSurface(
+          minimumHeight: minimumStateHeight,
+          child: const AppStatusView(type: AppStatusType.loading, title: "", subtitle: ""),
         );
       }
 
       if (controller.files.isEmpty) {
-        return SliverFillRemaining(hasScrollBody: false, child: Center(child: Text(i18n("status_empty_title"))));
+        return _buildStateSurface(
+          minimumHeight: minimumStateHeight,
+          child: Text(i18n("status_empty_title"), textAlign: TextAlign.center),
+        );
       }
 
       return SliverList(
@@ -310,6 +316,18 @@ class _WebDavPageState extends State<WebDavPage> {
         }, childCount: controller.files.length),
       );
     });
+  }
+
+  Widget _buildStateSurface({required double minimumHeight, required Widget child}) {
+    return SliverToBoxAdapter(
+      child: ConstrainedBox(
+        key: const ValueKey('webdav-state-content'),
+        constraints: BoxConstraints(minHeight: minimumHeight),
+        child: Center(
+          child: Padding(padding: const EdgeInsets.fromLTRB(24, 24, 24, 96), child: child),
+        ),
+      ),
+    );
   }
 
   List<Widget> _configurationIssueKeyWidgets() => [
@@ -367,18 +385,17 @@ class _WebDavPageState extends State<WebDavPage> {
     );
   }
 
-  Widget _buildErrorPage(String message) {
-    return SliverFillRemaining(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error, size: 64, color: Theme.of(Get.context!).colorScheme.onPrimaryContainer),
-            const SizedBox(height: 16),
-            Text(message, style: AppTextStyles.t12),
-            TextButton(onPressed: controller.loadFiles, child: Text(i18n("retry"))),
-          ],
-        ),
+  Widget _buildErrorPage(String message, double minimumStateHeight) {
+    return _buildStateSurface(
+      minimumHeight: minimumStateHeight,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error, size: 64, color: Theme.of(Get.context!).colorScheme.onPrimaryContainer),
+          const SizedBox(height: 16),
+          Text(message, textAlign: TextAlign.center, style: AppTextStyles.t12),
+          TextButton(onPressed: controller.loadFiles, child: Text(i18n("retry"))),
+        ],
       ),
     );
   }

@@ -277,6 +277,37 @@ void main() {
     expect(service.paths.last, '/first/');
   });
 
+  test('nameless directory uses its server path instead of throwing', () async {
+    final service = connect();
+    service.reads.single.complete([]);
+    await settle();
+
+    expect(() => controller.onFileTap(webdav.File(path: '/folder', isDir: true)), returnsNormally);
+    expect(controller.dirPath.value, '/folder/');
+    expect(service.paths.last, '/folder/');
+  });
+
+  test('directory without a name or path is ignored', () async {
+    final service = connect();
+    service.reads.single.complete([]);
+    await settle();
+
+    expect(() => controller.onFileTap(webdav.File(isDir: true)), returnsNormally);
+    expect(controller.dirPath.value, '/');
+    expect(service.paths, ['/']);
+  });
+
+  test('relative directory path is resolved from the current directory without duplicate separators', () async {
+    controller.dirPath.value = '/parent/';
+    final service = connect();
+    service.reads.single.complete([]);
+    await settle();
+
+    controller.onFileTap(webdav.File(path: 'child//', isDir: true));
+    expect(controller.dirPath.value, '/parent/child/');
+    expect(service.paths.last, '/parent/child/');
+  });
+
   for (final action in ['clear', 'switch', 'close']) {
     test('download completed after $action does not start local restore', () async {
       final service = connect();

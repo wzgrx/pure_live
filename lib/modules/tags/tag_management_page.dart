@@ -17,282 +17,287 @@ class TagManagementPage extends GetView<TagManagementController> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: IconButton(icon: const Icon(Remix.add_line), onPressed: () => _showTagDialog(context)),
+            child: IconButton(
+              key: const ValueKey('add-tag'),
+              tooltip: i18n('add_tag'),
+              icon: const Icon(Remix.add_line),
+              onPressed: () => _showTagDialog(context),
+            ),
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
+        physics: const PureLiveScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
-          Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 4), child: _buildTipBanner(theme)),
-          Expanded(
-            child: ListView(
-              physics: const PureLiveScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              children: [
-                context.buildGroupTitle(i18n('tag_management')),
-                Obx(() {
-                  if (controller.tags.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 80),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Remix.price_tag_3_line, size: 48, color: theme.disabledColor.withAlpha(100)),
-                            const SizedBox(height: 16),
-                            Text(
-                              i18n('no_tags_tip'),
-                              style: AppTextStyles.t14.copyWith(color: theme.disabledColor),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
+          _buildTipBanner(theme),
+          const SizedBox(height: 12),
+          context.buildGroupTitle(i18n('tag_management')),
+          Obx(() {
+            if (controller.tags.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Remix.price_tag_3_line, size: 48, color: theme.disabledColor.withAlpha(100)),
+                      const SizedBox(height: 16),
+                      Text(
+                        i18n('no_tags_tip'),
+                        style: AppTextStyles.t14.copyWith(color: theme.disabledColor),
+                        textAlign: TextAlign.center,
                       ),
-                    );
-                  }
-                  final children = List.generate(controller.tags.length, (index) {
-                    final tag = controller.tags[index];
-                    return Material(
-                      key: ValueKey(tag.id),
-                      color: Colors.transparent,
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.secondary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: theme.colorScheme.secondary.withValues(alpha: 0.3), width: 1.0),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: Row(
-                                            children: [
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                i18n('tag_detail'),
-                                                style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.bold),
-                                              ),
-                                            ],
+                    ],
+                  ),
+                ),
+              );
+            }
+            final children = List.generate(controller.tags.length, (index) {
+              final tag = controller.tags[index];
+              return Material(
+                key: ValueKey(tag.id),
+                color: Colors.transparent,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: theme.colorScheme.secondary.withValues(alpha: 0.3), width: 1.0),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              key: ValueKey('tag-detail-${tag.id}'),
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (dialogContext) => AlertDialog(
+                                    scrollable: true,
+                                    insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                                    title: Text(
+                                      i18n('tag_detail'),
+                                      style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.bold),
+                                    ),
+                                    contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          i18n('tag_name_label'),
+                                          style: AppTextStyles.t12.copyWith(
+                                            color: theme.colorScheme.primary,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          titlePadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                                          contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                i18n('tag_name_label'),
-                                                style: AppTextStyles.t12.copyWith(
-                                                  color: theme.colorScheme.primary,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                tag.name,
-                                                style: AppTextStyles.t16.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: theme.colorScheme.onSurface,
-                                                ),
-                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          tag.name,
+                                          style: AppTextStyles.t16.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        ),
 
-                                              if (tag.description.isNotEmpty) ...[
-                                                const SizedBox(height: 18),
-                                                Text(
-                                                  i18n('tag_desc_label'),
-                                                  style: AppTextStyles.t12.copyWith(
-                                                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Container(
-                                                  width: double.infinity,
-                                                  padding: const EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(
-                                                    color: theme.colorScheme.surfaceContainerHighest.withValues(
-                                                      alpha: 0.2,
-                                                    ),
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    border: Border.all(
-                                                      color: theme.dividerColor.withValues(alpha: 0.05),
-                                                      width: 0.5,
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    tag.description,
-                                                    style: AppTextStyles.t14.copyWith(
-                                                      color: theme.colorScheme.onSurfaceVariant,
-                                                      height: 1.4,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
+                                        if (tag.description.isNotEmpty) ...[
+                                          const SizedBox(height: 18),
+                                          Text(
+                                            i18n('tag_desc_label'),
+                                            style: AppTextStyles.t12.copyWith(
+                                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                            ),
                                           ),
-                                          actionsPadding: const EdgeInsets.fromLTRB(0, 0, 16, 16),
-                                          actions: [
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                elevation: 0,
-                                                backgroundColor: theme.colorScheme.primary,
-                                                foregroundColor: theme.colorScheme.onPrimary,
-                                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                              ),
-                                              onPressed: () => Navigator.pop(context),
-                                              child: Text(
-                                                i18n('confirm'),
-                                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                          const SizedBox(height: 6),
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: theme.dividerColor.withValues(alpha: 0.05),
+                                                width: 0.5,
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      tag.name,
-                                      style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.w600),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                            child: Text(
+                                              tag.description,
+                                              style: AppTextStyles.t14.copyWith(
+                                                color: theme.colorScheme.onSurfaceVariant,
+                                                height: 1.4,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
+                                    actionsPadding: const EdgeInsets.fromLTRB(0, 0, 16, 16),
+                                    actions: [
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          backgroundColor: theme.colorScheme.primary,
+                                          foregroundColor: theme.colorScheme.onPrimary,
+                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                        ),
+                                        onPressed: () => Navigator.pop(dialogContext),
+                                        child: Text(
+                                          i18n('confirm'),
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 4),
-                            Expanded(
+                                );
+                              },
                               child: Text(
-                                tag.description.isNotEmpty ? tag.description : i18n('no_description_placeholder'),
-                                style: AppTextStyles.t11.copyWith(
-                                  color: tag.description.isNotEmpty
-                                      ? theme.disabledColor
-                                      : theme.disabledColor.withValues(alpha: 0.4),
-                                  fontStyle: tag.description.isNotEmpty ? FontStyle.normal : FontStyle.italic,
-                                ),
-                                maxLines: 2,
+                                tag.name,
+                                style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.w600),
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Container(
-                              margin: const EdgeInsets.only(top: 6),
-                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(10),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 4),
+                      Expanded(
+                        child: Text(
+                          tag.description.isNotEmpty ? tag.description : i18n('no_description_placeholder'),
+                          style: AppTextStyles.t11.copyWith(
+                            color: tag.description.isNotEmpty
+                                ? theme.disabledColor
+                                : theme.disabledColor.withValues(alpha: 0.4),
+                            fontStyle: tag.description.isNotEmpty ? FontStyle.normal : FontStyle.italic,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: Tooltip(
+                                message: i18n('move_to_top'),
+                                child: InkWell(
+                                  key: ValueKey('pin-tag-${tag.id}'),
+                                  borderRadius: BorderRadius.circular(6),
+                                  onTap: () => controller.pinToTop(index),
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: ReorderableDragStartListener(
+                                      index: index,
+                                      child: Icon(
+                                        Remix.sort_number_desc,
+                                        size: 16,
+                                        color: theme.colorScheme.primary.withValues(alpha: 0.8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  // 1. 置顶按钮
-                                  Expanded(
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(6),
-                                      onTap: () => controller.pinToTop(index),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 6),
-                                        child: ReorderableDragStartListener(
-                                          index: index,
-                                          child: Icon(
-                                            Remix.sort_number_desc,
-                                            size: 16,
-                                            color: theme.colorScheme.primary.withValues(alpha: 0.8),
-                                          ),
-                                        ),
-                                      ),
+                            ),
+                            Container(width: 1, height: 14, color: theme.dividerColor.withValues(alpha: 0.1)),
+                            Expanded(
+                              child: Tooltip(
+                                message: i18n('edit_tag'),
+                                child: InkWell(
+                                  key: ValueKey('edit-tag-${tag.id}'),
+                                  borderRadius: BorderRadius.circular(6),
+                                  onTap: () => _showTagDialog(context, index: index, tag: tag),
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: Icon(Remix.edit_line, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(width: 1, height: 14, color: theme.dividerColor.withValues(alpha: 0.1)),
+                            Expanded(
+                              child: Tooltip(
+                                message: i18n('delete_tag'),
+                                child: InkWell(
+                                  key: ValueKey('delete-tag-${tag.id}'),
+                                  borderRadius: BorderRadius.circular(6),
+                                  onTap: () => _confirmDelete(context, tag),
+                                  child: SizedBox(
+                                    height: 48,
+                                    child: Icon(
+                                      Remix.delete_bin_line,
+                                      size: 16,
+                                      color: theme.colorScheme.error.withValues(alpha: 0.7),
                                     ),
                                   ),
-                                  // 分割线
-                                  Container(width: 1, height: 14, color: theme.dividerColor.withValues(alpha: 0.1)),
-                                  // 2. 编辑按钮
-                                  Expanded(
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(6),
-                                      onTap: () => _showTagDialog(context, index: index, tag: tag),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 6),
-                                        child: Icon(
-                                          Remix.edit_line,
-                                          size: 16,
-                                          color: theme.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // 分割线
-                                  Container(width: 1, height: 14, color: theme.dividerColor.withValues(alpha: 0.1)),
-                                  // 3. 删除按钮
-                                  Expanded(
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(6),
-                                      onTap: () => _confirmDelete(context, index, tag.name),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 6),
-                                        child: Icon(
-                                          Remix.delete_bin_line,
-                                          size: 16,
-                                          color: theme.colorScheme.error.withValues(alpha: 0.7),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    );
-                  });
+                    ],
+                  ),
+                ),
+              );
+            });
 
-                  return ReorderableBuilder(
-                    dragChildBoxDecoration: BoxDecoration(
-                      color: theme.colorScheme.surface, // 必须使用不透明的实体表面色
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 16,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    onReorder: (ReorderedListFunction reorderedListFunction) {
-                      final newList = reorderedListFunction(controller.tags) as List<LiveTag>;
-                      controller.updateAllTags(newList);
-                    },
-                    builder: (generatedChildren) {
-                      return GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: generatedChildren.length,
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 180,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          mainAxisExtent: 116,
-                        ),
-                        itemBuilder: (context, index) => generatedChildren[index],
-                      );
-                    },
-                    children: children,
-                  );
-                }),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
+            return ReorderableBuilder(
+              dragChildBoxDecoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 16,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              onReorder: (ReorderedListFunction reorderedListFunction) {
+                final newList = reorderedListFunction(controller.tags) as List<LiveTag>;
+                controller.updateAllTags(newList);
+              },
+              builder: (generatedChildren) {
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+                    final singleColumn = constraints.maxWidth < 420 || textScale > 1.5;
+                    final effectiveTextScale = textScale < 1 ? 1.0 : textScale;
+                    final cardExtent = 82 + 42 * effectiveTextScale;
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: generatedChildren.length,
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: singleColumn ? constraints.maxWidth : 180,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        mainAxisExtent: cardExtent,
+                      ),
+                      itemBuilder: (context, index) => generatedChildren[index],
+                    );
+                  },
+                );
+              },
+              children: children,
+            );
+          }),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -325,133 +330,173 @@ class TagManagementPage extends GetView<TagManagementController> {
   }
 
   void _showTagDialog(BuildContext context, {int? index, LiveTag? tag}) {
-    final isEdit = index != null && tag != null;
-    final nameController = TextEditingController(text: isEdit ? tag.name : '');
-    final descController = TextEditingController(text: isEdit ? tag.description : '');
-    final theme = Theme.of(context);
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isEdit ? i18n('edit_tag') : i18n('add_tag')),
-        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              i18n('tag_name_label'),
-              style: AppTextStyles.t12.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: nameController,
-              autofocus: !isEdit,
-              maxLength: 15,
-              maxLines: 1,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                hintText: i18n('tag_input_hint'),
-                counterText: '',
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: nameController,
-                  builder: (context, value, _) => value.text.isNotEmpty
-                      ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => nameController.clear())
-                      : const SizedBox.shrink(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              i18n('tag_desc_label'),
-              style: AppTextStyles.t12.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: descController,
-              maxLength: 40,
-              maxLines: 1,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) {
-                if (nameController.text.trim().isNotEmpty) Navigator.pop(context, true);
-              },
-              decoration: InputDecoration(
-                hintText: i18n('tag_desc_hint'),
-                counterText: '',
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: descController,
-                  builder: (context, value, _) => value.text.isNotEmpty
-                      ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => descController.clear())
-                      : const SizedBox.shrink(),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(0, 0, 16, 16),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(i18n('cancel'), style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () {
-              if (nameController.text.trim().isEmpty) {
-                SmartDialog.showToast(i18n('tag_name_empty_error'));
-                return;
-              }
-
-              bool success;
-              if (isEdit) {
-                success = controller.updateTag(index, nameController.text, descController.text);
-              } else {
-                success = controller.addTag(nameController.text, descController.text);
-              }
-
-              if (success) {
-                Navigator.pop(context);
-              } else {
-                SmartDialog.showToast(i18n('tag_invalid_or_duplicate'));
-              }
-            },
-            child: Text(i18n('confirm')),
-          ),
-        ],
-      ),
-    ).whenComplete(() {
-      nameController.dispose();
-      descController.dispose();
-    });
+      builder: (_) => _TagEditorDialog(controller: controller, index: index, tag: tag),
+    );
   }
 
-  void _confirmDelete(BuildContext context, int index, String tagName) {
+  void _confirmDelete(BuildContext context, LiveTag tag) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
+        scrollable: true,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         title: Text(i18n('delete_tag')),
-        content: Text('${i18n('delete_tag_confirm_msg')} "$tagName"?'),
+        content: Text('${i18n('delete_tag_confirm_msg')} "${tag.name}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n('cancel'))),
           TextButton(
+            key: const ValueKey('delete-tag-cancel'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(i18n('cancel')),
+          ),
+          TextButton(
+            key: const ValueKey('delete-tag-confirm'),
             onPressed: () {
-              controller.deleteTag(index);
-              Navigator.pop(context);
+              controller.deleteTag(controller.tags.indexWhere((current) => current.id == tag.id));
+              Navigator.pop(dialogContext);
             },
-            child: Text(i18n('delete'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(i18n('delete'), style: TextStyle(color: Theme.of(dialogContext).colorScheme.error)),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TagEditorDialog extends StatefulWidget {
+  const _TagEditorDialog({required this.controller, this.index, this.tag});
+
+  final TagManagementController controller;
+  final int? index;
+  final LiveTag? tag;
+
+  @override
+  State<_TagEditorDialog> createState() => _TagEditorDialogState();
+}
+
+class _TagEditorDialogState extends State<_TagEditorDialog> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
+
+  bool get _isEdit => widget.index != null && widget.tag != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: _isEdit ? widget.tag!.name : '');
+    _descriptionController = TextEditingController(text: _isEdit ? widget.tag!.description : '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_nameController.text.trim().isEmpty) {
+      SmartDialog.showToast(i18n('tag_name_empty_error'));
+      return;
+    }
+
+    final editIndex = _isEdit ? widget.controller.tags.indexWhere((current) => current.id == widget.tag!.id) : null;
+    final success = editIndex != null
+        ? widget.controller.updateTag(editIndex, _nameController.text, _descriptionController.text)
+        : widget.controller.addTag(_nameController.text, _descriptionController.text);
+    if (success) {
+      Navigator.pop(context);
+    } else {
+      SmartDialog.showToast(i18n('tag_invalid_or_duplicate'));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      scrollable: true,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      title: Text(_isEdit ? i18n('edit_tag') : i18n('add_tag')),
+      contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            i18n('tag_name_label'),
+            style: AppTextStyles.t12.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            key: const ValueKey('tag-editor-name'),
+            controller: _nameController,
+            autofocus: !_isEdit,
+            maxLength: 15,
+            maxLines: 1,
+            textInputAction: TextInputAction.next,
+            decoration: InputDecoration(
+              hintText: i18n('tag_input_hint'),
+              counterText: '',
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _nameController,
+                builder: (context, value, _) => value.text.isNotEmpty
+                    ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: _nameController.clear)
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            i18n('tag_desc_label'),
+            style: AppTextStyles.t12.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            key: const ValueKey('tag-editor-description'),
+            controller: _descriptionController,
+            maxLength: 40,
+            maxLines: 1,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+            decoration: InputDecoration(
+              hintText: i18n('tag_desc_hint'),
+              counterText: '',
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _descriptionController,
+                builder: (context, value, _) => value.text.isNotEmpty
+                    ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: _descriptionController.clear)
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actionsPadding: const EdgeInsets.fromLTRB(0, 0, 16, 16),
+      actions: [
+        TextButton(
+          key: const ValueKey('tag-editor-cancel'),
+          onPressed: () => Navigator.pop(context),
+          child: Text(i18n('cancel'), style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+        ),
+        ElevatedButton(
+          key: const ValueKey('tag-editor-confirm'),
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          onPressed: _submit,
+          child: Text(i18n('confirm')),
+        ),
+      ],
     );
   }
 }

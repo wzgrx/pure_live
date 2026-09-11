@@ -100,7 +100,7 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
         if (!_selectionTransaction) applyLocalFilter(resyncSource: false);
       }),
     );
-    _workers.add(ever(tagController.tags, (_) => applyLocalFilter()));
+    _workers.add(ever(tagController.tags, _handleTagsChanged));
     _workers.add(ever(tagController.roomTagsMap, (_) => applyLocalFilter()));
     _workers.add(ever(SettingsService.to.app.preferRealOnlineCounts, (_) => applyLocalFilter()));
     _workers.add(ever(SettingsService.to.app.realOnlinePlatforms, (_) => applyLocalFilter()));
@@ -121,6 +121,18 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
 
     listenFavorite();
     listenRoomChanged();
+  }
+
+  void _handleTagsChanged(List<LiveTag> tags) {
+    if (isClosed) return;
+    final selected = selectedTagId.value;
+    if (selected != TagManagementController.allTagKey && !tags.any((tag) => tag.id == selected)) {
+      _selectionTransaction = true;
+      selectedTagId.value = TagManagementController.allTagKey;
+      _selectionTransaction = false;
+      currentPage = 1;
+    }
+    applyLocalFilter();
   }
 
   void _handleStatusTabChange() {

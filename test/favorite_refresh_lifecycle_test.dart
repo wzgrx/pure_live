@@ -6,6 +6,8 @@ import 'package:hive_ce/hive.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/core/interface/live_site.dart';
+import 'package:pure_live/modules/tags/live_tag.dart';
+import 'package:pure_live/modules/tags/tag_management_controller.dart';
 
 _Favorite? _mounted;
 
@@ -205,6 +207,24 @@ void main() {
     c.syncRooms(roomSnapshot: [_room('changed')]);
     c.applyLocalFilter();
     expect(c.snapshot(), before);
+  });
+
+  _testWidgets('deleting the selected tag falls back to the complete favorites view', (tester) async {
+    final c = await _mount(tester);
+    await _drain(tester, c.source);
+    final tag = LiveTag(id: 'outdoor', name: 'Outdoor');
+    c.tagController.tags.assignAll([tag]);
+    c.tagController.setRoomTags(_room(), [tag.id]);
+    c.changeSelectedTag(tag.id);
+    await tester.pump(Duration.zero);
+    expect(c.selectedTagId.value, tag.id);
+    expect(c.list, hasLength(1));
+
+    c.tagController.deleteTag(0);
+    await tester.pump(Duration.zero);
+
+    expect(c.selectedTagId.value, TagManagementController.allTagKey);
+    expect(c.list, hasLength(1));
   });
 
   _testWidgets('closed lifecycle and debounce events do not restart favorite work', (tester) async {

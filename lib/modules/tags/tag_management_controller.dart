@@ -115,6 +115,7 @@ class TagManagementController extends GetxController {
   }
 
   bool updateTag(int index, String newName, String newDescription) {
+    if (index < 0 || index >= tags.length) return false;
     final cleanName = newName.trim();
     if (cleanName.isEmpty) return false;
 
@@ -144,7 +145,25 @@ class TagManagementController extends GetxController {
   }
 
   void deleteTag(int index) {
+    if (index < 0 || index >= tags.length) return;
+    final deletedTagId = tags[index].id;
     tags.removeAt(index);
+
+    var mappingChanged = false;
+    for (final entry in roomTagsMap.entries.toList(growable: false)) {
+      final remainingIds = entry.value.where((id) => id != deletedTagId).toList(growable: false);
+      if (remainingIds.length == entry.value.length) continue;
+      mappingChanged = true;
+      if (remainingIds.isEmpty) {
+        roomTagsMap.remove(entry.key);
+      } else {
+        roomTagsMap[entry.key] = remainingIds;
+      }
+    }
+    if (mappingChanged) {
+      roomTagsMap.refresh();
+      saveRoomTagsMapping();
+    }
     _refreshSequentialOrders();
   }
 

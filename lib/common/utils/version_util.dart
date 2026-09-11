@@ -68,11 +68,17 @@ class VersionUtil {
     return int.tryParse(_packageInfo!.buildNumber) ?? 0;
   }
 
-  Future<void> checkUpdate() async {
+  Future<bool> checkUpdate() async {
     if (_cachedVersionJson != null) {
-      _applyVersionData(_cachedVersionJson!);
-      isHasNewVersion.value = hasNewVersion();
-      return;
+      try {
+        _applyVersionData(_cachedVersionJson!);
+        isHasNewVersion.value = hasNewVersion();
+        return true;
+      } catch (_) {
+        _cachedVersionJson = null;
+        _resetAfterFailedCheck();
+        return false;
+      }
     }
 
     try {
@@ -88,26 +94,32 @@ class VersionUtil {
       ).timeout(const Duration(seconds: 10));
 
       if (data == null) {
-        latestUpdateLog = '更新检查失败';
-        return;
+        _resetAfterFailedCheck();
+        return false;
       }
 
-      _cachedVersionJson = data;
       _applyVersionData(data);
+      _cachedVersionJson = data;
       isHasNewVersion.value = hasNewVersion();
       debugPrint("🏁 更新线路成功");
+      return true;
     } catch (e) {
       debugPrint("⚠️ 更新检查失败: $e");
-      latestVersion = version;
-      latestUpdateLog = '更新检查失败';
+      _resetAfterFailedCheck();
+      return false;
     }
   }
 
   static void _applyVersionData(Map<String, dynamic> data) {
     final selected = selectPlatformVersionData(data, platform: _currentPlatformKey);
-    latestVersion = selected['version']?.toString() ?? version;
-    latestVersionNum = selected['version_num'] ?? 0;
-    latestBuildNumber = selected['build_number'];
+    final parsedVersion = selected['version']?.toString().trim() ?? '';
+    final parsedBuildNumber = _versionInt(selected['build_number']);
+    if (parsedVersion.isEmpty || parsedBuildNumber == null || parsedBuildNumber <= 0) {
+      throw const FormatException('Incomplete release identity');
+    }
+    latestVersion = parsedVersion;
+    latestVersionNum = _versionInt(selected['version_num']) ?? 0;
+    latestBuildNumber = parsedBuildNumber;
     latestUpdateLog = selected['version_desc']?.toString() ?? '';
     prerelease = selected['prerelease'] == true;
     downloadUrl = selected['download_url']?.toString() ?? '';
@@ -144,9 +156,13 @@ class VersionUtil {
   }
 
   static bool hasNewVersion() {
+    return isNewerVersion(latestVersion, version);
+  }
+
+  static bool isNewerVersion(String latest, String current) {
     try {
-      final latestClean = latestVersion.split('-')[0].replaceAll('v', '').trim();
-      final currentClean = version.split('-')[0].replaceAll('v', '').trim();
+      final latestClean = latest.split(RegExp(r'[-+]'))[0].replaceFirst(RegExp('^[vV]'), '').trim();
+      final currentClean = current.split(RegExp(r'[-+]'))[0].replaceFirst(RegExp('^[vV]'), '').trim();
 
       final latestParts = latestClean.split('.').map(int.parse).toList();
       final currentParts = currentClean.split('.').map(int.parse).toList();
@@ -166,5 +182,26 @@ class VersionUtil {
       }
     } catch (_) {}
     return false;
+  }
+
+  static int? _versionInt(Object? value) {
+    return switch (value) {
+      int number => number,
+      num number => number.toInt(),
+      String text => int.tryParse(text.trim()),
+      _ => null,
+    };
+  }
+
+  void _resetAfterFailedCheck() {
+    latestVersion = version;
+    latestBuildNumber = buildNumber > 0 ? buildNumber : null;
+    latestVersionNum = 0;
+    latestUpdateLog = '';
+    prerelease = false;
+    downloadUrl = '';
+    latestAndroidAbis = const {};
+    latestWindowsMsixAvailable = false;
+    isHasNewVersion.value = false;
   }
 }

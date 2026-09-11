@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/utils/version_util.dart';
 import 'package:pure_live/modules/version/version_controller.dart';
+import 'package:pure_live/modules/version/version_page.dart';
 
 void main() {
   test('maintained build reads updates and release assets from the same repository', () {
@@ -23,6 +27,49 @@ void main() {
     expect(urls.windowsMsix, endsWith('/PureLive-2.1.4-52-windows-x64.msix'));
     expect(urls.windowsPortable, endsWith('/PureLive-2.1.4-52-windows-x64-portable.zip'));
     expect(urls.macosUniversal, endsWith('/PureLive-2.1.4-52-macos-universal.zip'));
+  });
+
+  test('incomplete release identity never produces broken download links', () {
+    const missingVersion = ReleaseAssetUrls(
+      projectUrl: 'https://github.com/wzgrx/pure_live',
+      version: '',
+      buildNumber: 52,
+    );
+    const missingBuild = ReleaseAssetUrls(
+      projectUrl: 'https://github.com/wzgrx/pure_live',
+      version: '3.2.0',
+      buildNumber: 0,
+    );
+    const unsafeVersion = ReleaseAssetUrls(
+      projectUrl: 'https://github.com/wzgrx/pure_live',
+      version: '3.2.0/../../fixture',
+      buildNumber: 52,
+    );
+
+    expect(missingVersion.androidArm64, isEmpty);
+    expect(missingVersion.windowsSetup, isEmpty);
+    expect(missingBuild.androidArm64, isEmpty);
+    expect(missingBuild.windowsPortable, isEmpty);
+    expect(unsafeVersion.androidArm64, isEmpty);
+  });
+
+  test('download actions accept only absolute web URLs', () {
+    expect(versionDownloadUri('https://example.test/release.apk'), isNotNull);
+    expect(versionDownloadUri('http://127.0.0.1/release.apk'), isNotNull);
+    expect(versionDownloadUri('release.apk'), isNull);
+    expect(versionDownloadUri('file:///tmp/release.apk'), isNull);
+    expect(versionDownloadUri('javascript:alert(1)'), isNull);
+  });
+
+  test('update failure and download feedback are translated in both locales', () {
+    final english = jsonDecode(File('assets/translations/en.json').readAsStringSync()) as Map<String, dynamic>;
+    final chinese = jsonDecode(File('assets/translations/zh.json').readAsStringSync()) as Map<String, dynamic>;
+    const keys = {'version_update_download_failed', 'version_update_failed_subtitle', 'version_update_failed_title'};
+
+    for (final key in keys) {
+      expect(english[key], isA<String>().having((value) => value.trim(), key, isNotEmpty));
+      expect(chinese[key], isA<String>().having((value) => value.trim(), key, isNotEmpty));
+    }
   });
 
   test('Android update links are limited to APK variants declared by the feed', () {

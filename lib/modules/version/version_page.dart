@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
@@ -7,19 +9,38 @@ import 'package:markdown_widget/config/configs.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
 import 'package:pure_live/modules/version/version_controller.dart';
 
+typedef VersionDownloadHandler = Future<void> Function(String url, {String? fileName});
+
+Uri? versionDownloadUri(String rawUrl) {
+  final uri = Uri.tryParse(rawUrl.trim());
+  if (uri == null || !uri.hasAuthority || (uri.scheme != 'https' && uri.scheme != 'http')) return null;
+  return uri;
+}
+
 class VersionPage extends GetView<VersionController> {
-  const VersionPage({super.key});
+  const VersionPage({super.key, this.downloadRelease});
+
+  final VersionDownloadHandler? downloadRelease;
 
   @override
   Widget build(BuildContext context) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final toolbarHeight = textScale <= 1.5 ? kToolbarHeight : math.min(152.0, 44 + 36 * textScale);
     return Scaffold(
-      appBar: AppBar(title: Text(i18n("version_update"))),
+      appBar: AppBar(
+        toolbarHeight: toolbarHeight,
+        title: Text(i18n('version_update'), maxLines: 2, overflow: TextOverflow.ellipsis),
+      ),
       body: Obx(() {
         if (controller.loading.value) {
-          return AppStatusView(type: AppStatusType.loading, title: "", subtitle: "");
+          return const AppStatusView(type: AppStatusType.loading, title: '', subtitle: '');
+        }
+        if (controller.error.value) {
+          return _buildErrorState(context);
         }
 
         return ListView(
+          key: const ValueKey('version-update-scroll'),
           physics: const PureLiveScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
@@ -103,7 +124,7 @@ class VersionPage extends GetView<VersionController> {
                             final baseConfig = isDark ? MarkdownConfig.darkConfig : MarkdownConfig.defaultConfig;
 
                             return MarkdownBlock(
-                              data: VersionUtil.latestUpdateLog,
+                              data: controller.updateLog.value,
                               config: baseConfig.copy(
                                 configs: [
                                   PConfig(textStyle: textTheme.bodyMedium ?? const TextStyle()),
@@ -138,6 +159,49 @@ class VersionPage extends GetView<VersionController> {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context) {
+    final theme = Theme.of(context);
+    return CustomScrollView(
+      key: const ValueKey('version-update-error'),
+      physics: const PureLiveScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.cloud_off_rounded, size: 48, color: theme.colorScheme.primary),
+                  const SizedBox(height: 20),
+                  Text(
+                    i18n('version_update_failed_title'),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    i18n('version_update_failed_subtitle'),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton.icon(
+                    key: const ValueKey('version-update-retry'),
+                    onPressed: controller.checkNewVersion,
+                    icon: const Icon(Remix.refresh_line),
+                    label: Text(i18n('retry')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -188,7 +252,10 @@ class VersionPage extends GetView<VersionController> {
 
   Widget _buildDownloadSection(BuildContext context, {required String title, required String urls}) {
     final githubOriginOnly = SettingsService.to.app.useGitHubOriginForUpdates.v;
-    final List<String> mirrorUrls = getMirrorUrls(urls, githubOriginOnly: githubOriginOnly);
+    final mirrorUrls = getMirrorUrls(
+      urls,
+      githubOriginOnly: githubOriginOnly,
+    ).where((url) => versionDownloadUri(url) != null).toList(growable: false);
 
     if (mirrorUrls.isEmpty) {
       return const SizedBox.shrink();
@@ -210,9 +277,12 @@ class VersionPage extends GetView<VersionController> {
         LayoutBuilder(
           builder: (context, constraints) {
             final double maxWidth = constraints.maxWidth;
-
-            int maxColumns = 2;
-            if (PlatformUtils.isDesktop) {
+            final textScale = MediaQuery.textScalerOf(context).scale(1);
+            int maxColumns = 1;
+            if (textScale <= 1.5 && maxWidth >= 360) {
+              maxColumns = 2;
+            }
+            if (PlatformUtils.isDesktop && textScale <= 1.5) {
               maxColumns = maxWidth > 800 ? 4 : (maxWidth > 500 ? 3 : 2);
             }
 
@@ -226,16 +296,17 @@ class VersionPage extends GetView<VersionController> {
                 for (int i = 0; i < mirrorUrls.length; i++)
                   SizedBox(
                     width: buttonWidth,
-                    height: 38,
                     child: Tooltip(
                       message: mirrorUrls[i],
                       waitDuration: const Duration(milliseconds: 300),
                       child: OutlinedButton.icon(
+                        key: ValueKey('version-source-$title-$i'),
                         style:
                             OutlinedButton.styleFrom(
                               backgroundColor: theme.colorScheme.surfaceContainerLow,
                               foregroundColor: theme.colorScheme.onSurfaceVariant,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              minimumSize: const Size(0, 44),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                               // Subtle border matching your design specs
                               side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.08), width: 1),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -269,8 +340,9 @@ class VersionPage extends GetView<VersionController> {
                               ? i18n('github_origin_source')
                               : i18n("download_source", args: {"num": "${i + 1}"}),
                           style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.w600),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
@@ -283,12 +355,19 @@ class VersionPage extends GetView<VersionController> {
     );
   }
 
-  void _showActionDialog(BuildContext context, String platformName, String targetUrl, int sourceIndex) {
-    final theme = Theme.of(context);
-    showDialog(
-      context: context,
-      builder: (context) {
+  Future<void> _showActionDialog(
+    BuildContext pageContext,
+    String platformName,
+    String targetUrl,
+    int sourceIndex,
+  ) async {
+    final theme = Theme.of(pageContext);
+    await showDialog<void>(
+      context: pageContext,
+      builder: (dialogContext) {
         return AlertDialog(
+          scrollable: true,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           backgroundColor: theme.colorScheme.surfaceContainerHigh,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           titlePadding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 12),
@@ -322,6 +401,7 @@ class VersionPage extends GetView<VersionController> {
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
                 width: double.infinity,
@@ -332,43 +412,62 @@ class VersionPage extends GetView<VersionController> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: theme.dividerColor.withValues(alpha: 0.05)),
                 ),
-                child: Text(
+                child: SelectableText(
                   targetUrl,
                   style: AppTextStyles.t11.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(height: 8),
-              ListTile(
-                leading: Icon(Remix.download_2_line, color: theme.colorScheme.primary, size: 20),
-                title: Text(i18n("download"), style: AppTextStyles.t13.copyWith(fontWeight: FontWeight.w600)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  downloadAndInstallApk(targetUrl);
+              FilledButton.icon(
+                key: const ValueKey('version-source-download'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  _startDownload(pageContext, targetUrl);
                 },
+                icon: const Icon(Remix.download_2_line, size: 20),
+                label: Text(i18n('download'), textAlign: TextAlign.center),
               ),
-              ListTile(
-                leading: Icon(Remix.clipboard_line, color: theme.colorScheme.secondary, size: 20),
-                title: Text(i18n("copy_link"), style: AppTextStyles.t13.copyWith(fontWeight: FontWeight.w600)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Clipboard.setData(ClipboardData(text: targetUrl));
-                  Get.snackbar(
-                    i18n("done"),
-                    i18n("copied_to_clipboard"),
-                    snackPosition: SnackPosition.bottom,
-                    margin: const EdgeInsets.all(16),
-                  );
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const ValueKey('version-source-copy'),
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: targetUrl));
+                  if (!dialogContext.mounted) return;
+                  Navigator.of(dialogContext).pop();
+                  if (pageContext.mounted) _showMessage(pageContext, 'copied_to_clipboard');
                 },
+                icon: const Icon(Remix.clipboard_line, size: 20),
+                label: Text(i18n('copy_link'), textAlign: TextAlign.center),
               ),
             ],
           ),
-          actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n("cancel")))],
+          actions: [
+            TextButton(
+              key: const ValueKey('version-source-cancel'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(i18n('cancel')),
+            ),
+          ],
         );
       },
     );
+  }
+
+  Future<void> _startDownload(BuildContext context, String targetUrl) async {
+    if (versionDownloadUri(targetUrl) == null) return;
+    try {
+      final handler = downloadRelease;
+      if (handler != null) {
+        await handler(targetUrl);
+      } else {
+        await downloadAndInstallApk(targetUrl);
+      }
+    } catch (_) {
+      if (context.mounted) _showMessage(context, 'version_update_download_failed');
+    }
+  }
+
+  void _showMessage(BuildContext context, String key) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(i18n(key))));
   }
 }

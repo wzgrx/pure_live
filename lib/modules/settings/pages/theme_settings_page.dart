@@ -65,6 +65,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
                 title: i18n("change_loading_style"),
                 subtitle: i18n("change_loading_style_subtitle"),
                 onTap: () => Get.to(() => const LoadingStyleSettingsPage()),
+                stackTrailingOnNarrow: true,
                 trailing: Obx(() {
                   final String currentKey = SettingsService.to.theme.loadingStyle.v;
                   final bool isZh = Get.locale?.languageCode == 'zh';
@@ -174,39 +175,16 @@ class ThemeSettingsPage extends GetView<SettingsService> {
     );
   }
 
-  void showThemeModeSelectorDialog() {
-    showDialog(
+  Future<void> showThemeModeSelectorDialog() async {
+    final value = await showDialog<String>(
       context: Get.context!,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text(i18n('change_theme_mode')),
-          children: [
-            Obx(
-              () => RadioGroup<String>(
-                groupValue: SettingsService.to.theme.themeModeName.v,
-                onChanged: (String? value) {
-                  if (value != null) {
-                    SettingsService.to.theme.changeThemeMode(value);
-
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: AppConsts.themeModes.keys.map<Widget>((name) {
-                    return RadioListTile<String>(
-                      title: Text(i18n(AppConsts.themeModeI18n[name]!)),
-                      value: name,
-                      activeColor: Theme.of(context).colorScheme.primary,
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      builder: (context) => ThemeChoiceDialog<String>(
+        title: i18n('change_theme_mode'),
+        value: SettingsService.to.theme.themeModeName.v,
+        items: {for (final name in AppConsts.themeModes.keys) name: i18n(AppConsts.themeModeI18n[name]!)},
+      ),
     );
+    if (value != null) SettingsService.to.theme.changeThemeMode(value);
   }
 
   Future<bool> colorPickerDialog() async {
@@ -229,52 +207,23 @@ class ThemeSettingsPage extends GetView<SettingsService> {
     );
   }
 
-  void showLanguageSelecterDialog() {
-    showDialog(
-      context: Get.context!,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text(i18n("change_language")),
-          children: [
-            RadioGroup<String>(
-              groupValue: SettingsService.to.theme.languageName.v,
-              onChanged: (String? value) async {
-                if (value != null) {
-                  await SettingsService.to.theme.changeLanguage(value, context);
-                  if (context.mounted) Navigator.of(context).pop();
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 0, bottom: 10, left: 16, right: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: AppConsts.languages.keys.map<Widget>((name) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Radio<String>(value: name, activeColor: Theme.of(context).colorScheme.primary),
-                        GestureDetector(
-                          onTap: () async {
-                            await SettingsService.to.theme.changeLanguage(name, context);
-                            if (context.mounted) Navigator.of(context).pop();
-                          },
-                          child: Text(name, style: Theme.of(context).textTheme.bodyLarge),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+  Future<void> showLanguageSelecterDialog() async {
+    final pageContext = Get.context!;
+    final value = await showDialog<String>(
+      context: pageContext,
+      builder: (context) => ThemeChoiceDialog<String>(
+        title: i18n('change_language'),
+        value: SettingsService.to.theme.languageName.v,
+        items: {for (final name in AppConsts.languages.keys) name: name},
+      ),
     );
+    if (value != null && pageContext.mounted) {
+      await SettingsService.to.theme.changeLanguage(value, pageContext);
+    }
   }
 
-  void showCrossAxisSpacingDialog() {
-    showCustomSpacingDialog(
+  Future<void> showCrossAxisSpacingDialog() {
+    return showCustomSpacingDialog(
       title: i18n("cross_axis_spacing"),
       hintText: i18n("cross_axis_spacing_subtitle"),
       currentValue: SettingsService.to.theme.crossAxisSpacing.v,
@@ -282,8 +231,8 @@ class ThemeSettingsPage extends GetView<SettingsService> {
     );
   }
 
-  void showMainAxisSpacingDialog() {
-    showCustomSpacingDialog(
+  Future<void> showMainAxisSpacingDialog() {
+    return showCustomSpacingDialog(
       title: i18n("main_axis_spacing"),
       hintText: i18n("main_axis_spacing_subtitle"),
       currentValue: SettingsService.to.theme.mainAxisSpacing.v,
@@ -291,130 +240,259 @@ class ThemeSettingsPage extends GetView<SettingsService> {
     );
   }
 
-  void showCustomSpacingDialog({
+  Future<void> showCustomSpacingDialog({
     required String title,
     required String hintText,
     required double currentValue,
     required ValueChanged<double> onSelected,
-  }) {
-    final List<double> quickOptions = [0.0, 4.0, 6.0, 8.0, 12.0, 16.0];
-    final textController = TextEditingController(text: currentValue.toStringAsFixed(0));
-    double selectedValue = currentValue;
+  }) async {
+    final selectedValue = await Get.dialog<double>(
+      ThemeSpacingDialog(title: title, hintText: hintText, currentValue: currentValue),
+    );
+    if (selectedValue != null) onSelected(selectedValue);
+  }
+}
 
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          padding: const EdgeInsets.all(20),
-          child: StatefulBuilder(
-            builder: (context, setDialogState) {
-              final theme = Theme.of(context);
+class ThemeChoiceDialog<T> extends StatelessWidget {
+  const ThemeChoiceDialog({super.key, required this.title, required this.value, required this.items});
 
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: quickOptions.map((value) {
-                      final isSelected = value == selectedValue;
-                      return ChoiceChip(
-                        label: Text("${value.toInt()} px"),
-                        selected: isSelected,
-                        showCheckmark: false,
-                        side: BorderSide.none,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        onSelected: (selected) {
-                          if (selected) {
-                            setDialogState(() {
-                              selectedValue = value;
-                              textController.text = value.toStringAsFixed(0);
-                            });
-                          }
-                        },
-                      );
-                    }).toList(),
+  final String title;
+  final T value;
+  final Map<T, String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final compact = mediaQuery.size.width < 420 || mediaQuery.textScaler.scale(13) > 18;
+
+    return Dialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: compact ? 12 : 40, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 400, maxHeight: mediaQuery.size.height - 48),
+        child: SingleChildScrollView(
+          key: const ValueKey('theme-choice-dialog-scroll'),
+          physics: const ClampingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(compact ? 12 : 20, 20, compact ? 12 : 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Tooltip(
+                  message: title,
+                  child: Text(
+                    title,
+                    key: const ValueKey('theme-choice-dialog-title'),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 20),
-                  Text(hintText, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: textController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      suffixIcon: SizedBox(
-                        width: 32,
-                        height: 48,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              height: 22,
-                              width: 32,
-                              child: InkWell(
-                                borderRadius: const BorderRadius.only(topRight: Radius.circular(8)),
-                                onTap: () {
-                                  setDialogState(() {
-                                    selectedValue = (double.tryParse(textController.text) ?? 0.0) + 1.0;
-                                    textController.text = selectedValue.toStringAsFixed(0);
-                                  });
-                                },
-                                child: const Icon(Icons.arrow_drop_up, size: 20),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 22,
-                              width: 32,
-                              child: InkWell(
-                                borderRadius: const BorderRadius.only(bottomRight: Radius.circular(8)),
-                                onTap: () {
-                                  setDialogState(() {
-                                    double current = double.tryParse(textController.text) ?? 0.0;
-                                    selectedValue = current > 0.0 ? current - 1.0 : 0.0;
-                                    textController.text = selectedValue.toStringAsFixed(0);
-                                  });
-                                },
-                                child: const Icon(Icons.arrow_drop_down, size: 20),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    onChanged: (val) {
-                      final parsed = double.tryParse(val) ?? 0.0;
-                      setDialogState(() {
-                        selectedValue = parsed;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n("cancel"))),
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          onSelected(selectedValue);
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(i18n("confirm")),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            },
+                ),
+              ),
+              const SizedBox(height: 12),
+              RadioGroup<T>(
+                groupValue: value,
+                onChanged: (selected) {
+                  if (selected != null) Navigator.of(context).pop(selected);
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: items.entries.map((entry) {
+                    return RadioListTile<T>(
+                      key: ValueKey('theme-choice-${entry.key}'),
+                      title: Tooltip(message: entry.value, child: Text(entry.value)),
+                      value: entry.key,
+                      activeColor: Theme.of(context).colorScheme.primary,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    ).whenComplete(textController.dispose);
+    );
+  }
+}
+
+abstract final class ThemeSpacingPolicy {
+  static const double min = 0;
+  static const double max = 64;
+
+  static double? tryParse(String rawValue) {
+    final value = double.tryParse(rawValue.trim());
+    if (value == null || !value.isFinite || value < min || value > max) return null;
+    return value;
+  }
+}
+
+class ThemeSpacingDialog extends StatefulWidget {
+  const ThemeSpacingDialog({super.key, required this.title, required this.hintText, required this.currentValue});
+
+  final String title;
+  final String hintText;
+  final double currentValue;
+
+  @override
+  State<ThemeSpacingDialog> createState() => _ThemeSpacingDialogState();
+}
+
+class _ThemeSpacingDialogState extends State<ThemeSpacingDialog> {
+  static const _quickOptions = <double>[0, 4, 6, 8, 12, 16];
+
+  late final TextEditingController _textController;
+  late double _selectedValue;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedValue = ThemeSpacingPolicy.tryParse(_format(widget.currentValue)) ?? 6;
+    _textController = TextEditingController(text: _format(_selectedValue));
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  String _format(double value) => value == value.truncateToDouble() ? value.toInt().toString() : value.toString();
+
+  void _select(double value) {
+    setState(() {
+      _selectedValue = value;
+      _errorText = null;
+      _textController.value = TextEditingValue(
+        text: _format(value),
+        selection: TextSelection.collapsed(offset: _format(value).length),
+      );
+    });
+  }
+
+  void _step(double delta) {
+    final parsed = ThemeSpacingPolicy.tryParse(_textController.text) ?? _selectedValue;
+    _select((parsed + delta).clamp(ThemeSpacingPolicy.min, ThemeSpacingPolicy.max).toDouble());
+  }
+
+  void _submit() {
+    final value = ThemeSpacingPolicy.tryParse(_textController.text);
+    if (value == null) {
+      setState(() => _errorText = i18n('spacing_value_invalid'));
+      return;
+    }
+    Navigator.of(context).pop(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final compact = mediaQuery.size.width < 420 || mediaQuery.textScaler.scale(13) > 18;
+    final theme = Theme.of(context);
+
+    return Dialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: compact ? 12 : 40, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 400, maxHeight: mediaQuery.size.height - 48),
+        child: SingleChildScrollView(
+          key: const ValueKey('theme-spacing-dialog-scroll'),
+          physics: const ClampingScrollPhysics(),
+          padding: EdgeInsets.all(compact ? 16 : 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Tooltip(
+                message: widget.title,
+                child: Text(
+                  widget.title,
+                  key: const ValueKey('theme-spacing-dialog-title'),
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _quickOptions.map((value) {
+                  return ChoiceChip(
+                    key: ValueKey('theme-spacing-preset-${value.toInt()}'),
+                    label: Text('${value.toInt()} px'),
+                    selected: value == _selectedValue,
+                    showCheckmark: false,
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    onSelected: (selected) {
+                      if (selected) _select(value);
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+              Text(widget.hintText, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+              const SizedBox(height: 8),
+              TextField(
+                key: const ValueKey('theme-spacing-input'),
+                controller: _textController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  errorText: _errorText,
+                  errorMaxLines: 3,
+                  suffixIcon: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        key: const ValueKey('theme-spacing-increment'),
+                        tooltip: '+1',
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _step(1),
+                        icon: const Icon(Icons.arrow_drop_up),
+                      ),
+                      IconButton(
+                        key: const ValueKey('theme-spacing-decrement'),
+                        tooltip: '-1',
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _step(-1),
+                        icon: const Icon(Icons.arrow_drop_down),
+                      ),
+                    ],
+                  ),
+                ),
+                onChanged: (rawValue) {
+                  final value = ThemeSpacingPolicy.tryParse(rawValue);
+                  setState(() {
+                    _errorText = null;
+                    if (value != null) _selectedValue = value;
+                  });
+                },
+                onSubmitted: (_) => _submit(),
+              ),
+              const SizedBox(height: 24),
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  TextButton(
+                    key: const ValueKey('theme-spacing-cancel'),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(i18n('cancel')),
+                  ),
+                  ElevatedButton(
+                    key: const ValueKey('theme-spacing-confirm'),
+                    onPressed: _submit,
+                    child: Text(i18n('confirm')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

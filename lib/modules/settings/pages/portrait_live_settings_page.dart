@@ -4,7 +4,10 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/player/core/portrait_stream_support.dart';
 
 class PortraitLiveSettingsPage extends StatelessWidget {
-  const PortraitLiveSettingsPage({super.key});
+  const PortraitLiveSettingsPage({super.key, this.presentationRefreshOverride});
+
+  @visibleForTesting
+  final VoidCallback? presentationRefreshOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +46,7 @@ class PortraitLiveSettingsPage extends StatelessWidget {
                   _layoutModeLabel(settings.portraitLayoutMode),
                   style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                 ),
+                stackTrailingOnNarrow: true,
                 onTap: () => _selectEnum<PortraitLayoutMode>(
                   context,
                   title: i18n('portrait_layout_mode'),
@@ -67,6 +71,7 @@ class PortraitLiveSettingsPage extends StatelessWidget {
                   _fullscreenPolicyLabel(settings.portraitFullscreenPolicy),
                   style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                 ),
+                stackTrailingOnNarrow: true,
                 onTap: () => _selectEnum<PortraitFullscreenPolicy>(
                   context,
                   title: i18n('portrait_fullscreen_policy'),
@@ -90,6 +95,7 @@ class PortraitLiveSettingsPage extends StatelessWidget {
                   portraitFullscreenDisplayModeLabel(settings.portraitFullscreenDisplayMode),
                   style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                 ),
+                stackTrailingOnNarrow: true,
                 onTap: () => _selectEnum<PortraitFullscreenDisplayMode>(
                   context,
                   title: i18n('portrait_fullscreen_display_mode'),
@@ -118,6 +124,7 @@ class PortraitLiveSettingsPage extends StatelessWidget {
                   _danmakuModeLabel(settings.portraitDanmakuMode),
                   style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                 ),
+                stackTrailingOnNarrow: true,
                 onTap: () => _selectEnum<PortraitDanmakuMode>(
                   context,
                   title: i18n('portrait_danmaku_mode'),
@@ -165,6 +172,11 @@ class PortraitLiveSettingsPage extends StatelessWidget {
   }
 
   void _refreshPresentation() {
+    final callback = presentationRefreshOverride;
+    if (callback != null) {
+      callback();
+      return;
+    }
     GlobalPlayerService.instance.player.refreshPortraitPresentationPolicy();
   }
 
@@ -178,25 +190,30 @@ class PortraitLiveSettingsPage extends StatelessWidget {
   }) async {
     final value = await showDialog<T>(
       context: context,
-      builder: (dialogContext) => SimpleDialog(
+      builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(title),
-        children: values
-            .map(
-              (item) => SimpleDialogOption(
-                onPressed: () => Navigator.of(dialogContext).pop(item),
-                child: Row(
-                  children: [
-                    Icon(
-                      item == selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
-                      color: item == selected ? Theme.of(dialogContext).colorScheme.primary : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(label(item))),
-                  ],
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: values
+              .map(
+                (item) => SimpleDialogOption(
+                  onPressed: () => Navigator.of(dialogContext).pop(item),
+                  child: Row(
+                    children: [
+                      Icon(
+                        item == selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                        color: item == selected ? Theme.of(dialogContext).colorScheme.primary : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(label(item))),
+                    ],
+                  ),
                 ),
-              ),
-            )
-            .toList(),
+              )
+              .toList(),
+        ),
       ),
     );
     if (value != null) onSelected(value);

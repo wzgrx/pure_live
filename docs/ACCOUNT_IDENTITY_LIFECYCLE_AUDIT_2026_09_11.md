@@ -39,4 +39,4 @@
 
 ## 当前边界
 
-A2-01 保持 `RUN`。本批闭合账号页可见身份、Cookie 切换和退出的源码事务；Bilibili 二维码轮询的重入/计时器、Web 登录导航状态、真实账号有效性、Android/Windows 原生登录与最终候选操作继续分别验收。宏观状态保持 **20 PASS / 33 RUN / 9 NR，共 42 组未闭环**。
+A2-01 保持 `RUN`。本批闭合账号页可见身份、Cookie 切换和退出的源码事务；二维码轮询与 Web 登录导航的后续修订见 `docs/BILIBILI_LOGIN_LIFECYCLE_AND_LAYOUT_AUDIT_2026_09_11.md`。真实账号有效性、Android/Windows 原生登录与最终候选操作继续分别验收。宏观状态保持 **20 PASS / 33 RUN / 9 NR，共 42 组未闭环**。

@@ -92,7 +92,14 @@ void main() {
     expect(find.text('Highest (device maximum)'), findsOneWidget);
     expect(find.text('High power'), findsOneWidget);
 
-    final dialogScroll = find.descendant(of: find.byType(AlertDialog), matching: find.byType(Scrollable));
+    final dialogScroll = find
+        .descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+          ),
+        )
+        .first;
     await tester.scrollUntilVisible(find.text('Highest (device maximum)'), 120, scrollable: dialogScroll);
     await tester.ensureVisible(find.text('Highest (device maximum)'));
     await tester.pumpAndSettle();
@@ -106,6 +113,90 @@ void main() {
     expect(SettingsService.to.app.refreshRateMode, AppRefreshRateMode.performance);
     expect(find.byType(AlertDialog), findsNothing);
     expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  }, skip: !Platform.isWindows);
+
+  testWidgets('window-size editor localizes presets and keeps every control reachable in narrow very-large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      EasyLocalization(
+        supportedLocales: const [Locale('en')],
+        startLocale: const Locale('en'),
+        fallbackLocale: const Locale('en'),
+        saveLocale: false,
+        path: 'assets/translations',
+        assetLoader: _Translations(translations),
+        child: Builder(
+          builder: (context) => GetMaterialApp(
+            locale: context.locale,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3)),
+              child: child!,
+            ),
+            home: const GeneralSettingsPage(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Startup Window Size'));
+    await tester.pumpAndSettle();
+    expect(find.text('Startup Window Size').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('Startup Window Size'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.text('1080 × 720 (Default)'), findsOneWidget);
+    expect(find.text('1280 × 720 (720P)'), findsOneWidget);
+    expect(find.text('1600 × 900'), findsOneWidget);
+    expect(find.text('1920 × 1080 (1080P)'), findsOneWidget);
+    expect(find.text('2560 × 1440 (2K)'), findsOneWidget);
+    expect(find.textContaining('默认'), findsNothing);
+    expect(find.text('Width'), findsOneWidget);
+    expect(find.text('Height'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Confirm'), findsOneWidget);
+
+    final dialogScroll = find
+        .descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+          ),
+        )
+        .first;
+    await tester.ensureVisible(find.text('1080 × 720 (Default)'));
+    await tester.pumpAndSettle();
+    final defaultPresetTopLeft = tester.getTopLeft(find.text('1080 × 720 (Default)'));
+    await tester.tapAt(defaultPresetTopLeft + const Offset(4, 4));
+    await tester.pump();
+    expect(
+      tester.widgetList<TextField>(find.byType(TextField)).map((field) => field.controller!.text),
+      orderedEquals(['1080', '720']),
+    );
+    await tester.scrollUntilVisible(find.text('Height'), 80, scrollable: dialogScroll);
+    await tester.ensureVisible(find.text('Height'));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('Height')).dy, inInclusiveRange(0, 479));
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(SettingsService.to.window.storedWidth.value, 1280);
+    expect(SettingsService.to.window.storedHeight.value, 720);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

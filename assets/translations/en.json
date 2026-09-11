@@ -1099,6 +1099,7 @@
     "change_danmaku_font_family": "Change Danmaku Font",
     "window_size": "Startup Window Size",
     "preset_options": "Quick Presets",
+    "default_option": "Default",
     "custom_input": "Custom Dimensions",
     "width": "Width",
     "height": "Height",

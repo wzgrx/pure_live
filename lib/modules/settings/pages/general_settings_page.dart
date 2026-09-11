@@ -237,7 +237,7 @@ class GeneralSettingsPage extends GetView<SettingsService> {
     final heightController = TextEditingController(text: SettingsService.to.window.storedHeight.v.toInt().toString());
 
     final presets = [
-      {'name': '1080 × 720 (默认)', 'w': 1080.0, 'h': 720.0},
+      {'name': '1080 × 720 (${i18n("default_option")})', 'w': 1080.0, 'h': 720.0},
       {'name': '1280 × 720 (720P)', 'w': 1280.0, 'h': 720.0},
       {'name': '1600 × 900', 'w': 1600.0, 'h': 900.0},
       {'name': '1920 × 1080 (1080P)', 'w': 1920.0, 'h': 1080.0},
@@ -249,66 +249,65 @@ class GeneralSettingsPage extends GetView<SettingsService> {
       builder: (context) {
         final theme = Theme.of(context);
         return AlertDialog(
+          scrollable: true,
           title: Text(i18n("window_size")),
           content: SizedBox(
             width: 320,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(i18n("preset_options"), style: AppTextStyles.t13.copyWith(color: theme.hintColor)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: presets.map((preset) {
-                      return ActionChip(
-                        label: Text(preset['name'] as String),
-                        onPressed: () {
-                          widthController.text = (preset['w'] as double).toInt().toString();
-                          heightController.text = (preset['h'] as double).toInt().toString();
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(i18n("custom_input"), style: AppTextStyles.t13.copyWith(color: theme.hintColor)),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: widthController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: i18n("width"),
-                            hintText: "1080",
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(i18n("preset_options"), style: AppTextStyles.t13.copyWith(color: theme.hintColor)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: presets.map((preset) {
+                    return ActionChip(
+                      label: Text(preset['name'] as String),
+                      onPressed: () {
+                        widthController.text = (preset['w'] as double).toInt().toString();
+                        heightController.text = (preset['h'] as double).toInt().toString();
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                Text(i18n("custom_input"), style: AppTextStyles.t13.copyWith(color: theme.hintColor)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: widthController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: i18n("width"),
+                          hintText: "1080",
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text("×", style: AppTextStyles.t18),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: heightController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: i18n("height"),
-                            hintText: "720",
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text("×", style: AppTextStyles.t18),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: heightController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: i18n("height"),
+                          hintText: "720",
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           actions: [

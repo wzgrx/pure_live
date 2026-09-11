@@ -1099,6 +1099,7 @@
     "change_danmaku_font_family": "更换弹幕字体",
     "window_size": "开机窗口尺寸",
     "preset_options": "快捷预设选择",
+    "default_option": "默认",
     "custom_input": "自定义输入尺寸",
     "width": "宽度",
     "height": "高度",

@@ -201,6 +201,90 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   }, skip: !Platform.isWindows);
+
+  testWidgets('countdown editor keeps preset and custom actions reachable in narrow very-large text', (tester) async {
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      EasyLocalization(
+        supportedLocales: const [Locale('en')],
+        startLocale: const Locale('en'),
+        fallbackLocale: const Locale('en'),
+        saveLocale: false,
+        path: 'assets/translations',
+        assetLoader: _Translations(translations),
+        child: Builder(
+          builder: (context) => GetMaterialApp(
+            locale: context.locale,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3)),
+              child: child!,
+            ),
+            home: const GeneralSettingsPage(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Time before app exit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Time before app exit'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    for (final minutes in [15, 30, 45, 60, 90, 120, 180]) {
+      expect(find.descendant(of: find.byType(AlertDialog), matching: find.text('$minutes min')), findsOneWidget);
+    }
+    expect(find.text('Custom Duration'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+
+    final presetScroll = _dialogVerticalScrollable();
+    await tester.scrollUntilVisible(find.text('15 min'), 80, scrollable: presetScroll);
+    await tester.ensureVisible(find.text('15 min'));
+    await tester.pumpAndSettle();
+    final presetTopLeft = tester.getTopLeft(find.text('15 min'));
+    expect(presetTopLeft.dy, inInclusiveRange(0, 479));
+    expect(tester.takeException(), isNull);
+    await tester.tapAt(presetTopLeft + const Offset(4, 4));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(SettingsService.to.exit.autoShutDownTime.value, 15);
+    expect(find.byType(AlertDialog), findsNothing);
+
+    await tester.tap(find.text('Time before app exit'));
+    await tester.pumpAndSettle();
+    final customInput = find.byType(TextField);
+    await tester.ensureVisible(customInput);
+    await tester.pumpAndSettle();
+    await tester.enterText(customInput, '7');
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(SettingsService.to.exit.autoShutDownTime.value, 7);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+}
+
+Finder _dialogVerticalScrollable() {
+  return find
+      .descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+        ),
+      )
+      .first;
 }
 
 class _Translations extends AssetLoader {
@@ -214,7 +298,7 @@ class _Translations extends AssetLoader {
 
 class _TestSettingsService extends SettingsService {
   final AppSettingsController _app = _TestAppSettingsController();
-  final ExitSettingsController _exit = ExitSettingsController();
+  final ExitSettingsController _exit = _TestExitSettingsController();
   final FontSettingsController _font = FontSettingsController();
   final StartupController _startup = StartupController();
   final WindowSizeController _window = WindowSizeController();
@@ -251,4 +335,15 @@ class _TestAppSettingsController extends AppSettingsController {
 
   @override
   RxString get refreshRateModeName => _refreshRateModeName;
+}
+
+class _TestExitSettingsController extends ExitSettingsController {
+  final RxInt _autoShutDownTime = 120.obs;
+  final RxBool _enableAutoShutDownTime = false.obs;
+
+  @override
+  RxInt get autoShutDownTime => _autoShutDownTime;
+
+  @override
+  RxBool get enableAutoShutDownTime => _enableAutoShutDownTime;
 }

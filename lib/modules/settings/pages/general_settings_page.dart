@@ -347,89 +347,108 @@ class GeneralSettingsPage extends GetView<SettingsService> {
   }
 
   void _showCountdownDurationDialog(BuildContext context) {
-    final List<int> minutesOptions = [15, 30, 45, 60, 90, 120, 180];
-    final int currentValue = SettingsService.to.exit.autoShutDownTime.v;
-    final bool isCustom = !minutesOptions.contains(currentValue);
+    showDialog<void>(context: context, builder: (context) => const _CountdownDurationDialog());
+  }
+}
 
-    final TextEditingController inputController = TextEditingController(text: isCustom ? currentValue.toString() : "");
+class _CountdownDurationDialog extends StatefulWidget {
+  const _CountdownDurationDialog();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(i18n('select_countdown_duration')),
-          content: Container(
-            constraints: const BoxConstraints(maxWidth: 360),
-            width: MediaQuery.of(context).size.width,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(i18n('app_exit_timer_explain'), style: Theme.of(context).textTheme.bodySmall),
-                  const SizedBox(height: 12),
-                  Obx(() {
-                    final selectedValue = SettingsService.to.exit.autoShutDownTime.v;
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: minutesOptions.map<Widget>((minutes) {
-                        final bool isSelected = selectedValue == minutes;
-                        return ChoiceChip(
-                          label: Text("$minutes ${i18n('minutes')}"),
-                          selected: isSelected,
-                          selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.onSurface,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          ),
-                          onSelected: (bool selected) {
-                            if (selected) {
-                              SettingsService.to.exit.updateShutDownTime(minutes);
-                              Navigator.of(context).pop();
-                            }
-                          },
-                        );
-                      }).toList(),
-                    );
-                  }),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: inputController,
-                    keyboardType: TextInputType.number,
-                    style: AppTextStyles.t14,
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                      labelText: i18n('custom_duration'),
-                      suffixText: i18n('minutes'),
-                      helperText: i18n('app_exit_timer_custom_hint'),
-                      border: const OutlineInputBorder(),
+  @override
+  State<_CountdownDurationDialog> createState() => _CountdownDurationDialogState();
+}
+
+class _CountdownDurationDialogState extends State<_CountdownDurationDialog> {
+  static const List<int> _minutesOptions = [15, 30, 45, 60, 90, 120, 180];
+  late final TextEditingController _inputController;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentValue = SettingsService.to.exit.autoShutDownTime.v;
+    _inputController = TextEditingController(
+      text: _minutesOptions.contains(currentValue) ? '' : currentValue.toString(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _inputController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      scrollable: true,
+      title: Text(i18n('select_countdown_duration')),
+      content: Container(
+        constraints: const BoxConstraints(maxWidth: 360),
+        width: MediaQuery.sizeOf(context).width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(i18n('app_exit_timer_explain'), style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 12),
+            Obx(() {
+              final selectedValue = SettingsService.to.exit.autoShutDownTime.v;
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _minutesOptions.map<Widget>((minutes) {
+                  final isSelected = selectedValue == minutes;
+                  return ChoiceChip(
+                    label: Text("$minutes ${i18n('minutes')}"),
+                    selected: isSelected,
+                    selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
-                  ),
-                ],
+                    onSelected: (selected) {
+                      if (!selected) return;
+                      SettingsService.to.exit.updateShutDownTime(minutes);
+                      Navigator.of(context).pop();
+                    },
+                  );
+                }).toList(),
+              );
+            }),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _inputController,
+              keyboardType: TextInputType.number,
+              style: AppTextStyles.t14,
+              maxLines: 1,
+              decoration: InputDecoration(
+                labelText: i18n('custom_duration'),
+                suffixText: i18n('minutes'),
+                helperText: i18n('app_exit_timer_custom_hint'),
+                border: const OutlineInputBorder(),
               ),
             ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
-            FilledButton(
-              onPressed: () {
-                final parsedValue = int.tryParse(inputController.text.trim());
-                if (parsedValue == null || parsedValue < 1) {
-                  ToastUtil.show(i18n('app_exit_timer_custom_hint'));
-                  return;
-                }
-                SettingsService.to.exit.updateShutDownTime(parsedValue);
-                Navigator.of(context).pop();
-              },
-              child: Text(i18n('save')),
-            ),
           ],
-        );
-      },
-    ).whenComplete(inputController.dispose);
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
+        FilledButton(
+          onPressed: () {
+            final parsedValue = int.tryParse(_inputController.text.trim());
+            if (parsedValue == null || parsedValue < 1) {
+              ToastUtil.show(i18n('app_exit_timer_custom_hint'));
+              return;
+            }
+            SettingsService.to.exit.updateShutDownTime(parsedValue);
+            Navigator.of(context).pop();
+          },
+          child: Text(i18n('save')),
+        ),
+      ],
+    );
   }
 }
 

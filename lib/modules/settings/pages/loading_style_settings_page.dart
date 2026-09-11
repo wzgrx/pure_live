@@ -396,10 +396,20 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
     final theme = Theme.of(context);
     final isZh = Get.locale?.languageCode == 'zh';
     final double screenWidth = MediaQuery.of(context).size.width;
+    final double textScale = MediaQuery.textScalerOf(context).scale(1);
     int crossAxisCount = 3;
     double childAspectRatio = 0.95;
 
-    if (screenWidth >= 900) {
+    if (textScale > 1.5 && screenWidth < 600) {
+      crossAxisCount = 1;
+      childAspectRatio = 1.8;
+    } else if (textScale > 1.5 && screenWidth < 900) {
+      crossAxisCount = 2;
+      childAspectRatio = 1.5;
+    } else if (textScale > 1.5) {
+      crossAxisCount = 3;
+      childAspectRatio = 1.4;
+    } else if (screenWidth >= 900) {
       crossAxisCount = 6;
       childAspectRatio = 1.05;
     } else if (screenWidth >= 600) {
@@ -427,49 +437,53 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                context.buildGroupTitle(i18n("change_loading_color")),
-                context.buildModernCard([
-                  context.buildTile(
-                    icon: Remix.palette_line,
-                    title: i18n("change_loading_color"),
-                    subtitle: i18n("change_loading_color_subtitle"),
-                    onTap: colorPickerDialog,
-                    trailing: Obx(
-                      () => ColorIndicator(
-                        width: 28,
-                        height: 28,
-                        borderRadius: 6,
-                        color: HexColor(
-                          SettingsService.to.theme.loadingStyleColorSwitch.v.isEmpty
-                              ? theme.colorScheme.primary.hex
-                              : SettingsService.to.theme.loadingStyleColorSwitch.v,
+      body: CustomScrollView(
+        physics: const PureLiveScrollPhysics(),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  context.buildGroupTitle(i18n("change_loading_color")),
+                  context.buildModernCard([
+                    context.buildTile(
+                      icon: Remix.palette_line,
+                      title: i18n("change_loading_color"),
+                      subtitle: i18n("change_loading_color_subtitle"),
+                      onTap: colorPickerDialog,
+                      isLong: true,
+                      stackTrailingOnNarrow: true,
+                      trailing: Obx(
+                        () => ColorIndicator(
+                          width: 28,
+                          height: 28,
+                          borderRadius: 6,
+                          color: HexColor(
+                            SettingsService.to.theme.loadingStyleColorSwitch.v.isEmpty
+                                ? theme.colorScheme.primary.hex
+                                : SettingsService.to.theme.loadingStyleColorSwitch.v,
+                          ),
+                          onSelectFocus: false,
                         ),
-                        onSelectFocus: false,
                       ),
                     ),
-                  ),
-                ]),
-              ],
+                  ]),
+                ],
+              ),
             ),
           ),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 childAspectRatio: childAspectRatio,
               ),
-              itemCount: AppConsts.allStyles.length,
-              itemBuilder: (context, index) {
+              delegate: SliverChildBuilderDelegate((context, index) {
                 final item = AppConsts.allStyles[index];
                 final String key = item['key']!;
                 final String displayName = isZh ? item['nameZh']! : item['nameEn']!;
@@ -480,6 +494,7 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
                   final Color liveColor = currentHex.isEmpty ? theme.colorScheme.primary : HexColor(currentHex);
 
                   return InkWell(
+                    key: ValueKey('loading-style-$key'),
                     onTap: () => SettingsService.to.theme.loadingStyle.v = key,
                     borderRadius: BorderRadius.circular(16),
                     child: AnimatedContainer(
@@ -506,13 +521,17 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
-                                child: Text(
-                                  displayName,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.t11Bold.copyWith(
-                                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                                child: Tooltip(
+                                  message: displayName,
+                                  child: Text(
+                                    displayName,
+                                    key: ValueKey('loading-style-label-$key'),
+                                    textAlign: TextAlign.center,
+                                    maxLines: textScale > 1.5 ? 2 : 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyles.t11Bold.copyWith(
+                                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -529,7 +548,7 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
                     ),
                   );
                 });
-              },
+              }, childCount: AppConsts.allStyles.length),
             ),
           ),
         ],

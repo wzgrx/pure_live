@@ -46,11 +46,12 @@
 
 - **最新稳定版**：[v3.1.8](https://github.com/wzgrx/pure_live/releases/tag/v3.1.8)
 - **下一稳定版目标**：3.2.0，当前处于完整验收阶段，尚未发布。本轮只维护本仓库、不合并上游；优先源码审查、确定性回归和本地验证，手机操作按本轮明确安排执行，不把连接设备作为修复前置条件。进度、缺口与发布门禁见 [3.2.0 验收入口](docs/ACCEPTANCE_3_2_0.md)，开发包及旧版通过记录不等于最终版已通过。
-- **源码平台范围（未发布）**：目前 18 个直播站点 + IPTV，共 19 个适配器。新增 OPENREC / mellow-fan 与 TTingLive / FLEX TV；目录、搜索、弹幕和原生证据各自分列，注册不等于完整支持。见[平台能力表](docs/PLATFORM_COMPATIBILITY.md)、[OPENREC 应用审计](docs/OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)与[TTing 应用审计](docs/TTING_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)。其余 9 组参考平台和已接入平台的完整能力仍待验收。
-- **当前 Android 验收候选（未发布）**：bee143e2 已包含 OPENREC、Picarto 响应收尾及此前累计修订，通过 2492 项完整测试、42 项公共接口（9 个既有平台）及 arm64 Debug 产物检查；尚未安装。它不含后续 TTing、源策略输入链和弹幕界面修订，见[候选审计与前置条件](docs/OPENREC_PICARTO_ANDROID_CANDIDATE_2026_09_09.md)。Windows 候选仍为 f3de664a；两者不是当前全部源码的最终验收包。
+- **源码平台范围（未发布）**：目前 21 个直播站点 + IPTV，共 22 个适配器。新增 OPENREC / mellow-fan、TTingLive / FLEX TV、niconico 与微博直播；目录、搜索、弹幕和原生证据各自分列，注册不等于完整支持。见[平台能力表](docs/PLATFORM_COMPATIBILITY.md)、[OPENREC 应用审计](docs/OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)、[TTing 应用审计](docs/TTING_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)与[微博应用审计](docs/WEIBO_APPLICATION_INTEGRATION_2026_09_11.md)。其余 6 组参考平台和已接入平台的完整能力仍待验收。
+- **当前累计验收候选（未发布）**：Android `48154d15` 已完成 4072 项完整测试、42 项公共接口及 arm64 Debug 包检查，尚未安装；Windows `2fb471d3` 已生成 Debug 便携包并完成有限 GUI 冒烟。两者都早于当前源码，不含 09-11 的后续平台与设置修订，也不是 3.2.0 最终验收包。见[Android 候选审计](docs/ANDROID_CUMULATIVE_CANDIDATE_2026_09_10.md)与[Windows 候选审计](docs/HLS_WINDOWS_CANDIDATE_2026_09_10.md)。
 - **未发布的播放恢复加固**：已复现并修复等待新地址时仍替换已恢复连接、候选失败覆盖用户暂停、取消后转圈残留及提前错误回调逃逸。17 项新增案例纳入回归，详见[恢复事务审计](docs/PLAYBACK_RECOVERY_TRANSACTION_AUDIT_2026_09_05.md)；保持原生虎牙 FLV 健康连接，不增加定时重开。
 - **虎牙连续播放复核（源码未发布）**：原生 FLV 优先、健康连接不定时重开；后台续签不占播放器队列，恢复按活动 CDN/格式/凭据家族匹配，修复线路重排或过滤后按旧序号错选。1070 项回归与 42 项接口探测通过；上游与本地根因、修复边界见[线路身份审计](docs/HUYA_LINE_IDENTITY_AUDIT_2026_09_05.md)，既有原生采样见[后台续签审计](docs/HUYA_PREFETCH_OWNERSHIP_AUDIT_2026_09_05.md)。安装包、实际音画呈现与测试结果分开验收。
 - **加载动画资源修复（源码未发布）**：切换样式时销毁旧动画，恢复默认/未知样式时正确启动，颜色修改保留旋转相位。7 项定向回归通过，详见[加载生命周期审计](docs/LOADING_ANIMATION_LIFECYCLE_AUDIT_2026_09_05.md)；Windows 热门页空闲 CPU 的完整归因仍在核对，不将本次修复当作全局性能结论。
+- **加载样式设置布局修复（源码未发布）**：颜色卡片和 85 个样式单元统一使用惰性滚动页，320×480 / 3.0 倍英文下不再由固定标题区挤压网格；大字号采用响应式列数、两行名称和完整 Tooltip。详见[加载样式布局审计](docs/LOADING_STYLE_SETTINGS_LAYOUT_AUDIT_2026_09_11.md)。
 - **新增平台接入进度（源码未发布）**：AcFun 已接入热门、官网分类、作者搜索、分享链接、播放/录制输入和在线人数开关；真实官网搜索验证了稀疏分页，98 个结果按 20/20/20/20/18 连续返回。Windows 原生短录 MP4 已通过独立全文件解码；远端弹幕尚未接入，应用内明确提示，Android/实际观看/长时录制验收继续进行。当前 v3.1.8 安装包不含此功能。详见 [AcFun 接入审查](docs/ACFUN_NAVIGATION_AUDIT_2026_09_05.md)与[录制原生验证](docs/RECORDER_LIFECYCLE_AUDIT_2026_09_05.md)。
 - **录制实时统计与退出加固（源码未发布）**：已复现旧会话采样锁串扰、旧终止回调覆盖新会话、最后文件大小遗漏、关闭后任务与目录保护遗留；以会话所有权与生命周期栅栏修复，不增加轮询频率。详见[录制输出所有权审计](docs/RECORDER_OUTPUT_OWNERSHIP_AUDIT_2026_09_05.md)。
 - **录制启动与检测加固（源码未发布）**：停止、移除或退出后丢弃迟到的房间检测结果；启动只恢复未完成待录任务，保留已停止/完成/失败历史。启动恢复开关独立可见，自动检测关闭时只检查一次，详见[录制轮询与启动审计](docs/RECORDER_POLL_OWNERSHIP_AUDIT_2026_09_05.md)。

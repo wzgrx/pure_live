@@ -46,34 +46,13 @@ void main() {
   });
 
   testWidgets('resolution preferences localize stable values and keep whole options tappable', (tester) async {
-    tester.view.physicalSize = const Size(320, 480);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      EasyLocalization(
-        supportedLocales: const [Locale('en')],
-        startLocale: const Locale('en'),
-        fallbackLocale: const Locale('en'),
-        saveLocale: false,
-        path: 'assets/translations',
-        assetLoader: _Translations(english),
-        child: Builder(
-          builder: (context) => GetMaterialApp(
-            locale: context.locale,
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3)),
-              child: child!,
-            ),
-            home: const VideoSettingsPage(),
-          ),
-        ),
-      ),
+    await _pumpVideoSettings(
+      tester,
+      english: english,
+      size: const Size(320, 480),
+      textScale: 3,
+      platform: TargetPlatform.windows,
     );
-    await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(find.text('Desktop Default Volume'), 120, scrollable: _pageScrollable());
     await tester.pumpAndSettle();
@@ -122,10 +101,120 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   }, skip: !Platform.isWindows);
+
+  testWidgets('ASMR timer keeps every preset and action reachable in narrow very-large text', (tester) async {
+    await _pumpVideoSettings(
+      tester,
+      english: english,
+      size: const Size(320, 480),
+      textScale: 3,
+      platform: TargetPlatform.android,
+    );
+
+    final timerEntry = find.ancestor(of: find.text('Auto sleep playback duration'), matching: find.byType(ListTile));
+    await _scrollPageUntilHitTestable(tester, timerEntry);
+    await tester.tap(timerEntry.hitTestable());
+    await tester.pumpAndSettle();
+
+    final dialog = find.byType(AlertDialog);
+    expect(dialog, findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.byType(ActionChip)), findsNWidgets(10));
+    expect(find.descendant(of: dialog, matching: find.text('Custom playback duration')), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+    for (final label in ['15 min', '30 min', '45 min', '1 h', '90 min', '2 h', '4 h', '8 h', '12 h', '1 d']) {
+      expect(find.descendant(of: dialog, matching: find.text(label)), findsOneWidget);
+    }
+    final lastPreset = find.descendant(of: dialog, matching: find.byType(ActionChip)).last;
+    await tester.ensureVisible(lastPreset);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(lastPreset).bottom, lessThanOrEqualTo(480));
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+  }, skip: !Platform.isWindows);
+
+  testWidgets('ASMR timer keeps a focused custom input alive through route dismissal', (tester) async {
+    await _pumpVideoSettings(tester, english: english, size: const Size(420, 800), platform: TargetPlatform.android);
+
+    final timerEntry = find.ancestor(of: find.text('Auto sleep playback duration'), matching: find.byType(ListTile));
+    await _scrollPageUntilHitTestable(tester, timerEntry);
+    await tester.tap(timerEntry.hitTestable());
+    await tester.pumpAndSettle();
+    final customInput = find.byType(TextField);
+    await tester.ensureVisible(customInput);
+    await tester.pumpAndSettle();
+    await tester.enterText(customInput, '7');
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(SettingsService.to.app.asmrSleepMinutes.value, 7);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  }, skip: !Platform.isWindows);
+}
+
+Future<void> _pumpVideoSettings(
+  WidgetTester tester, {
+  required Map<String, dynamic> english,
+  required Size size,
+  double textScale = 1,
+  required TargetPlatform platform,
+}) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+  addTearDown(() async {
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  await tester.pumpWidget(
+    EasyLocalization(
+      supportedLocales: const [Locale('en')],
+      startLocale: const Locale('en'),
+      fallbackLocale: const Locale('en'),
+      saveLocale: false,
+      path: 'assets/translations',
+      assetLoader: _Translations(english),
+      child: Builder(
+        builder: (context) => GetMaterialApp(
+          locale: context.locale,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+            child: child!,
+          ),
+          home: VideoSettingsPage(platformOverride: platform),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
 }
 
 Finder _pageScrollable() {
   return find.descendant(of: find.byType(ListView), matching: find.byType(Scrollable)).first;
+}
+
+Future<void> _scrollPageUntilHitTestable(WidgetTester tester, Finder target) async {
+  final scrollable = tester.state<ScrollableState>(_pageScrollable());
+  for (var attempt = 0; attempt < 30; attempt++) {
+    if (target.hitTestable().evaluate().isNotEmpty) return;
+    final position = scrollable.position;
+    final next = position.pixels + position.viewportDimension * 0.75;
+    position.jumpTo(next > position.maxScrollExtent ? position.maxScrollExtent : next);
+    await tester.pump();
+  }
+  fail('Target did not become hit-testable after bounded page scrolling.');
 }
 
 class _Translations extends AssetLoader {

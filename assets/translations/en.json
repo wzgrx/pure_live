@@ -1185,6 +1185,7 @@
     "recommended": "Recommended",
     "minute": "min",
     "hour": "h",
+    "day": "d",
     "refresh_settings_subtitle": "Set automatic follow-state and thumbnail refresh",
     "cellular_warning_msg": "You are using mobile data, please mind your traffic consumption.",
     "never_show": "Don't show again",

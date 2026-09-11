@@ -1,10 +1,8 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
 import 'package:pure_live/player/utils/window_helper.dart';
-import 'package:pure_live/common/global/platform_utils.dart';
 import 'package:pure_live/player/core/live_audio_service.dart';
 import 'package:pure_live/modules/settings/pages/font_family_manager_page.dart';
 import 'package:pure_live/common/services/settings/app_settings_controller.dart';
@@ -13,7 +11,16 @@ import 'package:pure_live/modules/settings/pages/portrait_live_settings_page.dar
 import 'package:pure_live/modules/settings/pages/audience_metric_settings_page.dart';
 
 class VideoSettingsPage extends GetView<SettingsService> {
-  const VideoSettingsPage({super.key});
+  const VideoSettingsPage({super.key, this.platformOverride});
+
+  @visibleForTesting
+  final TargetPlatform? platformOverride;
+
+  TargetPlatform get _platform => platformOverride ?? defaultTargetPlatform;
+  bool get _isAndroid => _platform == TargetPlatform.android;
+  bool get _isWindows => _platform == TargetPlatform.windows;
+  bool get _isMobile => _platform == TargetPlatform.android || _platform == TargetPlatform.iOS;
+  bool get _isDesktop => !_isMobile;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +41,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
               value: SettingsService.to.vol.globalVolumeMute,
               icon: SettingsService.to.vol.globalVolumeMute.v ? Remix.volume_mute_line : Remix.volume_up_line,
             ),
-            if (PlatformUtils.isMobile)
+            if (_isMobile)
               Obx(
                 () => context.buildSliderTile(
                   context,
@@ -48,7 +55,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
                       SettingsService.to.vol.defaultMobileVolume.v = double.parse((val / 100).toStringAsFixed(2)),
                 ),
               ),
-            if (PlatformUtils.isDesktop)
+            if (_isDesktop)
               Obx(
                 () => context.buildSliderTile(
                   context,
@@ -117,7 +124,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => Get.to(() => const AudienceMetricSettingsPage()),
             ),
-            if (Platform.isAndroid)
+            if (_isAndroid)
               context.buildSwitchTile(
                 icon: Remix.music_2_line,
                 title: i18n("enable_background_play"),
@@ -125,7 +132,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
                 value: SettingsService.to.app.enableBackgroundPlay,
                 onChanged: (val) async {
                   SettingsService.to.app.enableBackgroundPlay.v = val;
-                  if (val && Platform.isAndroid) {
+                  if (val && _isAndroid) {
                     bool hasPermission = await LiveAudioService.requestPlatformPermissions();
                     SettingsService.to.app.enableBackgroundPlay.v = hasPermission;
                     await LiveAudioService.syncKeepAlive();
@@ -136,7 +143,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
                   }
                 },
               ),
-            if (Platform.isAndroid)
+            if (_isAndroid)
               context.buildSwitchTile(
                 icon: Remix.moon_clear_line,
                 title: i18n('asmr_sleep_mode'),
@@ -155,14 +162,14 @@ class VideoSettingsPage extends GetView<SettingsService> {
                   }
                 },
               ),
-            if (Platform.isAndroid)
+            if (_isAndroid)
               Obx(
                 () => context.buildTile(
                   icon: Remix.timer_2_line,
                   title: i18n('asmr_sleep_timer'),
                   subtitle: i18n('asmr_sleep_timer_desc'),
                   trailing: Text(
-                    _formatDuration(SettingsService.to.app.asmrSleepMinutes.v),
+                    _formatAsmrDuration(SettingsService.to.app.asmrSleepMinutes.v),
                     style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
                   ),
                   onTap: () => _showAsmrSleepTimerDialog(context),
@@ -174,7 +181,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
               value: SettingsService.to.player.floatPlay,
               icon: Remix.picture_in_picture_2_line,
             ),
-            if (Platform.isWindows)
+            if (_isWindows)
               context.buildSwitchTile(
                 title: i18n('windows_pip_always_on_top'),
                 subtitle: i18n('windows_pip_always_on_top_subtitle'),
@@ -182,7 +189,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
                 icon: Remix.pushpin_line,
                 onChanged: WindowHelper.instance.setPiPAlwaysOnTop,
               ),
-            if (Platform.isWindows)
+            if (_isWindows)
               context.buildSwitchTile(
                 title: i18n('windows_pip_remember_position'),
                 subtitle: i18n('windows_pip_remember_position_subtitle'),
@@ -192,7 +199,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
                   SettingsService.to.window.rememberPipPosition.v = value;
                 },
               ),
-            if (Platform.isWindows)
+            if (_isWindows)
               context.buildTile(
                 icon: Remix.reserved_line,
                 title: i18n('windows_pip_reset_position'),
@@ -224,7 +231,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
               value: SettingsService.to.app.enableFullScreenDefault,
               icon: Remix.fullscreen_line,
             ),
-            if (Platform.isAndroid)
+            if (_isAndroid)
               context.buildSwitchTile(
                 title: i18n('enable_screen_keep_on'),
                 subtitle: i18n('enable_screen_keep_on_subtitle'),
@@ -274,75 +281,7 @@ class VideoSettingsPage extends GetView<SettingsService> {
   }
 
   void _showAsmrSleepTimerDialog(BuildContext context) {
-    const options = [15, 30, 45, 60, 90, 120, 240, 480, 720, 1440];
-    final customController = TextEditingController(text: SettingsService.to.app.asmrSleepMinutes.v.toString());
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(i18n('asmr_sleep_timer')),
-        content: SizedBox(
-          width: 360,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(i18n('asmr_sleep_timer_explain'), style: Theme.of(dialogContext).textTheme.bodySmall),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: options
-                      .map(
-                        (minutes) => ActionChip(
-                          label: Text(_formatDuration(minutes)),
-                          onPressed: () => customController.text = minutes.toString(),
-                        ),
-                      )
-                      .toList(),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: customController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: i18n('custom_sleep_minutes'),
-                    helperText: i18n('custom_sleep_minutes_range'),
-                    suffixText: i18n('minutes'),
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(i18n('cancel'))),
-          FilledButton(
-            onPressed: () async {
-              final minutes = int.tryParse(customController.text.trim());
-              if (minutes == null || minutes < 1 || minutes > AppSettingsController.maxSleepMinutes) {
-                ToastUtil.show(i18n('custom_sleep_minutes_range'));
-                return;
-              }
-              SettingsService.to.app.asmrSleepMinutes.v = minutes;
-              await LiveAudioService.configureSleepTimer(
-                enabled: LiveAudioService.isSleepSessionActive,
-                minutes: minutes,
-              );
-              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-            },
-            child: Text(i18n('save')),
-          ),
-        ],
-      ),
-    ).whenComplete(customController.dispose);
-  }
-
-  String _formatDuration(int minutes) {
-    if (minutes % 1440 == 0) return '${minutes ~/ 1440} ${i18n('days')}';
-    if (minutes % 60 == 0) return '${minutes ~/ 60} ${i18n('hours')}';
-    return '$minutes ${i18n('minutes')}';
+    showDialog<void>(context: context, builder: (_) => const _AsmrSleepTimerDialog());
   }
 
   void showPreferResolutionSelectorDialog() {
@@ -412,4 +351,93 @@ class VideoSettingsPage extends GetView<SettingsService> {
     '流畅' => i18n('prefer_resolution_option_smooth'),
     _ => value,
   };
+}
+
+class _AsmrSleepTimerDialog extends StatefulWidget {
+  const _AsmrSleepTimerDialog();
+
+  @override
+  State<_AsmrSleepTimerDialog> createState() => _AsmrSleepTimerDialogState();
+}
+
+class _AsmrSleepTimerDialogState extends State<_AsmrSleepTimerDialog> {
+  static const _options = [15, 30, 45, 60, 90, 120, 240, 480, 720, 1440];
+
+  late final TextEditingController _customController;
+
+  @override
+  void initState() {
+    super.initState();
+    _customController = TextEditingController(text: SettingsService.to.app.asmrSleepMinutes.v.toString());
+  }
+
+  @override
+  void dispose() {
+    _customController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final minutes = int.tryParse(_customController.text.trim());
+    if (minutes == null || minutes < 1 || minutes > AppSettingsController.maxSleepMinutes) {
+      ToastUtil.show(i18n('custom_sleep_minutes_range'));
+      return;
+    }
+
+    SettingsService.to.app.asmrSleepMinutes.v = minutes;
+    await LiveAudioService.configureSleepTimer(enabled: LiveAudioService.isSleepSessionActive, minutes: minutes);
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      scrollable: true,
+      title: Text(i18n('asmr_sleep_timer')),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(i18n('asmr_sleep_timer_explain'), style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _options
+                  .map(
+                    (minutes) => ActionChip(
+                      label: Text(_formatAsmrDuration(minutes)),
+                      onPressed: () => _customController.text = minutes.toString(),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _customController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: i18n('custom_sleep_minutes'),
+                helperText: i18n('custom_sleep_minutes_range'),
+                suffixText: i18n('minutes'),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(i18n('cancel'))),
+        FilledButton(onPressed: _save, child: Text(i18n('save'))),
+      ],
+    );
+  }
+}
+
+String _formatAsmrDuration(int minutes) {
+  if (minutes % 1440 == 0) return '${minutes ~/ 1440} ${i18n('day')}';
+  if (minutes % 60 == 0) return '${minutes ~/ 60} ${i18n('hour')}';
+  return '$minutes ${i18n('minute')}';
 }

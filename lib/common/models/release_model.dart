@@ -18,14 +18,21 @@ class ReleaseModel {
   });
 
   factory ReleaseModel.fromJson(Map<String, dynamic> json) {
+    final rawAuthor = json['author'];
+    final rawFiles = json['files'];
     return ReleaseModel(
-      version: json['version'] ?? '',
-      title: json['title'] ?? '',
-      date: json['date'] ?? '',
-      github: json['github'] ?? '',
-      author: AuthorModel.fromJson(json['author'] ?? {}),
-      changelog: json['changelog'] ?? '',
-      files: (json['files'] as List<dynamic>? ?? []).map((e) => ReleaseFileModel.fromJson(e)).toList(),
+      version: _releaseString(json['version']),
+      title: _releaseString(json['title']),
+      date: _releaseString(json['date']),
+      github: _releaseString(json['github']),
+      author: AuthorModel.fromJson(rawAuthor is Map ? Map<String, dynamic>.from(rawAuthor) : const {}),
+      changelog: _releaseString(json['changelog']),
+      files: rawFiles is List
+          ? rawFiles
+                .whereType<Map>()
+                .map((item) => ReleaseFileModel.fromJson(Map<String, dynamic>.from(item)))
+                .toList(growable: false)
+          : const [],
     );
   }
 
@@ -50,7 +57,11 @@ class AuthorModel {
   AuthorModel({required this.name, required this.avatar, required this.profile});
 
   factory AuthorModel.fromJson(Map<String, dynamic> json) {
-    return AuthorModel(name: json['name'] ?? '', avatar: json['avatar'] ?? '', profile: json['profile'] ?? '');
+    return AuthorModel(
+      name: _releaseString(json['name']),
+      avatar: _releaseString(json['avatar']),
+      profile: _releaseString(json['profile']),
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -68,14 +79,29 @@ class ReleaseFileModel {
 
   factory ReleaseFileModel.fromJson(Map<String, dynamic> json) {
     return ReleaseFileModel(
-      name: json['name'] ?? '',
-      size: json['size'] ?? '',
-      downloads: json['downloads'] ?? 0,
-      url: json['url'] ?? '',
+      name: _releaseString(json['name']),
+      size: _releaseString(json['size']),
+      downloads: _releaseInt(json['downloads']),
+      url: _releaseString(json['url']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {'name': name, 'size': size, 'downloads': downloads, 'url': url};
   }
+}
+
+String _releaseString(Object? value) {
+  if (value == null) return '';
+  return value is String ? value : value.toString();
+}
+
+int _releaseInt(Object? value) {
+  final parsed = switch (value) {
+    int number => number,
+    num number => number.toInt(),
+    String text => int.tryParse(text.trim()) ?? 0,
+    _ => 0,
+  };
+  return parsed < 0 ? 0 : parsed;
 }

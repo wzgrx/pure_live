@@ -62,6 +62,10 @@ class _AreaCardState extends State<AreaCard> {
   Widget build(BuildContext context) {
     final displayImageUrl = normalizeNetworkImageUrl(_getFinalUrl());
     final officialEntry = CCCatalog.isOfficialEntry(widget.category);
+    final rawName = widget.category.areaName?.trim() ?? '';
+    final displayName = rawName.isEmpty ? i18n('unnamed_area') : rawName;
+    final rawTypeName = widget.category.typeName?.trim() ?? '';
+    final displayTypeName = rawTypeName.isEmpty ? i18n('no_data') : rawTypeName;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -106,13 +110,13 @@ class _AreaCardState extends State<AreaCard> {
               dense: true,
               contentPadding: const EdgeInsets.symmetric(horizontal: 10),
               title: Text(
-                widget.category.areaName!,
+                displayName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                officialEntry ? i18n('open_in_system_browser') : widget.category.typeName!,
+                officialEntry ? i18n('open_in_system_browser') : displayTypeName,
                 style: AppTextStyles.t11.copyWith(fontWeight: FontWeight.w500),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

@@ -28,9 +28,11 @@ class _AreasRoomPageState extends State<AreasRoomPage> {
 
   @override
   Widget build(BuildContext context) {
+    final rawAreaName = widget.subCategory.areaName?.trim() ?? '';
+    final areaName = rawAreaName.isEmpty ? i18n('unnamed_area') : rawAreaName;
     return KeepAliveWrapper(
       child: Scaffold(
-        appBar: AppBar(title: Text(widget.subCategory.areaName!)),
+        appBar: AppBar(title: Text(areaName)),
         body: BasePageView<BasePageScrollAndStateBone<LiveRoom>, LiveRoom>(
           controller: controller,
           enableRefresh: true,
@@ -84,7 +86,9 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
 
   Widget _buildAvatar(BuildContext context) {
     final theme = Theme.of(context);
-    final String firstChar = (area.areaName?.isNotEmpty ?? false) ? area.areaName!.substring(0, 1) : "";
+    final rawAreaName = area.areaName?.trim() ?? '';
+    final displayName = rawAreaName.isEmpty ? i18n('unnamed_area') : rawAreaName;
+    final firstChar = String.fromCharCode(displayName.runes.first);
     final pictureUrl = normalizeNetworkImageUrl(area.areaPic);
     final bool hasPic = pictureUrl.isNotEmpty;
 
@@ -130,6 +134,8 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final isFavorite = SettingsService.to.fav.isFavoriteArea(area);
+      final rawAreaName = area.areaName?.trim() ?? '';
+      final displayName = rawAreaName.isEmpty ? i18n('unnamed_area') : rawAreaName;
 
       return Padding(
         padding: EdgeInsets.only(
@@ -141,7 +147,7 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOutCubic,
-          height: 48,
+          constraints: const BoxConstraints(minHeight: 48),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(isFavorite ? 24 : 16),
@@ -167,7 +173,7 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: Text(i18n("unfollow")),
-                        content: Text(i18n("unfollow_message", args: {"name": area.areaName!})),
+                        content: Text(i18n("unfollow_message", args: {"name": displayName})),
                         actions: [
                           TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(i18n("cancel"))),
                           ElevatedButton(
@@ -186,7 +192,7 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
                   }
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -214,7 +220,7 @@ class FavoriteAreaFloatingButton extends StatelessWidget {
                                       ConstrainedBox(
                                         constraints: BoxConstraints(maxWidth: Get.width > 680 ? 120 : 80),
                                         child: Text(
-                                          area.areaName!,
+                                          displayName,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: AppTextStyles.t12Bold.copyWith(

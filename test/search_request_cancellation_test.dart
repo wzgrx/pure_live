@@ -392,6 +392,97 @@ void main() {
     expect(c.results.single.roomId, 'new-result');
   });
 
+  test('duplicate initial submits share one in-flight search transaction', () async {
+    var calls = 0;
+    final started = Completer<CancelToken>();
+    final release = Completer<void>();
+    final c = _controller([
+      _site(
+        _Owned((_, _, token) async {
+          calls++;
+          if (!started.isCompleted) started.complete(token);
+          await release.future;
+          return [_room('shared')];
+        }),
+      ),
+    ]);
+    c.index.value = 1;
+
+    final first = c.doSearch();
+    final token = await started.future;
+    final duplicate = c.doSearch();
+    await _flush();
+
+    expect(calls, 1);
+    expect(token.isCancelled, isFalse);
+    expect(identical(first, duplicate), isTrue);
+
+    release.complete();
+    await Future.wait([first, duplicate]);
+    expect(c.results.single.roomId, 'shared');
+  });
+
+  test('duplicate submit keeps a partially rendered aggregate search alive', () async {
+    var fastCalls = 0;
+    var slowCalls = 0;
+    final slowStarted = Completer<CancelToken>();
+    final releaseSlow = Completer<void>();
+    final c = _controller([
+      _site(
+        _Owned((_, _, _) async {
+          fastCalls++;
+          return [_room('fast')];
+        }),
+      ),
+      _site(
+        _Owned((_, _, token) async {
+          slowCalls++;
+          if (!slowStarted.isCompleted) slowStarted.complete(token);
+          await releaseSlow.future;
+          return [_room('slow', 'bilibili')];
+        }),
+        'bilibili',
+      ),
+    ]);
+
+    final first = c.doSearch();
+    final slowToken = await slowStarted.future;
+    await _flush();
+    expect(c.results.single.roomId, 'fast');
+    expect(c.loading.value, isFalse);
+    expect(c.pendingSiteCount.value, 1);
+
+    final duplicate = c.doSearch();
+    await _flush();
+    expect(identical(first, duplicate), isTrue);
+    expect(fastCalls, 1);
+    expect(slowCalls, 1);
+    expect(slowToken.isCancelled, isFalse);
+
+    releaseSlow.complete();
+    await Future.wait([first, duplicate]);
+    expect(c.results.map((room) => room.roomId), containsAll(['fast', 'slow']));
+  });
+
+  test('same keyword starts a fresh transaction after the prior search settles', () async {
+    var calls = 0;
+    final c = _controller([
+      _site(
+        _Legacy((_, _) async {
+          calls++;
+          return [_room('refresh-$calls')];
+        }),
+      ),
+    ]);
+    c.index.value = 1;
+
+    await c.doSearch();
+    await c.doSearch();
+
+    expect(calls, 2);
+    expect(c.results.single.roomId, 'refresh-2');
+  });
+
   test('closed controller actions allocate nothing and close is idempotent', () async {
     var calls = 0;
     final c = _controller([

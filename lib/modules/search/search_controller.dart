@@ -32,10 +32,14 @@ class SearchController extends GetxController {
   bool get _active => !_closed && !isClosed;
   bool _isCurrent(int generation) => _active && generation == _searchGeneration;
 
-  void _invalidateSearch() {
+  void _invalidateSearch({bool retireInitialTask = true}) {
     _searchGeneration++;
     _searchCancel?.cancel();
     _searchCancel = null;
+    if (retireInitialTask) {
+      _initialSearchKey = null;
+      _initialSearchTask = null;
+    }
   }
 
   var index = 0.obs;
@@ -53,6 +57,8 @@ class SearchController extends GetxController {
   int _searchGeneration = 0;
   int _currentPage = 0;
   String _activeKeyword = '';
+  ({int platformIndex, String keyword})? _initialSearchKey;
+  Future<void>? _initialSearchTask;
   final Map<String, LiveRoom> _rawResults = {};
   final Map<String, bool> _hasMoreByPlatform = {};
   final Map<String, int> _stagnantPagesByPlatform = {};
@@ -168,16 +174,36 @@ class SearchController extends GetxController {
     return false;
   }
 
-  Future<void> doSearch() async {
-    if (!_active) return;
+  Future<void> doSearch() {
+    if (!_active) return Future<void>.value();
     final keyword = searchController.text.trim();
     if (keyword.isEmpty) {
       ToastUtil.show(i18n("please_input_keyword"));
-      return;
+      return Future<void>.value();
     }
+
+    final key = (platformIndex: index.v, keyword: keyword);
+    final inFlight = _initialSearchTask;
+    // Enter and the toolbar action can dispatch in the same frame. Preserve
+    // the useful request (including a partially completed all-site search)
+    // instead of cancelling it and issuing an identical network fan-out.
+    if (inFlight != null && _initialSearchKey == key) return inFlight;
+
+    late final Future<void> task;
+    task = _startSearch(keyword).whenComplete(() {
+      if (!identical(_initialSearchTask, task)) return;
+      _initialSearchKey = null;
+      _initialSearchTask = null;
+    });
+    _initialSearchKey = key;
+    _initialSearchTask = task;
+    return task;
+  }
+
+  Future<void> _startSearch(String keyword) async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (scrollController.hasClients) scrollController.jumpTo(0);
-    _invalidateSearch();
+    _invalidateSearch(retireInitialTask: false);
     final generation = _searchGeneration;
     _searchCancel = CancelToken();
     _activeKeyword = keyword;

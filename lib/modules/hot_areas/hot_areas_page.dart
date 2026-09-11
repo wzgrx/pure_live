@@ -20,6 +20,7 @@ class HotAreasPage extends GetView<HotAreasController> {
           context.buildGroupTitle(i18n('platform_display')),
           Obx(() {
             if (controller.sites.isEmpty) return const SizedBox.shrink();
+            final visibleCount = SettingsService.to.fav.hotAreasList.length;
 
             return Container(
               clipBehavior: Clip.antiAlias,
@@ -38,31 +39,56 @@ class HotAreasPage extends GetView<HotAreasController> {
                   final item = controller.sites[index];
                   final bool isShow = controller.isSiteVisible(item.id);
 
+                  Widget buildControls() => Row(
+                    key: ValueKey('platform-controls-${item.id}'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Switch(
+                        key: ValueKey('platform-switch-${item.id}'),
+                        value: isShow,
+                        activeThumbColor: theme.colorScheme.primary,
+                        onChanged: (bool value) => controller.onChanged(item.id, value),
+                      ),
+                      if (isShow && visibleCount > 1) ...[
+                        const SizedBox(width: 8),
+                        ReorderableDragStartListener(
+                          key: ValueKey('platform-drag-${item.id}'),
+                          index: index,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Icon(RemixIcons.sort_asc, size: 20),
+                          ),
+                        ),
+                      ],
+                    ],
+                  );
+
                   return Material(
                     key: ValueKey(item.id),
                     color: Colors.transparent,
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                      title: Text(item.name, style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600)),
-                      leading: Image.asset(item.logo, width: 24, height: 24),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Switch(
-                            value: isShow,
-                            activeThumbColor: theme.colorScheme.primary,
-                            onChanged: (bool value) => controller.onChanged(item.id, value),
-                          ),
-                          const SizedBox(width: 8),
-                          ReorderableDragStartListener(
-                            index: index,
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Icon(RemixIcons.sort_asc, size: 20),
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final title = Text(
+                          item.name,
+                          key: ValueKey('platform-title-${item.id}'),
+                          style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600),
+                        );
+                        final controls = buildControls();
+                        final stackControls =
+                            constraints.maxWidth < 360 || MediaQuery.textScalerOf(context).scale(1) > 1.5;
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          title: stackControls
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [title, const SizedBox(height: 6), controls],
+                                )
+                              : title,
+                          leading: Image.asset(item.logo, width: 24, height: 24),
+                          trailing: stackControls ? null : controls,
+                        );
+                      },
                     ),
                   );
                 },
@@ -89,7 +115,7 @@ class HotAreasPage extends GetView<HotAreasController> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              i18n('drag_to_sort_tip'),
+              '${i18n('drag_to_sort_tip')}\n${i18n('at_least_one_platform_required')}',
               style: AppTextStyles.t13.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                 height: 1.4,

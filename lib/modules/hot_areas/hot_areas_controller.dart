@@ -37,7 +37,17 @@ class HotAreasController extends GetxController {
         currentList.add(id);
       }
     } else {
+      if (!currentList.contains(id)) return;
+      if (currentList.length <= 1) {
+        ToastUtil.show(i18n('at_least_one_platform_required'));
+        return;
+      }
       currentList.remove(id);
+    }
+
+    final currentPreference = SettingsService.to.fav.preferPlatform.v;
+    if (currentList.isNotEmpty && !currentList.contains(currentPreference)) {
+      SettingsService.to.fav.preferPlatform.v = currentList.first;
     }
 
     List<Site> sortedSites = [];
@@ -57,19 +67,21 @@ class HotAreasController extends GetxController {
   }
 
   void onReorder(int oldIndex, int newIndex) {
+    if (oldIndex < 0 || oldIndex >= sites.length) return;
+    final currentSavedIds = List<String>.from(SettingsService.to.fav.hotAreasList.v);
+    if (currentSavedIds.length <= 1 || !currentSavedIds.contains(sites[oldIndex].id)) return;
+    if (newIndex < 0) return;
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
     final item = sites.removeAt(oldIndex);
-    sites.insert(newIndex, item);
+    sites.insert(newIndex.clamp(0, sites.length), item);
 
-    final currentSavedIds = SettingsService.to.fav.hotAreasList.v;
-    List<String> newOrderSavedIds = [];
-    for (var site in sites) {
-      if (currentSavedIds.contains(site.id)) {
-        newOrderSavedIds.add(site.id);
-      }
-    }
+    final visibleIds = currentSavedIds.toSet();
+    final visibleSites = sites.where((site) => visibleIds.contains(site.id)).toList(growable: false);
+    final hiddenSites = sites.where((site) => !visibleIds.contains(site.id)).toList(growable: false);
+    sites.assignAll([...visibleSites, ...hiddenSites]);
+    final newOrderSavedIds = visibleSites.map((site) => site.id).toList(growable: false);
     SettingsService.to.fav.hotAreasList.v = newOrderSavedIds;
   }
 }

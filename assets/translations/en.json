@@ -863,6 +863,7 @@
     "navigation_display_settings": "Navigation Bar Controls",
     "navigation_display_settings_desc": "Customize or hide specific tabs on your bottom menu viewport",
     "at_least_one_menu_required": "At least one bottom navigation menu tab must be retained.",
+    "at_least_one_platform_required": "At least one live platform must remain visible.",
     "drag_menu_to_sort_tip": "Long-press the right icon and drag up or down to customize the display order of the bottom navigation menu tabs.",
     "network_error_title": "Network Request Failed",
     "native_search_title": "Native cross-platform search",

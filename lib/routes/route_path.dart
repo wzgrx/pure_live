@@ -92,6 +92,7 @@ class RoutePath {
   // WebDavPage
   static const kWebDavPage = "/web_dav_page";
 
+  /// Historical alias that opened the Douyin cookie page in older releases.
   static const kDouyuCookie = "/douyu_cookie";
 
   static const kKuaishouCookie = "/kuaishou_cookie";

@@ -864,6 +864,7 @@
     "navigation_display_settings": "导航栏显示控制",
     "navigation_display_settings_desc": "自由定制隐藏或显示底部导航栏特定功能板块",
     "at_least_one_menu_required": "请至少保留一个底部菜单标签页。",
+    "at_least_one_platform_required": "请至少保留一个可见直播平台。",
     "drag_menu_to_sort_tip": "长按右侧图标并上下拖动，即可自定义底部菜单栏的功能展示顺序。",
     "network_error_title": "网络请求失败",
     "native_search_title": "全平台原生搜索",

@@ -146,6 +146,14 @@ class AppPages {
     ),
 
     GetPage(
+      name: RoutePath.kDouyinCookie,
+      page: _smoothPage(() => const DouyinCookiePage()),
+      bindings: [DouyinCookieBinding()],
+    ),
+
+    // Preserve the historical misnamed deep link while all in-app navigation
+    // uses the canonical Douyin path above.
+    GetPage(
       name: RoutePath.kDouyuCookie,
       page: _smoothPage(() => const DouyinCookiePage()),
       bindings: [DouyinCookieBinding()],

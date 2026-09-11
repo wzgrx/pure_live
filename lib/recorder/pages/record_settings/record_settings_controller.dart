@@ -52,6 +52,7 @@ class RecordSettingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    unawaited(RecorderConfig.normalizeStoredValues());
     unawaited(_initializeStorage());
   }
 
@@ -96,16 +97,18 @@ class RecordSettingsController extends GetxController {
   /// 更新切片时长
   /// =====================================
   Future<void> updateSegmentTime(int v) async {
-    segmentTime.value = v;
-    await RecorderConfig.setSegmentTime(v);
+    final normalized = RecorderConfig.normalizeSegmentTime(v);
+    segmentTime.value = normalized;
+    await RecorderConfig.setSegmentTime(normalized);
   }
 
   /// =====================================
   /// 更新最大任务数
   /// =====================================
   Future<void> updateMaxTask(int v) async {
-    maxTaskCount.value = v;
-    await RecorderConfig.setMaxTaskCount(v);
+    final normalized = RecorderConfig.normalizeMaxTaskCount(v);
+    maxTaskCount.value = normalized;
+    await RecorderConfig.setMaxTaskCount(normalized);
   }
 
   /// =====================================
@@ -124,32 +127,36 @@ class RecordSettingsController extends GetxController {
   /// 更新最大重试次数
   /// =====================================
   Future<void> updateMaxRetryCount(int v) async {
-    maxRetryCount.value = v;
-    await RecorderConfig.setMaxRetryCount(v);
+    final normalized = RecorderConfig.normalizeMaxRetryCount(v);
+    maxRetryCount.value = normalized;
+    await RecorderConfig.setMaxRetryCount(normalized);
   }
 
   /// =====================================
   /// 更新重试等待时间
   /// =====================================
   Future<void> updateRetryDelay(int v) async {
-    retryDelay.value = v;
-    await RecorderConfig.setRetryDelay(v);
+    final normalized = RecorderConfig.normalizeRetryDelay(v);
+    retryDelay.value = normalized;
+    await RecorderConfig.setRetryDelay(normalized);
   }
 
   /// =====================================
   /// 更新开播检测间隔
   /// =====================================
   Future<void> updateLiveCheckInterval(int v) async {
-    liveCheckInterval.value = v;
-    await RecorderConfig.setLiveCheckInterval(v);
+    final normalized = RecorderConfig.normalizeLiveCheckInterval(v);
+    liveCheckInterval.value = normalized;
+    await RecorderConfig.setLiveCheckInterval(normalized);
   }
 
   /// =====================================
   /// 更新最大检测间隔
   /// =====================================
   Future<void> updateMaxCheckInterval(int v) async {
-    maxCheckInterval.value = v;
-    await RecorderConfig.setMaxCheckInterval(v);
+    final normalized = RecorderConfig.normalizeMaxCheckInterval(v);
+    maxCheckInterval.value = normalized;
+    await RecorderConfig.setMaxCheckInterval(normalized);
   }
 
   /// =====================================
@@ -200,13 +207,15 @@ class RecordSettingsController extends GetxController {
   }
 
   Future<void> updateDefaultQuality(String v) async {
-    defaultQuality.value = v;
-    await RecorderConfig.setDefaultQuality(v);
+    final normalized = RecorderConfig.normalizeDefaultQuality(v);
+    defaultQuality.value = normalized;
+    await RecorderConfig.setDefaultQuality(normalized);
   }
 
   Future<void> updateMaxCache(int v) async {
-    maxCacheMB.value = v;
-    await RecorderConfig.setMaxCacheMB(v);
+    final normalized = RecorderConfig.normalizeMaxCacheMB(v);
+    maxCacheMB.value = normalized;
+    await RecorderConfig.setMaxCacheMB(normalized);
   }
 
   /// =====================================
@@ -225,16 +234,18 @@ class RecordSettingsController extends GetxController {
   /// 更新读写超时
   /// =====================================
   Future<void> updateRwTimeout(int v) async {
-    rwTimeout.value = v;
-    await RecorderConfig.setRwTimeout(v);
+    final normalized = RecorderConfig.normalizeRwTimeout(v);
+    rwTimeout.value = normalized;
+    await RecorderConfig.setRwTimeout(normalized);
   }
 
   /// =====================================
   /// 更新缓冲队列大小
   /// =====================================
   Future<void> updateThreadQueueSize(int v) async {
-    threadQueueSize.value = v;
-    await RecorderConfig.setThreadQueueSize(v);
+    final normalized = RecorderConfig.normalizeThreadQueueSize(v);
+    threadQueueSize.value = normalized;
+    await RecorderConfig.setThreadQueueSize(normalized);
   }
 
   /// =====================================

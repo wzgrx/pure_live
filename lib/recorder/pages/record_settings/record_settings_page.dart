@@ -1,14 +1,12 @@
-import 'dart:io';
-
+import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
+import 'package:pure_live/recorder/consts/recorder_config.dart';
 import 'package:pure_live/recorder/pages/record_settings/record_settings_controller.dart';
 
 class RecordSettingsPage extends GetView<RecordSettingsController> {
   const RecordSettingsPage({super.key});
-
-  bool get isDesktop => Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
   String _formatDuration(int seconds) {
     if (seconds < 60) {
@@ -38,7 +36,7 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
               context.buildTile(
                 icon: Remix.hd_line,
                 title: i18n("default_record_quality"),
-                subtitle: controller.defaultQuality.value,
+                subtitle: _resolutionLabel(controller.defaultQuality.value),
                 onTap: _showQualityDialog,
               ),
               context.buildSwitchTile(
@@ -49,30 +47,7 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
               ),
             ]),
             const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                context.buildGroupTitle(i18n("cache_management")),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: TextButton.icon(
-                    onPressed: controller.openRecordDir,
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      foregroundColor: theme.colorScheme.primary,
-                    ),
-                    icon: const Icon(Remix.folder_open_line, size: 18),
-                    label: Text(
-                      i18n("recorder_open_folder"),
-                      style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            _buildCacheHeader(context, theme),
             context.buildModernCard([
               context.buildTile(
                 icon: Remix.folder_video_line,
@@ -108,15 +83,21 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                 title: i18n("clear_all_cache"),
                 subtitle: i18n("clear_all_cache_desc"),
                 onTap: () async {
-                  final ok = await Get.dialog<bool>(
-                    AlertDialog(
+                  final ok = await showDialog<bool>(
+                    context: Get.context!,
+                    builder: (dialogContext) => AlertDialog(
+                      scrollable: true,
+                      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                       title: Text(i18n("confirm_clear_cache"), style: const TextStyle(fontWeight: FontWeight.bold)),
                       content: Text(i18n("confirm_clear_cache_desc")),
                       actions: [
-                        TextButton(onPressed: () => Navigator.of(Get.context!).pop(false), child: Text(i18n("cancel"))),
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(false),
+                          child: Text(i18n("cancel")),
+                        ),
                         ElevatedButton(
-                          onPressed: () => Navigator.of(Get.context!).pop(true),
+                          onPressed: () => Navigator.of(dialogContext).pop(true),
                           child: Text(i18n("clear")),
                         ),
                       ],
@@ -156,8 +137,8 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                 icon: Remix.film_line,
                 title: i18n("segment_duration"),
                 value: controller.segmentTime.value.toDouble(),
-                min: 60,
-                max: 3600,
+                min: RecorderConfig.minSegmentTime.toDouble(),
+                max: RecorderConfig.maxSegmentTime.toDouble(),
                 displayValue: _formatDuration(controller.segmentTime.value),
                 onChanged: (v) => controller.updateSegmentTime(v.toInt()),
               ),
@@ -183,8 +164,8 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                   icon: Remix.loop_left_line,
                   title: i18n("max_retry_count"),
                   value: controller.maxRetryCount.value.toDouble(),
-                  min: 1,
-                  max: 20,
+                  min: RecorderConfig.minMaxRetryCount.toDouble(),
+                  max: RecorderConfig.maxMaxRetryCount.toDouble(),
                   displayValue: "${controller.maxRetryCount.value}",
                   onChanged: (v) => controller.updateMaxRetryCount(v.toInt()),
                 ),
@@ -193,8 +174,8 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                 icon: Remix.time_line,
                 title: i18n("retry_delay"),
                 value: controller.retryDelay.value.toDouble(),
-                min: 5,
-                max: 120,
+                min: RecorderConfig.minRetryDelay.toDouble(),
+                max: RecorderConfig.maxRetryDelay.toDouble(),
                 displayValue: "${controller.retryDelay.value}s",
                 onChanged: (v) => controller.updateRetryDelay(v.toInt()),
               ),
@@ -214,8 +195,8 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                   icon: Remix.time_line,
                   title: i18n("check_interval"),
                   value: controller.liveCheckInterval.value.toDouble(),
-                  min: 10,
-                  max: 300,
+                  min: RecorderConfig.minLiveCheckInterval.toDouble(),
+                  max: RecorderConfig.maxLiveCheckInterval.toDouble(),
                   displayValue: "${controller.liveCheckInterval.value}s",
                   onChanged: (v) => controller.updateLiveCheckInterval(v.toInt()),
                 ),
@@ -231,8 +212,8 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                     icon: Remix.hourglass_2_line,
                     title: i18n("max_check_interval"),
                     value: controller.maxCheckInterval.value.toDouble(),
-                    min: 300,
-                    max: 3600,
+                    min: RecorderConfig.minMaxCheckInterval.toDouble(),
+                    max: RecorderConfig.maxMaxCheckInterval.toDouble(),
                     displayValue: _formatDuration(controller.maxCheckInterval.value),
                     onChanged: (v) => controller.updateMaxCheckInterval(v.toInt()),
                   ),
@@ -252,250 +233,339 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
     );
   }
 
-  void _showRwTimeoutDialog() {
-    final theme = Get.theme;
+  Widget _buildCacheHeader(BuildContext context, ThemeData theme) {
+    final title = context.buildGroupTitle(i18n("cache_management"));
+    final action = Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: TextButton.icon(
+        onPressed: controller.openRecordDir,
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero,
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          foregroundColor: theme.colorScheme.primary,
+        ),
+        icon: const Icon(Remix.folder_open_line, size: 18),
+        label: Text(i18n("recorder_open_folder"), style: AppTextStyles.t14.copyWith(fontWeight: FontWeight.w600)),
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stack = constraints.maxWidth < 420 || MediaQuery.textScalerOf(context).scale(14) > 20;
+        if (stack) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              title,
+              Align(alignment: Alignment.centerRight, child: action),
+              const SizedBox(height: 8),
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(child: title),
+            const SizedBox(width: 12),
+            action,
+          ],
+        );
+      },
+    );
+  }
 
+  String _resolutionLabel(String value) {
+    final key = PlayerConsts.resolutionLabelKey(value);
+    return key == null ? value : i18n(key);
+  }
+
+  void _showRwTimeoutDialog() {
     final Map<int, String> timeoutOptions = {
       15: i18n("timeout_fast"),
       30: i18n("timeout_balanced"),
       60: i18n("timeout_safe"),
     };
-
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(i18n("rw_timeout"), style: const TextStyle(fontWeight: FontWeight.bold)),
-        content: RadioGroup<int>(
-          groupValue: controller.rwTimeout.value,
-          onChanged: (v) {
-            if (v != null) {
-              controller.updateRwTimeout(v);
-            }
-
-            Navigator.pop(Get.context!);
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: timeoutOptions.entries.map((entry) {
-              return RadioListTile<int>(
-                title: Text("${entry.key}s", style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w600)),
-                subtitle: Text(entry.value, style: AppTextStyles.t12),
-                value: entry.key,
-                activeColor: theme.colorScheme.primary,
-                selected: controller.rwTimeout.value == entry.key,
-                selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.05),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+    _showRadioDialog<int>(
+      title: i18n("rw_timeout"),
+      selected: controller.rwTimeout.value,
+      options: timeoutOptions.entries
+          .map((entry) => _RecordOption(value: entry.key, label: '${entry.key}s', description: entry.value))
+          .toList(growable: false),
+      onSelected: controller.updateRwTimeout,
     );
   }
 
   void _showQueueSizeDialog() {
-    final theme = Get.theme;
-
-    final List<int> queueOptions = [512, 1024, 2048, 4096, 8192];
-
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(i18n("queue_size"), style: const TextStyle(fontWeight: FontWeight.bold)),
-        content: RadioGroup<int>(
-          groupValue: controller.threadQueueSize.value,
-          onChanged: (v) {
-            if (v != null) {
-              controller.updateThreadQueueSize(v);
-            }
-
-            Navigator.pop(Get.context!);
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: queueOptions.map((value) {
-              String subTitle = "";
-
-              if (value <= 512) {
-                subTitle = i18n("power_saving_mode");
-              } else if (value == 1024) {
-                subTitle = i18n("hd_recommend");
-              } else if (value == 2048) {
-                subTitle = i18n("fhd_recommend");
-              } else {
-                subTitle = i18n("extreme_performance");
-              }
-
-              return RadioListTile<int>(
-                title: Text("$value", style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w600)),
-                subtitle: Text(subTitle, style: AppTextStyles.t12),
-                value: value,
-                activeColor: theme.colorScheme.primary,
-                selected: controller.threadQueueSize.value == value,
-                selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.05),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+    final queueOptions = RecorderConfig.supportedThreadQueueSizes;
+    _showRadioDialog<int>(
+      title: i18n("queue_size"),
+      selected: controller.threadQueueSize.value,
+      options: queueOptions
+          .map(
+            (value) => _RecordOption(
+              value: value,
+              label: '$value',
+              description: switch (value) {
+                <= 512 => i18n("power_saving_mode"),
+                1024 => i18n("hd_recommend"),
+                2048 => i18n("fhd_recommend"),
+                _ => i18n("extreme_performance"),
+              },
+            ),
+          )
+          .toList(growable: false),
+      onSelected: controller.updateThreadQueueSize,
     );
   }
 
   void _showMaxTaskDialog() {
-    final theme = Get.theme;
-
-    final textController = TextEditingController(text: controller.maxTaskCount.value.toString());
-
-    final options = List.generate(10, (i) => i + 1);
-
-    Get.dialog(
-      StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: Text(i18n("max_record_tasks"), style: const TextStyle(fontWeight: FontWeight.bold)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: textController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: i18n("manual_input"),
-                    hintText: i18n("input_range"),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(i18n("quick_select"), style: const TextStyle(fontWeight: FontWeight.w600)),
-                ),
-
-                const SizedBox(height: 8),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: options.map((v) {
-                      final selected = int.tryParse(textController.text) == v;
-
-                      return ChoiceChip(
-                        label: Text("$v"),
-                        selected: selected,
-                        onSelected: (_) {
-                          textController.text = "$v";
-                          setState(() {});
-                        },
-                        selectedColor: theme.colorScheme.primary.withValues(alpha: 0.2),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.of(Get.context!).pop(), child: Text(i18n("cancel"))),
-              ElevatedButton(
-                onPressed: () {
-                  final val = int.tryParse(textController.text);
-
-                  if (val == null || val < 1) return;
-
-                  controller.updateMaxTask(val);
-
-                  Navigator.of(Get.context!).pop();
-                },
-                child: Text(i18n("confirm")),
-              ),
-            ],
-          );
-        },
-      ),
-    ).whenComplete(textController.dispose);
-  }
-
-  void _showQualityDialog() {
-    final theme = Get.theme;
-
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(i18n("default_record_quality"), style: const TextStyle(fontWeight: FontWeight.bold)),
-        content: RadioGroup<String>(
-          groupValue: controller.defaultQuality.value,
-          onChanged: (v) {
-            if (v != null) {
-              controller.updateDefaultQuality(v);
-            }
-
-            Navigator.pop(Get.context!);
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: PlayerConsts.resolutions.map((e) {
-              return RadioListTile<String>(
-                title: Text(e, style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w500)),
-                value: e,
-                activeColor: theme.colorScheme.primary,
-                selected: controller.defaultQuality.value == e,
-                selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.05),
-              );
-            }).toList(),
-          ),
+    showDialog<void>(
+      context: Get.context!,
+      builder: (context) => _RecordIntegerDialog(
+        title: i18n("max_record_tasks"),
+        fieldKey: 'record-max-tasks',
+        initialValue: controller.maxTaskCount.value,
+        minimum: RecorderConfig.minMaxTaskCount,
+        maximum: RecorderConfig.maxMaxTaskCount,
+        hintText: i18n("input_range"),
+        errorText: i18n('record_max_tasks_invalid'),
+        quickValues: List.generate(
+          RecorderConfig.maxMaxTaskCount - RecorderConfig.minMaxTaskCount + 1,
+          (index) => RecorderConfig.minMaxTaskCount + index,
         ),
+        onSubmitted: controller.updateMaxTask,
       ),
     );
   }
 
-  void _showCacheDialog() {
-    final textController = TextEditingController(text: controller.maxCacheMB.value.toString());
+  void _showQualityDialog() {
+    _showRadioDialog<String>(
+      title: i18n("default_record_quality"),
+      selected: controller.defaultQuality.value,
+      options: PlayerConsts.resolutions
+          .map((value) => _RecordOption(value: value, label: _resolutionLabel(value)))
+          .toList(growable: false),
+      onSelected: controller.updateDefaultQuality,
+    );
+  }
 
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(i18n("set_max_cache"), style: const TextStyle(fontWeight: FontWeight.bold)),
-        content: TextField(
-          controller: textController,
-          keyboardType: TextInputType.number,
-          style: AppTextStyles.t18,
-          decoration: InputDecoration(
-            hintText: i18n("please_input_number"),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Get.theme.colorScheme.primary, width: 2),
+  void _showCacheDialog() {
+    showDialog<void>(
+      context: Get.context!,
+      builder: (context) => _RecordIntegerDialog(
+        title: i18n("set_max_cache"),
+        fieldKey: 'record-cache-limit',
+        initialValue: controller.maxCacheMB.value,
+        minimum: RecorderConfig.minMaxCacheMB,
+        hintText: i18n("please_input_number"),
+        errorText: i18n('record_cache_limit_invalid'),
+        onSubmitted: controller.updateMaxCache,
+      ),
+    );
+  }
+
+  void _showRadioDialog<T>({
+    required String title,
+    required T selected,
+    required List<_RecordOption<T>> options,
+    required Future<void> Function(T) onSelected,
+  }) {
+    var selectionPending = false;
+    showDialog<void>(
+      context: Get.context!,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        return AlertDialog(
+          scrollable: true,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+          content: RadioGroup<T>(
+            groupValue: selected,
+            onChanged: (value) async {
+              if (value == null || selectionPending) return;
+              selectionPending = true;
+              try {
+                await onSelected(value);
+                if (dialogContext.mounted && ModalRoute.of(dialogContext)?.isCurrent == true) {
+                  Navigator.of(dialogContext).pop();
+                }
+              } catch (_) {
+                selectionPending = false;
+                rethrow;
+              }
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: options
+                  .map(
+                    (option) => RadioListTile<T>(
+                      value: option.value,
+                      activeColor: theme.colorScheme.primary,
+                      selected: option.value == selected,
+                      selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.05),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      title: Text(option.label, style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w600)),
+                      subtitle: option.description == null ? null : Text(option.description!, style: AppTextStyles.t12),
+                    ),
+                  )
+                  .toList(growable: false),
             ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(Get.context!),
-            child: Text(i18n("cancel"), style: AppTextStyles.t16),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final val = int.tryParse(textController.text);
+        );
+      },
+    );
+  }
+}
 
-              if (val != null) {
-                controller.updateMaxCache(val);
-              }
+class _RecordOption<T> {
+  const _RecordOption({required this.value, required this.label, this.description});
 
-              Navigator.pop(Get.context!);
-            },
-            child: Text(i18n("confirm"), style: AppTextStyles.t16),
+  final T value;
+  final String label;
+  final String? description;
+}
+
+class _RecordIntegerDialog extends StatefulWidget {
+  const _RecordIntegerDialog({
+    required this.title,
+    required this.fieldKey,
+    required this.initialValue,
+    required this.minimum,
+    required this.hintText,
+    required this.errorText,
+    required this.onSubmitted,
+    this.maximum,
+    this.quickValues = const <int>[],
+  });
+
+  final String title;
+  final String fieldKey;
+  final int initialValue;
+  final int minimum;
+  final int? maximum;
+  final String hintText;
+  final String errorText;
+  final Future<void> Function(int) onSubmitted;
+  final List<int> quickValues;
+
+  @override
+  State<_RecordIntegerDialog> createState() => _RecordIntegerDialogState();
+}
+
+class _RecordIntegerDialogState extends State<_RecordIntegerDialog> {
+  late final TextEditingController _controller;
+  bool _invalid = false;
+  bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue.toString());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  int? _parse(String value) {
+    final parsed = int.tryParse(value);
+    if (parsed == null || parsed < widget.minimum) return null;
+    final maximum = widget.maximum;
+    if (maximum != null && parsed > maximum) return null;
+    return parsed;
+  }
+
+  void _validate(String value) {
+    final invalid = _parse(value) == null;
+    if (invalid != _invalid) setState(() => _invalid = invalid);
+  }
+
+  Future<void> _submit() async {
+    if (_submitting) return;
+    final value = _parse(_controller.text);
+    if (value == null) {
+      if (!_invalid) setState(() => _invalid = true);
+      return;
+    }
+    setState(() => _submitting = true);
+    try {
+      await widget.onSubmitted(value);
+      if (mounted && ModalRoute.of(context)?.isCurrent == true) Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) setState(() => _submitting = false);
+      rethrow;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      scrollable: true,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            key: ValueKey('${widget.fieldKey}-input'),
+            controller: _controller,
+            enabled: !_submitting,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: AppTextStyles.t18,
+            decoration: InputDecoration(
+              labelText: i18n("manual_input"),
+              hintText: widget.hintText,
+              errorText: _invalid ? widget.errorText : null,
+              errorMaxLines: 3,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              ),
+            ),
+            onChanged: _validate,
+            onSubmitted: (_) => _submit(),
           ),
+          if (widget.quickValues.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(i18n("quick_select"), style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: widget.quickValues
+                  .map(
+                    (value) => ChoiceChip(
+                      label: Text('$value'),
+                      selected: int.tryParse(_controller.text) == value,
+                      onSelected: _submitting
+                          ? null
+                          : (_) {
+                              _controller.text = '$value';
+                              setState(() => _invalid = false);
+                            },
+                      selectedColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          ],
         ],
       ),
-    ).whenComplete(textController.dispose);
+      actions: [
+        TextButton(onPressed: _submitting ? null : () => Navigator.of(context).pop(), child: Text(i18n("cancel"))),
+        FilledButton(onPressed: _submitting ? null : _submit, child: Text(i18n("confirm"))),
+      ],
+    );
   }
 }

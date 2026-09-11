@@ -343,14 +343,10 @@ class VideoSettingsPage extends GetView<SettingsService> {
     );
   }
 
-  String _preferredResolutionLabel(String value) => switch (value) {
-    '原画' => i18n('prefer_resolution_option_original'),
-    '蓝光8M' => i18n('prefer_resolution_option_blu_ray_8m'),
-    '蓝光4M' => i18n('prefer_resolution_option_blu_ray_4m'),
-    '超清' => i18n('prefer_resolution_option_super_hd'),
-    '流畅' => i18n('prefer_resolution_option_smooth'),
-    _ => value,
-  };
+  String _preferredResolutionLabel(String value) {
+    final key = PlayerConsts.resolutionLabelKey(value);
+    return key == null ? value : i18n(key);
+  }
 }
 
 class _AsmrSleepTimerDialog extends StatefulWidget {

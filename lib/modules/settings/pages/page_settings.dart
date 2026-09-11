@@ -68,8 +68,11 @@ class PageSettingsPage extends GetView<SettingsService> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           Text(i18n("current_options"), style: AppTextStyles.t12Muted),
                           TextButton.icon(
@@ -105,24 +108,23 @@ class PageSettingsPage extends GetView<SettingsService> {
                       const SizedBox(height: 24),
                       Text(i18n("custom_input"), style: AppTextStyles.t13Medium),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: customController,
-                              keyboardType: TextInputType.number,
-                              style: AppTextStyles.t14,
-                              decoration: InputDecoration(
-                                hintText: "20",
-                                suffixText: i18n("items_per_page"),
-                                suffixStyle: AppTextStyles.t12Muted,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              ),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final input = TextField(
+                            key: const Key('page-size-custom-input'),
+                            controller: customController,
+                            keyboardType: TextInputType.number,
+                            style: AppTextStyles.t14,
+                            decoration: InputDecoration(
+                              hintText: "20",
+                              suffixText: i18n("items_per_page"),
+                              suffixStyle: AppTextStyles.t12Muted,
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
+                          );
+                          final addButton = ElevatedButton(
+                            key: const Key('page-size-add-button'),
                             onPressed: () {
                               final int? val = int.tryParse(customController.text);
                               if (val != null && val > 0 && !draftOptions.contains(val)) {
@@ -137,8 +139,27 @@ class PageSettingsPage extends GetView<SettingsService> {
                               i18n("add"),
                               style: AppTextStyles.t13Medium.copyWith(color: theme.colorScheme.primary),
                             ),
-                          ),
-                        ],
+                          );
+                          final useStackedInput =
+                              constraints.maxWidth < 280 || MediaQuery.textScalerOf(context).scale(14) > 20;
+                          if (useStackedInput) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                input,
+                                const SizedBox(height: 8),
+                                Align(alignment: Alignment.centerRight, child: addButton),
+                              ],
+                            );
+                          }
+                          return Row(
+                            children: [
+                              Expanded(child: input),
+                              const SizedBox(width: 8),
+                              addButton,
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),

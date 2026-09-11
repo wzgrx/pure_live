@@ -1112,6 +1112,7 @@
     "invalid_input": "请输入正确的数值",
     "font_not_downloaded_or_corrupted": "所选字体未下载或已损坏，请重新选择或下载",
     "font_reset_default": "字体已成功重置为默认值",
+    "font_system_default": "系统默认",
     "firebase_enter_valid_email": "请输入有效的邮箱地址",
     "firebase_enter_email": "请输入邮箱",
     "firebase_enter_valid_password": "请输入至少6位密码",

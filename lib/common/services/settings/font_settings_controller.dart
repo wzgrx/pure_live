@@ -12,6 +12,8 @@ import 'package:pure_live/common/services/medels/download_status.dart';
 import 'package:pure_live/common/services/settings/danmaku_settings_controller.dart';
 
 class FontSettingsController extends GetxController {
+  static const defaultFontFamilyName = 'Default';
+
   Future<void>? _initialization;
   Future<void>? _fontDiskSizeRefresh;
   DateTime? _lastFontDiskSizeRefresh;
@@ -148,6 +150,21 @@ class FontSettingsController extends GetxController {
     await HivePrefUtil.setString('danmakuFontFamilyFileName', danmakuFontFamilyFileName.v);
   }
 
+  Future<void> resetAppFontFamily() async {
+    fontFamilyName.v = defaultFontFamilyName;
+    fontFamilyFileName.v = '';
+    await HivePrefUtil.setString('fontFamilyName', defaultFontFamilyName);
+    await HivePrefUtil.setString('fontFamilyFileName', '');
+    refreshSystemTheme();
+  }
+
+  Future<void> resetDanmakuFontFamily() async {
+    Get.find<DanmakuSettingsController>().danmakuFontFamilyName.v = defaultFontFamilyName;
+    danmakuFontFamilyFileName.v = '';
+    await HivePrefUtil.setString('danmakuFontFamilyName', defaultFontFamilyName);
+    await HivePrefUtil.setString('danmakuFontFamilyFileName', '');
+  }
+
   Future<void> refreshFontDiskSizes({bool force = false}) {
     final inFlight = _fontDiskSizeRefresh;
     if (inFlight != null) return inFlight;
@@ -187,18 +204,11 @@ class FontSettingsController extends GetxController {
   Future<void> uninstallFontFamily(FontModel font) async {
     await FontDownloadManager.instance.deleteFontFamily(font, (s) {});
     if (fontFamilyName.v == font.id) {
-      fontFamilyName.v = Platform.isWindows ? "Microsoft YaHei" : 'Default';
-      fontFamilyFileName.v = '';
-      await HivePrefUtil.setString('fontFamilyName', fontFamilyName.v);
-      await HivePrefUtil.setString('fontFamilyFileName', '');
-      refreshSystemTheme();
+      await resetAppFontFamily();
     }
     final danmaku = Get.find<DanmakuSettingsController>();
     if (danmaku.danmakuFontFamilyName.v == font.id) {
-      danmaku.danmakuFontFamilyName.v = 'Default';
-      danmakuFontFamilyFileName.v = '';
-      await HivePrefUtil.setString('danmakuFontFamilyName', 'Default');
-      await HivePrefUtil.setString('danmakuFontFamilyFileName', '');
+      await resetDanmakuFontFamily();
     }
     await refreshFontDiskSizes(force: true);
   }

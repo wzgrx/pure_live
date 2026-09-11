@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:pure_live/common/index.dart';
@@ -17,7 +18,29 @@ import 'package:pure_live/modules/about/widgets/version_dialog.dart';
 import 'package:pure_live/recorder/pages/recorder/recorder_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({
+    super.key,
+    this.updateCheckDelay = const Duration(seconds: 2),
+    this.initializePackageInfo,
+    this.checkForUpdate,
+    this.hasNewVersion,
+    this.updatePromptBuilder,
+  });
+
+  @visibleForTesting
+  final Duration updateCheckDelay;
+
+  @visibleForTesting
+  final Future<void> Function()? initializePackageInfo;
+
+  @visibleForTesting
+  final Future<bool> Function()? checkForUpdate;
+
+  @visibleForTesting
+  final bool Function()? hasNewVersion;
+
+  @visibleForTesting
+  final WidgetBuilder? updatePromptBuilder;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -76,8 +99,8 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin,
     // competed with the cold-start room verification and image requests.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _updateCheckTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) unawaited(addToOverlay());
+      _updateCheckTimer = Timer(widget.updateCheckDelay, () {
+        if (mounted) unawaited(_checkForStartupUpdate());
       });
     });
 
@@ -178,27 +201,23 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin,
     favoriteController.tabBottomIndex.value = index;
   }
 
-  Future<void> addToOverlay() async {
-    final overlay = Overlay.maybeOf(context);
-    late OverlayEntry entry;
-    entry = OverlayEntry(
-      builder: (context) => Container(
-        alignment: Alignment.center,
-        color: Colors.black54,
-        child: NewVersionDialog(entry: entry),
-      ),
-    );
-    await VersionUtil.initPackageInfo();
-    await VersionUtil().checkUpdate();
-    bool isHasNerVersion = SettingsService.to.app.enableAutoCheckUpdate.v && VersionUtil.hasNewVersion();
-    if (mounted) {
-      if (overlay != null && isHasNerVersion) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => overlay.insert(entry));
-      } else {
-        if (overlay != null && isHasNerVersion) {
-          overlay.insert(entry);
-        }
+  Future<void> _checkForStartupUpdate() async {
+    try {
+      await (widget.initializePackageInfo ?? VersionUtil.initPackageInfo)();
+      if (!mounted) return;
+      final checkForUpdate = widget.checkForUpdate ?? VersionUtil().checkUpdate;
+      final succeeded = await checkForUpdate();
+      final hasNewVersion = widget.hasNewVersion ?? VersionUtil.hasNewVersion;
+      if (!mounted || !succeeded || !SettingsService.to.app.enableAutoCheckUpdate.v || !hasNewVersion()) {
+        return;
       }
+      await showDialog<void>(
+        context: context,
+        useRootNavigator: true,
+        builder: widget.updatePromptBuilder ?? (_) => const NewVersionDialog(),
+      );
+    } catch (error, stackTrace) {
+      log('Startup update check skipped: $error', name: 'HomePage', error: error, stackTrace: stackTrace);
     }
   }
 

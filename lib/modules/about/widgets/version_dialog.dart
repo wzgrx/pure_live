@@ -24,73 +24,62 @@ class NoNewVersionDialog extends StatelessWidget {
 }
 
 class NewVersionDialog extends StatelessWidget {
-  const NewVersionDialog({super.key, this.entry});
+  const NewVersionDialog({super.key, this.onOpenProject, this.onUpdate});
 
-  final OverlayEntry? entry;
+  final VoidCallback? onOpenProject;
+  final VoidCallback? onUpdate;
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final maxWidth = mediaQuery.size.width * 0.9;
-    final maxHeight = mediaQuery.size.height * 0.7;
     final config = Get.isDarkMode ? MarkdownConfig.darkConfig : MarkdownConfig.defaultConfig;
     return AlertDialog(
+      key: const ValueKey('new-version-dialog'),
+      scrollable: true,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       title: Text(i18n("check_update")),
-      content: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextButton(
-                onPressed: () {
-                  if (entry != null) {
-                    entry!.remove();
-                  } else {
-                    Navigator.pop(context);
-                  }
-                  launchUrl(
-                    Uri.parse(VersionUtil.projectUrl),
-                    mode: LaunchMode.externalApplication,
-                  );
-                },
-                child: Text(i18n('open_source_free'), style: AppTextStyles.t20),
-              ),
-              MarkdownBlock(data: VersionUtil.latestUpdateLog, config: config),
-              const SizedBox(height: 10),
-            ],
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextButton.icon(
+            key: const ValueKey('new-version-open-project'),
+            style: TextButton.styleFrom(alignment: Alignment.centerLeft),
+            onPressed: () {
+              Navigator.pop(context);
+              final callback = onOpenProject;
+              if (callback != null) {
+                callback();
+              } else {
+                launchUrl(Uri.parse(VersionUtil.projectUrl), mode: LaunchMode.externalApplication);
+              }
+            },
+            icon: const Icon(Icons.open_in_new_rounded),
+            label: Text(i18n('open_source_free'), style: AppTextStyles.t15),
           ),
-        ),
+          MarkdownBlock(data: VersionUtil.latestUpdateLog, config: config),
+          const SizedBox(height: 10),
+        ],
       ),
-      actionsAlignment: MainAxisAlignment.start,
+      actionsAlignment: MainAxisAlignment.end,
+      actionsOverflowAlignment: OverflowBarAlignment.end,
       actions: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              child: Text(i18n("cancel")),
-              onPressed: () {
-                if (entry != null) {
-                  entry!.remove();
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            ElevatedButton(
-              child: Text(i18n("update")),
-              onPressed: () {
-                if (entry != null) {
-                  entry!.remove();
-                } else {
-                  Navigator.pop(context);
-                }
-                Get.toNamed(RoutePath.kVersionPage);
-              },
-            ),
-          ],
+        TextButton(
+          key: const ValueKey('new-version-cancel'),
+          onPressed: () => Navigator.pop(context),
+          child: Text(i18n("cancel")),
+        ),
+        FilledButton(
+          key: const ValueKey('new-version-update'),
+          onPressed: () {
+            Navigator.pop(context);
+            final callback = onUpdate;
+            if (callback != null) {
+              callback();
+            } else {
+              Get.toNamed(RoutePath.kVersionPage);
+            }
+          },
+          child: Text(i18n("update")),
         ),
       ],
     );

@@ -1534,6 +1534,8 @@
     "collapse_repeated_danmaku_desc": "Keep the first copy when different users send the same text. Local and system messages are unaffected.",
     "repeated_danmaku_window": "Identical-text window (seconds)",
     "super_chat": "Super Chat",
+    "super_chat_empty_title": "No Super Chats yet",
+    "super_chat_empty_subtitle": "Paid messages from the current room will appear here.",
     "multiview_title": "Multiview",
     "multiview_pick_for_cell": "Pick for cell {index}",
     "multiview_empty_cell_hint": "Tap to pick",

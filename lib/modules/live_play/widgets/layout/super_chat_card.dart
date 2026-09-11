@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
-import 'package:flutter_color/flutter_color.dart';
 import 'package:pure_live/plugins/locale_helper.dart';
 import 'package:pure_live/common/utils/toast_util.dart';
 import 'package:pure_live/common/models/live_message.dart';
@@ -89,12 +88,22 @@ class _SuperChatCardState extends State<SuperChatCard> {
     return _contrastText(background).withValues(alpha: opacity);
   }
 
+  Color _platformColor(String source, Color fallback) {
+    final value = source.trim();
+    final normalized = value.startsWith('#') ? value.substring(1) : value;
+    if (!RegExp(r'^(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$').hasMatch(normalized)) return fallback;
+    final parsed = int.tryParse(normalized, radix: 16);
+    if (parsed == null) return fallback;
+    return Color(normalized.length == 6 ? 0xFF000000 | parsed : parsed);
+  }
+
   @override
   Widget build(BuildContext context) {
     final message = widget.message;
+    final theme = Theme.of(context);
 
-    final headerColor = HexColor(message.backgroundColor);
-    final messageColor = HexColor(message.backgroundBottomColor);
+    final headerColor = _platformColor(message.backgroundColor, theme.colorScheme.primaryContainer);
+    final messageColor = _platformColor(message.backgroundBottomColor, theme.colorScheme.surfaceContainerHighest);
 
     final headerText = _contrastText(headerColor);
     final headerSubText = _secondaryText(headerColor);
@@ -139,70 +148,106 @@ class _SuperChatCardState extends State<SuperChatCard> {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 9, 12, 9),
       decoration: BoxDecoration(color: backgroundColor),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _buildAvatar(message.face, primaryText),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final stacked = constraints.maxWidth < 280 || MediaQuery.textScalerOf(context).scale(14) > 24;
+          final userName = Text(
+            message.userName,
+            maxLines: stacked ? 3 : 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: primaryText, fontSize: 14, height: 1.2, fontWeight: FontWeight.w600),
+          );
+          if (stacked) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  message.userName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: primaryText, fontSize: 14, height: 1.2, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 5),
                 Row(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(Remix.money_cny_circle_fill, size: 16, color: const Color(0xFFFFC107)),
-                    const SizedBox(width: 1),
-                    Text(
-                      '￥${message.price}',
-                      style: TextStyle(
-                        color: primaryText,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
+                    _buildAvatar(message.face, primaryText),
+                    const SizedBox(width: 10),
+                    Expanded(child: userName),
                   ],
                 ),
+                const SizedBox(height: 10),
+                _buildPrice(message, primaryText),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: _buildInfoArea(
+                    backgroundColor: backgroundColor,
+                    primaryText: primaryText,
+                    secondaryText: secondaryText,
+                  ),
+                ),
               ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          _buildInfoArea(backgroundColor: backgroundColor, primaryText: primaryText, secondaryText: secondaryText),
-        ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildAvatar(message.face, primaryText),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [userName, const SizedBox(height: 5), _buildPrice(message, primaryText)],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _buildInfoArea(backgroundColor: backgroundColor, primaryText: primaryText, secondaryText: secondaryText),
+            ],
+          );
+        },
       ),
     );
   }
 
+  Widget _buildPrice(LiveSuperChatMessage message, Color textColor) {
+    return Row(
+      children: [
+        const Icon(Remix.money_cny_circle_fill, size: 16, color: Color(0xFFFFC107)),
+        const SizedBox(width: 3),
+        Flexible(
+          child: Text(
+            '￥${message.price}',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildAvatar(String url, Color borderColor) {
+    final uri = Uri.tryParse(url.trim());
+    final hasRemoteAvatar = uri != null && (uri.scheme == 'http' || uri.scheme == 'https') && uri.host.isNotEmpty;
+    final fallback = Container(
+      color: Colors.black.withValues(alpha: 0.10),
+      alignment: Alignment.center,
+      child: Icon(Remix.user_2_fill, size: 20, color: borderColor),
+    );
     return Container(
       width: 44,
       height: 44,
       padding: const EdgeInsets.all(1.8),
       decoration: BoxDecoration(color: borderColor.withValues(alpha: 0.9), shape: BoxShape.circle),
       child: ClipOval(
-        child: Image.network(
-          url,
-          width: 40.4,
-          height: 40.4,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.medium,
-          errorBuilder: (_, _, _) {
-            return Container(
-              color: Colors.black.withValues(alpha: 0.10),
-              alignment: Alignment.center,
-              child: Icon(Remix.user_2_fill, size: 20, color: borderColor),
-            );
-          },
-        ),
+        child: hasRemoteAvatar
+            ? Image.network(
+                url,
+                width: 40.4,
+                height: 40.4,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.medium,
+                errorBuilder: (_, _, _) => fallback,
+              )
+            : fallback,
       ),
     );
   }

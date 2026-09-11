@@ -22,20 +22,32 @@ class SettingsPage extends GetView<SettingsService> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final scaledActionFontSize = mediaQuery.textScaler.scale(14);
+    final useCompactConfigAction = screenWidth < 520 || scaledActionFontSize > 18;
+    final configPreviewLabel = i18n('config_preview');
+    void openConfigPreview() => Get.to(() => LocalConfigPreviewPage());
 
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: screenWidth > 640 ? 0 : null,
-        title: Text(i18n("settings_title")),
+        title: Text(i18n('settings_title'), maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
-          TextButton(
-            onPressed: () => Get.to(() => LocalConfigPreviewPage()),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [Icon(Remix.file_text_line, size: 18), const SizedBox(width: 4), Text(i18n("config_preview"))],
+          if (useCompactConfigAction)
+            IconButton(
+              key: const ValueKey('settings-config-preview-action'),
+              tooltip: configPreviewLabel,
+              onPressed: openConfigPreview,
+              icon: const Icon(Remix.file_text_line, size: 20),
+            )
+          else
+            TextButton.icon(
+              key: const ValueKey('settings-config-preview-action'),
+              onPressed: openConfigPreview,
+              icon: const Icon(Remix.file_text_line, size: 18),
+              label: Text(configPreviewLabel, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-          ),
           const SizedBox(width: 8),
         ],
       ),

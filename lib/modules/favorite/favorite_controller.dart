@@ -53,8 +53,9 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
   final replayRooms = <LiveRoom>[].obs;
   final selectedTagId = TagManagementController.allTagKey.obs;
   final visibleTags = <LiveTag>[].obs;
+  final DateTime Function() _now;
 
-  FavoriteController() : super();
+  FavoriteController({DateTime Function()? now}) : _now = now ?? DateTime.now, super();
 
   /// Resolves the adapter once per platform in each refresh pass. Keep adapter
   /// construction separate from snapshot ownership and persistence.
@@ -114,6 +115,7 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
 
     _setupRefreshStrategy();
     _configSubscription = refreshConfigController.configChanges.listen((config) {
+      if (!config.refreshFavoriteOnResume) _cancelPendingResumeRefresh();
       _setupRefreshStrategy();
     });
 
@@ -144,6 +146,10 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
 
   void debounceRefresh() {
     if (isClosed) return;
+    // A local favourite change already schedules a complete refresh sooner
+    // than the delayed resume pass. Keep only the user-owned trigger so one
+    // change cannot publish two consecutive network snapshots.
+    _cancelPendingResumeRefresh();
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       unawaited(_fullRefreshRooms(showLoading: false));
@@ -154,23 +160,33 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (isClosed) return;
     if (state != AppLifecycleState.resumed) {
-      _resumeRefreshTimer?.cancel();
+      _cancelPendingResumeRefresh();
       return;
     }
     if (!refreshConfigController.refreshFavoriteOnResume.value) {
+      _cancelPendingResumeRefresh();
       return;
     }
     final last = _lastFullRefreshAt;
-    if (last == null || DateTime.now().difference(last) >= _resumeRefreshStaleAfter) {
+    if (last == null || _now().difference(last) >= _resumeRefreshStaleAfter) {
       // Paint the retained snapshot first. JSON parsing and image URL updates
       // then land as one transaction instead of competing with the foreground
       // transition and producing several visibly different grids.
-      _resumeRefreshTimer?.cancel();
-      _resumeRefreshTimer = Timer(
-        const Duration(milliseconds: 450),
-        () => unawaited(_fullRefreshRooms(showLoading: true, emitFinish: false, bypassFailureCooldown: true)),
-      );
+      _cancelPendingResumeRefresh();
+      _resumeRefreshTimer = Timer(const Duration(milliseconds: 450), () {
+        _resumeRefreshTimer = null;
+        unawaited(_fullRefreshRooms(showLoading: true, emitFinish: false, bypassFailureCooldown: true));
+      });
+    } else {
+      // A full refresh may have completed after an earlier resumed event but
+      // before its debounce expired. Do not let the older timer run anyway.
+      _cancelPendingResumeRefresh();
     }
+  }
+
+  void _cancelPendingResumeRefresh() {
+    _resumeRefreshTimer?.cancel();
+    _resumeRefreshTimer = null;
   }
 
   @override
@@ -184,7 +200,7 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
     _configSubscription?.cancel();
     _autoRefreshTimer?.cancel();
     _debounceTimer?.cancel();
-    _resumeRefreshTimer?.cancel();
+    _cancelPendingResumeRefresh();
     _favoriteSnapshotTimer?.cancel();
     for (final worker in _workers) {
       worker.dispose();
@@ -548,6 +564,9 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
   @override
   Future<void> refreshData() async {
     if (isClosed) return;
+    // Pull-to-refresh is authoritative for this interaction. A resume event
+    // queued just before the gesture must not follow it with another pass.
+    _cancelPendingResumeRefresh();
     final startup = _startupRefresh;
     if (startup != null) {
       // BasePageView performs a one-time mobile/desktop layout notification.
@@ -577,6 +596,7 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
     bool bypassFailureCooldown = false,
   }) async {
     if (isClosed) return;
+    _cancelPendingResumeRefresh();
     final startup = _startupRefresh;
     if (startup != null) {
       // Cold-start verification already covers every favourite. Coalescing
@@ -682,7 +702,13 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
           // remains unknown instead of carrying the previous process's live bit.
           SettingsService.to.fav.favoriteRooms.v = merged.rooms;
         }
-        if (markFullRefresh) _lastFullRefreshAt = DateTime.now();
+        if (markFullRefresh) {
+          _lastFullRefreshAt = _now();
+          // A resumed event can arrive while this pass is in flight. The
+          // completed full snapshot is newer than that event, so its delayed
+          // timer must not enqueue the same network work again.
+          _cancelPendingResumeRefresh();
+        }
         applyLocalFilter();
         if (emitFinish) EventBus.instance.emit('refresh_favorite_finish', true);
       } finally {
@@ -751,7 +777,7 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
   }) async {
     final key = _roomKey(room);
     final failedAt = _refreshFailureCooldown[key];
-    if (!bypassFailureCooldown && failedAt != null && DateTime.now().difference(failedAt) < _refreshFailureRetryAfter) {
+    if (!bypassFailureCooldown && failedAt != null && _now().difference(failedAt) < _refreshFailureRetryAfter) {
       return null;
     }
 
@@ -769,7 +795,7 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
     } catch (error, stackTrace) {
       if (isClosed) return null;
       final key = _roomKey(room);
-      _refreshFailureCooldown[key] = DateTime.now();
+      _refreshFailureCooldown[key] = _now();
 
       if (error is FormatException && error.message == 'Huya room metadata is unavailable') {
         developer.log('Favorite room unavailable: $key', name: 'FavoriteController');

@@ -43,7 +43,7 @@ class _Source extends LiveSite {
 }
 
 class _Favorite extends FavoriteController {
-  _Favorite(this.source);
+  _Favorite(this.source, {super.now});
   final _Source source;
   int factories = 0;
   final finishes = <IndicatorResult>[];
@@ -87,7 +87,7 @@ Future<void> _drain(WidgetTester tester, _Source source) async {
   }
 }
 
-Future<_Favorite> _mount(WidgetTester tester, {bool desktop = true}) async {
+Future<_Favorite> _mount(WidgetTester tester, {bool desktop = true, DateTime Function()? now}) async {
   Get.testMode = true;
   Get.reset();
   await Hive.box('app_settings').clear();
@@ -105,7 +105,7 @@ Future<_Favorite> _mount(WidgetTester tester, {bool desktop = true}) async {
       home: Builder(
         builder: (_) {
           if (owner == null) {
-            owner = _Favorite(source);
+            owner = _Favorite(source, now: now);
             _mounted = owner;
             Get.put<FavoriteController>(owner!);
           }
@@ -217,6 +217,75 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(tester.takeException(), isNull);
     expect(c.source.requests, hasLength(1));
+  });
+
+  _testWidgets('manual refresh supersedes a delayed resume refresh', (tester) async {
+    var now = DateTime.utc(2026, 9, 11);
+    final c = await _mount(tester, now: () => now);
+    await _drain(tester, c.source);
+    now = now.add(const Duration(seconds: 16));
+
+    c.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    final manual = c.refreshData();
+    await tester.pump(Duration.zero);
+    expect(c.source.requests, hasLength(2));
+    c.source.requests.last.complete(_room('manual'));
+    await tester.pump(Duration.zero);
+    await manual;
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(c.source.requests, hasLength(2), reason: 'one user refresh must not be followed by a second network pass');
+    expect(c.onlineRooms.single.title, 'manual');
+  });
+
+  _testWidgets('disabling resume refresh revokes an already scheduled pass', (tester) async {
+    var now = DateTime.utc(2026, 9, 11);
+    final c = await _mount(tester, now: () => now);
+    await _drain(tester, c.source);
+    now = now.add(const Duration(seconds: 16));
+
+    c.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    c.refreshConfigController.refreshFavoriteOnResume.value = false;
+    await tester.pump(Duration.zero);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(c.source.requests, hasLength(1));
+  });
+
+  _testWidgets('debounced favorite change supersedes a delayed resume refresh', (tester) async {
+    var now = DateTime.utc(2026, 9, 11);
+    final c = await _mount(tester, now: () => now);
+    await _drain(tester, c.source);
+    now = now.add(const Duration(seconds: 16));
+
+    c.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    c.debounceRefresh();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(c.source.requests, hasLength(2));
+    c.source.requests.last.complete(_room('event'));
+    await tester.pump(Duration.zero);
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(c.source.requests, hasLength(2), reason: 'the event-owned pass already refreshed the complete snapshot');
+    expect(c.onlineRooms.single.title, 'event');
+  });
+
+  _testWidgets('a completed full refresh revokes a resume event received while it was active', (tester) async {
+    var now = DateTime.utc(2026, 9, 11);
+    final c = await _mount(tester, now: () => now);
+    await _drain(tester, c.source);
+    now = now.add(const Duration(seconds: 16));
+
+    c.debounceRefresh();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(c.source.requests, hasLength(2));
+    c.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    c.source.requests.last.complete(_room('current-full'));
+    await tester.pump(Duration.zero);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(c.source.requests, hasLength(2), reason: 'the just-completed full snapshot satisfies the resume event');
+    expect(c.onlineRooms.single.title, 'current-full');
   });
 
   _testWidgets('favorite startup owns the page operation and preserves preview until completion', (tester) async {

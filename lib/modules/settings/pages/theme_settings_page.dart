@@ -1,6 +1,7 @@
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/consts/app_consts.dart';
+import 'package:pure_live/common/services/settings/font_settings_controller.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:pure_live/modules/settings/pages/page_settings.dart';
 import 'package:pure_live/modules/settings/pages/font_settings_page.dart';
@@ -153,8 +154,8 @@ class ThemeSettingsPage extends GetView<SettingsService> {
                 icon: Remix.text_spacing,
                 title: i18n("text_size_title"),
                 value: SettingsService.to.font.textScaleFactor.v,
-                min: 0.5,
-                max: 2.0,
+                min: FontSettingsController.minTextScaleFactor,
+                max: FontSettingsController.maxTextScaleFactor,
                 displayValue: SettingsService.to.font.textScaleFactor.v.toStringAsFixed(2),
                 onChanged: (val) {
                   SettingsService.to.font.textScaleFactor.v = val;

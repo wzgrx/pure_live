@@ -13,17 +13,35 @@ import 'package:pure_live/common/services/settings/danmaku_settings_controller.d
 
 class FontSettingsController extends GetxController {
   static const defaultFontFamilyName = 'Default';
+  static const defaultTextScaleFactor = 1.0;
+  static const minTextScaleFactor = 0.5;
+  static const maxTextScaleFactor = 2.0;
+  static const defaultFontSizeBodySmall = 12.0;
+  static const minFontSizeBodySmall = 9.0;
+  static const maxFontSizeBodySmall = 15.0;
+  static const defaultFontSizeBodyMedium = 13.0;
+  static const minFontSizeBodyMedium = 11.0;
+  static const maxFontSizeBodyMedium = 17.0;
+  static const defaultFontSizeBodyLarge = 14.0;
+  static const minFontSizeBodyLarge = 12.0;
+  static const maxFontSizeBodyLarge = 18.0;
+  static const defaultFontSizeTitleMedium = 15.0;
+  static const minFontSizeTitleMedium = 13.0;
+  static const maxFontSizeTitleMedium = 20.0;
+  static const defaultFontSizeTitleLarge = 20.0;
+  static const minFontSizeTitleLarge = 16.0;
+  static const maxFontSizeTitleLarge = 26.0;
 
   Future<void>? _initialization;
   Future<void>? _fontDiskSizeRefresh;
   DateTime? _lastFontDiskSizeRefresh;
   Worker? _themeWorker;
-  final RxDouble textScaleFactor = hiveDouble('textScaleFactor', 1.0);
-  final RxDouble fontSizeBodySmall = hiveDouble('fontSizeBodySmall', 12.0);
-  final RxDouble fontSizeBodyMedium = hiveDouble('fontSizeBodyMedium', 13.0);
-  final RxDouble fontSizeBodyLarge = hiveDouble('fontSizeBodyLarge', 14.0);
-  final RxDouble fontSizeTitleMedium = hiveDouble('fontSizeTitleMedium', 15.0);
-  final RxDouble fontSizeTitleLarge = hiveDouble('fontSizeTitleLarge', 20.0);
+  final RxDouble textScaleFactor = hiveDouble('textScaleFactor', defaultTextScaleFactor);
+  final RxDouble fontSizeBodySmall = hiveDouble('fontSizeBodySmall', defaultFontSizeBodySmall);
+  final RxDouble fontSizeBodyMedium = hiveDouble('fontSizeBodyMedium', defaultFontSizeBodyMedium);
+  final RxDouble fontSizeBodyLarge = hiveDouble('fontSizeBodyLarge', defaultFontSizeBodyLarge);
+  final RxDouble fontSizeTitleMedium = hiveDouble('fontSizeTitleMedium', defaultFontSizeTitleMedium);
+  final RxDouble fontSizeTitleLarge = hiveDouble('fontSizeTitleLarge', defaultFontSizeTitleLarge);
   final RxString fontFamilyName = hiveString('fontFamilyName', 'Default');
   final RxString fontFamilyFileName = hiveString('fontFamilyFileName', '');
   final RxString danmakuFontFamilyFileName = hiveString('danmakuFontFamilyFileName', '');
@@ -36,6 +54,7 @@ class FontSettingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _normalizeStoredTypography();
     unawaited(ensureInitialized());
 
     _themeWorker = everAll([
@@ -46,6 +65,71 @@ class FontSettingsController extends GetxController {
       fontSizeTitleLarge,
       fontFamilyName,
     ], (_) => refreshSystemTheme());
+  }
+
+  void _normalizeStoredTypography() {
+    textScaleFactor.v = _normalizeStoredValue(
+      textScaleFactor.v,
+      fallback: defaultTextScaleFactor,
+      min: minTextScaleFactor,
+      max: maxTextScaleFactor,
+    );
+    fontSizeBodySmall.v = _normalizeStoredValue(
+      fontSizeBodySmall.v,
+      fallback: defaultFontSizeBodySmall,
+      min: minFontSizeBodySmall,
+      max: maxFontSizeBodySmall,
+    );
+    fontSizeBodyMedium.v = _normalizeStoredValue(
+      fontSizeBodyMedium.v,
+      fallback: defaultFontSizeBodyMedium,
+      min: minFontSizeBodyMedium,
+      max: maxFontSizeBodyMedium,
+    );
+    fontSizeBodyLarge.v = _normalizeStoredValue(
+      fontSizeBodyLarge.v,
+      fallback: defaultFontSizeBodyLarge,
+      min: minFontSizeBodyLarge,
+      max: maxFontSizeBodyLarge,
+    );
+    fontSizeTitleMedium.v = _normalizeStoredValue(
+      fontSizeTitleMedium.v,
+      fallback: defaultFontSizeTitleMedium,
+      min: minFontSizeTitleMedium,
+      max: maxFontSizeTitleMedium,
+    );
+    fontSizeTitleLarge.v = _normalizeStoredValue(
+      fontSizeTitleLarge.v,
+      fallback: defaultFontSizeTitleLarge,
+      min: minFontSizeTitleLarge,
+      max: maxFontSizeTitleLarge,
+    );
+  }
+
+  static double _normalizeStoredValue(
+    double value, {
+    required double fallback,
+    required double min,
+    required double max,
+  }) {
+    if (!value.isFinite) return fallback;
+    return value.clamp(min, max).toDouble();
+  }
+
+  static double _parseBoundedValue(Object? raw, {required double fallback, required double min, required double max}) {
+    final value = ((raw ?? fallback) as num).toDouble();
+    if (!value.isFinite) {
+      throw const FormatException('Typography values must be finite');
+    }
+    return value.clamp(min, max).toDouble();
+  }
+
+  void resetTypography() {
+    fontSizeBodySmall.v = defaultFontSizeBodySmall;
+    fontSizeBodyMedium.v = defaultFontSizeBodyMedium;
+    fontSizeBodyLarge.v = defaultFontSizeBodyLarge;
+    fontSizeTitleMedium.v = defaultFontSizeTitleMedium;
+    fontSizeTitleLarge.v = defaultFontSizeTitleLarge;
   }
 
   @override
@@ -235,12 +319,42 @@ class FontSettingsController extends GetxController {
   /// Parse the complete section without notifying observers or persisting values.
   static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
     return {
-      'textScaleFactor': ((json['textScaleFactor'] ?? 1.0) as num).toDouble(),
-      'fontSizeBodySmall': ((json['fontSizeBodySmall'] ?? 12.0) as num).toDouble(),
-      'fontSizeBodyMedium': ((json['fontSizeBodyMedium'] ?? 13.0) as num).toDouble(),
-      'fontSizeBodyLarge': ((json['fontSizeBodyLarge'] ?? 14.0) as num).toDouble(),
-      'fontSizeTitleMedium': ((json['fontSizeTitleMedium'] ?? 15.0) as num).toDouble(),
-      'fontSizeTitleLarge': ((json['fontSizeTitleLarge'] ?? 20.0) as num).toDouble(),
+      'textScaleFactor': _parseBoundedValue(
+        json['textScaleFactor'],
+        fallback: defaultTextScaleFactor,
+        min: minTextScaleFactor,
+        max: maxTextScaleFactor,
+      ),
+      'fontSizeBodySmall': _parseBoundedValue(
+        json['fontSizeBodySmall'],
+        fallback: defaultFontSizeBodySmall,
+        min: minFontSizeBodySmall,
+        max: maxFontSizeBodySmall,
+      ),
+      'fontSizeBodyMedium': _parseBoundedValue(
+        json['fontSizeBodyMedium'],
+        fallback: defaultFontSizeBodyMedium,
+        min: minFontSizeBodyMedium,
+        max: maxFontSizeBodyMedium,
+      ),
+      'fontSizeBodyLarge': _parseBoundedValue(
+        json['fontSizeBodyLarge'],
+        fallback: defaultFontSizeBodyLarge,
+        min: minFontSizeBodyLarge,
+        max: maxFontSizeBodyLarge,
+      ),
+      'fontSizeTitleMedium': _parseBoundedValue(
+        json['fontSizeTitleMedium'],
+        fallback: defaultFontSizeTitleMedium,
+        min: minFontSizeTitleMedium,
+        max: maxFontSizeTitleMedium,
+      ),
+      'fontSizeTitleLarge': _parseBoundedValue(
+        json['fontSizeTitleLarge'],
+        fallback: defaultFontSizeTitleLarge,
+        min: minFontSizeTitleLarge,
+        max: maxFontSizeTitleLarge,
+      ),
       'fontFamilyName': (json['fontFamilyName'] ?? 'Default') as String,
       'fontFamilyFileName': (json['fontFamilyFileName'] ?? '') as String,
       'danmakuFontFamilyFileName': (json['danmakuFontFamilyFileName'] ?? '') as String,
@@ -262,17 +376,7 @@ class FontSettingsController extends GetxController {
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {
     final font = rootConfig?['font'] as Map<String, dynamic>? ?? {};
-    return {
-      'textScaleFactor': (font['textScaleFactor'] ?? 1.0).toDouble(),
-      'fontSizeBodySmall': (font['fontSizeBodySmall'] ?? 12.0).toDouble(),
-      'fontSizeBodyMedium': (font['fontSizeBodyMedium'] ?? 13.0).toDouble(),
-      'fontSizeBodyLarge': (font['fontSizeBodyLarge'] ?? 14.0).toDouble(),
-      'fontSizeTitleMedium': (font['fontSizeTitleMedium'] ?? 15.0).toDouble(),
-      'fontSizeTitleLarge': (font['fontSizeTitleLarge'] ?? 20.0).toDouble(),
-      'fontFamilyName': font['fontFamilyName'] ?? 'Default',
-      'fontFamilyFileName': font['fontFamilyFileName'] ?? '',
-      'danmakuFontFamilyFileName': font['danmakuFontFamilyFileName'] ?? '',
-    };
+    return parseConfig(font);
   }
 
   static Map<String, dynamic> mergeConfig(Map<String, dynamic> rootConfig, Map<String, dynamic> updateFields) {

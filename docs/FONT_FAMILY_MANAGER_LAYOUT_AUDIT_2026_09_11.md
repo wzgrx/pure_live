@@ -53,4 +53,5 @@
 ## 当前边界
 
 A2-01 保持 `RUN`，A2-07 保持 `PASS`。本批闭环 Windows 确定性窄屏/大字号、状态动作、默认身份持久化、
-多字重末项选择及惰性构建；真实字体下载/注册/删除、Android 触摸、进程重启与当前最终候选继续按总矩阵执行。
+多字重末项选择及惰性构建；精细字号范围、说明与重置另见
+[`FONT_SIZE_SETTINGS_LAYOUT_AND_BOUNDS_AUDIT_2026_09_11.md`](FONT_SIZE_SETTINGS_LAYOUT_AND_BOUNDS_AUDIT_2026_09_11.md)。真实字体下载/注册/删除、Android 触摸、进程重启与当前最终候选继续按总矩阵执行。

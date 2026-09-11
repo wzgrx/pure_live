@@ -346,6 +346,7 @@ extension AppLayoutFactory on BuildContext {
     BuildContext context, {
     required IconData icon,
     required String title,
+    String? subtitle,
     required double value,
     required double min,
     required double max,
@@ -418,6 +419,10 @@ extension AppLayoutFactory on BuildContext {
                     );
                   },
                 ),
+                if (subtitle != null && subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: AppTextStyles.t12.copyWith(color: theme.hintColor.withValues(alpha: 0.75))),
+                ],
                 const SizedBox(height: 2),
                 Transform.translate(
                   offset: const Offset(-4, 0),

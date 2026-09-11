@@ -1073,6 +1073,7 @@
     "font_title_large_title": "大号顶栏标题 (Title Large)",
     "font_title_large_desc": "用于页面顶栏(AppBar)大标题、警告对话框主体抬头",
     "font_settings_desc": "微调系统各项组件的专属预设字号基础值",
+    "font_settings_reset_confirm": "将五项精细字号全部恢复为默认值？",
     "reset": "重置",
     "font_family_settings": "字体样式设置",
     "downloading_font": "正在下载并载入全套字库...",

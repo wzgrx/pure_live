@@ -55,12 +55,6 @@ class ToolBoxController extends GetxController {
 
   void cancelAction() => _scope?.cancel();
 
-  @override
-  void onReady() {
-    super.onReady();
-    unawaited(autoCheckClipboard());
-  }
-
   Future<void> _runAction(
     String text,
     ToolBoxAction kind,
@@ -178,33 +172,67 @@ class ToolBoxController extends GetxController {
     var selected = false;
     final route = DialogRoute<T>(
       context: context,
-      builder: (dialogContext) => SimpleDialog(
-        title: Text(title),
-        children: [
-          for (var i = 0; i < items.length; i++)
-            ListTile(
-              title: Text(label(items[i], i), textAlign: TextAlign.center),
-              subtitle: subtitle == null
-                  ? null
-                  : Text(subtitle(items[i]), maxLines: 1, overflow: TextOverflow.ellipsis),
-              onTap: () {
-                if (!selected && scope.isActive) {
-                  selected = true;
-                  Navigator.of(dialogContext).pop(items[i]);
-                }
-              },
+      builder: (dialogContext) {
+        final mediaQuery = MediaQuery.of(dialogContext);
+        final maxHeight = (mediaQuery.size.height - mediaQuery.padding.vertical - mediaQuery.viewInsets.vertical - 32)
+            .clamp(160.0, double.infinity)
+            .toDouble();
+        return Dialog(
+          key: const ValueKey('toolbox-choice-dialog'),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 560, maxHeight: maxHeight),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(title, style: Theme.of(dialogContext).textTheme.headlineSmall),
+                          const SizedBox(height: 12),
+                          for (var i = 0; i < items.length; i++)
+                            ListTile(
+                              title: Text(label(items[i], i), textAlign: TextAlign.center),
+                              subtitle: subtitle == null
+                                  ? null
+                                  : Text(subtitle(items[i]), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              onTap: () {
+                                if (!selected && scope.isActive) {
+                                  selected = true;
+                                  Navigator.of(dialogContext).pop(items[i]);
+                                }
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton(
+                      key: const ValueKey('toolbox-choice-cancel'),
+                      onPressed: () {
+                        if (!selected) {
+                          selected = true;
+                          Navigator.of(dialogContext).pop();
+                        }
+                      },
+                      child: Text(i18n('cancel')),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          TextButton(
-            onPressed: () {
-              if (!selected) {
-                selected = true;
-                Navigator.of(dialogContext).pop();
-              }
-            },
-            child: Text(i18n('cancel')),
           ),
-        ],
-      ),
+        );
+      },
     );
     _ownedDialog = route;
     unawaited(
@@ -219,9 +247,10 @@ class ToolBoxController extends GetxController {
     }
   }
 
-  Future<void> autoCheckClipboard() async {
+  Future<void> autoCheckClipboard({BuildContext? context}) async {
     if (_disposed || isClosed || _clipboardChecked) return;
     _clipboardChecked = true;
+    final sourceRoute = context == null ? null : ModalRoute.of(context);
     final roomEmpty = roomJumpToController.text.isEmpty;
     final urlEmpty = getUrlController.text.isEmpty;
     if (!roomEmpty && !urlEmpty) return;
@@ -235,7 +264,11 @@ class ToolBoxController extends GetxController {
     } on MissingPluginException {
       return;
     }
-    if (_disposed || isClosed) return;
+    if (_disposed ||
+        isClosed ||
+        (context != null && (!context.mounted || sourceRoute == null || !sourceRoute.isCurrent))) {
+      return;
+    }
     final text = data?.text;
     if (text == null || !containsSupportedLink(text)) return;
 

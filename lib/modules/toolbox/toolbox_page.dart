@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/modules/toolbox/toolbox_controller.dart';
@@ -7,6 +9,9 @@ class ToolBoxPage extends GetView<ToolBoxController> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) unawaited(controller.autoCheckClipboard(context: context));
+    });
     return Scaffold(
       appBar: AppBar(title: Text(i18n("toolbox_title")), centerTitle: true, elevation: 0),
       body: ListView(

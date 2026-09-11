@@ -153,6 +153,21 @@ void main() {
     await reply(tester, url);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('clipboard completion on a covered toolbox route stays local', (tester) async {
+    await open(tester);
+    final context = tester.element(find.byType(ToolBoxPage));
+    unawaited(
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('Other page')))),
+    );
+    await tester.pumpAndSettle();
+
+    await reply(tester, url);
+
+    expect(find.text('Other page'), findsOneWidget);
+    expect(controller.roomJumpToController.text, isEmpty);
+    expect(controller.getUrlController.text, isEmpty);
+    expect(Get.isSnackbarOpen, isFalse);
+  });
   testWidgets('clipboard platform failure is contained', (tester) async {
     await open(tester);
     reads.single.completeError(PlatformException(code: 'clipboard_unavailable'));
@@ -219,7 +234,7 @@ void main() {
   });
   for (final locale in ['zh', 'en']) {
     testWidgets('$locale tools remain usable on a narrow large-text page', (tester) async {
-      await open(tester, size: const Size(320, 480), scale: 2, locale: locale);
+      await open(tester, size: const Size(320, 480), scale: 3, locale: locale);
       await reply(tester, null);
       final parse = find.widgetWithText(
         FilledButton,

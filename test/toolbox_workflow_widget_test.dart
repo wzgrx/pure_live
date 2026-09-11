@@ -115,7 +115,7 @@ void main() {
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(narrow ? 2 : 1)),
+              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(narrow ? 3 : 1)),
               child: child!,
             ),
             home: const ToolBoxPage(),
@@ -135,7 +135,9 @@ void main() {
     await frame(tester);
   }
 
-  Finder choices() => find.descendant(of: find.byType(SimpleDialog), matching: find.byType(ListTile));
+  Finder ownedDialog({bool skipOffstage = true}) =>
+      find.byKey(const ValueKey('toolbox-choice-dialog'), skipOffstage: skipOffstage);
+  Finder choices() => find.descendant(of: ownedDialog(), matching: find.byType(ListTile));
 
   for (final locale in ['zh', 'en']) {
     testWidgets('$locale toolbox restores controls for session-only input', (tester) async {
@@ -143,10 +145,13 @@ void main() {
         ..resolution = LivePlayUrlResolution.owned(input: NiconicoInputRecipe(programId: 'lv123', resolution: null));
       await open(tester, locale: locale, narrow: true);
       await start(tester, locale: locale);
+      await tester.ensureVisible(choices().first);
+      await frame(tester);
+      expect(choices().first.hitTestable(), findsOneWidget);
       await tester.tap(choices().first);
       await frame(tester);
       expect(controller.isBusy, isFalse);
-      expect(find.byType(SimpleDialog), findsNothing);
+      expect(ownedDialog(), findsNothing);
       expect(find.byType(ToolBoxPage), findsOneWidget);
       expect(controller.getUrlController.text, 'https://live.bilibili.com/123');
       expect(site.calls, ['detail', 'qualities', 'resolve']);
@@ -197,7 +202,7 @@ void main() {
     await open(tester);
     await start(tester);
     await tester.tap(
-      find.descendant(of: find.byType(SimpleDialog), matching: find.widgetWithText(TextButton, zh['cancel'] as String)),
+      find.descendant(of: ownedDialog(), matching: find.widgetWithText(TextButton, zh['cancel'] as String)),
     );
     await frame(tester);
     expect(site.calls, ['detail', 'qualities']);
@@ -216,7 +221,7 @@ void main() {
     pending.complete(site.room);
     await frame(tester);
     expect(site.calls, ['detail']);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
   });
   testWidgets('leaving the toolbox suppresses a late dialog without touching the new route', (tester) async {
     final pending = Completer<LiveRoom>();
@@ -231,7 +236,7 @@ void main() {
     pending.complete(site.room);
     await frame(tester);
     expect(find.text('Other page'), findsOneWidget);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
     expect(notices, isEmpty);
   });
   testWidgets('cancellation removes only its own dialog underneath another route', (tester) async {
@@ -250,7 +255,7 @@ void main() {
     controller.cancelAction();
     await frame(tester);
     expect(find.text('Unrelated dialog'), findsOneWidget);
-    expect(find.byType(SimpleDialog, skipOffstage: false), findsNothing);
+    expect(ownedDialog(skipOffstage: false), findsNothing);
     expect(notices, isEmpty);
   });
   testWidgets('network deadline restores controls and contains a late result', (tester) async {
@@ -271,14 +276,13 @@ void main() {
       await open(tester, locale: locale, narrow: true);
       await start(tester, locale: locale);
       final cancel = find.descendant(
-        of: find.byType(SimpleDialog),
+        of: ownedDialog(),
         matching: find.widgetWithText(TextButton, (locale == 'zh' ? zh : en)['cancel'] as String),
       );
-      await tester.ensureVisible(cancel);
-      await frame(tester);
+      expect(cancel.hitTestable(), findsOneWidget);
       await tester.tap(cancel);
       await frame(tester);
-      expect(find.byType(SimpleDialog), findsNothing);
+      expect(ownedDialog(), findsNothing);
       expect(controller.isBusy, isFalse);
       expect(tester.takeException(), isNull);
     });

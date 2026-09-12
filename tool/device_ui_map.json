@@ -719,6 +719,35 @@
             ]
           }
         ],
+        "open_player_kernel_settings": [
+          {
+            "tapSemantic": [
+              "菜单",
+              "Menu"
+            ],
+            "waitMs": 350
+          },
+          {
+            "tapSemantic": [
+              "设置",
+              "Settings"
+            ],
+            "waitMs": 600
+          },
+          {
+            "tapSemantic": [
+              "播放器内核",
+              "Player Engine"
+            ],
+            "waitMs": 600
+          },
+          {
+            "assertSemantic": [
+              "核心内核设置",
+              "Core Kernel Settings"
+            ]
+          }
+        ],
         "open_pip_danmaku_settings": [
           {
             "tapSemantic": [
@@ -3418,6 +3447,35 @@
             "assertSemantic": [
               "主题设置",
               "Theme Settings"
+            ]
+          }
+        ],
+        "open_player_kernel_settings": [
+          {
+            "tapSemantic": [
+              "菜单",
+              "Menu"
+            ],
+            "waitMs": 350
+          },
+          {
+            "tapSemantic": [
+              "设置",
+              "Settings"
+            ],
+            "waitMs": 600
+          },
+          {
+            "tapSemantic": [
+              "播放器内核",
+              "Player Engine"
+            ],
+            "waitMs": 600
+          },
+          {
+            "assertSemantic": [
+              "核心内核设置",
+              "Core Kernel Settings"
             ]
           }
         ],

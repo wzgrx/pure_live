@@ -13,6 +13,8 @@ $zhSettings = -join ([char[]]@(0x8BBE, 0x7F6E))
 $zhPipDanmaku = -join ([char[]]@(0x5C0F, 0x7A97, 0x5F39, 0x5E55))
 $zhStylePreview = -join ([char[]]@(0x6837, 0x5F0F, 0x9884, 0x89C8))
 $zhThemeSettings = -join ([char[]]@(0x4E3B, 0x9898, 0x8BBE, 0x7F6E))
+$zhPlayerEngine = -join ([char[]]@(0x64AD, 0x653E, 0x5668, 0x5185, 0x6838))
+$zhCoreKernelSettings = -join ([char[]]@(0x6838, 0x5FC3, 0x5185, 0x6838, 0x8BBE, 0x7F6E))
 
 $settingsProfiles = @($map.profiles.PSObject.Properties | Where-Object {
     $_.Value.sequences.PSObject.Properties['open_settings']
@@ -49,6 +51,43 @@ foreach ($profileProperty in $settingsProfiles) {
     }
 }
 Write-Output 'PASS settings routes use live semantics and verify the destination page'
+
+foreach ($profileProperty in $settingsProfiles) {
+    $kernelProperty = $profileProperty.Value.sequences.PSObject.Properties['open_player_kernel_settings']
+    if ($null -eq $kernelProperty) {
+        throw "Profile '$($profileProperty.Name)' is missing open_player_kernel_settings."
+    }
+    $kernelSequence = @($kernelProperty.Value)
+    $kernelSemanticSteps = @($kernelSequence | Where-Object { $_.PSObject.Properties['tapSemantic'] })
+    if ($kernelSemanticSteps.Count -ne 3 -or
+        @($kernelSequence | Where-Object { $_.PSObject.Properties['tap'] }).Count -ne 0) {
+        throw "Profile '$($profileProperty.Name)' open_player_kernel_settings must use live semantics for every tap."
+    }
+    foreach ($route in @(
+        [pscustomobject]@{ Step = 0; Aliases = @($zhMenu, 'Menu') },
+        [pscustomobject]@{ Step = 1; Aliases = @($zhSettings, 'Settings') },
+        [pscustomobject]@{ Step = 2; Aliases = @($zhPlayerEngine, 'Player Engine') }
+    )) {
+        $actualAliases = @($kernelSemanticSteps[$route.Step].tapSemantic | ForEach-Object { [string]$_ })
+        foreach ($alias in $route.Aliases) {
+            if ($actualAliases -notcontains $alias) {
+                throw "Profile '$($profileProperty.Name)' kernel route step $($route.Step) is missing '$alias'."
+            }
+        }
+    }
+    $kernelAssert = @($kernelSequence | Where-Object { $_.PSObject.Properties['assertSemantic'] }) |
+        Select-Object -Last 1
+    if ($null -eq $kernelAssert) {
+        throw "Profile '$($profileProperty.Name)' kernel route must verify its destination."
+    }
+    $kernelAssertAliases = @($kernelAssert.assertSemantic | ForEach-Object { [string]$_ })
+    foreach ($alias in @($zhCoreKernelSettings, 'Core Kernel Settings')) {
+        if ($kernelAssertAliases -notcontains $alias) {
+            throw "Profile '$($profileProperty.Name)' kernel route is missing destination alias '$alias'."
+        }
+    }
+}
+Write-Output 'PASS player-kernel routes use live semantics and verify the destination page'
 
 $semanticSteps = @($sequence | Where-Object { $_.PSObject.Properties['tapSemantic'] })
 if ($semanticSteps.Count -ne 3) {

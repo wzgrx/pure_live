@@ -154,6 +154,13 @@ K90 原生首轮补证还暴露 `open_settings` 仍使用两处历史缓存坐�
 
 以上补证仍不扩大 5 次单设备 Debug 运行的外推范围，A7-04 与宏观计数保持不变。
 
+为避免后续五种音频后端矩阵再次各自实现页面滚动，本轮又把该路径固化为
+`open_player_kernel_settings`：菜单、设置与播放器内核三步全部使用实时双语语义，并以
+“核心内核设置 / Core Kernel Settings”验证终点。测试先对缺失序列得到有效红灯；补齐两种
+竖屏 profile 后，UI map 回归及四 profile schema 校验通过。K90 原生复跑 4/4 检查通过，实际
+点击坐标来自当次 UI 层级，最终应用停止、桌面前台且 stay-awake 恢复为 `0`。证据：
+`local-artifacts/diagnostics/android-player-kernel-semantic-route-9da14ceb/summary.json`。
+
 ## Binder death-recipient 告警归因边界
 
 本轮 11 条 `AIBinder_linkToDeath` 告警均处在 Android 原生媒体链附近，而不是 AudioTrack 或

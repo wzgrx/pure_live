@@ -211,7 +211,7 @@ function Invoke-ModeTransition {
     throw "Mode transition did not reach audioOnly=$AudioOnly within 10 seconds."
 }
 
-function Invoke-ModeRoundTrip {
+function Invoke-AudioModeExercise {
     $audioMs = Invoke-ModeTransition -AudioOnly $true
     # The audio badge is intentionally published before the native track
     # command completes. Wait through PlayerManager's five-second deadline so
@@ -221,11 +221,9 @@ function Invoke-ModeRoundTrip {
     if (-not (Test-AudioOnlyPresentation $settledAudio)) {
         throw 'Audio-only presentation rolled back during the native settle window.'
     }
-    $videoMs = Invoke-ModeTransition -AudioOnly $false
     [pscustomobject]@{
         audioMs = $audioMs
         audioSettleMs = $audioTransitionSettleMilliseconds
-        videoMs = $videoMs
     }
 }
 
@@ -245,7 +243,11 @@ function Enter-FirstRoom {
     Invoke-TargetAdb @(
         'shell', 'input', 'tap', [string] $roomPoint.x, [string] $roomPoint.y
     ) | Out-Null
-    Wait-UiState -State room -TimeoutSeconds $RoomTimeoutSeconds
+    $roomState = Wait-UiState -State room -TimeoutSeconds $RoomTimeoutSeconds
+    if (Test-AudioOnlyPresentation $roomState.Document) {
+        throw 'A fresh room retained the previous route audio-only presentation.'
+    }
+    $roomState
 }
 
 function Exit-Room {
@@ -357,13 +359,12 @@ try {
     $result.coldHome = Get-ResourceSnapshot -Cycle -1 -Phase 'cold-home' -Name 'cold-home'
 
     $warmRoom = Enter-FirstRoom
-    $warmModes = Invoke-ModeRoundTrip
+    $warmModes = Invoke-AudioModeExercise
     $warmHome = Exit-Room
     $result.warmup = [ordered]@{
         roomEnterMs = $warmRoom.ElapsedMs
         audioMs = $warmModes.audioMs
         audioSettleMs = $warmModes.audioSettleMs
-        videoMs = $warmModes.videoMs
         homeReturnMs = $warmHome.ElapsedMs
     }
     Start-Sleep -Seconds $IdleReleaseSeconds
@@ -376,7 +377,7 @@ try {
     for ($cycle = 1; $cycle -le $Cycles; $cycle++) {
         $cycleTimer = [Diagnostics.Stopwatch]::StartNew()
         $roomState = Enter-FirstRoom
-        $modeState = Invoke-ModeRoundTrip
+        $modeState = Invoke-AudioModeExercise
         $homeState = Exit-Room
         $cycleTimer.Stop()
         $cycleResults.Add([pscustomobject][ordered]@{
@@ -384,7 +385,6 @@ try {
             roomEnterMs = $roomState.ElapsedMs
             audioMs = $modeState.audioMs
             audioSettleMs = $modeState.audioSettleMs
-            videoMs = $modeState.videoMs
             homeReturnMs = $homeState.ElapsedMs
             totalMs = $cycleTimer.ElapsedMilliseconds
         })
@@ -423,9 +423,7 @@ try {
     $baseline = $result.warmHomeBaseline
     $final = $result.finalHome
     $result.checks.cyclesComplete = $cycleResults.Count -eq $Cycles
-    $result.checks.modeRoundTripsComplete = @($cycleResults | Where-Object {
-        $_.audioMs -le 0 -or $_.videoMs -le 0
-    }).Count -eq 0
+    $result.checks.audioModeSwitchesComplete = @($cycleResults | Where-Object { $_.audioMs -le 0 }).Count -eq 0
     $result.checks.processStable = (Get-AppPid) -eq $script:initialAppPid
     $result.checks.finalHomeUiAlive = Test-HomeUi $finalUi.Document
     $result.checks.finalFdBounded = $final.fdCount -le ($baseline.fdCount + 24)

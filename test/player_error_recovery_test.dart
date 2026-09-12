@@ -1195,6 +1195,40 @@ void main() {
     await manager.dispose();
   });
 
+  test('a hung unexpected-pause resume command is bounded before engine recovery', () async {
+    final resumeBarrier = Completer<void>();
+    final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null, playBarrier: resumeBarrier.future);
+    final fijk = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);
+    final manager = _manager(
+      <PlayerEngine, _RecoveryFakePlayer>{PlayerEngine.mediaKit: mediaKit, PlayerEngine.fijk: fijk},
+      unexpectedPauseGrace: const Duration(milliseconds: 2),
+      unexpectedPauseFailureGrace: const Duration(milliseconds: 5),
+    );
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+
+    try {
+      await manager.play(
+        'https://cdn.example/hung-resume.flv',
+        const <String>['https://cdn.example/hung-resume.flv'],
+        const <String, String>{},
+        room: LiveRoom(roomId: 'hung-resume', platform: 'test'),
+      );
+      mediaKit.emitUnexpectedPlaying(false);
+
+      final deadline = DateTime.now().add(const Duration(milliseconds: 300));
+      while (manager.currentEngine != PlayerEngine.fijk && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+
+      expect(mediaKit.playCalls, 1);
+      expect(manager.currentEngine, PlayerEngine.fijk);
+      expect(fijk.openedUrls, <String>['https://cdn.example/hung-resume.flv']);
+    } finally {
+      if (!resumeBarrier.isCompleted) resumeBarrier.complete();
+      await manager.dispose();
+    }
+  });
+
   for (final notification in ['paused-state', 'playing-toggle']) {
     test('continuous buffering deadline survives repeated $notification notifications', () async {
       final first = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
@@ -3246,11 +3280,47 @@ void main() {
     expect(fijk.openedUrls, <String>['https://cdn.example/live.flv']);
     await manager.dispose();
   });
+
+  test('a hanging signed-source refresh is bounded before live completion fallback', () async {
+    final refreshBarrier = Completer<PlaybackSourceRefreshResult>();
+    final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final fijk = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{
+      PlayerEngine.mediaKit: mediaKit,
+      PlayerEngine.fijk: fijk,
+    }, sourceRefreshTimeout: const Duration(milliseconds: 5));
+    manager.configureDefaultEngine(PlayerEngine.mediaKit);
+
+    try {
+      await manager.play(
+        'https://cdn.example/expired-live.flv',
+        const <String>['https://cdn.example/expired-live.flv'],
+        const <String, String>{},
+        room: LiveRoom(roomId: 'hung-refresh', platform: 'test'),
+        sourceResolver: (_) => refreshBarrier.future,
+      );
+      mediaKit.emitCompleted();
+
+      final deadline = DateTime.now().add(const Duration(milliseconds: 300));
+      while (manager.currentEngine != PlayerEngine.fijk && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+
+      expect(manager.currentEngine, PlayerEngine.fijk);
+      expect(fijk.openedUrls, <String>['https://cdn.example/expired-live.flv']);
+    } finally {
+      if (!refreshBarrier.isCompleted) {
+        refreshBarrier.complete(const PlaybackSourceRefreshResult(urls: <String>[], preferredLineIndex: 0));
+      }
+      await manager.dispose();
+    }
+  });
 }
 
 PlayerManager _manager(
   Map<PlayerEngine, _RecoveryFakePlayer> players, {
   Duration sourceOpenTimeout = const Duration(seconds: 18),
+  Duration sourceRefreshTimeout = const Duration(seconds: 12),
   Duration sourceReadyTimeout = Duration.zero,
   Duration unexpectedPauseGrace = const Duration(milliseconds: 1200),
   Duration? unexpectedPauseFailureGrace,
@@ -3271,6 +3341,7 @@ PlayerManager _manager(
     ),
     lineManager: LineFallbackManager(),
     sourceOpenTimeout: sourceOpenTimeout,
+    sourceRefreshTimeout: sourceRefreshTimeout,
     sourceReadyTimeout: sourceReadyTimeout,
     unexpectedPauseGrace: unexpectedPauseGrace,
     unexpectedPauseFailureGrace: unexpectedPauseFailureGrace ?? unexpectedPauseGrace,
@@ -3306,6 +3377,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer {
     this.hangWhileOpening = false,
     this.initBarrier,
     this.openBarrier,
+    this.playBarrier,
     this.onOpenSource,
     this.pauseBarrier,
     this.unmuteBarrier,
@@ -3321,6 +3393,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer {
   final bool hangWhileOpening;
   final Future<void>? initBarrier;
   final Future<void>? openBarrier;
+  final Future<void>? playBarrier;
   final void Function()? onOpenSource;
   final Future<void>? pauseBarrier;
   final Future<void>? unmuteBarrier;
@@ -3419,6 +3492,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer {
   @override
   Future<void> play() async {
     playCalls++;
+    if (playBarrier != null) await playBarrier;
     _isPlaying = true;
     _playing.add(true);
   }

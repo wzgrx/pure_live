@@ -199,6 +199,7 @@ class PlayerManager {
   final LineFallbackManager lineManager;
   final Duration audioModeSwitchTimeout;
   final Duration sourceOpenTimeout;
+  final Duration sourceRefreshTimeout;
   final Duration sourceReadyTimeout;
   final Duration unexpectedPauseGrace;
   final Duration unexpectedPauseFailureGrace;
@@ -280,6 +281,7 @@ class PlayerManager {
     required this.lineManager,
     this.audioModeSwitchTimeout = const Duration(seconds: 5),
     this.sourceOpenTimeout = const Duration(seconds: 18),
+    this.sourceRefreshTimeout = const Duration(seconds: 12),
     this.sourceReadyTimeout = Duration.zero,
     this.unexpectedPauseGrace = const Duration(milliseconds: 350),
     this.unexpectedPauseFailureGrace = const Duration(seconds: 5),
@@ -2565,7 +2567,11 @@ class PlayerManager {
             // an audio-focus hand-off or CDN discontinuity without raising an
             // error. Reassert the existing source once before escalating to
             // the normal line/engine recovery state machine.
-            await player.play();
+            // A native resume acknowledgement may itself stall when the
+            // decoder or platform channel is wedged. Bound this command before
+            // handing the failure to the finite source/line/engine recovery
+            // path; otherwise the lifecycle queue also blocks later work.
+            await player.play().timeout(unexpectedPauseFailureGrace);
           } catch (error, stackTrace) {
             _schedulePlayerError(
               PlayerException(
@@ -3926,7 +3932,8 @@ class PlayerManager {
           _prefetchedSourceRefresh = null;
         } else {
           if (!cacheUsable) _prefetchedSourceRefresh = null;
-          refreshed = await resolver(
+          refreshed = await _resolvePlaybackSource(
+            resolver,
             PlaybackSourceRefreshRequest(
               currentLineIndex: currentIndex < 0 ? 0 : currentIndex,
               advanceLine: attempt > 0,
@@ -3937,7 +3944,8 @@ class PlayerManager {
           );
         }
       } else {
-        refreshed = await resolver(
+        refreshed = await _resolvePlaybackSource(
+          resolver,
           PlaybackSourceRefreshRequest(
             currentLineIndex: currentIndex < 0 ? 0 : currentIndex,
             advanceLine: false,
@@ -4084,6 +4092,24 @@ class PlayerManager {
       }
       return false;
     }
+  }
+
+  Future<PlaybackSourceRefreshResult> _resolvePlaybackSource(
+    PlaybackSourceResolver resolver,
+    PlaybackSourceRefreshRequest request,
+  ) {
+    final operation = Future<PlaybackSourceRefreshResult>.sync(() => resolver(request));
+    if (sourceRefreshTimeout <= Duration.zero) return operation;
+    return operation.timeout(
+      sourceRefreshTimeout,
+      onTimeout: () {
+        throw PlayerException(
+          message: 'Playback source refresh did not finish before the recovery deadline',
+          type: PlayerErrorType.source,
+          code: 'source_refresh_timeout',
+        );
+      },
+    );
   }
 
   void _publishTerminalPlayerError(PlayerException error) {

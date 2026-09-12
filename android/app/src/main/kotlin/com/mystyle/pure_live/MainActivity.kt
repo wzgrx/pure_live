@@ -2,6 +2,7 @@ package com.mystyle.purelive
 
 import android.content.Context
 import android.hardware.display.DisplayManager
+import android.media.AudioManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
@@ -258,6 +259,10 @@ class MainActivity : AudioServiceActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Keep physical volume controls attached to media whenever this
+        // window is foreground, including before a player acquires focus and
+        // after returning from a dialog, browser, PiP, or another activity.
+        setVolumeControlStream(AudioManager.STREAM_MUSIC)
         scheduleDisplayModeRefresh(delayMillis = 0)
         if (predictiveBackEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerPredictiveBack()

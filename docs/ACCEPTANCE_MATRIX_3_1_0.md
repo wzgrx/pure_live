@@ -33,7 +33,7 @@
 | A0-09 | PASS | v3.1.8 Android arm64-v8a 在新主力设备覆盖升级、启动与数据保留 | K90 Pro / `25102RKBEC` / Android 17 通过网络 ADB 覆盖安装，核对 `versionName=3.1.8`、arm64 分包 `versionCode=6121`；一次启动成功、原 6 个关注记录保留、无 AndroidRuntime/FATAL。短时内存只记录为启动基线，完整运行矩阵继续执行 |
 | A0-10 | PASS | 斗鱼过滤修订后的 v3.1.8 Android arm64 Debug 覆盖安装与基础运行 | 从干净提交 `971c2753` 构建，APK 为 299,150,717 B，SHA-256 `B0EEAF3434E961EFD10419BEF59AC46164D44CDD61DC5746CCE63C3AFFF259DF`；K90 Pro / cycle 200 覆盖安装并完成 14/14 直播冒烟，无 FATAL/ANR。构建：`local-artifacts/build-records/20260904T193151421Z-build-androidarm64-debug.json`；实机：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json` |
 
-> 2026-09-12 当前累计候选：精确 `3e41e848` arm64 Debug 已完成同签名覆盖安装，安装前后 58 个状态文件逐路径/大小/SHA 一致，设备 APK 哈希匹配候选。当前 Bilibili 冷启动、刷新、播放、10 条可见弹幕、音频模式往返、PiP 恢复、致命日志与退出清理 16/16 通过。它刷新 A0 当前候选证据，不新增宏观 PASS；详见 `docs/CURRENT_ANDROID_CANDIDATE_2026_09_12.md`。
+> 2026-09-12 当前累计候选：精确 `3e41e848` arm64 Debug 已完成同签名覆盖安装，安装前后 58 个状态文件逐路径/大小/SHA 一致，设备 APK 哈希匹配候选。当前 Bilibili 冷启动、刷新、播放、10 条可见弹幕、音频模式往返、PiP 恢复、致命日志与退出清理 16/16 通过；标准流呈现 7/7、抖音竖屏呈现 9/9 通过。它刷新 A0/A3 当前候选证据，不新增宏观 PASS；详见 `docs/CURRENT_ANDROID_CANDIDATE_2026_09_12.md`。
 
 ### A1 首页、关注、热门、分区与搜索
 

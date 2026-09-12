@@ -166,7 +166,7 @@ function Test-ShareDialog {
     param([Parameter(Mandatory = $true)][xml] $Document)
     $xml = $Document.OuterXml
     $cancel = Find-LabeledNode -Document $Document -Candidates @('取消', 'Cancel') -Clickable -Exact
-    $enter = Find-LabeledNode -Document $Document -Candidates @('进入直播间', 'Enter Room', 'Enter room') -Clickable
+    $enter = Find-LabeledNode -Document $Document -Candidates @('进入房间', '进入直播间', 'Enter Room', 'Enter room') -Clickable
     $share = Find-LabeledNode -Document $Document -Candidates @('分享', 'Share') -Exact
     $hasPlatform = $xml.Contains($ExpectedPlatform)
     $hasRoom = $xml.Contains($ExpectedRoomId)
@@ -222,7 +222,7 @@ function Assert-DialogBounds {
     $result = [ordered]@{}
     foreach ($entry in ([ordered]@{
         cancel = @('取消', 'Cancel')
-        enter = @('进入直播间', 'Enter Room', 'Enter room')
+        enter = @('进入房间', '进入直播间', 'Enter Room', 'Enter room')
     }).GetEnumerator()) {
         $node = Find-LabeledNode -Document $Document -Candidates $entry.Value -Clickable
         if (-not $node) { throw "Missing dialog action: $($entry.Key)." }

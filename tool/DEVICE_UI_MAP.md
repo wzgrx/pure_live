@@ -80,6 +80,12 @@ workflow and is never inferred from device-side manager applications.
 .\tool\android_ui.ps1 -Sequence open_local_interaction_settings
 .\tool\android_ui.ps1 -Sequence open_general_settings
 
+# In an acquired device turn, verify PiP preview enable/disable and persistence.
+# The runner restores the exact canonical Hive file and stops the app afterward.
+.\tool\android_pip_danmaku_settings_smoke.ps1 `
+  -Serial '192.168.1.2:5555' `
+  -EvidenceDirectory 'local-artifacts/diagnostics/pip-danmaku-settings'
+
 # Resolve one visible control from accessibility semantics, without a screenshot
 .\tool\android_ui.ps1 -TapSemantic '关闭菜单'
 

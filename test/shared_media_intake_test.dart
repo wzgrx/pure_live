@@ -239,6 +239,8 @@ void main() {
     final targets = File('android/app/src/main/res/xml/share_targets.xml').readAsStringSync();
     final probe = File('android/app/src/debug/kotlin/com/mystyle/pure_live/ShareIntentProbeReceiver.kt')
         .readAsStringSync();
+    final probeProvider = File('android/app/src/debug/kotlin/com/mystyle/pure_live/ShareIntentProbeProvider.kt')
+        .readAsStringSync();
 
     expect(manifest, contains('android.intent.action.SEND'));
     expect(manifest, contains('android.intent.action.SEND_MULTIPLE'));
@@ -247,12 +249,23 @@ void main() {
     expect(targets, contains('com.mystyle.purelive.dynamic_share_target'));
     expect(targets, isNot(contains('{your.package.identifier}')));
     expect(manifest, isNot(contains('ShareIntentProbeReceiver')));
+    expect(manifest, isNot(contains('ShareIntentProbeProvider')));
     expect(debugManifest, contains('android:name=".ShareIntentProbeReceiver"'));
     expect(debugManifest, contains('android:permission="android.permission.DUMP"'));
+    expect(debugManifest, contains('android:name=".ShareIntentProbeProvider"'));
+    expect(debugManifest, contains('android:exported="false"'));
     expect(probe, contains('Intent.ACTION_SEND_MULTIPLE'));
     expect(probe, contains('putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)'));
     expect(probe, contains('File(context.cacheDir, "share_probe").canonicalFile'));
-    expect(probe, contains('requestedPaths.size !in 1..MAX_ATTACHMENTS'));
+    expect(probe, contains('validatedFiles(context, request, 1..MAX_ATTACHMENTS)'));
+    expect(probe, contains('ShareIntentProbeProvider.MODE_TYPE_ERROR'));
+    expect(probe, contains('ShareIntentProbeProvider.MODE_QUERY_ERROR'));
+    expect(probe, contains('ShareIntentProbeProvider.MODE_LONG_NAME'));
+    expect(probeProvider, contains('intentional debug provider type failure'));
+    expect(probeProvider, contains('intentional debug provider query failure'));
+    expect(probeProvider, contains('LONG_DISPLAY_NAME'));
+    expect(probeProvider, contains('ParcelFileDescriptor.MODE_READ_ONLY'));
+    expect(probeProvider, contains('file.isWithin(root)'));
   });
 
   test('app-owned navigator defers cold share presentation until splash has finished', () {

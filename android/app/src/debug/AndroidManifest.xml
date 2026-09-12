@@ -14,5 +14,10 @@
             android:name=".ShareIntentProbeReceiver"
             android:exported="true"
             android:permission="android.permission.DUMP" />
+        <provider
+            android:name=".ShareIntentProbeProvider"
+            android:authorities="${applicationId}.shareProbeProvider"
+            android:exported="false"
+            android:grantUriPermissions="true" />
     </application>
 </manifest>

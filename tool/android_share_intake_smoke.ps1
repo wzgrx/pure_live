@@ -328,11 +328,13 @@ $remoteCacheRestore = "/data/local/tmp/purelive-share-intake-$PID-cache-restore.
 $remoteDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID.db"
 $remoteMixedDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID-mixed.db"
 $remoteMultipleDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID-multiple.db"
+$remoteProviderEdgeDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID-provider-edge.db"
 $localSettingsBackup = Join-Path $evidence 'app_settings.original.hive'
 $localCacheBackup = Join-Path $evidence 'iptv_cache.original.tar'
 $localDbSnapshot = Join-Path $evidence 'iptv_after_share.db'
 $localMixedDbSnapshot = Join-Path $evidence 'iptv_after_mixed_share.db'
 $localMultipleDbSnapshot = Join-Path $evidence 'iptv_after_multiple_share.db'
+$localProviderEdgeDbSnapshot = Join-Path $evidence 'iptv_after_provider_edge_share.db'
 $fixtureTag = Get-Date -Format 'yyMMddHHmmssff'
 $fixtureBaseName = "purelive-share-intake-$fixtureTag"
 $fixtureChannel = "Share Intake Fixture $fixtureTag"
@@ -353,6 +355,17 @@ $stagedMultipleEpg = "/data/local/tmp/$multipleEpgBaseName.xml"
 $probeRoot = "/data/user/0/$Package/cache/share_probe"
 $deviceMultiplePlaylist = "$probeRoot/$multiplePlaylistBaseName.m3u"
 $deviceMultipleEpg = "$probeRoot/$multipleEpgBaseName.xml"
+$providerFallbackBaseName = "$fixtureBaseName-provider-query-fallback"
+$providerFallbackChannel = "Share Provider Fallback $fixtureTag"
+$providerLongUnderlyingBaseName = "$fixtureBaseName-provider-long-source"
+$providerLongChannel = "Share Provider Long Name $fixtureTag"
+$providerLongExpectedPrefix = '共享_附件_'
+$localProviderFallback = Join-Path $evidence "$providerFallbackBaseName.m3u"
+$localProviderLong = Join-Path $evidence "$providerLongUnderlyingBaseName.m3u"
+$stagedProviderFallback = "/data/local/tmp/$providerFallbackBaseName.m3u"
+$stagedProviderLong = "/data/local/tmp/$providerLongUnderlyingBaseName.m3u"
+$deviceProviderFallback = "$probeRoot/$providerFallbackBaseName.m3u"
+$deviceProviderLong = "$probeRoot/$providerLongUnderlyingBaseName.m3u"
 [IO.File]::WriteAllText(
     $localFixture,
     "#EXTM3U`n#EXTINF:-1 tvg-id=`"$fixtureTag`" group-title=`"Fixture`",$fixtureChannel`nhttps://example.invalid/$fixtureTag/live.m3u8`n",
@@ -366,6 +379,16 @@ $deviceMultipleEpg = "$probeRoot/$multipleEpgBaseName.xml"
 [IO.File]::WriteAllText(
     $localMultipleEpg,
     "<?xml version=`"1.0`" encoding=`"UTF-8`"?>`n<tv><channel id=`"$multipleEpgChannelId`"><display-name>$multipleEpgChannel</display-name></channel><programme channel=`"$multipleEpgChannelId`" start=`"20360101000000 +0000`" stop=`"20360101010000 +0000`"><title>$multipleProgramme</title></programme></tv>`n",
+    [Text.UTF8Encoding]::new($false)
+)
+[IO.File]::WriteAllText(
+    $localProviderFallback,
+    "#EXTM3U`n#EXTINF:-1 tvg-id=`"provider-fallback-$fixtureTag`" group-title=`"Fixture`",$providerFallbackChannel`nhttps://example.invalid/$fixtureTag/provider-fallback.m3u8`n",
+    [Text.UTF8Encoding]::new($false)
+)
+[IO.File]::WriteAllText(
+    $localProviderLong,
+    "#EXTM3U`n#EXTINF:-1 tvg-id=`"provider-long-$fixtureTag`" group-title=`"Fixture`",$providerLongChannel`nhttps://example.invalid/$fixtureTag/provider-long.m3u8`n",
     [Text.UTF8Encoding]::new($false)
 )
 
@@ -387,6 +410,13 @@ $result = [ordered]@{
         epgBaseName = $multipleEpgBaseName
         epgChannel = $multipleEpgChannel
         programme = $multipleProgramme
+    }
+    providerEdgeShare = [ordered]@{
+        fallbackBaseName = $providerFallbackBaseName
+        fallbackChannel = $providerFallbackChannel
+        longUnderlyingBaseName = $providerLongUnderlyingBaseName
+        longChannel = $providerLongChannel
+        expectedSafePrefix = $providerLongExpectedPrefix
     }
     checks = [ordered]@{}
 }
@@ -626,6 +656,93 @@ finally:
     $result.multipleShare.databaseEvidence = $multipleQuery
     $result.checks.multiplePlaylistAndEpgAttachmentsImported = $true
 
+    Invoke-Adb @('push', $localProviderFallback, $stagedProviderFallback) | Out-Null
+    Invoke-Adb @('push', $localProviderLong, $stagedProviderLong) | Out-Null
+    Invoke-Adb @(
+        'shell',
+        "su -c `"cp '$stagedProviderFallback' '$deviceProviderFallback' && cp '$stagedProviderLong' '$deviceProviderLong' && chown ${settingsUid}:${settingsGid} '$deviceProviderFallback' '$deviceProviderLong' && chmod 600 '$deviceProviderFallback' '$deviceProviderLong' && restorecon '$deviceProviderFallback' '$deviceProviderLong'`""
+    ) | Out-Null
+    $result.providerEdgeShare.fallbackSha256 = Get-DeviceFileHash $deviceProviderFallback
+    $result.providerEdgeShare.longSha256 = Get-DeviceFileHash $deviceProviderLong
+    $result.providerEdgeShare.appLaunchOutput = (Invoke-Adb @(
+        'shell', 'am', 'start', '-W', '-n', "$Package/.MainActivity"
+    )) -join "`n"
+    Start-Sleep -Seconds 3
+    Assert-TargetForeground
+    $result.providerEdgeShare.probeOutput = (Invoke-Adb @(
+        'shell', 'am', 'broadcast', '--receiver-foreground',
+        '-a', 'com.mystyle.purelive.debug.PROVIDER_EDGE_PROBE',
+        '-n', "$Package/.ShareIntentProbeReceiver",
+        '--esa', 'paths', "$deviceProviderFallback,$deviceProviderLong"
+    )) -join "`n"
+    if ($result.providerEdgeShare.probeOutput -notmatch 'result=-1' -or
+        $result.providerEdgeShare.probeOutput -notmatch 'data="ok:provider_edges:3"') {
+        throw "Provider-edge probe was rejected: $($result.providerEdgeShare.probeOutput)"
+    }
+    Start-Sleep -Seconds 8
+    Assert-TargetForeground
+    Wait-SharedStagingEmpty
+    $result.providerEdgeShare.sharedStagingEntriesAfterImport = @(Get-SharedStagingEntries)
+    $providerEdgeLog = Get-ProcessLog
+    if ($providerEdgeLog.text) {
+        $processLogs.Add($providerEdgeLog.text)
+        [IO.File]::WriteAllText(
+            (Join-Path $evidence 'provider-edge-process.log'),
+            $providerEdgeLog.text,
+            [Text.UTF8Encoding]::new($false)
+        )
+    }
+    $result.providerEdgeShare.processId = $providerEdgeLog.pid
+    if ($providerEdgeLog.text -notmatch 'Shared URI attachment failed' -or
+        $providerEdgeLog.text -notmatch 'Shared URI display name query failed') {
+        throw 'Provider-edge process log did not prove both injected failure paths were exercised.'
+    }
+    $result.checks.providerFailuresExercised = $true
+    Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null
+    Copy-RootFileToHost $databasePath $remoteProviderEdgeDbSnapshot $localProviderEdgeDbSnapshot
+    $providerEdgeQueryCode = @'
+import json, sqlite3, sys
+db, fallback_channel, long_channel = sys.argv[1:]
+connection = sqlite3.connect(db)
+try:
+    fallback_rows = connection.execute(
+        "SELECT p.name, c.name, c.stream_url FROM providers p JOIN channels c ON c.provider_id = p.id WHERE c.name = ?",
+        (fallback_channel,),
+    ).fetchall()
+    long_rows = connection.execute(
+        "SELECT p.name, c.name, c.stream_url FROM providers p JOIN channels c ON c.provider_id = p.id WHERE c.name = ?",
+        (long_channel,),
+    ).fetchall()
+    print(json.dumps({"fallback": fallback_rows, "longName": long_rows}, ensure_ascii=False))
+finally:
+    connection.close()
+'@
+    $providerEdgeQueryText = (& python -c $providerEdgeQueryCode $localProviderEdgeDbSnapshot $providerFallbackChannel $providerLongChannel 2>&1) -join "`n"
+    if ($LASTEXITCODE -ne 0) { throw "Provider-edge SQLite evidence query failed: $providerEdgeQueryText" }
+    $providerEdgeQuery = $providerEdgeQueryText | ConvertFrom-Json
+    if (@($providerEdgeQuery.fallback).Count -ne 1 -or @($providerEdgeQuery.longName).Count -ne 1) {
+        throw "Good attachments after provider failures were not committed exactly once: $providerEdgeQueryText"
+    }
+    if ([string] $providerEdgeQuery.fallback[0][0] -ne $providerFallbackBaseName) {
+        throw "Query-failure URI did not fall back to its path filename: $providerEdgeQueryText"
+    }
+    $longProviderName = [string] $providerEdgeQuery.longName[0][0]
+    $longProviderNameBytes = [Text.Encoding]::UTF8.GetByteCount($longProviderName)
+    if (-not $longProviderName.StartsWith($providerLongExpectedPrefix) -or
+        -not $longProviderName.EndsWith('😀') -or
+        $longProviderName.Contains([char] 0x0001) -or
+        $longProviderName.Contains([char] 0xfffd) -or
+        $longProviderNameBytes -lt 170 -or
+        ($longProviderNameBytes + [Text.Encoding]::UTF8.GetByteCount('.m3u')) -gt 180) {
+        throw "Long shared display name was not safely sanitized and UTF-8 bounded: name='$longProviderName', bytes=$longProviderNameBytes"
+    }
+    $result.providerEdgeShare.databaseEvidence = $providerEdgeQuery
+    $result.providerEdgeShare.safeProviderName = $longProviderName
+    $result.providerEdgeShare.safeProviderNameUtf8Bytes = $longProviderNameBytes
+    $result.checks.providerFailureDidNotSuppressLaterAttachments = $true
+    $result.checks.queryFailureUsedUriFilename = $true
+    $result.checks.longUnicodeDisplayNameSanitizedAndBounded = $true
+
     $combinedLog = $processLogs -join "`n"
     $fatalPattern = '(?im)FATAL EXCEPTION|ANR in com\.mystyle\.purelive|EXCEPTION CAUGHT BY (?:RENDERING|WIDGETS) LIBRARY|Shared media intake failed|Shared IPTV Import Process Crash|IPTV Import Error:'
     if ($combinedLog -match $fatalPattern) { throw "Fatal or intake failure evidence was found in the app process log: $($Matches[0])" }
@@ -662,7 +779,22 @@ finally:
             if (-not $failure) { $failure = $_ } else { Write-Warning "Settings restoration also failed: $($_.Exception.Message)" }
         }
     }
-    foreach ($remote in @($deviceFixture, $stagedDeviceFixture, $stagedMultiplePlaylist, $stagedMultipleEpg, $remoteSettingsBackup, $remoteSettingsRestore, $remoteCacheBackup, $remoteCacheRestore, $remoteDbSnapshot, $remoteMixedDbSnapshot, $remoteMultipleDbSnapshot)) {
+    foreach ($remote in @(
+        $deviceFixture,
+        $stagedDeviceFixture,
+        $stagedMultiplePlaylist,
+        $stagedMultipleEpg,
+        $stagedProviderFallback,
+        $stagedProviderLong,
+        $remoteSettingsBackup,
+        $remoteSettingsRestore,
+        $remoteCacheBackup,
+        $remoteCacheRestore,
+        $remoteDbSnapshot,
+        $remoteMixedDbSnapshot,
+        $remoteMultipleDbSnapshot,
+        $remoteProviderEdgeDbSnapshot
+    )) {
         try { Invoke-Adb @('shell', "su -c `"rm -f '$remote'`"") | Out-Null } catch {}
     }
     try {

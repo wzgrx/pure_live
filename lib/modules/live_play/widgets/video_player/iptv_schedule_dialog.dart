@@ -60,6 +60,15 @@ class _IptvScheduleDialogContentState extends State<IptvScheduleDialogContent> {
         children: [
           _ScheduleHeader(theme: theme, onClose: _close),
           const Divider(height: 1, thickness: 0.5),
+          if (controller.room.isCatchUpActive)
+            Obx(() {
+              final switching = controller.catchUpSwitching.value;
+              return _ReturnToLiveAction(
+                enabled: !switching,
+                switching: switching,
+                onPressed: () => unawaited(controller.returnToLive(closeSchedule: _close)),
+              );
+            }),
           Expanded(child: Obx(() => _buildBody(context, theme))),
         ],
       ),
@@ -167,6 +176,41 @@ class _IptvScheduleDialogContentState extends State<IptvScheduleDialogContent> {
       return;
     }
     if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+  }
+}
+
+class _ReturnToLiveAction extends StatelessWidget {
+  const _ReturnToLiveAction({required this.enabled, required this.switching, required this.onPressed});
+
+  final bool enabled;
+  final bool switching;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          key: const ValueKey('iptv-return-to-live'),
+          onPressed: enabled ? onPressed : null,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              if (switching)
+                const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+              else
+                const Icon(Remix.live_line, size: 18),
+              Text(i18n('return_to_live'), textAlign: TextAlign.center),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

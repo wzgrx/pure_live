@@ -38,6 +38,8 @@ import 'package:pure_live/modules/live_play/widgets/local_interaction/local_mess
 
 typedef IptvPlayerStarter = Future<bool> Function(LiveRoom room);
 
+enum IptvPlaybackSwitchResult { started, superseded, failed }
+
 class LivePlayController extends GetxController
     with GetSingleTickerProviderStateMixin, WidgetsBindingObserver
     implements DanmakuSessionHost, PlayerSessionHost {
@@ -800,20 +802,22 @@ class LivePlayController extends GetxController
     }
   }
 
-  Future<bool> _initIptvPlayer(LiveRoom liveRoom, {required int loadEpoch}) async {
+  Future<IptvPlaybackSwitchResult> _initIptvPlayer(LiveRoom liveRoom, {required int loadEpoch}) async {
     final link = liveRoom.link?.trim() ?? '';
     if (link.isEmpty || liveRoom.normalizedRoomId.isEmpty) {
       if (_isRoomLoadCurrent(loadEpoch, liveRoom.roomId!, liveRoom.platform)) {
         updateRoom(success: false, isLoading: false, loadError: i18n('invalid_play_url'));
         ToastUtil.show(i18n('invalid_play_url'));
       }
-      return false;
+      return IptvPlaybackSwitchResult.failed;
     }
 
     updatePlayer(qualites: [LivePlayQuality(quality: '原画')], currentQuality: 0, currentLineIndex: 0);
 
     final started = await _switchToUrl(link, expectedRoom: liveRoom);
-    if (!_isRoomLoadCurrent(loadEpoch, liveRoom.roomId!, liveRoom.platform)) return false;
+    if (!_isRoomLoadCurrent(loadEpoch, liveRoom.roomId!, liveRoom.platform)) {
+      return IptvPlaybackSwitchResult.superseded;
+    }
 
     try {
       await danmakuController.stopDanmaku();
@@ -908,10 +912,12 @@ class LivePlayController extends GetxController
     }
   }
 
-  Future<bool> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
+  Future<IptvPlaybackSwitchResult> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
     final currentRoom = state.value.room.detail;
     final normalizedUrl = catchUpUrl.trim();
-    if (currentRoom == null || currentRoom.normalizedRoomId.isEmpty || normalizedUrl.isEmpty) return false;
+    if (currentRoom == null || currentRoom.normalizedRoomId.isEmpty || normalizedUrl.isEmpty) {
+      return IptvPlaybackSwitchResult.failed;
+    }
 
     final updatedRoom = currentRoom.copyWith(
       catchUpUrl: normalizedUrl,
@@ -924,7 +930,22 @@ class LivePlayController extends GetxController
     return _switchToUrl(normalizedUrl, expectedRoom: updatedRoom);
   }
 
-  Future<bool> _switchToUrl(String url, {required LiveRoom expectedRoom}) async {
+  Future<IptvPlaybackSwitchResult> returnToLive() async {
+    final currentRoom = state.value.room.detail;
+    final liveUrl = currentRoom?.link?.trim() ?? '';
+    if (currentRoom == null || currentRoom.normalizedRoomId.isEmpty || liveUrl.isEmpty) {
+      return IptvPlaybackSwitchResult.failed;
+    }
+    if (!currentRoom.isCatchUpActive) {
+      return IptvPlaybackSwitchResult.started;
+    }
+
+    final liveRoom = currentRoom.withoutCatchUp();
+    updateRoom(detail: liveRoom);
+    return _switchToUrl(liveUrl, expectedRoom: liveRoom);
+  }
+
+  Future<IptvPlaybackSwitchResult> _switchToUrl(String url, {required LiveRoom expectedRoom}) async {
     final playbackEpoch = ++_iptvPlaybackEpoch;
     updateRoom(success: false, isLoading: true, loadError: null);
     updatePlayer(playUrls: [url], currentLineIndex: 0);
@@ -933,13 +954,15 @@ class LivePlayController extends GetxController
       final started = injectedStarter != null
           ? await injectedStarter(expectedRoom)
           : await playerController.setDirectPlayer(room: expectedRoom, site: currentSite) != null;
-      if (!_isIptvPlaybackCurrent(playbackEpoch, expectedRoom)) return false;
+      if (!_isIptvPlaybackCurrent(playbackEpoch, expectedRoom)) {
+        return IptvPlaybackSwitchResult.superseded;
+      }
       if (!started) {
         updateRoom(success: false, isLoading: false, loadError: i18n('play_video_failed'));
-        return false;
+        return IptvPlaybackSwitchResult.failed;
       }
       updateRoom(success: true, isLoading: false, loadError: null);
-      return true;
+      return IptvPlaybackSwitchResult.started;
     } catch (error, stackTrace) {
       developer.log(
         'IPTV direct player start failed',
@@ -947,7 +970,9 @@ class LivePlayController extends GetxController
         error: error,
         stackTrace: stackTrace,
       );
-      if (!_isIptvPlaybackCurrent(playbackEpoch, expectedRoom)) return false;
+      if (!_isIptvPlaybackCurrent(playbackEpoch, expectedRoom)) {
+        return IptvPlaybackSwitchResult.superseded;
+      }
       updateRoom(success: false, isLoading: false, loadError: i18n('play_video_failed'));
       rethrow;
     }

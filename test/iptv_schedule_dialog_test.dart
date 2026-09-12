@@ -106,12 +106,52 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('catch-up schedule exposes one reachable return-to-live action and disables it while switching', (
+    tester,
+  ) async {
+    final controller = _ScheduleController(isCatchUp: true);
+    addTearDown(controller.disposeFixture);
+    await _pump(tester, controller, textScale: 3);
+    await tester.pumpAndSettle();
+
+    final action = find.byKey(const ValueKey('iptv-return-to-live'));
+    expect(action, findsOneWidget);
+    expect(find.text('Return to live'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    controller.catchUpSwitching.value = true;
+    await tester.pump();
+    await tester.pump();
+    expect(tester.widget<FilledButton>(action).onPressed, isNull);
+    await tester.tap(action);
+    await tester.pump();
+    expect(controller.returnLiveCalls, 0);
+
+    controller.catchUpSwitching.value = false;
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(action);
+    await tester.pump();
+    expect(controller.returnLiveCalls, 1);
+    expect(controller.closeCalls, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   test('dialog source keeps the body scrollable and avoids fixed ListTile layout', () {
     final source = File('lib/modules/live_play/widgets/video_player/iptv_schedule_dialog.dart').readAsStringSync();
     expect(source, contains('SingleChildScrollView'));
     expect(source, contains('LayoutBuilder'));
     expect(source, contains('scaledBody > 22'));
     expect(source, isNot(contains('ListTile(')));
+  });
+
+  test('return-to-live action and completion labels are complete in both locales', () async {
+    for (final locale in const ['en', 'zh']) {
+      final translations = jsonDecode(await File('assets/translations/$locale.json').readAsString());
+      for (final key in const ['return_to_live', 'returned_to_live']) {
+        expect(translations[key], isA<String>().having((value) => value.trim(), '$locale:$key', isNotEmpty));
+      }
+    }
   });
 }
 
@@ -203,14 +243,20 @@ class _FontSettings implements FontSettingsController {
 }
 
 class _ScheduleController implements VideoController {
+  _ScheduleController({bool isCatchUp = false})
+    : room = LiveRoom(
+        roomId: 'fixture-room',
+        platform: 'iptv',
+        title: 'Fixture channel',
+        epgId: 'fixture-epg',
+        link: 'https://fixture/live',
+        isCatchUp: isCatchUp,
+        catchUpUrl: isCatchUp ? 'https://fixture/catchup' : null,
+        catchUpStart: isCatchUp ? DateTime(2026, 9, 12, 9).millisecondsSinceEpoch : null,
+      );
+
   @override
-  final room = LiveRoom(
-    roomId: 'fixture-room',
-    platform: 'iptv',
-    title: 'Fixture channel',
-    epgId: 'fixture-epg',
-    link: 'https://fixture/live',
-  );
+  final LiveRoom room;
   @override
   final currentChannelSchedule = <EpgProgramme>[].obs;
   @override
@@ -228,6 +274,7 @@ class _ScheduleController implements VideoController {
 
   int loadCalls = 0;
   int closeCalls = 0;
+  int returnLiveCalls = 0;
   int? claimedIndex;
   final tappedTitles = <String>[];
 
@@ -254,6 +301,16 @@ class _ScheduleController implements VideoController {
     tappedTitles.add(programme.title);
     closeSchedule?.call();
     return IptvProgrammeSelectionResult.catchupStarted;
+  }
+
+  @override
+  Future<IptvProgrammeSelectionResult> returnToLive({
+    VoidCallback? closeSchedule,
+    ValueChanged<String>? showMessage,
+  }) async {
+    returnLiveCalls++;
+    closeSchedule?.call();
+    return IptvProgrammeSelectionResult.live;
   }
 
   void disposeFixture() {

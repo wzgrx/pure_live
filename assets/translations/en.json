@@ -878,6 +878,8 @@
     "view_schedule": "View Guide",
     "program_scheduled_hint": "This program has not started yet.",
     "playing_catchup": "Loading catch-up stream for",
+    "return_to_live": "Return to live",
+    "returned_to_live": "Returned to live",
     "import_action": "Import",
     "download_guide_sub": "Sync and overwrite with latest provider listings",
     "manage_page_title": "Subscription Source Manager",

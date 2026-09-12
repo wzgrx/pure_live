@@ -620,7 +620,7 @@ void main() {
   test('a superseded catch-up start publishes no false success message', () async {
     final room = LiveRoom(platform: 'fixture', roomId: 'room', link: 'https://fixture/live');
     final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
-    final live = _FakeLivePlayController()..startResult = false;
+    final live = _FakeLivePlayController()..startResult = IptvPlaybackSwitchResult.superseded;
     final controller = _controller(
       room: room,
       manager: manager,
@@ -643,6 +643,148 @@ void main() {
     expect(controller.catchUpSwitching.value, isFalse);
     expect(live.startCalls, 1);
     expect(messages, isEmpty);
+    controller.dispose();
+  });
+
+  test('a current catch-up start failure is reported instead of being labelled superseded', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room', link: 'https://fixture/live');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
+    final live = _FakeLivePlayController()..startResult = IptvPlaybackSwitchResult.failed;
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    final messages = <String>[];
+
+    final result = await controller.onProgrammeTapped(
+      _programme('failed result'),
+      now: DateTime(2026, 9, 12, 12),
+      closeSchedule: () {},
+      showMessage: messages.add,
+    );
+
+    expect(result, IptvProgrammeSelectionResult.failed);
+    expect(controller.catchUpSwitching.value, isFalse);
+    expect(live.startCalls, 1);
+    expect(messages, hasLength(1));
+    controller.dispose();
+  });
+
+  test('the live programme returns an active catch-up session to the original stream', () async {
+    final room = LiveRoom(
+      platform: 'fixture',
+      roomId: 'room',
+      link: 'https://fixture/live',
+      isCatchUp: true,
+      catchUpUrl: 'https://fixture/catchup',
+      catchUpStart: DateTime(2026, 9, 12, 10).millisecondsSinceEpoch,
+      catchUpEnd: DateTime(2026, 9, 12, 11).millisecondsSinceEpoch,
+    );
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.catchUpUrl!));
+    final live = _FakeLivePlayController()..returnLiveGate = Completer<void>();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    var closes = 0;
+    final messages = <String>[];
+    final programme = _programme('live now', start: DateTime(2026, 9, 12, 11), stop: DateTime(2026, 9, 12, 12));
+
+    final first = controller.onProgrammeTapped(
+      programme,
+      now: DateTime(2026, 9, 12, 11, 30),
+      closeSchedule: () => closes++,
+      showMessage: messages.add,
+    );
+    await live.returnLiveEntered.future;
+
+    expect(controller.catchUpSwitching.value, isTrue);
+    expect(manager.closeCalls, 1);
+    expect(live.returnLiveCalls, 1);
+    expect(closes, 1);
+    expect(messages, isEmpty);
+
+    final duplicate = await controller.returnToLive(closeSchedule: () => closes++, showMessage: messages.add);
+    expect(duplicate, IptvProgrammeSelectionResult.busy);
+    expect(live.returnLiveCalls, 1);
+    expect(closes, 1);
+
+    live.returnLiveGate!.complete();
+    expect(await first, IptvProgrammeSelectionResult.live);
+    expect(controller.catchUpSwitching.value, isFalse);
+    expect(messages, hasLength(1));
+    controller.dispose();
+  });
+
+  test('a superseded return-to-live request publishes no stale result message', () async {
+    final room = LiveRoom(
+      platform: 'fixture',
+      roomId: 'room',
+      link: 'https://fixture/live',
+      isCatchUp: true,
+      catchUpUrl: 'https://fixture/catchup',
+    );
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.catchUpUrl!));
+    final live = _FakeLivePlayController()..returnLiveResult = IptvPlaybackSwitchResult.superseded;
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    final messages = <String>[];
+
+    final result = await controller.returnToLive(closeSchedule: () {}, showMessage: messages.add);
+
+    expect(result, IptvProgrammeSelectionResult.superseded);
+    expect(controller.catchUpSwitching.value, isFalse);
+    expect(live.returnLiveCalls, 1);
+    expect(messages, isEmpty);
+    controller.dispose();
+  });
+
+  test('return to live keeps the schedule open when the original source is missing', () async {
+    final room = LiveRoom(
+      platform: 'fixture',
+      roomId: 'room',
+      link: '   ',
+      isCatchUp: true,
+      catchUpUrl: 'https://fixture/catchup',
+    );
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.catchUpUrl!));
+    final live = _FakeLivePlayController();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    var closes = 0;
+    final messages = <String>[];
+
+    final result = await controller.returnToLive(closeSchedule: () => closes++, showMessage: messages.add);
+
+    expect(result, IptvProgrammeSelectionResult.invalidUrl);
+    expect(closes, 0);
+    expect(manager.closeCalls, 0);
+    expect(live.returnLiveCalls, 0);
+    expect(messages, hasLength(1));
     controller.dispose();
   });
 
@@ -673,6 +815,8 @@ void main() {
       IptvProgrammeSelectionResult.live,
     );
     expect(closes, 1);
+    expect(live.returnLiveCalls, 0);
+    expect(manager.closeCalls, 0);
 
     expect(
       await controller.onProgrammeTapped(
@@ -994,13 +1138,17 @@ class _FakeLivePlayController implements LivePlayController {
   Object? startError;
   final startEntered = Completer<void>();
   int startCalls = 0;
-  bool startResult = true;
+  IptvPlaybackSwitchResult startResult = IptvPlaybackSwitchResult.started;
   String? catchUpUrl;
   int? startTime;
   int? endTime;
+  Completer<void>? returnLiveGate;
+  final returnLiveEntered = Completer<void>();
+  int returnLiveCalls = 0;
+  IptvPlaybackSwitchResult returnLiveResult = IptvPlaybackSwitchResult.started;
 
   @override
-  Future<bool> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
+  Future<IptvPlaybackSwitchResult> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
     startCalls++;
     this.catchUpUrl = catchUpUrl;
     this.startTime = startTime;
@@ -1009,6 +1157,14 @@ class _FakeLivePlayController implements LivePlayController {
     if (startError != null) throw startError!;
     await startGate?.future;
     return startResult;
+  }
+
+  @override
+  Future<IptvPlaybackSwitchResult> returnToLive() async {
+    returnLiveCalls++;
+    if (!returnLiveEntered.isCompleted) returnLiveEntered.complete();
+    await returnLiveGate?.future;
+    return returnLiveResult;
   }
 
   @override

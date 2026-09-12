@@ -356,6 +356,8 @@ class LiveRoom {
 
   String get normalizedRoomId => roomId?.trim() ?? '';
 
+  bool get isCatchUpActive => isCatchUp == true || (catchUpUrl?.trim().isNotEmpty ?? false);
+
   /// Canonical room state used by presentation and playback decisions.
   ///
   /// The project historically carried the same fact in both [status] and
@@ -721,6 +723,20 @@ extension LiveRoomExtension on LiveRoom {
 
   LiveRoom getLiveRoomWithError() {
     return copyWith(liveStatus: LiveStatus.offline, status: false, isRecord: false);
+  }
+
+  /// Returns a fresh room snapshot for the original live stream.
+  ///
+  /// [copyWith] deliberately treats null as "keep the previous value", which
+  /// is useful for partial metadata merges but cannot clear catch-up state.
+  /// Returning to live must remove the old interval as one snapshot so a later
+  /// schedule render never highlights a retired programme.
+  LiveRoom withoutCatchUp() {
+    final liveRoom = copyWith(isCatchUp: false);
+    liveRoom.catchUpUrl = null;
+    liveRoom.catchUpStart = null;
+    liveRoom.catchUpEnd = null;
+    return liveRoom;
   }
 
   LiveRoom fillFromDetail(LiveRoom? detail) {

@@ -1,5 +1,7 @@
 # 3.2.0 剩余工作与当前候选（2026-09-12）
 
+- **09-12 IPTV 从回看返回直播、结果语义与大字号动作已修订**：[审计](IPTV_RETURN_TO_LIVE_TRANSACTION_AND_LAYOUT_AUDIT_2026_09_12.md)。旧直播节目分支只关闭节目单，播放器仍停留在回看源；回看 URL/区间没有显式清除路径，布尔结果又会把当前启动失败误标为旧请求被取代。现由当前节目和明确按钮共用返回直播事务，恢复原始直播地址并清除完整回看快照；三态结果、播放代次和 single-flight 隔离迟到任务，空原始地址保留节目单和播放器。返回动作在 EPG 加载/错误/空列表及 320×480 / 3.0 倍文字下持续可达。最终九个测试文件联合 **214/214 PASS**，全库 analyze **No issues found**。真实 IPTV 网络/解码与 Android/Windows GUI 候选继续；A1-05/A3-04 保持 RUN，宏观仍为 20 PASS / 33 RUN / 9 NR，共 42 组未闭环，未操作手机、构建或发布，Astra Light 使用 0 次。
+
 - **09-12 IPTV 直连播放器初始化、换房与回看 latest-wins 事务已修订**：[审计](IPTV_DIRECT_PLAYER_TRANSACTION_AUDIT_2026_09_12.md)。旧初始路径在 `setPlayer` 完成前返回并标记成功，直连源绕过播放请求栅栏；回看迟到成功/异常还可写入新请求并发布假提示。现统一等待 `VideoController.initialization`，以播放器 load epoch + IPTV playback epoch 隔离换房、退出和新回看；空身份/空地址不创建事务，被取代结果不更改当前页面。直接定向 **37/37 PASS**，九个测试文件联合 **205/205 PASS**，全库 analyze **No issues found**。真实 IPTV/解码、返回直播和 Android/Windows GUI 候选继续；A1-05/A3-04 保持 RUN，宏观仍为 20 PASS / 33 RUN / 9 NR，共 42 组未闭环，未操作手机、构建或发布。
 
 - **09-12 IPTV 节目单来源隔离、回看切换事务与大字号布局已修订**：[审计](IPTV_SCHEDULE_CATCHUP_TRANSACTION_AND_LAYOUT_AUDIT_2026_09_12.md)。旧读取可由较慢来源覆盖新来源或在退出后写入，停止边界的高亮与点击不一致；回看会折叠重复查询参数、把参数放到 fragment 后，连续点击又能重叠销毁/创建播放器并提前提示成功。旧固定节目行在 320×480 / 3.0 倍英文下复现 131/11 像素横向溢出，错误与空列表也不可区分。现统一来源/代次/销毁栅栏、半开时间区间、纯 URL 策略、single-flight 完整等待、明确状态、一次当前定位及响应式滚动布局。最终三文件 **37/37 PASS**，与相邻 IPTV 文件去重 **142/142 PASS**，全库 analyze **No issues found**。M3U 提供方回看元数据、真实 IPTV/解码和返回直播继续，A1-05/A3-04 保持 RUN；宏观仍为 20 PASS / 33 RUN / 9 NR，共 42 组未闭环，未操作手机、构建或发布。

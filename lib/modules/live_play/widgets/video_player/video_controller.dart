@@ -1060,8 +1060,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     }
 
     if (phase == IptvProgrammePhase.live) {
-      _closeSchedule(closeSchedule);
-      return IptvProgrammeSelectionResult.live;
+      return returnToLive(closeSchedule: closeSchedule, showMessage: showMessage);
     }
 
     final originalUrl = room.link?.trim() ?? '';
@@ -1089,12 +1088,55 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     catchUpSwitching.value = true;
     _closeSchedule(closeSchedule);
     try {
-      final started = await _reloadWithCatchup(catchupUrl, programme);
-      if (!started) return IptvProgrammeSelectionResult.superseded;
+      final switchResult = await _reloadWithCatchup(catchupUrl, programme);
+      if (switchResult == IptvPlaybackSwitchResult.superseded) {
+        return IptvProgrammeSelectionResult.superseded;
+      }
+      if (switchResult == IptvPlaybackSwitchResult.failed) {
+        notify(i18n('play_video_failed'));
+        return IptvProgrammeSelectionResult.failed;
+      }
       notify('${i18n('playing_catchup')}: ${programme.title}');
       return IptvProgrammeSelectionResult.catchupStarted;
     } catch (error, stackTrace) {
       log('IPTV catch-up switch failed', name: 'VideoController', error: error, stackTrace: stackTrace);
+      notify(i18n('play_video_failed'));
+      return IptvProgrammeSelectionResult.failed;
+    } finally {
+      catchUpSwitching.value = false;
+    }
+  }
+
+  Future<IptvProgrammeSelectionResult> returnToLive({
+    VoidCallback? closeSchedule,
+    ValueChanged<String>? showMessage,
+  }) async {
+    if (catchUpSwitching.value) return IptvProgrammeSelectionResult.busy;
+    if (!room.isCatchUpActive) {
+      _closeSchedule(closeSchedule);
+      return IptvProgrammeSelectionResult.live;
+    }
+    if ((room.link?.trim() ?? '').isEmpty) {
+      (showMessage ?? ToastUtil.show)(i18n('invalid_play_url'));
+      return IptvProgrammeSelectionResult.invalidUrl;
+    }
+
+    catchUpSwitching.value = true;
+    _closeSchedule(closeSchedule);
+    final notify = showMessage ?? ToastUtil.show;
+    try {
+      final switchResult = await _reloadWithLive();
+      if (switchResult == IptvPlaybackSwitchResult.superseded) {
+        return IptvProgrammeSelectionResult.superseded;
+      }
+      if (switchResult == IptvPlaybackSwitchResult.failed) {
+        notify(i18n('play_video_failed'));
+        return IptvProgrammeSelectionResult.failed;
+      }
+      notify(i18n('returned_to_live'));
+      return IptvProgrammeSelectionResult.live;
+    } catch (error, stackTrace) {
+      log('IPTV return-to-live switch failed', name: 'VideoController', error: error, stackTrace: stackTrace);
       notify(i18n('play_video_failed'));
       return IptvProgrammeSelectionResult.failed;
     } finally {
@@ -1113,7 +1155,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     }
   }
 
-  Future<bool> _reloadWithCatchup(String catchupUrl, database.EpgProgramme programme) async {
+  Future<IptvPlaybackSwitchResult> _reloadWithCatchup(String catchupUrl, database.EpgProgramme programme) async {
     clearListener();
     await _playerManager.close();
     await destory();
@@ -1122,6 +1164,13 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
       startTime: programme.start.millisecondsSinceEpoch,
       endTime: programme.stop.millisecondsSinceEpoch,
     );
+  }
+
+  Future<IptvPlaybackSwitchResult> _reloadWithLive() async {
+    clearListener();
+    await _playerManager.close();
+    await destory();
+    return _livePlayController.returnToLive();
   }
 
   // 播放控制

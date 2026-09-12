@@ -46,6 +46,7 @@
 
 - **最新稳定版**：[v3.1.8](https://github.com/wzgrx/pure_live/releases/tag/v3.1.8)
 - **下一稳定版目标**：3.2.0，当前处于完整验收阶段，尚未发布。本轮只维护本仓库、不合并上游；优先源码审查、确定性回归和本地验证，手机操作按本轮明确安排执行，不把连接设备作为修复前置条件。进度、缺口与发布门禁见 [3.2.0 验收入口](docs/ACCEPTANCE_3_2_0.md)，开发包及旧版通过记录不等于最终版已通过。
+- **当前 Android 验收输入**：精确 `3e41e848` 的 arm64 Debug 已完成同签名覆盖安装、安装前后状态一致性及 Bilibili 播放/弹幕/音频模式/PiP 16/16 冒烟；仍是开发候选，不作为稳定版下载入口。详见[当前累计 Android 候选审计](docs/CURRENT_ANDROID_CANDIDATE_2026_09_12.md)。
 - **源码平台范围（未发布）**：目前 21 个直播站点 + IPTV，共 22 个适配器。新增 OPENREC / mellow-fan、TTingLive / FLEX TV、niconico 与微博直播；目录、搜索、弹幕和原生证据各自分列，注册不等于完整支持。见[平台能力表](docs/PLATFORM_COMPATIBILITY.md)、[OPENREC 应用审计](docs/OPENREC_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)、[TTing 应用审计](docs/TTING_APPLICATION_INTEGRATION_AUDIT_2026_09_09.md)与[微博应用审计](docs/WEIBO_APPLICATION_INTEGRATION_2026_09_11.md)。其余 6 组参考平台和已接入平台的完整能力仍待验收。
 - **当前累计验收候选（未发布）**：Android `48154d15` 已完成 4072 项完整测试、42 项公共接口及 arm64 Debug 包检查，尚未安装；Windows `2fb471d3` 已生成 Debug 便携包并完成有限 GUI 冒烟。两者都早于当前源码，不含 09-11 的后续平台与设置修订，也不是 3.2.0 最终验收包。见[Android 候选审计](docs/ANDROID_CUMULATIVE_CANDIDATE_2026_09_10.md)与[Windows 候选审计](docs/HLS_WINDOWS_CANDIDATE_2026_09_10.md)。
 - **弹幕重连状态修复（定向候选，未发布）**：Bilibili、抖音、斗鱼、虎牙、快手、SOOP、Twitch 与 YY 现用类型化事件区分暂态重连和最终关闭，直播间与多画面会话不再解析中文提示决定所有权。精确提交 `80c87c0e` 的 72/72 定向回归、全库 analyze 与 Android arm64 Debug 完整性检查通过；另在精确 `d77c6153` 以生产适配器对 Bilibili、Huya、Douyin 完成 Windows DIRECT 10 轮共 30/30 连接，全部 ready 且无重连/最终关闭。真实断网、长时恢复、Android 与 Issue #860 报告网络继续原生验收，详见[收藏刷新与弹幕连接审计](docs/ISSUE_860_REFRESH_DANMAKU_AUDIT_2026_09_11.md#后续增量公共直播弹幕重复连接探针)。

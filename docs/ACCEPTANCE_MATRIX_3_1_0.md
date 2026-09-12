@@ -33,6 +33,8 @@
 | A0-09 | PASS | v3.1.8 Android arm64-v8a 在新主力设备覆盖升级、启动与数据保留 | K90 Pro / `25102RKBEC` / Android 17 通过网络 ADB 覆盖安装，核对 `versionName=3.1.8`、arm64 分包 `versionCode=6121`；一次启动成功、原 6 个关注记录保留、无 AndroidRuntime/FATAL。短时内存只记录为启动基线，完整运行矩阵继续执行 |
 | A0-10 | PASS | 斗鱼过滤修订后的 v3.1.8 Android arm64 Debug 覆盖安装与基础运行 | 从干净提交 `971c2753` 构建，APK 为 299,150,717 B，SHA-256 `B0EEAF3434E961EFD10419BEF59AC46164D44CDD61DC5746CCE63C3AFFF259DF`；K90 Pro / cycle 200 覆盖安装并完成 14/14 直播冒烟，无 FATAL/ANR。构建：`local-artifacts/build-records/20260904T193151421Z-build-androidarm64-debug.json`；实机：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json` |
 
+> 2026-09-12 当前累计候选：精确 `3e41e848` arm64 Debug 已完成同签名覆盖安装，安装前后 58 个状态文件逐路径/大小/SHA 一致，设备 APK 哈希匹配候选。当前 Bilibili 冷启动、刷新、播放、10 条可见弹幕、音频模式往返、PiP 恢复、致命日志与退出清理 16/16 通过。它刷新 A0 当前候选证据，不新增宏观 PASS；详见 `docs/CURRENT_ANDROID_CANDIDATE_2026_09_12.md`。
+
 ### A1 首页、关注、热门、分区与搜索
 
 | ID | 状态 | 验收内容 |
@@ -82,7 +84,7 @@
 | A3-07 | RUN | 虎牙普通视频在其他应用前台时连续后台播放 10 分钟，21/21 媒体状态均为 `PLAYING`；PSS/RSS 呈波动平台，CPU 平均 2.24%、最高 5%，结束后媒体会话与 Wake Lock 释放。横竖屏、PiP、纯音频和锁屏组合仍按矩阵继续 |
 | A3-08 | RUN | 多画面真全屏显式退出表面已完成聚焦 Widget 回归：安全区 44×44 按钮、系统留白剥离、退出回调和按钮外格子点击隔离均通过。v3.1.3 Windows Release 便携包已验证按钮与 `Escape` 均从 `1536×960` 真全屏恢复到 `1276×718` 普通窗口。源码现让 Windows 每格按真实 viewport/DPR/源尺寸防抖协商输出，布局切换、窗口缩放及带 GlobalKey 的聚焦晋升会交换大/小纹理目标而不重建播放器；见 `docs/MULTIVIEW_RENDER_TARGET_AUDIT_2026_09_11.md`。Android 16 正式 APK 已覆盖安装、冷启动正常，系统返回/方向恢复与双端真实多路清晰度、资源和连续性继续复验 |
 
-> 2026-09-12 增量：Android 前台 Activity 现于每次 `onResume` 将硬件音量控件建议流恢复为 `STREAM_MUSIC`，不拦截按键或直接写系统音量；宿主合同原始 0/1，最终同提交 71/71、全库 analyze 及 `d8de9855` arm64 Debug 构建/完整性/16 KB ELF 对齐通过。物理按钮、输出路由和 #858 报告设备仍按新增 `AND-PLAY-16` 复验，A3-04/A7-02 与宏观计数不变，见 `docs/ANDROID_HARDWARE_VOLUME_ROUTING_AUDIT_2026_09_12.md`。
+> 2026-09-12 增量：Android 前台 Activity 现于每次 `onResume` 将硬件音量控件建议流恢复为 `STREAM_MUSIC`，不拦截按键或直接写系统音量；宿主合同原始 0/1，最终同提交 71/71、全库 analyze 及 `d8de9855` arm64 Debug 构建/完整性/16 KB ELF 对齐通过。后续 `3e41e848` 累计候选已覆盖安装：首页软件注入音量增加使媒体流 0→10、铃声流保持 0，随后恢复媒体流 0/muted、桌面、进程与 stay-awake。实体按钮、播放中、弹窗、全屏、PiP、外部 Activity、前后台和其他输出路由仍按 `AND-PLAY-16` 复验；A3-04/A7-02 与宏观计数不变，见 `docs/ANDROID_HARDWARE_VOLUME_ROUTING_AUDIT_2026_09_12.md`、`docs/CURRENT_ANDROID_CANDIDATE_2026_09_12.md`。
 
 > 2026-09-12 增量：直播画面中的房间方向和竖屏全屏显示模式选择器改为有界滚动内容与固定取消。“记住房间方向”只保存在路由草稿，选择方向后与方向一次提交；取消和系统返回不写设置。320×480 / 3.0 倍中英文新增 5/5、相关七文件 58/58，见 `docs/PORTRAIT_PLAYBACK_PICKER_LAYOUT_AND_TRANSACTION_AUDIT_2026_09_12.md`。AND-SET-07、A3-03/A3-04/A3-07 及宏观计数不变，真实竖屏与 Android 候选继续。
 

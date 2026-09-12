@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [当前累计 Android 候选覆盖安装与冒烟](CURRENT_ANDROID_CANDIDATE_2026_09_12.md)：精确提交构建/归档、同签名覆盖安装、安装前后状态逐文件一致、16/16 播放冒烟及 #858 首页软件音量路由补证。
+
 - [Android 物理音量键媒体流路由审计](ANDROID_HARDWARE_VOLUME_ROUTING_AUDIT_2026_09_12.md)：Issue #858 源码宿主缺口、`onResume` 媒体流归属、定向回归、精确提交 arm64 Debug 构建及物理按钮待验矩阵。
 
 - [IPTV 频道 HTTP 请求头、播放与录制链路审计](IPTV_HTTP_HEADER_PLAYBACK_AND_RECORDING_AUDIT_2026_09_12.md)：VLC/EXTHTTP/KODIPROP/URL suffix 解析、schema 9 幂等迁移，以及主播放器、多画面、纯音频和录制字段一致性。

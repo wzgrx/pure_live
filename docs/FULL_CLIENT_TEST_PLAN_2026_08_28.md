@@ -21,6 +21,7 @@
 - App 语义版本、build number、包名、ABI、Flutter/Gradle/Windows 工具链版本；
 - Android：设备序列号、型号、Android 版本、分辨率、密度、支持刷新率、当前刷新率、电量、温度、包版本；
 - Windows：系统版本、显示器分辨率/缩放/最高刷新率、GPU、播放器内核、数据目录；
+- iOS：设备型号、系统版本、App build、播放器内核、`vo/ao/hwdec`、Jetsam/Crash 报告可用性及测试房间；
 - 设置快照：主题、刷新率、导航、播放器、画中画、弹幕、本地互动、录制和平台登录状态。改变设置的案例结束后恢复快照；不修改真实账号 Cookie、关注关系和云端数据。
 
 证据统一写入：
@@ -231,7 +232,18 @@ Windows 阶段复用 A2–A8 的公共业务案例，并补充桌面特有检查
 - [ ] WIN-FAULT-01 断网、代理错误、DNS/超时、流断开、窗口失焦、显示器休眠恢复；状态可解释且可恢复。
 - [ ] WIN-SOAK-01 1–2 小时综合长测：播放、弹幕、定时切模式、短录制、网络抖动；若趋势提前稳定可按计划提前结束。
 
-## 6. 修复与回归规则
+## 6. iOS 社区平台补充矩阵
+
+- [ ] IOS-BASE-01 冻结设备、iOS、App build、房间、持续时间和完整 MPV 自定义设置；每轮保存系统 Crash/Jetsam 与应用日志。
+- [ ] IOS-SET-01 验证 iOS 仅暴露 `vo=libmpv`，音频为 `auto/audiounit/null`，硬解为通用项及 `videotoolbox` / `videotoolbox-copy`；导入 Android/Windows 备份后重新读取持久化值。
+- [ ] IOS-PLAY-01 同一抖音房间分别执行普通页与全屏各 30 分钟，记录首帧、画面/声音、内存压力、温度、横竖屏切换及退出时间点。
+- [ ] IOS-PLAY-02 对 `videotoolbox`、`videotoolbox-copy`、`auto-safe` 和 `no` 串行复验；每次只改变硬解项，退出房间并确认上一播放器已释放后再开始下一轮。
+- [ ] IOS-LIFE-01 普通页↔全屏、前后台、系统返回、换房和快速进入/退出各循环 20 次；崩溃时以第一份原生调用栈区分 Jetsam、MPV render-context dispose 与平台流错误。
+- [ ] IOS-REG-01 修订后复跑设置导入/重置、播放器创建、普通页/全屏、VideoToolbox 和软件解码相邻矩阵；源代码回归与 iOS 原生结果分层记录。
+
+Issue #859 的当前评论、源码缺口、media-kit #1361 对照及红绿记录见 `docs/ISSUE_AUDIT_2026_09_10.md`。当前缺少对应 iOS 设备的原生结果时，上述案例保持未执行，不借用 Android/Windows 结论。
+
+## 7. 修复与回归规则
 
 1. 复现后先写 `provenance`：`upstream-existing`、`fork-regression`、`integration-conflict`、`external-drift`、`environment-or-data` 或 `not-reproduced`。
 2. 找到第一个错误状态和所有者；不以增加任意延时、无限刷新、全局重建或无限重试掩盖问题。
@@ -240,7 +252,7 @@ Windows 阶段复用 A2–A8 的公共业务案例，并补充桌面特有检查
 5. Android 修复后重新安装来自当前 SHA 的 APK，重跑原案例、相邻模式和资源回落；随后才进入 Windows。
 6. 每个结果标记 `pass`、`fail`、`blocked-by-sample`、`external-drift` 或 `not-run`，并附证据路径。
 
-## 7. 最终报告结构
+## 8. 最终报告结构
 
 - 构建/安装基线和 SHA；
 - Android 逐阶段通过/失败/样本缺口数量；

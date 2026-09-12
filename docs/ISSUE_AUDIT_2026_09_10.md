@@ -21,9 +21,13 @@
 
 ## #859：iOS 抖音全屏播放闪退
 
-[原报告](https://github.com/liuchuancong/pure_live/issues/859)，09-09 13:23:14 UTC：iPhone 12 / iOS 16.5.1，版本只写“最新”，播放器描述为“最佳播放器”，全屏播放一段时间后退出。分类 **community-platform / not-reproduced**。
+[原报告](https://github.com/liuchuancong/pure_live/issues/859)，09-09 13:23:14 UTC：iPhone 12 / iOS 16.5.1，版本只写“最新”，全屏播放抖音一段时间后退出。09-11 的两条评论已补充确认实际使用 **MPV + VideoToolbox 硬解**；仍缺精确 build、房间、持续时间、完整 MPV 自定义项、崩溃/Jetsam 日志及普通页/全屏对照。分类保持 **community-platform / not-reproduced**。
 
-尚缺精确 build、真实引擎、当前公开样本、持续时间、崩溃/Jetsam 日志及普通页/全屏对照；未取得 iOS 原生运行证据。不把低内存、解码器或既有 Android 修复猜作根因。社区平台级别仅说明本轮证据来源；用户要求的全平台 3.2.0 验收仍保留，不因本记录缩小发布目标。
+后续源码审查确认一处独立、可确定复现的跨平台设置缺口：旧设置或备份可把 Android `playerCompatMode=true`、`mediacodec_embed` / `mediacodec`，或 Windows `wasapi` / `d3d11va` / RTX VSR 带入 iOS；MPV 重置又会写入 `vo=gpu`，而当前锁定的 media_kit iOS Flutter 纹理路径使用 `vo=libmpv`。提交 `233efa57` 增加平台 MPV 配置画像，在设置启动、导入、导出、重置、UI 选择和 MediaKit 创建处共同归一化；iOS 只持久化 `libmpv`，音频仅保留 `auto/audiounit/null`，硬解仅保留通用项及 `videotoolbox` / `videotoolbox-copy`。Android 兼容模式和 Windows RTX VSR 同时增加实际平台门禁，合法的 iOS `videotoolbox` 选择保持不变。
+
+上游 media-kit 的公开 [#1361](https://github.com/media-kit/media-kit/issues/1361) 记录了 iPhone 11 / iOS 16.6.1 在销毁 MPV render context 时的 `free_option_data` / `mpv_render_context_free` 竞态崩溃，现行 Darwin 输出代码仍保留相邻的异步释放结构。该线索与“iOS 16 + MPV + 播放后闪退”相邻，但当前报告没有调用栈、Jetsam 或销毁时序，故只登记为上游对照，不据此判定 #859 根因，也未在 Windows 环境直接修改 Swift 销毁流程。
+
+验证保留完整红绿链：修改前 `20260912T093438195Z-quality-focused.json` 为 **9 PASS / 1 FAIL**，精确落在 iOS 导入仍保留 Android 兼容模式；首轮修订 `20260912T093904090Z-quality-focused.json` 又由缺失 `defaultTargetPlatform` 导入在 analyze 阶段失败；补齐后同内容全库 analyze 无问题、六文件 **147/147 PASS**（`20260912T094342600Z-quality-focused.json`），精确提交 `233efa57` 再跑六文件 **147/147 PASS**（`20260912T094651341Z-quality-focused.json`）。两次门禁实际 ADB 命令均为 0；本轮没有 iOS 构建、原生运行或闪退复现。#859 继续等待报告设备的 crash/Jetsam、房间、时长、普通页/全屏对照和完整设置快照；社区平台级别仅说明本轮证据来源，3.2.0 全平台验收范围保持。
 
 ## #849：评论增量
 

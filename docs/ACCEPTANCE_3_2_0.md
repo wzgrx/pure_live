@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-12 iOS MPV 平台配置已收敛，Issue #859 继续取证**：[增量审计](ISSUE_AUDIT_2026_09_10.md#859ios-抖音全屏播放闪退)。报告评论已确认 MPV + VideoToolbox；提交 `233efa57` 阻断 Android/Windows MPV 专属设置经持久化或备份进入 iOS，固定 media_kit 的 `libmpv` 纹理输出并保留 AudioUnit/VideoToolbox 合法项。修改前 9/10、最终全库 analyze 与六文件 147/147 通过，精确提交复跑 147/147。报告设备 crash/Jetsam、全屏对照和 iOS 原生复现继续，#859 状态及宏观 42 组未闭环保持。
+
 - **09-12 Issue #860 当前评论与公共网络基线已补证**：[完整审计](ISSUE_860_REFRESH_DANMAKU_AUDIT_2026_09_11.md#后续增量公共直播弹幕重复连接探针)。评论截图显示 IPv4 APN 和暂态重连提示，仍缺可重放日志及具体平台/房间。新增 opt-in 生产适配器探针和守卫运行器；精确 `d77c6153` 的 Windows DIRECT 10 轮对 Bilibili、Huya、Douyin 共 30/30 会话通过，ready 后均保持连接，reconnect/terminal 为 0。报告网络、Android、断网与长时恢复继续；A4-01 和宏观 42 组未闭环保持。
 
 - **09-12 弹幕重连/关闭事件语义已类型化**：[Issue #860 后续增量](ISSUE_860_REFRESH_DANMAKU_AUDIT_2026_09_11.md#后续增量弹幕暂态重连与最终关闭事件类型化)。八个平台的暂态恢复统一走 `onReconnect`，重连耗尽等最终状态走 `onClose`；普通直播间与多画面宿主不再根据中文提示文本决定会话所有权。最终 13 文件 72/72、全库 analyze 及精确 `80c87c0e` Android arm64 Debug 内容/16 KB ELF 对齐通过。真实断网、长时恢复和报告房间仍待原生矩阵，A4-01 与宏观 42 组未闭环保持。

@@ -2,10 +2,19 @@
 
 ## 结论
 
-- 上游 Issue [#860](https://github.com/liuchuancong/pure_live/issues/860) 报告 3.1.2 中收藏刷新结果变化，以及抖音、虎牙、哔哩哔哩房间频繁出现弹幕断开。表单的平台字段为 Android，系统/设备描述却是 Windows 11 x64；截至本次审计没有日志、截图、网络轨迹或评论可用于重放。
+- 上游 Issue [#860](https://github.com/liuchuancong/pure_live/issues/860) 报告 3.1.2 中收藏刷新结果变化，以及抖音、虎牙、哔哩哔哩房间频繁出现弹幕断开。表单的平台字段为 Android，系统/设备描述却是 Windows 11 x64。09-12 复核时已有 3 条评论和 2 张截图：报告者展示了 IPv4 APN 配置及应用内暂态重连提示，并说明关闭相关选项后现象仍在；仍没有平台/房间/时间戳、关闭码、原始日志或网络轨迹可用于原样重放。
 - 当前源码版本为 3.1.8+4121。相对 3.1.2，直连 WebSocket 客户端、抖音双端点/签名/请求头/不活动检测，以及收藏刷新原子发布、当前标签生命周期和未知直播状态处理均已发生变化。因此，不把旧版本的宽泛现象直接判定为当前版本已复现或已整体修复。
 - 当前共享 `WebScoketUtils` 中存在一个可确定复现的生命周期缺口：连接仍停留在 HTTP Upgrade 时，房间关闭只请求 `sink.close()`，而该关闭也可能等待同一个未完成握手；活动 `connect()` 没有独立中止信号，房间退出、换房或重试因此可能持续等待。
-- 本批先修订共享连接助手的握手所有权和有界关闭，后续又在收藏链路确定性复现“恢复、手动与收藏变更触发器重复排队”的独立缺口。09-12 继续发现弹幕控制器用中文提示文本区分暂态重连和最终关闭；现已改为类型化事件。三项源码缺口均已修订；Issue #860 的完整随机变化和多平台高频断线仍维持“当前源码未复现”，后续需报告日志或生产探针继续归因。
+- 本批先修订共享连接助手的握手所有权和有界关闭，后续又在收藏链路确定性复现“恢复、手动与收藏变更触发器重复排队”的独立缺口。09-12 继续发现弹幕控制器用中文提示文本区分暂态重连和最终关闭；现已改为类型化事件。三项源码缺口均已修订；当前生产适配器的 Windows DIRECT 公共探针随后完成 30/30 次连接且没有重连或最终关闭。Issue #860 的完整随机变化和报告网络下的多平台高频断线仍维持“当前源码未复现”，后续需报告日志或原生网络矩阵继续归因。
+
+## 当前外部证据复核（2026-09-12）
+
+通过 GitHub API 重新读取当前 Issue 及全部评论；Issue 仍为 open，最后更新时间为 2026-09-11 14:10:04 UTC：
+
+1. 维护者询问是否与 IPv6 网络有关；报告者随后贴出两张截图并表示关闭后仍有相同现象，之后补充以前没有出现过弹幕加载失败。
+2. `local-artifacts/issue-860-current/network-settings.png` 显示中兴路由器的中国移动 APN 页面，截图所示 PDP 类型为 IPv4。该图只证明截图时展示的配置，不证明应用实际连接所走的 DNS、地址族、出口或中间网络。
+3. `local-artifacts/issue-860-current/danmaku-error.png` 显示应用依次提示“开始连接弹幕服务器”和“与服务器断开连接，正在尝试重连”。这能确认用户看到了暂态恢复事件，不包含平台、房间、时间、关闭码、重试次数或最终结果。
+4. 新评论没有补齐原始日志、网络轨迹、代理模式、刷新前后房间快照或 Android/Windows 二选一的实际设备说明，因此不把 IPv4 截图或一条暂态提示外推为根因。
 
 ## 当前源码与 3.1.2 的差异
 
@@ -97,9 +106,29 @@
 
 该候选未安装；真实断网、端点轮换、长时自动恢复和报告中的具体房间继续按 Android/Windows 原生矩阵验证。
 
+## 后续增量：公共直播弹幕重复连接探针
+
+为了让 Issue 的“十次有九次断开”有可重复、可统计且不依赖 GUI 的当前源码基线，新增显式 opt-in 探针 `tool/probes/danmaku_connection_matrix_probe_test.dart`（提交 `520ecf7a`）及资源守卫运行器 `tool/run_danmaku_connection_probe.ps1`（提交 `d77c6153`）。探针从生产 `Sites.of(...).liveSite` 路径取得公开推荐房间、详情和实际平台弹幕引擎；默认不运行，也不写入 Cookie、签名端点或消息正文，只保存公开房间 ID 与 ready/reconnect/terminal/chat/audience 聚合计数。
+
+精确提交 `d77c61535457f78aab82003f8a5192fe10157104` 的复跑命令：
+
+```powershell
+.\tool\run_danmaku_connection_probe.ps1 -RouteMode DIRECT -Cycles 10 -ObservationSeconds 5 -Platforms bilibili,huya,douyin
+```
+
+证据：
+
+- 运行记录：`local-artifacts/build-records/20260912T092153755Z-danmaku-connection-probe.json`，状态 succeeded，98.385 秒，实际 ADB 命令 0，结束后活动重型进程 0。
+- 结果：`local-artifacts/danmaku-probes/20260912T092015340Z-bilibili-huya-douyin-direct-10cycle.json`。
+- Bilibili：10/10 会话通过，ready 10、reconnect 0、terminal 0、chat 932、audience 20，10 次观察结束时均保持连接。
+- Huya：10/10 会话通过，ready 10、reconnect 0、terminal 0、chat 560、audience 4，10 次观察结束时均保持连接。
+- Douyin：10/10 会话通过，ready 10、reconnect 0、terminal 0、chat 4、audience 9，10 次观察结束时均保持连接。
+
+这 30 次生产适配器 DIRECT 会话没有复现报告所述高频断开，说明当前代码和本机网络下不存在同量级的普遍连接失败；它不是 Android 客户端、报告者网络、真实断网恢复、长时稳定性或特定房间的通过证据。A4-01 继续为 RUN，Issue 总体现象继续记为 `not-reproduced`。
+
 ## 边界与后续
 
-- 本文的确定性回归使用替身和 Windows 本机环回 TCP，未连接公共弹幕服务，未执行 Android 实机、原生 GUI、长时间网络抖动或多房间连续切换验证。
-- 09-12 类型化事件增量生成了精确提交的 Android arm64 Debug 候选并完成静态完整性检查；未安装或操作手机，未构建桌面候选，未发布 3.2.0。
+- 握手、收藏和类型化事件的确定性回归使用替身及 Windows 本机环回 TCP；09-12 另有显式 opt-in 的公共生产适配器探针。两类证据都没有执行 Android 实机、原生 GUI、长时间网络抖动或多房间连续切换验证。
+- 09-12 类型化事件增量生成了精确提交的 Android arm64 Debug 候选并完成静态完整性检查；公共探针只运行 Dart/Flutter 测试入口。未安装或操作手机，未构建桌面候选，未发布 3.2.0。
 - Issue #860 仍需带时间戳的平台名、房间 ID、关闭码/原因、代理模式和刷新前后快照，才能把收藏变化及每个平台的生产断线分别归因。
 - 全平台 3.2.0 的完整双端功能、异常恢复、性能与发布门禁继续；宏观 42 组未闭环计数保持不变。

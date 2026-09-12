@@ -170,6 +170,8 @@ local-artifacts/diagnostics/full-regression-20260828/
 
 每个平台至少完成一个当前在播样本的详情/播放/画质/线路/弹幕/录制探测；缺少直播样本时保留 fixture 自动化与探测时间，不借用另一平台结论。
 
+弹幕原生矩阵前可先运行当前生产适配器的重复连接基线：`.\tool\run_danmaku_connection_probe.ps1 -RouteMode DIRECT -Cycles 10 -ObservationSeconds 5 -Platforms bilibili,huya,douyin`。该 opt-in 探针只记录公开房间 ID 和聚合事件计数；通过只表示本机网络、短观察窗口和所列平台当时可连接，不替代 Android/Windows GUI、断网恢复、长时稳定性或指定报告房间。
+
 ### A7 — Android 录制、后台与本地互动
 
 - [ ] AND-REC-01 从直播页开始录制，录制中心立即出现正确房间、平台、画质、状态、时间、实时大小、速度和码率。

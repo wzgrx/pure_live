@@ -139,6 +139,8 @@
 > 同提交 K90 Debug 候选保留数据覆盖后完成 5/5 次同类循环，14/14 门禁通过；新 PID 日志尾窗
 > 中 AudioTrack 相关 152 行，OpenSL ES、unknown-key 与 `setVolume -19` 均为 0。Binder
 > death-recipient 告警仍单列跟踪；测试器的瞬态 TID 退出竞态由 `da8c15b1` 修订并重跑通过。
+> 后续 `09315462` 的 Android 五项音频菜单 Widget 与 `3bfda37b` 的双语语义设置路由通过，
+> 同一 K90 APK 的原生菜单 6/6 检查完成且规范 Hive 已恢复。
 > 本增量不改变 A7-04 的 `RUN` 状态，详见
 > `docs/ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md`。
 

@@ -81,7 +81,10 @@ A2-04 因此由 NR 进入 RUN；Windows 双栏、其余样式控件、默认/模
 哈希完全相同，设备 `base.apk` 与候选逐字节一致。K90 上 5/5 次真实 Bilibili
 视频→纯音频→退出、14/14 门禁通过；新 PID 日志尾窗含 152 行 AudioTrack 相关记录，
 OpenSL ES、unknown-key 和 `setVolume -19` 均为 0。Binder death-recipient 告警仍存在并拆分
-跟踪；瞬态线程退出造成的测试器误失败由 `da8c15b1` 修订后完整重跑通过。详见
+跟踪；瞬态线程退出造成的测试器误失败由 `da8c15b1` 修订后完整重跑通过。后续
+`09315462` 补齐 Android 五项音频菜单 Widget，`3bfda37b` 将设置导航改为双语实时语义与目标页
+断言；同一已安装 APK 的 K90 音频菜单 6/6 通过，当前选中 auto、桌面驱动未混入，规范 Hive
+用测试前副本精确恢复。详见
 [Android 音频输出后端审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)。
 
 ## 当前结论

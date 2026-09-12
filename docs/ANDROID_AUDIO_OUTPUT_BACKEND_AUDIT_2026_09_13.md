@@ -126,3 +126,30 @@ TID 消失时跳过该样本，同时保留 adb、su 和循环级错误；PowerS
    现有证据只支持把它与 OpenSL ES 告警拆开跟踪。
 
 本批 Windows Computer Use 与 Astra Light 使用次数均为 **0**。
+
+## 后续 UI 与验收工具补证
+
+初版 focused CI 只纳入设置控制器与两个播放器相邻文件，未覆盖播放器内核设置 Widget。随后显式
+执行 `test/player_kernel_settings_page_test.dart`，旧用例仍查找已经退役的
+`auto (Not available)`，得到 **2 PASS / 1 FAIL** 的有效红灯。`09315462` 更新该断言，并新增
+Android 目标平台 Widget：打开真实音频输出弹窗，逐项确认五个 Android 后端、排除 Windows、
+Linux 与 macOS 项，再选择 AAudio 并验证持久值。与设置控制器合跑 **16/16 PASS**；focused CI
+再次 16/16、全库 analyze 无问题。记录：
+`local-artifacts/build-records/20260912T165929371Z-quality-focused.json`。
+
+K90 原生首轮补证还暴露 `open_settings` 仍使用两处历史缓存坐标：脚本日志声称点击完成，但 UI
+层级仍停留首页，目标“播放器内核”经过 7 次滚动也未出现。测试先对两种竖屏 profile 得到有效
+红灯；`3bfda37b` 把“菜单 → 设置”改为双语实时语义，并以“主题设置 / Theme Settings”作
+目标页断言。PowerShell 与四 profile JSON 校验通过，随后同一已安装 APK 的真实语义路由到达
+播放器内核页和音频弹窗：
+
+- 当前选中 `auto (Automatic fallback)`；
+- 五个 RadioButton 完整可见，桌面驱动片段为 0；
+- 原生 UI 检查 **6/6 PASS**，截图与 XML 位于
+  `local-artifacts/diagnostics/android-player-audio-menu-fec7eae9-final/`；
+- 应用启动期间规范 Hive 字节发生运行态写入，测试没有把它解释为弹窗修改；清理阶段用开始前副本
+  恢复，最终 SHA-256 与基线
+  `19F40EA9E29A6017317ACB14AEBA8CF4378A6EEAA96BA15E09C7CD2312D1F050` 完全相同；
+- 最终 Pure Live 停止、系统桌面前台，stay-awake 恢复 `0`。
+
+以上补证仍不扩大 5 次单设备 Debug 运行的外推范围，A7-04 与宏观计数保持不变。

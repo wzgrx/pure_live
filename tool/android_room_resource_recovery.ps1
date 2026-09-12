@@ -32,6 +32,7 @@ $uiProfile = $uiMap.profiles.k90pro_portrait_1200x2608
 $roomPoint = $uiProfile.points.'home.first_left_room'
 $controlsPoint = $uiProfile.points.'live.show_controls'
 $audioPoint = $uiProfile.points.'live.audio_toggle'
+$audioTransitionSettleMilliseconds = 5250
 
 $adbCandidates = @((Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'), 'adb.exe')
 $adb = $adbCandidates | Where-Object {
@@ -212,8 +213,20 @@ function Invoke-ModeTransition {
 
 function Invoke-ModeRoundTrip {
     $audioMs = Invoke-ModeTransition -AudioOnly $true
+    # The audio badge is intentionally published before the native track
+    # command completes. Wait through PlayerManager's five-second deadline so
+    # the reverse tap is never delivered to the temporarily disabled button.
+    Start-Sleep -Milliseconds $audioTransitionSettleMilliseconds
+    $settledAudio = Get-UiHierarchy
+    if (-not (Test-AudioOnlyPresentation $settledAudio)) {
+        throw 'Audio-only presentation rolled back during the native settle window.'
+    }
     $videoMs = Invoke-ModeTransition -AudioOnly $false
-    [pscustomobject]@{ audioMs = $audioMs; videoMs = $videoMs }
+    [pscustomobject]@{
+        audioMs = $audioMs
+        audioSettleMs = $audioTransitionSettleMilliseconds
+        videoMs = $videoMs
+    }
 }
 
 function Enter-PopularBilibili {
@@ -349,6 +362,7 @@ try {
     $result.warmup = [ordered]@{
         roomEnterMs = $warmRoom.ElapsedMs
         audioMs = $warmModes.audioMs
+        audioSettleMs = $warmModes.audioSettleMs
         videoMs = $warmModes.videoMs
         homeReturnMs = $warmHome.ElapsedMs
     }
@@ -369,6 +383,7 @@ try {
             cycle = $cycle
             roomEnterMs = $roomState.ElapsedMs
             audioMs = $modeState.audioMs
+            audioSettleMs = $modeState.audioSettleMs
             videoMs = $modeState.videoMs
             homeReturnMs = $homeState.ElapsedMs
             totalMs = $cycleTimer.ElapsedMilliseconds

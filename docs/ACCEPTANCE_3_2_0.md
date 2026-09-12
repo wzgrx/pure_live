@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-12 Android 小窗弹幕设置已从未执行进入运行中**：[原生审计](ANDROID_PIP_DANMAKU_SETTINGS_NATIVE_AUDIT_2026_09_12.md)。旧 K90 缓存点落在卡片空隙且序列没有目标页断言；提交 `3627a936` 改为菜单/设置/小窗弹幕三步中英文语义点击并新增 `assertSemantic`，pwsh 与 Windows PowerShell 5.1 均 4/4，实际设备准确到达“样式预览”。提交 `3212c27b` 新增可恢复的原生 smoke；当前 `3e41e848` 候选完成开→关→重启→开→重启，Switch 数 4→1→1→4→4、禁用遮罩同步，两种状态均持久化。规范 Hive `443377` B 恢复前后 SHA-256 一致，应用停止、桌面/stay-awake 恢复。A2-04 由 NR→RUN，宏观更新为 **20 PASS / 34 RUN / 8 NR**、42 组未闭环；Windows 双栏、逐项样式、默认/模板、真实小窗与长测继续，本批 Astra Light 0 次。
+
 - **09-12 当前累计 Android 源码已落到手机并通过基础/呈现门禁**：[候选与原生证据](CURRENT_ANDROID_CANDIDATE_2026_09_12.md)。精确 `3e41e848` arm64 Debug 的签名/内容/16 KB 对齐、同签名覆盖安装、设备 APK 哈希及安装前后 58 个状态文件一致性均通过；Bilibili 播放/弹幕/音频往返/PiP/退出 16/16，标准流全屏/PiP 7/7、抖音竖屏沉浸/横屏/PiP 9/9。#858 首页软件注入进一步证明媒体流 0→10、铃声流不变且完整恢复；实体按钮和其余上下文继续。当前仍是 Debug 验收输入，完整质量、22 平台、录制、长测与发布门禁继续，宏观 42 组未闭环保持。
 
 - **09-12 iOS MPV 平台配置已收敛，Issue #859 继续取证**：[增量审计](ISSUE_AUDIT_2026_09_10.md#859ios-抖音全屏播放闪退)。报告评论已确认 MPV + VideoToolbox；提交 `233efa57` 阻断 Android/Windows MPV 专属设置经持久化或备份进入 iOS，固定 media_kit 的 `libmpv` 纹理输出并保留 AudioUnit/VideoToolbox 合法项。修改前 9/10、最终全库 analyze 与六文件 147/147 通过，精确提交复跑 147/147。报告设备 crash/Jetsam、全屏对照和 iOS 原生复现继续，#859 状态及宏观 42 组未闭环保持。

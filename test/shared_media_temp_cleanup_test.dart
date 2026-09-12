@@ -1,9 +1,27 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:pure_live/plugins/file_utils.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('default cleanup uses the application temporary directory', () async {
+    final root = await Directory.systemTemp.createTemp('shared-cleanup-platform-');
+    final originalPaths = PathProviderPlatform.instance;
+    PathProviderPlatform.instance = _TemporaryPaths(root.path);
+    addTearDown(() async {
+      PathProviderPlatform.instance = originalPaths;
+      if (await root.exists()) await root.delete(recursive: true);
+    });
+    final file = File('${root.path}/share_handler/fixture-id/original-name.m3u');
+    await file.create(recursive: true);
+
+    expect(await FileUtils.cleanupOwnedSharedMediaFile(file), isTrue);
+    expect(await file.exists(), isFalse);
+  });
+
   test('owned share-handler file and empty staging directories are removed', () async {
     final root = await Directory.systemTemp.createTemp('shared-cleanup-owned-');
     addTearDown(() async {
@@ -60,4 +78,13 @@ void main() {
       expect(source, contains('FileUtils.cleanupOwnedSharedMediaFile(file)'));
     }
   });
+}
+
+class _TemporaryPaths extends PathProviderPlatform {
+  _TemporaryPaths(this.path);
+
+  final String path;
+
+  @override
+  Future<String?> getTemporaryPath() async => path;
 }

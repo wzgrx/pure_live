@@ -76,7 +76,8 @@ class FileUtils {
   }
 
   static Future<bool> cleanupOwnedSharedMediaFile(File file, {Directory? temporaryDirectory}) async {
-    final root = p.normalize((temporaryDirectory ?? Directory.systemTemp).absolute.path);
+    final resolvedTemporaryDirectory = temporaryDirectory ?? await getTemporaryDirectory();
+    final root = p.normalize(resolvedTemporaryDirectory.absolute.path);
     final filePath = p.normalize(file.absolute.path);
     if (!p.isWithin(root, filePath)) return false;
 

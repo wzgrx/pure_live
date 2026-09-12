@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_room.dart';
 import 'package:pure_live/common/utils/live_url_tool.dart';
 import 'package:pure_live/get/get.dart';
+import 'package:pure_live/model/live_play_quality.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/toolbox_test_site.dart';
@@ -70,7 +71,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  Future<void> open(WidgetTester tester, {String locale = 'zh', bool narrow = false}) async {
+  Future<void> open(WidgetTester tester, {String locale = 'zh', bool narrow = false, double? textScale}) async {
     tester.view.physicalSize = narrow ? const Size(320, 480) : const Size(900, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -99,7 +100,7 @@ void main() {
             supportedLocales: context.supportedLocales,
             navigatorObservers: [FlutterSmartDialog.observer],
             builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(narrow ? 2 : 1)),
+              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale ?? (narrow ? 2 : 1))),
               child: FlutterSmartDialog.init()(context, child),
             ),
             home: Builder(
@@ -137,6 +138,9 @@ void main() {
           notify: notices.add,
         );
 
+  Finder ownedDialog({bool skipOffstage = true}) =>
+      find.byKey(const ValueKey('known-room-link-dialog'), skipOffstage: skipOffstage);
+
   for (final locale in ['zh', 'en']) {
     for (final cast in [false, true]) {
       testWidgets('$locale session-only ${cast ? 'cast' : 'copy'} closes with a capability notice', (tester) async {
@@ -150,7 +154,7 @@ void main() {
         await tester.tap(find.widgetWithText(ListTile, 'HD'));
         await frame(tester);
         expect(done, isTrue);
-        expect(find.byType(SimpleDialog), findsNothing);
+        expect(ownedDialog(), findsNothing);
         expect(find.text('Player fixture'), findsOneWidget);
         expect(site.calls, ['detail', 'qualities', 'resolve']);
         expect(copied, isEmpty);
@@ -187,7 +191,7 @@ void main() {
       await frame(tester);
       pending.complete(site.room);
       await frame(tester);
-      expect(find.byType(SimpleDialog), findsNothing);
+      expect(ownedDialog(), findsNothing);
       expect(find.text('Other page'), findsOneWidget);
     });
   }
@@ -198,7 +202,7 @@ void main() {
     await frame(tester);
     await tester.tap(find.widgetWithText(ListTile, 'HD'));
     await frame(tester);
-    await tester.tap(find.descendant(of: find.byType(SimpleDialog), matching: find.byType(ListTile)).first);
+    await tester.tap(find.descendant(of: ownedDialog(), matching: find.byType(ListTile)).first);
     await frame(tester);
     expect(writes, hasLength(1));
     expect(done, isFalse);
@@ -210,7 +214,7 @@ void main() {
     await frame(tester);
     await tester.tap(find.widgetWithText(ListTile, 'HD'));
     await frame(tester);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
   });
   testWidgets('known-room copy success is emitted only after actual clipboard completion', (tester) async {
     await open(tester);
@@ -219,7 +223,7 @@ void main() {
     await frame(tester);
     await tester.tap(find.widgetWithText(ListTile, 'SD'));
     await frame(tester);
-    await tester.tap(find.descendant(of: find.byType(SimpleDialog), matching: find.byType(ListTile)).last);
+    await tester.tap(find.descendant(of: ownedDialog(), matching: find.byType(ListTile)).last);
     await frame(tester);
     expect(site.requestedQuality, same(site.qualities.last));
     expect(copied, [site.urls.last]);
@@ -229,7 +233,7 @@ void main() {
     await frame(tester);
     expect(done, isTrue);
     expect(notices, ['toolbox_copy_success']);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
   });
   testWidgets('clipboard error closes the action without reporting success', (tester) async {
     await open(tester);
@@ -242,7 +246,7 @@ void main() {
     writes.single.completeError(PlatformException(code: 'fixture_denied'));
     await frame(tester);
     expect(notices, ['toolbox_copy_failed']);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
   });
   testWidgets('cast hands the selected URL to the receiver UI without copying', (tester) async {
     final pending = Completer<void>();
@@ -283,6 +287,22 @@ void main() {
     await frame(tester);
     expect(find.widgetWithText(ListTile, 'HD'), findsOneWidget);
   });
+  testWidgets('system back cancels a visible choice and releases the single-flight guard', (tester) async {
+    await open(tester);
+    final action = run();
+    await frame(tester);
+    expect(ownedDialog(), findsOneWidget);
+
+    expect(await tester.binding.handlePopRoute(), isTrue);
+    await frame(tester);
+    await action;
+    expect(ownedDialog(), findsNothing);
+    expect(notices, isEmpty);
+
+    unawaited(run());
+    await frame(tester);
+    expect(find.widgetWithText(ListTile, 'HD'), findsOneWidget);
+  });
   testWidgets('changed room invalidates a pending result', (tester) async {
     final pending = Completer<LiveRoom>();
     site.detailReply = pending.future;
@@ -293,7 +313,7 @@ void main() {
     pending.complete(site.room);
     await frame(tester);
     expect(site.calls, ['detail']);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
     expect(notices, isEmpty);
   });
   testWidgets('changed room prevents a visible stale choice from casting', (tester) async {
@@ -305,7 +325,7 @@ void main() {
     await frame(tester);
     expect(site.calls, ['detail', 'qualities']);
     expect(casted, isEmpty);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
   });
   testWidgets('duplicate retiring choice callbacks execute once', (tester) async {
     await open(tester);
@@ -332,7 +352,7 @@ void main() {
     await frame(tester);
     await tester.pump(const Duration(seconds: 13));
     await frame(tester);
-    expect(find.byType(SimpleDialog), findsNothing);
+    expect(ownedDialog(), findsNothing);
     expect(notices, ['toolbox_get_url_failed']);
     pending.complete(site.room);
     await frame(tester);
@@ -348,10 +368,53 @@ void main() {
       await frame(tester);
       await tester.tap(cancel);
       await frame(tester);
-      expect(find.byType(SimpleDialog), findsNothing);
+      expect(ownedDialog(), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }
+  for (final phase in ['quality', 'line']) {
+    testWidgets('narrow 3x $phase selector keeps cancellation fixed while choices scroll', (tester) async {
+      site.qualities = phase == 'quality'
+          ? List.generate(16, (index) => LivePlayQuality(quality: 'Quality ${index + 1}'))
+          : [LivePlayQuality(quality: 'Quality 1')];
+      site.urls = List.generate(16, (index) => 'https://cdn.example/line/${index + 1}/long-path');
+      await open(tester, locale: 'en', narrow: true, textScale: 3);
+      unawaited(run());
+      await frame(tester);
+      if (phase == 'line') {
+        final firstQuality = find.widgetWithText(ListTile, 'Quality 1');
+        await tester.ensureVisible(firstQuality);
+        await frame(tester);
+        await tester.tap(firstQuality);
+        await frame(tester);
+      }
+
+      final cancel = find.widgetWithText(TextButton, english['cancel'] as String);
+      expect(cancel.hitTestable(), findsOneWidget);
+      final lastChoice = find.byType(ListTile).last;
+      final scrollable = find.byType(Scrollable).last;
+      await tester.scrollUntilVisible(lastChoice, 160, scrollable: scrollable, maxScrolls: 20);
+      expect(lastChoice.hitTestable(), findsOneWidget);
+      expect(cancel.hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+  testWidgets('quality to line transition starts the new choice list at its first item', (tester) async {
+    site.qualities = List.generate(16, (index) => LivePlayQuality(quality: 'Quality ${index + 1}'));
+    site.urls = List.generate(16, (index) => 'https://cdn.example/line/${index + 1}');
+    await open(tester, locale: 'en', narrow: true, textScale: 1);
+    unawaited(run());
+    await frame(tester);
+
+    final lastQuality = find.widgetWithText(ListTile, 'Quality 16');
+    await tester.scrollUntilVisible(lastQuality, 160, scrollable: find.byType(Scrollable).last, maxScrolls: 20);
+    await tester.tap(lastQuality);
+    await frame(tester);
+
+    expect(site.requestedQuality, same(site.qualities.last));
+    expect(find.widgetWithText(ListTile, 'Line 1').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('known-room-link-cancel')).hitTestable(), findsOneWidget);
+  });
 }
 
 class _Loader extends AssetLoader {

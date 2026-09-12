@@ -76,11 +76,13 @@ class KnownRoomLinkDialog extends StatefulWidget {
 
 class _KnownRoomLinkDialogState extends State<KnownRoomLinkDialog> {
   late final ToolBoxActionScope _scope;
+  final ScrollController _scrollController = ScrollController();
   Route<dynamic>? _route;
   Route<dynamic>? _child;
   NavigatorState? _navigator;
   bool _finishing = false;
   String? _title;
+  VoidCallback? _cancelChoice;
   Widget _body = const Padding(
     padding: EdgeInsets.all(20),
     child: Center(child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator())),
@@ -133,9 +135,20 @@ class _KnownRoomLinkDialogState extends State<KnownRoomLinkDialog> {
     }
   }
 
-  Future<T?> _choose<T>(String title, List<T> items, String Function(T, int) label, {String Function(T)? subtitle}) {
+  Future<T?> _choose<T>(
+    String title,
+    List<T> items,
+    String Function(T, int) label, {
+    String Function(T)? subtitle,
+  }) async {
     _scope.checkActive();
     final result = Completer<T?>();
+    void cancelChoice() {
+      if (!result.isCompleted) result.complete();
+    }
+
+    _cancelChoice = cancelChoice;
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
     setState(() {
       _title = title;
       _body = Column(
@@ -143,6 +156,7 @@ class _KnownRoomLinkDialogState extends State<KnownRoomLinkDialog> {
         children: [
           for (var i = 0; i < items.length; i++)
             ListTile(
+              key: ValueKey('known-room-choice-$i'),
               title: Text(label(items[i], i), textAlign: TextAlign.center),
               subtitle: subtitle == null
                   ? null
@@ -153,6 +167,8 @@ class _KnownRoomLinkDialogState extends State<KnownRoomLinkDialog> {
                   _finish();
                   return;
                 }
+                if (identical(_cancelChoice, cancelChoice)) _cancelChoice = null;
+                if (_scrollController.hasClients) _scrollController.jumpTo(0);
                 setState(
                   () => _body = const Padding(
                     padding: EdgeInsets.all(20),
@@ -165,7 +181,11 @@ class _KnownRoomLinkDialogState extends State<KnownRoomLinkDialog> {
         ],
       );
     });
-    return result.future;
+    try {
+      return await result.future;
+    } finally {
+      if (identical(_cancelChoice, cancelChoice)) _cancelChoice = null;
+    }
   }
 
   Future<void> _cast(String url) async {
@@ -196,6 +216,8 @@ class _KnownRoomLinkDialogState extends State<KnownRoomLinkDialog> {
   void _finish() {
     if (_finishing) return;
     _finishing = true;
+    _cancelChoice?.call();
+    _cancelChoice = null;
     _scope.cancel();
     final route = _route;
     final navigator = _navigator;
@@ -209,16 +231,69 @@ class _KnownRoomLinkDialogState extends State<KnownRoomLinkDialog> {
 
   @override
   void dispose() {
+    _cancelChoice?.call();
+    _cancelChoice = null;
     _scope.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => SimpleDialog(
-    title: Text(_title ?? i18n(widget.cast ? 'cast_screen' : 'toolbox_get_direct_link')),
-    children: [
-      _body,
-      TextButton(onPressed: _finish, child: Text(i18n('cancel'))),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final availableHeight = mediaQuery.size.height - mediaQuery.padding.vertical - mediaQuery.viewInsets.vertical - 32;
+    return Dialog(
+      key: const ValueKey('known-room-link-dialog'),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 560,
+          maxHeight: availableHeight > 0 ? availableHeight : mediaQuery.size.height,
+        ),
+        child: SizedBox(
+          width: 520,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  key: const ValueKey('known-room-link-scroll'),
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        _title ?? i18n(widget.cast ? 'cast_screen' : 'toolbox_get_direct_link'),
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 12),
+                      _body,
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton(
+                      key: const ValueKey('known-room-link-cancel'),
+                      onPressed: _finish,
+                      child: Text(i18n('cancel')),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

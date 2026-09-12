@@ -93,6 +93,10 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
         epgId: epgId,
         currentProgramme: nowProg?.title,
         currentProgrammeDescription: nowProg?.description,
+        catchUpMode: ch.catchupMode,
+        catchUpSource: ch.catchupSource,
+        catchUpDays: ch.catchupDays,
+        catchUpCorrectionHours: ch.catchupCorrectionHours,
       ),
     );
 
@@ -244,6 +248,10 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
       epgId: epgId,
       currentProgramme: prog?.title,
       currentProgrammeDescription: prog?.description,
+      catchUpMode: channel.catchupMode,
+      catchUpSource: channel.catchupSource,
+      catchUpDays: channel.catchupDays,
+      catchUpCorrectionHours: channel.catchupCorrectionHours,
     );
   }
 
@@ -276,6 +284,10 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
           platform: Sites.iptvSite,
           link: ch.streamUrl,
           data: ch.streamUrl,
+          catchUpMode: ch.catchupMode,
+          catchUpSource: ch.catchupSource,
+          catchUpDays: ch.catchupDays,
+          catchUpCorrectionHours: ch.catchupCorrectionHours,
         ),
       );
     }
@@ -364,6 +376,10 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
         platform: Sites.iptvSite,
         link: ch.streamUrl,
         data: ch.streamUrl,
+        catchUpMode: ch.catchupMode,
+        catchUpSource: ch.catchupSource,
+        catchUpDays: ch.catchupDays,
+        catchUpCorrectionHours: ch.catchupCorrectionHours,
       );
     }).toList();
     return items;

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:xml/xml.dart';
 import 'package:archive/archive.dart';
 import 'package:pure_live/core/iptv/models/epg.dart';
@@ -96,6 +97,7 @@ class XmltvParser {
     final episodeNum = element.findElements('episode-num').firstOrNull?.innerText.trim();
 
     final rating = element.findElements('rating').firstOrNull?.findElements('value').firstOrNull?.innerText.trim();
+    final catchupId = _emptyToNull(element.getAttribute('catchup-id'));
 
     final isNew = element.findElements('new').isNotEmpty;
 
@@ -111,6 +113,7 @@ class XmltvParser {
       iconUrl: iconUrl,
       episodeNum: episodeNum,
       rating: rating,
+      catchupId: catchupId,
       isNew: isNew,
     );
   }
@@ -148,6 +151,11 @@ class XmltvParser {
     } catch (_) {
       return null;
     }
+  }
+
+  String? _emptyToNull(String? value) {
+    final normalized = value?.trim();
+    return normalized == null || normalized.isEmpty ? null : normalized;
   }
 }
 

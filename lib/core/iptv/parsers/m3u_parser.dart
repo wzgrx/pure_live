@@ -25,6 +25,7 @@ class M3uParser {
     _M3uMetadata? pending;
     int pendingLine = 0;
     String? directiveGroup;
+    var headerAttributes = const <String, String>{};
 
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i].trim();
@@ -33,7 +34,17 @@ class M3uParser {
         sawContent = true;
         if (!_header.hasMatch(line)) errors.add('Line ${i + 1}: Missing #EXTM3U header');
       }
-      if (_header.hasMatch(line)) continue;
+      if (_header.hasMatch(line)) {
+        final headerMetadata = line.substring('#EXTM3U'.length).trim();
+        if (headerMetadata.isNotEmpty) {
+          try {
+            headerAttributes = _parseMetadata(headerMetadata).attributes;
+          } on FormatException catch (e) {
+            errors.add('Line ${i + 1}: ${e.message}');
+          }
+        }
+        continue;
+      }
       if (line.startsWith(_extInf)) {
         if (pending != null) errors.add('Line $pendingLine: Missing stream URL');
         pending = null;
@@ -55,7 +66,7 @@ class M3uParser {
       if (line.startsWith('#')) continue;
       if (pending != null) {
         try {
-          channels.add(_parseEntry(pending, line, providerId, directiveGroup));
+          channels.add(_parseEntry(pending, line, providerId, directiveGroup, headerAttributes));
         } on FormatException catch (e) {
           errors.add('Line ${i + 1}: ${e.message}');
         }
@@ -67,7 +78,13 @@ class M3uParser {
     return PlaylistParseResult(channels: channels, errors: errors);
   }
 
-  Channel _parseEntry(_M3uMetadata metadata, String url, String providerId, String? directiveGroup) {
+  Channel _parseEntry(
+    _M3uMetadata metadata,
+    String url,
+    String providerId,
+    String? directiveGroup,
+    Map<String, String> headerAttributes,
+  ) {
     if (!_isValidStreamUrl(url)) throw const FormatException('Invalid or unsupported stream URL');
     final attrs = {...metadata.attributes};
     if (!attrs.containsKey('group-title') && directiveGroup != null) attrs['group-title'] = directiveGroup;
@@ -93,6 +110,26 @@ class M3uParser {
     final chnoStr = attrs['tvg-chno'];
     if (chnoStr != null) channelNumber = int.tryParse(chnoStr);
 
+    final catchupSource = _emptyToNull(attrs['catchup-source']) ?? _emptyToNull(headerAttributes['catchup-source']);
+    final legacyDays = _finiteDouble(attrs['timeshift']) ?? _finiteDouble(attrs['tvg-rec']);
+    final catchupDays =
+        _finiteDouble(attrs['catchup-days']) ?? _finiteDouble(headerAttributes['catchup-days']) ?? legacyDays;
+    var catchupMode =
+        (_emptyToNull(attrs['catchup']) ??
+                _emptyToNull(attrs['catchup-type']) ??
+                _emptyToNull(headerAttributes['catchup']) ??
+                _emptyToNull(headerAttributes['catchup-type']))
+            ?.toLowerCase();
+    if (const {'0', 'false', 'off', 'none', 'disabled'}.contains(catchupMode) || catchupDays == 0) {
+      catchupMode = 'disabled';
+    } else if (catchupMode == null && legacyDays != null && legacyDays > 0) {
+      catchupMode = 'shift';
+    } else if (catchupMode == null && catchupSource != null) {
+      catchupMode = 'default';
+    }
+    final catchupCorrectionHours =
+        _finiteDouble(attrs['catchup-correction']) ?? _finiteDouble(headerAttributes['catchup-correction']);
+
     return Channel(
       id: channelId,
       providerId: providerId,
@@ -104,6 +141,10 @@ class M3uParser {
       channelNumber: channelNumber,
       streamUrl: url,
       streamType: _inferStreamType(attrs, url),
+      catchupMode: catchupMode,
+      catchupSource: catchupSource,
+      catchupDays: catchupDays,
+      catchupCorrectionHours: catchupCorrectionHours,
     );
   }
 
@@ -188,6 +229,11 @@ class M3uParser {
   /// 空字符串转为null
   String? _emptyToNull(String? value) {
     return (value == null || value.isEmpty) ? null : value;
+  }
+
+  static double? _finiteDouble(String? value) {
+    final parsed = double.tryParse(value?.trim() ?? '');
+    return parsed != null && parsed.isFinite ? parsed : null;
   }
 }
 

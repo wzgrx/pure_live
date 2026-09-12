@@ -204,6 +204,52 @@ https://fixture/two
     expect(result.errors, isEmpty);
     expect(result.channels.single.groupTitle, isNull);
   });
+  test('provider catch-up metadata survives playlist parsing', () {
+    final channel = entry(
+      '-1 catchup="append" catchup-source="&start={utc}&duration={duration}" '
+      'catchup-days="3.5" catchup-correction="-2.5",News',
+    );
+
+    expect(channel.catchupMode, 'append');
+    expect(channel.catchupSource, '&start={utc}&duration={duration}');
+    expect(channel.catchupDays, 3.5);
+    expect(channel.catchupCorrectionHours, -2.5);
+  });
+  test('header catch-up defaults are inherited and channel values take precedence', () {
+    final result = M3uParser().parse('''#EXTM3U catchup-type="default" catchup-source="https://archive/{utc}" catchup-days="4.5" catchup-correction="1.5"
+#EXTINF:-1,One
+https://fixture/one
+#EXTINF:-1 catchup="append" catchup-source="&start={utc}" catchup-correction="-3",Two
+https://fixture/two
+''', providerId: 'fixture');
+
+    expect(result.errors, isEmpty);
+    expect(result.channels[0].catchupMode, 'default');
+    expect(result.channels[0].catchupSource, 'https://archive/{utc}');
+    expect(result.channels[0].catchupDays, 4.5);
+    expect(result.channels[0].catchupCorrectionHours, 1.5);
+    expect(result.channels[1].catchupMode, 'append');
+    expect(result.channels[1].catchupSource, '&start={utc}');
+    expect(result.channels[1].catchupCorrectionHours, -3);
+  });
+  test('legacy timeshift and tvg-rec advertise shift windows while zero disables catch-up', () {
+    final result = M3uParser().parse('''#EXTM3U
+#EXTINF:-1 timeshift="5",One
+https://fixture/one
+#EXTINF:-1 tvg-rec="2.5",Two
+https://fixture/two
+#EXTINF:-1 catchup="append" catchup-days="0",Three
+https://fixture/three
+''', providerId: 'fixture');
+
+    expect(result.errors, isEmpty);
+    expect(result.channels[0].catchupMode, 'shift');
+    expect(result.channels[0].catchupDays, 5);
+    expect(result.channels[1].catchupMode, 'shift');
+    expect(result.channels[1].catchupDays, 2.5);
+    expect(result.channels[2].catchupMode, 'disabled');
+    expect(result.channels[2].catchupDays, 0);
+  });
   test('empty input and nameless stanza report errors', () {
     for (final content in ['', '\uFEFF\n\r\n', '#EXTM3U\n#EXTINF:-1,\nhttps://fixture/live']) {
       final result = M3uParser().parse(content, providerId: 'fixture');

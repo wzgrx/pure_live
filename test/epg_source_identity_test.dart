@@ -130,6 +130,34 @@ void main() {
     expect(room.currentProgramme, 'B');
   });
 
+  test('stored provider catch-up metadata reaches the playback room unchanged', () async {
+    await db.upsertProvider(ProvidersCompanion.insert(id: 'archive', name: 'Archive', type: 'm3u'));
+    await db.upsertChannels([
+      ChannelsCompanion.insert(
+        id: 'archive-room',
+        providerId: 'archive',
+        name: 'Archive room',
+        streamUrl: 'https://fixture/live',
+        catchupMode: const drift.Value('append'),
+        catchupSource: const drift.Value('&start={utc}&duration={duration}'),
+        catchupDays: const drift.Value(3.5),
+        catchupCorrectionHours: const drift.Value(-2.5),
+      ),
+    ]);
+
+    final stored = await db.getChannelById('archive-room');
+    final room = await IptvSite().getRoomDetail(platform: 'iptv', roomId: 'archive-room');
+
+    expect(stored?.catchupMode, 'append');
+    expect(stored?.catchupSource, '&start={utc}&duration={duration}');
+    expect(stored?.catchupDays, 3.5);
+    expect(stored?.catchupCorrectionHours, -2.5);
+    expect(room.catchUpMode, 'append');
+    expect(room.catchUpSource, '&start={utc}&duration={duration}');
+    expect(room.catchUpDays, 3.5);
+    expect(room.catchUpCorrectionHours, -2.5);
+  });
+
   test('channel detail never mixes schedules from equal raw IDs', () async {
     await importSource('A');
     final b = await importSource('B');
@@ -160,10 +188,12 @@ void main() {
     final room = await IptvSite().getRoomDetail(platform: 'iptv', roomId: 'room');
     expect(room.currentProgramme, 'B');
   });
-  Future<void> reopen({bool legacy = false}) async {
+  Future<void> reopen({bool legacy = false, bool freshLegacy = false}) async {
     await db.close();
     Get.delete<DbService>(force: true);
-    final connection = NativeDatabase(File('${directory.path}/test.sqlite'));
+    final file = File('${directory.path}/test.sqlite');
+    if (freshLegacy && await file.exists()) await file.delete();
+    final connection = NativeDatabase(file);
     db = legacy ? _LegacyDatabase(connection) : AppDatabase.forTesting(connection);
     Get.put(DbService()..db = db);
   }
@@ -296,7 +326,7 @@ void main() {
   });
 
   test('schema 6 migration preserves source settings locked mappings and user actions', () async {
-    await reopen(legacy: true);
+    await reopen(legacy: true, freshLegacy: true);
     await legacySource('A', stored: 'legacy-A');
     await legacySource('B', stored: 'legacy-B');
     await db.upsertMapping(
@@ -348,7 +378,7 @@ void main() {
     final oldRecording = (await db.select(db.scheduledRecordings).get()).single;
     await reopen();
     expect(await db.getAllEpgSources(), oldSources);
-    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 7);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
     for (final id in ['A', 'B']) {
       final ch = (await db.getEpgChannelsForSource(id)).single;
       expect(ch.id, epgChannelKey(id, 'common'));
@@ -386,7 +416,7 @@ void main() {
   });
 
   test('migration retains orphaned-source programme and mapping references', () async {
-    await reopen(legacy: true);
+    await reopen(legacy: true, freshLegacy: true);
     await legacySource('A', channelRow: false);
     await legacySource('B');
     await db.upsertMapping(
@@ -412,7 +442,7 @@ void main() {
   });
 
   test('migration snapshots avoid old-to-new key rewrite chains', () async {
-    await reopen(legacy: true);
+    await reopen(legacy: true, freshLegacy: true);
     await legacySource('A', raw: 'plain');
     final looksFramed = epgChannelKey('A', 'plain');
     await db.upsertEpgChannels([
@@ -441,7 +471,7 @@ void main() {
   });
 
   test('failed migration rolls back programme rewrites and remains retryable at version 6', () async {
-    await reopen(legacy: true);
+    await reopen(legacy: true, freshLegacy: true);
     await legacySource('A');
     await db.upsertMapping(
       EpgMappingsCompanion.insert(channelId: 'room', providerId: 'provider', epgChannelId: 'common', epgSourceId: 'A'),
@@ -497,7 +527,7 @@ void main() {
   });
 
   test('version commits with orphaned identities before a later open failure', () async {
-    await reopen(legacy: true);
+    await reopen(legacy: true, freshLegacy: true);
     await legacySource('A', channelRow: false);
     await db.close();
     Get.delete<DbService>(force: true);
@@ -505,26 +535,26 @@ void main() {
     Get.put(DbService()..db = db);
     await expectLater(db.getAllEpgSources(), throwsA(isA<StateError>()));
     await reopen();
-    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 7);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
     expect((await db.select(db.epgProgrammes).get()).single.epgChannelId, epgChannelKey('A', 'common'));
   });
 
   test('future database version stays intact when downgrade is attempted', () async {
     await importSource('A');
     final old = await snapshot();
-    await db.customStatement('PRAGMA user_version = 8');
+    await db.customStatement('PRAGMA user_version = 9');
     await reopen();
     await expectLater(db.getAllEpgSources(), throwsA(isA<StateError>()));
     await db.close();
     Get.delete<DbService>(force: true);
-    db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), 8);
+    db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), 9);
     Get.put(DbService()..db = db);
-    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
     expect(await snapshot(), old);
   });
 
   for (int version = 1; version <= 5; version++) {
-    test('historical schema $version upgrades data and later tables through version 7', () async {
+    test('historical schema $version upgrades data and later tables through version 8', () async {
       await db.close();
       Get.delete<DbService>(force: true);
       db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), version);
@@ -552,9 +582,39 @@ void main() {
       expect(await db.select(db.epgReminders).get(), isEmpty);
       expect(await db.select(db.scheduledRecordings).get(), isEmpty);
       expect(await db.select(db.failoverGroups).get(), isEmpty);
-      expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 7);
+      expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
     });
   }
+
+  test('schema 7 adds nullable provider and programme catch-up metadata without changing existing rows', () async {
+    await db.close();
+    Get.delete<DbService>(force: true);
+    db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), 7);
+    Get.put(DbService()..db = db);
+    await db.customStatement("INSERT INTO providers (id, name, type) VALUES ('old', 'Old', 'm3u')");
+    await db.customStatement(
+      "INSERT INTO channels (id, provider_id, name, stream_url) "
+      "VALUES ('old-room', 'old', 'Old room', 'https://fixture/live')",
+    );
+    await db.customStatement(
+      "INSERT INTO epg_sources (id, name, url) VALUES ('epg', 'EPG', 'https://fixture/epg.xml')",
+    );
+    await db.customStatement(
+      "INSERT INTO epg_programmes (epg_channel_id, source_id, title, start, stop) "
+      "VALUES ('old-epg', 'epg', 'Old programme', 2082758400, 2082762000)",
+    );
+    await reopen();
+
+    final channel = await db.getChannelById('old-room');
+    expect(channel?.name, 'Old room');
+    expect(channel?.streamUrl, 'https://fixture/live');
+    expect(channel?.catchupMode, isNull);
+    expect(channel?.catchupSource, isNull);
+    expect(channel?.catchupDays, isNull);
+    expect(channel?.catchupCorrectionHours, isNull);
+    expect((await db.select(db.epgProgrammes).get()).single.catchupId, isNull);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
+  });
 }
 
 class _Settings extends SettingsService {
@@ -571,7 +631,12 @@ class _LegacyDatabase extends AppDatabase {
   @override
   int get schemaVersion => 6;
   @override
-  drift.MigrationStrategy get migration => drift.MigrationStrategy(onCreate: (m) => m.createAll());
+  drift.MigrationStrategy get migration => drift.MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+      await _dropCatchupColumns(this);
+    },
+  );
 }
 
 /// Reconstruct the schemas described by AppDatabase's existing migration steps.
@@ -604,8 +669,17 @@ class _HistoricalDatabase extends AppDatabase {
         await customStatement('ALTER TABLE providers DROP COLUMN is_auto_update');
         await customStatement('ALTER TABLE epg_sources DROP COLUMN is_auto_update');
       }
+      if (version < 8) await _dropCatchupColumns(this);
     },
   );
+}
+
+Future<void> _dropCatchupColumns(AppDatabase db) async {
+  await db.customStatement('ALTER TABLE channels DROP COLUMN catchup_mode');
+  await db.customStatement('ALTER TABLE channels DROP COLUMN catchup_source');
+  await db.customStatement('ALTER TABLE channels DROP COLUMN catchup_days');
+  await db.customStatement('ALTER TABLE channels DROP COLUMN catchup_correction_hours');
+  await db.customStatement('ALTER TABLE epg_programmes DROP COLUMN catchup_id');
 }
 
 class _FailAfterMigrationDatabase extends AppDatabase {

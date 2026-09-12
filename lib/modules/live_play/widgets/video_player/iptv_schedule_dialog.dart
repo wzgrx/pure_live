@@ -131,11 +131,29 @@ class _IptvScheduleDialogContentState extends State<IptvScheduleDialogContent> {
           itemCount: controller.currentChannelSchedule.length,
           itemBuilder: (context, index) {
             final programme = controller.currentChannelSchedule[index];
+            final phase = classifyIptvProgramme(
+              start: programme.start.toLocal(),
+              stop: programme.stop.toLocal(),
+              now: now,
+            );
+            final catchupAvailable =
+                phase != IptvProgrammePhase.catchup ||
+                evaluateIptvCatchupAvailability(
+                      programmeStop: programme.stop.toLocal(),
+                      now: now,
+                      mode: controller.room.catchUpMode,
+                      source: controller.room.catchUpSource,
+                      days: controller.room.catchUpDays,
+                      catchupId: programme.catchupId,
+                    ) ==
+                    IptvCatchupAvailability.available;
             return _ProgrammeTile(
+              key: ValueKey('iptv-programme-$index'),
               programme: programme,
               isCurrent: index == liveIndex,
-              phase: classifyIptvProgramme(start: programme.start.toLocal(), stop: programme.stop.toLocal(), now: now),
-              enabled: !switching,
+              phase: phase,
+              catchupAvailable: catchupAvailable,
+              enabled: !switching && catchupAvailable,
               onTap: () {
                 unawaited(controller.onProgrammeTapped(programme, closeSchedule: _close));
               },
@@ -306,9 +324,11 @@ class _ScheduleStatus extends StatelessWidget {
 
 class _ProgrammeTile extends StatelessWidget {
   const _ProgrammeTile({
+    super.key,
     required this.programme,
     required this.isCurrent,
     required this.phase,
+    required this.catchupAvailable,
     required this.enabled,
     required this.onTap,
   });
@@ -316,6 +336,7 @@ class _ProgrammeTile extends StatelessWidget {
   final database.EpgProgramme programme;
   final bool isCurrent;
   final IptvProgrammePhase phase;
+  final bool catchupAvailable;
   final bool enabled;
   final VoidCallback onTap;
 
@@ -349,6 +370,10 @@ class _ProgrammeTile extends StatelessWidget {
     );
     final status = switch (phase) {
       IptvProgrammePhase.live => _LiveTag(color: primary),
+      IptvProgrammePhase.catchup when !catchupAvailable => Tooltip(
+        message: i18n('catchup_unavailable'),
+        child: Icon(Remix.history_line, size: 16, color: theme.disabledColor),
+      ),
       IptvProgrammePhase.catchup => Icon(Remix.history_line, size: 16, color: theme.hintColor.withValues(alpha: 0.6)),
       IptvProgrammePhase.scheduled => const SizedBox.shrink(),
     };

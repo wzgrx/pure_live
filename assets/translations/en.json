@@ -880,6 +880,7 @@
     "playing_catchup": "Loading catch-up stream for",
     "return_to_live": "Return to live",
     "returned_to_live": "Returned to live",
+    "catchup_unavailable": "Catch-up is not available for this programme",
     "import_action": "Import",
     "download_guide_sub": "Sync and overwrite with latest provider listings",
     "manage_page_title": "Subscription Source Manager",

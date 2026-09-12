@@ -137,6 +137,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('provider-disabled catch-up rows are visibly unavailable and do not dispatch playback', (tester) async {
+    final controller = _ScheduleController();
+    controller.room.catchUpMode = 'disabled';
+    controller.currentChannelSchedule.add(
+      EpgProgramme(
+        id: 1,
+        epgChannelId: 'fixture-channel',
+        sourceId: 'fixture-source',
+        title: 'Archived programme',
+        start: DateTime(2026, 9, 12, 9),
+        stop: DateTime(2026, 9, 12, 10),
+      ),
+    );
+    addTearDown(controller.disposeFixture);
+    await _pump(tester, controller, textScale: 3, now: () => DateTime(2026, 9, 12, 11));
+    await tester.pumpAndSettle();
+
+    final row = find.byKey(const ValueKey('iptv-programme-0'));
+    expect(row, findsOneWidget);
+    expect(find.byTooltip('Catch-up is not available for this programme'), findsOneWidget);
+    await tester.tap(row);
+    await tester.pump();
+    expect(controller.tappedTitles, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   test('dialog source keeps the body scrollable and avoids fixed ListTile layout', () {
     final source = File('lib/modules/live_play/widgets/video_player/iptv_schedule_dialog.dart').readAsStringSync();
     expect(source, contains('SingleChildScrollView'));
@@ -148,7 +174,7 @@ void main() {
   test('return-to-live action and completion labels are complete in both locales', () async {
     for (final locale in const ['en', 'zh']) {
       final translations = jsonDecode(await File('assets/translations/$locale.json').readAsString());
-      for (final key in const ['return_to_live', 'returned_to_live']) {
+      for (final key in const ['return_to_live', 'returned_to_live', 'catchup_unavailable']) {
         expect(translations[key], isA<String>().having((value) => value.trim(), '$locale:$key', isNotEmpty));
       }
     }

@@ -109,6 +109,34 @@ void main() {
     expect(await db.select(db.epgProgrammes).get(), hasLength(501));
   });
 
+  test('XMLTV and JSON programme catch-up IDs persist after source replacement', () async {
+    final xml =
+        '<tv><channel id="new"><display-name>New</display-name></channel>'
+        '<programme channel="new" catchup-id="episode&amp;42" '
+        'start="20360101000000 +0000" stop="20360101010000 +0000"><title>XML</title></programme></tv>';
+    expect(await import(await input(xml)), isTrue);
+    await reopen();
+    expect((await db.select(db.epgProgrammes).get()).single.catchupId, 'episode&42');
+
+    final json = jsonEncode({
+      'channels': [
+        {'id': 'new', 'displayName': 'New'},
+      ],
+      'programmes': [
+        {
+          'channelId': 'new',
+          'title': 'JSON',
+          'start': '2036-01-01T00:00:00Z',
+          'stop': '2036-01-01T01:00:00Z',
+          'catchup-id': 'episode-43',
+        },
+      ],
+    });
+    expect(await import(await input(json, 'json')), isTrue);
+    await reopen();
+    expect((await db.select(db.epgProgrammes).get()).single.catchupId, 'episode-43');
+  });
+
   for (final extension in ['xml', 'json', 'gz']) {
     test('UTF-8 $extension preserves channel and programme text', () async {
       final content = extension == 'json'

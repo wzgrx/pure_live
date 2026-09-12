@@ -7,7 +7,6 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
-import 'package:drift/drift.dart' as drift;
 import 'package:pure_live/common/global/app_path_manager.dart';
 
 part 'database.g.dart';
@@ -37,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -68,6 +67,23 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 7) {
         await _migrateEpgChannelIdentities();
+      }
+      if (from < 8) {
+        final channelColumns = (await customSelect(
+          'PRAGMA table_info(channels)',
+        ).get()).map((row) => row.read<String>('name')).toSet();
+        if (!channelColumns.contains(channels.catchupMode.$name)) await m.addColumn(channels, channels.catchupMode);
+        if (!channelColumns.contains(channels.catchupSource.$name)) await m.addColumn(channels, channels.catchupSource);
+        if (!channelColumns.contains(channels.catchupDays.$name)) await m.addColumn(channels, channels.catchupDays);
+        if (!channelColumns.contains(channels.catchupCorrectionHours.$name)) {
+          await m.addColumn(channels, channels.catchupCorrectionHours);
+        }
+        final programmeColumns = (await customSelect(
+          'PRAGMA table_info(epg_programmes)',
+        ).get()).map((row) => row.read<String>('name')).toSet();
+        if (!programmeColumns.contains(epgProgrammes.catchupId.$name)) {
+          await m.addColumn(epgProgrammes, epgProgrammes.catchupId);
+        }
       }
       // Commit the version with the data, before Drift repeats its version write.
       // Otherwise an interrupted open could replay conversion of orphaned IDs.
@@ -347,13 +363,13 @@ class AppDatabase extends _$AppDatabase {
   Future<void> updateProviderUpdateStatus(String providerId, bool status) async {
     await (update(
       providers,
-    )..where((t) => t.id.equals(providerId))).write(ProvidersCompanion(isAutoUpdate: drift.Value(status)));
+    )..where((t) => t.id.equals(providerId))).write(ProvidersCompanion(isAutoUpdate: Value(status)));
   }
 
   Future<void> updateEpgSourceUpdateStatus(String sourceId, bool status) async {
-    await (update(epgSources)..where((t) => t.id.equals(sourceId))).write(
-      EpgSourcesCompanion(isAutoUpdate: drift.Value(status)),
-    ); // 🔒 必须使用 drift.Value 包装
+    await (update(
+      epgSources,
+    )..where((t) => t.id.equals(sourceId))).write(EpgSourcesCompanion(isAutoUpdate: Value(status))); // 🔒 必须使用 Value 包装
   }
 
   // 💡 精准获取：不仅要超时，而且必须是用户开启了自动更新开关（isAutoUpdate == true）的文件才会被查出来

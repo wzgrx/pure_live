@@ -13,6 +13,10 @@ class Channel extends Equatable {
   final int? channelNumber;
   final String streamUrl;
   final StreamType streamType;
+  final String? catchupMode;
+  final String? catchupSource;
+  final double? catchupDays;
+  final double? catchupCorrectionHours;
   final bool isFavorite;
 
   const Channel({
@@ -27,17 +31,17 @@ class Channel extends Equatable {
     this.channelNumber,
     required this.streamUrl,
     this.streamType = StreamType.live,
+    this.catchupMode,
+    this.catchupSource,
+    this.catchupDays,
+    this.catchupCorrectionHours,
     this.isFavorite = false,
   });
 
   /// The best display name available.
   String get displayName => tvgName ?? name;
 
-  Channel copyWith({
-    String? epgChannelId,
-    bool? isFavorite,
-    int? channelNumber,
-  }) {
+  Channel copyWith({String? epgChannelId, bool? isFavorite, int? channelNumber}) {
     return Channel(
       id: id,
       providerId: providerId,
@@ -50,6 +54,10 @@ class Channel extends Equatable {
       channelNumber: channelNumber ?? this.channelNumber,
       streamUrl: streamUrl,
       streamType: streamType,
+      catchupMode: catchupMode,
+      catchupSource: catchupSource,
+      catchupDays: catchupDays,
+      catchupCorrectionHours: catchupCorrectionHours,
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }
@@ -91,6 +99,7 @@ class Provider extends Equatable {
 }
 
 enum ProviderType { m3u, m3uPlus, xtreamCodes }
+
 enum ProviderStatus { unknown, online, offline, error }
 
 /// A unified channel that aggregates streams from multiple providers.
@@ -116,8 +125,7 @@ class UnifiedChannel extends Equatable {
   bool get hasFailoverSources => sources.length > 1;
 
   /// The primary (highest priority) stream source.
-  StreamSource? get primarySource =>
-      sources.isNotEmpty ? sources.first : null;
+  StreamSource? get primarySource => sources.isNotEmpty ? sources.first : null;
 
   @override
   List<Object?> get props => [id];

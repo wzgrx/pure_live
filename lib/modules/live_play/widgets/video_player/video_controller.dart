@@ -1040,6 +1040,10 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
       stop: programme.stop,
       type: type,
       now: now,
+      mode: room.catchUpMode,
+      source: room.catchUpSource,
+      correctionHours: room.catchUpCorrectionHours,
+      catchupId: programme.catchupId,
     );
   }
 
@@ -1063,6 +1067,19 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
       return returnToLive(closeSchedule: closeSchedule, showMessage: showMessage);
     }
 
+    final availability = evaluateIptvCatchupAvailability(
+      programmeStop: programme.stop,
+      now: actionTime,
+      mode: room.catchUpMode,
+      source: room.catchUpSource,
+      days: room.catchUpDays,
+      catchupId: programme.catchupId,
+    );
+    if (availability != IptvCatchupAvailability.available) {
+      notify(i18n('catchup_unavailable'));
+      return IptvProgrammeSelectionResult.catchupUnavailable;
+    }
+
     final originalUrl = room.link?.trim() ?? '';
     if (originalUrl.isEmpty) {
       notify(i18n('invalid_play_url'));
@@ -1083,6 +1100,9 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     } on ArgumentError {
       notify(i18n('invalid_play_url'));
       return IptvProgrammeSelectionResult.invalidUrl;
+    } on UnsupportedError {
+      notify(i18n('catchup_unavailable'));
+      return IptvProgrammeSelectionResult.catchupUnavailable;
     }
 
     catchUpSwitching.value = true;

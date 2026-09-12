@@ -198,6 +198,10 @@ class LiveRoom {
   bool? isCatchUp; // 是否正在时移
   int? catchUpStart; // 时移开始时间戳
   int? catchUpEnd; // 时移结束时间戳
+  String? catchUpMode; // M3U provider catch-up mode
+  String? catchUpSource; // M3U provider URL template/query
+  double? catchUpDays; // Provider archive window
+  double? catchUpCorrectionHours; // Provider timestamp correction
 
   /// Local epoch-millisecond timestamp used by the viewing-history UI.
   int? lastWatchedAt;
@@ -233,6 +237,10 @@ class LiveRoom {
     this.isCatchUp = false,
     this.catchUpStart,
     this.catchUpEnd,
+    this.catchUpMode,
+    this.catchUpSource,
+    this.catchUpDays,
+    this.catchUpCorrectionHours,
     this.lastWatchedAt,
     List<String>? tagIds,
   }) : liveStatus = liveStatus ?? _legacyStatusToLiveStatus(status: status, isRecord: isRecord),
@@ -270,6 +278,10 @@ class LiveRoom {
       isCatchUp = json['isCatchUp'] ?? false,
       catchUpStart = json['catchUpStart'],
       catchUpEnd = json['catchUpEnd'],
+      catchUpMode = json['catchUpMode']?.toString(),
+      catchUpSource = json['catchUpSource']?.toString(),
+      catchUpDays = _finiteDoubleFromJson(json['catchUpDays']),
+      catchUpCorrectionHours = _finiteDoubleFromJson(json['catchUpCorrectionHours']),
       lastWatchedAt = json['lastWatchedAt'] is num ? (json['lastWatchedAt'] as num).toInt() : null {
     // Earlier builds stored Huya's userCount/URI 8006 popularity in the
     // concurrent-viewer field. Current captures confirm both are popularity.
@@ -314,6 +326,10 @@ class LiveRoom {
     bool? isCatchUp,
     int? catchUpStart,
     int? catchUpEnd,
+    String? catchUpMode,
+    String? catchUpSource,
+    double? catchUpDays,
+    double? catchUpCorrectionHours,
     int? lastWatchedAt,
     List<String>? tagIds,
   }) {
@@ -347,6 +363,10 @@ class LiveRoom {
       isCatchUp: isCatchUp ?? this.isCatchUp,
       catchUpStart: catchUpStart ?? this.catchUpStart,
       catchUpEnd: catchUpEnd ?? this.catchUpEnd,
+      catchUpMode: catchUpMode ?? this.catchUpMode,
+      catchUpSource: catchUpSource ?? this.catchUpSource,
+      catchUpDays: catchUpDays ?? this.catchUpDays,
+      catchUpCorrectionHours: catchUpCorrectionHours ?? this.catchUpCorrectionHours,
       lastWatchedAt: lastWatchedAt ?? this.lastWatchedAt,
       tagIds: tagIds ?? this.tagIds,
     );
@@ -456,6 +476,10 @@ class LiveRoom {
       'isCatchUp': isCatchUp,
       'catchUpStart': catchUpStart,
       'catchUpEnd': catchUpEnd,
+      'catchUpMode': catchUpMode,
+      'catchUpSource': catchUpSource,
+      'catchUpDays': catchUpDays,
+      'catchUpCorrectionHours': catchUpCorrectionHours,
       'lastWatchedAt': lastWatchedAt,
     };
   }
@@ -656,6 +680,11 @@ class LiveRoom {
     final text = value?.trim() ?? '';
     return text.isNotEmpty && text != 'null' && RegExp(r'[0-9]').hasMatch(text);
   }
+
+  static double? _finiteDoubleFromJson(dynamic value) {
+    final parsed = value is num ? value.toDouble() : double.tryParse(value?.toString().trim() ?? '');
+    return parsed != null && parsed.isFinite ? parsed : null;
+  }
 }
 
 extension LiveRoomExtension on LiveRoom {
@@ -709,6 +738,10 @@ extension LiveRoomExtension on LiveRoom {
       isCatchUp: incoming.isCatchUp ?? isCatchUp,
       catchUpStart: incoming.catchUpStart ?? catchUpStart,
       catchUpEnd: incoming.catchUpEnd ?? catchUpEnd,
+      catchUpMode: _preferValue(incoming.catchUpMode, catchUpMode),
+      catchUpSource: _preferValue(incoming.catchUpSource, catchUpSource),
+      catchUpDays: incoming.catchUpDays ?? catchUpDays,
+      catchUpCorrectionHours: incoming.catchUpCorrectionHours ?? catchUpCorrectionHours,
 
       lastWatchedAt: incoming.lastWatchedAt ?? lastWatchedAt,
     );

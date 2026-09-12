@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:pure_live/core/iptv/models/epg.dart';
 
 class JsonEpgParser {
@@ -115,6 +116,8 @@ class JsonEpgParser {
 
     final category = item['category']?.toString() ?? item['genre']?.toString();
 
+    final catchupId = item['catchupId']?.toString() ?? item['catchup-id']?.toString();
+
     return EpgProgramme(
       channelId: channelId,
       sourceId: sourceId,
@@ -123,6 +126,7 @@ class JsonEpgParser {
       subtitle: subtitle,
       episodeNum: episodeNum,
       category: category,
+      catchupId: catchupId,
       start: start,
       stop: stop,
     );

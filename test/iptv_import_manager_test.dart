@@ -139,6 +139,30 @@ void main() {
     expect(channel.name, 'News, World');
   });
 
+  test('provider catch-up metadata persists and refreshes on the stable channel identity', () async {
+    String feed(String days, String correction) =>
+        '#EXTM3U catchup-correction="$correction"\n'
+        '#EXTINF:-1 tvg-id="news" catchup="append" '
+        'catchup-source="&start={utc}&duration={duration}" catchup-days="$days",News\n'
+        'https://fixture/live\n';
+
+    expect(await import(await input(feed('3.5', '-2.5'))), isTrue);
+    final first = (await db.select(db.channels).get()).single;
+    expect(first.catchupMode, 'append');
+    expect(first.catchupSource, '&start={utc}&duration={duration}');
+    expect(first.catchupDays, 3.5);
+    expect(first.catchupCorrectionHours, -2.5);
+
+    expect(await import(await input(feed('7', '1.25'))), isTrue);
+    await reopen();
+    final refreshed = (await db.select(db.channels).get()).single;
+    expect(refreshed.id, first.id);
+    expect(refreshed.catchupMode, 'append');
+    expect(refreshed.catchupSource, '&start={utc}&duration={duration}');
+    expect(refreshed.catchupDays, 7);
+    expect(refreshed.catchupCorrectionHours, 1.25);
+  });
+
   test('forced same-name refresh updates one provider instead of creating a duplicate', () async {
     expect(await import(await input(_m3u())), isTrue);
     final old = (await db.getAllProviders()).single;

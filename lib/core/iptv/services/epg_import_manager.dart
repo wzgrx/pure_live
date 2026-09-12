@@ -296,6 +296,7 @@ class EpgImportManager {
             description: drift.Value(e.description),
             subtitle: drift.Value(e.subtitle),
             episodeNum: drift.Value(e.episodeNum),
+            catchupId: drift.Value(e.catchupId),
           ),
         );
 

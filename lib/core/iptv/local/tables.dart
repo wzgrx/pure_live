@@ -31,6 +31,10 @@ class Channels extends Table {
   IntColumn get channelNumber => integer().nullable()();
   TextColumn get streamUrl => text()();
   TextColumn get streamType => text().withDefault(const Constant('live'))();
+  TextColumn get catchupMode => text().nullable()();
+  TextColumn get catchupSource => text().nullable()();
+  RealColumn get catchupDays => real().nullable()();
+  RealColumn get catchupCorrectionHours => real().nullable()();
   BoolColumn get favorite => boolean().withDefault(const Constant(false))();
   BoolColumn get hidden => boolean().withDefault(const Constant(false))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
@@ -75,6 +79,7 @@ class EpgProgrammes extends Table {
   TextColumn get subtitle => text().nullable()();
   TextColumn get episodeNum => text().nullable()();
   TextColumn get category => text().nullable()();
+  TextColumn get catchupId => text().nullable()();
   DateTimeColumn get start => dateTime()();
   DateTimeColumn get stop => dateTime()();
 }

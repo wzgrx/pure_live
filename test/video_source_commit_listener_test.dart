@@ -646,6 +646,89 @@ void main() {
     controller.dispose();
   });
 
+  test('catch-up selection resolves the imported provider template instead of inventing playseek', () async {
+    final room = LiveRoom(
+      platform: 'fixture',
+      roomId: 'room',
+      link: 'https://fixture/live?token=stable#preview',
+      catchUpMode: 'append',
+      catchUpSource: '&start={utc}&duration={duration}&episode={catchup-id}',
+      catchUpDays: 3,
+    );
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
+    final live = _FakeLivePlayController();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    final programme = _programme(
+      'provider archive',
+      start: DateTime.utc(2026, 9, 12, 10),
+      stop: DateTime.utc(2026, 9, 12, 11),
+      catchupId: 'episode-42',
+    );
+
+    final result = await controller.onProgrammeTapped(
+      programme,
+      now: DateTime.utc(2026, 9, 12, 12),
+      closeSchedule: () {},
+      showMessage: (_) {},
+    );
+    final uri = Uri.parse(live.catchUpUrl!);
+
+    expect(result, IptvProgrammeSelectionResult.catchupStarted);
+    expect(uri.queryParameters['token'], 'stable');
+    expect(uri.queryParameters['start'], '${programme.start.millisecondsSinceEpoch ~/ 1000}');
+    expect(uri.queryParameters['duration'], '3600');
+    expect(uri.queryParameters['episode'], 'episode-42');
+    expect(uri.queryParameters, isNot(contains('playseek')));
+    expect(uri.fragment, 'preview');
+    controller.dispose();
+  });
+
+  test('an expired provider archive keeps the schedule and player open', () async {
+    final room = LiveRoom(
+      platform: 'fixture',
+      roomId: 'room',
+      link: 'https://fixture/live',
+      catchUpMode: 'append',
+      catchUpSource: '&start={utc}',
+      catchUpDays: 1,
+    );
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
+    final live = _FakeLivePlayController();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    var closes = 0;
+    final messages = <String>[];
+
+    final result = await controller.onProgrammeTapped(
+      _programme('expired archive', start: DateTime.utc(2026, 9, 9, 10), stop: DateTime.utc(2026, 9, 9, 11)),
+      now: DateTime.utc(2026, 9, 12, 12),
+      closeSchedule: () => closes++,
+      showMessage: messages.add,
+    );
+
+    expect(result, IptvProgrammeSelectionResult.catchupUnavailable);
+    expect(closes, 0);
+    expect(manager.closeCalls, 0);
+    expect(live.startCalls, 0);
+    expect(messages, hasLength(1));
+    controller.dispose();
+  });
+
   test('a current catch-up start failure is reported instead of being labelled superseded', () async {
     final room = LiveRoom(platform: 'fixture', roomId: 'room', link: 'https://fixture/live');
     final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
@@ -897,7 +980,7 @@ VideoController _controller({
   );
 }
 
-EpgProgramme _programme(String title, {DateTime? start, DateTime? stop}) {
+EpgProgramme _programme(String title, {DateTime? start, DateTime? stop, String? catchupId}) {
   final resolvedStart = start ?? DateTime(2026, 9, 12, 10);
   return EpgProgramme(
     id: title.hashCode,
@@ -906,6 +989,7 @@ EpgProgramme _programme(String title, {DateTime? start, DateTime? stop}) {
     title: title,
     start: resolvedStart,
     stop: stop ?? resolvedStart.add(const Duration(hours: 1)),
+    catchupId: catchupId,
   );
 }
 

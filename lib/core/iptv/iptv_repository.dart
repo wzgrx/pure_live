@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:pure_live/get/get.dart' hide Value;
 import 'package:pure_live/plugins/db_service.dart';
 import 'package:pure_live/core/iptv/models/channel.dart' as models;
@@ -23,6 +24,10 @@ class IptvRepository extends GetxService {
           tvgId: e.tvgId,
           tvgName: e.tvgName,
           tvgLogo: e.tvgLogo,
+          catchupMode: e.catchupMode,
+          catchupSource: e.catchupSource,
+          catchupDays: e.catchupDays,
+          catchupCorrectionHours: e.catchupCorrectionHours,
         );
       }).toList();
     } catch (e) {

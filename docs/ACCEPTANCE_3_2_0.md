@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-12 IPTV 提供方回看元数据、归档窗口与 URL 策略已修订**：[新审计](IPTV_PROVIDER_CATCHUP_METADATA_AND_WINDOW_AUDIT_2026_09_12.md)。M3U 头部默认值和频道覆盖值现可解析并经 schema 8、刷新与 `LiveRoom` 持久化；XMLTV/JSON 的 `catchup-id` 进入节目数据。节目单按禁用状态、归档天数及必需字段判定可用性，统一支持 default/append/shift、Flussonic、Xtream Codes、VOD 与旧 `playseek`，未知模板不再猜测请求。直接九文件 **226/226**、最终 focused CI **295/295** 与全库 analyze 通过。真实 IPTV 提供方/解码及 Android/Windows GUI 继续，A1-05/A3-04 与宏观 42 组未闭环保持。
+
 - **09-12 IPTV 从回看返回直播的事务与布局已修订**：[新审计](IPTV_RETURN_TO_LIVE_TRANSACTION_AND_LAYOUT_AUDIT_2026_09_12.md)。当前直播节目和明确的“返回直播”动作统一恢复原始直播源，完整清除回看 URL/区间；播放结果区分当前失败与旧请求被取代，并复用 latest-wins、single-flight 和迟到提示栅栏。返回动作在 EPG 加载/错误/空列表及 320×480 / 3.0 倍文字下仍可达。最终九个测试文件联合 **214/214** 与全库 analyze 通过。提供方 M3U 回看元数据、真实 IPTV 网络/解码及双端 GUI 继续，A1-05/A3-04 与宏观 42 组未闭环保持。
 
 - **09-12 IPTV 直连播放器启动事务已修订**：[新审计](IPTV_DIRECT_PLAYER_TRANSACTION_AUDIT_2026_09_12.md)。初始 IPTV 和回看切换统一等待实际 `VideoController` 初始化，直连源纳入播放器请求代次；换房、退出和新回看使旧事务失效，迟到成功/异常不再覆盖新状态或发布假提示。直接定向 **37/37**、九个测试文件联合 **205/205** 与全库 analyze 通过。真实 IPTV/解码、返回直播与双端 GUI 继续，A1-05/A3-04 及宏观 42 组未闭环保持。

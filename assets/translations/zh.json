@@ -882,6 +882,7 @@
     "playing_catchup": "正在为您加载回看节目",
     "return_to_live": "返回直播",
     "returned_to_live": "已返回直播",
+    "catchup_unavailable": "该节目不在可回看范围内",
     "import_action": "导入",
     "download_guide_sub": "从服务器同步并覆盖最新的节目排班",
     "manage_page_title": "订阅源管理",

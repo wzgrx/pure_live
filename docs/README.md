@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [房间卡片长按与标签分配布局/完整性审计](ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md)：权威映射、旧键清理、响应式弹窗、新增标签自动选择，以及 K90 覆盖安装和原生重开保持验证。
+
 - [2026-09-13 GitHub Issue 增量审计](ISSUE_AUDIT_2026_09_13.md)：维护/参考仓库当前 open 计数、最新更新时间，以及 #859/#860/#861 现有专项窗口复核。
 
 - [Android MPV 音频输出后端审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)：AudioTrack→AAudio→OpenSL ES 回退、Android `auto`/`null` 语义、原生五项菜单与 K90 五后端真实播放矩阵。

@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-13 房间卡片长按与标签分配已完成源码、布局和 K90 原生闭环**：[专项审计](ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md)。`c83ed5cc` 统一以 `roomTagsMap` 读取/写入房间标签，过滤重复/失效 ID 并移除旧 room-id-only 键；卡片不再临时构造完整关注控制器，长按操作和标签选择器在窄屏/3.0 倍英文下响应式排列，新标签复用 15/40 边界、IME 和自动选中。专项 **4/4**、相邻十文件 **131/131**、全库 analyze 通过。`288827213` B arm64 Debug 已保留数据覆盖 K90，设备 APK 与 `88864CF5…8C65` 一致；真实 Bilibili 卡片完成未关注引导、创建、自动选中、确认和重开保持，PID 日志无 FATAL/ANR。规范 Hive 精确恢复到 `19F40EA9…D1F050`，应用停止、stay-awake 复原。A1-05/A2-01 保持 RUN，宏观保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环；本批 Astra Light 0 次。
+
 - **09-13 GitHub Issue 增量已核对**：[完整记录](ISSUE_AUDIT_2026_09_13.md)。维护仓库 open 0、参考仓库 open 19，最新公开更新时间仍停在 #860 的 `2026-09-11 14:10:04 UTC`；没有条目越过 #859/#860/#861 等现有专项审计窗口。只读查询未同步上游，宏观保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环；本批 Astra Light 0 次。
 
 - **09-13 Android 五种 MPV 音频输出已完成 K90 真实播放矩阵**：[专项审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)。`fec7eae9` 先把默认 OpenSL ES 单点改为 `audiotrack,aaudio,opensles,` 并补齐五项 Android 菜单、语义导航和即时/重启持久化；首轮逐后端播放据实暴露 `auto` 未解析为有效链、`null` 自动回退 Fijk 后仍创建 AudioTrack。`b303fffd` 统一 Android `auto` 有效链，并在初始化前把禁用音频意图传给自动回退内核；focused CI **189/189 PASS**、全库 analyze 无问题，Fijk 原生通道夹具 **8/8 PASS**。288826114 B arm64 Debug 已保留数据覆盖 K90，设备 APK 与 `539E8ACC…840E23` 一致；最终五项 **5/5** 真实 Bilibili 播放通过，每项均有动态画面与相符的原生后端门禁，`null` 的 AudioTrack/AAudio/OpenSL ES 信号和活跃 AudioFlinger 轨道均为 0。冷启动前台等待竞态由工具提交 `6f40be2c` 修订后完整重跑；设备 Hive 精确恢复到 `19F40EA9…D1F050`，应用停止、桌面与 stay-awake 复原。当前证据限一台 K90、一份 Debug 包和一个 Bilibili 房间；A7-04 保持 RUN，宏观保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环；本批 Astra Light 0 次。

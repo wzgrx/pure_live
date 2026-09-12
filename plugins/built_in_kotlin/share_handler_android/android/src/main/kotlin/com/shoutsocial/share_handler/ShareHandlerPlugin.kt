@@ -224,92 +224,87 @@ class ShareHandlerPlugin : FlutterPlugin, Messages.ShareHandlerApi, EventChannel
 
   private fun attachmentForUri(uri: Uri): Messages.SharedAttachment? {
     val contentResolver = applicationContext.contentResolver
-
-    // Obtain the MIME type of the URI
     val mimeType = contentResolver.getType(uri)
+    val type = getAttachmentType(mimeType)
 
-    // Get the absolute path from the URI
-    val path = FileDirectory.getAbsolutePath(applicationContext, uri) ?: return null
-
-    val file = File(path)
-
-    // Check if the file name has an extension
-    if (file.extension.isNotEmpty()) {
-      // File has an extension; use it directly
-      val type = getAttachmentType(mimeType)
-      return Messages.SharedAttachment.Builder()
-        .setPath(file.absolutePath)
-        .setType(type)
-        .build()
-    } else {
-      // File does not have an extension; copy it to cache with the correct extension
-
-      // Obtain the file name from the URI, including extension
-      val fileName = getFileNameFromUri(contentResolver, uri, mimeType) ?: return null
-
-      // Create a new file in the cache directory with the correct file name
-      val newFile = File(applicationContext.cacheDir, fileName)
-
-      // Copy the contents from the URI to the new file
-      val success = copyFile(contentResolver, uri, newFile)
-      if (!success) {
-        return null
+    // A file URI may already point to app-owned storage. Content URIs must be
+    // copied while their transient grant is active: resolving them to an
+    // external-storage path breaks under scoped storage on current Android.
+    if (uri.scheme.equals("file", ignoreCase = true)) {
+      val directFile = uri.path?.let(::File)
+      if (directFile?.isFile == true && directFile.canRead()) {
+        return Messages.SharedAttachment.Builder()
+          .setPath(directFile.absolutePath)
+          .setType(type)
+          .build()
       }
-
-      // Determine the attachment type using the MIME type
-      val type = getAttachmentType(mimeType)
-
-      // Return the attachment with the path to the copied file
-      return Messages.SharedAttachment.Builder()
-        .setPath(newFile.absolutePath)
-        .setType(type)
-        .build()
     }
+
+    val displayName = getFileNameFromUri(contentResolver, uri, mimeType) ?: return null
+    val safeName = File(displayName).name
+    val extension = File(safeName).extension.ifEmpty {
+      MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "bin"
+    }
+    val copiedFile = File.createTempFile("shared_", ".$extension", applicationContext.cacheDir)
+    if (!copyFile(contentResolver, uri, copiedFile)) {
+      copiedFile.delete()
+      return null
+    }
+    return Messages.SharedAttachment.Builder()
+      .setPath(copiedFile.absolutePath)
+      .setType(type)
+      .build()
   }
 
   // Function to get the file name from the URI
   private fun getFileNameFromUri(contentResolver: ContentResolver, uri: Uri, mimeType: String?): String? {
     var fileName: String? = null
-    val cursor = contentResolver.query(uri, null, null, null, null)
-    cursor?.use { c ->
-      if (c.moveToFirst()) {
-        val nameIndex = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        if (nameIndex != -1) {
-          fileName = c.getString(nameIndex)
+    try {
+      val cursor = contentResolver.query(uri, null, null, null, null)
+      cursor?.use { c ->
+        if (c.moveToFirst()) {
+          val nameIndex = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+          if (nameIndex != -1) {
+            fileName = c.getString(nameIndex)
+          }
         }
       }
+    } catch (e: Exception) {
+      Log.w("ShareHandler", "Shared URI display name query failed", e)
     }
 
-    // If the file name couldn't be obtained, generate one
-    if (fileName == null) {
-      fileName = "file_${System.currentTimeMillis()}"
-      // Add extension if possible
+    if (fileName.isNullOrBlank()) {
+      fileName = uri.lastPathSegment?.substringAfterLast('/')
+    }
+    if (fileName.isNullOrBlank()) {
+      var fallbackName = "file_${System.currentTimeMillis()}"
       mimeType?.let {
-        val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(it)
-        if (extension != null) {
-          fileName += ".$extension"
+        val fallbackExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(it)
+        if (fallbackExtension != null) {
+          fallbackName += ".$fallbackExtension"
         }
       }
+      fileName = fallbackName
     }
-
     return fileName
   }
 
   // Function to copy the file content from the URI to the destination file
   private fun copyFile(contentResolver: ContentResolver, uri: Uri, destinationFile: File): Boolean {
     return try {
-      contentResolver.openInputStream(uri)?.use { inputStream ->
+      val inputStream = contentResolver.openInputStream(uri) ?: return false
+      inputStream.use { input ->
         FileOutputStream(destinationFile).use { outputStream ->
           val buffer = ByteArray(8 * 1024) // 8KB buffer
           var bytesRead: Int
-          while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+          while (input.read(buffer).also { bytesRead = it } != -1) {
             outputStream.write(buffer, 0, bytesRead)
           }
         }
       }
       true
     } catch (e: Exception) {
-      e.printStackTrace()
+      Log.e("ShareHandler", "Shared URI copy failed", e)
       false
     }
   }

@@ -316,6 +316,7 @@ $fixtureBaseName = "purelive-share-intake-$fixtureTag"
 $fixtureChannel = "Share Intake Fixture $fixtureTag"
 $localFixture = Join-Path $evidence "$fixtureBaseName.m3u"
 $deviceFixture = "/sdcard/Download/$fixtureBaseName.m3u"
+$deviceFixtureUri = "content://com.android.externalstorage.documents/document/primary%3ADownload%2F$fixtureBaseName.m3u"
 [IO.File]::WriteAllText(
     $localFixture,
     "#EXTM3U`n#EXTINF:-1 tvg-id=`"$fixtureTag`" group-title=`"Fixture`",$fixtureChannel`nhttps://example.invalid/$fixtureTag/live.m3u8`n",
@@ -416,7 +417,7 @@ try {
     $result.fileShare.deviceFixtureSha256 = Get-DeviceFileHash $deviceFixture
     $result.fileShare.launchOutput = (Invoke-Adb @(
         'shell', 'am', 'start', '-W', '-a', 'android.intent.action.SEND', '-t', 'application/x-mpegURL',
-        '--grant-read-uri-permission', '--eu', 'android.intent.extra.STREAM', "file://$deviceFixture", '-n', "$Package/.MainActivity"
+        '--grant-read-uri-permission', '--eu', 'android.intent.extra.STREAM', $deviceFixtureUri, '-n', "$Package/.MainActivity"
     )) -join "`n"
     Start-Sleep -Seconds 5
     Assert-TargetForeground
@@ -431,7 +432,7 @@ db, provider_name, channel_name = sys.argv[1:]
 connection = sqlite3.connect(db)
 try:
     provider_rows = connection.execute("SELECT id, name, type, url FROM providers WHERE name = ?", (provider_name,)).fetchall()
-    channel_rows = connection.execute("SELECT provider_id, name, url FROM channels WHERE name = ?", (channel_name,)).fetchall()
+    channel_rows = connection.execute("SELECT provider_id, name, stream_url FROM channels WHERE name = ?", (channel_name,)).fetchall()
     print(json.dumps({"providers": provider_rows, "channels": channel_rows}, ensure_ascii=False))
 finally:
     connection.close()

@@ -223,6 +223,14 @@ void main() {
     expect(windowSource, contains('currentRoute != RoutePath.kSplash'));
     expect(windowSource, contains('ShareCommandImportDialog.show(context: navigatorContext'));
     expect(windowSource, isNot(contains('ShareCommandImportDialog.show(context: context')));
+
+    final androidPlugin = File(
+      'plugins/built_in_kotlin/share_handler_android/android/src/main/kotlin/com/shoutsocial/share_handler/ShareHandlerPlugin.kt',
+    ).readAsStringSync();
+    expect(androidPlugin, contains('uri.scheme.equals("file", ignoreCase = true)'));
+    expect(androidPlugin, contains(r'File.createTempFile("shared_", ".$extension", applicationContext.cacheDir)'));
+    expect(androidPlugin, contains('contentResolver.openInputStream(uri) ?: return false'));
+    expect(androidPlugin, isNot(contains('FileDirectory.getAbsolutePath(applicationContext, uri)')));
   });
 }
 

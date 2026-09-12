@@ -235,7 +235,10 @@ void main() {
 
   test('Android share declarations are scoped to supported content and use the real target', () {
     final manifest = File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
+    final debugManifest = File('android/app/src/debug/AndroidManifest.xml').readAsStringSync();
     final targets = File('android/app/src/main/res/xml/share_targets.xml').readAsStringSync();
+    final probe = File('android/app/src/debug/kotlin/com/mystyle/pure_live/ShareIntentProbeReceiver.kt')
+        .readAsStringSync();
 
     expect(manifest, contains('android.intent.action.SEND'));
     expect(manifest, contains('android.intent.action.SEND_MULTIPLE'));
@@ -243,6 +246,13 @@ void main() {
     expect(targets, contains('com.mystyle.purelive.MainActivity'));
     expect(targets, contains('com.mystyle.purelive.dynamic_share_target'));
     expect(targets, isNot(contains('{your.package.identifier}')));
+    expect(manifest, isNot(contains('ShareIntentProbeReceiver')));
+    expect(debugManifest, contains('android:name=".ShareIntentProbeReceiver"'));
+    expect(debugManifest, contains('android:permission="android.permission.DUMP"'));
+    expect(probe, contains('Intent.ACTION_SEND_MULTIPLE'));
+    expect(probe, contains('putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)'));
+    expect(probe, contains('File(context.cacheDir, "share_probe").canonicalFile'));
+    expect(probe, contains('requestedPaths.size !in 1..MAX_ATTACHMENTS'));
   });
 
   test('app-owned navigator defers cold share presentation until splash has finished', () {

@@ -10,5 +10,9 @@
             android:name=".RecorderLifecycleProbeReceiver"
             android:exported="true"
             android:permission="android.permission.DUMP" />
+        <receiver
+            android:name=".ShareIntentProbeReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP" />
     </application>
 </manifest>

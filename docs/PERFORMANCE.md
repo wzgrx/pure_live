@@ -58,19 +58,22 @@ Pure Live 在 Android 上提供省电、均衡、最高（设备上限）三档�
 
 以下命令只在当前任务明确要求设备性能验收时使用。日常卡顿、PiP、弹幕或生命周期问题先通过代码路径分析、时间线回归测试、Flutter Analyze 和本地构建完成修复闭环；设备连接不是代码诊断的前置条件，也不会由历史连接状态自动触发。
 
-安装本地 APK 后，可先确认系统给应用分配的显示模式：
+安装本地 APK 后，可先确认系统给应用分配的显示模式。所有目标命令显式指定序列号：
 
 ```powershell
-adb shell dumpsys display | Select-String -Pattern "mMode|supportedModes|refreshRate"
+$adb = 'C:\Users\123\AppData\Local\Android\Sdk\platform-tools\adb.exe'
+$serial = 'SERIAL'
+& $adb -s $serial shell dumpsys display | Select-String -Pattern "mMode|supportedModes|refreshRate"
 ```
 
-检查应用渲染帧统计：
+Flutter 画面通常位于独立 BLAST Surface，`gfxinfo` 的 Android View 样本不能代替 Flutter 帧结论。首页滚动使用项目工具采集目标 BLAST layer 的 SurfaceFlinger timestats 和进程主线程 schedstat：
 
 ```powershell
-adb shell dumpsys gfxinfo com.mystyle.purelive reset
-# 在手机上连续滚动首页、收藏页并进入/退出直播间
-adb shell dumpsys gfxinfo com.mystyle.purelive framestats > .\local-artifacts\gfxinfo-framestats.txt
+.\tool\run_android_device_test_turn.ps1 -NoRotation -Serial $serial -CommandLine `
+  "& '.\tool\android_home_scroll_performance.ps1' -Serial `$env:PURELIVE_ADB_SERIAL -ExpectedApkSha256 'EXPECTED_SHA256'"
 ```
+
+默认执行热门直播网格 20 上+20 下及相邻平台 20 左+20 右，每个输入前核对精确前台所有权；原始 layer dump、P50/P90/P95/P99、两帧/四帧间隔比例、主线程运行/排队时间、温控、内存、截图和日志统一写入 `local-artifacts/diagnostics/android-home-scroll-performance-*/`。`totalTimelineFrames=0` 时只使用 present 间隔和 dropped/lateAcquire/badDesiredPresent，不将分类字段的零值解释为零卡顿。
 
 重点观察：
 

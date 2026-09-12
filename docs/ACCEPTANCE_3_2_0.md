@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-12 Android 首页 120 Hz 滚动从未执行进入运行中**：[专项审计](ANDROID_HOME_SCROLL_FRAME_PACING_AUDIT_2026_09_12.md)。`09dce413` 增加 SurfaceFlinger 当前 BLAST layer、帧间隔直方图/百分位、两帧/四帧阈值和主线程 schedstat 解析，并进入固定质量门禁；相邻 45/45 与全库 analyze 通过。K90 的同一 Debug APK 完成热门网格 20 上+20 下及平台 20 左+20 右：竖向 P50/P90/P95/P99=8/8/16/24 ms，横向为 8/8/8/16 ms，两个 120 Hz 窗口的 dropped/lateAcquire/badDesiredPresent 均 0。竖向仍有一个 102 ms bucket，Release、冷/热图片、关注/分区长列表、温升及 timeline 归因继续。A1-06 由 NR→RUN，宏观更新为 **20 PASS / 39 RUN / 3 NR**、42 组未闭环；本批 Astra Light 0 次。
+
 - **09-12 视频几何仲裁与横屏返回方向已从未执行进入运行中**：[专项审计](VIDEO_GEOMETRY_ARBITRATION_AND_ORIENTATION_RESTORE_AUDIT_2026_09_12.md)。`01f7bfc6` 阻断极端截图比例结算，并让多数紧凑候选胜过单个最大面积异常值；确定性红灯 35/37 后相关回归转绿。K90 原生轮次进一步复现竖屏房间显式横屏后系统返回仍保持 `2608×1200`，`039f8ff3` 增加一次性方向恢复事务及可重试的 `/dev/tty` UI 层级采集。精确最终提交 197/197、全库 analyze 通过；同提交 arm64 Debug 已保留数据覆盖，设备包 SHA-256 与 `0F28A5F0…D4CD7F` 一致。最终竖屏→普通流连续原生轮次中，两类房间的横屏返回、PiP、房间存活、方向及致命日志断言均通过。A3-03 由 NR→RUN，宏观更新为 **20 PASS / 38 RUN / 4 NR**、42 组未闭环；真实内嵌黑边、长延迟几何、多次房间/重启和 Windows 客户端继续，本批 Astra Light 0 次。
 
 - **09-12 播放连续性恢复已从未执行进入运行中**：[专项审计](PLAYBACK_CONTINUITY_RECOVERY_AUDIT_2026_09_12.md)。`8a4a417c` 为意外暂停后卡住的原生 `play()` 和签名源 resolver 建立明确截止时间，超时后继续既有有限线路/内核恢复，不改变用户主动暂停意图。有效红灯 0/2；恢复文件 **116/116**、相邻 **129/129**、最终十文件 **245/245 PASS**，全库 analyze 无问题。精确 arm64 Debug 已保留数据覆盖 `25102RKBEC / myron`，设备包 SHA-256 与 `DFA6C412…54E70442` 一致，正常播放/音频/PiP/退出 **16/16 PASS**。A3-06 由 NR→RUN，宏观更新为 **20 PASS / 37 RUN / 5 NR**、42 组未闭环；真实 buffering/EOF/签名到期注入、长测和 Windows 客户端继续，本批 Astra Light 0 次。

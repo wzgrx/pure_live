@@ -32,7 +32,7 @@ $uiProfile = $uiMap.profiles.k90pro_portrait_1200x2608
 $roomPoint = $uiProfile.points.'home.first_left_room'
 $controlsPoint = $uiProfile.points.'live.show_controls'
 $audioPoint = $uiProfile.points.'live.audio_toggle'
-$roomModeSettleMilliseconds = 3000
+$roomModeSettleMilliseconds = 8000
 $audioTransitionSettleMilliseconds = 5250
 
 $adbCandidates = @((Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'), 'adb.exe')

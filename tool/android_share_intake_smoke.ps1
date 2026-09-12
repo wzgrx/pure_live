@@ -327,10 +327,12 @@ $remoteCacheBackup = "/data/local/tmp/purelive-share-intake-$PID-cache.tar"
 $remoteCacheRestore = "/data/local/tmp/purelive-share-intake-$PID-cache-restore.tar"
 $remoteDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID.db"
 $remoteMixedDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID-mixed.db"
+$remoteMultipleDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID-multiple.db"
 $localSettingsBackup = Join-Path $evidence 'app_settings.original.hive'
 $localCacheBackup = Join-Path $evidence 'iptv_cache.original.tar'
 $localDbSnapshot = Join-Path $evidence 'iptv_after_share.db'
 $localMixedDbSnapshot = Join-Path $evidence 'iptv_after_mixed_share.db'
+$localMultipleDbSnapshot = Join-Path $evidence 'iptv_after_multiple_share.db'
 $fixtureTag = Get-Date -Format 'yyMMddHHmmssff'
 $fixtureBaseName = "purelive-share-intake-$fixtureTag"
 $fixtureChannel = "Share Intake Fixture $fixtureTag"
@@ -338,9 +340,32 @@ $localFixture = Join-Path $evidence "$fixtureBaseName.m3u"
 $stagedDeviceFixture = "/data/local/tmp/$fixtureBaseName.m3u"
 $deviceFixture = "/data/user/0/$Package/cache/$fixtureBaseName.m3u"
 $deviceFixtureUri = "content://$Package.fileProvider/cache-path/$fixtureBaseName.m3u"
+$multiplePlaylistBaseName = "$fixtureBaseName-multiple-playlist"
+$multiplePlaylistChannel = "Share Multiple Playlist $fixtureTag"
+$multipleEpgBaseName = "$fixtureBaseName-multiple-epg"
+$multipleEpgChannelId = "share-multiple-$fixtureTag"
+$multipleEpgChannel = "Share Multiple EPG $fixtureTag"
+$multipleProgramme = "Share Multiple Programme $fixtureTag"
+$localMultiplePlaylist = Join-Path $evidence "$multiplePlaylistBaseName.m3u"
+$localMultipleEpg = Join-Path $evidence "$multipleEpgBaseName.xml"
+$stagedMultiplePlaylist = "/data/local/tmp/$multiplePlaylistBaseName.m3u"
+$stagedMultipleEpg = "/data/local/tmp/$multipleEpgBaseName.xml"
+$probeRoot = "/data/user/0/$Package/cache/share_probe"
+$deviceMultiplePlaylist = "$probeRoot/$multiplePlaylistBaseName.m3u"
+$deviceMultipleEpg = "$probeRoot/$multipleEpgBaseName.xml"
 [IO.File]::WriteAllText(
     $localFixture,
     "#EXTM3U`n#EXTINF:-1 tvg-id=`"$fixtureTag`" group-title=`"Fixture`",$fixtureChannel`nhttps://example.invalid/$fixtureTag/live.m3u8`n",
+    [Text.UTF8Encoding]::new($false)
+)
+[IO.File]::WriteAllText(
+    $localMultiplePlaylist,
+    "#EXTM3U`n#EXTINF:-1 tvg-id=`"multiple-$fixtureTag`" group-title=`"Fixture`",$multiplePlaylistChannel`nhttps://example.invalid/$fixtureTag/multiple.m3u8`n",
+    [Text.UTF8Encoding]::new($false)
+)
+[IO.File]::WriteAllText(
+    $localMultipleEpg,
+    "<?xml version=`"1.0`" encoding=`"UTF-8`"?>`n<tv><channel id=`"$multipleEpgChannelId`"><display-name>$multipleEpgChannel</display-name></channel><programme channel=`"$multipleEpgChannelId`" start=`"20360101000000 +0000`" stop=`"20360101010000 +0000`"><title>$multipleProgramme</title></programme></tv>`n",
     [Text.UTF8Encoding]::new($false)
 )
 
@@ -356,6 +381,13 @@ $result = [ordered]@{
     commandShare = [ordered]@{}
     mixedShare = [ordered]@{}
     fileShare = [ordered]@{ fixtureBaseName = $fixtureBaseName; fixtureChannel = $fixtureChannel }
+    multipleShare = [ordered]@{
+        playlistBaseName = $multiplePlaylistBaseName
+        playlistChannel = $multiplePlaylistChannel
+        epgBaseName = $multipleEpgBaseName
+        epgChannel = $multipleEpgChannel
+        programme = $multipleProgramme
+    }
     checks = [ordered]@{}
 }
 $failure = $null
@@ -509,6 +541,91 @@ finally:
     $result.fileShare.databaseEvidence = $query
     $result.checks.sharedPlaylistAttachmentImported = $true
 
+    Invoke-Adb @('push', $localMultiplePlaylist, $stagedMultiplePlaylist) | Out-Null
+    Invoke-Adb @('push', $localMultipleEpg, $stagedMultipleEpg) | Out-Null
+    Invoke-Adb @(
+        'shell',
+        "su -c `"mkdir -p '$probeRoot' && cp '$stagedMultiplePlaylist' '$deviceMultiplePlaylist' && cp '$stagedMultipleEpg' '$deviceMultipleEpg' && chown -R ${settingsUid}:${settingsGid} '$probeRoot' && chmod 700 '$probeRoot' && chmod 600 '$deviceMultiplePlaylist' '$deviceMultipleEpg' && restorecon -RF '$probeRoot'`""
+    ) | Out-Null
+    $result.multipleShare.playlistSha256 = Get-DeviceFileHash $deviceMultiplePlaylist
+    $result.multipleShare.epgSha256 = Get-DeviceFileHash $deviceMultipleEpg
+    $result.multipleShare.appLaunchOutput = (Invoke-Adb @(
+        'shell', 'am', 'start', '-W', '-n', "$Package/.MainActivity"
+    )) -join "`n"
+    Start-Sleep -Seconds 3
+    Assert-TargetForeground
+    $result.multipleShare.probeOutput = (Invoke-Adb @(
+        'shell', 'am', 'broadcast', '--receiver-foreground',
+        '-a', 'com.mystyle.purelive.debug.SEND_MULTIPLE_PROBE',
+        '-n', "$Package/.ShareIntentProbeReceiver",
+        '--esa', 'paths', "$deviceMultiplePlaylist,$deviceMultipleEpg"
+    )) -join "`n"
+    if ($result.multipleShare.probeOutput -notmatch 'result=-1' -or
+        $result.multipleShare.probeOutput -notmatch 'data="ok:send_multiple:2"') {
+        throw "SEND_MULTIPLE probe was rejected: $($result.multipleShare.probeOutput)"
+    }
+    Start-Sleep -Seconds 6
+    Assert-TargetForeground
+    Wait-SharedStagingEmpty
+    $result.multipleShare.sharedStagingEntriesAfterImport = @(Get-SharedStagingEntries)
+    $multipleLog = Get-ProcessLog
+    if ($multipleLog.text) {
+        $processLogs.Add($multipleLog.text)
+        [IO.File]::WriteAllText(
+            (Join-Path $evidence 'multiple-process.log'),
+            $multipleLog.text,
+            [Text.UTF8Encoding]::new($false)
+        )
+    }
+    $result.multipleShare.processId = $multipleLog.pid
+    Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null
+    Copy-RootFileToHost $databasePath $remoteMultipleDbSnapshot $localMultipleDbSnapshot
+    $multipleQueryCode = @'
+import json, sqlite3, sys
+db, provider_name, channel_name, epg_name, epg_channel, programme = sys.argv[1:]
+connection = sqlite3.connect(db)
+try:
+    provider_rows = connection.execute(
+        "SELECT id, name, type FROM providers WHERE name = ?", (provider_name,)
+    ).fetchall()
+    channel_rows = connection.execute(
+        "SELECT provider_id, name, stream_url FROM channels WHERE name = ?", (channel_name,)
+    ).fetchall()
+    source_rows = connection.execute(
+        "SELECT id, name FROM epg_sources WHERE name = ?", (epg_name,)
+    ).fetchall()
+    epg_channel_rows = connection.execute(
+        "SELECT source_id, channel_id, display_name FROM epg_channels WHERE display_name = ?",
+        (epg_channel,),
+    ).fetchall()
+    programme_rows = connection.execute(
+        "SELECT source_id, title FROM epg_programmes WHERE title = ?", (programme,)
+    ).fetchall()
+    print(json.dumps({
+        "providers": provider_rows,
+        "channels": channel_rows,
+        "epgSources": source_rows,
+        "epgChannels": epg_channel_rows,
+        "programmes": programme_rows,
+    }, ensure_ascii=False))
+finally:
+    connection.close()
+'@
+    $multipleQueryText = (& python -c $multipleQueryCode $localMultipleDbSnapshot $multiplePlaylistBaseName $multiplePlaylistChannel $multipleEpgBaseName $multipleEpgChannel $multipleProgramme 2>&1) -join "`n"
+    if ($LASTEXITCODE -ne 0) { throw "SEND_MULTIPLE SQLite evidence query failed: $multipleQueryText" }
+    $multipleQuery = $multipleQueryText | ConvertFrom-Json
+    if (@($multipleQuery.providers).Count -ne 1 -or @($multipleQuery.channels).Count -ne 1 -or
+        @($multipleQuery.epgSources).Count -ne 1 -or @($multipleQuery.epgChannels).Count -ne 1 -or
+        @($multipleQuery.programmes).Count -ne 1) {
+        throw "SEND_MULTIPLE fixtures were not committed exactly once: $multipleQueryText"
+    }
+    if ([string] $multipleQuery.providers[0][1] -ne $multiplePlaylistBaseName -or
+        [string] $multipleQuery.epgSources[0][1] -ne $multipleEpgBaseName) {
+        throw "SEND_MULTIPLE source names did not preserve attachment names: $multipleQueryText"
+    }
+    $result.multipleShare.databaseEvidence = $multipleQuery
+    $result.checks.multiplePlaylistAndEpgAttachmentsImported = $true
+
     $combinedLog = $processLogs -join "`n"
     $fatalPattern = '(?im)FATAL EXCEPTION|ANR in com\.mystyle\.purelive|EXCEPTION CAUGHT BY (?:RENDERING|WIDGETS) LIBRARY|Shared media intake failed|Shared IPTV Import Process Crash|IPTV Import Error:'
     if ($combinedLog -match $fatalPattern) { throw "Fatal or intake failure evidence was found in the app process log: $($Matches[0])" }
@@ -545,8 +662,15 @@ finally:
             if (-not $failure) { $failure = $_ } else { Write-Warning "Settings restoration also failed: $($_.Exception.Message)" }
         }
     }
-    foreach ($remote in @($deviceFixture, $stagedDeviceFixture, $remoteSettingsBackup, $remoteSettingsRestore, $remoteCacheBackup, $remoteCacheRestore, $remoteDbSnapshot, $remoteMixedDbSnapshot)) {
+    foreach ($remote in @($deviceFixture, $stagedDeviceFixture, $stagedMultiplePlaylist, $stagedMultipleEpg, $remoteSettingsBackup, $remoteSettingsRestore, $remoteCacheBackup, $remoteCacheRestore, $remoteDbSnapshot, $remoteMixedDbSnapshot, $remoteMultipleDbSnapshot)) {
         try { Invoke-Adb @('shell', "su -c `"rm -f '$remote'`"") | Out-Null } catch {}
+    }
+    try {
+        $guardedProbeRoot = "/data/user/0/$Package/cache/share_probe"
+        if ($probeRoot -ne $guardedProbeRoot) { throw 'Share probe cleanup target guard rejected the path.' }
+        Invoke-Adb @('shell', "su -c `"rm -rf '$probeRoot'`"") | Out-Null
+    } catch {
+        if (-not $failure) { $failure = $_ } else { Write-Warning "Share probe cleanup also failed: $($_.Exception.Message)" }
     }
     try { Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null } catch {}
     try { Invoke-Adb @('shell', 'input', 'keyevent', 'KEYCODE_HOME') | Out-Null } catch {}

@@ -23,6 +23,7 @@ import 'package:pure_live/modules/live_play/controllers/live_play_controller.dar
 import 'package:pure_live/modules/live_play/widgets/content_first_panel_layout.dart';
 import 'package:pure_live/modules/live_play/widgets/video_player/volume_control.dart';
 import 'package:pure_live/modules/live_play/widgets/video_player/video_controller.dart';
+import 'package:pure_live/modules/live_play/widgets/video_player/portrait_playback_picker_dialog.dart';
 import 'package:pure_live/modules/live_play/widgets/danmaku/danmaku_settings_binding.dart';
 import 'package:pure_live/modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart';
 import 'package:pure_live/player/core/portrait_stream_support.dart';
@@ -771,45 +772,14 @@ class PortraitOrientationButton extends StatelessWidget {
     controller.stopHideController();
     try {
       final settings = SettingsService.to.player;
-      final value = await showDialog<PortraitOrientationOverride>(
+      final result = await showDialog<PortraitOrientationPickerResult>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(i18n('portrait_room_override')),
-          contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final item in PortraitOrientationOverride.values)
-                  ListTile(
-                    key: ValueKey('portrait-room-override-${item.name}'),
-                    dense: true,
-                    leading: Icon(
-                      item == selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
-                      color: item == selected ? Theme.of(dialogContext).colorScheme.primary : null,
-                    ),
-                    title: Text(_overrideLabel(item)),
-                    onTap: () => Navigator.of(dialogContext).pop(item),
-                  ),
-                const Divider(height: 1),
-                Obx(
-                  () => SwitchListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                    title: Text(i18n('portrait_remember_room_override')),
-                    value: settings.rememberPortraitRoomOverride.v,
-                    onChanged: (value) => settings.rememberPortraitRoomOverride.v = value,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(i18n('cancel')))],
-        ),
+        builder: (dialogContext) =>
+            PortraitOrientationPickerDialog(selected: selected, remember: settings.rememberPortraitRoomOverride.v),
       );
-      if (value != null) {
-        settings.setPortraitOverrideForRoom(controller.room, value, remember: settings.rememberPortraitRoomOverride.v);
+      if (result != null) {
+        settings.rememberPortraitRoomOverride.v = result.remember;
+        settings.setPortraitOverrideForRoom(controller.room, result.orientation, remember: result.remember);
         GlobalPlayerService.instance.player.refreshPortraitPresentationPolicy();
       }
     } finally {
@@ -845,7 +815,7 @@ class PortraitFullscreenDisplayModeButton extends StatelessWidget {
         visualDensity: VisualDensity.compact,
         color: selected == PortraitFullscreenDisplayMode.ambient ? Colors.white : const Color(0xFFFFD166),
         onPressed: () => _showPicker(context, selected),
-        icon: Icon(_portraitFullscreenDisplayModeIcon(selected), size: 21),
+        icon: Icon(portraitFullscreenDisplayModeIcon(selected), size: 21),
       );
     });
   }
@@ -856,31 +826,7 @@ class PortraitFullscreenDisplayModeButton extends StatelessWidget {
     try {
       final value = await showDialog<PortraitFullscreenDisplayMode>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(i18n('portrait_fullscreen_display_mode')),
-          contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 380),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final item in PortraitFullscreenDisplayMode.values)
-                  ListTile(
-                    key: ValueKey('portrait-fullscreen-display-${item.name}'),
-                    dense: true,
-                    leading: Icon(
-                      item == selected ? Icons.radio_button_checked_rounded : _portraitFullscreenDisplayModeIcon(item),
-                      color: item == selected ? Theme.of(dialogContext).colorScheme.primary : null,
-                    ),
-                    title: Text(_portraitFullscreenDisplayModeLabel(item)),
-                    subtitle: Text(_portraitFullscreenDisplayModeDescription(item)),
-                    onTap: () => Navigator.of(dialogContext).pop(item),
-                  ),
-              ],
-            ),
-          ),
-          actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(i18n('cancel')))],
-        ),
+        builder: (dialogContext) => PortraitFullscreenDisplayModePickerDialog(selected: selected),
       );
       if (value != null) {
         SettingsService.to.player.portraitFullscreenDisplayModeName.v = value.name;
@@ -893,27 +839,6 @@ class PortraitFullscreenDisplayModeButton extends StatelessWidget {
     }
   }
 }
-
-IconData _portraitFullscreenDisplayModeIcon(PortraitFullscreenDisplayMode value) => switch (value) {
-  PortraitFullscreenDisplayMode.complete => Icons.crop_free_rounded,
-  PortraitFullscreenDisplayMode.ambient => Icons.blur_on_rounded,
-  PortraitFullscreenDisplayMode.balanced => Icons.fit_screen_rounded,
-  PortraitFullscreenDisplayMode.cover => Icons.fullscreen_rounded,
-};
-
-String _portraitFullscreenDisplayModeLabel(PortraitFullscreenDisplayMode value) => switch (value) {
-  PortraitFullscreenDisplayMode.complete => i18n('portrait_fullscreen_display_complete'),
-  PortraitFullscreenDisplayMode.ambient => i18n('portrait_fullscreen_display_ambient'),
-  PortraitFullscreenDisplayMode.balanced => i18n('portrait_fullscreen_display_balanced'),
-  PortraitFullscreenDisplayMode.cover => i18n('portrait_fullscreen_display_cover'),
-};
-
-String _portraitFullscreenDisplayModeDescription(PortraitFullscreenDisplayMode value) => switch (value) {
-  PortraitFullscreenDisplayMode.complete => i18n('portrait_fullscreen_display_complete_desc'),
-  PortraitFullscreenDisplayMode.ambient => i18n('portrait_fullscreen_display_ambient_desc'),
-  PortraitFullscreenDisplayMode.balanced => i18n('portrait_fullscreen_display_balanced_desc'),
-  PortraitFullscreenDisplayMode.cover => i18n('portrait_fullscreen_display_cover_desc'),
-};
 
 class PortraitStreamDiagnosticsBadge extends StatelessWidget {
   const PortraitStreamDiagnosticsBadge({super.key});

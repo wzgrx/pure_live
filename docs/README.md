@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [竖屏播放选择器布局与事务审计](PORTRAIT_PLAYBACK_PICKER_LAYOUT_AND_TRANSACTION_AUDIT_2026_09_12.md)：房间方向/记忆策略的原子提交、竖屏全屏显示模式、取消/系统返回及 320×480 三倍字号回归。
+
 - [Windows 虎牙候选复验与同页面资源对照](WINDOWS_HUYA_CANDIDATE_RECHECK_2026_09_05.md)：b231449e 的 AOT 身份、11 分钟播放、全屏与退出、空载热门页对照，以及 Esc 未闭合观察。
 
 - [关闭与快速重进的播放意图](PLAYER_CLOSE_INTENT_AUDIT_2026_09_05.md)：关闭后旧恢复接管、旧关闭覆盖新播放、取消请求仍开流的受控复现，派发代次修复与相邻回归。

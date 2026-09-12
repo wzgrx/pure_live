@@ -158,8 +158,32 @@ K90 原生首轮补证还暴露 `open_settings` 仍使用两处历史缓存坐�
 `open_player_kernel_settings`：菜单、设置与播放器内核三步全部使用实时双语语义，并以
 “核心内核设置 / Core Kernel Settings”验证终点。测试先对缺失序列得到有效红灯；补齐两种
 竖屏 profile 后，UI map 回归及四 profile schema 校验通过。K90 原生复跑 4/4 检查通过，实际
-点击坐标来自当次 UI 层级，最终应用停止、桌面前台且 stay-awake 恢复为 `0`。证据：
-`local-artifacts/diagnostics/android-player-kernel-semantic-route-9da14ceb/summary.json`。
+点击坐标来自当次 UI 层级，最终应用停止、桌面前台且 stay-awake 恢复为 `0`。该只读路由首版
+遗漏了设置文件保护；应用启动自身把规范 Hive 从 `19F40EA9…D1F050` 写成
+`DC887921…31E3C`。后续矩阵虽准确恢复了自身开始时的 `DC887921…31E3C`，但没有把它误报为
+更早的用户基线；检测到跨轮漂移后，已用原始本机副本按 `10946:10946:600` 与 SELinux context
+恢复，最终设备 SHA-256 精确回到 `19F40EA9…D1F050`。路由与修复证据：
+`local-artifacts/diagnostics/android-player-kernel-semantic-route-9da14ceb/summary.json`、
+`local-artifacts/diagnostics/android-player-kernel-semantic-route-9da14ceb/settings-repair-summary.json`。
+
+新增 `tool/android_audio_output_settings_smoke.ps1` 后完成五项原生选择矩阵。工具要求显式 serial，
+先核对型号/代号/root 和设备 APK 哈希，随后完整备份 Hive 的字节、uid/gid/mode；每项均通过
+语义路径启用“自定义驱动与硬件加速”，选择目标、立即重新打开弹窗核对，再强制停止并重启应用
+复核。结果如下：
+
+| 专家 `--ao` | 立即选中 | 重启后选中 | 弹窗选项数 |
+| --- | --- | --- | ---: |
+| `auto` | PASS | PASS | 5 |
+| `audiotrack` | PASS | PASS | 5 |
+| `aaudio` | PASS | PASS | 5 |
+| `opensles` | PASS | PASS | 5 |
+| `null` | PASS | PASS | 5 |
+
+五种值的即时显示和跨进程持久化全部通过，每次弹窗都只有五项 Android 后端；工具静态合同同时
+固定显式目标、精确选项、语义路由、备份/恢复及清理约束。矩阵结束后其开始态字节恢复通过，
+再完成上述跨轮基线校正；最终应用停止、桌面前台、stay-awake 为 `0`。完整证据：
+`local-artifacts/diagnostics/android-audio-output-settings-fec7eae9/summary.json`。这组结果证明设置
+UI 与持久化，不等同于五个后端都完成真实媒体输出；逐后端播放、声音/静音结果和原生日志仍单列。
 
 ## Binder death-recipient 告警归因边界
 

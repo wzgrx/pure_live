@@ -31,9 +31,9 @@ $uiMap = Get-Content (Join-Path $PSScriptRoot 'device_ui_map.json') -Raw -Encodi
 $uiProfile = $uiMap.profiles.k90pro_portrait_1200x2608
 $roomPoint = $uiProfile.points.'home.first_left_room'
 $controlsPoint = $uiProfile.points.'live.show_controls'
-$audioPoint = $uiProfile.points.'live.audio_toggle'
 $roomModeSettleMilliseconds = 8000
 $audioTransitionSettleMilliseconds = 5250
+$maxAudioInputAttempts = 3
 
 $adbCandidates = @((Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'), 'adb.exe')
 $adb = $adbCandidates | Where-Object {
@@ -55,6 +55,15 @@ function Invoke-TargetAdb {
 function Save-Text {
     param([Parameter(Mandatory = $true)][string] $Name, [AllowNull()][object] $Value)
     $Value | Out-File -LiteralPath (Join-Path $evidence $Name) -Encoding utf8 -Width 8192
+}
+
+function Save-XmlDocument {
+    param([Parameter(Mandatory = $true)][string] $Name, [Parameter(Mandatory = $true)][xml] $Document)
+    [IO.File]::WriteAllText(
+        (Join-Path $evidence "$Name.xml"),
+        $Document.OuterXml,
+        [Text.UTF8Encoding]::new($false)
+    )
 }
 
 function Save-Screenshot {
@@ -249,33 +258,78 @@ function Show-PlayerControls {
 }
 
 function Invoke-ModeTransition {
-    param([Parameter(Mandatory = $true)][bool] $AudioOnly)
-    $timer = [Diagnostics.Stopwatch]::StartNew()
-    # UIAutomator needs long enough that the transient control bar can hide
-    # before its XML arrives. Resolve the target from the already-validated K90
-    # profile, then verify the persistent presentation state instead of using a
-    # late semantic tap on a button that has left the tree.
-    Show-PlayerControls
-    Assert-TargetForeground
-    Invoke-TargetAdb @(
-        'shell', 'input', 'tap', [string] $audioPoint.x, [string] $audioPoint.y
-    ) | Out-Null
-    do {
-        Start-Sleep -Milliseconds 350
-        $document = Get-UiHierarchy
-        # The video-mode action is labelled "切换到纯音频模式". A substring
-        # search therefore reports audio mode even after video has returned;
-        # only the persistent centre badge owns the exact label below.
-        $hasAudioPresentation = Test-AudioOnlyPresentation $document
-        if ($hasAudioPresentation -eq $AudioOnly -and (Test-RoomUi $document)) {
-            return $timer.ElapsedMilliseconds
+    param(
+        [Parameter(Mandatory = $true)][bool] $AudioOnly,
+        [Parameter(Mandatory = $true)][string] $EvidencePrefix
+    )
+    $totalTimer = [Diagnostics.Stopwatch]::StartNew()
+    $actionLabel = if ($AudioOnly) { '切换到纯音频模式' } else { '切换到视频模式' }
+
+    for ($inputAttempt = 1; $inputAttempt -le $maxAudioInputAttempts; $inputAttempt++) {
+        $before = Get-UiHierarchy
+        if (-not (Test-RoomUi $before)) {
+            throw "Room UI was not ready before audio input attempt $inputAttempt."
         }
-    } while ($timer.Elapsed.TotalSeconds -lt 10)
-    throw "Mode transition did not reach audioOnly=$AudioOnly within 10 seconds."
+        if ((Test-AudioOnlyPresentation $before) -eq $AudioOnly) {
+            return [pscustomobject]@{
+                elapsedMs = $totalTimer.ElapsedMilliseconds
+                attempts = $inputAttempt - 1
+            }
+        }
+
+        # Do not deliver an input until the exact, enabled transition action is
+        # visible. Re-reveal the auto-hiding controls instead of assuming that a
+        # fixed delay left the mapped coordinate actionable.
+        $action = $null
+        for ($revealAttempt = 1; $revealAttempt -le 3 -and $null -eq $action; $revealAttempt++) {
+            Show-PlayerControls
+            $controls = Get-UiHierarchy
+            if (-not (Test-RoomUi $controls)) {
+                throw "Room UI disappeared while revealing audio controls on attempt $inputAttempt."
+            }
+            $action = Find-SemanticNode -Document $controls -Labels @($actionLabel)
+            if ($null -eq $action -and $revealAttempt -lt 3) { Start-Sleep -Milliseconds 750 }
+        }
+        if ($null -eq $action -or [string] $action.enabled -ne 'true') {
+            Save-XmlDocument "$EvidencePrefix-audio-attempt-$inputAttempt-before" $before
+            Save-XmlDocument "$EvidencePrefix-audio-attempt-$inputAttempt-controls" $controls
+            Save-Screenshot "$EvidencePrefix-audio-attempt-$inputAttempt-controls"
+            throw "Enabled audio transition action '$actionLabel' was not visible after three control reveals."
+        }
+
+        $point = Get-NodeCenter $action
+        Assert-TargetForeground
+        Invoke-TargetAdb @('shell', 'input', 'tap', [string] $point.X, [string] $point.Y) | Out-Null
+
+        $attemptTimer = [Diagnostics.Stopwatch]::StartNew()
+        do {
+            Start-Sleep -Milliseconds 350
+            $document = Get-UiHierarchy
+            # The video-mode action contains the words "纯音频模式". Only the
+            # persistent centre badge owns the exact label used by this check.
+            $hasAudioPresentation = Test-AudioOnlyPresentation $document
+            if ($hasAudioPresentation -eq $AudioOnly -and (Test-RoomUi $document)) {
+                return [pscustomobject]@{
+                    elapsedMs = $totalTimer.ElapsedMilliseconds
+                    attempts = $inputAttempt
+                }
+            }
+        } while ($attemptTimer.Elapsed.TotalSeconds -lt 10)
+
+        # The persistent state proves that this input was ignored. Preserve the
+        # before/after state and retry only while the target state is still
+        # absent; a successful transition is never tapped a second time.
+        Save-XmlDocument "$EvidencePrefix-audio-attempt-$inputAttempt-before" $before
+        Save-XmlDocument "$EvidencePrefix-audio-attempt-$inputAttempt-after" $document
+        Save-Screenshot "$EvidencePrefix-audio-attempt-$inputAttempt-after"
+        if ($inputAttempt -lt $maxAudioInputAttempts) { Start-Sleep -Seconds 2 }
+    }
+    throw "Mode transition did not reach audioOnly=$AudioOnly after $maxAudioInputAttempts state-verified input attempts."
 }
 
 function Invoke-AudioModeExercise {
-    $audioMs = Invoke-ModeTransition -AudioOnly $true
+    param([Parameter(Mandatory = $true)][string] $EvidencePrefix)
+    $audioTransition = Invoke-ModeTransition -AudioOnly $true -EvidencePrefix $EvidencePrefix
     # The audio badge is intentionally published before the native track
     # command completes. Wait through PlayerManager's five-second deadline so
     # the reverse tap is never delivered to the temporarily disabled button.
@@ -285,7 +339,8 @@ function Invoke-AudioModeExercise {
         throw 'Audio-only presentation rolled back during the native settle window.'
     }
     [pscustomobject]@{
-        audioMs = $audioMs
+        audioMs = $audioTransition.elapsedMs
+        audioAttempts = $audioTransition.attempts
         audioSettleMs = $audioTransitionSettleMilliseconds
     }
 }
@@ -334,6 +389,16 @@ function Get-AppPid {
     $candidate
 }
 
+function Save-AppLogcat {
+    param([Parameter(Mandatory = $true)][string] $Name)
+    if ($null -eq $script:initialAppPid) { return }
+    $logcat = Invoke-TargetAdb @(
+        'logcat', '-d', '-v', 'threadtime', "--pid=$script:initialAppPid", '-t', '5000'
+    )
+    Save-Text $Name $logcat
+    $logcat
+}
+
 function Get-ResourceSnapshot {
     param(
         [Parameter(Mandatory = $true)][int] $Cycle,
@@ -375,6 +440,7 @@ $result = [ordered]@{
     requestedCycles = $Cycles
     sampleEvery = $SampleEvery
     idleReleaseSeconds = $IdleReleaseSeconds
+    maxAudioInputAttempts = $maxAudioInputAttempts
     cycles = @()
     samples = @()
     series = [ordered]@{}
@@ -382,6 +448,8 @@ $result = [ordered]@{
 }
 $script:initialAppPid = $null
 $failure = $null
+$cycleResults = [Collections.Generic.List[object]]::new()
+$samples = [Collections.Generic.List[object]]::new()
 try {
     $deviceRows = @(& $adb devices -l)
     if (@($deviceRows | Where-Object { $_ -match ('^' + [regex]::Escape($Serial) + '\s+device(?:\s|$)') }).Count -ne 1) {
@@ -431,12 +499,13 @@ try {
 
     $warmRoom = Enter-FirstRoom
     Start-Sleep -Milliseconds $roomModeSettleMilliseconds
-    $warmModes = Invoke-AudioModeExercise
+    $warmModes = Invoke-AudioModeExercise -EvidencePrefix 'warmup'
     $warmHome = Exit-Room
     $result.warmup = [ordered]@{
         roomEnterMs = $warmRoom.ElapsedMs
         roomModeSettleMs = $roomModeSettleMilliseconds
         audioMs = $warmModes.audioMs
+        audioAttempts = $warmModes.audioAttempts
         audioSettleMs = $warmModes.audioSettleMs
         homeReturnMs = $warmHome.ElapsedMs
         appFloatingClosed = $warmHome.FloatingClosed
@@ -446,13 +515,11 @@ try {
     $result.warmHomeBaseline = Get-ResourceSnapshot -Cycle 0 -Phase 'warm-home-baseline' -Name 'warm-home-baseline'
     Save-Screenshot 'warm-home-baseline'
 
-    $cycleResults = [Collections.Generic.List[object]]::new()
-    $samples = [Collections.Generic.List[object]]::new()
     for ($cycle = 1; $cycle -le $Cycles; $cycle++) {
         $cycleTimer = [Diagnostics.Stopwatch]::StartNew()
         $roomState = Enter-FirstRoom
         Start-Sleep -Milliseconds $roomModeSettleMilliseconds
-        $modeState = Invoke-AudioModeExercise
+        $modeState = Invoke-AudioModeExercise -EvidencePrefix ("cycle-{0:D2}" -f $cycle)
         $homeState = Exit-Room
         $cycleTimer.Stop()
         $cycleResults.Add([pscustomobject][ordered]@{
@@ -460,14 +527,17 @@ try {
             roomEnterMs = $roomState.ElapsedMs
             roomModeSettleMs = $roomModeSettleMilliseconds
             audioMs = $modeState.audioMs
+            audioAttempts = $modeState.audioAttempts
             audioSettleMs = $modeState.audioSettleMs
             homeReturnMs = $homeState.ElapsedMs
             appFloatingClosed = $homeState.FloatingClosed
             totalMs = $cycleTimer.ElapsedMilliseconds
         })
+        $result.cycles = @($cycleResults)
         if (($cycle % $SampleEvery) -eq 0 -or $cycle -eq $Cycles) {
             $sample = Get-ResourceSnapshot -Cycle $cycle -Phase 'cycle-home' -Name ("cycle-{0:D2}-home" -f $cycle)
             $samples.Add($sample)
+            $result.samples = @($samples)
             Write-Host (
                 'cycle {0}/{1}: PSS={2}KB RSS={3}KB threads={4} fds={5} sockets={6} layers={7}' -f
                 $cycle, $Cycles, $sample.totalPssKb, $sample.totalRssKb, $sample.threadCount,
@@ -494,13 +564,14 @@ try {
         $result.series[$metric] = Measure-AndroidResourceSeries -Samples @($samples) -Property $metric
     }
 
-    $logcat = Invoke-TargetAdb @('logcat', '-d', '-v', 'threadtime', "--pid=$script:initialAppPid", '-t', '5000')
-    Save-Text 'logcat-tail.txt' $logcat
+    $logcat = Save-AppLogcat 'logcat-tail.txt'
     $logText = $logcat -join "`n"
     $baseline = $result.warmHomeBaseline
     $final = $result.finalHome
     $result.checks.cyclesComplete = $cycleResults.Count -eq $Cycles
-    $result.checks.audioModeSwitchesComplete = @($cycleResults | Where-Object { $_.audioMs -le 0 }).Count -eq 0
+    $result.checks.audioModeSwitchesComplete = @($cycleResults | Where-Object {
+        $_.audioMs -le 0 -or $_.audioAttempts -lt 1 -or $_.audioAttempts -gt $maxAudioInputAttempts
+    }).Count -eq 0
     $result.checks.appFloatingOwnershipHandled = if ($result.warmup.appFloatingClosed) {
         @($cycleResults | Where-Object { -not $_.appFloatingClosed }).Count -eq 0
     } else {
@@ -524,10 +595,13 @@ try {
     }
 } catch {
     $failure = $_
+    $result.cycles = @($cycleResults)
+    $result.samples = @($samples)
     $result.passed = $false
     $result.error = $_.Exception.Message
     try { Save-Screenshot 'failure' } catch {}
     try { Get-UiHierarchy 'failure' | Out-Null } catch {}
+    try { Save-AppLogcat 'failure-logcat-tail.txt' | Out-Null } catch {}
 } finally {
     try { Invoke-TargetAdb @('shell', 'am', 'force-stop', $Package) | Out-Null } catch {}
     try { Invoke-TargetAdb @('shell', 'input', 'keyevent', 'KEYCODE_HOME') | Out-Null } catch {}

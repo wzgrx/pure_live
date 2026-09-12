@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [主画面与小窗弹幕呈现一致性审计](DANMAKU_RENDERING_CONSISTENCY_AUDIT_2026_09_12.md)：速度/FPS/密度/字体/描边/区域源码矩阵、共享紧凑排版策略、K90 候选回归与 120 Hz 原生待验边界。
+
 - [当前累计 Android 候选覆盖安装与冒烟](CURRENT_ANDROID_CANDIDATE_2026_09_12.md)：基础候选同签名覆盖安装、16/16 播放冒烟、标准流 7/7、竖屏流 9/9、#858 首页软件音量路由，以及小窗设置增量候选专项。
 
 - [Android 小窗弹幕设置原生审计](ANDROID_PIP_DANMAKU_SETTINGS_NATIVE_AUDIT_2026_09_12.md)：K90 实测语义路由、目标页断言、开关即时预览、双向重启持久化、失败夹具修订与规范 Hive 精确恢复。

@@ -16,6 +16,7 @@ class DanmakuSettingsController extends GetxController {
   static const int defaultPipDanmakuMaxVisibleCount = 6;
   static const double defaultPipDanmakuEmitInterval = 0.35;
   static const int defaultPipDanmakuFps = 30;
+  static const bool defaultPipDanmakuAutoFps = true;
   static const bool defaultNoEmojiMode = false;
   static const bool defaultPipDanmakuNoEmojiMode = false;
   static const bool defaultFilterDouyuSuspectedAutomatedMessages = true;
@@ -65,7 +66,7 @@ class DanmakuSettingsController extends GetxController {
   final RxInt pipDanmakuMaxVisibleCount = hiveInt('pipDanmakuMaxVisibleCount', defaultPipDanmakuMaxVisibleCount);
   final RxDouble pipDanmakuEmitInterval = hiveDouble('pipDanmakuEmitInterval', defaultPipDanmakuEmitInterval);
   final RxInt pipDanmakuFps = hiveInt('pipDanmakuFps', defaultPipDanmakuFps);
-  final RxBool pipDanmakuAutoFps = hiveBool('pipDanmakuAutoFps', true);
+  final RxBool pipDanmakuAutoFps = hiveBool('pipDanmakuAutoFps', defaultPipDanmakuAutoFps);
 
   // Douyu sometimes emits room-local chat packets without either of the
   // decoration/fan markers used by its web client. Keep the conservative
@@ -142,7 +143,7 @@ class DanmakuSettingsController extends GetxController {
     pipDanmakuMaxVisibleCount.v = defaultPipDanmakuMaxVisibleCount;
     pipDanmakuEmitInterval.v = defaultPipDanmakuEmitInterval;
     pipDanmakuFps.v = defaultPipDanmakuFps;
-    pipDanmakuAutoFps.v = true;
+    pipDanmakuAutoFps.v = defaultPipDanmakuAutoFps;
   }
 
   Map<String, dynamic> toJson() {
@@ -244,7 +245,7 @@ class DanmakuSettingsController extends GetxController {
         (json['pipDanmakuEmitInterval'] ?? defaultPipDanmakuEmitInterval).toDouble().clamp(0.05, 2.0).toDouble(),
       ),
       'pipDanmakuFps': typed<int>((json['pipDanmakuFps'] ?? defaultPipDanmakuFps).toInt().clamp(15, 240).toInt()),
-      'pipDanmakuAutoFps': typed<bool>(json['pipDanmakuAutoFps'] ?? true),
+      'pipDanmakuAutoFps': typed<bool>(json['pipDanmakuAutoFps'] ?? defaultPipDanmakuAutoFps),
       'filterDouyuSuspectedAutomatedMessages': typed<bool>(
         json['filterDouyuSuspectedAutomatedMessages'] ?? defaultFilterDouyuSuspectedAutomatedMessages,
       ),

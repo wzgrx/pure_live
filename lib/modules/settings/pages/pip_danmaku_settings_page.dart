@@ -204,6 +204,7 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                 min: 8,
                 max: 24,
                 display: settings.pipDanmakuFontSize.v.toStringAsFixed(1),
+                semanticValueBuilder: (value) => value.toStringAsFixed(1),
                 onChanged: (value) => settings.pipDanmakuFontSize.v = value,
                 labelColor: labelColor,
                 digitColor: digitColor,
@@ -216,6 +217,8 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                 max: 900,
                 stepSize: 100,
                 display: i18n(AppConsts.fontWeightLabels[settings.pipDanmakuFontWeight.value] ?? 'font_weight_normal'),
+                semanticValueBuilder: (value) =>
+                    i18n(AppConsts.fontWeightLabels[value.round()] ?? 'font_weight_normal'),
                 onChanged: (v) {
                   settings.pipDanmakuFontWeight.value = v.round();
                 },
@@ -229,6 +232,7 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                 min: 20,
                 max: 400,
                 display: settings.pipDanmakuSpeed.v.toStringAsFixed(0),
+                semanticValueBuilder: (value) => value.toStringAsFixed(0),
                 onChanged: (value) => settings.pipDanmakuSpeed.v = value,
                 labelColor: labelColor,
                 digitColor: digitColor,
@@ -240,6 +244,7 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                 min: 0.1,
                 max: 1,
                 display: '${(settings.pipDanmakuOpacity.v * 100).toInt()}%',
+                semanticValueBuilder: (value) => '${(value * 100).toInt()}%',
                 onChanged: (value) => settings.pipDanmakuOpacity.v = value,
                 labelColor: labelColor,
                 digitColor: digitColor,
@@ -251,6 +256,7 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                 min: 0.1,
                 max: 1,
                 display: '${(settings.pipDanmakuArea.v * 100).toInt()}%',
+                semanticValueBuilder: (value) => '${(value * 100).toInt()}%',
                 onChanged: (value) => settings.pipDanmakuArea.v = value,
                 labelColor: labelColor,
                 digitColor: digitColor,
@@ -272,6 +278,7 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                 min: 0.05,
                 max: 2,
                 display: '${settings.pipDanmakuEmitInterval.v.toStringAsFixed(2)}s',
+                semanticValueBuilder: (value) => '${value.toStringAsFixed(2)}s',
                 onChanged: (value) => settings.pipDanmakuEmitInterval.v = value,
                 labelColor: labelColor,
                 digitColor: digitColor,
@@ -292,6 +299,7 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                   min: 15,
                   max: 240,
                   display: '${settings.pipDanmakuFps.v} FPS',
+                  semanticValueBuilder: (value) => '${value.toInt()} FPS',
                   onChanged: (value) => settings.pipDanmakuFps.v = value.toInt(),
                   labelColor: labelColor,
                   digitColor: digitColor,
@@ -318,6 +326,7 @@ class PipDanmakuSettingsSection extends StatelessWidget {
     required double min,
     required double max,
     required String display,
+    required String Function(double value) semanticValueBuilder,
     required ValueChanged<double> onChanged,
     required Color labelColor,
     required Color digitColor,
@@ -363,6 +372,8 @@ class PipDanmakuSettingsSection extends StatelessWidget {
                 value: value,
                 activeColor: theme.colorScheme.primary,
                 inactiveColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+                semanticFormatterCallback: (dynamic semanticValue) =>
+                    '$title, ${semanticValueBuilder((semanticValue as num).toDouble())}',
                 onChanged: (dynamic nextValue) => onChanged((nextValue as num).toDouble()),
               ),
             ),
@@ -414,27 +425,16 @@ class PipDanmakuSettingsSection extends StatelessWidget {
     required ValueChanged<bool> onChanged,
     required Color labelColor,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
-                ),
-                if (subtitle != null) ...[const SizedBox(height: 3), Text(subtitle, style: theme.textTheme.bodySmall)],
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Switch(value: value, activeThumbColor: theme.colorScheme.primary, onChanged: onChanged),
-        ],
+    return SwitchListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(
+        title,
+        style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
       ),
+      subtitle: subtitle == null ? null : Text(subtitle, style: theme.textTheme.bodySmall),
+      value: value,
+      activeThumbColor: theme.colorScheme.primary,
+      onChanged: onChanged,
     );
   }
 

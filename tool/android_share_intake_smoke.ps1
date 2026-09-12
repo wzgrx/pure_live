@@ -316,7 +316,7 @@ $fixtureBaseName = "purelive-share-intake-$fixtureTag"
 $fixtureChannel = "Share Intake Fixture $fixtureTag"
 $localFixture = Join-Path $evidence "$fixtureBaseName.m3u"
 $deviceFixture = "/sdcard/Download/$fixtureBaseName.m3u"
-$deviceFixtureUri = "content://com.android.externalstorage.documents/document/primary%3ADownload%2F$fixtureBaseName.m3u"
+$deviceFixtureUri = "content://$Package.fileProvider/external-path/Download/$fixtureBaseName.m3u"
 [IO.File]::WriteAllText(
     $localFixture,
     "#EXTM3U`n#EXTINF:-1 tvg-id=`"$fixtureTag`" group-title=`"Fixture`",$fixtureChannel`nhttps://example.invalid/$fixtureTag/live.m3u8`n",

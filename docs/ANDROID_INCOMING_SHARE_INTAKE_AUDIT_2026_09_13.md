@@ -14,13 +14,17 @@ REDMI K90 Pro Max 原生闭环。产品提交依次为：
 - `9c92fb7e27659f09e1b3de5d5b745b30ff59fe2a`：缓存副本保留安全化后的原附件名，IPTV/EPG 导入结束后
   清理插件拥有的唯一暂存目录，并把原文件名和暂存清理加入原生门禁；
 - `a180776c0decc4d3a6d01c7c3ff18fd888022fe4`：根据首轮严格门禁的红证据，把清理根目录从
-  `Directory.systemTemp` 修正为 `path_provider` 返回的应用临时目录。
+  `Directory.systemTemp` 修正为 `path_provider` 返回的应用临时目录；
+- `8f43f21be4f726c81ad2f87ad49e64b379cf0f9c`：分享入口在 `finally` 中释放每个插件附件，覆盖
+  口令优先、不支持的扩展、前一个导入异常和后续附件尚未执行等路径；释放单项失败只记录错误并继续
+  处理其余附件。
 
 最终 arm64 Debug 在同签名覆盖安装后完成冷启动口令、运行中不同口令、运行中重复口令抑制，以及
-M3U 内容 URI 导入。导入后的 SQLite 快照中恰有一个夹具频道及其唯一 Provider，Provider 名称与发送方
-原文件名一致；插件拥有的 `cache/share_handler` 暂存文件已清空。随后完整 IPTV 缓存树和 Hive 都按备份
-恢复。进程日志没有 FATAL/ANR、Flutter 渲染/Widget 异常或分享/导入错误，应用停止，桌面和
-stay-awake 恢复。
+M3U 内容 URI 导入。另用“最后处理的 warm 口令 + M3U 附件”验证口令优先路径：没有重开弹窗、没有
+导入夹具频道、插件暂存树为空；随后单独分享同一附件才入库。最终 SQLite 快照中恰有一个夹具频道及其
+唯一 Provider，Provider 名称与发送方原文件名一致；插件拥有的 `cache/share_handler` 暂存树已删除。
+随后完整 IPTV 缓存树和 Hive 都按备份恢复。进程日志没有 FATAL/ANR、Flutter 渲染/Widget 异常或
+分享/导入错误，应用停止，桌面和 stay-awake 恢复。
 
 该证据补充 A1-05/A2-01 的 Android 外部接收路径；Windows 原生剪贴板导入、两个真实应用之间的发送、
 EPG 多附件、Release 和异常 Provider 继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN /
@@ -44,6 +48,10 @@ EPG 多附件、Release 和异常 Provider 继续执行，因此两组保持 `RU
    `cache/share_handler/<uuid>/<原文件名>` 仍存在。红证据：
    `local-artifacts/diagnostics/android-share-intake-20260913T063431728/summary.json`。根因是
    `Directory.systemTemp` 没有解析到 Android 应用缓存根；改用 `getTemporaryDirectory()` 后同一门禁转绿。
+7. 混合分享门禁首轮在 cold→warm 后错误复用了较早的 cold 口令，它不属于“最后一条重复口令”，因此
+   产品按设计再次显示弹窗。失败证据：
+   `local-artifacts/diagnostics/android-share-intake-20260913T070033478/summary.json`。工具提交
+   `2ad872e2` 改用刚处理的 warm 口令后，才精确验证重复口令优先路径的附件释放。
 
 所有失败轮次都在摘要中保持 `failed`，没有记作通过。每轮原生脚本的 `finally` 均停止应用、恢复
 IPTV/Hive 并回到桌面。
@@ -53,7 +61,8 @@ IPTV/Hive 并回到桌面。
 - `SharedMediaReceiver` 先订阅运行中 stream，再读取并消费初始值；初始值处理后 reset，重复 start
   复用同一任务，stream/read/reset 的错误分别收口。
 - `SharedMediaIntake` 将口令、`.m3u/.m3u8/.txt` 和 `.xml/.gz/.json` 附件串行处理；路径去重，口令优先，
-  不支持的输入只发一次本地化反馈。
+  不支持的输入只发一次本地化反馈；所有插件附件最终都进入逐项释放，即使口令优先、扩展不支持或
+  前一个导入异常也不会跳过尚未执行的缓存副本。
 - 直接分享口令与剪贴板口令共用 `ShareCommandHandler.acceptCommandText` 的验证、排队、消费者成功后
   提交和生命周期重复抑制。
 - 应用自有 `GlobalKey<NavigatorState>` 传给 `GetMaterialApp`；冷启动处理最多等待 8 秒，并明确等到
@@ -70,10 +79,10 @@ IPTV/Hive 并回到桌面。
 
 | 项目 | 结果 |
 | --- | --- |
-| 分享接收与 Manifest/插件源码合同 | `test/shared_media_intake_test.dart` 10/10 |
+| 分享接收、附件释放与 Manifest/插件源码合同 | `test/shared_media_intake_test.dart` 11/11 |
 | 插件暂存目录所有权与平台临时路径清理 | `test/shared_media_temp_cleanup_test.dart` 5/5 |
 | 导入弹窗 320×480、3.0 倍英文 | `test/share_command_import_dialog_test.dart` 1/1 |
-| 首批五文件联合复验 | **109/109 PASS** |
+| 分享入口与两个导入管理器联合复验 | **110/110 PASS** |
 | 最终路径修订直接复验 | **15/15 PASS** |
 | 分享处理器最终直接复验 | 26/26 PASS（前一产品批） |
 | 相邻七文件 | 129/129 PASS（前一产品批） |
@@ -82,9 +91,9 @@ IPTV/Hive 并回到桌面。
 | 全库 Flutter analyze | `No issues found` |
 
 `tool/android_share_intake_smoke.ps1` 已加入固定 CI 静态门禁。它要求显式 serial、APK 和期望 SHA，
-覆盖安装前备份规范 Hive 与整个 IPTV 缓存树；文件导入后要求插件暂存目录没有残留，拉取关闭状态的
-SQLite 快照并用独立 Python sqlite3 查询夹具及原文件名 Provider，最后恢复数据树并逐文件核对
-uid/gid/mode/size/SHA。
+覆盖安装前备份规范 Hive 与整个 IPTV 缓存树；混合口令/附件要求不重开弹窗、不写入夹具频道且整个
+插件暂存树消失。文件单独导入后再次要求暂存树消失，拉取关闭状态的 SQLite 快照并用独立 Python
+sqlite3 查询夹具及原文件名 Provider，最后恢复数据树并逐文件核对 uid/gid/mode/size/SHA。
 
 ## 构建与 K90 原生结果
 
@@ -93,16 +102,16 @@ uid/gid/mode/size/SHA。
 
 | 项目 | 结果 |
 | --- | --- |
-| 精确产品提交 | `a180776c0decc4d3a6d01c7c3ff18fd888022fe4` |
+| 精确构建提交 | `2cc1b56d4c73ddfd50bcd963939fecc95910c0a4`（产品修订 `8f43f21b`；该提交仅追加门禁） |
 | 版本 / manifest code | `3.1.8+4121` / `6121` |
-| APK | `288819570` B |
-| SHA-256 | `5B9A2D261124003C2AC7FD4FBFADD2E7C8EEC0506E3F00CEE7EFD005C7199B19` |
+| APK | `288823157` B |
+| SHA-256 | `32D6B783E36EB79D9B01DC564692AF2A2BAB552E166C1BE565A86C0B87862F7B` |
 | ABI / 原生库 | `arm64-v8a` / 16；最小 ELF LOAD `0x4000` |
-| Flutter 资源 | 1262 项 / `206831944` B |
-| 构建记录 | `local-artifacts/build-records/20260912T224205532Z-build-androidarm64-debug.json` |
+| Flutter 资源 | 1262 项 / `206833496` B |
+| 构建记录 | `local-artifacts/build-records/20260912T230008763Z-build-androidarm64-debug.json` |
 
 最终原生摘要：
-`local-artifacts/diagnostics/android-share-intake-20260913T064232160/summary.json`。
+`local-artifacts/diagnostics/android-share-intake-20260913T070524332/summary.json`。
 
 - 设备先核对为 `25102RKBEC / myron / uid=0(root)`，全部设备命令显式绑定
   `192.168.1.2:5555`。
@@ -112,10 +121,13 @@ uid/gid/mode/size/SHA。
   “取消”和“进入房间”。两个按钮分别为 `150×144`、`302×144`，完全位于 1200×2608 屏幕。
 - 运行中第二条不同口令显示 room ID `27632811`；弹窗活动期间再发送同一口令，取消后没有二次弹窗，
   证明 warm stream 和串行重复抑制都生效。
+- 随后把刚处理的 warm 口令与 M3U 内容 URI 放进同一 Intent：弹窗没有重开，
+  `sharedStagingEntriesAfterCommand=[]`，关闭状态 SQLite 中夹具频道计数为 0，证明口令优先分支释放附件
+  而没有误导入；摘要门禁 `commandPriorityAttachmentReleased=true`。
 - M3U 通过应用 FileProvider 的内容 URI 进入插件；SQLite 快照中频道
-  `Share Intake Fixture 26091306423216` 与唯一 Provider ID 对齐，Provider 名称精确等于发送方原文件名
-  `purelive-share-intake-26091306423216`，流地址精确匹配夹具；导入完成后的
-  `sharedStagingFilesAfterImport` 为空。
+  `Share Intake Fixture 26091307052433` 与唯一 Provider ID 对齐，Provider 名称精确等于发送方原文件名
+  `purelive-share-intake-26091307052433`，流地址精确匹配夹具；导入完成后的
+  `sharedStagingFilesAfterImport` 和 `sharedStagingEntriesAfterImport` 均为空。
 - 原生 smoke 的 IPTV 缓存树恢复前后元数据和每文件 SHA 完全一致，数据库回到原 SHA
   `FD2A61D0...095D5`；该轮 Hive 也从 `19B6A903...F6333` 精确恢复。
 - 全批收尾又使用首轮操作前备份把规范 Hive 恢复到本轮起始 SHA
@@ -125,5 +137,5 @@ uid/gid/mode/size/SHA。
 - 结束时 Pure Live 已停止，顶层为 `com.miui.home`，stay-awake 为 0；未重启手机/adbd、未切换网络、
   未改 ADB 端口/授权，也未更新 Root/LSP/模块。
 
-原生工具识别/夹具/证据查询修订截至 `0e5ccd779aabbb394d15abf0b7820358c9667609`；随后
-`9c92fb7e` 与 `a180776c` 的产品及门禁修订共同构成上述最终 APK。
+原生工具识别/夹具/证据查询修订在 `2cc1b56d` 加入混合分享门禁，并由 `2ad872e2` 修正最后一条重复
+口令夹具；后者只改变执行脚本，因此复用应用内容完全相同的 `2cc1b56d` 精确 APK 完成最终原生轮次。

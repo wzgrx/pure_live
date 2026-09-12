@@ -22,6 +22,7 @@ import 'package:pure_live/get/get.dart';
 import 'package:pure_live/modules/live_play/controllers/live_play_controller.dart';
 import 'package:pure_live/modules/live_play/controllers/player_state.dart';
 import 'package:pure_live/modules/live_play/widgets/video_player/video_controller.dart';
+import 'package:pure_live/modules/live_play/widgets/video_player/iptv_programme_policy.dart';
 import 'package:pure_live/player/core/engine_fallback_manager.dart';
 import 'package:pure_live/player/core/line_fallback_manager.dart';
 import 'package:pure_live/player/core/player_manager.dart';
@@ -443,6 +444,251 @@ void main() {
       controller.dispose();
     }
   });
+
+  test('video schedule ignores an older load that finishes after the selected source changes', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: 'https://fixture/live'));
+    final pending = <String, Completer<List<EpgProgramme>>>{};
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      epgProgrammeLoader: ({required sourceId, required epgId, required start, required end}) {
+        return (pending[sourceId] ??= Completer<List<EpgProgramme>>()).future;
+      },
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+
+    SettingsService.to.iptv.selectedSourceId.value = 'A';
+    final oldLoad = controller.loadFullChannelSchedule('channel');
+    SettingsService.to.iptv.selectedSourceId.value = 'B';
+    final currentLoad = controller.loadFullChannelSchedule('channel');
+    pending['B']!.complete([_programme('B')]);
+    await currentLoad;
+    expect(controller.currentChannelSchedule.map((item) => item.title), ['B']);
+
+    pending['A']!.complete([_programme('A')]);
+    await oldLoad;
+    expect(controller.currentChannelSchedule.map((item) => item.title), ['B']);
+    controller.dispose();
+  });
+
+  test('video schedule releases loading when its source changes without a replacement read', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: 'https://fixture/live'));
+    final pending = Completer<List<EpgProgramme>>();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      epgProgrammeLoader: ({required sourceId, required epgId, required start, required end}) => pending.future,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+
+    SettingsService.to.iptv.selectedSourceId.value = 'A';
+    final load = controller.loadFullChannelSchedule('channel');
+    expect(controller.scheduleLoading.value, isTrue);
+    SettingsService.to.iptv.selectedSourceId.value = 'B';
+    pending.complete([_programme('stale')]);
+    await load;
+
+    expect(controller.currentChannelSchedule, isEmpty);
+    expect(controller.scheduleLoading.value, isFalse);
+    expect(controller.scheduleLoadFailed.value, isFalse);
+    controller.dispose();
+  });
+
+  test('video schedule ignores a database result that arrives after disposal', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: 'https://fixture/live'));
+    final pending = Completer<List<EpgProgramme>>();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      epgProgrammeLoader: ({required sourceId, required epgId, required start, required end}) => pending.future,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+
+    SettingsService.to.iptv.selectedSourceId.value = 'A';
+    final load = controller.loadFullChannelSchedule('channel');
+    controller.dispose();
+    pending.complete([_programme('late')]);
+    await load;
+
+    expect(controller.currentChannelSchedule, isEmpty);
+  });
+
+  test('video schedule exposes loading, failure, retry, and one-shot auto-scroll state', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: 'https://fixture/live'));
+    final attempts = <Completer<List<EpgProgramme>>>[];
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      epgProgrammeLoader: ({required sourceId, required epgId, required start, required end}) {
+        final attempt = Completer<List<EpgProgramme>>();
+        attempts.add(attempt);
+        return attempt.future;
+      },
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    SettingsService.to.iptv.selectedSourceId.value = 'A';
+
+    final failedLoad = controller.loadFullChannelSchedule('channel');
+    expect(controller.scheduleLoading.value, isTrue);
+    expect(controller.scheduleLoadFailed.value, isFalse);
+    attempts.single.completeError(StateError('fixture read failure'));
+    await failedLoad;
+    expect(controller.scheduleLoading.value, isFalse);
+    expect(controller.scheduleLoadFailed.value, isTrue);
+
+    final retry = controller.loadFullChannelSchedule('channel');
+    expect(controller.scheduleLoading.value, isTrue);
+    expect(controller.scheduleLoadFailed.value, isFalse);
+    attempts.last.complete([_programme('retry')]);
+    await retry;
+    expect(controller.scheduleLoading.value, isFalse);
+    expect(controller.scheduleLoadFailed.value, isFalse);
+    expect(controller.currentChannelSchedule.map((item) => item.title), ['retry']);
+    expect(controller.claimInitialScheduleScroll(-1), isFalse);
+    expect(controller.claimInitialScheduleScroll(0), isTrue);
+    expect(controller.claimInitialScheduleScroll(0), isFalse);
+    controller.dispose();
+  });
+
+  test('catch-up selection is awaitable, single-flight, and forwards the full programme interval', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room', link: 'https://fixture/live?token=stable#player');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
+    final live = _FakeLivePlayController()..startGate = Completer<void>();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    final programme = _programme('finished', start: DateTime(2026, 9, 12, 10), stop: DateTime(2026, 9, 12, 11));
+    var closes = 0;
+    final messages = <String>[];
+
+    final first = controller.onProgrammeTapped(
+      programme,
+      now: DateTime(2026, 9, 12, 12),
+      closeSchedule: () => closes++,
+      showMessage: messages.add,
+    );
+    await live.startEntered.future;
+
+    expect(controller.catchUpSwitching.value, isTrue);
+    expect(manager.closeCalls, 1);
+    expect(closes, 1);
+    expect(messages, isEmpty);
+    expect(Uri.parse(live.catchUpUrl!).fragment, 'player');
+    expect(Uri.parse(live.catchUpUrl!).queryParameters['playseek'], '20260912100000-20260912110000');
+    expect(live.startTime, programme.start.millisecondsSinceEpoch);
+    expect(live.endTime, programme.stop.millisecondsSinceEpoch);
+
+    final duplicate = await controller.onProgrammeTapped(
+      programme,
+      now: DateTime(2026, 9, 12, 12),
+      closeSchedule: () => closes++,
+      showMessage: messages.add,
+    );
+    expect(duplicate, IptvProgrammeSelectionResult.busy);
+    expect(live.startCalls, 1);
+    expect(closes, 1);
+
+    live.startGate!.complete();
+    expect(await first, IptvProgrammeSelectionResult.catchupStarted);
+    expect(controller.catchUpSwitching.value, isFalse);
+    expect(messages, hasLength(1));
+    controller.dispose();
+  });
+
+  test('programme tap shares exact boundary behavior and keeps invalid catch-up input open', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room', link: '   ');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: 'https://fixture/live'));
+    final live = _FakeLivePlayController();
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    final programme = _programme('boundary', start: DateTime(2026, 9, 12, 10), stop: DateTime(2026, 9, 12, 11));
+    var closes = 0;
+    final messages = <String>[];
+
+    expect(
+      await controller.onProgrammeTapped(
+        programme,
+        now: programme.start,
+        closeSchedule: () => closes++,
+        showMessage: messages.add,
+      ),
+      IptvProgrammeSelectionResult.live,
+    );
+    expect(closes, 1);
+
+    expect(
+      await controller.onProgrammeTapped(
+        programme,
+        now: programme.stop,
+        closeSchedule: () => closes++,
+        showMessage: messages.add,
+      ),
+      IptvProgrammeSelectionResult.invalidUrl,
+    );
+    expect(closes, 1);
+    expect(messages, hasLength(1));
+    expect(live.startCalls, 0);
+    controller.dispose();
+  });
+
+  test('catch-up startup failure is contained and releases the single-flight state', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room', link: 'https://fixture/live');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
+    final live = _FakeLivePlayController()..startError = StateError('fixture failure');
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    final messages = <String>[];
+
+    final result = await controller.onProgrammeTapped(
+      _programme('failed'),
+      now: DateTime(2026, 9, 12, 12),
+      closeSchedule: () {},
+      showMessage: messages.add,
+    );
+
+    expect(result, IptvProgrammeSelectionResult.failed);
+    expect(controller.catchUpSwitching.value, isFalse);
+    expect(live.startCalls, 1);
+    expect(manager.closeCalls, 1);
+    expect(messages, hasLength(1));
+    controller.dispose();
+  });
 }
 
 VideoController _controller({
@@ -453,6 +699,8 @@ VideoController _controller({
   DbService? dbService,
   OwnedPlaybackSource? ownedSource,
   VolumeController? systemVolumeController,
+  LivePlayController? livePlayController,
+  EpgProgrammeLoader? epgProgrammeLoader,
 }) {
   return VideoController(
     room: room,
@@ -471,7 +719,20 @@ VideoController _controller({
     playerManager: manager,
     settingsService: SettingsService.to,
     dbService: dbService ?? _FakeDbService(),
-    livePlayController: _FakeLivePlayController(),
+    livePlayController: livePlayController ?? _FakeLivePlayController(),
+    epgProgrammeLoader: epgProgrammeLoader,
+  );
+}
+
+EpgProgramme _programme(String title, {DateTime? start, DateTime? stop}) {
+  final resolvedStart = start ?? DateTime(2026, 9, 12, 10);
+  return EpgProgramme(
+    id: title.hashCode,
+    epgChannelId: 'fixture-channel',
+    sourceId: 'fixture-source',
+    title: title,
+    start: resolvedStart,
+    stop: stop ?? resolvedStart.add(const Duration(hours: 1)),
   );
 }
 
@@ -517,6 +778,7 @@ class _FakePlayerManager extends PlayerManager {
   final bool emitCurrentOnListen;
   PlaybackSourceCommitSnapshot? current;
   int playCalls = 0;
+  int closeCalls = 0;
   final ownedCalls = <PlaybackSource>[];
   bool _fixtureDisposed = false;
 
@@ -559,6 +821,11 @@ class _FakePlayerManager extends PlayerManager {
   }) async {
     playCalls++;
     currentFloatRoom = room;
+  }
+
+  @override
+  Future<void> close() async {
+    closeCalls++;
   }
 
   @override
@@ -694,6 +961,25 @@ class _FakeBattery implements Battery {
 class _FakeDbService extends DbService {}
 
 class _FakeLivePlayController implements LivePlayController {
+  Completer<void>? startGate;
+  Object? startError;
+  final startEntered = Completer<void>();
+  int startCalls = 0;
+  String? catchUpUrl;
+  int? startTime;
+  int? endTime;
+
+  @override
+  Future<void> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
+    startCalls++;
+    this.catchUpUrl = catchUpUrl;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    if (!startEntered.isCompleted) startEntered.complete();
+    if (startError != null) throw startError!;
+    await startGate?.future;
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

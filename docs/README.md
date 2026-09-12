@@ -4,9 +4,11 @@
 
 ## 开发与发布
 
-- [当前累计 Android 候选覆盖安装与冒烟](CURRENT_ANDROID_CANDIDATE_2026_09_12.md)：精确提交构建/归档、同签名覆盖安装、安装前后状态逐文件一致、16/16 播放冒烟、标准流 7/7、竖屏流 9/9 及 #858 首页软件音量路由补证。
+- [当前累计 Android 候选覆盖安装与冒烟](CURRENT_ANDROID_CANDIDATE_2026_09_12.md)：基础候选同签名覆盖安装、16/16 播放冒烟、标准流 7/7、竖屏流 9/9、#858 首页软件音量路由，以及小窗设置增量候选专项。
 
 - [Android 小窗弹幕设置原生审计](ANDROID_PIP_DANMAKU_SETTINGS_NATIVE_AUDIT_2026_09_12.md)：K90 实测语义路由、目标页断言、开关即时预览、双向重启持久化、失败夹具修订与规范 Hive 精确恢复。
+
+- [Android 小窗弹幕无障碍与默认恢复审计](ANDROID_PIP_DANMAKU_ACCESSIBILITY_RESET_AUDIT_2026_09_12.md)：具名整行开关、滑块设置名/格式化值、完整恢复范围、当前候选覆盖安装、取消/确认重启持久化与精确数据恢复。
 
 - [Android 物理音量键媒体流路由审计](ANDROID_HARDWARE_VOLUME_ROUTING_AUDIT_2026_09_12.md)：Issue #858 源码宿主缺口、`onResume` 媒体流归属、定向回归、精确提交 arm64 Debug 构建及物理按钮待验矩阵。
 

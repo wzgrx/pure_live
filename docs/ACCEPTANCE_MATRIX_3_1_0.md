@@ -58,7 +58,7 @@
 
 > 2026-09-13 增量：分享口令改为消费者成功后才提交已处理状态，合并并发剪贴板检查，以有界 SHA-256 历史抑制自分享，并在桌面/移动交接失败时保留重试和双语反馈；导入弹窗由发起路由持有，在 320×480 / 3.0 倍英文下可滚动操作。相邻七文件 40/40、全库 analyze 通过。精确 arm64 Debug 保留数据覆盖 K90 后，真实 Bilibili 分享动作打开 `com.android.intentresolver/.ChooserActivity`，口令预览与系统目标可见；不选外部目标直接返回后原房间动作仍可达，Hive 精确恢复且无 FATAL/ANR。见 `docs/SHARE_COMMAND_HANDOFF_AND_IMPORT_DIALOG_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows 原生剪贴板导入、双实例、Release 和异常平台通道继续，宏观计数不变。
 
-> 2026-09-13 增量：Android 已实际消费冷启动和运行中 `ACTION_SEND` 口令，并按内容 URI 复制后导入 M3U。原生轮次据实暴露并修订 AlertDialog intrinsic、Android 17 外部路径 EACCES 和暂存根错误；分享入口及两个导入管理器 110/110、最终路径 15/15、Kotlin 审计和全库 analyze 通过。K90 验证重复口令+附件不重开弹窗、不写入频道且暂存树清空；Debug-only shell 探针又以真实 `ArrayList<Uri>` 完成 `ACTION_SEND_MULTIPLE` 的 M3U+XMLTV 导入，Provider/频道与 EPG 来源/频道/节目各一条并保留原名。IPTV 树和 Hive 精确恢复、应用停止。见 `docs/ANDROID_INCOMING_SHARE_INTAKE_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows、真实第三方发送方、Release 和异常 Provider 继续，宏观计数不变。
+> 2026-09-13 增量：Android 已实际消费冷启动和运行中 `ACTION_SEND` 口令，并按内容 URI 复制后导入 M3U。原生轮次据实暴露并修订 AlertDialog intrinsic、Android 17 外部路径 EACCES 和暂存根错误；随后再隔离单 URI 异常，并以 UTF-8 字节和完整 code point 清洗/截断显示名。此前分享联合回归 110/110、最终路径 15/15 和全库 analyze 已通过，本边界增量直接 11/11、Kotlin 审计、精确构建与 K90 门禁通过。除冷/热/重复口令、混合附件、单 M3U 和真实 M3U+XMLTV 多附件外，Debug-only Provider 还验证类型/查询异常不会抑制后续两份 M3U，查询异常按 URI basename 回退，中文/emoji/控制字符超长名安全化为 175 UTF-8 字节 basename；频道各精确一条、暂存树为空、无 FATAL/ANR。IPTV 树和 Hive 精确恢复、应用停止。见 `docs/ANDROID_INCOMING_SHARE_INTAKE_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows、真实第三方发送方和 Release 继续，宏观计数不变。
 
 ### A2 设置全量
 

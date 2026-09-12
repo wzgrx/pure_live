@@ -18,7 +18,10 @@
   `Directory.systemTemp` 修正为 `path_provider` 返回的应用临时目录；
 - `8f43f21be4f726c81ad2f87ad49e64b379cf0f9c`：分享入口在 `finally` 中释放每个插件附件，覆盖
   口令优先、不支持的扩展、前一个导入异常和后续附件尚未执行等路径；释放单项失败只记录错误并继续
-  处理其余附件。
+  处理其余附件；
+- `98f5472aab1d5820b3fb11da73043054263677ba`：每个 URI 独立收口 Provider/路径异常，失败项不再
+  中断 `ACTION_SEND_MULTIPLE` 后续附件；显示名先清洗控制字符，再按 UTF-8 字节而非 UTF-16 长度
+  限制到 180 字节，扩展名单独限制为 24 字节，截断不拆分 Unicode code point。
 
 最终 arm64 Debug 在同签名覆盖安装后完成冷启动口令、运行中不同口令、运行中重复口令抑制，以及
 M3U 内容 URI 导入。另用“最后处理的 warm 口令 + M3U 附件”验证口令优先路径：没有重开弹窗、没有
@@ -26,11 +29,14 @@ M3U 内容 URI 导入。另用“最后处理的 warm 口令 + M3U 附件”验�
 唯一 Provider，Provider 名称与发送方原文件名一致；插件拥有的 `cache/share_handler` 暂存树已删除。
 Debug 专用 shell 探针再发送真实 `ArrayList<Uri>`：M3U Provider/频道与 XMLTV 来源/频道/节目各精确一条，
 两个来源都保留原附件名，暂存树仍为空；探针只在 Debug Manifest 注册并要求系统 `DUMP` 权限。
-随后完整 IPTV 缓存树和 Hive 都按备份恢复。进程日志没有 FATAL/ANR、Flutter 渲染/Widget 异常或
-分享/导入错误，应用停止，桌面和 stay-awake 恢复。
+追加的非导出 Debug ContentProvider 又在同一个 `ACTION_SEND_MULTIPLE` 中依次注入类型异常、查询异常和
+超长中文/emoji/控制字符显示名：异常项没有抑制后续两份 M3U，查询异常项按 URI 文件名入库，超长名
+清洗后 basename 为 175 个 UTF-8 字节、末尾 emoji 完整，两份频道各精确一条，暂存树为空。随后完整
+IPTV 缓存树和 Hive 都按备份恢复。除探针预期的 Provider 异常日志外，没有 FATAL/ANR、Flutter
+渲染/Widget 异常或导入失败，应用停止，桌面和 stay-awake 恢复。
 
-该证据补充 A1-05/A2-01 的 Android 外部接收路径；Windows 原生剪贴板导入、两个真实应用之间的发送、
-Release 和异常 Provider 继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组
+该证据补充 A1-05/A2-01 的 Android 外部接收路径；Windows 原生剪贴板导入、两个真实应用之间的发送和
+Release 继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组
 未闭环**。本批 Windows Computer Use 与 Astra Light 使用均为 **0 次**。
 
 ## 原始缺口与真实失败证据
@@ -55,6 +61,14 @@ Release 和异常 Provider 继续执行，因此两组保持 `RUN`。宏观仍�
    产品按设计再次显示弹窗。失败证据：
    `local-artifacts/diagnostics/android-share-intake-20260913T070033478/summary.json`。工具提交
    `2ad872e2` 改用刚处理的 warm 口令后，才精确验证重复口令优先路径的附件释放。
+8. Provider 边界门禁首轮已经执行类型异常、复制失败和查询异常，但日志断言等待了未触发的外层兜底
+   文案；Android `ContentResolver` 会记录并吞掉 Provider 的 `getType` 异常，随后实际落入复制失败路径。
+   失败摘要 `local-artifacts/diagnostics/android-share-intake-20260913T074432554/summary.json` 保留该差异，
+   `ed126884` 按真实三段日志修正证据门禁。
+9. 第二轮已经把异常后的两份有效附件写入数据库，Windows 控制台却以 GBK 输出含 emoji 的
+   `ensure_ascii=False` JSON，取证脚本得到 `UnicodeEncodeError`。失败摘要
+   `local-artifacts/diagnostics/android-share-intake-20260913T074806139/summary.json` 和数据库快照都保留；
+   离线转义查询确认两行存在，`d563a0bf` 将该段证据固定为 ASCII 转义 JSON 后完整重跑转绿。
 
 所有失败轮次都在摘要中保持 `failed`，没有记作通过。每轮原生脚本的 `finally` 均停止应用、恢复
 IPTV/Hive 并回到桌面。
@@ -74,10 +88,14 @@ IPTV/Hive 并回到桌面。
   `com.mystyle.purelive.MainActivity`。
 - Android 插件保留可读的应用内 `file://`；其余 URI 查询显示名，安全化 basename 后复制到
   `cache/share_handler/<uuid>/<原文件名>`。复制失败删除未完成文件及其目录；Dart 导入结束后仅清理
-  这个三层结构，不触碰外部输入或结构不明的临时文件。
+  这个三层结构，不触碰外部输入或结构不明的临时文件。每个 URI 单独收口异常并递归清理自己的 UUID
+  目录；文件名以 180 个 UTF-8 字节为上限、扩展名以 24 字节为上限，控制字符替换为 `_`，逐 code
+  point 截断以保留完整 emoji/代理对。
 - Debug 构建增加受 `android.permission.DUMP` 保护的 `ShareIntentProbeReceiver`；它只接受应用
   `cache/share_probe` 下 1～8 个规范文件，构造真实 `ACTION_SEND_MULTIPLE`/`ArrayList<Uri>` 后显式
-  发送给 MainActivity。主 Manifest 没有该组件，Release 包不含此测试入口。
+  发送给 MainActivity。非导出的 `ShareIntentProbeProvider` 只服务同应用 Debug 探针，可注入类型/查询
+  异常和超长显示名，文件访问仍以规范路径限制在同一探针缓存根。主 Manifest 没有这两个组件；Release
+  产物是否排除它们仍由后续 Release Manifest 门禁复验。
 - 导入弹窗不再嵌套 intrinsic 不兼容的 `LayoutBuilder`；改用 MediaQuery 的可用宽度和字号选择堆叠，
   继续使用可滚动 AlertDialog 与固定最小操作面。
 
@@ -85,7 +103,7 @@ IPTV/Hive 并回到桌面。
 
 | 项目 | 结果 |
 | --- | --- |
-| 分享接收、附件释放与 Manifest/插件源码合同 | `test/shared_media_intake_test.dart` 11/11 |
+| 分享接收、附件释放、Debug Provider 与 Manifest/插件源码合同 | `test/shared_media_intake_test.dart` 11/11 |
 | 插件暂存目录所有权与平台临时路径清理 | `test/shared_media_temp_cleanup_test.dart` 5/5 |
 | 导入弹窗 320×480、3.0 倍英文 | `test/share_command_import_dialog_test.dart` 1/1 |
 | 分享入口与两个导入管理器联合复验 | **110/110 PASS** |
@@ -96,11 +114,18 @@ IPTV/Hive 并回到桌面。
 | Built-in Kotlin 审计 | 10 个 Gradle 文件通过 |
 | 全库 Flutter analyze | `No issues found` |
 
+边界修订 `98f5472a` 后直接重跑 11/11 与 Built-in Kotlin 审计；随后 `c6817e74` 加入 Debug Provider
+和门禁，再次通过同一 11/11、PowerShell 静态合同与 Kotlin 审计。上表 110/110、15/15 和全库 analyze
+来自此前产品批的已记录输入；本次没有把它们写成新提交的重复执行结果，新增产品行为以精确构建和下方
+K90 数据库/日志证据闭环。
+
 `tool/android_share_intake_smoke.ps1` 已加入固定 CI 静态门禁。它要求显式 serial、APK 和期望 SHA，
 覆盖安装前备份规范 Hive 与整个 IPTV 缓存树；混合口令/附件要求不重开弹窗、不写入夹具频道且整个
 插件暂存树消失。文件单独导入后再次要求暂存树消失；随后 Debug shell 探针发送 M3U+XMLTV 的真实
-Parcelable URI 列表，并从关闭状态 SQLite 查询两类来源、频道和节目。最后恢复数据树并逐文件核对
-uid/gid/mode/size/SHA，同时删除受路径守卫保护的探针输入目录。
+Parcelable URI 列表，并从关闭状态 SQLite 查询两类来源、频道和节目。Provider 边界阶段再发送
+“类型异常 + 查询异常 + 超长显示名”三 URI 列表，以日志证明异常路径实际到达，并用关闭状态 SQLite
+证明两个后续附件各入库一次、回退名准确、控制字符已清洗且长名加扩展不超过 180 UTF-8 字节。最后
+恢复数据树并逐文件核对 uid/gid/mode/size/SHA，同时删除受路径守卫保护的探针输入目录。
 
 ## 构建与 K90 原生结果
 
@@ -109,16 +134,16 @@ uid/gid/mode/size/SHA，同时删除受路径守卫保护的探针输入目录�
 
 | 项目 | 结果 |
 | --- | --- |
-| 精确构建提交 | `944338e4f27324da0ed559a4536c1bbe9dfd8be5`（产品修订 `8f43f21b`，Debug 探针 `d2f7400c`） |
+| 精确构建提交 | `c6817e749aefc55d69fcb726cfaf446ec0746170`（产品修订 `98f5472a`，Debug Provider/探针 `c6817e74`） |
 | 版本 / manifest code | `3.1.8+4121` / `6121` |
 | APK | `288823157` B |
-| SHA-256 | `8803DFB82E453F0EC53613DE95A398F1FB96C0AD8C329CA68CDD04CB937002BF` |
+| SHA-256 | `55F94C97419C5A61ADC5D66FDBFEE4C1622071763A5CDB1040BDA718CB41F2B3` |
 | ABI / 原生库 | `arm64-v8a` / 16；最小 ELF LOAD `0x4000` |
 | Flutter 资源 | 1262 项 / `206833496` B |
-| 构建记录 | `local-artifacts/build-records/20260912T231844253Z-build-androidarm64-debug.json` |
+| 构建记录 | `local-artifacts/build-records/20260912T234345813Z-build-androidarm64-debug.json` |
 
 最终原生摘要：
-`local-artifacts/diagnostics/android-share-intake-20260913T071945128/summary.json`。
+`local-artifacts/diagnostics/android-share-intake-20260913T075039675/summary.json`。
 
 - 设备先核对为 `25102RKBEC / myron / uid=0(root)`，全部设备命令显式绑定
   `192.168.1.2:5555`。
@@ -132,22 +157,28 @@ uid/gid/mode/size/SHA，同时删除受路径守卫保护的探针输入目录�
   `sharedStagingEntriesAfterCommand=[]`，关闭状态 SQLite 中夹具频道计数为 0，证明口令优先分支释放附件
   而没有误导入；摘要门禁 `commandPriorityAttachmentReleased=true`。
 - M3U 通过应用 FileProvider 的内容 URI 进入插件；SQLite 快照中频道
-  `Share Intake Fixture 26091307194513` 与唯一 Provider ID 对齐，Provider 名称精确等于发送方原文件名
-  `purelive-share-intake-26091307194513`，流地址精确匹配夹具；导入完成后的
+  `Share Intake Fixture 26091307503968` 与唯一 Provider ID 对齐，Provider 名称精确等于发送方原文件名
+  `purelive-share-intake-26091307503968`，流地址精确匹配夹具；导入完成后的
   `sharedStagingFilesAfterImport` 和 `sharedStagingEntriesAfterImport` 均为空。
 - `ShareIntentProbeReceiver` 返回 `result=-1, data="ok:send_multiple:2"`；多附件 SQLite 快照中
-  `Share Multiple Playlist 26091307194513`、`Share Multiple EPG 26091307194513` 和
-  `Share Multiple Programme 26091307194513` 各一条，Provider/EPG 来源名称分别等于两份原附件
+  `Share Multiple Playlist 26091307503968`、`Share Multiple EPG 26091307503968` 和
+  `Share Multiple Programme 26091307503968` 各一条，Provider/EPG 来源名称分别等于两份原附件
   basename，`multiplePlaylistAndEpgAttachmentsImported=true`，暂存树为空。
+- `ShareIntentProbeReceiver` 的 Provider 边界动作返回 `result=-1, data="ok:provider_edges:3"`。日志同时
+  命中注入的类型异常、复制失败和查询异常；后续频道 `Share Provider Fallback 26091307503968` 与
+  `Share Provider Long Name 26091307503968` 各一条。前者 Provider 名精确回退到 URI basename；后者
+  从包含中文、emoji、控制字符且超过文件系统单分量预算的显示名得到
+  `共享_附件_长😀…长😀`，UTF-8 为 175 字节，控制字符和替换字符都不存在，末尾 emoji 完整；加
+  `.m3u` 后为 179 字节。`providerFailureDidNotSuppressLaterAttachments`、
+  `queryFailureUsedUriFilename` 和 `longUnicodeDisplayNameSanitizedAndBounded` 全为 true。
 - 原生 smoke 的 IPTV 缓存树恢复前后元数据和每文件 SHA 完全一致，数据库回到原 SHA
-  `FD2A61D0...095D5`；该轮 Hive 也从 `19B6A903...F6333` 精确恢复。
-- 全批收尾又使用首轮操作前备份把规范 Hive 恢复到本轮起始 SHA
-  `91D6BAC5FDC7D43C6709D42D3FF4C56E9732649C3551FFA8317AC1DAD7F6128F`；uid/gid/mode 和 SELinux
-  context 保持。记录：
-  `local-artifacts/diagnostics/android-share-intake-final-state-20260913T0618.json`。
+  `FD2A61D0...095D5`；规范 Hive 精确恢复到本轮起始 SHA
+  `91D6BAC5FDC7D43C6709D42D3FF4C56E9732649C3551FFA8317AC1DAD7F6128F`，uid/gid/mode 和 SELinux
+  context 保持。
 - 结束时 Pure Live 已停止，顶层为 `com.miui.home`，stay-awake 为 0；未重启手机/adbd、未切换网络、
   未改 ADB 端口/授权，也未更新 Root/LSP/模块。
 
 原生工具在 `2cc1b56d` 加入混合分享门禁，`2ad872e2` 修正最后一条重复口令夹具；`d2f7400c` 增加
-Debug-only 多附件发送器，`944338e4` 增加 M3U+EPG 数据库和暂存清理门禁。最终原生轮次绑定
-`944338e4` 精确 APK。
+Debug-only 多附件发送器，`944338e4` 增加 M3U+EPG 数据库和暂存清理门禁；`c6817e74` 增加异常
+Provider/长名注入，`ed126884` 按 Android 实际异常传播修正日志门禁，`d563a0bf` 固定 emoji JSON
+取证编码。最终原生轮次使用当前 `d563a0bf` 工具，绑定 `c6817e74` 精确 APK。

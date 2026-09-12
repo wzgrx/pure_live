@@ -34,6 +34,17 @@ def validate_text(value: object, owner: str) -> None:
     require("\ufffd" not in value, f"{owner}: contains Unicode replacement characters")
 
 
+def validate_semantic_candidates(value: object, owner: str) -> None:
+    if isinstance(value, str):
+        validate_text(value, owner)
+        require(bool(value.strip()), f"{owner}: semantic candidate must not be blank")
+        return
+    require(isinstance(value, list) and bool(value), f"{owner}: expected semantic text or candidates")
+    for index, candidate in enumerate(value):
+        validate_text(candidate, f"{owner}[{index}]")
+        require(bool(candidate.strip()), f"{owner}[{index}]: semantic candidate must not be blank")
+
+
 def main() -> None:
     data = json.loads(MAP_PATH.read_text(encoding="utf-8-sig"))
     require(data.get("schemaVersion") == 2, "device UI map schemaVersion must be 2")
@@ -91,10 +102,24 @@ def main() -> None:
         for sequence_name, sequence in sequences.items():
             require(isinstance(sequence, list) and sequence, f"{profile_name}.{sequence_name}: empty sequence")
             for index, step in enumerate(sequence):
-                actions = [key for key in ("tap", "tapSemantic", "swipe", "wait") if key in step]
+                actions = [
+                    key
+                    for key in ("tap", "tapSemantic", "assertSemantic", "swipe", "wait")
+                    if key in step
+                ]
                 require(len(actions) == 1, f"{profile_name}.{sequence_name}[{index}]: expected one action")
                 if "tap" in step:
                     require(step["tap"] in points, f"{profile_name}.{sequence_name}: missing point {step['tap']}")
+                if "tapSemantic" in step:
+                    validate_semantic_candidates(
+                        step["tapSemantic"],
+                        f"{profile_name}.{sequence_name}[{index}].tapSemantic",
+                    )
+                if "assertSemantic" in step:
+                    validate_semantic_candidates(
+                        step["assertSemantic"],
+                        f"{profile_name}.{sequence_name}[{index}].assertSemantic",
+                    )
                 if "swipe" in step:
                     require(
                         step["swipe"] in gestures,

@@ -55,3 +55,9 @@ Write-Output 'PASS K90 PiP settings cache matches measured bounds'
 
 & $runnerPath -Validate -Profile 'k90pro_portrait_1200x2608'
 Write-Output 'PASS android_ui accepts semantic route assertions'
+
+& python (Join-Path $PSScriptRoot 'validate_device_ui_map.py')
+if ($LASTEXITCODE -ne 0) {
+    throw "validate_device_ui_map.py exited with code $LASTEXITCODE."
+}
+Write-Output 'PASS device UI map schema accepts semantic route assertions'

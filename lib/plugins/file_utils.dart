@@ -6,7 +6,6 @@ import 'package:open_filex/open_filex.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:android_intent_plus/android_intent.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class FileUtils {
   static const String systemHotProviderId = "88888";
@@ -74,6 +73,29 @@ class FileUtils {
       return fileRef;
     }
     throw FileSystemException("Shared media target path cannot be verified on flash drive storage", shareContent);
+  }
+
+  static Future<bool> cleanupOwnedSharedMediaFile(File file, {Directory? temporaryDirectory}) async {
+    final root = p.normalize((temporaryDirectory ?? Directory.systemTemp).absolute.path);
+    final filePath = p.normalize(file.absolute.path);
+    if (!p.isWithin(root, filePath)) return false;
+
+    final relativeParts = p.split(p.relative(filePath, from: root));
+    if (relativeParts.length != 3 || relativeParts.first != 'share_handler') return false;
+
+    final attachmentDirectory = file.parent;
+    final stagingRoot = attachmentDirectory.parent;
+    try {
+      if (await file.exists()) await file.delete();
+      if (await attachmentDirectory.exists() && (await attachmentDirectory.list().isEmpty)) {
+        await attachmentDirectory.delete();
+      }
+      if (await stagingRoot.exists() && (await stagingRoot.list().isEmpty)) await stagingRoot.delete();
+      return true;
+    } catch (error) {
+      debugPrint('Shared media temporary cleanup failed: $error');
+      return false;
+    }
   }
 
   static Future<bool> openFileOrUrl(String pathOrUrl) async {

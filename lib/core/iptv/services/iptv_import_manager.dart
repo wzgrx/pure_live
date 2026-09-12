@@ -147,6 +147,7 @@ class IptvImportManager {
   }
 
   Future<bool> importFromSharedMedia(dynamic media, {bool forceUpdate = false, bool showTips = true}) async {
+    File? file;
     try {
       if (media.content == null || media.content!.isEmpty) {
         if (showTips) {
@@ -155,7 +156,7 @@ class IptvImportManager {
         return false;
       }
 
-      File file = await FileUtils.convertPhysicalFile(media.content!);
+      file = await FileUtils.convertPhysicalFile(media.content!);
       final ext = p.extension(file.path).toLowerCase();
       if (ext != '.m3u' && ext != '.m3u8' && ext != '.txt') {
         if (showTips) {
@@ -177,6 +178,8 @@ class IptvImportManager {
         ToastUtil.show(i18n("local_import_failed"));
       }
       return false;
+    } finally {
+      if (file != null) await FileUtils.cleanupOwnedSharedMediaFile(file);
     }
   }
 

@@ -78,6 +78,7 @@ foreach ($required in @(
     'warmShareCommandAccepted',
     'duplicateWarmShareSuppressed',
     'sharedPlaylistAttachmentImported',
+    'sharedMediaStagingCleaned',
     "'android.intent.action.SEND'",
     "'android.intent.extra.TEXT'",
     "'android.intent.extra.STREAM'",

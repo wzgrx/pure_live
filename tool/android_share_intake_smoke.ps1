@@ -428,6 +428,10 @@ try {
     $result.fileShare.processId = $log.pid
     Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null
     Copy-RootFileToHost $databasePath $remoteDbSnapshot $localDbSnapshot
+    $sharedStagingFiles = @(Invoke-Adb @('shell', "su -c `"if [ -d '/data/user/0/$Package/cache/share_handler' ]; then find '/data/user/0/$Package/cache/share_handler' -type f; fi`""))
+    $result.fileShare.sharedStagingFilesAfterImport = @($sharedStagingFiles | ForEach-Object { [string] $_ })
+    if ($sharedStagingFiles.Count -ne 0) { throw 'Shared-media staging files remained after import.' }
+    $result.checks.sharedMediaStagingCleaned = $true
     $pythonCode = @'
 import json, sqlite3, sys
 db, _provider_name, channel_name = sys.argv[1:]
@@ -446,8 +450,9 @@ finally:
     $queryText = (& python -c $pythonCode $localDbSnapshot $fixtureBaseName $fixtureChannel 2>&1) -join "`n"
     if ($LASTEXITCODE -ne 0) { throw "SQLite evidence query failed: $queryText" }
     $query = $queryText | ConvertFrom-Json
-    if (@($query.providers).Count -ne 1 -or @($query.channels).Count -ne 1) {
-        throw "Shared playlist fixture was not committed exactly once: $queryText"
+    if (@($query.providers).Count -ne 1 -or @($query.channels).Count -ne 1 -or
+        [string] $query.providers[0][1] -ne $fixtureBaseName) {
+      throw "Shared playlist fixture was not committed exactly once: $queryText"
     }
     $result.fileShare.databaseEvidence = $query
     $result.checks.sharedPlaylistAttachmentImported = $true

@@ -117,16 +117,16 @@ class EpgImportManager {
     }
   }
 
-  /// 4. 系统分享接收导入
   /// 4. 从系统 Share 管道媒体数据中恢复 EPG 节目单（已添加安全格式校验）
   Future<bool> importFromSharedMedia(dynamic media) async {
+    File? file;
     try {
       if (media.content == null || media.content!.isEmpty) {
         ToastUtil.show(i18n("epg_import_failed"));
         return false;
       }
 
-      File file = await FileUtils.convertPhysicalFile(media.content!);
+      file = await FileUtils.convertPhysicalFile(media.content!);
       final ext = p.extension(file.path).toLowerCase();
       if (ext != '.xml' && ext != '.gz' && ext != '.json') {
         ToastUtil.show(i18n("unsupported_file_format"));
@@ -138,6 +138,8 @@ class EpgImportManager {
       debugPrint("Shared EPG Import Process Crash: $e");
       ToastUtil.show(i18n("epg_import_failed"));
       return false;
+    } finally {
+      if (file != null) await FileUtils.cleanupOwnedSharedMediaFile(file);
     }
   }
 

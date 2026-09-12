@@ -25,6 +25,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.URLConnection
+import java.util.UUID
 
 private const val kEventsChannel = "com.shoutsocial.share_handler/sharedMediaStream"
 
@@ -241,19 +242,32 @@ class ShareHandlerPlugin : FlutterPlugin, Messages.ShareHandlerApi, EventChannel
     }
 
     val displayName = getFileNameFromUri(contentResolver, uri, mimeType) ?: return null
-    val safeName = File(displayName).name
-    val extension = File(safeName).extension.ifEmpty {
-      MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "bin"
-    }
-    val copiedFile = File.createTempFile("shared_", ".$extension", applicationContext.cacheDir)
+    val safeName = safeAttachmentFileName(displayName, mimeType)
+    val stagingRoot = File(applicationContext.cacheDir, "share_handler")
+    val attachmentDirectory = File(stagingRoot, UUID.randomUUID().toString())
+    if (!attachmentDirectory.mkdirs()) return null
+    val copiedFile = File(attachmentDirectory, safeName)
     if (!copyFile(contentResolver, uri, copiedFile)) {
       copiedFile.delete()
+      attachmentDirectory.delete()
       return null
     }
     return Messages.SharedAttachment.Builder()
       .setPath(copiedFile.absolutePath)
       .setType(type)
       .build()
+  }
+
+  private fun safeAttachmentFileName(displayName: String, mimeType: String?): String {
+    val leaf = displayName.substringAfterLast('/').substringAfterLast('\\').trim()
+    val fallbackExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "bin"
+    val candidate = leaf.takeIf { it.isNotEmpty() && it != "." && it != ".." }
+      ?: "file_${System.currentTimeMillis()}.$fallbackExtension"
+    if (candidate.length <= 180) return candidate
+
+    val extension = File(candidate).extension.take(24)
+    val suffix = if (extension.isEmpty()) "" else ".$extension"
+    return candidate.substringBeforeLast('.', candidate).take(180 - suffix.length) + suffix
   }
 
   // Function to get the file name from the URI

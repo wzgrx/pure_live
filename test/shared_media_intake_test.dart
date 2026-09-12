@@ -228,7 +228,9 @@ void main() {
       'plugins/built_in_kotlin/share_handler_android/android/src/main/kotlin/com/shoutsocial/share_handler/ShareHandlerPlugin.kt',
     ).readAsStringSync();
     expect(androidPlugin, contains('uri.scheme.equals("file", ignoreCase = true)'));
-    expect(androidPlugin, contains(r'File.createTempFile("shared_", ".$extension", applicationContext.cacheDir)'));
+    expect(androidPlugin, contains('File(applicationContext.cacheDir, "share_handler")'));
+    expect(androidPlugin, contains('File(attachmentDirectory, safeName)'));
+    expect(androidPlugin, contains('UUID.randomUUID().toString()'));
     expect(androidPlugin, contains('contentResolver.openInputStream(uri) ?: return false'));
     expect(androidPlugin, isNot(contains('FileDirectory.getAbsolutePath(applicationContext, uri)')));
   });

@@ -287,11 +287,6 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
     selectedTagId.value = tagId;
   }
 
-  void updateRoomTags(LiveRoom room, List<String> newTagIds) {
-    if (isClosed) return;
-    tagController.setRoomTags(room, newTagIds);
-  }
-
   List<LiveRoom> getAllRooms() {
     return List<LiveRoom>.from(SettingsService.to.fav.favoriteRooms.v);
   }

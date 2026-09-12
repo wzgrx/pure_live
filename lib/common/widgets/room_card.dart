@@ -97,6 +97,8 @@ class RoomCard extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          scrollable: true,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           backgroundColor: theme.colorScheme.surface,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -138,9 +140,6 @@ class RoomCard extends StatelessWidget {
   }
 
   void onLongPress(BuildContext context) {
-    final FavoriteController favoriteController = Get.isRegistered<FavoriteController>()
-        ? Get.find<FavoriteController>()
-        : Get.put(FavoriteController());
     final TagManagementController tagController = Get.find<TagManagementController>();
     final theme = Theme.of(context);
     final bool isFollowed = SettingsService.to.fav.isFavorite(room);
@@ -175,8 +174,8 @@ class RoomCard extends StatelessWidget {
             ),
 
             IconButton(
-              constraints: const BoxConstraints(),
-              padding: const EdgeInsets.all(6),
+              tooltip: i18n('share'),
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               icon: Icon(RemixIcons.share_forward_line, size: 20, color: theme.colorScheme.primary),
               onPressed: () {
                 Navigator.pop(context);
@@ -185,8 +184,8 @@ class RoomCard extends StatelessWidget {
             ),
             SizedBox(width: 6),
             IconButton(
-              constraints: const BoxConstraints(),
-              padding: const EdgeInsets.all(6),
+              tooltip: i18n('set_room_tags'),
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               icon: Icon(
                 Remix.price_tag_3_line,
                 size: 20,
@@ -195,7 +194,7 @@ class RoomCard extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
                 if (isFollowed) {
-                  _showTagSelectionGridModal(context, theme, favoriteController, tagController);
+                  _showTagSelectionGridModal(context, theme, tagController);
                 } else {
                   SmartDialog.showToast(i18n('tags_need_follow_tip'));
                   showFollowDialog(
@@ -204,7 +203,7 @@ class RoomCard extends StatelessWidget {
                     anchorName: room.nick ?? '',
                     onConfirm: () {
                       SettingsService.to.fav.addRoom(room);
-                      _showTagSelectionGridModal(context, theme, favoriteController, tagController);
+                      _showTagSelectionGridModal(context, theme, tagController);
                     },
                   );
                 }
@@ -252,24 +251,16 @@ class RoomCard extends StatelessWidget {
           ),
         ),
         actions: [
-          Container(
-            constraints: const BoxConstraints(maxWidth: 380),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FollowButton(room: room),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    i18n('close'),
-                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
+          FollowButton(room: room),
+          TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              i18n('close'),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -277,13 +268,13 @@ class RoomCard extends StatelessWidget {
     );
   }
 
-  void _showTagSelectionGridModal(
-    BuildContext context,
-    ThemeData theme,
-    FavoriteController favoriteController,
-    TagManagementController tagController,
-  ) {
-    List<String> tempSelectedIds = List<String>.from(room.tagIds);
+  void _showTagSelectionGridModal(BuildContext context, ThemeData theme, TagManagementController tagController) {
+    final availableTagIds = tagController.tags.map((tag) => tag.id).toSet();
+    final tempSelectedIds = tagController
+        .getTagsForRoom(room)
+        .where(availableTagIds.contains)
+        .toSet()
+        .toList(growable: true);
     final nameController = TextEditingController();
     final descController = TextEditingController();
 
@@ -293,6 +284,23 @@ class RoomCard extends StatelessWidget {
 
     bool showAddSection = false;
     final tagScrollController = ScrollController();
+    void submitNewTag(StateSetter setModalState) {
+      final name = nameController.text.trim();
+      if (name.isEmpty) {
+        SmartDialog.showToast(i18n('tag_name_empty_error'));
+        return;
+      }
+      if (!tagController.addTag(name, descController.text)) {
+        SmartDialog.showToast(i18n('tag_invalid_or_duplicate'));
+        return;
+      }
+      final newTag = tagController.tags.firstWhere((tag) => tag.name.toLowerCase() == name.toLowerCase());
+      tempSelectedIds.add(newTag.id);
+      nameController.clear();
+      descController.clear();
+      setModalState(() => showAddSection = false);
+    }
+
     Get.dialog(
       StatefulBuilder(
         builder: (context, setModalState) => AlertDialog(
@@ -300,86 +308,56 @@ class RoomCard extends StatelessWidget {
           elevation: 8,
           shadowColor: Colors.black.withValues(alpha: 0.15),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-          titlePadding: const EdgeInsets.fromLTRB(16, 24, 16, 0), // Adjusted padding to align back arrow neatly
-          contentPadding: const EdgeInsets.fromLTRB(28, 20, 28, 12),
-          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          titlePadding: EdgeInsets.fromLTRB(16, MediaQuery.textScalerOf(context).scale(1) >= 2 ? 8 : 24, 16, 0),
+          contentPadding: MediaQuery.textScalerOf(context).scale(1) >= 2
+              ? const EdgeInsets.fromLTRB(12, 8, 12, 4)
+              : const EdgeInsets.fromLTRB(28, 20, 28, 12),
+          actionsPadding: MediaQuery.textScalerOf(context).scale(1) >= 2
+              ? const EdgeInsets.fromLTRB(8, 0, 8, 8)
+              : const EdgeInsets.fromLTRB(20, 0, 20, 20),
           insetPadding: isSmallScreen
-              ? EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 24)
+              ? EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.05,
+                  vertical: MediaQuery.textScalerOf(context).scale(1) >= 2 ? 8 : 24,
+                )
               : const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: showAddSection ? 4 : 12),
-                    child: Text(
-                      i18n('set_room_tags'),
-                      style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w800, letterSpacing: 0.4),
-                    ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: showAddSection ? 4 : 12),
+                  child: Text(
+                    i18n('set_room_tags'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.t16.copyWith(fontWeight: FontWeight.w800, letterSpacing: 0.4),
                   ),
-                ],
+                ),
               ),
-
               showAddSection
                   ? Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            minimumSize: Size.zero,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
+                        IconButton(
+                          tooltip: i18n('cancel'),
                           onPressed: () {
                             nameController.clear();
                             descController.clear();
                             setModalState(() {
-                              showAddSection = false; // Collapse panel and revert header to default view layout
+                              showAddSection = false;
                             });
                           },
-                          child: Text(
-                            i18n('cancel'),
-                            style: AppTextStyles.t13.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          icon: const Icon(Icons.close_rounded),
                         ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            minimumSize: Size.zero,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          onPressed: () {
-                            final name = nameController.text.trim();
-                            if (name.isEmpty) {
-                              SmartDialog.showToast(i18n('tag_name_empty_error'));
-                              return;
-                            }
-
-                            final success = tagController.addTag(name, descController.text);
-                            if (success) {
-                              nameController.clear();
-                              descController.clear();
-                              setModalState(() {
-                                showAddSection = false; // Collapse panel and revert header to default view layout
-                              });
-                            } else {
-                              SmartDialog.showToast(i18n('tag_invalid_or_duplicate'));
-                            }
-                          },
-                          child: Text(
-                            i18n('confirm'),
-                            style: AppTextStyles.t13.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        IconButton(
+                          tooltip: i18n('add_tag'),
+                          onPressed: () => submitNewTag(setModalState),
+                          icon: const Icon(Icons.check_rounded),
                         ),
                       ],
                     )
                   : IconButton(
+                      tooltip: i18n('add_tag'),
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       icon: Icon(Remix.add_circle_line, size: 20, color: theme.colorScheme.primary),
@@ -393,7 +371,11 @@ class RoomCard extends StatelessWidget {
           ),
           content: Container(
             width: isSmallScreen ? screenWidth : 440,
-            constraints: BoxConstraints(maxHeight: isSmallScreen ? screenHeight * 0.54 : 390),
+            constraints: BoxConstraints(
+              maxHeight: isSmallScreen
+                  ? screenHeight * (MediaQuery.textScalerOf(context).scale(1) >= 2 ? 0.30 : 0.54)
+                  : 390,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -421,10 +403,13 @@ class RoomCard extends StatelessWidget {
                         const SizedBox(height: 10),
                         TextField(
                           controller: nameController,
+                          maxLength: 15,
                           maxLines: 1,
+                          textInputAction: TextInputAction.next,
                           style: AppTextStyles.t13.copyWith(fontWeight: FontWeight.w500),
                           decoration: InputDecoration(
                             hintText: i18n('tag_input_hint'),
+                            counterText: '',
                             hintStyle: TextStyle(color: theme.hintColor.withValues(alpha: 0.5)),
                             filled: true,
                             fillColor: theme.colorScheme.surface,
@@ -445,10 +430,14 @@ class RoomCard extends StatelessWidget {
                         const SizedBox(height: 8),
                         TextField(
                           controller: descController,
+                          maxLength: 40,
                           maxLines: 1,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => submitNewTag(setModalState),
                           style: AppTextStyles.t13.copyWith(fontWeight: FontWeight.w500),
                           decoration: InputDecoration(
                             hintText: i18n('tag_desc_hint'),
+                            counterText: '',
                             hintStyle: TextStyle(color: theme.hintColor.withValues(alpha: 0.5)),
                             filled: true,
                             fillColor: theme.colorScheme.surface,
@@ -470,135 +459,157 @@ class RoomCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                Expanded(
-                  child: tagController.tags.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Remix.price_tag_3_line, size: 36, color: theme.disabledColor.withValues(alpha: 0.4)),
-                              const SizedBox(height: 10),
-                              Text(i18n('no_tags_tip'), style: AppTextStyles.t13.copyWith(color: theme.disabledColor)),
-                            ],
-                          ),
-                        )
-                      : Scrollbar(
-                          controller: tagScrollController,
-                          thumbVisibility: true,
-                          thickness: 4.0,
-                          radius: const Radius.circular(4),
-                          child: GridView.builder(
-                            controller: tagScrollController,
-                            shrinkWrap: true,
-                            physics: const PureLiveScrollPhysics(),
-                            itemCount: tagController.tags.length,
-                            padding: const EdgeInsets.only(right: 10, top: 4, bottom: 4, left: 2),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              mainAxisExtent: 68,
+                if (!showAddSection)
+                  Expanded(
+                    child: tagController.tags.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Remix.price_tag_3_line,
+                                  size: 36,
+                                  color: theme.disabledColor.withValues(alpha: 0.4),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  i18n('no_tags_tip'),
+                                  style: AppTextStyles.t13.copyWith(color: theme.disabledColor),
+                                ),
+                              ],
                             ),
-                            itemBuilder: (context, index) {
-                              final tag = tagController.tags[index];
-                              final isSelected = tempSelectedIds.contains(tag.id);
-                              return AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                curve: Curves.easeInOut,
-                                child: InkWell(
-                                  onTap: () {
-                                    if (isSelected) {
-                                      tempSelectedIds.remove(tag.id);
-                                    } else {
-                                      tempSelectedIds.add(tag.id);
-                                    }
-                                    setModalState(() {});
-                                  },
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? theme.colorScheme.primary.withValues(alpha: 0.06)
-                                          : theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.6),
+                          )
+                        : Scrollbar(
+                            controller: tagScrollController,
+                            thumbVisibility: true,
+                            thickness: 4.0,
+                            radius: const Radius.circular(4),
+                            child: GridView.builder(
+                              key: const ValueKey('room-tag-assignment-list'),
+                              controller: tagScrollController,
+                              shrinkWrap: true,
+                              physics: const PureLiveScrollPhysics(),
+                              itemCount: tagController.tags.length,
+                              padding: const EdgeInsets.only(right: 10, top: 4, bottom: 4, left: 2),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: isSmallScreen || MediaQuery.textScalerOf(context).scale(1) >= 1.6
+                                    ? 1
+                                    : 2,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
+                                mainAxisExtent: MediaQuery.textScalerOf(context).scale(1) >= 2 ? 136 : 68,
+                              ),
+                              itemBuilder: (context, index) {
+                                final tag = tagController.tags[index];
+                                final isSelected = tempSelectedIds.contains(tag.id);
+                                return Semantics(
+                                  label: tag.name,
+                                  selected: isSelected,
+                                  button: true,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 180),
+                                    curve: Curves.easeInOut,
+                                    child: InkWell(
+                                      onTap: () {
+                                        if (isSelected) {
+                                          tempSelectedIds.remove(tag.id);
+                                        } else {
+                                          tempSelectedIds.add(tag.id);
+                                        }
+                                        setModalState(() {});
+                                      },
                                       borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? theme.colorScheme.primary
-                                            : theme.dividerColor.withValues(alpha: 0.05),
-                                        width: isSelected ? 1.4 : 0.6,
-                                      ),
-                                      boxShadow: isSelected
-                                          ? [
-                                              BoxShadow(
-                                                color: theme.colorScheme.primary.withValues(alpha: 0.04),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ]
-                                          : null,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                tag.name,
-                                                style: AppTextStyles.t13.copyWith(
-                                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                                  color: isSelected
-                                                      ? theme.colorScheme.primary
-                                                      : theme.colorScheme.onSurface,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              if (tag.description.isNotEmpty) ...[
-                                                const SizedBox(height: 3),
-                                                Text(
-                                                  tag.description,
-                                                  style: AppTextStyles.t11.copyWith(
-                                                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                                                    fontWeight: FontWeight.w500,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? theme.colorScheme.primary.withValues(alpha: 0.06)
+                                              : theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.6),
+                                          borderRadius: BorderRadius.circular(14),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? theme.colorScheme.primary
+                                                : theme.dividerColor.withValues(alpha: 0.05),
+                                            width: isSelected ? 1.4 : 0.6,
+                                          ),
+                                          boxShadow: isSelected
+                                              ? [
+                                                  BoxShadow(
+                                                    color: theme.colorScheme.primary.withValues(alpha: 0.04),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
                                                   ),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        AnimatedContainer(
-                                          duration: const Duration(milliseconds: 150),
-                                          width: 18,
-                                          height: 18,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                                            border: Border.all(
-                                              color: isSelected
-                                                  ? Colors.transparent
-                                                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.25),
-                                              width: isSelected ? 0 : 1.5,
-                                            ),
-                                          ),
-                                          child: isSelected
-                                              ? Icon(Icons.check_rounded, size: 12, color: theme.colorScheme.onPrimary)
+                                                ]
                                               : null,
                                         ),
-                                      ],
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    tag.name,
+                                                    style: AppTextStyles.t13.copyWith(
+                                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                                      color: isSelected
+                                                          ? theme.colorScheme.primary
+                                                          : theme.colorScheme.onSurface,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  if (tag.description.isNotEmpty) ...[
+                                                    const SizedBox(height: 3),
+                                                    Text(
+                                                      tag.description,
+                                                      style: AppTextStyles.t11.copyWith(
+                                                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                                                          alpha: 0.5,
+                                                        ),
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            AnimatedContainer(
+                                              duration: const Duration(milliseconds: 150),
+                                              width: 18,
+                                              height: 18,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? Colors.transparent
+                                                      : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.25),
+                                                  width: isSelected ? 0 : 1.5,
+                                                ),
+                                              ),
+                                              child: isSelected
+                                                  ? Icon(
+                                                      Icons.check_rounded,
+                                                      size: 12,
+                                                      color: theme.colorScheme.onPrimary,
+                                                    )
+                                                  : null,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                ),
+                  ),
               ],
             ),
           ),
@@ -624,29 +635,12 @@ class RoomCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
               ),
-              onPressed: () {
-                if (showAddSection) {
-                  final name = nameController.text.trim();
-                  if (name.isEmpty) {
-                    SmartDialog.showToast(i18n('tag_name_empty_error'));
-                    return;
-                  }
-
-                  final success = tagController.addTag(name, descController.text);
-                  if (success) {
-                    nameController.clear();
-                    descController.clear();
-                    setModalState(() {
-                      showAddSection = false; // Collapse panel and revert header to default view layout
-                    });
-                  } else {
-                    SmartDialog.showToast(i18n('tag_invalid_or_duplicate'));
-                  }
-                } else {
-                  favoriteController.updateRoomTags(room, tempSelectedIds);
-                  Navigator.pop(context);
-                }
-              },
+              onPressed: showAddSection
+                  ? null
+                  : () async {
+                      await tagController.setRoomTags(room, tempSelectedIds);
+                      if (context.mounted) Navigator.pop(context);
+                    },
               child: Text(i18n('confirm'), style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
@@ -760,46 +754,52 @@ class RoomCard extends StatelessWidget {
                   ),
               ],
             ),
-            ListTile(
-              dense: dense,
-              minLeadingWidth: dense ? 34 : 40,
-              contentPadding: EdgeInsets.symmetric(horizontal: dense ? 10 : 12, vertical: dense ? 4 : 6),
-              horizontalTitleGap: dense ? 8 : 12,
-              leading: CommonAvatar(avatarUrl: room.avatar, fallbackName: room.nick, dense: dense),
-              title: Text(
-                room.title ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: (dense ? AppTextStyles.t13 : AppTextStyles.t15).copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-              subtitle: Text(
-                room.nick ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: (dense ? AppTextStyles.t12 : AppTextStyles.t13).copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.grey[400] : Colors.grey[700],
-                ),
-              ),
-              trailing: dense
-                  ? null
-                  : Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[800] : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        room.platform?.toUpperCase() ?? '',
-                        style: AppTextStyles.t11.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.grey[300] : Colors.grey[800],
-                        ),
-                      ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final textScale = MediaQuery.textScalerOf(context).scale(1);
+                final showPlatformBadge = !dense && constraints.maxWidth >= 280 && textScale < 1.8;
+                return ListTile(
+                  dense: dense,
+                  minLeadingWidth: dense ? 34 : 40,
+                  contentPadding: EdgeInsets.symmetric(horizontal: dense ? 10 : 12, vertical: dense ? 4 : 6),
+                  horizontalTitleGap: dense ? 8 : 12,
+                  leading: CommonAvatar(avatarUrl: room.avatar, fallbackName: room.nick, dense: dense),
+                  title: Text(
+                    room.title ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: (dense ? AppTextStyles.t13 : AppTextStyles.t15).copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
+                  ),
+                  subtitle: Text(
+                    room.nick ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: (dense ? AppTextStyles.t12 : AppTextStyles.t13).copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.grey[400] : Colors.grey[700],
+                    ),
+                  ),
+                  trailing: showPlatformBadge
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[800] : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            room.platform?.toUpperCase() ?? '',
+                            style: AppTextStyles.t11.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.grey[300] : Colors.grey[800],
+                            ),
+                          ),
+                        )
+                      : null,
+                );
+              },
             ),
           ],
         ),

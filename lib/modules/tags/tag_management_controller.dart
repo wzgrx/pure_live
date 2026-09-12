@@ -36,16 +36,22 @@ class TagManagementController extends GetxController {
     await HivePrefUtil.setAnyPref(_roomTagsMappingKey, roomTagsMap);
   }
 
-  void setRoomTags(LiveRoom room, List<String> newTagIds) {
+  Future<void> setRoomTags(LiveRoom room, List<String> newTagIds) async {
     final roomKey = room.identityKey;
-    if (newTagIds.isEmpty) {
+    final validTagIds = tags.map((tag) => tag.id).toSet();
+    final normalizedTagIds = newTagIds.where(validTagIds.contains).toSet().toList(growable: false);
+    final legacyKey = room.normalizedRoomId;
+    if (legacyKey.isNotEmpty && legacyKey != roomKey) {
+      roomTagsMap.remove(legacyKey);
+    }
+    if (normalizedTagIds.isEmpty) {
       roomTagsMap.remove(roomKey);
     } else {
-      roomTagsMap[roomKey] = List<String>.from(newTagIds);
+      roomTagsMap[roomKey] = normalizedTagIds;
     }
 
     roomTagsMap.refresh();
-    saveRoomTagsMapping();
+    await saveRoomTagsMapping();
   }
 
   /// Moves the legacy room-number-only mapping to platform-scoped identities.

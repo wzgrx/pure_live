@@ -58,6 +58,8 @@
 
 > 2026-09-13 增量：分享口令改为消费者成功后才提交已处理状态，合并并发剪贴板检查，以有界 SHA-256 历史抑制自分享，并在桌面/移动交接失败时保留重试和双语反馈；导入弹窗由发起路由持有，在 320×480 / 3.0 倍英文下可滚动操作。相邻七文件 40/40、全库 analyze 通过。精确 arm64 Debug 保留数据覆盖 K90 后，真实 Bilibili 分享动作打开 `com.android.intentresolver/.ChooserActivity`，口令预览与系统目标可见；不选外部目标直接返回后原房间动作仍可达，Hive 精确恢复且无 FATAL/ANR。见 `docs/SHARE_COMMAND_HANDOFF_AND_IMPORT_DIALOG_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows 原生剪贴板导入、双实例、Release 和异常平台通道继续，宏观计数不变。
 
+> 2026-09-13 增量：Android 已实际消费冷启动和运行中 `ACTION_SEND` 口令，并按内容 URI 复制后导入 M3U。原生首轮据实暴露并修订 AlertDialog intrinsic 异常与 Android 17 外部路径 EACCES；最终 11/11、Kotlin 审计、全库 analyze 及 K90 冷/热/重复/M3U→SQLite 门禁通过。IPTV 树和 Hive 精确恢复、应用停止。见 `docs/ANDROID_INCOMING_SHARE_INTAKE_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows、真实跨应用、EPG 多附件、Release 和异常 Provider 继续，宏观计数不变。
+
 ### A2 设置全量
 
 主题/夜间、自定义字体、布局间距、刷新、视频/音量、竖屏直播、观看指标、后台/助眠、小窗弹幕、播放器内核/硬解/代理、本地互动、导航、平台 Cookie、缓存、备份、录制目录、日志。每个控件核对：初始值、修改后即时效果、返回后保存、重启后恢复、跨页面文案一致、Android 不出现 Windows 专属项。

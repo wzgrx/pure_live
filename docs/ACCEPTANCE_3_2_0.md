@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-13 Android 外部分享口令/附件已完成当前 K90 原生闭环**：[专项审计](ANDROID_INCOMING_SHARE_INTAKE_AUDIT_2026_09_13.md)。`269caa91` 接通初始与运行中分享、附件分类及应用 Navigator；首份候选真实复现 AlertDialog intrinsic 布局异常后由 `63417d9b` 修订，Android 17 外部物理路径 EACCES 再由 `292d3c83` 以内容 URI 即时复制修订。最终 11/11、Built-in Kotlin 审计和全库 analyze 通过；288819073 B / `528B8389…7D38` arm64 Debug 在 K90 完成冷启动口令、不同 warm 口令、重复 warm 抑制、M3U 内容 URI→SQLite 唯一频道/Provider，并且无致命/渲染/导入日志。IPTV 树逐文件恢复，全批 Hive 回到操作前 `91D6BAC5…6128F`，应用停止、桌面/stay-awake 复原。A1-05/A2-01 保持 RUN，宏观保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环；Astra Light 0 次。
+
 - **09-13 房间卡片长按与标签分配已完成源码、布局和 K90 原生闭环**：[专项审计](ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md)。`c83ed5cc` 统一以 `roomTagsMap` 读取/写入房间标签，过滤重复/失效 ID 并移除旧 room-id-only 键；卡片不再临时构造完整关注控制器，长按操作和标签选择器在窄屏/3.0 倍英文下响应式排列，新标签复用 15/40 边界、IME 和自动选中。专项 **4/4**、相邻十文件 **131/131**、全库 analyze 通过。`288827213` B arm64 Debug 已保留数据覆盖 K90，设备 APK 与 `88864CF5…8C65` 一致；真实 Bilibili 卡片完成未关注引导、创建、自动选中、确认和重开保持，PID 日志无 FATAL/ANR。规范 Hive 精确恢复到 `19F40EA9…D1F050`，应用停止、stay-awake 复原。A1-05/A2-01 保持 RUN，宏观保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环；本批 Astra Light 0 次。
 
 - **09-13 GitHub Issue 增量已核对**：[完整记录](ISSUE_AUDIT_2026_09_13.md)。维护仓库 open 0、参考仓库 open 19，最新公开更新时间仍停在 #860 的 `2026-09-11 14:10:04 UTC`；没有条目越过 #859/#860/#861 等现有专项审计窗口。只读查询未同步上游，宏观保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环；本批 Astra Light 0 次。

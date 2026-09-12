@@ -84,7 +84,7 @@ Android arm64 Debug 已保留数据覆盖 K90；真实 Bilibili 房间的分享�
   `19F40EA9E29A6017317ACB14AEBA8CF4378A6EEAA96BA15E09C7CD2312D1F050`；uid/gid/mode 和
   SELinux context 保持。结束时应用无进程，stay-awake 为 0。
 
-系统分享截图为同目录 `share-surface-1.png`，UI 层级为 `share-surface-1.xml`。
+系统分享截图为同目录 `share-surface-2.png`，UI 层级为 `share-surface-2.xml`。
 
 ## 工具与验收边界
 

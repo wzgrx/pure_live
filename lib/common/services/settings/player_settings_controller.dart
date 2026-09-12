@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:pure_live/player/core/portrait_stream_support.dart';
+import 'package:pure_live/player/utils/mpv_platform_profile.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
 
 @visibleForTesting
@@ -91,7 +92,22 @@ class PlayerSettingsController extends GetxController {
     super.onInit();
     final normalizedPlayerKey = normalizeVideoPlayerKeyForPlatform(videoPlayerKey.v, defaultTargetPlatform);
     if (videoPlayerKey.v != normalizedPlayerKey) videoPlayerKey.v = normalizedPlayerKey;
+    _normalizeMpvSettingsForPlatform(defaultTargetPlatform);
     _loadPortraitRoomOverrides(_portraitRoomOverridesRaw.v);
+  }
+
+  void _normalizeMpvSettingsForPlatform(TargetPlatform platform) {
+    if (platform != TargetPlatform.android && playerCompatMode.v) playerCompatMode.v = false;
+    if (platform != TargetPlatform.windows && enableRtxVsr.v) enableRtxVsr.v = false;
+
+    final normalizedVideoOutput = normalizeMpvVideoOutputDriverForPlatform(videoOutputDriver.v, platform);
+    if (videoOutputDriver.v != normalizedVideoOutput) videoOutputDriver.v = normalizedVideoOutput;
+
+    final normalizedAudioOutput = normalizeMpvAudioOutputDriverForPlatform(audioOutputDriver.v, platform);
+    if (audioOutputDriver.v != normalizedAudioOutput) audioOutputDriver.v = normalizedAudioOutput;
+
+    final normalizedHardwareDecoder = normalizeMpvHardwareDecoderForPlatform(videoHardwareDecoder.v, platform);
+    if (videoHardwareDecoder.v != normalizedHardwareDecoder) videoHardwareDecoder.v = normalizedHardwareDecoder;
   }
 
   PortraitOrientationOverride portraitOverrideForRoom(LiveRoom? room) {
@@ -183,7 +199,7 @@ class PlayerSettingsController extends GetxController {
     enableCodec.v = true;
     playerCompatMode.v = false;
     customPlayerOutput.v = false;
-    videoOutputDriver.v = 'gpu';
+    videoOutputDriver.v = defaultMpvVideoOutputDriverForPlatform(defaultTargetPlatform);
     audioOutputDriver.v = 'auto';
     videoHardwareDecoder.v = 'auto';
     enableRtxVsr.v = false;
@@ -235,14 +251,27 @@ class PlayerSettingsController extends GetxController {
       'preferResolution': typed<String>(json['preferResolution'] ?? PlayerConsts.resolutions.first),
       'preferResolutionCellular': typed<String>(json['preferResolutionCellular'] ?? PlayerConsts.resolutions.first),
       'enableCodec': typed<bool>(json['enableCodec'] ?? true),
-      'playerCompatMode': typed<bool>(json['playerCompatMode'] ?? false),
+      'playerCompatMode': defaultTargetPlatform == TargetPlatform.android
+          ? typed<bool>(json['playerCompatMode'] ?? false)
+          : false,
       'customPlayerOutput': typed<bool>(json['customPlayerOutput'] ?? false),
-      'videoOutputDriver': typed<String>(json['videoOutputDriver'] ?? 'gpu'),
-      'audioOutputDriver': typed<String>(json['audioOutputDriver'] ?? 'auto'),
-      'videoHardwareDecoder': typed<String>(json['videoHardwareDecoder'] ?? 'auto'),
+      'videoOutputDriver': normalizeMpvVideoOutputDriverForPlatform(
+        typed<String>(json['videoOutputDriver'] ?? defaultMpvVideoOutputDriverForPlatform(defaultTargetPlatform)),
+        defaultTargetPlatform,
+      ),
+      'audioOutputDriver': normalizeMpvAudioOutputDriverForPlatform(
+        typed<String>(json['audioOutputDriver'] ?? 'auto'),
+        defaultTargetPlatform,
+      ),
+      'videoHardwareDecoder': normalizeMpvHardwareDecoderForPlatform(
+        typed<String>(json['videoHardwareDecoder'] ?? 'auto'),
+        defaultTargetPlatform,
+      ),
       'floatPlay': typed<bool>(json['floatPlay'] ?? false),
       'windowsPipAlwaysOnTop': typed<bool>(json['windowsPipAlwaysOnTop'] ?? false),
-      'enableRtxVsr': typed<bool>(json['enableRtxVsr'] ?? false),
+      'enableRtxVsr': defaultTargetPlatform == TargetPlatform.windows
+          ? typed<bool>(json['enableRtxVsr'] ?? false)
+          : false,
       'audioOnly': typed<bool>(false),
       'useHardStopOnExit': typed<bool>(json['useHardStopOnExit'] ?? false),
       'enablePortraitStreamAdaptation': typed<bool>(json['enablePortraitStreamAdaptation'] ?? true),
@@ -314,18 +343,27 @@ class PlayerSettingsController extends GetxController {
       'preferResolution': player['preferResolution'] ?? PlayerConsts.resolutions.first,
       'preferResolutionCellular': player['preferResolutionCellular'] ?? PlayerConsts.resolutions.first,
       'enableCodec': player['enableCodec'] ?? true,
-      'playerCompatMode': player['playerCompatMode'] ?? false,
+      'playerCompatMode': defaultTargetPlatform == TargetPlatform.android ? player['playerCompatMode'] ?? false : false,
       'customPlayerOutput': player['customPlayerOutput'] ?? false,
-      'videoOutputDriver': player['videoOutputDriver'] ?? 'gpu',
-      'audioOutputDriver': player['audioOutputDriver'] ?? 'auto',
-      'videoHardwareDecoder': player['videoHardwareDecoder'] ?? 'auto',
+      'videoOutputDriver': normalizeMpvVideoOutputDriverForPlatform(
+        (player['videoOutputDriver'] ?? defaultMpvVideoOutputDriverForPlatform(defaultTargetPlatform)) as String,
+        defaultTargetPlatform,
+      ),
+      'audioOutputDriver': normalizeMpvAudioOutputDriverForPlatform(
+        (player['audioOutputDriver'] ?? 'auto') as String,
+        defaultTargetPlatform,
+      ),
+      'videoHardwareDecoder': normalizeMpvHardwareDecoderForPlatform(
+        (player['videoHardwareDecoder'] ?? 'auto') as String,
+        defaultTargetPlatform,
+      ),
       'floatPlay': player['floatPlay'] ?? false,
       'windowsPipAlwaysOnTop': player['windowsPipAlwaysOnTop'] ?? false,
       // Compatibility-only input for backups created before the ownership of
       // this setting moved to WindowSizeController. New exports store it in
       // the windowSize section.
       'rememberPipPosition': player['rememberPipPosition'] ?? true,
-      'enableRtxVsr': player['enableRtxVsr'] ?? false,
+      'enableRtxVsr': defaultTargetPlatform == TargetPlatform.windows ? player['enableRtxVsr'] ?? false : false,
       'audioOnly': false,
       'useHardStopOnExit': player['useHardStopOnExit'] ?? false,
       'enablePortraitStreamAdaptation': player['enablePortraitStreamAdaptation'] ?? true,

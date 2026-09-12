@@ -7,6 +7,7 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/services/settings/player_settings_controller.dart';
 import 'package:pure_live/core/common/proxy_routing.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:pure_live/player/utils/mpv_platform_profile.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
 import 'package:pure_live/player/models/player_engine.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
@@ -109,6 +110,10 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
 
   Widget _buildMpvSettings(BuildContext context) {
     final theme = Theme.of(context);
+    final platform = defaultTargetPlatform;
+    final videoOutputDrivers = mpvVideoOutputDriversForPlatform(platform);
+    final audioOutputDrivers = mpvAudioOutputDriversForPlatform(platform);
+    final hardwareDecoders = mpvHardwareDecodersForPlatform(platform);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -149,8 +154,8 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
             () => context.buildMenuTile<String>(
               title: i18n("video_output_driver"),
               icon: Remix.movie_line,
-              value: SettingsService.to.player.videoOutputDriver.v,
-              valueMap: PlayerConsts.videoOutputDrivers,
+              value: normalizeMpvVideoOutputDriverForPlatform(SettingsService.to.player.videoOutputDriver.v, platform),
+              valueMap: videoOutputDrivers,
               onChanged: (e) => SettingsService.to.player.videoOutputDriver.v = e,
             ),
           ),
@@ -158,8 +163,8 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
             () => context.buildMenuTile<String>(
               title: i18n("audio_output_driver"),
               icon: Remix.volume_up_line,
-              value: SettingsService.to.player.audioOutputDriver.v,
-              valueMap: PlayerConsts.audioOutputDrivers,
+              value: normalizeMpvAudioOutputDriverForPlatform(SettingsService.to.player.audioOutputDriver.v, platform),
+              valueMap: audioOutputDrivers,
               onChanged: (e) => SettingsService.to.player.audioOutputDriver.v = e,
             ),
           ),
@@ -167,8 +172,8 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
             () => context.buildMenuTile<String>(
               title: i18n("hardware_decoder"),
               icon: Remix.cpu_line,
-              value: SettingsService.to.player.videoHardwareDecoder.v,
-              valueMap: PlayerConsts.hardwareDecoder,
+              value: normalizeMpvHardwareDecoderForPlatform(SettingsService.to.player.videoHardwareDecoder.v, platform),
+              valueMap: hardwareDecoders,
               onChanged: (e) => SettingsService.to.player.videoHardwareDecoder.v = e,
             ),
           ),

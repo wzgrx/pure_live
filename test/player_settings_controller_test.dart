@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/services/settings/player_settings_controller.dart';
+import 'package:pure_live/player/utils/mpv_platform_profile.dart';
 
 void main() {
   group('player settings migration', () {
@@ -28,6 +29,47 @@ void main() {
       expect(normalizeVideoPlayerKeyForPlatform('missing', TargetPlatform.android), 'mpv');
       expect(normalizeVideoPlayerKeyForPlatform('missing', TargetPlatform.iOS), 'ijk');
       expect(availableVideoPlayerKeysForPlatform(TargetPlatform.windows), const <String>['mpv']);
+    });
+
+    test('normalizes Android-only and desktop MPV options imported on iOS', () {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      final imported = PlayerSettingsController.extractConfig({
+        'player': <String, dynamic>{
+          'videoPlayerKey': 'mpv',
+          'playerCompatMode': true,
+          'customPlayerOutput': true,
+          'videoOutputDriver': 'mediacodec_embed',
+          'audioOutputDriver': 'wasapi',
+          'videoHardwareDecoder': 'd3d11va',
+          'enableRtxVsr': true,
+        },
+      });
+
+      expect(imported['videoPlayerKey'], 'mpv');
+      expect(imported['playerCompatMode'], isFalse);
+      expect(imported['customPlayerOutput'], isTrue);
+      expect(imported['videoOutputDriver'], 'libmpv');
+      expect(imported['audioOutputDriver'], 'auto');
+      expect(imported['videoHardwareDecoder'], 'auto');
+      expect(imported['enableRtxVsr'], isFalse);
+    });
+
+    test('publishes an iOS MPV profile that keeps the Flutter texture and VideoToolbox choices', () {
+      expect(mpvVideoOutputDriversForPlatform(TargetPlatform.iOS).keys, <String>['libmpv']);
+      expect(mpvAudioOutputDriversForPlatform(TargetPlatform.iOS).keys, <String>['auto', 'audiounit', 'null']);
+      expect(mpvHardwareDecodersForPlatform(TargetPlatform.iOS).keys, <String>[
+        'auto',
+        'auto-safe',
+        'auto-copy',
+        'no',
+        'videotoolbox',
+        'videotoolbox-copy',
+      ]);
+      expect(normalizeMpvVideoOutputDriverForPlatform('gpu', TargetPlatform.iOS), 'libmpv');
+      expect(normalizeMpvHardwareDecoderForPlatform('videotoolbox', TargetPlatform.iOS), 'videotoolbox');
+      expect(normalizeMpvHardwareDecoderForPlatform('mediacodec', TargetPlatform.iOS), 'auto');
     });
 
     test('retires the legacy global audio-only default', () {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../models/player_state.dart';
@@ -15,6 +16,7 @@ import 'package:media_kit/media_kit.dart' hide PlayerState;
 import 'package:pure_live/player/models/player_engine.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
 import 'package:pure_live/player/utils/live_buffer_policy.dart';
+import 'package:pure_live/player/utils/mpv_platform_profile.dart';
 import 'package:pure_live/common/utils/latest_async_value_queue.dart';
 import 'package:pure_live/player/widgets/video_output_viewport_sizer.dart';
 import 'package:pure_live/player/interface/media_kit_player_accessor.dart';
@@ -102,7 +104,10 @@ class MediaKitAdapter
     await native.setProperty('hwdec-software-fallback', '1');
 
     if (SettingsService.to.player.customPlayerOutput.v) {
-      await native.setProperty('ao', SettingsService.to.player.audioOutputDriver.v);
+      await native.setProperty(
+        'ao',
+        normalizeMpvAudioOutputDriverForPlatform(SettingsService.to.player.audioOutputDriver.v, defaultTargetPlatform),
+      );
     } else if (PlatformUtils.isLinux) {
       await native.setProperty('ao', 'alsa');
     }
@@ -255,17 +260,28 @@ class MediaKitAdapter
       // =========================
       // controller
       // =========================
+      final platform = defaultTargetPlatform;
+      final androidCompatMode = PlatformUtils.isAndroid && SettingsService.to.player.playerCompatMode.v;
+      final videoOutputDriver = normalizeMpvVideoOutputDriverForPlatform(
+        SettingsService.to.player.videoOutputDriver.v,
+        platform,
+      );
+      final hardwareDecoder = normalizeMpvHardwareDecoderForPlatform(
+        SettingsService.to.player.videoHardwareDecoder.v,
+        platform,
+      );
+
       _preferredHardwareDecoder = PlatformUtils.isMacOS
           ? 'no'
-          : SettingsService.to.player.playerCompatMode.v
+          : androidCompatMode
           ? 'mediacodec'
           : SettingsService.to.player.customPlayerOutput.v
-          ? SettingsService.to.player.videoHardwareDecoder.v
+          ? hardwareDecoder
           : SettingsService.to.player.enableCodec.v
           ? 'auto-safe'
           : 'no';
 
-      _controller = SettingsService.to.player.playerCompatMode.v
+      _controller = androidCompatMode
           ? VideoController(
               _player,
               configuration: const VideoControllerConfiguration(vo: 'mediacodec_embed', hwdec: 'mediacodec'),
@@ -274,8 +290,8 @@ class MediaKitAdapter
           ? VideoController(
               _player,
               configuration: VideoControllerConfiguration(
-                vo: SettingsService.to.player.videoOutputDriver.v,
-                hwdec: PlatformUtils.isMacOS ? 'no' : SettingsService.to.player.videoHardwareDecoder.v,
+                vo: videoOutputDriver,
+                hwdec: PlatformUtils.isMacOS ? 'no' : hardwareDecoder,
                 enableHardwareAcceleration: !PlatformUtils.isMacOS,
               ),
             )

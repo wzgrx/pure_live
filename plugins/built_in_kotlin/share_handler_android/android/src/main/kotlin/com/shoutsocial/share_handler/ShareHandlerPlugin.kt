@@ -28,6 +28,8 @@ import java.net.URLConnection
 import java.util.UUID
 
 private const val kEventsChannel = "com.shoutsocial.share_handler/sharedMediaStream"
+private const val MAX_ATTACHMENT_NAME_BYTES = 180
+private const val MAX_ATTACHMENT_EXTENSION_BYTES = 24
 
 /** ShareHandlerPlugin */
 class ShareHandlerPlugin : FlutterPlugin, Messages.ShareHandlerApi, EventChannel.StreamHandler, ActivityAware,
@@ -224,50 +226,84 @@ class ShareHandlerPlugin : FlutterPlugin, Messages.ShareHandlerApi, EventChannel
   }
 
   private fun attachmentForUri(uri: Uri): Messages.SharedAttachment? {
-    val contentResolver = applicationContext.contentResolver
-    val mimeType = contentResolver.getType(uri)
-    val type = getAttachmentType(mimeType)
+    var attachmentDirectory: File? = null
+    return try {
+      val contentResolver = applicationContext.contentResolver
+      val mimeType = contentResolver.getType(uri)
+      val type = getAttachmentType(mimeType)
 
-    // A file URI may already point to app-owned storage. Content URIs must be
-    // copied while their transient grant is active: resolving them to an
-    // external-storage path breaks under scoped storage on current Android.
-    if (uri.scheme.equals("file", ignoreCase = true)) {
-      val directFile = uri.path?.let(::File)
-      if (directFile?.isFile == true && directFile.canRead()) {
-        return Messages.SharedAttachment.Builder()
-          .setPath(directFile.absolutePath)
-          .setType(type)
-          .build()
+      // A file URI may already point to app-owned storage. Content URIs must be
+      // copied while their transient grant is active: resolving them to an
+      // external-storage path breaks under scoped storage on current Android.
+      if (uri.scheme.equals("file", ignoreCase = true)) {
+        val directFile = uri.path?.let(::File)
+        if (directFile?.isFile == true && directFile.canRead()) {
+          return Messages.SharedAttachment.Builder()
+            .setPath(directFile.absolutePath)
+            .setType(type)
+            .build()
+        }
       }
-    }
 
-    val displayName = getFileNameFromUri(contentResolver, uri, mimeType) ?: return null
-    val safeName = safeAttachmentFileName(displayName, mimeType)
-    val stagingRoot = File(applicationContext.cacheDir, "share_handler")
-    val attachmentDirectory = File(stagingRoot, UUID.randomUUID().toString())
-    if (!attachmentDirectory.mkdirs()) return null
-    val copiedFile = File(attachmentDirectory, safeName)
-    if (!copyFile(contentResolver, uri, copiedFile)) {
-      copiedFile.delete()
-      attachmentDirectory.delete()
-      return null
+      val displayName = getFileNameFromUri(contentResolver, uri, mimeType) ?: return null
+      val safeName = safeAttachmentFileName(displayName, mimeType)
+      val stagingRoot = File(applicationContext.cacheDir, "share_handler")
+      val directory = File(stagingRoot, UUID.randomUUID().toString())
+      attachmentDirectory = directory
+      if (!directory.mkdirs()) return null
+      val copiedFile = File(directory, safeName)
+      if (!copyFile(contentResolver, uri, copiedFile)) {
+        copiedFile.delete()
+        directory.delete()
+        return null
+      }
+      Messages.SharedAttachment.Builder()
+        .setPath(copiedFile.absolutePath)
+        .setType(type)
+        .build()
+    } catch (error: Exception) {
+      attachmentDirectory?.let { directory -> runCatching { directory.deleteRecursively() } }
+      Log.e("ShareHandler", "Shared URI attachment failed", error)
+      null
     }
-    return Messages.SharedAttachment.Builder()
-      .setPath(copiedFile.absolutePath)
-      .setType(type)
-      .build()
   }
 
   private fun safeAttachmentFileName(displayName: String, mimeType: String?): String {
     val leaf = displayName.substringAfterLast('/').substringAfterLast('\\').trim()
     val fallbackExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "bin"
-    val candidate = leaf.takeIf { it.isNotEmpty() && it != "." && it != ".." }
+    val sanitizedLeaf = buildString(leaf.length) {
+      leaf.forEach { character ->
+        append(if (character.code < 0x20 || character.code == 0x7f) '_' else character)
+      }
+    }
+    val candidate = sanitizedLeaf.takeIf { it.isNotEmpty() && it != "." && it != ".." }
       ?: "file_${System.currentTimeMillis()}.$fallbackExtension"
-    if (candidate.length <= 180) return candidate
+    if (candidate.toByteArray(Charsets.UTF_8).size <= MAX_ATTACHMENT_NAME_BYTES) return candidate
 
-    val extension = File(candidate).extension.take(24)
+    val originalExtension = candidate.substringAfterLast('.', "")
+    val extension = truncateUtf8(originalExtension, MAX_ATTACHMENT_EXTENSION_BYTES)
     val suffix = if (extension.isEmpty()) "" else ".$extension"
-    return candidate.substringBeforeLast('.', candidate).take(180 - suffix.length) + suffix
+    val rawBase = if (originalExtension.isEmpty()) candidate else candidate.dropLast(originalExtension.length + 1)
+    val baseBudget = MAX_ATTACHMENT_NAME_BYTES - suffix.toByteArray(Charsets.UTF_8).size
+    val base = truncateUtf8(rawBase, baseBudget).ifEmpty { "file" }
+    return base + suffix
+  }
+
+  private fun truncateUtf8(value: String, maxBytes: Int): String {
+    if (maxBytes <= 0) return ""
+    val result = StringBuilder()
+    var usedBytes = 0
+    var offset = 0
+    while (offset < value.length) {
+      val codePoint = Character.codePointAt(value, offset)
+      val segment = String(Character.toChars(codePoint))
+      val segmentBytes = segment.toByteArray(Charsets.UTF_8).size
+      if (usedBytes + segmentBytes > maxBytes) break
+      result.append(segment)
+      usedBytes += segmentBytes
+      offset += Character.charCount(codePoint)
+    }
+    return result.toString()
   }
 
   // Function to get the file name from the URI

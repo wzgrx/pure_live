@@ -272,8 +272,14 @@ void main() {
     ).readAsStringSync();
     expect(androidPlugin, contains('uri.scheme.equals("file", ignoreCase = true)'));
     expect(androidPlugin, contains('File(applicationContext.cacheDir, "share_handler")'));
-    expect(androidPlugin, contains('File(attachmentDirectory, safeName)'));
+    expect(androidPlugin, contains('File(directory, safeName)'));
     expect(androidPlugin, contains('UUID.randomUUID().toString()'));
+    expect(androidPlugin, contains('MAX_ATTACHMENT_NAME_BYTES = 180'));
+    expect(androidPlugin, contains('candidate.toByteArray(Charsets.UTF_8).size'));
+    expect(androidPlugin, contains('private fun truncateUtf8'));
+    expect(androidPlugin, contains('character.code < 0x20 || character.code == 0x7f'));
+    expect(androidPlugin, contains('Shared URI attachment failed'));
+    expect(androidPlugin, contains('directory.deleteRecursively()'));
     expect(androidPlugin, contains('contentResolver.openInputStream(uri) ?: return false'));
     expect(androidPlugin, isNot(contains('FileDirectory.getAbsolutePath(applicationContext, uri)')));
   });

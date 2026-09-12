@@ -37,6 +37,7 @@ class ResolvedRecordStream {
     this.refreshAt,
     this.invalidAt,
     this.sourceQueryPolicy,
+    this.httpHeaders = const <String, String>{},
   }) : inputRecipe = null;
 
   const ResolvedRecordStream.owned({
@@ -49,7 +50,8 @@ class ResolvedRecordStream {
        candidateUrls = const [],
        refreshAt = null,
        invalidAt = null,
-       sourceQueryPolicy = null;
+       sourceQueryPolicy = null,
+       httpHeaders = const <String, String>{};
 
   /// Empty only for an owned input; never pass this compatibility view to FFmpeg.
   final String url;
@@ -73,6 +75,7 @@ class ResolvedRecordStream {
   /// one. It is retained for diagnostics and future bounded retry decisions.
   final DateTime? invalidAt;
   final HlsSourceQueryPolicy? sourceQueryPolicy;
+  final Map<String, String> httpHeaders;
 
   String get lineLabel => '线路${lineIndex + 1}';
 }
@@ -380,6 +383,7 @@ class StreamResolverService extends GetxService {
       inputRecipe: lineIndex == null || lineIndex == 0 ? resolution.inputRecipe : null,
       urls: validUrls,
       sourceQueryPolicies: resolution.sourceQueryPolicies,
+      httpHeaders: detail.httpHeaders,
       refreshTimes: validUrls.map((url) => leaseMetadata?.getPlayUrlRefreshAt(url)?.toUtc()).toList(growable: false),
       invalidTimes: validUrls.map((url) => leaseMetadata?.getPlayUrlInvalidAt(url)?.toUtc()).toList(growable: false),
       lineIndexes: lineIndex == null
@@ -415,6 +419,7 @@ class _ResolvedQuality {
     required this.refreshTimes,
     required this.invalidTimes,
     required this.sourceQueryPolicies,
+    required this.httpHeaders,
   });
 
   final LiveInputRecipe? inputRecipe;
@@ -427,6 +432,7 @@ class _ResolvedQuality {
   final List<DateTime?> refreshTimes;
   final List<DateTime?> invalidTimes;
   final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
+  final Map<String, String> httpHeaders;
 
   ResolvedRecordStream select(int position) {
     final input = inputRecipe;
@@ -443,6 +449,7 @@ class _ResolvedQuality {
       refreshAt: refreshTimes[normalizedPosition],
       invalidAt: invalidTimes[normalizedPosition],
       sourceQueryPolicy: sourceQueryPolicies[urls[normalizedPosition]],
+      httpHeaders: Map<String, String>.unmodifiable(httpHeaders),
     );
   }
 }

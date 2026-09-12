@@ -142,6 +142,7 @@ void main() {
         catchupSource: const drift.Value('&start={utc}&duration={duration}'),
         catchupDays: const drift.Value(3.5),
         catchupCorrectionHours: const drift.Value(-2.5),
+        httpHeadersJson: const drift.Value('{"user-agent":"Archive Agent","referer":"https://fixture/room"}'),
       ),
     ]);
 
@@ -152,10 +153,28 @@ void main() {
     expect(stored?.catchupSource, '&start={utc}&duration={duration}');
     expect(stored?.catchupDays, 3.5);
     expect(stored?.catchupCorrectionHours, -2.5);
+    expect(stored?.httpHeadersJson, isNotNull);
     expect(room.catchUpMode, 'append');
     expect(room.catchUpSource, '&start={utc}&duration={duration}');
     expect(room.catchUpDays, 3.5);
     expect(room.catchUpCorrectionHours, -2.5);
+    expect(room.httpHeaders, {'referer': 'https://fixture/room', 'user-agent': 'Archive Agent'});
+  });
+
+  test('malformed persisted IPTV headers degrade to an empty room profile', () async {
+    await db.upsertProvider(ProvidersCompanion.insert(id: 'headers', name: 'Headers', type: 'm3u'));
+    await db.upsertChannels([
+      ChannelsCompanion.insert(
+        id: 'headers-room',
+        providerId: 'headers',
+        name: 'Headers room',
+        streamUrl: 'https://fixture/live',
+        httpHeadersJson: const drift.Value('{broken'),
+      ),
+    ]);
+
+    final room = await IptvSite().getRoomDetail(platform: 'iptv', roomId: 'headers-room');
+    expect(room.httpHeaders, isEmpty);
   });
 
   test('channel detail never mixes schedules from equal raw IDs', () async {
@@ -378,7 +397,7 @@ void main() {
     final oldRecording = (await db.select(db.scheduledRecordings).get()).single;
     await reopen();
     expect(await db.getAllEpgSources(), oldSources);
-    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
     for (final id in ['A', 'B']) {
       final ch = (await db.getEpgChannelsForSource(id)).single;
       expect(ch.id, epgChannelKey(id, 'common'));
@@ -535,26 +554,26 @@ void main() {
     Get.put(DbService()..db = db);
     await expectLater(db.getAllEpgSources(), throwsA(isA<StateError>()));
     await reopen();
-    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
     expect((await db.select(db.epgProgrammes).get()).single.epgChannelId, epgChannelKey('A', 'common'));
   });
 
   test('future database version stays intact when downgrade is attempted', () async {
     await importSource('A');
     final old = await snapshot();
-    await db.customStatement('PRAGMA user_version = 9');
+    await db.customStatement('PRAGMA user_version = 10');
     await reopen();
     await expectLater(db.getAllEpgSources(), throwsA(isA<StateError>()));
     await db.close();
     Get.delete<DbService>(force: true);
-    db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), 9);
+    db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), 10);
     Get.put(DbService()..db = db);
-    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 10);
     expect(await snapshot(), old);
   });
 
   for (int version = 1; version <= 5; version++) {
-    test('historical schema $version upgrades data and later tables through version 8', () async {
+    test('historical schema $version upgrades data and later tables through version 9', () async {
       await db.close();
       Get.delete<DbService>(force: true);
       db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), version);
@@ -582,7 +601,7 @@ void main() {
       expect(await db.select(db.epgReminders).get(), isEmpty);
       expect(await db.select(db.scheduledRecordings).get(), isEmpty);
       expect(await db.select(db.failoverGroups).get(), isEmpty);
-      expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
+      expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
     });
   }
 
@@ -612,8 +631,43 @@ void main() {
     expect(channel?.catchupSource, isNull);
     expect(channel?.catchupDays, isNull);
     expect(channel?.catchupCorrectionHours, isNull);
+    expect(channel?.httpHeadersJson, isNull);
     expect((await db.select(db.epgProgrammes).get()).single.catchupId, isNull);
-    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 8);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
+  });
+
+  test('schema 8 adds nullable per-channel HTTP headers without changing existing rows', () async {
+    await db.close();
+    Get.delete<DbService>(force: true);
+    db = _HistoricalDatabase(NativeDatabase(File('${directory.path}/test.sqlite')), 8);
+    Get.put(DbService()..db = db);
+    await db.customStatement("INSERT INTO providers (id, name, type) VALUES ('old', 'Old', 'm3u')");
+    await db.customStatement(
+      "INSERT INTO channels (id, provider_id, name, stream_url) "
+      "VALUES ('old-room', 'old', 'Old room', 'https://fixture/live')",
+    );
+    await reopen();
+
+    expect((await db.getChannelById('old-room'))?.httpHeadersJson, isNull);
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
+  });
+
+  test('schema 8 replay skips an existing header column and preserves its value', () async {
+    await db.upsertProvider(ProvidersCompanion.insert(id: 'replay', name: 'Replay', type: 'm3u'));
+    await db.upsertChannels([
+      ChannelsCompanion.insert(
+        id: 'replay-room',
+        providerId: 'replay',
+        name: 'Replay room',
+        streamUrl: 'https://fixture/live',
+        httpHeadersJson: const drift.Value('{"authorization":"Bearer replay"}'),
+      ),
+    ]);
+    await db.customStatement('PRAGMA user_version = 8');
+    await reopen();
+
+    expect((await db.getChannelById('replay-room'))?.httpHeadersJson, '{"authorization":"Bearer replay"}');
+    expect((await db.customSelect('PRAGMA user_version').get()).single.read<int>('user_version'), 9);
   });
 }
 
@@ -670,6 +724,7 @@ class _HistoricalDatabase extends AppDatabase {
         await customStatement('ALTER TABLE epg_sources DROP COLUMN is_auto_update');
       }
       if (version < 8) await _dropCatchupColumns(this);
+      if (version < 9) await customStatement('ALTER TABLE channels DROP COLUMN http_headers_json');
     },
   );
 }

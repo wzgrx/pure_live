@@ -874,7 +874,11 @@ class RecorderController extends GetxService {
       final recipe = resolved.inputRecipe;
       final ownedSource = recipe == null ? null : _inputRecordingBinder(recipe);
       final headers = ownedSource == null
-          ? await FFmpegHeaderFactory.build(platform: task.platform, roomId: task.roomId)
+          ? await FFmpegHeaderFactory.build(
+              platform: task.platform,
+              roomId: task.roomId,
+              roomHeaders: resolved.httpHeaders,
+            )
           : const <String, String>{};
       if (token.isCancelled) return;
 

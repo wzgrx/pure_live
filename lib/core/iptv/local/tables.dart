@@ -35,6 +35,7 @@ class Channels extends Table {
   TextColumn get catchupSource => text().nullable()();
   RealColumn get catchupDays => real().nullable()();
   RealColumn get catchupCorrectionHours => real().nullable()();
+  TextColumn get httpHeadersJson => text().nullable()();
   BoolColumn get favorite => boolean().withDefault(const Constant(false))();
   BoolColumn get hidden => boolean().withDefault(const Constant(false))();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();

@@ -163,6 +163,27 @@ void main() {
     expect(refreshed.catchupCorrectionHours, 1.25);
   });
 
+  test('per-channel HTTP headers persist, refresh and clear on the stable channel identity', () async {
+    String feed(String options) =>
+        '#EXTM3U\n'
+        '#EXTINF:-1 tvg-id="news",News\n'
+        '#EXTVLCOPT:http-user-agent=Directive Agent\n'
+        'https://fixture/live.m3u8$options\n';
+
+    expect(await import(await input(feed('|user-agent=URL%20Agent&referrer=https%3A%2F%2Ffixture%2Froom'))), isTrue);
+    final first = (await db.select(db.channels).get()).single;
+    expect(first.httpHeadersJson, '{"referer":"https://fixture/room","user-agent":"URL Agent"}');
+
+    expect(await import(await input(feed('|authorization=Bearer%20next'))), isTrue);
+    await reopen();
+    final refreshed = (await db.select(db.channels).get()).single;
+    expect(refreshed.id, first.id);
+    expect(refreshed.httpHeadersJson, '{"authorization":"Bearer next","user-agent":"Directive Agent"}');
+
+    expect(await import(await input('#EXTM3U\n#EXTINF:-1 tvg-id="news",News\nhttps://fixture/live.m3u8\n')), isTrue);
+    expect((await db.select(db.channels).get()).single.httpHeadersJson, isNull);
+  });
+
   test('forced same-name refresh updates one provider instead of creating a duplicate', () async {
     expect(await import(await input(_m3u())), isTrue);
     final old = (await db.getAllProviders()).single;

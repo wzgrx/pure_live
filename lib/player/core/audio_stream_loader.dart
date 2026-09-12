@@ -29,6 +29,7 @@ class AudioStreamLoader {
     required Function(String audioUrl) onAudioReady,
     Function(FFmpegEvent event)? onFFmpegEvent,
     required String platform, // 用于构建FFmpeg请求头
+    Map<String, String> roomHeaders = const <String, String>{},
   }) async {
     if (_currentTaskId != null) {
       stop();
@@ -41,7 +42,7 @@ class AudioStreamLoader {
 
     log('AudioStreamLoader: 分配空闲端口 -> $port, URL -> $_currentAudioUrl');
 
-    final headers = await FFmpegHeaderFactory.build(platform: platform);
+    final headers = await FFmpegHeaderFactory.build(platform: platform, roomHeaders: roomHeaders);
 
     final arguments = FFmpegCommandBuilder.buildAudioStreamArguments(
       headers: headers,

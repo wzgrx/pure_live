@@ -250,6 +250,92 @@ https://fixture/three
     expect(result.channels[2].catchupMode, 'disabled');
     expect(result.channels[2].catchupDays, 0);
   });
+  test('entry HTTP directives and URL options become headers without leaking into the media URL', () {
+    final result = M3uParser().parse('''#EXTM3U
+#EXTINF:-1,Protected
+#EXTVLCOPT:http-user-agent=Directive Agent/1.0
+#EXTVLCOPT:http-referrer=https://fixture/guide?id=1
+https://fixture/live.m3u8|seekable=1&reconnect_streamed=1&user-agent=URL+Agent%2F2.0&referrer=https%3A%2F%2Ffixture%2Froom%3Fa%3D1%26b%3D2&!x-token=abc%2B%3D
+#EXTINF:-1,Plain
+https://fixture/plain.m3u8
+''', providerId: 'fixture');
+
+    expect(result.errors, isEmpty);
+    expect(result.channels, hasLength(2));
+    expect(result.channels.first.streamUrl, 'https://fixture/live.m3u8');
+    expect(result.channels.first.httpHeaders, {
+      'user-agent': 'URL Agent/2.0',
+      'referer': 'https://fixture/room?a=1&b=2',
+      'x-token': 'abc+=',
+    });
+    expect(result.channels.last.httpHeaders, isEmpty);
+  });
+  test('header and EXTINF HTTP defaults yield to entry directives and URL options', () {
+    final result = M3uParser().parse('''#EXTM3U http-user-agent="Header Agent" http-referrer="https://fixture/header"
+#EXTINF:-1 http-user-agent="Attribute Agent" http-referrer="https://fixture/attribute",One
+#EXTVLCOPT:http-user-agent=Directive Agent
+https://fixture/one.m3u8
+#EXTINF:-1,Two
+https://fixture/two.m3u8|cookies=session%3D42
+''', providerId: 'fixture');
+
+    expect(result.errors, isEmpty);
+    expect(result.channels.first.httpHeaders, {
+      'user-agent': 'Directive Agent',
+      'referer': 'https://fixture/attribute',
+    });
+    expect(result.channels.last.httpHeaders, {
+      'user-agent': 'Header Agent',
+      'referer': 'https://fixture/header',
+      'cookie': 'session=42',
+    });
+  });
+  test('EXTHTTP and Kodi adaptive header properties support leading and stanza forms', () {
+    final result = M3uParser().parse('''#EXTM3U
+#EXTHTTP:{"Cookie":"session=first","X-Device":"tv"}
+#EXTINF:-1,One
+https://fixture/one.mpd
+#EXTINF:-1,Two
+#KODIPROP:inputstream.adaptive.stream_headers=origin=https%3A%2F%2Ffixture&authorization=Bearer%20two
+#KODIPROP:inputstream.adaptive.manifest_headers=x-manifest=yes
+https://fixture/two.m3u8
+''', providerId: 'fixture');
+
+    expect(result.errors, isEmpty);
+    expect(result.channels.first.httpHeaders, {'cookie': 'session=first', 'x-device': 'tv'});
+    expect(result.channels.last.httpHeaders, {
+      'authorization': 'Bearer two',
+      'origin': 'https://fixture',
+      'x-manifest': 'yes',
+    });
+  });
+  test('malformed EXTHTTP JSON marks the playlist snapshot invalid', () {
+    final result = M3uParser().parse(
+      '#EXTM3U\n#EXTINF:-1,Broken\n#EXTHTTP:{"Cookie":}\nhttps://fixture/live.m3u8\n',
+      providerId: 'fixture',
+    );
+
+    expect(result.hasErrors, isTrue);
+    expect(result.errors.single, contains('Invalid EXTHTTP header'));
+  });
+  test('EXTHTTP rejects mixed non-string values instead of keeping partial authentication', () {
+    final result = M3uParser().parse(
+      '#EXTM3U\n#EXTINF:-1,Broken\n#EXTHTTP:{"Cookie":"session=one","Authorization":42}\nhttps://fixture/live.m3u8\n',
+      providerId: 'fixture',
+    );
+
+    expect(result.hasErrors, isTrue);
+    expect(result.errors.single, contains('Invalid EXTHTTP header'));
+  });
+  test('malformed URL header options reject the stanza instead of sending an ambiguous URL', () {
+    final result = M3uParser().parse(
+      '#EXTM3U\n#EXTINF:-1,Broken\nhttps://fixture/live.m3u8|Authorization\n',
+      providerId: 'fixture',
+    );
+
+    expect(result.channels, isEmpty);
+    expect(result.errors.single, contains('Invalid stream header option'));
+  });
   test('empty input and nameless stanza report errors', () {
     for (final content in ['', '\uFEFF\n\r\n', '#EXTM3U\n#EXTINF:-1,\nhttps://fixture/live']) {
       final result = M3uParser().parse(content, providerId: 'fixture');

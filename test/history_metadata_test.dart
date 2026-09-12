@@ -47,6 +47,27 @@ void main() {
     expect(LiveRoom.fromJson({'catchUpCorrectionHours': double.infinity}).catchUpCorrectionHours, isNull);
   });
 
+  test('IPTV HTTP headers survive room JSON with normalized names and no control characters', () {
+    final decoded = LiveRoom.fromJson(
+      LiveRoom(
+        roomId: 'iptv-headers',
+        platform: 'iptv',
+        httpHeaders: const {
+          'User-Agent': 'Channel Agent',
+          'Referrer': 'https://fixture/room',
+          'X-Token': 'line-one\r\nline-two',
+          'bad name': 'discarded',
+        },
+      ).toJson(),
+    );
+
+    expect(decoded.httpHeaders, {
+      'user-agent': 'Channel Agent',
+      'referer': 'https://fixture/room',
+      'x-token': 'line-one line-two',
+    });
+  });
+
   test('history list keeps newest fifty entries', () {
     var history = <LiveRoom>[];
     for (var index = 0; index < 55; index++) {

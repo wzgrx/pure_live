@@ -1,4 +1,5 @@
 import 'package:pure_live/player/core/live_room_volume_manager.dart';
+import 'package:pure_live/core/common/http_header_policy.dart';
 
 enum LiveStatus { live, offline, replay, unknown, banned }
 
@@ -202,6 +203,7 @@ class LiveRoom {
   String? catchUpSource; // M3U provider URL template/query
   double? catchUpDays; // Provider archive window
   double? catchUpCorrectionHours; // Provider timestamp correction
+  Map<String, String> httpHeaders; // Per-channel IPTV media request fields
 
   /// Local epoch-millisecond timestamp used by the viewing-history UI.
   int? lastWatchedAt;
@@ -241,6 +243,7 @@ class LiveRoom {
     this.catchUpSource,
     this.catchUpDays,
     this.catchUpCorrectionHours,
+    this.httpHeaders = const <String, String>{},
     this.lastWatchedAt,
     List<String>? tagIds,
   }) : liveStatus = liveStatus ?? _legacyStatusToLiveStatus(status: status, isRecord: isRecord),
@@ -282,6 +285,7 @@ class LiveRoom {
       catchUpSource = json['catchUpSource']?.toString(),
       catchUpDays = _finiteDoubleFromJson(json['catchUpDays']),
       catchUpCorrectionHours = _finiteDoubleFromJson(json['catchUpCorrectionHours']),
+      httpHeaders = HttpHeaderPolicy.normalize(json['httpHeaders'] is Map ? json['httpHeaders'] as Map : null),
       lastWatchedAt = json['lastWatchedAt'] is num ? (json['lastWatchedAt'] as num).toInt() : null {
     // Earlier builds stored Huya's userCount/URI 8006 popularity in the
     // concurrent-viewer field. Current captures confirm both are popularity.
@@ -330,6 +334,7 @@ class LiveRoom {
     String? catchUpSource,
     double? catchUpDays,
     double? catchUpCorrectionHours,
+    Map<String, String>? httpHeaders,
     int? lastWatchedAt,
     List<String>? tagIds,
   }) {
@@ -367,6 +372,7 @@ class LiveRoom {
       catchUpSource: catchUpSource ?? this.catchUpSource,
       catchUpDays: catchUpDays ?? this.catchUpDays,
       catchUpCorrectionHours: catchUpCorrectionHours ?? this.catchUpCorrectionHours,
+      httpHeaders: httpHeaders ?? this.httpHeaders,
       lastWatchedAt: lastWatchedAt ?? this.lastWatchedAt,
       tagIds: tagIds ?? this.tagIds,
     );
@@ -480,6 +486,7 @@ class LiveRoom {
       'catchUpSource': catchUpSource,
       'catchUpDays': catchUpDays,
       'catchUpCorrectionHours': catchUpCorrectionHours,
+      'httpHeaders': HttpHeaderPolicy.normalize(httpHeaders),
       'lastWatchedAt': lastWatchedAt,
     };
   }
@@ -742,6 +749,7 @@ extension LiveRoomExtension on LiveRoom {
       catchUpSource: _preferValue(incoming.catchUpSource, catchUpSource),
       catchUpDays: incoming.catchUpDays ?? catchUpDays,
       catchUpCorrectionHours: incoming.catchUpCorrectionHours ?? catchUpCorrectionHours,
+      httpHeaders: incoming.normalizedPlatformId == 'iptv' ? incoming.httpHeaders : httpHeaders,
 
       lastWatchedAt: incoming.lastWatchedAt ?? lastWatchedAt,
     );

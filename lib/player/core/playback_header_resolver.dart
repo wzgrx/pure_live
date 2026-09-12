@@ -15,6 +15,7 @@ import 'package:pure_live/core/site/missevan/missevan_api.dart';
 import 'package:pure_live/core/site/inke/inke_api.dart';
 import 'package:pure_live/core/site/kilakila/kilakila_api.dart';
 import 'package:pure_live/core/site/huajiao/huajiao_api.dart';
+import 'package:pure_live/core/common/http_header_policy.dart';
 
 /// Resolves the HTTP headers used to read a platform's media stream.
 ///
@@ -34,7 +35,11 @@ class PlaybackHeaderResolver {
       'AppleWebKit/537.36 (KHTML, like Gecko) '
       'Chrome/140.0.0.0 Safari/537.36';
 
-  static Future<Map<String, String>> resolve({required String platform, String roomId = ''}) async {
+  static Future<Map<String, String>> resolve({
+    required String platform,
+    String roomId = '',
+    Map<String, String> roomHeaders = const <String, String>{},
+  }) async {
     final normalizedPlatform = platform.trim().toLowerCase();
     final normalizedRoomId = Uri.encodeComponent(roomId.trim());
     Map<String, String> headers;
@@ -132,7 +137,10 @@ class PlaybackHeaderResolver {
         break;
       case Sites.iptvSite:
         final userAgent = _configuredValue((settings) => settings.iptv.customIptvUserAgent.value);
-        headers = userAgent.isEmpty ? const <String, String>{} : <String, String>{'user-agent': userAgent};
+        headers = <String, String>{
+          if (userAgent.isNotEmpty) 'user-agent': userAgent,
+          ...HttpHeaderPolicy.normalize(roomHeaders),
+        };
         break;
       case Sites.picartoSite:
         headers = {...PicartoApi.playHeaders, 'User-Agent': _desktopUserAgent};
@@ -168,7 +176,7 @@ class PlaybackHeaderResolver {
         headers = const <String, String>{};
     }
 
-    return _sanitize(headers);
+    return HttpHeaderPolicy.normalize(headers);
   }
 
   static String _configuredCookie(String Function(SettingsService settings) read) => _configuredValue(read);
@@ -179,18 +187,5 @@ class PlaybackHeaderResolver {
     } catch (_) {
       return '';
     }
-  }
-
-  static Map<String, String> _sanitize(Map<String, String> source) {
-    final result = <String, String>{};
-    final validName = RegExp(r'^[A-Za-z0-9-]+$');
-    for (final entry in source.entries) {
-      final name = entry.key.trim().toLowerCase();
-      final value = entry.value.replaceAll(RegExp(r'[\r\n\u0000]+'), ' ').trim();
-      if (name.isNotEmpty && value.isNotEmpty && validName.hasMatch(name)) {
-        result[name] = value;
-      }
-    }
-    return Map<String, String>.unmodifiable(result);
   }
 }

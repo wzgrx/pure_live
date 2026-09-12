@@ -304,6 +304,17 @@ void main() {
     expect(liveSite.legacyCalls, 0);
   });
 
+  test('default multiview resolution forwards IPTV per-channel headers', () async {
+    final source = await MultiviewController.resolveStreamForSite(
+      LiveRoom(roomId: 'headers', platform: Sites.iptvSite),
+      site: Site(id: Sites.iptvSite, name: 'IPTV', logo: '', liveSite: _HeaderMultiviewSite()),
+      preferLowest: false,
+    );
+
+    expect(source.url, 'https://fixture/live.m3u8');
+    expect(source.headers, {'authorization': 'Bearer multiview', 'referer': 'https://fixture/room'});
+  });
+
   test('quality commits rotating headers and policy before later line changes', () async {
     final harness = _Harness();
     final controller = harness.controller;
@@ -1339,4 +1350,24 @@ class _PolicyMultiviewSite extends LiveSite implements LivePlayUrlResolver {
       sourceQueryPolicies: {url: HlsSourceQueryPolicy.fromSource(Uri.parse(url))},
     );
   }
+}
+
+class _HeaderMultiviewSite extends LiveSite {
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId, required String platform}) async => LiveRoom(
+    roomId: roomId,
+    platform: platform,
+    liveStatus: LiveStatus.live,
+    httpHeaders: const {'Authorization': 'Bearer multiview', 'Referrer': 'https://fixture/room'},
+  );
+
+  @override
+  Future<List<LivePlayQuality>> getPlayQualites({required LiveRoom detail}) async => [
+    LivePlayQuality(quality: 'Original'),
+  ];
+
+  @override
+  Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async => [
+    'https://fixture/live.m3u8',
+  ];
 }

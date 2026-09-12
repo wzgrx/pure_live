@@ -681,6 +681,15 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, Channel> {
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _httpHeadersJsonMeta = const VerificationMeta('httpHeadersJson');
+  @override
+  late final GeneratedColumn<String> httpHeadersJson = GeneratedColumn<String>(
+    'http_headers_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _favoriteMeta = const VerificationMeta('favorite');
   @override
   late final GeneratedColumn<bool> favorite = GeneratedColumn<bool>(
@@ -740,6 +749,7 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, Channel> {
     catchupSource,
     catchupDays,
     catchupCorrectionHours,
+    httpHeadersJson,
     favorite,
     hidden,
     sortOrder,
@@ -813,6 +823,12 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, Channel> {
         catchupCorrectionHours.isAcceptableOrUnknown(data['catchup_correction_hours']!, _catchupCorrectionHoursMeta),
       );
     }
+    if (data.containsKey('http_headers_json')) {
+      context.handle(
+        _httpHeadersJsonMeta,
+        httpHeadersJson.isAcceptableOrUnknown(data['http_headers_json']!, _httpHeadersJsonMeta),
+      );
+    }
     if (data.containsKey('favorite')) {
       context.handle(_favoriteMeta, favorite.isAcceptableOrUnknown(data['favorite']!, _favoriteMeta));
     }
@@ -851,6 +867,10 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, Channel> {
         DriftSqlType.double,
         data['${effectivePrefix}catchup_correction_hours'],
       ),
+      httpHeadersJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}http_headers_json'],
+      ),
       favorite: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}favorite'])!,
       hidden: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}hidden'])!,
       sortOrder: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
@@ -879,6 +899,7 @@ class Channel extends DataClass implements Insertable<Channel> {
   final String? catchupSource;
   final double? catchupDays;
   final double? catchupCorrectionHours;
+  final String? httpHeadersJson;
   final bool favorite;
   final bool hidden;
   final int sortOrder;
@@ -898,6 +919,7 @@ class Channel extends DataClass implements Insertable<Channel> {
     this.catchupSource,
     this.catchupDays,
     this.catchupCorrectionHours,
+    this.httpHeadersJson,
     required this.favorite,
     required this.hidden,
     required this.sortOrder,
@@ -938,6 +960,9 @@ class Channel extends DataClass implements Insertable<Channel> {
     if (!nullToAbsent || catchupCorrectionHours != null) {
       map['catchup_correction_hours'] = Variable<double>(catchupCorrectionHours);
     }
+    if (!nullToAbsent || httpHeadersJson != null) {
+      map['http_headers_json'] = Variable<String>(httpHeadersJson);
+    }
     map['favorite'] = Variable<bool>(favorite);
     map['hidden'] = Variable<bool>(hidden);
     map['sort_order'] = Variable<int>(sortOrder);
@@ -963,6 +988,7 @@ class Channel extends DataClass implements Insertable<Channel> {
       catchupCorrectionHours: catchupCorrectionHours == null && nullToAbsent
           ? const Value.absent()
           : Value(catchupCorrectionHours),
+      httpHeadersJson: httpHeadersJson == null && nullToAbsent ? const Value.absent() : Value(httpHeadersJson),
       favorite: Value(favorite),
       hidden: Value(hidden),
       sortOrder: Value(sortOrder),
@@ -987,6 +1013,7 @@ class Channel extends DataClass implements Insertable<Channel> {
       catchupSource: serializer.fromJson<String?>(json['catchupSource']),
       catchupDays: serializer.fromJson<double?>(json['catchupDays']),
       catchupCorrectionHours: serializer.fromJson<double?>(json['catchupCorrectionHours']),
+      httpHeadersJson: serializer.fromJson<String?>(json['httpHeadersJson']),
       favorite: serializer.fromJson<bool>(json['favorite']),
       hidden: serializer.fromJson<bool>(json['hidden']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
@@ -1011,6 +1038,7 @@ class Channel extends DataClass implements Insertable<Channel> {
       'catchupSource': serializer.toJson<String?>(catchupSource),
       'catchupDays': serializer.toJson<double?>(catchupDays),
       'catchupCorrectionHours': serializer.toJson<double?>(catchupCorrectionHours),
+      'httpHeadersJson': serializer.toJson<String?>(httpHeadersJson),
       'favorite': serializer.toJson<bool>(favorite),
       'hidden': serializer.toJson<bool>(hidden),
       'sortOrder': serializer.toJson<int>(sortOrder),
@@ -1033,6 +1061,7 @@ class Channel extends DataClass implements Insertable<Channel> {
     Value<String?> catchupSource = const Value.absent(),
     Value<double?> catchupDays = const Value.absent(),
     Value<double?> catchupCorrectionHours = const Value.absent(),
+    Value<String?> httpHeadersJson = const Value.absent(),
     bool? favorite,
     bool? hidden,
     int? sortOrder,
@@ -1052,6 +1081,7 @@ class Channel extends DataClass implements Insertable<Channel> {
     catchupSource: catchupSource.present ? catchupSource.value : this.catchupSource,
     catchupDays: catchupDays.present ? catchupDays.value : this.catchupDays,
     catchupCorrectionHours: catchupCorrectionHours.present ? catchupCorrectionHours.value : this.catchupCorrectionHours,
+    httpHeadersJson: httpHeadersJson.present ? httpHeadersJson.value : this.httpHeadersJson,
     favorite: favorite ?? this.favorite,
     hidden: hidden ?? this.hidden,
     sortOrder: sortOrder ?? this.sortOrder,
@@ -1075,6 +1105,7 @@ class Channel extends DataClass implements Insertable<Channel> {
       catchupCorrectionHours: data.catchupCorrectionHours.present
           ? data.catchupCorrectionHours.value
           : this.catchupCorrectionHours,
+      httpHeadersJson: data.httpHeadersJson.present ? data.httpHeadersJson.value : this.httpHeadersJson,
       favorite: data.favorite.present ? data.favorite.value : this.favorite,
       hidden: data.hidden.present ? data.hidden.value : this.hidden,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
@@ -1099,6 +1130,7 @@ class Channel extends DataClass implements Insertable<Channel> {
           ..write('catchupSource: $catchupSource, ')
           ..write('catchupDays: $catchupDays, ')
           ..write('catchupCorrectionHours: $catchupCorrectionHours, ')
+          ..write('httpHeadersJson: $httpHeadersJson, ')
           ..write('favorite: $favorite, ')
           ..write('hidden: $hidden, ')
           ..write('sortOrder: $sortOrder, ')
@@ -1123,6 +1155,7 @@ class Channel extends DataClass implements Insertable<Channel> {
     catchupSource,
     catchupDays,
     catchupCorrectionHours,
+    httpHeadersJson,
     favorite,
     hidden,
     sortOrder,
@@ -1146,6 +1179,7 @@ class Channel extends DataClass implements Insertable<Channel> {
           other.catchupSource == this.catchupSource &&
           other.catchupDays == this.catchupDays &&
           other.catchupCorrectionHours == this.catchupCorrectionHours &&
+          other.httpHeadersJson == this.httpHeadersJson &&
           other.favorite == this.favorite &&
           other.hidden == this.hidden &&
           other.sortOrder == this.sortOrder &&
@@ -1167,6 +1201,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
   final Value<String?> catchupSource;
   final Value<double?> catchupDays;
   final Value<double?> catchupCorrectionHours;
+  final Value<String?> httpHeadersJson;
   final Value<bool> favorite;
   final Value<bool> hidden;
   final Value<int> sortOrder;
@@ -1187,6 +1222,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
     this.catchupSource = const Value.absent(),
     this.catchupDays = const Value.absent(),
     this.catchupCorrectionHours = const Value.absent(),
+    this.httpHeadersJson = const Value.absent(),
     this.favorite = const Value.absent(),
     this.hidden = const Value.absent(),
     this.sortOrder = const Value.absent(),
@@ -1208,6 +1244,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
     this.catchupSource = const Value.absent(),
     this.catchupDays = const Value.absent(),
     this.catchupCorrectionHours = const Value.absent(),
+    this.httpHeadersJson = const Value.absent(),
     this.favorite = const Value.absent(),
     this.hidden = const Value.absent(),
     this.sortOrder = const Value.absent(),
@@ -1232,6 +1269,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
     Expression<String>? catchupSource,
     Expression<double>? catchupDays,
     Expression<double>? catchupCorrectionHours,
+    Expression<String>? httpHeadersJson,
     Expression<bool>? favorite,
     Expression<bool>? hidden,
     Expression<int>? sortOrder,
@@ -1253,6 +1291,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
       if (catchupSource != null) 'catchup_source': catchupSource,
       if (catchupDays != null) 'catchup_days': catchupDays,
       if (catchupCorrectionHours != null) 'catchup_correction_hours': catchupCorrectionHours,
+      if (httpHeadersJson != null) 'http_headers_json': httpHeadersJson,
       if (favorite != null) 'favorite': favorite,
       if (hidden != null) 'hidden': hidden,
       if (sortOrder != null) 'sort_order': sortOrder,
@@ -1276,6 +1315,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
     Value<String?>? catchupSource,
     Value<double?>? catchupDays,
     Value<double?>? catchupCorrectionHours,
+    Value<String?>? httpHeadersJson,
     Value<bool>? favorite,
     Value<bool>? hidden,
     Value<int>? sortOrder,
@@ -1297,6 +1337,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
       catchupSource: catchupSource ?? this.catchupSource,
       catchupDays: catchupDays ?? this.catchupDays,
       catchupCorrectionHours: catchupCorrectionHours ?? this.catchupCorrectionHours,
+      httpHeadersJson: httpHeadersJson ?? this.httpHeadersJson,
       favorite: favorite ?? this.favorite,
       hidden: hidden ?? this.hidden,
       sortOrder: sortOrder ?? this.sortOrder,
@@ -1350,6 +1391,9 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
     if (catchupCorrectionHours.present) {
       map['catchup_correction_hours'] = Variable<double>(catchupCorrectionHours.value);
     }
+    if (httpHeadersJson.present) {
+      map['http_headers_json'] = Variable<String>(httpHeadersJson.value);
+    }
     if (favorite.present) {
       map['favorite'] = Variable<bool>(favorite.value);
     }
@@ -1385,6 +1429,7 @@ class ChannelsCompanion extends UpdateCompanion<Channel> {
           ..write('catchupSource: $catchupSource, ')
           ..write('catchupDays: $catchupDays, ')
           ..write('catchupCorrectionHours: $catchupCorrectionHours, ')
+          ..write('httpHeadersJson: $httpHeadersJson, ')
           ..write('favorite: $favorite, ')
           ..write('hidden: $hidden, ')
           ..write('sortOrder: $sortOrder, ')
@@ -5755,6 +5800,7 @@ typedef $$ChannelsTableCreateCompanionBuilder = ChannelsCompanion Function({
   Value<String?> catchupSource,
   Value<double?> catchupDays,
   Value<double?> catchupCorrectionHours,
+  Value<String?> httpHeadersJson,
   Value<bool> favorite,
   Value<bool> hidden,
   Value<int> sortOrder,
@@ -5776,6 +5822,7 @@ typedef $$ChannelsTableUpdateCompanionBuilder = ChannelsCompanion Function({
   Value<String?> catchupSource,
   Value<double?> catchupDays,
   Value<double?> catchupCorrectionHours,
+  Value<String?> httpHeadersJson,
   Value<bool> favorite,
   Value<bool> hidden,
   Value<int> sortOrder,
@@ -5890,6 +5937,9 @@ class $$ChannelsTableFilterComposer extends Composer<_$AppDatabase, $ChannelsTab
 
   ColumnFilters<double> get catchupCorrectionHours =>
       $composableBuilder(column: $table.catchupCorrectionHours, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get httpHeadersJson =>
+      $composableBuilder(column: $table.httpHeadersJson, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get favorite =>
       $composableBuilder(column: $table.favorite, builder: (column) => ColumnFilters(column));
@@ -6024,6 +6074,9 @@ class $$ChannelsTableOrderingComposer extends Composer<_$AppDatabase, $ChannelsT
   ColumnOrderings<double> get catchupCorrectionHours =>
       $composableBuilder(column: $table.catchupCorrectionHours, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get httpHeadersJson =>
+      $composableBuilder(column: $table.httpHeadersJson, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get favorite =>
       $composableBuilder(column: $table.favorite, builder: (column) => ColumnOrderings(column));
 
@@ -6093,6 +6146,9 @@ class $$ChannelsTableAnnotationComposer extends Composer<_$AppDatabase, $Channel
 
   GeneratedColumn<double> get catchupCorrectionHours =>
       $composableBuilder(column: $table.catchupCorrectionHours, builder: (column) => column);
+
+  GeneratedColumn<String> get httpHeadersJson =>
+      $composableBuilder(column: $table.httpHeadersJson, builder: (column) => column);
 
   GeneratedColumn<bool> get favorite => $composableBuilder(column: $table.favorite, builder: (column) => column);
 
@@ -6224,6 +6280,7 @@ class $$ChannelsTableTableManager
                 Value<String?> catchupSource = const Value.absent(),
                 Value<double?> catchupDays = const Value.absent(),
                 Value<double?> catchupCorrectionHours = const Value.absent(),
+                Value<String?> httpHeadersJson = const Value.absent(),
                 Value<bool> favorite = const Value.absent(),
                 Value<bool> hidden = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
@@ -6244,6 +6301,7 @@ class $$ChannelsTableTableManager
                 catchupSource: catchupSource,
                 catchupDays: catchupDays,
                 catchupCorrectionHours: catchupCorrectionHours,
+                httpHeadersJson: httpHeadersJson,
                 favorite: favorite,
                 hidden: hidden,
                 sortOrder: sortOrder,
@@ -6266,6 +6324,7 @@ class $$ChannelsTableTableManager
                 Value<String?> catchupSource = const Value.absent(),
                 Value<double?> catchupDays = const Value.absent(),
                 Value<double?> catchupCorrectionHours = const Value.absent(),
+                Value<String?> httpHeadersJson = const Value.absent(),
                 Value<bool> favorite = const Value.absent(),
                 Value<bool> hidden = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
@@ -6286,6 +6345,7 @@ class $$ChannelsTableTableManager
                 catchupSource: catchupSource,
                 catchupDays: catchupDays,
                 catchupCorrectionHours: catchupCorrectionHours,
+                httpHeadersJson: httpHeadersJson,
                 favorite: favorite,
                 hidden: hidden,
                 sortOrder: sortOrder,

@@ -13,6 +13,7 @@ import 'package:pure_live/core/iptv/core/fuzzy_match.dart';
 import 'package:pure_live/core/danmaku/empty_danmaku.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/iptv/services/auto_sync_scheduler.dart';
+import 'package:pure_live/core/common/http_header_policy.dart';
 
 class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
   @override
@@ -97,6 +98,7 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
         catchUpSource: ch.catchupSource,
         catchUpDays: ch.catchupDays,
         catchUpCorrectionHours: ch.catchupCorrectionHours,
+        httpHeaders: HttpHeaderPolicy.decode(ch.httpHeadersJson),
       ),
     );
 
@@ -252,6 +254,7 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
       catchUpSource: channel.catchupSource,
       catchUpDays: channel.catchupDays,
       catchUpCorrectionHours: channel.catchupCorrectionHours,
+      httpHeaders: HttpHeaderPolicy.decode(channel.httpHeadersJson),
     );
   }
 
@@ -288,6 +291,7 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
           catchUpSource: ch.catchupSource,
           catchUpDays: ch.catchupDays,
           catchUpCorrectionHours: ch.catchupCorrectionHours,
+          httpHeaders: ch.httpHeaders,
         ),
       );
     }
@@ -380,6 +384,7 @@ class IptvSite implements LiveSite, LiveSiteRecordRoomResolver {
         catchUpSource: ch.catchupSource,
         catchUpDays: ch.catchupDays,
         catchUpCorrectionHours: ch.catchupCorrectionHours,
+        httpHeaders: HttpHeaderPolicy.decode(ch.httpHeadersJson),
       );
     }).toList();
     return items;

@@ -36,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -83,6 +83,14 @@ class AppDatabase extends _$AppDatabase {
         ).get()).map((row) => row.read<String>('name')).toSet();
         if (!programmeColumns.contains(epgProgrammes.catchupId.$name)) {
           await m.addColumn(epgProgrammes, epgProgrammes.catchupId);
+        }
+      }
+      if (from < 9) {
+        final channelColumns = (await customSelect(
+          'PRAGMA table_info(channels)',
+        ).get()).map((row) => row.read<String>('name')).toSet();
+        if (!channelColumns.contains(channels.httpHeadersJson.$name)) {
+          await m.addColumn(channels, channels.httpHeadersJson);
         }
       }
       // Commit the version with the data, before Drift repeats its version write.

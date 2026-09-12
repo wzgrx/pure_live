@@ -202,6 +202,19 @@ void main() {
     expect(site.strictCalls, 1);
   });
 
+  test('recording resolution carries authoritative IPTV channel headers with the selected URL', () async {
+    final site = _FakeSite(
+      qualities: <LivePlayQuality>[LivePlayQuality(quality: '原画', id: 'source')],
+      urls: const <String>['https://cdn.example/live.m3u8'],
+      httpHeaders: const {'user-agent': 'Playlist Agent', 'referer': 'https://fixture/room'},
+    );
+
+    final resolved = await StreamResolverService(siteResolver: (_) => site)
+        .resolveStream(roomId: '1', platform: 'iptv', preferredQuality: '原画');
+
+    expect(resolved.httpHeaders, {'user-agent': 'Playlist Agent', 'referer': 'https://fixture/room'});
+  });
+
   test('strict room transport failures stay retryable instead of becoming offline', () async {
     final resolver = StreamResolverService(
       siteResolver: (_) => _StrictFakeSite(strictError: StateError('temporary metadata error')),
@@ -225,6 +238,7 @@ class _FakeSite extends LiveSite implements LivePlayUrlResolver {
     this.urls = const <String>[],
     this.appliedQuality,
     this.qualityError,
+    this.httpHeaders = const <String, String>{},
   });
 
   final bool live;
@@ -232,6 +246,7 @@ class _FakeSite extends LiveSite implements LivePlayUrlResolver {
   final List<String> urls;
   final Object? appliedQuality;
   final Object? qualityError;
+  final Map<String, String> httpHeaders;
   final List<String> resolveCalls = <String>[];
 
   @override
@@ -241,6 +256,7 @@ class _FakeSite extends LiveSite implements LivePlayUrlResolver {
       platform: platform,
       liveStatus: live ? LiveStatus.live : LiveStatus.offline,
       isRecord: false,
+      httpHeaders: httpHeaders,
     );
   }
 

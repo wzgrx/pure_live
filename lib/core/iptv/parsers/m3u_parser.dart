@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:pure_live/core/iptv/models/channel.dart';
 import 'package:pure_live/core/iptv/parsers/playlist_parse_result.dart';
+import 'package:pure_live/core/common/http_header_policy.dart';
 
 /// Parses M3U and M3U Plus playlist formats.
 ///
@@ -12,6 +15,18 @@ import 'package:pure_live/core/iptv/parsers/playlist_parse_result.dart';
 class M3uParser {
   static const String _extInf = '#EXTINF:';
   static const String _extGrp = '#EXTGRP:';
+  static const String _extVlcOpt = '#EXTVLCOPT:';
+  static const String _extHttp = '#EXTHTTP:';
+  static const String _kodiProp = '#KODIPROP:';
+  static const Set<String> _nonHttpUrlOptions = {
+    'seekable',
+    'reconnect_at_eof',
+    'reconnect_streamed',
+    'reconnect_delay_max',
+    'icy',
+    'icy_metadata_headers',
+    'icy_metadata_packet',
+  };
 
   static String? lastEpgUrl;
 
@@ -26,6 +41,8 @@ class M3uParser {
     int pendingLine = 0;
     String? directiveGroup;
     var headerAttributes = const <String, String>{};
+    var pendingHeaders = <String, String>{};
+    var nextEntryHeaders = <String, String>{};
 
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i].trim();
@@ -48,6 +65,8 @@ class M3uParser {
       if (line.startsWith(_extInf)) {
         if (pending != null) errors.add('Line $pendingLine: Missing stream URL');
         pending = null;
+        pendingHeaders = nextEntryHeaders;
+        nextEntryHeaders = <String, String>{};
         pendingLine = i + 1;
         try {
           pending = _parseMetadata(line.substring(_extInf.length));
@@ -62,15 +81,31 @@ class M3uParser {
         directiveGroup = _emptyToNull(line.substring(_extGrp.length).trim());
         continue;
       }
+      if (line.startsWith(_extVlcOpt) || line.startsWith(_extHttp) || line.startsWith(_kodiProp)) {
+        final target = pending == null ? nextEntryHeaders : pendingHeaders;
+        try {
+          if (line.startsWith(_extVlcOpt)) {
+            _applyHttpProperty(target, line.substring(_extVlcOpt.length));
+          } else if (line.startsWith(_extHttp)) {
+            _applyExtHttp(target, line.substring(_extHttp.length));
+          } else {
+            _applyKodiProperty(target, line.substring(_kodiProp.length));
+          }
+        } on FormatException catch (e) {
+          errors.add('Line ${i + 1}: ${e.message}');
+        }
+        continue;
+      }
       // Unknown extension directives are not stream URLs.
       if (line.startsWith('#')) continue;
       if (pending != null) {
         try {
-          channels.add(_parseEntry(pending, line, providerId, directiveGroup, headerAttributes));
+          channels.add(_parseEntry(pending, line, providerId, directiveGroup, headerAttributes, pendingHeaders));
         } on FormatException catch (e) {
           errors.add('Line ${i + 1}: ${e.message}');
         }
         pending = null;
+        pendingHeaders = <String, String>{};
       }
     }
     if (pending != null) errors.add('Line $pendingLine: Missing stream URL');
@@ -84,8 +119,10 @@ class M3uParser {
     String providerId,
     String? directiveGroup,
     Map<String, String> headerAttributes,
+    Map<String, String> directiveHeaders,
   ) {
-    if (!_isValidStreamUrl(url)) throw const FormatException('Invalid or unsupported stream URL');
+    final parsedStream = _parseStreamUrl(url);
+    if (!_isValidStreamUrl(parsedStream.url)) throw const FormatException('Invalid or unsupported stream URL');
     final attrs = {...metadata.attributes};
     if (!attrs.containsKey('group-title') && directiveGroup != null) attrs['group-title'] = directiveGroup;
     final name = metadata.displayName.isNotEmpty ? metadata.displayName : attrs['tvg-name'];
@@ -101,7 +138,7 @@ class M3uParser {
     } else if (name.isNotEmpty) {
       uniqueKey = name;
     } else {
-      uniqueKey = url;
+      uniqueKey = parsedStream.url;
     }
     final channelId = '${providerId}_${uniqueKey.hashCode}';
 
@@ -129,6 +166,12 @@ class M3uParser {
     }
     final catchupCorrectionHours =
         _finiteDouble(attrs['catchup-correction']) ?? _finiteDouble(headerAttributes['catchup-correction']);
+    final httpHeaders = HttpHeaderPolicy.normalize({
+      ..._metadataHttpHeaders(headerAttributes),
+      ..._metadataHttpHeaders(attrs),
+      ...directiveHeaders,
+      ...parsedStream.headers,
+    });
 
     return Channel(
       id: channelId,
@@ -139,13 +182,119 @@ class M3uParser {
       tvgLogo: _emptyToNull(attrs['tvg-logo']),
       groupTitle: _emptyToNull(attrs['group-title']),
       channelNumber: channelNumber,
-      streamUrl: url,
-      streamType: _inferStreamType(attrs, url),
+      streamUrl: parsedStream.url,
+      streamType: _inferStreamType(attrs, parsedStream.url),
       catchupMode: catchupMode,
       catchupSource: catchupSource,
       catchupDays: catchupDays,
       catchupCorrectionHours: catchupCorrectionHours,
+      httpHeaders: httpHeaders,
     );
+  }
+
+  static Map<String, String> _metadataHttpHeaders(Map<String, String> attributes) {
+    final result = <String, String>{};
+    for (final key in const <String>[
+      'user-agent',
+      'http-user-agent',
+      'referer',
+      'referrer',
+      'http-referer',
+      'http-referrer',
+      'origin',
+      'authorization',
+      'cookie',
+      'cookies',
+    ]) {
+      final value = attributes[key];
+      if (value != null && value.trim().isNotEmpty) result[key] = value;
+    }
+    return result;
+  }
+
+  static void _applyHttpProperty(Map<String, String> target, String content) {
+    final separator = content.indexOf('=');
+    final rawName = separator < 0 ? content.trim() : content.substring(0, separator).trim();
+    final canonical = HttpHeaderPolicy.canonicalName(rawName);
+    if (!const {'user-agent', 'referer'}.contains(canonical)) return;
+    if (separator <= 0 || separator == content.length - 1) {
+      throw const FormatException('Invalid stream header directive');
+    }
+    final value = content.substring(separator + 1).trim();
+    final normalized = HttpHeaderPolicy.normalize({canonical!: value});
+    if (normalized.isEmpty) throw const FormatException('Invalid stream header directive');
+    target.addAll(normalized);
+  }
+
+  static void _applyKodiProperty(Map<String, String> target, String content) {
+    final separator = content.indexOf('=');
+    final name = separator < 0 ? content.trim().toLowerCase() : content.substring(0, separator).trim().toLowerCase();
+    if (name.endsWith('.stream_headers') || name.endsWith('.manifest_headers')) {
+      if (separator <= 0 || separator == content.length - 1) {
+        throw const FormatException('Invalid stream header directive');
+      }
+      target.addAll(_parseHeaderOptions(content.substring(separator + 1)));
+      return;
+    }
+    _applyHttpProperty(target, content);
+  }
+
+  static void _applyExtHttp(Map<String, String> target, String content) {
+    final value = content.trim();
+    if (value.isEmpty) throw const FormatException('Invalid EXTHTTP header');
+    if (value.startsWith('{')) {
+      try {
+        final decoded = jsonDecode(value);
+        if (decoded is! Map) throw const FormatException('Invalid EXTHTTP header');
+        for (final entry in decoded.entries) {
+          if (entry.key is! String ||
+              entry.value is! String ||
+              HttpHeaderPolicy.normalize({entry.key: entry.value}).isEmpty) {
+            throw const FormatException('Invalid EXTHTTP header');
+          }
+        }
+        final normalized = HttpHeaderPolicy.normalize(decoded);
+        target.addAll(normalized);
+      } on FormatException {
+        throw const FormatException('Invalid EXTHTTP header');
+      }
+      return;
+    }
+    target.addAll(_parseHeaderOptions(value));
+  }
+
+  static _ParsedStream _parseStreamUrl(String raw) {
+    final separator = raw.indexOf('|');
+    if (separator < 0) return _ParsedStream(raw.trim(), const <String, String>{});
+    final url = raw.substring(0, separator).trim();
+    final options = raw.substring(separator + 1);
+    if (url.isEmpty || options.trim().isEmpty) {
+      throw const FormatException('Invalid stream header option');
+    }
+    return _ParsedStream(url, _parseHeaderOptions(options, ignoreTransportOptions: true));
+  }
+
+  static Map<String, String> _parseHeaderOptions(String options, {bool ignoreTransportOptions = false}) {
+    final headers = <String, String>{};
+    for (final option in options.split('&')) {
+      final equals = option.indexOf('=');
+      if (equals <= 0 || equals == option.length - 1) {
+        throw const FormatException('Invalid stream header option');
+      }
+      try {
+        final rawName = Uri.decodeQueryComponent(option.substring(0, equals).trim());
+        final value = Uri.decodeQueryComponent(option.substring(equals + 1).trim());
+        if (ignoreTransportOptions && !rawName.startsWith('!') && _nonHttpUrlOptions.contains(rawName.toLowerCase())) {
+          continue;
+        }
+        final normalized = HttpHeaderPolicy.normalize({rawName: value});
+        if (normalized.isEmpty) throw const FormatException('Invalid stream header option');
+        headers.addAll(normalized);
+      } on FormatException {
+        throw const FormatException('Invalid stream header option');
+      }
+    }
+    return HttpHeaderPolicy.normalize(headers);
   }
 
   /// Read one attribute at a time, stopping at the first comma outside a
@@ -241,6 +390,12 @@ class _M3uMetadata {
   const _M3uMetadata(this.attributes, this.displayName);
   final Map<String, String> attributes;
   final String displayName;
+}
+
+class _ParsedStream {
+  const _ParsedStream(this.url, this.headers);
+  final String url;
+  final Map<String, String> headers;
 }
 
 /// 解析结果实体

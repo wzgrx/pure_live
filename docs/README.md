@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [IPTV 频道 HTTP 请求头、播放与录制链路审计](IPTV_HTTP_HEADER_PLAYBACK_AND_RECORDING_AUDIT_2026_09_12.md)：VLC/EXTHTTP/KODIPROP/URL suffix 解析、schema 9 幂等迁移，以及主播放器、多画面、纯音频和录制字段一致性。
+
 - [IPTV 提供方回看元数据、归档窗口与 URL 策略审计](IPTV_PROVIDER_CATCHUP_METADATA_AND_WINDOW_AUDIT_2026_09_12.md)：M3U/XMLTV 元数据持久化、schema 8 幂等迁移、提供方窗口判定，以及 default/append/shift/Flussonic/Xtream/VOD 地址回归。
 
 - [竖屏播放选择器布局与事务审计](PORTRAIT_PLAYBACK_PICKER_LAYOUT_AND_TRANSACTION_AUDIT_2026_09_12.md)：房间方向/记忆策略的原子提交、竖屏全屏显示模式、取消/系统返回及 320×480 三倍字号回归。

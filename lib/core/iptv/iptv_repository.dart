@@ -4,6 +4,7 @@ import 'package:pure_live/get/get.dart' hide Value;
 import 'package:pure_live/plugins/db_service.dart';
 import 'package:pure_live/core/iptv/models/channel.dart' as models;
 import 'package:pure_live/core/iptv/local/database.dart' as database;
+import 'package:pure_live/core/common/http_header_policy.dart';
 
 class IptvRepository extends GetxService {
   Future<IptvRepository> init() async {
@@ -28,6 +29,7 @@ class IptvRepository extends GetxService {
           catchupSource: e.catchupSource,
           catchupDays: e.catchupDays,
           catchupCorrectionHours: e.catchupCorrectionHours,
+          httpHeaders: HttpHeaderPolicy.decode(e.httpHeadersJson),
         );
       }).toList();
     } catch (e) {

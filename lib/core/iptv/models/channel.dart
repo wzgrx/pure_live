@@ -17,6 +17,7 @@ class Channel extends Equatable {
   final String? catchupSource;
   final double? catchupDays;
   final double? catchupCorrectionHours;
+  final Map<String, String> httpHeaders;
   final bool isFavorite;
 
   const Channel({
@@ -35,6 +36,7 @@ class Channel extends Equatable {
     this.catchupSource,
     this.catchupDays,
     this.catchupCorrectionHours,
+    this.httpHeaders = const <String, String>{},
     this.isFavorite = false,
   });
 
@@ -58,6 +60,7 @@ class Channel extends Equatable {
       catchupSource: catchupSource,
       catchupDays: catchupDays,
       catchupCorrectionHours: catchupCorrectionHours,
+      httpHeaders: httpHeaders,
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }

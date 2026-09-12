@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pure_live/core/iptv/local/database.dart' as db;
 import 'package:pure_live/core/iptv/models/channel.dart' as model;
+import 'package:pure_live/core/common/http_header_policy.dart';
 
 /// Preserve durable IDs by unambiguous feed identity, never String.hashCode.
 /// Combined stream/name matches precede URL-independent matches for rotating
@@ -29,6 +30,7 @@ List<db.ChannelsCompanion> reconcilePlaylistChannels({
         channel.catchupSource,
         channel.catchupDays,
         channel.catchupCorrectionHours,
+        HttpHeaderPolicy.encode(channel.httpHeaders),
       ]),
       () => channel,
     );
@@ -119,6 +121,7 @@ db.ChannelsCompanion _entry(String providerId, model.Channel channel, db.Channel
     catchupSource: Value(channel.catchupSource),
     catchupDays: Value(channel.catchupDays),
     catchupCorrectionHours: Value(channel.catchupCorrectionHours),
+    httpHeadersJson: Value(HttpHeaderPolicy.encode(channel.httpHeaders)),
     favorite: Value(old?.favorite ?? false),
     hidden: Value(old?.hidden ?? false),
     sortOrder: Value(old?.sortOrder ?? 0),

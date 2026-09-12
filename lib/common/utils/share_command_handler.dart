@@ -44,6 +44,7 @@ class ShareCommandHandler {
   final LinkedHashSet<String> _blacklistHashes = LinkedHashSet<String>();
   String _lastProcessedHashInLifecycle = '';
   Future<void>? _clipboardCheckTask;
+  Future<void> _commandQueue = Future<void>.value();
 
   static int _validateRetainedHashLimit(int value) {
     if (value < 1) {
@@ -81,6 +82,11 @@ class ShareCommandHandler {
     return !const {'0', 'null', 'undefined', 'nan', 'none'}.contains(roomId.toLowerCase());
   }
 
+  static bool isUsableCommand(String text) {
+    final roomMap = ShareCommandCodec.decodeShort(text.trim());
+    return roomMap != null && _hasUsableRoomIdentity(roomMap);
+  }
+
   String _hashText(String text) {
     return sha256.convert(utf8.encode(text.trim())).toString();
   }
@@ -104,32 +110,47 @@ class ShareCommandHandler {
   }
 
   Future<void> _checkClipboard(FutureOr<void> Function(String roomInfo) onMatchFound) async {
+    late final String currentText;
     try {
-      final currentText = (await _readClipboard())?.trim() ?? '';
+      currentText = (await _readClipboard())?.trim() ?? '';
       if (currentText.isEmpty) return;
-
-      final currentHash = _hashText(currentText);
-
-      if (_blacklistHashes.contains(currentHash)) {
-        return;
-      }
-
-      if (currentHash == _lastProcessedHashInLifecycle) {
-        return;
-      }
-
-      final roomMap = ShareCommandCodec.decodeShort(currentText);
-      if (roomMap == null || !_hasUsableRoomIdentity(roomMap)) return;
-
-      await onMatchFound(currentText);
-      _lastProcessedHashInLifecycle = currentHash;
     } catch (error, stackTrace) {
       log(
-        'Clipboard share command was not accepted',
+        'Clipboard share command could not be read',
         name: 'ShareCommandHandler',
         error: error,
         stackTrace: stackTrace,
       );
+      return;
+    }
+
+    await acceptCommandText(currentText, onMatchFound);
+  }
+
+  Future<bool> acceptCommandText(String text, FutureOr<void> Function(String roomInfo) onMatchFound) {
+    late final Future<bool> operation;
+    operation = _commandQueue.then((_) => _acceptCommandText(text, onMatchFound));
+    _commandQueue = operation.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+    return operation;
+  }
+
+  Future<bool> _acceptCommandText(String text, FutureOr<void> Function(String roomInfo) onMatchFound) async {
+    final currentText = text.trim();
+    if (currentText.isEmpty) return false;
+
+    final currentHash = _hashText(currentText);
+    if (_blacklistHashes.contains(currentHash) || currentHash == _lastProcessedHashInLifecycle) {
+      return false;
+    }
+    if (!isUsableCommand(currentText)) return false;
+
+    try {
+      await onMatchFound(currentText);
+      _lastProcessedHashInLifecycle = currentHash;
+      return true;
+    } catch (error, stackTrace) {
+      log('Share command was not accepted', name: 'ShareCommandHandler', error: error, stackTrace: stackTrace);
+      return false;
     }
   }
 

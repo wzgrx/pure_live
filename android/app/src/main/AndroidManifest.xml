@@ -69,12 +69,26 @@
       <intent-filter>
         <action android:name="android.intent.action.SEND" />
         <category android:name="android.intent.category.DEFAULT" />
-        <data android:mimeType="*/*" />
+        <data android:mimeType="text/plain" />
+        <data android:mimeType="application/x-mpegURL" />
+        <data android:mimeType="application/vnd.apple.mpegurl" />
+        <data android:mimeType="application/xml" />
+        <data android:mimeType="text/xml" />
+        <data android:mimeType="application/json" />
+        <data android:mimeType="application/gzip" />
+        <data android:mimeType="application/octet-stream" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.SEND_MULTIPLE" />
         <category android:name="android.intent.category.DEFAULT" />
-        <data android:mimeType="*/*" />
+        <data android:mimeType="text/plain" />
+        <data android:mimeType="application/x-mpegURL" />
+        <data android:mimeType="application/vnd.apple.mpegurl" />
+        <data android:mimeType="application/xml" />
+        <data android:mimeType="text/xml" />
+        <data android:mimeType="application/json" />
+        <data android:mimeType="application/gzip" />
+        <data android:mimeType="application/octet-stream" />
       </intent-filter>
       <meta-data android:name="android.service.chooser.chooser_target_service"
         android:value="androidx.sharetarget.ChooserTargetServiceCompat" />

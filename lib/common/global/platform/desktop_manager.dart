@@ -463,6 +463,7 @@ class _WindowControlButtonState extends State<WindowControlButton> {
 
 mixin DesktopWindowMixin<T extends StatefulWidget> on State<T>
     implements WindowListener, TrayListener, WidgetsBindingObserver {
+  final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Pure Live navigator');
   bool _isDialogOpen = false;
   Timer? _windowGeometryTimer;
   Timer? _shareCommandResumeTimer;
@@ -495,26 +496,50 @@ mixin DesktopWindowMixin<T extends StatefulWidget> on State<T>
   }
 
   void _checkShareCommand() {
-    if (!mounted || _isDialogOpen) return;
+    if (!mounted) return;
 
-    unawaited(
-      ShareCommandHandler.instance.checkClipboard((fullText) async {
-        if (!mounted || _isDialogOpen) return;
-        final roomMap = ShareCommandCodec.decodeShort(fullText);
-        if (roomMap == null) throw const FormatException('Share command payload disappeared after validation.');
+    unawaited(ShareCommandHandler.instance.checkClipboard(_presentShareCommand));
+  }
 
-        final room = LiveRoom.fromJson(roomMap).normalizedIdentityCopy();
-        _isDialogOpen = true;
-        try {
-          final enterRoom = await ShareCommandImportDialog.show(context: context, room: room);
-          if (enterRoom == true && mounted) {
-            AppNavigator.toLiveRoomDetail(liveRoom: room);
-          }
-        } finally {
-          _isDialogOpen = false;
-        }
-      }),
-    );
+  Future<bool> handleIncomingShareCommand(String fullText) {
+    return ShareCommandHandler.instance.acceptCommandText(fullText, _presentShareCommand);
+  }
+
+  Future<void> _presentShareCommand(String fullText) async {
+    final navigatorContext = await _waitForShareCommandNavigator();
+    if (!mounted || !navigatorContext.mounted) {
+      throw StateError('Share command route owner is no longer mounted.');
+    }
+    if (_isDialogOpen) throw StateError('A share command dialog is already active.');
+
+    final roomMap = ShareCommandCodec.decodeShort(fullText);
+    if (roomMap == null) throw const FormatException('Share command payload disappeared after validation.');
+
+    final room = LiveRoom.fromJson(roomMap).normalizedIdentityCopy();
+    _isDialogOpen = true;
+    try {
+      final enterRoom = await ShareCommandImportDialog.show(context: navigatorContext, room: room);
+      if (enterRoom == true && mounted) {
+        AppNavigator.toLiveRoomDetail(liveRoom: room);
+      }
+    } finally {
+      _isDialogOpen = false;
+    }
+  }
+
+  Future<BuildContext> _waitForShareCommandNavigator() async {
+    final deadline = DateTime.now().add(const Duration(seconds: 8));
+    while (mounted && DateTime.now().isBefore(deadline)) {
+      final navigatorContext = appNavigatorKey.currentContext;
+      final currentRoute = Get.isRegistered<RouteObserverController>()
+          ? RouteObserverController.to.currentRoute.value
+          : '';
+      if (navigatorContext != null && currentRoute.isNotEmpty && currentRoute != RoutePath.kSplash) {
+        return navigatorContext;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    throw StateError('Share command navigator did not become ready.');
   }
 
   @override

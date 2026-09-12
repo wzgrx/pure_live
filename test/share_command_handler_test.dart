@@ -52,6 +52,42 @@ void main() {
     expect(callbacks, 1);
   });
 
+  test('direct commands share the same serialized lifecycle acceptance', () async {
+    final command = _command('direct-overlap-fixture');
+    final firstGate = Completer<void>();
+    final callbacks = <String>[];
+    final handler = ShareCommandHandler(notifySuccess: (_) {}, notifyFailure: (_) {});
+
+    final first = handler.acceptCommandText(command, (_) async {
+      callbacks.add('first');
+      await firstGate.future;
+    });
+    final second = handler.acceptCommandText(command, (_) => callbacks.add('second'));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(callbacks, ['first']);
+    firstGate.complete();
+    expect(await first, isTrue);
+    expect(await second, isFalse);
+    expect(callbacks, ['first']);
+  });
+
+  test('a failed direct command consumer leaves the queued duplicate retryable', () async {
+    final command = _command('direct-retry-fixture');
+    final callbacks = <String>[];
+    final handler = ShareCommandHandler(notifySuccess: (_) {}, notifyFailure: (_) {});
+
+    final first = handler.acceptCommandText(command, (_) {
+      callbacks.add('first');
+      throw StateError('fixture direct consumer failed');
+    });
+    final second = handler.acceptCommandText(command, (_) => callbacks.add('second'));
+
+    expect(await first, isFalse);
+    expect(await second, isTrue);
+    expect(callbacks, ['first', 'second']);
+  });
+
   test('clipboard import ignores signed commands without a usable room identity', () async {
     for (final data in [
       {'platform': '', 'roomId': '123'},
@@ -68,6 +104,15 @@ void main() {
       await handler.checkClipboard((_) => imports++);
       expect(imports, 0, reason: data.toString());
     }
+  });
+
+  test('usable command classification matches import identity validation', () {
+    expect(ShareCommandHandler.isUsableCommand(_command('usable-fixture')), isTrue);
+    expect(
+      ShareCommandHandler.isUsableCommand(ShareCommandCodec.encodeShort({'platform': 'bilibili', 'roomId': '0'})),
+      isFalse,
+    );
+    expect(ShareCommandHandler.isUsableCommand('not-a-share-command'), isFalse);
   });
 
   test('desktop share commits a decodable command and suppresses its trimmed clipboard copy', () async {

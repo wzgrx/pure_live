@@ -14,6 +14,8 @@ import 'package:pure_live/common/global/platform_utils.dart';
 import 'package:pure_live/routes/route_observer_controller.dart';
 import 'package:pure_live/core/iptv/services/epg_import_manager.dart';
 import 'package:pure_live/common/global/platform/desktop_manager.dart';
+import 'package:pure_live/common/utils/share_command_handler.dart';
+import 'package:pure_live/common/utils/shared_media_intake.dart';
 import 'package:pure_live/core/iptv/services/iptv_import_manager.dart';
 import 'package:material_ui/material_ui.dart' as material;
 
@@ -47,7 +49,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with DesktopWindowMixin {
-  StreamSubscription<SharedMedia>? _sharedMediaSubscription;
+  SharedMediaReceiver? _sharedMediaReceiver;
 
   @override
   void initState() {
@@ -92,28 +94,33 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
     if (PlatformUtils.isDesktop) {
       DesktopManager.disposeListeners();
     }
-    final subscription = _sharedMediaSubscription;
-    if (subscription != null) unawaited(subscription.cancel());
+    final receiver = _sharedMediaReceiver;
+    if (receiver != null) unawaited(receiver.dispose());
     unawaited(GlobalPlayerService.instance.dispose());
     super.dispose();
   }
 
   Future<void> initSharedMediaListener() async {
-    if (Platform.isAndroid) {
-      final handler = ShareHandler.instance;
-      await handler.getInitialSharedMedia();
-      _sharedMediaSubscription = handler.sharedMediaStream.listen((SharedMedia media) async {
-        final path = media.content?.trim().toLowerCase() ?? '';
-        if (path.isEmpty) return;
-        if (path.endsWith('.m3u') || path.endsWith('.txt') || path.contains('.m3u8')) {
-          await IptvImportManager().importFromSharedMedia(media);
-        } else if (path.endsWith('.xml') || path.endsWith('.gz') || path.endsWith('.json')) {
-          await EpgImportManager().importFromSharedMedia(media);
-        } else {
-          ToastUtil.show(i18n("unsupported_file_format"));
-        }
-      });
-    }
+    if (!Platform.isAndroid) return;
+
+    final handler = ShareHandler.instance;
+    final intake = SharedMediaIntake(
+      isRoomCommand: ShareCommandHandler.isUsableCommand,
+      consumeRoomCommand: handleIncomingShareCommand,
+      importPlaylist: (path) => IptvImportManager().importFromSharedMedia(SharedMedia(content: path)),
+      importEpg: (path) => EpgImportManager().importFromSharedMedia(SharedMedia(content: path)),
+      notifyUnsupported: (key) => ToastUtil.show(i18n(key)),
+      reportError: (error, stackTrace) => debugPrint('Shared media receiver failed: $error\n$stackTrace'),
+    );
+    final receiver = SharedMediaReceiver(
+      readInitialMedia: handler.getInitialSharedMedia,
+      resetInitialMedia: handler.resetInitialSharedMedia,
+      mediaStream: handler.sharedMediaStream,
+      intake: intake,
+      reportError: (error, stackTrace) => debugPrint('Shared media channel failed: $error\n$stackTrace'),
+    );
+    _sharedMediaReceiver = receiver;
+    await receiver.start();
   }
 
   @override
@@ -141,6 +148,7 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
             // application title avoids asking EasyLocalization for a key
             // before its delegate has completed the first load.
             title: i18n('app_name'),
+            navigatorKey: appNavigatorKey,
             scrollBehavior: MyCustomScrollBehavior(),
             debugShowCheckedModeBanner: false,
             themeMode: AppConsts.themeModes[SettingsService.to.theme.themeModeName.v]!,

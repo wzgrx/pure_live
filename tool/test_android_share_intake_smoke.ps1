@@ -82,7 +82,7 @@ foreach ($required in @(
     "'android.intent.extra.TEXT'",
     "'android.intent.extra.STREAM'",
     "'application/x-mpegURL'",
-    'content://$Package.fileProvider/external-path/Download/',
+    'content://$Package.fileProvider/cache-path/',
     "logcat', '--pid'",
     'noFatalOrAnr',
     'EXCEPTION CAUGHT BY (?:RENDERING|WIDGETS) LIBRARY',

@@ -315,8 +315,9 @@ $fixtureTag = Get-Date -Format 'yyMMddHHmmssff'
 $fixtureBaseName = "purelive-share-intake-$fixtureTag"
 $fixtureChannel = "Share Intake Fixture $fixtureTag"
 $localFixture = Join-Path $evidence "$fixtureBaseName.m3u"
-$deviceFixture = "/sdcard/Download/$fixtureBaseName.m3u"
-$deviceFixtureUri = "content://$Package.fileProvider/external-path/Download/$fixtureBaseName.m3u"
+$stagedDeviceFixture = "/data/local/tmp/$fixtureBaseName.m3u"
+$deviceFixture = "/data/user/0/$Package/cache/$fixtureBaseName.m3u"
+$deviceFixtureUri = "content://$Package.fileProvider/cache-path/$fixtureBaseName.m3u"
 [IO.File]::WriteAllText(
     $localFixture,
     "#EXTM3U`n#EXTINF:-1 tvg-id=`"$fixtureTag`" group-title=`"Fixture`",$fixtureChannel`nhttps://example.invalid/$fixtureTag/live.m3u8`n",
@@ -413,7 +414,8 @@ try {
     $result.checks.warmShareCommandAccepted = $true
     $result.checks.duplicateWarmShareSuppressed = $true
 
-    Invoke-Adb @('push', $localFixture, $deviceFixture) | Out-Null
+    Invoke-Adb @('push', $localFixture, $stagedDeviceFixture) | Out-Null
+    Invoke-Adb @('shell', "su -c `"cp '$stagedDeviceFixture' '$deviceFixture' && chown ${settingsUid}:${settingsGid} '$deviceFixture' && chmod 600 '$deviceFixture' && restorecon '$deviceFixture'`"") | Out-Null
     $result.fileShare.deviceFixtureSha256 = Get-DeviceFileHash $deviceFixture
     $result.fileShare.launchOutput = (Invoke-Adb @(
         'shell', 'am', 'start', '-W', '-a', 'android.intent.action.SEND', '-t', 'application/x-mpegURL',
@@ -482,7 +484,7 @@ finally:
             if (-not $failure) { $failure = $_ } else { Write-Warning "Settings restoration also failed: $($_.Exception.Message)" }
         }
     }
-    foreach ($remote in @($deviceFixture, $remoteSettingsBackup, $remoteSettingsRestore, $remoteCacheBackup, $remoteCacheRestore, $remoteDbSnapshot)) {
+    foreach ($remote in @($deviceFixture, $stagedDeviceFixture, $remoteSettingsBackup, $remoteSettingsRestore, $remoteCacheBackup, $remoteCacheRestore, $remoteDbSnapshot)) {
         try { Invoke-Adb @('shell', "su -c `"rm -f '$remote'`"") | Out-Null } catch {}
     }
     try { Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null } catch {}

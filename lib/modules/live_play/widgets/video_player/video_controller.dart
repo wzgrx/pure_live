@@ -760,7 +760,14 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   Future<void> setVolume(double value) async {
-    if (!_ownsVolume || !value.isFinite) return;
+    await trySetVolume(value);
+  }
+
+  /// Applies a user-requested volume and reports whether the active room still
+  /// owned the operation. Ordinary controls keep using [setVolume], while
+  /// transactional UI can retain its draft when the platform write fails.
+  Future<bool> trySetVolume(double value) async {
+    if (!_ownsVolume || !value.isFinite) return false;
     final revision = ++_volumeRevision;
     final resolved = value.clamp(0.0, 1.0).toDouble();
     try {
@@ -771,11 +778,14 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
       }
       // A system event can report the actual, quantized device level before
       // the setter completes. Never replace that event or a newer room's state.
-      if (!_ownsVolume || revision != _volumeRevision) return;
+      if (!_ownsVolume) return false;
+      if (revision != _volumeRevision) return true;
       currentVolume.value = resolved;
       await room.saveCurrentVolume(resolved);
+      return true;
     } catch (error, stack) {
       log('Set volume failed', name: 'VideoController.Volume', error: error, stackTrace: stack);
+      return false;
     }
   }
 

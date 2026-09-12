@@ -68,6 +68,45 @@ void main() {
     expect(VolumeSettingsController.parseRoomVolumes(null), isEmpty);
   });
 
+  test('finite imported and persisted volumes are normalized to the supported range', () async {
+    final parsed = VolumeSettingsController.parseConfig({
+      'defaultMobileVolume': -2,
+      'defaultDesktopVolume': 4,
+      'roomVolumes': {'low': -1, 'high': 3},
+    });
+    expect(parsed.mobile, 0.0);
+    expect(parsed.desktop, 1.0);
+    expect(parsed.volumes, {'low': 0.0, 'high': 1.0});
+
+    await HivePrefUtil.clear();
+    await HivePrefUtil.setDouble('defaultMobileVolume', double.nan);
+    await HivePrefUtil.setDouble('defaultDesktopVolume', double.infinity);
+    await HivePrefUtil.setString('roomVolumes', '{"low":-2,"high":4}');
+    final volume = Get.put(VolumeSettingsController());
+
+    expect(volume.defaultMobileVolume.value, 0.5);
+    expect(volume.defaultDesktopVolume.value, 1.0);
+    expect(volume.roomVolumes, {'low': 0.0, 'high': 1.0});
+    await Future<void>.delayed(Duration.zero);
+    await HivePrefUtil.flush();
+    expect(HivePrefUtil.getDouble('defaultMobileVolume'), 0.5);
+    expect(HivePrefUtil.getDouble('defaultDesktopVolume'), 1.0);
+    expect(jsonDecode(HivePrefUtil.getString('roomVolumes')!), {'low': 0.0, 'high': 1.0});
+  });
+
+  test('non-finite defaults and runtime room writes preserve valid state', () {
+    for (final invalid in [double.nan, double.infinity, double.negativeInfinity]) {
+      expect(() => VolumeSettingsController.parseConfig({'defaultMobileVolume': invalid}), throwsFormatException);
+    }
+
+    final volume = Get.put(VolumeSettingsController());
+    volume.roomVolumes = {'kept': 0.6};
+    volume.setRoomVolume('kept', double.nan);
+    expect(volume.roomVolumes, {'kept': 0.6});
+    expect(() => volume.roomVolumes = {'bad': double.infinity}, throwsArgumentError);
+    expect(volume.roomVolumes, {'kept': 0.6});
+  });
+
   test('malformed volume data preserves all volume settings', () {
     final volume = Get.put(VolumeSettingsController());
     volume.roomVolumes = {'kept': 0.6};

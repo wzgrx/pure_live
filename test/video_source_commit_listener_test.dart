@@ -191,6 +191,21 @@ void main() {
     expect(controller.showVolume.value, isFalse);
   });
 
+  test('transactional volume apply reports a native write failure', () async {
+    final volume = _SystemVolume();
+    final controller = volumeController(volume);
+    await controller.initialization;
+    final visible = controller.currentVolume.value;
+    final saved = controller.room.getSavedVolume();
+    volume.writes.clear();
+    volume.writeError = StateError('platform write failed');
+
+    expect(await controller.trySetVolume(0.3), isFalse);
+    expect(volume.writes, [0.3]);
+    expect(controller.currentVolume.value, visible);
+    expect(controller.room.getSavedVolume(), saved);
+  });
+
   test('system volume failed initial read does not prevent source dispatch', () async {
     final volume = _SystemVolume()..readError = StateError('platform read failed');
     final manager = _FakePlayerManager(LiveRoom(platform: 'fixture', roomId: 'volume'), null);
@@ -699,6 +714,7 @@ class _SystemVolume implements VolumeController {
   bool fetchInitial = false;
   double initialValue = 0.8;
   Object? readError;
+  Object? writeError;
   @override
   bool showSystemUI = true;
   @override
@@ -711,6 +727,7 @@ class _SystemVolume implements VolumeController {
   @override
   Future<void> setVolume(double value) async {
     writes.add(value);
+    if (writeError != null) throw writeError!;
     await writeReply?.future;
   }
 

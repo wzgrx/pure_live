@@ -75,6 +75,15 @@ Flutter 画面通常位于独立 BLAST Surface，`gfxinfo` 的 Android View 样�
 
 默认执行热门直播网格 20 上+20 下及相邻平台 20 左+20 右，每个输入前核对精确前台所有权；原始 layer dump、P50/P90/P95/P99、两帧/四帧间隔比例、主线程运行/排队时间、温控、内存、截图和日志统一写入 `local-artifacts/diagnostics/android-home-scroll-performance-*/`。`totalTimelineFrames=0` 时只使用 present 间隔和 dropped/lateAcquire/badDesiredPresent，不将分类字段的零值解释为零卡顿。
 
+直播间重复进入、音频模式与退出后的资源恢复使用同一身份/哈希门禁：
+
+```powershell
+.\tool\run_android_device_test_turn.ps1 -NoRotation -Serial $serial -CommandLine `
+  "& '.\tool\android_room_resource_recovery.ps1' -Serial `$env:PURELIVE_ADB_SERIAL -ExpectedApkSha256 'EXPECTED_SHA256' -Cycles 50 -SampleEvery 5 -IdleReleaseSeconds 52"
+```
+
+该工具每 5 轮采集 `/proc/PID/status`、`dumpsys meminfo`、FD 类型、逐线程 `comm` 与目标 SurfaceFlinger layer；退出应用内悬浮播放后等待 52 秒，覆盖播放器默认 45 秒空闲硬释放窗口。每次模式输入先解析精确且启用的可点击动作，只有持久状态仍未变化时才有限重试。首轮 K90 Debug 数据和当前边界见 [Android 50 次资源恢复审计](ANDROID_ROOM_RESOURCE_RECOVERY_AUDIT_2026_09_13.md)。
+
 重点观察：
 
 1. 首页和收藏列表的快速滚动；

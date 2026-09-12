@@ -1,4 +1,6 @@
-# 3.2.0 剩余工作与当前候选（2026-09-12）
+# 3.2.0 剩余工作与当前候选（2026-09-13）
+
+- **09-13 Android 50 次进退房与资源恢复已取得首轮完整原生证据**：[完整记录](ANDROID_ROOM_RESOURCE_RECOVERY_AUDIT_2026_09_13.md)。`61462573` 增加进程/内存/FD/线程/SurfaceFlinger 解析与循环工具；失败轮次先后暴露空诊断行、瞬态语义、应用内悬浮所有权、静态输入和中途证据丢失，最终 `1d29b9cb` 改为精确可点击动作与持久状态感知重试。K90 上绑定 `039f8ff3` 的 Debug APK 完成 50/50 次 Bilibili 视频→纯音频→退出，50 次均一次输入生效、悬浮会话关闭且进程稳定。每 5 轮的原生播放器/Codec 线程、FD、Socket、DMA-BUF、GPU FD、BLAST layer 无递增；空闲 52 秒后 FD 300→262、DMA-BUF 53→25，最终 PSS/RSS 相对预热首页 +16,684/+17,012 KB，无 FATAL/ANR。A7-04 由 NR→RUN；宏观为 **20 PASS / 40 RUN / 2 NR**、42 组未闭环。Release、多平台、视频恢复、全屏/PiP/后台和更长轮次继续，Astra Light 0 次。
 
 - **09-12 Android 首页滚动已取得首轮 120 Hz SurfaceFlinger 量化**：[完整记录](ANDROID_HOME_SCROLL_FRAME_PACING_AUDIT_2026_09_12.md)。`09dce413` 新增目标 BLAST layer timestats、帧间隔百分位/阈值和主线程 schedstat 工具，并纳入固定本地门禁；精确提交相邻 **45/45 PASS**、全库 analyze 无问题。K90 上核对已安装 Debug APK SHA-256 为 `0F28A5F0…D4CD7F` 后执行热门网格 20 上+20 下、平台 20 左+20 右：竖向 2924 帧、P50/P90/P95/P99 为 8/8/16/24 ms、`>=16 ms` 5.472%、最大 102 ms；横向 2842 帧、8/8/8/16 ms、`>=16 ms` 2.322%、最大 42 ms；两组 dropped/lateAcquire/badDesiredPresent 均 0，页面、进程日志与清理断言通过。A1-06 由 NR→RUN；宏观为 **20 PASS / 39 RUN / 3 NR**、42 组未闭环。Release 对照、离群点 timeline、长列表与温升轮次继续，Astra Light 0 次。
 

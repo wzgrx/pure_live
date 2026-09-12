@@ -51,6 +51,11 @@ UIAutomator before tapping. This is slower, but remains screenshot-free and is
 useful after a layout change. If the label is unavailable, the measured
 coordinate remains the fallback.
 
+Route-sensitive sequences may use bilingual `tapSemantic` candidates followed
+by `assertSemantic`. The assertion reads the destination accessibility tree and
+ends the sequence with an error when the expected page-only label is absent, so
+a stale coordinate or unchanged screen is never reported as a successful route.
+
 Screenshots and UI XML are collected only when a command fails and
 `-CaptureOnFailure` was explicitly supplied.
 
@@ -109,6 +114,9 @@ deliberately skipped on this fast path because it can outlive the control layer.
    `-Validate` before device regression.
 5. Verify player state through app logs/semantics after each action. A successful
    tap alone is not a playback result.
+6. End navigation sequences with a destination-only `assertSemantic` whenever a
+   stable label exists; include both Chinese and English aliases for localized
+   routes.
 
 ## v3.0.22 竖屏全屏手势
 

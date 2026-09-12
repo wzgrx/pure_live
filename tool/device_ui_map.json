@@ -709,16 +709,31 @@
         ],
         "open_pip_danmaku_settings": [
           {
-            "tap": "home.menu",
+            "tapSemantic": [
+              "菜单",
+              "Menu"
+            ],
             "waitMs": 350
           },
           {
-            "tap": "drawer.settings",
+            "tapSemantic": [
+              "设置",
+              "Settings"
+            ],
             "waitMs": 600
           },
           {
-            "tap": "settings.pip_danmaku",
+            "tapSemantic": [
+              "小窗弹幕",
+              "PiP Danmaku"
+            ],
             "waitMs": 600
+          },
+          {
+            "assertSemantic": [
+              "样式预览",
+              "Style Preview"
+            ]
           }
         ],
         "enter_first_bilibili_room": [
@@ -2917,14 +2932,17 @@
         },
         "settings.pip_danmaku": {
           "x": 600,
-          "y": 2175,
+          "y": 2006,
           "label": "设置：小窗弹幕",
-          "semantic": "小窗弹幕…",
+          "semantic": [
+            "小窗弹幕",
+            "PiP Danmaku"
+          ],
           "bounds": [
-            53,
-            2030,
-            1147,
-            2320
+            48,
+            1874,
+            1152,
+            2138
           ]
         },
         "settings.player_kernel": {
@@ -3381,16 +3399,31 @@
         ],
         "open_pip_danmaku_settings": [
           {
-            "tap": "home.menu",
+            "tapSemantic": [
+              "菜单",
+              "Menu"
+            ],
             "waitMs": 350
           },
           {
-            "tap": "drawer.settings",
+            "tapSemantic": [
+              "设置",
+              "Settings"
+            ],
             "waitMs": 600
           },
           {
-            "tap": "settings.pip_danmaku",
+            "tapSemantic": [
+              "小窗弹幕",
+              "PiP Danmaku"
+            ],
             "waitMs": 600
+          },
+          {
+            "assertSemantic": [
+              "样式预览",
+              "Style Preview"
+            ]
           }
         ],
         "enter_first_bilibili_room": [

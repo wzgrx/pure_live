@@ -372,13 +372,34 @@ function Invoke-TapPoint {
     if (-not $DryRun) { Invoke-Adb -AdbArguments @('shell', 'input', 'tap', $point.X, $point.Y) | Out-Null }
 }
 
+function Format-SemanticCandidates {
+    param([string[]]$Semantics)
+    (@($Semantics | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) | ForEach-Object { "'$_'" }) -join ' or '
+}
+
 function Invoke-TapSemantic {
-    param([string]$Semantic)
+    param([string[]]$Semantics)
     Assert-TargetApp $map.package
-    $node = Find-SemanticNode (Get-UiNodes) @($Semantic)
-    if (-not $node) { throw "Semantic target '$Semantic' is not visible." }
-    Write-Host ("tap semantic '{0}' ({1},{2})" -f $Semantic, $node.Bounds.X, $node.Bounds.Y)
+    $candidates = @($Semantics | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($candidates.Count -eq 0) { throw 'Semantic tap requires at least one non-empty candidate.' }
+    $node = Find-SemanticNode (Get-UiNodes) $candidates
+    if (-not $node) { throw "Semantic target $(Format-SemanticCandidates $candidates) is not visible." }
+    $matched = if ($node.Description) { $node.Description.Split("`n")[0] } else { $node.Text.Split("`n")[0] }
+    Write-Host ("tap semantic '{0}' ({1},{2})" -f $matched, $node.Bounds.X, $node.Bounds.Y)
     if (-not $DryRun) { Invoke-Adb -AdbArguments @('shell', 'input', 'tap', $node.Bounds.X, $node.Bounds.Y) | Out-Null }
+}
+
+function Invoke-AssertSemantic {
+    param([string[]]$Semantics)
+    Assert-TargetApp $map.package
+    $candidates = @($Semantics | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($candidates.Count -eq 0) { throw 'Semantic assertion requires at least one non-empty candidate.' }
+    $node = Find-SemanticNode (Get-UiNodes) $candidates
+    if (-not $node) {
+        throw "Expected semantic $(Format-SemanticCandidates $candidates) is not visible. The sequence did not reach its destination."
+    }
+    $matched = if ($node.Description) { $node.Description.Split("`n")[0] } else { $node.Text.Split("`n")[0] }
+    Write-Host ("assert semantic '{0}' at ({1},{2})" -f $matched, $node.Bounds.X, $node.Bounds.Y)
 }
 
 function Invoke-SwipeGesture {
@@ -459,7 +480,7 @@ function Test-Map {
             # sequence step intentionally contains exactly one action. Keep the
             # filtered result as an array on both Windows PowerShell and pwsh.
             $actions = @(
-                @('tap', 'tapSemantic', 'swipe', 'wait') | Where-Object {
+                @('tap', 'tapSemantic', 'assertSemantic', 'swipe', 'wait') | Where-Object {
                     $step.PSObject.Properties[$_]
                 }
             )
@@ -471,6 +492,17 @@ function Test-Map {
             }
             if ($step.PSObject.Properties['swipe'] -and -not $SelectedProfile.Data.gestures.PSObject.Properties[$step.swipe]) {
                 $errors.Add("Sequence '$($sequence.Name)' references missing gesture '$($step.swipe)'.")
+            }
+            foreach ($semanticAction in @('tapSemantic', 'assertSemantic')) {
+                if (-not $step.PSObject.Properties[$semanticAction]) { continue }
+                $semantics = @(
+                    $step.PSObject.Properties[$semanticAction].Value |
+                        ForEach-Object { [string]$_ } |
+                        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                )
+                if ($semantics.Count -eq 0) {
+                    $errors.Add("Sequence '$($sequence.Name)' has an empty $semanticAction action.")
+                }
             }
             if ($step.PSObject.Properties['wait'] -and ((-not [bool]$step.wait) -or $step.waitMs -le 0)) {
                 $errors.Add("Sequence '$($sequence.Name)' has an invalid wait action.")
@@ -533,23 +565,27 @@ try {
             $property = $selected.Data.sequences.PSObject.Properties[$Sequence]
             if (-not $property) { throw "Unknown UI sequence '$Sequence'. Run .\tool\android_ui.ps1 -List." }
             foreach ($step in $property.Value) {
+                $stepWaitMs = if ($step.PSObject.Properties['waitMs']) { [int]$step.waitMs } else { 0 }
                 if ($step.PSObject.Properties['tap']) {
                     $verifyStep = $step.PSObject.Properties['verifySemantics'] -and [bool]$step.verifySemantics
                     Invoke-TapPoint $selected $step.tap -SemanticCheck:($VerifySemantics -or $verifyStep)
                 }
                 elseif ($step.PSObject.Properties['tapSemantic']) {
-                    Invoke-TapSemantic $step.tapSemantic
+                    Invoke-TapSemantic -Semantics @($step.tapSemantic)
+                }
+                elseif ($step.PSObject.Properties['assertSemantic']) {
+                    Invoke-AssertSemantic -Semantics @($step.assertSemantic)
                 }
                 elseif ($step.PSObject.Properties['swipe']) {
                     Invoke-SwipeGesture $selected $step.swipe
                 }
                 elseif ($step.PSObject.Properties['wait']) {
-                    if (-not [bool]$step.wait -or $step.waitMs -le 0) {
+                    if (-not [bool]$step.wait -or $stepWaitMs -le 0) {
                         throw "Sequence '$Sequence' has an invalid wait action."
                     }
-                    Write-Host "wait $($step.waitMs)ms"
+                    Write-Host "wait ${stepWaitMs}ms"
                 }
-                if ($step.waitMs -gt 0 -and -not $DryRun) { Start-Sleep -Milliseconds $step.waitMs }
+                if ($stepWaitMs -gt 0 -and -not $DryRun) { Start-Sleep -Milliseconds $stepWaitMs }
             }
         }
         'Snapshot' { Save-Snapshot $map $selected $Snapshot }

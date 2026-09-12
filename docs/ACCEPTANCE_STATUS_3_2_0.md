@@ -1,5 +1,7 @@
 # 3.2.0 剩余工作与当前候选（2026-09-13）
 
+- **09-13 分享口令交接与导入弹窗已修订并完成 K90 系统面板验收**：[专项审计](SHARE_COMMAND_HANDOFF_AND_IMPORT_DIALOG_AUDIT_2026_09_13.md)。`5e1b9423` 将剪贴板处理改为消费者成功后提交、并发 single-flight 和默认 128 项 SHA-256 自分享历史；桌面/移动平台失败保持可重试并显示双语反馈，无效房间身份不进入平台通道。导入弹窗改由发起 State 持有路由，计时器可取消，320×480 / 3.0 倍英文长内容可滚动且 Cancel/Enter 返回明确结果。相邻七文件 **40/40 PASS**、全库 analyze 无问题；288832063 B / `5A8B6A08…3A23A` arm64 Debug 已保留数据覆盖 K90，真实 Bilibili 房间分享打开 `com.android.intentresolver/.ChooserActivity` 并显示口令预览/系统目标，测试未选择外部目标，系统返回后原房间动作仍可达。设备包哈希一致，Hive 精确恢复，应用停止、stay-awake 归零。A1-05/A2-01 保持 RUN；宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组未闭环**，Astra Light 使用 0 次。
+
 - **09-13 房间卡片长按、关注与标签分配已修订并完成 K90 原生专项**：[审计](ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md)。标签链 `c83ed5cc` 统一权威映射、有效 ID/旧键规则、持久化等待、响应式弹窗和新增标签边界；关注增量 `d499e41c` 移除一次性本地状态与全局 Navigator，改为观察规范关注集合、所属路由关闭、取消关注确认和单次事务。标签原有专项 **4/4 PASS**、相邻十文件 **131/131 PASS**；关注追加后同文件 **8/8 PASS**、相邻九文件 **73/73 PASS**，全库 analyze 无问题。最新干净 APK `288827674` B / `ABEEDA36…1726` 已覆盖 K90 且保留首次安装时间；真实 Bilibili 房间的直接关注关闭、取消关注提示/取消/确认、状态重开、再次关注、数字夹具创建/自动选择/确认/重开保持和无 FATAL/ANR 全部通过。Hive 哈希、uid/gid/mode/SELinux context 精确恢复，应用停止、stay-awake 归零。A1-05/A2-01 保持 RUN；宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组未闭环**，Astra Light 使用 0 次。
 
 - **09-13 GitHub Issue 已刷新到当前公开状态**：[增量审计](ISSUE_AUDIT_2026_09_13.md)。维护仓库 open 0、参考仓库 open 19；最新更新时间仍为 #860 的 `2026-09-11 14:10:04 UTC`，#859/#861 及其余条目均未越过现有专项读取窗口。本轮只读查询，没有同步上游或写入 Issue；宏观状态保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环，Astra Light 0 次。

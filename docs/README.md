@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [分享口令交接与导入弹窗审计](SHARE_COMMAND_HANDOFF_AND_IMPORT_DIALOG_AUDIT_2026_09_13.md)：消费者成功提交、失败重试、并发合并、有界自分享抑制、响应式导入弹窗，以及 K90 系统分享面板和返回原应用验证。
+
 - [房间卡片长按与标签分配布局/完整性审计](ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md)：权威映射、旧键清理、响应式弹窗、所属 Navigator 的关注/取消确认、新增标签自动选择，以及 K90 覆盖安装和原生重开保持验证。
 
 - [2026-09-13 GitHub Issue 增量审计](ISSUE_AUDIT_2026_09_13.md)：维护/参考仓库当前 open 计数、最新更新时间，以及 #859/#860/#861 现有专项窗口复核。

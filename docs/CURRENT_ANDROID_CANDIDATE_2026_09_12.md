@@ -87,15 +87,30 @@ AudioFlinger 轨道均为 0。冷启动等待竞态由工具提交 `6f40be2c` �
 精确恢复、应用停止、桌面与 stay-awake 复原。详见
 [Android 音频输出后端审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)。
 
+## 09-13 分享口令交接增量候选
+
+产品提交 `5e1b9423` 将剪贴板导入改为消费者成功后提交、并发 single-flight 和有界 SHA-256
+自分享历史；平台交接失败保持可重试并显示双语提示。桌面导入弹窗改由发起 State 持有路由，
+320×480 / 3.0 倍英文长内容可滚动，取消/进入返回明确结果。相邻七文件 **40/40 PASS**，全库
+analyze 无问题。
+
+精确 arm64 Debug 为 `288832063` B，SHA-256
+`5A8B6A081495DD1D68B07D6BEBEE75EC1957FF212193B82388D3FD9409D3A23A`。该包已保留数据覆盖 K90，
+首次安装时间保持且设备 `base.apk` 与候选一致。真实 Bilibili 房间点击分享后打开
+`com.android.intentresolver/.ChooserActivity`，口令预览与系统目标可见；测试不选择外部目标，
+系统返回后原房间详情动作仍可达。同轮关注/取消确认/标签重开回归和进程日志门禁通过，规范 Hive
+精确恢复、应用停止、stay-awake 归零。详见
+[分享口令专项](SHARE_COMMAND_HANDOFF_AND_IMPORT_DIALOG_AUDIT_2026_09_13.md)。
+
 ## 当前结论
 
-09-13 最新以产品提交 `d499e41c` 构建并覆盖房间卡片关注/标签分配增量候选。当前设备安装包为
-`288827674` B，SHA-256
-`ABEEDA3687FA4EFF1A7D2BBCC7D3CEC18ACE1CBF76F0B2BB8928DAAE0CA21726`；`firstInstallTime` 保持，
-设备 `base.apk` 与候选逐字节一致。K90 上真实 Bilibili 卡片完成长按、直接关注并关闭所属详情、取消关注
-提示的取消与确认、状态重开、再次关注、新建标签自动选中、确认和重开保持，应用 PID 日志无
-FATAL/ANR；规范 Hive 精确恢复到 `19F40EA9…D1F050`，应用停止且 stay-awake 恢复 0。详见
-[房间标签专项](ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md)。此前 Android
+09-13 最新以产品提交 `5e1b9423` 构建并覆盖分享口令交接增量候选。当前设备安装包为
+`288832063` B，SHA-256
+`5A8B6A081495DD1D68B07D6BEBEE75EC1957FF212193B82388D3FD9409D3A23A`；`firstInstallTime` 保持，
+设备 `base.apk` 与候选逐字节一致。K90 上真实 Bilibili 卡片分享已打开系统 Chooser，口令预览与
+分享目标列表可见；不选择目标返回后原房间操作继续可达。同轮关注/取消确认/标签重开与应用 PID 日志
+门禁通过；规范 Hive 精确恢复到 `19F40EA9…D1F050`，应用停止且 stay-awake 恢复 0。详见
+[分享口令专项](SHARE_COMMAND_HANDOFF_AND_IMPORT_DIALOG_AUDIT_2026_09_13.md)。此前 Android
 五后端真实播放矩阵与 5 次进退房专项仍分别绑定各自精确包。50 次资源循环仍绑定前一
 `039f8ff3` 候选，基础播放、
 弹幕、PiP、标准/竖屏呈现及其他增量证据各自继续按原精确包记录，不自动外推到新字节。当前仍是

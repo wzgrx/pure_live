@@ -65,6 +65,14 @@ function Get-TopPackage {
     ''
 }
 
+function Get-TopActivityComponent {
+    $dump = (Invoke-Adb @('shell', 'dumpsys', 'activity', 'activities')) -join "`n"
+    if ($dump -match '(?m)^\s*topResumedActivity=.*?\s([A-Za-z0-9._]+\/[A-Za-z0-9._$]+)') {
+        return $Matches[1]
+    }
+    ''
+}
+
 function Assert-TargetForeground {
     $top = Get-TopPackage
     if ($top -ne $Package) { throw "Expected $Package to be top resumed; actual='$top'." }
@@ -115,8 +123,12 @@ function Get-NodeLabel {
 }
 
 function Save-UiState {
-    param([Parameter(Mandatory = $true)][string] $Name, [switch] $NoScreenshot)
-    Assert-TargetForeground
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [switch] $NoScreenshot,
+        [switch] $AllowSystemSurface
+    )
+    if (-not $AllowSystemSurface.IsPresent) { Assert-TargetForeground }
     $xmlPath = Join-Path $evidence "$Name.xml"
     $pngPath = Join-Path $evidence "$Name.png"
     $captured = $false
@@ -142,6 +154,50 @@ function Save-UiState {
         }
     }
     [xml] [IO.File]::ReadAllText($xmlPath, [Text.Encoding]::UTF8)
+}
+
+function Wait-SystemShareSurface {
+    param([int] $TimeoutSeconds = 15)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $attempt = 0
+    do {
+        $attempt++
+        $component = Get-TopActivityComponent
+        $isSystemChooser = $component -match '^(android|com\.android\.intentresolver)/' -and
+            $component -match '(?i)(Chooser|Resolver|Intent)'
+        if ($isSystemChooser) {
+            $document = Save-UiState "share-surface-$attempt" -AllowSystemSurface
+            $observedComponent = Get-TopActivityComponent
+            $rootNode = $document.SelectSingleNode('/hierarchy/node')
+            $surfacePackage = if ($rootNode) { [string] $rootNode.package } else { '' }
+            $headlineNode = $document.SelectSingleNode("//node[contains(@resource-id, 'headline')]")
+            $previewNode = $document.SelectSingleNode("//node[contains(@resource-id, 'content_preview_text')]")
+            $previewText = if ($previewNode) { [string] $previewNode.text } else { '' }
+            if ($observedComponent -eq $component -and
+                $surfacePackage -match '^(android|com\.android\.intentresolver)$' -and
+                $headlineNode -and $previewText.Length -ge 20) {
+                return [pscustomobject]@{
+                    component = $component
+                    package = $surfacePackage
+                    headline = [string] $headlineNode.text
+                    previewLength = $previewText.Length
+                    document = $document
+                }
+            }
+        }
+        Start-Sleep -Milliseconds 500
+    } while ((Get-Date) -lt $deadline)
+    throw "Timed out waiting for the system share surface; top activity='$(Get-TopActivityComponent)'."
+}
+
+function Wait-TargetForeground {
+    param([int] $TimeoutSeconds = 15)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    do {
+        if ((Get-TopPackage) -eq $Package) { return }
+        Start-Sleep -Milliseconds 500
+    } while ((Get-Date) -lt $deadline)
+    throw "Timed out returning to $Package; top package='$(Get-TopPackage)'."
 }
 
 function Find-LabeledNode {
@@ -465,6 +521,24 @@ try {
     $firstDialog = Open-RoomDialog $roomTarget 'room-dialog-first'
     $result.states.firstDialogControls = $firstDialog.controls
     $result.checks.longPressDialogControlsReachable = $true
+
+    $shareAction = Find-LabeledNode -Document $firstDialog.document -Candidates @('分享', 'Share') -Clickable -Exact
+    if (-not $shareAction) { throw 'Room details expose no exact Share action.' }
+    Invoke-TapNode $shareAction
+    $shareSurface = Wait-SystemShareSurface
+    $result.states.shareSurface = [ordered]@{
+        component = $shareSurface.component
+        package = $shareSurface.package
+        headline = $shareSurface.headline
+        previewLength = $shareSurface.previewLength
+        hierarchyLength = $shareSurface.document.OuterXml.Length
+    }
+    $result.checks.shareActionOpenedSystemSurface = $true
+    Invoke-Adb @('shell', 'input', 'keyevent', 'KEYCODE_BACK') | Out-Null
+    Wait-TargetForeground
+    $firstDialog = Open-RoomDialog $roomTarget 'room-dialog-after-share'
+    $result.states.afterShareDialogControls = $firstDialog.controls
+    $result.checks.shareSurfaceReturnedToOwningApp = $true
 
     $currentDialog = $firstDialog
     $initialFollow = Get-RoomFollowControl $currentDialog.document

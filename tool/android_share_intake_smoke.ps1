@@ -693,7 +693,8 @@ finally:
         )
     }
     $result.providerEdgeShare.processId = $providerEdgeLog.pid
-    if ($providerEdgeLog.text -notmatch 'Shared URI attachment failed' -or
+    if ($providerEdgeLog.text -notmatch 'intentional debug provider type failure' -or
+        $providerEdgeLog.text -notmatch 'Shared URI copy failed' -or
         $providerEdgeLog.text -notmatch 'Shared URI display name query failed') {
         throw 'Provider-edge process log did not prove both injected failure paths were exercised.'
     }

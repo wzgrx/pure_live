@@ -183,7 +183,61 @@ K90 原生首轮补证还暴露 `open_settings` 仍使用两处历史缓存坐�
 固定显式目标、精确选项、语义路由、备份/恢复及清理约束。矩阵结束后其开始态字节恢复通过，
 再完成上述跨轮基线校正；最终应用停止、桌面前台、stay-awake 为 `0`。完整证据：
 `local-artifacts/diagnostics/android-audio-output-settings-fec7eae9/summary.json`。这组结果证明设置
-UI 与持久化，不等同于五个后端都完成真实媒体输出；逐后端播放、声音/静音结果和原生日志仍单列。
+UI 与持久化；下节继续记录五个后端的真实媒体输出矩阵。
+
+## 五后端真实播放矩阵与回退修订
+
+首次逐后端播放矩阵
+`local-artifacts/diagnostics/android-audio-output-playback-matrix-fec7eae9/summary.json`
+只有 `audiotrack`、`aaudio`、`opensles` 通过。`auto` 虽有实时视频，但没有命中可接受的
+Android 音频后端；`null` 在 MediaKit 后续自动回退到 Fijk 时又由 Fijk 固定音量创建了
+AudioTrack，破坏静音语义。这里同时暴露了两个相邻缺口：Android 专家值 `auto` 没有解析为
+当前包已验证的有序链，自动换内核也没有继承“禁用音频输出”的意图。
+
+产品提交 `b303fffd` 完成以下修订：
+
+- Android 自定义 `auto` 在进入 MPV 前解析为 `audiotrack,aaudio,opensles,`，其他平台和专家
+  显式值保持原语义；
+- `null` 通过同步的播放器能力合同在初始化前传递到自动回退内核；Fijk 同时写入 IJK
+  `an=1`、宿主 `request-audio-focus=0` 和音量 0，VideoPlayer 先静音再启动，避免创建阶段的
+  短暂有声窗口；
+- 只抑制自动回退路径，用户手动切换内核继续保持正常音频；
+- 播放 smoke 增加显式 `-PlaybackProbe`，要求画面帧变化、目标应用 Surface、原生解码日志，
+  并按选择核对 MediaKit/Fijk/Better、AudioTrack/AAudio/OpenSL ES、Fijk `an=1` 及
+  AudioFlinger 活跃轨道。
+
+有效红测先命中缺失的解析助手、同步能力合同和构造器参数；最终 focused CI **189/189 PASS**，
+全库 analyze 为 `No issues found`。Fijk 原生通道夹具 **8/8 PASS**，明确记录 `an=1`、
+`request-audio-focus=0` 和 volume 0。干净 `b303fffd` arm64 Debug 构建记录为
+`local-artifacts/build-records/20260912T181911316Z-build-androidarm64-debug.json`：APK
+`288826114` B，SHA-256
+`539E8ACC0A52699B820B6F7330A382D962E526A44B1418392CCCC43C23840E23`，设备覆盖安装后
+`base.apk` 逐字节一致且 `firstInstallTime` 保持 `2026-07-21 18:07:53`。
+
+短矩阵先确认 `auto` 有 AudioTrack 活跃轨道、`null` 的三类后端信号和 AudioFlinger 活跃轨道
+均为 0；结果见
+`local-artifacts/diagnostics/android-audio-output-fallback-b303fffd/install-playback-summary.json`。
+随后完整矩阵第一次运行在冷启动后 250 ms 仍停留 MIUI 桌面，安全前台断言按设计中止输入；
+`6f40be2c` 将目标应用进入改为 `am start -W` 后轮询 top-resumed package，保留
+`-NoBringToFront` 的即时保护语义。最终原生结果：
+
+| 专家 `--ao` | 实时画面 | 实际后端信号 | 活跃 AudioFlinger | 结果 |
+| --- | --- | --- | ---: | --- |
+| `auto` | PASS | MediaKit + AudioTrack | 1 | PASS |
+| `audiotrack` | PASS | MediaKit + AudioTrack | 1 | PASS |
+| `aaudio` | PASS | MediaKit + AAudio | 1 | PASS |
+| `opensles` | PASS | MediaKit + OpenSL ES | 0（以初始化日志门禁） | PASS |
+| `null` | PASS | MediaKit；三类音频后端均无信号 | 0 | PASS |
+
+最终汇总
+`local-artifacts/diagnostics/android-audio-output-playback-matrix-b303fffd-rerun/summary.json`
+为 **5/5 PASS**：五项均跨进程保持、到达真实 Bilibili 房间、画面帧变化且无 FATAL/ANR；
+规范 Hive 最终恢复到
+`19F40EA9E29A6017317ACB14AEBA8CF4378A6EEAA96BA15E09C7CD2312D1F050`，应用停止、桌面前台，
+stay-awake 恢复 `0`。本轮只覆盖一台 K90、一份 Debug 包和一个 Bilibili 房间；最终五轮
+MediaKit 均稳定，Fijk 自动回退抑制由单元/原生通道夹具证明而未在该直播源现场触发。
+A7-04 保持 RUN，宏观保持 **20 PASS / 40 RUN / 2 NR**、42 组未闭环；Release、多平台、
+视频恢复、全屏/PiP/后台和更长轮次继续。
 
 ## Binder death-recipient 告警归因边界
 

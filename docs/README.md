@@ -6,7 +6,7 @@
 
 - [2026-09-13 GitHub Issue 增量审计](ISSUE_AUDIT_2026_09_13.md)：维护/参考仓库当前 open 计数、最新更新时间，以及 #859/#860/#861 现有专项窗口复核。
 
-- [Android MPV 音频输出后端审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)：AudioTrack→AAudio→OpenSL ES 回退、设置菜单平台过滤、K90 进退房日志、原生五项菜单与语义导航修订。
+- [Android MPV 音频输出后端审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)：AudioTrack→AAudio→OpenSL ES 回退、Android `auto`/`null` 语义、原生五项菜单与 K90 五后端真实播放矩阵。
 
 - [主画面与小窗弹幕呈现一致性审计](DANMAKU_RENDERING_CONSISTENCY_AUDIT_2026_09_12.md)：速度/FPS/密度/字体/描边/区域源码矩阵、共享紧凑排版策略、K90 候选回归与 120 Hz 原生待验边界。
 

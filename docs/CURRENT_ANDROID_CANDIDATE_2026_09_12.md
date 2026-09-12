@@ -69,28 +69,29 @@ A2-04 因此由 NR 进入 RUN；Windows 双栏、其余样式控件、默认/模
 
 该包已通过 `install -r -t` 覆盖当前安装，首次安装时间保持、首次启动前规范 Hive SHA 不变，设备 `base.apk` 与候选逐字节一致。K90 原生页面的四个可见 Switch 均有独立中文名称，字号/字重滑块分别显示“字体大小, 12.0”“字体粗细, 稍粗”；取消恢复保留关闭状态，确认恢复后回到默认开启并跨进程保持。最终规范 Hive 精确恢复、应用停止、桌面与 stay-awake 原值恢复。详见[无障碍与默认恢复审计](ANDROID_PIP_DANMAKU_ACCESSIBILITY_RESET_AUDIT_2026_09_12.md)。
 
-## 09-13 AudioTrack 优先增量候选
+## 09-13 五后端音频输出增量候选
 
-`fec7eae9` 将 Android 普通 MPV 音频输出从依赖侧固定 OpenSL ES 改为
-`audiotrack,aaudio,opensles,` 有序回退，并把 Android 设置页限制为当前包实际包含的驱动；
-用户启用专家输出时仍优先尊重显式选择。相邻与 focused CI 均 **28/28 PASS**、全库 analyze
-无问题。干净提交构建的 arm64 Debug 为 `288822657` B，SHA-256
-`DE7DE185B3E44700CB0D7BE4D2907B17CEB6EFC48BF7BAD53FA5FF95ADFFAE0E`。
+`fec7eae9` 先将 Android 普通 MPV 音频输出从固定 OpenSL ES 改为
+`audiotrack,aaudio,opensles,` 有序回退，并补齐 Android 五项音频菜单、双语实时语义导航与
+即时/重启持久化矩阵。首次逐后端播放发现专家 `auto` 没有解析为可用链，`null` 又会在自动
+换到 Fijk 后创建 AudioTrack；`b303fffd` 因此统一 Android `auto` 的有效链，并在播放器初始化
+前把 `null` 静音意图传给自动回退内核。最终 focused CI **189/189 PASS**、全库 analyze 无问题，
+Fijk 原生通道夹具另以 **8/8 PASS** 固定 `an=1`、不申请音频焦点和音量 0。
 
-该包已保留数据覆盖当前设备：`firstInstallTime` 保持，规范 Hive 安装前、本机备份和首次启动前
-哈希完全相同，设备 `base.apk` 与候选逐字节一致。K90 上 5/5 次真实 Bilibili
-视频→纯音频→退出、14/14 门禁通过；新 PID 日志尾窗含 152 行 AudioTrack 相关记录，
-OpenSL ES、unknown-key 和 `setVolume -19` 均为 0。Binder death-recipient 告警仍存在并拆分
-跟踪；瞬态线程退出造成的测试器误失败由 `da8c15b1` 修订后完整重跑通过。后续
-`09315462` 补齐 Android 五项音频菜单 Widget，`3bfda37b` 将设置导航改为双语实时语义与目标页
-断言；同一已安装 APK 的 K90 音频菜单 6/6 通过，当前选中 auto、桌面驱动未混入，规范 Hive
-用测试前副本精确恢复。详见
+干净 `b303fffd` arm64 Debug 为 `288826114` B，SHA-256
+`539E8ACC0A52699B820B6F7330A382D962E526A44B1418392CCCC43C23840E23`。该包已保留数据覆盖
+当前设备：`firstInstallTime` 保持，设备 `base.apk` 与候选逐字节一致。K90 上最终
+`auto`、`audiotrack`、`aaudio`、`opensles`、`null` **5/5** 真实 Bilibili 播放矩阵通过，
+每项均有动态画面与对应原生后端门禁；`null` 的 AudioTrack/AAudio/OpenSL ES 信号和活跃
+AudioFlinger 轨道均为 0。冷启动等待竞态由工具提交 `6f40be2c` 修订后完整重跑通过，规范 Hive
+精确恢复、应用停止、桌面与 stay-awake 复原。详见
 [Android 音频输出后端审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)。
 
 ## 当前结论
 
-当前设备安装的是 `fec7eae9` 同签名 Android 增量候选，最新包哈希为
-`DE7DE185B3E44700CB0D7BE4D2907B17CEB6EFC48BF7BAD53FA5FF95ADFFAE0E`；其 Android
-音频输出与 5 次进退房专项已经通过。50 次资源循环仍绑定前一 `039f8ff3` 候选，基础播放、弹幕、
-PiP、标准/竖屏呈现及其他增量证据各自继续按原精确包记录，不自动外推到新字节。当前仍是 Debug
-验收输入；宏观状态为 **20 PASS / 40 RUN / 2 NR，共 42 组未闭环**。
+当前设备安装的是产品提交 `b303fffd` 的同签名 Android 增量候选；仓库最新 `6f40be2c` 只修订
+原生测试工具，不改变 APK。当前包为 `288826114` B，SHA-256
+`539E8ACC0A52699B820B6F7330A382D962E526A44B1418392CCCC43C23840E23`；Android 五后端真实
+播放矩阵与此前 5 次进退房专项均已通过。50 次资源循环仍绑定前一 `039f8ff3` 候选，基础播放、
+弹幕、PiP、标准/竖屏呈现及其他增量证据各自继续按原精确包记录，不自动外推到新字节。当前仍是
+Debug 验收输入；宏观状态为 **20 PASS / 40 RUN / 2 NR，共 42 组未闭环**。

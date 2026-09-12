@@ -440,13 +440,13 @@ try {
     $result.fileShare.deviceFixtureSha256 = Get-DeviceFileHash $deviceFixture
     $result.mixedShare.launchOutput = (Invoke-Adb @(
         'shell', 'am', 'start', '-W', '-a', 'android.intent.action.SEND', '-t', 'application/x-mpegURL',
-        '--grant-read-uri-permission', '--es', 'android.intent.extra.TEXT', $ShareCommand,
+        '--grant-read-uri-permission', '--es', 'android.intent.extra.TEXT', $WarmShareCommand,
         '--eu', 'android.intent.extra.STREAM', $deviceFixtureUri, '-n', "$Package/.MainActivity"
     )) -join "`n"
     Start-Sleep -Seconds 2
     Assert-TargetForeground
     $afterMixed = Save-UiState 'mixed-command-attachment-after'
-    if (Test-ShareDialog $afterMixed $ExpectedRoomId) { throw 'A duplicate command with an attachment reopened the import dialog.' }
+    if (Test-ShareDialog $afterMixed $ExpectedWarmRoomId) { throw 'A duplicate command with an attachment reopened the import dialog.' }
     Wait-SharedStagingEmpty
     $result.mixedShare.sharedStagingEntriesAfterCommand = @(Get-SharedStagingEntries)
     Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null

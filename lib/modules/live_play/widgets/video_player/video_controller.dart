@@ -269,6 +269,43 @@ class DanmakuManager {
   }
 }
 
+/// One-shot orientation ownership for a fullscreen presentation.
+///
+/// An explicit landscape action entered from a portrait room must restore the
+/// portrait normal room when fullscreen closes. Ordinary fullscreen entries
+/// replace any unfinished request so an earlier presentation cannot affect a
+/// later one.
+class FullscreenOrientationRestoreState {
+  bool _restorePortrait = false;
+
+  void begin({required bool restorePortraitOnExit}) {
+    _restorePortrait = restorePortraitOnExit;
+  }
+
+  bool takePortraitRestore() {
+    final restore = _restorePortrait;
+    _restorePortrait = false;
+    return restore;
+  }
+}
+
+Future<void> exitFullscreenWithOrientationRestore({
+  required FullscreenOrientationRestoreState state,
+  required Future<void> Function() exitFullscreen,
+  required Future<void> Function() restorePortrait,
+  required Future<void> Function() releaseOrientation,
+  Duration portraitSettleDelay = const Duration(milliseconds: 350),
+}) async {
+  final shouldRestorePortrait = state.takePortraitRestore();
+  await exitFullscreen();
+  if (!shouldRestorePortrait) return;
+  await restorePortrait();
+  if (portraitSettleDelay > Duration.zero) {
+    await Future<void>.delayed(portraitSettleDelay);
+  }
+  await releaseOrientation();
+}
+
 class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   // 常量定义
   // Two seconds was shorter than the orientation animation plus an
@@ -329,6 +366,7 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   final catchUpSwitching = false.obs;
   final batteryLevel = 100.obs;
   final currentVolume = 1.0.obs;
+  final FullscreenOrientationRestoreState _fullscreenOrientationRestore = FullscreenOrientationRestoreState();
 
   // 弹幕相关
   final hideDanmaku = false.obs;
@@ -1272,7 +1310,12 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
 
   // 全屏管理
   Future<void> exitFullScreen() async {
-    await WindowService().doExitFullScreen();
+    await exitFullscreenWithOrientationRestore(
+      state: _fullscreenOrientationRestore,
+      exitFullscreen: WindowService().doExitFullScreen,
+      restorePortrait: WindowService().verticalScreen,
+      releaseOrientation: WindowService().followSystemOrientation,
+    );
     GlobalPlayerState.to.isFullscreen.value = false;
   }
 
@@ -1307,6 +1350,8 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
   }
 
   Future<void> enterFullScreen({bool forceLandscape = false}) async {
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+    _fullscreenOrientationRestore.begin(restorePortraitOnExit: isMobile && forceLandscape);
     await WindowService().doEnterFullScreen();
     GlobalPlayerState.to.isFullscreen.value = true;
 

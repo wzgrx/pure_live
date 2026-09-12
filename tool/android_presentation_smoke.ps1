@@ -77,22 +77,34 @@ function Get-DisplayMetrics {
 function Save-UiDump {
     param([Parameter(Mandatory = $true)][string] $Name)
     Ensure-Awake
-    $remote = "/sdcard/purelive-$PID-$Name.xml"
     $local = Join-Path $evidence "$Name.xml"
-    try {
-        $captured = $false
-        for ($attempt = 1; $attempt -le 2 -and -not $captured; $attempt++) {
-            try {
-                Invoke-Adb -AdbArguments @('shell', 'timeout', '12', 'uiautomator', 'dump', '--compressed', $remote) | Out-Null
-                Invoke-Adb -AdbArguments @('pull', $remote, $local) | Out-Null
-                $captured = $true
-            } catch {
-                if ($attempt -eq 2) { throw }
-                Start-Sleep -Milliseconds 500
+    $captured = $false
+    # Android's uiautomator can return a zero shell status without creating the
+    # requested sdcard file while a Flutter route or system bar is animating.
+    # Stream the hierarchy through exec-out instead and require an actual XML
+    # document; retrying the whole capture keeps a transient framework state
+    # from being reported as a product failure.
+    $maximumAttempts = 4
+    for ($attempt = 1; $attempt -le $maximumAttempts -and -not $captured; $attempt++) {
+        try {
+            $raw = (Invoke-Adb -AdbArguments @('exec-out', 'uiautomator', 'dump', '--compressed', '/dev/tty')) -join "`n"
+            $xmlMatch = [regex]::Match($raw, '(?s)<\?xml\b.*?</hierarchy>')
+            if (-not $xmlMatch.Success) {
+                [IO.File]::WriteAllText(
+                    "$local.uia-attempt-$attempt.txt",
+                    $raw,
+                    [Text.UTF8Encoding]::new($false)
+                )
+                throw 'uiautomator returned no XML hierarchy.'
             }
+            [IO.File]::WriteAllText($local, $xmlMatch.Value, [Text.UTF8Encoding]::new($false))
+            $captured = $true
+        } catch {
+            if ($attempt -eq $maximumAttempts) {
+                throw "UI hierarchy capture failed after $maximumAttempts attempts: $($_.Exception.Message)"
+            }
+            Start-Sleep -Milliseconds (350 + 250 * $attempt)
         }
-    } finally {
-        try { Invoke-Adb -AdbArguments @('shell', 'rm', '-f', $remote) | Out-Null } catch {}
     }
     [xml](Get-Content -LiteralPath $local -Raw -Encoding UTF8)
 }

@@ -19,6 +19,7 @@ class SharedMediaIntakeResult {
 typedef SharedRoomCommandPredicate = bool Function(String text);
 typedef SharedRoomCommandConsumer = Future<bool> Function(String text);
 typedef SharedFileImporter = Future<bool> Function(String path);
+typedef SharedAttachmentReleaser = Future<void> Function(String path);
 typedef SharedMediaFeedback = void Function(String localizationKey);
 typedef SharedMediaErrorReporter = void Function(Object error, StackTrace stackTrace);
 
@@ -28,6 +29,7 @@ class SharedMediaIntake {
     required this.consumeRoomCommand,
     required this.importPlaylist,
     required this.importEpg,
+    required this.releaseAttachment,
     required this.notifyUnsupported,
     SharedMediaErrorReporter? reportError,
   }) : _reportError = reportError ?? _logError;
@@ -39,6 +41,7 @@ class SharedMediaIntake {
   final SharedRoomCommandConsumer consumeRoomCommand;
   final SharedFileImporter importPlaylist;
   final SharedFileImporter importEpg;
+  final SharedAttachmentReleaser releaseAttachment;
   final SharedMediaFeedback notifyUnsupported;
   final SharedMediaErrorReporter _reportError;
   Future<void> _queue = Future<void>.value();
@@ -54,6 +57,12 @@ class SharedMediaIntake {
   }
 
   Future<SharedMediaIntakeResult> _ingest(SharedMedia media) async {
+    final attachmentPaths = <String>{};
+    for (final attachment in media.attachments ?? const <SharedAttachment?>[]) {
+      final path = attachment?.path.trim() ?? '';
+      if (path.isNotEmpty) attachmentPaths.add(path);
+    }
+
     try {
       final text = media.content?.trim() ?? '';
       if (text.isNotEmpty && isRoomCommand(text)) {
@@ -65,11 +74,7 @@ class SharedMediaIntake {
         );
       }
 
-      final paths = <String>{};
-      for (final attachment in media.attachments ?? const <SharedAttachment?>[]) {
-        final path = attachment?.path.trim() ?? '';
-        if (path.isNotEmpty) paths.add(path);
-      }
+      final paths = <String>{...attachmentPaths};
       if (text.isNotEmpty && _supportedExtension(text) != null) {
         paths.add(text);
       }
@@ -97,6 +102,14 @@ class SharedMediaIntake {
     } catch (error, stackTrace) {
       _reportErrorSafely(error, stackTrace);
       return const SharedMediaIntakeResult(kind: SharedMediaIntakeKind.failed);
+    } finally {
+      for (final path in attachmentPaths) {
+        try {
+          await releaseAttachment(path);
+        } catch (error, stackTrace) {
+          _reportErrorSafely(error, stackTrace);
+        }
+      }
     }
   }
 

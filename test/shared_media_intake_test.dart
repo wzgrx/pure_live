@@ -9,6 +9,7 @@ void main() {
   test('a room command takes precedence over file attachments and is handled once', () async {
     final commands = <String>[];
     final files = <String>[];
+    final released = <String>[];
     final unsupported = <String>[];
     final intake = SharedMediaIntake(
       isRoomCommand: (text) => text == 'room-command',
@@ -24,6 +25,7 @@ void main() {
         files.add(path);
         return true;
       },
+      releaseAttachment: (path) async => released.add(path),
       notifyUnsupported: unsupported.add,
     );
 
@@ -36,11 +38,13 @@ void main() {
     expect(result.acceptedCount, 1);
     expect(commands, ['room-command']);
     expect(files, isEmpty);
+    expect(released, ['/cache/ignored.m3u']);
     expect(unsupported, isEmpty);
   });
 
   test('Android attachment paths are deduplicated and routed by supported extension', () async {
     final operations = <String>[];
+    final released = <String>[];
     final intake = _intake(
       importPlaylist: (path) async {
         operations.add('playlist:$path');
@@ -50,6 +54,7 @@ void main() {
         operations.add('epg:$path');
         return true;
       },
+      releaseAttachment: (path) async => released.add(path),
     );
 
     final result = await intake.ingest(
@@ -68,6 +73,7 @@ void main() {
     expect(result.attemptedCount, 2);
     expect(result.acceptedCount, 2);
     expect(operations, ['playlist:/cache/Fixture.M3U', 'epg:/cache/guide.XML']);
+    expect(released, ['/cache/Fixture.M3U', '/cache/guide.XML', '/cache/poster.png']);
   });
 
   test('legacy content paths retain file URI decoding and query-safe extension matching', () async {
@@ -102,22 +108,47 @@ void main() {
   test('a failing queued import is contained and a later share still runs', () async {
     final errors = <Object>[];
     final operations = <String>[];
+    final released = <String>[];
     final intake = _intake(
       importPlaylist: (_) async => throw StateError('fixture playlist failure'),
       importEpg: (path) async {
         operations.add(path);
         return true;
       },
+      releaseAttachment: (path) async => released.add(path),
       reportError: (error, _) => errors.add(error),
     );
 
-    final failed = intake.ingest(SharedMedia(attachments: [_attachment('/cache/list.m3u')]));
+    final failed = intake.ingest(
+      SharedMedia(attachments: [_attachment('/cache/list.m3u'), _attachment('/cache/not-reached.json')]),
+    );
     final recovered = intake.ingest(SharedMedia(attachments: [_attachment('/cache/guide.json')]));
 
     expect((await failed).kind, SharedMediaIntakeKind.failed);
     expect((await recovered).kind, SharedMediaIntakeKind.files);
     expect(operations, ['/cache/guide.json']);
+    expect(released, ['/cache/list.m3u', '/cache/not-reached.json', '/cache/guide.json']);
     expect(errors, hasLength(1));
+  });
+
+  test('attachment release failures are reported and do not skip later cleanup', () async {
+    final errors = <Object>[];
+    final released = <String>[];
+    final intake = _intake(
+      releaseAttachment: (path) async {
+        released.add(path);
+        if (path.endsWith('first.bin')) throw StateError('fixture release failure');
+      },
+      reportError: (error, _) => errors.add(error),
+    );
+
+    final result = await intake.ingest(
+      SharedMedia(attachments: [_attachment('/cache/first.bin'), _attachment('/cache/second.bin')]),
+    );
+
+    expect(result.kind, SharedMediaIntakeKind.unsupported);
+    expect(released, ['/cache/first.bin', '/cache/second.bin']);
+    expect(errors.single, isA<StateError>());
   });
 
   test('receiver subscribes before awaiting cold-start media, consumes it and resets it', () async {
@@ -219,6 +250,8 @@ void main() {
     final windowSource = File('lib/common/global/platform/desktop_manager.dart').readAsStringSync();
 
     expect(mainSource, contains('navigatorKey: appNavigatorKey'));
+    expect(mainSource, contains('releaseAttachment: (path) async'));
+    expect(mainSource, contains('FileUtils.cleanupOwnedSharedMediaFile(File(path))'));
     expect(windowSource, contains('appNavigatorKey.currentContext'));
     expect(windowSource, contains('currentRoute != RoutePath.kSplash'));
     expect(windowSource, contains('ShareCommandImportDialog.show(context: navigatorContext'));
@@ -243,6 +276,7 @@ SharedMediaIntake _intake({
   SharedRoomCommandConsumer? consumeRoomCommand,
   SharedFileImporter? importPlaylist,
   SharedFileImporter? importEpg,
+  SharedAttachmentReleaser? releaseAttachment,
   SharedMediaFeedback? notifyUnsupported,
   SharedMediaErrorReporter? reportError,
 }) {
@@ -251,6 +285,7 @@ SharedMediaIntake _intake({
     consumeRoomCommand: consumeRoomCommand ?? (_) async => true,
     importPlaylist: importPlaylist ?? (_) async => true,
     importEpg: importEpg ?? (_) async => true,
+    releaseAttachment: releaseAttachment ?? (_) async {},
     notifyUnsupported: notifyUnsupported ?? (_) {},
     reportError: reportError,
   );

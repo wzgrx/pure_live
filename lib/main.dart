@@ -17,6 +17,7 @@ import 'package:pure_live/common/global/platform/desktop_manager.dart';
 import 'package:pure_live/common/utils/share_command_handler.dart';
 import 'package:pure_live/common/utils/shared_media_intake.dart';
 import 'package:pure_live/core/iptv/services/iptv_import_manager.dart';
+import 'package:pure_live/plugins/file_utils.dart';
 import 'package:material_ui/material_ui.dart' as material;
 
 void main(List<String> args) async {
@@ -109,6 +110,9 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
       consumeRoomCommand: handleIncomingShareCommand,
       importPlaylist: (path) => IptvImportManager().importFromSharedMedia(SharedMedia(content: path)),
       importEpg: (path) => EpgImportManager().importFromSharedMedia(SharedMedia(content: path)),
+      releaseAttachment: (path) async {
+        await FileUtils.cleanupOwnedSharedMediaFile(File(path));
+      },
       notifyUnsupported: (key) => ToastUtil.show(i18n(key)),
       reportError: (error, stackTrace) => debugPrint('Shared media receiver failed: $error\n$stackTrace'),
     );

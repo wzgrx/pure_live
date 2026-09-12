@@ -27,6 +27,11 @@ $evidence = if ([string]::IsNullOrWhiteSpace($EvidenceDirectory)) {
     [IO.Path]::GetFullPath((Join-Path $repo $EvidenceDirectory))
 }
 [IO.Directory]::CreateDirectory($evidence) | Out-Null
+$uiMap = Get-Content (Join-Path $PSScriptRoot 'device_ui_map.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$uiProfile = $uiMap.profiles.k90pro_portrait_1200x2608
+$roomPoint = $uiProfile.points.'home.first_left_room'
+$controlsPoint = $uiProfile.points.'live.show_controls'
+$audioPoint = $uiProfile.points.'live.audio_toggle'
 
 $adbCandidates = @((Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'), 'adb.exe')
 $adb = $adbCandidates | Where-Object {
@@ -166,32 +171,38 @@ function Wait-UiState {
 
 function Show-PlayerControls {
     Assert-TargetForeground
-    Invoke-TargetAdb @('shell', 'input', 'tap', '600', '906') | Out-Null
+    Invoke-TargetAdb @(
+        'shell', 'input', 'tap', [string] $controlsPoint.x, [string] $controlsPoint.y
+    ) | Out-Null
     Start-Sleep -Milliseconds 250
 }
 
 function Invoke-ModeTransition {
-    param(
-        [Parameter(Mandatory = $true)][string] $Action,
-        [Parameter(Mandatory = $true)][string] $ExpectedNextAction
-    )
+    param([Parameter(Mandatory = $true)][bool] $AudioOnly)
     $timer = [Diagnostics.Stopwatch]::StartNew()
+    # UIAutomator needs long enough that the transient control bar can hide
+    # before its XML arrives. Resolve the target from the already-validated K90
+    # profile, then verify the persistent presentation state instead of using a
+    # late semantic tap on a button that has left the tree.
     Show-PlayerControls
-    Invoke-SemanticTap @($Action)
+    Assert-TargetForeground
+    Invoke-TargetAdb @(
+        'shell', 'input', 'tap', [string] $audioPoint.x, [string] $audioPoint.y
+    ) | Out-Null
     do {
         Start-Sleep -Milliseconds 350
-        Show-PlayerControls
         $document = Get-UiHierarchy
-        if (Find-SemanticNode -Document $document -Labels @($ExpectedNextAction)) {
+        $hasAudioPresentation = $document.OuterXml.Contains('纯音频模式')
+        if ($hasAudioPresentation -eq $AudioOnly -and (Test-RoomUi $document)) {
             return $timer.ElapsedMilliseconds
         }
     } while ($timer.Elapsed.TotalSeconds -lt 10)
-    throw "Mode transition did not expose '$ExpectedNextAction' within 10 seconds."
+    throw "Mode transition did not reach audioOnly=$AudioOnly within 10 seconds."
 }
 
 function Invoke-ModeRoundTrip {
-    $audioMs = Invoke-ModeTransition -Action '切换到纯音频模式' -ExpectedNextAction '切换到视频模式'
-    $videoMs = Invoke-ModeTransition -Action '切换到视频模式' -ExpectedNextAction '切换到纯音频模式'
+    $audioMs = Invoke-ModeTransition -AudioOnly $true
+    $videoMs = Invoke-ModeTransition -AudioOnly $false
     [pscustomobject]@{ audioMs = $audioMs; videoMs = $videoMs }
 }
 
@@ -208,7 +219,9 @@ function Enter-PopularBilibili {
 
 function Enter-FirstRoom {
     Assert-TargetForeground
-    Invoke-TargetAdb @('shell', 'input', 'tap', '317', '741') | Out-Null
+    Invoke-TargetAdb @(
+        'shell', 'input', 'tap', [string] $roomPoint.x, [string] $roomPoint.y
+    ) | Out-Null
     Wait-UiState -State room -TimeoutSeconds $RoomTimeoutSeconds
 }
 
@@ -290,7 +303,10 @@ try {
     if ($result.identity.root -notmatch 'uid=0\(root\)') { throw 'Root shell verification failed.' }
 
     $displaySize = ((Invoke-TargetAdb @('shell', 'wm', 'size')) -join "`n").Trim()
-    if ($displaySize -notmatch '1200x2608') { throw "The K90 portrait UI profile does not match: $displaySize" }
+    $expectedDisplaySize = "$($uiProfile.width)x$($uiProfile.height)"
+    if ($displaySize -notmatch [regex]::Escape($expectedDisplaySize)) {
+        throw "The K90 portrait UI profile does not match: $displaySize"
+    }
     $packageInfo = Invoke-TargetAdb @('shell', 'dumpsys', 'package', $Package)
     Save-Text 'package.txt' $packageInfo
     $packageText = $packageInfo -join "`n"

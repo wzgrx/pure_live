@@ -278,12 +278,32 @@ class LiveStreamGeometryHintResolver {
 
   static LiveStreamGeometryHint? _selectAspectConsensus(List<LiveStreamGeometryHint> candidates) {
     if (candidates.isEmpty) return null;
-    candidates.sort((left, right) => (right.width * right.height).compareTo(left.width * left.height));
-    final reference = candidates.first;
-    final matching = candidates
-        .where((candidate) => (candidate.aspectRatio - reference.aspectRatio).abs() / reference.aspectRatio <= 0.08)
-        .length;
-    if (candidates.length > 1 && matching * 2 <= candidates.length) return null;
+    final byAspect = List<LiveStreamGeometryHint>.from(candidates)
+      ..sort((left, right) => left.aspectRatio.compareTo(right.aspectRatio));
+    var bestStart = 0;
+    var bestLength = 1;
+    for (var start = 0; start < byAspect.length; start++) {
+      for (var end = start + bestLength; end < byAspect.length; end++) {
+        final low = byAspect[start].aspectRatio;
+        final high = byAspect[end].aspectRatio;
+        if ((high - low) / high > 0.08) break;
+        final length = end - start + 1;
+        if (length > bestLength) {
+          bestStart = start;
+          bestLength = length;
+        }
+      }
+    }
+    // A fallback hint must represent a strict majority. A split set remains
+    // deliberately undecided, while one high-resolution outlier no longer
+    // vetoes several mutually consistent quality declarations.
+    if (candidates.length > 1 && bestLength * 2 <= candidates.length) return null;
+    final matching = byAspect.sublist(bestStart, bestStart + bestLength)
+      ..sort((left, right) {
+        final area = (right.width * right.height).compareTo(left.width * left.height);
+        return area != 0 ? area : right.confidence.compareTo(left.confidence);
+      });
+    final reference = matching.first;
     return LiveStreamGeometryHint(
       width: reference.width,
       height: reference.height,

@@ -83,7 +83,15 @@ class ActiveVideoContentObservation {
   /// those two independent coordinate spaces from being mixed later.
   final double canvasAspectRatio;
 
-  bool get isReliable => insets.isValid && confidence.isFinite && confidence >= 0.86;
+  /// Zero means that the probe did not report its canvas and the current
+  /// decoder canvas may be used. A non-zero value is independent geometry and
+  /// must pass the same generous live-video bounds as platform metadata. This
+  /// keeps corrupt screenshot dimensions from settling content evidence or
+  /// erasing an otherwise trustworthy stream hint.
+  bool get hasPlausibleCanvasAspectRatio =>
+      canvasAspectRatio == 0 || (canvasAspectRatio.isFinite && canvasAspectRatio >= 0.30 && canvasAspectRatio <= 3.50);
+
+  bool get isReliable => insets.isValid && confidence.isFinite && confidence >= 0.86 && hasPlausibleCanvasAspectRatio;
 }
 
 @immutable

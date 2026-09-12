@@ -154,5 +154,17 @@ void main() {
 
       expect(hint, isNull);
     });
+
+    test('uses the majority aspect cluster when the largest candidate is anomalous', () {
+      final hint = LiveStreamGeometryHintResolver.resolveDouyin({
+        'candidate_resolution': ['2400x900', '720x1280', '1080x1920'],
+      });
+
+      expect(hint, isNotNull);
+      expect(hint!.width, 1080);
+      expect(hint.height, 1920);
+      expect(hint.aspectRatio, closeTo(9 / 16, 0.001));
+      expect(hint.source, 'douyin.stream_consensus');
+    });
   });
 }

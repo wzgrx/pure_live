@@ -186,6 +186,27 @@ void main() {
       expect(snapshot.evidence, VideoGeometryEvidence.activeContent);
     });
 
+    test('implausible screenshot geometry cannot settle or erase a trusted stream hint', () {
+      final detector = PortraitStreamDetector();
+      final start = DateTime(2026, 1, 1);
+      detector.observeSourceMetadata(1080, 1920, confidence: 0.99, source: 'douyin.extra');
+      detector.observe(1920, 1080, now: start);
+      detector.commitPending(now: start.add(const Duration(milliseconds: 500)));
+      const malformed = ActiveVideoContentObservation(
+        insets: NormalizedVideoInsets.none,
+        confidence: 0.99,
+        canvasAspectRatio: 50,
+      );
+
+      detector.observeActiveContent(malformed);
+      final snapshot = detector.observeActiveContent(malformed);
+
+      expect(snapshot.hasTrustedSourceHint, isTrue);
+      expect(snapshot.hasActiveContentObservation, isFalse);
+      expect(snapshot.orientation, VideoSourceOrientation.landscape);
+      expect(detector.contentEvidenceSettled, isFalse);
+    });
+
     test('screenshot canvas corrects decoder metadata before applying measured bars', () {
       final detector = PortraitStreamDetector();
       detector.observeSourceMetadata(1080, 1920, confidence: 0.99, source: 'douyin.extra');

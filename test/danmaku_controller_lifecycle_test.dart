@@ -137,6 +137,47 @@ void main() {
     expect(host.currentRoomId, 'room-pip-connecting');
     expect(controller.needReconnect(room), isFalse);
   });
+
+  test('typed reconnect notice preserves session ownership across localized text', () async {
+    final host = _TestDanmakuHost();
+    final engine = _ReconnectCycleDanmaku();
+    final controller = DanmakuController(host, recoveryAllowed: (_) => true);
+    final room = LiveRoom(roomId: 'room-retry', platform: 'test', danmakuData: const <String, dynamic>{});
+    controller.initDanmaku(engine);
+
+    await controller.connectRoom(room);
+    engine.simulateReconnect('endpoint retry scheduled');
+
+    expect(host.currentRoomId, 'room-retry');
+    expect(host.systemMessages.last, 'endpoint retry scheduled');
+    expect(controller.needReconnect(room), isTrue, reason: 'the transport is temporarily disconnected');
+
+    engine.simulateReady();
+
+    expect(host.currentRoomId, 'room-retry');
+    expect(controller.needReconnect(room), isFalse);
+  });
+
+  test('typed terminal close releases ownership even when its text mentions reconnecting', () async {
+    final host = _TestDanmakuHost();
+    final engine = _ReconnectCycleDanmaku();
+    final controller = DanmakuController(host, recoveryAllowed: (_) => true);
+    final room = LiveRoom(roomId: 'room-terminal', platform: 'test', danmakuData: const <String, dynamic>{});
+    controller.initDanmaku(engine);
+
+    await controller.connectRoom(room);
+    engine.simulateClose('终止失败：日志仍含“正在尝试重连”');
+
+    expect(host.currentRoomId, isNull);
+    expect(controller.needReconnect(room), isTrue);
+
+    engine.simulateReady();
+    expect(host.currentRoomId, isNull, reason: 'a late callback cannot reclaim a released session');
+
+    await controller.connectRoom(room);
+    expect(host.currentRoomId, 'room-terminal');
+    expect(controller.needReconnect(room), isFalse);
+  });
 }
 
 class _CountingEmptyDanmaku extends EmptyDanmaku {
@@ -247,5 +288,31 @@ class _ConnectingDanmaku extends LiveDanmaku {
   Future<void> stop() async {
     stopCalls++;
     markDisconnected();
+  }
+}
+
+class _ReconnectCycleDanmaku extends LiveDanmaku {
+  @override
+  Future<void> start(dynamic args) async {
+    markConnected();
+    onReady?.call();
+  }
+
+  @override
+  Future<void> stop() async => markDisconnected();
+
+  void simulateReconnect(String message) {
+    markDisconnected();
+    onReconnect?.call(message);
+  }
+
+  void simulateClose(String message) {
+    markDisconnected();
+    onClose?.call(message);
+  }
+
+  void simulateReady() {
+    markConnected();
+    onReady?.call();
   }
 }

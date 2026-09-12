@@ -45,6 +45,8 @@ class SoopDanmaku implements LiveDanmaku {
   @override
   Function(LiveMessage msg)? onMessage;
   @override
+  Function(String msg)? onReconnect;
+  @override
   Function(String msg)? onClose;
   @override
   Function()? onReady;
@@ -100,7 +102,7 @@ class SoopDanmaku implements LiveDanmaku {
       },
       onReconnect: () {
         markDisconnected();
-        onClose?.call("与服务器断开连接，正在尝试重连");
+        onReconnect?.call("与服务器断开连接，正在尝试重连");
       },
       onClose: (e) {
         markDisconnected();
@@ -135,6 +137,7 @@ class SoopDanmaku implements LiveDanmaku {
   Future<void> stop() async {
     markDisconnected();
     onMessage = null;
+    onReconnect = null;
     onClose = null;
     onReady = null;
     webScoketUtils?.close();

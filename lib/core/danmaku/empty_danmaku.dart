@@ -27,6 +27,8 @@ class EmptyDanmaku implements LiveDanmaku {
   @override
   Function(LiveMessage msg)? onMessage;
   @override
+  Function(String msg)? onReconnect;
+  @override
   Function(String msg)? onClose;
   @override
   Function()? onReady;
@@ -45,6 +47,7 @@ class EmptyDanmaku implements LiveDanmaku {
   Future stop() async {
     markDisconnected();
     onMessage = null;
+    onReconnect = null;
     onClose = null;
     onReady = null;
   }

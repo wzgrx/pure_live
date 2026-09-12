@@ -29,6 +29,9 @@ class TwitchDanmaku implements LiveDanmaku {
   var serverUrl = "wss://irc-ws.chat.twitch.tv";
 
   @override
+  Function(String msg)? onReconnect;
+
+  @override
   Function(String msg)? onClose;
 
   @override
@@ -60,7 +63,7 @@ class TwitchDanmaku implements LiveDanmaku {
       },
       onReconnect: () {
         markDisconnected();
-        onClose?.call("与服务器断开连接，正在尝试重连");
+        onReconnect?.call("与服务器断开连接，正在尝试重连");
       },
       onClose: (e) {
         markDisconnected();
@@ -97,6 +100,7 @@ class TwitchDanmaku implements LiveDanmaku {
   @override
   Future stop() async {
     onMessage = null;
+    onReconnect = null;
     onClose = null;
     await webScoketUtils?.close();
     webScoketUtils = null;

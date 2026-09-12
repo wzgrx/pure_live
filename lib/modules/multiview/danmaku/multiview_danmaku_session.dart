@@ -140,6 +140,7 @@ class MultiviewDanmakuSession {
     _engine = null;
     if (engine == null) return;
     engine.onMessage = null;
+    engine.onReconnect = null;
     engine.onClose = null;
     engine.onReady = null;
     await _stopEngineQuietly(engine);
@@ -164,6 +165,14 @@ class MultiviewDanmakuSession {
           stackTrace: stackTrace,
         );
       }
+    };
+
+    engine.onReconnect = (reason) {
+      developer.log(
+        'MultiviewDanmakuSession: transport reconnecting for $key '
+        '(${token == _epoch ? 'current' : 'stale'} session): $reason',
+        name: 'MultiviewDanmakuSession',
+      );
     };
 
     engine.onClose = (reason) {

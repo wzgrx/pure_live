@@ -61,6 +61,8 @@ class KuaishouDanmaku implements LiveDanmaku {
   @override
   Function(LiveMessage msg)? onMessage;
   @override
+  Function(String msg)? onReconnect;
+  @override
   Function(String msg)? onClose;
   @override
   Function()? onReady;
@@ -179,7 +181,7 @@ class KuaishouDanmaku implements LiveDanmaku {
       return;
     }
     if (_reconnectAttempts == 1) {
-      onClose?.call('与服务器断开连接，正在尝试重连');
+      onReconnect?.call('与服务器断开连接，正在尝试重连');
     }
     final seconds = 1 << (_reconnectAttempts - 1).clamp(0, 3);
     _schedulePoll(generation, Duration(seconds: seconds));
@@ -207,6 +209,7 @@ class KuaishouDanmaku implements LiveDanmaku {
     _reconnectAttempts = 0;
     markDisconnected();
     onMessage = null;
+    onReconnect = null;
     onClose = null;
     onReady = null;
   }

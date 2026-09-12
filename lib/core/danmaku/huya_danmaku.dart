@@ -65,6 +65,8 @@ class HuyaDanmaku implements LiveDanmaku {
   @override
   Function(LiveMessage msg)? onMessage;
   @override
+  Function(String msg)? onReconnect;
+  @override
   Function(String msg)? onClose;
   @override
   Function()? onReady;
@@ -114,7 +116,7 @@ class HuyaDanmaku implements LiveDanmaku {
       onReconnect: () {
         if (generation != _generation) return;
         markDisconnected();
-        onClose?.call("与服务器断开连接，正在尝试重连");
+        onReconnect?.call("与服务器断开连接，正在尝试重连");
       },
       onClose: (e) {
         if (generation != _generation) return;
@@ -159,6 +161,7 @@ class HuyaDanmaku implements LiveDanmaku {
     _emittedSuperChats.clear();
     markDisconnected();
     onMessage = null;
+    onReconnect = null;
     onClose = null;
     onReady = null;
     await webScoketUtils?.close();

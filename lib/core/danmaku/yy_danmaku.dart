@@ -27,6 +27,9 @@ class YyDanmaku implements LiveDanmaku {
   int heartbeatTime = 5 * 1000;
 
   @override
+  Function(String msg)? onReconnect;
+
+  @override
   Function(String msg)? onClose;
 
   @override
@@ -105,7 +108,7 @@ class YyDanmaku implements LiveDanmaku {
         _handshakeTimer?.cancel();
         markDisconnected();
         final detail = _lastSocketFailure.isEmpty ? '' : '（${_compactFailure(_lastSocketFailure)}）';
-        onClose?.call('与服务器断开连接$detail，正在尝试重连');
+        onReconnect?.call('与服务器断开连接$detail，正在尝试重连');
       },
       onFailure: (message) {
         if (generation != _generation) return;
@@ -137,7 +140,7 @@ class YyDanmaku implements LiveDanmaku {
     _handshakeTimer = Timer(const Duration(seconds: 15), () {
       if (generation != _generation || isConnected) return;
       CoreLog.error('YY 弹幕协议握手超时，准备重连');
-      onClose?.call('YY 弹幕协议握手超时，正在尝试重连');
+      onReconnect?.call('YY 弹幕协议握手超时，正在尝试重连');
       webScoketUtils?.reconnect();
     });
   }
@@ -183,7 +186,7 @@ class YyDanmaku implements LiveDanmaku {
       _handshakeTimer?.cancel();
       markDisconnected();
       CoreLog.error(failure);
-      onClose?.call('$failure，正在尝试重连');
+      onReconnect?.call('$failure，正在尝试重连');
       webScoketUtils?.reconnect();
     }
   }
@@ -202,6 +205,7 @@ class YyDanmaku implements LiveDanmaku {
     markDisconnected();
     _protocol = null;
     onMessage = null;
+    onReconnect = null;
     onClose = null;
     onReady = null;
     await webScoketUtils?.close();

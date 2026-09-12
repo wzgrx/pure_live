@@ -3,6 +3,12 @@ import 'package:pure_live/common/models/live_message.dart';
 
 abstract class LiveDanmaku {
   Function(LiveMessage msg)? onMessage;
+
+  /// Reports a transient transport interruption while the engine still owns
+  /// the room and is scheduling recovery.
+  Function(String msg)? onReconnect;
+
+  /// Reports a terminal transport failure after automatic recovery ends.
   Function(String msg)? onClose;
   Function()? onReady;
 

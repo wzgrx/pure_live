@@ -221,17 +221,19 @@ class DanmakuController extends GetxController {
       }
     };
 
+    engine.onReconnect = (msg) {
+      if (!_acceptsCallback(engine, key, token)) return;
+      _addStatusMessage(msg);
+    };
+
     engine.onClose = (msg) {
       if (!_acceptsCallback(engine, key, token)) return;
       _addStatusMessage(msg);
-      // Transient reconnect notices retain ownership of this session. A final
-      // failure releases the room key so a manual refresh creates a fresh
-      // transport instead of remaining attached to a dead socket.
-      if (!msg.contains('正在尝试重连')) {
-        _sessionKey = null;
-        _connectingKey = null;
-        _main.updateDanmakuRoomId(null);
-      }
+      // A terminal failure releases the room key so a manual refresh creates
+      // a fresh transport instead of remaining attached to a dead socket.
+      _sessionKey = null;
+      _connectingKey = null;
+      _main.updateDanmakuRoomId(null);
     };
 
     engine.onReady = () {
@@ -313,6 +315,7 @@ class DanmakuController extends GetxController {
 
   void _detachCallbacks(LiveDanmaku engine) {
     engine.onMessage = null;
+    engine.onReconnect = null;
     engine.onClose = null;
     engine.onReady = null;
   }

@@ -72,6 +72,8 @@ class BiliBiliDanmaku implements LiveDanmaku {
   @override
   Function(LiveMessage msg)? onMessage;
   @override
+  Function(String msg)? onReconnect;
+  @override
   Function(String msg)? onClose;
   @override
   Function()? onReady;
@@ -138,7 +140,7 @@ class BiliBiliDanmaku implements LiveDanmaku {
       onReconnect: () {
         _authTimer?.cancel();
         markDisconnected();
-        onClose?.call("与服务器断开连接，正在尝试重连");
+        onReconnect?.call("与服务器断开连接，正在尝试重连");
       },
       onClose: (e) {
         _authTimer?.cancel();
@@ -195,6 +197,7 @@ class BiliBiliDanmaku implements LiveDanmaku {
     _authTimer = null;
     markDisconnected();
     onMessage = null;
+    onReconnect = null;
     onClose = null;
     onReady = null;
     await webScoketUtils?.close();

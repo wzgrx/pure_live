@@ -430,11 +430,15 @@ try {
     Copy-RootFileToHost $databasePath $remoteDbSnapshot $localDbSnapshot
     $pythonCode = @'
 import json, sqlite3, sys
-db, provider_name, channel_name = sys.argv[1:]
+db, _provider_name, channel_name = sys.argv[1:]
 connection = sqlite3.connect(db)
 try:
-    provider_rows = connection.execute("SELECT id, name, type, url FROM providers WHERE name = ?", (provider_name,)).fetchall()
     channel_rows = connection.execute("SELECT provider_id, name, stream_url FROM channels WHERE name = ?", (channel_name,)).fetchall()
+    provider_rows = connection.execute(
+        "SELECT id, name, type, url FROM providers WHERE id IN "
+        "(SELECT provider_id FROM channels WHERE name = ?)",
+        (channel_name,),
+    ).fetchall()
     print(json.dumps({"providers": provider_rows, "channels": channel_rows}, ensure_ascii=False))
 finally:
     connection.close()

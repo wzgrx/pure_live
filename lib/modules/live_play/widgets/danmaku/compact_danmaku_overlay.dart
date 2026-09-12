@@ -25,7 +25,7 @@ class CompactDanmakuOverlay extends StatelessWidget {
       final autoScale = settings.pipDanmakuAutoScale.v;
       final noEmojiMode = settings.pipDanmakuNoEmojiMode.v;
       final configuredFontSize = settings.pipDanmakuFontSize.v;
-      final configuredFontWeight = FontWeight(settings.pipDanmakuFontWeight.value);
+      final configuredFontWeight = settings.pipDanmakuFontWeight.value;
       final area = settings.pipDanmakuArea.v;
       final speed = settings.pipDanmakuSpeed.v;
       final opacity = settings.pipDanmakuOpacity.v;
@@ -34,6 +34,13 @@ class CompactDanmakuOverlay extends StatelessWidget {
       final emitInterval = settings.pipDanmakuEmitInterval.v;
       final fontFamily = controller.danmakuFontFamilyName.value;
       final showStroke = controller.enableDanmakuStroke.value;
+      final strokeWidth = controller.danmakuFontBorder.value;
+      final typography = CompactDanmakuTypography.resolve(
+        configuredFontWeight: configuredFontWeight,
+        configuredFontFamily: fontFamily,
+        showStroke: showStroke,
+        configuredStrokeWidth: strokeWidth,
+      );
 
       return IgnorePointer(
         child: LayoutBuilder(
@@ -51,14 +58,14 @@ class CompactDanmakuOverlay extends StatelessWidget {
                 controller: controller.pipDanmakuController,
                 config: BarrageConfig(
                   fontSize: metrics.fontSize,
-                  fontWeight: configuredFontWeight,
-                  fontFamily: fontFamily,
+                  fontWeight: FontWeight(typography.fontWeight),
+                  fontFamily: typography.fontFamily,
                   area: area,
                   baseSpeed: metrics.baseSpeed,
                   opacity: opacity,
-                  showStroke: showStroke,
+                  showStroke: typography.showStroke,
                   noEmojiMode: noEmojiMode,
-                  strokeWidth: 1.0,
+                  strokeWidth: typography.strokeWidth,
                   fps: fps,
                   safeArea: false,
                   trackHeight: metrics.trackHeight,

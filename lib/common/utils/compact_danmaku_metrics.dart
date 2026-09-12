@@ -51,3 +51,37 @@ final class CompactDanmakuMetrics {
   final double emojiSize;
   final double overlapSafeGap;
 }
+
+/// Typography shared by the compact renderer and the settings preview.
+///
+/// PiP has independent size and weight controls, while the selected danmaku
+/// font and outline remain global. Resolving those inherited values in one
+/// place keeps the preview and the live compact surface on the same contract.
+final class CompactDanmakuTypography {
+  const CompactDanmakuTypography._({
+    required this.fontWeight,
+    required this.fontFamily,
+    required this.showStroke,
+    required this.strokeWidth,
+  });
+
+  factory CompactDanmakuTypography.resolve({
+    required int configuredFontWeight,
+    required String configuredFontFamily,
+    required bool showStroke,
+    required double configuredStrokeWidth,
+  }) {
+    final strokeWidth = configuredStrokeWidth.isFinite ? configuredStrokeWidth.clamp(0.0, 4.0).toDouble() : 1.5;
+    return CompactDanmakuTypography._(
+      fontWeight: configuredFontWeight.clamp(100, 900).toInt(),
+      fontFamily: configuredFontFamily,
+      showStroke: showStroke && strokeWidth > 0,
+      strokeWidth: strokeWidth,
+    );
+  }
+
+  final int fontWeight;
+  final String fontFamily;
+  final bool showStroke;
+  final double strokeWidth;
+}

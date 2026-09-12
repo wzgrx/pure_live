@@ -53,4 +53,25 @@ void main() {
     expect(unbounded.fontSize, 20);
     expect(unbounded.baseSpeed, 100);
   });
+
+  test('compact typography carries the global outline into PiP', () {
+    final enabled = CompactDanmakuTypography.resolve(
+      configuredFontWeight: 800,
+      configuredFontFamily: 'custom-family',
+      showStroke: true,
+      configuredStrokeWidth: 3,
+    );
+    final zeroWidth = CompactDanmakuTypography.resolve(
+      configuredFontWeight: 500,
+      configuredFontFamily: 'Default',
+      showStroke: true,
+      configuredStrokeWidth: 0,
+    );
+
+    expect(enabled.fontWeight, 800);
+    expect(enabled.fontFamily, 'custom-family');
+    expect(enabled.showStroke, isTrue);
+    expect(enabled.strokeWidth, 3);
+    expect(zeroWidth.showStroke, isFalse);
+  });
 }

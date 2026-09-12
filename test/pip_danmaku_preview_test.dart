@@ -294,6 +294,44 @@ void main() {
     expect((painter.painters.first.text as TextSpan).text, isNot(contains('🎉')));
   });
 
+  testWidgets('preview follows the outline used by the compact renderer', (tester) async {
+    final settings = SettingsService.to.danmaku;
+    settings.enableDanmakuStroke.value = false;
+    settings.danmakuFontBorder.value = 3;
+
+    await tester.pumpWidget(
+      EasyLocalization(
+        supportedLocales: const [Locale('zh')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('zh'),
+        assetLoader: const _TestAssetLoader(),
+        child: Builder(
+          builder: (context) => GetMaterialApp(
+            locale: context.locale,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            home: const Scaffold(body: SizedBox(width: 350, child: PipDanmakuPreview())),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    dynamic painter = _previewPainter(tester);
+    expect(painter.showStroke, isFalse);
+    expect(painter.strokeWidth, 3);
+    expect(painter.strokePainters, isEmpty);
+
+    settings.enableDanmakuStroke.value = true;
+    await tester.pump();
+
+    painter = _previewPainter(tester);
+    expect(painter.showStroke, isTrue);
+    expect(painter.strokeWidth, 3);
+    expect(painter.strokePainters, hasLength(painter.painters.length));
+  });
+
   testWidgets('auto scale keeps preview motion aligned with the compact renderer', (tester) async {
     SettingsService.to.danmaku.pipDanmakuSpeed.value = 120;
 

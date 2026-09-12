@@ -7,6 +7,7 @@ import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:pure_live/common/widgets/count_button.dart';
+import 'package:flame_barrage/flame_barrage.dart';
 
 class PipDanmakuSettingsPage extends StatelessWidget {
   const PipDanmakuSettingsPage({super.key});
@@ -533,6 +534,9 @@ class _PipDanmakuPreviewState extends State<PipDanmakuPreview> with SingleTicker
       final unifiedColor = Color(settings.pipDanmakuColor.v);
       final configuredFontSize = settings.pipDanmakuFontSize.v;
       final fontWeight = settings.pipDanmakuFontWeight.v;
+      final fontFamily = settings.danmakuFontFamilyName.v;
+      final showStroke = settings.enableDanmakuStroke.v;
+      final strokeWidth = settings.danmakuFontBorder.v;
       final speed = settings.pipDanmakuSpeed.v;
       final opacity = enabled ? settings.pipDanmakuOpacity.v : 0.25;
       final area = settings.pipDanmakuArea.v;
@@ -565,24 +569,57 @@ class _PipDanmakuPreviewState extends State<PipDanmakuPreview> with SingleTicker
                     configuredSpeed: speed,
                   );
                   final fontSize = metrics.fontSize;
+                  final typography = CompactDanmakuTypography.resolve(
+                    configuredFontWeight: fontWeight,
+                    configuredFontFamily: fontFamily,
+                    showStroke: showStroke,
+                    configuredStrokeWidth: strokeWidth,
+                  );
                   final areaHeight = constraints.maxHeight * area;
                   final previewText = i18n('pip_danmaku_preview_text');
-                  final painters = List<TextPainter>.generate(
+                  final previewTexts = List<String>.generate(
                     maxVisibleCount.clamp(1, 20).toInt(),
+                    (index) => '$previewText ${index + 1}${noEmojiMode ? '' : ' 🎉'}',
+                  );
+                  final painters = List<TextPainter>.generate(
+                    previewTexts.length,
                     (index) => TextPainter(
                       text: TextSpan(
-                        text: '$previewText ${index + 1}${noEmojiMode ? '' : ' 🎉'}',
+                        text: previewTexts[index],
                         style: TextStyle(
                           color: colors[index % colors.length].withValues(alpha: opacity),
                           fontSize: fontSize,
-                          fontWeight: FontWeight(fontWeight),
-                          shadows: const [Shadow(color: Colors.black, blurRadius: 2, offset: Offset(0.5, 0.5))],
+                          fontWeight: FontWeight(typography.fontWeight),
+                          fontFamily: typography.fontFamily,
+                          height: 1.15,
                         ),
                       ),
                       maxLines: 1,
                       textDirection: TextDirection.ltr,
                     )..layout(),
                   );
+                  final strokePainters = typography.showStroke
+                      ? List<TextPainter>.generate(
+                          previewTexts.length,
+                          (index) => TextPainter(
+                            text: TextSpan(
+                              text: previewTexts[index],
+                              style: TextStyle(
+                                foreground: Paint()
+                                  ..style = PaintingStyle.stroke
+                                  ..strokeWidth = typography.strokeWidth
+                                  ..color = Colors.black.withValues(alpha: resolveBarrageStrokeOpacity(opacity)),
+                                fontSize: fontSize,
+                                fontWeight: FontWeight(typography.fontWeight),
+                                fontFamily: typography.fontFamily,
+                                height: 1.15,
+                              ),
+                            ),
+                            maxLines: 1,
+                            textDirection: TextDirection.ltr,
+                          )..layout(),
+                        )
+                      : const <TextPainter>[];
 
                   return Stack(
                     children: [
@@ -602,8 +639,12 @@ class _PipDanmakuPreviewState extends State<PipDanmakuPreview> with SingleTicker
                                 painter: _PipDanmakuPreviewPainter(
                                   progress: quantizedProgress,
                                   painters: painters,
+                                  strokePainters: strokePainters,
                                   fontSize: fontSize,
-                                  fontWeight: fontWeight,
+                                  fontWeight: typography.fontWeight,
+                                  fontFamily: typography.fontFamily,
+                                  showStroke: typography.showStroke,
+                                  strokeWidth: typography.strokeWidth,
                                   speed: metrics.baseSpeed,
                                   trackHeight: metrics.trackHeight,
                                   overlapSafeGap: metrics.overlapSafeGap,
@@ -640,8 +681,12 @@ class _PipDanmakuPreviewPainter extends CustomPainter {
   const _PipDanmakuPreviewPainter({
     required this.progress,
     required this.painters,
+    required this.strokePainters,
     required this.fontSize,
     required this.fontWeight,
+    required this.fontFamily,
+    required this.showStroke,
+    required this.strokeWidth,
     required this.speed,
     required this.trackHeight,
     required this.overlapSafeGap,
@@ -650,8 +695,12 @@ class _PipDanmakuPreviewPainter extends CustomPainter {
 
   final double progress;
   final List<TextPainter> painters;
+  final List<TextPainter> strokePainters;
   final double fontSize;
   final int fontWeight;
+  final String fontFamily;
+  final bool showStroke;
+  final double strokeWidth;
   final double speed;
   final double trackHeight;
   final double overlapSafeGap;
@@ -670,6 +719,9 @@ class _PipDanmakuPreviewPainter extends CustomPainter {
       final travelled = elapsedSeconds * speed + phaseDistance;
       final x = size.width - (travelled % travel);
       final y = (index % laneCount) * trackHeight + math.max(0, (trackHeight - painter.height) / 2);
+      if (showStroke) {
+        strokePainters[index].paint(canvas, Offset(x, y));
+      }
       painter.paint(canvas, Offset(x, y));
     }
   }
@@ -678,7 +730,12 @@ class _PipDanmakuPreviewPainter extends CustomPainter {
   bool shouldRepaint(covariant _PipDanmakuPreviewPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.painters != painters ||
+        oldDelegate.strokePainters != strokePainters ||
         oldDelegate.fontSize != fontSize ||
+        oldDelegate.fontWeight != fontWeight ||
+        oldDelegate.fontFamily != fontFamily ||
+        oldDelegate.showStroke != showStroke ||
+        oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.speed != speed ||
         oldDelegate.trackHeight != trackHeight ||
         oldDelegate.overlapSafeGap != overlapSafeGap ||

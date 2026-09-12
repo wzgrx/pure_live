@@ -2,8 +2,9 @@
 
 ## 结论
 
-本批把 Android `ACTION_SEND` 冷启动口令、运行中口令和播放列表附件接入同一串行处理链，并完成
-REDMI K90 Pro Max 原生闭环。产品提交依次为：
+本批把 Android `ACTION_SEND` 冷启动口令、运行中口令、播放列表附件，以及
+`ACTION_SEND_MULTIPLE` 的播放列表+EPG 接入同一串行处理链，并完成 REDMI K90 Pro Max 原生闭环。
+产品提交依次为：
 
 - `269caa91656c615e7dbbda41840bb9bbdb44307a`：消费初始分享、监听运行中分享，按口令/播放列表/EPG
   分类，限定 Manifest MIME，并用应用自有 Navigator 等待 Splash 结束后显示导入弹窗；
@@ -23,12 +24,14 @@ REDMI K90 Pro Max 原生闭环。产品提交依次为：
 M3U 内容 URI 导入。另用“最后处理的 warm 口令 + M3U 附件”验证口令优先路径：没有重开弹窗、没有
 导入夹具频道、插件暂存树为空；随后单独分享同一附件才入库。最终 SQLite 快照中恰有一个夹具频道及其
 唯一 Provider，Provider 名称与发送方原文件名一致；插件拥有的 `cache/share_handler` 暂存树已删除。
+Debug 专用 shell 探针再发送真实 `ArrayList<Uri>`：M3U Provider/频道与 XMLTV 来源/频道/节目各精确一条，
+两个来源都保留原附件名，暂存树仍为空；探针只在 Debug Manifest 注册并要求系统 `DUMP` 权限。
 随后完整 IPTV 缓存树和 Hive 都按备份恢复。进程日志没有 FATAL/ANR、Flutter 渲染/Widget 异常或
 分享/导入错误，应用停止，桌面和 stay-awake 恢复。
 
 该证据补充 A1-05/A2-01 的 Android 外部接收路径；Windows 原生剪贴板导入、两个真实应用之间的发送、
-EPG 多附件、Release 和异常 Provider 继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN /
-2 NR，共 42 组未闭环**。本批 Windows Computer Use 与 Astra Light 使用均为 **0 次**。
+Release 和异常 Provider 继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组
+未闭环**。本批 Windows Computer Use 与 Astra Light 使用均为 **0 次**。
 
 ## 原始缺口与真实失败证据
 
@@ -72,6 +75,9 @@ IPTV/Hive 并回到桌面。
 - Android 插件保留可读的应用内 `file://`；其余 URI 查询显示名，安全化 basename 后复制到
   `cache/share_handler/<uuid>/<原文件名>`。复制失败删除未完成文件及其目录；Dart 导入结束后仅清理
   这个三层结构，不触碰外部输入或结构不明的临时文件。
+- Debug 构建增加受 `android.permission.DUMP` 保护的 `ShareIntentProbeReceiver`；它只接受应用
+  `cache/share_probe` 下 1～8 个规范文件，构造真实 `ACTION_SEND_MULTIPLE`/`ArrayList<Uri>` 后显式
+  发送给 MainActivity。主 Manifest 没有该组件，Release 包不含此测试入口。
 - 导入弹窗不再嵌套 intrinsic 不兼容的 `LayoutBuilder`；改用 MediaQuery 的可用宽度和字号选择堆叠，
   继续使用可滚动 AlertDialog 与固定最小操作面。
 
@@ -92,8 +98,9 @@ IPTV/Hive 并回到桌面。
 
 `tool/android_share_intake_smoke.ps1` 已加入固定 CI 静态门禁。它要求显式 serial、APK 和期望 SHA，
 覆盖安装前备份规范 Hive 与整个 IPTV 缓存树；混合口令/附件要求不重开弹窗、不写入夹具频道且整个
-插件暂存树消失。文件单独导入后再次要求暂存树消失，拉取关闭状态的 SQLite 快照并用独立 Python
-sqlite3 查询夹具及原文件名 Provider，最后恢复数据树并逐文件核对 uid/gid/mode/size/SHA。
+插件暂存树消失。文件单独导入后再次要求暂存树消失；随后 Debug shell 探针发送 M3U+XMLTV 的真实
+Parcelable URI 列表，并从关闭状态 SQLite 查询两类来源、频道和节目。最后恢复数据树并逐文件核对
+uid/gid/mode/size/SHA，同时删除受路径守卫保护的探针输入目录。
 
 ## 构建与 K90 原生结果
 
@@ -102,16 +109,16 @@ sqlite3 查询夹具及原文件名 Provider，最后恢复数据树并逐文件
 
 | 项目 | 结果 |
 | --- | --- |
-| 精确构建提交 | `2cc1b56d4c73ddfd50bcd963939fecc95910c0a4`（产品修订 `8f43f21b`；该提交仅追加门禁） |
+| 精确构建提交 | `944338e4f27324da0ed559a4536c1bbe9dfd8be5`（产品修订 `8f43f21b`，Debug 探针 `d2f7400c`） |
 | 版本 / manifest code | `3.1.8+4121` / `6121` |
 | APK | `288823157` B |
-| SHA-256 | `32D6B783E36EB79D9B01DC564692AF2A2BAB552E166C1BE565A86C0B87862F7B` |
+| SHA-256 | `8803DFB82E453F0EC53613DE95A398F1FB96C0AD8C329CA68CDD04CB937002BF` |
 | ABI / 原生库 | `arm64-v8a` / 16；最小 ELF LOAD `0x4000` |
 | Flutter 资源 | 1262 项 / `206833496` B |
-| 构建记录 | `local-artifacts/build-records/20260912T230008763Z-build-androidarm64-debug.json` |
+| 构建记录 | `local-artifacts/build-records/20260912T231844253Z-build-androidarm64-debug.json` |
 
 最终原生摘要：
-`local-artifacts/diagnostics/android-share-intake-20260913T070524332/summary.json`。
+`local-artifacts/diagnostics/android-share-intake-20260913T071945128/summary.json`。
 
 - 设备先核对为 `25102RKBEC / myron / uid=0(root)`，全部设备命令显式绑定
   `192.168.1.2:5555`。
@@ -125,9 +132,13 @@ sqlite3 查询夹具及原文件名 Provider，最后恢复数据树并逐文件
   `sharedStagingEntriesAfterCommand=[]`，关闭状态 SQLite 中夹具频道计数为 0，证明口令优先分支释放附件
   而没有误导入；摘要门禁 `commandPriorityAttachmentReleased=true`。
 - M3U 通过应用 FileProvider 的内容 URI 进入插件；SQLite 快照中频道
-  `Share Intake Fixture 26091307052433` 与唯一 Provider ID 对齐，Provider 名称精确等于发送方原文件名
-  `purelive-share-intake-26091307052433`，流地址精确匹配夹具；导入完成后的
+  `Share Intake Fixture 26091307194513` 与唯一 Provider ID 对齐，Provider 名称精确等于发送方原文件名
+  `purelive-share-intake-26091307194513`，流地址精确匹配夹具；导入完成后的
   `sharedStagingFilesAfterImport` 和 `sharedStagingEntriesAfterImport` 均为空。
+- `ShareIntentProbeReceiver` 返回 `result=-1, data="ok:send_multiple:2"`；多附件 SQLite 快照中
+  `Share Multiple Playlist 26091307194513`、`Share Multiple EPG 26091307194513` 和
+  `Share Multiple Programme 26091307194513` 各一条，Provider/EPG 来源名称分别等于两份原附件
+  basename，`multiplePlaylistAndEpgAttachmentsImported=true`，暂存树为空。
 - 原生 smoke 的 IPTV 缓存树恢复前后元数据和每文件 SHA 完全一致，数据库回到原 SHA
   `FD2A61D0...095D5`；该轮 Hive 也从 `19B6A903...F6333` 精确恢复。
 - 全批收尾又使用首轮操作前备份把规范 Hive 恢复到本轮起始 SHA
@@ -137,5 +148,6 @@ sqlite3 查询夹具及原文件名 Provider，最后恢复数据树并逐文件
 - 结束时 Pure Live 已停止，顶层为 `com.miui.home`，stay-awake 为 0；未重启手机/adbd、未切换网络、
   未改 ADB 端口/授权，也未更新 Root/LSP/模块。
 
-原生工具识别/夹具/证据查询修订在 `2cc1b56d` 加入混合分享门禁，并由 `2ad872e2` 修正最后一条重复
-口令夹具；后者只改变执行脚本，因此复用应用内容完全相同的 `2cc1b56d` 精确 APK 完成最终原生轮次。
+原生工具在 `2cc1b56d` 加入混合分享门禁，`2ad872e2` 修正最后一条重复口令夹具；`d2f7400c` 增加
+Debug-only 多附件发送器，`944338e4` 增加 M3U+EPG 数据库和暂存清理门禁。最终原生轮次绑定
+`944338e4` 精确 APK。

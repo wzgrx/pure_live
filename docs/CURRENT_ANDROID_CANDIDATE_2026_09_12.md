@@ -69,6 +69,25 @@ A2-04 因此由 NR 进入 RUN；Windows 双栏、其余样式控件、默认/模
 
 该包已通过 `install -r -t` 覆盖当前安装，首次安装时间保持、首次启动前规范 Hive SHA 不变，设备 `base.apk` 与候选逐字节一致。K90 原生页面的四个可见 Switch 均有独立中文名称，字号/字重滑块分别显示“字体大小, 12.0”“字体粗细, 稍粗”；取消恢复保留关闭状态，确认恢复后回到默认开启并跨进程保持。最终规范 Hive 精确恢复、应用停止、桌面与 stay-awake 原值恢复。详见[无障碍与默认恢复审计](ANDROID_PIP_DANMAKU_ACCESSIBILITY_RESET_AUDIT_2026_09_12.md)。
 
+## 09-13 AudioTrack 优先增量候选
+
+`fec7eae9` 将 Android 普通 MPV 音频输出从依赖侧固定 OpenSL ES 改为
+`audiotrack,aaudio,opensles,` 有序回退，并把 Android 设置页限制为当前包实际包含的驱动；
+用户启用专家输出时仍优先尊重显式选择。相邻与 focused CI 均 **28/28 PASS**、全库 analyze
+无问题。干净提交构建的 arm64 Debug 为 `288822657` B，SHA-256
+`DE7DE185B3E44700CB0D7BE4D2907B17CEB6EFC48BF7BAD53FA5FF95ADFFAE0E`。
+
+该包已保留数据覆盖当前设备：`firstInstallTime` 保持，规范 Hive 安装前、本机备份和首次启动前
+哈希完全相同，设备 `base.apk` 与候选逐字节一致。K90 上 5/5 次真实 Bilibili
+视频→纯音频→退出、14/14 门禁通过；新 PID 日志尾窗含 152 行 AudioTrack 相关记录，
+OpenSL ES、unknown-key 和 `setVolume -19` 均为 0。Binder death-recipient 告警仍存在并拆分
+跟踪；瞬态线程退出造成的测试器误失败由 `da8c15b1` 修订后完整重跑通过。详见
+[Android 音频输出后端审计](ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md)。
+
 ## 当前结论
 
-当前设备安装的是 `63597cf1` 同签名 Android 增量候选；其小窗弹幕辅助语义与恢复默认专项已通过。基础播放/弹幕/音频模式/PiP、标准流与竖屏流呈现及首页软件音量路由仍来自前一 `3e41e848` 候选，未把这些结果自动外推到新字节。当前仍是 Debug 验收输入；宏观状态为 **20 PASS / 34 RUN / 8 NR，共 42 组未闭环**。
+当前设备安装的是 `fec7eae9` 同签名 Android 增量候选，最新包哈希为
+`DE7DE185B3E44700CB0D7BE4D2907B17CEB6EFC48BF7BAD53FA5FF95ADFFAE0E`；其 Android
+音频输出与 5 次进退房专项已经通过。50 次资源循环仍绑定前一 `039f8ff3` 候选，基础播放、弹幕、
+PiP、标准/竖屏呈现及其他增量证据各自继续按原精确包记录，不自动外推到新字节。当前仍是 Debug
+验收输入；宏观状态为 **20 PASS / 40 RUN / 2 NR，共 42 组未闭环**。

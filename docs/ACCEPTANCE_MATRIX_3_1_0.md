@@ -134,6 +134,14 @@
 | A7-03 | RUN | 虎牙普通视频后台 10 分钟：PSS 438,712～497,718 KB、拟合约 `+283.9 KB/min`；RSS 643,384～702,020 KB、拟合约 `+299.3 KB/min`；CPU 平均 2.24%、最高 5%。结束后进程与锁释放。首页、PiP、录制和温度对照仍待执行 |
 | A7-04 | RUN | K90 Android 17 上同一 Bilibili Debug 房间完成 50/50 次视频→纯音频→返回并关闭应用内悬浮会话；50 次均一次输入生效、进程未重启。每 5 轮采样中原生播放器/Codec 线程、FD、Socket、DMA-BUF、GPU FD 与 BLAST layer 均稳定；52 秒空闲硬释放后 FD 300→262、DMA-BUF 53→25，最终 PSS/RSS 相对预热首页为 +16,684/+17,012 KB，无 FATAL/ANR。Release、多平台、视频恢复、全屏/PiP/后台与长轮次继续，见 `docs/ANDROID_ROOM_RESOURCE_RECOVERY_AUDIT_2026_09_13.md` |
 
+> 2026-09-13 增量：`fec7eae9` 将 Android 普通 MPV 音频输出改为
+> `audiotrack,aaudio,opensles,` 有序回退，并把设置页限制为当前 Android 包实际包含的驱动。
+> 同提交 K90 Debug 候选保留数据覆盖后完成 5/5 次同类循环，14/14 门禁通过；新 PID 日志尾窗
+> 中 AudioTrack 相关 152 行，OpenSL ES、unknown-key 与 `setVolume -19` 均为 0。Binder
+> death-recipient 告警仍单列跟踪；测试器的瞬态 TID 退出竞态由 `da8c15b1` 修订并重跑通过。
+> 本增量不改变 A7-04 的 `RUN` 状态，详见
+> `docs/ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md`。
+
 ### A8 当前实机事实
 
 - 当前主设备：K90 Pro / `25102RKBEC`（`myron`），Android 17 / API 37，1200×2608，arm64-v8a，支持 60/90/120 Hz。旧 OnePlus PJZ110 / Android 16 记录保留为历史基线，不与新设备结果混写。
@@ -143,6 +151,7 @@
 - v3.0.24 首页已加载并可操作；冷启动后 8 秒样本 `TOTAL PSS 226040 KB`、`TOTAL RSS 399688 KB`，仅作基线，不代表长时通过。
 - #818 已在 `6458d541` arm64 Release 实机闭环：普通视频和手动纯音频均遵循后台播放总开关；关闭时退桌面暂停并释放当前 Wake Lock，回前台恢复；开启时普通视频继续；系统 PiP 作为用户主动紧凑播放继续；1 分钟自动助眠在总开关关闭时仍按计时播放，到点停止并释放 Pure Live 保活锁。纯音频/视频自动化也改为先等待 2 秒控件自动隐藏，再确定性唤出并点击，避免测试脚本把已显示的控制层反向隐藏。
 - 09-13 当前 `039f8ff3` 产品候选完成正常退出路径 50 次循环：视频→纯音频、返回、关闭应用内悬浮会话均闭环；循环态 FD/Socket/DMA-BUF/Codec/BLAST 保持平台，52 秒空闲释放后 FD 300→262、DMA-BUF 53→25，最终 PSS/RSS 相对预热首页为 +16,684/+17,012 KB。A7-04 已由 NR→RUN，完整数据见 `docs/ANDROID_ROOM_RESOURCE_RECOVERY_AUDIT_2026_09_13.md`。
+- 09-13 当前设备已进一步覆盖为 `fec7eae9` 音频输出候选，APK SHA-256 为 `DE7DE185B3E44700CB0D7BE4D2907B17CEB6EFC48BF7BAD53FA5FF95ADFFAE0E`。规范 Hive 覆盖前后逐字节一致；5/5 次真实 Bilibili 视频→纯音频→退出通过，AudioTrack 路径活跃，OpenSL ES/unknown-key/`setVolume -19` 尾窗记录为 0。完整数据见 `docs/ANDROID_AUDIO_OUTPUT_BACKEND_AUDIT_2026_09_13.md`。
 
 ## 3. Windows x64 执行账本
 

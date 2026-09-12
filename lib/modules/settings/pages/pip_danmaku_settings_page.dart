@@ -409,6 +409,9 @@ class PipDanmakuSettingsSection extends StatelessWidget {
             maxValue: max,
             minValue: min,
             selectedValue: value,
+            semanticLabel: title,
+            decrementSemanticLabel: i18n('decrease_value', args: {'label': title}),
+            incrementSemanticLabel: i18n('increase_value', args: {'label': title}),
             onChanged: onChanged,
             textStyle: TextStyle(color: digitColor, fontSize: 14, fontWeight: FontWeight.bold),
           ),
@@ -440,32 +443,39 @@ class PipDanmakuSettingsSection extends StatelessWidget {
 
   Widget _colorPickerRow(BuildContext context, {required Color labelColor, required Color digitColor}) {
     final color = Color(SettingsService.to.danmaku.pipDanmakuColor.v);
-    return InkWell(
-      onTap: () => _showColorPicker(context, color),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                i18n('pip_danmaku_color'),
-                style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+    final colorText = '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
+    return Semantics(
+      button: true,
+      label: '${i18n('pip_danmaku_color')}, $colorText',
+      child: InkWell(
+        onTap: () => _showColorPicker(context, color),
+        child: ExcludeSemantics(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ColorIndicator(width: 28, height: 28, borderRadius: 14, color: color),
-                const SizedBox(width: 8),
-                Text(
-                  '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}',
-                  style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.bold, color: digitColor),
+                Flexible(
+                  child: Text(
+                    i18n('pip_danmaku_color'),
+                    style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ColorIndicator(width: 28, height: 28, borderRadius: 14, color: color),
+                    const SizedBox(width: 8),
+                    Text(
+                      colorText,
+                      style: AppTextStyles.t12.copyWith(fontWeight: FontWeight.bold, color: digitColor),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

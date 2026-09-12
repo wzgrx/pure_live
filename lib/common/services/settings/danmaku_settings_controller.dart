@@ -4,6 +4,16 @@ import 'package:pure_live/common/models/app_refresh_rate_mode.dart';
 import 'package:pure_live/common/services/display_mode_service.dart';
 
 class DanmakuSettingsController extends GetxController {
+  static const double defaultDanmakuTopArea = 0.0;
+  static const double defaultDanmakuArea = 1.0;
+  static const double defaultDanmakuBottomArea = 0.5;
+  static const double defaultDanmakuSpeed = 120.0;
+  static const double defaultDanmakuFontSize = 16.0;
+  static const int defaultDanmakuFontWeight = 500;
+  static const double defaultDanmakuFontBorder = 1.5;
+  static const double defaultDanmakuOpacity = 1.0;
+  static const int defaultDanmakuFps = 60;
+  static const bool defaultDanmakuAutoFps = true;
   static const bool defaultEnablePipDanmaku = true;
   static const bool defaultPipDanmakuAutoScale = true;
   static const bool defaultPipDanmakuUseOriginalColor = true;
@@ -30,20 +40,32 @@ class DanmakuSettingsController extends GetxController {
     return ((raw.clamp(100, 900) / 100).round() * 100).clamp(100, 900).toInt();
   }
 
+  static double _boundedDouble(Object? value, {required double fallback, required double min, required double max}) {
+    final raw = value == null ? fallback : (value as num).toDouble();
+    if (!raw.isFinite) return fallback;
+    return raw.clamp(min, max).toDouble();
+  }
+
+  static int _boundedInt(Object? value, {required int fallback, required int min, required int max}) {
+    final rawNumber = value == null ? fallback.toDouble() : (value as num).toDouble();
+    if (!rawNumber.isFinite) return fallback;
+    return rawNumber.toInt().clamp(min, max).toInt();
+  }
+
   final RxBool hideDanmaku = hiveBool('hideDanmaku', false);
   final RxBool noEmojiMode = hiveBool('noEmojiMode', defaultNoEmojiMode);
-  final RxDouble danmakuTopArea = hiveDouble('danmakuTopArea', 0.0);
-  final RxDouble danmakuArea = hiveDouble('danmakuArea', 1.0);
-  final RxDouble danmakuBottomArea = hiveDouble('danmakuBottomArea', 0.5);
-  final RxDouble danmakuSpeed = hiveDouble('danmakuSpeed', 120.0);
-  final RxDouble danmakuFontSize = hiveDouble('danmakuFontSize', 16.0);
-  final RxInt danmakuFontWeight = hiveInt('danmakuFontWeight', 500);
-  final RxDouble danmakuFontBorder = hiveDouble('danmakuFontBorder', 1.5);
-  final RxDouble danmakuOpacity = hiveDouble('danmakuOpacity', 1.0);
+  final RxDouble danmakuTopArea = hiveDouble('danmakuTopArea', defaultDanmakuTopArea);
+  final RxDouble danmakuArea = hiveDouble('danmakuArea', defaultDanmakuArea);
+  final RxDouble danmakuBottomArea = hiveDouble('danmakuBottomArea', defaultDanmakuBottomArea);
+  final RxDouble danmakuSpeed = hiveDouble('danmakuSpeed', defaultDanmakuSpeed);
+  final RxDouble danmakuFontSize = hiveDouble('danmakuFontSize', defaultDanmakuFontSize);
+  final RxInt danmakuFontWeight = hiveInt('danmakuFontWeight', defaultDanmakuFontWeight);
+  final RxDouble danmakuFontBorder = hiveDouble('danmakuFontBorder', defaultDanmakuFontBorder);
+  final RxDouble danmakuOpacity = hiveDouble('danmakuOpacity', defaultDanmakuOpacity);
   final RxBool enableDanmakuDisplay = hiveBool('enableDanmakuDisplay', true);
   final RxBool enableDanmakuStroke = hiveBool('enableDanmakuStroke', true);
-  final RxInt danmakuFps = hiveInt('danmakuFps', 60);
-  final RxBool danmakuAutoFps = hiveBool('danmakuAutoFps', true);
+  final RxInt danmakuFps = hiveInt('danmakuFps', defaultDanmakuFps);
+  final RxBool danmakuAutoFps = hiveBool('danmakuAutoFps', defaultDanmakuAutoFps);
   final RxBool enableDanmakuTapInteraction = hiveBool('enableDanmakuTapInteraction', true);
   final RxBool enableDanmakuLongPressInteraction = hiveBool('enableDanmakuLongPressInteraction', true);
   final RxBool collapseRepeatedDanmaku = hiveBool('collapseRepeatedDanmaku', false);
@@ -59,7 +81,7 @@ class DanmakuSettingsController extends GetxController {
   final RxBool pipDanmakuUseOriginalColor = hiveBool('pipDanmakuUseOriginalColor', defaultPipDanmakuUseOriginalColor);
   final RxInt pipDanmakuColor = hiveInt('pipDanmakuColor', defaultPipDanmakuColor);
   final RxDouble pipDanmakuFontSize = hiveDouble('pipDanmakuFontSize', defaultPipDanmakuFontSize);
-  final RxInt pipDanmakuFontWeight = hiveInt('pipDanmakuFontWeight', 500);
+  final RxInt pipDanmakuFontWeight = hiveInt('pipDanmakuFontWeight', defaultPipDanmakuFontWeight);
   final RxDouble pipDanmakuSpeed = hiveDouble('pipDanmakuSpeed', defaultPipDanmakuSpeed);
   final RxDouble pipDanmakuOpacity = hiveDouble('pipDanmakuOpacity', defaultPipDanmakuOpacity);
   final RxDouble pipDanmakuArea = hiveDouble('pipDanmakuArea', defaultPipDanmakuArea);
@@ -88,7 +110,15 @@ class DanmakuSettingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    danmakuTopArea.v = _boundedDouble(danmakuTopArea.v, fallback: defaultDanmakuTopArea, min: 0, max: 300);
+    danmakuArea.v = _boundedDouble(danmakuArea.v, fallback: defaultDanmakuArea, min: 0, max: 1);
+    danmakuBottomArea.v = _boundedDouble(danmakuBottomArea.v, fallback: defaultDanmakuBottomArea, min: 0, max: 300);
+    danmakuSpeed.v = _boundedDouble(danmakuSpeed.v, fallback: defaultDanmakuSpeed, min: 20, max: 400);
+    danmakuFontSize.v = _boundedDouble(danmakuFontSize.v, fallback: defaultDanmakuFontSize, min: 10, max: 30);
     danmakuFontWeight.v = normalizeFontWeight(danmakuFontWeight.v);
+    danmakuFontBorder.v = _boundedDouble(danmakuFontBorder.v, fallback: defaultDanmakuFontBorder, min: 0, max: 4);
+    danmakuOpacity.v = _boundedDouble(danmakuOpacity.v, fallback: defaultDanmakuOpacity, min: 0, max: 1);
+    danmakuFps.v = _boundedInt(danmakuFps.v, fallback: defaultDanmakuFps, min: 30, max: 240);
     pipDanmakuFontWeight.v = normalizeFontWeight(pipDanmakuFontWeight.v);
     danmakuSimilarityThreshold.v = danmakuSimilarityThreshold.v.clamp(50, 100).toInt();
     danmakuSimilarityCacheDuration.v = danmakuSimilarityCacheDuration.v.clamp(1, 60).toInt();
@@ -196,19 +226,31 @@ class DanmakuSettingsController extends GetxController {
     return {
       'hideDanmaku': typed<bool>(json['hideDanmaku'] ?? false),
       'noEmojiMode': typed<bool>(json['noEmojiMode'] ?? defaultNoEmojiMode),
-      'danmakuTopArea': typed<double>(json['danmakuTopArea']?.toDouble() ?? 0.0),
-      'danmakuArea': typed<double>(json['danmakuArea']?.toDouble() ?? 1.0),
-      'danmakuBottomArea': typed<double>(json['danmakuBottomArea']?.toDouble() ?? 0.5),
-      'danmakuSpeed': typed<double>((json['danmakuSpeed'] ?? 120.0).toDouble().clamp(20.0, 400.0).toDouble()),
-      'danmakuFontSize': typed<double>(json['danmakuFontSize']?.toDouble() ?? 16.0),
+      'danmakuTopArea': typed<double>(
+        _boundedDouble(json['danmakuTopArea'], fallback: defaultDanmakuTopArea, min: 0, max: 300),
+      ),
+      'danmakuArea': typed<double>(_boundedDouble(json['danmakuArea'], fallback: defaultDanmakuArea, min: 0, max: 1)),
+      'danmakuBottomArea': typed<double>(
+        _boundedDouble(json['danmakuBottomArea'], fallback: defaultDanmakuBottomArea, min: 0, max: 300),
+      ),
+      'danmakuSpeed': typed<double>(
+        _boundedDouble(json['danmakuSpeed'], fallback: defaultDanmakuSpeed, min: 20, max: 400),
+      ),
+      'danmakuFontSize': typed<double>(
+        _boundedDouble(json['danmakuFontSize'], fallback: defaultDanmakuFontSize, min: 10, max: 30),
+      ),
       'danmakuFontWeight': typed<int>(normalizeFontWeight(json['danmakuFontWeight'])),
-      'danmakuFontBorder': typed<double>((json['danmakuFontBorder']?.toDouble() ?? 1.5).clamp(0.0, 4.0).toDouble()),
-      'danmakuOpacity': typed<double>(json['danmakuOpacity']?.toDouble() ?? 1.0),
+      'danmakuFontBorder': typed<double>(
+        _boundedDouble(json['danmakuFontBorder'], fallback: defaultDanmakuFontBorder, min: 0, max: 4),
+      ),
+      'danmakuOpacity': typed<double>(
+        _boundedDouble(json['danmakuOpacity'], fallback: defaultDanmakuOpacity, min: 0, max: 1),
+      ),
       'enableDanmakuDisplay': typed<bool>(json['enableDanmakuDisplay'] ?? true),
       'danmakuFontFamilyName': typed<String>(json['danmakuFontFamilyName'] ?? 'Default'),
       'enableDanmakuStroke': typed<bool>(json['enableDanmakuStroke'] ?? true),
-      'danmakuFps': typed<int>(json['danmakuFps']?.toInt() ?? 60),
-      'danmakuAutoFps': typed<bool>(json['danmakuAutoFps'] ?? true),
+      'danmakuFps': typed<int>(_boundedInt(json['danmakuFps'], fallback: defaultDanmakuFps, min: 30, max: 240)),
+      'danmakuAutoFps': typed<bool>(json['danmakuAutoFps'] ?? defaultDanmakuAutoFps),
       'enableDanmakuTapInteraction': typed<bool>(json['enableDanmakuTapInteraction'] ?? true),
       'enableDanmakuLongPressInteraction': typed<bool>(json['enableDanmakuLongPressInteraction'] ?? true),
       'collapseRepeatedDanmaku': typed<bool>(json['collapseRepeatedDanmaku'] ?? false),
@@ -312,19 +354,29 @@ class DanmakuSettingsController extends GetxController {
     return {
       'hideDanmaku': danmaku['hideDanmaku'] ?? false,
       'noEmojiMode': danmaku['noEmojiMode'] ?? defaultNoEmojiMode,
-      'danmakuTopArea': (danmaku['danmakuTopArea'] ?? 0.0).toDouble(),
-      'danmakuArea': (danmaku['danmakuArea'] ?? 1.0).toDouble(),
-      'danmakuBottomArea': (danmaku['danmakuBottomArea'] ?? 0.5).toDouble(),
-      'danmakuSpeed': (danmaku['danmakuSpeed'] ?? 120.0).toDouble().clamp(20.0, 400.0).toDouble(),
-      'danmakuFontSize': (danmaku['danmakuFontSize'] ?? 16.0).toDouble(),
+      'danmakuTopArea': _boundedDouble(danmaku['danmakuTopArea'], fallback: defaultDanmakuTopArea, min: 0, max: 300),
+      'danmakuArea': _boundedDouble(danmaku['danmakuArea'], fallback: defaultDanmakuArea, min: 0, max: 1),
+      'danmakuBottomArea': _boundedDouble(
+        danmaku['danmakuBottomArea'],
+        fallback: defaultDanmakuBottomArea,
+        min: 0,
+        max: 300,
+      ),
+      'danmakuSpeed': _boundedDouble(danmaku['danmakuSpeed'], fallback: defaultDanmakuSpeed, min: 20, max: 400),
+      'danmakuFontSize': _boundedDouble(danmaku['danmakuFontSize'], fallback: defaultDanmakuFontSize, min: 10, max: 30),
       'danmakuFontWeight': normalizeFontWeight(danmaku['danmakuFontWeight']),
-      'danmakuFontBorder': (danmaku['danmakuFontBorder'] ?? 1.5).toDouble().clamp(0.0, 4.0).toDouble(),
-      'danmakuOpacity': (danmaku['danmakuOpacity'] ?? 1.0).toDouble(),
+      'danmakuFontBorder': _boundedDouble(
+        danmaku['danmakuFontBorder'],
+        fallback: defaultDanmakuFontBorder,
+        min: 0,
+        max: 4,
+      ),
+      'danmakuOpacity': _boundedDouble(danmaku['danmakuOpacity'], fallback: defaultDanmakuOpacity, min: 0, max: 1),
       'enableDanmakuDisplay': danmaku['enableDanmakuDisplay'] ?? true,
       'danmakuFontFamilyName': danmaku['danmakuFontFamilyName'] ?? 'Default',
       'enableDanmakuStroke': danmaku['enableDanmakuStroke'] ?? true,
-      'danmakuFps': (danmaku['danmakuFps'] ?? 60).toInt(),
-      'danmakuAutoFps': danmaku['danmakuAutoFps'] ?? true,
+      'danmakuFps': _boundedInt(danmaku['danmakuFps'], fallback: defaultDanmakuFps, min: 30, max: 240),
+      'danmakuAutoFps': danmaku['danmakuAutoFps'] ?? defaultDanmakuAutoFps,
       'enableDanmakuTapInteraction': danmaku['enableDanmakuTapInteraction'] ?? true,
       'enableDanmakuLongPressInteraction': danmaku['enableDanmakuLongPressInteraction'] ?? true,
       'collapseRepeatedDanmaku': danmaku['collapseRepeatedDanmaku'] ?? false,
@@ -362,7 +414,7 @@ class DanmakuSettingsController extends GetxController {
           .clamp(0.05, 2.0)
           .toDouble(),
       'pipDanmakuFps': (danmaku['pipDanmakuFps'] ?? defaultPipDanmakuFps).toInt().clamp(15, 240).toInt(),
-      'pipDanmakuAutoFps': danmaku['pipDanmakuAutoFps'] ?? true,
+      'pipDanmakuAutoFps': danmaku['pipDanmakuAutoFps'] ?? defaultPipDanmakuAutoFps,
       'filterDouyuSuspectedAutomatedMessages':
           danmaku['filterDouyuSuspectedAutomatedMessages'] ?? defaultFilterDouyuSuspectedAutomatedMessages,
       'enableDanmakuSimilarityFilter': danmaku['enableDanmakuSimilarityFilter'] ?? defaultEnableDanmakuSimilarityFilter,

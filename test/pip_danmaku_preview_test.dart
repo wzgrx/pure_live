@@ -185,6 +185,37 @@ void main() {
     }
   });
 
+  testWidgets('color and counter rows expose named actions and values', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SettingsService.to.danmaku.pipDanmakuUseOriginalColor.value = false;
+    final semanticsHandle = tester.ensureSemantics();
+    try {
+      await _pumpPipSettingsPage(tester);
+      final settings = find.byKey(const ValueKey('pip-danmaku-settings-scroll'));
+      final scrollable = find.descendant(of: settings, matching: find.byType(Scrollable));
+
+      final color = find.bySemanticsLabel('Unified danmaku color, #FFFFFFFF');
+      await tester.scrollUntilVisible(color, 180, scrollable: scrollable);
+      await tester.pump();
+      expect(color, findsOne);
+      expect(tester.semantics.find(color).getSemanticsData().hasAction(ui.SemanticsAction.tap), isTrue);
+
+      await tester.scrollUntilVisible(find.text('Maximum visible'), 180, scrollable: scrollable);
+      await tester.pump();
+      final maximumVisible = find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == 'Maximum visible, 6',
+      );
+      expect(maximumVisible, findsOne);
+      expect(find.bySemanticsLabel('Increase Maximum visible'), findsOne);
+      expect(find.bySemanticsLabel('Decrease Maximum visible'), findsOne);
+    } finally {
+      semanticsHandle.dispose();
+    }
+  });
+
   testWidgets('reset cancellation preserves values and confirmation restores every PiP default', (tester) async {
     final settings = SettingsService.to.danmaku;
     settings.enablePipDanmaku.value = false;
@@ -327,16 +358,21 @@ class _TestAssetLoader extends AssetLoader {
     'pip_danmaku_auto_scale': 'Auto scale',
     'danmaku_no_emoji': 'Pure text',
     'pip_danmaku_original_color': 'Original color',
+    'pip_danmaku_color': 'Unified danmaku color',
     'font_size': 'Font size',
     'font_weight': 'Font weight',
     'font_weight_medium': 'Medium',
     'font_weight_normal': 'Normal',
     'font_weight_semi_bold': 'Semi-bold',
+    'font_weight_bold': 'Bold',
+    'font_weight_extra_bold': 'Extra-bold',
     'speed': 'Speed',
     'opacity': 'Opacity',
     'danmaku_area': 'Area',
     'pip_danmaku_max_visible': 'Maximum visible',
     'pip_danmaku_interval': 'Interval',
+    'increase_value': 'Increase {label}',
+    'decrease_value': 'Decrease {label}',
     'danmaku_fps': 'FPS',
     'dynamic_follow_display': 'Dynamic',
     'pip_danmaku_fps_policy_desc': 'Follow the global interface refresh policy',

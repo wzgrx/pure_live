@@ -113,24 +113,50 @@ void main() {
       expect(config['pipDanmakuNoEmojiMode'], isTrue);
     });
 
-    test('clamps legacy main-player speed to the supported range', () {
-      final slow = DanmakuSettingsController.extractConfig({
-        'danmaku': {'danmakuSpeed': 8},
-      });
-      final fast = DanmakuSettingsController.extractConfig({
-        'danmaku': {'danmakuSpeed': 800},
+    test('clamps imported main-player values to their rendered control ranges', () {
+      final config = DanmakuSettingsController.extractConfig({
+        'danmaku': {
+          'danmakuTopArea': -1,
+          'danmakuArea': 2,
+          'danmakuBottomArea': 999,
+          'danmakuSpeed': 8,
+          'danmakuFontSize': 50,
+          'danmakuFontBorder': 8,
+          'danmakuOpacity': -0.5,
+          'danmakuFps': 500,
+        },
       });
 
-      expect(slow['danmakuSpeed'], 20.0);
-      expect(fast['danmakuSpeed'], 400.0);
+      expect(config['danmakuTopArea'], 0.0);
+      expect(config['danmakuArea'], 1.0);
+      expect(config['danmakuBottomArea'], 300.0);
+      expect(config['danmakuSpeed'], 20.0);
+      expect(config['danmakuFontSize'], 30.0);
+      expect(config['danmakuFontBorder'], 4.0);
+      expect(config['danmakuOpacity'], 0.0);
+      expect(config['danmakuFps'], 240);
     });
 
-    test('clamps imported stroke width to the renderer range', () {
-      final config = DanmakuSettingsController.extractConfig({
-        'danmaku': {'danmakuFontBorder': 8},
+    test('non-finite main-player values fall back before reaching widgets', () {
+      final config = DanmakuSettingsController.parseConfig({
+        'danmakuTopArea': double.nan,
+        'danmakuArea': double.infinity,
+        'danmakuBottomArea': double.negativeInfinity,
+        'danmakuSpeed': double.nan,
+        'danmakuFontSize': double.infinity,
+        'danmakuFontBorder': double.nan,
+        'danmakuOpacity': double.negativeInfinity,
+        'danmakuFps': double.infinity,
       });
 
-      expect(config['danmakuFontBorder'], 4.0);
+      expect(config['danmakuTopArea'], DanmakuSettingsController.defaultDanmakuTopArea);
+      expect(config['danmakuArea'], DanmakuSettingsController.defaultDanmakuArea);
+      expect(config['danmakuBottomArea'], DanmakuSettingsController.defaultDanmakuBottomArea);
+      expect(config['danmakuSpeed'], DanmakuSettingsController.defaultDanmakuSpeed);
+      expect(config['danmakuFontSize'], DanmakuSettingsController.defaultDanmakuFontSize);
+      expect(config['danmakuFontBorder'], DanmakuSettingsController.defaultDanmakuFontBorder);
+      expect(config['danmakuOpacity'], DanmakuSettingsController.defaultDanmakuOpacity);
+      expect(config['danmakuFps'], DanmakuSettingsController.defaultDanmakuFps);
     });
 
     test('clamps imported compact values to supported ranges', () {

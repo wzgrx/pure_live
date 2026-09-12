@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pure_live/common/style/app_text_styles.dart';
 
@@ -14,6 +15,9 @@ class CountButton extends StatefulWidget {
     this.buttonSize = const Size(35, 35),
     this.incrementIcon,
     this.decrementIcon,
+    this.semanticLabel,
+    this.incrementSemanticLabel,
+    this.decrementSemanticLabel,
     this.borderRadius = 12.0,
     required this.onChanged,
     this.valueBuilder,
@@ -33,6 +37,9 @@ class CountButton extends StatefulWidget {
 
   final Widget? incrementIcon;
   final Widget? decrementIcon;
+  final String? semanticLabel;
+  final String? incrementSemanticLabel;
+  final String? decrementSemanticLabel;
 
   final double borderRadius;
 
@@ -90,21 +97,28 @@ class _CountButtonState extends State<CountButton> {
                   ),
                 ),
                 onPressed: _decrement,
-                child: widget.decrementIcon ?? Icon(Icons.remove, color: foregroundColor),
+                child: _buildSemanticIcon(
+                  widget.decrementIcon ?? Icon(Icons.remove, color: foregroundColor),
+                  widget.decrementSemanticLabel,
+                ),
               ),
             ),
           ),
 
-          Container(
-            height: widget.buttonSize.height,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: Border.symmetric(horizontal: BorderSide(color: backgroundColor, width: 2)),
+          Semantics(
+            label: widget.semanticLabel == null ? null : '${widget.semanticLabel}, ${widget.selectedValue}',
+            excludeSemantics: widget.semanticLabel != null,
+            child: Container(
+              height: widget.buttonSize.height,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: Border.symmetric(horizontal: BorderSide(color: backgroundColor, width: 2)),
+              ),
+              child: widget.valueBuilder != null
+                  ? widget.valueBuilder!(widget.selectedValue)
+                  : Text(widget.selectedValue.toString(), style: effectiveTextStyle),
             ),
-            child: widget.valueBuilder != null
-                ? widget.valueBuilder!(widget.selectedValue)
-                : Text(widget.selectedValue.toString(), style: effectiveTextStyle),
           ),
 
           SizedBox(
@@ -129,12 +143,23 @@ class _CountButtonState extends State<CountButton> {
                   ),
                 ),
                 onPressed: _increment,
-                child: widget.incrementIcon ?? Icon(Icons.add, color: foregroundColor),
+                child: _buildSemanticIcon(
+                  widget.incrementIcon ?? Icon(Icons.add, color: foregroundColor),
+                  widget.incrementSemanticLabel,
+                ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSemanticIcon(Widget icon, String? label) {
+    if (label == null) return icon;
+    return Semantics(
+      label: label,
+      child: ExcludeSemantics(child: icon),
     );
   }
 

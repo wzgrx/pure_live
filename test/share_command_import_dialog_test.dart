@@ -73,6 +73,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.byType(LayoutBuilder), findsNothing);
+
     Future<void> openDialog() async {
       await tester.tap(find.text('Open').hitTestable());
       await tester.pumpAndSettle();

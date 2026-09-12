@@ -18,6 +18,7 @@ class ShareCommandImportDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final stacked = MediaQuery.sizeOf(context).width < 350 || textScale >= 1.6;
 
     return AlertDialog(
       scrollable: true,
@@ -26,36 +27,31 @@ class ShareCommandImportDialog extends StatelessWidget {
       title: Text(i18n('share')),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final stacked = constraints.maxWidth < 300 || textScale >= 1.6;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (stacked) _StackedRoomIdentity(room: room) else _InlineRoomIdentity(room: room),
-                const SizedBox(height: 16),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.35)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _MetadataRow(label: i18n('platform'), value: room.platform ?? '', stacked: stacked),
-                        const SizedBox(height: 10),
-                        _MetadataRow(label: i18n('room_id'), value: room.roomId ?? '', stacked: stacked),
-                      ],
-                    ),
-                  ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (stacked) _StackedRoomIdentity(room: room) else _InlineRoomIdentity(room: room),
+            const SizedBox(height: 16),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.35)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _MetadataRow(label: i18n('platform'), value: room.platform ?? '', stacked: stacked),
+                    const SizedBox(height: 10),
+                    _MetadataRow(label: i18n('room_id'), value: room.roomId ?? '', stacked: stacked),
+                  ],
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
       actions: [

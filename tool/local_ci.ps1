@@ -71,6 +71,7 @@ try {
     & (Join-Path $PSScriptRoot 'test_android_surfaceflinger_timestats.ps1')
     & (Join-Path $PSScriptRoot 'test_android_process_resource_metrics.ps1')
     & (Join-Path $PSScriptRoot 'test_android_room_tag_assignment_smoke.ps1')
+    & (Join-Path $PSScriptRoot 'test_android_share_intake_smoke.ps1')
 
     python (Join-Path $PSScriptRoot 'validate_device_ui_map.py')
     Assert-PureLiveCommandSucceeded 'Device UI map validation'

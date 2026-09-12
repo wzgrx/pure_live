@@ -15,6 +15,7 @@ import 'package:pure_live/common/global/platform_utils.dart';
 import 'package:pure_live/plugins/share_command_handler.dart';
 import 'package:pure_live/routes/route_observer_controller.dart';
 import 'package:pure_live/common/utils/share_command_handler.dart';
+import 'package:pure_live/common/widgets/share_command_import_dialog.dart';
 import 'package:pure_live/modules/live_play/controllers/player_state.dart';
 import 'package:pure_live/player/utils/window_helper.dart';
 
@@ -464,19 +465,21 @@ mixin DesktopWindowMixin<T extends StatefulWidget> on State<T>
     implements WindowListener, TrayListener, WidgetsBindingObserver {
   bool _isDialogOpen = false;
   Timer? _windowGeometryTimer;
+  Timer? _shareCommandResumeTimer;
   final _sizeController = SettingsService.to.window;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkShareCommand();
+      if (mounted) _checkShareCommand();
     });
   }
 
   @override
   void dispose() {
     _windowGeometryTimer?.cancel();
+    _shareCommandResumeTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -484,127 +487,34 @@ mixin DesktopWindowMixin<T extends StatefulWidget> on State<T>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      Future.delayed(const Duration(seconds: 1), () {
-        _checkShareCommand();
+      _shareCommandResumeTimer?.cancel();
+      _shareCommandResumeTimer = Timer(const Duration(seconds: 1), () {
+        if (mounted) _checkShareCommand();
       });
     }
   }
 
   void _checkShareCommand() {
-    if (_isDialogOpen) return;
+    if (!mounted || _isDialogOpen) return;
 
-    ShareCommandHandler.instance.checkClipboard((fullText) {
-      try {
-        final isMine = ShareCommandCodec.isMyCommand(fullText);
-        if (isMine) {
-          final roomMap = ShareCommandCodec.decodeShort(fullText);
-          final LiveRoom room = LiveRoom.fromJson(roomMap!);
-          if (_isDialogOpen) return;
-          _isDialogOpen = true;
-          _showProductSelectionDialog(room);
+    unawaited(
+      ShareCommandHandler.instance.checkClipboard((fullText) async {
+        if (!mounted || _isDialogOpen) return;
+        final roomMap = ShareCommandCodec.decodeShort(fullText);
+        if (roomMap == null) throw const FormatException('Share command payload disappeared after validation.');
+
+        final room = LiveRoom.fromJson(roomMap).normalizedIdentityCopy();
+        _isDialogOpen = true;
+        try {
+          final enterRoom = await ShareCommandImportDialog.show(context: context, room: room);
+          if (enterRoom == true && mounted) {
+            AppNavigator.toLiveRoomDetail(liveRoom: room);
+          }
+        } finally {
+          _isDialogOpen = false;
         }
-      } catch (e) {
-        debugPrint(e.toString());
-      }
-    });
-  }
-
-  void _showProductSelectionDialog(LiveRoom room) {
-    final avatarUrl = normalizeNetworkImageUrl(room.avatar);
-    showDialog(
-      context: Get.context!,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
-          contentPadding: const EdgeInsets.all(16),
-          content: SizedBox(
-            width: 320,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundImage: avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
-                      child: avatarUrl.isEmpty ? const Icon(Icons.person) : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            room.title ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.t16Bold,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            room.nick ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.t13Muted,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Text('${i18n('platform')}：', style: const TextStyle(color: Colors.grey)),
-                          Text(room.platform ?? 'UNKNOWN', style: const TextStyle(fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Text('${i18n('room_id')}：', style: const TextStyle(color: Colors.grey)),
-                          Text(room.roomId ?? '', style: const TextStyle(fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(onPressed: () => Navigator.pop(context), child: Text(i18n('cancel'))),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        AppNavigator.toLiveRoomDetail(liveRoom: room);
-                      },
-                      child: Text(i18n('enter_room')),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    ).then((_) {
-      _isDialogOpen = false;
-    });
+      }),
+    );
   }
 
   @override

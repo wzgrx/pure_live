@@ -1198,6 +1198,7 @@
     "audio_output_driver": "Audio Output Driver (--ao)",
     "hardware_decoder": "Hardware Decoder (--hwdec)",
     "share": "Share",
+    "share_failed": "Sharing failed. Please try again.",
     "player_mpv": "MPV Player",
     "player_ijk": "IJK Player",
     "player_exo": "Exo Player",

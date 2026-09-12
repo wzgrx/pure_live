@@ -1198,6 +1198,7 @@
     "audio_output_driver": "音频输出驱动(--ao)",
     "hardware_decoder": "硬件解码器(--hwdec)",
     "share": "分享",
+    "share_failed": "分享失败，请重试",
     "player_mpv": "Mpv播放器",
     "player_ijk": "IJK播放器",
     "player_exo": "Exo播放器",

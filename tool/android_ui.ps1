@@ -230,9 +230,18 @@ function Assert-TargetApp {
 
 function Enter-TargetApp {
     param([string]$Package)
-    if (-not $NoBringToFront) {
-        Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-n', "$Package/.MainActivity") | Out-Null
-        Start-Sleep -Milliseconds 250
+    if ($NoBringToFront) {
+        Assert-TargetApp $Package
+        return
+    }
+
+    Invoke-Adb -AdbArguments @('shell', 'am', 'start', '-W', '-n', "$Package/.MainActivity") | Out-Null
+    # ActivityManager can finish the launch command before topResumedActivity
+    # moves away from the launcher on a cold Flutter start. Observe that state
+    # transition instead of relying on one fixed delay.
+    for ($attempt = 1; $attempt -le 12; $attempt++) {
+        if ((Get-TopPackage) -eq $Package) { return }
+        if ($attempt -lt 12) { Start-Sleep -Milliseconds 250 }
     }
     Assert-TargetApp $Package
 }

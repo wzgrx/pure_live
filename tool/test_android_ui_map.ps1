@@ -16,6 +16,28 @@ $zhThemeSettings = -join ([char[]]@(0x4E3B, 0x9898, 0x8BBE, 0x7F6E))
 $zhPlayerEngine = -join ([char[]]@(0x64AD, 0x653E, 0x5668, 0x5185, 0x6838))
 $zhCoreKernelSettings = -join ([char[]]@(0x6838, 0x5FC3, 0x5185, 0x6838, 0x8BBE, 0x7F6E))
 
+$tokens = $null
+$parseErrors = $null
+$runnerAst = [Management.Automation.Language.Parser]::ParseFile(
+    $runnerPath,
+    [ref]$tokens,
+    [ref]$parseErrors
+)
+if ($parseErrors.Count -gt 0) { throw 'android_ui.ps1 must parse before route contracts are checked.' }
+$enterTargetApp = $runnerAst.Find({
+    param($node)
+    $node -is [Management.Automation.Language.FunctionDefinitionAst] -and
+        $node.Name -eq 'Enter-TargetApp'
+}, $true)
+if ($null -eq $enterTargetApp -or
+    $enterTargetApp.Extent.Text -notmatch "'start',\s*'-W',\s*'-n'" -or
+    $null -eq $enterTargetApp.Body.Find({
+        param($node) $node -is [Management.Automation.Language.ForStatementAst]
+    }, $true)) {
+    throw 'Android UI cold entry must wait for ActivityManager and poll the actual top-resumed package.'
+}
+Write-Output 'PASS Android UI cold entry waits for the target foreground'
+
 $settingsProfiles = @($map.profiles.PSObject.Properties | Where-Object {
     $_.Value.sequences.PSObject.Properties['open_settings']
 })

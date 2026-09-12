@@ -144,6 +144,13 @@ function Test-HomeUi {
     -not (Test-RoomUi $Document) -and $raw.Contains('热门') -and $raw.Contains('分区') -and $raw.Contains('录制中心')
 }
 
+function Test-AudioOnlyPresentation {
+    param([Parameter(Mandatory = $true)][xml] $Document)
+    @($Document.SelectNodes('//node') | Where-Object {
+        [string] $_.'content-desc' -eq '纯音频模式' -or [string] $_.text -eq '纯音频模式'
+    }).Count -gt 0
+}
+
 function Wait-UiState {
     param(
         [Parameter(Mandatory = $true)][ValidateSet('room', 'home')][string] $State,
@@ -192,7 +199,10 @@ function Invoke-ModeTransition {
     do {
         Start-Sleep -Milliseconds 350
         $document = Get-UiHierarchy
-        $hasAudioPresentation = $document.OuterXml.Contains('纯音频模式')
+        # The video-mode action is labelled "切换到纯音频模式". A substring
+        # search therefore reports audio mode even after video has returned;
+        # only the persistent centre badge owns the exact label below.
+        $hasAudioPresentation = Test-AudioOnlyPresentation $document
         if ($hasAudioPresentation -eq $AudioOnly -and (Test-RoomUi $document)) {
             return $timer.ElapsedMilliseconds
         }

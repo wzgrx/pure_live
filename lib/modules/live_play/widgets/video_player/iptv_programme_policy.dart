@@ -8,7 +8,7 @@ enum IptvProgrammePhase { scheduled, live, catchup }
 
 enum CatchupUrlType { default_, playseek, offset }
 
-enum IptvProgrammeSelectionResult { scheduled, live, catchupStarted, busy, invalidUrl, failed }
+enum IptvProgrammeSelectionResult { scheduled, live, catchupStarted, superseded, busy, invalidUrl, failed }
 
 IptvProgrammePhase classifyIptvProgramme({required DateTime start, required DateTime stop, required DateTime now}) {
   if (now.isBefore(start)) return IptvProgrammePhase.scheduled;

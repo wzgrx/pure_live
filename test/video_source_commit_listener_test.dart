@@ -617,6 +617,35 @@ void main() {
     controller.dispose();
   });
 
+  test('a superseded catch-up start publishes no false success message', () async {
+    final room = LiveRoom(platform: 'fixture', roomId: 'room', link: 'https://fixture/live');
+    final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: room.link!));
+    final live = _FakeLivePlayController()..startResult = false;
+    final controller = _controller(
+      room: room,
+      manager: manager,
+      reuseCurrentSession: true,
+      onSourceCommitted: (_) {},
+      livePlayController: live,
+    );
+    addTearDown(manager.disposeFixture);
+    await controller.initialization;
+    final messages = <String>[];
+
+    final result = await controller.onProgrammeTapped(
+      _programme('superseded'),
+      now: DateTime(2026, 9, 12, 12),
+      closeSchedule: () {},
+      showMessage: messages.add,
+    );
+
+    expect(result, IptvProgrammeSelectionResult.superseded);
+    expect(controller.catchUpSwitching.value, isFalse);
+    expect(live.startCalls, 1);
+    expect(messages, isEmpty);
+    controller.dispose();
+  });
+
   test('programme tap shares exact boundary behavior and keeps invalid catch-up input open', () async {
     final room = LiveRoom(platform: 'fixture', roomId: 'room', link: '   ');
     final manager = _FakePlayerManager(room, _commit(revision: 5, room: room, url: 'https://fixture/live'));
@@ -965,12 +994,13 @@ class _FakeLivePlayController implements LivePlayController {
   Object? startError;
   final startEntered = Completer<void>();
   int startCalls = 0;
+  bool startResult = true;
   String? catchUpUrl;
   int? startTime;
   int? endTime;
 
   @override
-  Future<void> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
+  Future<bool> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
     startCalls++;
     this.catchUpUrl = catchUpUrl;
     this.startTime = startTime;
@@ -978,6 +1008,7 @@ class _FakeLivePlayController implements LivePlayController {
     if (!startEntered.isCompleted) startEntered.complete();
     if (startError != null) throw startError!;
     await startGate?.future;
+    return startResult;
   }
 
   @override

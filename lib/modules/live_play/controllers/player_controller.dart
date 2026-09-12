@@ -454,6 +454,30 @@ class PlayerController extends GetxController {
     return videoController;
   }
 
+  /// Opens a caller-supplied direct source under this controller's normal
+  /// latest-load fence.
+  ///
+  /// IPTV does not run the quality-discovery pipeline, so calling [setPlayer]
+  /// directly used to omit the load epoch that protects ordinary sources.
+  /// A room switch could therefore attach the older direct source after the
+  /// new room had already invalidated playback work.
+  Future<VideoController?> setDirectPlayer({required LiveRoom room, required Site site}) async {
+    final roomId = room.normalizedRoomId;
+    if (roomId.isEmpty) return null;
+    invalidateLoad();
+    final loadEpoch = _loadEpoch;
+    final controller = await setPlayer(roomId: roomId, expectedRoom: room, expectedSite: site, loadEpoch: loadEpoch);
+    if (controller == null) return null;
+    try {
+      await controller.initialization;
+    } catch (_) {
+      if (!_isLoadCurrent(loadEpoch, room, site)) return null;
+      rethrow;
+    }
+    if (!_isLoadCurrent(loadEpoch, room, site) || controller.status == PlayerStatus.disposed) return null;
+    return controller.status == PlayerStatus.error ? null : controller;
+  }
+
   /// Attaches a new route-scoped UI controller to the native player retained by
   /// [PlayerManager] while the app floating window was visible.
   ///

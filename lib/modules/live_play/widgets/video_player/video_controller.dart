@@ -1089,7 +1089,8 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     catchUpSwitching.value = true;
     _closeSchedule(closeSchedule);
     try {
-      await _reloadWithCatchup(catchupUrl, programme);
+      final started = await _reloadWithCatchup(catchupUrl, programme);
+      if (!started) return IptvProgrammeSelectionResult.superseded;
       notify('${i18n('playing_catchup')}: ${programme.title}');
       return IptvProgrammeSelectionResult.catchupStarted;
     } catch (error, stackTrace) {
@@ -1112,11 +1113,11 @@ class VideoController with ChangeNotifier implements DanmakuSettingsBinding {
     }
   }
 
-  Future<void> _reloadWithCatchup(String catchupUrl, database.EpgProgramme programme) async {
+  Future<bool> _reloadWithCatchup(String catchupUrl, database.EpgProgramme programme) async {
     clearListener();
     await _playerManager.close();
     await destory();
-    await _livePlayController.startCatchUp(
+    return _livePlayController.startCatchUp(
       catchUpUrl: catchupUrl,
       startTime: programme.start.millisecondsSinceEpoch,
       endTime: programme.stop.millisecondsSinceEpoch,

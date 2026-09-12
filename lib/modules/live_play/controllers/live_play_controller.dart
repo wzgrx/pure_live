@@ -36,13 +36,19 @@ import 'package:pure_live/modules/live_play/widgets/local_interaction/local_mess
 
 // live_play_controller.dart
 
+typedef IptvPlayerStarter = Future<bool> Function(LiveRoom room);
+
 class LivePlayController extends GetxController
     with GetSingleTickerProviderStateMixin, WidgetsBindingObserver
     implements DanmakuSessionHost, PlayerSessionHost {
-  LivePlayController({required this.room, required this.site});
+  LivePlayController({required this.room, required this.site}) : _iptvPlayerStarter = null;
+
+  @visibleForTesting
+  LivePlayController.withIptvPlayerStarter(this._iptvPlayerStarter, {required this.room, required this.site});
 
   final String site;
   final LiveRoom room;
+  final IptvPlayerStarter? _iptvPlayerStarter;
 
   late final TimerController timerController;
   late final DanmakuController danmakuController;
@@ -71,6 +77,7 @@ class LivePlayController extends GetxController
   bool _reactiveStateClosed = false;
   bool _suppressAppFloatingOnNextPop = false;
   int _roomLoadEpoch = 0;
+  int _iptvPlaybackEpoch = 0;
   bool _asmrSessionActive = false;
   Timer? _localGiftEffectTimer;
   Timer? _danmakuFlushTimer;
@@ -689,7 +696,7 @@ class LivePlayController extends GetxController
       unawaited(getSuperChatMessage(roomId, platform: requestedPlatform, loadEpoch: loadEpoch));
 
       if (currentSite.id == Sites.iptvSite) {
-        _initIptvPlayer();
+        await _initIptvPlayer(liveRoom, loadEpoch: loadEpoch);
         return liveRoom;
       }
 
@@ -793,24 +800,27 @@ class LivePlayController extends GetxController
     }
   }
 
-  void _initIptvPlayer() {
-    final link = state.value.room.detail?.link;
-    if (link == null || link.isEmpty) {
-      ToastUtil.show(i18n('invalid_play_url'));
-      return;
+  Future<bool> _initIptvPlayer(LiveRoom liveRoom, {required int loadEpoch}) async {
+    final link = liveRoom.link?.trim() ?? '';
+    if (link.isEmpty || liveRoom.normalizedRoomId.isEmpty) {
+      if (_isRoomLoadCurrent(loadEpoch, liveRoom.roomId!, liveRoom.platform)) {
+        updateRoom(success: false, isLoading: false, loadError: i18n('invalid_play_url'));
+        ToastUtil.show(i18n('invalid_play_url'));
+      }
+      return false;
     }
 
-    updatePlayer(
-      qualites: [LivePlayQuality(quality: '原画')],
-      currentQuality: 0,
-      currentLineIndex: 0,
-      playUrls: [link],
-    );
+    updatePlayer(qualites: [LivePlayQuality(quality: '原画')], currentQuality: 0, currentLineIndex: 0);
 
-    playerController.setPlayer(roomId: state.value.room.detail!.roomId!);
-    updateRoom(success: true);
+    final started = await _switchToUrl(link, expectedRoom: liveRoom);
+    if (!_isRoomLoadCurrent(loadEpoch, liveRoom.roomId!, liveRoom.platform)) return false;
 
-    unawaited(danmakuController.stopDanmaku());
+    try {
+      await danmakuController.stopDanmaku();
+    } catch (error, stackTrace) {
+      developer.log('IPTV danmaku cleanup failed', name: 'LivePlayController', error: error, stackTrace: stackTrace);
+    }
+    return started;
   }
 
   void _restoreQualityAndLines() {
@@ -821,6 +831,7 @@ class LivePlayController extends GetxController
     // Fence any room-detail/play-quality request that was started before this
     // switch. Its late result must not restore the previous room or socket.
     invalidateRoomLoad();
+    _iptvPlaybackEpoch++;
     playerController.invalidateLoad();
     _localMessageDeliveryQueue.cancelAll();
     final sameRoom =
@@ -897,26 +908,59 @@ class LivePlayController extends GetxController
     }
   }
 
-  Future<void> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
+  Future<bool> startCatchUp({required String catchUpUrl, int? startTime, int? endTime}) async {
     final currentRoom = state.value.room.detail;
-    if (currentRoom == null) return;
+    final normalizedUrl = catchUpUrl.trim();
+    if (currentRoom == null || currentRoom.normalizedRoomId.isEmpty || normalizedUrl.isEmpty) return false;
 
     final updatedRoom = currentRoom.copyWith(
-      catchUpUrl: catchUpUrl,
+      catchUpUrl: normalizedUrl,
       isCatchUp: true,
       catchUpStart: startTime,
       catchUpEnd: endTime,
     );
 
     updateRoom(detail: updatedRoom);
-    await _switchToUrl(catchUpUrl);
+    return _switchToUrl(normalizedUrl, expectedRoom: updatedRoom);
   }
 
-  Future<void> _switchToUrl(String url) async {
-    updateRoom(success: false);
+  Future<bool> _switchToUrl(String url, {required LiveRoom expectedRoom}) async {
+    final playbackEpoch = ++_iptvPlaybackEpoch;
+    updateRoom(success: false, isLoading: true, loadError: null);
     updatePlayer(playUrls: [url], currentLineIndex: 0);
-    await playerController.setPlayer(roomId: state.value.room.detail!.roomId!);
-    updateRoom(success: true);
+    try {
+      final injectedStarter = _iptvPlayerStarter;
+      final started = injectedStarter != null
+          ? await injectedStarter(expectedRoom)
+          : await playerController.setDirectPlayer(room: expectedRoom, site: currentSite) != null;
+      if (!_isIptvPlaybackCurrent(playbackEpoch, expectedRoom)) return false;
+      if (!started) {
+        updateRoom(success: false, isLoading: false, loadError: i18n('play_video_failed'));
+        return false;
+      }
+      updateRoom(success: true, isLoading: false, loadError: null);
+      return true;
+    } catch (error, stackTrace) {
+      developer.log(
+        'IPTV direct player start failed',
+        name: 'LivePlayController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (!_isIptvPlaybackCurrent(playbackEpoch, expectedRoom)) return false;
+      updateRoom(success: false, isLoading: false, loadError: i18n('play_video_failed'));
+      rethrow;
+    }
+  }
+
+  bool _isIptvPlaybackCurrent(int playbackEpoch, LiveRoom expectedRoom) {
+    final currentRoom = state.value.room.detail;
+    return !_ownerClosed &&
+        !isClosed &&
+        playbackEpoch == _iptvPlaybackEpoch &&
+        currentRoom?.normalizedRoomId == expectedRoom.normalizedRoomId &&
+        currentRoom?.normalizedPlatformId == expectedRoom.normalizedPlatformId &&
+        currentRoom?.catchUpUrl == expectedRoom.catchUpUrl;
   }
 
   void setNormalScreen() => updateUI(screenMode: VideoMode.normal);
@@ -1034,6 +1078,7 @@ class LivePlayController extends GetxController
   void onClose() {
     _ownerClosed = true;
     _roomLoadEpoch++;
+    _iptvPlaybackEpoch++;
     WidgetsBinding.instance.removeObserver(this);
     _pipStateWorker?.dispose();
     _screenKeepOnWorker?.dispose();

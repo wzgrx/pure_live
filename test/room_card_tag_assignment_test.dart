@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -140,6 +141,78 @@ void main() {
     expect(_selectedIndicatorFor('Long tag name 11'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('long-press follow action observes favorite changes made outside its own state', (tester) async {
+    final room = _room();
+    await _pumpFollowButton(tester, english, room);
+
+    expect(find.text('Follow'), findsOneWidget);
+    SettingsService.to.fav.addRoom(room);
+    await tester.pumpAndSettle();
+    expect(find.text('Unfollow'), findsOneWidget);
+
+    SettingsService.to.fav.removeRoom(room);
+    await tester.pumpAndSettle();
+    expect(find.text('Follow'), findsOneWidget);
+  });
+
+  testWidgets('long-press follow action closes the navigator that owns its dialog', (tester) async {
+    final room = _room();
+    final nestedNavigator = await _pumpNestedFollowDialog(tester, english, room);
+
+    expect(nestedNavigator.currentState!.canPop(), isTrue);
+    await tester.tap(find.text('Follow').hitTestable());
+    await tester.pumpAndSettle();
+
+    expect(SettingsService.to.fav.isFavorite(room), isTrue);
+    expect(nestedNavigator.currentState!.canPop(), isFalse);
+  });
+
+  testWidgets('long-press unfollow requires confirmation and keeps cancellation local', (tester) async {
+    final room = _room();
+    SettingsService.to.fav.addRoom(room);
+    final nestedNavigator = await _pumpNestedFollowDialog(tester, english, room);
+
+    await tester.tap(find.text('Unfollow').hitTestable());
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.fav.isFavorite(room), isTrue);
+    expect(find.text('Are you sure to unfollow Fixture anchor?'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel').hitTestable());
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.fav.isFavorite(room), isTrue);
+    expect(nestedNavigator.currentState!.canPop(), isTrue);
+
+    await tester.tap(find.text('Unfollow').hitTestable());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirm').hitTestable());
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.fav.isFavorite(room), isFalse);
+    expect(nestedNavigator.currentState!.canPop(), isFalse);
+  });
+
+  testWidgets('long-press unfollow confirmation remains usable at 320x480 with 3x English text', (tester) async {
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final room = _room();
+    SettingsService.to.fav.addRoom(room);
+    final nestedNavigator = await _pumpNestedFollowDialog(tester, english, room, textScale: 3);
+
+    await tester.tap(find.text('Unfollow').hitTestable());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Cancel').hitTestable(), findsOneWidget);
+    expect(find.text('Confirm').hitTestable(), findsOneWidget);
+
+    await tester.tap(find.text('Cancel').hitTestable());
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.fav.isFavorite(room), isTrue);
+    expect(nestedNavigator.currentState!.canPop(), isTrue);
+  });
 }
 
 LiveRoom _room() => LiveRoom(
@@ -198,6 +271,85 @@ Future<ValueNotifier<double>> _pumpCard(WidgetTester tester, Map<String, dynamic
   );
   await tester.pumpAndSettle();
   return textScale;
+}
+
+Future<void> _pumpFollowButton(WidgetTester tester, Map<String, dynamic> english, LiveRoom room) async {
+  await tester.pumpWidget(
+    EasyLocalization(
+      supportedLocales: const [Locale('en')],
+      startLocale: const Locale('en'),
+      fallbackLocale: const Locale('en'),
+      saveLocale: false,
+      path: 'assets/translations',
+      assetLoader: _Translations(english),
+      child: Builder(
+        builder: (context) => GetMaterialApp(
+          locale: context.locale,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          home: Scaffold(
+            body: Center(child: FollowButton(room: room)),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<GlobalKey<NavigatorState>> _pumpNestedFollowDialog(
+  WidgetTester tester,
+  Map<String, dynamic> english,
+  LiveRoom room, {
+  double textScale = 1,
+}) async {
+  final navigatorKey = GlobalKey<NavigatorState>();
+  await tester.pumpWidget(
+    EasyLocalization(
+      supportedLocales: const [Locale('en')],
+      startLocale: const Locale('en'),
+      fallbackLocale: const Locale('en'),
+      saveLocale: false,
+      path: 'assets/translations',
+      assetLoader: _Translations(english),
+      child: Builder(
+        builder: (context) => GetMaterialApp(
+          locale: context.locale,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+            child: child!,
+          ),
+          home: Navigator(
+            key: navigatorKey,
+            onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => const Scaffold(body: SizedBox.expand())),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  unawaited(
+    navigatorKey.currentState!.push<void>(
+      DialogRoute<void>(
+        context: navigatorKey.currentContext!,
+        barrierDismissible: false,
+        builder: (_) => Dialog(
+          insetPadding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: FollowButton(room: room),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return navigatorKey;
 }
 
 Future<void> _openTagAssignment(WidgetTester tester) async {

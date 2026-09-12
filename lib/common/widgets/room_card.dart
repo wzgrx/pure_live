@@ -6,6 +6,7 @@ import 'package:pure_live/common/widgets/common_avatar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pure_live/common/utils/share_command_handler.dart';
 import 'package:pure_live/modules/tags/tag_management_controller.dart';
+import 'package:pure_live/plugins/event_bus.dart';
 
 class RoomCard extends StatelessWidget {
   const RoomCard({
@@ -818,22 +819,69 @@ class FollowButton extends StatefulWidget {
 }
 
 class _FollowButtonState extends State<FollowButton> {
-  late bool isFavorite = SettingsService.to.fav.isFavorite(widget.room);
+  bool _busy = false;
+
+  Future<void> _toggleFavorite(bool isFavorite) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+
+    final favorites = SettingsService.to.fav;
+    try {
+      if (!isFavorite) {
+        final changed = favorites.addRoom(widget.room);
+        if (changed) EventBus.instance.emit('changeFavorite', true);
+
+        if (mounted && (changed || favorites.isFavorite(widget.room))) {
+          Navigator.of(context).pop();
+        }
+        return;
+      }
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        useRootNavigator: false,
+        builder: (dialogContext) => AlertDialog(
+          scrollable: true,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          title: Text(i18n('unfollow')),
+          content: Text(i18n('unfollow_message', args: {'name': widget.room.nick ?? ''})),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(i18n('cancel'))),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(i18n('confirm'))),
+          ],
+        ),
+      );
+
+      if (!mounted || confirmed != true) return;
+
+      final changed = favorites.removeRoom(widget.room);
+      if (changed) EventBus.instance.emit('changeFavorite', true);
+      if (!favorites.isFavorite(widget.room)) {
+        Navigator.of(context).pop();
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton.tonal(
-      onPressed: () {
-        setState(() => isFavorite = !isFavorite);
-        isFavorite ? SettingsService.to.fav.addRoom(widget.room) : SettingsService.to.fav.removeRoom(widget.room);
-        Navigator.of(Get.context!).pop();
-      },
-      style: FilledButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      ),
-      child: Text(isFavorite ? i18n("unfollow") : i18n("follow"), style: const TextStyle(fontWeight: FontWeight.w600)),
-    );
+    return Obx(() {
+      final favoriteRooms = SettingsService.to.fav.favoriteRooms.value;
+      final isFavorite = favoriteRooms.any((candidate) => candidate.hasSameIdentity(widget.room));
+
+      return FilledButton.tonal(
+        onPressed: _busy ? null : () => _toggleFavorite(isFavorite),
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        ),
+        child: Text(
+          isFavorite ? i18n('unfollow') : i18n('follow'),
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      );
+    });
   }
 }
 

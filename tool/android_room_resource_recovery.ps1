@@ -316,8 +316,8 @@ function Exit-Room {
     $timer = [Diagnostics.Stopwatch]::StartNew()
     Assert-TargetForeground
     Invoke-TargetAdb @('shell', 'input', 'keyevent', '4') | Out-Null
-    $home = Wait-UiState -State home -TimeoutSeconds 12
-    $floatingClosed = Close-AppFloatingIfPresent $home.Document
+    $homeAfterPop = Wait-UiState -State home -TimeoutSeconds 12
+    $floatingClosed = Close-AppFloatingIfPresent $homeAfterPop.Document
     $settledHome = Wait-UiState -State home -TimeoutSeconds 8
     [pscustomobject]@{
         Document = $settledHome.Document

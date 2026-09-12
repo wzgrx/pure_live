@@ -261,6 +261,24 @@ function Start-ShareTextIntent {
     )) -join "`n"
 }
 
+function Get-SharedStagingEntries {
+    @(Invoke-Adb @(
+        'shell',
+        "su -c `"if [ -e '/data/user/0/$Package/cache/share_handler' ]; then find '/data/user/0/$Package/cache/share_handler' -mindepth 0 -print; fi`""
+    ))
+}
+
+function Wait-SharedStagingEmpty {
+    param([int] $TimeoutSeconds = 12)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    do {
+        $entries = @(Get-SharedStagingEntries)
+        if ($entries.Count -eq 0) { return }
+        Start-Sleep -Milliseconds 400
+    } while ((Get-Date) -lt $deadline)
+    throw "Shared-media staging entries remained: $($entries -join ', ')"
+}
+
 function Get-TreeManifest {
     param([Parameter(Mandatory = $true)][string] $Path)
     $metadata = @(Invoke-Adb @('shell', "su -c `"find '$Path' -exec stat -c '%F|%u|%g|%a|%s|%n' '{}' ';' | sort`""))
@@ -308,9 +326,11 @@ $remoteSettingsRestore = "/data/local/tmp/purelive-share-intake-$PID-restore.hiv
 $remoteCacheBackup = "/data/local/tmp/purelive-share-intake-$PID-cache.tar"
 $remoteCacheRestore = "/data/local/tmp/purelive-share-intake-$PID-cache-restore.tar"
 $remoteDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID.db"
+$remoteMixedDbSnapshot = "/data/local/tmp/purelive-share-intake-$PID-mixed.db"
 $localSettingsBackup = Join-Path $evidence 'app_settings.original.hive'
 $localCacheBackup = Join-Path $evidence 'iptv_cache.original.tar'
 $localDbSnapshot = Join-Path $evidence 'iptv_after_share.db'
+$localMixedDbSnapshot = Join-Path $evidence 'iptv_after_mixed_share.db'
 $fixtureTag = Get-Date -Format 'yyMMddHHmmssff'
 $fixtureBaseName = "purelive-share-intake-$fixtureTag"
 $fixtureChannel = "Share Intake Fixture $fixtureTag"
@@ -334,6 +354,7 @@ $result = [ordered]@{
     apk = [ordered]@{ path = $apk; expectedSha256 = $ExpectedApkSha256.ToUpperInvariant() }
     preservedState = [ordered]@{}
     commandShare = [ordered]@{}
+    mixedShare = [ordered]@{}
     fileShare = [ordered]@{ fixtureBaseName = $fixtureBaseName; fixtureChannel = $fixtureChannel }
     checks = [ordered]@{}
 }
@@ -417,6 +438,35 @@ try {
     Invoke-Adb @('push', $localFixture, $stagedDeviceFixture) | Out-Null
     Invoke-Adb @('shell', "su -c `"cp '$stagedDeviceFixture' '$deviceFixture' && chown ${settingsUid}:${settingsGid} '$deviceFixture' && chmod 600 '$deviceFixture' && restorecon '$deviceFixture'`"") | Out-Null
     $result.fileShare.deviceFixtureSha256 = Get-DeviceFileHash $deviceFixture
+    $result.mixedShare.launchOutput = (Invoke-Adb @(
+        'shell', 'am', 'start', '-W', '-a', 'android.intent.action.SEND', '-t', 'application/x-mpegURL',
+        '--grant-read-uri-permission', '--es', 'android.intent.extra.TEXT', $ShareCommand,
+        '--eu', 'android.intent.extra.STREAM', $deviceFixtureUri, '-n', "$Package/.MainActivity"
+    )) -join "`n"
+    Start-Sleep -Seconds 2
+    Assert-TargetForeground
+    $afterMixed = Save-UiState 'mixed-command-attachment-after'
+    if (Test-ShareDialog $afterMixed $ExpectedRoomId) { throw 'A duplicate command with an attachment reopened the import dialog.' }
+    Wait-SharedStagingEmpty
+    $result.mixedShare.sharedStagingEntriesAfterCommand = @(Get-SharedStagingEntries)
+    Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null
+    Copy-RootFileToHost $databasePath $remoteMixedDbSnapshot $localMixedDbSnapshot
+    $mixedQueryCode = @'
+import sqlite3, sys
+db, channel_name = sys.argv[1:]
+connection = sqlite3.connect(db)
+try:
+    print(connection.execute("SELECT count(*) FROM channels WHERE name = ?", (channel_name,)).fetchone()[0])
+finally:
+    connection.close()
+'@
+    $mixedCountText = (& python -c $mixedQueryCode $localMixedDbSnapshot $fixtureChannel 2>&1) -join "`n"
+    if ($LASTEXITCODE -ne 0 -or $mixedCountText.Trim() -ne '0') {
+        throw "A command-priority attachment was imported instead of only being released: $mixedCountText"
+    }
+    $result.mixedShare.databaseChannelCount = 0
+    $result.checks.commandPriorityAttachmentReleased = $true
+
     $result.fileShare.launchOutput = (Invoke-Adb @(
         'shell', 'am', 'start', '-W', '-a', 'android.intent.action.SEND', '-t', 'application/x-mpegURL',
         '--grant-read-uri-permission', '--eu', 'android.intent.extra.STREAM', $deviceFixtureUri, '-n', "$Package/.MainActivity"
@@ -428,8 +478,10 @@ try {
     $result.fileShare.processId = $log.pid
     Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null
     Copy-RootFileToHost $databasePath $remoteDbSnapshot $localDbSnapshot
+    Wait-SharedStagingEmpty
     $sharedStagingFiles = @(Invoke-Adb @('shell', "su -c `"if [ -d '/data/user/0/$Package/cache/share_handler' ]; then find '/data/user/0/$Package/cache/share_handler' -type f; fi`""))
     $result.fileShare.sharedStagingFilesAfterImport = @($sharedStagingFiles | ForEach-Object { [string] $_ })
+    $result.fileShare.sharedStagingEntriesAfterImport = @(Get-SharedStagingEntries)
     if ($sharedStagingFiles.Count -ne 0) { throw 'Shared-media staging files remained after import.' }
     $result.checks.sharedMediaStagingCleaned = $true
     $pythonCode = @'
@@ -493,7 +545,7 @@ finally:
             if (-not $failure) { $failure = $_ } else { Write-Warning "Settings restoration also failed: $($_.Exception.Message)" }
         }
     }
-    foreach ($remote in @($deviceFixture, $stagedDeviceFixture, $remoteSettingsBackup, $remoteSettingsRestore, $remoteCacheBackup, $remoteCacheRestore, $remoteDbSnapshot)) {
+    foreach ($remote in @($deviceFixture, $stagedDeviceFixture, $remoteSettingsBackup, $remoteSettingsRestore, $remoteCacheBackup, $remoteCacheRestore, $remoteDbSnapshot, $remoteMixedDbSnapshot)) {
         try { Invoke-Adb @('shell', "su -c `"rm -f '$remote'`"") | Out-Null } catch {}
     }
     try { Invoke-Adb @('shell', 'am', 'force-stop', $Package) | Out-Null } catch {}

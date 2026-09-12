@@ -95,6 +95,7 @@ foreach ($required in @(
     'Shared URI copy failed',
     'Shared URI display name query failed',
     "GetByteCount('.m3u')",
+    '"longName": long_rows}, ensure_ascii=True',
     'Share probe cleanup target guard rejected the path.',
     "'android.intent.action.SEND'",
     "'android.intent.extra.TEXT'",

@@ -714,7 +714,7 @@ try:
         "SELECT p.name, c.name, c.stream_url FROM providers p JOIN channels c ON c.provider_id = p.id WHERE c.name = ?",
         (long_channel,),
     ).fetchall()
-    print(json.dumps({"fallback": fallback_rows, "longName": long_rows}, ensure_ascii=False))
+    print(json.dumps({"fallback": fallback_rows, "longName": long_rows}, ensure_ascii=True))
 finally:
     connection.close()
 '@

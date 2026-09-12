@@ -75,12 +75,9 @@ void main() {
     auth.isConnecting = true;
     await _pumpLocalized(tester, english: english, home: const BackupPage());
 
-    final title = find.text('Reconnecting...');
+    final title = find.text('Connecting to Firebase...');
     final tile = find.ancestor(of: title, matching: find.byType(ListTile));
-    final subtitle = find.descendant(
-      of: tile,
-      matching: find.text('Attempting to reconnect to Firebase services, please wait...'),
-    );
+    final subtitle = find.descendant(of: tile, matching: find.text('Initializing Firebase services. Please wait...'));
     final progress = find.descendant(of: tile, matching: find.byType(CircularProgressIndicator));
 
     expect(tester.widget<Text>(subtitle).maxLines, isNull);

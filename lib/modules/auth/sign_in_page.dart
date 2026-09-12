@@ -3,11 +3,12 @@ import 'dart:developer' as developer;
 import 'package:pure_live/common/index.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pure_live/modules/auth/auth_controller.dart';
-import 'package:pure_live/modules/auth/utils/firebase_manager.dart';
 import 'package:pure_live/modules/auth/components/firebase_email_auth.dart';
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+  const SignInPage({super.key, this.authBackend = const FirebaseEmailAuthBackend()});
+
+  final FirebaseEmailAuthBackend authBackend;
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -22,19 +23,10 @@ class _SignInPageState extends State<SignInPage> {
     if (user.providerData.any((info) => info.providerId == 'github.com')) {
       providerStr = "GitHub";
     }
-    developer.log('🎉 登录成功! 渠道: $providerStr, 邮箱: $email, UID: ${user.uid}');
+    developer.log('Firebase sign-in completed via $providerStr.');
     try {
       final AuthController authController = Get.find<AuthController>();
-      authController.isLogin = true;
-      authController.user = user;
-      authController.userId = user.uid;
-      authController.update();
-      await FirebaseManager.getInstance().loadUploadConfig();
-      final wantLoad = SettingsService.to.fav.favoriteRooms.v.isEmpty;
-      if (wantLoad) {
-        await FirebaseManager.getInstance().downloadConfig();
-      }
-      authController.update();
+      await authController.acceptAuthenticatedUser(user);
     } catch (e) {
       developer.log('❌ 状态同步或拉取云端配置失败: $e');
     }
@@ -54,9 +46,8 @@ class _SignInPageState extends State<SignInPage> {
           child: Column(
             children: [
               FirebaseEmailAuth(
+                backend: widget.authBackend,
                 onPasswordResetEmailSent: () {
-                  final AuthController authController = Get.find<AuthController>();
-                  authController.shouldGoReset = true;
                   ToastUtil.show(i18n('reset_password_email'));
                 },
                 onSignInComplete: _handleSignInComplete,

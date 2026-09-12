@@ -12,6 +12,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:pure_live/modules/auth/auth_controller.dart';
 import 'package:pure_live/common/services/settings/backup_controller.dart';
 
+class _FirebaseAuthSessionChanged implements Exception {
+  const _FirebaseAuthSessionChanged();
+}
+
 Map<String, dynamic> buildFirebaseConfigUploadData({
   required String config,
   required String email,
@@ -28,8 +32,23 @@ Map<String, dynamic> buildFirebaseConfigUploadData({
   return payload;
 }
 
+Map<String, dynamic>? parseFirebaseStoredConfig(Object? storedConfig) {
+  if (storedConfig == null) return null;
+  final Object? decoded;
+  if (storedConfig is String) {
+    if (storedConfig.trim().isEmpty) return null;
+    decoded = jsonDecode(storedConfig);
+  } else {
+    decoded = storedConfig;
+  }
+  if (decoded is! Map) {
+    throw const FormatException('Firebase config payload must be an object.');
+  }
+  return Map<String, dynamic>.from(decoded);
+}
+
 class FirebaseManager {
-  static late FirebaseManager _instance;
+  static final FirebaseManager _instance = FirebaseManager._internal();
   static const String customScheme = 'purelive';
   static String? currentUserRole;
   static Set<String> managementRoles = {};
@@ -38,21 +57,32 @@ class FirebaseManager {
   static Map<String, int> roleWeights = {};
 
   static bool canUploadConfig = false;
+  Future<void>? _initialization;
 
   FirebaseManager._internal();
 
-  factory FirebaseManager.getInstance() {
-    _instance = FirebaseManager._internal();
-    return _instance;
-  }
+  factory FirebaseManager.getInstance() => _instance;
 
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
   FirebaseAuth get auth => FirebaseAuth.instance;
 
-  Future<void> initial() async {
+  Future<void> initial() {
+    final existing = _initialization;
+    if (existing != null) return existing;
+
+    late final Future<void> operation;
+    operation = _initializeOnce().catchError((Object error, StackTrace stackTrace) {
+      if (identical(_initialization, operation)) _initialization = null;
+      Error.throwWithStackTrace(error, stackTrace);
+    });
+    _initialization = operation;
+    return operation;
+  }
+
+  Future<void> _initializeOnce() async {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    registerWindowsCustomScheme(customScheme, description: 'PureLive Authentication Callback');
+    await registerWindowsCustomScheme(customScheme, description: 'PureLive Authentication Callback');
   }
 
   Future<void> registerWindowsCustomScheme(String scheme, {String? description}) async {
@@ -94,11 +124,7 @@ class FirebaseManager {
     await auth.signOut();
     try {
       final AuthController authController = Get.find<AuthController>();
-
-      authController.isLogin = false;
-      authController.user = null;
-      authController.userId = '';
-      authController.update();
+      await authController.acceptSignedOut();
     } catch (e) {
       developer.log('❌ 退出登录时状态同步清空失败: $e');
     }
@@ -109,57 +135,73 @@ class FirebaseManager {
     }
   }
 
-  Future<bool> loadUploadConfig() async {
-    final user = Get.find<AuthController>().user;
+  Future<bool> loadUploadConfig({String? expectedUserId, bool rethrowFailures = false}) async {
+    final authController = Get.find<AuthController>();
+    final user = authController.user;
     if (user == null) {
       canUploadConfig = false;
       currentUserRole = null;
+      return false;
+    }
+    final requestedUserId = user.uid.trim();
+    if (requestedUserId.isEmpty || (expectedUserId != null && expectedUserId != requestedUserId)) {
       return false;
     }
 
     try {
       await Future.delayed(const Duration(milliseconds: 200));
 
-      final doc = await firestore.collection('users').doc(user.uid).get();
-      if (!doc.exists) {
-        canUploadConfig = true;
-      } else {
-        final data = doc.data();
-        canUploadConfig = data?['canUpload'] != false;
-      }
+      final doc = await firestore.collection('users').doc(requestedUserId).get();
+      final nextCanUpload = !doc.exists || doc.data()?['canUpload'] != false;
 
-      final permDoc = await firestore.collection('permissions').doc(user.uid).get();
-      if (permDoc.exists) {
-        final permData = permDoc.data();
-        currentUserRole = permData?['role'] as String?;
-      } else {
-        currentUserRole = null;
-      }
+      final permDoc = await firestore.collection('permissions').doc(requestedUserId).get();
+      final nextUserRole = permDoc.exists ? (permDoc.data()?['role'] as String?) : null;
 
       final rolesSnapshot = await firestore.collection('roles').get();
-
-      roleVisibilityMap.clear();
-      roleWeights.clear();
-      managementRoles.clear();
+      final nextRoleVisibilityMap = <String, List<String>>{};
+      final nextRoleWeights = <String, int>{};
+      final nextManagementRoles = <String>{};
 
       for (var roleDoc in rolesSnapshot.docs) {
         final roleData = roleDoc.data();
         final String roleId = roleDoc.id;
 
-        roleVisibilityMap[roleId] = List<String>.from(roleData['canSeeRoles'] ?? []);
-        roleWeights[roleId] = roleData['weight'] ?? 2;
+        nextRoleVisibilityMap[roleId] = List<String>.from(roleData['canSeeRoles'] ?? []);
+        nextRoleWeights[roleId] = roleData['weight'] ?? 2;
         if (roleData['isManagement'] == true) {
-          managementRoles.add(roleId);
+          nextManagementRoles.add(roleId);
         }
       }
 
-      roleWeights['user'] = 2;
+      nextRoleWeights['user'] = 2;
+      if (!_isCurrentControllerUser(requestedUserId)) return false;
+
+      canUploadConfig = nextCanUpload;
+      currentUserRole = nextUserRole;
+      roleVisibilityMap = nextRoleVisibilityMap;
+      roleWeights = nextRoleWeights;
+      managementRoles = nextManagementRoles;
 
       return canUploadConfig;
     } catch (e) {
       debugPrint('[FirebaseManager] 从 users 集合读取权限异常（停止上传）: $e');
-      canUploadConfig = false;
-      currentUserRole = null;
+      if (_isCurrentControllerUser(requestedUserId)) {
+        canUploadConfig = false;
+        currentUserRole = null;
+      }
+      if (rethrowFailures) rethrow;
+      return false;
+    }
+  }
+
+  bool _isCurrentControllerUser(String expectedUserId) {
+    try {
+      final controller = Get.find<AuthController>();
+      return !controller.isClosed &&
+          controller.isLogin &&
+          controller.userId == expectedUserId &&
+          controller.user?.uid == expectedUserId;
+    } catch (_) {
       return false;
     }
   }
@@ -176,14 +218,19 @@ class FirebaseManager {
       ToastUtil.show(i18n('firebase_account_unauthorized'));
       return;
     }
-    await loadUploadConfig();
+    final userId = secureUser.uid;
+    if (!_isCurrentControllerUser(userId)) {
+      ToastUtil.show(i18n('firebase_account_unauthorized'));
+      return;
+    }
+    await loadUploadConfig(expectedUserId: userId);
+    if (!_isCurrentControllerUser(userId)) return;
 
     if (!canUploadConfig) {
       ToastUtil.show(i18n('firebase_account_unauthorized'));
       return;
     }
 
-    final userId = secureUser.uid;
     final BackupController backup = Get.find<BackupController>();
     final backupData = jsonEncode(backup.exportAllSettings());
     final formattedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
@@ -191,7 +238,9 @@ class FirebaseManager {
     try {
       final userReference = firestore.collection('users').doc(userId);
       await firestore.runTransaction((transaction) async {
+        if (!_isCurrentControllerUser(userId)) throw const _FirebaseAuthSessionChanged();
         final existingDocument = await transaction.get(userReference);
+        if (!_isCurrentControllerUser(userId)) throw const _FirebaseAuthSessionChanged();
         final existingData = existingDocument.data();
         final payload = buildFirebaseConfigUploadData(
           config: backupData,
@@ -205,48 +254,67 @@ class FirebaseManager {
         transaction.set(userReference, payload, SetOptions(merge: true));
       });
 
-      ToastUtil.show(i18n('webdav_upload_success'));
+      if (_isCurrentControllerUser(userId)) ToastUtil.show(i18n('webdav_upload_success'));
+    } on _FirebaseAuthSessionChanged {
+      developer.log('Firebase config upload stopped after the authenticated session changed.');
     } catch (e) {
       developer.log('❌ 上传失败（可能被安全规则拦截）: $e');
-      ToastUtil.show(i18n('firebase_account_unauthorized'));
+      if (_isCurrentControllerUser(userId)) ToastUtil.show(i18n('firebase_account_unauthorized'));
     }
   }
 
-  Future<void> downloadConfig() async {
+  Future<void> downloadConfig({
+    String? expectedUserId,
+    bool reloadPermissions = true,
+    bool showFeedback = true,
+    bool rethrowFailures = false,
+  }) async {
     final secureUser = auth.currentUser;
     if (secureUser == null || secureUser.uid.trim().isEmpty) {
-      ToastUtil.show(i18n('firebase_account_unauthorized'));
+      if (showFeedback) ToastUtil.show(i18n('firebase_account_unauthorized'));
       return;
     }
+    final requestedUserId = expectedUserId ?? secureUser.uid;
+    if (secureUser.uid != requestedUserId || !_isCurrentControllerUser(requestedUserId)) return;
 
     final FavoriteController favoriteController = Get.find<FavoriteController>();
     final BackupController backup = Get.find<BackupController>();
 
-    await loadUploadConfig();
+    if (reloadPermissions) {
+      await loadUploadConfig(expectedUserId: requestedUserId);
+    }
+    if (!_isCurrentControllerUser(requestedUserId)) return;
 
     if (!canUploadConfig) {
-      ToastUtil.show(i18n('firebase_account_unauthorized'));
+      if (showFeedback) ToastUtil.show(i18n('firebase_account_unauthorized'));
       return;
     }
     try {
-      final document = await firestore.collection('users').doc(secureUser.uid).get();
+      final document = await firestore.collection('users').doc(requestedUserId).get();
+      if (!_isCurrentControllerUser(requestedUserId)) return;
 
       if (!document.exists) {
-        ToastUtil.show(i18n('no_data'));
+        if (showFeedback) ToastUtil.show(i18n('no_data'));
         return;
       }
 
       final data = document.data()!;
-      final storedConfig = data['config'];
-      final back = storedConfig is String
-          ? Map<String, dynamic>.from(jsonDecode(storedConfig) as Map)
-          : Map<String, dynamic>.from(storedConfig as Map);
+      final back = parseFirebaseStoredConfig(data['config']);
+      if (back == null) {
+        if (showFeedback) ToastUtil.show(i18n('no_data'));
+        return;
+      }
+      if (!_isCurrentControllerUser(requestedUserId)) return;
       await backup.restoreAllSettings(back);
+      if (!_isCurrentControllerUser(requestedUserId)) return;
       favoriteController.refreshData();
-      ToastUtil.show(i18n('download_success'));
+      if (showFeedback) ToastUtil.show(i18n('download_success'));
     } catch (e) {
       developer.log('❌ 下载失败（可能被安全规则拦截）: $e');
-      ToastUtil.show(i18n('firebase_account_unauthorized'));
+      if (showFeedback && _isCurrentControllerUser(requestedUserId)) {
+        ToastUtil.show(i18n('firebase_account_unauthorized'));
+      }
+      if (rethrowFailures) rethrow;
     }
   }
 

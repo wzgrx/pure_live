@@ -12,7 +12,9 @@ import 'package:pure_live/common/services/settings/theme_settings_controller.dar
 import 'package:pure_live/common/services/settings_service.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/get/get.dart';
+import 'package:pure_live/modules/auth/auth_controller.dart';
 import 'package:pure_live/modules/auth/components/firebase_email_auth.dart';
+import 'package:pure_live/modules/auth/sign_in_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -168,6 +170,36 @@ void main() {
     await _pumpFrames(tester);
     expect(find.widgetWithText(FilledButton, 'Reset Password'), findsOneWidget);
   });
+
+  testWidgets('sign-in page keeps the form busy until controller synchronization finishes', (tester) async {
+    final synchronization = Completer<void>();
+    final controllerBackend = _FixtureAuthControllerBackend(synchronization);
+    final authController = Get.put<AuthController>(AuthController(backend: controllerBackend, autoStart: false));
+    final user = _FixtureUser(uid: 'fixture-user', email: 'fixture@example.com');
+    final credentialResult = Completer<UserCredential>()..complete(_FixtureCredential(user));
+    final emailBackend = _FixtureBackend(signInResult: credentialResult);
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_localizedHost(english, SignInPage(authBackend: emailBackend)));
+    await _pumpFrames(tester);
+    await tester.enterText(find.byType(TextFormField).at(0), 'fixture@example.com');
+    await tester.enterText(find.byType(TextFormField).at(1), 'password');
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign In'));
+    await tester.pump();
+
+    expect(controllerBackend.syncedUserIds, ['fixture-user']);
+    expect(authController.isLogin, isTrue);
+    expect(find.widgetWithText(FilledButton, 'Sign In'), findsNothing);
+
+    synchronization.complete();
+    await _pumpFrames(tester);
+    expect(find.widgetWithText(FilledButton, 'Sign In'), findsOneWidget);
+    expect(authController.isReady, isTrue);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _FixtureBackend extends FirebaseEmailAuthBackend {
@@ -196,6 +228,43 @@ class _FixtureBackend extends FirebaseEmailAuthBackend {
   Future<void> sendPasswordResetEmail(String email) async {
     if (resetError != null) throw resetError!;
   }
+}
+
+class _FixtureAuthControllerBackend extends FirebaseAuthControllerBackend {
+  _FixtureAuthControllerBackend(this.synchronization);
+
+  final Completer<void> synchronization;
+  final syncedUserIds = <String>[];
+
+  @override
+  Future<void> syncConfigs(String userId) async {
+    syncedUserIds.add(userId);
+    await synchronization.future;
+  }
+}
+
+class _FixtureCredential implements UserCredential {
+  _FixtureCredential(this.user);
+
+  @override
+  final User user;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FixtureUser implements User {
+  _FixtureUser({required this.uid, required this.email});
+
+  @override
+  final String uid;
+  @override
+  final String email;
+  @override
+  List<UserInfo> get providerData => const [];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 Future<void> _pumpAuth(

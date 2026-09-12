@@ -9,6 +9,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/scheduler.dart';
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/services/settings/app_settings_controller.dart';
 import 'package:pure_live/plugins/event_bus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:pure_live/plugins/emoji_manager.dart';
@@ -648,6 +649,17 @@ class LivePlayController extends GetxController
     if (state.value.ui.closeTimeFlag) {
       timerController.toggleTimer(true, times);
     }
+  }
+
+  /// Commits the timer editor draft as one state/timer transaction.
+  ///
+  /// Applying duration and enabled state through the two legacy setters can
+  /// restart an existing timer twice, while changing the switch inside a
+  /// dialog used to mutate the live session even when the user cancelled.
+  void applyRoomPlaybackTimer({required bool enabled, required int minutes}) {
+    final normalizedMinutes = minutes.clamp(1, AppSettingsController.maxSleepMinutes).toInt();
+    updateUI(closeTimes: normalizedMinutes, closeTimeFlag: enabled);
+    timerController.toggleTimer(enabled, normalizedMinutes);
   }
 
   Future<LiveRoom> onInitPlayerState({

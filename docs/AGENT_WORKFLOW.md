@@ -55,7 +55,7 @@ Pass free-form workflow inputs and release text through environment variables or
 
 ## Model and task handoff
 
-The runtime controls model and reasoning effort. The audited agent/build configuration has no OpenAI API request settings; adding model API parameters to these files would not configure the running Codex session. Preserve the chosen GPT-6 Astra settings. Optimize useful context and evidence, not token count or parallelism in isolation.
+The runtime controls model and reasoning effort. Reserve **Astra Light** for Windows client acceptance that genuinely requires Computer Use visual interaction, and keep at most one Astra task active at any time because it is the high-cost route. Source review, ordinary tests, builds, documentation, Android work and other non-Computer-Use checks use the regular configured model. Agent/build files have no OpenAI API request settings, so writing model API parameters into them does not configure the running Codex session. Optimize useful context and evidence, not token count or parallelism in isolation.
 
 For long work, retain a concise checkpoint: current request, changed paths, evidence already passed, failures/pending acceptance and the next action. New user scope changes take effect immediately; preserve previous uncommitted work separately. Ask a focused question only when the missing answer changes the outcome, while continuing independent authorized work.
 

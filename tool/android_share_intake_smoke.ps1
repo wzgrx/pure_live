@@ -12,7 +12,9 @@ param(
     [string] $ExpectedDevice = 'myron',
     [string] $ExpectedPlatform = 'bilibili',
     [string] $ExpectedRoomId = '27632810',
-    [string] $ShareCommand = 'iKFtqXB1cmVfbGl2ZaFwqGJpbGliaWxpoXKoMjc2MzI4MTCidGnZJeOAkOmHkeeJjOeCueWUsSDjgJHlhajpuqbpopzlgLzmrYzmiYuhbr3nuqblrpot5pyd5pqu5YWJ5bm0LeWdj-eUt-S6uqFsoKFj2WJodHRwczovL2kwLmhkc2xiLmNvbS9iZnMvbGl2ZS9uZXdfcm9vbV9jb3Zlci9kOTFmMTc0OWY0Zjk3ZjE1NWNlZDg0MmIxZThiM2UwYjJlZjc1YjM5LmpwZ0A0MDB3LmpwZ6Fh2UpodHRwczovL2kxLmhkc2xiLmNvbS9iZnMvZmFjZS9kNzU3MzgyOGU0OTY2OTBhZTc4NDk5NDg4MTcyYzY4YTNhNjU1OTczLmpwZw'
+    [string] $ShareCommand = 'iKFtqXB1cmVfbGl2ZaFwqGJpbGliaWxpoXKoMjc2MzI4MTCidGnZJeOAkOmHkeeJjOeCueWUsSDjgJHlhajpuqbpopzlgLzmrYzmiYuhbr3nuqblrpot5pyd5pqu5YWJ5bm0LeWdj-eUt-S6uqFsoKFj2WJodHRwczovL2kwLmhkc2xiLmNvbS9iZnMvbGl2ZS9uZXdfcm9vbV9jb3Zlci9kOTFmMTc0OWY0Zjk3ZjE1NWNlZDg0MmIxZThiM2UwYjJlZjc1YjM5LmpwZ0A0MDB3LmpwZ6Fh2UpodHRwczovL2kxLmhkc2xiLmNvbS9iZnMvZmFjZS9kNzU3MzgyOGU0OTY2OTBhZTc4NDk5NDg4MTcyYzY4YTNhNjU1OTczLmpwZw',
+    [string] $ExpectedWarmRoomId = '27632811',
+    [string] $WarmShareCommand = 'iKFtqXB1cmVfbGl2ZaFwqGJpbGliaWxpoXKoMjc2MzI4MTGidGnZJeOAkOmHkeeJjOeCueWUsSDjgJHlhajpuqbpopzlgLzmrYzmiYuhbr3nuqblrpot5pyd5pqu5YWJ5bm0LeWdj-eUt-S6uqFsoKFj2WJodHRwczovL2kwLmhkc2xiLmNvbS9iZnMvbGl2ZS9uZXdfcm9vbV9jb3Zlci9kOTFmMTc0OWY0Zjk3ZjE1NWNlZDg0MmIxZThiM2UwYjJlZjc1YjM5LmpwZ0A0MDB3LmpwZ6Fh2UpodHRwczovL2kxLmhkc2xiLmNvbS9iZnMvZmFjZS9kNzU3MzgyOGU0OTY2OTBhZTc4NDk5NDg4MTcyYzY4YTNhNjU1OTczLmpwZw'
 )
 
 Set-StrictMode -Version Latest
@@ -163,25 +165,32 @@ function Find-LabeledNode {
 }
 
 function Test-ShareDialog {
-    param([Parameter(Mandatory = $true)][xml] $Document)
+    param(
+        [Parameter(Mandatory = $true)][xml] $Document,
+        [string] $RoomId = $ExpectedRoomId
+    )
     $xml = $Document.OuterXml
     $cancel = Find-LabeledNode -Document $Document -Candidates @('取消', 'Cancel') -Clickable -Exact
     $enter = Find-LabeledNode -Document $Document -Candidates @('进入房间', '进入直播间', 'Enter Room', 'Enter room') -Clickable
     $share = Find-LabeledNode -Document $Document -Candidates @('分享', 'Share') -Exact
     $hasPlatform = $xml.Contains($ExpectedPlatform)
-    $hasRoom = $xml.Contains($ExpectedRoomId)
+    $hasRoom = $xml.Contains($RoomId)
     [bool] ($cancel -and $enter -and $share -and $hasPlatform -and $hasRoom)
 }
 
 function Wait-ShareDialog {
-    param([Parameter(Mandatory = $true)][string] $Prefix, [int] $TimeoutSeconds = 25)
+    param(
+        [Parameter(Mandatory = $true)][string] $Prefix,
+        [string] $RoomId = $ExpectedRoomId,
+        [int] $TimeoutSeconds = 25
+    )
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     $attempt = 0
     do {
         $attempt++
         if ((Get-TopPackage) -eq $Package) {
             $document = Save-UiState "$Prefix-$attempt" -NoScreenshot
-            if (Test-ShareDialog $document) { return Save-UiState "$Prefix-ready" }
+            if (Test-ShareDialog $document $RoomId) { return Save-UiState "$Prefix-ready" }
         }
         Start-Sleep -Milliseconds 650
     } while ((Get-Date) -lt $deadline)
@@ -189,13 +198,17 @@ function Wait-ShareDialog {
 }
 
 function Wait-ShareDialogClosed {
-    param([Parameter(Mandatory = $true)][string] $Prefix, [int] $TimeoutSeconds = 12)
+    param(
+        [Parameter(Mandatory = $true)][string] $Prefix,
+        [string] $RoomId = $ExpectedRoomId,
+        [int] $TimeoutSeconds = 12
+    )
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     $attempt = 0
     do {
         $attempt++
         $document = Save-UiState "$Prefix-$attempt" -NoScreenshot
-        if (-not (Test-ShareDialog $document)) { return $document }
+        if (-not (Test-ShareDialog $document $RoomId)) { return $document }
         Start-Sleep -Milliseconds 650
     } while ((Get-Date) -lt $deadline)
     throw 'The shared-room import dialog remained visible after cancellation.'
@@ -209,12 +222,16 @@ function Invoke-TapNode {
 }
 
 function Close-ShareDialog {
-    param([Parameter(Mandatory = $true)][xml] $Document, [Parameter(Mandatory = $true)][string] $Prefix)
+    param(
+        [Parameter(Mandatory = $true)][xml] $Document,
+        [Parameter(Mandatory = $true)][string] $Prefix,
+        [string] $RoomId = $ExpectedRoomId
+    )
     $cancel = Find-LabeledNode -Document $Document -Candidates @('取消', 'Cancel') -Clickable -Exact
     if (-not $cancel) { throw 'The shared-room import dialog has no Cancel action.' }
     Invoke-TapNode $cancel
     Start-Sleep -Milliseconds 500
-    Wait-ShareDialogClosed $Prefix | Out-Null
+    Wait-ShareDialogClosed $Prefix $RoomId | Out-Null
 }
 
 function Assert-DialogBounds {
@@ -237,9 +254,10 @@ function Assert-DialogBounds {
 }
 
 function Start-ShareTextIntent {
+    param([string] $Command = $ShareCommand)
     (Invoke-Adb @(
         'shell', 'am', 'start', '-W', '-a', 'android.intent.action.SEND', '-t', 'text/plain',
-        '--es', 'android.intent.extra.TEXT', $ShareCommand, '-n', "$Package/.MainActivity"
+        '--es', 'android.intent.extra.TEXT', $Command, '-n', "$Package/.MainActivity"
     )) -join "`n"
 }
 
@@ -383,14 +401,14 @@ try {
     $result.checks.coldShareCommandAcceptedAfterSplash = $true
     Close-ShareDialog $coldDialog 'cold-share-closed'
 
-    $result.commandShare.warmLaunchOutput = Start-ShareTextIntent
-    $warmDialog = Wait-ShareDialog 'warm-share'
-    $result.commandShare.duplicateLaunchOutput = Start-ShareTextIntent
+    $result.commandShare.warmLaunchOutput = Start-ShareTextIntent $WarmShareCommand
+    $warmDialog = Wait-ShareDialog 'warm-share' $ExpectedWarmRoomId
+    $result.commandShare.duplicateLaunchOutput = Start-ShareTextIntent $WarmShareCommand
     Start-Sleep -Milliseconds 500
-    Close-ShareDialog $warmDialog 'warm-share-closed'
+    Close-ShareDialog $warmDialog 'warm-share-closed' $ExpectedWarmRoomId
     Start-Sleep -Seconds 2
     $afterDuplicate = Save-UiState 'warm-share-after-duplicate'
-    if (Test-ShareDialog $afterDuplicate) { throw 'A duplicate warm share reopened the import dialog.' }
+    if (Test-ShareDialog $afterDuplicate $ExpectedWarmRoomId) { throw 'A duplicate warm share reopened the import dialog.' }
     $result.checks.warmShareCommandAccepted = $true
     $result.checks.duplicateWarmShareSuppressed = $true
 

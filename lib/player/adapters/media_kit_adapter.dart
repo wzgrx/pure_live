@@ -103,13 +103,11 @@ class MediaKitAdapter
     // live packets before the fallback is attempted.
     await native.setProperty('hwdec-software-fallback', '1');
 
-    if (SettingsService.to.player.customPlayerOutput.v) {
-      await native.setProperty(
-        'ao',
-        normalizeMpvAudioOutputDriverForPlatform(SettingsService.to.player.audioOutputDriver.v, defaultTargetPlatform),
-      );
-    } else if (PlatformUtils.isLinux) {
-      await native.setProperty('ao', 'alsa');
+    final audioOutput = SettingsService.to.player.customPlayerOutput.v
+        ? normalizeMpvAudioOutputDriverForPlatform(SettingsService.to.player.audioOutputDriver.v, defaultTargetPlatform)
+        : defaultMpvAudioOutputDriverForPlatform(defaultTargetPlatform);
+    if (audioOutput != null) {
+      await native.setProperty('ao', audioOutput);
     }
 
     // Multiview also calls this shared initializer. Keep its media routing;

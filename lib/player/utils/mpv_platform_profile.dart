@@ -7,6 +7,13 @@ const Map<String, String> _iosAudioOutputDrivers = <String, String>{
   'audiounit': 'audiounit (iOS only)',
   'null': 'null (No audio output)',
 };
+const Map<String, String> _androidAudioOutputDrivers = <String, String>{
+  'auto': 'auto (Automatic fallback)',
+  'audiotrack': 'audiotrack (Android AudioTrack)',
+  'aaudio': 'aaudio (Android 8.0+)',
+  'opensles': 'opensles (Legacy fallback)',
+  'null': 'null (No audio output)',
+};
 const Map<String, String> _iosHardwareDecoders = <String, String>{
   'auto': 'auto',
   'auto-safe': 'auto-safe',
@@ -18,14 +25,17 @@ const Map<String, String> _iosHardwareDecoders = <String, String>{
 
 /// Returns only native MPV outputs that the current settings UI may persist.
 ///
-/// media_kit owns the iOS Flutter texture through `vo=libmpv`. Android and
-/// desktop keep their existing expert list; filtering those platforms needs
-/// separate native evidence because their output backends differ.
+/// media_kit owns the iOS Flutter texture through `vo=libmpv`. Android exposes
+/// only drivers compiled into the bundled libmpv instead of mixing Windows and
+/// Linux choices into the phone settings menu.
 Map<String, String> mpvVideoOutputDriversForPlatform(TargetPlatform platform) =>
     platform == TargetPlatform.iOS ? _iosVideoOutputDrivers : PlayerConsts.videoOutputDrivers;
 
-Map<String, String> mpvAudioOutputDriversForPlatform(TargetPlatform platform) =>
-    platform == TargetPlatform.iOS ? _iosAudioOutputDrivers : PlayerConsts.audioOutputDrivers;
+Map<String, String> mpvAudioOutputDriversForPlatform(TargetPlatform platform) => switch (platform) {
+  TargetPlatform.android => _androidAudioOutputDrivers,
+  TargetPlatform.iOS => _iosAudioOutputDrivers,
+  _ => PlayerConsts.audioOutputDrivers,
+};
 
 Map<String, String> mpvHardwareDecodersForPlatform(TargetPlatform platform) =>
     platform == TargetPlatform.iOS ? _iosHardwareDecoders : PlayerConsts.hardwareDecoder;
@@ -41,6 +51,18 @@ String normalizeMpvVideoOutputDriverForPlatform(String value, TargetPlatform pla
 
 String normalizeMpvAudioOutputDriverForPlatform(String value, TargetPlatform platform) =>
     _normalizeMpvOption(value, mpvAudioOutputDriversForPlatform(platform), 'auto');
+
+/// Native audio preference applied when expert output overrides are disabled.
+///
+/// The bundled Android libmpv contains all three drivers. Prefer AudioTrack's
+/// platform mixer path, retain AAudio and OpenSL ES as ordered fallbacks, then
+/// let mpv probe any remaining compiled driver. Linux retains the existing
+/// explicit ALSA default; other platforms keep media_kit's native default.
+String? defaultMpvAudioOutputDriverForPlatform(TargetPlatform platform) => switch (platform) {
+  TargetPlatform.android => 'audiotrack,aaudio,opensles,',
+  TargetPlatform.linux => 'alsa',
+  _ => null,
+};
 
 String normalizeMpvHardwareDecoderForPlatform(String value, TargetPlatform platform) =>
     _normalizeMpvOption(value, mpvHardwareDecodersForPlatform(platform), 'auto');

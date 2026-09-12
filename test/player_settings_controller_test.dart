@@ -72,6 +72,20 @@ void main() {
       expect(normalizeMpvHardwareDecoderForPlatform('mediacodec', TargetPlatform.iOS), 'auto');
     });
 
+    test('publishes only Android audio outputs and prefers modern native backends with fallback', () {
+      expect(mpvAudioOutputDriversForPlatform(TargetPlatform.android).keys, <String>[
+        'auto',
+        'audiotrack',
+        'aaudio',
+        'opensles',
+        'null',
+      ]);
+      expect(normalizeMpvAudioOutputDriverForPlatform('wasapi', TargetPlatform.android), 'auto');
+      expect(defaultMpvAudioOutputDriverForPlatform(TargetPlatform.android), 'audiotrack,aaudio,opensles,');
+      expect(defaultMpvAudioOutputDriverForPlatform(TargetPlatform.linux), 'alsa');
+      expect(defaultMpvAudioOutputDriverForPlatform(TargetPlatform.windows), isNull);
+    });
+
     test('retires the legacy global audio-only default', () {
       final config = PlayerSettingsController.extractConfig({
         'player': <String, dynamic>{'audioOnly': true, 'floatPlay': true},

@@ -76,7 +76,7 @@ class PlayerConsts {
     "sdl": "sdl (Cross-platform, via SDL library)",
     "openal": "openal (Cross-platform, OpenAL backend)",
     "libao": "libao (Cross-platform, uses libao library)",
-    "auto": "auto (Not available)",
+    "auto": "auto (Automatic fallback)",
   };
 
   static const hardwareDecoder = {

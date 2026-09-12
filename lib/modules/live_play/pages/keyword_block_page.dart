@@ -1,5 +1,6 @@
-import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/services/settings/favorite_room_controller.dart';
+import 'package:remixicon/remixicon.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 class KeywordBlockPage extends StatefulWidget {
@@ -102,6 +103,7 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
                         max: 100,
                         stepSize: 1,
                         display: '${dm.danmakuSimilarityThreshold.v}%',
+                        semanticValueBuilder: (value) => '${value.round()}%',
                         onChanged: (value) => dm.danmakuSimilarityThreshold.v = value.round(),
                         labelColor: labelColor,
                         digitColor: digitColor,
@@ -117,6 +119,8 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
                           'danmaku_similarity_cache_seconds',
                           args: {'seconds': '${dm.danmakuSimilarityCacheDuration.v}'},
                         ),
+                        semanticValueBuilder: (value) =>
+                            i18n('danmaku_similarity_cache_seconds', args: {'seconds': '${value.round()}'}),
                         onChanged: (value) => dm.danmakuSimilarityCacheDuration.v = value.round(),
                         labelColor: labelColor,
                         digitColor: digitColor,
@@ -129,6 +133,7 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
                         max: 1000,
                         stepSize: 10,
                         display: '${dm.danmakuSimilarityMaxCacheSize.v}',
+                        semanticValueBuilder: (value) => '${value.round()}',
                         onChanged: (value) => dm.danmakuSimilarityMaxCacheSize.v = value.round(),
                         labelColor: labelColor,
                         digitColor: digitColor,
@@ -198,6 +203,7 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
       child: TextField(
         controller: textEditingController,
         focusNode: _focusNode,
+        maxLength: FavoriteRoomController.maxShieldKeywordLength,
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => addKeyword(),
@@ -238,6 +244,7 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
   // ================================================================
 
   Widget _buildItem(ThemeData theme, {required String text, required IconData icon, required VoidCallback onRemove}) {
+    final removeLabel = '${i18n('click_to_remove')}: $text';
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
       child: RepaintBoundary(
@@ -247,11 +254,18 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
           child: ListTile(
             dense: true,
             leading: Icon(icon, size: 19, color: theme.colorScheme.primary),
-            title: Text(text, maxLines: 2, overflow: TextOverflow.ellipsis),
-            trailing: IconButton(
-              tooltip: i18n('click_to_remove'),
-              icon: const Icon(Remix.close_line, size: 18),
-              onPressed: onRemove,
+            title: Text(text),
+            trailing: Semantics(
+              container: true,
+              button: true,
+              label: removeLabel,
+              child: ExcludeSemantics(
+                child: IconButton(
+                  tooltip: removeLabel,
+                  icon: const Icon(Remix.close_line, size: 18),
+                  onPressed: onRemove,
+                ),
+              ),
             ),
           ),
         ),
@@ -270,6 +284,7 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
     required double min,
     required double max,
     required String display,
+    required String Function(double value) semanticValueBuilder,
     required ValueChanged<double> onChanged,
     required Color labelColor,
     required Color digitColor,
@@ -319,6 +334,8 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
                 stepSize: stepSize,
                 activeColor: theme.colorScheme.primary,
                 inactiveColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+                semanticFormatterCallback: (dynamic semanticValue) =>
+                    '$title, ${semanticValueBuilder((semanticValue as num).toDouble())}',
                 onChanged: (dynamic value) {
                   onChanged(value as double);
                 },
@@ -342,29 +359,18 @@ class _KeywordBlockPageState extends State<KeywordBlockPage> {
     required ValueChanged<bool> onChanged,
     required Color labelColor,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: AppTextStyles.t12.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                ],
-              ],
-            ),
-          ),
-          Switch(value: value, activeThumbColor: theme.colorScheme.primary, onChanged: onChanged),
-        ],
+    return SwitchListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(
+        title,
+        style: AppTextStyles.t15.copyWith(fontWeight: FontWeight.w600, color: labelColor),
       ),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle, style: AppTextStyles.t12.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+      value: value,
+      activeThumbColor: theme.colorScheme.primary,
+      onChanged: onChanged,
     );
   }
 }

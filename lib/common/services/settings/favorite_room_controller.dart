@@ -3,6 +3,8 @@ import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:pure_live/common/services/utils/backup_migration_util.dart';
 
 class FavoriteRoomController extends GetxController {
+  static const int maxShieldKeywordLength = 40;
+
   final RxList<String> shieldList = hiveStringList('shieldList', <String>[]);
 
   final RxList<String> blockedDanmakuUsers = hiveStringList('blockedDanmakuUsers', <String>[]);
@@ -38,6 +40,7 @@ class FavoriteRoomController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _normalizeDanmakuBlocks();
     _normalizeSiteCatalogIds();
     _normalizeFavoriteRoomIdentities();
     _migrateSiteCatalog();
@@ -322,14 +325,15 @@ class FavoriteRoomController extends GetxController {
     return true;
   }
 
-  void addShieldList(String value) {
+  bool addShieldList(String value) {
     final text = value.trim();
 
-    if (text.isEmpty || shieldList.contains(text)) return;
+    if (text.isEmpty || shieldList.any((item) => item.trim().toLowerCase() == text.toLowerCase())) return false;
 
     final updated = List<String>.from(shieldList);
     updated.add(text);
     shieldList.assignAll(updated);
+    return true;
   }
 
   void removeShieldList(int index) {
@@ -340,16 +344,17 @@ class FavoriteRoomController extends GetxController {
     shieldList.assignAll(updated);
   }
 
-  void addBlockedDanmakuUser(String value) {
+  bool addBlockedDanmakuUser(String value) {
     final user = value.trim();
 
-    if (user.isEmpty || blockedDanmakuUsers.contains(user)) {
-      return;
+    if (user.isEmpty || blockedDanmakuUsers.any((item) => item.trim().toLowerCase() == user.toLowerCase())) {
+      return false;
     }
 
     final updated = List<String>.from(blockedDanmakuUsers);
     updated.add(user);
     blockedDanmakuUsers.assignAll(updated);
+    return true;
   }
 
   void removeBlockedDanmakuUser(int index) {
@@ -395,8 +400,10 @@ class FavoriteRoomController extends GetxController {
 
   static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
     return {
-      'shieldList': List<String>.from(json['shieldList'] ?? const <String>[]),
-      'blockedDanmakuUsers': List<String>.from(json['blockedDanmakuUsers'] ?? const <String>[]),
+      'shieldList': _normalizeDanmakuBlockValues(List<String>.from(json['shieldList'] ?? const <String>[])),
+      'blockedDanmakuUsers': _normalizeDanmakuBlockValues(
+        List<String>.from(json['blockedDanmakuUsers'] ?? const <String>[]),
+      ),
       'hotAreasList': List<String>.from(json['hotAreasList'] ?? AppConsts.supportSites),
       'preferPlatform': json['preferPlatform']?.toString().trim().toLowerCase() ?? Sites.bilibiliSite,
       'favoriteRooms': BackupMigrationUtil.parseObjectList(json['favoriteRooms'], LiveRoom.fromJson, strict: true),
@@ -420,8 +427,10 @@ class FavoriteRoomController extends GetxController {
     final favorite = rootConfig?['favorite'] as Map<String, dynamic>? ?? {};
 
     return {
-      'shieldList': List<String>.from(favorite['shieldList'] ?? const <String>[]),
-      'blockedDanmakuUsers': List<String>.from(favorite['blockedDanmakuUsers'] ?? const <String>[]),
+      'shieldList': _normalizeDanmakuBlockValues(List<String>.from(favorite['shieldList'] ?? const <String>[])),
+      'blockedDanmakuUsers': _normalizeDanmakuBlockValues(
+        List<String>.from(favorite['blockedDanmakuUsers'] ?? const <String>[]),
+      ),
       'hotAreasList': List<String>.from(favorite['hotAreasList'] ?? AppConsts.supportSites),
       'preferPlatform': favorite['preferPlatform'] ?? Sites.bilibiliSite,
       'favoriteRooms': BackupMigrationUtil.parseObjectList(
@@ -454,6 +463,23 @@ class FavoriteRoomController extends GetxController {
     }
 
     return true;
+  }
+
+  void _normalizeDanmakuBlocks() {
+    final keywords = _normalizeDanmakuBlockValues(shieldList);
+    if (!_sameStrings(shieldList, keywords)) shieldList.assignAll(keywords);
+    final users = _normalizeDanmakuBlockValues(blockedDanmakuUsers);
+    if (!_sameStrings(blockedDanmakuUsers, users)) blockedDanmakuUsers.assignAll(users);
+  }
+
+  static List<String> _normalizeDanmakuBlockValues(Iterable<String> values) {
+    final seen = <String>{};
+    final normalized = <String>[];
+    for (final rawValue in values) {
+      final value = rawValue.trim();
+      if (value.isNotEmpty && seen.add(value.toLowerCase())) normalized.add(value);
+    }
+    return normalized;
   }
 
   static Map<String, dynamic> mergeConfig(Map<String, dynamic> rootConfig, Map<String, dynamic> updateFields) {

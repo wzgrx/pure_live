@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -159,6 +160,35 @@ void main() {
     });
   }
 
+  _case('modern list exposes the complete stored keyword and a named remove action', (tester) async {
+    final keyword = List.filled(8, 'LongKeyword').join();
+    settings.fav.shieldList.assignAll([keyword]);
+    final semantics = tester.ensureSemantics();
+    try {
+      await open(tester, modern: true, width: 320, scale: 2);
+      final label = find.text(keyword);
+      await visible(tester, label);
+      final text = tester.widget<Text>(label);
+      expect(text.maxLines, isNull);
+      expect(text.overflow, isNot(TextOverflow.ellipsis));
+      expect(find.bySemanticsLabel('Click to remove: $keyword'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
+  });
+
+  _case('legacy keyword chip names the exact remove target', (tester) async {
+    settings.fav.shieldList.assignAll(['Selected keyword']);
+    final semantics = tester.ensureSemantics();
+    try {
+      await open(tester, modern: false);
+      expect(find.bySemanticsLabel('Click to remove: Selected keyword'), findsOneWidget);
+    } finally {
+      semantics.dispose();
+    }
+  });
+
   for (final language in ['en', 'zh']) {
     _case('live filter slider headers fit $language narrow large text', (tester) async {
       settings.danmaku.enableDanmakuSimilarityFilter.value = true;
@@ -218,13 +248,14 @@ void main() {
       await open(tester, modern: modern);
       final field = find.byType(TextField);
       await visible(tester, field);
+      expect(tester.widget<TextField>(field).maxLength, 40);
       await tester.enterText(field, '  first  ');
       final add = modern ? find.byTooltip(labels['add'] as String) : find.text(labels['add'] as String);
       await tester.tap(add);
       await tester.pumpAndSettle();
       expect(settings.fav.shieldList.toList(), ['first']);
       expect(tester.widget<TextField>(field).controller!.text, isEmpty);
-      await tester.enterText(field, 'first');
+      await tester.enterText(field, 'FIRST');
       await tester.tap(add);
       await tester.pumpAndSettle();
       expect(settings.fav.shieldList.toList(), ['first']);
@@ -246,7 +277,7 @@ void main() {
     final toggleLabel = find.text(labels['danmaku_similarity_filter_enable'] as String);
     await visible(tester, toggleLabel);
     final toggle = find.descendant(
-      of: find.ancestor(of: toggleLabel, matching: find.byType(Row)),
+      of: find.ancestor(of: toggleLabel, matching: find.byType(SwitchListTile)),
       matching: find.byType(Switch),
     );
     await visible(tester, toggle);
@@ -269,5 +300,49 @@ void main() {
     expect(find.byType(SfSlider), findsNothing);
     expect(settings.danmaku.danmakuSimilarityThreshold.value, selected);
     expect(tester.takeException(), isNull);
+  });
+
+  _case('filter switch row and slider expose complete adjustable semantics', (tester) async {
+    final semantics = tester.ensureSemantics();
+    try {
+      await open(tester, modern: true, width: 320, scale: 2);
+      final toggleLabel = labels['danmaku_similarity_filter_enable'] as String;
+      await visible(tester, find.text(toggleLabel));
+      await tester.tap(find.text(toggleLabel));
+      await tester.pumpAndSettle();
+      expect(settings.danmaku.enableDanmakuSimilarityFilter.value, isTrue);
+
+      final slider = find.byType(SfSlider).first;
+      await visible(tester, slider);
+      final thresholdLabel = labels['danmaku_similarity_threshold'] as String;
+      final thresholdValue = settings.danmaku.danmakuSimilarityThreshold.value;
+      final threshold = find.semantics.byValue('$thresholdLabel, $thresholdValue%');
+      expect(threshold, findsOneWidget);
+      final data = threshold.evaluate().single.getSemanticsData();
+      expect(data.hasAction(ui.SemanticsAction.increase), isTrue);
+      expect(data.hasAction(ui.SemanticsAction.decrease), isTrue);
+    } finally {
+      semantics.dispose();
+    }
+  });
+
+  test('filter preference parsing trims and deduplicates the case-insensitive matching keys', () {
+    final parsed = FavoriteRoomController.parseConfig({
+      'shieldList': ['  Spam  ', 'spam', '', 'NEWS'],
+      'blockedDanmakuUsers': [' Alice ', 'alice', 'BOB'],
+    });
+
+    expect(parsed['shieldList'], ['Spam', 'NEWS']);
+    expect(parsed['blockedDanmakuUsers'], ['Alice', 'BOB']);
+  });
+
+  test('filter add APIs preserve the first spelling and reject case-only duplicates', () {
+    expect(settings.fav.addShieldList('  Spam  '), isTrue);
+    expect(settings.fav.addShieldList('spam'), isFalse);
+    expect(settings.fav.shieldList, ['Spam']);
+
+    expect(settings.fav.addBlockedDanmakuUser(' Alice '), isTrue);
+    expect(settings.fav.addBlockedDanmakuUser('alice'), isFalse);
+    expect(settings.fav.blockedDanmakuUsers, ['Alice']);
   });
 }

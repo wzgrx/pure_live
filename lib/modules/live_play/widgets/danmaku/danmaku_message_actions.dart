@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/services/settings/favorite_room_controller.dart';
 import 'package:pure_live/modules/live_play/controllers/live_play_controller.dart';
 
 class DanmakuMessageActions {
@@ -108,7 +109,7 @@ class _DanmakuKeywordDialogState extends State<_DanmakuKeywordDialog> {
     content: TextField(
       controller: _textController,
       autofocus: true,
-      maxLength: 40,
+      maxLength: FavoriteRoomController.maxShieldKeywordLength,
       decoration: InputDecoration(hintText: i18n('please_enter_keyword')),
     ),
     actions: [

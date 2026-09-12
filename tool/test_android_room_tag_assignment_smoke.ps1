@@ -27,9 +27,13 @@ foreach ($name in @(
     'Save-UiState',
     'Find-LabeledNode',
     'Assert-VisibleBounds',
+    'Wait-UiExcludes',
     'Open-PopularBilibili',
     'Get-RoomTarget',
     'Open-RoomDialog',
+    'Get-RoomFollowControl',
+    'Wait-RoomDialogClosed',
+    'Invoke-UnfollowContract',
     'Set-EditorText'
 )) {
     $function = $ast.Find({
@@ -66,6 +70,11 @@ foreach ($required in @(
     'settingsFileRestoredExactly',
     'installedApkMatchesCandidate',
     'longPressDialogControlsReachable',
+    'followActionClosesOwningDialog',
+    'followStateRetainedOnReopen',
+    'unfollowRequiresConfirmation',
+    'unfollowCancelPreservesFavorite',
+    'unfollowConfirmClosesOwningDialog',
     'tagSelectorControlsReachable',
     'newTagAutoSelected',
     'assignmentRetainedOnReopen',

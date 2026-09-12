@@ -89,12 +89,12 @@ AudioFlinger 轨道均为 0。冷启动等待竞态由工具提交 `6f40be2c` �
 
 ## 当前结论
 
-09-13 又以产品提交 `c83ed5cc` 构建并覆盖房间卡片/标签分配增量候选。当前设备安装包为
-`288827213` B，SHA-256
-`88864CF52952C4505E79E4FA2E304DC8845905A1D77E04276F1B242D7BAB8C65`；`firstInstallTime` 保持，
-设备 `base.apk` 与候选逐字节一致。K90 上真实 Bilibili 卡片完成长按、关注引导、新建标签自动选中、
-确认和重开保持，应用 PID 日志无 FATAL/ANR；规范 Hive 精确恢复到 `19F40EA9…D1F050`，应用停止且
-stay-awake 恢复 0。详见
+09-13 最新以产品提交 `d499e41c` 构建并覆盖房间卡片关注/标签分配增量候选。当前设备安装包为
+`288827674` B，SHA-256
+`ABEEDA3687FA4EFF1A7D2BBCC7D3CEC18ACE1CBF76F0B2BB8928DAAE0CA21726`；`firstInstallTime` 保持，
+设备 `base.apk` 与候选逐字节一致。K90 上真实 Bilibili 卡片完成长按、直接关注并关闭所属详情、取消关注
+提示的取消与确认、状态重开、再次关注、新建标签自动选中、确认和重开保持，应用 PID 日志无
+FATAL/ANR；规范 Hive 精确恢复到 `19F40EA9…D1F050`，应用停止且 stay-awake 恢复 0。详见
 [房间标签专项](ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md)。此前 Android
 五后端真实播放矩阵与 5 次进退房专项仍分别绑定各自精确包。50 次资源循环仍绑定前一
 `039f8ff3` 候选，基础播放、

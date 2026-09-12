@@ -223,6 +223,23 @@ function Wait-UiContains {
     throw "Timed out waiting for UI: $($Candidates -join ' / ')."
 }
 
+function Wait-UiExcludes {
+    param(
+        [Parameter(Mandatory = $true)][string[]] $Candidates,
+        [Parameter(Mandatory = $true)][string] $Prefix,
+        [int] $TimeoutSeconds = 15
+    )
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $attempt = 0
+    do {
+        $attempt++
+        $document = Save-UiState "$Prefix-$attempt" -NoScreenshot
+        if (-not (Test-ContainsAny $document.OuterXml $Candidates)) { return $document }
+        Start-Sleep -Milliseconds 700
+    } while ((Get-Date) -lt $deadline)
+    throw "Timed out waiting for UI to close: $($Candidates -join ' / ')."
+}
+
 function Assert-VisibleBounds {
     param([Parameter(Mandatory = $true)] $Node, [int] $Width, [int] $Height, [string] $Name)
     $b = Get-Bounds $Node
@@ -296,6 +313,79 @@ function Open-RoomDialog {
         $controls[$entry.Key] = Assert-VisibleBounds $node $result.display.width $result.display.height "$Phase/$($entry.Key)"
     }
     [pscustomobject]@{ document = $dialog; controls = $controls }
+}
+
+function Get-RoomFollowControl {
+    param([Parameter(Mandatory = $true)][xml] $Document)
+    $unfollow = Find-LabeledNode -Document $Document -Candidates @('取消关注', 'Unfollow') -Clickable -Exact -BottomMost
+    if ($unfollow) {
+        return [pscustomobject]@{ node = $unfollow; isFavorite = $true; label = Get-NodeLabel $unfollow }
+    }
+    $follow = Find-LabeledNode -Document $Document -Candidates @('关注', 'Follow') -Clickable -Exact -BottomMost
+    if ($follow) {
+        return [pscustomobject]@{ node = $follow; isFavorite = $false; label = Get-NodeLabel $follow }
+    }
+    throw 'Room dialog exposes neither an exact Follow nor Unfollow action.'
+}
+
+function Wait-RoomDialogClosed {
+    param([Parameter(Mandatory = $true)][string] $Prefix, [int] $TimeoutSeconds = 15)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $attempt = 0
+    do {
+        $attempt++
+        $document = Save-UiState "$Prefix-$attempt" -NoScreenshot
+        $close = Find-LabeledNode -Document $document -Candidates @('关闭', 'Close') -Clickable -Exact -BottomMost
+        if (-not $close) { return $document }
+        Start-Sleep -Milliseconds 700
+    } while ((Get-Date) -lt $deadline)
+    throw 'Room details remained open after the follow action completed.'
+}
+
+function Invoke-UnfollowContract {
+    param(
+        [Parameter(Mandatory = $true)] $Dialog,
+        [Parameter(Mandatory = $true)] $RoomTarget,
+        [Parameter(Mandatory = $true)][string] $Phase
+    )
+    $control = Get-RoomFollowControl $Dialog.document
+    if (-not $control.isFavorite) { throw "${Phase}: expected an Unfollow action before opening confirmation." }
+    Invoke-TapNode $control.node
+    $promptLabels = @('确定要取消关注', 'Are you sure to unfollow')
+    Wait-UiContains $promptLabels "$Phase-prompt-ready" | Out-Null
+    $prompt = Save-UiState "$Phase-prompt"
+    $message = Find-LabeledNode -Document $prompt -Candidates $promptLabels
+    $cancel = Find-LabeledNode -Document $prompt -Candidates @('取消', 'Cancel') -Clickable -Exact -BottomMost
+    $confirm = Find-LabeledNode -Document $prompt -Candidates @('确认', 'Confirm') -Clickable -Exact -BottomMost
+    if (-not $message -or -not $cancel -or -not $confirm) { throw "${Phase}: unfollow confirmation is incomplete." }
+    $promptEvidence = [ordered]@{
+        message = [ordered]@{ label = Get-NodeLabel $message; bounds = [string] $message.bounds }
+        cancel = Assert-VisibleBounds $cancel $result.display.width $result.display.height "$Phase/cancel"
+        confirm = Assert-VisibleBounds $confirm $result.display.width $result.display.height "$Phase/confirm"
+    }
+
+    Invoke-TapNode $cancel
+    $afterCancel = Wait-UiExcludes $promptLabels "$Phase-after-cancel"
+    $afterCancelControl = Get-RoomFollowControl $afterCancel
+    if (-not $afterCancelControl.isFavorite) { throw "${Phase}: cancelling unfollow changed the favorite state." }
+
+    Invoke-TapNode $afterCancelControl.node
+    $confirmPrompt = Wait-UiContains $promptLabels "$Phase-confirm-ready"
+    Invoke-TapLabel $confirmPrompt @('确认', 'Confirm') -Exact -BottomMost
+    Wait-RoomDialogClosed "$Phase-after-confirm" | Out-Null
+    $reopened = Open-RoomDialog $RoomTarget "$Phase-reopened"
+    $afterConfirmControl = Get-RoomFollowControl $reopened.document
+    if ($afterConfirmControl.isFavorite) { throw "${Phase}: confirming unfollow did not change the room action to Follow." }
+
+    [pscustomobject]@{
+        dialog = $reopened
+        evidence = [ordered]@{
+            prompt = $promptEvidence
+            cancelPreservedFavorite = $true
+            confirmClosedOwningDialog = $true
+            reopenedLabel = $afterConfirmControl.label
+        }
+    }
 }
 
 $settingsPath = "/data/user/0/$Package/app_flutter/PURE_LIVE/HIVE_DB/app_settings.hive"
@@ -376,7 +466,50 @@ try {
     $result.states.firstDialogControls = $firstDialog.controls
     $result.checks.longPressDialogControlsReachable = $true
 
-    Invoke-TapLabel $firstDialog.document @('设置房间标签', 'Set Room Tags')
+    $currentDialog = $firstDialog
+    $initialFollow = Get-RoomFollowControl $currentDialog.document
+    $result.states.initialFollowAction = [ordered]@{
+        label = $initialFollow.label
+        isFavorite = $initialFollow.isFavorite
+        bounds = [string] $initialFollow.node.bounds
+    }
+    if ($initialFollow.isFavorite) {
+        $normalized = Invoke-UnfollowContract $currentDialog $roomTarget 'normalize-initial-favorite'
+        $result.states.initialFavoriteNormalization = $normalized.evidence
+        $currentDialog = $normalized.dialog
+    }
+
+    $followControl = Get-RoomFollowControl $currentDialog.document
+    if ($followControl.isFavorite) { throw 'Expected an unfollowed room before the direct Follow action.' }
+    Invoke-TapNode $followControl.node
+    Wait-RoomDialogClosed 'direct-follow-closed' | Out-Null
+    $currentDialog = Open-RoomDialog $roomTarget 'room-dialog-after-direct-follow'
+    $followedControl = Get-RoomFollowControl $currentDialog.document
+    if (-not $followedControl.isFavorite) { throw 'Direct Follow did not persist when the room dialog reopened.' }
+    $result.states.directFollow = [ordered]@{
+        initialLabel = $followControl.label
+        reopenedLabel = $followedControl.label
+    }
+    $result.checks.followActionClosesOwningDialog = $true
+    $result.checks.followStateRetainedOnReopen = $true
+
+    $unfollowed = Invoke-UnfollowContract $currentDialog $roomTarget 'direct-unfollow'
+    $result.states.directUnfollow = $unfollowed.evidence
+    $result.checks.unfollowRequiresConfirmation = $true
+    $result.checks.unfollowCancelPreservesFavorite = $true
+    $result.checks.unfollowConfirmClosesOwningDialog = $true
+    $currentDialog = $unfollowed.dialog
+
+    $refollowControl = Get-RoomFollowControl $currentDialog.document
+    if ($refollowControl.isFavorite) { throw 'Expected Follow after the direct unfollow contract.' }
+    Invoke-TapNode $refollowControl.node
+    Wait-RoomDialogClosed 'refollow-closed' | Out-Null
+    $currentDialog = Open-RoomDialog $roomTarget 'room-dialog-after-refollow'
+    if (-not (Get-RoomFollowControl $currentDialog.document).isFavorite) {
+        throw 'Room did not return to a followed state before tag assignment.'
+    }
+
+    Invoke-TapLabel $currentDialog.document @('设置房间标签', 'Set Room Tags')
     $afterTag = Save-UiState 'after-tag-action'
     if (-not (Test-ContainsAny $afterTag.OuterXml @('设置房间标签', 'Set Room Tags'))) {
         if (-not (Test-ContainsAny $afterTag.OuterXml @('是否关注', '关注主播', 'Would you like to follow'))) {

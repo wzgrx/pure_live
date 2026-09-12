@@ -54,7 +54,7 @@
 
 > 2026-09-12 增量：Firebase 个人中心的配置预览、上传、下载和退出已统一为页面所有的单一活动事务；下载覆盖本机设置与退出增加确认，空账号 ID、动作异常和安全返回均有确定性回归。320×480 / 3.0 倍英文下全部入口可滚动到达，见 `docs/FIREBASE_PROFILE_ACTION_AND_LAYOUT_AUDIT_2026_09_12.md`。A1-05 与 A2-01 保持 `RUN`，真实 Firebase 与双端候选操作继续。
 
-> 2026-09-13 增量：房间卡片长按与标签分配已统一权威映射、有效 ID/旧键写入规则和响应式弹窗；新增标签复用 15/40 边界、IME 并自动选中。专项 4/4、相邻十文件 131/131、全库 analyze 通过；K90 上覆盖安装后完成真实 Bilibili 未关注引导、创建、确认及重开保持，设置精确恢复且无 FATAL/ANR。见 `docs/ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows 右键、Release、其余平台和大量标签原生滚动继续，宏观计数不变。
+> 2026-09-13 增量：房间卡片长按与标签分配已统一权威映射、有效 ID/旧键写入规则和响应式弹窗；新增标签复用 15/40 边界、IME 并自动选中。关注按钮另统一规范集合观察、所属 Navigator、取消关注确认和 single-flight。标签原有专项 4/4、相邻十文件 131/131；关注追加后同文件 8/8、相邻九文件 73/73，全库 analyze 通过。K90 最新覆盖安装后完成真实 Bilibili 直接关注关闭、取消提示/取消/确认、状态重开、再次关注、创建标签、确认及重开保持，设置精确恢复且无 FATAL/ANR。见 `docs/ROOM_CARD_TAG_ASSIGNMENT_LAYOUT_AND_INTEGRITY_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows 右键、Release、其余平台和大量标签原生滚动继续，宏观计数不变。
 
 ### A2 设置全量
 

@@ -92,7 +92,7 @@
 
 | ID | 状态 | 验收内容 |
 |---|---|---|
-| A4-01 | RUN | 房间隔离、时间戳、去重、重连、横竖屏/PiP 返回后继续；关闭房间后旧消息不进入新房。K90 Pro / cycle 200 使用包含本轮修订的最终 Debug APK，完成远端弹幕连接、10 条可见消息、系统 PiP 与恢复后弹幕 UI 存活，14/14 门禁通过。斗鱼合帧、跨房、空文本与疑似自动消息开关回归 6/6；全平台相似文本过滤的新默认值及备份兼容回归 12/12。长时间断网重连与连续换房仍继续执行。证据：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json`、`local-artifacts/build-records/20260904T192547043Z-quality-focused.json` |
+| A4-01 | RUN | 房间隔离、时间戳、去重、重连、横竖屏/PiP 返回后继续；关闭房间后旧消息不进入新房。K90 Pro / cycle 200 使用包含本轮修订的最终 Debug APK，完成远端弹幕连接、10 条可见消息、系统 PiP 与恢复后弹幕 UI 存活，14/14 门禁通过。斗鱼合帧、跨房、空文本与疑似自动消息开关回归 6/6；全平台相似文本过滤的新默认值及备份兼容回归 12/12。09-12 八个平台改用类型化暂态重连/最终关闭事件，控制器不再解析中文提示；精确 `80c87c0e` 的 72/72 与 Android arm64 Debug 静态检查通过。长时间断网重连与连续换房仍继续执行。证据：`local-artifacts/diagnostics/android-runtime-smoke-20260905T033502392/summary.json`、`local-artifacts/build-records/20260904T192547043Z-quality-focused.json`、`local-artifacts/build-records/20260912T090015564Z-quality-focused.json`、`docs/ISSUE_860_REFRESH_DANMAKU_AUDIT_2026_09_11.md` |
 | A4-02 | NR | 列表上滑一次即冻结，累计新消息，回到底部一次追平；快速滚动、长按屏蔽、关键词管理 |
 | A4-03 | NR | 主画面、小窗弹幕速度/FPS/密度/字体/描边/区域一致，120 Hz 下无明显跳步 |
 | A4-04 | RUN | K90 Pro / cycle 193 已验证本地互动开关启用、重启持久化、竖屏与横屏全屏输入、2 秒排队、同一共享列表回显和原设置恢复；横屏输入期间控制栏保持挂载，测试器通过被键盘遮挡时仍可达的 IME `send` 动作提交。源码已为全部 22 个支持平台补齐独立本地化身份、通用礼包回落和 ID 归一化，并修复窄屏大字号的样式标题/数值溢出；4 文件 16/16 通过。真实平台礼包、等级、特效及跨入口组合矩阵继续执行。证据：`local-artifacts/diagnostics/android-local-interaction-enabled-20260905T015317914/summary.json`、`docs/LOCAL_INTERACTION_PLATFORM_AND_LAYOUT_AUDIT_2026_09_11.md` |

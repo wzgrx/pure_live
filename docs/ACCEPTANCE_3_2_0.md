@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-12 弹幕重连/关闭事件语义已类型化**：[Issue #860 后续增量](ISSUE_860_REFRESH_DANMAKU_AUDIT_2026_09_11.md#后续增量弹幕暂态重连与最终关闭事件类型化)。八个平台的暂态恢复统一走 `onReconnect`，重连耗尽等最终状态走 `onClose`；普通直播间与多画面宿主不再根据中文提示文本决定会话所有权。最终 13 文件 72/72、全库 analyze 及精确 `80c87c0e` Android arm64 Debug 内容/16 KB ELF 对齐通过。真实断网、长时恢复和报告房间仍待原生矩阵，A4-01 与宏观 42 组未闭环保持。
+
 - **09-12 Android 物理音量键的媒体流宿主缺口已修订**：[新审计](ANDROID_HARDWARE_VOLUME_ROUTING_AUDIT_2026_09_12.md)。前台 Activity 每次 `onResume` 均将硬件音量控件建议流恢复为 `STREAM_MUSIC`，覆盖播放器取得焦点前以及弹窗、浏览器、PiP 和前后台返回；保留系统按键分发，不直接写流音量。原实现宿主合同红测 0/1，修订后同提交定向 71/71、全库 analyze 及 Android arm64 Debug 编译/内容/16 KB ELF 对齐通过。#858 报告设备仍待物理按钮复验，A3-04/A7-02 与宏观 42 组未闭环保持。
 
 - **09-12 IPTV 频道 HTTP 请求头、播放与录制链路已修订**：[新审计](IPTV_HTTP_HEADER_PLAYBACK_AND_RECORDING_AUDIT_2026_09_12.md)。M3U 的 `#EXTVLCOPT`、`#EXTHTTP`、adaptive `#KODIPROP`、头部/频道属性和 URL `|...` 后缀现经统一策略解析，按确定性优先级进入 schema 9 与稳定刷新；主播放器、多画面、纯音频和录制共用规范字段，频道值覆盖全局 UA，畸形快照保留旧数据。直接六文件 **152/152**、多画面 **53/53**、最终 focused CI **426/426** 与全库 analyze 通过。真实受保护源、DRM、双端解码及 GUI 继续，A1-05/A3-04 与宏观 42 组未闭环保持。

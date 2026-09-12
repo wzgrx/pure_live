@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [string] $Serial = $env:PURELIVE_ADB_SERIAL,
     [string] $EvidenceDirectory,

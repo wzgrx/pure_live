@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $path = Join-Path $PSScriptRoot 'android_recording_smoke.ps1'
 $errors = $null
 $ast = [Management.Automation.Language.Parser]::ParseFile($path, [ref]$null, [ref]$errors)

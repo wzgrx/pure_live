@@ -12,8 +12,54 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:best_form_validator/best_form_validator.dart';
 import 'package:pure_live/modules/auth/utils/firebase_manager.dart';
 
-final _auth = FirebaseAuth.instance;
-final _db = FirebaseFirestore.instance;
+class FirebaseEmailAuthBackend {
+  const FirebaseEmailAuthBackend();
+
+  bool get supportsPasswordReset => true;
+
+  Future<UserCredential> signInWithEmail(String email, String password) {
+    return FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+  }
+
+  Future<UserCredential> createUserWithEmail(String email, String password) {
+    return FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+  }
+
+  Future<void> saveUserProfile(String userId, Map<String, dynamic> data) {
+    return FirebaseFirestore.instance.collection('users').doc(userId).set(data);
+  }
+
+  Future<void> sendPasswordResetEmail(String email) {
+    return FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  }
+
+  Future<UserCredential> signInWithPopup(AuthProvider provider) {
+    return FirebaseAuth.instance.signInWithPopup(provider);
+  }
+
+  Future<UserCredential> signInWithProvider(AuthProvider provider) {
+    return FirebaseAuth.instance.signInWithProvider(provider);
+  }
+
+  Future<UserCredential> signInWithCredential(AuthCredential credential) {
+    return FirebaseAuth.instance.signInWithCredential(credential);
+  }
+}
+
+Map<String, dynamic> buildFirebaseSignUpProfileData({
+  required String email,
+  required Map<String, String> metadata,
+  required Object createdAt,
+}) {
+  const reservedFields = {'email', 'created_at', 'createdAt', 'config', 'update_at', 'version', 'canUpload'};
+  final data = <String, dynamic>{'email': email.trim(), 'created_at': createdAt};
+  for (final entry in metadata.entries) {
+    final key = entry.key.trim();
+    if (key.isEmpty || reservedFields.contains(key)) continue;
+    data[key] = entry.value.trim();
+  }
+  return data;
+}
 
 class MetaDataField {
   final String label;
@@ -26,10 +72,11 @@ class MetaDataField {
 
 class FirebaseEmailAuth extends StatefulWidget {
   final String? redirectTo;
-  final void Function(UserCredential credential) onSignInComplete;
-  final void Function(UserCredential credential) onSignUpComplete;
-  final void Function()? onPasswordResetEmailSent;
+  final FutureOr<void> Function(UserCredential credential) onSignInComplete;
+  final FutureOr<void> Function(UserCredential credential) onSignUpComplete;
+  final FutureOr<void> Function()? onPasswordResetEmailSent;
   final void Function(Object error)? onError;
+  final FirebaseEmailAuthBackend backend;
 
   final List<MetaDataField>? metadataFields;
   const FirebaseEmailAuth({
@@ -40,6 +87,7 @@ class FirebaseEmailAuth extends StatefulWidget {
     this.onPasswordResetEmailSent,
     this.onError,
     this.metadataFields,
+    this.backend = const FirebaseEmailAuthBackend(),
   });
 
   @override
@@ -55,6 +103,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
   bool _forgotPassword = false;
   bool _isSigningIn = true;
   bool _obscurePassword = true;
+  int _actionGeneration = 0;
 
   @override
   void initState() {
@@ -66,6 +115,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
 
   @override
   void dispose() {
+    _actionGeneration++;
     _emailController.dispose();
     _passwordController.dispose();
     for (final controller in _metadataControllers.values) {
@@ -85,6 +135,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
         children: [
           _buildFormCard(theme, [
             TextFormField(
+              enabled: !_isLoading,
               keyboardType: TextInputType.emailAddress,
               autofillHints: const [AutofillHints.email],
               style: AppTextStyles.t14,
@@ -104,6 +155,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
             if (!_forgotPassword) ...[
               const SizedBox(height: 16),
               TextFormField(
+                enabled: !_isLoading,
                 validator: (value) {
                   if (value == null || value.isEmpty || value.length < 6) {
                     return i18n('firebase_enter_valid_password');
@@ -116,12 +168,13 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
                   hintText: i18n('firebase_enter_password'),
                   prefixIcon: Remix.lock_line,
                   suffixIcon: IconButton(
+                    tooltip: i18n(_obscurePassword ? 'firebase_show_password' : 'firebase_hide_password'),
                     icon: Icon(
                       _obscurePassword ? Remix.eye_off_line : Remix.eye_line,
                       size: 18,
                       color: theme.hintColor.withValues(alpha: 0.6),
                     ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    onPressed: _isLoading ? null : () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
                 obscureText: _obscurePassword,
@@ -133,6 +186,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: TextFormField(
+                      enabled: !_isLoading,
                       controller: _metadataControllers[metadataField],
                       style: AppTextStyles.t14,
                       decoration: InputDecoration(
@@ -155,8 +209,8 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
           ]),
           const SizedBox(height: 24),
           if (!_forgotPassword) ...[
-            SizedBox(
-              height: 46,
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 46),
               child: FilledButton(
                 style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 onPressed: _isLoading ? null : _handleSubmit,
@@ -185,8 +239,8 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
                 ],
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 46,
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 46),
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -199,25 +253,27 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
               ),
             ],
             const SizedBox(height: 12),
-            if (_isSigningIn && Platform.isAndroid)
+            if (_isSigningIn && widget.backend.supportsPasswordReset)
               TextButton(
-                onPressed: () => setState(() => _forgotPassword = true),
+                onPressed: _isLoading ? null : () => setState(() => _forgotPassword = true),
                 child: Text(i18n('firebase_forgot_password')),
               ),
             TextButton(
               key: const ValueKey('toggleSignInButton'),
-              onPressed: () {
-                setState(() {
-                  _forgotPassword = false;
-                  _isSigningIn = !_isSigningIn;
-                });
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      setState(() {
+                        _forgotPassword = false;
+                        _isSigningIn = !_isSigningIn;
+                      });
+                    },
               child: Text(_isSigningIn ? i18n('firebase_no_account') : i18n('firebase_has_account')),
             ),
           ],
-          if (_isSigningIn && _forgotPassword && Platform.isAndroid) ...[
-            SizedBox(
-              height: 46,
+          if (_isSigningIn && _forgotPassword && widget.backend.supportsPasswordReset) ...[
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 46),
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -234,7 +290,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
             ),
             const SizedBox(height: 12),
             TextButton(
-              onPressed: () => setState(() => _forgotPassword = false),
+              onPressed: _isLoading ? null : () => setState(() => _forgotPassword = false),
               child: Text(i18n('firebase_back_sign_in'), style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
@@ -244,14 +300,14 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
   }
 
   Future<void> _handleGitHubSignIn() async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
+    final generation = _beginAction();
+    if (generation == null) return;
     try {
-      UserCredential? credential;
+      late final UserCredential credential;
       final githubProvider = GithubAuthProvider()..addScope('user:email');
 
       if (kIsWeb) {
-        credential = await _auth.signInWithPopup(githubProvider);
+        credential = await widget.backend.signInWithPopup(githubProvider);
       } else if (Platform.isWindows) {
         final authUrl = Uri.parse(
           '${FirebaseManager.middlePageUrl}?platform=windows&scheme=${FirebaseManager.customScheme}',
@@ -269,7 +325,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
         );
 
         if (pasteText == null || pasteText.trim().isEmpty) {
-          throw 'cancel';
+          return;
         }
 
         const prefix = 'purelive://auth?credential=';
@@ -287,7 +343,7 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
         }
 
         final githubCredential = GithubAuthProvider.credential(accessToken);
-        credential = await _auth.signInWithCredential(githubCredential);
+        credential = await widget.backend.signInWithCredential(githubCredential);
 
         if (await windowManager.isMinimized()) {
           await windowManager.restore();
@@ -300,99 +356,94 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
       } else if (Platform.isMacOS || Platform.isLinux) {
         throw 'Unsupported desktop platform';
       } else {
-        credential = await _auth.signInWithProvider(githubProvider);
+        credential = await widget.backend.signInWithProvider(githubProvider);
       }
 
-      widget.onSignInComplete(credential);
-    } on FirebaseAuthException catch (e) {
-      _showErrorSnackbar(e.message ?? 'GitHub authentication failed', isError: true);
-    } catch (e) {
-      _showErrorSnackbar(e.toString(), isError: true);
+      if (!_isCurrentAction(generation)) return;
+      await Future.sync(() => widget.onSignInComplete(credential));
+    } catch (error) {
+      if (_isCurrentAction(generation)) {
+        _reportActionError(error, 'firebase_github_sign_in_failed');
+      }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      _finishAction(generation);
     }
   }
 
-  void _showErrorSnackbar(String message, {bool isError = false}) {
+  void _reportActionError(Object error, String fallbackKey) {
     if (widget.onError != null) {
-      widget.onError!(message);
+      widget.onError!(error);
       return;
     }
 
-    Get.showSnackbar(
-      GetSnackBar(
-        message: message,
-        duration: const Duration(seconds: 3),
-        backgroundColor: isError ? Get.theme.colorScheme.error : Get.theme.colorScheme.primary,
-      ),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(i18n(fallbackKey)), backgroundColor: Theme.of(context).colorScheme.error));
   }
 
-  Future _handleSubmit() async {
+  Future<void> _handleSubmit() async {
+    if (_isLoading || !mounted) return;
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
+    final generation = _beginAction();
+    if (generation == null) return;
     try {
       if (_isSigningIn) {
-        final credential = await _auth.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        widget.onSignInComplete.call(credential);
+        final credential = await widget.backend.signInWithEmail(_emailController.text.trim(), _passwordController.text);
+        if (!_isCurrentAction(generation)) return;
+        await Future.sync(() => widget.onSignInComplete(credential));
       } else {
-        final credential = await _auth.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
+        final email = _emailController.text.trim();
+        final credential = await widget.backend.createUserWithEmail(email, _passwordController.text);
         if (credential.user != null) {
-          final Map<String, dynamic> userData = {
-            'email': _emailController.text.trim(),
-            'created_at': FieldValue.serverTimestamp(),
-          };
-          _metadataControllers.forEach((field, controller) {
-            userData[field.key] = controller.text;
-          });
-          await _db.collection('users').doc(credential.user!.uid).set(userData);
+          final userData = buildFirebaseSignUpProfileData(
+            email: email,
+            metadata: {for (final entry in _metadataControllers.entries) entry.key.key: entry.value.text},
+            createdAt: FieldValue.serverTimestamp(),
+          );
+          await widget.backend.saveUserProfile(credential.user!.uid, userData);
         }
-        widget.onSignUpComplete.call(credential);
-      }
-    } on FirebaseAuthException catch (error) {
-      if (widget.onError == null) {
-        Get.showSnackbar(
-          GetSnackBar(message: error.message ?? 'Authentication failed', backgroundColor: Get.theme.colorScheme.error),
-        );
-      } else {
-        widget.onError?.call(error);
+        if (!_isCurrentAction(generation)) return;
+        await Future.sync(() => widget.onSignUpComplete(credential));
       }
     } catch (error) {
-      if (widget.onError == null) {
-        Get.showSnackbar(
-          GetSnackBar(
-            message: i18n('firebase_unexpected_err', args: {'error': error.toString()}),
-            backgroundColor: Get.theme.colorScheme.primary,
-          ),
-        );
-      } else {
-        widget.onError?.call(error);
+      if (_isCurrentAction(generation)) {
+        _reportActionError(error, _isSigningIn ? 'firebase_email_sign_in_failed' : 'firebase_email_sign_up_failed');
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      _finishAction(generation);
     }
   }
 
-  Future _handleResetPassword() async {
+  Future<void> _handleResetPassword() async {
+    if (_isLoading || !mounted) return;
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
+    final generation = _beginAction();
+    if (generation == null) return;
     try {
       final email = _emailController.text.trim();
-      await _auth.sendPasswordResetEmail(email: email);
-      widget.onPasswordResetEmailSent?.call();
-    } on FirebaseAuthException catch (error) {
-      widget.onError?.call(error);
+      await widget.backend.sendPasswordResetEmail(email);
+      if (!_isCurrentAction(generation)) return;
+      await Future.sync(() => widget.onPasswordResetEmailSent?.call());
     } catch (error) {
-      widget.onError?.call(error);
+      if (_isCurrentAction(generation)) {
+        _reportActionError(error, 'firebase_password_reset_failed');
+      }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      _finishAction(generation);
     }
+  }
+
+  int? _beginAction() {
+    if (!mounted || _isLoading) return null;
+    final generation = ++_actionGeneration;
+    setState(() => _isLoading = true);
+    return generation;
+  }
+
+  bool _isCurrentAction(int generation) => mounted && generation == _actionGeneration;
+
+  void _finishAction(int generation) {
+    if (!_isCurrentAction(generation)) return;
+    setState(() => _isLoading = false);
   }
 
   InputDecoration _buildInputDecoration(

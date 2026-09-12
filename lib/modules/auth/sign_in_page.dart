@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+
 import 'package:pure_live/common/index.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pure_live/modules/auth/auth_controller.dart';
@@ -13,7 +14,7 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  void _handleSignInComplete(UserCredential credential) async {
+  Future<void> _handleSignInComplete(UserCredential credential) async {
     final user = credential.user;
     if (user == null) return;
     final String email = user.email ?? "未公开邮箱";
@@ -37,8 +38,9 @@ class _SignInPageState extends State<SignInPage> {
     } catch (e) {
       developer.log('❌ 状态同步或拉取云端配置失败: $e');
     }
+    if (!mounted) return;
     ToastUtil.show('$providerStr ${i18n('firebase_sign_success')} ($email)');
-    Navigator.of(Get.context!).pop();
+    await Navigator.of(context).maybePop();
   }
 
   @override
@@ -57,12 +59,8 @@ class _SignInPageState extends State<SignInPage> {
                   authController.shouldGoReset = true;
                   ToastUtil.show(i18n('reset_password_email'));
                 },
-                onSignInComplete: (UserCredential credential) {
-                  _handleSignInComplete(credential);
-                },
-                onSignUpComplete: (UserCredential credential) {
-                  _handleSignInComplete(credential);
-                },
+                onSignInComplete: _handleSignInComplete,
+                onSignUpComplete: _handleSignInComplete,
               ),
             ],
           ),

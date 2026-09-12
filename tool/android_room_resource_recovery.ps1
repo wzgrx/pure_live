@@ -415,8 +415,7 @@ function Get-ResourceSnapshot {
     # Android's toybox `ps -T ... NAME` repeats the process name for every row
     # on some vendor builds. Read each task's comm file so native codec/player
     # workers remain observable instead of collapsing into the package name.
-    $threadCommand = 'su -c ''for t in /proc/' + $currentPid +
-        '/task/*; do n=${t##*/}; printf "%s " "$n"; cat "$t/comm"; done'''
+    $threadCommand = New-AndroidThreadSnapshotShellCommand -ProcessId $currentPid
     $threads = Invoke-TargetAdb @('shell', $threadCommand)
     $layers = Invoke-TargetAdb @('shell', 'dumpsys', 'SurfaceFlinger', '--list')
     Save-Text "$Name-proc-status.txt" $proc

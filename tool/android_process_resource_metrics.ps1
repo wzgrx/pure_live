@@ -22,6 +22,21 @@ function Get-AndroidInlineInteger {
     [long] $match.Groups[1].Value
 }
 
+function New-AndroidThreadSnapshotShellCommand {
+    [CmdletBinding()]
+    param([Parameter(Mandatory = $true)][string] $ProcessId)
+
+    if ($ProcessId -notmatch '^\d+$') {
+        throw "Android process id must contain digits only: $ProcessId"
+    }
+
+    # A task can exit between glob expansion and reading its comm file. Treat
+    # that single disappearing task as a skipped sample instead of failing the
+    # whole resource run; errors from adb/su and the loop itself remain visible.
+    'su -c ''for t in /proc/' + $ProcessId +
+        '/task/*; do n=${t##*/}; c=$(cat "$t/comm" 2>/dev/null) || continue; printf "%s %s\n" "$n" "$c"; done'''
+}
+
 function ConvertFrom-AndroidProcessResourceText {
     [CmdletBinding()]
     param(

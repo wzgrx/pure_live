@@ -6,6 +6,18 @@ function Assert-Equal {
     if ($Actual -ne $Expected) { throw "$Label expected '$Expected' but received '$Actual'." }
 }
 
+$threadCommand = New-AndroidThreadSnapshotShellCommand -ProcessId '12345'
+Assert-Equal $threadCommand `
+    'su -c ''for t in /proc/12345/task/*; do n=${t##*/}; c=$(cat "$t/comm" 2>/dev/null) || continue; printf "%s %s\n" "$n" "$c"; done''' `
+    'race-tolerant thread snapshot command'
+$invalidPidRejected = $false
+try {
+    New-AndroidThreadSnapshotShellCommand -ProcessId '12; id' | Out-Null
+} catch {
+    $invalidPidRejected = $true
+}
+if (-not $invalidPidRejected) { throw 'Thread snapshot command must reject a non-numeric process id.' }
+
 $snapshot = ConvertFrom-AndroidProcessResourceText `
     -ProcStatusLines @(
         'Name: pure_live',

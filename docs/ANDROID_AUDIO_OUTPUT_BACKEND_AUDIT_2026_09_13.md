@@ -122,8 +122,8 @@ TID 消失时跳过该样本，同时保留 adb、su 和循环级错误；PowerS
 2. 分别实测专家设置中的 `auto`、`audiotrack`、`aaudio`、`opensles` 与 `null`，并验证备份导入
    和升级迁移。
 3. 把视频、纯音频、全屏、PiP、后台、耳机/蓝牙和音频焦点场景纳入同一长时资源矩阵。
-4. 独立定位仍存在的 `AIBinder_linkToDeath` 告警；本轮日志中它出现 11 次，但没有 FATAL/ANR，
-   现有证据只支持把它与 OpenSL ES 告警拆开跟踪。
+4. 在正式签名 Release 和其他厂商设备上继续记录 `AIBinder_linkToDeath` 告警，连同系统 build
+   fingerprint、Codec2 组件名和发生阶段对照；不为消除日志而关闭硬件解码。
 
 本批 Windows Computer Use 与 Astra Light 使用次数均为 **0**。
 
@@ -153,3 +153,39 @@ K90 原生首轮补证还暴露 `open_settings` 仍使用两处历史缓存坐�
 - 最终 Pure Live 停止、系统桌面前台，stay-awake 恢复 `0`。
 
 以上补证仍不扩大 5 次单设备 Debug 运行的外推范围，A7-04 与宏观计数保持不变。
+
+## Binder death-recipient 告警归因边界
+
+本轮 11 条 `AIBinder_linkToDeath` 告警均处在 Android 原生媒体链附近，而不是 AudioTrack 或
+OpenSL ES 初始化附近。日志可复核的相邻关系包括：
+
+- `CCodec allocate(c2.qti.avc.decoder)` 之后紧接告警，再出现
+  `Created component [c2.qti.avc.decoder]`；
+- `CCodecBufferChannel ... start` 与 `MediaCodec ... STARTED` 之后再次出现同文告警；
+- 有限日志尾窗覆盖的连续四次 MediaCodec 会话重复出现这一结构，音频后端切换后告警仍存在，
+  且本轮没有 FATAL/ANR。
+
+Android Binder NDK 的 `AIBinder_DeathRecipient::linkToDeath` 源码明确：传入非空 cookie、但 death
+recipient 没有设置 `onUnlinked` 回调时会打印该告警。与本机时序相符的 Codec2 AIDL 客户端实现
+在 `AidlDeathManager` 中创建 death recipient，并把序号转成非空 cookie 传给
+`AIBinder_linkToDeath`，该实现片段没有先设置 `onUnlinked`。作为版本差异对照，AOSP 当前
+Codec2 AIDL `Component` 的另一条 death-recipient 路径已经在 link 前调用
+`AIBinder_DeathRecipient_setOnUnlinked`，并由回调释放上下文。Flutter `video_player` 的公开日志也
+记录了同类告警紧跟 `c2.qti.avc.decoder` 创建，说明该现象并非 Pure Live/media-kit 独有。
+
+参考：
+
+- Binder NDK 告警条件：
+  <https://android.googlesource.com/platform/frameworks/native/+/master/libs/binder/ndk/ibinder.cpp#598>
+- Codec2 客户端 `AidlDeathManager`：
+  <https://android.googlesource.com/platform/frameworks/av/+/aa71b5c2c1/media/codec2/hal/client/client.cpp#1893>
+- 当前 Codec2 AIDL `Component` 的 `onUnlinked` 生命周期：
+  <https://android.googlesource.com/platform/frameworks/av/+/refs/heads/main/media/codec2/hal/aidl/Component.cpp#533>
+- Flutter `video_player` 的同类 CCodec 日志：
+  <https://github.com/flutter/flutter/issues/176575>
+
+据此，本轮把它分类为 **Android 平台/厂商 Codec2 媒体栈告警的高可信归因线索**：本机日志与
+AOSP 调用形态一致，但缺少该 Android 17 系统映像的带符号栈和精确 frameworks/av 构建提交，
+所以不把源码对照写成设备二进制的最终根因证明。Pure Live 源码没有直接调用上述 Binder NDK
+API；当前也没有崩溃、ANR 或资源门禁失败支持在应用层禁用 MediaCodec/硬件解码。后续只在
+Release、其他系统版本或实际故障伴随出现时升级处理优先级。

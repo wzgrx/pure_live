@@ -699,12 +699,24 @@
       "sequences": {
         "open_settings": [
           {
-            "tap": "home.menu",
+            "tapSemantic": [
+              "菜单",
+              "Menu"
+            ],
             "waitMs": 350
           },
           {
-            "tap": "drawer.settings",
+            "tapSemantic": [
+              "设置",
+              "Settings"
+            ],
             "waitMs": 600
+          },
+          {
+            "assertSemantic": [
+              "主题设置",
+              "Theme Settings"
+            ]
           }
         ],
         "open_pip_danmaku_settings": [
@@ -3389,12 +3401,24 @@
       "sequences": {
         "open_settings": [
           {
-            "tap": "home.menu",
+            "tapSemantic": [
+              "菜单",
+              "Menu"
+            ],
             "waitMs": 350
           },
           {
-            "tap": "drawer.settings",
+            "tapSemantic": [
+              "设置",
+              "Settings"
+            ],
             "waitMs": 600
+          },
+          {
+            "assertSemantic": [
+              "主题设置",
+              "Theme Settings"
+            ]
           }
         ],
         "open_pip_danmaku_settings": [

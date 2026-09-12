@@ -12,6 +12,43 @@ $zhMenu = -join ([char[]]@(0x83DC, 0x5355))
 $zhSettings = -join ([char[]]@(0x8BBE, 0x7F6E))
 $zhPipDanmaku = -join ([char[]]@(0x5C0F, 0x7A97, 0x5F39, 0x5E55))
 $zhStylePreview = -join ([char[]]@(0x6837, 0x5F0F, 0x9884, 0x89C8))
+$zhThemeSettings = -join ([char[]]@(0x4E3B, 0x9898, 0x8BBE, 0x7F6E))
+
+$settingsProfiles = @($map.profiles.PSObject.Properties | Where-Object {
+    $_.Value.sequences.PSObject.Properties['open_settings']
+})
+if ($settingsProfiles.Count -eq 0) { throw 'At least one device profile must define open_settings.' }
+foreach ($profileProperty in $settingsProfiles) {
+    $settingsSequence = @($profileProperty.Value.sequences.open_settings)
+    $settingsSemanticSteps = @($settingsSequence | Where-Object { $_.PSObject.Properties['tapSemantic'] })
+    if ($settingsSemanticSteps.Count -ne 2 -or
+        @($settingsSequence | Where-Object { $_.PSObject.Properties['tap'] }).Count -ne 0) {
+        throw "Profile '$($profileProperty.Name)' open_settings must use live semantics for Menu and Settings."
+    }
+    foreach ($route in @(
+        [pscustomobject]@{ Step = 0; Aliases = @($zhMenu, 'Menu') },
+        [pscustomobject]@{ Step = 1; Aliases = @($zhSettings, 'Settings') }
+    )) {
+        $actualAliases = @($settingsSemanticSteps[$route.Step].tapSemantic | ForEach-Object { [string]$_ })
+        foreach ($alias in $route.Aliases) {
+            if ($actualAliases -notcontains $alias) {
+                throw "Profile '$($profileProperty.Name)' open_settings step $($route.Step) is missing '$alias'."
+            }
+        }
+    }
+    $settingsAssert = @($settingsSequence | Where-Object { $_.PSObject.Properties['assertSemantic'] }) |
+        Select-Object -Last 1
+    if ($null -eq $settingsAssert) {
+        throw "Profile '$($profileProperty.Name)' open_settings must verify its destination."
+    }
+    $settingsAssertAliases = @($settingsAssert.assertSemantic | ForEach-Object { [string]$_ })
+    foreach ($alias in @($zhThemeSettings, 'Theme Settings')) {
+        if ($settingsAssertAliases -notcontains $alias) {
+            throw "Profile '$($profileProperty.Name)' open_settings is missing destination alias '$alias'."
+        }
+    }
+}
+Write-Output 'PASS settings routes use live semantics and verify the destination page'
 
 $semanticSteps = @($sequence | Where-Object { $_.PSObject.Properties['tapSemantic'] })
 if ($semanticSteps.Count -ne 3) {

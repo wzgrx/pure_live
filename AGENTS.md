@@ -40,7 +40,7 @@ Read [BUILD_POLICY.md](BUILD_POLICY.md) before heavy commands. Use [docs/AGENT_W
 
 - Default to source/tests/local builds. Phone discovery, ADB, install, logs and device UI require a current explicit device request. Historical phone connections are not continuing consent.
 - Read-only upstream comparison is distinct from merging; merge only within the current requested scope. For requested device work, use `tool/run_android_device_test_turn.ps1` and its shared-device lease; see [docs/ANDROID_DEVICE_TEST_ROTATION.md](docs/ANDROID_DEVICE_TEST_ROTATION.md).
-- Reserve **Astra Light** for Windows client tests that genuinely need Computer Use visual interaction. Run at most one Astra task at a time; source review, ordinary tests, builds, documentation, Android work and non-Computer-Use checks stay on the regular configured model.
+- Reserve **Astra Light** only for Windows client tests that genuinely need Computer Use visual interaction. For each Windows client acceptance batch, create at most one Astra Light task in total (not merely one concurrently), and reuse that task for all GUI checks. Source review, ordinary tests, builds, documentation, Android work and non-Computer-Use checks stay on the regular configured model; this limit avoids unnecessary Astra cost.
 - Use subagents only when explicitly requested by the user or applicable instructions. Keep independent read-only work separate; serialize edits to shared files, builds and device leases. Preserve the configured model/effort unless the user requests a change.
 
 ## Completion

@@ -32,6 +32,7 @@ $uiProfile = $uiMap.profiles.k90pro_portrait_1200x2608
 $roomPoint = $uiProfile.points.'home.first_left_room'
 $controlsPoint = $uiProfile.points.'live.show_controls'
 $audioPoint = $uiProfile.points.'live.audio_toggle'
+$roomModeSettleMilliseconds = 3000
 $audioTransitionSettleMilliseconds = 5250
 
 $adbCandidates = @((Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'), 'adb.exe')
@@ -429,10 +430,12 @@ try {
     $result.coldHome = Get-ResourceSnapshot -Cycle -1 -Phase 'cold-home' -Name 'cold-home'
 
     $warmRoom = Enter-FirstRoom
+    Start-Sleep -Milliseconds $roomModeSettleMilliseconds
     $warmModes = Invoke-AudioModeExercise
     $warmHome = Exit-Room
     $result.warmup = [ordered]@{
         roomEnterMs = $warmRoom.ElapsedMs
+        roomModeSettleMs = $roomModeSettleMilliseconds
         audioMs = $warmModes.audioMs
         audioSettleMs = $warmModes.audioSettleMs
         homeReturnMs = $warmHome.ElapsedMs
@@ -448,12 +451,14 @@ try {
     for ($cycle = 1; $cycle -le $Cycles; $cycle++) {
         $cycleTimer = [Diagnostics.Stopwatch]::StartNew()
         $roomState = Enter-FirstRoom
+        Start-Sleep -Milliseconds $roomModeSettleMilliseconds
         $modeState = Invoke-AudioModeExercise
         $homeState = Exit-Room
         $cycleTimer.Stop()
         $cycleResults.Add([pscustomobject][ordered]@{
             cycle = $cycle
             roomEnterMs = $roomState.ElapsedMs
+            roomModeSettleMs = $roomModeSettleMilliseconds
             audioMs = $modeState.audioMs
             audioSettleMs = $modeState.audioSettleMs
             homeReturnMs = $homeState.ElapsedMs

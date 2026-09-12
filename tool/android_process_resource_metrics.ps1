@@ -25,11 +25,11 @@ function Get-AndroidInlineInteger {
 function ConvertFrom-AndroidProcessResourceText {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)][string[]] $ProcStatusLines,
-        [Parameter(Mandatory = $true)][string[]] $MeminfoLines,
-        [Parameter(Mandatory = $true)][string[]] $FdLines,
-        [Parameter(Mandatory = $true)][string[]] $ThreadLines,
-        [Parameter(Mandatory = $true)][string[]] $SurfaceLayerLines,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string[]] $ProcStatusLines,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string[]] $MeminfoLines,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string[]] $FdLines,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string[]] $ThreadLines,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string[]] $SurfaceLayerLines,
         [Parameter(Mandatory = $true)][string] $Package,
         [int] $Cycle = 0,
         [string] $Phase = ''

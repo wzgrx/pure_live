@@ -238,7 +238,12 @@ function Get-ResourceSnapshot {
     $proc = Invoke-TargetAdb @('shell', 'cat', "/proc/$currentPid/status")
     $meminfo = Invoke-TargetAdb @('shell', 'dumpsys', 'meminfo', $Package)
     $fds = Invoke-TargetAdb @('shell', "su -c 'ls -l /proc/$currentPid/fd'")
-    $threads = Invoke-TargetAdb @('shell', "su -c 'ps -T -p $currentPid -o TID,NAME'")
+    # Android's toybox `ps -T ... NAME` repeats the process name for every row
+    # on some vendor builds. Read each task's comm file so native codec/player
+    # workers remain observable instead of collapsing into the package name.
+    $threadCommand = 'su -c ''for t in /proc/' + $currentPid +
+        '/task/*; do n=${t##*/}; printf "%s " "$n"; cat "$t/comm"; done'''
+    $threads = Invoke-TargetAdb @('shell', $threadCommand)
     $layers = Invoke-TargetAdb @('shell', 'dumpsys', 'SurfaceFlinger', '--list')
     Save-Text "$Name-proc-status.txt" $proc
     Save-Text "$Name-meminfo.txt" $meminfo

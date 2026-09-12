@@ -9,6 +9,7 @@ function Assert-Equal {
 $snapshot = ConvertFrom-AndroidProcessResourceText `
     -ProcStatusLines @(
         'Name: pure_live',
+        '',
         'FDSize: 512',
         'VmSize: 123456 kB',
         'VmRSS: 654321 kB',
@@ -20,6 +21,7 @@ $snapshot = ConvertFrom-AndroidProcessResourceText `
     ) `
     -MeminfoLines @(
         'TOTAL PSS: 500000 TOTAL RSS: 700000 TOTAL SWAP PSS: 123',
+        '',
         ' Java Heap: 10000',
         ' Native Heap: 20000',
         ' Graphics: 30000',
@@ -31,6 +33,7 @@ $snapshot = ConvertFrom-AndroidProcessResourceText `
         ' WebViews: 0'
     ) `
     -FdLines @(
+        '',
         'lrwx------ 1 u0_a1 u0_a1 64 0 -> socket:[10]',
         'lrwx------ 1 u0_a1 u0_a1 64 1 -> pipe:[11]',
         'lrwx------ 1 u0_a1 u0_a1 64 2 -> anon_inode:[eventpoll]',
@@ -38,8 +41,9 @@ $snapshot = ConvertFrom-AndroidProcessResourceText `
         'lrwx------ 1 u0_a1 u0_a1 64 4 -> /dev/kgsl-3d0',
         'lr-x------ 1 u0_a1 u0_a1 64 5 -> /data/app/base.apk'
     ) `
-    -ThreadLines @('100 pure_live', '101 1.ui', '102 mpv/vo', '103 CCodecLooper') `
+    -ThreadLines @('', '100 pure_live', '101 1.ui', '102 mpv/vo', '103 CCodecLooper') `
     -SurfaceLayerLines @(
+        '',
         'com.mystyle.purelive/com.mystyle.purelive.MainActivity#12',
         'SurfaceView[com.mystyle.purelive] BLAST#13',
         'other.package BLAST#14'

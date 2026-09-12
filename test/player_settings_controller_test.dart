@@ -84,6 +84,24 @@ void main() {
       expect(defaultMpvAudioOutputDriverForPlatform(TargetPlatform.android), 'audiotrack,aaudio,opensles,');
       expect(defaultMpvAudioOutputDriverForPlatform(TargetPlatform.linux), 'alsa');
       expect(defaultMpvAudioOutputDriverForPlatform(TargetPlatform.windows), isNull);
+      expect(
+        effectiveMpvAudioOutputDriverForPlatform(
+          customOutput: true,
+          configuredDriver: 'auto',
+          platform: TargetPlatform.android,
+        ),
+        'audiotrack,aaudio,opensles,',
+        reason:
+            'Android automatic output must use the verified native fallback chain instead of a silent pseudo-driver',
+      );
+      expect(
+        effectiveMpvAudioOutputDriverForPlatform(
+          customOutput: true,
+          configuredDriver: 'null',
+          platform: TargetPlatform.android,
+        ),
+        'null',
+      );
     });
 
     test('retires the legacy global audio-only default', () {

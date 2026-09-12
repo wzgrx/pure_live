@@ -816,6 +816,57 @@ void main() {
     await manager.dispose();
   });
 
+  test('automatic MPV fallback suppresses audio before the replacement engine initializes', () async {
+    final mediaKit = _RecoveryFakePlayer(
+      PlayerEngine.mediaKit,
+      (_) => PlayerException(message: 'mpv output rejected', type: PlayerErrorType.native),
+    );
+    final fijk = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{
+      PlayerEngine.mediaKit: mediaKit,
+      PlayerEngine.fijk: fijk,
+    }, suppressAutomaticFallbackAudio: () => true);
+
+    await manager.initialize(engine: PlayerEngine.mediaKit);
+    await manager.play(
+      'https://cdn.example/null-output.flv',
+      const <String>['https://cdn.example/null-output.flv'],
+      const <String, String>{},
+      room: LiveRoom(roomId: 'null-output', platform: 'test'),
+    );
+
+    expect(manager.currentEngine, PlayerEngine.fijk);
+    expect(fijk.audioOutputSuppressionWrites, <bool>[true]);
+    expect(fijk.audioOutputWasSuppressedBeforeInit, isTrue);
+    expect(fijk.openedUrls, <String>['https://cdn.example/null-output.flv']);
+
+    await manager.dispose();
+  });
+
+  test('manual switch away from MPV keeps the selected engine audio enabled', () async {
+    final mediaKit = _RecoveryFakePlayer(PlayerEngine.mediaKit, (_) => null);
+    final fijk = _RecoveryFakePlayer(PlayerEngine.fijk, (_) => null);
+    final manager = _manager(<PlayerEngine, _RecoveryFakePlayer>{
+      PlayerEngine.mediaKit: mediaKit,
+      PlayerEngine.fijk: fijk,
+    }, suppressAutomaticFallbackAudio: () => true);
+
+    await manager.initialize(engine: PlayerEngine.mediaKit);
+    await manager.play(
+      'https://cdn.example/manual-engine.flv',
+      const <String>['https://cdn.example/manual-engine.flv'],
+      const <String, String>{},
+      room: LiveRoom(roomId: 'manual-engine', platform: 'test'),
+    );
+    await manager.switchEngine(PlayerEngine.fijk, isManual: true);
+
+    expect(manager.currentEngine, PlayerEngine.fijk);
+    expect(fijk.audioOutputSuppressionWrites, <bool>[false]);
+    expect(fijk.audioOutputWasSuppressedBeforeInit, isFalse);
+
+    await manager.dispose();
+  });
+
   test('initial engine allocation failure stays private and falls back', () async {
     final mediaKit = _RecoveryFakePlayer(
       PlayerEngine.mediaKit,
@@ -3331,6 +3382,7 @@ PlayerManager _manager(
   List<Duration> transientLiveRetryDelays = const <Duration>[Duration(milliseconds: 750), Duration(seconds: 2)],
   UnifiedPlayerCreator? playerCreator,
   PlaybackInputFactory? sourceInputFactory,
+  bool Function()? suppressAutomaticFallbackAudio,
 }) {
   return PlayerManager(
     playerCreator: playerCreator ?? (engine) => players[engine]!,
@@ -3353,10 +3405,11 @@ PlayerManager _manager(
     useHardStopOnExit: () => false,
     audioModeServiceSync: (_, _) async {},
     audioSessionStart: (_) async {},
+    suppressAutomaticFallbackAudio: suppressAutomaticFallbackAudio,
   );
 }
 
-class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer {
+class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer, AudioOutputSuppressionAwarePlayer {
   bool _privateInput = false;
   final openedPrivateInputs = <bool>[];
   final openedSourceIdentities = <String?>[];
@@ -3413,6 +3466,13 @@ class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer {
   int playCalls = 0;
   int disposeCalls = 0;
   int softStopCalls = 0;
+  final List<bool> audioOutputSuppressionWrites = <bool>[];
+  bool audioOutputWasSuppressedBeforeInit = false;
+
+  @override
+  void setAudioOutputSuppressed(bool suppressed) {
+    audioOutputSuppressionWrites.add(suppressed);
+  }
 
   void emitUnexpectedPlaying(bool playing) {
     _isPlaying = playing;
@@ -3439,6 +3499,7 @@ class _RecoveryFakePlayer implements UnifiedPlayer, PrivateInputAwarePlayer {
 
   @override
   Future<void> init({bool audioOnly = false}) async {
+    audioOutputWasSuppressedBeforeInit = audioOutputSuppressionWrites.isNotEmpty && audioOutputSuppressionWrites.last;
     final error = initFailure;
     if (error != null) throw error;
     if (initBarrier != null) await initBarrier;

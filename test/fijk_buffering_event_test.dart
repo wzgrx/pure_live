@@ -74,6 +74,17 @@ void main() {
     expect(native.pauseCalls, 0);
   });
 
+  test('suppressed fallback disables IJK audio before source preparation', () async {
+    adapter.setAudioOutputSuppressed(true);
+
+    await open();
+
+    expect(native.optionValues['an'], <Object?>[1]);
+    expect(native.optionValues['request-audio-focus'], <Object?>[0]);
+    expect(native.volumeWrites, <double>[0.0]);
+    expect(native.openCalls, 1);
+  });
+
   test('geometry and rendering events do not clear ongoing native buffering', () async {
     await open();
     await native.freeze(true);
@@ -163,6 +174,8 @@ class _NativeFijkFixture {
   var releaseCalls = 0;
   var eventCancelCalls = 0;
   bool freezeDuringPrepare = false;
+  final Map<String, List<Object?>> optionValues = <String, List<Object?>>{};
+  final List<double> volumeWrites = <double>[];
 
   void install() {
     messenger.setMockMethodCallHandler(plugin, (call) async {
@@ -175,6 +188,15 @@ class _NativeFijkFixture {
       return null;
     });
     messenger.setMockMethodCallHandler(player, (call) async {
+      if (call.method == 'setOption') {
+        final arguments = Map<Object?, Object?>.from(call.arguments as Map);
+        final key = arguments['key']! as String;
+        final value = arguments.containsKey('long') ? arguments['long'] : arguments['str'];
+        optionValues.putIfAbsent(key, () => <Object?>[]).add(value);
+      } else if (call.method == 'setVolume') {
+        final arguments = Map<Object?, Object?>.from(call.arguments as Map);
+        volumeWrites.add(arguments['volume']! as double);
+      }
       switch (call.method) {
         case 'setDataSource':
           openCalls++;

@@ -21,10 +21,14 @@ class FijkAdapter
         FijkPlayerAccessor,
         VideoFitAwarePlayer,
         SourceTransitionAwarePlayer,
-        PrivateInputAwarePlayer {
+        PrivateInputAwarePlayer,
+        AudioOutputSuppressionAwarePlayer {
   bool _privateInput = false;
+  bool _audioOutputSuppressed = false;
   @override
   void setPrivateInput(bool value, {String? sourceIdentity}) => _privateInput = value;
+  @override
+  void setAudioOutputSuppressed(bool suppressed) => _audioOutputSuppressed = suppressed;
   late final FijkPlayer _player;
 
   bool _initialized = false;
@@ -270,7 +274,12 @@ class FijkAdapter
         await _player.reset();
       }
       await _setupProxy(privateInput: privateInput);
-      await FijkHelper.setFijkOption(_player, enableCodec: SettingsService.to.player.enableCodec.v, headers: headers);
+      await FijkHelper.setFijkOption(
+        _player,
+        enableCodec: SettingsService.to.player.enableCodec.v,
+        disableAudioOutput: _audioOutputSuppressed,
+        headers: headers,
+      );
 
       // Native prepare can enter FijkState.error before the Future completes.
       // Enabling the source listener afterwards lost that sole callback and
@@ -288,7 +297,7 @@ class FijkAdapter
       if (!_playingSubject.value && _stateSubject.value != PlayerState.buffering) {
         _stateSubject.add(PlayerState.ready);
       }
-      await setVolume(1.0);
+      await setVolume(_audioOutputSuppressed ? 0.0 : 1.0);
     } catch (e, s) {
       _sourceOpening = false;
       _acceptSourceEvents = false;

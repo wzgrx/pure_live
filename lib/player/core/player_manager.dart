@@ -225,6 +225,7 @@ class PlayerManager {
   /// immediate low-power behaviour used by automatic ASMR and focused tests.
   final Duration? audioModeVideoWarmRetention;
   final UnifiedPlayerCreator _playerCreator;
+  final bool Function() _suppressAutomaticFallbackAudio;
   final bool Function() _useHardStopOnExit;
   final Floating? _androidFloatingOverride;
   bool get _usesAndroidPip => PlatformUtils.isAndroid || _androidFloatingOverride != null;
@@ -302,11 +303,13 @@ class PlayerManager {
     this._sourceInputFactory,
     Floating? androidFloating,
     bool Function()? useHardStopOnExit,
+    bool Function()? suppressAutomaticFallbackAudio,
     this._audioModeServiceSync,
     Future<void> Function(LiveRoom room)? audioSessionStart,
   }) : _androidFloatingOverride = androidFloating,
        _playerCreator = playerCreator ?? PlayerAdapterFactory.create,
        _useHardStopOnExit = useHardStopOnExit ?? (() => SettingsService.to.player.useHardStopOnExit.v),
+       _suppressAutomaticFallbackAudio = suppressAutomaticFallbackAudio ?? (() => false),
        _audioSessionStart =
            audioSessionStart ??
            ((room) => LiveAudioService.start(room.roomId!, room.title ?? "", room.nick ?? "", room.avatar)) {
@@ -1047,9 +1050,19 @@ class PlayerManager {
     }
   }
 
-  Future<UnifiedPlayer> _createPlayer(PlayerEngine engine, {bool audioOnly = false}) async {
+  Future<UnifiedPlayer> _createPlayer(
+    PlayerEngine engine, {
+    bool audioOnly = false,
+    bool suppressAudioOutput = false,
+  }) async {
     final player = await _playerCreator(engine);
     try {
+      if (player is AudioOutputSuppressionAwarePlayer) {
+        (player as AudioOutputSuppressionAwarePlayer).setAudioOutputSuppressed(suppressAudioOutput);
+        if (suppressAudioOutput) {
+          log('Suppressing audio output for automatic fallback engine: ${engine.name}', name: 'PlayerManager');
+        }
+      }
       await player.init(audioOnly: audioOnly);
       return player;
     } catch (_) {
@@ -1792,7 +1805,12 @@ class PlayerManager {
     var candidateInstalled = false;
 
     try {
-      candidate = await _createPlayer(engine, audioOnly: targetAudioOnly);
+      final suppressFallbackAudio =
+          !isManual &&
+          engine != PlayerEngine.mediaKit &&
+          oldDefaultEngine == PlayerEngine.mediaKit &&
+          _suppressAutomaticFallbackAudio();
+      candidate = await _createPlayer(engine, audioOnly: targetAudioOnly, suppressAudioOutput: suppressFallbackAudio);
       if (forceRecreate && identical(candidate, oldPlayer)) {
         throw StateError('Forced player recreation returned the active player instance');
       }

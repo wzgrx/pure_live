@@ -16,7 +16,12 @@ import 'package:better_player_plus/better_player_plus.dart';
 import 'package:pure_live/player/interface/video_player_accessor.dart';
 
 class BetterPlayerAdapter
-    implements UnifiedPlayer, BetterPlayerAccessor, VideoFitAwarePlayer, SourceTransitionAwarePlayer {
+    implements
+        UnifiedPlayer,
+        BetterPlayerAccessor,
+        VideoFitAwarePlayer,
+        SourceTransitionAwarePlayer,
+        AudioOutputSuppressionAwarePlayer {
   BetterPlayerController? _controller;
 
   bool _initialized = false;
@@ -25,8 +30,12 @@ class BetterPlayerAdapter
   bool _sourceTransitionPrepared = false;
   bool _acceptSourceEvents = false;
   bool _sourceOpening = false;
+  bool _audioOutputSuppressed = false;
   PlayerException? _deferredSourceError;
   BoxFit _videoFit = BoxFit.contain;
+
+  @override
+  void setAudioOutputSuppressed(bool suppressed) => _audioOutputSuppressed = suppressed;
 
   void Function(BetterPlayerEvent)? _eventListener;
 
@@ -46,7 +55,9 @@ class BetterPlayerAdapter
     _isAudioOnly = audioOnly;
 
     BetterPlayerConfiguration betterPlayerConfiguration = BetterPlayerConfiguration(
-      autoPlay: true,
+      // A suppressed automatic fallback starts only after its native volume is
+      // zero, avoiding a short audible burst during source initialization.
+      autoPlay: !_audioOutputSuppressed,
       fit: _videoFit,
       handleLifecycle: false,
       fullScreenByDefault: false,
@@ -207,7 +218,8 @@ class BetterPlayerAdapter
       _publishCurrentSourceState();
 
       _stateSubject.add(PlayerState.ready);
-      await setVolume(1.0);
+      await setVolume(_audioOutputSuppressed ? 0.0 : 1.0);
+      if (_audioOutputSuppressed) await play();
     } catch (e, s) {
       _sourceOpening = false;
       _acceptSourceEvents = false;

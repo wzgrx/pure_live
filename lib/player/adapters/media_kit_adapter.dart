@@ -103,9 +103,11 @@ class MediaKitAdapter
     // live packets before the fallback is attempted.
     await native.setProperty('hwdec-software-fallback', '1');
 
-    final audioOutput = SettingsService.to.player.customPlayerOutput.v
-        ? normalizeMpvAudioOutputDriverForPlatform(SettingsService.to.player.audioOutputDriver.v, defaultTargetPlatform)
-        : defaultMpvAudioOutputDriverForPlatform(defaultTargetPlatform);
+    final audioOutput = effectiveMpvAudioOutputDriverForPlatform(
+      customOutput: SettingsService.to.player.customPlayerOutput.v,
+      configuredDriver: SettingsService.to.player.audioOutputDriver.v,
+      platform: defaultTargetPlatform,
+    );
     if (audioOutput != null) {
       await native.setProperty('ao', audioOutput);
     }

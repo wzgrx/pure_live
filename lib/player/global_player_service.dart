@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
+
 import 'core/player_manager.dart';
 import 'models/player_engine.dart';
 import 'core/line_fallback_manager.dart';
@@ -8,6 +10,8 @@ import 'core/live_audio_service.dart';
 import 'core/playback_lifecycle_coordinator.dart';
 
 import 'package:pure_live/common/global/platform_utils.dart';
+import 'package:pure_live/common/services/settings_service.dart';
+import 'package:pure_live/player/utils/mpv_platform_profile.dart';
 
 class GlobalPlayerService {
   GlobalPlayerService._();
@@ -47,6 +51,11 @@ class GlobalPlayerService {
         supportedEngines: PlatformUtils.isMobile ? PlayerEngine.values : [PlayerEngine.mediaKit],
       ),
       lineManager: LineFallbackManager(),
+      suppressAutomaticFallbackAudio: () => isMpvAudioOutputDisabledForPlatform(
+        customOutput: SettingsService.to.player.customPlayerOutput.value,
+        configuredDriver: SettingsService.to.player.audioOutputDriver.value,
+        platform: defaultTargetPlatform,
+      ),
     );
     LiveAudioService.configurePlaybackCommands(
       play: playerManager.resume,

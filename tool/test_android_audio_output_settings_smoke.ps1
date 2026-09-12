@@ -37,6 +37,14 @@ if (@(Compare-Object ($acceptedDrivers | Sort-Object) ($expectedDrivers | Sort-O
     throw 'Audio-output smoke driver set differs from the Android product contract.'
 }
 
+$playbackProbeParameter = $ast.ParamBlock.Parameters | Where-Object {
+    $_.Name.VariablePath.UserPath -eq 'PlaybackProbe'
+}
+if ($null -eq $playbackProbeParameter -or
+    -not ($playbackProbeParameter.Attributes | Where-Object { $_.TypeName.Name -eq 'switch' })) {
+    throw 'Audio-output smoke must expose an opt-in PlaybackProbe switch.'
+}
+
 $labelTable = (Find-Assignment 'expectedLabels').Right.Find({
     param($node) $node -is [Management.Automation.Language.HashtableAst]
 }, $true).SafeGetValue()
@@ -63,7 +71,9 @@ foreach ($name in @(
     'Assert-CustomOutputEnabled',
     'Open-AudioOutputDialog',
     'Assert-AudioOutputDialog',
-    'Select-AudioOutput'
+    'Select-AudioOutput',
+    'Save-Screenshot',
+    'Invoke-AudioPlaybackProbe'
 )) {
     $function = $ast.Find({
         param($node)
@@ -95,6 +105,18 @@ foreach ($required in @(
     'Settings backup hash differs from device file.',
     'cat ''$remoteRestore'' > ''$dataFile''',
     'settingsRestoredExactly',
+    '--pid=$appProcessId',
+    'MediaCodec',
+    'screenFramesChanged',
+    'mediaKitLoaded',
+    'fijkLoaded',
+    'fijkAudioDisableOptionCount',
+    'fijkAudioRenderCount',
+    'activeAudioFlingerTrackCount',
+    'audioTrackStartCount',
+    'aaudioLineCount',
+    'openSlesLineCount',
+    'noFatalOrAnr',
     "input', 'keyevent', 'KEYCODE_HOME'",
     'am'', ''force-stop'', $Package'
 )) {
@@ -103,4 +125,5 @@ foreach ($required in @(
 foreach ($forbidden in @('adb devices', 'kill-server', 'reboot', 'tcpip 5555')) {
     if ($source -match [regex]::Escape($forbidden)) { throw "Forbidden device operation found: $forbidden" }
 }
+if ($source -match "logcat', '-c") { throw 'Playback probe must not clear the process-global logcat buffer.' }
 Write-Output 'PASS identity, semantic route, exact backup restoration and cleanup guards are present'

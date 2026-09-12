@@ -6,6 +6,7 @@ param(
     [string] $ExpectedModel = '25102RKBEC',
     [string] $ExpectedDevice = 'myron',
     [string] $ExpectedApkSha256 = '',
+    [switch] $PlaybackProbe,
     [ValidateSet('auto', 'audiotrack', 'aaudio', 'opensles', 'null')]
     [string[]] $Drivers = @('auto', 'audiotrack', 'aaudio', 'opensles', 'null')
 )
@@ -255,12 +256,153 @@ function Close-Dialog {
     Start-Sleep -Milliseconds 400
 }
 
+function Save-Text {
+    param([Parameter(Mandatory = $true)][string] $Name, [AllowNull()][object] $Value)
+    $Value | Out-File -LiteralPath (Join-Path $evidence $Name) -Encoding utf8 -Width 8192
+}
+
+function Save-Screenshot {
+    param([Parameter(Mandatory = $true)][string] $Name)
+    $remote = "/sdcard/purelive-audio-output-$PID-$Name.png"
+    $local = Join-Path $evidence "$Name.png"
+    try {
+        Invoke-TargetAdb @('shell', 'screencap', '-p', $remote) | Out-Null
+        Invoke-TargetAdb @('pull', $remote, $local) | Out-Null
+    } finally {
+        try { Invoke-TargetAdb @('shell', 'rm', '-f', $remote) | Out-Null } catch {}
+    }
+    $local
+}
+
+function Invoke-AudioPlaybackProbe {
+    param([Parameter(Mandatory = $true)][string] $Driver)
+    $phase = "driver-$Driver-playback"
+    Invoke-TargetAdb @('shell', 'am', 'force-stop', $Package) | Out-Null
+    $route = @(& (Join-Path $PSScriptRoot 'android_ui.ps1') `
+        -Sequence enter_first_bilibili_room -Serial $Serial -CaptureOnFailure *>&1)
+    if (-not $?) { throw ($route -join "`n") }
+    $route | Set-Content -LiteralPath (Join-Path $evidence "$phase-route.txt") -Encoding utf8
+
+    $roomDocument = $null
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
+        $candidate = Get-UiHierarchy "$phase-room-$attempt"
+        $raw = $candidate.OuterXml
+        if (($raw.Contains('弹幕列表') -and $raw.Contains('弹幕设置')) -or
+            ($raw.Contains('Danmaku List') -and $raw.Contains('Danmaku Settings'))) {
+            $roomDocument = $candidate
+            break
+        }
+        Start-Sleep -Seconds 1
+    }
+    if ($null -eq $roomDocument) { throw "${phase}: live-room semantics did not appear." }
+    Start-Sleep -Seconds 8
+    $roomDocument = Get-UiHierarchy "$phase-room-settled"
+    $frameOnePath = Save-Screenshot "$phase-frame-1"
+    Start-Sleep -Seconds 2
+    $frameTwoPath = Save-Screenshot "$phase-frame-2"
+    $frameOneSha256 = (Get-FileHash -LiteralPath $frameOnePath -Algorithm SHA256).Hash
+    $frameTwoSha256 = (Get-FileHash -LiteralPath $frameTwoPath -Algorithm SHA256).Hash
+    $screenFramesChanged = $frameOneSha256 -ne $frameTwoSha256
+
+    $pidText = (Invoke-TargetAdb @('shell', 'pidof', $Package)) -join ' '
+    if ($pidText.Trim() -notmatch '^(\d+)$') { throw "${phase}: expected one app PID, got '$pidText'." }
+    $appProcessId = $Matches[1]
+    $logcat = Invoke-TargetAdb @('logcat', '-d', '-v', 'threadtime', "--pid=$appProcessId", '-t', '4000')
+    Save-Text "$phase-logcat.txt" $logcat
+    $logText = $logcat -join "`n"
+
+    $audioFlinger = Invoke-TargetAdb @('shell', 'dumpsys', 'media.audio_flinger')
+    Save-Text "$phase-audio-flinger.txt" $audioFlinger
+    $audioFlingerText = $audioFlinger -join "`n"
+    $surfaceLayers = @(
+        Invoke-TargetAdb @('shell', 'dumpsys', 'SurfaceFlinger', '--list') |
+            Where-Object { [string] $_ -match [regex]::Escape($Package) }
+    )
+    Save-Text "$phase-surface-layers.txt" $surfaceLayers
+
+    $audioTrackStartCount = ([regex]::Matches($logText, '(?im)\bAudioTrack:\s+start\(')).Count
+    $aaudioLineCount = ([regex]::Matches($logText, '(?im)\bAAudio[A-Za-z_]*')).Count
+    $openSlesLineCount = ([regex]::Matches($logText, '(?im)(?:OpenSL\s*ES|OpenSLES|libOpenSLES)')).Count
+    $mediaKitLoaded = ([regex]::Matches(
+        $logText,
+        '(?im)media_kit:\s+NativeReferenceHolder:\s+Allocated\b'
+    )).Count -gt 0
+    $fijkLoaded = ([regex]::Matches(
+        $logText,
+        '(?im)(?:\[fijk\].*create player id:|IJKMEDIA:\s+ijkmediaplayer version)'
+    )).Count -gt 0
+    $betterPlayerLoaded = ([regex]::Matches(
+        $logText,
+        '(?im)(?:\bExoPlayerImpl\b|\bandroidx\.media3\b)'
+    )).Count -gt 0
+    $audioSuppressionAppliedCount = ([regex]::Matches(
+        $logText,
+        '(?im)PlayerManager:\s+Suppressing audio output for automatic fallback engine:'
+    )).Count
+    $fijkAudioDisableOptionCount = ([regex]::Matches(
+        $logText,
+        '(?im)\[fijk\].*setOption k:an, v:1\b'
+    )).Count
+    $fijkAudioRenderCount = ([regex]::Matches(
+        $logText,
+        '(?im)(?:first audio frame rendered|FFP_MSG_AUDIO_RENDERING_START|\[fijk\].*audio rendering started)'
+    )).Count
+    $activeAudioFlingerTrackCount = ([regex]::Matches(
+        $audioFlingerText,
+        "(?m)^\s*\d+\s+yes\s+$appProcessId/\s+\d+\b"
+    )).Count
+    $backendSignalMatched = switch ($Driver) {
+        'auto' { $audioTrackStartCount -gt 0 }
+        'audiotrack' { $audioTrackStartCount -gt 0 }
+        'aaudio' { $aaudioLineCount -gt 0 }
+        'opensles' { $openSlesLineCount -gt 0 }
+        'null' {
+            $audioTrackStartCount -eq 0 -and
+            $aaudioLineCount -eq 0 -and
+            $openSlesLineCount -eq 0 -and
+            $activeAudioFlingerTrackCount -eq 0 -and
+            $fijkAudioRenderCount -eq 0 -and
+            (-not $fijkLoaded -or $fijkAudioDisableOptionCount -gt 0)
+        }
+        default { $false }
+    }
+    $nativeVideoLineCount = ([regex]::Matches(
+        $logText,
+        '(?im)(?:CCodec.*c2\..*decoder|MediaCodec.*setState:\s*STARTED)'
+    )).Count
+    $fatalOrAnrCount = ([regex]::Matches($logText, '(?im)FATAL EXCEPTION|ANR in com\.mystyle\.purelive')).Count
+
+    [ordered]@{
+        pid = [int] $appProcessId
+        roomSemanticsVisible = $true
+        packageSurfaceLayerCount = $surfaceLayers.Count
+        nativeVideoLineCount = $nativeVideoLineCount
+        frameOneSha256 = $frameOneSha256
+        frameTwoSha256 = $frameTwoSha256
+        screenFramesChanged = $screenFramesChanged
+        mediaKitLoaded = $mediaKitLoaded
+        fijkLoaded = $fijkLoaded
+        betterPlayerLoaded = $betterPlayerLoaded
+        audioSuppressionAppliedCount = $audioSuppressionAppliedCount
+        fijkAudioDisableOptionCount = $fijkAudioDisableOptionCount
+        fijkAudioRenderCount = $fijkAudioRenderCount
+        audioTrackStartCount = $audioTrackStartCount
+        aaudioLineCount = $aaudioLineCount
+        openSlesLineCount = $openSlesLineCount
+        binderDeathRecipientWarningCount = ([regex]::Matches($logText, 'AIBinder_linkToDeath')).Count
+        activeAudioFlingerTrackCount = $activeAudioFlingerTrackCount
+        backendSignalMatched = [bool] $backendSignalMatched
+        noFatalOrAnr = $fatalOrAnrCount -eq 0
+    }
+}
+
 $result = [ordered]@{
     schemaVersion = 1
     startedAt = (Get-Date).ToString('o')
     serial = $Serial
     package = $Package
     requestedDrivers = @($Drivers)
+    playbackProbe = $PlaybackProbe.IsPresent
     expectedOptions = @($expectedLabelValues)
     identity = $null
     apk = [ordered]@{}
@@ -340,6 +482,7 @@ try {
         $relaunch = Assert-AudioOutputDialog `
             -Document $relaunchDialog.Document -ExpectedDriver $driver -Phase "$phase-relaunch"
         Close-Dialog
+        $playback = if ($PlaybackProbe.IsPresent) { Invoke-AudioPlaybackProbe $driver } else { $null }
         Invoke-TargetAdb @('shell', 'am', 'force-stop', $Package) | Out-Null
 
         $driverResults.Add([ordered]@{
@@ -351,6 +494,7 @@ try {
             relaunchDialogScrolls = $relaunchDialog.Scrolls
             immediate = $immediate
             relaunch = $relaunch
+            playback = $playback
             settingsSha256 = Get-DeviceFileHash $dataFile
         })
         $result.driverResults = @($driverResults)
@@ -362,6 +506,22 @@ try {
     }).Count -eq 0
     $result.checks.allChoicesAppliedImmediately = $driverResults.Count -eq $Drivers.Count
     $result.checks.allChoicesPersistedAcrossRelaunch = $driverResults.Count -eq $Drivers.Count
+    if ($PlaybackProbe.IsPresent) {
+        $result.checks.allPlaybackRoomsReached = @($driverResults | Where-Object {
+            -not $_.playback.roomSemanticsVisible
+        }).Count -eq 0
+        $result.checks.allPlaybackVideoPathsObserved = @($driverResults | Where-Object {
+            $_.playback.packageSurfaceLayerCount -lt 1 -or
+            $_.playback.nativeVideoLineCount -lt 1 -or
+            -not $_.playback.screenFramesChanged
+        }).Count -eq 0
+        $result.checks.allBackendSignalsMatched = @($driverResults | Where-Object {
+            -not $_.playback.backendSignalMatched
+        }).Count -eq 0
+        $result.checks.allPlaybackRunsFreeOfFatalOrAnr = @($driverResults | Where-Object {
+            -not $_.playback.noFatalOrAnr
+        }).Count -eq 0
+    }
 } catch {
     $failure = $_
     $result.error = $_.Exception.Message

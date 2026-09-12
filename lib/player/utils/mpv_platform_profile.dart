@@ -64,6 +64,31 @@ String? defaultMpvAudioOutputDriverForPlatform(TargetPlatform platform) => switc
   _ => null,
 };
 
+/// Resolves the value sent to libmpv after applying the platform contract.
+///
+/// Android's bundled libmpv exposes several concrete backends. Treat the
+/// user-facing `auto` choice as the same ordered chain used by the safe
+/// default instead of passing a pseudo-driver which has produced video with no
+/// audio device on real Android builds.
+String? effectiveMpvAudioOutputDriverForPlatform({
+  required bool customOutput,
+  required String configuredDriver,
+  required TargetPlatform platform,
+}) {
+  if (!customOutput) return defaultMpvAudioOutputDriverForPlatform(platform);
+  final normalized = normalizeMpvAudioOutputDriverForPlatform(configuredDriver, platform);
+  if (platform == TargetPlatform.android && normalized == 'auto') {
+    return defaultMpvAudioOutputDriverForPlatform(platform);
+  }
+  return normalized;
+}
+
+bool isMpvAudioOutputDisabledForPlatform({
+  required bool customOutput,
+  required String configuredDriver,
+  required TargetPlatform platform,
+}) => customOutput && normalizeMpvAudioOutputDriverForPlatform(configuredDriver, platform) == 'null';
+
 String normalizeMpvHardwareDecoderForPlatform(String value, TargetPlatform platform) =>
     _normalizeMpvOption(value, mpvHardwareDecodersForPlatform(platform), 'auto');
 

@@ -106,6 +106,16 @@ abstract interface class PrivateInputAwarePlayer {
   void setPrivateInput(bool value, {String? sourceIdentity});
 }
 
+/// Optional pre-initialization policy for a replacement engine.
+///
+/// An automatic fallback from MPV must preserve an explicitly selected null
+/// audio output. The manager calls this before [UnifiedPlayer.init], allowing
+/// autoplay adapters to disable their audio track before opening the source
+/// rather than briefly emitting sound and muting afterwards.
+abstract interface class AudioOutputSuppressionAwarePlayer {
+  void setAudioOutputSuppressed(bool suppressed);
+}
+
 /// Optional capability for a native player that can retry the current source
 /// with software video decoding before the manager allocates another engine.
 ///

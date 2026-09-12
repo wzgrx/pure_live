@@ -95,8 +95,50 @@ void main() {
 
     final audioOutputTitle = find.text('Audio Output Driver (--ao)');
     await _scrollPageUntilHitTestable(tester, audioOutputTitle);
-    final audioOutputValue = find.text('auto (Not available)');
+    final audioOutputValue = find.text('auto (Automatic fallback)');
     expect(tester.getRect(audioOutputValue).top, greaterThanOrEqualTo(tester.getRect(audioOutputTitle).bottom));
+    expect(tester.takeException(), isNull);
+    debugDefaultTargetPlatformOverride = null;
+  }, skip: !Platform.isWindows);
+
+  testWidgets('Android audio output menu exposes only native fallback drivers', (tester) async {
+    SettingsService.to.player.videoPlayerKey.v = 'mpv';
+    SettingsService.to.player.audioOutputDriver.v = 'auto';
+    await _pumpKernelPage(tester, translations, size: const Size(1200, 1600), platform: TargetPlatform.android);
+
+    final audioOutputTitle = find.text('Audio Output Driver (--ao)');
+    await _scrollPageUntilHitTestable(tester, audioOutputTitle);
+    expect(find.text('auto (Automatic fallback)'), findsOneWidget);
+    await tester.tap(audioOutputTitle.hitTestable());
+    await tester.pumpAndSettle();
+
+    final dialog = find.byType(AlertDialog);
+    expect(dialog, findsOneWidget);
+    for (final label in <String>[
+      'auto (Automatic fallback)',
+      'audiotrack (Android AudioTrack)',
+      'aaudio (Android 8.0+)',
+      'opensles (Legacy fallback)',
+      'null (No audio output)',
+    ]) {
+      expect(find.descendant(of: dialog, matching: find.text(label)), findsOneWidget);
+    }
+    for (final desktopOnly in <String>['wasapi', 'coreaudio', 'alsa', 'pulse']) {
+      expect(
+        find.descendant(
+          of: dialog,
+          matching: find.byWidgetPredicate((widget) => widget is Text && widget.data?.startsWith(desktopOnly) == true),
+        ),
+        findsNothing,
+      );
+    }
+
+    await tester.tap(
+      find.ancestor(of: find.text('aaudio (Android 8.0+)'), matching: find.byType(RadioListTile<String>)),
+    );
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.player.audioOutputDriver.v, 'aaudio');
+    expect(dialog, findsNothing);
     expect(tester.takeException(), isNull);
     debugDefaultTargetPlatformOverride = null;
   }, skip: !Platform.isWindows);
@@ -158,8 +200,9 @@ Future<void> _pumpKernelPage(
   Map<String, dynamic> translations, {
   required Size size,
   double textScale = 1,
+  TargetPlatform platform = TargetPlatform.windows,
 }) async {
-  debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+  debugDefaultTargetPlatformOverride = platform;
   addTearDown(() => debugDefaultTargetPlatformOverride = null);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;

@@ -107,6 +107,24 @@ function Get-NodeCenter {
     }
 }
 
+function Get-NodeBounds {
+    param([Parameter(Mandatory = $true)] $Node)
+    $match = [regex]::Match([string] $Node.bounds, '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$')
+    if (-not $match.Success) { return $null }
+    $left = [int] $match.Groups[1].Value
+    $top = [int] $match.Groups[2].Value
+    $right = [int] $match.Groups[3].Value
+    $bottom = [int] $match.Groups[4].Value
+    [pscustomobject]@{
+        Left = $left
+        Top = $top
+        Right = $right
+        Bottom = $bottom
+        Width = $right - $left
+        Height = $bottom - $top
+    }
+}
+
 function Find-SemanticNode {
     param([Parameter(Mandatory = $true)] [xml] $Document, [Parameter(Mandatory = $true)][string[]] $Labels)
     foreach ($label in $Labels) {
@@ -150,6 +168,50 @@ function Test-AudioOnlyPresentation {
     @($Document.SelectNodes('//node') | Where-Object {
         [string] $_.'content-desc' -eq '纯音频模式' -or [string] $_.text -eq '纯音频模式'
     }).Count -gt 0
+}
+
+function Find-AppFloatingBounds {
+    param([Parameter(Mandatory = $true)][xml] $Document)
+    foreach ($node in @($Document.SelectNodes('//node'))) {
+        if ($node.clickable -ne 'true' -or [string] $node.'content-desc' -or [string] $node.text) { continue }
+        $bounds = Get-NodeBounds $node
+        if ($null -eq $bounds) { continue }
+        # The app floating player is a medium, unlabelled draggable action near
+        # the upper-right. Exclude the full-screen semantics root, zero-area
+        # placeholders and ordinary labelled room cards.
+        if ($bounds.Width -ge 300 -and $bounds.Width -le 900 -and
+            $bounds.Height -ge 150 -and $bounds.Height -le 600 -and
+            $bounds.Top -ge 200 -and $bounds.Bottom -le 1000) {
+            return $bounds
+        }
+    }
+    $null
+}
+
+function Close-AppFloatingIfPresent {
+    param([Parameter(Mandatory = $true)][xml] $Document)
+    $bounds = Find-AppFloatingBounds $Document
+    if ($null -eq $bounds) { return $false }
+
+    # Mobile floating controls auto-hide after three seconds. Waiting makes the
+    # first close-position tap deterministically reveal them; the second tap
+    # then owns the visible close button instead of reopening the room.
+    Start-Sleep -Milliseconds 3500
+    $closeX = [int] [math]::Round($bounds.Right - $bounds.Width * 0.127)
+    $closeY = [int] [math]::Round($bounds.Top + $bounds.Height * 0.205)
+    Assert-TargetForeground
+    Invoke-TargetAdb @('shell', 'input', 'tap', [string] $closeX, [string] $closeY) | Out-Null
+    Start-Sleep -Milliseconds 300
+    Assert-TargetForeground
+    Invoke-TargetAdb @('shell', 'input', 'tap', [string] $closeX, [string] $closeY) | Out-Null
+
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    do {
+        Start-Sleep -Milliseconds 450
+        $updated = Get-UiHierarchy
+        if ($null -eq (Find-AppFloatingBounds $updated)) { return $true }
+    } while ($timer.Elapsed.TotalSeconds -lt 8)
+    throw 'Application-floating player did not close after its visible close action.'
 }
 
 function Wait-UiState {
@@ -251,9 +313,17 @@ function Enter-FirstRoom {
 }
 
 function Exit-Room {
+    $timer = [Diagnostics.Stopwatch]::StartNew()
     Assert-TargetForeground
     Invoke-TargetAdb @('shell', 'input', 'keyevent', '4') | Out-Null
-    Wait-UiState -State home -TimeoutSeconds 12
+    $home = Wait-UiState -State home -TimeoutSeconds 12
+    $floatingClosed = Close-AppFloatingIfPresent $home.Document
+    $settledHome = Wait-UiState -State home -TimeoutSeconds 8
+    [pscustomobject]@{
+        Document = $settledHome.Document
+        ElapsedMs = $timer.ElapsedMilliseconds
+        FloatingClosed = $floatingClosed
+    }
 }
 
 function Get-AppPid {
@@ -366,6 +436,7 @@ try {
         audioMs = $warmModes.audioMs
         audioSettleMs = $warmModes.audioSettleMs
         homeReturnMs = $warmHome.ElapsedMs
+        appFloatingClosed = $warmHome.FloatingClosed
     }
     Start-Sleep -Seconds $IdleReleaseSeconds
     $warmBaselineUi = Wait-UiState -State home -TimeoutSeconds 5 -EvidenceName 'warm-home-baseline'
@@ -386,6 +457,7 @@ try {
             audioMs = $modeState.audioMs
             audioSettleMs = $modeState.audioSettleMs
             homeReturnMs = $homeState.ElapsedMs
+            appFloatingClosed = $homeState.FloatingClosed
             totalMs = $cycleTimer.ElapsedMilliseconds
         })
         if (($cycle % $SampleEvery) -eq 0 -or $cycle -eq $Cycles) {
@@ -424,6 +496,11 @@ try {
     $final = $result.finalHome
     $result.checks.cyclesComplete = $cycleResults.Count -eq $Cycles
     $result.checks.audioModeSwitchesComplete = @($cycleResults | Where-Object { $_.audioMs -le 0 }).Count -eq 0
+    $result.checks.appFloatingOwnershipHandled = if ($result.warmup.appFloatingClosed) {
+        @($cycleResults | Where-Object { -not $_.appFloatingClosed }).Count -eq 0
+    } else {
+        @($cycleResults | Where-Object { $_.appFloatingClosed }).Count -eq 0
+    }
     $result.checks.processStable = (Get-AppPid) -eq $script:initialAppPid
     $result.checks.finalHomeUiAlive = Test-HomeUi $finalUi.Document
     $result.checks.finalFdBounded = $final.fdCount -le ($baseline.fdCount + 24)

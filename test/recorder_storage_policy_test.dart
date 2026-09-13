@@ -165,6 +165,24 @@ void main() {
     expect(await active.exists(), isFalse);
   });
 
+  test('cache limit counts active bytes while deleting only completed recordings', () async {
+    final service = serviceFor(null);
+    final managed = await service.getRecordDir();
+    final activeDirectory = await Directory(p.join(managed.path, 'bilibili', 'active')).create(recursive: true);
+    final completedDirectory = await Directory(p.join(managed.path, 'bilibili', 'completed')).create(recursive: true);
+    final active = await File(p.join(activeDirectory.path, 'active.ts')).writeAsBytes(List<int>.filled(4096, 1));
+    final completed = await File(p.join(completedDirectory.path, 'completed.mp4'))
+        .writeAsBytes(List<int>.filled(4096, 2));
+    service.protectDirectory(activeDirectory.path);
+
+    // The active file alone fits under this limit, but active + completed do
+    // not. The completed file must be reclaimed without touching live output.
+    await service.enforceLimit(maxMB: 0.005);
+
+    expect(await active.exists(), isTrue);
+    expect(await completed.exists(), isFalse);
+  });
+
   test('active-directory protection is reference counted', () async {
     final service = serviceFor(null);
     final managed = await service.getRecordDir();

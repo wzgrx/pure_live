@@ -195,17 +195,21 @@ class CacheService extends GetxService {
   /// Enforces the recording limit from one recursive snapshot.
   ///
   /// This avoids repeatedly scanning the full tree and guarantees bounded
-  /// work even when files disappear or become locked during rotation.
+  /// work even when files disappear or become locked during rotation. Active
+  /// output contributes to the limit but is never selected for deletion, so a
+  /// growing recording can still reclaim older completed files first.
   Future<void> enforceLimit({double maxMB = 2048}) async {
     final maxBytes = (maxMB.clamp(0, double.infinity) * 1024 * 1024).round();
-    final files = await _managedFiles(excludeProtected: true);
+    final files = await _managedFiles();
     final entries = <({File file, int size, DateTime modified})>[];
     var totalBytes = 0;
     for (final file in files) {
       try {
         final stat = await file.stat();
         totalBytes += stat.size;
-        entries.add((file: file, size: stat.size, modified: stat.modified));
+        if (!_isProtectedPath(file.path)) {
+          entries.add((file: file, size: stat.size, modified: stat.modified));
+        }
       } on FileSystemException {
         // File rotation between list/stat is expected.
       }

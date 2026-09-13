@@ -1,4 +1,4 @@
-# Pure helpers. Loading this file performs no device discovery or commands.
+﻿# Pure helpers. Loading this file performs no device discovery or commands.
 function Get-RecordingForegroundPackage {
     param([AllowEmptyString()][string] $ActivityDump)
     # Prefer top-resumed over a lower resumed activity on multi-window devices.

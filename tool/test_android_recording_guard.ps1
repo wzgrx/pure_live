@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -274,8 +274,15 @@ try {
     Assert-Equal $script:observations 48 'selection never commits has bounded observations'
     Assert-Equal @($script:calls | Where-Object { $_ -match 'shell input tap' }).Count 47 'last observation sends no unverified tap'
 
-    $english = $visible.Replace('第 1 个标签，共 2 个','Tab 1 of 2').Replace('第 2 个标签，共 2 个','Tab 2 of 2')
-    Assert-Equal @(Get-RecordingPlatformTabs -Xml $english -KnownLabels @('全部','Picarto')).Count 2 'English ordinals'
+    # Keep this English-ordinal fixture ASCII-only. Windows PowerShell 5.1
+    # reads UTF-8 scripts without a BOM through the active ANSI code page, and
+    # some mojibake byte sequences can turn the old Chinese Replace literal
+    # into an unmatched quote before the test even starts.
+    $english = '<hierarchy>' +
+        '<node content-desc="All&#10;Tab 1 of 2" enabled="true" clickable="true" selected="false" bounds="[50,100][150,180]"/>' +
+        '<node content-desc="Picarto&#10;Tab 2 of 2" enabled="true" clickable="true" selected="false" bounds="[150,100][250,180]"/>' +
+        '</hierarchy>'
+    Assert-Equal @(Get-RecordingPlatformTabs -Xml $english -KnownLabels @('All','Picarto')).Count 2 'English ordinals'
     $ambiguous = '<hierarchy>'+(New-Tab '全部' 1 2 50)+(New-Tab 'Picarto' 2 2 150 $false 300)+'</hierarchy>'
     Assert-Throws { Get-RecordingPlatformTabs -Xml $ambiguous -KnownLabels @('全部','Picarto') } 'ambiguous'
     Assert-Throws { Get-RecordingPlatformTabs -Xml '<hierarchy/>' -KnownLabels @('Picarto') } 'No visible'

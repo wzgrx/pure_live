@@ -1,4 +1,4 @@
-# Sourcing this helper never contacts Android. IO is bound to one context.
+﻿# Sourcing this helper never contacts Android. IO is bound to one context.
 function Initialize-ProxyContext {
     param([string]$Serial, $AdbExecutable, [string]$EvidenceDirectory)
     if ([string]::IsNullOrWhiteSpace($Serial)) { throw 'An explicit proxy Serial is required.' }
@@ -292,11 +292,16 @@ function Save-ProxySession {
 
 function Read-ProxySession {
     param([string]$Path,[string]$Serial)
-    $s=Get-Content -LiteralPath $Path -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable
-    if($s.schemaVersion -ne 1 -or $s.serial -cne $Serial -or $s.package -cne 'com.mystyle.purelive' -or
-        $s.model -cne '25102RKBEC' -or $s.device -cne 'myron' -or
-        ($s.port -isnot [long] -and $s.port -isnot [int])){throw 'Proxy session identity/schema mismatch.'}
-    if($s.port -lt 1 -or $s.port -gt 65535){throw 'Invalid proxy session port.'}
+    # ConvertFrom-Json -AsHashtable starts in PowerShell 6. Build the flat
+    # session dictionary explicitly so the same recovery journal works in the
+    # Windows PowerShell 5.1 shell used by local/device operators.
+    $decoded=Get-Content -LiteralPath $Path -Raw -Encoding utf8 | ConvertFrom-Json
+    $s=[ordered]@{}
+    foreach($property in @($decoded.PSObject.Properties)){$s[$property.Name]=$property.Value}
+    if($s['schemaVersion'] -ne 1 -or $s['serial'] -cne $Serial -or $s['package'] -cne 'com.mystyle.purelive' -or
+        $s['model'] -cne '25102RKBEC' -or $s['device'] -cne 'myron' -or
+        ($s['port'] -isnot [long] -and $s['port'] -isnot [int])){throw 'Proxy session identity/schema mismatch.'}
+    if($s['port'] -lt 1 -or $s['port'] -gt 65535){throw 'Invalid proxy session port.'}
     foreach($key in @('ownedReverse','reverseUncertain','uiMayHaveChanged','previousApp','previousPlayer')){
         if($s[$key] -isnot [bool]){throw "Invalid proxy session flag: $key"}
     }

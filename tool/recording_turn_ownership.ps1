@@ -1,4 +1,4 @@
-# Read-only ownership gates shared by the recording smoke and proxy wrapper.
+﻿# Read-only ownership gates shared by the recording smoke and proxy wrapper.
 function Test-RecordingRuntimeIdle {
     param([AllowEmptyString()][string] $ServiceDump, [switch] $AllowPlaybackServices,
         [string] $Package = 'com.mystyle.purelive')

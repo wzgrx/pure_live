@@ -4,6 +4,23 @@ param()
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
+# Windows PowerShell 5.1 decodes a UTF-8 script without a BOM through the
+# active ANSI code page. Non-ASCII UI semantics can then become different
+# labels or even syntax characters before a fixture/device script starts.
+$trackedPowerShellFiles = @(& git -C $repoRoot ls-files -- '*.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'Failed to enumerate tracked PowerShell files.' }
+foreach ($relativePath in $trackedPowerShellFiles) {
+    $bytes = [IO.File]::ReadAllBytes((Join-Path $repoRoot $relativePath))
+    $hasUtf8Bom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
+    $hasNonAscii = $false
+    foreach ($byte in $bytes) {
+        if ($byte -ge 0x80) { $hasNonAscii = $true; break }
+    }
+    if ($hasNonAscii -and -not $hasUtf8Bom) {
+        throw "PowerShell file with non-ASCII text must use a UTF-8 BOM for Windows PowerShell 5.1: $relativePath"
+    }
+}
+
 $requiredFiles = @(
     'BUILD_POLICY.md',
     'MAINTENANCE_POLICY.md',

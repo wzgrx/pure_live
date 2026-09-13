@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [代理端点持久化与备份边界审计](PROXY_ENDPOINT_PERSISTENCE_AUDIT_2026_09_13.md)：应用/播放器代理的 Hive 修复、严格备份类型、1～65535 端口合同、7897 回落值与导出归一化。
+
 - [应用退出与 IPTV 自动同步计时设置审计](DEFERRED_TIMER_SETTINGS_AUDIT_2026_09_13.md)：退出分钟数、同步小时数的持久化/备份/调度边界，超范围输入反馈及单次重启语义。
 
 - [网络故障诊断与播放恢复审计](NETWORK_FAILURE_RECOVERY_AUDIT_2026_09_13.md)：Android/curl/POSIX/Windows DNS 语法、HTTP 5xx、具体错误优先级及既有有界线路/源/内核恢复链。

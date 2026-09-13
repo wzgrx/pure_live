@@ -37,7 +37,8 @@ foreach ($name in @(
     'Get-TreeManifest',
     'Assert-TreeManifestEqual',
     'Copy-RootFileToHost',
-    'Get-ProcessLog'
+    'Get-ProcessLog',
+    'Test-ExternalUriGrant'
 )) {
     $function = $ast.Find({
         param($node)
@@ -80,6 +81,10 @@ foreach ($required in @(
     'content://com\.android\.externalstorage\.documents',
     'android\.intent\.action\.SEND_MULTIPLE',
     'externalDocumentsProviderUrisGranted',
+    'sourcePkg=com\.android\.externalstorage',
+    'targetPkg=$([regex]::Escape($Package))',
+    'playlistToTarget',
+    'epgToTarget',
     'uiProducedSendMultipleIntent',
     'uiDrivenMultipleShareImported',
     'SELECT id, name, type FROM providers WHERE name = ?',

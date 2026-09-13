@@ -294,6 +294,15 @@ function Get-ProcessLog {
     [ordered]@{ pid = [int] $pidText; text = $text }
 }
 
+function Test-ExternalUriGrant {
+    param(
+        [Parameter(Mandatory = $true)][string] $PermissionDump,
+        [Parameter(Mandatory = $true)][string] $FileName
+    )
+    $pattern = "(?m)^\s*UriPermission\{[^\r\n]*content://com\.android\.externalstorage\.documents[^\r\n]*$([regex]::Escape($FileName))[^\r\n]*\}\r?\n\s*targetUserId=\d+\s+sourcePkg=com\.android\.externalstorage\s+targetPkg=$([regex]::Escape($Package))\s*$"
+    $PermissionDump -match $pattern
+}
+
 $settingsPath = "/data/user/0/$Package/app_flutter/PURE_LIVE/HIVE_DB/app_settings.hive"
 $pureLiveRoot = "/data/user/0/$Package/app_flutter/PURE_LIVE"
 $iptvCachePath = "$pureLiveRoot/IPTV_CACHE"
@@ -336,6 +345,7 @@ $programme = "DocumentsUI Programme $fixtureTag"
 $result = [ordered]@{
     schemaVersion = 1
     startedAt = (Get-Date).ToString('o')
+    evidenceDirectory = $evidence
     serial = $Serial
     package = $Package
     buildMode = $BuildMode
@@ -493,12 +503,13 @@ try {
     [IO.File]::WriteAllText((Join-Path $evidence 'target-activity.txt'), $targetActivityDump, [Text.UTF8Encoding]::new($false))
     $systemLog = (Invoke-Adb @('logcat', '-d', '-v', 'threadtime', '-T', $logStartTime)) -join "`n"
     [IO.File]::WriteAllText((Join-Path $evidence 'system-since-share.log'), $systemLog, [Text.UTF8Encoding]::new($false))
-    $uriEvidence = $uriPermissionDump + "`n" + $targetActivityDump + "`n" + $systemLog
-    if ($uriEvidence -notmatch 'content://com\.android\.externalstorage\.documents' -or
-        -not $uriEvidence.Contains($playlistFileName) -or
-        -not $uriEvidence.Contains($epgFileName)) {
-        throw 'Runtime evidence did not retain both external DocumentsProvider content URI grants.'
+    $playlistGrant = Test-ExternalUriGrant $uriPermissionDump $playlistFileName
+    $epgGrant = Test-ExternalUriGrant $uriPermissionDump $epgFileName
+    $result.import.uriGrantEvidence = [ordered]@{ playlistToTarget = $playlistGrant; epgToTarget = $epgGrant }
+    if (-not $playlistGrant -or -not $epgGrant) {
+        throw 'Runtime permission state did not retain both external DocumentsProvider content URI grants to Pure Live.'
     }
+    $uriEvidence = $uriPermissionDump + "`n" + $targetActivityDump + "`n" + $systemLog
     if ($uriEvidence -notmatch 'android\.intent\.action\.SEND_MULTIPLE') {
         throw 'Runtime evidence did not identify the UI-driven intent as ACTION_SEND_MULTIPLE.'
     }

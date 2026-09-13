@@ -23,6 +23,7 @@ For code-only changes that still require native acceptance later, preserve the e
 
 - `tool/validate_build_policy.ps1`: static repository policy checks, no Flutter/Gradle/ADB.
 - `tool/validate_agent_workflow.py`: instruction links and workflow graph/trigger invariants (requires Python 3.11+ and PyYAML in the developer environment).
+- Acceptance status, numbered matrix or platform-count changes: `python -m unittest discover -s tool/tests -p test_acceptance_status_alignment.py`; checks all 62 unique A/W rows, current PASS/RUN/NR totals and the registered-site count against the platform-expansion head.
 - Release text/input changes: `python -m unittest discover -s tool/tests -p test_release_workflow_data.py`; needs Bash (Git Bash on Windows, optionally selected by `BASH_EXE`). Executes only tag validation and Markdown rendering in temporary directories; no release calls.
 - `tool/local_ci.ps1 -Scope Focused -TestPath <paths> [-Analyze] [-SkipPubGet]`: affected code verification.
 - `tool/local_ci.ps1 -Scope Full`: formal delivery quality gate.

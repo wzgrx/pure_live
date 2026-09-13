@@ -1,3 +1,13 @@
+const int defaultProxyPort = 7897;
+const int minProxyPort = 1;
+const int maxProxyPort = 65535;
+
+bool isValidProxyPort(int port) => port >= minProxyPort && port <= maxProxyPort;
+
+/// Repairs a persisted or imported port instead of passing an invalid socket
+/// endpoint into every application, player and recorder proxy consumer.
+int normalizeStoredProxyPort(int port) => isValidProxyPort(port) ? port : defaultProxyPort;
+
 /// Normalizes a proxy host entered with desktop or mobile input methods.
 ///
 /// Chinese keyboards commonly turn an ASCII dot into `。` or `．`. Passing
@@ -21,7 +31,7 @@ String normalizeProxyHost(String value) {
 /// user to finish, but must not replace the last working proxy endpoint.
 int? parseProxyPortInput(String value) {
   final port = int.tryParse(value.trim());
-  if (port == null || port < 1 || port > 65535) return null;
+  if (port == null || !isValidProxyPort(port)) return null;
   return port;
 }
 
@@ -35,7 +45,7 @@ String buildProxyDirective({required bool enabled, required String host, require
     return 'DIRECT';
   }
   final normalizedHost = normalizeProxyHost(host);
-  if (!enabled || normalizedHost.isEmpty || port < 1 || port > 65535) {
+  if (!enabled || normalizedHost.isEmpty || !isValidProxyPort(port)) {
     return 'DIRECT';
   }
 

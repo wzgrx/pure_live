@@ -18,6 +18,13 @@ void main() {
       expect(parseProxyPortInput('12.5'), isNull);
     });
 
+    test('repairs stored TCP ports with the product default', () {
+      expect(normalizeStoredProxyPort(1), 1);
+      expect(normalizeStoredProxyPort(65535), 65535);
+      expect(normalizeStoredProxyPort(0), defaultProxyPort);
+      expect(normalizeStoredProxyPort(65536), defaultProxyPort);
+    });
+
     test('builds direct and proxy directives without invalid half-edited values', () {
       expect(buildProxyDirective(enabled: false, host: '127.0.0.1', port: 7897), 'DIRECT');
       expect(buildProxyDirective(enabled: true, host: '', port: 7897), 'DIRECT');

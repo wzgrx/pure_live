@@ -1,24 +1,30 @@
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/core/common/http_client.dart';
-import 'package:pure_live/core/common/proxy_routing.dart';
+import 'package:pure_live/core/common/proxy_routing.dart' as proxy_routing;
 
 class ProxySettingsController extends GetxController {
+  static const int defaultProxyPort = proxy_routing.defaultProxyPort;
+
   final RxBool enableProxy = hiveBool('enableProxy', false);
   final RxString proxyHost = hiveString('proxyHost', '');
-  final RxInt proxyPort = hiveInt('proxyPort', 7897);
+  final RxInt proxyPort = hiveInt('proxyPort', defaultProxyPort);
 
   // app proxy settings
   final RxBool enableAppProxy = hiveBool('enableAppProxy', false);
   final RxString appProxyHost = hiveString('appProxyHost', '');
-  final RxInt appProxyPort = hiveInt('appProxyPort', 7897);
+  final RxInt appProxyPort = hiveInt('appProxyPort', defaultProxyPort);
   @override
   void onInit() {
     super.onInit();
 
-    final normalizedAppHost = normalizeProxyHost(appProxyHost.v);
+    final normalizedAppHost = proxy_routing.normalizeProxyHost(appProxyHost.v);
     if (normalizedAppHost != appProxyHost.v) appProxyHost.v = normalizedAppHost;
-    final normalizedPlayerHost = normalizeProxyHost(proxyHost.v);
+    final normalizedAppPort = proxy_routing.normalizeStoredProxyPort(appProxyPort.v);
+    if (normalizedAppPort != appProxyPort.v) appProxyPort.v = normalizedAppPort;
+    final normalizedPlayerHost = proxy_routing.normalizeProxyHost(proxyHost.v);
     if (normalizedPlayerHost != proxyHost.v) proxyHost.v = normalizedPlayerHost;
+    final normalizedPlayerPort = proxy_routing.normalizeStoredProxyPort(proxyPort.v);
+    if (normalizedPlayerPort != proxyPort.v) proxyPort.v = normalizedPlayerPort;
 
     ever<bool>(enableAppProxy, (_) => _refreshDioConnections());
     ever<String>(appProxyHost, (_) => _refreshDioConnections());
@@ -34,11 +40,11 @@ class ProxySettingsController extends GetxController {
   Map<String, dynamic> toJson() {
     return {
       'enableProxy': enableProxy.v,
-      'proxyHost': normalizeProxyHost(proxyHost.v),
-      'proxyPort': proxyPort.v,
+      'proxyHost': proxy_routing.normalizeProxyHost(proxyHost.v),
+      'proxyPort': proxy_routing.normalizeStoredProxyPort(proxyPort.v),
       'enableAppProxy': enableAppProxy.v,
-      'appProxyHost': normalizeProxyHost(appProxyHost.v),
-      'appProxyPort': appProxyPort.v,
+      'appProxyHost': proxy_routing.normalizeProxyHost(appProxyHost.v),
+      'appProxyPort': proxy_routing.normalizeStoredProxyPort(appProxyPort.v),
     };
   }
 
@@ -46,11 +52,11 @@ class ProxySettingsController extends GetxController {
   static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
     return {
       'enableProxy': (json['enableProxy'] ?? false) as bool,
-      'proxyHost': normalizeProxyHost((json['proxyHost'] ?? '').toString()),
-      'proxyPort': (json['proxyPort'] ?? 1080) as int,
+      'proxyHost': proxy_routing.normalizeProxyHost((json['proxyHost'] ?? '') as String),
+      'proxyPort': proxy_routing.normalizeStoredProxyPort((json['proxyPort'] ?? defaultProxyPort) as int),
       'enableAppProxy': (json['enableAppProxy'] ?? false) as bool,
-      'appProxyHost': normalizeProxyHost((json['appProxyHost'] ?? '').toString()),
-      'appProxyPort': (json['appProxyPort'] ?? 1080) as int,
+      'appProxyHost': proxy_routing.normalizeProxyHost((json['appProxyHost'] ?? '') as String),
+      'appProxyPort': proxy_routing.normalizeStoredProxyPort((json['appProxyPort'] ?? defaultProxyPort) as int),
     };
   }
 
@@ -68,11 +74,11 @@ class ProxySettingsController extends GetxController {
     final proxy = rootConfig?['proxy'] as Map<String, dynamic>? ?? {};
     return {
       'enableProxy': proxy['enableProxy'] ?? false,
-      'proxyHost': proxy['proxyHost'] ?? '',
-      'proxyPort': proxy['proxyPort'] ?? 7897,
+      'proxyHost': proxy_routing.normalizeProxyHost((proxy['proxyHost'] ?? '') as String),
+      'proxyPort': proxy_routing.normalizeStoredProxyPort((proxy['proxyPort'] ?? defaultProxyPort) as int),
       'enableAppProxy': proxy['enableAppProxy'] ?? false,
-      'appProxyHost': proxy['appProxyHost'] ?? '',
-      'appProxyPort': proxy['appProxyPort'] ?? 7897,
+      'appProxyHost': proxy_routing.normalizeProxyHost((proxy['appProxyHost'] ?? '') as String),
+      'appProxyPort': proxy_routing.normalizeStoredProxyPort((proxy['appProxyPort'] ?? defaultProxyPort) as int),
     };
   }
 

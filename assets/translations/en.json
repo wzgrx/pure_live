@@ -1338,6 +1338,8 @@
     "items_per_page": "items/page",
     "rows": "Rows",
     "page_size_options_manage": "Page Size Options",
+    "page_size_value_range": "Enter a whole number from 1 to 100",
+    "page_size_value_duplicate": "That page size is already listed",
     "current_options": "Current Active Options",
     "adaptive_recommend": "Adaptive Auto",
     "cloud_backup": "Cloud Backup",

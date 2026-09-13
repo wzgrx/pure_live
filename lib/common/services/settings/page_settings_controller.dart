@@ -1,10 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:pure_live/common/services/utils/hive_rx.dart';
 
 class PageSettingsController extends GetxController {
+  static const int minPageSize = 1;
+  static const int maxPageSize = 100;
+
   static PageSettingsController get to => Get.find<PageSettingsController>();
 
   final RxBool showPageSizeSelector = hiveBool('page_show_size_selector', true);
@@ -44,6 +48,19 @@ class PageSettingsController extends GetxController {
     }
   }
 
+  static bool isValidPageSize(int value) => value >= minPageSize && value <= maxPageSize;
+
+  static List<int> normalizePageSizeOptions(Iterable<int> values) {
+    final normalized = values.where(isValidPageSize).toSet().toList()..sort();
+    if (normalized.isNotEmpty) return normalized;
+    return getInitPageSizeOptions().where(isValidPageSize).toSet().toList()..sort();
+  }
+
+  static int normalizeDefaultPageSize(int value, Iterable<int> options) {
+    final normalizedOptions = normalizePageSizeOptions(options);
+    return normalizedOptions.contains(value) ? value : normalizedOptions.first;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -51,21 +68,21 @@ class PageSettingsController extends GetxController {
 
     _workers.add(
       ever(pageSizeOptions, (List<int> options) {
-        if (options.isNotEmpty && !options.contains(defaultPageSize.v)) {
-          defaultPageSize.v = options.first;
+        final normalized = normalizePageSizeOptions(options);
+        if (!listEquals(options, normalized)) {
+          pageSizeOptions.assignAll(normalized);
+          return;
         }
+        _pageSizeOptionsRaw.v = jsonEncode(normalized);
+        final normalizedDefault = normalizeDefaultPageSize(defaultPageSize.v, normalized);
+        if (normalizedDefault != defaultPageSize.v) defaultPageSize.v = normalizedDefault;
       }),
     );
 
     _workers.add(
       debounce(defaultPageSize, (int size) {
-        if (size <= 0 || !pageSizeOptions.contains(size)) {
-          if (pageSizeOptions.isNotEmpty) {
-            defaultPageSize.v = pageSizeOptions.first;
-          } else {
-            defaultPageSize.v = _getInitPageSize();
-          }
-        }
+        final normalized = normalizeDefaultPageSize(size, pageSizeOptions);
+        if (normalized != size) defaultPageSize.v = normalized;
       }, time: const Duration(milliseconds: 300)),
     );
   }
@@ -79,43 +96,52 @@ class PageSettingsController extends GetxController {
   }
 
   void _loadPageSizeOptions() {
+    late final List<int> decodedOptions;
     try {
       final List<dynamic> decoded = jsonDecode(_pageSizeOptionsRaw.v);
-      pageSizeOptions.assignAll(decoded.cast<int>());
+      decodedOptions = List<int>.from(decoded);
     } catch (_) {
-      pageSizeOptions.assignAll(getInitPageSizeOptions());
+      decodedOptions = getInitPageSizeOptions();
     }
+    final normalized = normalizePageSizeOptions(decodedOptions);
+    pageSizeOptions.assignAll(normalized);
+    final encoded = jsonEncode(normalized);
+    if (_pageSizeOptionsRaw.v != encoded) _pageSizeOptionsRaw.v = encoded;
+    final normalizedDefault = normalizeDefaultPageSize(defaultPageSize.v, normalized);
+    if (defaultPageSize.v != normalizedDefault) defaultPageSize.v = normalizedDefault;
   }
 
   void saveAllPageSizeOptions(List<int> newOptions) {
-    if (newOptions.isNotEmpty) {
-      newOptions.sort();
-      pageSizeOptions.assignAll(newOptions);
-      _pageSizeOptionsRaw.v = jsonEncode(newOptions);
-    }
+    final normalized = normalizePageSizeOptions(newOptions);
+    pageSizeOptions.assignAll(normalized);
+    _pageSizeOptionsRaw.v = jsonEncode(normalized);
+    final normalizedDefault = normalizeDefaultPageSize(defaultPageSize.v, normalized);
+    if (defaultPageSize.v != normalizedDefault) defaultPageSize.v = normalizedDefault;
   }
 
   Map<String, dynamic> toJson() {
+    final options = normalizePageSizeOptions(pageSizeOptions);
     return {
       'showPageSizeSelector': showPageSizeSelector.v,
       'showGotoButton': showGotoButton.v,
       'showScrollToTopBtn': showScrollToTopBtn.v,
-      'defaultPageSize': defaultPageSize.v,
-      'pageSizeOptions': pageSizeOptions.toList(),
+      'defaultPageSize': normalizeDefaultPageSize(defaultPageSize.v, options),
+      'pageSizeOptions': options,
     };
   }
 
   static Map<String, dynamic> parseConfig(Map<String, dynamic> json) {
     final raw = json['pageSizeOptions'] as List?;
     // Eager copy: a lazy cast could throw after scalar settings were committed.
-    final options = raw == null ? getInitPageSizeOptions() : List<int>.from(raw);
+    final options = normalizePageSizeOptions(raw == null ? getInitPageSizeOptions() : List<int>.from(raw));
+    final defaultSize = normalizeDefaultPageSize(json['defaultPageSize'] as int? ?? _getInitPageSize(), options);
     return {
-      'showPageSizeSelector': json['showPageSizeSelector'] as bool? ?? false,
-      'showGotoButton': json['showGotoButton'] as bool? ?? false,
+      'showPageSizeSelector': json['showPageSizeSelector'] as bool? ?? true,
+      'showGotoButton': json['showGotoButton'] as bool? ?? true,
       'showScrollToTopBtn': json['showScrollToTopBtn'] as bool? ?? true,
-      'defaultPageSize': json['defaultPageSize'] as int? ?? _getInitPageSize(),
+      'defaultPageSize': defaultSize,
       'pageSizeOptions': options,
-      'pageSizeOptionsRaw': raw == null ? '' : jsonEncode(options),
+      'pageSizeOptionsRaw': jsonEncode(options),
     };
   }
 
@@ -124,19 +150,24 @@ class PageSettingsController extends GetxController {
     showPageSizeSelector.v = parsed['showPageSizeSelector'];
     showGotoButton.v = parsed['showGotoButton'];
     showScrollToTopBtn.v = parsed['showScrollToTopBtn'];
-    defaultPageSize.v = parsed['defaultPageSize'];
     pageSizeOptions.assignAll(parsed['pageSizeOptions']);
     _pageSizeOptionsRaw.v = parsed['pageSizeOptionsRaw'];
+    defaultPageSize.v = parsed['defaultPageSize'];
   }
 
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {
     final page = rootConfig?['page'] as Map<String, dynamic>? ?? {};
+    final raw = page['pageSizeOptions'] as List?;
+    final options = normalizePageSizeOptions(raw == null ? getInitPageSizeOptions() : List<int>.from(raw));
     return {
-      'showPageSizeSelector': page['showPageSizeSelector'] ?? true,
-      'showGotoButton': page['showGotoButton'] ?? true,
-      'showScrollToTopBtn': page['showScrollToTopBtn'] ?? true,
-      'defaultPageSize': page['defaultPageSize'] ?? PageSettingsController._getInitPageSize(),
-      'pageSizeOptions': page['pageSizeOptions'] ?? PageSettingsController.getInitPageSizeOptions(),
+      'showPageSizeSelector': page['showPageSizeSelector'] as bool? ?? true,
+      'showGotoButton': page['showGotoButton'] as bool? ?? true,
+      'showScrollToTopBtn': page['showScrollToTopBtn'] as bool? ?? true,
+      'defaultPageSize': normalizeDefaultPageSize(
+        page['defaultPageSize'] as int? ?? PageSettingsController._getInitPageSize(),
+        options,
+      ),
+      'pageSizeOptions': options,
     };
   }
 

@@ -73,6 +73,33 @@ void main() {
     expect(find.text('Add').hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('page-size editor explains range and duplicate errors before committing', (tester) async {
+    pageController.saveAllPageSizeOptions(PageSettingsController.getInitPageSizeOptions());
+    await _openPage(tester, pageController: pageController, size: const Size(900, 600));
+    await tester.tap(find.text('Page Size Options'));
+    await tester.pumpAndSettle();
+
+    final input = find.byKey(const Key('page-size-custom-input'));
+    final add = find.byKey(const Key('page-size-add-button'));
+    await tester.enterText(input, '101');
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    expect(find.text('Enter a whole number from 1 to 100'), findsOneWidget);
+
+    await tester.enterText(input, '24');
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    expect(find.text('That page size is already listed'), findsOneWidget);
+
+    await tester.enterText(input, '100');
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(Chip, '100'), findsOneWidget);
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    expect(pageController.pageSizeOptions, [12, 24, 36, 48, 100]);
+  });
 }
 
 Future<void> _openPage(
@@ -130,6 +157,8 @@ class _TestAssetLoader extends AssetLoader {
     'adaptive_recommend': 'Adaptive Auto',
     'custom_input': 'Custom Input',
     'items_per_page': 'items/page',
+    'page_size_value_range': 'Enter a whole number from 1 to 100',
+    'page_size_value_duplicate': 'That page size is already listed',
     'add': 'Add',
     'cancel': 'Cancel',
     'confirm': 'Confirm',

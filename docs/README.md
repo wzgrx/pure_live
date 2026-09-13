@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [主题设置持久化、备份与首帧安全审计](THEME_SETTINGS_PERSISTENCE_AND_FIRST_FRAME_AUDIT_2026_09_13.md)：模式/语言/颜色/加载样式支持项、0～64 有限间距、启动与运行时修复、旧版字段兼容及安全首帧消费。
+
 - [单页数量设置边界与弹窗生命周期审计](PAGE_SIZE_SETTINGS_BOUNDARY_AND_LIFECYCLE_AUDIT_2026_09_13.md)：1～100 持久化/备份合同、默认值归属、无副作用保存、双语输入反馈与路由退出控制器所有权。
 
 - [代理端点持久化与备份边界审计](PROXY_ENDPOINT_PERSISTENCE_AUDIT_2026_09_13.md)：应用/播放器代理的 Hive 修复、严格备份类型、1～65535 端口合同、7897 回落值与导出归一化。

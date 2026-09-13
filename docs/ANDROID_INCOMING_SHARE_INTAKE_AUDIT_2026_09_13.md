@@ -35,8 +35,9 @@ Debug 专用 shell 探针再发送真实 `ArrayList<Uri>`：M3U Provider/频道�
 IPTV 缓存树和 Hive 都按备份恢复。除探针预期的 Provider 异常日志外，没有 FATAL/ANR、Flutter
 渲染/Widget 异常或导入失败，应用停止，桌面和 stay-awake 恢复。
 
-该证据补充 A1-05/A2-01 的 Android 外部接收路径；Windows 原生剪贴板导入、两个真实应用之间的发送和
-Release 继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组
+同源码的 R8/资源收缩 Release 测试包随后也完成保留数据覆盖：冷/热/重复口令、混合附件释放、单 M3U、
+探针排除、APK 哈希与精确恢复全部通过。该证据补充 A1-05/A2-01 的 Android 外部接收路径；Windows
+原生剪贴板导入、两个真实应用之间的发送和最终正式签名候选继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组
 未闭环**。本批 Windows Computer Use 与 Astra Light 使用均为 **0 次**。
 
 ## 原始缺口与真实失败证据
@@ -120,12 +121,15 @@ IPTV/Hive 并回到桌面。
 K90 数据库/日志证据闭环。
 
 `tool/android_share_intake_smoke.ps1` 已加入固定 CI 静态门禁。它要求显式 serial、APK 和期望 SHA，
+并要求显式选择 Debug/Release，避免用错误的探针预期验收另一种构建；
 覆盖安装前备份规范 Hive 与整个 IPTV 缓存树；混合口令/附件要求不重开弹窗、不写入夹具频道且整个
 插件暂存树消失。文件单独导入后再次要求暂存树消失；随后 Debug shell 探针发送 M3U+XMLTV 的真实
 Parcelable URI 列表，并从关闭状态 SQLite 查询两类来源、频道和节目。Provider 边界阶段再发送
 “类型异常 + 查询异常 + 超长显示名”三 URI 列表，以日志证明异常路径实际到达，并用关闭状态 SQLite
 证明两个后续附件各入库一次、回退名准确、控制字符已清洗且长名加扩展不超过 180 UTF-8 字节。最后
 恢复数据树并逐文件核对 uid/gid/mode/size/SHA，同时删除受路径守卫保护的探针输入目录。
+Release 模式复用全部公共步骤，但不调用 Debug 探针，并从安装后的 package dump 确认
+`ShareIntentProbeReceiver`、`ShareIntentProbeProvider`、`RecorderLifecycleProbeReceiver` 均不存在。
 
 ## 构建与 K90 原生结果
 
@@ -141,6 +145,20 @@ Parcelable URI 列表，并从关闭状态 SQLite 查询两类来源、频道和
 | ABI / 原生库 | `arm64-v8a` / 16；最小 ELF LOAD `0x4000` |
 | Flutter 资源 | 1262 项 / `206833496` B |
 | 构建记录 | `local-artifacts/build-records/20260912T234345813Z-build-androidarm64-debug.json` |
+
+同源码当前文档提交 `52e25b82d35a7b363b545e59a1a648250c34c428` 另生成 R8/资源收缩 Release
+测试包；本机没有 `android/key.properties`，因此构建器明确使用 Android Debug 证书并在文件名标注
+`debug-signed`，它不是最终正式签名发布件。
+
+| Release 测试包项目 | 结果 |
+| --- | --- |
+| APK | `127835744` B，`PureLive-3.1.8-4121-debug-signed-android-arm64-v8a-release.apk` |
+| SHA-256 | `4BF855719631665EBE88B368CB64E2359AB72788D600D9E477E5416FD81E6B82` |
+| ABI / 原生库 | `arm64-v8a` / 16；最小 ELF LOAD `0x4000` |
+| Flutter 资源 | 1259 项 / `15543712` B |
+| 证书 | Android Debug；SHA-256 `1E832295A696CF8210BCA063E458BAD0BE12DFA64939D3362FF11B8F237FF7B9`，与已装 Debug 候选一致 |
+| APK Manifest | MainActivity、SEND、SEND_MULTIPLE 存在；三个项目 Debug 探针组件计数 0 |
+| 构建记录 | `local-artifacts/build-records/20260913T000101263Z-build-androidarm64-release.json` |
 
 最终原生摘要：
 `local-artifacts/diagnostics/android-share-intake-20260913T075039675/summary.json`。
@@ -178,7 +196,21 @@ Parcelable URI 列表，并从关闭状态 SQLite 查询两类来源、频道和
 - 结束时 Pure Live 已停止，顶层为 `com.miui.home`，stay-awake 为 0；未重启手机/adbd、未切换网络、
   未改 ADB 端口/授权，也未更新 Root/LSP/模块。
 
+Release 模式原生摘要：
+`local-artifacts/diagnostics/android-share-intake-20260913T080423059/summary.json`。
+
+- 同证书 `install -r -t` 返回 `Success`，首次安装时间仍为 `2026-07-21 18:07:53`，设备 `base.apk`
+  与 Release 测试包 SHA 精确一致；覆盖安装没有改变 Hive 或 IPTV 树。
+- R8/资源收缩包完成冷启动口令、运行中口令、重复抑制、重复口令+附件释放和单 M3U 导入；夹具 Provider/
+  频道各一条，暂存文件与目录都为空，进程日志无 FATAL/ANR 或导入失败。
+- 安装后的 package dump 不含三个项目 Debug 探针，`releaseDebugProbesExcluded=true`；该轮不借用 Debug
+  Provider 声称 Release 多附件边界结果，多附件/异常矩阵仍以上述精确 Debug 包为证据。
+- 13 项 Release 模式检查全为 true；IPTV 树逐文件恢复，Hive 回到 `91D6BAC5…6128F`，应用停止，
+  顶层 `com.miui.home`，stay-awake 恢复为 0。
+
 原生工具在 `2cc1b56d` 加入混合分享门禁，`2ad872e2` 修正最后一条重复口令夹具；`d2f7400c` 增加
 Debug-only 多附件发送器，`944338e4` 增加 M3U+EPG 数据库和暂存清理门禁；`c6817e74` 增加异常
 Provider/长名注入，`ed126884` 按 Android 实际异常传播修正日志门禁，`d563a0bf` 固定 emoji JSON
-取证编码。最终原生轮次使用当前 `d563a0bf` 工具，绑定 `c6817e74` 精确 APK。
+取证编码，`7f1df73e` 增加显式 Release 模式和安装后探针排除检查。最终 Debug 原生轮次使用
+`d563a0bf` 工具绑定 `c6817e74` 精确 APK；Release 原生轮次使用 `7f1df73e` 工具绑定 `52e25b82`
+构建的精确测试包。

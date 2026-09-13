@@ -32,6 +32,12 @@ param($Serial,$Platform,$RecordSeconds,$PlatformLoadTimeoutSeconds,$ProxySession
 if($env:FAIL_SMOKE -eq '1'){throw 'smoke-failure'}
 $global:LASTEXITCODE=0
 '''
+OWNERSHIP = r'''
+function Assert-AndroidRecordingRuntimeIdle {
+ param($Adb,$Serial,$Package='com.mystyle.purelive')
+ if([string]::IsNullOrWhiteSpace($Serial)){throw 'missing-test-serial'}
+}
+'''
 
 @unittest.skipUnless(PWSH, 'PowerShell required')
 class ProxyWrapperTests(unittest.TestCase):
@@ -41,6 +47,7 @@ class ProxyWrapperTests(unittest.TestCase):
             (root / 'tool').mkdir()
             for name in ('android_foreign_recording_smoke.ps1', 'android_restore_proxy_defaults.ps1'):
                 shutil.copyfile(TOOL / name, root / 'tool' / name)
+            (root / 'tool/recording_turn_ownership.ps1').write_text(OWNERSHIP, encoding='utf-8')
             (root / 'tool/android_configure_proxy.ps1').write_text(CONFIGURE, encoding='utf-8')
             (root / 'tool/android_recording_smoke.ps1').write_text(SMOKE, encoding='utf-8')
             env = os.environ.copy()

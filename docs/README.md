@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [网络故障诊断与播放恢复审计](NETWORK_FAILURE_RECOVERY_AUDIT_2026_09_13.md)：Android/curl/POSIX/Windows DNS 语法、HTTP 5xx、具体错误优先级及既有有界线路/源/内核恢复链。
+
 - [Windows PowerShell 5.1 工具链兼容性审计](POWERSHELL_5_TOOLCHAIN_COMPATIBILITY_AUDIT_2026_09_13.md)：非 ASCII 脚本 UTF-8 BOM 合同、代理 journal 跨代解码、双 PowerShell 夹具与端到端质量门禁。
 
 - [录制目录、存储耗尽与自动恢复权限审计](RECORDER_STORAGE_FAILURE_AUDIT_2026_09_13.md)：事务式目录选择、并发安全写探针、自动恢复静默权限探测、独立存储耗尽诊断、续接阻断、计入活动输出的安全额度回收及设置变更即时应用。

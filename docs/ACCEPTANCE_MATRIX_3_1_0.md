@@ -135,7 +135,7 @@
 
 | ID | 状态 | 验收内容 |
 |---|---|---|
-| A7-01 | NR | Wi-Fi 断开/恢复、Clash 开关、DNS/超时、直播端断流、切移动网络 |
+| A7-01 | RUN | Wi-Fi 断开/恢复、Clash 开关、DNS/超时、直播端断流、切移动网络；`44b63210` 补齐 Android/curl/POSIX/Windows DNS 诊断与 HTTP 5xx 分类，并让具体传输原因优先于通用输入打开文本；八文件 186/186、全库 analyze 通过。当前候选真实网络切换、应用代理开关、系统恢复、跨网络与上游实际断流继续，见 `docs/NETWORK_FAILURE_RECOVERY_AUDIT_2026_09_13.md` |
 | A7-02 | RUN | `723b4452` 已完成权限请求分流、事务式录制目录选择、并发安全写探针、存储耗尽独立诊断及非重试续接的源码/确定性子集；七文件 79/79、全库 analyze 通过。系统权限拒绝/恢复、真实存储耗尽、低电量、温控、长时间锁屏、来电/音频焦点和耳机拔出仍待当前候选原生验证，见 `docs/RECORDER_STORAGE_FAILURE_AUDIT_2026_09_13.md` |
 | A7-03 | RUN | 虎牙普通视频后台 10 分钟：PSS 438,712～497,718 KB、拟合约 `+283.9 KB/min`；RSS 643,384～702,020 KB、拟合约 `+299.3 KB/min`；CPU 平均 2.24%、最高 5%。结束后进程与锁释放。首页、PiP、录制和温度对照仍待执行 |
 | A7-04 | RUN | K90 Android 17 上同一 Bilibili Debug 房间完成 50/50 次视频→纯音频→返回并关闭应用内悬浮会话；50 次均一次输入生效、进程未重启。每 5 轮采样中原生播放器/Codec 线程、FD、Socket、DMA-BUF、GPU FD 与 BLAST layer 均稳定；52 秒空闲硬释放后 FD 300→262、DMA-BUF 53→25，最终 PSS/RSS 相对预热首页为 +16,684/+17,012 KB，无 FATAL/ANR。Release、多平台、视频恢复、全屏/PiP/后台与长轮次继续，见 `docs/ANDROID_ROOM_RESOURCE_RECOVERY_AUDIT_2026_09_13.md` |

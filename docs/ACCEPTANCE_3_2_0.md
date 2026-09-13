@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-13 DNS、HTTP 5xx 与播放端网络故障已进入类型化有界恢复**：[专项审计](NETWORK_FAILURE_RECOVERY_AUDIT_2026_09_13.md)。有效红灯先证明 Android/curl/POSIX/Windows 常见主机解析语法和 HTTP 5xx 被降级为普通原生日志，再证明通用 input-open 文本会抢先吞掉具体传输原因；`44b63210` 补齐跨平台标记、严格三位 5xx 识别和“具体传输 → 精确源错误 → 宽泛解码运行时”的优先级。直接 **13/13 PASS**，最终八文件 **186/186 PASS**，全库 analyze 无问题；未执行直播站点生产探针、构建或操作设备。A7-01 由 NR→RUN，宏观更新为 **20 PASS / 42 RUN / 0 NR**、仍有 42 组未闭环；Astra Light 0 次。
+
 - **09-13 Windows PowerShell 5.1 质量/原生工具链已恢复跨代兼容**：[专项审计](POWERSHELL_5_TOOLCHAIN_COMPATIBILITY_AUDIT_2026_09_13.md)。有效红灯先后证明无 BOM UTF-8 会把中文 UI 语义解码为语法字符，`ConvertFrom-Json -AsHashtable` 又会在 Windows PowerShell 5.1 读取代理 journal 时失败。`fd015458` 为全部 25 个含非 ASCII 的受跟踪 `.ps1` 建立 UTF-8 BOM 合同，以兼容字典构造替换 PowerShell 6+ 专用参数，并在构建策略中新增防回归扫描。录制导航和 38 个代理事务场景均在两代 PowerShell 通过；Windows PowerShell 5.1 端到端 focused CI 与 Flutter 存储策略 **15/15 PASS**，真实 ADB 命令 0。本批未构建、操作设备或改变宏观账本，仍为 **20 PASS / 41 RUN / 1 NR**、42 组未闭环；Astra Light 0 次。
 
 - **09-13 录制目录、存储耗尽与自动恢复权限链已完成源码修订和确定性回归**：[专项审计](RECORDER_STORAGE_FAILURE_AUDIT_2026_09_13.md)。`723b4452` 将目录变更收敛为验证成功后再持久化的事务，改用每次检查原子唯一的目录内写探针，隔离启动初始化与用户选择竞态并合并重复点击；开机自动恢复只静默探测权限，显式开始仍保留交互请求。FFmpeg 新增非重试型 `storageFull` 双语诊断，兼容续接路径同步阻断空间耗尽和本地输出写失败。初轮七文件 **79/79 PASS**；`f07d1861` 修复活动录制未计入缓存上限导致旧文件不回收，活动输出只计量、不进入删除候选，四文件 **71/71 PASS**；`afdcff04` 再让开启限制或调低已开启额度立即回收并刷新大小，红灯 **12 PASS / 3 FAIL** 后直接回归 **15/15 PASS**，最终四文件 **61/61 PASS**。三轮全库 analyze 均无问题；未构建、安装或操作设备。A7-02 由 NR→RUN，宏观更新为 **20 PASS / 41 RUN / 1 NR**、仍有 42 组未闭环；Astra Light 0 次。

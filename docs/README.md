@@ -6,7 +6,7 @@
 
 - [Windows PowerShell 5.1 工具链兼容性审计](POWERSHELL_5_TOOLCHAIN_COMPATIBILITY_AUDIT_2026_09_13.md)：非 ASCII 脚本 UTF-8 BOM 合同、代理 journal 跨代解码、双 PowerShell 夹具与端到端质量门禁。
 
-- [录制目录、存储耗尽与自动恢复权限审计](RECORDER_STORAGE_FAILURE_AUDIT_2026_09_13.md)：事务式目录选择、并发安全写探针、自动恢复静默权限探测、独立存储耗尽诊断、续接阻断及计入活动输出的安全额度回收。
+- [录制目录、存储耗尽与自动恢复权限审计](RECORDER_STORAGE_FAILURE_AUDIT_2026_09_13.md)：事务式目录选择、并发安全写探针、自动恢复静默权限探测、独立存储耗尽诊断、续接阻断、计入活动输出的安全额度回收及设置变更即时应用。
 
 - [分享口令交接与导入弹窗审计](SHARE_COMMAND_HANDOFF_AND_IMPORT_DIALOG_AUDIT_2026_09_13.md)：消费者成功提交、失败重试、并发合并、有界自分享抑制、响应式导入弹窗，以及 K90 系统分享面板和返回原应用验证。
 

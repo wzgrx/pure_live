@@ -1,5 +1,7 @@
 # 3.2.0 剩余工作与当前候选（2026-09-13）
 
+- **09-13 应用退出与 IPTV 自动同步计时设置已统一边界**：[专项审计](DEFERRED_TIMER_SETTINGS_AUDIT_2026_09_13.md)。源码原先允许持久化、备份和公开写入绕过退出分钟数/IPTV 同步小时数边界，一次退出计时动作还会被两个 500 ms 观察器再次重置。有效红灯锁定缺少归一化合同，并实证界面将 `525601` 从原值 15 直接提交；`d68db3d7` 统一 1～525600 分钟与 2～72 小时合同、启动修复、备份/导出和最终调度入口，同一显式动作现在只重启一次。首轮四文件 **25/25 PASS**，最终九文件 **79/79 PASS**、全库 analyze 无问题。未构建或操作设备；A1-05/A2-01 保持 RUN，宏观保持 **20 PASS / 42 RUN / 0 NR，共 42 组未闭环**，Astra Light 使用 0 次。
+
 - **09-13 DNS、HTTP 5xx 与播放端网络故障已进入类型化有界恢复**：[专项审计](NETWORK_FAILURE_RECOVERY_AUDIT_2026_09_13.md)。原分类器漏掉 Android/curl/POSIX/Windows 常见主机解析语法与 HTTP 5xx，且通用 input-open 文本会先于具体传输原因匹配。两轮有效红灯均为 **11 PASS / 2 FAIL**；`44b63210` 补齐跨平台标记、严格 5xx 模式和具体错误优先级，直接 **13/13 PASS**，最终分类器、播放器恢复、MediaKit/Fijk 缓冲、弹幕、录制与失败界面八文件 **186/186 PASS**，全库 analyze 无问题。未执行直播站点生产探针、构建或操作设备。A7-01 由 NR→RUN；宏观更新为 **20 PASS / 42 RUN / 0 NR，共 42 组未闭环**，Astra Light 使用 0 次。
 
 - **09-13 Windows PowerShell 5.1 质量/原生工具链已恢复跨代兼容**：[专项审计](POWERSHELL_5_TOOLCHAIN_COMPATIBILITY_AUDIT_2026_09_13.md)。有效红灯先后锁定无 BOM UTF-8 中文 UI 语义的 ANSI 误解码，以及 PowerShell 6+ 专用 `ConvertFrom-Json -AsHashtable`。`fd015458` 为全部 25 个含非 ASCII 的受跟踪 `.ps1` 保留 UTF-8 BOM，代理 journal 改用两代 PowerShell 共通的显式字典构造，构建策略新增全脚本防回归扫描。录制导航与 38 个代理事务场景均在两代 PowerShell 通过，Windows PowerShell 5.1 端到端 focused CI 和 Flutter 存储策略 **15/15 PASS**，真实 ADB 命令 0。本批未构建、操作设备或改变账本；宏观仍为 **20 PASS / 41 RUN / 1 NR，共 42 组未闭环**，Astra Light 使用 0 次。

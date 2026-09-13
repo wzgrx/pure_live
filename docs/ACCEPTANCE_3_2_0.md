@@ -1,5 +1,7 @@
 # 3.2.0 完整验收入口
 
+- **09-13 应用退出与 IPTV 自动同步计时设置已统一边界**：[专项审计](DEFERRED_TIMER_SETTINGS_AUDIT_2026_09_13.md)。有效红灯证明两个计时设置缺少持久化/备份合同，且退出计时界面把超上限 `525601` 从原值 15 直接提交。`d68db3d7` 将应用退出收敛到 1～525600 分钟、IPTV 自动同步收敛到 2～72 小时，并修复一次退出计时动作被两个延迟观察器二次重置的问题。首轮四文件 **25/25 PASS**，最终九文件 **79/79 PASS**、全库 analyze 无问题；未构建或操作设备。A1-05/A2-01 保持 RUN，宏观保持 **20 PASS / 42 RUN / 0 NR**、仍有 42 组未闭环；Astra Light 0 次。
+
 - **09-13 DNS、HTTP 5xx 与播放端网络故障已进入类型化有界恢复**：[专项审计](NETWORK_FAILURE_RECOVERY_AUDIT_2026_09_13.md)。有效红灯先证明 Android/curl/POSIX/Windows 常见主机解析语法和 HTTP 5xx 被降级为普通原生日志，再证明通用 input-open 文本会抢先吞掉具体传输原因；`44b63210` 补齐跨平台标记、严格三位 5xx 识别和“具体传输 → 精确源错误 → 宽泛解码运行时”的优先级。直接 **13/13 PASS**，最终八文件 **186/186 PASS**，全库 analyze 无问题；未执行直播站点生产探针、构建或操作设备。A7-01 由 NR→RUN，宏观更新为 **20 PASS / 42 RUN / 0 NR**、仍有 42 组未闭环；Astra Light 0 次。
 
 - **09-13 Windows PowerShell 5.1 质量/原生工具链已恢复跨代兼容**：[专项审计](POWERSHELL_5_TOOLCHAIN_COMPATIBILITY_AUDIT_2026_09_13.md)。有效红灯先后证明无 BOM UTF-8 会把中文 UI 语义解码为语法字符，`ConvertFrom-Json -AsHashtable` 又会在 Windows PowerShell 5.1 读取代理 journal 时失败。`fd015458` 为全部 25 个含非 ASCII 的受跟踪 `.ps1` 建立 UTF-8 BOM 合同，以兼容字典构造替换 PowerShell 6+ 专用参数，并在构建策略中新增防回归扫描。录制导航和 38 个代理事务场景均在两代 PowerShell 通过；Windows PowerShell 5.1 端到端 focused CI 与 Flutter 存储策略 **15/15 PASS**，真实 ADB 命令 0。本批未构建、操作设备或改变宏观账本，仍为 **20 PASS / 41 RUN / 1 NR**、42 组未闭环；Astra Light 0 次。

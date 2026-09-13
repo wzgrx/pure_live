@@ -60,6 +60,8 @@
 
 > 2026-09-13 增量：Android 已实际消费冷启动和运行中 `ACTION_SEND` 口令，并按内容 URI 复制后导入 M3U。原生轮次据实暴露并修订 AlertDialog intrinsic、Android 17 外部路径 EACCES 和暂存根错误；随后再隔离单 URI 异常，并以 UTF-8 字节和完整 code point 清洗/截断显示名。此前分享联合回归 110/110、最终路径 15/15 和全库 analyze 已通过，本边界增量直接 11/11、Kotlin 审计、精确构建与 K90 门禁通过。除冷/热/重复口令、混合附件、单 M3U 和真实 M3U+XMLTV 多附件外，Debug-only Provider 还验证类型/查询异常不会抑制后续两份 M3U，查询异常按 URI basename 回退，中文/emoji/控制字符超长名安全化为 175 UTF-8 字节 basename；频道各精确一条、暂存树为空、无 FATAL/ANR。同源码 R8 Release 测试包继续通过公共分享链和 Debug 探针排除；独立 DocumentsUI 又真实选中 M3U+XMLTV，经系统 chooser 将 `ACTION_SEND_MULTIPLE` 交给 Pure Live。两份 ExternalStorageProvider URI 明确授权给目标包，播放列表与 EPG 各精确入库一次，17/17 原生检查通过。该包使用 Debug 证书并标记 `debug-signed`。三轮 IPTV 树和 Hive 均精确恢复、外部夹具精确删除、应用停止。见 `docs/ANDROID_INCOMING_SHARE_INTAKE_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，Windows 和最终正式签名候选继续，宏观计数不变。
 
+> 2026-09-13 增量：应用退出分钟数与 IPTV 自动同步小时数已统一持久化、当前/旧版备份、公开写入、UI 和最终调度边界；退出计时同一显式动作不再被两个延迟观察器二次重置。`d68db3d7` 的首轮四文件 25/25、最终九文件 79/79 与全库 analyze 通过，见 `docs/DEFERRED_TIMER_SETTINGS_AUDIT_2026_09_13.md`。A1-05/A2-01 保持 `RUN`，真实双端倒计时退出、重启和 IPTV 服务端同步继续，宏观计数不变。
+
 ### A2 设置全量
 
 主题/夜间、自定义字体、布局间距、刷新、视频/音量、竖屏直播、观看指标、后台/助眠、小窗弹幕、播放器内核/硬解/代理、本地互动、导航、平台 Cookie、缓存、备份、录制目录、日志。每个控件核对：初始值、修改后即时效果、返回后保存、重启后恢复、跨页面文案一致、Android 不出现 Windows 专属项。

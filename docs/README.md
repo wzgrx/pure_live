@@ -4,6 +4,8 @@
 
 ## 开发与发布
 
+- [应用退出与 IPTV 自动同步计时设置审计](DEFERRED_TIMER_SETTINGS_AUDIT_2026_09_13.md)：退出分钟数、同步小时数的持久化/备份/调度边界，超范围输入反馈及单次重启语义。
+
 - [网络故障诊断与播放恢复审计](NETWORK_FAILURE_RECOVERY_AUDIT_2026_09_13.md)：Android/curl/POSIX/Windows DNS 语法、HTTP 5xx、具体错误优先级及既有有界线路/源/内核恢复链。
 
 - [Windows PowerShell 5.1 工具链兼容性审计](POWERSHELL_5_TOOLCHAIN_COMPATIBILITY_AUDIT_2026_09_13.md)：非 ASCII 脚本 UTF-8 BOM 合同、代理 journal 跨代解码、双 PowerShell 夹具与端到端质量门禁。

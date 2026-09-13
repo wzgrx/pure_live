@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
@@ -71,6 +73,7 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                 title: i18n("enable_cache_limit"),
                 subtitle: i18n("enable_cache_limit_desc"),
                 value: controller.enableCacheLimit,
+                onChanged: (value) => unawaited(controller.updateEnableCacheLimit(value)),
               ),
               if (controller.enableCacheLimit.value)
                 context.buildTile(

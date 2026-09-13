@@ -65,6 +65,37 @@ void main() {
     expect(RecorderConfig.enableCacheLimit, isTrue);
   });
 
+  test('enabling the cache limit immediately reclaims completed output above the limit', () async {
+    final cache = installCacheService();
+    final controller = RecordSettingsController();
+    await controller.updateMaxCache(1);
+    final managed = await cache.getRecordDir();
+    final completed = await File(p.join(managed.path, 'completed.mp4'))
+        .writeAsBytes(List<int>.filled(2 * 1024 * 1024, 1));
+    await controller.refreshStorageInfo();
+    expect(controller.cacheSizeMB.value, greaterThan(1));
+
+    await controller.updateEnableCacheLimit(true);
+
+    expect(await completed.exists(), isFalse);
+    expect(controller.cacheSizeMB.value, 0);
+  });
+
+  test('lowering an enabled cache limit applies the new bound immediately', () async {
+    final cache = installCacheService();
+    await RecorderConfig.setEnableCacheLimit(true);
+    await RecorderConfig.setMaxCacheMB(4);
+    final controller = RecordSettingsController();
+    final managed = await cache.getRecordDir();
+    final completed = await File(p.join(managed.path, 'completed.mp4'))
+        .writeAsBytes(List<int>.filled(2 * 1024 * 1024, 1));
+
+    await controller.updateMaxCache(1);
+
+    expect(await completed.exists(), isFalse);
+    expect(controller.cacheSizeMB.value, 0);
+  });
+
   test('persisted recorder numbers are normalized to every UI and runtime boundary', () async {
     await HivePrefUtil.setInt(RecorderKeys.segmentTime, 0);
     await HivePrefUtil.setInt(RecorderKeys.maxTaskCount, 99);

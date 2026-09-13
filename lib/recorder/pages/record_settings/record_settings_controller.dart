@@ -17,6 +17,8 @@ class RecordSettingsController extends GetxController {
 
   final RecordDirectoryPicker _directoryPicker;
   Future<void>? _storageInitialization;
+  Future<void>? _cacheLimitApplication;
+  int _cacheLimitRevision = 0;
 
   /// =====================================
   /// 基础配置
@@ -102,6 +104,31 @@ class RecordSettingsController extends GetxController {
   /// 保留这个方法是为了兼容现有 UI 调用。
   Future<void> updateEnableCacheLimit(bool v) async {
     enableCacheLimit.value = v;
+    await _applyCacheLimit();
+  }
+
+  Future<void> _applyCacheLimit() {
+    _cacheLimitRevision++;
+    final pending = _cacheLimitApplication;
+    if (pending != null) return pending;
+
+    late final Future<void> tracked;
+    tracked = _drainCacheLimitChanges().whenComplete(() {
+      if (identical(_cacheLimitApplication, tracked)) _cacheLimitApplication = null;
+    });
+    _cacheLimitApplication = tracked;
+    return tracked;
+  }
+
+  Future<void> _drainCacheLimitChanges() async {
+    var appliedRevision = -1;
+    while (!isClosed && appliedRevision != _cacheLimitRevision) {
+      appliedRevision = _cacheLimitRevision;
+      if (enableCacheLimit.value) {
+        await CacheService.to.enforceLimit(maxMB: maxCacheMB.value.toDouble());
+        if (!isClosed) await refreshCacheSize();
+      }
+    }
   }
 
   /// =====================================
@@ -255,6 +282,7 @@ class RecordSettingsController extends GetxController {
     final normalized = RecorderConfig.normalizeMaxCacheMB(v);
     maxCacheMB.value = normalized;
     await RecorderConfig.setMaxCacheMB(normalized);
+    await _applyCacheLimit();
   }
 
   /// =====================================

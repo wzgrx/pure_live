@@ -197,6 +197,25 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('cache-limit switch invokes the controller transaction', (tester) async {
+    await _pumpRecorderSettings(
+      tester,
+      translations: englishTranslations,
+      locale: const Locale('en'),
+      size: const Size(360, 780),
+      textScale: 1,
+    );
+
+    final cacheLimit = find.widgetWithText(SwitchListTile, 'Enable Cache Limit');
+    await _scrollPageUntilHitTestable(tester, cacheLimit);
+    await tester.tap(find.descendant(of: cacheLimit, matching: find.byType(Switch)));
+    await tester.pump();
+
+    expect((settings as _RecorderSettings).cacheLimitUpdates, [true]);
+    expect(tester.widget<SwitchListTile>(cacheLimit).value, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('described timeout and queue menus keep their final choices reachable', (tester) async {
     await _pumpRecorderSettings(
       tester,
@@ -322,12 +341,19 @@ class _RecorderSettings extends RecordSettingsController {
   final _resume = false.obs;
   final _polling = false.obs;
   final _cacheLimit = false.obs;
+  final cacheLimitUpdates = <bool>[];
   @override
   RxBool get autoStartOnBoot => _resume;
   @override
   RxBool get enablePolling => _polling;
   @override
   RxBool get enableCacheLimit => _cacheLimit;
+  @override
+  Future<void> updateEnableCacheLimit(bool value) async {
+    cacheLimitUpdates.add(value);
+    enableCacheLimit.value = value;
+  }
+
   @override
   Future<void> updateDefaultQuality(String value) async {
     defaultQuality.value = RecorderConfig.normalizeDefaultQuality(value);

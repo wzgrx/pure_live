@@ -1,24 +1,42 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:pure_live/get/get.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:pure_live/common/services/utils/hive_rx.dart';
 
 class ExitSettingsController extends GetxController {
+  static const int defaultAutoShutdownMinutes = 120;
+  static const int minAutoShutdownMinutes = 1;
+  static const int maxAutoShutdownMinutes = 525600;
+
+  static int normalizeAutoShutdownMinutes(int minutes) => minutes.clamp(minAutoShutdownMinutes, maxAutoShutdownMinutes);
+
   final RxBool dontAskExit = hiveBool('dontAskExit', false);
   final RxString exitChoose = hiveString('exitChoose', '');
-  final RxInt autoShutDownTime = hiveInt('autoShutDownTime', 120);
+  final RxInt autoShutDownTime = hiveInt('autoShutDownTime', defaultAutoShutdownMinutes);
   final RxBool enableAutoShutDownTime = hiveBool('enableAutoShutDownTime', false);
 
   final StopWatchTimer _stopWatchTimer = StopWatchTimer(mode: StopWatchMode.countDown);
   StopWatchTimer get stopWatchTimer => _stopWatchTimer;
   final List<Worker> _workers = <Worker>[];
   StreamSubscription<dynamic>? _timerEndedSubscription;
+  bool? _appliedTimerEnabled;
+  int? _appliedTimerMinutes;
+  int _timerRestartCount = 0;
+
+  @visibleForTesting
+  int get timerRestartCount => _timerRestartCount;
 
   @override
   void onInit() {
     super.onInit();
+
+    final normalizedMinutes = normalizeAutoShutdownMinutes(autoShutDownTime.v);
+    if (normalizedMinutes != autoShutDownTime.v) {
+      autoShutDownTime.v = normalizedMinutes;
+    }
 
     _workers.add(
       debounce(enableAutoShutDownTime, (_) {
@@ -48,37 +66,51 @@ class ExitSettingsController extends GetxController {
 
   void onInitShutDown() {
     if (enableAutoShutDownTime.v && !_stopWatchTimer.isRunning) {
-      _stopWatchTimer.onResetTimer();
-      _stopWatchTimer.setPresetMinuteTime(autoShutDownTime.v, add: false);
-      _stopWatchTimer.onStartTimer();
+      restartShutdownTimer(force: true);
     }
   }
 
   void updateShutDownTime(int minutes) {
-    autoShutDownTime.v = minutes;
+    autoShutDownTime.v = normalizeAutoShutdownMinutes(minutes);
     autoShutDownTime.refresh();
     if (enableAutoShutDownTime.v) {
-      restartShutdownTimer();
+      restartShutdownTimer(force: true);
     }
   }
 
-  void restartShutdownTimer() {
+  void restartShutdownTimer({bool force = false}) {
+    final normalizedMinutes = normalizeAutoShutdownMinutes(autoShutDownTime.v);
+    if (normalizedMinutes != autoShutDownTime.v) {
+      autoShutDownTime.v = normalizedMinutes;
+    }
+    if (!force &&
+        _appliedTimerEnabled == true &&
+        _appliedTimerMinutes == normalizedMinutes &&
+        _stopWatchTimer.isRunning) {
+      return;
+    }
+    _appliedTimerEnabled = true;
+    _appliedTimerMinutes = normalizedMinutes;
+    _timerRestartCount++;
     _stopWatchTimer.onStopTimer();
     _stopWatchTimer.onResetTimer();
-    _stopWatchTimer.setPresetMinuteTime(autoShutDownTime.v, add: false);
+    _stopWatchTimer.setPresetMinuteTime(normalizedMinutes, add: false);
     _stopWatchTimer.onStartTimer();
   }
 
   void stopShutdownTimer() {
+    if (_appliedTimerEnabled == false && !_stopWatchTimer.isRunning) return;
+    _appliedTimerEnabled = false;
+    _appliedTimerMinutes = normalizeAutoShutdownMinutes(autoShutDownTime.v);
     _stopWatchTimer.onStopTimer();
     _stopWatchTimer.onResetTimer();
   }
 
   void changeShutDownConfig(int minutes, bool enabled) {
-    autoShutDownTime.v = minutes;
+    autoShutDownTime.v = normalizeAutoShutdownMinutes(minutes);
     enableAutoShutDownTime.v = enabled;
     if (enabled) {
-      restartShutdownTimer();
+      restartShutdownTimer(force: true);
     } else {
       stopShutdownTimer();
     }
@@ -86,7 +118,7 @@ class ExitSettingsController extends GetxController {
 
   void enableAutoShutdown() {
     enableAutoShutDownTime.v = true;
-    restartShutdownTimer();
+    restartShutdownTimer(force: true);
   }
 
   void disableAutoShutdown() {
@@ -106,7 +138,7 @@ class ExitSettingsController extends GetxController {
     return {
       'dontAskExit': dontAskExit.v,
       'exitChoose': exitChoose.v,
-      'autoShutDownTime': autoShutDownTime.v,
+      'autoShutDownTime': normalizeAutoShutdownMinutes(autoShutDownTime.v),
       'enableAutoShutDownTime': enableAutoShutDownTime.v,
     };
   }
@@ -116,7 +148,7 @@ class ExitSettingsController extends GetxController {
     return {
       'dontAskExit': (json['dontAskExit'] ?? false) as bool,
       'exitChoose': (json['exitChoose'] ?? '') as String,
-      'autoShutDownTime': (json['autoShutDownTime'] ?? 120) as int,
+      'autoShutDownTime': normalizeAutoShutdownMinutes((json['autoShutDownTime'] ?? defaultAutoShutdownMinutes) as int),
       'enableAutoShutDownTime': (json['enableAutoShutDownTime'] ?? false) as bool,
     };
   }
@@ -146,7 +178,7 @@ class ExitSettingsController extends GetxController {
     return {
       'dontAskExit': exit['dontAskExit'] ?? false,
       'exitChoose': exit['exitChoose'] ?? '',
-      'autoShutDownTime': exit['autoShutDownTime'] ?? 120,
+      'autoShutDownTime': normalizeAutoShutdownMinutes((exit['autoShutDownTime'] ?? defaultAutoShutdownMinutes) as int),
       'enableAutoShutDownTime': exit['enableAutoShutDownTime'] ?? false,
     };
   }

@@ -263,6 +263,12 @@ void main() {
     final customInput = find.byType(TextField);
     await tester.ensureVisible(customInput);
     await tester.pumpAndSettle();
+    await tester.enterText(customInput, '525601');
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+    expect(SettingsService.to.exit.autoShutDownTime.value, 15);
+    expect(find.byType(AlertDialog), findsOneWidget);
+
     await tester.enterText(customInput, '7');
     await tester.tap(find.text('Save'));
     await tester.pump();

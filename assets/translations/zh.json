@@ -1475,7 +1475,7 @@
     "asmr_sleep_timer_explain": "自动助眠启动时按此时长重新计时，到时停止播放。可选快捷时长，也可直接输入分钟数。",
     "days": "天",
     "app_exit_timer_explain": "这是整个应用的退出计时。保存时长或打开开关后重新计时，到时关闭应用。",
-    "app_exit_timer_custom_hint": "输入大于 0 的分钟数",
+    "app_exit_timer_custom_hint": "输入 1～525600 分钟",
     "audience_metric_settings": "观看数据与排行口径",
     "audience_metric_settings_desc": "在平台热度和真实在线人数之间切换，并单独管理支持的平台",
     "audience_display_mode": "卡片显示与排行方式",

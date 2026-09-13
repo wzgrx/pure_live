@@ -5,11 +5,24 @@ import 'package:pure_live/core/iptv/services/auto_sync_scheduler.dart';
 
 class IptvSettingsController extends GetxController {
   static const String autoSyncHoursIntervalKey = 'autoSyncHoursInterval';
+  static const int defaultAutoSyncHours = 24;
+  static const int minAutoSyncHours = 2;
+  static const int maxAutoSyncHours = 72;
+
+  static int normalizeAutoSyncHours(int hours) => hours.clamp(minAutoSyncHours, maxAutoSyncHours);
+
+  int normalizeCurrentAutoSyncHours() {
+    final normalizedHours = normalizeAutoSyncHours(autoSyncHoursInterval.v);
+    if (normalizedHours != autoSyncHoursInterval.v) {
+      autoSyncHoursInterval.v = normalizedHours;
+    }
+    return normalizedHours;
+  }
 
   final RxString selectedSourceName = hiveString('selectedSourceName', '');
   final RxString selectedSourceId = hiveString('selectedSourceId', '');
   final RxBool isAutoSyncEnabled = hiveBool('isAutoSyncEnabled', false);
-  final RxInt autoSyncHoursInterval = hiveInt(autoSyncHoursIntervalKey, 24);
+  final RxInt autoSyncHoursInterval = hiveInt(autoSyncHoursIntervalKey, defaultAutoSyncHours);
   final RxString customIptvUserAgent = hiveString('customIptvUserAgent', '');
   final RxString m3uDirectory = hiveString('m3uDirectory', 'm3uDirectory');
 
@@ -18,6 +31,7 @@ class IptvSettingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    normalizeCurrentAutoSyncHours();
     if (!isAutoSyncEnabled.v) return;
     _startupSyncTimer = Timer(3.seconds, () {
       final iptvEnabled = SettingsService.to.fav.hotAreasList.v.contains(Sites.iptvSite);
@@ -45,7 +59,7 @@ class IptvSettingsController extends GetxController {
       'selectedSourceName': selectedSourceName.v,
       'selectedSourceId': selectedSourceId.v,
       'isAutoSyncEnabled': isAutoSyncEnabled.v,
-      'autoSyncHoursInterval': autoSyncHoursInterval.v,
+      'autoSyncHoursInterval': normalizeAutoSyncHours(autoSyncHoursInterval.v),
       'customIptvUserAgent': customIptvUserAgent.v,
       'm3uDirectory': m3uDirectory.v,
     };
@@ -57,7 +71,7 @@ class IptvSettingsController extends GetxController {
       'selectedSourceName': (json['selectedSourceName'] ?? '') as String,
       'selectedSourceId': (json['selectedSourceId'] ?? '') as String,
       'isAutoSyncEnabled': (json['isAutoSyncEnabled'] ?? false) as bool,
-      'autoSyncHoursInterval': (json['autoSyncHoursInterval'] ?? 24) as int,
+      'autoSyncHoursInterval': normalizeAutoSyncHours((json['autoSyncHoursInterval'] ?? defaultAutoSyncHours) as int),
       'customIptvUserAgent': (json['customIptvUserAgent'] ?? '') as String,
       'm3uDirectory': (json['m3uDirectory'] ?? 'm3uDirectory') as String,
     };
@@ -79,7 +93,7 @@ class IptvSettingsController extends GetxController {
       'selectedSourceName': iptv['selectedSourceName'] ?? '',
       'selectedSourceId': iptv['selectedSourceId'] ?? '',
       'isAutoSyncEnabled': iptv['isAutoSyncEnabled'] ?? false,
-      'autoSyncHoursInterval': iptv['autoSyncHoursInterval'] ?? 24,
+      'autoSyncHoursInterval': normalizeAutoSyncHours((iptv['autoSyncHoursInterval'] ?? defaultAutoSyncHours) as int),
       'customIptvUserAgent': iptv['customIptvUserAgent'] ?? '',
       'm3uDirectory': iptv['m3uDirectory'] ?? 'm3uDirectory',
     };

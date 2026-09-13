@@ -1475,7 +1475,7 @@
     "asmr_sleep_timer_explain": "The timer restarts when auto sleep begins and stops playback when it expires. Choose a preset or enter minutes.",
     "days": "days",
     "app_exit_timer_explain": "This timer exits the whole app. Saving a duration or enabling the switch restarts it.",
-    "app_exit_timer_custom_hint": "Enter a value greater than 0 minutes",
+    "app_exit_timer_custom_hint": "Enter 1–525600 minutes",
     "audience_metric_settings": "Audience data and ranking",
     "audience_metric_settings_desc": "Choose platform heat or real concurrent viewers and manage supported platforms separately",
     "audience_display_mode": "Card display and ranking mode",

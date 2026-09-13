@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
+import 'package:pure_live/common/services/settings/exit_settings_controller.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 class GeneralSettingsPage extends GetView<SettingsService> {
@@ -438,7 +439,9 @@ class _CountdownDurationDialogState extends State<_CountdownDurationDialog> {
         FilledButton(
           onPressed: () {
             final parsedValue = int.tryParse(_inputController.text.trim());
-            if (parsedValue == null || parsedValue < 1) {
+            if (parsedValue == null ||
+                parsedValue < ExitSettingsController.minAutoShutdownMinutes ||
+                parsedValue > ExitSettingsController.maxAutoShutdownMinutes) {
               ToastUtil.show(i18n('app_exit_timer_custom_hint'));
               return;
             }

@@ -20,7 +20,7 @@ class AutoSyncScheduler {
     if (!SettingsService.to.iptv.isAutoSyncEnabled.v) return;
 
     final db = Get.find<DbService>().db;
-    final int hoursInterval = SettingsService.to.iptv.autoSyncHoursInterval.v;
+    final int hoursInterval = SettingsService.to.iptv.normalizeCurrentAutoSyncHours();
     final Duration checkInterval = Duration(hours: hoursInterval);
 
     try {

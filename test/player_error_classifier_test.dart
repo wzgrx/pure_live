@@ -29,6 +29,38 @@ void main() {
       expect(PlayerErrorClassifier.classify('Input/output error').type, PlayerErrorType.network);
       expect(PlayerErrorClassifier.classify('Server returned 403 Forbidden').type, PlayerErrorType.source);
       expect(PlayerErrorClassifier.classify('Error opening input').type, PlayerErrorType.source);
+      expect(PlayerErrorClassifier.classify('Could not find codec parameters').type, PlayerErrorType.source);
+    });
+
+    test('recognizes platform DNS diagnostics as terminal transport failures', () {
+      const diagnostics = <String>[
+        'Error opening input: java.net.UnknownHostException: Unable to resolve host "cdn.example": No address associated with hostname',
+        'Failed to open stream: Could not resolve host: cdn.example',
+        'getaddrinfo failed: EAI_AGAIN',
+        'nodename nor servname provided, or not known',
+        'No such host is known',
+      ];
+
+      for (final diagnostic in diagnostics) {
+        final result = PlayerErrorClassifier.classify(diagnostic);
+        expect(result.type, PlayerErrorType.network, reason: diagnostic);
+        expect(result.code, 'transport', reason: diagnostic);
+        expect(result.immediatelyTerminal, isTrue, reason: diagnostic);
+      }
+    });
+
+    test('treats HTTP server failures as transport recovery signals', () {
+      for (final diagnostic in <String>[
+        'Server returned 500 Internal Server Error',
+        'HTTP error 502 Bad Gateway',
+        'Failed to open input: Server returned 503 Service Unavailable',
+        'HTTP error 504 Gateway Timeout',
+      ]) {
+        final result = PlayerErrorClassifier.classify(diagnostic);
+        expect(result.type, PlayerErrorType.network, reason: diagnostic);
+        expect(result.code, 'transport', reason: diagnostic);
+        expect(result.immediatelyTerminal, isTrue, reason: diagnostic);
+      }
     });
 
     test('keeps audio and video decoder diagnostics in separate recovery lanes', () {

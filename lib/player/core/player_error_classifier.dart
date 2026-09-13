@@ -73,21 +73,34 @@ class PlayerErrorClassifier {
     }
 
     if (_containsAny(value, const <String>[
-      'mediacodec',
-      'decoder',
-      'decode',
-      'codec',
-      'invalid nal',
-      'non-existing pps',
-      'missing reference picture',
-      'corrupt decoded frame',
-      'error while decoding',
-    ])) {
+          'connection timed out',
+          'network timeout',
+          'network is down',
+          'network is unreachable',
+          'host is unreachable',
+          'connection refused',
+          'connection reset',
+          'failed to resolve',
+          'could not resolve host',
+          'unable to resolve host',
+          'no address associated with hostname',
+          'getaddrinfo failed',
+          'nodename nor servname',
+          'no such host is known',
+          'temporary failure in name resolution',
+          'name or service not known',
+          'tls handshake',
+          'ssl handshake',
+          'certificate verify failed',
+          'input/output error',
+          'i/o error',
+        ]) ||
+        _httpServerFailure.hasMatch(value)) {
       return const NativePlayerErrorClassification(
-        type: PlayerErrorType.codec,
-        code: 'decoder_runtime',
-        immediatelyTerminal: false,
-      ).withComponent(decoderComponent);
+        type: PlayerErrorType.network,
+        code: 'transport',
+        immediatelyTerminal: true,
+      );
     }
 
     if (_containsAny(value, const <String>[
@@ -115,26 +128,21 @@ class PlayerErrorClassifier {
     }
 
     if (_containsAny(value, const <String>[
-      'connection timed out',
-      'network timeout',
-      'network is unreachable',
-      'host is unreachable',
-      'connection refused',
-      'connection reset',
-      'failed to resolve',
-      'temporary failure in name resolution',
-      'name or service not known',
-      'tls handshake',
-      'ssl handshake',
-      'certificate verify failed',
-      'input/output error',
-      'i/o error',
+      'mediacodec',
+      'decoder',
+      'decode',
+      'codec',
+      'invalid nal',
+      'non-existing pps',
+      'missing reference picture',
+      'corrupt decoded frame',
+      'error while decoding',
     ])) {
       return const NativePlayerErrorClassification(
-        type: PlayerErrorType.network,
-        code: 'transport',
-        immediatelyTerminal: true,
-      );
+        type: PlayerErrorType.codec,
+        code: 'decoder_runtime',
+        immediatelyTerminal: false,
+      ).withComponent(decoderComponent);
     }
 
     if (_containsAny(value, const <String>[
@@ -158,6 +166,8 @@ class PlayerErrorClassifier {
       immediatelyTerminal: false,
     );
   }
+
+  static final RegExp _httpServerFailure = RegExp(r'(?:server returned|http error)\s+5\d\d(?:\D|$)');
 
   static bool _containsAny(String value, List<String> markers) => markers.any(value.contains);
 }

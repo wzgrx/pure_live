@@ -6,6 +6,9 @@ param(
     [string] $ApkPath,
     [Parameter(Mandatory = $true)]
     [string] $ExpectedApkSha256,
+    [Parameter(Mandatory = $true)]
+    [ValidateSet('Debug', 'Release')]
+    [string] $BuildMode,
     [string] $EvidenceDirectory,
     [string] $Package = 'com.mystyle.purelive',
     [string] $ExpectedModel = '25102RKBEC',
@@ -399,7 +402,11 @@ $result = [ordered]@{
     package = $Package
     identity = $null
     display = [ordered]@{}
-    apk = [ordered]@{ path = $apk; expectedSha256 = $ExpectedApkSha256.ToUpperInvariant() }
+    apk = [ordered]@{
+        path = $apk
+        expectedSha256 = $ExpectedApkSha256.ToUpperInvariant()
+        buildMode = $BuildMode
+    }
     preservedState = [ordered]@{}
     commandShare = [ordered]@{}
     mixedShare = [ordered]@{}
@@ -571,6 +578,7 @@ finally:
     $result.fileShare.databaseEvidence = $query
     $result.checks.sharedPlaylistAttachmentImported = $true
 
+    if ($BuildMode -eq 'Debug') {
     Invoke-Adb @('push', $localMultiplePlaylist, $stagedMultiplePlaylist) | Out-Null
     Invoke-Adb @('push', $localMultipleEpg, $stagedMultipleEpg) | Out-Null
     Invoke-Adb @(
@@ -743,6 +751,19 @@ finally:
     $result.checks.providerFailureDidNotSuppressLaterAttachments = $true
     $result.checks.queryFailureUsedUriFilename = $true
     $result.checks.longUnicodeDisplayNameSanitizedAndBounded = $true
+    } else {
+        $packageDump = (Invoke-Adb @('shell', 'dumpsys', 'package', $Package)) -join "`n"
+        $debugProbePattern = 'ShareIntentProbeReceiver|ShareIntentProbeProvider|RecorderLifecycleProbeReceiver'
+        if ($packageDump -match $debugProbePattern) {
+            throw "Release package exposed a debug-only probe component: $($Matches[0])"
+        }
+        $result.releaseIsolation = [ordered]@{
+            shareIntentProbeReceiver = $false
+            shareIntentProbeProvider = $false
+            recorderLifecycleProbeReceiver = $false
+        }
+        $result.checks.releaseDebugProbesExcluded = $true
+    }
 
     $combinedLog = $processLogs -join "`n"
     $fatalPattern = '(?im)FATAL EXCEPTION|ANR in com\.mystyle\.purelive|EXCEPTION CAUGHT BY (?:RENDERING|WIDGETS) LIBRARY|Shared media intake failed|Shared IPTV Import Process Crash|IPTV Import Error:'

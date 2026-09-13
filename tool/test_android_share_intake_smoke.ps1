@@ -9,7 +9,7 @@ $errors = $null
 $ast = [Management.Automation.Language.Parser]::ParseFile($path, [ref] $tokens, [ref] $errors)
 if ($errors.Count) { throw ($errors | Out-String) }
 
-foreach ($name in @('Serial', 'ApkPath', 'ExpectedApkSha256')) {
+foreach ($name in @('Serial', 'ApkPath', 'ExpectedApkSha256', 'BuildMode')) {
     $parameter = $ast.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -eq $name }
     $attribute = $parameter.Attributes | Where-Object { $_.TypeName.Name -eq 'Parameter' }
     if ($null -eq $parameter -or $null -eq $attribute -or $attribute.Extent.Text -notmatch '(?i)Mandatory\s*=\s*\$true') {
@@ -86,9 +86,12 @@ foreach ($required in @(
     'providerFailureDidNotSuppressLaterAttachments',
     'queryFailureUsedUriFilename',
     'longUnicodeDisplayNameSanitizedAndBounded',
+    'releaseDebugProbesExcluded',
     'sharedMediaStagingCleaned',
     'com.mystyle.purelive.debug.SEND_MULTIPLE_PROBE',
     'com.mystyle.purelive.debug.PROVIDER_EDGE_PROBE',
+    "if (`$BuildMode -eq 'Debug')",
+    'Release package exposed a debug-only probe component',
     'ShareIntentProbeReceiver',
     "'--esa', 'paths'",
     'intentional debug provider type failure',

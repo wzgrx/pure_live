@@ -45,6 +45,20 @@ void main() {
       isFalse,
     );
     expect(RecorderContinuationPolicy.shouldRetryFailure(errorCode: 1, rawLogs: 'Protocol not found'), isFalse);
+    expect(
+      RecorderContinuationPolicy.shouldRetryFailure(
+        errorCode: 1,
+        rawLogs: 'av_interleaved_write_frame(): No space left on device',
+      ),
+      isFalse,
+    );
+    expect(
+      RecorderContinuationPolicy.shouldRetryFailure(
+        errorCode: 1,
+        rawLogs: 'Error writing trailer: Disk quota exceeded',
+      ),
+      isFalse,
+    );
   });
 
   test('polling backoff is bounded and can be disabled', () {

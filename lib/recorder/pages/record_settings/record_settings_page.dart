@@ -55,7 +55,16 @@ class RecordSettingsPage extends GetView<RecordSettingsController> {
                 subtitle: controller.managedRecordPath.value.isEmpty
                     ? controller.recordSavePath.value
                     : controller.managedRecordPath.value,
-                onTap: controller.pickRecordDir,
+                trailing: controller.selectingRecordDirectory.value
+                    ? SizedBox.square(
+                        dimension: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          semanticsLabel: i18n('record_storage_checking'),
+                        ),
+                      )
+                    : null,
+                onTap: controller.selectingRecordDirectory.value ? null : controller.pickRecordDir,
               ),
               context.buildSwitchTile(
                 icon: Remix.exchange_box_line,

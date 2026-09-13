@@ -627,9 +627,13 @@ class RecorderController extends GetxService {
     }
   }
 
-  Future<bool> requestStoragePermission() async {
+  Future<bool> requestStoragePermission({bool requestIfMissing = true}) async {
     if (!Platform.isAndroid) return true;
     if (await _canWriteRecordDirectory()) return true;
+    // Automatic resume runs during controller initialization rather than a
+    // direct user gesture. Leave the task stopped when access disappeared;
+    // the next explicit start can present the system permission surface.
+    if (!requestIfMissing) return false;
 
     try {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
@@ -651,26 +655,7 @@ class RecorderController extends GetxService {
     return false;
   }
 
-  Future<bool> _canWriteRecordDirectory() async {
-    File? probe;
-    try {
-      final directory = await CacheService.to.getRecordDir();
-      probe = File('${directory.path}${Platform.pathSeparator}.pure_live_write_probe_$pid');
-      await probe.writeAsString('ok', flush: true);
-      await probe.delete();
-      return true;
-    } on FileSystemException {
-      return false;
-    } finally {
-      if (probe != null && await probe.exists()) {
-        try {
-          await probe.delete();
-        } on FileSystemException {
-          // Best-effort cleanup after a failed storage probe.
-        }
-      }
-    }
-  }
+  Future<bool> _canWriteRecordDirectory() => CacheService.to.canWriteRecordDir();
 
   Future<LiveRecordTask?> addTask({required LiveRoom room, bool startImmediately = true}) async {
     if (_isClosing || !await requestStoragePermission() || _isClosing) return null;
@@ -1527,7 +1512,9 @@ class RecorderController extends GetxService {
       }
     }
     if (_isClosing || !settings.autoStartOnBoot.value || resumeTaskIds.isEmpty) return;
-    if (!await requestStoragePermission() || _isClosing || !settings.autoStartOnBoot.value) return;
+    if (!await requestStoragePermission(requestIfMissing: false) || _isClosing || !settings.autoStartOnBoot.value) {
+      return;
+    }
 
     final candidates = restored.where((task) => resumeTaskIds.contains(task.taskId)).toList();
     var next = 0;

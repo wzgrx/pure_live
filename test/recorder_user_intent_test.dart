@@ -238,6 +238,22 @@ void main() {
     expect(await recorder.startTask(task), isTrue);
     expect(task.fileSize, 0);
     expect(task.status, RecordStatus.queued);
+    expect(recorder.permissionRequests, [true, true]);
+  });
+  test('boot resume checks storage without opening a permission request', () async {
+    final persisted = makeTask('boot-resume')
+      ..status = RecordStatus.waitingLive
+      ..wasStoppedByUser = false;
+    await HivePrefUtil.setString(RecorderKeys.recorderTasks, jsonEncode([persisted.toJson()]));
+    recorder.settings.autoStartOnBoot.value = true;
+    recorder.permission = Completer<bool>()..complete(false);
+
+    await recorder.restoreAndAutoPoll();
+
+    expect(recorder.permissionRequests, [false]);
+    expect(recorder.tasks.single.taskId, 'boot-resume');
+    expect(recorder.tasks.single.status, RecordStatus.stopped);
+    expect(scheduler.starts, isEmpty);
   });
   test('closing completes the user start without waiting for the system dialog', () async {
     recorder.permission = Completer<bool>();
@@ -540,9 +556,11 @@ class _Recorder extends RecorderController {
       );
   Completer<bool>? permission;
   var permissionCalls = 0;
+  final permissionRequests = <bool>[];
   @override
-  Future<bool> requestStoragePermission() async {
+  Future<bool> requestStoragePermission({bool requestIfMissing = true}) async {
     permissionCalls++;
+    permissionRequests.add(requestIfMissing);
     return permission?.future ?? true;
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ffmpeg_kit_extended_flutter/ffmpeg_kit_extended_flutter.dart' show FFmpegSession;
 import 'package:pure_live/recorder/services/ffmpeg_service.dart';
+import 'package:pure_live/recorder/services/recorder_continuation_policy.dart';
 
 void main() {
   test('missing picture access units are packet and output integrity failures', () {
@@ -104,6 +105,18 @@ void main() {
     expect(output.retryable, isFalse);
     expect(input.kind, FFmpegFailureKind.inputOpen);
     expect(input.retryable, isTrue);
+  });
+
+  test('exhausted local storage is distinct and never enters reconnect', () {
+    for (final logs in [
+      'av_interleaved_write_frame(): No space left on device',
+      'Error writing trailer: Disk quota exceeded',
+    ]) {
+      final failure = FFmpegFailureClassifier.classify(code: 1, logs: logs);
+      expect(failure.kind, FFmpegFailureKind.storageFull);
+      expect(failure.retryable, isFalse);
+      expect(RecorderContinuationPolicy.shouldRetryFailure(errorCode: 1, rawLogs: logs), isFalse);
+    }
   });
 
   test('HTTP, transport, format and decoder failures remain separately observable', () {

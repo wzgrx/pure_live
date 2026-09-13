@@ -36,9 +36,40 @@ class CacheService extends GetxService {
   /// Returns the only directory whose contents this service is allowed to
   /// manage. The default application RECORDS directory is already isolated;
   /// a user-selected directory receives a dedicated child directory.
-  Future<Directory> getRecordDir() async {
+  Future<Directory> getRecordDir() => _resolveRecordDir(_configuredPathResolver());
+
+  /// Resolves and verifies a proposed parent directory before settings commit
+  /// it. The configured resolver is deliberately not changed by this preview.
+  Future<Directory> prepareRecordDir(String? configuredPath) async {
+    final directory = await _resolveRecordDir(configuredPath);
+    Directory? probeDirectory;
+    try {
+      // Directory.createTemp owns an atomic unique name. Manual starts for
+      // different rooms may check storage concurrently, so a process-wide
+      // fixed probe file would let one request delete another request's file.
+      probeDirectory = await directory.createTemp('.pure_live_write_probe_${pid}_');
+      final probe = File(p.join(probeDirectory.path, 'probe'));
+      await probe.writeAsString('ok', flush: true);
+      return directory;
+    } finally {
+      if (probeDirectory != null && await probeDirectory.exists()) {
+        await probeDirectory.delete(recursive: true);
+      }
+    }
+  }
+
+  Future<bool> canWriteRecordDir() async {
+    try {
+      await prepareRecordDir(_configuredPathResolver());
+      return true;
+    } on FileSystemException {
+      return false;
+    }
+  }
+
+  Future<Directory> _resolveRecordDir(String? configuredValue) async {
     final defaultDir = await _defaultDirectoryResolver();
-    final configuredPath = _configuredPathResolver()?.trim() ?? '';
+    final configuredPath = configuredValue?.trim() ?? '';
     final Directory recordDir;
 
     if (configuredPath.isEmpty || _samePath(configuredPath, defaultDir.path) || isAndroidPrivatePath(configuredPath)) {

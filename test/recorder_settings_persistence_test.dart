@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:path/path.dart' as p;
 import 'package:pure_live/common/utils/hive_pref_util.dart';
+import 'package:pure_live/get/get.dart';
 import 'package:pure_live/recorder/consts/recorder_config.dart';
 import 'package:pure_live/recorder/consts/recorder_keys.dart';
 import 'package:pure_live/recorder/pages/record_settings/record_settings_controller.dart';
+import 'package:pure_live/recorder/services/cache_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -13,15 +17,21 @@ void main() {
   late Directory hiveDirectory;
 
   setUp(() async {
+    Get.testMode = true;
     hiveDirectory = await Directory.systemTemp.createTemp('pure_live_recorder_settings_');
     Hive.init(hiveDirectory.path);
     await HivePrefUtil.init();
   });
 
   tearDown(() async {
+    Get.reset();
     await Hive.close();
     await hiveDirectory.delete(recursive: true);
   });
+
+  CacheService installCacheService() => Get.put(
+    CacheService(defaultDirectoryResolver: () async => Directory(p.join(hiveDirectory.path, 'default-records'))),
+  );
 
   test('recorder switches persist when their reactive values change', () async {
     final controller = RecordSettingsController();
@@ -133,5 +143,63 @@ void main() {
     expect(RecorderConfig.rwTimeout, 15);
     expect(RecorderConfig.threadQueueSize, 2048);
     expect(RecorderConfig.defaultQuality, '原画');
+  });
+
+  test('directory selection commits only after the candidate is writable', () async {
+    installCacheService();
+    final previous = Directory(p.join(hiveDirectory.path, 'previous'));
+    await RecorderConfig.setRecordSavePath(previous.path);
+    final blocked = await File(p.join(hiveDirectory.path, 'blocked-parent')).writeAsString('fixture');
+    final controller = RecordSettingsController(directoryPicker: () async => blocked.path);
+    await controller.refreshStorageInfo();
+    final previousManagedPath = controller.managedRecordPath.value;
+
+    await controller.pickRecordDir();
+
+    expect(controller.recordSavePath.value, previous.path);
+    expect(RecorderConfig.recordSavePath, previous.path);
+    expect(controller.managedRecordPath.value, previousManagedPath);
+    expect(controller.selectingRecordDirectory.value, isFalse);
+  });
+
+  test('directory selection publishes the verified managed child and coalesces repeated taps', () async {
+    installCacheService();
+    final selected = Directory(p.join(hiveDirectory.path, 'selected'));
+    final picker = Completer<String?>();
+    var pickerCalls = 0;
+    final controller = RecordSettingsController(
+      directoryPicker: () {
+        pickerCalls++;
+        return picker.future;
+      },
+    );
+
+    final first = controller.pickRecordDir();
+    final second = controller.pickRecordDir();
+    expect(controller.selectingRecordDirectory.value, isTrue);
+    expect(pickerCalls, 1);
+    picker.complete(selected.path);
+    await Future.wait([first, second]);
+
+    expect(controller.selectingRecordDirectory.value, isFalse);
+    expect(controller.recordSavePath.value, selected.path);
+    expect(RecorderConfig.recordSavePath, selected.path);
+    expect(p.equals(controller.managedRecordPath.value, p.join(selected.path, CacheService.managedFolderName)), isTrue);
+  });
+
+  test('a user directory chosen during startup wins after default initialization settles', () async {
+    final defaultGate = Completer<Directory>();
+    Get.put(CacheService(defaultDirectoryResolver: () => defaultGate.future));
+    final selected = Directory(p.join(hiveDirectory.path, 'selected-during-startup'));
+    final controller = Get.put(RecordSettingsController(directoryPicker: () async => selected.path));
+
+    final choosing = controller.pickRecordDir();
+    expect(controller.selectingRecordDirectory.value, isTrue);
+    defaultGate.complete(Directory(p.join(hiveDirectory.path, 'startup-default')));
+    await choosing;
+
+    expect(controller.recordSavePath.value, selected.path);
+    expect(RecorderConfig.recordSavePath, selected.path);
+    expect(p.equals(controller.managedRecordPath.value, p.join(selected.path, CacheService.managedFolderName)), isTrue);
   });
 }

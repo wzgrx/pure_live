@@ -27,6 +27,14 @@ class RecorderContinuationPolicy {
       'muxer not found',
       'invalid data found when processing output',
       'file exists',
+      'no space left on device',
+      'disk quota exceeded',
+      'not enough space on the disk',
+      'read-only file system',
+      'could not open output',
+      'failed to open segment',
+      'error writing trailer',
+      'av_interleaved_write_frame',
     ];
     return !fatalMarkers.any(normalizedLogs.contains);
   }

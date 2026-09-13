@@ -43,6 +43,35 @@ void main() {
     expect(p.equals(directory.path, p.join(selectedParent.path, CacheService.managedFolderName)), isTrue);
   });
 
+  test('candidate preparation verifies write access without changing the configured root', () async {
+    final service = serviceFor(null);
+    final candidate = Directory(p.join(sandbox.path, 'candidate'));
+
+    final prepared = await service.prepareRecordDir(candidate.path);
+
+    expect(p.equals(prepared.path, p.join(candidate.path, CacheService.managedFolderName)), isTrue);
+    expect(File(p.join(prepared.path, CacheService.ownershipMarkerName)).existsSync(), isTrue);
+    expect(p.equals((await service.getRecordDir()).path, defaultDirectory.path), isTrue);
+
+    final blockedParent = await File(p.join(sandbox.path, 'not-a-directory')).writeAsString('fixture');
+    await expectLater(service.prepareRecordDir(blockedParent.path), throwsA(isA<FileSystemException>()));
+    expect(p.equals((await service.getRecordDir()).path, defaultDirectory.path), isTrue);
+  });
+
+  test('concurrent write checks own isolated probes and leave no temporary entries', () async {
+    final service = serviceFor(null);
+
+    final results = await Future.wait(List.generate(24, (_) => service.canWriteRecordDir()));
+
+    expect(results, everyElement(isTrue));
+    final directory = await service.getRecordDir();
+    final leftovers = await directory
+        .list(followLinks: false)
+        .where((entity) => p.basename(entity.path).startsWith('.pure_live_write_probe_'))
+        .toList();
+    expect(leftovers, isEmpty);
+  });
+
   test('selecting the managed child does not create a duplicate nesting level', () async {
     final managed = await Directory(p.join(sandbox.path, CacheService.managedFolderName)).create(recursive: true);
     await File(p.join(managed.path, CacheService.ownershipMarkerName)).writeAsString('owned');

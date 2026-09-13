@@ -1,15 +1,23 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:pure_live/common/index.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:pure_live/plugins/file_utils.dart';
 import 'package:pure_live/recorder/consts/recorder_keys.dart';
-import 'package:pure_live/common/global/app_path_manager.dart';
 import 'package:pure_live/recorder/consts/recorder_config.dart';
 import 'package:pure_live/recorder/services/cache_service.dart';
 
+typedef RecordDirectoryPicker = Future<String?> Function();
+
 class RecordSettingsController extends GetxController {
+  RecordSettingsController({RecordDirectoryPicker? directoryPicker})
+    : _directoryPicker = directoryPicker ?? (() => FilePicker.getDirectoryPath());
+
+  final RecordDirectoryPicker _directoryPicker;
+  Future<void>? _storageInitialization;
+
   /// =====================================
   /// 基础配置
   /// =====================================
@@ -18,6 +26,7 @@ class RecordSettingsController extends GetxController {
   final maxCacheMB = RecorderConfig.maxCacheMB.obs;
   final cacheSizeMB = 0.0.obs;
   final managedRecordPath = ''.obs;
+  final selectingRecordDirectory = false.obs;
 
   /// =====================================
   /// 录制性能与画质
@@ -53,12 +62,22 @@ class RecordSettingsController extends GetxController {
   void onInit() {
     super.onInit();
     unawaited(RecorderConfig.normalizeStoredValues());
-    unawaited(_initializeStorage());
+    final initialization = _initializeStorage();
+    _storageInitialization = initialization;
+    unawaited(initialization);
   }
 
   Future<void> _initializeStorage() async {
-    await initRecordPath();
-    await refreshStorageInfo();
+    try {
+      await initRecordPath();
+      await refreshStorageInfo();
+    } catch (error, stackTrace) {
+      developer.log('Recorder storage initialization failed', error: error, stackTrace: stackTrace);
+      if (!isClosed) {
+        managedRecordPath.value = '';
+        cacheSizeMB.value = 0;
+      }
+    }
   }
 
   /// =====================================
@@ -187,12 +206,32 @@ class RecordSettingsController extends GetxController {
   /// 选择录制目录
   /// =====================================
   Future<void> pickRecordDir() async {
-    final result = await FilePicker.getDirectoryPath();
+    if (isClosed || selectingRecordDirectory.value) return;
+    selectingRecordDirectory.value = true;
+    try {
+      final selected = (await _directoryPicker())?.trim() ?? '';
+      if (selected.isEmpty || isClosed) return;
+      // Startup may still be persisting the default folder. Let that older
+      // operation settle so this explicit choice is always committed last.
+      await _storageInitialization;
+      if (isClosed) return;
 
-    if (result != null && result.isNotEmpty) {
-      recordSavePath.value = result;
-      await RecorderConfig.setRecordSavePath(result);
-      await refreshStorageInfo();
+      final directory = await CacheService.to.prepareRecordDir(selected);
+      if (isClosed) return;
+
+      // Persist only after the managed child has passed a real create/write/
+      // delete probe. A rejected picker result therefore retains the last
+      // working path in both memory and Hive.
+      await RecorderConfig.setRecordSavePath(selected);
+      if (isClosed) return;
+      recordSavePath.value = selected;
+      managedRecordPath.value = directory.path;
+      await refreshCacheSize();
+    } catch (error, stackTrace) {
+      developer.log('Recorder directory selection failed', error: error, stackTrace: stackTrace);
+      if (!isClosed) ToastUtil.show(i18n('path_or_permission_error'));
+    } finally {
+      if (!isClosed) selectingRecordDirectory.value = false;
     }
   }
 
@@ -266,7 +305,7 @@ class RecordSettingsController extends GetxController {
 
   Future<void> initRecordPath() async {
     if (recordSavePath.value.isEmpty) {
-      final Directory recordDir = await AppPathManager().getDir(AppPathManager.dirRecords);
+      final Directory recordDir = await CacheService.to.getRecordDir();
 
       recordSavePath.value = recordDir.path;
 

@@ -36,7 +36,17 @@ int normalizeLiveRecordedSeconds({required int rawMilliseconds, required int wal
   return rawSeconds;
 }
 
-enum FFmpegFailureKind { outputPath, command, httpAccess, transport, inputOpen, inputFormat, decoder, native }
+enum FFmpegFailureKind {
+  storageFull,
+  outputPath,
+  command,
+  httpAccess,
+  transport,
+  inputOpen,
+  inputFormat,
+  decoder,
+  native,
+}
 
 class FFmpegFailureDiagnosis {
   const FFmpegFailureDiagnosis({required this.kind, required this.retryable});
@@ -51,13 +61,19 @@ class FFmpegFailureClassifier {
   static FFmpegFailureDiagnosis classify({required int code, required String logs}) {
     final value = logs.toLowerCase();
     if (_containsAny(value, const <String>[
+      'no space left on device',
+      'disk quota exceeded',
+      'not enough space on the disk',
+    ])) {
+      return const FFmpegFailureDiagnosis(kind: FFmpegFailureKind.storageFull, retryable: false);
+    }
+    if (_containsAny(value, const <String>[
       'error opening output',
       'unable to open output',
       'could not open output',
       'failed to open segment',
       'error writing trailer',
       'av_interleaved_write_frame',
-      'no space left on device',
       'read-only file system',
       'permission denied',
     ])) {
@@ -761,6 +777,8 @@ class FFmpegService {
 
   static String _friendlyError(int code, String logs, FFmpegFailureDiagnosis diagnosis) {
     switch (diagnosis.kind) {
+      case FFmpegFailureKind.storageFull:
+        return i18n('recorder_storage_full');
       case FFmpegFailureKind.outputPath:
         return i18n('path_or_permission_error');
       case FFmpegFailureKind.command:

@@ -36,9 +36,12 @@ IPTV 缓存树和 Hive 都按备份恢复。除探针预期的 Provider 异常�
 渲染/Widget 异常或导入失败，应用停止，桌面和 stay-awake 恢复。
 
 同源码的 R8/资源收缩 Release 测试包随后也完成保留数据覆盖：冷/热/重复口令、混合附件释放、单 M3U、
-探针排除、APK 哈希与精确恢复全部通过。该证据补充 A1-05/A2-01 的 Android 外部接收路径；Windows
-原生剪贴板导入、两个真实应用之间的发送和最终正式签名候选继续执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组
-未闭环**。本批 Windows Computer Use 与 Astra Light 使用均为 **0 次**。
+探针排除、APK 哈希与精确恢复全部通过。独立系统包 DocumentsUI 又在真实 UI 中选择 M3U+XMLTV，经过
+系统分享面板把 `ACTION_SEND_MULTIPLE` 交给 Pure Live；两份 ExternalStorageProvider 内容 URI 都明确
+授权给目标包，播放列表与 EPG 数据各精确入库一次，17/17 检查通过。该证据补充 A1-05/A2-01 的
+Android 外部接收路径并关闭“真实外部应用发送方”缺口；Windows 原生剪贴板导入和最终正式签名候选继续
+执行，因此两组保持 `RUN`。宏观仍为 **20 PASS / 40 RUN / 2 NR，共 42 组未闭环**。本批 Windows
+Computer Use 与 Astra Light 使用均为 **0 次**。
 
 ## 原始缺口与真实失败证据
 
@@ -112,6 +115,7 @@ IPTV/Hive 并回到桌面。
 | 分享处理器最终直接复验 | 26/26 PASS（前一产品批） |
 | 相邻七文件 | 129/129 PASS（前一产品批） |
 | PowerShell 原生工具静态合同 | PASS；ADB 入口全部显式 `-s`，禁用操作与恢复门禁通过 |
+| DocumentsUI 外部发送工具静态合同 | PASS；独立 UID、语义选取、URI 授权、SQLite 与精确清理门禁通过 |
 | Built-in Kotlin 审计 | 10 个 Gradle 文件通过 |
 | 全库 Flutter analyze | `No issues found` |
 
@@ -130,6 +134,14 @@ Parcelable URI 列表，并从关闭状态 SQLite 查询两类来源、频道和
 恢复数据树并逐文件核对 uid/gid/mode/size/SHA，同时删除受路径守卫保护的探针输入目录。
 Release 模式复用全部公共步骤，但不调用 Debug 探针，并从安装后的 package dump 确认
 `ShareIntentProbeReceiver`、`ShareIntentProbeProvider`、`RecorderLifecycleProbeReceiver` 均不存在。
+
+`tool/android_documentsui_share_smoke.ps1` 把真实外部发送方单独固化：只接受显式 Release、serial、APK
+路径和 SHA；先核对设备身份及 DocumentsUI/Pure Live 的独立包名、UID，再精确备份 Hive 与完整 IPTV
+树。工具在唯一 Download 目录写入并核对两份夹具，通过 DocumentsUI 语义节点长按/点按达到“已选择
+2 项”，点击其真实分享动作，在系统 chooser 中按应用标签选择 Pure Live。目标启动后同时要求 chooser
+来源、`ACTION_SEND_MULTIPLE`、两份 `com.android.externalstorage.documents` URI 对目标包的 read grant、
+暂存清空和关闭状态 SQLite 数据成立；finally 仅删除两个精确文件，再以受保护前缀执行非递归 `rmdir`，
+随后逐文件恢复并核对用户数据。
 
 ## 构建与 K90 原生结果
 
@@ -208,9 +220,34 @@ Release 模式原生摘要：
 - 13 项 Release 模式检查全为 true；IPTV 树逐文件恢复，Hive 回到 `91D6BAC5…6128F`，应用停止，
   顶层 `com.miui.home`，stay-awake 恢复为 0。
 
+真实 DocumentsUI 外部发送摘要：
+`local-artifacts/diagnostics/android-documentsui-share-20260913T083103384/summary.json`。
+
+- 最终工具提交为 `0876d27ec59382e822f29412c59d4e3dbcf3abe5`，继续绑定上述精确 Release
+  测试包与 SHA；覆盖安装返回 `Success`，`firstInstallTime` 保持 `2026-07-21 18:07:53`，设备
+  `base.apk` 哈希精确匹配，三个 Debug 探针仍不存在。
+- 发送方 `com.google.android.documentsui` / UID 10096 与目标 `com.mystyle.purelive` / UID 10946
+  独立。UI 层级先显示唯一外部目录和两份文件，再依次出现“已选择 1 项”“已选择 2 项”；分享动作
+  `com.google.android.documentsui:id/action_menu_share` 可点击。
+- `com.android.intentresolver/.ChooserActivity` 的 activity 记录明确
+  `launchedFromPackage=com.google.android.documentsui`，系统面板内“纯粹直播”目标可点击；随后目标
+  前台保持存活。
+- `dumpsys activity permissions` 分别记录两份
+  `content://com.android.externalstorage.documents/document/...` URI 的
+  `sourcePkg=com.android.externalstorage targetPkg=com.mystyle.purelive` read grant；系统日志明确记录
+  `android.intent.action.SEND_MULTIPLE`。MIUI chooser 的预览进程曾记录自己的元数据预览权限警告，
+  但目标授权、读取和入库均成立，该观察不属于 Pure Live 导入失败。
+- 关闭应用后 SQLite 中 Provider `documentsui-playlist-26091308310340`、频道
+  `DocumentsUI Playlist 26091308310340`、EPG 来源 `documentsui-epg-26091308310340`、EPG 频道与节目
+  各精确一条，来源名保留外部文件 basename；插件暂存树为空，目标进程没有 FATAL/ANR 或导入失败。
+- 17 项检查全为 true；外部两个夹具文件和唯一目录精确删除，IPTV 树元数据/逐文件 SHA 与 Hive
+  `91D6BAC5…6128F` 均恢复，应用停止、顶层 `com.miui.home`、stay-awake 回到 0。测试未停止或更新 MT，
+  未改 ADB/网络/Root/LSP 状态。
+
 原生工具在 `2cc1b56d` 加入混合分享门禁，`2ad872e2` 修正最后一条重复口令夹具；`d2f7400c` 增加
 Debug-only 多附件发送器，`944338e4` 增加 M3U+EPG 数据库和暂存清理门禁；`c6817e74` 增加异常
 Provider/长名注入，`ed126884` 按 Android 实际异常传播修正日志门禁，`d563a0bf` 固定 emoji JSON
-取证编码，`7f1df73e` 增加显式 Release 模式和安装后探针排除检查。最终 Debug 原生轮次使用
-`d563a0bf` 工具绑定 `c6817e74` 精确 APK；Release 原生轮次使用 `7f1df73e` 工具绑定 `52e25b82`
-构建的精确测试包。
+取证编码，`7f1df73e` 增加显式 Release 模式和安装后探针排除检查。`91498e22` 新增 DocumentsUI
+真实外部发送工具，`0876d27e` 把两份 URI grant 分别绑定到目标包。最终 Debug 原生轮次使用
+`d563a0bf` 工具绑定 `c6817e74` 精确 APK；公共 Release 轮次使用 `7f1df73e`，外部发送轮次使用
+`0876d27e`，二者均绑定 `52e25b82` 构建的精确测试包。

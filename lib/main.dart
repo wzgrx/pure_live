@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/services/settings/player_settings_controller.dart';
-import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:pure_live/common/global/initialized.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
@@ -132,7 +131,7 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         return Obx(() {
-          final themeColor = HexColor(SettingsService.to.theme.themeColorSwitch.v);
+          final themeColor = SettingsService.to.theme.themeColor;
           final showSplashPage = SettingsService.to.app.showSplashPage.v;
           final currentFactor = SettingsService.to.font.textScaleFactor.v;
 
@@ -155,7 +154,7 @@ class _MyAppState extends State<MyApp> with DesktopWindowMixin {
             navigatorKey: appNavigatorKey,
             scrollBehavior: MyCustomScrollBehavior(),
             debugShowCheckedModeBanner: false,
-            themeMode: AppConsts.themeModes[SettingsService.to.theme.themeModeName.v]!,
+            themeMode: SettingsService.to.theme.themeMode,
             theme: lightTheme.copyWith(
               appBarTheme: const AppBarTheme(surfaceTintColor: Colors.transparent),
               pageTransitionsTheme: const PageTransitionsTheme(

@@ -24,7 +24,7 @@ class HotAreasController extends GetxController {
     super.onInit();
   }
 
-  Color get themeColor => HexColor(SettingsService.to.theme.themeColorSwitch.v);
+  Color get themeColor => SettingsService.to.theme.themeColor;
 
   bool isSiteVisible(String id) {
     return SettingsService.to.fav.hotAreasList.v.contains(id);

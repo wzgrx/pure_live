@@ -93,6 +93,15 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('invalid restored loading color keeps the animated default visible', (tester) async {
+    settings.theme.loadingStyle.value = 'removed-style';
+    settings.theme.loadingStyleColorSwitch.value = 'not-a-color';
+    await mountLoading(tester);
+    expect(find.byType(RotationTransition), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('loading completion and unmount retire all animation callbacks', (tester) async {
     final type = ValueNotifier(AppStatusType.loading);
     addTearDown(type.dispose);

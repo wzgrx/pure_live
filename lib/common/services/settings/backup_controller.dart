@@ -77,7 +77,7 @@ class BackupController extends GetxController {
   // extractors, rather than maintaining another list of hundreds of fields.
   static final Map<String, Set<String>> _sectionKeys = {
     'app': AppSettingsController.extractConfig(null).keys.toSet(),
-    'theme': ThemeSettingsController.extractConfig(null).keys.toSet(),
+    'theme': ThemeSettingsController.extractConfig(null).keys.toSet()..add('languageName'),
     'font': FontSettingsController.extractConfig(null).keys.toSet(),
     'player': PlayerSettingsController.extractConfig(null).keys.toSet(),
     'danmaku': DanmakuSettingsController.extractConfig(null).keys.toSet()..add('pipDanmaNoEmojiMode'),

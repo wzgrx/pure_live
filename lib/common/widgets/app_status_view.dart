@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pure_live/get/get.dart';
-import 'package:flutter_color/flutter_color.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:pure_live/plugins/locale_helper.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:pure_live/common/style/app_text_styles.dart';
-import 'package:pure_live/common/services/utils/hive_rx.dart';
 import 'package:pure_live/common/services/settings_service.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -384,13 +382,7 @@ class _AppStatusViewState extends State<AppStatusView> {
 
   Widget _buildLoadingWidget(String style) {
     final theme = Theme.of(context);
-    Color parsedColor;
-    final hexColor = SettingsService.to.theme.loadingStyleColorSwitch.v;
-    if (hexColor.isNotEmpty) {
-      parsedColor = HexColor(hexColor);
-    } else {
-      parsedColor = widget.iconColor ?? theme.colorScheme.primary;
-    }
+    final parsedColor = SettingsService.to.theme.loadingStyleColor ?? widget.iconColor ?? theme.colorScheme.primary;
 
     final double size = widget.isMini
         ? 24
@@ -415,7 +407,7 @@ class _AppStatusViewState extends State<AppStatusView> {
     if (widget.type == AppStatusType.loading) {
       return Center(
         child: Obx(() {
-          return _buildLoadingWidget(SettingsService.to.theme.loadingStyle.v);
+          return _buildLoadingWidget(SettingsService.to.theme.resolvedLoadingStyle);
         }),
       );
     }

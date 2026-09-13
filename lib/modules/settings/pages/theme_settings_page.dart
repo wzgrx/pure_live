@@ -2,6 +2,7 @@ import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/consts/app_consts.dart';
 import 'package:pure_live/common/services/settings/font_settings_controller.dart';
+import 'package:pure_live/common/services/settings/theme_settings_controller.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:pure_live/modules/settings/pages/page_settings.dart';
 import 'package:pure_live/modules/settings/pages/font_settings_page.dart';
@@ -40,7 +41,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
                   width: 28,
                   height: 28,
                   borderRadius: 6,
-                  color: HexColor(SettingsService.to.theme.themeColorSwitch.v),
+                  color: SettingsService.to.theme.themeColor,
                   onSelectFocus: false,
                 ),
               ),
@@ -54,7 +55,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
             Obx(
               () => context.buildTile(
                 iconWidget: SizedBox(
-                  key: ValueKey(SettingsService.to.theme.loadingStyle.v),
+                  key: ValueKey(SettingsService.to.theme.resolvedLoadingStyle),
                   width: 24,
                   child: AppStatusView(
                     type: AppStatusType.loading,
@@ -68,7 +69,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
                 onTap: () => Get.to(() => const LoadingStyleSettingsPage()),
                 stackTrailingOnNarrow: true,
                 trailing: Obx(() {
-                  final String currentKey = SettingsService.to.theme.loadingStyle.v;
+                  final String currentKey = SettingsService.to.theme.resolvedLoadingStyle;
                   final bool isZh = Get.locale?.languageCode == 'zh';
                   final Map<String, String> currentItem = AppConsts.allStyles.firstWhere(
                     (item) => item['key'] == currentKey,
@@ -181,7 +182,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
       context: Get.context!,
       builder: (context) => ThemeChoiceDialog<String>(
         title: i18n('change_theme_mode'),
-        value: SettingsService.to.theme.themeModeName.v,
+        value: SettingsService.to.theme.resolvedThemeModeName,
         items: {for (final name in AppConsts.themeModes.keys) name: i18n(AppConsts.themeModeI18n[name]!)},
       ),
     );
@@ -190,7 +191,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
 
   Future<bool> colorPickerDialog() async {
     final bool isZh = Get.locale?.languageCode == 'zh';
-    final initialColor = HexColor(SettingsService.to.theme.themeColorSwitch.v);
+    final initialColor = SettingsService.to.theme.themeColor;
     return showAppColorPickerDialog(
       context: Get.context!,
       initialColor: initialColor,
@@ -214,7 +215,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
       context: pageContext,
       builder: (context) => ThemeChoiceDialog<String>(
         title: i18n('change_language'),
-        value: SettingsService.to.theme.languageName.v,
+        value: SettingsService.to.theme.resolvedLanguageName,
         items: {for (final name in AppConsts.languages.keys) name: name},
       ),
     );
@@ -227,7 +228,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
     return showCustomSpacingDialog(
       title: i18n("cross_axis_spacing"),
       hintText: i18n("cross_axis_spacing_subtitle"),
-      currentValue: SettingsService.to.theme.crossAxisSpacing.v,
+      currentValue: SettingsService.to.theme.resolvedCrossAxisSpacing,
       onSelected: (value) => SettingsService.to.theme.crossAxisSpacing.v = value,
     );
   }
@@ -236,7 +237,7 @@ class ThemeSettingsPage extends GetView<SettingsService> {
     return showCustomSpacingDialog(
       title: i18n("main_axis_spacing"),
       hintText: i18n("main_axis_spacing_subtitle"),
-      currentValue: SettingsService.to.theme.mainAxisSpacing.v,
+      currentValue: SettingsService.to.theme.resolvedMainAxisSpacing,
       onSelected: (value) => SettingsService.to.theme.mainAxisSpacing.v = value,
     );
   }
@@ -318,8 +319,8 @@ class ThemeChoiceDialog<T> extends StatelessWidget {
 }
 
 abstract final class ThemeSpacingPolicy {
-  static const double min = 0;
-  static const double max = 64;
+  static const double min = ThemeSettingsController.minSpacing;
+  static const double max = ThemeSettingsController.maxSpacing;
 
   static double? tryParse(String rawValue) {
     final value = double.tryParse(rawValue.trim());

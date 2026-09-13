@@ -14,7 +14,7 @@ class DanmuShieldController extends GetxController {
     textEditingController.clear();
   }
 
-  Color get themeColor => HexColor(SettingsService.to.theme.themeColorSwitch.v);
+  Color get themeColor => SettingsService.to.theme.themeColor;
 
   void remove(String keyword) {
     final favorites = SettingsService.to.fav;

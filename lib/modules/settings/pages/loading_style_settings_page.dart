@@ -25,11 +25,7 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
 
   Future<bool> colorPickerDialog() async {
     final bool isZh = Get.locale?.languageCode == 'zh';
-    final initialColor = HexColor(
-      SettingsService.to.theme.loadingStyleColorSwitch.v.isEmpty
-          ? Theme.of(context).colorScheme.primary.hex
-          : SettingsService.to.theme.loadingStyleColorSwitch.v,
-    );
+    final initialColor = SettingsService.to.theme.loadingStyleColor ?? Theme.of(context).colorScheme.primary;
     return showAppColorPickerDialog(
       context: context,
       initialColor: initialColor,
@@ -460,11 +456,7 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
                           width: 28,
                           height: 28,
                           borderRadius: 6,
-                          color: HexColor(
-                            SettingsService.to.theme.loadingStyleColorSwitch.v.isEmpty
-                                ? theme.colorScheme.primary.hex
-                                : SettingsService.to.theme.loadingStyleColorSwitch.v,
-                          ),
+                          color: SettingsService.to.theme.loadingStyleColor ?? theme.colorScheme.primary,
                           onSelectFocus: false,
                         ),
                       ),
@@ -489,9 +481,8 @@ class _LoadingStyleSettingsPageState extends State<LoadingStyleSettingsPage> wit
                 final String displayName = isZh ? item['nameZh']! : item['nameEn']!;
 
                 return Obx(() {
-                  final bool isSelected = SettingsService.to.theme.loadingStyle.v == key;
-                  final String currentHex = SettingsService.to.theme.loadingStyleColorSwitch.v;
-                  final Color liveColor = currentHex.isEmpty ? theme.colorScheme.primary : HexColor(currentHex);
+                  final bool isSelected = SettingsService.to.theme.resolvedLoadingStyle == key;
+                  final Color liveColor = SettingsService.to.theme.loadingStyleColor ?? theme.colorScheme.primary;
 
                   return InkWell(
                     key: ValueKey('loading-style-$key'),

@@ -3076,9 +3076,11 @@ class PlayerManager {
             }),
           ),
         ),
-        right: 50,
-        top: 100,
-        slideType: FloatingEdgeType.onRightAndTop,
+        // Bottom-right above the navigation bar: the old top-right spot sat
+        // on the tab row and the first field of most pages (search, links).
+        right: 16,
+        bottom: _floatingBottomOffset(),
+        slideType: FloatingEdgeType.onRightAndBottom,
         params: FloatingParams(isSnapToEdge: false, snapToEdgeSpace: 10, dragOpacity: 0.8),
       ),
     );
@@ -3102,6 +3104,13 @@ class PlayerManager {
       isHovered.value = true;
       resetHideTimer();
     }
+  }
+
+  static double _floatingBottomOffset() {
+    final context = Get.overlayContext;
+    final inset = context == null ? 0.0 : MediaQuery.viewPaddingOf(context).bottom;
+    // Material 3 NavigationBar height plus a small gap.
+    return inset + 80 + 16;
   }
 
   Future<void> closeAppFloating() async {

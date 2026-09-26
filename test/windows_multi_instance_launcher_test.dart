@@ -44,4 +44,35 @@ void main() {
     expect(decoded!.effectiveLiveStatus, LiveStatus.offline);
     expect(decoded.status, isFalse);
   });
+
+  test('only the settings file the launcher wrote is imported', () {
+    const temp = '/tmp/fixture-temp';
+    const id = 'window_42_1790000000';
+    List<String> args(String path, {String instance = id}) => [
+      '${WindowsMultiInstanceLauncher.instancePrefix}$instance',
+      '${WindowsMultiInstanceLauncher.configPrefix}$path',
+    ];
+
+    expect(
+      WindowsMultiInstanceLauncher.configFileFromArgs(args('$temp/pure_live_instance_ab12/$id.json'), tempRoot: temp),
+      '$temp/pure_live_instance_ab12/$id.json',
+    );
+    for (final path in [
+      '/home/user/Documents/settings.json',
+      '$temp/other_ab12/$id.json',
+      '$temp/pure_live_instance_ab12/window_other.json',
+      '$temp/pure_live_instance_ab12/../../etc/$id.json',
+      '$temp/$id.json',
+      '',
+    ]) {
+      expect(WindowsMultiInstanceLauncher.configFileFromArgs(args(path), tempRoot: temp), isNull, reason: path);
+    }
+    expect(
+      WindowsMultiInstanceLauncher.configFileFromArgs([
+        '${WindowsMultiInstanceLauncher.configPrefix}$temp/pure_live_instance_ab12/$id.json',
+      ], tempRoot: temp),
+      isNull,
+      reason: 'the main window never imports a hand-over file',
+    );
+  });
 }

@@ -1,3 +1,4 @@
+import 'package:pure_live/common/widgets/scrollable_tab_bar.dart';
 import 'popular_grid_view.dart';
 
 import 'package:pure_live/common/index.dart';
@@ -24,7 +25,7 @@ class PopularPage extends GetView<PopularController> {
               centerTitle: true,
               leading: showAction ? const MenuButton() : null,
               actions: showAction ? [CommonAppBarActions()] : null,
-              title: TabBar(
+              title: ScrollableTabBar(
                 key: const ValueKey('popular-platform-tabs'),
                 controller: controller.tabController,
                 isScrollable: true,

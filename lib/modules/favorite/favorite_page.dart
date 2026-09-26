@@ -1,3 +1,4 @@
+import 'package:pure_live/common/widgets/scrollable_tab_bar.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:pure_live/modules/tags/live_tag.dart';
@@ -121,7 +122,7 @@ class _FavoriteSiteTabsState extends State<_FavoriteSiteTabs> with SingleTickerP
     final availableSitesList = widget.availableSitesList;
     return Column(
       children: [
-        TabBar(
+        ScrollableTabBar(
           key: const ValueKey('favorite-platform-tabs'),
           controller: _tabController,
           isScrollable: true,

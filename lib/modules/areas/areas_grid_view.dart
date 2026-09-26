@@ -1,3 +1,4 @@
+import 'package:pure_live/common/widgets/scrollable_tab_bar.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:pure_live/common/index.dart';
@@ -178,7 +179,7 @@ class _AreaGridViewState extends State<AreaGridView> with TickerProviderStateMix
 
       return Column(
         children: [
-          TabBar(
+          ScrollableTabBar(
             key: const ValueKey('area-category-tabs'),
             controller: _tabController,
             // A tap is committed intent, unlike an unfinished horizontal drag.

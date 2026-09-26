@@ -1,3 +1,4 @@
+import 'package:pure_live/common/widgets/scrollable_tab_bar.dart';
 import 'dart:async';
 
 import 'package:pure_live/common/index.dart';
@@ -154,7 +155,7 @@ class _PlayOtherState extends State<PlayOther> with SingleTickerProviderStateMix
             ),
             SizedBox(
               height: textMetrics.tabBarHeight,
-              child: TabBar(
+              child: ScrollableTabBar(
                 controller: tabController,
                 isScrollable: textMetrics.scrollTabs,
                 tabAlignment: textMetrics.scrollTabs ? TabAlignment.start : TabAlignment.fill,

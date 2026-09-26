@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/release_model.dart';
-import 'package:pure_live/modules/about/version_history.dart';
+import 'package:pure_live/modules/about/widgets/release_history_repository.dart';
 
 void main() {
   group('release history feed contract', () {
     test('history follows the maintained update repository', () {
-      final source = File('lib/modules/about/version_history.dart').readAsStringSync();
+      final source = File('lib/modules/about/widgets/release_history_repository.dart').readAsStringSync();
 
       expect(source, contains('VersionUtil.mirror'));
       expect(source, isNot(contains("owner: 'liuchuancong'")));
@@ -21,15 +21,18 @@ void main() {
         'date': '2026-09-11',
         'author': {'name': 123},
         'files': [
-          {'name': 'PureLive.apk', 'size': 2048, 'downloads': '17', 'url': 'https://example.test/PureLive.apk'},
+          {'name': 'PureLive.apk', 'size': 5242880, 'downloads': '17', 'url': 'https://example.test/PureLive.apk'},
+          {'name': 'PureLive.zip', 'size': '137.52mb', 'url': 'https://example.test/PureLive.zip'},
         ],
       });
 
       expect(release.version, '3.2');
       expect(release.title, '320');
       expect(release.author.name, '123');
-      expect(release.files.single.size, '2048');
-      expect(release.files.single.downloads, 17);
+      // Byte counts from the GitHub API read as megabytes, like releases.json.
+      expect(release.files.first.size, '5.00mb');
+      expect(release.files.last.size, '137.52mb');
+      expect(release.files.first.downloads, 17);
     });
 
     test('malformed nested entries are isolated instead of breaking the complete history', () {
@@ -49,8 +52,19 @@ void main() {
       expect(release.files.single.downloads, 0);
     });
 
+    test('releases sharing a date sort by numeric version', () {
+      final releases = ReleaseHistoryRepository.instance.parse([
+        {'version': '3.2.9', 'date': '2026-09-26'},
+        {'version': '3.2.10', 'date': '2026-09-26'},
+        {'version': '3.2.8', 'date': '2026-09-26'},
+      ]);
+      expect(releases.map((release) => release.version), ['3.2.10', '3.2.9', '3.2.8']);
+      expect(compareReleaseVersions('v3.2.10', '3.2.9'), greaterThan(0));
+      expect(compareReleaseVersions('3.2', '3.2.0'), 0);
+    });
+
     test('payload parser filters unusable rows and sorts the retained releases', () {
-      final releases = parseReleaseHistoryPayload({
+      final releases = ReleaseHistoryRepository.instance.parse({
         'releases': [
           {'version': '3.1.9', 'date': '2026-09-10'},
           'invalid row',
@@ -60,12 +74,12 @@ void main() {
       });
 
       expect(releases.map((release) => release.version), ['3.2.0', '3.1.9']);
-      expect(() => parseReleaseHistoryPayload({'releases': 'invalid'}), throwsFormatException);
+      expect(() => ReleaseHistoryRepository.instance.parse({'releases': 'invalid'}), throwsFormatException);
     });
 
     test('bundled maintained release history is completely parseable', () {
       final raw = jsonDecode(File('assets/releases.json').readAsStringSync()) as List<dynamic>;
-      final releases = parseReleaseHistoryPayload(raw);
+      final releases = ReleaseHistoryRepository.instance.parse(raw);
 
       expect(releases, hasLength(raw.length));
       expect(releases.first.version, '3.2.9');
@@ -74,7 +88,7 @@ void main() {
 
     test('release actions share the normalized complete HTTP target contract', () {
       expect(
-        releaseHistoryWebUri(' HTTPS://Example.TEST:8443/release?q=a%2Fb ')?.toString(),
+        ReleaseHistoryRepository.instance.webUri(' HTTPS://Example.TEST:8443/release?q=a%2Fb ')?.toString(),
         'https://example.test:8443/release?q=a%2Fb',
       );
       for (final value in <String>[
@@ -85,7 +99,7 @@ void main() {
         '/relative/release',
         '',
       ]) {
-        expect(releaseHistoryWebUri(value), isNull, reason: value);
+        expect(ReleaseHistoryRepository.instance.webUri(value), isNull, reason: value);
       }
     });
   });

@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/utils/version_util.dart';
-import 'package:pure_live/modules/version/version_controller.dart';
+import 'package:pure_live/common/utils/release_asset_urls.dart';
 import 'package:pure_live/modules/version/version_page.dart';
 
 void main() {
@@ -13,44 +13,54 @@ void main() {
     expect(VersionUtil.releaseUrl, contains('/repos/wzgrx/pure_live/releases'));
   });
 
-  test('release URLs match locally produced artifact names', () {
-    const urls = ReleaseAssetUrls(
-      projectUrl: 'https://github.com/liuchuancong/pure_live',
-      version: '2.1.4',
-      buildNumber: 52,
+  Map<String, dynamic> asset(String name, {String? url}) => {
+    'name': name,
+    'browser_download_url': url ?? 'https://github.com/wzgrx/pure_live/releases/download/v3.2.9/$name',
+  };
+
+  test('release assets are found by platform keywords in this repository\'s own file names', () {
+    final urls = ReleaseAssetUrls(
+      assets: [
+        asset('BUILD_METADATA.json'),
+        asset('SHA256SUMS.txt'),
+        asset('PureLive-3.2.9-4132-debug-signed-android-arm64-v8a-release.apk'),
+        asset('PureLive-3.2.9-4132-linux-x64.tar.gz'),
+        asset('PureLive-3.2.9-4132-windows-x64-portable.zip'),
+        asset('PureLive-3.2.9-4132-windows-x64-setup.exe'),
+      ],
     );
 
-    expect(urls.androidArm64, endsWith('/PureLive-2.1.4-52-android-arm64-v8a-release.apk'));
-    expect(urls.androidArmeabiV7a, endsWith('/PureLive-2.1.4-52-android-armeabi-v7a-release.apk'));
-    expect(urls.androidX8664, endsWith('/PureLive-2.1.4-52-android-x86_64-release.apk'));
-    expect(urls.windowsSetup, endsWith('/PureLive-2.1.4-52-windows-x64-setup.exe'));
-    expect(urls.windowsMsix, endsWith('/PureLive-2.1.4-52-windows-x64.msix'));
-    expect(urls.windowsPortable, endsWith('/PureLive-2.1.4-52-windows-x64-portable.zip'));
-    expect(urls.macosUniversal, endsWith('/PureLive-2.1.4-52-macos-universal.zip'));
+    expect(urls.androidArm64, endsWith('/PureLive-3.2.9-4132-debug-signed-android-arm64-v8a-release.apk'));
+    expect(urls.windowsSetup, endsWith('/PureLive-3.2.9-4132-windows-x64-setup.exe'));
+    expect(urls.windowsPortable, endsWith('/PureLive-3.2.9-4132-windows-x64-portable.zip'));
+    expect(urls.linuxX64, endsWith('/PureLive-3.2.9-4132-linux-x64.tar.gz'));
+    // Artifacts this release does not publish are absent, never guessed.
+    expect(urls.androidArmeabiV7a, isNull);
+    expect(urls.windowsMsix, isNull);
+    expect(urls.macosUrl, isNull);
+    expect(urls.all.keys, [
+      'android-arm64-v8a',
+      'windows-x64-setup.exe',
+      'windows-x64-portable.zip',
+      'linux-x64.tar.gz',
+    ]);
   });
 
-  test('incomplete release identity never produces broken download links', () {
-    const missingVersion = ReleaseAssetUrls(
-      projectUrl: 'https://github.com/wzgrx/pure_live',
-      version: '',
-      buildNumber: 52,
-    );
-    const missingBuild = ReleaseAssetUrls(
-      projectUrl: 'https://github.com/wzgrx/pure_live',
-      version: '3.2.0',
-      buildNumber: 0,
-    );
-    const unsafeVersion = ReleaseAssetUrls(
-      projectUrl: 'https://github.com/wzgrx/pure_live',
-      version: '3.2.0/../../fixture',
-      buildNumber: 52,
+  test('upstream-style names, release preference and unsafe links', () {
+    final urls = ReleaseAssetUrls(
+      assets: [
+        asset('PureLive-3.1.5-4104-android-arm64-v8a-debug.apk'),
+        asset('PureLive-3.1.5-4104-android-arm64-v8a-release.apk'),
+        asset('PureLive-3.1.5-4104-android-x86_64-release.apk', url: 'http://example.test/x86.apk'),
+        asset('PureLive-3.1.5-4104-android-armeabi-v7a-release.apk', url: 'file:///tmp/v7a.apk'),
+        asset('', url: 'https://example.test/nameless.apk'),
+      ],
     );
 
-    expect(missingVersion.androidArm64, isEmpty);
-    expect(missingVersion.windowsSetup, isEmpty);
-    expect(missingBuild.androidArm64, isEmpty);
-    expect(missingBuild.windowsPortable, isEmpty);
-    expect(unsafeVersion.androidArm64, isEmpty);
+    expect(urls.androidArm64, endsWith('-android-arm64-v8a-release.apk'));
+    expect(urls.androidX8664, isNull, reason: 'plain HTTP is refused');
+    expect(urls.androidArmeabiV7a, isNull, reason: 'only HTTPS URLs are used');
+    expect(const ReleaseAssetUrls(assets: []).all, isEmpty);
   });
 
   test('download actions accept only absolute web URLs', () {

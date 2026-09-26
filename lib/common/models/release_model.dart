@@ -18,21 +18,23 @@ class ReleaseModel {
   });
 
   factory ReleaseModel.fromJson(Map<String, dynamic> json) {
-    final rawAuthor = json['author'];
-    final rawFiles = json['files'];
+    final rawFiles = json['files'] ?? json['assets'];
+    final filesData = rawFiles is List ? rawFiles : const <dynamic>[];
+
+    final authorData = json['author'] is Map ? Map<String, dynamic>.from(json['author'] as Map) : <String, dynamic>{};
+
     return ReleaseModel(
-      version: _releaseString(json['version']),
-      title: _releaseString(json['title']),
-      date: _releaseString(json['date']),
-      github: _releaseString(json['github']),
-      author: AuthorModel.fromJson(rawAuthor is Map ? Map<String, dynamic>.from(rawAuthor) : const {}),
-      changelog: _releaseString(json['changelog']),
-      files: rawFiles is List
-          ? rawFiles
-                .whereType<Map>()
-                .map((item) => ReleaseFileModel.fromJson(Map<String, dynamic>.from(item)))
-                .toList(growable: false)
-          : const [],
+      version: _string(json['version'] ?? json['tagName']),
+      title: _string(json['title'] ?? json['name']),
+      date: _string(json['date'] ?? json['publishedAt']),
+      github: _string(json['github'] ?? json['url']),
+      author: AuthorModel(
+        name: _string(authorData['name'] ?? authorData['login']),
+        avatar: _string(authorData['avatar'] ?? authorData['avatar_url']),
+        profile: _string(authorData['profile'] ?? authorData['html_url']),
+      ),
+      changelog: _string(json['changelog'] ?? json['body']),
+      files: filesData.whereType<Map>().map((e) => ReleaseFileModel.fromJson(Map<String, dynamic>.from(e))).toList(),
     );
   }
 
@@ -58,9 +60,9 @@ class AuthorModel {
 
   factory AuthorModel.fromJson(Map<String, dynamic> json) {
     return AuthorModel(
-      name: _releaseString(json['name']),
-      avatar: _releaseString(json['avatar']),
-      profile: _releaseString(json['profile']),
+      name: _string(json['name'] ?? json['login']),
+      avatar: _string(json['avatar'] ?? json['avatar_url']),
+      profile: _string(json['profile'] ?? json['html_url']),
     );
   }
 
@@ -79,10 +81,10 @@ class ReleaseFileModel {
 
   factory ReleaseFileModel.fromJson(Map<String, dynamic> json) {
     return ReleaseFileModel(
-      name: _releaseString(json['name']),
-      size: _releaseString(json['size']),
-      downloads: _releaseInt(json['downloads']),
-      url: _releaseString(json['url']),
+      name: _string(json['name']),
+      size: _formatSize(json['size']),
+      downloads: _int(json['downloads'] ?? json['downloadCount']),
+      url: _string(json['url'] ?? json['browser_download_url']),
     );
   }
 
@@ -91,17 +93,32 @@ class ReleaseFileModel {
   }
 }
 
-String _releaseString(Object? value) {
+String _string(Object? value) {
   if (value == null) return '';
-  return value is String ? value : value.toString();
+  return value.toString().trim();
 }
 
-int _releaseInt(Object? value) {
-  final parsed = switch (value) {
+int _int(Object? value) {
+  return switch (value) {
     int number => number,
     num number => number.toInt(),
     String text => int.tryParse(text.trim()) ?? 0,
     _ => 0,
   };
-  return parsed < 0 ? 0 : parsed;
+}
+
+/// Normalizes size to a human-readable string.
+///
+/// GitHub API returns the size in bytes as a number.
+/// The custom format already returns a formatted string like "120.42mb".
+String _formatSize(Object? value) {
+  if (value == null) return '0.0mb';
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? '0.0mb' : trimmed;
+  }
+  if (value is num) {
+    return '${(value / (1024 * 1024)).toStringAsFixed(2)}mb';
+  }
+  return value.toString();
 }

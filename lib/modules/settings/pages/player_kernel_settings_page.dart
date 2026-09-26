@@ -7,7 +7,8 @@ import 'package:pure_live/common/index.dart';
 import 'package:pure_live/common/services/settings/player_settings_controller.dart';
 import 'package:pure_live/core/common/proxy_routing.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:pure_live/player/utils/mpv_platform_profile.dart';
+import 'package:pure_live/player/utils/mpv_option_labels.dart';
+import 'package:pure_live/modules/settings/pages/mpv_option_page.dart';
 import 'package:pure_live/player/utils/player_consts.dart';
 import 'package:pure_live/player/models/player_engine.dart';
 import 'package:pure_live/common/global/platform_utils.dart';
@@ -118,10 +119,6 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
 
   Widget _buildMpvSettings(BuildContext context) {
     final theme = Theme.of(context);
-    final platform = defaultTargetPlatform;
-    final videoOutputDrivers = mpvVideoOutputDriversForPlatform(platform);
-    final audioOutputDrivers = mpvAudioOutputDriversForPlatform(platform);
-    final hardwareDecoders = mpvHardwareDecodersForPlatform(platform);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,35 +155,52 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
             title: i18n("custom_output_hwdec"),
             value: SettingsService.to.player.customPlayerOutput,
           ),
-          Obx(
-            () => context.buildMenuTile<String>(
-              title: i18n("video_output_driver"),
-              icon: Remix.movie_line,
-              value: normalizeMpvVideoOutputDriverForPlatform(SettingsService.to.player.videoOutputDriver.v, platform),
-              valueMap: videoOutputDrivers,
-              onChanged: (e) => SettingsService.to.player.videoOutputDriver.v = e,
-            ),
+          _optionTile(
+            context,
+            kind: MpvOptionKind.videoOutput,
+            title: i18n("video_output_driver"),
+            icon: Remix.movie_line,
+            value: SettingsService.to.player.videoOutputDriver,
           ),
-          Obx(
-            () => context.buildMenuTile<String>(
-              title: i18n("audio_output_driver"),
-              icon: Remix.volume_up_line,
-              value: normalizeMpvAudioOutputDriverForPlatform(SettingsService.to.player.audioOutputDriver.v, platform),
-              valueMap: audioOutputDrivers,
-              onChanged: (e) => SettingsService.to.player.audioOutputDriver.v = e,
-            ),
+          _optionTile(
+            context,
+            kind: MpvOptionKind.audioOutput,
+            title: i18n("audio_output_driver"),
+            icon: Remix.volume_up_line,
+            value: SettingsService.to.player.audioOutputDriver,
           ),
-          Obx(
-            () => context.buildMenuTile<String>(
-              title: i18n("hardware_decoder"),
-              icon: Remix.cpu_line,
-              value: normalizeMpvHardwareDecoderForPlatform(SettingsService.to.player.videoHardwareDecoder.v, platform),
-              valueMap: hardwareDecoders,
-              onChanged: (e) => SettingsService.to.player.videoHardwareDecoder.v = e,
-            ),
+          _optionTile(
+            context,
+            kind: MpvOptionKind.hardwareDecoder,
+            title: i18n("hardware_decoder"),
+            icon: Remix.cpu_line,
+            value: SettingsService.to.player.videoHardwareDecoder,
           ),
         ]),
       ],
+    );
+  }
+
+  Widget _optionTile(
+    BuildContext context, {
+    required MpvOptionKind kind,
+    required String title,
+    required IconData icon,
+    required RxString value,
+  }) {
+    return Obx(
+      () => context.buildTile(
+        icon: icon,
+        title: title,
+        subtitle: mpvOptionLabel(
+          kind,
+          normalizedMpvOption(kind, value.value, defaultTargetPlatform),
+          defaultTargetPlatform,
+          zh: Get.locale?.languageCode == 'zh',
+        ),
+        trailing: const Icon(Remix.arrow_right_s_line),
+        onTap: () => Get.to(() => MpvOptionPage(kind: kind, title: title, value: value)),
+      ),
     );
   }
 

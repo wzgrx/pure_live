@@ -48,6 +48,26 @@ void main() {
 
   tearDownAll(Hive.close);
 
+  testWidgets('decoder, renderer and audio output open a picker that stores the choice', (tester) async {
+    await _pumpKernelPage(tester, translations, size: const Size(900, 1400));
+
+    final decoderTile = find.text('Hardware Decoder (--hwdec)');
+    await tester.scrollUntilVisible(decoderTile, 120, scrollable: find.byType(Scrollable).first);
+    await tester.tap(decoderTile);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Off (software decoding)'), findsOneWidget);
+    expect(find.text('Vulkan (experimental)'), findsOneWidget);
+    await tester.tap(find.text('Off (software decoding)'));
+    await tester.pumpAndSettle();
+    expect(SettingsService.to.player.videoHardwareDecoder.v, 'no');
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Off (software decoding)'), findsOneWidget, reason: 'the tile shows the stored choice');
+    debugDefaultTargetPlatformOverride = null;
+  });
+
   testWidgets('Windows replaces a stale IJK or fvp preference and presents MPV as a fixed engine', (tester) async {
     await _pumpKernelPage(tester, translations, size: const Size(900, 900));
 

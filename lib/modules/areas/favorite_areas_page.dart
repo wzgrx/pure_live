@@ -1,3 +1,4 @@
+import 'package:pure_live/common/widgets/scrollable_tab_bar.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/common/index.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
@@ -93,7 +94,7 @@ class _FavoriteAreaSiteTabsState extends State<_FavoriteAreaSiteTabs> with Singl
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TabBar(
+        ScrollableTabBar(
           key: const ValueKey('favorite-areas-platform-tabs'),
           controller: _tabController,
           onTap: (index) => widget.controller.selectSite(index, widget.sites[index].id),

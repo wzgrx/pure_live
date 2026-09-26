@@ -154,6 +154,12 @@ class _BackupPageState extends State<BackupPage> {
                 isLong: true,
                 onTap: () => Get.toNamed(RoutePath.kWebDavPage),
               ),
+              context.buildTile(
+                icon: Remix.qr_scan_2_line,
+                title: i18n('remote_sync'),
+                subtitle: i18n('remote_sync_subtitle'),
+                onTap: () => Get.toNamed(RoutePath.kRemoteSync),
+              ),
               if (Platform.isAndroid || Platform.isIOS)
                 context.buildTile(
                   icon: Remix.qr_code_line,

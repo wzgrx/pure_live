@@ -61,6 +61,8 @@ import 'package:pure_live/modules/account/kuaishou/kuaishou_cookie_page.dart';
 import 'package:pure_live/modules/account/kuaishou/kuaishou_cookie_binding.dart';
 import 'package:pure_live/recorder/pages/record_settings/record_settings_page.dart';
 import 'package:pure_live/recorder/pages/record_settings/record_settings_binding.dart';
+import 'package:pure_live/modules/remote_receiver/remote_sync_page.dart';
+import 'package:pure_live/modules/remote_receiver/remote_sync_binding.dart';
 
 // auth
 
@@ -246,6 +248,11 @@ class AppPages {
       name: RoutePath.kSettingsTags,
       page: _smoothPage(() => const TagManagementPage()),
       bindings: [TagManagementBinding()],
+    ),
+    GetPage(
+      name: RoutePath.kRemoteSync,
+      page: _smoothPage(() => const RemoteSyncPage()),
+      bindings: [RemoteSyncBinding()],
     ),
   ];
 }

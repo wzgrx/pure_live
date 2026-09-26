@@ -35,6 +35,7 @@ class RoutePath {
 
   /// 本地恢复
   static const kBackup = "/backup";
+  static const kRemoteSync = "/remote_sync";
 
   /// 关于
   static const kAbout = "/about";

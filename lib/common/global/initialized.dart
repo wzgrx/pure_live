@@ -16,6 +16,7 @@ import 'package:pure_live/core/common/proxy_routing.dart';
 import 'package:pure_live/core/common/web_socket_util.dart';
 import 'package:pure_live/recorder/ffmpeg/ffmpeg_manager.dart';
 import 'package:pure_live/recorder/services/recorder_proxy_routing.dart';
+import 'package:pure_live/common/services/settings/backup_controller.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
 import 'package:pure_live/common/global/platform/mobile_manager.dart';
 import 'package:pure_live/common/global/platform/desktop_manager.dart';
@@ -83,6 +84,13 @@ class AppInitializer {
     // SettingsService was registered, then work on a later launch only because
     // the database/cache files had already been created.
     await InitialServices.init();
+    // A window opened by WindowsMultiInstanceLauncher starts from the opening
+    // window's settings (proxy, cookies, follows) instead of an empty profile.
+    final configFilePath = WindowsMultiInstanceLauncher.configFileFromArgs(args);
+    if (configFilePath != null) {
+      final restored = await Get.find<BackupController>().recoverAndDelete(File(configFilePath));
+      log('Windows multi-instance settings ${restored ? 'restored' : 'restore failed'}: $configFilePath');
+    }
     configureRecorderProxyRouting((_) {
       final proxy = SettingsService.to.proxy;
       return buildProxyDirective(

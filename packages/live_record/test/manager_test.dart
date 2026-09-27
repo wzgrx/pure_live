@@ -206,6 +206,27 @@ void main() {
     });
   });
 
+  test('a stop while finalising after the room went offline ends stopped, not waiting', () {
+    fakeAsync((async) {
+      final rig = _Rig(settings: const RecordSettings(polling: true));
+      unawaited(rig.manager.init());
+      unawaited(rig.manager.add(roomDetail()));
+      async.elapse(const Duration(seconds: 5));
+      rig.manager.updates.where((task) => task.state == RecordState.finalizing).take(1).listen((_) {
+        unawaited(rig.manager.stop('douyu:9999'));
+      });
+      rig.rooms.live = false;
+      rig.cdn.ended = true;
+      async.elapse(const Duration(seconds: 10));
+      expect(rig.task().state, RecordState.stopped);
+      expect(rig.task().stopCause, StopCause.user);
+      expect(rig.task().nextCheckAt, isNull);
+      final calls = rig.rooms.detailCalls;
+      async.elapse(const Duration(minutes: 5));
+      expect(rig.rooms.detailCalls, calls);
+    });
+  });
+
   test('switching polling off stops waiting tasks; switching it on checks them at once (§12)', () {
     fakeAsync((async) {
       final rig = _Rig(settings: const RecordSettings(polling: true));
@@ -351,6 +372,7 @@ void main() {
       final second = _Rig(store: store, files: files, settings: const RecordSettings(resumeOnLaunch: true));
       unawaited(second.manager.init());
       async.elapse(const Duration(seconds: 10));
+      expect(second.remuxer.inputs, hasLength(1), reason: 'the exit left the remux to this launch');
       expect(second.task().state, RecordState.recording);
       unawaited(second.manager.dispose());
       async.elapse(const Duration(seconds: 5));

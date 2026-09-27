@@ -286,6 +286,8 @@ final class RecordManager {
         recoveries.add(_serial(runtime, () => _recover(runtime)));
       } else if (state == RecordState.waitingLive) {
         _update(runtime, task.copyWith(state: RecordState.stopped, stopCause: StopCause.appRestart));
+      } else if (task.stopCause == StopCause.appRestart) {
+        recoveries.add(_serial(runtime, () => _remuxAfterExit(runtime)));
       }
     }
     _recovered = () async {
@@ -720,6 +722,12 @@ final class RecordManager {
       case SessionEnd.ended:
         state = RecordState.completed;
     }
+    final lateStop = runtime.stopCause;
+    if (lateStop != null && state == RecordState.waitingLive) {
+      // Stopped while finalising after the room went offline: stay stopped.
+      state = RecordState.stopped;
+      cause = lateStop;
+    }
     if (runtime.interrupted) {
       state = RecordState.failed;
       failure = RecordFailure(RecordErrorKind.backgroundInterrupted, RecordStage.background);
@@ -945,6 +953,30 @@ final class RecordManager {
   }
 
   // Recovery (§14).
+
+  /// Remuxes the closed segments of a task stopped by the last app exit (§16.2).
+  Future<void> _remuxAfterExit(_Runtime runtime) async {
+    final prior = runtime.task;
+    final session = prior.session;
+    if (session == null || session.outputs.isNotEmpty) return;
+    final segments = [
+      for (final path in session.segments)
+        if (await _files.exists(path)) path,
+    ];
+    if (segments.isEmpty || _remuxer == null || !_settings.remuxToMp4) return;
+    _update(runtime, prior.copyWith(state: RecordState.finalizing));
+    final (outputs, failure) = await _remux(runtime, segments);
+    _update(
+      runtime,
+      runtime.task.copyWith(
+        state: failure == null ? RecordState.stopped : RecordState.failed,
+        stopCause: failure == null ? prior.stopCause : null,
+        failure: failure,
+        remuxProgress: null,
+        session: session.copyWith(outputs: outputs),
+      ),
+    );
+  }
 
   Future<void> _recover(_Runtime runtime) async {
     final task = runtime.task;

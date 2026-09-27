@@ -42,6 +42,8 @@ export 'src/sites/sixroom/sixroom_parse.dart';
 export 'src/sites/sixroom/sixroom_site.dart';
 export 'src/sites/steambroadcast/steambroadcast_parse.dart';
 export 'src/sites/steambroadcast/steambroadcast_site.dart';
+export 'src/sites/tiktok/tiktok_parse.dart';
+export 'src/sites/tiktok/tiktok_site.dart';
 export 'src/sites/weibo/weibo_parse.dart';
 export 'src/sites/weibo/weibo_site.dart';
 export 'src/sites/xiaohongshu/xiaohongshu_parse.dart';

@@ -13,6 +13,7 @@ import 'package:live_cli/src/fixture/rules/looklive.dart';
 import 'package:live_cli/src/fixture/rules/niconico.dart';
 import 'package:live_cli/src/fixture/rules/sixroom.dart';
 import 'package:live_cli/src/fixture/rules/steambroadcast.dart';
+import 'package:live_cli/src/fixture/rules/tiktok.dart';
 import 'package:live_cli/src/fixture/rules/weibo.dart';
 import 'package:live_cli/src/fixture/rules/xiaohongshu.dart';
 import 'package:live_cli/src/fixture/rules/youtube.dart';
@@ -37,6 +38,7 @@ const Map<String, ScrubRules> platformRules = {
   'niconico': niconicoRules,
   'sixroom': sixroomRules,
   'steambroadcast': steambroadcastRules,
+  'tiktok': tiktokRules,
   'weibo': weiboRules,
   'xiaohongshu': xiaohongshuRules,
   'youtube': youtubeRules,

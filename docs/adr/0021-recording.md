@@ -19,7 +19,7 @@
 
 4. **错误全部类型化**（`RecordErrorKind`，每种带重试类别）：`upstreamEof` 走快速重连、`http4xx` 立即重新解析（第一次续签原线路、第二次换线路、第三次起常规退避）、`http5xx` 同址 1/2/4 s 后常规退避、网络与解析错误常规退避并受 `maxRetries` 约束；连接前失败的线路立即换下一条，全部失败记 `allLinesFailed` 并常规退避。在 §21 的清单外补了 `regionBlocked` 和 `retriesExhausted`。
 
-5. **转封装通过注入的 `Remuxer`。** 本包只定义接口和提交流程（`.partial`、成功才改名、失败删 `.partial` 保留源、60 s 无进度看门狗、进度单调且最高 0.99、默认删源）。应用按 ADR 0005 §4 提供链接 libmpv 那份 libavformat 的原生垫片；`tools/live_cli` 用 `ffmpeg` 可执行文件（`FfmpegProcessRemuxer`），只用于桌面工具。
+5. **转封装通过注入的 `Remuxer`。** 本包只定义接口和提交流程（`.partial`、成功才改名、失败删 `.partial` 保留源、60 s 无进度看门狗、进度单调且最高 0.99、默认删源）。应用按 ADR 0005 §4 提供链接 libmpv 那份 libavformat 的原生垫片；`tools/live_cli` 用 `ffmpeg` 可执行文件（`FfmpegProcessRemuxer`），只用于桌面工具。（2026-09-28 起实现改为本包内的纯 Dart 转封装，见补充决定。）
 
 6. **弹幕由 `RecordChatSource` 提供。** 接口只有 `connect(RoomDetail) → Stream<RecordChatMessage>`，应用用 `live_danmaku` 实现（本包不依赖它）。管理器在会话解析、录制、重连时订阅，出错或结束 30 s 后重连；消息按写入器的“墙钟 ↔ 文件时间”锚点写进与分段同名的 B 站格式 XML。
 
@@ -37,9 +37,10 @@
 ## 补充决定（2026-09-28，主会话）
 
 - **回放不录**：平台返回回放（轮播、重播）时按下播处理，会话结束、监控任务回到等待开播。轮播是旧内容，旧版照常录制会占满空间并让任务一直停在录制中（spec/modules/record.md §4.1）。
+- **转封装用纯 Dart 实现，取代 ADR 0005 §4 的原生垫片**：`FlvToMp4Remuxer`（`packages/live_record/lib/src/remux/`）自己解复用 FLV（复用 `live_media` 的 `FlvFramer`）并写 faststart MP4：第一遍逐 tag 建紧凑样本表（每样本约 4 字节，`stts`/`ctts` 游程编码），据此排好 `moov`；第二遍再解复用一次，把负载按计划的块顺序写进 `mdat`，不写临时文件，内存与文件大小无关。不再需要把 libavformat 链接进来，也不用为此改 libmpv 的构建配方；Android 与 Windows 同一份代码，能在 `dart test` 里测。应用用 `IsolateRemuxer(FlvToMp4Remuxer())` 放到后台 isolate 运行。用 libmpv 的 stream-record 转封装的尝试失败（不写 moov、按实时速度写）。范围是录制器会写出的编码：H.264、H.265（旧式 codec 12 与 Enhanced FLV `hvc1`，含虎牙那种 Annex B 负载，按参数集重建 `hvcC`）和 AAC（含 ADTS 包装）；其它编码、文件中途配置变化（写入器遇到配置变化本来就切分段）、损坏或截断的输入都报 `RemuxException`，源 FLV 保留。实测斗鱼、虎牙（H.264 与 H.265）、B 站各约 60 s：包数与 FLV 一致、DTS 单调、完整解码无错误，音视频负载 MD5 与 FLV 相同（Annex B 的 H.265 解码画面逐帧相同），时长与 `ffmpeg -c copy` 的结果一致；2.1 GiB 文件约 200 MiB/s、峰值内存 88 MiB（`packages/live_record/README.md`）。HLS 本地归档和旧 TS 的转封装在录制器产出它们时再加。
 
 ## 影响
 
 - `spec/modules/record.md` 补充了决定 1–4、8 对应的说明。
-- 应用接入时需要提供：`RecordRooms`（`SiteRecordRooms` 包住各平台适配器）、`RecordTaskStore`（`live_store`）、`Remuxer`（原生垫片）、`RecordChatSource`（`live_danmaku`），并在 Android 前台服务里观察 `activeCountChanges`，在 `onTimeout` 时调用 `interruptAll`，在桌面退出时调用 `stopAll`。
+- 应用接入时需要提供：`RecordRooms`（`SiteRecordRooms` 包住各平台适配器）、`RecordTaskStore`（`live_store`）、`Remuxer`（`IsolateRemuxer(FlvToMp4Remuxer())`）、`RecordChatSource`（`live_danmaku`），并在 Android 前台服务里观察 `activeCountChanges`，在 `onTimeout` 时调用 `interruptAll`，在桌面退出时调用 `stopAll`。
 - `live_cli record` 是录制的真实网络探针：斗鱼每次改动拼接或写入器都要跑一遍，PASS 且 `gaps.json` 为空才算通过。

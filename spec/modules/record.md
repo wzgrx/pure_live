@@ -352,9 +352,9 @@ refreshAt 前重新解析同画质同线路，拿到新列表地址后在下一�
 ## 10. 转封装
 
 - 触发：会话收尾时，由 `record.remuxToMp4` 决定（默认开，与旧版一致：旧版总是转 MP4）。转封装单独排队，默认同时 1 个，不占录制并发槽 **[决定]**。
-- 方式：stream copy 为 MP4（不解码、不转码），`+faststart`。以 FFmpeg `doc/examples/remux.c` 为蓝本的原生垫片，在后台 isolate 运行（ADR 0005 §4）。输入：FLV 分段、HLS 本地归档、旧 TS（仅迁移时用 concat）。
+- 方式：stream copy 为 MP4（不解码、不转码），`+faststart`（`moov` 在 `mdat` 前）。纯 Dart 实现 `FlvToMp4Remuxer`，在后台 isolate 运行（`IsolateRemuxer`；ADR 0021 补充决定，取代 ADR 0005 §4 的原生垫片）。输入：FLV 分段（H.264、H.265、AAC）；HLS 本地归档、旧 TS（仅迁移时用 concat）在录制器产出它们时再加 **[决定]**。
 - 提交：写 `<目标>.partial`，成功后原子改名；不覆盖已有文件（video_processor_service.dart:206-209, 291-296, 347-355）。
-- 成功条件：垫片返回成功、没有任何解复用或复用错误（包括 invalid data、PES 长度不符、写 trailer 失败）、输出大小 > 0。stream copy 不解码，退出码为 0 不能说明输入完整（263e458a、a65638bd、9a588f4b；docs/HUYA_RECORDER_LEASE_AUDIT_2026_09_05.md §2）。
+- 成功条件：转封装返回成功、没有任何解复用或复用错误（包括 invalid data、PES 长度不符、截断的 tag、不支持的编码、文件中途配置变化、写入失败）、输出大小 > 0。stream copy 不解码，退出码为 0 不能说明输入完整（263e458a、a65638bd、9a588f4b；docs/HUYA_RECORDER_LEASE_AUDIT_2026_09_05.md §2）。
 - 失败：删 `.partial`，保留源文件，任务标失败（类型 remuxFailed），界面可重试（video_processor_service.dart:79-91）。
 - 成功后是否删源：`record.keepSourceAfterRemux`（默认关，即删除，与旧版一致：video_processor_service.dart:297-303）。删除失败（文件被占用）不影响成功结果，下次清理再删。
 - 可中断：取消后立即停止，删 `.partial`，保留源；进入“改名提交”后不可取消（:33-38, 291-294）。

@@ -488,7 +488,7 @@ abstract final class Settings {
 
   /// Notify when a followed streamer goes live; off by default. Rooms can opt
   /// out one by one (room preference `liveAlert`). Device scope: the
-  /// notification permission belongs to the device (ADR draft-live-alerts).
+  /// notification permission belongs to the device (ADR ADR 0028).
   static const liveAlerts = BoolSetting('alerts.live', false, scope: SettingScope.device);
 
   // Data.

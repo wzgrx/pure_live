@@ -228,7 +228,7 @@
 | F-WIN-04 | 关闭窗口：退出或最小化到托盘，可“不再询问” | P2 | 保留 | `lib/common/services/settings/exit_settings_controller.dart:10-26`；`desktop_manager.dart:673-679` |
 | F-WIN-05 | 开机自启（默认开：首次启动即注册） | P2 | 保留，**默认改为关**：开机自启应由用户主动开启（诊断 05 §⑤ 标为待确认；按“隐私默认安全”取保守值） | `lib/common/services/settings/startup_controller.dart:25-53` |
 | F-WIN-06 | 窗口：Mica 效果、自绘标题栏（全屏时隐藏）、窗口大小和位置记忆、便携版数据跟随安装目录 | P2 | 保留；多显示器按各自缩放渲染（PLAN §08） | `desktop_manager.dart:48-99`；`lib/common/global/app_path_manager.dart:47-293` |
-| F-WIN-07 | 显示器刷新率：枚举当前显示器支持的刷新率，窗口移动或换显示器时更新 | P2 | 保留 | `windows/runner/flutter_window.cpp` |
+| F-WIN-07 | 显示器刷新率：枚举当前显示器支持的刷新率，窗口移动或换显示器时更新 | P2 | **不再需要（2026-09-28）**：3.x 用它给弹幕选帧率；v4 的弹幕帧时钟跟随显示器的垂直同步（`DanmakuFrameClock`），Flutter 在换显示器时自动切换刷新率，所以不枚举 | `windows/runner/flutter_window.cpp` |
 
 ## 18 Android TV、画中画与小窗、后台播放
 

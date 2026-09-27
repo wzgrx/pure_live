@@ -259,6 +259,9 @@ class OfflineRoomRow extends StatelessWidget {
             onLongPress: onMenu,
             leading: CircleAvatar(
               backgroundColor: scheme.surfaceContainerHighest,
+              // Material 3's default is onPrimaryContainer: white on this
+              // light grey in the fidelity scheme.
+              foregroundColor: scheme.onSurfaceVariant,
               foregroundImage: avatar,
               child: Text(anchorName.isEmpty ? '?' : anchorName.characters.first),
             ),

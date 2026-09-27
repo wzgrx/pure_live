@@ -69,6 +69,33 @@ void main() {
     expect(audience.right, lessThanOrEqualTo(cover.right));
   });
 
+  testWidgets("an offline row's initial reads on its circle in light and dark", (tester) async {
+    double contrast(Color a, Color b) {
+      final (la, lb) = (a.computeLuminance(), b.computeLuminance());
+      return (la > lb ? la + 0.05 : lb + 0.05) / (la > lb ? lb + 0.05 : la + 0.05);
+    }
+
+    for (final appearance in [Appearance.light, Appearance.dark]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: PureTheme.of(appearance, platform: TargetPlatform.android),
+          home: const Scaffold(
+            body: OfflineRoomRow(platformId: 'douyu', anchorName: '青柠'),
+          ),
+        ),
+      );
+      final circle = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+      final initial = tester.widget<RichText>(
+        find.descendant(of: find.byType(CircleAvatar), matching: find.byType(RichText)),
+      );
+      expect(
+        contrast(initial.text.style!.color!, circle.backgroundColor!),
+        greaterThanOrEqualTo(4.5),
+        reason: '$appearance (principles §2.2: text at least 4.5:1)',
+      );
+    }
+  });
+
   testWidgets('compact density puts name and title on one line', (tester) async {
     await tester.pumpWidget(
       host(

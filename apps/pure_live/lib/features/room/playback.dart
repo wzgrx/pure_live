@@ -1,0 +1,47 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
+import 'package:live_player/live_player.dart';
+import 'package:live_store/live_store.dart';
+import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/core/store.dart';
+
+/// The playback session of the open room page. One session per page; the
+/// engine is created on the first open and released when the page goes away
+/// (ADR 0018; mini player and multiview come later).
+final Provider<PlaybackSession> playbackSessionProvider = Provider.autoDispose<PlaybackSession>((ref) {
+  final settings = ref.read(storeProvider).settings;
+  final session = PlaybackSession(
+    engine: mpvEngineFactory(MpvEngineConfig(hardwareDecoding: settings.get(Settings.hardwareDecoding))),
+  );
+  ref.onDispose(() => unawaited(session.dispose()));
+  return session;
+});
+
+/// Picks the platform quality that matches the user's preference: the
+/// platform's list is best first, the preference names a relative level.
+Quality? preferredQuality(List<Quality> offered, QualityPreference preference) {
+  if (offered.isEmpty || preference == QualityPreference.original) return null;
+  final index = preference.index.clamp(0, offered.length - 1);
+  return offered[index];
+}
+
+/// Opens [detail] in [session] at the stored default quality: resolves once,
+/// then opens with that set when it already is the wanted quality, or asks
+/// for the wanted one.
+Future<void> openRoom({
+  required PlatformSite site,
+  required SettingsStore settings,
+  required PlaybackSession session,
+  required RoomDetail detail,
+}) async {
+  final initial = await site.streams.streams(detail);
+  final wanted = preferredQuality(initial.qualities, settings.get(Settings.qualityWifi));
+  await session.open(
+    wanted == null || wanted == initial.selected
+        ? PlaybackRequest.room(site.streams, detail, initial: initial)
+        : PlaybackRequest.room(site.streams, detail, quality: wanted),
+  );
+}

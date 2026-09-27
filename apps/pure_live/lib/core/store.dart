@@ -42,3 +42,9 @@ final textScaleSetting = NotifierProvider<SettingNotifier<double>, double>(() =>
 final catalogPlatformsSetting = NotifierProvider<SettingNotifier<List<String>>, List<String>>(
   () => SettingNotifier(Settings.catalogPlatforms),
 );
+
+/// How the video fills its box.
+final videoFitSetting = NotifierProvider<SettingNotifier<VideoFit>, VideoFit>(() => SettingNotifier(Settings.videoFit));
+
+/// Keep the screen on while playing.
+final screenKeepOnSetting = NotifierProvider<SettingNotifier<bool>, bool>(() => SettingNotifier(Settings.screenKeepOn));

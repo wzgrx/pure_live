@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +12,7 @@ import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/room/player_view.dart';
 import 'package:pure_live_app/features/room/room_layout.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,41 +36,73 @@ final StreamProviderFamily<bool, RoomRef> isFollowedProvider = StreamProvider.au
 
 /// The room page: video on top at compact width, video plus chat panel from
 /// expanded width (principles §5.2). No navigation bar inside a room.
-class RoomPage extends ConsumerWidget {
+class RoomPage extends ConsumerStatefulWidget {
   const new({required this.room, super.key});
 
   /// The room.
   final RoomRef room;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RoomPage> createState() => _RoomPageState();
+}
+
+class _RoomPageState extends ConsumerState<RoomPage> {
+  bool _fullscreen = false;
+
+  Future<void> _setFullscreen(bool on) async {
+    if (on == _fullscreen) return;
+    setState(() => _fullscreen = on);
+    await applyFullscreen(on: on, portraitVideo: false);
+  }
+
+  @override
+  void dispose() {
+    if (_fullscreen) unawaited(applyFullscreen(on: false, portraitVideo: false));
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final room = widget.room;
     final async = ref.watch(roomDetailProvider(room));
-    return Scaffold(
-      body: SafeArea(
-        child: async.when(
-          loading: () => const LoadingView(),
-          error: (error, _) {
-            final text = describeError(error);
-            return Column(
-              children: [
-                const _TopBar(),
-                Expanded(
-                  child: MessageView.error(
-                    title: text.title,
-                    message: text.message,
-                    onAction: text.retryable ? () => ref.invalidate(roomDetailProvider(room)) : null,
-                    secondaryLabel: '返回',
-                    onSecondary: () => context.pop(),
+    return PopScope(
+      // Back leaves fullscreen first (principles §6.1).
+      canPop: !_fullscreen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) unawaited(_setFullscreen(false));
+      },
+      child: Scaffold(
+        backgroundColor: _fullscreen ? Colors.black : null,
+        body: SafeArea(
+          top: !_fullscreen,
+          bottom: !_fullscreen,
+          left: !_fullscreen,
+          right: !_fullscreen,
+          child: async.when(
+            loading: () => const LoadingView(),
+            error: (error, _) {
+              final text = describeError(error);
+              return Column(
+                children: [
+                  const _TopBar(),
+                  Expanded(
+                    child: MessageView.error(
+                      title: text.title,
+                      message: text.message,
+                      onAction: text.retryable ? () => ref.invalidate(roomDetailProvider(room)) : null,
+                      secondaryLabel: '返回',
+                      onSecondary: () => context.pop(),
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
-          data: (detail) => RoomLayout(
-            presentation: RoomPresentation.inline,
-            video: _PlayerArea(detail: detail),
-            info: _RoomInfo(detail: detail),
-            chat: const _ChatPlaceholder(),
+                ],
+              );
+            },
+            data: (detail) => RoomLayout(
+              presentation: _fullscreen ? RoomPresentation.fullscreen : RoomPresentation.inline,
+              video: PlayerView(detail: detail, fullscreen: _fullscreen, onFullscreen: _setFullscreen),
+              info: _RoomInfo(detail: detail),
+              chat: const _ChatPlaceholder(),
+            ),
           ),
         ),
       ),
@@ -83,63 +118,13 @@ class _ChatPlaceholder extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const new({this.color});
-
-  final Color? color;
+  const new();
 
   @override
   Widget build(BuildContext context) => Align(
     alignment: Alignment.centerLeft,
-    child: IconButton(tooltip: '返回', color: color, icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+    child: IconButton(tooltip: '返回', icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
   );
-}
-
-/// The video surface; shows the cover until playback is wired in.
-class _PlayerArea extends StatelessWidget {
-  const new({required this.detail});
-
-  final RoomDetail detail;
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final cover = networkImage(
-      detail.card.cover,
-      logicalWidth: width,
-      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-    );
-    final live = detail.state == LiveState.live;
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: ColoredBox(
-        color: Colors.black,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (cover != null)
-              Opacity(
-                opacity: 0.35,
-                child: Image(image: cover, fit: BoxFit.cover),
-              ),
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(live ? Icons.play_circle_outline : Icons.tv_off_outlined, color: Colors.white, size: 48),
-                  const SizedBox(height: Space.s2),
-                  Text(
-                    live ? '播放器即将接入' : (detail.state == LiveState.replay ? S.replay : S.offline),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            const Positioned(left: 0, top: 0, child: _TopBar(color: Colors.white)),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _RoomInfo extends ConsumerWidget {

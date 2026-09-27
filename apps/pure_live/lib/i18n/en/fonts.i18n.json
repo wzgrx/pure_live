@@ -1,0 +1,23 @@
+{
+  "downloadFailed": "Could not download \"{font}\". Check your network or proxy and try again.",
+  "downloaded": "\"{name}\" downloaded",
+  "deleted": "Deleted \"{name}\"; it stops using memory after a restart",
+  "title": "Fonts",
+  "listFailed": "Could not load the font list",
+  "systemFont": "System font",
+  "inUse": "In use",
+  "appFont": "Interface font",
+  "danmakuFont": "Danmaku font",
+  "resetAppFont": "Use the system font for the interface",
+  "resetDanmakuFont": "Use the system font for danmaku",
+  "downloadable": "Fonts to download",
+  "downloadableNote": "Only fonts that are free to use and share (SIL OFL 1.1, IPA Font License) are listed. The files are large; download them on Wi-Fi.",
+  "useInterface": "interface",
+  "useDanmaku": "danmaku",
+  "usedFor": "Used for {uses}",
+  "and": " and ",
+  "download": "Download",
+  "use": "Use",
+  "useForInterface": "Use for the interface",
+  "useForDanmaku": "Use for danmaku"
+}

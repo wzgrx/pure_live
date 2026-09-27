@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Blocked words and users (F-DM-04: 3.x's shield page and the room tab
 /// merged into one page). Matching ignores case and surrounding spaces
@@ -17,11 +18,11 @@ class BlockListPage extends StatelessWidget {
     length: 2,
     child: Scaffold(
       appBar: AppBar(
-        title: const Text('屏蔽词和屏蔽用户'),
-        bottom: const TabBar(
+        title: Text(t.danmaku.blockListTitle),
+        bottom: TabBar(
           tabs: [
-            Tab(text: '关键词'),
-            Tab(text: '用户'),
+            Tab(text: t.danmaku.blockKeywords),
+            Tab(text: t.danmaku.blockUsers),
           ],
         ),
       ),
@@ -61,7 +62,7 @@ class _RuleListState extends ConsumerState<_RuleList> {
     _input.clear();
     final added = await ref.read(blockRuleWriterProvider).add(widget.kind, value);
     if (!added && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('“$value”已经在列表里')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.danmaku.alreadyBlocked(value: value))));
     }
   }
 
@@ -71,9 +72,9 @@ class _RuleListState extends ConsumerState<_RuleList> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('已移除“${rule.value}”'),
+          content: Text(t.danmaku.unblocked(value: rule.value)),
           action: SnackBarAction(
-            label: '撤销',
+            label: t.common.undo,
             onPressed: () => unawaited(ref.read(blockRuleWriterProvider).add(rule.kind, rule.value)),
           ),
         ),
@@ -94,22 +95,22 @@ class _RuleListState extends ConsumerState<_RuleList> {
                   controller: _input,
                   maxLength: 64,
                   decoration: InputDecoration(
-                    hintText: _keyword ? '输入要屏蔽的词' : '输入要屏蔽的用户名',
-                    helperText: _keyword ? '包含这个词的弹幕不显示' : '按用户名完全匹配',
+                    hintText: _keyword ? t.danmaku.keywordHint : t.danmaku.userHint,
+                    helperText: _keyword ? t.danmaku.keywordHelper : t.danmaku.userHelper,
                     counterText: '',
                   ),
                   onSubmitted: (_) => _add(),
                 ),
               ),
               const SizedBox(width: Space.s2),
-              FilledButton(onPressed: _add, child: const Text('添加')),
+              FilledButton(onPressed: _add, child: Text(t.common.add)),
             ],
           ),
         ),
         Expanded(
           child: rules.when(
             loading: () => const LoadingView(),
-            error: (error, _) => MessageView.error(title: '读取屏蔽列表失败', message: '$error'),
+            error: (error, _) => MessageView.error(title: t.danmaku.blockListLoadFailed, message: '$error'),
             data: (all) {
               final shown = [
                 for (final rule in all.reversed)
@@ -118,8 +119,8 @@ class _RuleListState extends ConsumerState<_RuleList> {
               if (shown.isEmpty) {
                 return MessageView(
                   icon: _keyword ? Icons.block : Icons.person_off_outlined,
-                  title: _keyword ? '还没有屏蔽词' : '还没有屏蔽用户',
-                  message: '也可以在直播间里点一条弹幕来屏蔽',
+                  title: _keyword ? t.danmaku.noBlockedKeywords : t.danmaku.noBlockedUsers,
+                  message: t.danmaku.blockFromRoomHint,
                 );
               }
               return ListView.builder(
@@ -128,7 +129,11 @@ class _RuleListState extends ConsumerState<_RuleList> {
                   final rule = shown[index];
                   return ListTile(
                     title: Text(rule.value),
-                    trailing: IconButton(tooltip: '移除', icon: const Icon(Icons.close), onPressed: () => _remove(rule)),
+                    trailing: IconButton(
+                      tooltip: t.common.remove,
+                      icon: const Icon(Icons.close),
+                      onPressed: () => _remove(rule),
+                    ),
                   );
                 },
               );

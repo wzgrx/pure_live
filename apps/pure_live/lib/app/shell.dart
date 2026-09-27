@@ -6,13 +6,13 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/features/discover/discover_refresh.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
-const _destinations = [
-  NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: S.follows),
-  NavDestination(icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: S.discover),
-  NavDestination(icon: Icons.search, selectedIcon: Icons.saved_search, label: S.search),
-  NavDestination(icon: Icons.person_outline, selectedIcon: Icons.person, label: S.me),
+List<NavDestination> get _destinations => [
+  NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: t.app.tabs.follows),
+  NavDestination(icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: t.app.tabs.discover),
+  NavDestination(icon: Icons.search, selectedIcon: Icons.saved_search, label: t.app.tabs.search),
+  NavDestination(icon: Icons.person_outline, selectedIcon: Icons.person, label: t.app.tabs.me),
 ];
 
 /// The four top-level destinations (principles §4.1) in the adaptive shell;
@@ -103,7 +103,7 @@ class OfflineBar extends StatelessWidget {
               Icon(Icons.wifi_off, size: Sizes.iconDense, color: colors.onErrorContainer),
               const SizedBox(width: Space.s2),
               Expanded(
-                child: Text('网络已断开，恢复后列表和播放会重新加载', style: TextStyle(color: colors.onErrorContainer)),
+                child: Text(t.app.offlineBanner, style: TextStyle(color: colors.onErrorContainer)),
               ),
             ],
           ),

@@ -1,0 +1,12 @@
+{
+  "setGroups": "設定群組",
+  "streamLink": "取得直連網址",
+  "openInNewWindow": "在新視窗開啟",
+  "followedName": "已追蹤 {name}",
+  "notLive": "主播現在沒有開播，拿不到直連網址。",
+  "loadingLines": "正在取得線路",
+  "linesTapToCopy": "線路（點一下複製）",
+  "noLinesForQuality": "這個畫質沒有可用的線路",
+  "clipboardFailed": "無法寫入剪貼簿，請再試一次",
+  "streamLinkFor": "取得直連網址 · {title}"
+}

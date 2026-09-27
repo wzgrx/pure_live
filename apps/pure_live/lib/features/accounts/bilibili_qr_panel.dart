@@ -6,6 +6,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/accounts/account_services.dart';
 import 'package:pure_live_app/features/accounts/bilibili_qr_login.dart';
 import 'package:pure_live_app/features/sync/qr_code_view.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// B 站 QR sign-in in place (spec/sites/bilibili.md §8.3): the code, what
 /// the phone did, and a refresh once it expired or failed. Polling stops
@@ -51,13 +52,13 @@ class _BilibiliQrPanelState extends ConsumerState<BilibiliQrPanel> {
     final theme = Theme.of(context);
     final code = _login.code;
     final (text, refresh) = switch (_login.phase) {
-      QrLoginPhase.loading => ('正在获取二维码', false),
-      QrLoginPhase.waiting => ('用哔哩哔哩手机客户端扫描二维码', false),
-      QrLoginPhase.scanned => ('已扫码，请在手机上确认登录', false),
-      QrLoginPhase.expired => ('二维码已过期', true),
-      QrLoginPhase.verifying => ('正在校验登录', false),
-      QrLoginPhase.done => ('已登录：${_login.identity?.name ?? ''}', false),
-      QrLoginPhase.failed => (_login.message ?? '登录失败', true),
+      QrLoginPhase.loading => (t.accounts.qrLoading, false),
+      QrLoginPhase.waiting => (t.accounts.qrWaiting, false),
+      QrLoginPhase.scanned => (t.accounts.qrScanned, false),
+      QrLoginPhase.expired => (t.accounts.qrExpired, true),
+      QrLoginPhase.verifying => (t.accounts.verifyingSignIn, false),
+      QrLoginPhase.done => (t.accounts.signedInName(name: _login.identity?.name ?? ''), false),
+      QrLoginPhase.failed => (_login.message ?? t.accounts.signInFailed, true),
     };
     final showCode = code != null && (_login.phase == QrLoginPhase.waiting || _login.phase == QrLoginPhase.scanned);
     return Padding(
@@ -67,7 +68,7 @@ class _BilibiliQrPanelState extends ConsumerState<BilibiliQrPanel> {
           SizedBox.square(
             dimension: 200,
             child: showCode
-                ? QrCodeView(data: code.toString(), semanticLabel: '哔哩哔哩登录二维码')
+                ? QrCodeView(data: code.toString(), semanticLabel: t.accounts.qrLabel)
                 : Center(
                     child: _login.phase == QrLoginPhase.loading || _login.phase == QrLoginPhase.verifying
                         ? const CircularProgressIndicator()
@@ -82,7 +83,7 @@ class _BilibiliQrPanelState extends ConsumerState<BilibiliQrPanel> {
           Text(text, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
           if (refresh) ...[
             const SizedBox(height: Space.s2),
-            FilledButton.tonal(onPressed: _login.start, child: const Text('刷新二维码')),
+            FilledButton.tonal(onPressed: _login.start, child: Text(t.accounts.qrRefresh)),
           ],
         ],
       ),

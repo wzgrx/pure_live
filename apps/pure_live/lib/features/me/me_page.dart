@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/version.dart';
 import 'package:pure_live_app/features/iptv/iptv_page.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// "我的": history, recordings, multiview, accounts, backup, settings, about
 /// (principles §4.1). Entries not in the preview yet say so.
@@ -13,7 +13,7 @@ class MePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(S.me)),
+      appBar: AppBar(title: Text(t.app.tabs.me)),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -22,53 +22,53 @@ class MePage extends StatelessWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.history),
-                title: const Text(S.history),
+                title: Text(t.app.history),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/history'),
               ),
               ListTile(
                 leading: const Icon(Icons.fiber_manual_record_outlined),
-                title: const Text(S.recordings),
+                title: Text(t.app.recordings),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/recordings'),
               ),
               ListTile(
                 leading: const Icon(Icons.grid_view),
-                title: const Text(S.multiview),
+                title: Text(t.app.multiview),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/multiview'),
               ),
               ListTile(
                 leading: const Icon(Icons.live_tv_outlined),
-                title: const Text('网络电视'),
-                subtitle: const Text('IPTV 播放列表、节目单和自动同步'),
+                title: Text(t.iptv.title),
+                subtitle: Text(t.me.iptvSubtitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push(iptvLocation),
               ),
               ListTile(
                 leading: const Icon(Icons.account_circle_outlined),
-                title: const Text(S.accounts),
+                title: Text(t.app.accounts),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/accounts'),
               ),
               ListTile(
                 leading: const Icon(Icons.cloud_sync_outlined),
-                title: const Text(S.backup),
-                subtitle: const Text('备份文件、WebDAV、局域网同步；可以导入 3.x 的备份'),
+                title: Text(t.app.backup),
+                subtitle: Text(t.me.backupSubtitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/backup'),
               ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.settings_outlined),
-                title: const Text(S.settings),
+                title: Text(t.app.settings),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/settings'),
               ),
               ListTile(
                 leading: const Icon(Icons.info_outline),
-                title: const Text(S.about),
-                subtitle: const Text('${S.version} $appVersion · 更新、开源许可'),
+                title: Text(t.app.about),
+                subtitle: Text(t.me.aboutSubtitle(version: appVersion)),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/about'),
               ),

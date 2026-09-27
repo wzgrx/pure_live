@@ -7,6 +7,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/fonts/fonts.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// 字体 (F-SET-01, F-DM-06): download fonts with a clear licence and use one
@@ -48,7 +49,7 @@ class _FontsPageState extends ConsumerState<FontsPage> {
           .download(font, progress: (value) => mounted ? setState(() => _progress[font.id] = value) : null);
       if (!mounted) return;
       setState(() => _installed.add(font.id));
-      _say('“${font.name}”已下载');
+      _say(t.fonts.downloaded(name: font.name));
     } on Object catch (error) {
       _say('$error');
     } finally {
@@ -63,7 +64,7 @@ class _FontsPageState extends ConsumerState<FontsPage> {
     await ref.read(fontFilesProvider).delete(font);
     if (!mounted) return;
     setState(() => _installed.remove(font.id));
-    _say('已删除“${font.name}”，重启后不再占用内存');
+    _say(t.fonts.deleted(name: font.name));
   }
 
   Future<void> _use(Setting<String> setting, FontEntry? font) async {
@@ -81,19 +82,20 @@ class _FontsPageState extends ConsumerState<FontsPage> {
     final danmakuFont = settings.get(Settings.danmakuFontFamily);
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('字体')),
+      appBar: AppBar(title: Text(t.fonts.title)),
       body: catalogue.when(
         loading: () => const LoadingView(),
-        error: (error, _) => const MessageView.error(title: '读不到字体列表'),
+        error: (error, _) => MessageView.error(title: t.fonts.listFailed),
         data: (fonts) {
           if (!_scanned) unawaited(_scan(fonts));
-          String nameOf(String id) =>
-              id.isEmpty ? '系统字体' : fonts.where((font) => font.id == id).firstOrNull?.name ?? '系统字体';
+          String nameOf(String id) => id.isEmpty
+              ? t.fonts.systemFont
+              : fonts.where((font) => font.id == id).firstOrNull?.name ?? t.fonts.systemFont;
           return ListView(
             children: [
-              const SettingsHeader('正在使用'),
-              ListTile(title: const Text('界面字体'), subtitle: Text(nameOf(appFont))),
-              ListTile(title: const Text('弹幕字体'), subtitle: Text(nameOf(danmakuFont))),
+              SettingsHeader(t.fonts.inUse),
+              ListTile(title: Text(t.fonts.appFont), subtitle: Text(nameOf(appFont))),
+              ListTile(title: Text(t.fonts.danmakuFont), subtitle: Text(nameOf(danmakuFont))),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: Space.s4),
                 child: Wrap(
@@ -102,23 +104,20 @@ class _FontsPageState extends ConsumerState<FontsPage> {
                     if (appFont.isNotEmpty)
                       TextButton(
                         onPressed: () => unawaited(_use(Settings.appFontFamily, null)),
-                        child: const Text('界面改回系统字体'),
+                        child: Text(t.fonts.resetAppFont),
                       ),
                     if (danmakuFont.isNotEmpty)
                       TextButton(
                         onPressed: () => unawaited(_use(Settings.danmakuFontFamily, null)),
-                        child: const Text('弹幕改回系统字体'),
+                        child: Text(t.fonts.resetDanmakuFont),
                       ),
                   ],
                 ),
               ),
-              const SettingsHeader('可下载的字体'),
+              SettingsHeader(t.fonts.downloadable),
               Padding(
                 padding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s2),
-                child: Text(
-                  '只列出允许自由使用和分发的字体（SIL OFL 1.1、IPA 字体许可）。字体文件较大，建议在 Wi-Fi 下下载。',
-                  style: theme.textTheme.bodySmall,
-                ),
+                child: Text(t.fonts.downloadableNote, style: theme.textTheme.bodySmall),
               ),
               for (final font in fonts)
                 _FontTile(
@@ -166,7 +165,7 @@ class _FontTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final used = [if (usedForApp) '界面', if (usedForDanmaku) '弹幕'];
+    final used = [if (usedForApp) t.fonts.useInterface, if (usedForDanmaku) t.fonts.useDanmaku];
     return ListTile(
       title: Text(
         font.name,
@@ -175,7 +174,7 @@ class _FontTile extends StatelessWidget {
       ),
       subtitle: Text(
         [
-          if (used.isNotEmpty) '用于${used.join('和')}',
+          if (used.isNotEmpty) t.fonts.usedFor(uses: used.join(t.fonts.and)),
           font.licenseName,
           if (font.description.isNotEmpty) font.description,
         ].join(' · '),
@@ -185,18 +184,22 @@ class _FontTile extends StatelessWidget {
       ),
       trailing: switch (progress) {
         final value? => SizedBox.square(dimension: 24, child: CircularProgressIndicator(value: value, strokeWidth: 3)),
-        null when !installed => IconButton(tooltip: '下载', icon: const Icon(Icons.download), onPressed: onDownload),
+        null when !installed => IconButton(
+          tooltip: t.fonts.download,
+          icon: const Icon(Icons.download),
+          onPressed: onDownload,
+        ),
         null => PopupMenuButton<String>(
-          tooltip: '使用',
+          tooltip: t.fonts.use,
           onSelected: (action) => switch (action) {
             'app' => onUseForApp(),
             'danmaku' => onUseForDanmaku(),
             _ => onDelete(),
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 'app', child: Text('用作界面字体')),
-            const PopupMenuItem(value: 'danmaku', child: Text('用作弹幕字体')),
-            const PopupMenuItem(value: 'delete', child: Text('删除')),
+            PopupMenuItem(value: 'app', child: Text(t.fonts.useForInterface)),
+            PopupMenuItem(value: 'danmaku', child: Text(t.fonts.useForDanmaku)),
+            PopupMenuItem(value: 'delete', child: Text(t.common.delete)),
           ],
         ),
       },

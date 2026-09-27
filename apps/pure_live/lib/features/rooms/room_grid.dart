@@ -17,7 +17,7 @@ import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/card_marks.dart';
 import 'package:pure_live_app/features/rooms/room_card_menu.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Geometry of a card grid in a content area of a given width: the window
 /// class's margins, gap and column count (principles §5.2), or on TV four
@@ -224,7 +224,7 @@ class _RoomCardGridState extends State<RoomCardGrid> {
         child: ListView(
           children: [
             const SizedBox(height: 120),
-            MessageView(title: widget.emptyText ?? S.empty),
+            MessageView(title: widget.emptyText ?? t.common.noRooms),
           ],
         ),
       );
@@ -298,11 +298,11 @@ class _Footer extends StatelessWidget {
         .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant);
     final Widget child;
     if (moreError != null) {
-      child = TextButton(onPressed: onRetry, child: const Text(S.loadMoreFailed));
+      child = TextButton(onPressed: onRetry, child: Text(t.common.loadMoreFailed));
     } else if (hasMore) {
       child = const SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2));
     } else {
-      child = Text(S.noMore, style: style);
+      child = Text(t.common.noMore, style: style);
     }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: Space.s6),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/app/locale.dart';
 import 'package:pure_live_app/features/room/gestures.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 export 'package:pure_live_app/features/room/presentation.dart' show RoomPresentation;
 
@@ -59,7 +61,13 @@ class RoomLayout extends StatelessWidget {
   /// The "横屏全屏" button of the portrait layout.
   final VoidCallback? onForceLandscape;
 
-  static final ThemeData _overlayTheme = PureTheme.of(Appearance.dark);
+  static final Map<Locale, ThemeData> _overlayThemes = {};
+
+  /// The dark panel theme, with the interface language's text (principles §2.3).
+  static ThemeData get _overlayTheme {
+    final locale = flutterLocaleOf(LocaleSettings.currentLocale);
+    return _overlayThemes.putIfAbsent(locale, () => PureTheme.of(Appearance.dark, locale: locale));
+  }
 
   @override
   Widget build(BuildContext context) => WindowLayoutBuilder(
@@ -157,10 +165,10 @@ class _Tabs extends StatelessWidget {
     length: 2,
     child: Column(
       children: [
-        const TabBar(
+        TabBar(
           tabs: [
-            Tab(text: '弹幕'),
-            Tab(text: '直播间'),
+            Tab(text: t.room.tab.danmaku),
+            Tab(text: t.room.tab.room),
           ],
         ),
         Expanded(
@@ -304,7 +312,7 @@ class PortraitPanelLayoutState extends State<PortraitPanelLayout> {
               child: FilledButton.tonalIcon(
                 onPressed: widget.onForceLandscape,
                 icon: const Icon(Icons.screen_rotation, size: 18),
-                label: const Text('横屏全屏'),
+                label: Text(t.room.forceLandscape),
               ),
             ),
         ],

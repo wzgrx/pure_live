@@ -17,6 +17,7 @@ import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
 import 'package:pure_live_app/features/recording/record_schedule.dart';
 import 'package:pure_live_app/features/room/playback.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A channel with its sources and guide match.
 final FutureProviderFamily<IptvChannel, RoomRef> iptvChannelProvider = FutureProvider.autoDispose
@@ -131,8 +132,8 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
       session: session,
       detail: widget.detail,
     ),
-    done: '已回到直播',
-    failed: '回到直播失败，可以点画面上的重试',
+    done: t.iptv.backToLive,
+    failed: t.iptv.backToLiveFailed,
   );
 
   Future<void> _openGuide(PlaybackSession session, DateTime? replaying) async {
@@ -148,7 +149,7 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
     final now = _now();
     switch (programmePhase(chosen, now)) {
       case ProgrammePhase.upcoming:
-        _toast('节目还没开始');
+        _toast(t.iptv.notStarted);
       case ProgrammePhase.live:
         if (replaying != null) await _backToLive(session);
       case ProgrammePhase.past:
@@ -158,15 +159,15 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
           case CatchupAvailability.available:
             await _switch(
               () => replayProgramme(site, session, channel, chosen),
-              done: '正在回看：${chosen.title}',
-              failed: '这个节目不能回看',
+              done: t.iptv.catchingUp(title: chosen.title),
+              failed: t.iptv.noCatchUp,
             );
           case CatchupAvailability.disabled:
-            _toast('这个频道没有开放回看');
+            _toast(t.iptv.channelNoCatchUp);
           case CatchupAvailability.expired:
-            _toast('超出了回看的时间范围');
+            _toast(t.iptv.outOfCatchUpWindow);
           case CatchupAvailability.unsupported:
-            _toast('这个节目不能回看');
+            _toast(t.iptv.noCatchUp);
         }
     }
   }
@@ -208,10 +209,10 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
               children: [
                 Icon(replaying == null ? Icons.live_tv : Icons.history, size: 18, color: theme.colorScheme.primary),
                 const SizedBox(width: Space.s2),
-                Text(replaying == null ? '正在播出' : '回看中', style: theme.textTheme.labelLarge),
+                Text(replaying == null ? t.iptv.onAir : t.iptv.catchUp, style: theme.textTheme.labelLarge),
                 if ((channel?.sources.length ?? 0) > 1) ...[
                   const SizedBox(width: Space.s2),
-                  Text('${channel!.sources.length} 条线路', style: muted),
+                  Text(t.iptv.lines(n: channel!.sources.length), style: muted),
                 ],
               ],
             ),
@@ -233,14 +234,17 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
               ],
               if (next != null && replay == null) ...[
                 const SizedBox(height: Space.s2),
-                Text('接下来 ${clockText(next.start)} ${next.title}', style: muted),
+                Text(
+                  t.iptv.upNext(time: clockText(next.start), title: next.title),
+                  style: muted,
+                ),
               ],
             ] else if (guide.isLoading || channel == null)
-              Text('正在读取节目单…', style: muted)
+              Text(t.iptv.loadingGuide, style: muted)
             else if (!matched)
-              Text('没有匹配到节目单：添加或更换节目单源后会自动匹配', style: muted)
+              Text(t.iptv.noGuideMatch, style: muted)
             else
-              Text('节目单里暂时没有这个时段的节目', style: muted),
+              Text(t.iptv.noProgrammeNow, style: muted),
             const SizedBox(height: Space.s3),
             Wrap(
               spacing: Space.s2,
@@ -249,13 +253,13 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
                 if (matched)
                   FilledButton.tonalIcon(
                     icon: const Icon(Icons.event_note, size: 18),
-                    label: const Text('节目单'),
+                    label: Text(t.iptv.guide),
                     onPressed: switching ? null : () => _openGuide(session, replaying),
                   )
                 else if (channel != null)
                   OutlinedButton.icon(
                     icon: const Icon(Icons.event_note_outlined, size: 18),
-                    label: const Text('节目单源'),
+                    label: Text(t.iptv.guideSources),
                     onPressed: () => context.push(iptvGuideLocation),
                   ),
                 if (replaying != null)
@@ -263,7 +267,7 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
                     icon: switching
                         ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.live_tv, size: 18),
-                    label: const Text('回到直播'),
+                    label: Text(t.iptv.returnToLive),
                     onPressed: switching ? null : () => _backToLive(session),
                   ),
               ],
@@ -303,13 +307,18 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
     final today = widget.now.toLocal();
     final days = DateTime(local.year, local.month, local.day).difference(DateTime(today.year, today.month, today.day));
     final label = switch (days.inDays) {
-      0 => '今天',
-      -1 => '昨天',
-      -2 => '前天',
-      1 => '明天',
+      0 => t.iptv.today,
+      -1 => t.iptv.yesterday,
+      -2 => t.iptv.dayBeforeYesterday,
+      1 => t.iptv.tomorrow,
       _ => '',
     };
-    return '$label ${local.month}月${local.day}日'.trim();
+    return t.iptv
+        .dayWithDate(
+          label: label,
+          date: t.common.monthDay(month: local.month, day: local.day),
+        )
+        .trim();
   }
 
   @override
@@ -325,11 +334,13 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
       maxChildSize: 0.95,
       builder: (context, controller) => guide.when(
         loading: () => const LoadingView(),
-        error: (error, _) =>
-            MessageView.error(title: '读取节目单失败', onAction: () => ref.invalidate(iptvGuideProvider(widget.room))),
+        error: (error, _) => MessageView.error(
+          title: t.iptv.guideLoadFailed,
+          onAction: () => ref.invalidate(iptvGuideProvider(widget.room)),
+        ),
         data: (programmes) {
           if (programmes.isEmpty) {
-            return const MessageView(icon: Icons.event_busy, title: '没有节目', message: '节目单里没有这个频道前后两天的节目。');
+            return MessageView(icon: Icons.event_busy, title: t.iptv.noProgrammes, message: t.iptv.noProgrammesHint);
           }
           final rows = <Object>[];
           String? day;
@@ -376,10 +387,10 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
                   channel != null &&
                   site.availability(channel, programme) == CatchupAvailability.available;
               final trailing = switch (phase) {
-                _ when replaying => const Text('回看中'),
+                _ when replaying => Text(t.iptv.catchUp),
                 ProgrammePhase.live => const LiveBadge(),
                 ProgrammePhase.past when available => const Icon(Icons.replay, size: 20),
-                ProgrammePhase.past => Text('不可回看', style: theme.textTheme.bodySmall),
+                ProgrammePhase.past => Text(t.iptv.noCatchUpTag, style: theme.textTheme.bodySmall),
                 // F-IPTV-09: a reminder 1 minute before the start.
                 ProgrammePhase.upcoming => Row(
                   mainAxisSize: MainAxisSize.min,

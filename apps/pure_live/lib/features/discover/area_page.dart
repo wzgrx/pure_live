@@ -10,6 +10,7 @@ import 'package:pure_live_app/features/discover/discover_refresh.dart';
 import 'package:pure_live_app/features/discover/followed_areas.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Rooms of one area.
 class AreaPage extends ConsumerWidget {
@@ -31,7 +32,7 @@ class AreaPage extends ConsumerWidget {
         actions: [
           if (area != null)
             IconButton(
-              tooltip: followed ? '取消收藏分区' : '收藏分区',
+              tooltip: followed ? t.discover.unfollowArea : t.discover.followArea,
               icon: Icon(followed ? Icons.star : Icons.star_border),
               onPressed: () {
                 final store = ref.read(storeProvider).followAreas;
@@ -42,7 +43,7 @@ class AreaPage extends ConsumerWidget {
         ],
       ),
       body: area == null
-          ? MessageView(title: '分区信息已失效', actionLabel: '返回', onAction: () => context.pop())
+          ? MessageView(title: t.discover.areaGone, actionLabel: t.common.back, onAction: () => context.pop())
           : RoomGrid(query: AreaQuery(platform, area), refreshOn: discoverRefreshProvider),
     );
   }

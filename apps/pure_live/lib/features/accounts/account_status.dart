@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/web/cookie_text.dart';
 import 'package:pure_live_app/features/accounts/account_services.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The result of the last "校验" of a platform's stored cookie (F-ACC-01).
 @immutable
@@ -134,25 +135,29 @@ String formatAccountTime(DateTime time) {
 /// cookie itself (constitution rule 8).
 String accountSummary(String platform, AccountStore store, AccountCheck check, {required DateTime now}) {
   final cookie = store.cookie(platform);
-  if (cookie == null) return check is AccountExpired ? '登录已失效，请重新登录' : '未登录';
+  if (cookie == null) return check is AccountExpired ? t.accounts.sessionExpired : t.accounts.signedOut;
   if (platform == 'douyu') {
     final status = douyuStatus(store, now);
     final end = status.expiry == null ? null : formatAccountTime(status.expiry!);
     return switch (status.state) {
-      DouyuSessionState.none => '未登录',
-      DouyuSessionState.guest => '已填 Cookie，但里面没有登录信息',
-      DouyuSessionState.valid when end == null => '已登录 · 有效期未知',
-      DouyuSessionState.valid => '已登录 · 有效期到 $end${status.renewable ? '，到期前可续期' : ''}',
-      DouyuSessionState.expiredRefreshable => '已在 $end 过期，可以续期',
-      DouyuSessionState.expired => '已过期，请重新登录',
+      DouyuSessionState.none => t.accounts.signedOut,
+      DouyuSessionState.guest => t.accounts.guestCookie,
+      DouyuSessionState.valid when end == null => t.accounts.validUnknown,
+      DouyuSessionState.valid =>
+        status.renewable ? t.accounts.validUntilRenewable(end: end ?? '') : t.accounts.validUntil(end: end ?? ''),
+      DouyuSessionState.expiredRefreshable => t.accounts.expiredRenewable(end: end ?? ''),
+      DouyuSessionState.expired => t.accounts.expired,
     };
   }
   final uid = platform == 'bilibili' ? cookieField(cookie, 'DedeUserID') : null;
   return switch (check) {
-    AccountVerified(:final identity) => '已登录 · ${identity.name}${identity.uid == null ? '' : '（UID ${identity.uid}）'}',
-    AccountChecking() => '已登录 · 正在校验',
-    AccountExpired() => 'Cookie 已失效，请重新登录',
-    AccountCheckFailed(:final reason) => '已登录 · 校验失败：$reason',
-    AccountUnchecked() => uid == null ? '已填 Cookie' : '已登录 · UID $uid',
+    AccountVerified(:final identity) =>
+      identity.uid == null
+          ? t.accounts.signedInAs(name: identity.name)
+          : t.accounts.signedInAsWithUid(name: identity.name, uid: identity.uid!),
+    AccountChecking() => t.accounts.verifying,
+    AccountExpired() => t.accounts.cookieExpired,
+    AccountCheckFailed(:final reason) => t.accounts.verifyFailed(reason: reason),
+    AccountUnchecked() => uid == null ? t.accounts.cookieSaved : t.accounts.signedInUid(uid: uid),
   };
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart' as audio;
 import 'package:flutter/services.dart';
 import 'package:pure_live_app/features/system/media_controls.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The Android media session, notification and foreground service through
 /// audio_service (F-BG-01): play/pause/close in the notification, lock
@@ -26,10 +27,10 @@ final class AndroidMediaControls implements MediaControls {
 
   Future<_LiveAudioHandler> _init() => _handler ??= audio.AudioService.init(
     builder: () => _LiveAudioHandler(_commands.add),
-    config: const audio.AudioServiceConfig(
+    config: audio.AudioServiceConfig(
       androidNotificationChannelId: 'com.mystyle.purelive.playback',
-      androidNotificationChannelName: '后台播放',
-      androidNotificationChannelDescription: '后台播放直播间声音时的通知',
+      androidNotificationChannelName: t.settings.playback.background,
+      androidNotificationChannelDescription: t.system.backgroundChannelDescription,
       androidNotificationIcon: 'drawable/ic_launcher_monochrome',
       androidStopForegroundOnPause: false,
     ),

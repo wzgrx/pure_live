@@ -9,6 +9,7 @@ import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The custom order of the follows page (spec/product.md F-FAV-01, 自定义):
 /// drag a streamer to its place; the order is stored at once.
@@ -31,7 +32,7 @@ class _FollowOrderPageState extends ConsumerState<FollowOrderPage> {
       await ref.read(storeProvider).follows.reorder(order);
     } on Object {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('顺序没有保存，请重试')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.follows.orderNotSaved)));
       }
     } finally {
       if (mounted) setState(() => _pending = null);
@@ -47,9 +48,9 @@ class _FollowOrderPageState extends ConsumerState<FollowOrderPage> {
         : [for (final ref in pending) ...follows.where((follow) => follow.ref == ref)];
     final dpr = MediaQuery.devicePixelRatioOf(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('调整顺序')),
+      appBar: AppBar(title: Text(t.follows.reorder)),
       body: shown.isEmpty
-          ? const MessageView(icon: Icons.favorite_border, title: '还没有关注的主播')
+          ? MessageView(icon: Icons.favorite_border, title: t.follows.emptyTitle)
           : Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(

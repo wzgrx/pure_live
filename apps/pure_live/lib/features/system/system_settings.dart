@@ -4,23 +4,32 @@ import 'package:flutter/widgets.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/features/system/close_behaviour.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// System tiles of 设置 › 通用 (principles §4.4): launch at login and the
 /// close behaviour on Windows.
 List<Widget> systemGeneralTiles({bool? windows}) => [
-  if (windows ?? Platform.isWindows) ...const [
-    SwitchSettingTile(setting: Settings.launchAtStartup, title: '开机自启', subtitle: '登录 Windows 后自动打开纯粹直播'),
-    CloseBehaviourTile(),
+  if (windows ?? Platform.isWindows) ...[
+    SwitchSettingTile(
+      setting: Settings.launchAtStartup,
+      title: t.system.launchAtStartup,
+      subtitle: t.system.launchAtStartupSubtitle,
+    ),
+    const CloseBehaviourTile(),
   ],
 ];
 
 /// System tiles of 设置 › 播放: the mini window everywhere, automatic
 /// picture-in-picture on Android and the PiP window on top on Windows.
 List<Widget> systemPlaybackTiles({bool? android, bool? windows}) => [
-  const SwitchSettingTile(setting: Settings.miniPlayerOnLeave, title: '离开直播间时小窗播放', subtitle: '小窗会继续占用内存和流量'),
+  SwitchSettingTile(
+    setting: Settings.miniPlayerOnLeave,
+    title: t.system.miniOnLeave,
+    subtitle: t.system.miniOnLeaveSubtitle,
+  ),
   if (android ?? Platform.isAndroid)
-    const SwitchSettingTile(setting: Settings.autoPip, title: '离开应用时自动画中画', subtitle: '在直播间按主屏幕键时进入画中画'),
-  if (windows ?? Platform.isWindows) const SwitchSettingTile(setting: Settings.pipAlwaysOnTop, title: '画中画窗口置顶'),
+    SwitchSettingTile(setting: Settings.autoPip, title: t.system.autoPip, subtitle: t.system.autoPipSubtitle),
+  if (windows ?? Platform.isWindows) SwitchSettingTile(setting: Settings.pipAlwaysOnTop, title: t.system.pipOnTop),
 ];
 
 /// Which system tiles a [SystemSettingTiles] shows.

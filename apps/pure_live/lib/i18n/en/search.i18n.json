@@ -1,0 +1,33 @@
+{
+  "voice": "Voice search",
+  "clear": "Clear",
+  "results": "Search results",
+  "all": "All",
+  "failedTag": "Failed",
+  "allFailed": "Search failed. Check your network and pull down to retry.",
+  "someFailed": "Search failed on {platforms}. Pull down to retry.",
+  "hint": "Search streamers and rooms, or paste a room link",
+  "liveOnly": "Live only",
+  "resolvingLink": "Recognising the link",
+  "noLinkMatch": "No room link found",
+  "empty": "No matching rooms",
+  "sort": {
+    "smart": "Smart",
+    "platform": "By platform",
+    "audience": "By viewers"
+  },
+  "web": {
+    "title": "Web search",
+    "enterKeyword": "Enter a keyword first",
+    "pickPlatform": "Which platform's website to search",
+    "roomFound": "Room found",
+    "stay": "Stay on the page",
+    "titleFor": "Web search · {name}",
+    "pageRooms": "Rooms on this page",
+    "unavailable": "Web search is not available here",
+    "notOpened": "The page did not open",
+    "scanning": "Looking for rooms on this page",
+    "noRooms": "No room links found on this page",
+    "pageRoomsTitle": "Rooms on this page"
+  }
+}

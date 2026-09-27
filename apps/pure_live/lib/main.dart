@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/app/app.dart';
+import 'package:pure_live_app/app/locale.dart';
 import 'package:pure_live_app/app/version.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/data_root.dart';
@@ -42,6 +43,10 @@ Future<void> main(List<String> args) async {
   // F-DSC-03: platforms this version added join the user's list.
   await appendNewPlatforms(store);
   final recordPaths = await RecordPaths.resolve(root.path);
+  // The interface language before the first frame (F-APP-06).
+  applyAppLocale(
+    localeForSetting(store.settings.get(Settings.locale), WidgetsBinding.instance.platformDispatcher.locales),
+  );
   final prefs = await AppPrefs.load(store.meta);
   // Known before the first frame, so a TV never flashes the phone layout.
   final tv = await TvDevice.detect();

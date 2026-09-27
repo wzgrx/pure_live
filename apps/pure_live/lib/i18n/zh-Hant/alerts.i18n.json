@@ -1,0 +1,21 @@
+{
+  "notificationsDenied": "沒有通知權限，開播提醒維持關閉。可以在系統設定裡允許本應用程式的通知後再開啟",
+  "liveAlerts": "開播提醒",
+  "liveAlertsSubtitle": "追蹤的主播開播時傳送通知，應用程式在背景執行時按重新整理間隔檢查；可在追蹤頁對單一主播關閉",
+  "notificationsUnsupported": "這個系統不支援通知",
+  "enableAlertsFirst": "請先在 設定 › 一般 開啟開播提醒",
+  "roomAlertOff": "這個主播開播時不提醒",
+  "roomAlertOn": "開播時傳送通知",
+  "reminderSet": "已提醒",
+  "remindMe": "提醒我",
+  "cannotRemind": "無法提醒",
+  "reminderDenied": "沒有通知權限。可以在系統設定裡允許本應用程式的通知後再設定節目提醒。",
+  "wentLive": "{name} 開播了",
+  "manyWentLive": "{first}等 {n} 位主播開播了",
+  "namesAndMore": "{names} 等",
+  "liveChannelDescription": "追蹤的主播開播時提醒",
+  "programmeReminders": "節目提醒",
+  "programmeChannelDescription": "網路電視節目開始前 1 分鐘提醒",
+  "programmeStarting": "{title} 即將開始",
+  "programmeBody": "{channel} · {time} 開始"
+}

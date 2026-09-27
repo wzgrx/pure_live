@@ -7,6 +7,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart' show BlockKind;
 import 'package:pure_live_app/features/danmaku/danmaku_source.dart';
 import 'package:pure_live_app/features/danmaku/on_video.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// One change of the chat list, for incremental list updates (LST-1).
 @immutable
@@ -373,14 +374,14 @@ final class RoomDanmaku {
   /// video, on this device only; nothing is sent to the platform and no
   /// filter applies (local lines are never filtered or sampled). False when
   /// there is nothing to show.
-  bool sendLocal(String text, {String userName = '我'}) {
+  bool sendLocal(String text, {String? userName}) {
     final value = text.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (_disposed || value.isEmpty) return false;
     final line = DanmakuChat(
       room: room.ref.key,
       session: 0,
       receivedAt: _now().microsecondsSinceEpoch,
-      userName: userName,
+      userName: userName ?? t.danmaku.localSender,
       text: String.fromCharCodes(value.runes.take(localMaxLength)),
       isLocal: true,
     );

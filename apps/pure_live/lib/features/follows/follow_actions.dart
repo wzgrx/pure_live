@@ -4,6 +4,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Follows [room] and waits for the write (spec/product.md F-FAV-02). The
 /// store writes in one transaction, so a failed write leaves the follows as
@@ -16,7 +17,7 @@ Future<bool> followWithNotice(BuildContext context, WidgetRef ref, RoomSnapshot 
     return true;
   } on Object catch (error, stack) {
     ref.read(appLogProvider).error('follows', 'follow ${room.ref.key} failed', error, stack);
-    messenger?.showSnackBar(const SnackBar(content: Text('关注失败，没有保存，请重试')));
+    messenger?.showSnackBar(SnackBar(content: Text(t.follows.followFailed)));
     return false;
   }
 }
@@ -30,7 +31,7 @@ Future<FollowedRoom?> unfollowWithNotice(BuildContext context, WidgetRef ref, Ro
     return await ref.read(storeProvider).follows.unfollow(room);
   } on Object catch (error, stack) {
     ref.read(appLogProvider).error('follows', 'unfollow ${room.key} failed', error, stack);
-    messenger?.showSnackBar(const SnackBar(content: Text('取消关注失败，关注还在，请重试')));
+    messenger?.showSnackBar(SnackBar(content: Text(t.follows.unfollowFailed)));
     return null;
   }
 }
@@ -45,15 +46,15 @@ Future<void> unfollowWithUndo(BuildContext context, WidgetRef ref, RoomRef room,
   if (removed == null) return;
   messenger?.showSnackBar(
     SnackBar(
-      content: Text('已取消关注 $name'),
+      content: Text(t.follows.unfollowed(name: name)),
       action: SnackBarAction(
-        label: '撤销',
+        label: t.common.undo,
         onPressed: () async {
           try {
             await store.follows.restore([removed]);
           } on Object catch (error, stack) {
             log.error('follows', 'undo unfollow ${room.key} failed', error, stack);
-            messenger.showSnackBar(const SnackBar(content: Text('撤销失败，没能恢复关注')));
+            messenger.showSnackBar(SnackBar(content: Text(t.follows.undoFailed)));
           }
         },
       ),

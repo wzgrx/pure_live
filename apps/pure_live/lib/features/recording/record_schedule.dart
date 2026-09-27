@@ -8,6 +8,7 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A recording booked for a time window (F-IPTV-10, part of the recording
 /// center): an IPTV programme, or any room between two times.
@@ -258,7 +259,7 @@ class ProgrammeRecordButton extends ConsumerWidget {
     final item = ScheduledRecording.ofProgramme(room, programme);
     final on = ref.watch(recordScheduleProvider).any((booked) => booked.key == item.key);
     return IconButton(
-      tooltip: on ? '取消预约录制' : '预约录制',
+      tooltip: on ? t.recording.cancelSchedule : t.recording.schedule,
       isSelected: on,
       icon: const Icon(Icons.radio_button_unchecked),
       selectedIcon: const Icon(Icons.radio_button_checked),

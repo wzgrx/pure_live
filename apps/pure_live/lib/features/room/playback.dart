@@ -35,7 +35,9 @@ final Provider<PlaybackSession> playbackSessionProvider = Provider.autoDispose<P
   return session;
 });
 
-/// The names of the standard levels (live-room Q-2).
+/// The names of the standard levels (live-room Q-2). They are matched
+/// against the platforms' own quality labels, so they stay in Chinese in
+/// every interface language (F-APP-06).
 const Map<QualityPreference, String> qualityPreferenceNames = {
   QualityPreference.original: '原画',
   QualityPreference.bluRay8M: '蓝光8M',

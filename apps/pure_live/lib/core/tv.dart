@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// What the platform says about the device (principles §5.1 rule 1). Android
 /// answers on the `purelive/tv` channel (`TvSupport.kt`); elsewhere nothing
@@ -54,9 +55,9 @@ final class TvDevice {
 
   /// Starts the platform speech recognizer and returns what was said, or
   /// null when it was cancelled or is unavailable.
-  static Future<String?> recognizeSpeech({String prompt = '说出主播名或直播间'}) async {
+  static Future<String?> recognizeSpeech({String? prompt}) async {
     try {
-      final text = await _channel.invokeMethod<String>('recognizeSpeech', {'prompt': prompt});
+      final text = await _channel.invokeMethod<String>('recognizeSpeech', {'prompt': prompt ?? t.tv.speechPrompt});
       final trimmed = text?.trim();
       return trimmed == null || trimmed.isEmpty ? null : trimmed;
     } on Object catch (error) {

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart' show BlockKind;
 import 'package:pure_live_app/features/danmaku/danmaku_text.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Blocks a word or a user; the room applies it at once and stores it.
 typedef BlockCallback = void Function(BlockKind kind, String value);
@@ -39,19 +40,19 @@ Future<void> showChatLineActions(
           if (line is DanmakuChat) ...[
             ListTile(
               leading: const Icon(Icons.copy_outlined),
-              title: const Text('复制'),
+              title: Text(t.common.copy),
               onTap: () => Navigator.pop(context, _LineAction.copy),
             ),
             ListTile(
               leading: const Icon(Icons.block),
-              title: const Text('屏蔽关键词'),
+              title: Text(t.danmaku.blockKeyword),
               onTap: () => Navigator.pop(context, _LineAction.blockKeyword),
             ),
           ],
           if (user.isNotEmpty)
             ListTile(
               leading: const Icon(Icons.person_off_outlined),
-              title: const Text('屏蔽用户'),
+              title: Text(t.danmaku.blockUser),
               subtitle: Text(user),
               onTap: () => Navigator.pop(context, _LineAction.blockUser),
             ),
@@ -63,15 +64,23 @@ Future<void> showChatLineActions(
   switch (action) {
     case _LineAction.copy:
       await Clipboard.setData(ClipboardData(text: text));
-      messenger?.showSnackBar(const SnackBar(content: Text('已复制')));
+      messenger?.showSnackBar(SnackBar(content: Text(t.common.copied)));
     case _LineAction.blockKeyword:
       final keyword = await showBlockKeywordDialog(context, initial: text);
       if (keyword == null) return;
       onBlock(BlockKind.keyword, keyword);
-      _confirm(messenger, '已屏蔽关键词“$keyword”', onUnblock == null ? null : () => onUnblock(BlockKind.keyword, keyword));
+      _confirm(
+        messenger,
+        t.danmaku.keywordBlocked(keyword: keyword),
+        onUnblock == null ? null : () => onUnblock(BlockKind.keyword, keyword),
+      );
     case _LineAction.blockUser:
       onBlock(BlockKind.user, user);
-      _confirm(messenger, '已屏蔽用户“$user”', onUnblock == null ? null : () => onUnblock(BlockKind.user, user));
+      _confirm(
+        messenger,
+        t.danmaku.userBlocked(user: user),
+        onUnblock == null ? null : () => onUnblock(BlockKind.user, user),
+      );
   }
 }
 
@@ -79,7 +88,7 @@ void _confirm(ScaffoldMessengerState? messenger, String text, VoidCallback? undo
   messenger?.showSnackBar(
     SnackBar(
       content: Text(text),
-      action: undo == null ? null : SnackBarAction(label: '撤销', onPressed: undo),
+      action: undo == null ? null : SnackBarAction(label: t.common.undo, onPressed: undo),
     ),
   );
 }
@@ -119,17 +128,17 @@ class _KeywordDialogState extends State<_KeywordDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('屏蔽关键词'),
+    title: Text(t.danmaku.blockKeyword),
     content: TextField(
       controller: _text,
       autofocus: true,
       maxLength: 64,
-      decoration: const InputDecoration(hintText: '包含这个词的弹幕都会被隐藏', helperText: '不区分大小写'),
+      decoration: InputDecoration(hintText: t.danmaku.blockKeywordHint, helperText: t.danmaku.caseInsensitive),
       onSubmitted: (_) => _submit(),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-      FilledButton(onPressed: _submit, child: const Text('屏蔽')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+      FilledButton(onPressed: _submit, child: Text(t.danmaku.block)),
     ],
   );
 }

@@ -10,6 +10,7 @@ import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/features/iptv/iptv_repository.dart';
 import 'package:pure_live_app/features/iptv/xtream.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Runs a parse off the UI isolate; tests run it inline.
 typedef IptvCompute = Future<R> Function<R>(R Function() task);
@@ -54,16 +55,16 @@ final class IptvBadUrlError implements Exception {
 
 /// What to tell the user about a failed import or sync (principles rule 3).
 String iptvErrorText(Object error) => switch (error) {
-  IptvEmptyError(guide: true) => '没有识别出节目单，确认是 XMLTV 或 JSON 格式',
-  IptvEmptyError() => '没有识别出频道，确认是 M3U、TXT 或 JSON 播放列表',
-  IptvBadUrlError() => '请输入 http 或 https 开头的网址',
+  IptvEmptyError(guide: true) => t.iptv.error.noGuide,
+  IptvEmptyError() => t.iptv.error.noChannels,
+  IptvBadUrlError() => t.iptv.error.badUrl,
   XtreamRejectedError(:final message) => message,
-  XtreamMissingError() => '找不到这个 Xtream 账号的登录信息，删除后重新登录',
-  NotFound() => '地址不存在（404），检查网址是否还有效',
-  NetworkFailure() || TransportFailure() => '网络连接失败，检查网络或代理后重试',
-  FileSystemException() => '读不到文件，重新导入一次',
-  FormatException() => '文件格式不对',
-  _ => '同步失败',
+  XtreamMissingError() => t.iptv.error.xtreamMissing,
+  NotFound() => t.iptv.error.notFound,
+  NetworkFailure() || TransportFailure() => t.iptv.error.network,
+  FileSystemException() => t.iptv.error.file,
+  FormatException() => t.iptv.error.format,
+  _ => t.iptv.error.generic,
 };
 
 /// Imports and syncs playlists and programme guides (spec/modules/iptv.md
@@ -186,7 +187,7 @@ final class IptvSync {
     try {
       answer = jsonDecode(utf8.decode(await fetcher.download(account.authUri, userAgent: _globalAgent)));
     } on FormatException {
-      throw const XtreamRejectedError('服务器的回应不是 Xtream 接口，检查服务器地址');
+      throw XtreamRejectedError(t.iptv.error.notXtream);
     }
     final status = parseXtreamStatus(answer);
     if (!status.usable) throw XtreamRejectedError(status.problem);
@@ -199,7 +200,10 @@ final class IptvSync {
     final id = await store.addPlaylist(name: title, source: '$xtreamScheme$key');
     // The provider's own guide, never the credentialed url-tvg of the file.
     final result = await _storePlaylist(id, parsed, adoptGuide: false);
-    final guideId = await store.addGuideSource(name: '$title 节目单', source: '$xtreamScheme$key#guide');
+    final guideId = await store.addGuideSource(
+      name: t.iptv.xtreamGuideName(title: title),
+      source: '$xtreamScheme$key#guide',
+    );
     try {
       await syncGuide((await store.guideSources()).firstWhere((source) => source.id == guideId));
     } on Object {
@@ -400,7 +404,7 @@ final class IptvSync {
     var base = fallback.split(RegExp(r'[/\\]')).last;
     final dot = base.lastIndexOf('.');
     if (dot > 0) base = base.substring(0, dot);
-    return base.isEmpty ? '播放列表' : base;
+    return base.isEmpty ? t.iptv.defaultPlaylistName : base;
   }
 
   Future<File> _keep(String folder, String fileName, List<int> bytes) async {
@@ -433,7 +437,7 @@ final class XtreamMissingError implements Exception {
   const new();
 
   @override
-  String toString() => '找不到这个 Xtream 账号的登录信息，删除后重新登录';
+  String toString() => t.iptv.error.xtreamMissing;
 }
 
 /// The provider refused the account.

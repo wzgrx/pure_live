@@ -8,6 +8,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_ui/live_ui.dart' show MessageView, Radii, Space;
 import 'package:pure_live_app/features/danmaku/danmaku_text.dart';
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The chat panel of a room (spec/modules/danmaku.md §6): status and audience
 /// line, pinned super chats, and the chat list that follows the newest line
@@ -47,14 +48,14 @@ class ChatPanel extends StatelessWidget {
     if (!enabled) {
       return MessageView(
         icon: Icons.subtitles_off_outlined,
-        title: '弹幕已关闭',
-        message: '打开后连接弹幕，并在画面上显示',
-        actionLabel: '打开弹幕',
+        title: t.danmaku.off,
+        message: t.danmaku.offHint,
+        actionLabel: t.danmaku.turnOn,
         onAction: onEnable,
       );
     }
     if (!live || danmaku == null) {
-      return const MessageView(icon: Icons.subtitles_outlined, title: '未开播时没有弹幕');
+      return MessageView(icon: Icons.subtitles_outlined, title: t.danmaku.offlineNoDanmaku);
     }
     return Column(
       children: [
@@ -105,15 +106,15 @@ class _LocalChatInputState extends State<LocalChatInput> {
             maxLength: RoomDanmaku.localMaxLength,
             textInputAction: TextInputAction.send,
             onSubmitted: (_) => _send(),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               isDense: true,
               counterText: '',
-              hintText: '发条本地弹幕（只在本机显示）',
-              border: OutlineInputBorder(),
+              hintText: t.danmaku.localHint,
+              border: const OutlineInputBorder(),
             ),
           ),
         ),
-        IconButton(tooltip: '发送', icon: const Icon(Icons.send), onPressed: _send),
+        IconButton(tooltip: t.common.send, icon: const Icon(Icons.send), onPressed: _send),
       ],
     ),
   );
@@ -150,14 +151,18 @@ class _StatusBar extends StatelessWidget {
                             child: Text(text, style: small, maxLines: 1, overflow: TextOverflow.ellipsis),
                           ),
                         if (connection == ChatConnection.closed)
-                          TextButton(onPressed: danmaku.reconnect, child: const Text('重新连接')),
+                          TextButton(onPressed: danmaku.reconnect, child: Text(t.danmaku.reconnect)),
                       ],
                     );
                   },
                 ),
               ),
               if (onOpenSettings != null)
-                IconButton(tooltip: '弹幕设置', icon: const Icon(Icons.tune, size: 20), onPressed: onOpenSettings),
+                IconButton(
+                  tooltip: t.danmaku.settings,
+                  icon: const Icon(Icons.tune, size: 20),
+                  onPressed: onOpenSettings,
+                ),
             ],
           ),
           ValueListenableBuilder(
@@ -434,7 +439,7 @@ class ChatListState extends State<ChatList> {
             child: Center(
               child: FilledButton.tonalIcon(
                 icon: const Icon(Icons.arrow_downward, size: 18),
-                label: Text(_unseen > 0 ? '新消息 $_unseen' : '回到最新'),
+                label: Text(_unseen > 0 ? t.danmaku.newMessages(n: _unseen) : t.danmaku.jumpToLatest),
                 onPressed: follow,
               ),
             ),
@@ -463,7 +468,10 @@ class ChatLineTile extends StatelessWidget {
               text: '$medal${chat.medalLevel == null ? '' : ' ${chat.medalLevel}'}  ',
               style: theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.tertiary),
             ),
-          TextSpan(text: '${chat.userName}：', style: nameStyle),
+          TextSpan(
+            text: t.danmaku.chatName(name: chat.userName),
+            style: nameStyle,
+          ),
           TextSpan(text: chat.text),
         ],
       ),

@@ -12,6 +12,7 @@ import 'package:pure_live_app/features/multiview/multiview_cell.dart';
 import 'package:pure_live_app/features/multiview/multiview_controller.dart';
 import 'package:pure_live_app/features/multiview/multiview_sheets.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// How the page shows itself (OPS-5).
 enum MultiviewDisplay {
@@ -377,16 +378,20 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       MultiviewDisplay.normal => Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          leading: IconButton(tooltip: '返回', icon: const Icon(Icons.arrow_back), onPressed: _back),
-          title: const Text('多画面'),
+          leading: IconButton(tooltip: t.common.back, icon: const Icon(Icons.arrow_back), onPressed: _back),
+          title: Text(t.app.multiview),
           actions: [
             if (!tv) ...[
               IconButton(
-                tooltip: '沉浸模式',
+                tooltip: t.multiview.immersive,
                 icon: const Icon(Icons.open_in_full),
                 onPressed: () => unawaited(_setDisplay(MultiviewDisplay.immersive)),
               ),
-              IconButton(tooltip: '全屏', icon: const Icon(Icons.fullscreen), onPressed: _toggleFullscreen),
+              IconButton(
+                tooltip: t.multiview.fullscreen,
+                icon: const Icon(Icons.fullscreen),
+                onPressed: _toggleFullscreen,
+              ),
             ],
           ],
           bottom: PreferredSize(
@@ -423,7 +428,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
                 right: Space.s4,
                 bottom: Space.s4,
                 child: IconButton.filledTonal(
-                  tooltip: '退出沉浸模式',
+                  tooltip: t.multiview.exitImmersive,
                   icon: const Icon(Icons.close_fullscreen),
                   onPressed: () => unawaited(_setDisplay(MultiviewDisplay.normal)),
                 ),
@@ -446,7 +451,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(Space.s2),
                   child: IconButton.filledTonal(
-                    tooltip: '退出全屏',
+                    tooltip: t.multiview.exitFullscreen,
                     icon: const Icon(Icons.fullscreen_exit),
                     onPressed: () => unawaited(_setDisplay(MultiviewDisplay.normal)),
                   ),
@@ -467,7 +472,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       // Video pages are dark in every theme (principles §3); TV already is.
       child: theme.brightness == Brightness.light && !tv
           ? Theme(
-              data: PureTheme.of(Appearance.dark, platform: theme.platform),
+              data: PureTheme.of(Appearance.dark, platform: theme.platform, locale: Localizations.localeOf(context)),
               child: page,
             )
           : page,
@@ -503,7 +508,7 @@ class _Toolbar extends ConsumerWidget {
             // TV keeps the fixed 2×2 (principles §5.3).
             if (!tv)
               PopupMenuButton<MultiviewLayout>(
-                tooltip: '布局',
+                tooltip: t.multiview.layout,
                 onSelected: onLayout,
                 itemBuilder: (context) => [
                   for (final layout in layouts)
@@ -524,7 +529,7 @@ class _Toolbar extends ConsumerWidget {
             if (state.layout == MultiviewLayout.onePlusN && !tv)
               // LYT-1: full means the decoders, and the reason is shown.
               IconButton(
-                tooltip: canAdd ? '添加画面' : '已达上限：本设备最多同时播放 $capacity 路',
+                tooltip: canAdd ? t.multiview.addCell : t.multiview.capacityReached(n: capacity),
                 icon: Icon(Icons.add, color: canAdd ? null : scheme.onSurface.withValues(alpha: 0.38)),
                 onPressed: () {
                   if (canAdd) {
@@ -532,27 +537,27 @@ class _Toolbar extends ConsumerWidget {
                   } else {
                     ScaffoldMessenger.maybeOf(context)
                       ?..hideCurrentSnackBar()
-                      ..showSnackBar(SnackBar(content: Text('本设备最多同时播放 $capacity 路画面，先关掉一格再添加')));
+                      ..showSnackBar(SnackBar(content: Text(t.multiview.capacityHint(n: capacity))));
                   }
                 },
               ),
             if (danmakuOn)
               IconButton(
-                tooltip: state.danmaku ? '关闭弹幕' : '开启弹幕',
+                tooltip: state.danmaku ? t.multiview.danmakuOff : t.multiview.danmakuOn,
                 isSelected: state.danmaku,
                 icon: const Icon(Icons.subtitles_off_outlined),
                 selectedIcon: const Icon(Icons.subtitles),
                 onPressed: controller.toggleDanmaku,
               ),
             IconButton(
-              tooltip: state.muteAll ? '取消全部静音' : '全部静音',
+              tooltip: state.muteAll ? t.multiview.unmuteAll : t.multiview.muteAll,
               isSelected: state.muteAll,
               icon: const Icon(Icons.volume_up),
               selectedIcon: const Icon(Icons.volume_off),
               onPressed: controller.toggleMuteAll,
             ),
             IconButton(
-              tooltip: '所选画面音量',
+              tooltip: t.multiview.selectedVolume,
               icon: const Icon(Icons.tune),
               onPressed: selected?.status == CellStatus.playing
                   ? () => unawaited(showMultiviewVolumeSheet(context, state.selected))
@@ -582,7 +587,7 @@ class _PickerPanel extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(Space.s4, Space.s3, Space.s4, 0),
-            child: Text('选择直播间 · 放到第 ${target + 1} 格', style: theme.textTheme.titleSmall),
+            child: Text(t.multiview.pickRoomFor(n: target + 1), style: theme.textTheme.titleSmall),
           ),
           Expanded(child: MultiviewRoomPicker(onPicked: onPicked)),
         ],

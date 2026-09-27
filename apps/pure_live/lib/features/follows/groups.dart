@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Groups (tags) in the user's order (spec/product.md F-FAV-05).
 final StreamProvider<List<Tag>> tagsProvider = StreamProvider<List<Tag>>(
@@ -22,11 +23,11 @@ Future<GroupFields?> askGroupFields(
   BuildContext context, {
   String name = '',
   String description = '',
-  String title = '新建分组',
+  String? title,
 }) async {
   final result = await showDialog<GroupFields>(
     context: context,
-    builder: (context) => _GroupEditor(title: title, name: name, description: description),
+    builder: (context) => _GroupEditor(title: title ?? t.follows.newGroup, name: name, description: description),
   );
   return result == null || result.name.isEmpty ? null : result;
 }
@@ -67,20 +68,20 @@ class _GroupEditorState extends State<_GroupEditor> {
           controller: _name,
           autofocus: true,
           maxLength: 20,
-          decoration: const InputDecoration(labelText: '分组名称'),
+          decoration: InputDecoration(labelText: t.follows.groupName),
           textInputAction: TextInputAction.next,
         ),
         TextField(
           controller: _description,
           maxLength: 60,
-          decoration: const InputDecoration(labelText: '描述（可选）', hintText: '比如：晚上常看的'),
+          decoration: InputDecoration(labelText: t.follows.groupDescription, hintText: t.follows.groupDescriptionHint),
           onSubmitted: (_) => _done(),
         ),
       ],
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-      FilledButton(onPressed: _done, child: const Text('确定')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+      FilledButton(onPressed: _done, child: Text(t.common.ok)),
     ],
   );
 }
@@ -96,21 +97,28 @@ Future<Tag?> createGroup(BuildContext context, WidgetRef ref) async {
   try {
     return await ref.read(storeProvider).tags.create(fields.name, description: fields.description);
   } on TagNameException catch (error) {
-    if (context.mounted) _say(context, error.duplicate ? '已经有叫“${fields.name}”的分组了' : '分组名称不能为空');
+    if (context.mounted) {
+      _say(context, error.duplicate ? t.follows.groupExists(name: fields.name) : t.follows.groupNameEmpty);
+    }
     return null;
   }
 }
 
 /// Edits the name and description of [tag] (F-FAV-05: 改名、描述).
 Future<void> editGroup(BuildContext context, WidgetRef ref, Tag tag) async {
-  final fields = await askGroupFields(context, name: tag.name, description: tag.description, title: '编辑分组');
+  final fields = await askGroupFields(
+    context,
+    name: tag.name,
+    description: tag.description,
+    title: t.follows.editGroup,
+  );
   if (fields == null || !context.mounted) return;
   final tags = ref.read(storeProvider).tags;
   try {
     if (fields.name != tag.name) await tags.rename(tag.id, fields.name);
     if (fields.description != tag.description) await tags.describe(tag.id, fields.description);
   } on TagNameException {
-    if (context.mounted) _say(context, '已经有叫“${fields.name}”的分组了');
+    if (context.mounted) _say(context, t.follows.groupExists(name: fields.name));
   }
 }
 
@@ -128,7 +136,7 @@ Future<void> editRoomGroups(BuildContext context, WidgetRef ref, RoomRef room, S
     await store.tags.setTagsOf(room, chosen);
   } on Object {
     // The write is one transaction: the groups stay as they were.
-    if (context.mounted) _say(context, '分组没有保存，请重试');
+    if (context.mounted) _say(context, t.follows.groupNotSaved);
   }
 }
 
@@ -149,7 +157,7 @@ class _GroupPickerState extends ConsumerState<_GroupPicker> {
   Widget build(BuildContext context) {
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
     return AlertDialog(
-      title: Text('设置分组 · ${widget.title}'),
+      title: Text(t.follows.setGroupsFor(title: widget.title)),
       content: SizedBox(
         width: 360,
         child: ListView(
@@ -163,7 +171,7 @@ class _GroupPickerState extends ConsumerState<_GroupPicker> {
               ),
             ListTile(
               leading: const Icon(Icons.add),
-              title: const Text('新建分组'),
+              title: Text(t.follows.newGroup),
               onTap: () async {
                 final tag = await createGroup(context, ref);
                 if (tag != null) setState(() => _selected.add(tag.id));
@@ -173,8 +181,8 @@ class _GroupPickerState extends ConsumerState<_GroupPicker> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-        FilledButton(onPressed: () => Navigator.pop(context, _selected), child: const Text('保存')),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+        FilledButton(onPressed: () => Navigator.pop(context, _selected), child: Text(t.common.save)),
       ],
     );
   }
@@ -189,14 +197,14 @@ class GroupsPage extends ConsumerWidget {
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
     final store = ref.read(storeProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('管理分组')),
+      appBar: AppBar(title: Text(t.follows.manageGroups)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => createGroup(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('新建分组'),
+        label: Text(t.follows.newGroup),
       ),
       body: tags.isEmpty
-          ? const MessageView(icon: Icons.folder_outlined, title: '还没有分组', message: '分组可以把关注的主播归类，在关注页按分组查看。')
+          ? MessageView(icon: Icons.folder_outlined, title: t.follows.noGroups, message: t.follows.groupsHint)
           : Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
@@ -220,12 +228,12 @@ class GroupsPage extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            tooltip: '改名和描述',
+                            tooltip: t.follows.renameAndDescribe,
                             icon: const Icon(Icons.edit_outlined),
                             onPressed: () => editGroup(context, ref, tag),
                           ),
                           IconButton(
-                            tooltip: '删除',
+                            tooltip: t.common.delete,
                             icon: const Icon(Icons.delete_outline),
                             onPressed: () async {
                               final members = [
@@ -236,9 +244,9 @@ class GroupsPage extends ConsumerWidget {
                               if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('已删除分组“${tag.name}”'),
+                                  content: Text(t.follows.groupDeleted(name: tag.name)),
                                   action: SnackBarAction(
-                                    label: '撤销',
+                                    label: t.common.undo,
                                     onPressed: () async {
                                       final restored = await store.tags.create(tag.name, description: tag.description);
                                       await store.tags.addRooms(restored.id, members);

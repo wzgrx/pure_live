@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/recording/recording_page.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// What the record menu offers for a room's task (F-ROOM-14).
 enum RoomRecordAction {
@@ -80,13 +81,16 @@ class RoomRecordButton extends ConsumerWidget {
           } else {
             await manager.start(key);
           }
-          say('开始录制');
+          say(t.recording.start);
         case RoomRecordAction.watch:
           if (!ref.read(storeProvider).settings.get(Settings.recordPolling)) {
             messenger?.showSnackBar(
               SnackBar(
-                content: const Text('要先在录制设置里打开“定时检查开播”'),
-                action: SnackBarAction(label: '去设置', onPressed: () => context.go('/me/settings/recording')),
+                content: Text(t.room.enableMonitoringFirst),
+                action: SnackBarAction(
+                  label: t.room.goToSettings,
+                  onPressed: () => context.go('/me/settings/recording'),
+                ),
               ),
             );
             return;
@@ -97,15 +101,15 @@ class RoomRecordButton extends ConsumerWidget {
             // A strict check first: offline goes back to waiting (polling is on).
             await manager.start(key);
           }
-          say('开播后自动录制');
+          say(t.room.recordWhenLive);
         case RoomRecordAction.stop:
-          say('正在停止录制，已录的文件会保留');
+          say(t.room.stoppingRecording);
           await manager.stop(key);
         case RoomRecordAction.checkNow:
           await manager.checkNow(key);
         case RoomRecordAction.remove:
           await manager.remove(key);
-          say('已移除录制任务，已录的文件会保留');
+          say(t.room.taskRemoved);
         case RoomRecordAction.openCenter:
           if (context.mounted) context.go('/me/recordings');
       }
@@ -120,7 +124,7 @@ class RoomRecordButton extends ConsumerWidget {
     final state = task?.state;
     final running = state != null && (state.active || state == RecordState.waitingLive);
     final live = detail.state == LiveState.live;
-    final label = running ? recordStateText(task!) : '录制';
+    final label = running ? recordStateText(task!) : t.room.record;
     final colors = Theme.of(context).colorScheme;
     return MenuAnchor(
       menuChildren: [
@@ -136,12 +140,12 @@ class RoomRecordButton extends ConsumerWidget {
             }),
             onPressed: () => unawaited(_run(context, ref, action, task)),
             child: Text(switch (action) {
-              RoomRecordAction.recordNow => '立即录制',
-              RoomRecordAction.watch => '开播时自动录制',
-              RoomRecordAction.stop => '停止录制',
-              RoomRecordAction.checkNow => '立即检查开播',
-              RoomRecordAction.remove => state == RecordState.waitingLive ? '移除监控' : '移除录制任务',
-              RoomRecordAction.openCenter => '录制中心',
+              RoomRecordAction.recordNow => t.room.recordNow,
+              RoomRecordAction.watch => t.room.recordOnLive,
+              RoomRecordAction.stop => t.recording.stopTitle,
+              RoomRecordAction.checkNow => t.recording.checkNow,
+              RoomRecordAction.remove => state == RecordState.waitingLive ? t.recording.removeWatch : t.room.removeTask,
+              RoomRecordAction.openCenter => t.app.recordings,
             }),
           ),
       ],

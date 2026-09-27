@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_cast/live_cast.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Android's Wi-Fi multicast lock around a search (F-CAST-01): many Wi-Fi
 /// drivers drop SSDP traffic while no app holds it. `CastMulticast.kt` owns
@@ -108,19 +109,19 @@ final class CastSource {
 /// info is accepted (REG-ROOM-016).
 CastSource castSourceOf(RoomDetail detail, PlaybackState state) {
   final line = state.line ?? state.commit?.line;
-  if (line == null) return const CastSource(problem: '还没有拿到直播地址，等画面出来后再投屏');
+  if (line == null) return CastSource(problem: t.cast.noAddressYet);
   final url = line.url;
   if (!(url.isScheme('http') || url.isScheme('https'))) {
-    return const CastSource(problem: '当前线路不是 http(s) 地址，电视打不开');
+    return CastSource(problem: t.cast.notHttp);
   }
-  if (url.host.isEmpty || url.userInfo.isNotEmpty) return const CastSource(problem: '当前线路的地址无效');
-  if (isLocalHost(url.host)) return const CastSource(problem: '当前线路是本机地址，电视访问不到');
+  if (url.host.isEmpty || url.userInfo.isNotEmpty) return CastSource(problem: t.cast.invalidAddress);
+  if (isLocalHost(url.host)) return CastSource(problem: t.cast.localAddress);
   final card = detail.card;
   final title = [card.anchorName.trim(), card.title.trim()].where((part) => part.isNotEmpty).join(' - ');
   return CastSource(
     media: CastMedia(
       url: url,
-      title: title.isEmpty ? '直播' : title,
+      title: title.isEmpty ? t.cast.defaultTitle : title,
       mimeType: line.format == StreamFormat.hls ? CastMime.hls : CastMime.guess(url),
     ),
     needsHeaders: line.headers.isNotEmpty,
@@ -281,21 +282,21 @@ final NotifierProvider<CastNotifier, CastState> castProvider = NotifierProvider<
 
 /// A failure as UI copy.
 String castFailureText(Object failure) => switch (failure) {
-  CastTimeoutFailure() || CastNetworkFailure() => '连不上这台设备，确认它开着，并且和手机连着同一个 Wi-Fi',
-  UpnpActionFailure(:final error) when error.busy => '设备正忙，稍后再试',
-  UpnpActionFailure(error: UpnpError.formatNotSupported || UpnpError.illegalMimeType) => '设备不支持这种直播流格式，换一条线路试试',
-  UpnpActionFailure(:final error) when error.unplayable => '设备打不开这个直播地址，换一条线路试试',
-  UpnpActionFailure(:final code) => '设备拒绝了投屏（错误码 $code）',
-  CastHttpFailure(:final statusCode) => '设备返回了错误（HTTP $statusCode）',
-  CastProtocolFailure() => '设备的回应无法识别',
-  _ => '投屏失败',
+  CastTimeoutFailure() || CastNetworkFailure() => t.cast.failure.unreachable,
+  UpnpActionFailure(:final error) when error.busy => t.cast.failure.busy,
+  UpnpActionFailure(error: UpnpError.formatNotSupported || UpnpError.illegalMimeType) => t.cast.failure.format,
+  UpnpActionFailure(:final error) when error.unplayable => t.cast.failure.unplayable,
+  UpnpActionFailure(:final code) => t.cast.failure.refused(code: code),
+  CastHttpFailure(:final statusCode) => t.cast.failure.http(status: statusCode),
+  CastProtocolFailure() => t.cast.failure.protocol,
+  _ => t.cast.failure.generic,
 };
 
 /// What the renderer does, as UI copy; null when unknown.
 String? tvStateText(TransportState? state) => switch (state) {
-  TransportState.playing => '电视正在播放',
-  TransportState.transitioning => '电视正在加载',
-  TransportState.pausedPlayback => '电视已暂停',
-  TransportState.stopped || TransportState.noMediaPresent => '电视已停止播放',
+  TransportState.playing => t.cast.tv.playing,
+  TransportState.transitioning => t.cast.tv.loading,
+  TransportState.pausedPlayback => t.cast.tv.paused,
+  TransportState.stopped || TransportState.noMediaPresent => t.cast.tv.stopped,
   _ => null,
 };

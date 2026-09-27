@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/system/mini_player.dart';
 import 'package:pure_live_app/features/system/now_playing.dart';
 import 'package:pure_live_app/features/system/pip.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Longest edge of the mini window (PIP-4): 350 on desktops, 220 elsewhere.
 double miniWindowLongEdge({required bool desktop}) => desktop ? 350 : 220;
@@ -160,8 +161,8 @@ class _MiniWindowState extends ConsumerState<_MiniWindow> {
                       ),
                     ),
                   if (_state.phase == PlaybackPhase.error)
-                    const Center(
-                      child: Text('播放出错了', style: TextStyle(color: Colors.white)),
+                    Center(
+                      child: Text(t.system.playbackError, style: const TextStyle(color: Colors.white)),
                     ),
                   if (_controls) _overlay(),
                 ],
@@ -184,7 +185,7 @@ class _MiniWindowState extends ConsumerState<_MiniWindow> {
           Align(
             alignment: Alignment.topLeft,
             child: Semantics(
-              label: '回到直播间',
+              label: t.system.backToRoom,
               button: true,
               child: IconButton(
                 color: ink,
@@ -197,7 +198,7 @@ class _MiniWindowState extends ConsumerState<_MiniWindow> {
           Align(
             alignment: Alignment.topRight,
             child: Semantics(
-              label: '关闭小窗',
+              label: t.system.closeMini,
               button: true,
               child: IconButton(
                 color: ink,
@@ -209,7 +210,7 @@ class _MiniWindowState extends ConsumerState<_MiniWindow> {
           ),
           Center(
             child: Semantics(
-              label: paused ? '播放' : '暂停',
+              label: paused ? t.common.play : t.common.pause,
               button: true,
               child: IconButton(
                 color: ink,

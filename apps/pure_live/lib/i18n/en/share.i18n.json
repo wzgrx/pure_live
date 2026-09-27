@@ -1,0 +1,8 @@
+{
+  "roomN": "Room {id}",
+  "shareCodeReceived": "Share code received",
+  "roomLinkFound": "Room link found",
+  "fromClipboard": "From the clipboard. You can turn off clipboard detection in Settings › General.",
+  "enterRoom": "Open room",
+  "codeCopied": "Share code copied. Whoever copies it and opens Pure Live (3.x or v4) goes straight to this room."
+}

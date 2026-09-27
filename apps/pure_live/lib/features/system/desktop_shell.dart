@@ -7,6 +7,7 @@ import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/features/system/close_behaviour.dart';
 import 'package:pure_live_app/features/system/launch_args.dart';
 import 'package:pure_live_app/features/system/windows_native.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:window_manager/window_manager.dart';
 
 /// The `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` value of this app.
@@ -56,7 +57,7 @@ final class WindowsShell with WindowListener {
   var _exiting = false;
 
   /// Tray labels.
-  static const trayTooltip = '纯粹直播';
+  static String get trayTooltip => t.app.name;
 
   /// Starts listening, shows the tray icon and applies the autostart setting;
   /// finally tells the runner to deliver queued forwarded launches.
@@ -66,7 +67,12 @@ final class WindowsShell with WindowListener {
       ..add(native.trayEvents.listen(onTrayEvent));
     await window.setPreventClose(preventClose: true);
     if (!secondaryWindow) {
-      await native.showTray(tooltip: trayTooltip, show: '显示窗口', hide: '隐藏窗口', exit: '退出');
+      await native.showTray(
+        tooltip: trayTooltip,
+        show: t.system.showWindow,
+        hide: t.system.hideWindow,
+        exit: t.common.exit,
+      );
       await _applyAutostart(settings.get(Settings.launchAtStartup));
       _subscriptions.add(settings.watch(Settings.launchAtStartup).skip(1).listen(_applyAutostart));
     }

@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Writes [text] to the clipboard; true only once the write went through
 /// (REG-ROOM-016: copying reports success only after the clipboard took it).
@@ -36,7 +37,7 @@ Future<Uri?> showStreamLinkPicker(
     context: context,
     builder: (context) => StreamLinkDialog(room: room, title: title, clipboard: clipboard ?? _systemClipboard),
   );
-  if (copied != null) messenger?.showSnackBar(const SnackBar(content: Text('直链已复制，有时效，过期后需要重新复制')));
+  if (copied != null) messenger?.showSnackBar(SnackBar(content: Text(t.room.streamUrlCopied)));
   return copied;
 }
 
@@ -130,7 +131,7 @@ class _StreamLinkDialogState extends ConsumerState<StreamLinkDialog> {
     final error = _error;
     final Widget body;
     if (_offline) {
-      body = const Text('主播现在没有开播，拿不到直链。');
+      body = Text(t.rooms.notLive);
     } else if (error != null) {
       final text = describeError(error);
       body = Column(
@@ -143,19 +144,19 @@ class _StreamLinkDialogState extends ConsumerState<StreamLinkDialog> {
           if (text.retryable)
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(onPressed: () => _load(_streams?.selected), child: const Text('重试')),
+              child: TextButton(onPressed: () => _load(_streams?.selected), child: Text(t.common.retry)),
             ),
         ],
       );
     } else if (streams == null) {
-      body = const SizedBox(height: 96, child: LoadingView(label: '正在获取线路'));
+      body = SizedBox(height: 96, child: LoadingView(label: t.rooms.loadingLines));
     } else {
       final loading = _loading != null;
       body = Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('画质', style: theme.textTheme.titleSmall),
+          Text(t.multiview.quality, style: theme.textTheme.titleSmall),
           const SizedBox(height: Space.s2),
           Wrap(
             spacing: Space.s2,
@@ -170,35 +171,35 @@ class _StreamLinkDialogState extends ConsumerState<StreamLinkDialog> {
             ],
           ),
           const SizedBox(height: Space.s4),
-          Text('线路（点一下复制）', style: theme.textTheme.titleSmall),
+          Text(t.rooms.linesTapToCopy, style: theme.textTheme.titleSmall),
           if (loading)
             const Padding(
               padding: EdgeInsets.all(Space.s4),
               child: Center(child: CircularProgressIndicator()),
             )
           else if (streams.lines.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: Space.s2),
-              child: Text('这个画质没有可用的线路'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: Space.s2),
+              child: Text(t.rooms.noLinesForQuality),
             )
           else
             for (final (index, line) in streams.lines.indexed)
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.content_copy),
-                title: Text('线路 ${index + 1} · ${line.format == StreamFormat.flv ? 'FLV' : 'HLS'}'),
+                title: Text('${t.multiview.lineN(n: index + 1)} · ${line.format == StreamFormat.flv ? 'FLV' : 'HLS'}'),
                 subtitle: Text(line.url.host, maxLines: 1, overflow: TextOverflow.ellipsis),
                 onTap: () => _copy(line),
               ),
           if (_copyFailed)
-            Text('没能写入剪贴板，再试一次', style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.error)),
+            Text(t.rooms.clipboardFailed, style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.error)),
         ],
       );
     }
     return AlertDialog(
-      title: Text(widget.title == null ? '获取直链' : '获取直链 · ${widget.title}'),
+      title: Text(widget.title == null ? t.rooms.streamLink : t.rooms.streamLinkFor(title: widget.title!)),
       content: SizedBox(width: 400, child: SingleChildScrollView(child: body)),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭'))],
+      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.close))],
     );
   }
 }

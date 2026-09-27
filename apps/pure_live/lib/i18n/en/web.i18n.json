@@ -1,0 +1,5 @@
+{
+  "webView2Title": "WebView2 Runtime required",
+  "webView2Body": "Web sign-in and web search use Microsoft Edge WebView2 Runtime, which is not installed on this computer. Windows 11 and up-to-date Windows 10 usually include it.\n\nTo install it, open Microsoft's download page, download the Evergreen Bootstrapper and run it, then reopen Pure Live.",
+  "openDownloadPage": "Open download page"
+}

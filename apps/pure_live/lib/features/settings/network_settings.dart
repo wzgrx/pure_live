@@ -8,6 +8,7 @@ import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/system_proxy.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// 设置 › 网络 (spec/product.md F-SET-07): one proxy for requests, chat,
 /// playback and recording, optionally only for some platforms.
@@ -19,18 +20,18 @@ class NetworkSettings extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       const SystemProxyTile(),
-      const SwitchSettingTile(
+      SwitchSettingTile(
         setting: Settings.proxyEnabled,
-        title: '使用代理',
-        subtitle: 'HTTP 代理，例如 Clash 的 7897 端口；打开后不再跟随系统代理',
+        title: t.settings.network.useProxy,
+        subtitle: t.settings.network.useProxySubtitle,
       ),
       SettingBuilder<String>(
         setting: Settings.proxyHost,
         builder: (context, value, set) => ListTile(
-          title: const Text('代理地址'),
-          subtitle: Text(value.isEmpty ? '未设置（例如 127.0.0.1）' : value),
+          title: Text(t.settings.network.proxyHost),
+          subtitle: Text(value.isEmpty ? t.settings.network.proxyHostUnset : value),
           onTap: () async {
-            final text = await _editText(context, '代理地址', value, TextInputType.url);
+            final text = await _editText(context, t.settings.network.proxyHost, value, TextInputType.url);
             if (text != null) set(text.trim());
           },
         ),
@@ -38,16 +39,16 @@ class NetworkSettings extends StatelessWidget {
       SettingBuilder<int>(
         setting: Settings.proxyPort,
         builder: (context, value, set) => ListTile(
-          title: const Text('代理端口'),
+          title: Text(t.settings.network.proxyPort),
           subtitle: Text('$value'),
           onTap: () async {
-            final text = await _editText(context, '代理端口', '$value', TextInputType.number);
+            final text = await _editText(context, t.settings.network.proxyPort, '$value', TextInputType.number);
             final port = int.tryParse(text ?? '');
             if (port != null && port > 0 && port < 65536) set(port);
           },
         ),
       ),
-      const SettingsHeader('走代理的平台'),
+      SettingsHeader(t.settings.network.proxyPlatforms),
       SettingBuilder<List<String>>(
         setting: Settings.proxyPlatforms,
         builder: (context, chosen, set) => Padding(
@@ -56,7 +57,7 @@ class NetworkSettings extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                chosen.isEmpty ? '现在所有平台都走代理。选中下面的平台后，只有选中的平台走代理。' : '只有选中的平台走代理。',
+                chosen.isEmpty ? t.settings.network.proxyAll : t.settings.network.proxySelected,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
@@ -93,8 +94,8 @@ class NetworkSettings extends StatelessWidget {
           onSubmitted: (value) => Navigator.pop(context, value),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('保存')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, controller.text), child: Text(t.common.save)),
         ],
       ),
     );
@@ -112,13 +113,13 @@ class SystemProxyTile extends ConsumerWidget {
     final system = ref.watch(systemProxyProvider);
     final manual = ref.watch(proxyEnabledSetting);
     return SwitchListTile(
-      title: const Text('跟随系统代理'),
+      title: Text(t.settings.network.systemProxy),
       subtitle: Text(
         manual
-            ? '手动代理打开时不使用系统代理'
+            ? t.settings.network.systemProxyManual
             : system == null
-            ? '系统当前没有设置代理，直接连接'
-            : '系统代理：${system.host}:${system.port}',
+            ? t.settings.network.systemProxyNone
+            : t.settings.network.systemProxyIs(host: system.host, port: system.port),
       ),
       value: ref.watch(followSystemProxySetting),
       onChanged: (value) {

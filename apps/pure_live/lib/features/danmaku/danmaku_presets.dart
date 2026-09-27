@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A danmaku look in one step (F-DM-02 位置预设): area, margins, speed and
 /// text. The values are 3.x's `DanmakuViewingPreset`s.
@@ -61,11 +62,11 @@ final class DanmakuPreset {
 }
 
 /// The presets, in 3.x's order; the last one restores the defaults.
-const danmakuPresets = [
-  DanmakuPreset(name: '最佳观感', area: 0.20, speed: 118, fontSize: 16, strokeWidth: 1.5, opacity: 0.92),
-  DanmakuPreset(name: '舒适', area: 0.35, speed: 105, fontSize: 17, strokeWidth: 1.5, opacity: 0.90),
-  DanmakuPreset(name: '密集', area: 0.55, speed: 138, fontSize: 15, strokeWidth: 1.2, opacity: 0.88),
-  DanmakuPreset(name: '恢复默认', area: 1, speed: 120, fontSize: 16, strokeWidth: 1.5, opacity: 1),
+List<DanmakuPreset> get danmakuPresets => [
+  DanmakuPreset(name: t.danmaku.preset.best, area: 0.20, speed: 118, fontSize: 16, strokeWidth: 1.5, opacity: 0.92),
+  DanmakuPreset(name: t.danmaku.preset.comfort, area: 0.35, speed: 105, fontSize: 17, strokeWidth: 1.5, opacity: 0.90),
+  DanmakuPreset(name: t.danmaku.preset.dense, area: 0.55, speed: 138, fontSize: 15, strokeWidth: 1.2, opacity: 0.88),
+  DanmakuPreset(name: t.danmaku.preset.reset, area: 1, speed: 120, fontSize: 16, strokeWidth: 1.5, opacity: 1),
 ];
 
 /// The user's own danmaku style (F-DM-02 样式模板), stored as 3.x's JSON

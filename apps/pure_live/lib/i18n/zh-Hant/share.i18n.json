@@ -1,0 +1,8 @@
+{
+  "roomN": "房間 {id}",
+  "shareCodeReceived": "收到分享碼",
+  "roomLinkFound": "發現直播間連結",
+  "fromClipboard": "來自剪貼簿。可以在 設定 › 一般 裡關閉剪貼簿辨識。",
+  "enterRoom": "進入直播間",
+  "codeCopied": "分享碼已複製。對方複製後開啟純粹直播（3.x 或 v4），即可進入這個直播間"
+}

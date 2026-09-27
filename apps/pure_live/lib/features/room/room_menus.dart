@@ -15,6 +15,7 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/follows/follow_status.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Q-12: quality and line in one panel, two columns when there is room. The
@@ -69,7 +70,7 @@ class _QualityLinePanelState extends State<_QualityLinePanel> {
     final qualities = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('画质', style: theme.textTheme.titleSmall),
+        Text(t.multiview.quality, style: theme.textTheme.titleSmall),
         const SizedBox(height: Space.s2),
         Wrap(
           spacing: Space.s2,
@@ -92,14 +93,14 @@ class _QualityLinePanelState extends State<_QualityLinePanel> {
         ),
         if (limited) ...[
           const SizedBox(height: Space.s1),
-          Text('平台限制为 ${line.confirmed!.label}', style: theme.textTheme.bodySmall),
+          Text(t.room.platformLimited(quality: line.confirmed!.label), style: theme.textTheme.bodySmall),
         ],
       ],
     );
     final lines = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('线路', style: theme.textTheme.titleSmall),
+        Text(t.multiview.line, style: theme.textTheme.titleSmall),
         const SizedBox(height: Space.s2),
         Wrap(
           spacing: Space.s2,
@@ -107,7 +108,7 @@ class _QualityLinePanelState extends State<_QualityLinePanel> {
           children: [
             for (final (index, option) in _state.lines.indexed)
               ChoiceChip(
-                label: Text('线路 ${index + 1}'),
+                label: Text(t.multiview.lineN(n: index + 1)),
                 selected: option.lineId == line?.lineId,
                 onSelected: (_) {
                   unawaited(widget.session.selectLine(option.lineId));
@@ -155,9 +156,9 @@ class _QualityLinePanelState extends State<_QualityLinePanel> {
 
 /// "画质 · 线路 2" for the control bar (Q-12).
 String qualityLineLabel(PlaybackState state) {
-  final quality = state.quality?.label ?? '画质';
+  final quality = state.quality?.label ?? t.multiview.quality;
   final index = state.lines.indexWhere((line) => line.lineId == state.line?.lineId);
-  return state.lines.length > 1 && index >= 0 ? '$quality · 线路 ${index + 1}' : quality;
+  return state.lines.length > 1 && index >= 0 ? t.room.qualityLine(quality: quality, n: index + 1) : quality;
 }
 
 /// What the quick panel asked for (T-07).
@@ -239,7 +240,7 @@ Future<QuickAction?> showQuickPanel(
               if (hint)
                 Padding(
                   padding: const EdgeInsets.only(bottom: Space.s3),
-                  child: Text('长按画面打开快捷面板；长按弹幕可以复制或屏蔽', style: theme.textTheme.bodySmall),
+                  child: Text(t.room.quickPanelHint, style: theme.textTheme.bodySmall),
                 ),
               Wrap(
                 alignment: WrapAlignment.spaceAround,
@@ -249,27 +250,32 @@ Future<QuickAction?> showQuickPanel(
                     action(
                       QuickAction.toggleDanmaku,
                       danmakuShown ? Icons.subtitles : Icons.subtitles_off_outlined,
-                      danmakuShown ? '关闭弹幕' : '打开弹幕',
+                      danmakuShown ? t.multiview.danmakuOff : t.danmaku.turnOn,
                       selected: danmakuShown,
                     ),
-                  action(QuickAction.screenshot, Icons.photo_camera_outlined, '截图', enabled: canScreenshot),
-                  action(QuickAction.sleepTimer, Icons.bedtime_outlined, '定时关闭'),
+                  action(
+                    QuickAction.screenshot,
+                    Icons.photo_camera_outlined,
+                    t.room.screenshot,
+                    enabled: canScreenshot,
+                  ),
+                  action(QuickAction.sleepTimer, Icons.bedtime_outlined, t.room.sleepTimer),
                   action(
                     QuickAction.audioOnly,
                     Icons.headphones_outlined,
-                    audioOnly ? '恢复画面' : '纯音频',
+                    audioOnly ? t.room.restoreVideo : t.room.audioOnly,
                     selected: audioOnly,
                   ),
                 ],
               ),
               const SizedBox(height: Space.s3),
-              Text('画面比例', style: theme.textTheme.titleSmall),
+              Text(t.room.aspect, style: theme.textTheme.titleSmall),
               const SizedBox(height: Space.s2),
               SegmentedButton<QuickAction>(
-                segments: const [
-                  ButtonSegment(value: QuickAction.fitContain, label: Text('适应')),
-                  ButtonSegment(value: QuickAction.fitCover, label: Text('填充')),
-                  ButtonSegment(value: QuickAction.fitFill, label: Text('拉伸')),
+                segments: [
+                  ButtonSegment(value: QuickAction.fitContain, label: Text(t.room.fit.contain)),
+                  ButtonSegment(value: QuickAction.fitCover, label: Text(t.room.fit.cover)),
+                  ButtonSegment(value: QuickAction.fitFill, label: Text(t.room.fit.fill)),
                 ],
                 selected: {
                   switch (fit) {
@@ -347,19 +353,19 @@ List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({
     child: ListTile(leading: Icon(icon), title: Text(label), contentPadding: EdgeInsets.zero),
   );
   return [
-    item(RoomMenuAction.switchRoom, Icons.swap_horiz, '切换直播间'),
-    item(RoomMenuAction.openSite, Icons.open_in_new, '打开原站'),
-    if (openApp) item(RoomMenuAction.openApp, Icons.launch, '在 App 中打开'),
-    item(RoomMenuAction.share, Icons.share_outlined, '分享'),
-    item(RoomMenuAction.cast, Icons.cast, '投屏'),
-    item(RoomMenuAction.copyStreamUrl, Icons.link, '复制直链'),
-    item(RoomMenuAction.sleepTimer, Icons.bedtime_outlined, '定时关闭'),
-    item(RoomMenuAction.volume, Icons.volume_up_outlined, '房间音量'),
-    if (danmakuAvailable) item(RoomMenuAction.danmakuSettings, Icons.tune, '弹幕设置'),
-    item(RoomMenuAction.multiview, Icons.grid_view, '加入多画面'),
-    if (desktop) item(RoomMenuAction.keys, Icons.keyboard_outlined, '快捷键'),
+    item(RoomMenuAction.switchRoom, Icons.swap_horiz, t.room.switchRoom),
+    item(RoomMenuAction.openSite, Icons.open_in_new, t.common.openSite),
+    if (openApp) item(RoomMenuAction.openApp, Icons.launch, t.room.openInApp),
+    item(RoomMenuAction.share, Icons.share_outlined, t.room.share),
+    item(RoomMenuAction.cast, Icons.cast, t.room.cast),
+    item(RoomMenuAction.copyStreamUrl, Icons.link, t.room.copyStreamUrl),
+    item(RoomMenuAction.sleepTimer, Icons.bedtime_outlined, t.room.sleepTimer),
+    item(RoomMenuAction.volume, Icons.volume_up_outlined, t.room.roomVolume),
+    if (danmakuAvailable) item(RoomMenuAction.danmakuSettings, Icons.tune, t.danmaku.settings),
+    item(RoomMenuAction.multiview, Icons.grid_view, t.room.addToMultiview),
+    if (desktop) item(RoomMenuAction.keys, Icons.keyboard_outlined, t.room.shortcuts),
     // F-WIN-02: Windows only.
-    if (newWindow) item(RoomMenuAction.newWindow, Icons.open_in_browser, '新窗口打开'),
+    if (newWindow) item(RoomMenuAction.newWindow, Icons.open_in_browser, t.room.openInNewWindow),
   ];
 }
 
@@ -381,7 +387,7 @@ Future<void> shareRoom(BuildContext context, RoomDetail detail) async {
       await SharePlus.instance.share(
         ShareParams(
           text: code,
-          subject: '${card.anchorName}的直播间',
+          subject: t.room.shareSubject(name: card.anchorName),
           // iPad anchors the sheet to the button.
           sharePositionOrigin: box is RenderBox && box.hasSize ? box.localToGlobal(Offset.zero) & box.size : null,
         ),
@@ -393,7 +399,7 @@ Future<void> shareRoom(BuildContext context, RoomDetail detail) async {
   }
   await Clipboard.setData(ClipboardData(text: code));
   if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('分享口令已复制，对方在纯粹直播里粘贴即可打开')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.room.shareCodeCopied)));
   }
 }
 
@@ -402,11 +408,11 @@ Future<void> copyStreamUrl(BuildContext context, PlaybackState state) async {
   final url = state.line?.url;
   final messenger = ScaffoldMessenger.of(context);
   if (url == null) {
-    messenger.showSnackBar(const SnackBar(content: Text('还没有拿到直播流')));
+    messenger.showSnackBar(SnackBar(content: Text(t.room.noStreamYet)));
     return;
   }
   await Clipboard.setData(ClipboardData(text: url.toString()));
-  messenger.showSnackBar(const SnackBar(content: Text('直链已复制，有时效，过期后需要重新复制')));
+  messenger.showSnackBar(SnackBar(content: Text(t.room.streamUrlCopied)));
 }
 
 /// Whether the session can take a screenshot (mpv only).
@@ -471,7 +477,7 @@ class _SwitchRoomPanel extends ConsumerWidget {
     ];
     Widget list(AsyncValue<List<StoredRoom>> rooms, String empty) => rooms.when(
       loading: () => const LoadingView(),
-      error: (error, _) => MessageView.error(title: '读取失败', message: '$error'),
+      error: (error, _) => MessageView.error(title: t.common.loadFailed, message: '$error'),
       data: (rooms) {
         final shown = [
           for (final room in rooms)
@@ -502,11 +508,11 @@ class _SwitchRoomPanel extends ConsumerWidget {
       length: 3,
       child: Column(
         children: [
-          const TabBar(
+          TabBar(
             tabs: [
-              Tab(text: '开播的关注'),
-              Tab(text: '录制中'),
-              Tab(text: '观看历史'),
+              Tab(text: t.follows.liveFollows),
+              Tab(text: t.recording.state.recording),
+              Tab(text: t.app.history),
             ],
           ),
           Expanded(
@@ -522,10 +528,10 @@ class _SwitchRoomPanel extends ConsumerWidget {
                           follow.room,
                     ],
                   ),
-                  '没有开播的关注',
+                  t.room.noLiveFollows,
                 ),
-                list(AsyncValue.data(recording), '没有正在录制的直播间'),
-                list(history.whenData((all) => [for (final entry in all) entry.room]), '还没有观看历史'),
+                list(AsyncValue.data(recording), t.room.noRecordingRooms),
+                list(history.whenData((all) => [for (final entry in all) entry.room]), t.room.noHistory),
               ],
             ),
           ),
@@ -550,7 +556,7 @@ Future<void> showRoomVolumeDialog(
     var value = volume;
     return StatefulBuilder(
       builder: (context, setState) => AlertDialog(
-        title: const Text('房间音量'),
+        title: Text(t.room.roomVolume),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -571,7 +577,10 @@ Future<void> showRoomVolumeDialog(
                 SizedBox(width: 44, child: Text('${(value * 100).round()}%', textAlign: TextAlign.end)),
               ],
             ),
-            Text(desktop ? '这个直播间会记住这个音量' : '只调节播放器音量，不改动手机的媒体音量', style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              desktop ? t.room.volumeRemembered : t.room.volumePlayerOnly,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
         actions: [
@@ -580,9 +589,9 @@ Future<void> showRoomVolumeDialog(
               onSaveDefault();
               Navigator.pop(context);
             },
-            child: Text(desktop ? '设为默认音量' : '设为手机默认音量'),
+            child: Text(desktop ? t.room.setDefaultVolume : t.room.setPhoneDefaultVolume),
           ),
-          FilledButton(onPressed: () => Navigator.pop(context), child: const Text('完成')),
+          FilledButton(onPressed: () => Navigator.pop(context), child: Text(t.common.done)),
         ],
       ),
     );
@@ -593,23 +602,23 @@ Future<void> showRoomVolumeDialog(
 Future<void> showKeyHelp(BuildContext context) => showDialog<void>(
   context: context,
   builder: (context) => AlertDialog(
-    title: const Text('快捷键'),
+    title: Text(t.room.shortcuts),
     content: SingleChildScrollView(
       child: Table(
         columnWidths: const {0: IntrinsicColumnWidth()},
         children: [
-          for (final (key, action) in const [
-            ('空格', '播放 / 暂停'),
-            ('F、双击', '全屏 / 退出全屏'),
-            ('Esc', '关闭弹层 → 退出全屏或剧场 → 离开直播间'),
-            ('T', '剧场模式'),
-            ('C', '显示 / 收起聊天栏'),
-            ('M', '静音'),
-            ('↑ ↓、滚轮', '音量 ±5%'),
-            ('D', '弹幕开关'),
-            ('Q / L', '画质 / 线路'),
-            ('R、F5、Ctrl+R', '刷新'),
-            ('?', '快捷键帮助'),
+          for (final (key, action) in [
+            (t.room.key.space, t.room.key.playPause),
+            (t.room.key.fullscreenKeys, t.room.key.fullscreen),
+            ('Esc', t.room.key.escape),
+            ('T', t.room.key.theater),
+            ('C', t.room.key.chat),
+            ('M', t.room.key.mute),
+            (t.room.key.volumeKeys, t.room.key.volume),
+            ('D', t.room.key.danmaku),
+            ('Q / L', t.room.key.qualityLine),
+            (t.room.key.refreshKeys, t.common.refresh),
+            ('?', t.room.key.help),
           ])
             TableRow(
               children: [
@@ -626,7 +635,7 @@ Future<void> showKeyHelp(BuildContext context) => showDialog<void>(
         ],
       ),
     ),
-    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭'))],
+    actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.close))],
   ),
 );
 

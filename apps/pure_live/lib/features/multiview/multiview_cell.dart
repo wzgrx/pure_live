@@ -10,6 +10,7 @@ import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/multiview/multiview_controller.dart';
 import 'package:pure_live_app/features/multiview/multiview_sheets.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// One cell (CEL-1): the video, the chat layer when the cell is the danmaku
 /// target (DM-3), the state overlay, the sound-focus and pick-target marks
@@ -163,7 +164,7 @@ class _CellOverlay extends StatelessWidget {
             children: [
               Icon(Icons.add_circle_outline, color: tone, size: 36),
               const SizedBox(height: Space.s1),
-              Text('添加直播间', style: TextStyle(color: tone)),
+              Text(t.multiview.addRoom, style: TextStyle(color: tone)),
             ],
           ),
         );
@@ -172,7 +173,7 @@ class _CellOverlay extends StatelessWidget {
       case CellStatus.offline:
         return Center(
           child: Text(
-            '${name ?? ''} 未开播\n点这里换一个',
+            t.multiview.offlineCell(name: name ?? ''),
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70),
           ),
@@ -191,7 +192,7 @@ class _CellOverlay extends StatelessWidget {
               children: [
                 // REC-MV-6: recovery gave up; the cell says so and offers a retry.
                 if (playback?.phase == PlaybackPhase.error)
-                  _Failure(title: '播放中断', onRetry: onRetry)
+                  _Failure(title: t.multiview.interrupted, onRetry: onRetry)
                 else if (cell.paused || (playback?.showsPaused ?? false))
                   const Center(child: Icon(Icons.pause_circle_outline, color: Colors.white70, size: 40))
                 else if (playback?.showsBuffering ?? false)
@@ -256,7 +257,7 @@ class _Failure extends StatelessWidget {
           style: const TextStyle(color: Colors.white),
         ),
         const SizedBox(height: Space.s2),
-        FilledButton.tonal(onPressed: onRetry, child: const Text('重试')),
+        FilledButton.tonal(onPressed: onRetry, child: Text(t.common.retry)),
       ],
     ),
   );
@@ -303,26 +304,42 @@ class MultiviewControlBar extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (cell.paused)
-                  button(Icons.play_arrow, '继续', () => controller.setPaused(index, paused: false))
+                  button(Icons.play_arrow, t.common.resume, () => controller.setPaused(index, paused: false))
                 else
-                  button(Icons.pause, '暂停', () => controller.setPaused(index, paused: true)),
-                button(Icons.refresh, '刷新', () => unawaited(controller.refresh(index))),
+                  button(Icons.pause, t.common.pause, () => controller.setPaused(index, paused: true)),
+                button(Icons.refresh, t.common.refresh, () => unawaited(controller.refresh(index))),
                 if (danmakuOn) ...[
                   button(
                     state.danmaku ? Icons.subtitles : Icons.subtitles_off_outlined,
-                    state.danmaku ? '关闭弹幕' : '开启弹幕',
+                    state.danmaku ? t.multiview.danmakuOff : t.multiview.danmakuOn,
                     controller.toggleDanmaku,
                     color: state.danmaku ? Theme.of(context).colorScheme.primary : null,
                   ),
-                  button(Icons.tune, '弹幕设置', () => unawaited(showDanmakuSettingsSheet(context))),
+                  button(Icons.tune, t.danmaku.settings, () => unawaited(showDanmakuSettingsSheet(context))),
                 ],
                 if (playback.qualities.length > 1)
-                  button(Icons.hd_outlined, '画质', () => unawaited(showMultiviewQualitySheet(context, ref, index))),
+                  button(
+                    Icons.hd_outlined,
+                    t.multiview.quality,
+                    () => unawaited(showMultiviewQualitySheet(context, ref, index)),
+                  ),
                 if (playback.lines.length > 1)
-                  button(Icons.alt_route, '线路', () => unawaited(showMultiviewLineSheet(context, ref, index))),
-                button(Icons.volume_up_outlined, '音量', () => unawaited(showMultiviewVolumeSheet(context, index))),
+                  button(
+                    Icons.alt_route,
+                    t.multiview.line,
+                    () => unawaited(showMultiviewLineSheet(context, ref, index)),
+                  ),
+                button(
+                  Icons.volume_up_outlined,
+                  t.multiview.volume,
+                  () => unawaited(showMultiviewVolumeSheet(context, index)),
+                ),
                 if (onFullscreen case final toggle?)
-                  button(fullscreen ? Icons.fullscreen_exit : Icons.fullscreen, fullscreen ? '退出全屏' : '全屏', toggle),
+                  button(
+                    fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                    fullscreen ? t.multiview.exitFullscreen : t.multiview.fullscreen,
+                    toggle,
+                  ),
               ],
             ),
           ),

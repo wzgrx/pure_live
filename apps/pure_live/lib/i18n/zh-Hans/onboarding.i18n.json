@@ -1,0 +1,13 @@
+{
+  "welcome": "欢迎使用{app} v4",
+  "intro": "预览版是单独安装的，读不到 3.x 里的数据。可以把 3.x 或其它设备上的关注和设置导入进来，也可以直接开始。",
+  "fromFile": "从备份文件导入",
+  "fromFileSubtitle": "3.x 的“备份与恢复”导出的文件，或 v4 的备份文件",
+  "fromWebdav": "从 WebDAV 导入",
+  "fromWebdavSubtitle": "之前上传到坚果云、Nextcloud 等网盘的备份",
+  "fromDevice": "从另一台设备导入",
+  "fromDeviceSubtitle": "同一网络下，由另一台设备通过局域网同步发送过来",
+  "skip": "跳过，直接开始",
+  "laterHint": "以后可以在 我的 › 备份与同步 里随时导入。",
+  "crashPrompt": "上次运行时出现了错误。导出诊断包附在问题反馈里，可以帮助定位原因"
+}

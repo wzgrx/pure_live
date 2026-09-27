@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/features/share/clipboard_watch.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The 3.x-compatible share code of a room (F-SHR-01, store.md §8).
 String shareCodeOf(RoomDetail detail) {
@@ -32,7 +33,6 @@ Future<void> shareRoom(BuildContext context, WidgetRef ref, RoomDetail detail) a
   ref.read(clipboardWatcherProvider).remember(text);
   await Clipboard.setData(ClipboardData(text: text));
   if (context.mounted) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('分享口令已复制。对方复制后打开纯粹直播（3.x 或 v4），即可进入这个直播间')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.share.codeCopied)));
   }
 }

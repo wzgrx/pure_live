@@ -14,57 +14,61 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/recording/record_schedule.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// State in words (spec/product.md F-REC-01).
 String recordStateText(RecordTask task) => switch (task.state) {
-  RecordState.queued => '排队中',
-  RecordState.resolving => '准备中',
-  RecordState.recording => '录制中',
-  RecordState.reconnecting => '重连中',
-  RecordState.finalizing => task.remuxProgress == null ? '处理中' : '转封装 ${(task.remuxProgress! * 100).round()}%',
-  RecordState.waitingLive => '等待开播',
-  RecordState.completed => '已完成',
-  RecordState.failed => '失败',
+  RecordState.queued => t.recording.state.queued,
+  RecordState.resolving => t.recording.state.resolving,
+  RecordState.recording => t.recording.state.recording,
+  RecordState.reconnecting => t.recording.state.reconnecting,
+  RecordState.finalizing =>
+    task.remuxProgress == null
+        ? t.recording.state.finalizing
+        : t.recording.state.remuxing(percent: (task.remuxProgress! * 100).round()),
+  RecordState.waitingLive => t.recording.state.waitingLive,
+  RecordState.completed => t.recording.state.completed,
+  RecordState.failed => t.recording.state.failed,
   RecordState.stopped => switch (task.stopCause) {
-    StopCause.pollingOff => '已停止（开播监控已关闭）',
-    StopCause.appRestart => '已停止（应用退出）',
-    _ => '已停止',
+    StopCause.pollingOff => t.recording.state.stoppedPollingOff,
+    StopCause.appRestart => t.recording.state.stoppedAppExit,
+    _ => t.recording.state.stopped,
   },
 };
 
 /// Why a recording failed, in words; the kind decides, never log text.
 String recordFailureText(RecordFailure failure) => switch (failure.kind) {
-  RecordErrorKind.roomOffline => '主播已下播',
-  RecordErrorKind.roomBanned => '直播间被封禁',
-  RecordErrorKind.roomNotFound => '直播间不存在',
-  RecordErrorKind.platformUnsupported => '这个平台暂不支持录制',
-  RecordErrorKind.loginRequired => '需要登录平台账号',
-  RecordErrorKind.regionBlocked => '当前地区无法观看',
-  RecordErrorKind.noQuality || RecordErrorKind.allLinesFailed => '拿不到可录制的直播流',
-  RecordErrorKind.unsupportedProtocol => '这个直播间只有暂不支持录制的 HLS 流',
-  RecordErrorKind.diskFull => '存储空间不足',
-  RecordErrorKind.permissionDenied || RecordErrorKind.readOnly => '没有录制目录的写入权限',
-  RecordErrorKind.pathInvalid => '录制目录不可用',
-  RecordErrorKind.diskStalled => '磁盘写入卡住了',
-  RecordErrorKind.backgroundInterrupted => '后台运行时间被系统用尽',
-  RecordErrorKind.remuxFailed => '转成 MP4 失败，原始文件已保留',
-  RecordErrorKind.inputDamaged => '录制文件损坏',
-  RecordErrorKind.retriesExhausted => '多次重试都没有成功',
-  _ => '网络或直播流出错',
+  RecordErrorKind.roomOffline => t.recording.failure.offline,
+  RecordErrorKind.roomBanned => t.recording.failure.banned,
+  RecordErrorKind.roomNotFound => t.recording.failure.missing,
+  RecordErrorKind.platformUnsupported => t.recording.failure.unsupported,
+  RecordErrorKind.loginRequired => t.recording.failure.needsLogin,
+  RecordErrorKind.regionBlocked => t.recording.failure.region,
+  RecordErrorKind.noQuality || RecordErrorKind.allLinesFailed => t.recording.failure.noStream,
+  RecordErrorKind.unsupportedProtocol => t.recording.failure.hlsOnly,
+  RecordErrorKind.diskFull => t.recording.failure.diskFull,
+  RecordErrorKind.permissionDenied || RecordErrorKind.readOnly => t.recording.failure.noPermission,
+  RecordErrorKind.pathInvalid => t.recording.failure.directory,
+  RecordErrorKind.diskStalled => t.recording.failure.writeStalled,
+  RecordErrorKind.backgroundInterrupted => t.recording.failure.background,
+  RecordErrorKind.remuxFailed => t.recording.failure.remux,
+  RecordErrorKind.inputDamaged => t.recording.failure.corrupt,
+  RecordErrorKind.retriesExhausted => t.recording.failure.retries,
+  _ => t.recording.failure.stream,
 };
 
 /// Where a recording failed (spec/modules/record.md §21 stages), in words.
 String recordStageText(RecordStage stage) => switch (stage) {
-  RecordStage.room => '房间检查',
-  RecordStage.quality => '选画质',
-  RecordStage.stream => '取流',
-  RecordStage.network => '连接',
-  RecordStage.writer => '写文件',
-  RecordStage.remux => '转封装',
-  RecordStage.scheduler => '排队调度',
-  RecordStage.background => '后台运行',
-  RecordStage.status => '开播检查',
+  RecordStage.room => t.recording.stage.check,
+  RecordStage.quality => t.recording.stage.quality,
+  RecordStage.stream => t.recording.stage.resolve,
+  RecordStage.network => t.recording.stage.connect,
+  RecordStage.writer => t.recording.stage.write,
+  RecordStage.remux => t.recording.stage.remux,
+  RecordStage.scheduler => t.recording.stage.queue,
+  RecordStage.background => t.recording.stage.background,
+  RecordStage.status => t.recording.stage.poll,
 };
 
 /// The display name of [task]: the streamer, or the room number.
@@ -88,7 +92,7 @@ Future<bool> confirmRecordAction(
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.common.cancel)),
           FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(action)),
         ],
       ),
@@ -99,20 +103,30 @@ Future<bool> confirmRecordAction(
 /// states need no confirmation (F-REC-02).
 Future<bool> confirmRecordStop(BuildContext context, RecordTask task) async =>
     !recordStopNeedsConfirm(task.state) ||
-    await confirmRecordAction(context, title: '停止录制', message: '停止录制“${recordTaskName(task)}”？已录的部分会保存。', action: '停止');
+    await confirmRecordAction(
+      context,
+      title: t.recording.stopTitle,
+      message: t.recording.stopConfirm(name: recordTaskName(task)),
+      action: t.common.stop,
+    );
 
 /// Confirms removing [task]: "移除监控" for a watched room, "删除录制任务"
 /// otherwise (F-REC-02). The files always stay.
 Future<bool> confirmRecordRemove(BuildContext context, RecordTask task) {
   final name = recordTaskName(task);
   if (task.state == RecordState.waitingLive) {
-    return confirmRecordAction(context, title: '移除监控', message: '不再等待“$name”开播？已录的文件会保留。', action: '移除');
+    return confirmRecordAction(
+      context,
+      title: t.recording.removeWatch,
+      message: t.recording.removeWatchConfirm(name: name),
+      action: t.common.remove,
+    );
   }
   return confirmRecordAction(
     context,
-    title: '删除录制任务',
-    message: task.state.active ? '删除“$name”的录制任务？正在进行的录制会先停止，已录的文件会保留。' : '删除“$name”的录制任务？已录的文件会保留。',
-    action: '删除',
+    title: t.recording.deleteTask,
+    message: task.state.active ? t.recording.deleteTaskRunning(name: name) : t.recording.deleteTaskConfirm(name: name),
+    action: t.common.delete,
   );
 }
 
@@ -180,10 +194,10 @@ class RecordingPage extends ConsumerWidget {
       builder: (context) => SizedBox(
         height: MediaQuery.sizeOf(context).height * 0.7,
         child: follows.isEmpty
-            ? const MessageView(title: '还没有关注的主播', message: '也可以在直播间里点录制按钮。')
+            ? MessageView(title: t.follows.emptyTitle, message: t.recording.recordFromRoomHint)
             : ListView(
                 children: [
-                  const ListTile(title: Text('从关注里选择')),
+                  ListTile(title: Text(t.recording.pickFromFollows)),
                   for (final follow in follows)
                     ListTile(
                       leading: PlatformLogo(platformId: follow.ref.platform, size: Sizes.iconMd),
@@ -213,10 +227,10 @@ class RecordingPage extends ConsumerWidget {
     final schedule = ref.watch(recordScheduleProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('录制中心'),
+        title: Text(t.app.recordings),
         actions: [
           IconButton(
-            tooltip: '录制设置',
+            tooltip: t.recording.settings,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.go('/me/settings/recording'),
           ),
@@ -225,7 +239,7 @@ class RecordingPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _add(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('添加录制'),
+        label: Text(t.recording.add),
       ),
       body: StreamBuilder<List<RecordTask>>(
         stream: manager.listChanges,
@@ -233,10 +247,10 @@ class RecordingPage extends ConsumerWidget {
         builder: (context, snapshot) {
           final tasks = snapshot.data ?? const <RecordTask>[];
           if (tasks.isEmpty && schedule.isEmpty) {
-            return const MessageView(
+            return MessageView(
               icon: Icons.fiber_manual_record_outlined,
-              title: '还没有录制任务',
-              message: '在直播间点录制，或者从关注里添加。开启开播监控后，主播开播会自动开始录制。',
+              title: t.recording.noTasks,
+              message: t.recording.noTasksHint,
             );
           }
           return ListView(
@@ -244,9 +258,9 @@ class RecordingPage extends ConsumerWidget {
             children: [
               // F-IPTV-10: booked windows first.
               if (schedule.isNotEmpty) ...[
-                const SettingsHeader('定时录制'),
+                SettingsHeader(t.recording.scheduled),
                 for (final item in schedule) _ScheduledTile(item: item),
-                if (tasks.isNotEmpty) const SettingsHeader('录制任务'),
+                if (tasks.isNotEmpty) SettingsHeader(t.recording.tasks),
               ],
               for (final task in tasks) _WatchedTask(initial: task),
             ],
@@ -294,7 +308,8 @@ class _WatchedTask extends ConsumerWidget {
         } else {
           await Clipboard.setData(ClipboardData(text: directory));
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('文件夹路径已复制：$directory')));
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(t.recording.folderCopied(path: directory))));
           }
         }
       case RecordTaskAction.remove:
@@ -335,7 +350,7 @@ class RecordTaskTile extends StatelessWidget {
       if (session != null && session.bytes > 0) _size(session.bytes),
       if (session != null && session.media > Duration.zero) _duration(session.media),
       if (task.state == RecordState.recording && task.bitsPerSecond > 0) '${task.bitsPerSecond ~/ 1000} kbps',
-      if (session != null && session.gaps > 0) '缺口 ${session.gaps}',
+      if (session != null && session.gaps > 0) t.recording.gaps(n: session.gaps),
     ];
     final problem = task.failure ?? task.retrying;
     final next = task.nextCheckAt;
@@ -349,13 +364,16 @@ class RecordTaskTile extends StatelessWidget {
           Text(details.join(' · '), style: LiveTheme.of(context).numeric),
           if (problem != null)
             Text(
-              '${recordFailureText(problem)} · 出错环节：${recordStageText(problem.stage)}',
+              t.recording.problemWithStage(problem: recordFailureText(problem), stage: recordStageText(problem.stage)),
               style: theme.textTheme.bodySmall!.copyWith(
                 color: task.failure != null ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
               ),
             ),
           if (task.state == RecordState.waitingLive && next != null)
-            Text('下次检查 ${TimeOfDay.fromDateTime(next.toLocal()).format(context)}', style: theme.textTheme.bodySmall),
+            Text(
+              t.recording.nextCheck(time: TimeOfDay.fromDateTime(next.toLocal()).format(context)),
+              style: theme.textTheme.bodySmall,
+            ),
         ],
       ),
       isThreeLine: problem != null || task.state == RecordState.waitingLive,
@@ -365,36 +383,37 @@ class RecordTaskTile extends StatelessWidget {
           if (button == RecordTaskAction.stop)
             IconButton(
               tooltip: switch (task.state) {
-                RecordState.waitingLive => '停止监控',
-                RecordState.queued => '取消排队',
-                _ => '停止录制',
+                RecordState.waitingLive => t.recording.stopWatch,
+                RecordState.queued => t.recording.cancelQueue,
+                _ => t.recording.stopTitle,
               },
               icon: const Icon(Icons.stop_circle_outlined),
               onPressed: () => unawaited(_dispatch(context, RecordTaskAction.stop)),
             )
           else if (button == RecordTaskAction.start)
             IconButton(
-              tooltip: session == null ? '开始录制' : '重新录制',
+              tooltip: session == null ? t.recording.start : t.recording.restart,
               icon: session == null
                   ? const Icon(Icons.fiber_manual_record, color: Color(0xFFD92D20))
                   : const Icon(Icons.replay),
               onPressed: () => unawaited(_dispatch(context, RecordTaskAction.start)),
             ),
           PopupMenuButton<RecordTaskAction>(
-            tooltip: '更多',
+            tooltip: t.common.more,
             onSelected: (action) => unawaited(_dispatch(context, action)),
             itemBuilder: (context) => [
               for (final action in recordTaskMenu(task))
                 PopupMenuItem(
                   value: action,
                   child: Text(switch (action) {
-                    RecordTaskAction.checkNow => '立即检查开播',
-                    RecordTaskAction.forceStart => '强制开始',
-                    RecordTaskAction.retryRemux => '重试转封装',
-                    RecordTaskAction.openFolder => '打开文件夹',
-                    RecordTaskAction.remove => task.state == RecordState.waitingLive ? '移除监控' : '删除任务（保留文件）',
-                    RecordTaskAction.stop => '停止',
-                    RecordTaskAction.start => '重新录制',
+                    RecordTaskAction.checkNow => t.recording.checkNow,
+                    RecordTaskAction.forceStart => t.recording.forceStart,
+                    RecordTaskAction.retryRemux => t.recording.retryRemux,
+                    RecordTaskAction.openFolder => t.recording.openFolder,
+                    RecordTaskAction.remove =>
+                      task.state == RecordState.waitingLive ? t.recording.removeWatch : t.recording.deleteKeepFiles,
+                    RecordTaskAction.stop => t.common.stop,
+                    RecordTaskAction.start => t.recording.restart,
                   }),
                 ),
             ],
@@ -417,7 +436,9 @@ class _ScheduledTile extends ConsumerWidget {
     String at(DateTime time) {
       final local = time.toLocal();
       String two(int value) => value.toString().padLeft(2, '0');
-      final day = local.day == now.day && local.month == now.month ? '' : '${local.month}月${local.day}日 ';
+      final day = local.day == now.day && local.month == now.month
+          ? ''
+          : '${t.common.monthDay(month: local.month, day: local.day)} ';
       return '$day${two(local.hour)}:${two(local.minute)}';
     }
 
@@ -427,9 +448,11 @@ class _ScheduledTile extends ConsumerWidget {
         color: running ? Theme.of(context).colorScheme.error : null,
       ),
       title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text('${item.room.roomId} · ${at(item.start)}–${at(item.stop)}${running ? ' · 录制中' : ''}'),
+      subtitle: Text(
+        '${item.room.roomId} · ${at(item.start)}–${at(item.stop)}${running ? ' · ${t.recording.state.recording}' : ''}',
+      ),
       trailing: IconButton(
-        tooltip: '取消定时录制',
+        tooltip: t.recording.cancelScheduled,
         icon: const Icon(Icons.close),
         onPressed: () => unawaited(ref.read(recordScheduleProvider.notifier).remove(item)),
       ),

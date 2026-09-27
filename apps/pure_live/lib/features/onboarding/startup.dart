@@ -13,6 +13,7 @@ import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
 import 'package:pure_live_app/features/onboarding/first_run.dart';
 import 'package:pure_live_app/features/onboarding/onboarding_page.dart';
 import 'package:pure_live_app/features/share/clipboard_watch.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of the diagnostics page.
 const diagnosticsLocation = '/me/diagnostics';
@@ -68,9 +69,9 @@ void _offerCrashReport(Ref ref, GoRouter router) {
   if (context == null) return;
   ScaffoldMessenger.maybeOf(context)?.showSnackBar(
     SnackBar(
-      content: const Text('上次运行时出现了错误。导出诊断包附在问题反馈里，可以帮助定位原因'),
+      content: Text(t.onboarding.crashPrompt),
       duration: const Duration(seconds: 10),
-      action: SnackBarAction(label: '导出', onPressed: () => router.go(diagnosticsLocation)),
+      action: SnackBarAction(label: t.common.export, onPressed: () => router.go(diagnosticsLocation)),
     ),
   );
 }

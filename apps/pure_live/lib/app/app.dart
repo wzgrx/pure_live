@@ -1,8 +1,10 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/appearance.dart';
+import 'package:pure_live_app/app/locale.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/recording.dart';
@@ -16,7 +18,7 @@ import 'package:pure_live_app/features/iptv/iptv_share.dart';
 import 'package:pure_live_app/features/recording/record_schedule.dart';
 import 'package:pure_live_app/features/system/mini_player_host.dart';
 import 'package:pure_live_app/features/system/system_integration.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The root widget.
 class PureLiveApp extends ConsumerWidget {
@@ -38,6 +40,11 @@ class PureLiveApp extends ConsumerWidget {
       // Known before the first room opens (Q-2); listened, so a network
       // change does not rebuild the app.
       ..listen(networkKindProvider, (_, _) {});
+    // F-APP-06: the chosen language, or the system's. Pages read the global
+    // `t`, so a change rebuilds everything below (state is kept).
+    final appLocale = ref.watch(appLocaleProvider);
+    if (applyAppLocale(appLocale)) rebuildAllText(context);
+    final locale = flutterLocaleOf(appLocale);
     final tv = ref.watch(tvConfigProvider);
     final textScale = ref.watch(textScaleSetting);
     final dynamicColor = ref.watch(dynamicColorSetting) && !tv.enabled;
@@ -53,9 +60,13 @@ class PureLiveApp extends ConsumerWidget {
         tv: tv.enabled,
         seed: seed,
         fontFamily: fontFamily,
+        locale: locale,
       );
       return MaterialApp.router(
-        title: S.appName,
+        title: t.app.name,
+        locale: locale,
+        supportedLocales: supportedFlutterLocales,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         debugShowCheckedModeBanner: false,
         theme: light,
         darkTheme: dark,

@@ -12,6 +12,7 @@ import 'package:pure_live_app/features/backup/backup_flow.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
 import 'package:pure_live_app/features/sync/webdav_client.dart';
 import 'package:pure_live_app/features/sync/webdav_profiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// WebDAV profiles of this installation.
 final webDavProfileStoreProvider = Provider<WebDavProfileStore>(
@@ -29,13 +30,13 @@ final webDavClientFactoryProvider = Provider<WebDavClient Function(WebDavProfile
 
 /// Chinese text for a failed WebDAV request.
 String webDavErrorText(Object error) => switch (error) {
-  WebDavException(error: WebDavError.unauthorized) => '用户名或密码不对',
-  WebDavException(error: WebDavError.forbidden) => '这个账号没有权限访问该位置',
-  WebDavException(error: WebDavError.notFound) => '远端没有这个文件或目录',
-  WebDavException(error: WebDavError.insufficientStorage) => '网盘空间不足',
-  WebDavException(error: WebDavError.network) => '连不上服务器，请检查地址和网络',
-  WebDavException(error: WebDavError.invalidResponse) => '服务器的响应不是 WebDAV 格式，请检查地址',
-  WebDavException(:final status) => '服务器出错（HTTP $status）',
+  WebDavException(error: WebDavError.unauthorized) => t.sync.webdav.error.unauthorized,
+  WebDavException(error: WebDavError.forbidden) => t.sync.webdav.error.forbidden,
+  WebDavException(error: WebDavError.notFound) => t.sync.webdav.error.notFound,
+  WebDavException(error: WebDavError.insufficientStorage) => t.sync.webdav.error.storage,
+  WebDavException(error: WebDavError.network) => t.sync.webdav.error.network,
+  WebDavException(error: WebDavError.invalidResponse) => t.sync.webdav.error.invalid,
+  WebDavException(:final status) => t.sync.webdav.error.http(status: status ?? '?'),
   _ => backupErrorText(error),
 };
 
@@ -114,7 +115,7 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     } on WebDavException catch (error) {
       if (!mounted || generation != _generation) return;
       setState(
-        () => _listError = error.error == WebDavError.notFound ? '远端目录还不存在，第一次上传时会自动创建' : webDavErrorText(error),
+        () => _listError = error.error == WebDavError.notFound ? t.sync.webdav.noDirectory : webDavErrorText(error),
       );
     } on Object catch (error, stack) {
       ref.read(appLogProvider).error('webdav', 'list failed', error, stack);
@@ -152,15 +153,15 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     }
   }
 
-  Future<void> _test() => _run('测试连接', (_) async {
+  Future<void> _test() => _run(t.sync.webdav.test, (_) async {
     final exists = await _client(_current!).check(_current!.directory);
-    _toast(exists ? '连接成功' : '连接成功；备份目录还不存在，第一次上传时会自动创建');
+    _toast(exists ? t.sync.webdav.connected : t.sync.webdav.connectedNoDirectory);
   });
 
   Future<void> _upload() async {
-    final options = await showExportOptions(context, title: '上传备份', action: '上传');
+    final options = await showExportOptions(context, title: t.sync.webdav.uploadBackup, action: t.sync.webdav.upload);
     if (options == null) return;
-    await _run('上传', (generation) async {
+    await _run(t.sync.webdav.upload, (generation) async {
       final profile = _current!;
       final directory = _directory;
       final now = DateTime.now();
@@ -171,12 +172,12 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       await client.ensureDirectory(directory);
       await client.put([...directory, BackupService.fileName(options.scope, now)], encodeBackup(document));
       if (generation != _generation) return;
-      _toast('已上传');
+      _toast(t.sync.webdav.uploaded);
       unawaited(_list());
     });
   }
 
-  Future<void> _restore(WebDavEntry entry, RestoreMode mode) => _run('恢复', (generation) async {
+  Future<void> _restore(WebDavEntry entry, RestoreMode mode) => _run(t.sync.webdav.restore, (generation) async {
     final bytes = await _client(_current!).get(entry.path);
     if (!mounted || generation != _generation) return;
     await confirmAndRestore(
@@ -184,7 +185,7 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       service: ref.read(backupServiceProvider),
       document: decodeBackup(bytes),
       mode: mode,
-      source: '来自 WebDAV：${entry.name}',
+      source: t.sync.webdav.fromWebdav(name: entry.name),
     );
   });
 
@@ -192,19 +193,19 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除远端文件'),
-        content: Text('确定删除 ${entry.name}？删除后无法恢复。'),
+        title: Text(t.sync.webdav.deleteRemote),
+        content: Text(t.sync.webdav.deleteRemoteConfirm(name: entry.name)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('删除')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.common.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(t.common.delete)),
         ],
       ),
     );
     if (confirmed != true) return;
-    await _run('删除', (generation) async {
+    await _run(t.common.delete, (generation) async {
       await _client(_current!).delete(entry.path);
       if (generation != _generation) return;
-      _toast('已删除');
+      _toast(t.sync.webdav.deleted);
       unawaited(_list());
     });
   }
@@ -226,11 +227,11 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除账号'),
-        content: Text('删除“${profile.name}”和保存的密码？远端的备份文件不受影响。'),
+        title: Text(t.sync.webdav.deleteAccount),
+        content: Text(t.sync.webdav.deleteAccountConfirm(name: profile.name)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('删除')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.common.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(t.common.delete)),
         ],
       ),
     );
@@ -246,8 +247,12 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       appBar: AppBar(
         title: const Text('WebDAV'),
         actions: [
-          IconButton(tooltip: '帮助', icon: const Icon(Icons.help_outline), onPressed: () => _showHelp(context)),
-          IconButton(tooltip: '添加账号', icon: const Icon(Icons.add), onPressed: _edit),
+          IconButton(
+            tooltip: t.sync.webdav.help,
+            icon: const Icon(Icons.help_outline),
+            onPressed: () => _showHelp(context),
+          ),
+          IconButton(tooltip: t.sync.webdav.addAccount, icon: const Icon(Icons.add), onPressed: _edit),
         ],
       ),
       body: Align(
@@ -259,9 +264,9 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
               : current == null
               ? MessageView(
                   icon: Icons.cloud_off_outlined,
-                  title: '还没有 WebDAV 账号',
-                  message: '添加坚果云、Nextcloud、群晖等支持 WebDAV 的网盘，把备份存到云端。',
-                  actionLabel: '添加账号',
+                  title: t.sync.webdav.noAccounts,
+                  message: t.sync.webdav.noAccountsHint,
+                  actionLabel: t.sync.webdav.addAccount,
                   onAction: _edit,
                 )
               : AbsorbPointer(absorbing: _busy != null, child: _body(current)),
@@ -283,7 +288,7 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
             title: Text(current.name),
             subtitle: Text('${current.baseUrl}${current.username.isEmpty ? '' : ' · ${current.username}'}'),
             trailing: PopupMenuButton<String>(
-              tooltip: '账号',
+              tooltip: t.sync.webdav.account,
               onSelected: (value) async {
                 switch (value) {
                   case 'edit':
@@ -296,9 +301,13 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
               },
               itemBuilder: (context) => [
                 for (final profile in _profiles)
-                  if (profile.id != current.id) PopupMenuItem(value: profile.id, child: Text('切换到 ${profile.name}')),
-                const PopupMenuItem(value: 'edit', child: Text('编辑')),
-                const PopupMenuItem(value: 'delete', child: Text('删除')),
+                  if (profile.id != current.id)
+                    PopupMenuItem(
+                      value: profile.id,
+                      child: Text(t.sync.webdav.switchTo(name: profile.name)),
+                    ),
+                PopupMenuItem(value: 'edit', child: Text(t.common.edit)),
+                PopupMenuItem(value: 'delete', child: Text(t.common.delete)),
               ],
             ),
           ),
@@ -311,12 +320,12 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
                 OutlinedButton.icon(
                   onPressed: _test,
                   icon: const Icon(Icons.wifi_tethering),
-                  label: const Text('测试连接'),
+                  label: Text(t.sync.webdav.test),
                 ),
                 FilledButton.icon(
                   onPressed: _upload,
                   icon: const Icon(Icons.cloud_upload_outlined),
-                  label: const Text('上传备份'),
+                  label: Text(t.sync.webdav.uploadBackup),
                 ),
               ],
             ),
@@ -325,14 +334,14 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
           const Divider(),
           ListTile(
             dense: true,
-            title: Text('远端文件 $path'),
-            subtitle: const Text('点文件可以恢复或删除；3.x 的 purelive_*.txt 备份也能恢复'),
-            trailing: IconButton(tooltip: '刷新', icon: const Icon(Icons.refresh), onPressed: _list),
+            title: Text(t.sync.webdav.remoteFiles(path: path)),
+            subtitle: Text(t.sync.webdav.remoteFilesHint),
+            trailing: IconButton(tooltip: t.common.refresh, icon: const Icon(Icons.refresh), onPressed: _list),
           ),
           if (_directory.isNotEmpty)
             ListTile(
               leading: const Icon(Icons.arrow_upward),
-              title: const Text('上一级'),
+              title: Text(t.sync.webdav.up),
               onTap: () => _open(_directory.sublist(0, _directory.length - 1)),
             ),
           if (_listError case final error?)
@@ -343,7 +352,7 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (entries.isEmpty)
-            const Padding(padding: EdgeInsets.all(Space.s4), child: Text('这里还没有备份'))
+            Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.sync.webdav.noBackups))
           else
             for (final entry in entries) _entryTile(entry),
         ],
@@ -369,16 +378,16 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       title: Text(entry.name, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: details.isEmpty ? null : Text(details),
       trailing: PopupMenuButton<String>(
-        tooltip: '操作',
+        tooltip: t.sync.webdav.actions,
         onSelected: (value) => switch (value) {
           'full' => _restore(entry, RestoreMode.full),
           'follows' => _restore(entry, RestoreMode.follows),
           _ => _delete(entry),
         },
-        itemBuilder: (context) => const [
-          PopupMenuItem(value: 'full', child: Text('完整恢复')),
-          PopupMenuItem(value: 'follows', child: Text('仅恢复关注')),
-          PopupMenuItem(value: 'delete', child: Text('删除')),
+        itemBuilder: (context) => [
+          PopupMenuItem(value: 'full', child: Text(t.backup.restoreFull)),
+          PopupMenuItem(value: 'follows', child: Text(t.backup.restoreFollows)),
+          PopupMenuItem(value: 'delete', child: Text(t.common.delete)),
         ],
       ),
     );
@@ -395,17 +404,9 @@ void _showHelp(BuildContext context) => unawaited(
   showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('WebDAV 帮助'),
-      content: const SingleChildScrollView(
-        child: Text(
-          '坚果云：地址填 https://dav.jianguoyun.com/dav/，用户名是登录邮箱，密码要用“账户信息 › 安全选项”里生成的第三方应用密码。\n\n'
-          'Nextcloud / ownCloud：地址填 https://你的域名/remote.php/dav/files/用户名/。\n\n'
-          '群晖：在套件中心安装 WebDAV Server，地址填 https://NAS地址:5006/。\n\n'
-          'Alist 等：地址一般是 https://域名/dav/。\n\n'
-          '备份目录默认是 pure_live，第一次上传时自动创建。密码加密保存在本机，不会进入普通备份。',
-        ),
-      ),
-      actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('知道了'))],
+      title: Text(t.sync.webdav.helpTitle),
+      content: SingleChildScrollView(child: Text(t.sync.webdav.helpBody)),
+      actions: [FilledButton(onPressed: () => Navigator.pop(context), child: Text(t.common.gotIt))],
     ),
   ),
 );
@@ -422,7 +423,9 @@ class _ProfileDialog extends StatefulWidget {
 }
 
 class _ProfileDialogState extends State<_ProfileDialog> {
-  late final _name = TextEditingController(text: widget.profile?.name ?? (widget.taken.isEmpty ? '我的网盘' : ''));
+  late final _name = TextEditingController(
+    text: widget.profile?.name ?? (widget.taken.isEmpty ? t.sync.webdav.defaultName : ''),
+  );
   late final _url = TextEditingController(text: widget.profile?.baseUrl ?? 'https://');
   late final _user = TextEditingController(text: widget.profile?.username ?? '');
   final _password = TextEditingController();
@@ -462,9 +465,9 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       setState(() {
         _saving = false;
         _error = switch (error.error) {
-          WebDavProfileError.emptyName => '请填写名称',
-          WebDavProfileError.duplicateName => '已经有同名的账号',
-          WebDavProfileError.invalidUrl => '地址要以 http:// 或 https:// 开头，不能带用户名、问号参数或 #',
+          WebDavProfileError.emptyName => t.sync.webdav.nameRequired,
+          WebDavProfileError.duplicateName => t.sync.webdav.nameTaken,
+          WebDavProfileError.invalidUrl => t.sync.webdav.badUrl,
         };
       });
     }
@@ -472,7 +475,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text(widget.profile == null ? '添加 WebDAV 账号' : '编辑 WebDAV 账号'),
+    title: Text(widget.profile == null ? t.sync.webdav.addTitle : t.sync.webdav.editTitle),
     content: SizedBox(
       width: 480,
       child: SingleChildScrollView(
@@ -481,25 +484,28 @@ class _ProfileDialogState extends State<_ProfileDialog> {
           children: [
             TextField(
               controller: _name,
-              decoration: const InputDecoration(labelText: '名称'),
+              decoration: InputDecoration(labelText: t.common.name),
             ),
             TextField(
               controller: _url,
               keyboardType: TextInputType.url,
-              decoration: const InputDecoration(labelText: '地址', hintText: 'https://dav.jianguoyun.com/dav/'),
+              decoration: InputDecoration(labelText: t.sync.lan.address, hintText: 'https://dav.jianguoyun.com/dav/'),
             ),
             TextField(
               controller: _user,
-              decoration: const InputDecoration(labelText: '用户名'),
+              decoration: InputDecoration(labelText: t.common.username),
             ),
             TextField(
               controller: _password,
               obscureText: true,
-              decoration: InputDecoration(labelText: '密码', helperText: widget.profile == null ? '加密保存在本机' : '不修改请留空'),
+              decoration: InputDecoration(
+                labelText: t.common.password,
+                helperText: widget.profile == null ? t.sync.webdav.passwordStored : t.sync.webdav.passwordKeep,
+              ),
             ),
             TextField(
               controller: _directory,
-              decoration: const InputDecoration(labelText: '备份目录', helperText: '留空表示根目录'),
+              decoration: InputDecoration(labelText: t.sync.webdav.directory, helperText: t.sync.webdav.directoryRoot),
             ),
             if (_error case final error?)
               Padding(
@@ -511,8 +517,8 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       ),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-      FilledButton(onPressed: _saving ? null : _save, child: const Text('保存')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+      FilledButton(onPressed: _saving ? null : _save, child: Text(t.common.save)),
     ],
   );
 }

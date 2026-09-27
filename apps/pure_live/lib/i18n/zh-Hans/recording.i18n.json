@@ -1,0 +1,90 @@
+{
+  "notice": {
+    "finishingTitle": "正在处理录制文件",
+    "finishingText(param=n)": {
+      "other": "{n} 个录制正在收尾，完成后通知会消失"
+    },
+    "namesAndMore": "{names} 等",
+    "recordingTitle(param=n)": {
+      "other": "正在录制 {n} 个直播间"
+    },
+    "recordingText(param=n)": {
+      "other": "{shown}；{n} 个正在收尾"
+    }
+  },
+  "cancelSchedule": "取消预约录制",
+  "schedule": "预约录制",
+  "state": {
+    "queued": "排队中",
+    "resolving": "准备中",
+    "recording": "录制中",
+    "reconnecting": "重连中",
+    "finalizing": "处理中",
+    "remuxing": "转封装 {percent}%",
+    "waitingLive": "等待开播",
+    "completed": "已完成",
+    "failed": "失败",
+    "stoppedPollingOff": "已停止（开播监控已关闭）",
+    "stoppedAppExit": "已停止（应用退出）",
+    "stopped": "已停止"
+  },
+  "failure": {
+    "offline": "主播已下播",
+    "banned": "直播间被封禁",
+    "missing": "直播间不存在",
+    "unsupported": "这个平台暂不支持录制",
+    "needsLogin": "需要登录平台账号",
+    "region": "当前地区无法观看",
+    "noStream": "拿不到可录制的直播流",
+    "hlsOnly": "这个直播间只有暂不支持录制的 HLS 流",
+    "diskFull": "存储空间不足",
+    "noPermission": "没有录制目录的写入权限",
+    "directory": "录制目录不可用",
+    "writeStalled": "磁盘写入卡住了",
+    "background": "后台运行时间被系统用尽",
+    "remux": "转成 MP4 失败，原始文件已保留",
+    "corrupt": "录制文件损坏",
+    "retries": "多次重试都没有成功",
+    "stream": "网络或直播流出错"
+  },
+  "stage": {
+    "check": "房间检查",
+    "quality": "选画质",
+    "resolve": "取流",
+    "connect": "连接",
+    "write": "写文件",
+    "remux": "转封装",
+    "queue": "排队调度",
+    "background": "后台运行",
+    "poll": "开播检查"
+  },
+  "stopTitle": "停止录制",
+  "stopConfirm": "停止录制“{name}”？已录的部分会保存。",
+  "removeWatch": "移除监控",
+  "removeWatchConfirm": "不再等待“{name}”开播？已录的文件会保留。",
+  "deleteTask": "删除录制任务",
+  "deleteTaskRunning": "删除“{name}”的录制任务？正在进行的录制会先停止，已录的文件会保留。",
+  "deleteTaskConfirm": "删除“{name}”的录制任务？已录的文件会保留。",
+  "recordFromRoomHint": "也可以在直播间里点录制按钮。",
+  "pickFromFollows": "从关注里选择",
+  "settings": "录制设置",
+  "add": "添加录制",
+  "noTasks": "还没有录制任务",
+  "noTasksHint": "在直播间点录制，或者从关注里添加。开启开播监控后，主播开播会自动开始录制。",
+  "scheduled": "定时录制",
+  "tasks": "录制任务",
+  "folderCopied": "文件夹路径已复制：{path}",
+  "gaps": "缺口 {n}",
+  "problemWithStage": "{problem} · 出错环节：{stage}",
+  "nextCheck": "下次检查 {time}",
+  "stopWatch": "停止监控",
+  "cancelQueue": "取消排队",
+  "start": "开始录制",
+  "restart": "重新录制",
+  "checkNow": "立即检查开播",
+  "forceStart": "强制开始",
+  "retryRemux": "重试转封装",
+  "openFolder": "打开文件夹",
+  "deleteKeepFiles": "删除任务（保留文件）",
+  "cancelScheduled": "取消定时录制"
+}

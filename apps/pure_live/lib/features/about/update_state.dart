@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/about/releases.dart';
 import 'package:pure_live_app/features/about/semver.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of the version and update page.
 const updateLocation = '/me/about/update';
@@ -79,9 +80,9 @@ final updateProvider = NotifierProvider<UpdateNotifier, UpdateStatus?>(UpdateNot
 
 /// Chinese text for a failed check.
 String updateErrorText(UpdateCheckException error) => switch (error.error) {
-  UpdateCheckError.rateLimited => 'GitHub 限制了检查频率，请过一会儿再试',
-  UpdateCheckError.network => '连不上 GitHub，请检查网络或代理',
-  UpdateCheckError.server => '检查更新失败（${error.detail ?? '未知错误'}）',
+  UpdateCheckError.rateLimited => t.about.errorRateLimited,
+  UpdateCheckError.network => t.about.errorNetwork,
+  UpdateCheckError.server => t.about.errorServer(detail: error.detail ?? t.about.unknownError),
 };
 
 /// The automatic check (F-UPD-01): once per launch, 2 s after the first
@@ -96,9 +97,13 @@ Timer scheduleAutoUpdateCheck(Ref ref, GoRouter router, {Duration delay = const 
       if (latest == null || context == null || !context.mounted) return;
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
-          content: Text('发现新版本 ${latest.version}${latest.preRelease ? '（预览版）' : ''}'),
+          content: Text(
+            latest.preRelease
+                ? t.about.newPreviewVersion(version: latest.version)
+                : t.about.newVersion(version: latest.version),
+          ),
           duration: const Duration(seconds: 8),
-          action: SnackBarAction(label: '查看', onPressed: () => router.go(updateLocation)),
+          action: SnackBarAction(label: t.about.view, onPressed: () => router.go(updateLocation)),
         ),
       );
     });

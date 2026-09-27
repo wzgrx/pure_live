@@ -17,7 +17,7 @@ import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/card_marks.dart';
 import 'package:pure_live_app/features/rooms/room_card_menu.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Which follows to show: live, all, or all by group (principles §4.1).
 enum _Filter { live, all, group }
@@ -26,11 +26,11 @@ enum _Filter { live, all, group }
 const _editOrder = 'editOrder';
 
 /// Menu labels of the orders (F-FAV-01).
-const Map<FollowSort, String> followSortLabels = {
-  FollowSort.audience: '按人数',
-  FollowSort.liveTime: '按开播时间',
-  FollowSort.platform: '按平台',
-  FollowSort.custom: '自定义顺序',
+Map<FollowSort, String> get followSortLabels => {
+  FollowSort.audience: t.follows.sort.audience,
+  FollowSort.liveTime: t.follows.sort.liveTime,
+  FollowSort.platform: t.follows.sort.platform,
+  FollowSort.custom: t.follows.sort.custom,
 };
 
 /// Followed streamers: live ones as cover cards, the rest as compact rows
@@ -85,10 +85,10 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: const Text(S.follows),
+        title: Text(t.app.tabs.follows),
         actions: [
           PopupMenuButton<Object>(
-            tooltip: '排序',
+            tooltip: t.follows.sortTooltip,
             icon: const Icon(Icons.sort),
             onSelected: (choice) async {
               final setting = ref.read(followSortSetting.notifier);
@@ -104,11 +104,11 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
               for (final MapEntry(key: option, value: label) in followSortLabels.entries)
                 CheckedPopupMenuItem<Object>(value: option, checked: option == sort, child: Text(label)),
               const PopupMenuDivider(),
-              const PopupMenuItem<Object>(value: _editOrder, child: Text('调整自定义顺序')),
+              PopupMenuItem<Object>(value: _editOrder, child: Text(t.follows.editCustomOrder)),
             ],
           ),
           IconButton(
-            tooltip: '一键多画面',
+            tooltip: t.follows.openMultiview,
             icon: const Icon(Icons.grid_view),
             // Live follows in their shown order fill the grid (ENT-1).
             onPressed: () => unawaited(context.push('/multiview', extra: [for (final entry in live) entry.follow.ref])),
@@ -120,7 +120,7 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
             )
           else
             IconButton(
-              tooltip: '刷新开播状态',
+              tooltip: t.follows.refreshStatus,
               icon: const Icon(Icons.refresh),
               onPressed: () => ref.read(followRefreshProvider.notifier).refresh(),
             ),
@@ -128,14 +128,14 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
       ),
       body: follows.when(
         loading: () => const LoadingView(),
-        error: (error, _) => MessageView.error(title: '读取关注失败', message: '$error'),
+        error: (error, _) => MessageView.error(title: t.follows.loadFailed, message: '$error'),
         data: (rooms) {
           if (rooms.isEmpty) {
             return MessageView(
               icon: Icons.favorite_border,
-              title: S.followsEmptyTitle,
-              message: S.followsEmptyMessage,
-              actionLabel: S.goDiscover,
+              title: t.follows.emptyTitle,
+              message: t.follows.emptyMessage,
+              actionLabel: t.follows.goDiscover,
               onAction: () => context.go('/discover'),
             );
           }
@@ -210,7 +210,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
     final origin = RoomOrigin([
       for (final entry in live)
         RoomEntry(entry.follow.ref, name: entry.follow.room.anchorName, title: entry.follow.room.title),
-    ], label: '开播的关注');
+    ], label: t.follows.liveFollows);
     final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -222,7 +222,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
           if (entry.status == FollowStatus.unsupported) {
             // F-FAV-08: say so instead of opening a room that cannot load.
             ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text('${platformName(room.platform)}已下线或这个版本还不支持，关注会一直保留')));
+                .showSnackBar(SnackBar(content: Text(t.follows.platformRetired(name: platformName(room.platform)))));
             return;
           }
           unawaited(context.push(roomLocation(room), extra: origin));
@@ -275,14 +275,17 @@ class _FollowListState extends ConsumerState<_FollowList> {
             final entry = rows[index];
             final room = entry.follow.room;
             final last = room.lastLiveAt;
-            final lastText = last == null ? null : '上次开播 ${formatAgo(last, now)}';
+            final lastText = last == null ? null : t.follows.lastLive(ago: formatAgo(last, now));
             final (String? tag, String subtitle) = switch (entry.status) {
-              FollowStatus.unsupported => ('未支持', '${platformName(room.ref.platform)} · 暂不支持'),
-              FollowStatus.unknown => ('状态未知', lastText ?? '没能获取开播状态'),
-              FollowStatus.missing => ('房间不存在', lastText ?? '平台找不到这个房间'),
-              FollowStatus.replay => ('轮播', lastText ?? '正在轮播'),
-              FollowStatus.checking => (null, lastText ?? '正在检查开播状态'),
-              FollowStatus.offline || FollowStatus.live => (null, lastText ?? S.offline),
+              FollowStatus.unsupported => (
+                t.follows.tag.unsupported,
+                t.follows.unsupportedPlatform(name: platformName(room.ref.platform)),
+              ),
+              FollowStatus.unknown => (t.follows.tag.unknown, lastText ?? t.follows.unknownDetail),
+              FollowStatus.missing => (t.follows.tag.missing, lastText ?? t.follows.missingDetail),
+              FollowStatus.replay => (t.follows.tag.replay, lastText ?? t.follows.replayDetail),
+              FollowStatus.checking => (null, lastText ?? t.follows.checking),
+              FollowStatus.offline || FollowStatus.live => (null, lastText ?? t.common.offline),
             };
             return OfflineRoomRow(
               platformId: room.ref.platform,
@@ -315,11 +318,13 @@ class _FollowListState extends ConsumerState<_FollowList> {
           if (failedPlatforms.isNotEmpty)
             SliverToBoxAdapter(
               child: MaterialBanner(
-                content: Text('${failedPlatforms.map(platformName).join('、')} 刷新失败，这些主播的状态暂时未知'),
+                content: Text(
+                  t.follows.refreshFailed(platforms: failedPlatforms.map(platformName).join(t.common.listSeparator)),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                    child: const Text('知道了'),
+                    child: Text(t.common.gotIt),
                   ),
                 ],
               ),
@@ -332,23 +337,23 @@ class _FollowListState extends ConsumerState<_FollowList> {
                 runSpacing: Space.s2,
                 children: [
                   ChoiceChip(
-                    label: Text(session.checking ? '开播' : '开播 ${live.length}'),
+                    label: Text(session.checking ? t.follows.filter.live : t.follows.filter.liveCount(n: live.length)),
                     selected: filter == _Filter.live,
                     onSelected: (_) => widget.onFilter(_Filter.live),
                   ),
                   ChoiceChip(
-                    label: const Text('全部'),
+                    label: Text(t.common.all),
                     selected: filter == _Filter.all,
                     onSelected: (_) => widget.onFilter(_Filter.all),
                   ),
                   ChoiceChip(
-                    label: const Text('分组'),
+                    label: Text(t.follows.filter.groups),
                     selected: filter == _Filter.group,
                     onSelected: (_) => widget.onFilter(_Filter.group),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.folder_outlined, size: 18),
-                    label: const Text('管理分组'),
+                    label: Text(t.follows.manageGroups),
                     onPressed: () => context.push('/follows/groups'),
                   ),
                 ],
@@ -360,12 +365,12 @@ class _FollowListState extends ConsumerState<_FollowList> {
           if (session.checking)
             SliverPadding(
               padding: EdgeInsets.fromLTRB(margin, Space.s1, margin, Space.s1),
-              sliver: const SliverToBoxAdapter(
+              sliver: SliverToBoxAdapter(
                 child: Row(
                   children: [
-                    SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                    SizedBox(width: Space.s2),
-                    Text('正在检查开播状态'),
+                    const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                    const SizedBox(width: Space.s2),
+                    Text(t.follows.checking),
                   ],
                 ),
               ),
@@ -376,7 +381,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 80),
-                    child: MessageView(title: session.checking ? '正在检查开播状态' : '关注的主播都没开播'),
+                    child: MessageView(title: session.checking ? t.follows.checking : t.follows.noneLive),
                   ),
                 ),
               liveGrid(live, _focus),
@@ -384,7 +389,11 @@ class _FollowListState extends ConsumerState<_FollowList> {
             _Filter.all => [
               liveGrid(live, _focus),
               if (widget.rows.isNotEmpty)
-                heading(session.checking ? '全部关注 ${widget.rows.length}' : '未开播 ${widget.rows.length}'),
+                heading(
+                  session.checking
+                      ? t.follows.allCount(n: widget.rows.length)
+                      : t.follows.offlineCount(n: widget.rows.length),
+                ),
               rowList(widget.rows),
             ],
             _Filter.group => _groups(tags, heading, liveGrid, rowList),
@@ -406,15 +415,15 @@ class _FollowListState extends ConsumerState<_FollowList> {
   ) {
     final sections = <(String id, String title, String description, bool Function(FollowEntry entry) member)>[
       for (final tag in tags) (tag.id, tag.name, tag.description, (entry) => entry.follow.tagIds.contains(tag.id)),
-      ('', '未分组', '', (entry) => entry.follow.tagIds.every((id) => !tags.any((tag) => tag.id == id))),
+      ('', t.follows.ungrouped, '', (entry) => entry.follow.tagIds.every((id) => !tags.any((tag) => tag.id == id))),
     ];
     return [
       if (tags.isEmpty)
         SliverToBoxAdapter(
           child: ListTile(
             leading: const Icon(Icons.folder_outlined),
-            title: const Text('还没有分组'),
-            subtitle: const Text('在“管理分组”新建分组，再从主播的更多菜单里设置分组'),
+            title: Text(t.follows.noGroups),
+            subtitle: Text(t.follows.noGroupsHint),
             onTap: () => context.push('/follows/groups'),
           ),
         ),
@@ -427,10 +436,10 @@ class _FollowListState extends ConsumerState<_FollowList> {
           return [
             heading('$title · ${cards.length + rows.length}', detail: description, top: Space.s4),
             if (cards.isEmpty && rows.isEmpty)
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
-                  child: Text('这个分组还没有主播'),
+                  padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
+                  child: Text(t.follows.groupEmpty),
                 ),
               ),
             liveGrid(cards, focus),

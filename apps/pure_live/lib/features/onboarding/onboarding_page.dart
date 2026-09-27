@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/backup/backup_flow.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of the first-run wizard.
 const welcomeLocation = '/welcome';
@@ -67,30 +67,30 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               children: [
                 if (_busy) const LinearProgressIndicator(),
                 const SizedBox(height: Space.s6),
-                Text('欢迎使用${S.appName} v4', style: theme.textTheme.headlineSmall),
+                Text(t.onboarding.welcome(app: t.app.name), style: theme.textTheme.headlineSmall),
                 const SizedBox(height: Space.s3),
-                const Text('预览版是单独安装的，读不到 3.x 里的数据。可以把 3.x 或其它设备上的关注和设置导入进来，也可以直接开始。'),
+                Text(t.onboarding.intro),
                 const SizedBox(height: Space.s6),
-                option(Icons.upload_file, '从备份文件导入', '3.x 的“备份与恢复”导出的文件，或 v4 的备份文件', _importFile),
+                option(Icons.upload_file, t.onboarding.fromFile, t.onboarding.fromFileSubtitle, _importFile),
                 option(
                   Icons.cloud_outlined,
-                  '从 WebDAV 导入',
-                  '之前上传到坚果云、Nextcloud 等网盘的备份',
+                  t.onboarding.fromWebdav,
+                  t.onboarding.fromWebdavSubtitle,
                   () => context.go('/me/backup/webdav'),
                 ),
                 option(
                   Icons.devices_other_outlined,
-                  '从另一台设备导入',
-                  '同一网络下，由另一台设备通过局域网同步发送过来',
+                  t.onboarding.fromDevice,
+                  t.onboarding.fromDeviceSubtitle,
                   () => context.go('/me/backup/lan?receive=1'),
                 ),
                 const SizedBox(height: Space.s3),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton(onPressed: _busy ? null : _finish, child: const Text('跳过，直接开始')),
+                  child: TextButton(onPressed: _busy ? null : _finish, child: Text(t.onboarding.skip)),
                 ),
                 const SizedBox(height: Space.s3),
-                Text('以后可以在 我的 › 备份与同步 里随时导入。', style: theme.textTheme.bodySmall),
+                Text(t.onboarding.laterHint, style: theme.textTheme.bodySmall),
               ],
             ),
           ),

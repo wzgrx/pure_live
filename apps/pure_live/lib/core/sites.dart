@@ -4,6 +4,7 @@ import 'package:live_net/live_net.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A platform adapter seen through its capabilities (ADR 0010, rule 7). The
 /// first five platforms and the IPTV source implement all of them.
@@ -50,43 +51,14 @@ const platformOrder = [
   'iptv',
 ];
 
-/// Short display names for tabs and badges.
-const platformNames = {
-  'bilibili': '哔哩哔哩',
-  'douyu': '斗鱼',
-  'huya': '虎牙',
-  'douyin': '抖音',
-  'kuaishou': '快手',
-  'cc': '网易CC',
-  'yy': 'YY',
-  'soop': 'SOOP',
-  'acfun': 'AcFun',
-  'twitch': 'Twitch',
-  'chzzk': 'CHZZK',
-  'missevan': '猫耳 FM',
-  'kilakila': '克拉克拉',
-  'inke': '映客',
-  'picarto': 'Picarto',
-  'twitcasting': 'TwitCasting',
-  'showroom': 'SHOWROOM',
-  'pandalive': 'PandaTV',
-  '17live': '17LIVE',
-  'iptv': '网络电视',
-};
+/// Short display names for tabs and badges, in the interface language
+/// (F-APP-06; lib/i18n/*/sites.i18n.json). Every id of [platformOrder] has
+/// one.
+Map<String, String> get platformNames => t.sites.names;
 
 /// Names of 3.x platforms this build has no adapter for, so their follows and
 /// history still read well (spec/product.md F-FAV-08).
-const _otherPlatformNames = {
-  'huajiao': '花椒',
-  'weibo': '微博直播',
-  'xiaohongshu': '小红书',
-  'youtube': 'YouTube Live',
-  'tiktok': 'TikTok LIVE',
-  'niconico': 'niconico',
-  'bigo': 'Bigo Live',
-  'fc2live': 'FC2 Live',
-  'kick': 'Kick',
-};
+Map<String, String> get _otherPlatformNames => t.sites.otherNames;
 
 /// The display name of any platform id, supported or not.
 String platformName(String id) => platformNames[id] ?? _otherPlatformNames[id] ?? id;

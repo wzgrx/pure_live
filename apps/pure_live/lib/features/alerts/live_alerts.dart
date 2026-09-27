@@ -12,6 +12,7 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/alerts/alert_notifier.dart';
 import 'package:pure_live_app/features/diagnostics/app_log.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A followed room's state as one refresh saw it.
 @immutable
@@ -193,7 +194,7 @@ List<AlertNotice> liveAlertNotices(List<LiveObservation> alerts) {
         AlertNotice(
           id: alertIdOf('live:${alert.ref.key}'),
           channel: AlertChannel.live,
-          title: '${name(alert)} 开播了',
+          title: t.alerts.wentLive(name: name(alert)),
           body: [
             platformNames[alert.ref.platform] ?? alert.ref.platform,
             if (alert.title.trim().isNotEmpty) alert.title.trim(),
@@ -203,13 +204,13 @@ List<AlertNotice> liveAlertNotices(List<LiveObservation> alerts) {
     ];
   }
   final names = alerts.map(name).toList();
-  final listed = names.take(LiveAlertRules.combinedNames).join('、');
+  final listed = names.take(LiveAlertRules.combinedNames).join(t.common.listSeparator);
   return [
     AlertNotice(
       id: LiveAlertRules.combinedNoticeId,
       channel: AlertChannel.live,
-      title: '${names.first}等 ${alerts.length} 位主播开播了',
-      body: names.length > LiveAlertRules.combinedNames ? '$listed 等' : listed,
+      title: t.alerts.manyWentLive(first: names.first, n: alerts.length),
+      body: names.length > LiveAlertRules.combinedNames ? t.alerts.namesAndMore(names: listed) : listed,
       payload: followsLiveLocation,
     ),
   ];

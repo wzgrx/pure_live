@@ -1,0 +1,13 @@
+{
+  "welcome": "Welcome to {app} v4",
+  "intro": "The preview is a separate install and cannot read 3.x's data. Import your follows and settings from 3.x or another device, or just start.",
+  "fromFile": "Import from a backup file",
+  "fromFileSubtitle": "A file exported by 3.x's Backup and restore, or a v4 backup",
+  "fromWebdav": "Import from WebDAV",
+  "fromWebdavSubtitle": "A backup you uploaded to Jianguoyun, Nextcloud or another drive",
+  "fromDevice": "Import from another device",
+  "fromDeviceSubtitle": "Sent by another device on the same network with LAN sync",
+  "skip": "Skip and start",
+  "laterHint": "You can import any time later under Me › Backup and sync.",
+  "crashPrompt": "Something went wrong last time. Export a diagnostics bundle and attach it to a problem report to help find the cause."
+}

@@ -9,6 +9,7 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/multiview/multiview_controller.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The room picker (CEL-4): follows and history, live rooms first, filtered
 /// by a keyword. Shown in the side panel (LYT-7) or a bottom sheet.
@@ -36,7 +37,9 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
     Widget list(AsyncValue<List<StoredRoom>> rooms, String empty) {
       final all = rooms.value;
       if (all == null) {
-        return rooms.hasError ? const MessageView(title: '读取失败') : const Center(child: CircularProgressIndicator());
+        return rooms.hasError
+            ? MessageView(title: t.common.loadFailed)
+            : const Center(child: CircularProgressIndicator());
       }
       final shown = all.where(matches).toList()
         ..sort((a, b) => (b.lastState == LiveState.live ? 1 : 0).compareTo(a.lastState == LiveState.live ? 1 : 0));
@@ -65,21 +68,21 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
           Padding(
             padding: const EdgeInsets.all(Space.s3),
             child: TextField(
-              decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: '按主播名或标题筛选'),
+              decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: t.multiview.filterHint),
               onChanged: (value) => setState(() => _filter = value.trim().toLowerCase()),
             ),
           ),
-          const TabBar(
+          TabBar(
             tabs: [
-              Tab(text: '关注'),
-              Tab(text: '观看历史'),
+              Tab(text: t.app.tabs.follows),
+              Tab(text: t.app.history),
             ],
           ),
           Expanded(
             child: TabBarView(
               children: [
-                list(follows.whenData((rows) => [for (final f in rows) f.room]), '还没有关注的主播'),
-                list(history.whenData((rows) => [for (final h in rows) h.room]), '还没有观看记录'),
+                list(follows.whenData((rows) => [for (final f in rows) f.room]), t.follows.emptyTitle),
+                list(history.whenData((rows) => [for (final h in rows) h.room]), t.me.noHistory),
               ],
             ),
           ),
@@ -127,18 +130,19 @@ Future<void> showMultiviewCellMenu(BuildContext context, WidgetRef ref, int inde
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(title: Text(cell.detail?.card.anchorName ?? '第 ${index + 1} 格')),
-              item(MultiviewCellAction.swap, Icons.swap_horiz, '换房'),
+              ListTile(title: Text(cell.detail?.card.anchorName ?? t.multiview.cell(n: index + 1))),
+              item(MultiviewCellAction.swap, Icons.swap_horiz, t.multiview.switchRoom),
               if (cell.paused)
-                item(MultiviewCellAction.resume, Icons.play_arrow, '继续')
+                item(MultiviewCellAction.resume, Icons.play_arrow, t.common.resume)
               else
-                item(MultiviewCellAction.pause, Icons.pause, '暂停'),
+                item(MultiviewCellAction.pause, Icons.pause, t.common.pause),
               if ((session?.state.qualities.length ?? 0) > 1)
-                item(MultiviewCellAction.quality, Icons.hd_outlined, '画质'),
-              if ((session?.state.lines.length ?? 0) > 1) item(MultiviewCellAction.line, Icons.alt_route, '线路'),
-              item(MultiviewCellAction.volume, Icons.volume_up_outlined, '音量'),
-              item(MultiviewCellAction.refresh, Icons.refresh, '刷新'),
-              item(MultiviewCellAction.close, Icons.close, '关闭'),
+                item(MultiviewCellAction.quality, Icons.hd_outlined, t.multiview.quality),
+              if ((session?.state.lines.length ?? 0) > 1)
+                item(MultiviewCellAction.line, Icons.alt_route, t.multiview.line),
+              item(MultiviewCellAction.volume, Icons.volume_up_outlined, t.multiview.volume),
+              item(MultiviewCellAction.refresh, Icons.refresh, t.common.refresh),
+              item(MultiviewCellAction.close, Icons.close, t.common.close),
             ],
           ),
         ),
@@ -206,7 +210,7 @@ Future<void> showMultiviewLineSheet(BuildContext context, WidgetRef ref, int ind
         children: [
           for (final (i, line) in lines.indexed)
             ListTile(
-              title: Text('线路 ${i + 1}'),
+              title: Text(t.multiview.lineN(n: i + 1)),
               trailing: line.lineId == session.state.line?.lineId ? const Icon(Icons.check) : null,
               onTap: () => Navigator.pop(context, line.lineId),
             ),
@@ -235,7 +239,7 @@ class MultiviewVolumePanel extends ConsumerWidget {
     final state = ref.watch(multiviewProvider);
     final cell = state.cells.elementAtOrNull(index);
     if (cell == null || cell.status != CellStatus.playing) {
-      return const Padding(padding: EdgeInsets.all(Space.s6), child: Text('这一格没有在播放'));
+      return Padding(padding: const EdgeInsets.all(Space.s6), child: Text(t.multiview.cellIdle));
     }
     final controller = ref.read(multiviewProvider.notifier);
     final theme = Theme.of(context);
@@ -250,7 +254,7 @@ class MultiviewVolumePanel extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  cell.detail?.card.anchorName ?? '第 ${index + 1} 格',
+                  cell.detail?.card.anchorName ?? t.multiview.cell(n: index + 1),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium,
@@ -275,10 +279,10 @@ class MultiviewVolumePanel extends ConsumerWidget {
           ),
           Text(
             state.muteAll
-                ? '已全部静音；音量按直播间保存，取消静音后生效'
+                ? t.multiview.allMutedHint
                 : index == state.audioFocus
-                ? '音量按直播间保存'
-                : '音量按直播间保存；这一格成为声音来源后生效',
+                ? t.multiview.volumePerRoom
+                : t.multiview.volumeNotSource,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ],

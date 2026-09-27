@@ -1,0 +1,37 @@
+{
+  "addRoom": "Add room",
+  "offlineCell": "{name} is offline\nTap here to pick another",
+  "interrupted": "Playback stopped",
+  "danmakuOff": "Turn off danmaku",
+  "danmakuOn": "Turn on danmaku",
+  "quality": "Quality",
+  "line": "Line",
+  "volume": "Volume",
+  "exitFullscreen": "Exit full screen",
+  "fullscreen": "Full screen",
+  "onePlusN": "1 large + small",
+  "immersive": "Immersive mode",
+  "exitImmersive": "Exit immersive mode",
+  "layout": "Layout",
+  "addCell": "Add a view",
+  "capacityReached(param=n)": {
+    "one": "Limit reached: this device plays at most {n} stream at once",
+    "other": "Limit reached: this device plays at most {n} streams at once"
+  },
+  "capacityHint(param=n)": {
+    "one": "This device plays at most {n} stream at once. Close a view before adding another.",
+    "other": "This device plays at most {n} streams at once. Close a view before adding another."
+  },
+  "unmuteAll": "Unmute all",
+  "muteAll": "Mute all",
+  "selectedVolume": "Volume of the selected view",
+  "pickRoomFor": "Choose a room · view {n}",
+  "filterHint": "Filter by streamer or title",
+  "cell": "View {n}",
+  "switchRoom": "Change room",
+  "lineN": "Line {n}",
+  "cellIdle": "Nothing is playing in this view",
+  "allMutedHint": "Everything is muted. Volume is saved per room and applies when you unmute.",
+  "volumePerRoom": "Volume is saved per room",
+  "volumeNotSource": "Volume is saved per room and applies once this view is the sound source"
+}

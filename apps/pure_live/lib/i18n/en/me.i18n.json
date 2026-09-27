@@ -1,0 +1,10 @@
+{
+  "pureBlackSubtitle": "Use a pure black background in dark mode, for OLED screens",
+  "denseFollows": "Compact cards on Following",
+  "denseFollowsSubtitle": "Streamer name and title on one line, so more rooms fit on screen",
+  "historyCleared": "Watch history cleared",
+  "noHistory": "No watch history yet",
+  "iptvSubtitle": "IPTV playlists, TV guides and auto sync",
+  "backupSubtitle": "Backup files, WebDAV and LAN sync; 3.x backups can be imported",
+  "aboutSubtitle": "Version {version} · updates, licences"
+}

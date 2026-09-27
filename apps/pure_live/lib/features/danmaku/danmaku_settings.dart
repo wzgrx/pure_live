@@ -9,6 +9,7 @@ import 'package:live_ui/live_ui.dart' show Sizes, Space;
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_presets.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of the block-list page.
 const blockListLocation = '/danmaku/blocks';
@@ -23,106 +24,122 @@ class DanmakuSettingsTiles extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const SwitchSettingTile(setting: Settings.danmakuEnabled, title: '显示弹幕', subtitle: '关闭后不再连接弹幕'),
-      const SettingsHeader('样式'),
+      SwitchSettingTile(setting: Settings.danmakuEnabled, title: t.danmaku.show, subtitle: t.danmaku.showSubtitle),
+      SettingsHeader(t.danmaku.style),
       const DanmakuPresetRow(),
-      const DanmakuSliderTile(
+      DanmakuSliderTile(
         setting: Settings.danmakuFontSize,
-        title: '字号',
+        title: t.danmaku.fontSize,
         min: 10,
         max: 30,
         divisions: 20,
         format: _integer,
       ),
-      const DanmakuSliderTile(
+      DanmakuSliderTile(
         setting: Settings.danmakuFontWeight,
-        title: '字重',
+        title: t.danmaku.fontWeight,
         min: 100,
         max: 900,
         divisions: 8,
         format: _integer,
       ),
-      const DanmakuSliderTile(
+      DanmakuSliderTile(
         setting: Settings.danmakuOpacity,
-        title: '不透明度',
+        title: t.danmaku.opacity,
         min: 0.1,
         max: 1,
         divisions: 18,
         format: _percent,
       ),
-      const DanmakuSliderTile(
+      DanmakuSliderTile(
         setting: Settings.danmakuSpeed,
-        title: '速度（越大越快）',
+        title: t.danmaku.speedHint,
         min: 20,
         max: 400,
         divisions: 38,
         format: _integer,
       ),
-      const DanmakuSliderTile(
+      DanmakuSliderTile(
         setting: Settings.danmakuArea,
-        title: '显示区域',
+        title: t.danmaku.area,
         min: 0.1,
         max: 1,
         divisions: 18,
         format: _percent,
       ),
-      const DanmakuSliderTile(
+      DanmakuSliderTile(
         setting: Settings.danmakuTopArea,
-        title: '顶部留白',
+        title: t.danmaku.topMargin,
         min: 0,
         max: 200,
         divisions: 40,
         format: _dp,
       ),
-      const DanmakuSliderTile(
+      DanmakuSliderTile(
         setting: Settings.danmakuBottomArea,
-        title: '底部留白',
+        title: t.danmaku.bottomMargin,
         min: 0,
         max: 200,
         divisions: 40,
         format: _dp,
       ),
-      const SwitchSettingTile(setting: Settings.danmakuStroke, title: '描边'),
-      const DanmakuSliderTile(
+      SwitchSettingTile(setting: Settings.danmakuStroke, title: t.danmaku.stroke),
+      DanmakuSliderTile(
         setting: Settings.danmakuStrokeWidth,
-        title: '描边粗细',
+        title: t.danmaku.strokeWidth,
         min: 0.5,
         max: 4,
         divisions: 7,
         format: _oneDecimal,
       ),
-      const SwitchSettingTile(setting: Settings.danmakuNoEmoji, title: '隐藏表情', subtitle: '只有表情的弹幕不显示'),
-      const SwitchSettingTile(setting: Settings.danmakuAutoFps, title: '帧率自动', subtitle: '跟随“通用 › 刷新率”'),
+      SwitchSettingTile(
+        setting: Settings.danmakuNoEmoji,
+        title: t.danmaku.hideEmoji,
+        subtitle: t.danmaku.hideEmojiSubtitle,
+      ),
+      SwitchSettingTile(
+        setting: Settings.danmakuAutoFps,
+        title: t.danmaku.autoFps,
+        subtitle: t.danmaku.autoFpsSubtitle,
+      ),
       SettingBuilder<bool>(
         setting: Settings.danmakuAutoFps,
         builder: (context, auto, _) => auto
             ? const SizedBox.shrink()
-            : const DanmakuSliderTile(
+            : DanmakuSliderTile(
                 setting: Settings.danmakuFps,
-                title: '帧率',
+                title: t.danmaku.fps,
                 min: 30,
                 max: 240,
                 divisions: 7,
                 format: _integer,
               ),
       ),
-      const SettingsHeader('画面弹幕的点击'),
-      const SwitchSettingTile(setting: Settings.danmakuTapInteraction, title: '点击弹幕', subtitle: '打开复制和屏蔽'),
-      const SwitchSettingTile(setting: Settings.danmakuLongPressInteraction, title: '长按弹幕', subtitle: '打开复制和屏蔽'),
-      const SettingsHeader('过滤'),
+      SettingsHeader(t.danmaku.videoTaps),
+      SwitchSettingTile(
+        setting: Settings.danmakuTapInteraction,
+        title: t.danmaku.tapDanmaku,
+        subtitle: t.danmaku.opensActions,
+      ),
+      SwitchSettingTile(
+        setting: Settings.danmakuLongPressInteraction,
+        title: t.danmaku.longPressDanmaku,
+        subtitle: t.danmaku.opensActions,
+      ),
+      SettingsHeader(t.danmaku.filters),
       ListTile(
         leading: const Icon(Icons.block),
-        title: const Text('屏蔽词和屏蔽用户'),
+        title: Text(t.danmaku.blockListTitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push(blockListLocation),
       ),
-      const SwitchSettingTile(setting: Settings.danmakuCollapseRepeated, title: '合并重复弹幕'),
+      SwitchSettingTile(setting: Settings.danmakuCollapseRepeated, title: t.danmaku.collapseRepeated),
       SettingBuilder<bool>(
         setting: Settings.danmakuCollapseRepeated,
         builder: (context, on, _) => on
-            ? const DanmakuSliderTile(
+            ? DanmakuSliderTile(
                 setting: Settings.danmakuRepeatedWindowSeconds,
-                title: '合并窗口',
+                title: t.danmaku.collapseWindow,
                 min: 1,
                 max: 30,
                 divisions: 29,
@@ -130,15 +147,19 @@ class DanmakuSettingsTiles extends StatelessWidget {
               )
             : const SizedBox.shrink(),
       ),
-      const SwitchSettingTile(setting: Settings.danmakuSimilarityFilter, title: '过滤相似弹幕', subtitle: '热门房间里短弹幕可能被过滤'),
+      SwitchSettingTile(
+        setting: Settings.danmakuSimilarityFilter,
+        title: t.danmaku.filterSimilar,
+        subtitle: t.danmaku.filterSimilarSubtitle,
+      ),
       SettingBuilder<bool>(
         setting: Settings.danmakuSimilarityFilter,
         builder: (context, on, _) => on
-            ? const Column(
+            ? Column(
                 children: [
                   DanmakuSliderTile(
                     setting: Settings.danmakuSimilarityThreshold,
-                    title: '相似度阈值',
+                    title: t.danmaku.similarityThreshold,
                     min: 50,
                     max: 100,
                     divisions: 50,
@@ -146,7 +167,7 @@ class DanmakuSettingsTiles extends StatelessWidget {
                   ),
                   DanmakuSliderTile(
                     setting: Settings.danmakuSimilarityCacheDuration,
-                    title: '比较最近',
+                    title: t.danmaku.compareRecent,
                     min: 1,
                     max: 60,
                     divisions: 59,
@@ -154,7 +175,7 @@ class DanmakuSettingsTiles extends StatelessWidget {
                   ),
                   DanmakuSliderTile(
                     setting: Settings.danmakuSimilarityMaxCacheSize,
-                    title: '最多比较',
+                    title: t.danmaku.compareMost,
                     min: 20,
                     max: 1000,
                     divisions: 49,
@@ -164,10 +185,10 @@ class DanmakuSettingsTiles extends StatelessWidget {
               )
             : const SizedBox.shrink(),
       ),
-      const SwitchSettingTile(
+      SwitchSettingTile(
         setting: Settings.danmakuFilterDouyuAutomated,
-        title: '过滤斗鱼疑似机器人弹幕',
-        subtitle: '默认关闭，可能误伤正常弹幕',
+        title: t.danmaku.douyuBots,
+        subtitle: t.danmaku.douyuBotsSubtitle,
       ),
     ],
   );
@@ -178,8 +199,8 @@ String _integerPercent(double value) => '${value.round()}%';
 String _percent(double value) => '${(value * 100).round()}%';
 String _dp(double value) => '${value.round()}';
 String _oneDecimal(double value) => value.toStringAsFixed(1);
-String _seconds(double value) => '${value.round()} 秒';
-String _lines(double value) => '${value.round()} 条';
+String _seconds(double value) => t.common.seconds(n: value.round());
+String _lines(double value) => t.common.items(n: value.round());
 
 /// A number setting on a slider that stores while the thumb moves (at most
 /// every 150 ms) and on release, so the on-video style follows the drag.
@@ -287,10 +308,10 @@ Future<void> showDanmakuSettingsSheet(BuildContext context) => showModalBottomSh
     maxChildSize: 0.9,
     builder: (context, controller) => ListView(
       controller: controller,
-      children: const [
-        ListTile(title: Text('弹幕设置')),
-        DanmakuSettingsTiles(),
-        SizedBox(height: 24),
+      children: [
+        ListTile(title: Text(t.danmaku.settings)),
+        const DanmakuSettingsTiles(),
+        const SizedBox(height: 24),
       ],
     ),
   ),
@@ -340,24 +361,24 @@ class _DanmakuPresetRowState extends ConsumerState<DanmakuPresetRow> {
               selected: preset.matches(settings),
               onSelected: (_) async {
                 await preset.apply(settings);
-                say('已应用“${preset.name}”');
+                say(t.danmaku.presetApplied(name: preset.name));
               },
             ),
           TextButton.icon(
             icon: const Icon(Icons.bookmark_add_outlined, size: 18),
-            label: const Text('保存为我的样式'),
+            label: Text(t.danmaku.saveMyStyle),
             onPressed: () async {
               await DanmakuTemplate.save(settings);
-              say('已保存当前弹幕样式');
+              say(t.danmaku.styleSaved);
             },
           ),
           TextButton.icon(
             icon: const Icon(Icons.bookmark_outline, size: 18),
-            label: const Text('恢复我的样式'),
+            label: Text(t.danmaku.restoreMyStyle),
             onPressed: DanmakuTemplate.exists(settings)
                 ? () async {
                     final restored = await DanmakuTemplate.restore(settings);
-                    say(restored ? '已恢复保存的弹幕样式' : '保存的样式已损坏，没能恢复');
+                    say(restored ? t.danmaku.styleRestored : t.danmaku.styleBroken);
                   }
                 : null,
           ),
@@ -375,14 +396,14 @@ class PipDanmakuTiles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!Platform.isAndroid && !Platform.isWindows) return const SizedBox.shrink();
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SettingsHeader('画中画弹幕'),
-        SwitchSettingTile(setting: Settings.danmakuPipEnabled, title: '画中画里显示弹幕'),
+        SettingsHeader(t.danmaku.pip),
+        SwitchSettingTile(setting: Settings.danmakuPipEnabled, title: t.danmaku.pipShow),
         SliderSettingTile(
           setting: Settings.danmakuPipFontSize,
-          title: '字号',
+          title: t.danmaku.fontSize,
           min: 8,
           max: 24,
           divisions: 16,
@@ -390,7 +411,7 @@ class PipDanmakuTiles extends StatelessWidget {
         ),
         SliderSettingTile(
           setting: Settings.danmakuPipSpeed,
-          title: '速度',
+          title: t.danmaku.speed,
           min: 20,
           max: 400,
           divisions: 38,
@@ -398,7 +419,7 @@ class PipDanmakuTiles extends StatelessWidget {
         ),
         SliderSettingTile(
           setting: Settings.danmakuPipOpacity,
-          title: '不透明度',
+          title: t.danmaku.opacity,
           min: 0.1,
           max: 1,
           divisions: 9,
@@ -406,7 +427,7 @@ class PipDanmakuTiles extends StatelessWidget {
         ),
         SliderSettingTile(
           setting: Settings.danmakuPipArea,
-          title: '显示区域',
+          title: t.danmaku.area,
           min: 0.1,
           max: 1,
           divisions: 9,
@@ -414,13 +435,13 @@ class PipDanmakuTiles extends StatelessWidget {
         ),
         SliderSettingTile(
           setting: Settings.danmakuPipMaxVisibleCount,
-          title: '同屏最多',
+          title: t.danmaku.maxOnScreen,
           min: 1,
           max: 20,
           divisions: 19,
           format: _integer,
         ),
-        SwitchSettingTile(setting: Settings.danmakuPipNoEmoji, title: '不显示表情'),
+        SwitchSettingTile(setting: Settings.danmakuPipNoEmoji, title: t.danmaku.noEmoji),
       ],
     );
   }

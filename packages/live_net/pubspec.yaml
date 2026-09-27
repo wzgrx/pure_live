@@ -1,5 +1,5 @@
-name: live_core
-description: Platform adapters, models and failures of Pure Live v4. Pure Dart, no Flutter.
+name: live_net
+description: HTTP transport for Pure Live v4 platform adapters (docs/adr/0011-live-net.md).
 publish_to: none
 version: 0.1.0
 
@@ -9,8 +9,6 @@ environment:
 resolution: workspace
 
 dependencies:
-  crypto: ^3.0.7
-  live_net: any
   meta: ^1.19.0
 
 dev_dependencies:

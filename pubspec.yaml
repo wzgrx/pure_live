@@ -10,6 +10,7 @@ environment:
 # at the root and is the workspace root, so all members share one pubspec.lock.
 workspace:
   - packages/live_core
+  - packages/live_net
   - tools/live_cli
   - tools/check_latest
 

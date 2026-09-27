@@ -101,6 +101,28 @@ void main() {
     expect(douyu.requests, ['a', 'a']);
   });
 
+  test('a refresh that cannot read the store keeps the last result and stops the spinner', () async {
+    final broken = await LiveStore.inMemory();
+    await broken.follows.follow(RoomSnapshot(ref: RoomRef('douyu', 'a'), anchorName: '主播a'));
+    final c = ProviderContainer(
+      overrides: [
+        storeProvider.overrideWithValue(broken),
+        sitesProvider.overrideWithValue({'douyu': PlatformSite(_Site('douyu'))}),
+        alertNotifierProvider.overrideWithValue(FakeAlertNotifier()),
+      ],
+    );
+    addTearDown(c.dispose);
+    final first = await c.read(followRefreshProvider.future);
+    await broken.close();
+
+    final again = await c.read(followRefreshProvider.notifier).refresh();
+    expect(again, same(first));
+    final state = c.read(followRefreshProvider);
+    expect(state.isLoading, isFalse);
+    expect(state.hasError, isTrue);
+    expect(state.value, same(first), reason: 'the page keeps what it showed');
+  });
+
   test('F-APP-03: coming back refreshes 450 ms later, only when the last refresh is 15 s old', () async {
     await follow('douyu', 'a');
     final douyu = _Site('douyu');

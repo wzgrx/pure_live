@@ -118,8 +118,17 @@ class FollowRefreshNotifier extends AsyncNotifier<FollowRefreshResult?> {
     if (running != null) return running;
     // Keep the last result while loading, so the page shows a spinner but
     // no card moves until the new result is published (F-FAV-03).
+    final previous = state.value;
+    final log = ref.read(appLogProvider);
     if (ref.mounted && state.hasValue) state = const AsyncLoading<FollowRefreshResult?>();
-    return _start();
+    return _start().catchError((Object error, StackTrace stack) {
+      // A store failure: the spinner stops and the last result stays (the
+      // error keeps the previous value); timers and pull-to-refresh get the
+      // last result instead of an unhandled error.
+      log.error('follows', 'refresh failed', error, stack);
+      if (ref.mounted) state = AsyncError<FollowRefreshResult?>(error, stack);
+      return previous ?? const FollowRefreshResult(checked: 0, failedPlatforms: {});
+    });
   }
 
   Future<FollowRefreshResult> _start() {

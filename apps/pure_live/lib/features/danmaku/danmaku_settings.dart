@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -362,6 +363,65 @@ class _DanmakuPresetRowState extends ConsumerState<DanmakuPresetRow> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 画中画弹幕 (F-DM-07): the light danmaku of picture-in-picture, on the
+/// platforms that have it.
+class PipDanmakuTiles extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Platform.isAndroid && !Platform.isWindows) return const SizedBox.shrink();
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsHeader('画中画弹幕'),
+        SwitchSettingTile(setting: Settings.danmakuPipEnabled, title: '画中画里显示弹幕'),
+        SliderSettingTile(
+          setting: Settings.danmakuPipFontSize,
+          title: '字号',
+          min: 8,
+          max: 24,
+          divisions: 16,
+          format: _integer,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipSpeed,
+          title: '速度',
+          min: 20,
+          max: 400,
+          divisions: 38,
+          format: _integer,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipOpacity,
+          title: '不透明度',
+          min: 0.1,
+          max: 1,
+          divisions: 9,
+          format: _percent,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipArea,
+          title: '显示区域',
+          min: 0.1,
+          max: 1,
+          divisions: 9,
+          format: _percent,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipMaxVisibleCount,
+          title: '同屏最多',
+          min: 1,
+          max: 20,
+          divisions: 19,
+          format: _integer,
+        ),
+        SwitchSettingTile(setting: Settings.danmakuPipNoEmoji, title: '不显示表情'),
+      ],
     );
   }
 }

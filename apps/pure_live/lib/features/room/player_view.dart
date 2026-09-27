@@ -858,7 +858,19 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         : const ColoredBox(color: Colors.black);
     // PIP-2: from the request on only the video shows, so the system's
     // entry animation captures no controls.
-    if (ref.watch(pipProvider.select((pip) => pip.videoOnly))) return RepaintBoundary(child: video);
+    if (ref.watch(pipProvider.select((pip) => pip.videoOnly))) {
+      // F-PIP-01: the video and, if on, light danmaku (F-DM-07).
+      final pipDanmaku = danmakuShown && ref.watch(pipDanmakuProvider).enabled;
+      return RepaintBoundary(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            video,
+            if (pipDanmaku) DanmakuOverlay(controller: widget.overlay, visible: true),
+          ],
+        ),
+      );
+    }
     _pipSupported = ref.watch(pipProvider.select((pip) => pip.supported));
     return MouseRegion(
       onHover: _onHover,

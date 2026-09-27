@@ -267,7 +267,7 @@ class SettingsGroupBody extends StatelessWidget {
           format: _percent,
         ),
       ],
-      SettingsGroup.danmaku => const [DanmakuSettingsTiles()],
+      SettingsGroup.danmaku => const [DanmakuSettingsTiles(), PipDanmakuTiles()],
       SettingsGroup.data => const [
         SliderSettingTile(
           setting: Settings.historyLimit,

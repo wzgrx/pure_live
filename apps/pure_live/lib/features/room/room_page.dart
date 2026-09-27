@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/room/room_layout.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -62,20 +63,11 @@ class RoomPage extends ConsumerWidget {
               ],
             );
           },
-          data: (detail) => WindowLayoutBuilder(
-            builder: (context, layout) {
-              final info = _RoomInfo(detail: detail);
-              final player = _PlayerArea(detail: detail);
-              if (layout.width.atLeast(WidthClass.expanded) && !layout.isShortLandscape) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: ListView(children: [const _TopBar(), player, info])),
-                  ],
-                );
-              }
-              return ListView(children: [const _TopBar(), player, info]);
-            },
+          data: (detail) => RoomLayout(
+            presentation: RoomPresentation.inline,
+            video: _PlayerArea(detail: detail),
+            info: _RoomInfo(detail: detail),
+            chat: const _ChatPlaceholder(),
           ),
         ),
       ),
@@ -83,13 +75,22 @@ class RoomPage extends ConsumerWidget {
   }
 }
 
-class _TopBar extends StatelessWidget {
+class _ChatPlaceholder extends StatelessWidget {
   const new();
+
+  @override
+  Widget build(BuildContext context) => const MessageView(icon: Icons.subtitles_outlined, title: '弹幕即将接入');
+}
+
+class _TopBar extends StatelessWidget {
+  const new({this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => Align(
     alignment: Alignment.centerLeft,
-    child: IconButton(tooltip: '返回', icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+    child: IconButton(tooltip: '返回', color: color, icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
   );
 }
 
@@ -133,6 +134,7 @@ class _PlayerArea extends StatelessWidget {
                 ],
               ),
             ),
+            const Positioned(left: 0, top: 0, child: _TopBar(color: Colors.white)),
           ],
         ),
       ),

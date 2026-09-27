@@ -231,7 +231,6 @@ class SettingsGroupBody extends StatelessWidget {
           divisions: 50,
           format: _historyLimit,
         ),
-        ListTile(enabled: false, title: Text('备份与恢复'), subtitle: Text(S.comingSoon)),
         ListTile(enabled: false, title: Text('WebDAV 与局域网同步'), subtitle: Text(S.comingSoon)),
       ],
       SettingsGroup.recording ||

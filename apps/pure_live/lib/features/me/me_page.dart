@@ -29,7 +29,13 @@ class MePage extends StatelessWidget {
               later(Icons.fiber_manual_record_outlined, S.recordings),
               later(Icons.grid_view, S.multiview),
               later(Icons.account_circle_outlined, S.accounts),
-              later(Icons.cloud_sync_outlined, S.backup),
+              ListTile(
+                leading: const Icon(Icons.cloud_sync_outlined),
+                title: const Text(S.backup),
+                subtitle: const Text('可以导入 3.x 的备份，把关注带过来'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/me/backup'),
+              ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.settings_outlined),

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:pure_live_app/app/shell.dart';
+import 'package:pure_live_app/features/backup/backup_page.dart';
 import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
@@ -57,6 +58,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(path: 'appearance', builder: (context, state) => const AppearancePage()),
                   GoRoute(path: 'history', builder: (context, state) => const HistoryPage()),
+                  GoRoute(path: 'backup', builder: (context, state) => const BackupPage()),
                   GoRoute(
                     path: 'settings',
                     builder: (context, state) => const SettingsPage(),

@@ -21,6 +21,8 @@ export 'src/sites/douyu/douyu_sign.dart';
 export 'src/sites/douyu/douyu_site.dart';
 export 'src/sites/huya/huya_parse.dart';
 export 'src/sites/huya/huya_site.dart';
+export 'src/sites/inke/inke_parse.dart';
+export 'src/sites/inke/inke_site.dart';
 export 'src/sites/kilakila/kilakila_link.dart';
 export 'src/sites/kilakila/kilakila_parse.dart';
 export 'src/sites/kilakila/kilakila_site.dart';

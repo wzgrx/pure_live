@@ -470,12 +470,13 @@ abstract final class Settings {
     legacy: [LegacyKey('refreshFavoriteOnResume')],
   );
 
-  /// Interval of [autoRefreshFollows], in minutes.
+  /// Interval of [autoRefreshFollows], in minutes; 5–360 like 3.x
+  /// `normalizeRefreshInterval` (F-FAV-04).
   static const autoRefreshInterval = IntSetting(
     'refresh.autoRefreshInterval',
     30,
-    min: 1,
-    max: 1440,
+    min: 5,
+    max: 360,
     legacy: [LegacyKey('autoRefreshInterval')],
   );
 

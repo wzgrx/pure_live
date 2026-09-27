@@ -179,7 +179,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 | page_size_options_raw | String | '' | page.sizeOptions |
 | autoRefreshFavorite / autoRefreshThumbnails | bool | false | refresh.autoRefreshFavorite / refresh.autoRefreshThumbnails（封面定时刷新，F-FAV-04） |
 | refreshFavoriteOnResume | bool | true | refresh.refreshFavoriteOnResume |
-| autoRefreshInterval / thumbnailRefreshInterval / maxConcurrentRefresh | int | 30 / 30 / 4 | refresh.autoRefreshInterval / refresh.thumbnailRefreshInterval（夹紧到 5–360 分钟，同旧版）/ refresh.maxConcurrentRefresh |
+| autoRefreshInterval / thumbnailRefreshInterval / maxConcurrentRefresh | int | 30 / 30 / 4 | refresh.autoRefreshInterval / refresh.thumbnailRefreshInterval（两个间隔都夹紧到 5–360 分钟，同旧版 `normalizeRefreshInterval`）/ refresh.maxConcurrentRefresh（1–16） |
 
 **网络、窗口、退出、启动（proxy_settings_controller.dart:9-18；window_size_controller.dart:8-107；exit_settings_controller.dart:10-26；startup_controller.dart:25）**
 

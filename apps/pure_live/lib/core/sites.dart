@@ -37,6 +37,53 @@ const platformNames = {
   'iptv': '网络电视',
 };
 
+/// Names of 3.x platforms this build has no adapter for, so their follows and
+/// history still read well (spec/product.md F-FAV-08).
+const _otherPlatformNames = {
+  'cc': '网易CC',
+  'yy': 'YY',
+  'acfun': 'AcFun 直播',
+  'huajiao': '花椒',
+  'inke': '映客',
+  'missevan': '猫耳 FM',
+  'kilakila': '克拉克拉',
+  'weibo': '微博直播',
+  'xiaohongshu': '小红书',
+  'twitch': 'Twitch',
+  'soop': 'Soop',
+  'youtube': 'YouTube Live',
+  'tiktok': 'TikTok LIVE',
+  'niconico': 'niconico',
+  'bigo': 'Bigo Live',
+  'fc2live': 'FC2 Live',
+  'chzzk': 'CHZZK',
+  'kick': 'Kick',
+};
+
+/// The display name of any platform id, supported or not.
+String platformName(String id) => platformNames[id] ?? _otherPlatformNames[id] ?? id;
+
+/// A room on a platform this build has no adapter for: retired, or not ported
+/// to v4 yet (spec/product.md F-FAV-08). Typed, so a page shows a notice
+/// instead of failing on a missing adapter.
+final class PlatformUnsupported implements Exception {
+  /// Creates the error for [platform].
+  const new(this.platform);
+
+  /// The platform id.
+  final String platform;
+
+  @override
+  String toString() => 'PlatformUnsupported($platform)';
+}
+
+/// Adapter lookup that fails with a type instead of a null check.
+extension SiteLookup on Map<String, PlatformSite> {
+  /// The adapter of [platform]; throws [PlatformUnsupported] when this build
+  /// has none (F-FAV-08).
+  PlatformSite of(String platform) => this[platform] ?? (throw PlatformUnsupported(platform));
+}
+
 /// Whether [platform] has accounts to sign in to (IPTV has none).
 bool platformHasAccount(String platform) => platform != 'iptv';
 

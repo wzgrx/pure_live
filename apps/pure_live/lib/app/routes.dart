@@ -13,6 +13,7 @@ import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
 import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
+import 'package:pure_live_app/features/follows/follow_order_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/features/health/platform_status_page.dart';
@@ -67,7 +68,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/follows',
                 builder: (context, state) =>
                     FollowsPage(filter: state.uri.queryParameters['filter'], request: state.uri.queryParameters['at']),
-                routes: [GoRoute(path: 'groups', builder: (context, state) => const GroupsPage())],
+                routes: [
+                  GoRoute(path: 'groups', builder: (context, state) => const GroupsPage()),
+                  GoRoute(path: 'order', builder: (context, state) => const FollowOrderPage()),
+                ],
               ),
             ],
           ),

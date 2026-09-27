@@ -74,6 +74,8 @@ void main() {
       expect(convert(Settings.coverRefreshInterval, 'thumbnailRefreshInterval', 45), 45);
       expect(convert(Settings.coverRefreshInterval, 'thumbnailRefreshInterval', 1), 5);
       expect(convert(Settings.coverRefreshInterval, 'thumbnailRefreshInterval', 9000), 360);
+      expect(convert(Settings.autoRefreshInterval, 'autoRefreshInterval', 180), 180);
+      expect(convert(Settings.autoRefreshInterval, 'autoRefreshInterval', 1), 5);
       expect(Settings.followSort.decode('custom'), FollowSort.custom);
       expect(Settings.followSort.decode('fans'), isNull);
     });

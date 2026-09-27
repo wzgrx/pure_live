@@ -22,6 +22,7 @@ import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_source.dart';
 import 'package:pure_live_app/features/danmaku/on_video.dart';
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
+import 'package:pure_live_app/features/follows/follow_actions.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/iptv/iptv_room.dart';
 import 'package:pure_live_app/features/room/gestures.dart';
@@ -43,7 +44,8 @@ import 'package:url_launcher/url_launcher.dart';
 /// A room's details.
 final FutureProviderFamily<RoomDetail, RoomRef> roomDetailProvider = FutureProvider.autoDispose
     .family<RoomDetail, RoomRef>((ref, room) async {
-      final detail = await ref.watch(sitesProvider)[room.platform]!.rooms.detail(room);
+      // F-FAV-08: a platform without an adapter fails with a type, shown as a notice page.
+      final detail = await ref.watch(sitesProvider).of(room.platform).rooms.detail(room);
       // Opening a room records it in the history (IPTV channels excepted,
       // F-HIS-01) and refreshes a followed card.
       final store = ref.read(storeProvider);
@@ -869,13 +871,14 @@ class _RoomInfo extends ConsumerWidget {
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.favorite, size: 18),
                   label: const Text(S.unfollow),
-                  onPressed: () => ref.read(storeProvider).follows.unfollow(card.ref),
+                  // F-FAV-02: the write is awaited; a failure is said.
+                  onPressed: () => unfollowWithNotice(context, ref, card.ref),
                 )
               else
                 FilledButton.icon(
                   icon: const Icon(Icons.favorite_border, size: 18),
                   label: const Text(S.follow),
-                  onPressed: () => ref.read(storeProvider).follows.follow(RoomSnapshot.fromDetail(detail)),
+                  onPressed: () => followWithNotice(context, ref, RoomSnapshot.fromDetail(detail)),
                 ),
               // F-ROOM-14; IPTV channels record from the recording center.
               if (card.ref.platform != 'iptv') RoomRecordButton(detail: detail),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
@@ -10,6 +11,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
+import 'package:pure_live_app/features/rooms/card_marks.dart';
 import 'package:pure_live_app/features/rooms/room_card_menu.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/l10n/strings.dart';
@@ -92,7 +94,16 @@ final class CardGridGeometry {
 
 /// A paged, pull-to-refresh grid of room cards for one [RoomListQuery].
 class RoomGrid extends ConsumerWidget {
-  const new({required this.query, this.where, this.density = CardDensity.standard, this.emptyText, super.key});
+  const new({
+    required this.query,
+    this.where,
+    this.arrange,
+    this.density = CardDensity.standard,
+    this.emptyText,
+    this.refreshOn,
+    this.originLabel,
+    super.key,
+  });
 
   /// The list to show.
   final RoomListQuery query;
@@ -100,15 +111,25 @@ class RoomGrid extends ConsumerWidget {
   /// Optional client-side filter ("只看开播").
   final bool Function(RoomCard card)? where;
 
+  /// Optional client-side order of the loaded rooms (search sort, F-SRC-01).
+  final List<RoomCard> Function(List<RoomCard> cards)? arrange;
+
   /// Card density.
   final CardDensity density;
 
   /// Empty-state title.
   final String? emptyText;
 
+  /// Reloads the list when this changes (discover on resume, F-APP-03).
+  final ProviderListenable<Object?>? refreshOn;
+
+  /// Name of the list for switching rooms (F-NEW-04).
+  final String? originLabel;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = roomListProvider(query);
+    if (refreshOn case final signal?) ref.listen(signal, (_, _) => ref.invalidate(provider));
     final async = ref.watch(provider);
     return async.when(
       skipLoadingOnRefresh: true,
@@ -118,22 +139,15 @@ class RoomGrid extends ConsumerWidget {
         return MessageView.error(title: text.title, message: text.message, onAction: () => ref.invalidate(provider));
       },
       data: (state) {
-        final items = where == null ? state.items : state.items.where(where!).toList();
-        if (items.isEmpty && !state.hasMore) {
-          return RefreshIndicator(
-            onRefresh: () => ref.refresh(provider.future),
-            child: ListView(
-              children: [
-                const SizedBox(height: 120),
-                MessageView(title: emptyText ?? S.empty),
-              ],
-            ),
-          );
-        }
-        return _Grid(
+        final filtered = where == null ? state.items : state.items.where(where!).toList();
+        final items = arrange == null ? filtered : arrange!(filtered);
+        return RoomCardGrid(
           items: items,
-          state: state,
+          hasMore: state.hasMore,
+          moreError: state.moreError,
           density: density,
+          emptyText: emptyText,
+          originLabel: originLabel,
           onLoadMore: () => ref.read(provider.notifier).loadMore(),
           onRefresh: () => ref.refresh(provider.future),
         );
@@ -142,26 +156,54 @@ class RoomGrid extends ConsumerWidget {
   }
 }
 
-class _Grid extends StatefulWidget {
+/// Room cards in a grid with infinite scrolling: [onLoadMore] runs near the
+/// end, the footer shows loading, a retry or the end (F-DSC-04, PLAN §10).
+class RoomCardGrid extends StatefulWidget {
   const new({
     required this.items,
-    required this.state,
-    required this.density,
+    required this.hasMore,
     required this.onLoadMore,
     required this.onRefresh,
+    this.moreError,
+    this.density = CardDensity.standard,
+    this.emptyText,
+    this.originLabel,
+    this.header,
+    super.key,
   });
 
+  /// Cards in their shown order.
   final List<RoomCard> items;
-  final RoomListState state;
+
+  /// Whether another page can load.
+  final bool hasMore;
+
+  /// The last next-page request failed.
+  final Object? moreError;
+
+  /// Card density.
   final CardDensity density;
+
+  /// Empty-state title.
+  final String? emptyText;
+
+  /// Name of the list for switching rooms (F-NEW-04).
+  final String? originLabel;
+
+  /// A note above the cards (partial failures).
+  final Widget? header;
+
+  /// Loads the next page; ignored while one loads.
   final VoidCallback onLoadMore;
+
+  /// Pull to refresh.
   final Future<void> Function() onRefresh;
 
   @override
-  State<_Grid> createState() => _GridState();
+  State<RoomCardGrid> createState() => _RoomCardGridState();
 }
 
-class _GridState extends State<_Grid> {
+class _RoomCardGridState extends State<RoomCardGrid> {
   final TvGridFocus _focus = TvGridFocus(debugLabel: 'room-grid');
 
   @override
@@ -173,6 +215,17 @@ class _GridState extends State<_Grid> {
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
+    if (items.isEmpty && !widget.hasMore) {
+      return RefreshIndicator(
+        onRefresh: widget.onRefresh,
+        child: ListView(
+          children: [
+            const SizedBox(height: 120),
+            MessageView(title: widget.emptyText ?? S.empty),
+          ],
+        ),
+      );
+    }
     // The column count follows the content width, which excludes the
     // navigation rail (principles §5.2).
     return LayoutBuilder(
@@ -182,13 +235,15 @@ class _GridState extends State<_Grid> {
         final now = DateTime.now();
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) {
-            if (notification.metrics.extentAfter < 800) widget.onLoadMore();
+            if (notification.metrics.extentAfter < 800 && widget.hasMore) widget.onLoadMore();
             return false;
           },
           child: RefreshIndicator(
             onRefresh: widget.onRefresh,
             child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
+                if (widget.header case final header?) SliverToBoxAdapter(child: header),
                 SliverPadding(
                   padding: grid.padding,
                   sliver: SliverGrid.builder(
@@ -200,7 +255,7 @@ class _GridState extends State<_Grid> {
                       coverWidth: grid.cellWidth,
                       devicePixelRatio: dpr,
                       now: now,
-                      origin: () => RoomOrigin.fromCards(items),
+                      origin: () => RoomOrigin.fromCards(items, label: widget.originLabel),
                       focusNode: _focus.node(index),
                       onFocusChange: (focused) {
                         if (focused) _focus.focused(index);
@@ -216,7 +271,7 @@ class _GridState extends State<_Grid> {
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: _Footer(state: widget.state, onRetry: widget.onLoadMore),
+                  child: _Footer(hasMore: widget.hasMore, moreError: widget.moreError, onRetry: widget.onLoadMore),
                 ),
               ],
             ),
@@ -228,9 +283,10 @@ class _GridState extends State<_Grid> {
 }
 
 class _Footer extends StatelessWidget {
-  const new({required this.state, required this.onRetry});
+  const new({required this.hasMore, required this.moreError, required this.onRetry});
 
-  final RoomListState state;
+  final bool hasMore;
+  final Object? moreError;
   final VoidCallback onRetry;
 
   @override
@@ -238,9 +294,9 @@ class _Footer extends StatelessWidget {
     final style = Theme.of(context).textTheme.bodySmall!
         .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant);
     final Widget child;
-    if (state.moreError != null) {
+    if (moreError != null) {
       child = TextButton(onPressed: onRetry, child: const Text(S.loadMoreFailed));
-    } else if (state.hasMore) {
+    } else if (hasMore) {
       child = const SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2));
     } else {
       child = Text(S.noMore, style: style);
@@ -290,14 +346,20 @@ class RoomCardTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final audience = card.audience.online ?? card.audience.popularity ?? card.audience.cumulative;
     final since = card.liveSince;
+    final live = card.state == LiveState.live;
+    // F-FAV-01: the recording mark on every card (principles §4.2); F-FAV-04:
+    // live covers follow the cover refresh period.
+    final recording = ref.watch(recordingRoomsProvider.select((rooms) => rooms.value?.contains(card.ref.key) ?? false));
+    final period = live ? ref.watch(coverPeriodProvider) : null;
     return RoomCardView(
       platformId: card.ref.platform,
       anchorName: card.anchorName,
       title: card.title,
-      isLive: card.state == LiveState.live,
-      cover: networkImage(card.cover, logicalWidth: coverWidth, devicePixelRatio: devicePixelRatio),
+      isLive: live,
+      cover: networkImage(card.cover, logicalWidth: coverWidth, devicePixelRatio: devicePixelRatio, period: period),
       audience: audience == null ? null : formatCount(audience),
-      liveFor: since == null || card.state != LiveState.live ? null : formatLiveDuration(now.difference(since)),
+      liveFor: since == null || !live ? null : formatLiveDuration(now.difference(since)),
+      recording: recording,
       density: density,
       focusNode: focusNode,
       onKeyEvent: onKeyEvent,

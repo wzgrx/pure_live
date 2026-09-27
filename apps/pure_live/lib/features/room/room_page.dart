@@ -344,6 +344,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     _follow(detail, switched: previous != null && previous.ref != detail.ref);
     if (!_adoptedOnce) {
       _adoptedOnce = true;
+      if (!_touch && !_tv) _tip(Tip.desktopRoom, '按 C 收起或展开聊天栏，按 T 进入剧场模式，按 ? 查看全部快捷键');
       // F-ROOM-15: fullscreen 1 s after entering, when the setting is on.
       if (live && !_tv && ref.read(storeProvider).settings.get(Settings.fullScreenDefault)) {
         _defaultFullscreen = Timer(const Duration(seconds: 1), () {
@@ -368,6 +369,17 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       } else {
         _nowPlaying.detach(_session);
       }
+    });
+  }
+
+  /// A one-time tip (principles §6.5): a small bar at the bottom, 3 s, off
+  /// the middle of the picture. Deferred: it may be asked for during build.
+  void _tip(Tip tip, String text) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !ref.read(appPrefsProvider.notifier).takeTip(tip)) return;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text(text), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 3)),
+      );
     });
   }
 
@@ -408,6 +420,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     );
     setState(() => _presentation = next);
     if (next == RoomPresentation.portraitFullscreen) _offerSwitchGesture();
+    if (next.isFullscreen && _touch && !_tv) _tip(Tip.fullscreen, '双指缩放切换画面比例，长按画面打开快捷面板');
     try {
       // A platform that never answers must not block every later change.
       await applyPresentation(

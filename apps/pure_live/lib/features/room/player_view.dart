@@ -12,6 +12,7 @@ import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart' as player;
 import 'package:live_store/live_store.dart' as store;
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/network.dart';
@@ -726,6 +727,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         canScreenshot: canScreenshot(_session),
         audioOnly: _state.audioOnly,
         fit: _fit,
+        explain: ref.read(appPrefsProvider.notifier).takeTip(Tip.quickPanel),
       ),
     );
     if (action == null || !mounted) return;

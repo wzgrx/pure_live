@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart' show VideoFit;
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
@@ -96,9 +97,6 @@ class TvRoomLayerState extends ConsumerState<TvRoomLayer> {
   bool _controls = false;
   TvPanel _panel = TvPanel.none;
 
-  /// Shown once per run: the remote's keys in a room.
-  static bool _explained = false;
-
   /// Whether the info bar and control row show.
   bool get controlsVisible => _controls;
 
@@ -116,8 +114,8 @@ class TvRoomLayerState extends ConsumerState<TvRoomLayer> {
       // The page's own focus may hold the route's focus from the loading
       // state; the remote keys start here.
       _root.requestFocus();
-      if (!_explained) {
-        _explained = true;
+      // Once per installation (principles §6.5).
+      if (ref.read(appPrefsProvider.notifier).takeTip(Tip.tvRoom)) {
         widget.player.currentState?.showHint(
           Icons.settings_remote_outlined,
           '上下键换台，左键直播间列表，右键播放设置，确认键显示控制',

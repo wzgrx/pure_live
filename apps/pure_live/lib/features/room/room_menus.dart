@@ -185,10 +185,9 @@ enum QuickAction {
   fitFill,
 }
 
-var _quickPanelHinted = false;
-
 /// The long-press quick panel (T-07, principles §6.1): 画质, 线路, 弹幕开关,
-/// 截图, 定时关闭, 画面比例. The first one of a run explains itself (§6.5).
+/// 截图, 定时关闭, 画面比例. The first one ever explains itself when
+/// [explain] (principles §6.5).
 Future<QuickAction?> showQuickPanel(
   BuildContext context, {
   required String qualityLabel,
@@ -197,9 +196,9 @@ Future<QuickAction?> showQuickPanel(
   required bool canScreenshot,
   required bool audioOnly,
   required VideoFit fit,
+  bool explain = false,
 }) {
-  final hint = !_quickPanelHinted;
-  _quickPanelHinted = true;
+  final hint = explain;
   return showModalBottomSheet<QuickAction>(
     context: context,
     showDragHandle: true,

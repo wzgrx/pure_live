@@ -10,6 +10,9 @@ final class PlatformSite {
 
   final Object _site;
 
+  /// The adapter itself, for packages that look capabilities up by type.
+  Object get raw => _site;
+
   LiveSite get info => _site as LiveSite;
   CatalogSource get catalog => _site as CatalogSource;
   SearchSource get search => _site as SearchSource;

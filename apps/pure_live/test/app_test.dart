@@ -2,8 +2,10 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/app/app.dart';
+import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
@@ -49,6 +51,15 @@ void main() {
         overrides: [
           sitesProvider.overrideWithValue(sites),
           storeProvider.overrideWithValue(store),
+          // A recorder that never touches the disk or network in this test.
+          recordManagerProvider.overrideWithValue(
+            RecordManager(
+              rooms: SiteRecordRooms((_) => null),
+              store: MemoryRecordTaskStore(),
+              root: '/nonexistent',
+              opener: httpRecordOpener(),
+            ),
+          ),
           followsProvider.overrideWith((ref) => Stream.value(const [])),
           followRefreshProvider.overrideWith(_NoRefresh.new),
           isFollowedProvider.overrideWith((ref, room) => Stream.value(false)),

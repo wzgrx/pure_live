@@ -469,6 +469,173 @@ abstract final class Settings {
     legacy: [LegacyKey('window_height')],
   );
 
+  // Recording (spec/modules/record.md §20); device scope, never synced.
+
+  /// Default recording quality.
+  static const recordDefaultQuality = EnumSetting<QualityPreference>(
+    'record.defaultQuality',
+    QualityPreference.original,
+    QualityPreference.values,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('default_quality', convert: _quality)],
+  );
+
+  /// Recordings that run at once.
+  static const recordMaxConcurrent = IntSetting(
+    'record.maxConcurrent',
+    3,
+    min: 1,
+    max: 10,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('maxTaskCount')],
+  );
+
+  /// Reconnect after a dropped connection.
+  static const recordAutoReconnect = BoolSetting(
+    'record.autoReconnect',
+    true,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('autoReconnect')],
+  );
+
+  /// Retries before a recording fails.
+  static const recordMaxRetries = IntSetting(
+    'record.maxRetries',
+    5,
+    min: 1,
+    max: 20,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('max_retry_count')],
+  );
+
+  /// Seconds between retries.
+  static const recordRetryDelay = IntSetting(
+    'record.retryDelay',
+    30,
+    min: 5,
+    max: 120,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('retry_delay')],
+  );
+
+  /// Watch offline rooms and record when they go live.
+  static const recordPolling = BoolSetting(
+    'record.polling',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('enable_polling')],
+  );
+
+  /// Seconds between live checks while waiting.
+  static const recordLiveCheckInterval = IntSetting(
+    'record.liveCheckInterval',
+    30,
+    min: 10,
+    max: 300,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('live_check_interval')],
+  );
+
+  /// Double the wait after each failed check.
+  static const recordBackoff = BoolSetting(
+    'record.backoff',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('enable_backoff')],
+  );
+
+  /// Longest wait between checks with backoff, in seconds.
+  static const recordMaxCheckInterval = IntSetting(
+    'record.maxCheckInterval',
+    300,
+    min: 300,
+    max: 3600,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('max_check_interval')],
+  );
+
+  /// Resume unfinished recordings when the app starts.
+  static const recordResumeOnLaunch = BoolSetting(
+    'record.resumeOnLaunch',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('auto_start_on_boot')],
+  );
+
+  /// Read timeout in seconds: 15, 30 or 60.
+  static const recordReadTimeout = IntSetting(
+    'record.readTimeout',
+    15,
+    min: 15,
+    max: 60,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('recorder_rw_timeout')],
+  );
+
+  /// Folder names in pinyin.
+  static const recordPinyinFolders = BoolSetting(
+    'record.pinyinFolders',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('recorder_folder_naming_strategy', convert: _truthy)],
+  );
+
+  /// Save chat next to the video.
+  static const recordDanmaku = BoolSetting(
+    'record.danmaku',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('recorder_record_danmaku')],
+  );
+
+  /// Limit the recording folder size.
+  static const recordCacheLimitEnabled = BoolSetting(
+    'record.cacheLimitEnabled',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('enableCacheLimit')],
+  );
+
+  /// Recording folder limit in MB.
+  static const recordCacheLimitMb = IntSetting(
+    'record.cacheLimitMB',
+    1024,
+    min: 1,
+    max: 16777216,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('maxCacheMB')],
+  );
+
+  /// Chosen parent folder for recordings; empty means the app data folder.
+  static const recordDirectory = StringSetting(
+    'record.directory',
+    '',
+    scope: SettingScope.device,
+    legacy: [LegacyKey('recordSavePath')],
+  );
+
+  /// New segment after this many minutes; 0 = off.
+  static const recordSplitMinutes = IntSetting('record.splitMinutes', 0, min: 0, max: 1440, scope: SettingScope.device);
+
+  /// New segment after this many MB; 0 = off.
+  static const recordSplitMegabytes = IntSetting(
+    'record.splitMegabytes',
+    0,
+    min: 0,
+    max: 1048576,
+    scope: SettingScope.device,
+  );
+
+  /// Remux finished FLV files to MP4.
+  static const recordRemuxToMp4 = BoolSetting('record.remuxToMp4', true, scope: SettingScope.device);
+
+  /// Keep the FLV after a successful remux.
+  static const recordKeepSourceAfterRemux = BoolSetting(
+    'record.keepSourceAfterRemux',
+    false,
+    scope: SettingScope.device,
+  );
+
   /// Every registered setting.
   static const List<Setting<Object>> all = [
     themeMode,
@@ -535,6 +702,26 @@ abstract final class Settings {
     launchAtStartup,
     windowWidth,
     windowHeight,
+    recordDefaultQuality,
+    recordMaxConcurrent,
+    recordAutoReconnect,
+    recordMaxRetries,
+    recordRetryDelay,
+    recordPolling,
+    recordLiveCheckInterval,
+    recordBackoff,
+    recordMaxCheckInterval,
+    recordResumeOnLaunch,
+    recordReadTimeout,
+    recordPinyinFolders,
+    recordDanmaku,
+    recordCacheLimitEnabled,
+    recordCacheLimitMb,
+    recordDirectory,
+    recordSplitMinutes,
+    recordSplitMegabytes,
+    recordRemuxToMp4,
+    recordKeepSourceAfterRemux,
   ];
 
   static final Map<String, Setting<Object>> _byId = {for (final setting in all) setting.id: setting};
@@ -575,3 +762,5 @@ Object? _videoFit(Object? value) {
 Object? _highRefreshRate(Object? value) => value == true ? 'balanced' : 'powerSaving';
 
 Object? _lowerTrim(Object? value) => value is String ? value.trim().toLowerCase() : null;
+
+Object? _truthy(Object? value) => value == true || value == 'pinyin' || value == 1;

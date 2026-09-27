@@ -17,9 +17,11 @@ dependencies:
   flutter_riverpod: ^3.4.3
   go_router: ^18.0.1
   live_core: any
+  live_danmaku: any
   live_media: any
   live_net: any
   live_player: any
+  live_record: any
   live_store: any
   live_ui: any
   path_provider: ^2.1.6

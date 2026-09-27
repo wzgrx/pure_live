@@ -10,8 +10,6 @@ class MePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget later(IconData icon, String title) =>
-        ListTile(enabled: false, leading: Icon(icon), title: Text(title), subtitle: const Text(S.comingSoon));
     return Scaffold(
       appBar: AppBar(title: const Text(S.me)),
       body: Align(
@@ -26,7 +24,12 @@ class MePage extends StatelessWidget {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/history'),
               ),
-              later(Icons.fiber_manual_record_outlined, S.recordings),
+              ListTile(
+                leading: const Icon(Icons.fiber_manual_record_outlined),
+                title: const Text(S.recordings),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/me/recordings'),
+              ),
               ListTile(
                 leading: const Icon(Icons.grid_view),
                 title: const Text(S.multiview),

@@ -14,6 +14,7 @@ import 'package:pure_live_app/features/me/appearance_page.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/me/me_page.dart';
 import 'package:pure_live_app/features/multiview/multiview_page.dart';
+import 'package:pure_live_app/features/recording/recording_page.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
 import 'package:pure_live_app/features/settings/settings_page.dart';
@@ -79,6 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(path: 'appearance', builder: (context, state) => const AppearancePage()),
                   GoRoute(path: 'history', builder: (context, state) => const HistoryPage()),
                   GoRoute(path: 'backup', builder: (context, state) => const BackupPage()),
+                  GoRoute(path: 'recordings', builder: (context, state) => const RecordingPage()),
                   GoRoute(path: 'accounts', builder: (context, state) => const AccountsPage()),
                   GoRoute(
                     path: 'settings',

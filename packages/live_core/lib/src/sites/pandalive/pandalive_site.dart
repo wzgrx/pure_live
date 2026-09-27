@@ -17,11 +17,13 @@ const _userAgent =
 
 /// The PandaTV adapter (spec/sites/pandalive.md).
 final class PandaliveSite implements LiveSite, CatalogSource, SearchSource, RoomSource, StreamSource, LinkResolver {
-  /// Creates the adapter.
-  new(this.http);
+  /// Creates the adapter; [now] stamps stream leases.
+  new(this.http, {DateTime Function()? now}) : _now = now ?? DateTime.now;
 
   /// Transport.
   final LiveHttp http;
+
+  final DateTime Function() _now;
 
   /// Directory and search page size.
   static const pageSize = 30;
@@ -168,12 +170,19 @@ final class PandaliveSite implements LiveSite, CatalogSource, SearchSource, Room
   Future<StreamSet> streams(RoomDetail room, {Quality? quality}) async {
     final id = _checkedId(room.ref);
     final session = await play(id);
+    final issuedAt = _now();
     // §6.2 the master's token is single use: read it once, hand out variants.
     final response = await _send(LiveRequest(site: _site, url: session.master, headers: mediaHeaders));
     if (response.status == 403) throw const RiskControl(_site, detail: 'IVS master HTTP 403');
     if (response.status == 404) throw const StreamUnavailable(_site, 'IVS master HTTP 404');
     if (!response.isSuccess) throw NetworkFailure(_site, 'IVS master HTTP ${response.status}');
-    return PandaliveParse.streams(response.text, master: session.master, headers: mediaHeaders, wanted: quality?.id);
+    return PandaliveParse.streams(
+      response.text,
+      master: session.master,
+      headers: mediaHeaders,
+      issuedAt: issuedAt,
+      wanted: quality?.id,
+    );
   }
 
   @override

@@ -253,10 +253,23 @@ abstract final class PandaliveParse {
   /// §6.1 media comes from Amazon IVS over HTTPS.
   static bool isMediaHost(Uri url) => url.scheme == 'https' && url.host.toLowerCase().endsWith('.live-video.net');
 
+  /// §6.2 how long a variant playlist URL is known to stay valid; it is
+  /// refreshed then, since an expired playlist stops playback.
+  static const variantRefresh = Duration(minutes: 30);
+
+  /// §6.2 the lease of variant URLs issued at [issuedAt].
+  static Lease variantLease(DateTime issuedAt) => Lease(refreshAt: issuedAt.add(variantRefresh), cutsConnection: true);
+
   /// §5 one quality per IVS variant (best first); the source rendition
   /// (`VIDEO="chunked"`) is marked 原画. The master itself is single use
-  /// (§6.2), so lines are variant playlists.
-  static StreamSet streams(String body, {required Uri master, required Map<String, String> headers, String? wanted}) {
+  /// (§6.2), so lines are variant playlists, leased from [issuedAt].
+  static StreamSet streams(
+    String body, {
+    required Uri master,
+    required Map<String, String> headers,
+    required DateTime issuedAt,
+    String? wanted,
+  }) {
     final List<HlsVariant> variants;
     try {
       variants = HlsPlaylist.variants(body, source: master);
@@ -294,6 +307,7 @@ abstract final class PandaliveParse {
           confirmed: selected,
           headers: headers,
           codec: variant.videoCodec,
+          lease: variantLease(issuedAt),
         ),
       ],
     );

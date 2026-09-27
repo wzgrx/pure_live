@@ -106,7 +106,8 @@
 
 - 主列表地址带 `token`（ES384 JWT：`aws:single-use-uuid`、`exp = 签发 + 600 s`、`aws:access-control-allow-origin: https://*.pandalive.co.kr`、`aws:strict-origin-enforcement: true`）。
 - **同一地址第二次请求返回 403 `playback_auth_error`**（2026-09-27 实测）。所以适配器自己读一次主列表，把**变体地址**交给播放器；每次取流都重新调用 `live/play`。旧版也是先读主列表再给变体（A:420-425）。
-- 变体地址（`https://<id>.<区>.playlist.live-video.net/v1/playlist/<不透明令牌>.m3u8`）可重复读取：主列表令牌过期后仍可用，签发 34 分钟后仍能取到列表和分片（2026-09-27 实测）。v4 不设租期；变体失效时播放器报错，按常规重新取流 [待确认变体的最长有效期]。
+- 变体地址（`https://<id>.<区>.playlist.live-video.net/v1/playlist/<不透明令牌>.m3u8`）可重复读取，主列表令牌过期后仍可用，但**有有效期**：同一个变体地址签发 34 分钟后仍能取到列表和分片，87 分钟后返回 403 `Forbidden`（2026-09-27 实测；直播间仍在播）。过期后列表不再更新，播放停住。
+- 租期：签发（调用 `live/play` 的时刻）后 30 分钟刷新，`cutsConnection = true`；没有可读的到期时间（令牌不透明），`expiresAt` 不填 [待确认准确有效期]。
 
 ### 6.3 请求头
 
@@ -194,6 +195,7 @@ PandaTV 把拒绝放在 **HTTP 400** 的 JSON 里（`result: false`、`message`�
 | REG-PANDALIVE-001 | 不存在的主播、已下播、成人房都报“格式错误” | 旧版把非 200 的响应体丢掉，400 一律当格式错误，读不到 `errorData.code` 和 `message` | 400 照常解析 JSON，按 §9 映射 | A:197-200、A:261 |
 | REG-PANDALIVE-002 | 播放器打不开主列表 | IVS 主列表令牌只能用一次 | 适配器读一次，交出变体地址 | §6.2 |
 | REG-PANDALIVE-003 | 列表、分片 403 | IVS 强制检查 Origin | 所有媒体请求带 Origin | §6.3 |
+| REG-PANDALIVE-005 | 看一个多小时后画面停住 | 变体地址会过期 | 30 分钟租期，到期重新取流 | §6.2 |
 | REG-PANDALIVE-004 | 开播时间差 9 小时 | `startTime` 是韩国时间且不带时区 | 按 UTC+9 换算 | §2.3 |
 
 ---
@@ -227,7 +229,7 @@ PandaTV 把拒绝放在 **HTTP 400** 的 JSON 里（`result: false`、`message`�
 
 | # | 问题 | 怎么查 |
 |---|---|---|
-| 1 | 变体地址的最长有效期 | 长时间播放同一变体 |
+| 1 | 变体地址的准确有效期（34～87 分钟之间） | 每 5 分钟轮询同一变体 |
 | 2 | 密码房的 `errorData.code` 和带密码的 `live/play` | 找密码房 |
 | 3 | 聊天令牌过期时服务端的断开方式（关闭码、`reconnect`） | 连满 30 分钟 |
 | 4 | `category` 代码的名称 | 网页分类筛选（目前没有） |

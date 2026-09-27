@@ -11,9 +11,12 @@ import 'fixture.dart';
 
 const _live = 'daisy00';
 const _offline = 'flffl369';
+final _issued = DateTime.utc(2026, 9, 27, 18, 49);
 
-PandaliveSite _site(List<String> samples) =>
-    PandaliveSite(ReplayHttp.fixtures('../../fixtures/pandalive', samples, ignoredQuery: {'token'}));
+PandaliveSite _site(List<String> samples) => PandaliveSite(
+  ReplayHttp.fixtures('../../fixtures/pandalive', samples, ignoredQuery: {'token'}),
+  now: () => _issued,
+);
 
 Map<String, dynamic> _body(String sample) => jsonDecode(Fixture.load('pandalive', sample).body) as Map<String, dynamic>;
 
@@ -144,6 +147,7 @@ void main() {
       Fixture.load('pandalive', 'S06-master').body,
       master: master,
       headers: PandaliveSite.mediaHeaders,
+      issuedAt: _issued,
     );
     expect(set.qualities.map((q) => q.id), ['1080p', '720p', '480p', '360p', '160p']);
     expect(set.qualities.first.label, '1080p 原画');
@@ -153,11 +157,14 @@ void main() {
     expect(line.url.path, startsWith('/v1/playlist/'));
     expect(line.codec, 'avc');
     expect(line.headers['origin'], 'https://www.pandalive.co.kr');
-    expect(line.lease, isNull);
+    expect(line.lease?.refreshAt, _issued.add(const Duration(minutes: 30)));
+    expect(line.lease?.expiresAt, isNull);
+    expect(line.lease?.cutsConnection, isTrue);
     final low = PandaliveParse.streams(
       Fixture.load('pandalive', 'S06-master').body,
       master: master,
       headers: const {},
+      issuedAt: _issued,
       wanted: '360p',
     );
     expect(low.lines.single.confirmed?.id, '360p');
@@ -204,6 +211,7 @@ void main() {
       final set = await site.streams(detail);
       expect(set.qualities, hasLength(5));
       expect(set.lines.single.headers, PandaliveSite.mediaHeaders);
+      expect(set.lines.single.lease?.refreshAt, _issued.add(PandaliveParse.variantRefresh));
     });
 
     test('links resolve without a request', () async {

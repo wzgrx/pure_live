@@ -15,8 +15,10 @@ import 'package:live_record/src/retry.dart';
 import 'package:live_record/src/rooms.dart';
 import 'package:live_record/src/session.dart';
 import 'package:live_record/src/settings.dart';
+import 'package:live_record/src/storage.dart';
 import 'package:live_record/src/store.dart';
 import 'package:live_record/src/task.dart';
+import 'package:path/path.dart' as p;
 
 /// Timings of the manager; defaults follow the spec.
 final class RecordManagerTimings {
@@ -29,6 +31,7 @@ final class RecordManagerTimings {
     this.checkTimeout = const Duration(seconds: 20),
     this.chatRetry = const Duration(seconds: 30),
     this.resumeChecks = 3,
+    this.storageCheck = const Duration(minutes: 1),
   });
 
   /// Least time between two session starts (§11.3).
@@ -51,6 +54,9 @@ final class RecordManagerTimings {
 
   /// Strict checks running at once when resuming on launch (§14.2).
   final int resumeChecks;
+
+  /// Interval of the storage limit check while it is on (§15).
+  final Duration storageCheck;
 }
 
 final class _Runtime {
@@ -100,11 +106,36 @@ final class _Slots {
   final _queue = ListQueue<_Waiter>();
   Timer? _timer;
 
-  Future<bool> acquire(_Runtime runtime) {
+  /// Waits for a slot; [force] takes one at once, beyond [max] and the
+  /// spacing (the user's "force start", spec §2).
+  Future<bool> acquire(_Runtime runtime, {bool force = false}) {
+    if (force) {
+      _grantNow();
+      return Future.value(true);
+    }
     final waiter = _Waiter(runtime, runtime.generation);
     _queue.add(waiter);
     _pump();
     return waiter.done.future;
+  }
+
+  /// Grants the queued request of [runtime] at once (spec §2 "强制开始");
+  /// false when it is not queued.
+  bool force(_Runtime runtime) {
+    final waiter = _queue
+        .where((w) => identical(w.runtime, runtime) && w.generation == runtime.generation && !w.done.isCompleted)
+        .firstOrNull;
+    if (waiter == null) return false;
+    _queue.remove(waiter);
+    _grantNow();
+    waiter.done.complete(true);
+    _pump();
+    return true;
+  }
+
+  void _grantNow() {
+    used++;
+    _lastGrant = clock.now();
   }
 
   void cancel(_Runtime runtime) {
@@ -225,6 +256,8 @@ final class RecordManager {
   Future<void> _persisting = Future.value();
   Future<void>? _recovered;
   var _disposed = false;
+  Timer? _storageTimer;
+  Future<StorageSweep?>? _sweeping;
 
   /// Settings in force.
   RecordSettings get settings => _settings;
@@ -272,6 +305,7 @@ final class RecordManager {
       _order.add(task.key);
     }
     _list.add(tasks);
+    _scheduleStorage();
     // Tasks that were active or waiting when the app last ended: crashed
     // ones (still active in the store) or ones stopped by [stopAll] on exit.
     final candidates = <_Runtime>[];
@@ -353,29 +387,49 @@ final class RecordManager {
     _checkAlive();
     final runtime = _runtimes[key];
     if (runtime == null) return Future.value();
+    return _serial(runtime, () => _begin(runtime));
+  }
+
+  /// Starts [key] at once, without waiting for a concurrency slot or the
+  /// 5 s start spacing (spec §2 "强制开始", §11.1): a queued task takes an
+  /// extra slot now, a waiting one starts its session now. The strict room
+  /// check still decides whether the room is live; offline goes back to
+  /// waiting (polling on). Other states behave like [start].
+  Future<void> forceStart(String key) {
+    _checkAlive();
+    final runtime = _runtimes[key];
+    if (runtime == null) return Future.value();
     return _serial(runtime, () async {
-      // Already recording: nothing to do. Finalising: wait for it to finish.
-      if (runtime.running != null && runtime.task.state != RecordState.finalizing) return;
-      await runtime.running;
-      if (runtime.removed) return;
-      _cancelPoll(runtime);
-      runtime
-        ..generation += 1
-        ..pollRounds = 0;
-      _update(
-        runtime,
-        runtime.task.copyWith(
-          state: RecordState.queued,
-          cursor: null,
-          failure: null,
-          stopCause: null,
-          retrying: null,
-          nextCheckAt: null,
-          autoReconnect: _settings.autoReconnect,
-        ),
-      );
-      _launch(runtime);
+      if (runtime.task.state == RecordState.queued && runtime.running != null) {
+        _slots.force(runtime);
+        return;
+      }
+      await _begin(runtime, force: true);
     });
+  }
+
+  Future<void> _begin(_Runtime runtime, {bool force = false}) async {
+    // Already recording: nothing to do. Finalising: wait for it to finish.
+    if (runtime.running != null && runtime.task.state != RecordState.finalizing) return;
+    await runtime.running;
+    if (runtime.removed) return;
+    _cancelPoll(runtime);
+    runtime
+      ..generation += 1
+      ..pollRounds = 0;
+    _update(
+      runtime,
+      runtime.task.copyWith(
+        state: RecordState.queued,
+        cursor: null,
+        failure: null,
+        stopCause: null,
+        retrying: null,
+        nextCheckAt: null,
+        autoReconnect: _settings.autoReconnect,
+      ),
+    );
+    _launch(runtime, force: force);
   }
 
   /// Stops [key] as the user asked; completes when its files are final
@@ -437,6 +491,102 @@ final class RecordManager {
     });
   }
 
+  /// Replaces the task list with [imported] from a backup (store.md §7.2
+  /// `recordTasks`, spec/modules/record.md §13). Tasks holding a session
+  /// (queued through finalizing) are left as they are, whether or not the
+  /// backup has them; other local tasks missing from [imported] are removed
+  /// (their files stay). An imported task replaces a local one of the same
+  /// room, keeping the local session info (its files are on this device).
+  /// Imported tasks come in stopped: [StopCause.pollingOff] ones wait for
+  /// their room while polling is on (§12), others stay stopped. Returns the
+  /// number of tasks written.
+  Future<int> importTasks(Iterable<RecordTask> imported) async {
+    _checkAlive();
+    final incoming = <String, RecordTask>{for (final task in imported) task.key: task};
+    for (final runtime in _runtimes.values.toList()) {
+      if (!incoming.containsKey(runtime.task.key) && !runtime.task.state.active) await remove(runtime.task.key);
+    }
+    var written = 0;
+    for (final task in incoming.values) {
+      final restored = task.copyWith(
+        state: RecordState.stopped,
+        stopCause: task.stopCause == StopCause.pollingOff ? StopCause.pollingOff : StopCause.user,
+        failure: null,
+        cursor: null,
+        retrying: null,
+        nextCheckAt: null,
+      );
+      var runtime = _runtimes[task.key];
+      if (runtime == null) {
+        runtime = _Runtime(restored.copyWith(session: null));
+        _runtimes[task.key] = runtime;
+        _order.add(task.key);
+        _markDirty(runtime);
+      } else {
+        final local = runtime;
+        var skipped = false;
+        await _serial(local, () async {
+          if (local.task.state.active || local.removed) {
+            skipped = true;
+            return;
+          }
+          _cancelPoll(local);
+          local.generation++;
+          _update(local, restored.copyWith(session: local.task.session));
+        });
+        if (skipped) continue;
+      }
+      written++;
+      if (_settings.polling && runtime.task.stopCause == StopCause.pollingOff) {
+        final waiting = runtime;
+        // The first check follows `liveCheckInterval`, not all at once.
+        await _serial(waiting, () async => _wait(waiting));
+      }
+    }
+    _list.add(tasks);
+    await _flush();
+    return written;
+  }
+
+  /// Keeps the recording root under `storageLimitMegabytes` now (spec §15);
+  /// null when the limit is off. A sweep already running is shared.
+  Future<StorageSweep?> sweepStorage() {
+    final limit = _settings.storageLimitBytes;
+    if (limit == null || _disposed) return Future.value();
+    return _sweeping ??= () async {
+      try {
+        return await enforceStorageLimit(
+          files: _files,
+          root: root,
+          limitBytes: limit,
+          isProtected: _protectedDirectory,
+        );
+      } on Object {
+        // An unreadable root is retried at the next check.
+        return null;
+      } finally {
+        _sweeping = null;
+      }
+    }();
+  }
+
+  /// Session directories of tasks resolving, recording, reconnecting or
+  /// finalizing (remux and crash recovery included) are never cleaned (§15).
+  bool _protectedDirectory(String directory) {
+    for (final runtime in _runtimes.values) {
+      final state = runtime.task.state;
+      final layout = runtime.task.session?.layout;
+      if (layout == null || !(state.holdsSlot || state == RecordState.finalizing)) continue;
+      if (p.equals(layout.directory, directory)) return true;
+    }
+    return false;
+  }
+
+  void _scheduleStorage() {
+    if (_storageTimer != null || _disposed || _settings.storageLimitBytes == null) return;
+    _storageTimer = Timer.periodic(timings.storageCheck, (_) => unawaited(sweepStorage()));
+  }
+
   /// Applies new settings. Switching polling off moves waiting tasks to
   /// stopped (they never sit in "waiting" unchecked, REG-RECORD-033); switching
   /// it on puts them back and checks every waiting task at once (§12).
@@ -448,6 +598,11 @@ final class RecordManager {
       .._pump();
     for (final runtime in _runtimes.values) {
       runtime.session?.retrySettings = _settings;
+    }
+    if (previous.storageLimitMegabytes != _settings.storageLimitMegabytes) {
+      _storageTimer?.cancel();
+      _storageTimer = null;
+      _scheduleStorage();
     }
     if (previous.polling && !_settings.polling) {
       for (final runtime in _runtimes.values.toList()) {
@@ -502,12 +657,17 @@ final class RecordManager {
     await _flush();
   }
 
+  /// Writes pending task state now; completes when it is stored. The Android
+  /// keep-alive awaits this before letting go of the process (§13, §16.1).
+  Future<void> flush() => _flush();
+
   /// Stops polling and sessions, writes pending state and releases resources.
   Future<void> dispose() async {
     if (_disposed) return;
     await stopAll();
     _disposed = true;
     _persistTimer?.cancel();
+    _storageTimer?.cancel();
     _slots.dispose();
     for (final runtime in _runtimes.values) {
       _cancelPoll(runtime);
@@ -571,7 +731,7 @@ final class RecordManager {
 
   // Sessions.
 
-  void _launch(_Runtime runtime) {
+  void _launch(_Runtime runtime, {bool force = false}) {
     runtime
       ..stopCause = null
       ..remuxOnStop = true
@@ -580,7 +740,7 @@ final class RecordManager {
     final done = Completer<void>();
     runtime.running = done.future;
     unawaited(
-      _runSession(runtime, generation).whenComplete(() {
+      _runSession(runtime, generation, force: force).whenComplete(() {
         if (identical(runtime.running, done.future)) runtime.running = null;
         done.complete();
       }),
@@ -589,8 +749,8 @@ final class RecordManager {
 
   bool _current(_Runtime runtime, int generation) => runtime.generation == generation && !runtime.removed;
 
-  Future<void> _runSession(_Runtime runtime, int generation) async {
-    final granted = await _slots.acquire(runtime);
+  Future<void> _runSession(_Runtime runtime, int generation, {bool force = false}) async {
+    final granted = await _slots.acquire(runtime, force: force);
     if (!granted) return;
     if (!_current(runtime, generation)) {
       _slots.release();

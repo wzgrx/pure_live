@@ -127,7 +127,7 @@
 | F-REC-03 | 录制设置：默认画质、优先最佳流、分段时长、最大任务数、重试次数与间隔、退避、轮询开关与间隔、读写超时档位、缓存上限、存储目录、拼音文件夹名、开机自动开始、录制弹幕、性能档位 | P1 | 保留；分段语义随中继直写调整（ADR 0005） | `lib/recorder/pages/record_settings/record_settings_page.dart`；`lib/recorder/consts/recorder_config.dart:99-296` |
 | F-REC-04 | 录制弹幕与视频同步保存 | P1 | 保留 | `lib/recorder/services/recording_danmaku_service.dart` |
 | F-REC-05 | 录制文件处理与合并（FFmpegKit 转封装） | P1 | **重新设计**：中继直写 FLV/TS，按需用共享 FFmpeg 转 MP4；去掉 FFmpegKit（ADR 0005） | `lib/recorder/services/video_processor_service.dart`；`ffmpeg_service.dart` |
-| F-REC-06 | Android 后台录制：前台服务、唤醒锁、异常中断处理 | P1 | 保留 [待确认：Android 15 起 dataSync 前台服务每天限 6 小时，长时间录制的应对办法] | `android/app/src/main/kotlin/com/mystyle/pure_live/RecorderForegroundService.kt`；`recorder_controller.dart:1013-1060` |
+| F-REC-06 | Android 后台录制：前台服务、唤醒锁、异常中断处理 | P1 | 保留；服务类型改为 `specialUse`，避开 Android 15 起 dataSync 每天 6 小时的上限（spec/modules/record.md §16.1，2026-09-28） | `android/app/src/main/kotlin/com/mystyle/pure_live/RecorderForegroundService.kt`；`recorder_controller.dart:1013-1060` |
 | F-REC-07 | 启动 3 秒后按需恢复未完成的录制任务 | P1 | 保留 | `lib/common/global/initial_services.dart:50-92`（诊断 05 §④7） |
 
 ## 9 历史
@@ -259,5 +259,5 @@
 
 ## 20 待确认
 
-1. F-REC-06：Android 15 起 dataSync 前台服务每天 6 小时的限制下，长时间录制怎么办（诊断 08 ①）。
+1. ~~F-REC-06：Android 15 起 dataSync 前台服务每天 6 小时的限制下，长时间录制怎么办（诊断 08 ①）~~：2026-09-28 改用 `specialUse` 类型，没有时间上限（spec/modules/record.md §16.1，docs/adr/0029-record-service.md）。
 2. 旧数据迁移相关的待确认（安卓旧路径 `pure_live/app_settings.hive` 是否有正式版用过、语言两份存储的优先级）归存储规格（`spec/modules/store.md`）处理，本清单不重复。

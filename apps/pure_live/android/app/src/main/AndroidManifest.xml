@@ -8,6 +8,9 @@
     <!-- Background play (F-BG-01): audio_service's media foreground service. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Background recording (F-REC-06, ADR 0029). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Android 17: proxies and relays on the local network (3.2.7 lesson). -->
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
@@ -92,6 +95,16 @@
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
+        </service>
+        <!-- Background recording (F-REC-06): specialUse has no daily limit,
+             unlike dataSync (ADR 0029). -->
+        <service
+            android:name=".RecordService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Live stream recording: writes a live broadcast the user chose to record to local files until the broadcast ends or the user stops it." />
         </service>
         <!-- Headset and media buttons. -->
         <receiver

@@ -9,7 +9,7 @@ import 'package:pure_live_app/features/backup/data_settings.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/health/cache_tile.dart';
 import 'package:pure_live_app/features/settings/network_settings.dart';
-import 'package:pure_live_app/features/settings/record_directory_tile.dart';
+import 'package:pure_live_app/features/settings/record_settings.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/features/system/system_settings.dart';
 import 'package:pure_live_app/l10n/strings.dart';
@@ -280,55 +280,7 @@ class SettingsGroupBody extends StatelessWidget {
         DataSyncTiles(),
         CacheTile(),
       ],
-      SettingsGroup.recording => [
-        ListTile(
-          title: const Text('录制中心'),
-          subtitle: const Text('查看和管理录制任务'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => context.go('/me/recordings'),
-        ),
-        const RecordDirectoryTile(),
-        const ChoiceSettingTile<QualityPreference>(
-          setting: Settings.recordDefaultQuality,
-          title: '默认录制画质',
-          labels: _quality,
-        ),
-        const SwitchSettingTile(setting: Settings.recordPolling, title: '开播监控', subtitle: '主播开播后自动开始录制'),
-        const SliderSettingTile(
-          setting: Settings.recordLiveCheckInterval,
-          title: '开播检查间隔（秒）',
-          min: 10,
-          max: 300,
-          divisions: 29,
-          format: _integer,
-        ),
-        const SwitchSettingTile(setting: Settings.recordAutoReconnect, title: '断线自动重连'),
-        const SliderSettingTile(
-          setting: Settings.recordMaxConcurrent,
-          title: '同时录制的数量',
-          min: 1,
-          max: 10,
-          divisions: 9,
-          format: _integer,
-        ),
-        const SliderSettingTile(
-          setting: Settings.recordSplitMinutes,
-          title: '按时长分段（分钟，0 为不分段）',
-          min: 0,
-          max: 240,
-          divisions: 48,
-          format: _integer,
-        ),
-        const SwitchSettingTile(setting: Settings.recordDanmaku, title: '同时保存弹幕', subtitle: '与视频同名的 XML 文件'),
-        const SwitchSettingTile(setting: Settings.recordRemuxToMp4, title: '录完转成 MP4'),
-        const SwitchSettingTile(setting: Settings.recordKeepSourceAfterRemux, title: '转成 MP4 后保留原始 FLV'),
-        const SwitchSettingTile(
-          setting: Settings.recordPinyinFolders,
-          title: '文件夹名用拼音',
-          subtitle: '主播名转成拼音作文件夹名，方便在不支持中文的设备上查看',
-        ),
-        const SwitchSettingTile(setting: Settings.recordResumeOnLaunch, title: '启动时继续未完成的录制'),
-      ],
+      SettingsGroup.recording => const [RecordSettingsTiles()],
       SettingsGroup.accounts => [
         ListTile(
           title: const Text('首页平台'),

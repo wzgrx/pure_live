@@ -7,13 +7,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/version.dart';
+import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/secrets.dart';
 import 'package:pure_live_app/core/store.dart';
 
-/// Backups of this app: v4 format with the app version, and the secret store
-/// so accounts can travel in a passphrase-protected section (store.md §7.3).
+/// Backups of this app: v4 format with the app version, the secret store
+/// so accounts can travel in a passphrase-protected section (store.md §7.3),
+/// and the recorder's tasks (F-BAK-01), read only when a backup runs.
 final backupServiceProvider = Provider<BackupService>(
-  (ref) => BackupService(ref.watch(storeProvider), secrets: ref.watch(secretStoreProvider), appVersion: appVersion),
+  (ref) => BackupService(
+    ref.watch(storeProvider),
+    secrets: ref.watch(secretStoreProvider),
+    recordTasks: RecordTaskBackupAdapter(() => ref.read(recordManagerProvider)),
+    appVersion: appVersion,
+  ),
 );
 
 /// What to put into a backup.
@@ -373,6 +380,7 @@ const _sectionNames = {
   'blockRules': '屏蔽词',
   'settings': '设置',
   'roomPrefs': '直播间偏好',
+  'recordTasks': '录制任务',
   'secrets': '平台登录信息',
 };
 

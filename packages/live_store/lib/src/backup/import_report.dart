@@ -31,7 +31,7 @@ final class ImportIssue {
 
   /// Machine-readable reason: `invalidRoom`, `duplicate`, `unknownKey`,
   /// `invalidValue`, `unknownTag`, `otherPlatform`, `unsupported`,
-  /// `unmatchedRoom`, `invalidItem`, `overLimit`.
+  /// `unmatchedRoom`, `invalidItem`, `overLimit`, `writeFailed`.
   final String reason;
 
   /// What was affected, for example a room key or setting id.

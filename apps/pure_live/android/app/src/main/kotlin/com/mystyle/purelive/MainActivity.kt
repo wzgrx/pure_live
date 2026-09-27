@@ -47,6 +47,8 @@ class MainActivity : AudioServiceActivity() {
         pip?.detach()
         pip = PictureInPicture(this, messenger)
         PlaybackLocks.attach(applicationContext, messenger)
+        // Background recording (F-REC-06): foreground service and locks on purelive/record.
+        RecordKeepAlive.attach(this, messenger)
         MethodChannel(messenger, "purelive/share").setMethodCallHandler { call, result ->
             when (call.method) {
                 "takePendingText" -> {

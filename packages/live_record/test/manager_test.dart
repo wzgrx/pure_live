@@ -503,6 +503,143 @@ void main() {
     });
   });
 
+  test('force start: a queued task takes an extra slot at once; the limit still holds for others (§2, §11.1)', () {
+    fakeAsync((async) {
+      final rig = _Rig(settings: const RecordSettings(maxConcurrent: 1, remuxToMp4: false));
+      unawaited(rig.manager.init());
+      unawaited(rig.manager.add(roomDetail(roomId: '1')));
+      unawaited(rig.manager.add(roomDetail(roomId: '2')));
+      async.elapse(const Duration(seconds: 2));
+      expect(rig.task('douyu:1').state, isNot(RecordState.queued));
+      expect(rig.task('douyu:2').state, RecordState.queued);
+
+      unawaited(rig.manager.forceStart('douyu:2'));
+      async.elapse(const Duration(seconds: 2));
+      expect(rig.task('douyu:2').state, RecordState.recording, reason: 'no slot, no 5 s spacing');
+      expect(rig.task('douyu:1').state, RecordState.recording);
+
+      unawaited(rig.manager.add(roomDetail(roomId: '3')));
+      async.elapse(const Duration(seconds: 10));
+      expect(rig.task('douyu:3').state, RecordState.queued, reason: 'the forced slot is an extra one');
+      unawaited(rig.manager.stop('douyu:2'));
+      async.elapse(const Duration(seconds: 10));
+      expect(rig.task('douyu:3').state, RecordState.queued, reason: 'the extra slot ends with its session');
+      unawaited(rig.manager.stop('douyu:1'));
+      async.elapse(const Duration(seconds: 10));
+      expect(rig.task('douyu:3').state, isNot(RecordState.queued));
+      unawaited(rig.manager.dispose());
+      async.elapse(const Duration(seconds: 5));
+    });
+  });
+
+  test('force start: a waiting task starts now; offline goes back to waiting (§2, §12)', () {
+    fakeAsync((async) {
+      final rig = _Rig(settings: const RecordSettings(polling: true, maxConcurrent: 1, remuxToMp4: false));
+      rig.rooms.live = false;
+      unawaited(rig.manager.init());
+      unawaited(rig.manager.add(roomDetail(), start: false));
+      async.flushMicrotasks();
+      expect(rig.task().state, RecordState.waitingLive);
+
+      // Offline: the strict check ends the session and polling resumes.
+      unawaited(rig.manager.forceStart('douyu:9999'));
+      async.elapse(const Duration(seconds: 2));
+      expect(rig.states(), containsAllInOrder([RecordState.queued, RecordState.resolving, RecordState.waitingLive]));
+      expect(rig.task().state, RecordState.waitingLive);
+      expect(rig.task().nextCheckAt, isNotNull);
+
+      // Live: recorded at once, not at the next check 30 s away.
+      rig.rooms.live = true;
+      unawaited(rig.manager.forceStart('douyu:9999'));
+      async.elapse(const Duration(seconds: 2));
+      expect(rig.task().state, RecordState.recording);
+      expect(rig.task().nextCheckAt, isNull);
+      unawaited(rig.manager.dispose());
+      async.elapse(const Duration(seconds: 5));
+    });
+  });
+
+  test('storage limit: every minute the oldest files go; the recording folder is kept (§15)', () {
+    fakeAsync((async) {
+      const mb = 1024 * 1024;
+      final rig = _Rig(settings: const RecordSettings(storageLimitMegabytes: 1, remuxToMp4: false));
+      final old = DateTime.utc(2026);
+      rig.files
+        ..put('/rec/huya/someone/2026-01-01/a_001.flv', List.filled(2 * mb, 0), modified: old)
+        ..put('/rec/huya/someone/2026-01-02/b_001.flv', List.filled(2 * mb, 0), modified: old);
+      unawaited(rig.manager.init());
+      unawaited(rig.manager.add(roomDetail()));
+      async.elapse(const Duration(seconds: 30));
+      expect(rig.files.paths, hasLength(greaterThanOrEqualTo(3)), reason: 'nothing deleted before the first check');
+      async.elapse(const Duration(seconds: 31));
+      expect(rig.files.paths.where((path) => path.startsWith('/rec/huya')), isEmpty);
+      expect(rig.files.directories, isNot(contains('/rec/huya')));
+      final directory = rig.task().session!.layout.directory;
+      expect(rig.files.paths.where((path) => path.startsWith(directory)), isNotEmpty, reason: 'protected');
+
+      // Switched off: no more checks.
+      unawaited(rig.manager.updateSettings(rig.manager.settings.copyWith(storageLimitMegabytes: 0)));
+      rig.files.put('/rec/kuaishou/x/2026-01-01/c_001.flv', List.filled(2 * mb, 0), modified: old);
+      async.elapse(const Duration(minutes: 3));
+      expect(rig.files.paths, contains('/rec/kuaishou/x/2026-01-01/c_001.flv'));
+      unawaited(rig.manager.dispose());
+      async.elapse(const Duration(seconds: 5));
+    });
+  });
+
+  test('importTasks replaces idle tasks, keeps active ones and waits for monitored rooms (store.md §7.2)', () {
+    fakeAsync((async) {
+      final rig = _Rig(settings: const RecordSettings(polling: true, remuxToMp4: false));
+      unawaited(rig.manager.init());
+      unawaited(rig.manager.add(roomDetail(roomId: '1')));
+      async.elapse(const Duration(seconds: 3));
+      rig.rooms.live = false;
+      unawaited(rig.manager.add(roomDetail(roomId: '2'), start: false));
+      unawaited(rig.manager.add(roomDetail(roomId: '3'), start: false));
+      async.flushMicrotasks();
+      unawaited(rig.manager.stop('douyu:3'));
+      async.flushMicrotasks();
+      expect(rig.task('douyu:2').state, RecordState.waitingLive);
+
+      int? written;
+      unawaited(
+        rig.manager
+            .importTasks([
+              RecordTask(
+                room: RoomRef('douyu', '2'),
+                createdAt: DateTime.utc(2026),
+                state: RecordState.stopped,
+                stopCause: StopCause.user,
+                quality: RecordQuality.smooth,
+              ),
+              RecordTask(
+                room: RoomRef('douyu', '4'),
+                createdAt: DateTime.utc(2026),
+                state: RecordState.stopped,
+                stopCause: StopCause.pollingOff,
+                snapshot: const RecordRoomSnapshot(anchorName: '四'),
+              ),
+              RecordTask(room: RoomRef('douyu', '1'), createdAt: DateTime.utc(2026), state: RecordState.stopped),
+            ])
+            .then((value) => written = value),
+      );
+      async.elapse(const Duration(seconds: 1));
+      expect(written, 2, reason: 'the recording task is left alone');
+      expect(rig.task('douyu:1').state, RecordState.recording);
+      expect(rig.manager.task('douyu:3'), isNull, reason: 'not in the backup and idle: removed');
+      expect(rig.task('douyu:2').state, RecordState.stopped);
+      expect(rig.task('douyu:2').stopCause, StopCause.user);
+      expect(rig.task('douyu:2').quality, RecordQuality.smooth);
+      expect(rig.task('douyu:4').state, RecordState.waitingLive);
+      expect(rig.task('douyu:4').snapshot.anchorName, '四');
+      expect(rig.manager.tasks.map((task) => task.key), ['douyu:1', 'douyu:2', 'douyu:4']);
+      expect(rig.store.stored.keys, containsAll(['douyu:1', 'douyu:2', 'douyu:4']));
+      expect(rig.store.stored.keys, isNot(contains('douyu:3')));
+      unawaited(rig.manager.dispose());
+      async.elapse(const Duration(seconds: 5));
+    });
+  });
+
   test('JsonFileRecordTaskStore round-trips tasks atomically', () async {
     final dir = await Directory.systemTemp.createTemp('live_record_store');
     addTearDown(() => dir.delete(recursive: true));

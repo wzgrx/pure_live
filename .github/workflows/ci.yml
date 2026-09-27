@@ -1,12 +1,10 @@
 name: CI
 
-# v4 gate on every push to master and every pull request (docs/rewrite/PLAN.md, phase 3).
-# Runs tools/gate/gate.sh --all: dependency direction, format/analyze/tests for every
-# v4 workspace member, the legacy app's analyze and tests (legacy/, ADR 0013), and the tool tests.
+# Manual only (docs/adr/0014-v4-first.md): Actions minutes are used up and hosted
+# runners are slow, so the required gate runs locally before every push:
+#   bash tools/gate/gate.sh --all
+# This workflow runs the same command on demand.
 on:
-  push:
-    branches: [master]
-  pull_request:
   workflow_dispatch:
 
 permissions:

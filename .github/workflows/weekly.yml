@@ -2,9 +2,9 @@ name: Weekly latest-version check
 
 # spec/constitution.md, rule 3: toolchain, forks and dependencies track the latest
 # official stable releases. Reports what is behind; upgrades go through the gate.
+# Manual only (docs/adr/0014-v4-first.md); run check_latest locally instead:
+#   GITHUB_TOKEN=$(gh auth token) dart run tools/check_latest/bin/check_latest.dart --report-only
 on:
-  schedule:
-    - cron: "17 2 * * 1"
   workflow_dispatch:
 
 permissions:

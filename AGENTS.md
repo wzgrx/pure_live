@@ -3,9 +3,9 @@
 ## v4 rewrite
 
 - A full rewrite is in progress on `master`: plan [docs/rewrite/PLAN.md](docs/rewrite/PLAN.md), rules and accepted decisions [spec/constitution.md](spec/constitution.md), decisions [docs/adr/](docs/adr/README.md), progress [docs/rewrite/STATUS.md](docs/rewrite/STATUS.md).
-- The current 3.x app lives in `legacy/` (ADR 0013) and keeps shipping until v4.0.0; run its commands from `legacy/`. New v4 code goes into `packages/`, `tools/` and `apps/pure_live`; `legacy/lib/` only gets fixes and wiring. The root `pubspec.yaml` only declares the pub workspace; `pubspec.lock` stays at the root.
+- The 3.x app lives in `legacy/` (ADR 0013) and is frozen (ADR 0014): v3.2.11 was the last 3.x release, it is no longer built, and it only serves as reference code for the specs. All new work is v4 code in `packages/`, `tools/` and `apps/pure_live`; v4 package APIs need not stay compatible with `legacy/`. The root `pubspec.yaml` only declares the pub workspace; `pubspec.lock` stays at the root.
 - The installed 3.x apps read `assets/version.json` and `assets/releases.json` from the root of `master`; `legacy/assets/` holds the packaged copies. Update both copies together, only with a published release.
-- v4 gate: `tools/gate/gate.sh` (changed members) or `tools/gate/gate.sh --all` (CI: every member plus legacy analyze/tests and `legacy/tool/tests`). Dependency direction lives in `tools/gate/check_deps.py`; pinned toolchain in `toolchain.env`; `dart run tools/check_latest/bin/check_latest.dart` compares it with the latest official releases.
+- v4 gate: `tools/gate/gate.sh` (changed members) or `tools/gate/gate.sh --all` (every member; required locally before every push). GitHub Actions minutes are used up: `ci.yml` and `weekly.yml` are manual only, and builds run on the local machines (ADR 0014). `tools/gate/gate.sh --legacy` runs the frozen app's checks on request. Dependency direction lives in `tools/gate/check_deps.py`; pinned toolchain in `toolchain.env`; `dart run tools/check_latest/bin/check_latest.dart` compares it with the latest official releases.
 
 ## Scope and execution
 

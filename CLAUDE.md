@@ -5,6 +5,7 @@
 ## v4 rewrite
 
 - The rewrite plan is approved and Claude makes the remaining choices: record each lasting one in `docs/adr/`, update `docs/rewrite/STATUS.md` as phases move, and follow `spec/constitution.md`.
+- 3.x is frozen and no longer built (ADR 0014). Build v4 locally (WSL for Android, Windows for Windows), never on GitHub Actions: its minutes are used up. Run `tools/gate/gate.sh --all` before every push.
 
 ## Branch and WSL environment
 

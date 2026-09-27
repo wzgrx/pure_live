@@ -573,9 +573,9 @@ flowchart LR
 | 0 诊断与基线 | 子代理并行诊断各模块；测量旧版性能和体积基线 | `docs/rewrite/DIAGNOSIS.md` 和基线数据落档 |
 | 1 规格与样本 | 从旧代码反推规格；整理回归清单；为主力平台录制真实接口样本 | 每条结论附旧代码位置；待确认项由 Claude 查证后清零 |
 | 2 设计方向与设计系统 | 调研、设计原则、设计系统页面、关键页面稿 | 独立子代理对照原则复核通过 |
-| 3 工程底座 | workspace、旧应用收进 `legacy/`、最新工具链、lint、hooks、CI、`live_cli`、`check_latest` | 旧应用照常构建发布；CI 全绿 |
-| 4 平台与网络层 | `live_net` + `live_core`，先做 5 个主力平台，通过开关接回旧应用 | 样本测试和探针全过；旧应用发 3.3.x 验证 |
-| 5 播放、弹幕、录制层 | `live_media`、`live_danmaku`、`live_record`；去掉 FFmpegKit 和 IJK | 契约测试、真机播放和录制、体积门禁 |
+| 3 工程底座 | workspace、旧应用收进 `legacy/`、最新工具链、lint、hooks、本机门禁、`live_cli`、`check_latest` | 本机门禁全绿（ADR 0014） |
+| 4 平台与网络层 | `live_net` + `live_core`，先做 5 个主力平台 | 样本测试和探针全过（3.3.x 取消，ADR 0014） |
+| 5 播放、弹幕、录制层 | `live_media`、`live_danmaku`、`live_record`；去掉 FFmpegKit 和 IJK；与第 6 阶段合并推进（ADR 0014） | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | `live_ui` 和各页面；预览版包名 `.next` | 截图测试、五个宽度等级、性能门禁；预览版试用 |
 | 7 其余平台、TV、桌面 | 其余 28 个平台逐个评估后批量迁移；TV 焦点体系；Windows 细节 | 每个平台探针通过或明确下线 |
 | 8 对齐验收与切换 | 对齐清单、旧数据迁移、正式签名、发布流水线 | 发布 v4.0.0，删除 `legacy/` |

@@ -7,6 +7,7 @@ export 'src/color_tokens.dart';
 export 'src/danmaku/danmaku_lanes.dart';
 export 'src/danmaku/danmaku_models.dart';
 export 'src/danmaku/danmaku_text.dart' show danmakuDisplayText;
+export 'src/danmaku/danmaku_view.dart';
 export 'src/format.dart';
 export 'src/metrics.dart';
 export 'src/room_card_view.dart';

@@ -32,7 +32,7 @@
 | 路径 | 内容 | v4 处理 | 证据 |
 |---|---|---|---|
 | `HIVE_DB/app_settings.hive`（+ `.lock`） | 唯一的 Hive box，见 §1.3–1.6 | 只读导入，保留原文件 | hive_pref_util.dart:40-46；initialized.dart:65-68 |
-| `IPTV_CACHE/pure_live_tv/pure_live_tv.db` | IPTV drift 库，见 §1.7 | 原库沿用 | database.dart:631-647 |
+| `IPTV_CACHE/pure_live_tv/pure_live_tv.db` | IPTV drift 库，见 §1.7 | 只读导入到主库，不升级（iptv.md §9） | database.dart:631-647 |
 | `IPTV_CACHE/pure_live_tv/playlists/` | 用户导入的播放列表文件（`<毫秒>_<uuid><扩展名>`） | 原样沿用 | playlist_storage.dart:9-26 |
 | `IPTV_CACHE/categories.json`、`hot.m3u` | IPTV 分类、热门列表缓存 | 沿用，可重新下载 | app_path_manager.dart:38-40 |
 | `DOWNLOADS/` | 下载的字体 `fonts/<id>/`、更新包；可由 `downloadDirectoryPath` 改到别处；Android 默认为系统下载目录下 | 原样保留，路径设置迁移 | :23, 374-381；cache_controller.dart:104-135 |
@@ -264,7 +264,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 
 ## 3. v4 数据模型
 
-主库用 drift（最新稳定版），文件 `<根>/DB/pure_live.db` **[决定]**；IPTV 库原位沿用（§1.7）。所有时间用 UTC 毫秒。
+主库用 drift（最新稳定版），文件 `<根>/DB/pure_live.db` **[决定]**；IPTV 数据也在主库（schema 2 的 `iptv_*` 表，见 [iptv.md](iptv.md) §7），旧 IPTV 库只读导入（§1.7）**[决定]**（2026-09-28 修订，原为“原位沿用”）。所有时间用 UTC 毫秒。
 
 | 表 | 关键列 | 约束与说明 |
 |---|---|---|
@@ -422,7 +422,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 ### 6.7 回退保障
 
 - 旧 Hive 文件、旧 SharedPreferences 一律不改，回退到 3.3.x 时旧版读到的是迁移时刻的数据（v4 期间的新改动不会回写）。
-- IPTV 库：旧版遇到更高的 schemaVersion 会直接报错（database.dart:54-56）。v4 第一次升级 IPTV 库结构之前，必须先把库文件复制到本次的 `MIGRATION_BACKUP/app-v4-…/`，并在说明里告诉回退用户如何还原 **[决定]**。
+- IPTV 库：旧版遇到更高的 schemaVersion 会直接报错（database.dart:54-56）。v4 不修改旧 IPTV 库（数据在主库，旧库只读导入），回退后旧版照常读到迁移时的 IPTV 数据 **[决定]**（2026-09-28 修订，原为“升级前先备份库文件”）。
 
 ## 7. 备份格式 v4 与旧格式兼容
 
@@ -445,7 +445,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
     "roomPrefs": [],
     "recordTasks": [],
     "webdavProfiles": [{"name": "…", "baseUrl": "…", "username": "…"}],
-    "iptv": {"providers": [], "favoriteLists": [], "failoverGroups": [], "epgSources": [], "epgMappings": []}
+    "iptv": {"playlists": [{"name": "…", "url": "…", "autoSync": true, "order": 0}], "epgSources": [{"name": "…", "url": "…", "autoSync": true, "selected": true, "order": 0}]}
   },
   "secrets": null
 }
@@ -455,7 +455,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 - 房间以 `platform` + `roomId` 表示，附展示快照；不写内部行 id。
 - settings 只含注册表中 `synced` 和 `device` 作用域的键；`device` 只在同一平台家族之间恢复。
 - 不含：签名 URL、Cookie、密码（除非 §7.3）、EPG 节目数据、缓存、录制文件本身。
-- iptv 分区包含源（不含 Xtream 密码）、收藏列表、备用组、EPG 源和映射 **[决定]**（旧备份没有 IPTV 数据：诊断 05 ⑦-7）。
+- iptv 分区包含网址来源的播放列表和节目单源（名称、地址、播放列表 UA、自动同步、当前节目单、顺序）**[决定]**（旧备份没有 IPTV 数据：诊断 05 ⑦-7）。文件来源、频道和节目不进备份，换设备后重新同步；收藏列表、备用组已合并进关注和线路（product F-IPTV-08、F-IPTV-11），节目单匹配每次自动计算，都不需要备份（2026-09-28 修订，见 iptv.md §7）。读取时 `providers` 是 `playlists` 的别名；Xtream 以后加入时密码仍不进备份。
 - 文件名：`purelive_v4_<yyyy-MM-ddTHH_mm_ss>_<uuid>.json`，关注专用为 `purelive_v4_follows_…json` **[决定]**。写 `.part` 后改名，替换已有文件时先保留 `.previous`，与旧版一致（backup_controller.dart:363-405）。
 - 旧版遇到 v4 文件会因为找不到已识别的分区而拒绝，不会写坏数据（backup_controller.dart:146-168）。
 

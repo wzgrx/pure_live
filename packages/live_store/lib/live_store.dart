@@ -1,5 +1,6 @@
 /// Storage of Pure Live v4 (spec/modules/store.md, ADR 0004): the drift
-/// database with typed stores and the settings registry. Pure Dart.
+/// database with typed stores, the settings registry and encrypted secrets.
+/// Pure Dart.
 library;
 
 export 'src/block_rules.dart' show BlockKind, BlockRule, BlockRuleStore;
@@ -11,6 +12,9 @@ export 'src/meta_store.dart' show MetaStore;
 export 'src/room_prefs.dart' show RoomPrefStore;
 export 'src/room_store.dart' show RoomStore;
 export 'src/rooms.dart' show RoomSnapshot, StoredRoom;
+export 'src/secrets/secret_cipher.dart' show AesGcmSecretCipher, SecretCipher;
+export 'src/secrets/secret_store.dart'
+    show FileSecretBackend, MemorySecretBackend, SecretBackend, SecretRefs, SecretStore;
 export 'src/settings/registry.dart' show Settings;
 export 'src/settings/setting.dart'
     show

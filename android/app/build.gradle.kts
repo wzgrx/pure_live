@@ -34,8 +34,13 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     buildFeatures {
         buildConfig = true
     }
-    compileSdk = 37
-    ndkVersion = flutter.ndkVersion
+    // Latest stable platform (API 37, minor 2) and NDK; both pinned in toolchain.env.
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
+    ndkVersion = "30.0.16248370"
     lint {
         disable.add("NullSafeMutableLiveData")
         checkReleaseBuilds = true

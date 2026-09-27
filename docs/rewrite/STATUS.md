@@ -48,20 +48,22 @@
 - `.claude/settings.json` hooks：编辑后格式化 v4 的 Dart 文件；会话结束时运行门禁。
 - `dependency_overrides` 复查：9 个越过 SDK 锁定的覆盖删掉会让 8 个包降到非最新版，保留；路径覆盖按替代进度移除（ADR 0008）。
 
-`check_latest` 首次结果（2026-09-27）：141 项中 137 项已是最新，以下 4 项落后，逐项升级并验证：
+`check_latest` 首次结果（2026-09-27）：141 项中 137 项已是最新，落后的 4 项已升级，现在 0 项落后：
 
-| 项目 | 当前 | 最新 |
-|---|---|---|
-| JDK（Temurin） | 26 | 27 |
-| Android NDK | 27.3.13750724（Flutter 默认） | 30.0.16248370 |
-| Kotlin | 2.2.10（AGP 内置） | 2.4.20 |
-| compileSdk | 37 | 37.2 |
+| 项目 | 原来 | 现在 | 说明 |
+|---|---|---|---|
+| JDK（Temurin） | 26 | 27 | WSL、Windows 本地构建和 CI 工作流都改为 27；字节码目标仍为 17 |
+| Android NDK | 28.2.13676358（Flutter 默认；`toolchain.env` 原先误写为 27.3） | 30.0.16248370 | 应用和全部插件模块统一用同一个 NDK，APK 里的 `libc++_shared.so` 随之换成 NDK 30 的 |
+| Kotlin | 2.2.10（AGP 内置） | 2.4.20 | 在 `android/build.gradle.kts` 声明 KGP；`tool/audit_built_in_kotlin.py` 检查它与 `toolchain.env` 一致 |
+| compileSdk | 37 | 37.2 | |
+
+验证：arm64 正式包构建通过，22 个原生库都是 16KB 对齐。**真机冒烟（播放、弹幕、录制）在下一次 3.3.x 发布前做**，因为 C++ 运行库换了版本；自编的 libmpv 用 NDK 29 构建，第 5 阶段重建原生库时统一到 NDK 30。
+
+CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4 成员、`tool/tests` 58 个）。
 
 还没做：
 
-- 以上 4 项升级。
-- 确认 CI 全绿。
-- 新增 `packages/live_platform`。
+- 新增 `packages/live_platform`（第 5 阶段需要原生接口时再建）。
 
 ## 已完成的前置工作
 
@@ -91,3 +93,4 @@
 - 2026-09-27：第 0 阶段完成：8 份模块诊断、旧版基线（Windows、K90）、决策记录 0003–0006；依据许可证诊断，播放内核改为全平台只用 mpv。进入第 1 阶段。
 - 2026-09-27：第 1 阶段规格写完（产品、5 个平台、6 个模块、回归清单）。第 3 阶段开工：workspace、`live_core`、`live_cli`、`check_latest`、依赖方向检查、门禁脚本、CI、hooks。
 - 2026-09-27：第 2 阶段设计原则定稿（[spec/design/principles.md](../../spec/design/principles.md)）：品牌蓝 `#2E6FE0`，一级入口为关注、发现、搜索、我的，PLAN 第 07–09 节与它冲突处以它为准。
+- 2026-09-27：工具链升级到最新：JDK 27、NDK 30.0.16248370、Kotlin 2.4.20、compileSdk 37.2；ADR 0008 保留越过 SDK 锁定的依赖覆盖。

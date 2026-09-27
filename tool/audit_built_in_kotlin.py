@@ -16,6 +16,8 @@ GRADLE_PROPERTIES = ROOT / "android" / "gradle.properties"
 SETTINGS = ROOT / "android" / "settings.gradle.kts"
 APP_GRADLE = ROOT / "android" / "app" / "build.gradle.kts"
 GRADLE_WRAPPER = ROOT / "android" / "gradle" / "wrapper" / "gradle-wrapper.properties"
+ROOT_GRADLE = ROOT / "android" / "build.gradle.kts"
+TOOLCHAIN = ROOT / "toolchain.env"
 LOCAL_PLUGIN_ROOTS = (
     ROOT / "plugins" / "built_in_kotlin",
     ROOT / "plugins" / "flv_lzc",
@@ -111,6 +113,22 @@ def main() -> int:
     gradle_match = re.search(r"gradle-([0-9.]+)-(?:all|bin)\.zip", wrapper)
     if not gradle_match or tuple(map(int, gradle_match.group(1).split("."))) < (9, 5, 0):
         errors.append("Gradle wrapper must use 9.5.0 or newer for AGP 9.3")
+
+    # The root build file may lift built-in Kotlin to a newer KGP (AGP 9 docs);
+    # it must match the pinned toolchain so the compiler version is not guessed.
+    pinned = re.search(r"(?m)^KOTLIN_VERSION=(\S+)$", TOOLCHAIN.read_text(encoding="utf-8"))
+    classpath = re.search(
+        r'classpath\(\s*"org\.jetbrains\.kotlin:kotlin-gradle-plugin:([0-9.]+)"\s*\)',
+        without_comments(ROOT_GRADLE.read_text(encoding="utf-8")),
+    )
+    if not pinned:
+        errors.append("toolchain.env must pin KOTLIN_VERSION")
+    elif classpath and classpath.group(1) != pinned.group(1):
+        errors.append(
+            f"android/build.gradle.kts uses KGP {classpath.group(1)}, toolchain.env pins {pinned.group(1)}"
+        )
+    elif not classpath and pinned.group(1) != "2.2.10":
+        errors.append("toolchain.env pins a KGP newer than AGP's bundled 2.2.10, but android/build.gradle.kts does not declare it")
 
     for path in gradle_files():
         text = without_comments(path.read_text(encoding="utf-8"))

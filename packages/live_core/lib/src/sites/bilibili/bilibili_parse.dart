@@ -394,6 +394,7 @@ abstract final class BilibiliParse {
       cover: _image(item['cover'], '@400w.jpg') ?? _image(item['user_cover'], '@400w.jpg'),
       area: jsonString(item['area_v2_name']) ?? jsonString(item['area_name']) ?? jsonString(item['areaName']),
       audience: _audience(item['online'], item['watched_show'], LiveState.live),
+      avatar: _image(item['face']),
     );
   }
 

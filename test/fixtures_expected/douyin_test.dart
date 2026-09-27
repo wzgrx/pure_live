@@ -14,6 +14,7 @@ import 'package:pure_live/common/utils/live_url_tool.dart';
 import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/core/site/douyin/douyin_search.dart';
 import 'package:pure_live/core/site/douyin/douyin_site.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 
 import 'douyin_support.dart';
 import 'support.dart';
@@ -52,6 +53,9 @@ const _detailGenerator =
 
 void main() {
   setUpDouyinSettings();
+  // These tests freeze the legacy parsers; keep lists off the v4 bridge.
+  setUpAll(() => V4Bridge.platformsOverride = const {});
+  tearDownAll(() => V4Bridge.platformsOverride = null);
 
   test('S01-home', () async {
     final fixture = _load('S01-home');

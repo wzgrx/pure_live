@@ -130,6 +130,7 @@ abstract final class DouyinParse {
           cover: _image(room['cover']),
           area: _text(item['tag_name']) ?? areaName,
           audience: _audience(room),
+          avatar: _image(owner['avatar_thumb']),
         ),
       );
     }
@@ -171,6 +172,7 @@ abstract final class DouyinParse {
           cover: _image(room['cover']) ?? _image(envelope['cover']),
           area: _feedArea(envelope, room),
           audience: _audience(room),
+          avatar: _image(owner['avatar_thumb']) ?? _image(owner['avatar_large']) ?? _image(envelope['avatar_thumb']),
         ),
       );
     }

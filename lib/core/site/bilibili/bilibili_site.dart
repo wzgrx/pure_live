@@ -11,6 +11,7 @@ import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/common/convert_helper.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/danmaku/bilibili_danmaku.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:pure_live/core/utils/live_quality_label.dart';
 import 'package:pure_live/modules/live_play/controllers/player_controller.dart';
 
@@ -63,6 +64,7 @@ class BiliBiliSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoo
 
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.categories(id);
     try {
       List<LiveCategory> categories = [];
       var result = await HttpClient.instance.getJson(
@@ -94,6 +96,7 @@ class BiliBiliSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoo
 
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.areaRooms(id, category, page);
     try {
       const baseUrl = "https://api.live.bilibili.com/xlive/web-interface/v1/second/getList";
       var url =
@@ -303,6 +306,7 @@ class BiliBiliSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoo
 
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.recommended(id, page);
     const rankedUrl = 'https://api.live.bilibili.com/room/v1/Area/getListByAreaID';
     Object? rankedError;
 

@@ -6,6 +6,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/core/site/kuaishou/kuaishou_site.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:pure_live/model/live_category.dart';
 
 import 'kuaishou_support.dart';
@@ -18,6 +19,9 @@ FixtureSample _load(String sample) => FixtureSample.load('kuaishou', sample);
 
 void main() {
   setUpAll(setUpKuaishouLegacy);
+  // These tests freeze the legacy parsers; keep lists off the v4 bridge.
+  setUpAll(() => V4Bridge.platformsOverride = const {});
+  tearDownAll(() => V4Bridge.platformsOverride = null);
 
   group('S01 category/data', () {
     // Pages that end a first-level category, so the legacy traversal

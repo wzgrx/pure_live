@@ -60,6 +60,8 @@ void main() {
         final legacy = (fixture.legacy as List).cast<Map<String, dynamic>>();
         expectCardsMatchLegacy(result.items, legacy);
         expect(result.items.map((r) => r.cover?.toString()), legacy.map((r) => r['cover']));
+        // `face` is the streamer's avatar; the 3.3.x bridge shows it on legacy cards.
+        expect(result.items.map((r) => r.avatar?.toString() ?? ''), legacy.map((r) => r['avatar']));
         // Neither endpoint reports an end: only the empty page is the last one.
         expect(result.isLast, legacy.isEmpty);
       });

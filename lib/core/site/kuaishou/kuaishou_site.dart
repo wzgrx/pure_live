@@ -11,6 +11,7 @@ import 'package:pure_live/core/common/http_client.dart';
 import 'package:pure_live/model/live_play_quality.dart';
 import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/danmaku/kuaishou_danmaku.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/modules/live_play/controllers/player_controller.dart';
@@ -51,6 +52,7 @@ class KuaishowSite implements LiveSite, LiveSiteRoomRefresher, LiveSiteRecordRoo
 
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.categories(id);
     List<LiveCategory> categories = [
       LiveCategory(id: "1", name: "热门", children: []),
       LiveCategory(id: "2", name: "网游", children: []),

@@ -701,6 +701,8 @@ void _expectCards(List<RoomCard> cards, List<Map<String, dynamic>> legacy, Map<S
   expect(cards.map((r) => r.title), legacy.map((r) => r['title']));
   expect(cards.map((r) => r.anchorName), legacy.map((r) => r['nick']));
   expect(cards.map((r) => r.cover?.toString()), legacy.map((r) => _blankToNull(r['cover'])));
+  // The streamer's avatar (`owner.avatar_thumb`), shown on legacy cards by the 3.3.x bridge.
+  expect(cards.map((r) => r.avatar?.toString()), legacy.map((r) => _blankToNull(r['avatar'])));
   expect(cards.map((r) => r.state == LiveState.live), legacy.map((r) => r['status']));
   for (final (index, card) in cards.indexed) {
     _expectAudience(card.audience, legacy[index], raw[card.ref.roomId]!);

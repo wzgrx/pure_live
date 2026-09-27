@@ -8,6 +8,7 @@ import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/common/services/settings/bilibili_account_service.dart';
 import 'package:pure_live/common/services/settings_service.dart';
 import 'package:pure_live/core/site/bilibili/bilibili_site.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:pure_live/modules/account/bilibili/qr_login_controller.dart';
 
 import 'bilibili_support.dart';
@@ -15,6 +16,9 @@ import 'support.dart';
 
 void main() {
   setUpAll(setUpBilibiliSettings);
+  // These tests freeze the legacy parsers; keep lists off the v4 bridge.
+  setUpAll(() => V4Bridge.platformsOverride = const {});
+  tearDownAll(() => V4Bridge.platformsOverride = null);
 
   test('S01-guest', () async {
     final fixture = bilibiliSample('S01-guest');

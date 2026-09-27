@@ -13,6 +13,7 @@ import 'package:pure_live/core/danmaku/douyin_danmaku.dart';
 import 'package:pure_live/core/site/douyin/douyin_audience.dart';
 import 'package:pure_live/core/interface/live_danmaku.dart';
 import 'package:pure_live/core/site/douyin/douyin_search.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:pure_live/core/utils/douyin/douyin_utils.dart';
 import 'package:pure_live/core/utils/douyin/douyin_request_params.dart';
 import 'package:pure_live/core/utils/live_quality_label.dart';
@@ -131,6 +132,7 @@ class DouyinSite implements LiveSite, LiveSiteRecordRoomResolver {
 
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.categories(id);
     List<LiveCategory> categories = [];
     var result = await HttpClient.instance.getText(
       "https://live.douyin.com/",
@@ -175,6 +177,7 @@ class DouyinSite implements LiveSite, LiveSiteRecordRoomResolver {
 
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.areaRooms(id, category, page);
     var ids = category.areaId?.split(',');
     var partitionId = ids?[0];
     var partitionType = ids?[1];
@@ -233,6 +236,7 @@ class DouyinSite implements LiveSite, LiveSiteRecordRoomResolver {
 
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.recommended(id, page);
     try {
       final result = await HttpClient.instance.getJson(
         "https://live.douyin.com/webcast/feed/",

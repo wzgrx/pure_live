@@ -11,7 +11,7 @@ import 'package:window_manager/window_manager.dart';
 
 /// The `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` value of this app.
 /// The preview uses its own name so it never touches 3.x's `PureLive` entry;
-/// the release that replaces 3.x switches to `PureLive` (ADR draft-system).
+/// the release that replaces 3.x switches to `PureLive` (ADR 0025).
 const autostartValueName = 'PureLiveNext';
 
 /// The Windows shell around the main window: tray icon (F-WIN-03), close

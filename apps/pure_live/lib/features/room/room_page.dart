@@ -655,7 +655,9 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     ref
       ..listen(portraitAdaptationSetting, (_, _) => _sourceChanged())
       ..watch(portraitAdaptationSetting)
-      ..watch(portraitFullscreenPolicySetting);
+      ..watch(portraitFullscreenPolicySetting)
+      // The switch list needs this run's check of the follows (F-FAV-03).
+      ..listen(followRefreshProvider, (_, _) {});
     final portraitArea = ref.watch(portraitDanmakuAreaSetting);
     final pip = ref.watch(pipProvider.select((pip) => pip.videoOnly));
     final pipLook = pip ? ref.watch(pipDanmakuProvider) : null;

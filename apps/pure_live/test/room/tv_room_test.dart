@@ -72,6 +72,8 @@ void main() {
           blockRulesProvider.overrideWith((ref) => Stream.value(const [])),
           playbackSessionProvider.overrideWith((ref) => session),
           followsProvider.overrideWith((ref) => Stream.value(follows)),
+          // This run already checked the follows (F-FAV-03).
+          followRefreshProvider.overrideWith(_Checked.new),
           historyProvider.overrideWith((ref) => Stream.value(const [])),
         ],
         child: MaterialApp(
@@ -208,4 +210,11 @@ void main() {
     expect(showing(tester), '1');
     await tester.pump(const Duration(seconds: 5));
   });
+}
+
+/// A first refresh that already finished.
+class _Checked extends FollowRefreshNotifier {
+  @override
+  Future<FollowRefreshResult?> build() async =>
+      FollowRefreshResult(checked: 1, failedPlatforms: const {}, at: DateTime(2020));
 }

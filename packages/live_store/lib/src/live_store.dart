@@ -7,6 +7,7 @@ import 'package:live_store/src/database/database.dart';
 import 'package:live_store/src/follow_areas.dart';
 import 'package:live_store/src/follows.dart';
 import 'package:live_store/src/history.dart';
+import 'package:live_store/src/iptv.dart';
 import 'package:live_store/src/meta_store.dart';
 import 'package:live_store/src/room_prefs.dart';
 import 'package:live_store/src/room_store.dart';
@@ -30,6 +31,7 @@ final class LiveStore {
       tags = TagStore(database),
       blockRules = BlockRuleStore(database),
       roomPrefs = RoomPrefStore(database),
+      iptv = IptvStore(database),
       meta = MetaStore(database) {
     history = HistoryStore(database, settings);
   }
@@ -98,6 +100,9 @@ final class LiveStore {
 
   /// Per-room preferences.
   final RoomPrefStore roomPrefs;
+
+  /// IPTV playlists, guide sources and programmes.
+  final IptvStore iptv;
 
   /// Internal bookkeeping.
   final MetaStore meta;

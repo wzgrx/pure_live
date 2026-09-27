@@ -12,6 +12,16 @@ export 'src/block_rules.dart' show BlockKind, BlockRule, BlockRuleStore;
 export 'src/follow_areas.dart' show FollowAreaStore, FollowedArea;
 export 'src/follows.dart' show FollowSource, FollowStore, FollowedRoom;
 export 'src/history.dart' show HistoryEntry, HistoryStore;
+export 'src/iptv.dart'
+    show
+        IptvEntryRecord,
+        IptvGuideChannelRecord,
+        IptvGuideSourceRecord,
+        IptvPlaylistRecord,
+        IptvProgrammeRecord,
+        IptvSourceRecord,
+        IptvStore,
+        isRemoteSource;
 export 'src/live_store.dart' show LiveStore;
 export 'src/meta_store.dart' show MetaStore;
 export 'src/room_prefs.dart' show RoomPrefStore;

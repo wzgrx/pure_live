@@ -10,6 +10,7 @@ import 'package:live_store/src/backup/v4_format.dart';
 import 'package:live_store/src/database/database.dart';
 import 'package:live_store/src/follow_areas.dart';
 import 'package:live_store/src/follows.dart';
+import 'package:live_store/src/iptv.dart';
 import 'package:live_store/src/live_store.dart';
 import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets/secret_store.dart';
@@ -329,6 +330,7 @@ final class BackupService {
               );
         }
       }
+      if (plan.iptv case final iptv?) await _applyIptv(db, iptv, now);
     });
     await _store.settings.load();
     await _store.history.trim();
@@ -336,6 +338,57 @@ final class BackupService {
     if (plan.secrets case final values? when store != null && values.isNotEmpty) {
       await store.writeAll(values);
       plan.report.written('secrets', values.length);
+    }
+  }
+
+  /// Replaces the URL playlists and guide sources; file-imported ones stay
+  /// first. Restored ones have no entries until their first sync.
+  static Future<void> _applyIptv(StoreDatabase db, PlannedIptv iptv, DateTime now) async {
+    for (final playlist in await db.select(db.iptvPlaylists).get()) {
+      if (isRemoteSource(playlist.source)) {
+        await (db.delete(db.iptvPlaylists)..where((row) => row.id.equals(playlist.id))).go();
+      }
+    }
+    var order = (await db.select(db.iptvPlaylists).get()).length;
+    for (final playlist in iptv.playlists) {
+      await db
+          .into(db.iptvPlaylists)
+          .insert(
+            IptvPlaylistsCompanion.insert(
+              name: playlist.name,
+              source: playlist.url,
+              userAgent: Value(playlist.userAgent),
+              autoSync: Value(playlist.autoSync),
+              sortOrder: order++,
+              createdAt: now.millisecondsSinceEpoch,
+            ),
+          );
+    }
+    for (final guide in await db.select(db.iptvGuideSources).get()) {
+      if (isRemoteSource(guide.source)) {
+        await (db.delete(db.iptvGuideSources)..where((row) => row.id.equals(guide.id))).go();
+      }
+    }
+    final kept = await db.select(db.iptvGuideSources).get();
+    final select = iptv.guides.any((guide) => guide.selected);
+    if (select) await db.update(db.iptvGuideSources).write(const IptvGuideSourcesCompanion(selected: Value(false)));
+    order = kept.length;
+    var selected = !select && kept.any((guide) => guide.selected);
+    for (final guide in iptv.guides) {
+      final pick = !selected && (guide.selected || !select);
+      selected = selected || pick;
+      await db
+          .into(db.iptvGuideSources)
+          .insert(
+            IptvGuideSourcesCompanion.insert(
+              name: guide.name,
+              source: guide.url,
+              autoSync: Value(guide.autoSync),
+              selected: Value(pick),
+              sortOrder: order++,
+              createdAt: now.millisecondsSinceEpoch,
+            ),
+          );
     }
   }
 

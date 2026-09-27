@@ -245,3 +245,177 @@ class MetaEntries extends Table {
   @override
   Set<Column> get primaryKey => {key};
 }
+
+/// IPTV playlists (spec/modules/iptv.md §7, schema 2).
+@DataClassName('IptvPlaylistRow')
+class IptvPlaylists extends Table {
+  /// Row id; the playlist's identity in this database.
+  IntColumn get id => integer().autoIncrement()();
+
+  /// Display name.
+  TextColumn get name => text()();
+
+  /// Where the playlist comes from: an http(s) URL, or the path of the copy
+  /// the app keeps of an imported file.
+  TextColumn get source => text()();
+
+  /// User-Agent for this playlist's downloads and streams; null uses the
+  /// global one.
+  TextColumn get userAgent => text().nullable()();
+
+  /// Whether automatic sync includes this playlist (URL playlists only).
+  BoolColumn get autoSync => boolean().withDefault(const Constant(true))();
+
+  /// Programme guide URL the playlist names (`x-tvg-url`).
+  TextColumn get guideUrl => text().nullable()();
+
+  /// Last successful sync (UTC milliseconds).
+  IntColumn get lastSyncAt => integer().nullable()();
+
+  /// Last sync attempt, successful or not (UTC milliseconds).
+  IntColumn get lastAttemptAt => integer().nullable()();
+
+  /// Why the last attempt failed; null after a success.
+  TextColumn get lastError => text().nullable()();
+
+  /// Custom order, ascending.
+  IntColumn get sortOrder => integer()();
+
+  /// When the playlist was added (UTC milliseconds).
+  IntColumn get createdAt => integer()();
+}
+
+/// IPTV playlist entries: one row per stream; rows with the same name are
+/// the lines of one channel.
+@DataClassName('IptvChannelRow')
+@TableIndex(name: 'iptv_channels_name', columns: {#name})
+@TableIndex(name: 'iptv_channels_group', columns: {#playlist, #groupName, #position})
+class IptvChannels extends Table {
+  /// Row id.
+  IntColumn get id => integer().autoIncrement()();
+
+  /// The playlist.
+  IntColumn get playlist => integer().references(IptvPlaylists, #id, onDelete: KeyAction.cascade)();
+
+  /// Position in the playlist file.
+  IntColumn get position => integer()();
+
+  /// Channel name (identity), whitespace collapsed.
+  TextColumn get name => text()();
+
+  /// Group; empty when none.
+  TextColumn get groupName => text().withDefault(const Constant(''))();
+
+  /// Stream URL.
+  TextColumn get url => text()();
+
+  /// `tvg-id`.
+  TextColumn get tvgId => text().nullable()();
+
+  /// `tvg-name`.
+  TextColumn get tvgName => text().nullable()();
+
+  /// Logo URL.
+  TextColumn get logo => text().nullable()();
+
+  /// Catch-up mode (lower case).
+  TextColumn get catchupMode => text().nullable()();
+
+  /// Catch-up URL template.
+  TextColumn get catchupSource => text().nullable()();
+
+  /// Catch-up window in days.
+  RealColumn get catchupDays => real().nullable()();
+
+  /// Catch-up time correction in hours.
+  RealColumn get catchupCorrection => real().nullable()();
+
+  /// Request headers as a JSON object; null when none.
+  TextColumn get headers => text().nullable()();
+}
+
+/// IPTV programme guide sources (XMLTV / JSON).
+@DataClassName('IptvGuideSourceRow')
+class IptvGuideSources extends Table {
+  /// Row id.
+  IntColumn get id => integer().autoIncrement()();
+
+  /// Display name.
+  TextColumn get name => text()();
+
+  /// An http(s) URL, or the path of the kept copy of an imported file.
+  TextColumn get source => text()();
+
+  /// Whether automatic sync includes this source.
+  BoolColumn get autoSync => boolean().withDefault(const Constant(true))();
+
+  /// Whether this is the selected guide; at most one row is.
+  BoolColumn get selected => boolean().withDefault(const Constant(false))();
+
+  /// Last successful sync (UTC milliseconds).
+  IntColumn get lastSyncAt => integer().nullable()();
+
+  /// Last sync attempt (UTC milliseconds).
+  IntColumn get lastAttemptAt => integer().nullable()();
+
+  /// Why the last attempt failed; null after a success.
+  TextColumn get lastError => text().nullable()();
+
+  /// Custom order, ascending.
+  IntColumn get sortOrder => integer()();
+
+  /// When the source was added (UTC milliseconds).
+  IntColumn get createdAt => integer()();
+}
+
+/// Channels of a guide source.
+@DataClassName('IptvGuideChannelRow')
+class IptvGuideChannels extends Table {
+  /// The guide source.
+  IntColumn get source => integer().references(IptvGuideSources, #id, onDelete: KeyAction.cascade)();
+
+  /// Guide channel id.
+  TextColumn get channelId => text()();
+
+  /// Display names joined by the unit separator (code point 31).
+  TextColumn get names => text().withDefault(const Constant(''))();
+
+  /// Icon URL.
+  TextColumn get icon => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {source, channelId};
+}
+
+/// Programmes of a guide source, kept for a bounded window (iptv.md §2.3).
+@DataClassName('IptvProgrammeRow')
+@TableIndex(name: 'iptv_programmes_channel', columns: {#source, #channelId, #start})
+@TableIndex(name: 'iptv_programmes_stop', columns: {#stop})
+class IptvProgrammes extends Table {
+  /// Row id.
+  IntColumn get id => integer().autoIncrement()();
+
+  /// The guide source.
+  IntColumn get source => integer().references(IptvGuideSources, #id, onDelete: KeyAction.cascade)();
+
+  /// Guide channel id.
+  TextColumn get channelId => text()();
+
+  /// Start (UTC milliseconds).
+  IntColumn get start => integer()();
+
+  /// Stop (UTC milliseconds).
+  IntColumn get stop => integer()();
+
+  /// Title.
+  TextColumn get title => text()();
+
+  /// Episode title.
+  TextColumn get subtitle => text().nullable()();
+
+  /// Description.
+  TextColumn get description => text().nullable()();
+
+  /// XMLTV `catchup-id`.
+  TextColumn get catchupId => text().nullable()();
+}

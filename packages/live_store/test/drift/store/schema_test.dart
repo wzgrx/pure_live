@@ -22,8 +22,9 @@ void main() {
   });
 
   test('a new database matches the dumped schema', () async {
-    final db = StoreDatabase(await verifier.startAt(1));
-    await verifier.migrateAndValidate(db, 1);
+    final latest = GeneratedHelper.versions.last;
+    final db = StoreDatabase(await verifier.startAt(latest));
+    await verifier.migrateAndValidate(db, latest);
     await db.close();
   });
 }

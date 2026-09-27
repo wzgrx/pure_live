@@ -181,7 +181,7 @@ void main() {
           {'platform': 'DOUYU', 'roomId': '2', 'order': 0},
           {'platform': 'douyu', 'roomId': '1', 'nick': 'filled'},
         ],
-        'iptv': {'providers': <Object?>[]},
+        'recordTasks': <Object?>[],
         'future': <Object?>[],
       },
       'secrets': null,

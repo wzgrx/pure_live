@@ -93,6 +93,44 @@ final class PlannedRoomPref {
   final Object value;
 }
 
+/// A URL playlist or guide source to restore (store.md §7.1 `iptv`).
+@internal
+@immutable
+final class PlannedIptvSource {
+  /// Creates a source.
+  const new({required this.name, required this.url, this.userAgent, this.autoSync = true, this.selected = false});
+
+  /// Display name.
+  final String name;
+
+  /// http(s) URL.
+  final String url;
+
+  /// Playlist User-Agent (playlists only).
+  final String? userAgent;
+
+  /// Whether automatic sync includes it.
+  final bool autoSync;
+
+  /// Whether it is the selected guide (guides only).
+  final bool selected;
+}
+
+/// The IPTV section to restore: URL playlists and URL guide sources, in
+/// order. File-imported ones are never in a backup and stay on restore.
+@internal
+@immutable
+final class PlannedIptv {
+  /// Creates the section.
+  const new({this.playlists = const [], this.guides = const []});
+
+  /// Playlists.
+  final List<PlannedIptvSource> playlists;
+
+  /// Guide sources.
+  final List<PlannedIptvSource> guides;
+}
+
 /// Everything an import will write, validated before anything is written
 /// (store.md §7.2). A null section is absent from the source and leaves the
 /// local data unchanged.
@@ -151,6 +189,10 @@ final class ImportPlan {
   @internal
   Map<String, String?>? secrets;
 
+  /// IPTV playlists and guide sources.
+  @internal
+  PlannedIptv? iptv;
+
   /// Keeps only follows and followed areas (follows-only restore).
   @internal
   void restrictToFollows() {
@@ -161,6 +203,7 @@ final class ImportPlan {
     blockRules = null;
     roomPrefs = null;
     secrets = null;
+    iptv = null;
   }
 }
 

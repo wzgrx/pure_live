@@ -7,6 +7,7 @@ import 'package:live_store/src/backup/json_read.dart';
 import 'package:live_store/src/backup/secret_envelope.dart';
 import 'package:live_store/src/block_rules.dart';
 import 'package:live_store/src/follow_areas.dart';
+import 'package:live_store/src/iptv.dart';
 import 'package:live_store/src/live_store.dart';
 import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets/secret_store.dart';
@@ -55,11 +56,12 @@ abstract final class V4Format {
     'history',
     'blockRules',
     'roomPrefs',
+    'iptv',
   };
 
   /// Sections of the format this app does not store yet; restoring leaves
   /// them out (and local data unchanged).
-  static const _later = {'recordTasks', 'webdavProfiles', 'iptv'};
+  static const _later = {'recordTasks', 'webdavProfiles'};
 
   /// Whether [json] is a v4 document.
   static bool recognizes(Map<String, Object?> json) => json['format'] == format;
@@ -141,6 +143,32 @@ abstract final class V4Format {
             'value': jsonDecode(row.read<String>('value')),
           },
       ];
+      // URL playlists and guides only: an imported file stays on its device,
+      // and channels and programmes come back with the next sync (iptv.md §7).
+      sections['iptv'] = {
+        'playlists': [
+          for (final playlist in await store.iptv.playlists())
+            if (playlist.isRemote)
+              {
+                'name': playlist.name,
+                'url': playlist.source,
+                if (playlist.userAgent != null) 'userAgent': playlist.userAgent,
+                'autoSync': playlist.autoSync,
+                'order': playlist.order,
+              },
+        ],
+        'epgSources': [
+          for (final guide in await store.iptv.guideSources())
+            if (guide.isRemote)
+              {
+                'name': guide.name,
+                'url': guide.source,
+                'autoSync': guide.autoSync,
+                'selected': guide.selected,
+                'order': guide.order,
+              },
+        ],
+      };
     }
     Map<String, Object?>? sealed;
     if (passphrase != null && secrets != null && scope == BackupScope.full) {
@@ -297,6 +325,7 @@ abstract final class V4Format {
         }
       }
     }
+    if (sections['iptv'] case final Object iptv) plan.iptv = _iptv(iptv, report);
     plan.roomPrefs = _list(sections, 'roomPrefs', report, (item) {
       final ref = _ref(item, report, 'roomPrefs');
       final key = JsonRead.nonEmpty(item['key']);
@@ -342,6 +371,54 @@ abstract final class V4Format {
       report.written('blockRules', rules.values.fold(0, (sum, list) => sum + list.length));
     }
     if (plan.roomPrefs case final prefs?) report.written('roomPrefs', prefs.length);
+    if (plan.iptv case final iptv?) {
+      report
+        ..written('iptvPlaylists', iptv.playlists.length)
+        ..written('iptvGuides', iptv.guides.length);
+    }
+  }
+
+  /// The `iptv` section: `playlists` (alias `providers`) and `epgSources`,
+  /// each a list of `{name, url, …}` with an http(s) URL, unique by URL.
+  static PlannedIptv _iptv(Object section, ImportReport report) {
+    if (section is! Map<String, Object?>) throw const FormatException('Invalid backup section: iptv');
+    List<PlannedIptvSource> read(String name, Object? list, {required bool guides}) {
+      if (list == null) return const [];
+      if (list is! List) throw FormatException('Invalid backup section: iptv.$name');
+      report.read(name, list.length);
+      final items = <(int, PlannedIptvSource)>[];
+      final urls = <String>{};
+      for (final raw in list) {
+        final item = raw is Map<String, Object?> ? raw : null;
+        final url = JsonRead.nonEmpty(item?['url']);
+        if (item == null || url == null || !isRemoteSource(url)) {
+          report.drop(name, 'invalidItem', url);
+          continue;
+        }
+        if (!urls.add(url)) {
+          report.drop(name, 'duplicate', url);
+          continue;
+        }
+        items.add((
+          _order(item),
+          PlannedIptvSource(
+            name: JsonRead.nonEmpty(item['name']) ?? url,
+            url: url,
+            userAgent: guides ? null : JsonRead.nonEmpty(item['userAgent']),
+            autoSync: item['autoSync'] != false,
+            selected: guides && item['selected'] == true,
+          ),
+        ));
+      }
+      final sorted = [...items.indexed]
+        ..sort((a, b) => a.$2.$1 != b.$2.$1 ? a.$2.$1.compareTo(b.$2.$1) : a.$1.compareTo(b.$1));
+      return [for (final (_, (_, source)) in sorted) source];
+    }
+
+    return PlannedIptv(
+      playlists: read('iptvPlaylists', section['playlists'] ?? section['providers'], guides: false),
+      guides: read('iptvGuides', section['epgSources'], guides: true),
+    );
   }
 
   static Map<String, Object> _settings(

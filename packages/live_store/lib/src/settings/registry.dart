@@ -426,6 +426,28 @@ abstract final class Settings {
     legacy: [LegacyKey('preferPlatform', convert: _lowerTrim)],
   );
 
+  // IPTV (spec/modules/iptv.md §6).
+
+  /// Sync URL playlists and guides automatically (F-IPTV-03; off by default).
+  static const iptvAutoSync = BoolSetting('iptv.autoSync', false, legacy: [LegacyKey('isAutoSyncEnabled')]);
+
+  /// Hours between automatic syncs.
+  static const iptvAutoSyncHours = IntSetting(
+    'iptv.autoSyncHours',
+    24,
+    min: 1,
+    max: 168,
+    legacy: [LegacyKey('autoSyncHoursInterval')],
+  );
+
+  /// User-Agent for IPTV downloads and streams (F-IPTV-04); empty for none.
+  static const iptvUserAgent = StringSetting(
+    'iptv.userAgent',
+    '',
+    maxLength: 512,
+    legacy: [LegacyKey('customIptvUserAgent')],
+  );
+
   // Accounts (not secrets; the cookies live in the secret store).
 
   /// Bilibili user id of the signed-in account; 0 when signed out.
@@ -736,6 +758,9 @@ abstract final class Settings {
     historyLimit,
     catalogPlatforms,
     catalogPreferred,
+    iptvAutoSync,
+    iptvAutoSyncHours,
+    iptvUserAgent,
     bilibiliUid,
     douyuCookieSavedAt,
     launchAtStartup,

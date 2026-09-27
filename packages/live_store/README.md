@@ -26,6 +26,7 @@ final secrets = await SecretStore.open(
 | `store.followAreas` | 关注的分区（身份：平台、命名空间、分区 id） | `watchAll()`、`follow`、`unfollow`、`contains` |
 | `store.roomPrefs` | 房间级偏好（`volume`、`portraitLayout`） | `get` / `set`、`volumeOf` / `setVolume` |
 | `store.settings` | 设置 | `get(setting)`（同步）、`set`、`reset`、`resetAll`、`watch(setting)`、`changes` |
+| `store.iptv` | IPTV 播放列表、条目、节目单源、节目单频道和节目（[iptv.md](../../spec/modules/iptv.md) §7） | `watchPlaylists()`、`addPlaylist`、`replaceEntries`（整体替换，一次事务）、`recordPlaylistFailure`、`groups`、`channels`（按名称去重分页）、`sources(name)`；`watchGuideSources()`、`addGuideSource`（第一个自动设为当前）、`selectGuideSource`、`replaceGuide`、`programmes`、`programmesAt`、`pruneProgrammes` |
 | `store.meta` | 内部记录（导入账本、设备 id） | `get` / `set` |
 
 房间一律用 `live_core` 的 `RoomRef` 表示：平台小写，房间号区分大小写，`0`、`null`、`undefined`、`nan`、`none` 无效。写入方法在数据真正落库后才完成；`watch…` 流在相关表变化后重新发出。`StoredRoom.lastState` 只是缓存，关注页启动时应一律显示“未知”，等第一次刷新（store.md §6.4.10）。
@@ -88,6 +89,6 @@ await backup.restoreFile(file, mode: RestoreMode.follows);    // 仅恢复关注
 ## 已知缺口
 
 - 3.x Hive 数据的自动迁移（store.md §6）：需要旧应用的私有目录，`.next` 预览包读不到，也还没有 `hive_ce` 读取层。扁平的 3.x 键值格式已经由 `LegacyFormat` 处理（与 Hive 键同名），缺的是读 `.hive` 文件、来源发现、指纹账本、`siteCatalogMigration` 等计数器和“只补缺”的合并（§6.5）。
-- `record_tasks`、`record_files`、`webdav_profiles` 表和 IPTV 数据还没有；备份里对应的分区读到时写进报告并跳过（本机数据不变）。
+- `record_tasks`、`record_files`、`webdav_profiles` 表还没有；备份里对应的分区读到时写进报告并跳过（本机数据不变）。IPTV 在 schema 2（备份只含网址来源，iptv.md §7）；旧版 IPTV 库的只读导入还没做。
 - 房间的 `extra`（IPTV 字段、公告、简介）导入时保存，但还不进 v4 备份。
 - 设置注册表先覆盖预览版需要的约 60 项；其余 3.x 设置在导入报告里列为 `unknownKey`。

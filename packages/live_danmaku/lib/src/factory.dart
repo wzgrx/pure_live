@@ -1,6 +1,7 @@
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/connector.dart';
 import 'package:live_danmaku/src/model.dart';
+import 'package:live_danmaku/src/sites/acfun.dart';
 import 'package:live_danmaku/src/sites/bilibili.dart';
 import 'package:live_danmaku/src/sites/douyin.dart';
 import 'package:live_danmaku/src/sites/douyu.dart';
@@ -11,7 +12,7 @@ import 'package:live_danmaku/src/sites/yy.dart';
 import 'package:live_danmaku/src/transport.dart';
 
 /// Platforms with a chat connector.
-const danmakuPlatforms = {'bilibili', 'douyin', 'douyu', 'huya', 'kuaishou', 'soop', 'yy'};
+const danmakuPlatforms = {'acfun', 'bilibili', 'douyin', 'douyu', 'huya', 'kuaishou', 'soop', 'yy'};
 
 /// The chat connector for [room]'s platform, or null when the platform has
 /// none (the UI shows [DanmakuStatus.unsupported] once, REG-DANMAKU-021).
@@ -48,6 +49,7 @@ DanmakuConnector? danmakuConnectorFor(
     session: session,
     clock: clock,
   ),
+  'acfun' => AcfunConnector(detail: room, transport: transport, session: session, clock: clock),
   'soop' => SoopConnector(detail: room, transport: transport, session: session, clock: clock),
   'yy' => YyConnector(detail: room, transport: transport, session: session, clock: clock),
   _ => null,

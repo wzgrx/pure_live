@@ -3,6 +3,7 @@
 /// background isolate that runs them. Pure Dart, no Flutter.
 library;
 
+export 'src/codec/aes.dart';
 export 'src/codec/protobuf.dart';
 export 'src/codec/stt.dart';
 export 'src/codec/tars.dart';
@@ -20,6 +21,7 @@ export 'src/runtime/base.dart' show ConnectorBase;
 export 'src/runtime/exact_websocket.dart' show ExactWebSocket;
 export 'src/runtime/reconnect.dart';
 export 'src/runtime/socket_connector.dart' show SocketConnector, SocketPlan;
+export 'src/sites/acfun.dart';
 export 'src/sites/bilibili.dart';
 export 'src/sites/douyin.dart';
 export 'src/sites/douyu.dart';

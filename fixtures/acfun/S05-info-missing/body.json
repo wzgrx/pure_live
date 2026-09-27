@@ -1,0 +1,46 @@
+{
+  "result": 0,
+  "host-name": "eg5-xrbyk-sqp-ugzi167.covmjh",
+  "visitor": 0,
+  "authorId": 99999999999,
+  "user": {
+    "action": 3,
+    "href": "0",
+    "followingCount": "0",
+    "headUrl": "",
+    "fanCountValue": 99,
+    "avatarFrame": 0,
+    "avatarFrameMobileImg": "",
+    "avatarFramePcImg": "",
+    "isFollowing": false,
+    "followingStatus": 1,
+    "nameColor": 0,
+    "contributeCount": "0",
+    "sexTrend": -1,
+    "gender": -1,
+    "avatarImage": "",
+    "userHeadImgInfo": {
+      "width": 0,
+      "height": 0,
+      "size": 0,
+      "type": 0,
+      "animated": false,
+      "thumbnailImage": {
+        "cdnUrls": [
+          {
+            "url": "",
+            "freeTrafficCdn": false
+          }
+        ]
+      },
+      "thumbnailImageCdnUrl": ""
+    },
+    "isFollowed": false,
+    "followingCountValue": 0,
+    "contributeCountValue": 0,
+    "fanCount": "99",
+    "socialMedal": {},
+    "id": "0"
+  },
+  "requestId": "e60c6b63d49b41bbb6071c2746a3eb4d"
+}

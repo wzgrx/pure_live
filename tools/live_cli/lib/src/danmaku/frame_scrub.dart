@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:live_cli/src/danmaku/recorder.dart';
+import 'package:live_cli/src/danmaku/scrub_acfun.dart';
 import 'package:live_cli/src/danmaku/scrub_sites.dart';
 import 'package:live_cli/src/danmaku/scrub_soop.dart';
 import 'package:live_cli/src/danmaku/scrub_yy.dart';
@@ -128,6 +129,7 @@ abstract class FrameScrubber {
 
   /// The scrubber for [platform].
   factory forPlatform(String platform, RoomDetail detail, {int? seed}) => switch (platform) {
+    'acfun' => AcfunFrameScrubber(detail, seed: seed),
     'douyu' => DouyuFrameScrubber(detail, seed: seed),
     'huya' => HuyaFrameScrubber(detail, seed: seed),
     'bilibili' => BilibiliFrameScrubber(detail, seed: seed),

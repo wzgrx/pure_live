@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:live_cli/live_cli.dart';
@@ -172,6 +173,171 @@ void main() {
     expect(packets.first.fields[2], isNot(startsWith('realviewer77')));
     expect(packets.first.fields[6], startsWith('观众'));
     expect(packets.last.fields, ['']);
+  });
+
+  test('acfun: the visitor session, tickets and senders are replaced; frames are sealed again and still decode', () {
+    final scrubber = FrameScrubber.forPlatform('acfun', _room('acfun', '41254970', {'author': '41254970'}), seed: 5);
+    final security = Uint8List.fromList(List.generate(16, (i) => i + 1));
+    final sessionKey = Uint8List.fromList(List.generate(16, (i) => 90 + i));
+    final session = AcfunChatSession(
+      userId: 1700000000000001,
+      token: 'visitorTokenABC123',
+      security: security,
+      deviceId: 'web_realdevice00001',
+      liveId: 'LIVE1',
+      tickets: const ['realTicket+AAA=='],
+      attach: 'realAttach/BBB==',
+    );
+    Uint8List down(String command, List<int> data, List<int> key, int mode) {
+      final plain =
+          (ProtoWriter()
+                ..string(1, command)
+                ..integer(2, 1)
+                ..bytes(4, data))
+              .toBytes();
+      final header =
+          (ProtoWriter()
+                ..integer(1, 13)
+                ..integer(2, 1700000000000001)
+                ..integer(7, plain.length)
+                ..integer(8, mode)
+                ..integer(10, 5))
+              .toBytes();
+      return AcfunProtocol.frame(header, AcfunProtocol.seal(plain, key, Random(1)));
+    }
+
+    final link = AcfunLink(session);
+    final register = link.register();
+    final answer = down(
+      AcfunProtocol.register,
+      (ProtoWriter()
+            ..bytes(2, sessionKey)
+            ..integer(3, 77))
+          .toBytes(),
+      security,
+      1,
+    );
+    link.read(answer);
+    final comment =
+        (ProtoWriter()
+              ..string(1, '好活')
+              ..integer(2, 1790000000000)
+              ..bytes(
+                3,
+                (ProtoWriter()
+                      ..integer(1, 123456789)
+                      ..string(2, '真名字')
+                      ..bytes(3, utf8.encode('https://avatar.example/real.png')))
+                    .toBytes(),
+              ))
+            .toBytes();
+    final signals =
+        (ProtoWriter()
+              ..bytes(
+                1,
+                (ProtoWriter()
+                      ..string(1, 'CommonActionSignalComment')
+                      ..bytes(2, comment))
+                    .toBytes(),
+              )
+              ..bytes(
+                1,
+                (ProtoWriter()
+                      ..string(1, 'CommonActionSignalRichText')
+                      ..bytes(2, [1, 2, 3]))
+                    .toBytes(),
+              ))
+            .toBytes();
+    final push =
+        (ProtoWriter()
+              ..string(1, 'ZtLiveScActionSignal')
+              ..integer(2, 2)
+              ..bytes(3, gzip.encode(signals))
+              ..string(5, 'realTicket+AAA=='))
+            .toBytes();
+    final query = {
+      'subBiz': 'mainApp',
+      'userId': '1700000000000001',
+      'did': 'web_realdevice00001',
+      'acfun.api.visitor_st': 'visitorTokenABC123',
+    };
+    final frames = [
+      CapturedFrame(
+        direction: 'in',
+        millis: 0,
+        text: true,
+        url: Uri.https('id.app.acfun.cn', '/rest/app/visitor/login'),
+        bytes: utf8.encode(
+          jsonEncode({
+            'result': 0,
+            'userId': 1700000000000001,
+            'acfun.api.visitor_st': 'visitorTokenABC123',
+            'acSecurity': base64.encode(security),
+          }),
+        ),
+      ),
+      CapturedFrame(
+        direction: 'in',
+        millis: 1,
+        text: true,
+        url: Uri.https('api.kuaishouzt.com', '/rest/zt/live/web/startPlay', query),
+        bytes: utf8.encode(
+          jsonEncode({
+            'result': 1,
+            'data': {
+              'liveId': 'LIVE1',
+              'availableTickets': ['realTicket+AAA=='],
+              'enterRoomAttach': 'realAttach/BBB==',
+              'videoPlayRes': '{"url":"https://cdn.example/x.flv?auth_key=1-2-3"}',
+            },
+            'host': 'real-host-name-01',
+          }),
+        ),
+      ),
+      CapturedFrame(direction: 'out', millis: 2, bytes: register),
+      CapturedFrame(direction: 'in', millis: 3, bytes: answer),
+      CapturedFrame(direction: 'out', millis: 4, bytes: link.enterRoom()),
+      CapturedFrame(direction: 'in', millis: 5, bytes: down(AcfunProtocol.message, push, sessionKey, 2)),
+    ];
+    final result = scrubber.scrub(frames, [(url: AcfunProtocol.endpoint, headers: const <String, String>{})]);
+    expect(scrubber.findLeak(result.frames, result.handshakes.toString()), isNull);
+    final text = result.frames.take(2).map((frame) => utf8.decode(frame.bytes)).join();
+    for (final secret in [
+      'visitorTokenABC123',
+      'realTicket',
+      'realAttach',
+      'real-host',
+      'auth_key',
+      '1700000000000001',
+    ]) {
+      expect(text, isNot(contains(secret)));
+    }
+    expect(result.frames[1].url!.queryParameters['did'], isNot('web_realdevice00001'));
+    final visitor = AcfunProtocol.visitor(utf8.decode(result.frames[0].bytes));
+    expect(visitor.security, isNot(security));
+    final play = AcfunProtocol.startPlay(utf8.decode(result.frames[1].bytes))!;
+    final fake = AcfunChatSession(
+      userId: visitor.userId,
+      token: visitor.token,
+      security: visitor.security,
+      deviceId: '',
+      liveId: play.liveId,
+      tickets: play.tickets,
+      attach: play.attach,
+    );
+    final reader = AcfunLink(fake);
+    final (:header, :payload) = AcfunProtocol.unframe(result.frames[2].bytes);
+    expect(header.message(9)!.string(2), visitor.token, reason: 'the header token is the replaced one');
+    expect(ProtoMessage.decode(AcfunProtocol.open(payload, visitor.security)).string(1), 'Basic.Register');
+    expect(reader.read(result.frames[3].bytes).command, 'Basic.Register');
+    expect(reader.registered, isTrue);
+    final message = reader.read(result.frames[5].bytes);
+    final context = DecodeContext(room: 'acfun:41254970', session: 0, receivedAt: 0, now: DateTime.utc(2026));
+    final chat = AcfunProtocol.push(message.payload, context).events.single as DanmakuChat;
+    expect(chat.text, '好活', reason: 'chat text is public');
+    expect(chat.userName, startsWith('观众'));
+    expect(chat.userId, isNot('123456789'));
+    expect(chat.userId, hasLength(9));
   });
 
   test('a masked name keeps its mask', () {

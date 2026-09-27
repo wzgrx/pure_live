@@ -1,0 +1,14 @@
+{"ms":16,"command":"open"}
+{"ms":23,"playing":false}
+{"ms":23,"completed":false}
+{"ms":23,"position":0}
+{"ms":23,"duration":0}
+{"ms":23,"buffering":false}
+{"ms":23,"tracks":{"video":2,"audio":2}}
+{"ms":23,"width":null}
+{"ms":23,"height":null}
+{"ms":29,"playing":true}
+{"ms":29,"buffering":true}
+{"ms":32,"server":"garbage /live/0.flv"}
+{"ms":77,"error":"Failed to recognize file format."}
+{"ms":6030,"command":"dispose"}

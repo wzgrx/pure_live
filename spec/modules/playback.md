@@ -132,7 +132,23 @@
 - **EVT-12 错误分类**：生命周期、视频输出、解码器初始化、传输、打开失败属于立即终态类；运行期解码、运行期源、其它原生诊断属于可恢复类（先观察，见 EVT-7）。
   证据：`lib/player/core/player_error_classifier.dart:30-170`。
 
-**验收**：【轨迹】在 Windows 和 K90 上用真实 libmpv 录下这些场景的事件轨迹：正常起播、流结束（斗鱼 300 s）、CDN 断开、断供缓冲、打开 403/404、硬解失败回退软解、纯音频切换、换线路、关闭。轨迹存入样本目录，契约测试逐条断言 EVT-1～EVT-11；每次升级 libmpv 或 media_kit 分支都重录并比对差异。
+- **EVT-13 打开时先发一组复位事件**：`open` 之后依次到达 playing=false、completed=false、buffering=false，随后在任何数据到达之前就报 playing=true、buffering=true。所以 open 之后的 playing=true 只表示“正在尝试播放”（与 EVT-8 一致）。
+  证据：`fixtures/player/*/trace.jsonl` 开头几行。
+- **EVT-14 流结束的完整顺序**：buffering=true → playing=false → completed=true → buffering=false，同一毫秒内还会把轨道列表复位（EVT-1、EVT-4 的实测版本）。
+  证据：`fixtures/player/eof`。
+- **EVT-15 断供超过 `network-timeout` 表现为流结束**：连接保持打开但不再发数据时，buffering=true 之后约 `network-timeout` 秒报 playing=false、completed=true，**没有 error**（录制时 media_kit 默认 5 s，旧应用设为 15 s）。会话层不能靠 error 区分断供和正常结束，要结合结束前的缓冲时长判断。
+  证据：`fixtures/player/stall`（最后一个数据包在 3.0 s，completed 在 8.1 s）。
+- **EVT-16 中途断开与正常结束无法区分**：服务端在传输中途断开连接（不发 chunked 结束块），内核同样只报 completed=true，没有 error。
+  证据：`fixtures/player/reset`。
+- **EVT-17 打开失败只报 error，不复位状态**：403 或非媒体数据时，内核只发一条 error（`Failed to open …`、`Failed to recognize file format.`），playing 和 buffering 保持在 open 时的 true。会话层收到这类 error 后必须自己把状态置为失败，不能等 playing=false。同一个播放器随后再 open 能正常起播。
+  证据：`fixtures/player/http403`、`garbage`、`reopen_after_403`。
+- **EVT-18 暂停和停止**：pause() 与 play() 只切换 playing，不产生缓冲事件；stop() 报 playing=false、duration=0、buffering=false，不报 completed。
+  证据：`fixtures/player/pause_resume`、`stop_while_buffering`。
+- **EVT-19 无时长元数据的直播流**：duration 报告的是持续增长的已缓冲长度，不是 0，不能用 duration 判断是不是直播。
+  证据：`fixtures/player/eof`（媒体用 `-flvflags no_duration_filesize` 生成）。
+**验收**：【轨迹】在 Windows 和 K90 上用真实 libmpv 录下这些场景的事件轨迹：正常起播、流结束（斗鱼 300 s）、CDN 断开、断供缓冲、打开 403/404、硬解失败回退软解、纯音频切换、换线路、关闭。轨迹存入样本目录，契约测试逐条断言 EVT-1～EVT-19；每次升级 libmpv 或 media_kit 分支都重录并比对差异。
+
+进度：Linux 无视频输出（`vo=null`）的 8 个场景已录入 `fixtures/player/`（`tool/probes/player_event_trace_probe_test.dart`）。无视频输出时宽高一直为 null，首帧和画面相关的轨迹要在 Windows 和 K90 上用真实视频输出录制。
 
 ## 5 健康监测
 

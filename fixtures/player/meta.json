@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-09-27T09:46:56.599219Z",
+  "host": "linux",
+  "mpv": "mpv v0.41.0-11-gf011d73d5-dirty",
+  "ffmpeg": "n9.0.2",
+  "mediaKit": "third_party/media_kit (docs/adr/0002-media-kit-fork.md)",
+  "mpvOptions": {
+    "network-timeout": "5.000000",
+    "cache": "yes",
+    "cache-secs": "3600000.000000",
+    "demuxer-readahead-secs": "1.000000",
+    "demuxer-max-bytes": "33554432",
+    "hwdec": "no"
+  },
+  "media": [
+    "stream|codec_name=h264|width=320|height=180|r_frame_rate=25/1",
+    "stream|codec_name=aac|r_frame_rate=0/0",
+    "format|duration=7.960000"
+  ],
+  "recorder": "tool/probes/player_event_trace_probe_test.dart",
+  "note": "Times are wall-clock ms from the scenario start; replay keeps order and relative gaps."
+}

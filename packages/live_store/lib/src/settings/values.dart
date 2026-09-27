@@ -110,3 +110,41 @@ enum TvMode {
   /// Always off.
   off,
 }
+
+/// Orientation lock of fullscreen on phones (live-room §2, F-ROOM-06);
+/// names match 3.x `portraitFullscreenPolicy`.
+enum PortraitFullscreenPolicy {
+  /// Portrait sources go to portrait fullscreen, others lock landscape.
+  followSource,
+
+  /// Never lock: fullscreen follows how the phone is held.
+  followSystem,
+
+  /// Always landscape, portrait sources included.
+  landscape,
+}
+
+/// How a portrait source fills portrait fullscreen (F-ROOM-06).
+enum PortraitFit {
+  /// The whole picture, bars where the shapes differ.
+  contain,
+
+  /// Fill the screen, cropping the edges.
+  cover,
+}
+
+/// Where danmaku flies in portrait fullscreen (F-ROOM-06); names match 3.x
+/// `portraitDanmakuMode`.
+enum PortraitDanmakuArea {
+  /// The area of the danmaku settings.
+  followGlobal,
+
+  /// The top quarter, off the streamer's face.
+  upperQuarter,
+
+  /// Half of the usual area.
+  reduced,
+
+  /// No danmaku on the video.
+  hidden,
+}

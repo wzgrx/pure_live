@@ -24,7 +24,7 @@ export 'src/iptv.dart'
         isRemoteSource;
 export 'src/live_store.dart' show LiveStore;
 export 'src/meta_store.dart' show MetaStore;
-export 'src/room_prefs.dart' show RoomPrefStore;
+export 'src/room_prefs.dart' show PortraitOverride, RoomPrefStore;
 export 'src/room_store.dart' show RoomStore;
 export 'src/rooms.dart' show RoomSnapshot, StoredRoom;
 export 'src/secrets/secret_cipher.dart' show AesGcmSecretCipher, SecretCipher;

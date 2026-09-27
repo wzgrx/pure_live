@@ -46,6 +46,18 @@ void main() {
       expect(convert(Settings.qualityWifi, 'preferResolution', '蓝光8M'), QualityPreference.bluRay8M);
       expect(convert(Settings.qualityMobile, 'preferResolutionCellular', '超清'), QualityPreference.superHigh);
       expect(convert(Settings.qualityMobile, 'preferResolutionCellular', '4K'), QualityPreference.original);
+      expect(convert(Settings.portraitAdaptation, 'enablePortraitStreamAdaptation', false), isFalse);
+      expect(
+        convert(Settings.portraitFullscreenPolicy, 'portraitFullscreenPolicy', 'followSystem'),
+        PortraitFullscreenPolicy.followSystem,
+      );
+      expect(convert(Settings.portraitFit, 'portraitFullscreenDisplayMode', 'cover'), PortraitFit.cover);
+      expect(convert(Settings.portraitFit, 'portraitFullscreenDisplayMode', 'ambient'), PortraitFit.contain);
+      expect(
+        convert(Settings.portraitDanmakuArea, 'portraitDanmakuMode', 'upperQuarter'),
+        PortraitDanmakuArea.upperQuarter,
+      );
+      expect(convert(Settings.rememberPortraitOverride, 'rememberPortraitRoomOverride', false), isFalse);
       expect(convert(Settings.videoFit, 'videoFitIndex', 5), VideoFit.scaleDown);
       expect(convert(Settings.videoFit, 'videoFitIndex', 9), VideoFit.contain);
       expect(convert(Settings.refreshRateMode, 'enableHighRefreshRate', true), RefreshRateMode.balanced);

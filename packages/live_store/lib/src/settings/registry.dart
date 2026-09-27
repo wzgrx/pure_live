@@ -155,6 +155,46 @@ abstract final class Settings {
   /// (principles.md §6.1).
   static const switchRoomGesture = BoolSetting('player.switchRoomGesture', false);
 
+  /// Portrait stream adaptation (F-ROOM-06, GEO-7): off treats every source
+  /// as landscape.
+  static const portraitAdaptation = BoolSetting(
+    'player.portraitAdaptation',
+    true,
+    legacy: [LegacyKey('enablePortraitStreamAdaptation')],
+  );
+
+  /// Fullscreen orientation on phones (F-ROOM-06).
+  static const portraitFullscreenPolicy = EnumSetting<PortraitFullscreenPolicy>(
+    'player.portraitFullscreenPolicy',
+    PortraitFullscreenPolicy.followSource,
+    PortraitFullscreenPolicy.values,
+    legacy: [LegacyKey('portraitFullscreenPolicy')],
+  );
+
+  /// How portrait sources fill portrait fullscreen (F-ROOM-06; 3.x's four
+  /// display modes become fit or fill).
+  static const portraitFit = EnumSetting<PortraitFit>(
+    'player.portraitFit',
+    PortraitFit.contain,
+    PortraitFit.values,
+    legacy: [LegacyKey('portraitFullscreenDisplayMode', convert: _portraitFit)],
+  );
+
+  /// Danmaku area in portrait fullscreen (F-ROOM-06).
+  static const portraitDanmakuArea = EnumSetting<PortraitDanmakuArea>(
+    'player.portraitDanmakuArea',
+    PortraitDanmakuArea.followGlobal,
+    PortraitDanmakuArea.values,
+    legacy: [LegacyKey('portraitDanmakuMode')],
+  );
+
+  /// Remember each room's orientation override (GEO-7).
+  static const rememberPortraitOverride = BoolSetting(
+    'player.rememberPortraitOverride',
+    true,
+    legacy: [LegacyKey('rememberPortraitRoomOverride')],
+  );
+
   /// Default volume on phones and tablets (0–1).
   static const defaultMobileVolume = DoubleSetting(
     'volume.defaultMobileVolume',
@@ -786,6 +826,11 @@ abstract final class Settings {
     backgroundPlay,
     fullScreenDefault,
     switchRoomGesture,
+    portraitAdaptation,
+    portraitFullscreenPolicy,
+    portraitFit,
+    portraitDanmakuArea,
+    rememberPortraitOverride,
     defaultMobileVolume,
     defaultDesktopVolume,
     globalMute,
@@ -888,6 +933,8 @@ Object? _locale(Object? value) {
   if (text == 'English' || text.toLowerCase().startsWith('en')) return 'en';
   return null;
 }
+
+Object? _portraitFit(Object? value) => value == 'cover' ? 'cover' : 'contain';
 
 Object? _quality(Object? value) => switch (value is String ? value.trim() : null) {
   '蓝光8M' => 'bluRay8M',

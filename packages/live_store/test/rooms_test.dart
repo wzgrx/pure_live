@@ -214,6 +214,16 @@ void main() {
       expect(await store.followAreas.unfollow(areas.first), isTrue);
     });
 
+    test('GEO-7: a room orientation override is stored and automatic removes it', () async {
+      final ref = RoomRef('douyu', '1');
+      expect(await store.roomPrefs.portraitOverrideOf(ref), PortraitOverride.automatic);
+      await store.roomPrefs.setPortraitOverride(ref, PortraitOverride.portrait);
+      expect(await store.roomPrefs.portraitOverrideOf(ref), PortraitOverride.portrait);
+      expect(await store.roomPrefs.get(ref, RoomPrefStore.portraitLayout), 'portrait', reason: '3.x names');
+      await store.roomPrefs.setPortraitOverride(ref, PortraitOverride.automatic);
+      expect(await store.roomPrefs.get(ref, RoomPrefStore.portraitLayout), isNull);
+    });
+
     test('room volume is clamped and removable', () async {
       final ref = RoomRef('douyu', '1');
       expect(await store.roomPrefs.volumeOf(ref), isNull);

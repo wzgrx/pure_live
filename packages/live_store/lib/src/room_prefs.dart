@@ -52,7 +52,30 @@ final class RoomPrefStore {
     return value is num && value.isFinite ? value.toDouble().clamp(0, 1).toDouble() : null;
   }
 
+  /// The orientation override of [ref] (GEO-7), automatic when none.
+  Future<PortraitOverride> portraitOverrideOf(RoomRef ref) async {
+    final value = await get(ref, portraitLayout);
+    return PortraitOverride.values.firstWhere((item) => item.name == value, orElse: () => PortraitOverride.automatic);
+  }
+
+  /// Stores the override of [ref]; automatic removes it.
+  Future<void> setPortraitOverride(RoomRef ref, PortraitOverride value) =>
+      set(ref, portraitLayout, value == PortraitOverride.automatic ? null : value.name);
+
   /// Stores the volume of [ref], clamped to 0–1; null removes it.
   Future<void> setVolume(RoomRef ref, double? value) =>
       set(ref, volume, value == null || !value.isFinite ? null : value.clamp(0, 1).toDouble());
+}
+
+/// A room's orientation override (GEO-7); names match 3.x
+/// `portraitRoomOverrides` values.
+enum PortraitOverride {
+  /// Follow the detected geometry.
+  automatic,
+
+  /// Treat the source as portrait.
+  portrait,
+
+  /// Treat the source as landscape.
+  landscape,
 }

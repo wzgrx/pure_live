@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "platform": "fc2live",
+  "sample": "S05-master",
+  "capturedAt": "2026-09-27T19:46:53.790216Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://us-west-1-media.live.fc2.com/a/stream/62996200/0/master_playlist?targets=10,20,30,90&c=VKTvPRBJpz22aFH8SQ6f8&d=z0YKIcG77_fdLqp9Cy4mJ9fg38gvw_PLcpWgVv5Ux1qK3srgMJfCWhHU4pih6Buh",
+    "headers": {
+      "Origin": "https://live.fc2.com",
+      "Referer": "https://live.fc2.com/",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "connection": "keep-alive",
+      "cache-control": "no-cache",
+      "access-control-allow-origin": "https://live.fc2.com",
+      "date": "Sun, 27 Sep 2026 19:46:52 GMT",
+      "transfer-encoding": "chunked",
+      "vary": "accept-encoding",
+      "content-encoding": "gzip",
+      "content-type": "application/x-mpegURL",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "fa5e31066fb79f6f30a87e4ca5238b867534d279afe4d250ba809504e4fa2c9a",
+    "length": 757
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "text:c",
+      "rule": "secret"
+    },
+    {
+      "where": "text:d",
+      "rule": "secret"
+    },
+    {
+      "where": "url:c",
+      "rule": "secret"
+    },
+    {
+      "where": "url:d",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -4,13 +4,14 @@ import 'package:live_danmaku/src/model.dart';
 import 'package:live_danmaku/src/sites/bilibili.dart';
 import 'package:live_danmaku/src/sites/douyin.dart';
 import 'package:live_danmaku/src/sites/douyu.dart';
+import 'package:live_danmaku/src/sites/fc2live.dart';
 import 'package:live_danmaku/src/sites/huya.dart';
 import 'package:live_danmaku/src/sites/kuaishou.dart';
 import 'package:live_danmaku/src/sites/steambroadcast.dart';
 import 'package:live_danmaku/src/transport.dart';
 
 /// Platforms with a chat connector.
-const danmakuPlatforms = {'bilibili', 'douyin', 'douyu', 'huya', 'kuaishou', 'steambroadcast'};
+const danmakuPlatforms = {'bilibili', 'douyin', 'douyu', 'fc2live', 'huya', 'kuaishou', 'steambroadcast'};
 
 /// The chat connector for [room]'s platform, or null when the platform has
 /// none (the UI shows [DanmakuStatus.unsupported] once, REG-DANMAKU-021).
@@ -25,6 +26,7 @@ DanmakuConnector? danmakuConnectorFor(
   DanmakuClock? clock,
 }) => switch (room.ref.platform) {
   'douyu' => DouyuConnector(detail: room, transport: transport, session: session, clock: clock),
+  'fc2live' => Fc2LiveConnector(detail: room, transport: transport, session: session, clock: clock),
   'huya' => HuyaConnector(detail: room, transport: transport, session: session, clock: clock),
   'bilibili' => BilibiliConnector(
     detail: room,

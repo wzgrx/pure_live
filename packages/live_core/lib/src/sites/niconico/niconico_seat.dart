@@ -1,65 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:live_core/src/site_error.dart';
 import 'package:live_core/src/sites/niconico/niconico_parse.dart';
+import 'package:live_core/src/text_socket.dart';
 import 'package:live_net/live_net.dart';
 
 const _site = 'niconico';
 
 /// A text WebSocket a seat talks over (injectable for tests).
-abstract interface class NiconicoSocket {
-  /// Received text messages; the stream ends when the socket closes.
-  Stream<String> get messages;
+typedef NiconicoSocket = TextSocket;
 
-  /// Sends one text message; ignored after close.
-  void send(String text);
-
-  /// Closes the socket.
-  Future<void> close();
-}
-
-/// Opens a [NiconicoSocket] to [url] with [headers].
-typedef NiconicoConnect = Future<NiconicoSocket> Function(Uri url, Map<String, String> headers);
+/// Opens a [NiconicoSocket] to a URL with request headers.
+typedef NiconicoConnect = TextSocketConnect;
 
 /// [NiconicoConnect] on `dart:io` through [route] (the platform's proxy
 /// route, so the seat takes the same path as the adapter's HTTP).
-NiconicoConnect ioNiconicoConnect(ProxyRoute route) => (url, headers) async {
-  final client = HttpClient()
-    ..connectionTimeout = const Duration(seconds: 10)
-    ..findProxy = (_) => route.directive;
-  try {
-    final socket = await WebSocket.connect(
-      url.toString(),
-      headers: headers,
-      customClient: client,
-    ).timeout(const Duration(seconds: 15));
-    client.close();
-    return _IoSocket(socket);
-  } on Object {
-    client.close(force: true);
-    rethrow;
-  }
-};
-
-final class _IoSocket implements NiconicoSocket {
-  new(this._socket);
-
-  final WebSocket _socket;
-
-  @override
-  Stream<String> get messages => _socket.where((data) => data is String).cast<String>();
-
-  @override
-  void send(String text) {
-    if (_socket.readyState == WebSocket.open) _socket.add(text);
-  }
-
-  @override
-  Future<void> close() =>
-      _socket.close(WebSocketStatus.normalClosure).timeout(const Duration(seconds: 2), onTimeout: () {});
-}
+NiconicoConnect ioNiconicoConnect(ProxyRoute route) => ioTextSocketConnect(route);
 
 /// One watching seat (spec/sites/niconico.md §6.2): the WebSocket session
 /// that holds the stream grant. The key server refuses new AES keys within

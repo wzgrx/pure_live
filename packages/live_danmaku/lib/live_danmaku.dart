@@ -22,6 +22,7 @@ export 'src/runtime/socket_connector.dart' show SocketConnector, SocketPlan;
 export 'src/sites/bilibili.dart';
 export 'src/sites/douyin.dart';
 export 'src/sites/douyu.dart';
+export 'src/sites/fc2live.dart';
 export 'src/sites/huya.dart';
 export 'src/sites/kuaishou.dart';
 export 'src/sites/steambroadcast.dart';

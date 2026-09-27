@@ -1,0 +1,306 @@
+{
+  "status": 1,
+  "data": {
+    "channel_data": {
+      "channelid": "99999999",
+      "userid": "99999999",
+      "adult": 0,
+      "twoshot": 0,
+      "title": "",
+      "info": "",
+      "image": "",
+      "login_only": 0,
+      "gift_limit": 0,
+      "gift_list": [
+        {
+          "id": 0,
+          "type": 0,
+          "url": [
+            "/img/gift/basic-baloon.png",
+            "/img/gift/basic-baloon2.png",
+            "/img/gift/basic-baloon3.png"
+          ],
+          "name": "風船"
+        },
+        {
+          "id": 1,
+          "type": 0,
+          "url": [
+            "/img/gift/basic-heart.png",
+            "/img/gift/basic-heart2.png"
+          ],
+          "name": "ハート"
+        },
+        {
+          "id": 2,
+          "type": 1,
+          "url": [
+            "/img/gift/basic-diamond.png",
+            "/img/gift/basic-diamond2.png",
+            "/img/gift/basic-diamond3.png"
+          ],
+          "name": "ダイヤ"
+        },
+        {
+          "id": 3,
+          "type": 5,
+          "url": [
+            "/img/gift/basic-donut.png",
+            "/img/gift/basic-donut2.png"
+          ],
+          "name": "ドーナツ"
+        },
+        {
+          "id": 4,
+          "type": 1,
+          "url": [
+            "/img/gift/basic-ninja.png",
+            "/img/gift/basic-ninja.png",
+            "/img/gift/basic-ninja.png",
+            "/img/gift/basic-ninja.png",
+            "/img/gift/basic-ninja2.png"
+          ],
+          "name": "ニンジャ"
+        },
+        {
+          "id": 5,
+          "type": 1,
+          "url": [
+            "/img/gift/basic-candy.png",
+            "/img/gift/basic-candy2.png"
+          ],
+          "name": "キャンディ"
+        },
+        {
+          "id": 6,
+          "type": 2,
+          "url": [
+            "/img/gift/basic-cracker.png",
+            "/img/gift/basic-cracker2.png"
+          ],
+          "name": "クラッカー"
+        },
+        {
+          "id": 7,
+          "type": 4,
+          "url": [
+            "/img/gift/basic-fireworks.png",
+            "/img/gift/basic-fireworks2.png",
+            "/img/gift/basic-fireworks3.png",
+            "/img/gift/basic-fireworks4.png"
+          ],
+          "name": "花火"
+        },
+        {
+          "id": 8,
+          "type": 3,
+          "url": [
+            "/img/gift/basic-kiss.png",
+            "/img/gift/basic-kiss2.png"
+          ],
+          "name": "キッス"
+        },
+        {
+          "id": 9,
+          "type": 2,
+          "url": [
+            "/img/gift/basic-good.png",
+            "/img/gift/basic-good2.png"
+          ],
+          "name": "いいね"
+        },
+        {
+          "id": 10,
+          "type": 6,
+          "url": [
+            "/img/gift/basic-car.png",
+            "/img/gift/basic-car2.png",
+            "/img/gift/basic-car3.png",
+            "/img/gift/basic-car4.png"
+          ],
+          "name": "車"
+        },
+        {
+          "id": 11,
+          "type": 10,
+          "url": [
+            "/img/gift/basic-fish.png",
+            "/img/gift/basic-fish2.png",
+            "/img/gift/basic-fish3.png",
+            "/img/gift/basic-fish4.png",
+            "/img/gift/basic-fish5.png"
+          ],
+          "name": "さかな"
+        },
+        {
+          "id": 12,
+          "type": 10,
+          "url": [
+            "/img/gift/basic-ufo.png",
+            "/img/gift/basic-ufo2.png",
+            "/img/gift/basic-ufo3.png"
+          ],
+          "name": "UFO"
+        },
+        {
+          "id": 13,
+          "type": 2,
+          "url": [
+            "/img/gift/basic-champagne.png",
+            "/img/gift/basic-champagne2.png",
+            "/img/gift/basic-champagne3.png"
+          ],
+          "name": "シャンパン"
+        },
+        {
+          "id": 999,
+          "type": 7,
+          "url": [
+            "/img/gift/ochako.png"
+          ],
+          "name": "オチャコ"
+        }
+      ],
+      "comment_limit": "",
+      "tfollow": 0,
+      "tname": "",
+      "fee": 0,
+      "amount": 0,
+      "interval": 60,
+      "category": "0",
+      "category_name": "ライブ配信",
+      "is_official": 0,
+      "is_premium_publisher": 0,
+      "is_link_share": 0,
+      "ticketid": 0,
+      "is_premium": 0,
+      "ticket_price": 0,
+      "ticket_only": 0,
+      "is_app": 0,
+      "is_video": 0,
+      "is_rest": 0,
+      "count": 0,
+      "total": 0,
+      "is_publish": 0,
+      "is_limited": 0,
+      "start": 0,
+      "version": "",
+      "fc2_channel": {
+        "result": 0,
+        "userid": 0,
+        "fc2id": 0,
+        "adult": 0,
+        "title": "",
+        "description": "",
+        "url": "",
+        "images": []
+      },
+      "publish_method": "",
+      "video_stereo3d": "",
+      "video_mapping": "",
+      "video_horizontal_view": ""
+    },
+    "profile_data": {
+      "userid": "",
+      "fc2id": "",
+      "cid": "",
+      "name": "",
+      "info": "",
+      "icon": "",
+      "image": "",
+      "sex": "",
+      "age": ""
+    },
+    "user_data": {
+      "is_login": 0,
+      "userid": 0,
+      "fc2id": 0,
+      "cid": 0,
+      "icon": "",
+      "name": "",
+      "point": 0,
+      "adult_access": 1,
+      "recauth": 0,
+      "is_premium_user": 0,
+      "gift_list": [
+        {
+          "id": 0,
+          "category": 0,
+          "amount": 0
+        },
+        {
+          "id": 3,
+          "category": 0,
+          "amount": 0
+        },
+        {
+          "id": 4,
+          "category": 0,
+          "amount": 0
+        },
+        {
+          "id": 6,
+          "category": 0,
+          "amount": 0
+        },
+        {
+          "id": 9,
+          "category": 0,
+          "amount": 0
+        },
+        {
+          "id": 10,
+          "category": 0,
+          "amount": 0
+        },
+        {
+          "id": 11,
+          "category": 0,
+          "amount": 0
+        },
+        {
+          "id": 1,
+          "category": 0,
+          "amount": 10
+        },
+        {
+          "id": 5,
+          "category": 0,
+          "amount": 10
+        },
+        {
+          "id": 8,
+          "category": 0,
+          "amount": 100
+        },
+        {
+          "id": 7,
+          "category": 0,
+          "amount": 1000
+        },
+        {
+          "id": 13,
+          "category": 0,
+          "amount": 10000
+        },
+        {
+          "id": 2,
+          "category": 1,
+          "amount": 0
+        },
+        {
+          "id": 12,
+          "category": 1,
+          "amount": 0
+        }
+      ],
+      "stamina": {
+        "timestamp": 1790537842,
+        "stamina": [
+          [],
+          []
+        ]
+      }
+    }
+  }
+}

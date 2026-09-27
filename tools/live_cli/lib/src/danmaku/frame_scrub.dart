@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:live_cli/src/danmaku/recorder.dart';
+import 'package:live_cli/src/danmaku/scrub_fc2live.dart';
 import 'package:live_cli/src/danmaku/scrub_sites.dart';
 import 'package:live_cli/src/danmaku/scrub_steambroadcast.dart';
 import 'package:live_core/live_core.dart';
@@ -128,6 +129,7 @@ abstract class FrameScrubber {
   /// The scrubber for [platform].
   factory forPlatform(String platform, RoomDetail detail, {int? seed}) => switch (platform) {
     'douyu' => DouyuFrameScrubber(detail, seed: seed),
+    'fc2live' => Fc2LiveFrameScrubber(detail, seed: seed),
     'huya' => HuyaFrameScrubber(detail, seed: seed),
     'bilibili' => BilibiliFrameScrubber(detail, seed: seed),
     'douyin' => DouyinFrameScrubber(detail, seed: seed),

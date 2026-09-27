@@ -7,7 +7,7 @@
 - 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连；中国大陆直连是否需要代理 [待确认]）：最近节目列表、搜索、观看页、观看座位 WebSocket、HLS（LL-HLS、fMP4、AES-128）都能匿名使用。
 - 能力：目录（7 个标签页 → 在播节目，分页）、推荐（“一般”标签页）、搜索（在播节目）、详情、取流（HLS 主列表 + 座位租期）、链接解析、弹幕（评论服务器 NDGR，§7）。
 - 不提供：时移回放；登录（会员限定、付费节目报 NeedsLogin）。
-- **播放层缺口**（§6.3、§6.5）：HLS 的 Cookie 按路径区分，`StreamLine.headers` 只能带一组，`live_media`/`live_player` 需要按路径发 Cookie 才能真正播放。
+- **按路径的 Cookie**（§6.3）：HLS 的 Cookie 按路径区分，`StreamLine.headers` 只能带一组；线路带中继配方，由 `live_media` 的 HLS 中继按路径发送（ADR 0033），待真机验证。
 
 ---
 
@@ -93,7 +93,7 @@
 - v4：线路的 `cookie` 请求头只能放主列表那组（探针用它拿主列表）。完整的 Cookie 由适配器按线路提供：`cookieFile(line)` 给出 Netscape Cookie 文件内容（每行 `.nicovideo.jp TRUE <path> TRUE <expires> <name> <value>`），`grantFor(line)` 给出结构化的授权。播放层需要其一：
   1. mpv 设 `cookies=yes`、`cookies-file=<临时文件>`（FFmpeg 的 HLS 读取器按路径匹配 Cookie 存储）；或
   2. `live_media` 的 HLS 中继按请求路径加 Cookie（PLAN 的 SRC-2 第 3 项，尚未实现）。
-  `live_media` 现在只把 `headers` 交给引擎（ADR 0018 决定 7），两者都没有，所以**现在还播不了**，只能拿到主列表。这是报告给播放层的缺口，本阶段不改 `live_media`。
+  v4 选第 2 种（ADR 0033）：线路带 `hlsRelay: HlsRelayRecipe(cookies: …)`，读座位当前的授权，中继给每个请求只带路径匹配的那组。实际播放待真实网络和真机验证。
 
 ### 6.4 座位租期（用现有的 `Lease` 表达保活）
 

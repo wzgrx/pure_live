@@ -68,7 +68,7 @@
 - **SRC-2 管线选择**（互斥，按顺序判断）：
   1. 租期会断开连接的 FLV（`cutsConnection=true`）→ FLV 拼接续流；
   2. ~~旧式 codec 12 HEVC 的 FLV → 标签转写~~：不做。所有平台的 libmpv 都是 FFmpeg ≥ 8（Android/Linux 为 9.0.2，Windows 为 FFmpeg master Lavc63.13，见 DIAGNOSIS），能直接识别 codec 12（2026-09-28 结清）；
-  3. 需要改写的 HLS（带查询策略，或自有源配方）→ HLS 中继；
+  3. 带中继配方的 HLS（`StreamLine.hlsRelay`：按路径的 Cookie、分片还原）→ HLS 中继（ADR 0033）；
   4. 其它 → 直连。
 
   证据：PST:129-183；诊断 02 §1.4。验收：【单元】表驱动。
@@ -102,7 +102,7 @@
   证据：PM:4254-4260；PERT:2867。验收：【单元】。
 - **SRC-9 自有源配方**（Bigo、FC2、Niconico 等）：播放层不接收占位 URL、原始 Cookie、签名 WebSocket；获取元数据和座位在同一个输入事务里完成。首批 5 个平台不用，但保留能力。
   证据：PST:183-186；`lib/player/core/playback_source.dart:31-41`。验收：【单元】。
-- **SRC-10 HLS 查询策略**：[待确认] 唯一的产出者 TTing 已在 1495f56b 下线；如果没有站点再产出，删除这条路径。
+- **SRC-10 HLS 查询策略**：不做。唯一的产出者 TTing 已在 1495f56b 下线，v4 没有平台需要；以后需要时给配方加字段（ADR 0033）。
 
 ## 4 mpv 内核事件契约
 

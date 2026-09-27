@@ -44,7 +44,7 @@ void main() {
   test('every platform in the order has a name, the stored default lists them all', () {
     expect(platformNames.keys.toSet(), platformOrder.toSet());
     expect(Settings.catalogPlatforms.defaultValue, platformOrder);
-    expect(platformName('bigo'), 'Bigo Live', reason: 'not registered yet (ADR 0031), follows still read well');
+    expect(platformName('huajiao'), '花椒', reason: 'retired, follows still read well');
   });
 
   test('discover lists catalog platforms only, search native-search ones only', () {

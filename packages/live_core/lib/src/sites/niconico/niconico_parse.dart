@@ -6,6 +6,7 @@ import 'package:live_core/src/page.dart';
 import 'package:live_core/src/room.dart';
 import 'package:live_core/src/room_ref.dart';
 import 'package:live_core/src/site_error.dart';
+import 'package:live_core/src/stream.dart';
 import 'package:live_core/src/text.dart';
 import 'package:meta/meta.dart';
 
@@ -15,31 +16,6 @@ Map<Object?, Object?> _obj(Object? value) => value is Map ? value : const <Objec
 
 /// What a watch page says (spec/sites/niconico.md §4).
 typedef NiconicoWatch = ({RoomDetail detail, String programId, Uri? webSocket, SiteError? denied});
-
-/// One cookie of a stream grant, scoped to a path (spec/sites/niconico.md §6.3).
-@immutable
-final class NiconicoCookie {
-  /// Creates a cookie.
-  const new({required this.name, required this.value, required this.path, required this.domain, this.expires});
-
-  /// Cookie name (the same name repeats under different paths).
-  final String name;
-
-  /// Cookie value.
-  final String value;
-
-  /// Path prefix it applies to (`/hls/playlists/…`, `/hls/segments/…`, `/hls/keys/…`).
-  final String path;
-
-  /// Domain (`nicovideo.jp`).
-  final String domain;
-
-  /// Expiry, when given.
-  final DateTime? expires;
-
-  /// Whether this cookie is sent to [url].
-  bool appliesTo(Uri url) => url.path.startsWith(path) && (url.host == domain || url.host.endsWith('.$domain'));
-}
 
 /// The `stream` message of a seat: the HLS master and its cookies.
 @immutable
@@ -52,7 +28,7 @@ final class NiconicoGrant {
 
   /// Path-scoped cookies; every request under `/hls/` needs the ones whose
   /// path matches (§6.3).
-  final List<NiconicoCookie> cookies;
+  final List<ScopedCookie> cookies;
 
   /// `availableQualities` (`abr`, `1.5Mbps480p30fps`, …).
   final List<String> qualities;
@@ -311,7 +287,7 @@ abstract final class NiconicoParse {
   static NiconicoGrant grant(Map<String, dynamic> data) {
     final master = jsonUrl(data['uri']);
     if (data['protocol'] != 'hls' || master == null) throw ApiChanged(_site, 'stream: protocol ${data['protocol']}');
-    final cookies = <NiconicoCookie>[
+    final cookies = <ScopedCookie>[
       for (final raw in (data['cookies'] as List?) ?? const [])
         if (raw is Map)
           if ((jsonString(raw['name']), jsonString(raw['value']), jsonString(raw['path'])) case (
@@ -319,7 +295,7 @@ abstract final class NiconicoParse {
             final String value,
             final String path,
           ))
-            NiconicoCookie(
+            ScopedCookie(
               name: name,
               value: value,
               path: path,

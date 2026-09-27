@@ -183,6 +183,12 @@ void main() {
       final again = await site.streams(detail);
       expect(again.lines.single.url, line.url, reason: 'the held seat is reused');
       expect(urls, hasLength(1));
+      // The relay sends each request only the cookies of its own path.
+      final relay = line.hlsRelay!;
+      final segment = line.url.replace(path: line.url.path.replaceFirst('/hls/playlists/', '/hls/segments/'));
+      expect(relay.cookieHeaderFor(line.url), line.headers['cookie']);
+      expect(relay.cookieHeaderFor(segment), isNot(line.headers['cookie']));
+      expect(relay.cookieHeaderFor(Uri.parse('https://example.test/hls/playlists/')), isNull);
       expect(site.cookieFile(line), isNotNull);
       await site.close();
       expect(socket.closed, isTrue);

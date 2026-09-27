@@ -61,7 +61,7 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 - 媒体请求头：`Origin: https://www.bigo.tv`、`Referer: https://www.bigo.tv/`、UA。
 - **分片加扰（§6.3）**：列表带 `#EXT-X-BIGO-WEB-PROTECTION:VERSION=1,SEED=<n>`，每个分片前两个 TS 包的前 16 字节被异或（同步字节 `0x47` 变成别的值，PAT/PMT 不可读）。
   - 实测（2026-09-28，同一直播间）：把 3 个分片存成本地点播列表，ffmpeg 不解扰也能解码（它扫描 PES 猜流）；但 ffmpeg 直接打开线上直播列表，11 次只成功 1 次（代理出口 1/8、默认出口 0/3），失败都是 `could not find codec parameters`——窗口只有 3 个短分片，每个分片的 PAT/PMT 都被扰乱，探测期内拿不到节目表。经本地 HLS 中继转发（同一上游、同一代理）：解扰 2/2 成功，不解扰 0/2（超时）。
-  - 结论：播放器（media_kit 底层是 ffmpeg）直接播放不可用，需要 `live_media` 的 HLS 中继在转发分片时调用解扰函数（§6.3）。**这是 `live_media` 的缺口**：现在的管线只有 splice/direct，不改写 HLS。旧版录制器用自有输入做同样的事（R:70-75）。
+  - 结论：播放器（media_kit 底层是 ffmpeg）直接播放不可用，需要 `live_media` 的 HLS 中继在转发分片时调用解扰函数（§6.3）。线路带 `hlsRelay: HlsRelayRecipe(restore: BigoProtection.restorer)`，由 ADR 0033 的 HLS 中继解扰（2026-09-28 实现）。旧版录制器用自有输入做同样的事（R:70-75）。
 
 ## 6. 取流
 

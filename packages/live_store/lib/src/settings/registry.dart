@@ -633,6 +633,7 @@ abstract final class Settings {
       'youtube',
       'tiktok',
       'fc2live',
+      'bigo',
       'iptv',
     ],
     lowerCase: true,

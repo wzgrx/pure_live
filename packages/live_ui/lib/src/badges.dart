@@ -36,6 +36,7 @@ const _logos = {
   'youtube',
   'tiktok',
   'fc2live',
+  'bigo',
 };
 
 /// A platform's logo, used as is (principles §3.4).

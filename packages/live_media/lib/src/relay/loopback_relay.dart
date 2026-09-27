@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_media/src/relay/flv_splicer.dart';
+import 'package:live_media/src/relay/hls_relay.dart';
 import 'package:live_media/src/relay/upstream.dart';
 import 'package:live_net/live_net.dart';
 
@@ -25,16 +26,18 @@ abstract interface class RelayInput {
 /// input closes. Playback and recording share it. Upstream requests go out
 /// with TLS verification and the [proxy] policy's route.
 final class LoopbackRelay {
-  new _(this._server, this.proxy, this._opener, this.timings);
+  new _(this._server, this.proxy, this._opener, this._hlsUpstream, this.timings);
 
-  /// Starts a relay on an ephemeral loopback port. [opener] replaces the
-  /// HTTP upstream (tests); by default [openHttpFlv] with [proxy]'s route
-  /// and [idleTimeout].
+  /// Starts a relay on an ephemeral loopback port. [opener] and
+  /// [hlsUpstream] replace the HTTP upstreams (tests); by default
+  /// [openHttpFlv] and [IoHlsUpstream] with [proxy]'s route and
+  /// [idleTimeout].
   static Future<LoopbackRelay> start({
     ProxyPolicy proxy = const FixedProxyPolicy(),
     Duration idleTimeout = const Duration(seconds: 15),
     SpliceTimings timings = const SpliceTimings(),
     FlvSourceOpener Function(String site)? opener,
+    HlsUpstream Function(String site)? hlsUpstream,
   }) async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final relay = LoopbackRelay._(
@@ -48,6 +51,9 @@ final class LoopbackRelay {
                 connectTimeout: timings.connectTimeout,
                 idleTimeout: idleTimeout,
               ),
+      hlsUpstream ??
+          (site) =>
+              IoHlsUpstream(site: site, proxy: proxy, connectTimeout: timings.connectTimeout, idleTimeout: idleTimeout),
       timings,
     );
     relay._requests = server.listen(relay._handle);
@@ -59,11 +65,13 @@ final class LoopbackRelay {
   /// Upstream proxy policy.
   final ProxyPolicy proxy;
   final FlvSourceOpener Function(String site) _opener;
+  final HlsUpstream Function(String site) _hlsUpstream;
 
   /// Splice limits.
   final SpliceTimings timings;
   late final StreamSubscription<HttpRequest> _requests;
   final _routes = <String, _SpliceRoute>{};
+  final _hlsRoutes = <String, _HlsInput>{};
   final _random = Random.secure();
   var _closed = false;
 
@@ -84,8 +92,7 @@ final class LoopbackRelay {
     void Function(StreamLine line)? onRenewed,
   }) {
     if (_closed) throw StateError('LoopbackRelay is closed');
-    final secret = base64UrlEncode(List.generate(18, (_) => _random.nextInt(256))).replaceAll('=', '');
-    final path = '/$secret/live.flv';
+    final path = '/${_secret()}/live.flv';
     final route = _SpliceRoute(
       relay: this,
       path: path,
@@ -99,7 +106,30 @@ final class LoopbackRelay {
     return route;
   }
 
+  /// Serves the HLS [line] through its recipe (SRC-2 item 3): playlists
+  /// rewritten to point here, per-path cookies, restored segments. [site]
+  /// selects the upstream proxy route.
+  RelayInput openHls(StreamLine line, {required String site}) {
+    if (_closed) throw StateError('LoopbackRelay is closed');
+    final secret = _secret();
+    final input = _HlsInput(
+      this,
+      secret,
+      HlsRoute(prefix: '/$secret/', port: port, line: line, upstream: _hlsUpstream(site)),
+    );
+    _hlsRoutes[secret] = input;
+    return input;
+  }
+
+  String _secret() => base64UrlEncode(List.generate(18, (_) => _random.nextInt(256))).replaceAll('=', '');
+
   Future<void> _handle(HttpRequest request) async {
+    final segments = request.uri.pathSegments;
+    final hls = segments.length == 2 ? _hlsRoutes[segments.first] : null;
+    if (!_closed && hls != null) {
+      await hls.route.serve(request, segments.last);
+      return;
+    }
     final route = _routes[request.uri.path];
     if (_closed || route == null || request.method != 'GET') {
       try {
@@ -117,7 +147,10 @@ final class LoopbackRelay {
   Future<void> close() async {
     if (_closed) return;
     _closed = true;
-    await Future.wait([for (final route in _routes.values.toList()) route.close()]);
+    await Future.wait([
+      for (final route in _routes.values.toList()) route.close(),
+      for (final input in _hlsRoutes.values.toList()) input.close(),
+    ]);
     await _requests.cancel();
     await _server.close(force: true);
   }
@@ -215,5 +248,25 @@ final class _SpliceRoute implements RelayInput {
     _closed = true;
     relay._routes.remove(path);
     await Future.wait([for (final splicer in _splicers.toList()) splicer.cancel()]);
+  }
+}
+
+final class _HlsInput implements RelayInput {
+  new(this.relay, this.secret, this.route);
+
+  final LoopbackRelay relay;
+  final String secret;
+  final HlsRoute route;
+
+  @override
+  Uri get uri => route.uri;
+
+  @override
+  StreamLine get line => route.line;
+
+  @override
+  Future<void> close() async {
+    relay._hlsRoutes.remove(secret);
+    route.close();
   }
 }

@@ -56,7 +56,7 @@ const platformOrder = [
   'showroom',
   'pandalive',
   '17live',
-  // Batch 3b (ADR 0031): Bigo waits for its HLS relay.
+  // Batch 3b (ADR 0031).
   'liveme',
   'steambroadcast',
   'sixroom',
@@ -70,6 +70,7 @@ const platformOrder = [
   'youtube',
   'tiktok',
   'fc2live',
+  'bigo',
   'iptv',
 ];
 
@@ -107,12 +108,13 @@ const platformNames = {
   'youtube': 'YouTube Live',
   'tiktok': 'TikTok LIVE',
   'fc2live': 'FC2 Live',
+  'bigo': 'Bigo Live',
   'iptv': '网络电视',
 };
 
 /// Names of 3.x platforms this build has no adapter for, so their follows and
 /// history still read well (spec/product.md F-FAV-08).
-const _otherPlatformNames = {'huajiao': '花椒', 'bigo': 'Bigo Live', 'kick': 'Kick'};
+const _otherPlatformNames = {'huajiao': '花椒', 'kick': 'Kick'};
 
 /// The display name of any platform id, supported or not.
 String platformName(String id) => platformNames[id] ?? _otherPlatformNames[id] ?? id;
@@ -205,6 +207,7 @@ final sitesProvider = Provider<Map<String, PlatformSite>>((ref) {
     'youtube': PlatformSite(YouTubeSite(http)),
     'tiktok': PlatformSite(TikTokSite(http)),
     'fc2live': PlatformSite(fc2),
+    'bigo': PlatformSite(BigoSite(http)),
     'iptv': PlatformSite(ref.watch(iptvSiteProvider)),
   };
 });

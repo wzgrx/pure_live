@@ -6,6 +6,7 @@ export 'src/engine/diagnostics.dart';
 export 'src/engine/engine.dart';
 export 'src/relay/flv.dart';
 export 'src/relay/flv_splicer.dart';
+export 'src/relay/hls_relay.dart';
 export 'src/relay/loopback_relay.dart';
 export 'src/relay/source_pipeline.dart';
 export 'src/relay/upstream.dart';

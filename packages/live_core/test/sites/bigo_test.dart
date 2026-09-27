@@ -113,6 +113,13 @@ void main() {
       expect(BigoProtection.transform(BigoProtection.transform(segment, 807018584), 807018584), segment);
       expect(BigoProtection.transform(segment, 807018584).sublist(376), segment.sublist(376));
     });
+
+    test('§6.3 the relay restorer: by the playlist seed, none for an unprotected playlist', () {
+      final segment = Uint8List.fromList(List.generate(188 * 2, (i) => i & 0xff));
+      final restore = BigoProtection.restorer(Fixture.load('bigo', 'S04-playlist').body)!;
+      expect(restore(BigoProtection.transform(segment, 807018584)), segment);
+      expect(BigoProtection.restorer('#EXTM3U\n#EXT-X-VERSION:3\n'), isNull);
+    });
   });
 
   group('adapter', () {
@@ -122,6 +129,7 @@ void main() {
       expect(detail.state, LiveState.live);
       final set = await site.streams(detail);
       expect(set.lines.single.headers['referer'], 'https://www.bigo.tv/');
+      expect(set.lines.single.hlsRelay?.restore, isNotNull, reason: 'segments go through the relay');
       expect(set.selected, BigoParse.auto);
     });
 

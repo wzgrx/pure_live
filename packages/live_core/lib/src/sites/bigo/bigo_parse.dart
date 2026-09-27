@@ -160,9 +160,16 @@ abstract final class BigoParse {
     );
   }
 
-  /// §5 the one HLS line (segments need the §6.3 transform).
-  static StreamLine line(Uri hls, {required Map<String, String> headers}) =>
-      StreamLine(url: hls, format: StreamFormat.hls, lineId: hls.host, requested: auto, headers: headers, codec: 'avc');
+  /// §5 the one HLS line; the relay restores its segments (§6.3).
+  static StreamLine line(Uri hls, {required Map<String, String> headers}) => StreamLine(
+    url: hls,
+    format: StreamFormat.hls,
+    lineId: hls.host,
+    requested: auto,
+    headers: headers,
+    codec: 'avc',
+    hlsRelay: const HlsRelayRecipe(restore: BigoProtection.restorer),
+  );
 }
 
 /// §6.3 Bigo's web HLS protection: a playlist tag carries a seed; the first
@@ -179,6 +186,13 @@ abstract final class BigoProtection {
     final seed = value == null ? null : int.tryParse(value);
     if (seed == null || seed > 0xffffffff) throw const ApiChanged(_site, 'bad HLS protection seed');
     return seed;
+  }
+
+  /// How the segments of media [playlist] are restored; null when the
+  /// playlist is not protected.
+  static SegmentRestore? restorer(String playlist) {
+    final seed = BigoProtection.seed(playlist);
+    return seed == null ? null : (segment) => transform(segment, seed);
   }
 
   /// Unscrambles (or scrambles) a segment.

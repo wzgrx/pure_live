@@ -214,8 +214,8 @@ final class NiconicoSite implements LiveSite, CatalogSource, SearchSource, RoomS
       lineId: 'dlive',
       requested: auto,
       headers: {
-        // Only the playlists' cookies fit one header; segments and keys need
-        // their own (§6.3, cookieFile).
+        // Only the master's cookies fit one header (the probe uses it); the
+        // relay sends each request its own set (§6.3).
         'cookie': grant.cookieHeader(grant.master),
         'origin': 'https://live.nicovideo.jp',
         'referer': 'https://live.nicovideo.jp/',
@@ -223,6 +223,8 @@ final class NiconicoSite implements LiveSite, CatalogSource, SearchSource, RoomS
       },
       codec: 'avc',
       lease: Lease(refreshAt: now.add(renewEvery), expiresAt: now.add(holdFor), cutsConnection: false),
+      // The seat's current grant: a later `stream` message replaces it.
+      hlsRelay: HlsRelayRecipe(cookies: () => (seat!.isOpen ? seat.grant : grant).cookies),
     );
     return StreamSet(qualities: const [auto], selected: auto, lines: [line]);
   }

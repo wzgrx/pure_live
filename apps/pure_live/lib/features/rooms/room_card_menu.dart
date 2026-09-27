@@ -8,6 +8,7 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/alerts/alert_tiles.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
 import 'package:pure_live_app/features/system/launch_args.dart';
@@ -75,6 +76,8 @@ Future<void> showRoomCardMenu(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(title: Text(anchorName), subtitle: Text(platformNames[room.platform] ?? room.platform)),
+            // F-NEW-01: per-room live alerts for followed rooms (not IPTV channels).
+            if (followed && room.platform != 'iptv') RoomAlertSwitch(room: room),
             for (final action in actions)
               ListTile(
                 leading: Icon(switch (action) {

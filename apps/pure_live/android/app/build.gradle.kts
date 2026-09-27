@@ -27,6 +27,9 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     ndkVersion = "30.0.16248370"
 
     compileOptions {
+        // flutter_local_notifications requires core library desugaring in the
+        // app (live alerts, ADR ADR 0028).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -66,4 +69,10 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // GPL-2.0 with the Classpath Exception (OpenJDK library code); the
+    // exception permits shipping it with the AGPL app (ADR ADR 0028).
+    add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.5")
 }

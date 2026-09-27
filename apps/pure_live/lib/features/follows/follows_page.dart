@@ -23,15 +23,34 @@ enum _Filter { live, all, group }
 /// Followed streamers: live ones as cover cards sorted by audience, offline
 /// ones as compact rows without covers (principles §4.1, §4.3).
 class FollowsPage extends ConsumerStatefulWidget {
-  const new({super.key});
+  const new({this.filter, this.request, super.key});
+
+  /// `live` opens the live tab (the combined live alert, F-NEW-01).
+  final String? filter;
+
+  /// Changes with each outside request, so a repeated request applies
+  /// [filter] again after the user switched tabs.
+  final String? request;
 
   @override
   ConsumerState<FollowsPage> createState() => _FollowsPageState();
 }
 
 class _FollowsPageState extends ConsumerState<FollowsPage> {
-  _Filter _filter = _Filter.all;
+  late _Filter _filter = _requested ?? _Filter.all;
   String? _groupId;
+
+  _Filter? get _requested => widget.filter == 'live' ? _Filter.live : null;
+
+  @override
+  void didUpdateWidget(FollowsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final requested = _requested;
+    if (requested != null && (widget.request != oldWidget.request || widget.filter != oldWidget.filter)) {
+      _filter = requested;
+      _groupId = null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

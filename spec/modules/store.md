@@ -275,12 +275,12 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 | room_tags | room_id、tag_id | 唯一对；以此为准，不用 LiveRoom.tagIds |
 | history | room_id、last_watched_at（可空） | 每房间一行；条数上限由 `history.limit` 决定，0 = 不限 |
 | block_rules | kind（keyword / user）、value、value_folded、created_at | 唯一 (kind, value_folded)；value_folded = 去空白后小写（favorite_room_controller.dart:627-635） |
-| room_prefs | room_id、key（volume、portraitLayout、…）、value（JSON） | 唯一 (room_id, key) |
+| room_prefs | room_id、key（volume、portraitLayout、liveAlert、…）、value（JSON） | 唯一 (room_id, key)。liveAlert 只存 `false`（该房间不开播提醒），没有则跟随全局开关 `alerts.live`（ADR 草稿 ADR 0028） |
 | record_tasks | id、room_id、status、auto_reconnect、quality_pref、quality_cursor、line_cursor、stopped_by_user、retry_count、last_error_kind、last_error_text、last_error_stage、session_started_at、session_dir、bytes、media_ms、created_at | 每房间一个任务；**不含 URL、请求头、Cookie**（record.md §13） |
 | record_files | id、task_id（可空）、room_id、path、kind（flv / hls / ts / mp4 / xml / gaps / legacy_ts）、state（writing / complete / interrupted / remuxing / remuxed / remux_failed / missing）、bytes、media_ms、started_at、ended_at、gap_count、source_file_id | 删除任务不删记录 |
 | webdav_profiles | id、name、base_url、username、secret_ref、is_current、remote_dir | name 唯一；密码只在密钥库 |
 | settings | key、value（JSON）、updated_at | 键必须在设置注册表里（§5） |
-| meta | key、value | schema 版本、导入账本、设备 id、首启标记等 |
+| meta | key、value | schema 版本、导入账本、设备 id、首启标记、开播提醒记录（`alerts.liveRecords`）、节目提醒列表（`alerts.programmeReminders`）等 |
 
 - 所有写入等待完成才算成功；失败回滚内存状态（旧版关注、历史已这样做：favorite_room_controller.dart:404-436；69e5b80b）。退出前把未完成的写入刷盘，最多等 2 s（plugins/utils.dart:19-23）。
 - 历史清空只删除“清空时刻的快照”里的行，期间新增的记录保留（history_controller.dart:43-47；db3ef116；history_metadata_test.dart:31）。

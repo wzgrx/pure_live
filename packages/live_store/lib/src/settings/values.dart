@@ -148,3 +148,20 @@ enum PortraitDanmakuArea {
   /// No danmaku on the video.
   hidden,
 }
+
+/// Order of the follows page (spec/design/principles.md §4.1, F-FAV-01).
+enum FollowSort {
+  /// Audience, largest first; offline rooms by when they were last live (the
+  /// 3.x order and the default).
+  audience,
+
+  /// The broadcast that started last first; offline rooms by when they were
+  /// last live.
+  liveTime,
+
+  /// Platform order, then audience.
+  platform,
+
+  /// The user's own order (follows.sort_order).
+  custom,
+}

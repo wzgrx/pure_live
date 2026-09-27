@@ -47,6 +47,10 @@ abstract final class Settings {
   /// Compact cards on the follow page (principles.md §4.3; 3.x default on).
   static const denseFollows = BoolSetting('app.denseFavorites', true, legacy: [LegacyKey('enableDenseFavorites')]);
 
+  /// Order of the follow page (principles.md §4.1, F-FAV-01); 3.x always
+  /// sorted by audience, so that is the default.
+  static const followSort = EnumSetting<FollowSort>('follows.sort', FollowSort.audience, FollowSort.values);
+
   /// 3.x room card preset on phones; kept for import, v4 derives density.
   static const cardPresetMobile = EnumSetting<CardPreset>(
     'roomCard.mobilePreset',
@@ -484,6 +488,23 @@ abstract final class Settings {
     legacy: [LegacyKey('maxConcurrentRefresh')],
   );
 
+  /// Fetch live covers again on a timer instead of keeping the cached image
+  /// (F-FAV-04; 3.x `autoRefreshThumbnails`, default off).
+  static const autoRefreshCovers = BoolSetting(
+    'refresh.autoRefreshThumbnails',
+    false,
+    legacy: [LegacyKey('autoRefreshThumbnails')],
+  );
+
+  /// Interval of [autoRefreshCovers], in minutes (3.x clamps to 5–360).
+  static const coverRefreshInterval = IntSetting(
+    'refresh.thumbnailRefreshInterval',
+    30,
+    min: 5,
+    max: 360,
+    legacy: [LegacyKey('thumbnailRefreshInterval')],
+  );
+
   // Alerts (spec/product.md F-NEW-01).
 
   /// Notify when a followed streamer goes live; off by default. Rooms can opt
@@ -816,6 +837,7 @@ abstract final class Settings {
     locale,
     textScale,
     denseFollows,
+    followSort,
     cardPresetMobile,
     cardPresetDesktop,
     startPage,
@@ -878,6 +900,8 @@ abstract final class Settings {
     refreshFollowsOnResume,
     autoRefreshInterval,
     maxConcurrentRefresh,
+    autoRefreshCovers,
+    coverRefreshInterval,
     liveAlerts,
     historyLimit,
     catalogPlatforms,

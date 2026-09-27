@@ -69,6 +69,77 @@ class LiveBadge extends StatelessWidget {
   }
 }
 
+/// The "录制中" mark of a room the recorder is saving (spec/product.md
+/// F-FAV-01): a dot plus text on a scrim, so it reads on any cover and never
+/// relies on colour alone (principles rule 2).
+class RecordingBadge extends StatelessWidget {
+  /// Creates the badge.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = LiveTheme.of(context).numeric.copyWith(color: Colors.white);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: const Color(0x99000000), borderRadius: BorderRadius.circular(Radii.r1)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Space.s1 + 2, vertical: 1),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const DecoratedBox(
+              decoration: BoxDecoration(color: Color(0xFFFF3B30), shape: BoxShape.circle),
+              child: SizedBox.square(dimension: 6),
+            ),
+            const SizedBox(width: Space.s1),
+            Text('录制中', style: style),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A short state label beside a name, such as "未支持" or "状态未知": tonal
+/// fill and text, no colour-only meaning.
+class StatusTag extends StatelessWidget {
+  /// Creates the tag; [recording] puts the recording dot before the text.
+  const new(this.text, {this.recording = false, super.key});
+
+  /// The recording mark for list rows ("录制中").
+  const new recording({Key? key}) : this('录制中', recording: true, key: key);
+
+  /// The label.
+  final String text;
+
+  /// Whether to show the recording dot.
+  final bool recording;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final style = Theme.of(context).textTheme.labelSmall!.copyWith(color: scheme.onSecondaryContainer);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(Radii.r1)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Space.s1 + 2, vertical: 1),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (recording) ...[
+              DecoratedBox(
+                decoration: BoxDecoration(color: scheme.error, shape: BoxShape.circle),
+                child: const SizedBox.square(dimension: 6),
+              ),
+              const SizedBox(width: Space.s1),
+            ],
+            Text(text, style: style),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// A figure on a cover (audience), on a scrim so it reads on any image.
 class CoverLabel extends StatelessWidget {
   /// Creates the label.

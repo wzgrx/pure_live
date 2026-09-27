@@ -17,7 +17,10 @@ bool looksLikeLink(String input) =>
 /// Search: one box for keywords and links (principles §4.1). A recognised link
 /// shows "打开直播间" on top; keywords search every platform, grouped by platform.
 class SearchPage extends ConsumerStatefulWidget {
-  const new({super.key});
+  const new({this.initialQuery, super.key});
+
+  /// Text to search right away (shared text that is not a room link).
+  final String? initialQuery;
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
@@ -28,6 +31,27 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   String _keyword = '';
   bool _liveOnly = false;
   Future<RoomRef?>? _link;
+
+  @override
+  void initState() {
+    super.initState();
+    _applyInitial();
+  }
+
+  @override
+  void didUpdateWidget(SearchPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialQuery != oldWidget.initialQuery) _applyInitial();
+  }
+
+  void _applyInitial() {
+    final query = widget.initialQuery;
+    if (query == null || query.trim().isEmpty) return;
+    _controller.text = query;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _submit(query);
+    });
+  }
 
   @override
   void dispose() {

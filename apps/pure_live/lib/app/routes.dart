@@ -17,6 +17,9 @@ import 'package:pure_live_app/features/settings/settings_page.dart';
 /// (principles §4.1).
 String roomLocation(RoomRef room) => '/room/${Uri.encodeComponent(room.platform)}/${Uri.encodeComponent(room.roomId)}';
 
+/// Search with [text] filled in and submitted.
+String searchLocation(String text) => Uri(path: '/search', queryParameters: {'q': text}).toString();
+
 /// Location of an area's room list.
 String areaLocation(String platform) => '/discover/area/${Uri.encodeComponent(platform)}';
 
@@ -48,7 +51,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/search', builder: (context, state) => const SearchPage())],
+            routes: [
+              GoRoute(
+                path: '/search',
+                builder: (context, state) => SearchPage(initialQuery: state.uri.queryParameters['q']),
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [

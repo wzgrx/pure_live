@@ -8,6 +8,7 @@ import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/app/app.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
+import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/about/releases.dart';
@@ -105,6 +106,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          recordManagerProvider.overrideWithValue(fakeRecordManager()),
           storeProvider.overrideWithValue(store),
           sitesProvider.overrideWithValue({for (final id in platformOrder) id: PlatformSite(FakeSite(id))}),
           followsProvider.overrideWith((ref) => Stream.value(const [])),

@@ -31,7 +31,7 @@ dependency_overrides:
   # unchanged in the latest ones (WakelockPlus.enable/disable; XmlDocument in
   # the Apple hook). Overriding keeps the rest of the graph current (ADR 0008).
   wakelock_plus: 1.8.0
-  xml: 7.0.1
+  xml: 7.1.0
   # Flutter 3.47.5 pins these below their latest stable releases; overriding
   # keeps test, analyzer and code generators current (ADR 0008).
   _fe_analyzer_shared: 108.0.0

@@ -1,4 +1,5 @@
 import 'package:live_core/live_core.dart';
+import 'package:live_record/live_record.dart';
 
 /// An adapter with canned pages, for widget and provider tests.
 final class FakeSite implements LiveSite, CatalogSource, SearchSource, RoomSource, StreamSource, LinkResolver {
@@ -67,3 +68,11 @@ final class FakeSite implements LiveSite, CatalogSource, SearchSource, RoomSourc
     audience: const Audience(online: 35512),
   );
 }
+
+/// A recorder that never touches the disk or the network.
+RecordManager fakeRecordManager() => RecordManager(
+  rooms: SiteRecordRooms((_) => null),
+  store: MemoryRecordTaskStore(),
+  root: '/nonexistent',
+  opener: httpRecordOpener(),
+);

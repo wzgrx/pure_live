@@ -13,6 +13,7 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 ```
 
 - 这组测试带 `@Tags(['screenshots'])`，标签在 `apps/pure_live/dart_test.yaml` 声明，**默认包含在 `flutter test` 和门禁里**：68 张在 WSL 上约 23 秒（连编译约 31 秒），低于 60 秒的门槛；整个应用的 `flutter test` 因此从约 49 秒变为约 85 秒（2026-09-28 实测）。
+- 比较失败时，差异图写在 `test/screenshots/failures/`（`*_masterImage`、`*_testImage`、`*_isolatedDiff`、`*_maskedDiff`，已忽略，不提交）。
 - 更新后用图片查看器或 `git diff --stat` 检查哪些图变了；只改了一处界面却有很多图变化，通常说明改动波及了共用组件。
 - 找不到字体文件的机器（例如 Windows 主机）上整组跳过，不算失败，控制台打印 `screenshots skipped: …`。
 

@@ -93,7 +93,7 @@
 - v4：线路的 `cookie` 请求头只能放主列表那组（探针用它拿主列表）。完整的 Cookie 由适配器按线路提供：`cookieFile(line)` 给出 Netscape Cookie 文件内容（每行 `.nicovideo.jp TRUE <path> TRUE <expires> <name> <value>`），`grantFor(line)` 给出结构化的授权。播放层需要其一：
   1. mpv 设 `cookies=yes`、`cookies-file=<临时文件>`（FFmpeg 的 HLS 读取器按路径匹配 Cookie 存储）；或
   2. `live_media` 的 HLS 中继按请求路径加 Cookie（PLAN 的 SRC-2 第 3 项，尚未实现）。
-  v4 选第 2 种（ADR 0033）：线路带 `hlsRelay: HlsRelayRecipe(cookies: …)`，读座位当前的授权，中继给每个请求只带路径匹配的那组。实际播放待真实网络和真机验证。
+  v4 选第 2 种（ADR 0033）：线路带 `hlsRelay: HlsRelayRecipe(cookies: …)`，读座位当前的授权，中继给每个请求只带路径匹配的那组。实网验证（2026-09-28，默认出口）：`live_cli probe niconico` 两个在播用户房间，经中继依次取到主列表、变体列表和 fMP4 初始化段（`ftyp`），都是 HTTP 200；带画面的实际播放待真机验证。
 
 ### 6.4 座位租期（用现有的 `Lease` 表达保活）
 

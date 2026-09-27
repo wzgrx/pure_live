@@ -106,7 +106,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                       GoRoute(path: 'webdav', builder: (context, state) => const WebDavPage()),
                       GoRoute(
                         path: 'lan',
-                        builder: (context, state) => LanSyncPage(receive: state.uri.queryParameters['receive'] == '1'),
+                        builder: (context, state) => LanSyncPage(
+                          receive: state.uri.queryParameters['receive'] == '1',
+                          target: state.uri.queryParameters['target'],
+                        ),
                       ),
                     ],
                   ),

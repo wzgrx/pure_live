@@ -26,6 +26,7 @@ import 'package:pure_live_app/features/room/gestures.dart';
 import 'package:pure_live_app/features/room/playback.dart';
 import 'package:pure_live_app/features/room/player_view.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
+import 'package:pure_live_app/features/room/record_button.dart';
 import 'package:pure_live_app/features/room/room_layout.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
 import 'package:pure_live_app/features/system/mini_player.dart';
@@ -663,6 +664,8 @@ class _RoomInfo extends ConsumerWidget {
                   label: const Text(S.follow),
                   onPressed: () => ref.read(storeProvider).follows.follow(RoomSnapshot.fromDetail(detail)),
                 ),
+              // F-ROOM-14; IPTV channels record from the recording center.
+              if (card.ref.platform != 'iptv') RoomRecordButton(detail: detail),
               OutlinedButton.icon(
                 icon: const Icon(Icons.grid_view, size: 18),
                 label: const Text('加入多画面'),

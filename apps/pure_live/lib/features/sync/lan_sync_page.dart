@@ -75,17 +75,21 @@ const _localNetworkNote =
 /// receiving user sees what would be imported and confirms before anything
 /// is written. Accounts travel only inside a passphrase-encrypted section.
 class LanSyncPage extends ConsumerStatefulWidget {
-  const new({this.receive = false, super.key});
+  const new({this.receive = false, this.target, super.key});
 
   /// Open on the receive tab and start receiving at once (first-run wizard).
   final bool receive;
+
+  /// An address to send to, from a scanned `purelive://host:port/sync?code=`
+  /// link (F-SYNC-01): opens on the send tab with it filled in.
+  final String? target;
 
   @override
   ConsumerState<LanSyncPage> createState() => _LanSyncPageState();
 }
 
 class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProviderStateMixin {
-  late final TabController _tabs = TabController(length: 2, vsync: this);
+  late final TabController _tabs = TabController(length: 2, vsync: this, initialIndex: widget.target == null ? 0 : 1);
 
   // Receiving.
   LanSyncReceiver? _receiver;
@@ -105,6 +109,10 @@ class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProv
   void initState() {
     super.initState();
     if (widget.receive) unawaited(_start());
+    if (widget.target case final target?) {
+      _address.text = target;
+      _onAddressChanged(target);
+    }
   }
 
   @override

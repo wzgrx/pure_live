@@ -30,6 +30,12 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+            <!-- Links and files reach Dart through purelive/share, not as
+                 router paths: Flutter's own deep linking would push the path
+                 of a content:// file or a purelive:// link as a route. -->
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -39,6 +45,14 @@
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
+            </intent-filter>
+            <!-- purelive://room/<platform>/<roomId> and the LAN sync QR code
+                 purelive://<host>:<port>/sync?code= (F-APP-05, F-SYNC-01). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="purelive" />
             </intent-filter>
             <!-- Share or open an IPTV playlist file (spec/modules/iptv.md §6). -->
             <intent-filter>

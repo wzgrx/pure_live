@@ -21,6 +21,7 @@ import javax.crypto.spec.GCMParameterSpec
 /**
  * Hands text shared into the app (a room link or share code, spec/product.md §5)
  * to Dart: the text of the launching intent once, later shares as events.
+ * `purelive://` links opened with the app (F-APP-05) go the same way as text.
  * Playlist files shared into the app or opened with it (spec/modules/iptv.md
  * §6) go the same way as `{name, bytes}` on their own channel.
  *
@@ -174,10 +175,11 @@ class MainActivity : AudioServiceActivity() {
         }
 
     private fun sharedText(intent: Intent?): String? =
-        if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            intent.getStringExtra(Intent.EXTRA_TEXT)?.takeIf { it.isNotBlank() }
-        } else {
-            null
+        when {
+            intent?.action == Intent.ACTION_SEND && intent.type == "text/plain" ->
+                intent.getStringExtra(Intent.EXTRA_TEXT)?.takeIf { it.isNotBlank() }
+            intent?.action == Intent.ACTION_VIEW && intent.data?.scheme == "purelive" -> intent.dataString
+            else -> null
         }
 
     /**

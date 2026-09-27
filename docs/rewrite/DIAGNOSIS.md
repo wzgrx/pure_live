@@ -56,6 +56,25 @@
 | Windows 首次启动默认注册开机自启（`enableStartUp=true`） | 行为可疑 | 设置默认值 | 待核实是否有意，v4 默认关闭 |
 | 录制合并进度事件没有订阅者，界面只能显示“处理中” | 体验 | `lib/recorder/services/video_processor_service.dart` | v4 覆盖 |
 
+## 规格中核对出的旧版缺陷
+
+第 1 阶段写规格时逐条对照了旧代码，又发现下列缺陷。依据和 v4 的正确做法见对应规格。标“3.3.x”的影响用户，先修到旧应用；其余由 v4 覆盖。
+
+| 缺陷 | 规格 | 处理 |
+|---|---|---|
+| 虎牙弹幕不校验分组 id，可能混入其它房间的弹幕；发送者 `lMid` 读错 Tars tag | [huya.md](../../spec/sites/huya.md) §7 | 3.3.x |
+| B 站 HTTP 412 / `-412` 没有处理，直接当网络错误；`-352` 只抛错、不刷新签名重试 | [bilibili.md](../../spec/sites/bilibili.md) §9 | 3.3.x |
+| B 站短号和长号成为同一房间的两个身份（收藏、取流用输入值，只有弹幕换成长号） | [bilibili.md](../../spec/sites/bilibili.md) §1 | v4（`RoomRef` 规范化） |
+| 快手限流、下播页、不存在的主播页被当成“没有结果”或抛类型错误（REG-KUAISHOU-015、020） | [kuaishou.md](../../spec/sites/kuaishou.md) | 3.3.x |
+| 斗鱼弹幕包长度按 UTF-16 计算，只对 ASCII 内容正确 | [douyu.md](../../spec/sites/douyu.md) §7.2 | 3.3.x |
+| 斗鱼续期重新签全部 CDN 再按下标选线，下标可能指到另一个 CDN | [douyu.md](../../spec/sites/douyu.md) §6.8 | v4（租期协调） |
+| 抖音 Cookie 存在进程级静态变量，登录、换号、退出后要重启才生效（REG-DOUYIN-017） | [douyin.md](../../spec/sites/douyin.md) | 3.3.x |
+| 录制：关闭轮询时重试用尽，任务停在“等待开播”；断网时 2 秒一次无限重试；重连期间并发槽被排队任务抢走 | [record.md](../../spec/modules/record.md) §11、§12 | 3.3.x（前两项），v4 |
+| Windows 新窗口交接文件把含 Cookie 的完整导出明文写进系统临时目录（REG-STORE-024） | [store.md](../../spec/modules/store.md) | 3.3.x |
+| `currentWebDavConfig` 存着第二份明文 WebDAV 密码；恢复只含部分分区的备份会把缺少的分区重置为默认值 | [store.md](../../spec/modules/store.md) | v4（密钥库、分区恢复） |
+| 多画面声音焦点格和选台目标格的描边参数没被使用，用户看不出下一个选台填到哪一格 | [multiview.md](../../spec/modules/multiview.md) AUD-4 | v4 |
+| IPTV 的 Xtream、频道收藏夹、节目提醒、定时录制、故障切换只有数据模型，从未上线 | [product.md](../../spec/product.md) | v4 按规格并入其它功能 |
+
 ## 待确认事项
 
 诊断报告中标为 [待确认] 的条目由第 1 阶段逐项查证；影响决定的几项：

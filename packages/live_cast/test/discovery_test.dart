@@ -119,6 +119,33 @@ void main() {
     });
   });
 
+  test('a failed description is tried again on a later answer; a readable non-renderer is not', () {
+    fakeAsync((async) {
+      var kodiCalls = 0;
+      final run = _run()..start();
+      run.http.answers[_kodiLocation] = (_) =>
+          ++kodiCalls == 1 ? const CastTimeoutFailure(Duration(seconds: 3)) : CastHttpResponse(200, sample('kodi.xml'));
+      async.flushMicrotasks();
+      final server = ssdpAnswer(
+        location: '$_serverLocation',
+        usn: 'uuid:nas::$avTransportTarget',
+        st: avTransportTarget,
+      );
+      final socket = run.sockets.single
+        ..answer(_kodiAnswer(avTransportTarget))
+        ..answer(server);
+      async.flushMicrotasks();
+      expect(run.devices, isEmpty);
+      socket
+        ..answer(_kodiAnswer(mediaRendererTarget))
+        ..answer(server);
+      async.flushMicrotasks();
+      expect(run.devices.map((device) => device.id), [_kodiUuid]);
+      expect(kodiCalls, 2);
+      expect(run.http.requests.where((request) => request.url == _serverLocation), hasLength(1));
+    });
+  });
+
   test('answers after the deadline are ignored; a description still loading finishes first', () {
     fakeAsync((async) {
       final run = _run()

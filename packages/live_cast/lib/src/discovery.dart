@@ -128,11 +128,14 @@ final class _Search {
     _loading++;
     try {
       final answer = await _owner._http.send('GET', response.location, timeout: _owner.descriptionTimeout);
-      if (_done || !answer.isSuccess) return;
+      if (!answer.isSuccess) throw CastHttpFailure(answer.statusCode, 'description');
       final device = parseDeviceDescription(answer.body, response.location);
       if (device != null && !_done && _emitted.add(device.id)) _out.add(device);
     } on Exception {
-      // Unreachable or not a renderer description: skip this device.
+      // Unreachable or unreadable: a later answer of this device (the
+      // resend, another interface) may try again. A readable description
+      // without AVTransport is not retried.
+      _answered.remove(response.deviceId);
     } finally {
       _loading--;
       if (!_listening && _loading == 0) _finish();

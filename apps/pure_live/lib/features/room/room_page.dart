@@ -23,6 +23,7 @@ import 'package:pure_live_app/features/danmaku/on_video.dart';
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
 import 'package:pure_live_app/features/room/gestures.dart';
 import 'package:pure_live_app/features/room/playback.dart';
+import 'package:pure_live_app/features/iptv/iptv_room.dart';
 import 'package:pure_live_app/features/room/player_view.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/features/room/room_layout.dart';
@@ -34,10 +35,11 @@ import 'package:url_launcher/url_launcher.dart';
 final FutureProviderFamily<RoomDetail, RoomRef> roomDetailProvider = FutureProvider.autoDispose
     .family<RoomDetail, RoomRef>((ref, room) async {
       final detail = await ref.watch(sitesProvider)[room.platform]!.rooms.detail(room);
-      // Opening a room records it in the history and refreshes a followed card.
+      // Opening a room records it in the history (IPTV channels excepted,
+      // F-HIS-01) and refreshes a followed card.
       final store = ref.read(storeProvider);
       final snapshot = RoomSnapshot.fromDetail(detail);
-      await store.history.record(snapshot);
+      if (room.platform != 'iptv') await store.history.record(snapshot);
       await store.rooms.update([snapshot]);
       return detail;
     });
@@ -559,6 +561,7 @@ class _RoomInfo extends ConsumerWidget {
           ),
           const SizedBox(height: Space.s3),
           Text(card.title, style: theme.textTheme.bodyLarge),
+          if (card.ref.platform == 'iptv') ...[const SizedBox(height: Space.s3), IptvRoomPanel(detail: detail)],
           if (card.area != null) ...[
             const SizedBox(height: Space.s1),
             Text(card.area!, style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurfaceVariant)),

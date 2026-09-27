@@ -7,6 +7,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/discover/followed_areas.dart';
+import 'package:pure_live_app/features/iptv/iptv_discover.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/l10n/strings.dart';
@@ -42,7 +43,12 @@ class DiscoverPage extends ConsumerWidget {
             ],
           ),
         ),
-        body: TabBarView(children: [for (final id in platforms) _PlatformDiscover(platform: id)]),
+        body: TabBarView(
+          children: [
+            for (final id in platforms)
+              if (id == 'iptv') const IptvDiscover() else _PlatformDiscover(platform: id),
+          ],
+        ),
       ),
     );
   }

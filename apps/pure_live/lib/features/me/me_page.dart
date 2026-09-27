@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/version.dart';
+import 'package:pure_live_app/features/iptv/iptv_page.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 /// "我的": history, recordings, multiview, accounts, backup, settings, about
@@ -36,6 +37,13 @@ class MePage extends StatelessWidget {
                 title: const Text(S.multiview),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/multiview'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.live_tv_outlined),
+                title: const Text('网络电视'),
+                subtitle: const Text('IPTV 播放列表、节目单和自动同步'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(iptvLocation),
               ),
               ListTile(
                 leading: const Icon(Icons.account_circle_outlined),

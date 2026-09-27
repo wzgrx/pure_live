@@ -77,7 +77,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
   @override
   Widget build(BuildContext context) {
     final secrets = ref.watch(secretStoreProvider);
-    final platforms = ref.watch(enabledPlatformsProvider);
+    final platforms = ref.watch(enabledPlatformsProvider).where(platformHasAccount);
     return Scaffold(
       appBar: AppBar(title: const Text('平台账号')),
       body: Align(

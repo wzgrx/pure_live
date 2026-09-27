@@ -16,6 +16,9 @@ import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/features/health/platform_status_page.dart';
+import 'package:pure_live_app/features/iptv/guide_page.dart';
+import 'package:pure_live_app/features/iptv/iptv_page.dart';
+import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
 import 'package:pure_live_app/features/me/appearance_page.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/me/me_page.dart';
@@ -129,6 +132,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: welcomeLocation, builder: (context, state) => const OnboardingPage()),
       GoRoute(path: blockListLocation, builder: (context, state) => const BlockListPage()),
+      GoRoute(
+        path: iptvLocation,
+        builder: (context, state) => IptvPage(initialImport: state.extra as IptvImportRequest?),
+        routes: [GoRoute(path: 'guide', builder: (context, state) => const IptvGuidePage())],
+      ),
       GoRoute(
         path: '/multiview',
         builder: (context, state) => MultiviewPage(rooms: (state.extra as List<RoomRef>?) ?? const []),

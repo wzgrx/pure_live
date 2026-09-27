@@ -5,6 +5,8 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/share_intake.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/iptv/iptv_providers.dart';
+import 'package:pure_live_app/features/iptv/iptv_share.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 /// The root widget.
@@ -16,7 +18,9 @@ class PureLiveApp extends ConsumerWidget {
     ref
       ..watch(shareIntakeProvider)
       // Start the recorder so crash recovery and resumable tasks run at launch.
-      ..watch(recordManagerProvider);
+      ..watch(recordManagerProvider)
+      ..watch(iptvShareIntakeProvider)
+      ..watch(iptvAutoSyncProvider);
     final (light, dark, mode) = themesFor(ref.watch(themeModeSetting), pureBlack: ref.watch(pureBlackSetting));
     return MaterialApp.router(
       title: S.appName,

@@ -4,6 +4,7 @@ import 'package:live_net/live_net.dart';
 /// What to tell the user about a failure: the UI decides by type, never by
 /// message text (ADR 0010, rule 6; principles rule 3).
 ({String title, String message, bool retryable}) describeError(Object error) => switch (error) {
+  NotFound(site: 'iptv') => (title: '频道不存在', message: '播放列表里已经没有这个频道，可能改名或被删除了。', retryable: false),
   NotFound() => (title: '直播间不存在', message: '房间号可能已经失效，或者主播换了房间。', retryable: false),
   NeedsLogin() => (title: '需要登录', message: '这个内容要登录平台账号后才能看，平台账号登录会在后续预览版开放。', retryable: false),
   RateLimited() => (title: '请求太频繁', message: '平台限制了访问频率，等一会儿再试。', retryable: true),

@@ -410,10 +410,11 @@ abstract final class Settings {
   /// History size limit; 0 means unlimited (store.md §3).
   static const historyLimit = IntSetting('history.limit', 50, min: 0, legacy: [LegacyKey('historyLimit')]);
 
-  /// Visible platforms in discover, in order (store.md §6.4.8).
+  /// Visible platforms in discover, in order (store.md §6.4.8); IPTV shows as
+  /// the "网络电视" platform (iptv.md §5), as it did in 3.x.
   static const catalogPlatforms = StringListSetting(
     'catalog.platforms',
-    ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou'],
+    ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'iptv'],
     lowerCase: true,
     legacy: [LegacyKey('hotAreasList')],
   );

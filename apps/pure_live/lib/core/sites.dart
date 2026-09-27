@@ -3,9 +3,10 @@ import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 
 /// A platform adapter seen through its capabilities (ADR 0010, rule 7). The
-/// first five platforms implement all of them.
+/// first five platforms and the IPTV source implement all of them.
 final class PlatformSite {
   const new(this._site);
 
@@ -22,11 +23,22 @@ final class PlatformSite {
   LinkResolver get links => _site as LinkResolver;
 }
 
-/// Platform ids in display order (constitution: first five platforms).
-const platformOrder = ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou'];
+/// Platform ids in display order (constitution: first five platforms), then
+/// the IPTV source (spec/modules/iptv.md §5).
+const platformOrder = ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'iptv'];
 
 /// Short display names for tabs and badges.
-const platformNames = {'bilibili': '哔哩哔哩', 'douyu': '斗鱼', 'huya': '虎牙', 'douyin': '抖音', 'kuaishou': '快手'};
+const platformNames = {
+  'bilibili': '哔哩哔哩',
+  'douyu': '斗鱼',
+  'huya': '虎牙',
+  'douyin': '抖音',
+  'kuaishou': '快手',
+  'iptv': '网络电视',
+};
+
+/// Whether [platform] has accounts to sign in to (IPTV has none).
+bool platformHasAccount(String platform) => platform != 'iptv';
 
 /// The user's platform cookies. In memory until live_store's encrypted vault
 /// is wired in.
@@ -53,6 +65,7 @@ final sitesProvider = Provider<Map<String, PlatformSite>>((ref) {
     'huya': PlatformSite(HuyaSite(http, cookies: cookies)),
     'douyin': PlatformSite(DouyinSite(http, cookies: cookies)),
     'kuaishou': PlatformSite(KuaishouSite(http, cookies: cookies)),
+    'iptv': PlatformSite(ref.watch(iptvSiteProvider)),
   };
 });
 

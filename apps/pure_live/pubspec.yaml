@@ -20,6 +20,7 @@ dependencies:
   go_router: ^18.0.1
   live_core: any
   live_danmaku: any
+  live_iptv: any
   live_media: any
   live_net: any
   live_player: any

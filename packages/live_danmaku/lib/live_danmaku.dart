@@ -20,6 +20,7 @@ export 'src/runtime/base.dart' show ConnectorBase;
 export 'src/runtime/reconnect.dart';
 export 'src/runtime/socket_connector.dart' show SocketConnector, SocketPlan;
 export 'src/sites/bilibili.dart';
+export 'src/sites/chzzk.dart';
 export 'src/sites/douyin.dart';
 export 'src/sites/douyu.dart';
 export 'src/sites/huya.dart';

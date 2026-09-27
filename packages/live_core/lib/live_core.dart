@@ -2,6 +2,7 @@
 library;
 
 export 'src/audience.dart';
+export 'src/hls_playlist.dart';
 export 'src/live_state.dart';
 export 'src/page.dart';
 export 'src/room.dart';
@@ -10,6 +11,8 @@ export 'src/site.dart';
 export 'src/site_error.dart';
 export 'src/sites/bilibili/bilibili_parse.dart';
 export 'src/sites/bilibili/bilibili_site.dart';
+export 'src/sites/chzzk/chzzk_parse.dart';
+export 'src/sites/chzzk/chzzk_site.dart';
 export 'src/sites/douyin/douyin_parse.dart';
 export 'src/sites/douyin/douyin_site.dart';
 export 'src/sites/douyu/douyu_parse.dart';

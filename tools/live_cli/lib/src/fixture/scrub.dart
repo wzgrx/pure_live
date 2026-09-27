@@ -24,6 +24,7 @@ class ScrubRules {
     this.jsonPaths = const {},
     this.queryParams = const {},
     this.responseHeaders = const {},
+    this.textPatterns = const {},
   });
 
   /// JSON object keys (at any depth) whose values are replaced.
@@ -43,6 +44,13 @@ class ScrubRules {
   /// [jsonPaths] instead. Any header still holding a value replaced elsewhere
   /// gets the same synthetic value (a signature echoed back, for example).
   final Map<String, ScrubRule> responseHeaders;
+
+  /// Regular expressions whose first capture group is replaced wherever it
+  /// appears in URLs, form bodies, header values and text: signatures that
+  /// sit inside a path segment or a compound value (Akamai
+  /// `hdnts=st=…~exp=…~hmac=<hex>`), where [queryParams] cannot reach them
+  /// without also replacing the expiry next to them.
+  final Map<String, ScrubRule> textPatterns;
 }
 
 /// One replacement, recorded in meta.json without the original value.
@@ -196,7 +204,26 @@ class Scrubber {
 
   /// Replaces listed query/form parameter values inside [text] (a URL, a form
   /// body or any text containing URLs).
-  String scrubQuery(String text, [String where = 'query']) {
+  String scrubQuery(String text, [String where = 'query']) => _scrubPatterns(_scrubParams(text, where), where);
+
+  String _scrubPatterns(String text, String where) {
+    var out = text;
+    for (final MapEntry(key: source, value: rule) in rules.textPatterns.entries) {
+      out = out.replaceAllMapped(RegExp(source), (match) {
+        final whole = match.group(0)!;
+        final value = match.group(1);
+        if (value == null || value.length <= 1) return whole;
+        // The group's first occurrence in the match; patterns put a literal
+        // prefix (`hmac=`) before it.
+        final offset = whole.indexOf(value);
+        final replaced = replace(value, rule, '$where:/$source/');
+        return '${whole.substring(0, offset)}$replaced${whole.substring(offset + value.length)}';
+      });
+    }
+    return out;
+  }
+
+  String _scrubParams(String text, String where) {
     if (rules.queryParams.isEmpty || !text.contains('=')) return text;
     return text.replaceAllMapped(_queryPair, (match) {
       final name = match.group(2)!;

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:live_cli/src/danmaku/recorder.dart';
+import 'package:live_cli/src/danmaku/scrub_json_sites.dart';
 import 'package:live_cli/src/danmaku/scrub_sites.dart';
 import 'package:live_core/live_core.dart';
 
@@ -129,6 +130,7 @@ abstract class FrameScrubber {
     'douyu' => DouyuFrameScrubber(detail, seed: seed),
     'huya' => HuyaFrameScrubber(detail, seed: seed),
     'bilibili' => BilibiliFrameScrubber(detail, seed: seed),
+    'chzzk' => ChzzkFrameScrubber(detail, seed: seed),
     'douyin' => DouyinFrameScrubber(detail, seed: seed),
     'kuaishou' => KuaishouFrameScrubber(detail, seed: seed),
     _ => throw ArgumentError.value(platform, 'platform', 'no frame scrubber'),

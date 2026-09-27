@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/features/backup/data_settings.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
@@ -127,6 +128,7 @@ class SettingsGroupBody extends StatelessWidget {
           },
         ),
         SwitchSettingTile(setting: Settings.autoCheckUpdate, title: '自动检查更新'),
+        ClipboardRecognitionTile(),
         SettingsHeader('关注刷新'),
         SwitchSettingTile(setting: Settings.autoRefreshFollows, title: '定时刷新关注的开播状态'),
         SwitchSettingTile(setting: Settings.refreshFollowsOnResume, title: '回到应用时刷新关注'),
@@ -231,7 +233,7 @@ class SettingsGroupBody extends StatelessWidget {
           divisions: 50,
           format: _historyLimit,
         ),
-        ListTile(enabled: false, title: Text('WebDAV 与局域网同步'), subtitle: Text(S.comingSoon)),
+        DataSyncTiles(),
       ],
       SettingsGroup.recording ||
       SettingsGroup.accounts ||

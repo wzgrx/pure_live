@@ -4,8 +4,11 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/app/shell.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/about/about_page.dart';
+import 'package:pure_live_app/features/about/update_page.dart';
 import 'package:pure_live_app/features/accounts/accounts_page.dart';
 import 'package:pure_live_app/features/backup/backup_page.dart';
+import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
 import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
@@ -14,10 +17,13 @@ import 'package:pure_live_app/features/me/appearance_page.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/me/me_page.dart';
 import 'package:pure_live_app/features/multiview/multiview_page.dart';
+import 'package:pure_live_app/features/onboarding/onboarding_page.dart';
 import 'package:pure_live_app/features/recording/recording_page.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
 import 'package:pure_live_app/features/settings/settings_page.dart';
+import 'package:pure_live_app/features/sync/lan_sync_page.dart';
+import 'package:pure_live_app/features/sync/webdav_page.dart';
 
 /// Location of a room page; the room is a full-screen route outside the shell
 /// (principles §4.1).
@@ -79,7 +85,23 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(path: 'appearance', builder: (context, state) => const AppearancePage()),
                   GoRoute(path: 'history', builder: (context, state) => const HistoryPage()),
-                  GoRoute(path: 'backup', builder: (context, state) => const BackupPage()),
+                  GoRoute(
+                    path: 'backup',
+                    builder: (context, state) => const BackupPage(),
+                    routes: [
+                      GoRoute(path: 'webdav', builder: (context, state) => const WebDavPage()),
+                      GoRoute(
+                        path: 'lan',
+                        builder: (context, state) => LanSyncPage(receive: state.uri.queryParameters['receive'] == '1'),
+                      ),
+                    ],
+                  ),
+                  GoRoute(path: 'diagnostics', builder: (context, state) => const DiagnosticsPage()),
+                  GoRoute(
+                    path: 'about',
+                    builder: (context, state) => const AboutPage(),
+                    routes: [GoRoute(path: 'update', builder: (context, state) => const UpdatePage())],
+                  ),
                   GoRoute(path: 'recordings', builder: (context, state) => const RecordingPage()),
                   GoRoute(path: 'accounts', builder: (context, state) => const AccountsPage()),
                   GoRoute(
@@ -99,6 +121,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      GoRoute(path: welcomeLocation, builder: (context, state) => const OnboardingPage()),
       GoRoute(
         path: '/multiview',
         builder: (context, state) => MultiviewPage(rooms: (state.extra as List<RoomRef>?) ?? const []),

@@ -99,6 +99,7 @@ abstract final class KugouLiveParse {
         popularity: hot != null && hot > 0 ? hot : null,
       ),
       avatar: image(row['userLogo']) ?? image(row['logo']),
+      followers: jsonCount(row['fansCount']),
     );
   }
 

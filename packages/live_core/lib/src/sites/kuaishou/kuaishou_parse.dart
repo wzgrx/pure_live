@@ -172,6 +172,8 @@ abstract final class KuaishouParse {
             anchorName: jsonString(item['name']) ?? '',
             state: !_banned(item['bannedStatus']) && _truthy(item['living']) ? LiveState.live : LiveState.offline,
             cover: jsonUrl(item['avatar']),
+            // §3 `counts.fan` with units (`2960.4w`).
+            followers: item['counts'] is Map ? _audience((item['counts'] as Map)['fan']) : null,
           ),
     ];
     return Page(rooms, next: list.isEmpty ? null : _cursor(page + 1, jsonString(data['ussid'])));

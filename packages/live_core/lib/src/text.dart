@@ -51,6 +51,13 @@ int? jsonInt(Object? value) {
   return null;
 }
 
+/// A count from a JSON number or integer string: [jsonInt] when it is zero
+/// or more, else null.
+int? jsonCount(Object? value) => switch (jsonInt(value)) {
+  final int count when count >= 0 => count,
+  _ => null,
+};
+
 /// A trimmed non-empty string from a JSON value, or null.
 String? jsonString(Object? value) {
   if (value == null) return null;

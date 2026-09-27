@@ -106,6 +106,7 @@ abstract final class SeventeenliveParse {
           ? DateTime.fromMillisecondsSinceEpoch(begin * 1000, isUtc: true)
           : null,
       avatar: image(user['picture']),
+      followers: jsonCount(user['followerCount']),
     );
   }
 

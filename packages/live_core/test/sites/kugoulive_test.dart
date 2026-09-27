@@ -58,6 +58,7 @@ void main() {
       final page = KugouLiveParse.search(body);
       expect(page.items, isNotEmpty);
       expect(page.items.map((c) => c.state).toSet(), {LiveState.live, LiveState.offline});
+      expect(page.items.every((c) => c.followers != null), isTrue, reason: '`fansCount`');
       expect(page.isLast, isTrue);
       expect(KugouLiveParse.search(Fixture.load('kugoulive', 'S06-search-empty').body).items, isEmpty);
     });

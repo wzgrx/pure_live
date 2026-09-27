@@ -689,7 +689,13 @@ void main() {
           'result': 1,
           'ussid': 'dXNzaWQ=',
           'list': [
-            {'id': 'tianci666', 'name': 'A', 'avatar': 'https://p.test/a.jpg', 'living': true},
+            {
+              'id': 'tianci666',
+              'name': 'A',
+              'avatar': 'https://p.test/a.jpg',
+              'living': true,
+              'counts': {'fan': '2960.4w', 'follow': '12'},
+            },
             {'id': '', 'name': 'skipped'},
             {
               'id': 'ATM-Heros',
@@ -707,6 +713,7 @@ void main() {
       expect(page.items.first.title, 'A');
       expect(page.items.first.cover, Uri.parse('https://p.test/a.jpg'));
       expect(page.items.every((r) => r.audience.isEmpty), isTrue);
+      expect(page.items.map((r) => r.followers), [29604000, null, null], reason: '`counts.fan` with units');
       expect(page.next, const PageCursor('2:dXNzaWQ='));
       expect(KuaishouParse.searchUri('王者', cursor: page.next).queryParameters, {
         'keyword': '王者',

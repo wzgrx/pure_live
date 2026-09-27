@@ -15,6 +15,10 @@ enum SearchSort {
 
   /// Audience, then platform order.
   audience,
+
+  /// The streamer's followers where the platform reports them, then
+  /// audience, then platform order.
+  followers,
 }
 
 /// Menu labels of [SearchSort].
@@ -22,6 +26,7 @@ const Map<SearchSort, String> searchSortLabels = {
   SearchSort.smart: '智能',
   SearchSort.platform: '按平台',
   SearchSort.audience: '按人数',
+  SearchSort.followers: '按粉丝',
 };
 
 int _audience(RoomCard card) => card.audience.online ?? card.audience.popularity ?? card.audience.cumulative ?? 0;
@@ -49,11 +54,13 @@ List<RoomCard> sortSearch(List<RoomCard> cards, SearchSort sort, {required List<
     if (live != 0) return live;
     final byPlatform = platformRank(a).compareTo(platformRank(b));
     final byAudience = _audience(b).compareTo(_audience(a));
+    final byFollowers = (b.followers ?? 0).compareTo(a.followers ?? 0);
     final byRelevance = rank[a.ref.key]!.compareTo(rank[b.ref.key]!);
     for (final order in switch (sort) {
       SearchSort.smart => [byRelevance, byPlatform],
       SearchSort.platform => [byPlatform, byAudience],
       SearchSort.audience => [byAudience, byPlatform],
+      SearchSort.followers => [byFollowers, byAudience, byPlatform],
     }) {
       if (order != 0) return order;
     }

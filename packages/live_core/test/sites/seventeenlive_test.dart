@@ -64,7 +64,9 @@ void main() {
   });
 
   test('§3 search: current broadcasts only', () {
-    expect(SeventeenliveParse.searchPage(Fixture.load('17live', 'S03-search').body).items.single.ref.roomId, _live);
+    final found = SeventeenliveParse.searchPage(Fixture.load('17live', 'S03-search').body).items.single;
+    expect(found.ref.roomId, _live);
+    expect(found.followers, 2775);
     expect(SeventeenliveParse.searchPage(Fixture.load('17live', 'S03-search-none').body).items, isEmpty);
   });
 

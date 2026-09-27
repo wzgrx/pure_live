@@ -73,6 +73,7 @@ void main() {
         ('minecraft', LiveState.offline),
       ]);
       expect(first.items[1].audience, Audience.none);
+      expect(first.items.first.followers, 278737, reason: '`followers.totalCount`');
       expect(first.items.first.cover?.path, endsWith('-440x248.jpg'));
       final second = TwitchParse.searchPage(_load('S04-search-p2').body);
       expect(second.items, hasLength(15));

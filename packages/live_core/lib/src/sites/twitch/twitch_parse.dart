@@ -226,6 +226,10 @@ abstract final class TwitchParse {
           area: game is Map ? jsonString(game['displayName']) ?? jsonString(game['name']) : null,
           audience: live ? Audience(online: jsonInt(stream['viewersCount'])) : Audience.none,
           avatar: _image(item['profileImageURL']),
+          followers: switch (item['followers']) {
+            final Map<dynamic, dynamic> followers => jsonCount(followers['totalCount']),
+            _ => null,
+          },
         ),
       );
     }

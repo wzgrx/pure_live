@@ -7,6 +7,7 @@ typedef SiteFactory = Object Function(LiveHttp http);
 /// Adapters available to the command-line tools; grows as phase 4 lands them.
 final Map<String, SiteFactory> siteFactories = {
   'baidulive': BaiduLiveSite.new,
+  'bigo': BigoSite.new,
   'bilibili': BilibiliSite.new,
   'douyin': DouyinSite.new,
   'douyu': DouyuSite.new,

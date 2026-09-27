@@ -1,4 +1,5 @@
 import 'package:live_cli/src/fixture/rules/baidulive.dart';
+import 'package:live_cli/src/fixture/rules/bigo.dart';
 import 'package:live_cli/src/fixture/rules/bilibili.dart';
 import 'package:live_cli/src/fixture/rules/douyin.dart';
 import 'package:live_cli/src/fixture/rules/douyu.dart';
@@ -21,6 +22,7 @@ import 'package:live_cli/src/fixture/scrub.dart';
 /// Set-Cookie values and Authorization headers are always scrubbed.
 const Map<String, ScrubRules> platformRules = {
   'baidulive': baiduliveRules,
+  'bigo': bigoRules,
   'bilibili': bilibiliRules,
   'douyin': douyinRules,
   'douyu': douyuRules,

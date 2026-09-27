@@ -182,6 +182,10 @@
 - 直接 POST `https://gql.twitch.tv/integrity`（带 `X-Device-Id`，旧版的纯 HTTP 办法，site:286-300）**能拿到令牌**（响应头 `X-Kpsdk-Ct`），但带上它的翻页请求仍然 `failed integrity check`（实测）：服务端据令牌判定这是自动化客户端。
 - 可用的令牌要在浏览器里运行 Kasada 的 KPSDK 脚本（`https://k.twitchcdn.net/…/p.js`）后由它改造过的 `fetch` 请求 `/integrity`。旧版为此用无界面 WebView（`TwitchWebIntegrityProvider`，wi:16-60，只支持 Android、iOS、macOS），最后甚至把 GraphQL 请求整个放进 Chromium 里发（site:173-210）。
 - v4 的 `live_core` 是纯 Dart，没有 WebView，**不实现翻页，也不伪造令牌**。要恢复翻页，需要应用层提供一个“完整性令牌来源”（WebView 里跑 KPSDK），适配器在有令牌时带 `Client-Integrity` 请求下一页；这需要真机验证，本阶段不做。
+- **2026-09-28 调研结论（内置网页组件接入后）**：仍然不做，列表继续停在第一页。
+  - 旧版的演变说明浏览器里拿到的令牌拿到浏览器外面用并不可靠：它先在无界面 WebView 里取令牌、交给 `dart:io` 和 Android 系统 HTTP 栈使用，最后把整个 GraphQL 请求都搬进 Chromium 里发（site:173-210）。令牌和发请求的客户端绑定，脱离浏览器重放大概率仍被判为自动化客户端。
+  - 这条路的本质是让平台的反自动化脚本给非浏览器客户端“放行”。本项目不伪造令牌，也不以绕过平台风控为目标；是否值得做、怎么做，需要用户明确决定，并先在真机上验证。本次会话里尝试在本机无界面 Chromium 做对照实验，被权限系统拦下，没有新的实验证据。
+  - 所以 `live_core` 不增加令牌来源接口，`TwitchSite` 保持现状（见 docs/adr/draft-webview.md）。
 
 **Android 的 TLS 问题**
 
@@ -264,7 +268,7 @@
 | # | 问题 | 怎么查 |
 |---|---|---|
 | 1 | Android 上 `dart:io` 经代理访问 `gql.twitch.tv` 是否仍被重置 | 真机，经应用代理 |
-| 2 | WebView 里的 KPSDK 令牌能否让 v4 翻页（接口设计见 §8） | 真机 WebView 原型 |
+| 2 | WebView 里的 KPSDK 令牌能否让 v4 翻页（接口设计见 §8）。2026-09-28：暂不做，理由见 §8 调研结论；要做需用户决定 | 真机 WebView 原型 |
 | 3 | 地区限制、订阅专属直播的令牌和 usher 应答形态 | 找对应频道或换地区 |
 | 4 | `rerun`（回放）是否还存在 | 找重播频道 |
 | 5 | HEVC/AV1 增强广播是否值得请求 | 播放器支持情况 |

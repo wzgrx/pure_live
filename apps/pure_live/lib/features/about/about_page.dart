@@ -54,6 +54,13 @@ class AboutPage extends ConsumerWidget {
                 onTap: () => context.go(updateLocation),
               ),
               ListTile(
+                leading: const Icon(Icons.monitor_heart_outlined),
+                title: const Text('平台状态'),
+                subtitle: const Text('检查各平台现在能不能访问'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/me/about/status'),
+              ),
+              ListTile(
                 leading: const Icon(Icons.code),
                 title: const Text('项目主页'),
                 subtitle: Text(checker.projectUrl.toString()),

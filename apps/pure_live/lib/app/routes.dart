@@ -13,6 +13,7 @@ import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
+import 'package:pure_live_app/features/health/platform_status_page.dart';
 import 'package:pure_live_app/features/me/appearance_page.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/me/me_page.dart';
@@ -100,7 +101,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'about',
                     builder: (context, state) => const AboutPage(),
-                    routes: [GoRoute(path: 'update', builder: (context, state) => const UpdatePage())],
+                    routes: [
+                      GoRoute(path: 'update', builder: (context, state) => const UpdatePage()),
+                      GoRoute(path: 'status', builder: (context, state) => const PlatformStatusPage()),
+                    ],
                   ),
                   GoRoute(path: 'recordings', builder: (context, state) => const RecordingPage()),
                   GoRoute(path: 'accounts', builder: (context, state) => const AccountsPage()),

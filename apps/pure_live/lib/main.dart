@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pure_live_app/app/app.dart';
 import 'package:pure_live_app/app/version.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
+import 'package:pure_live_app/core/data_root.dart';
 import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/secrets.dart';
@@ -28,7 +28,8 @@ Future<void> main(List<String> args) async {
   // Listening before the first frame; forwarded launches queue in the runner
   // until the shell says it is ready (F-WIN-01).
   final windows = Platform.isWindows ? WindowsNative() : null;
-  final root = await getApplicationSupportDirectory();
+  // F-WIN-06: beside the executable on Windows when writable.
+  final root = await resolveDataRoot();
   // The local rolling log first, so start-up failures are recorded (F-BAK-02).
   final log = await AppLog.open(Directory('${root.path}${Platform.pathSeparator}logs'));
   AppLog.current = log;
@@ -54,6 +55,7 @@ Future<void> main(List<String> args) async {
     ProviderScope(
       overrides: [
         storeProvider.overrideWithValue(store),
+        dataRootProvider.overrideWithValue(root),
         recordPathsProvider.overrideWithValue(recordPaths),
         secretStoreProvider.overrideWithValue(secrets),
         // Adapters read the user's platform cookies from the encrypted store.

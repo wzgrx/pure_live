@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:pure_live_app/core/data_root.dart';
 import 'package:pure_live_app/core/secrets.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -28,7 +28,7 @@ final iptvSiteProvider = Provider<IptvSite>((ref) {
 /// `<data root>/IPTV`, where imported playlist and guide files are kept.
 final iptvDirectoryProvider = Provider<Future<Directory> Function()>(
   (ref) =>
-      () async => Directory('${(await getApplicationSupportDirectory()).path}${Platform.pathSeparator}IPTV'),
+      () async => Directory('${ref.read(dataRootProvider).path}${Platform.pathSeparator}IPTV'),
 );
 
 /// Imports and syncs; after every change the IPTV discover lists reload.

@@ -28,7 +28,7 @@ void main() {
       '限制录制目录大小',
       '录制目录上限',
     ],
-    SettingsGroup.accounts: ['首页平台', '平台账号'],
+    SettingsGroup.accounts: ['首页平台', '观众数口径', '平台账号'],
     SettingsGroup.network: ['使用代理', '代理地址', '代理端口'],
     SettingsGroup.data: ['观看历史最多保留'],
   };

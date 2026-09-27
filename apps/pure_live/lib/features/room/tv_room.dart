@@ -8,6 +8,7 @@ import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart' show VideoFit;
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
+import 'package:pure_live_app/core/audience.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
@@ -313,7 +314,7 @@ class _ControlBar extends ConsumerWidget {
     const ink = Colors.white;
     final card = detail.card;
     final prefs = ref.watch(danmakuPrefsProvider);
-    final audience = card.audience.online ?? card.audience.popularity ?? card.audience.cumulative;
+    final audience = shownAudience(card.audience, preferOnline: ref.watch(preferRealOnlineSetting));
     final position = entries.indexWhere((entry) => entry.ref == card.ref);
     final paused = state.phase == PlaybackPhase.paused;
     Widget button(IconData icon, String label, VoidCallback onPressed, {FocusNode? focusNode}) => Padding(

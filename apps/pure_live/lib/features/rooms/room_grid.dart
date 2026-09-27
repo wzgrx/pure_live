@@ -8,6 +8,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
+import 'package:pure_live_app/core/audience.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
@@ -344,7 +345,7 @@ class RoomCardTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final audience = card.audience.online ?? card.audience.popularity ?? card.audience.cumulative;
+    final audience = shownAudience(card.audience, preferOnline: ref.watch(preferRealOnlineSetting));
     final since = card.liveSince;
     final live = card.state == LiveState.live;
     // F-FAV-01: the recording mark on every card (principles §4.2); F-FAV-04:

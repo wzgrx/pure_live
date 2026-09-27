@@ -300,6 +300,12 @@ class SettingsGroupBody extends StatelessWidget {
           onTap: () => context.go('/me/platforms'),
         ),
         ListTile(
+          title: const Text('观众数口径'),
+          subtitle: const Text('卡片显示热度还是在线人数，以及各平台数字的含义'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.go('/me/audience'),
+        ),
+        ListTile(
           title: const Text('平台账号'),
           subtitle: const Text('登录或退出各平台账号'),
           trailing: const Icon(Icons.chevron_right),

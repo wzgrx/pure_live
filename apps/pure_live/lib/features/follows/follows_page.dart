@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
+import 'package:pure_live_app/core/audience.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -197,6 +198,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
     final failedPlatforms = session.result?.failedPlatforms ?? const <String>{};
     final layout = WindowLayout(MediaQuery.sizeOf(context));
     final dense = ref.watch(denseFollowsSetting);
+    final preferOnline = ref.watch(preferRealOnlineSetting);
     final density = dense ? CardDensity.compact : CardDensity.standard;
     final recording = ref.watch(recordingRoomsProvider).value ?? const <String>{};
     final period = ref.watch(coverPeriodProvider);
@@ -237,7 +239,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
             itemBuilder: (context, index) {
               final entry = cards[index];
               final room = entry.follow.room;
-              final audience = room.audience.online ?? room.audience.popularity ?? room.audience.cumulative;
+              final audience = shownAudience(room.audience, preferOnline: preferOnline);
               final since = session.liveSince(entry.follow);
               return RoomCardView(
                 platformId: room.ref.platform,

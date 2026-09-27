@@ -8,4 +8,6 @@ export 'src/room.dart';
 export 'src/room_ref.dart';
 export 'src/site.dart';
 export 'src/site_error.dart';
+export 'src/sites/douyu/douyu_parse.dart';
 export 'src/stream.dart';
+export 'src/text.dart';

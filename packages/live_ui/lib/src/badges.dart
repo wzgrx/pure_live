@@ -98,7 +98,12 @@ class LiveBadge extends StatelessWidget {
       decoration: BoxDecoration(color: live.live, borderRadius: BorderRadius.circular(Radii.r1)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Space.s1 + 2, vertical: 1),
-        child: Text(duration == null ? LiveUiText.current.live : LiveUiText.current.liveFor(duration!), style: style),
+        child: Text(
+          duration == null ? LiveUiText.current.live : LiveUiText.current.liveFor(duration!),
+          style: style,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }

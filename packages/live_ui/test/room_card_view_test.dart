@@ -39,6 +39,33 @@ void main() {
     expect(find.bySemanticsLabel('主播，直播中，标题'), findsOneWidget);
   });
 
+  testWidgets('at twice the text size the live badge and the audience stay side by side', (tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: host(
+          const RoomCardView(
+            platformId: 'douyu',
+            anchorName: '主播',
+            title: '标题',
+            isLive: true,
+            // The test font draws every glyph a full em wide.
+            audience: '1.2万',
+            liveFor: '01:24',
+          ),
+          width: 172,
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final badge = tester.getRect(find.byType(LiveBadge));
+    final audience = tester.getRect(find.byType(CoverLabel));
+    final cover = tester.getRect(find.byType(AspectRatio));
+    expect(badge.right, lessThanOrEqualTo(audience.left), reason: 'no overlap');
+    expect(badge.left, greaterThanOrEqualTo(cover.left));
+    expect(audience.right, lessThanOrEqualTo(cover.right));
+  });
+
   testWidgets('compact density puts name and title on one line', (tester) async {
     await tester.pumpWidget(
       host(

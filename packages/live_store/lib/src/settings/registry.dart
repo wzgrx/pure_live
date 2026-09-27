@@ -405,6 +405,13 @@ abstract final class Settings {
     legacy: [LegacyKey('maxConcurrentRefresh')],
   );
 
+  // Alerts (spec/product.md F-NEW-01).
+
+  /// Notify when a followed streamer goes live; off by default. Rooms can opt
+  /// out one by one (room preference `liveAlert`). Device scope: the
+  /// notification permission belongs to the device (ADR draft-live-alerts).
+  static const liveAlerts = BoolSetting('alerts.live', false, scope: SettingScope.device);
+
   // Data.
 
   /// History size limit; 0 means unlimited (store.md §3).
@@ -756,6 +763,7 @@ abstract final class Settings {
     refreshFollowsOnResume,
     autoRefreshInterval,
     maxConcurrentRefresh,
+    liveAlerts,
     historyLimit,
     catalogPlatforms,
     catalogPreferred,

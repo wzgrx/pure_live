@@ -5,8 +5,8 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/src/database/database.dart';
 import 'package:live_store/src/rooms.dart';
 
-/// Per-room preferences (store.md §3): `volume` (0–1), `portraitLayout`, and
-/// later keys. Values are JSON.
+/// Per-room preferences (store.md §3): `volume` (0–1), `portraitLayout`,
+/// `liveAlert`, and later keys. Values are JSON.
 final class RoomPrefStore {
   /// Wraps [_db].
   new(this._db);
@@ -18,6 +18,11 @@ final class RoomPrefStore {
 
   /// Key of the per-room portrait layout name.
   static const portraitLayout = 'portraitLayout';
+
+  /// Key of the per-room live alert switch (F-NEW-01): only `false` is
+  /// stored, for a room that opted out; without it the room follows the
+  /// global setting.
+  static const liveAlert = 'liveAlert';
 
   /// The value of [key] for [ref], or null.
   Future<Object?> get(RoomRef ref, String key) async {
@@ -45,6 +50,31 @@ final class RoomPrefStore {
         .into(_db.roomPrefs)
         .insertOnConflictUpdate(RoomPrefsCompanion.insert(room: room, key: key, value: jsonEncode(value)));
   });
+
+  Selectable<RoomRef> _roomsWith(String key, Object value) => _db
+      .customSelect(
+        'SELECT r.platform, r.room_id FROM room_prefs p JOIN rooms r ON r.id = p.room '
+        'WHERE p.key = ?1 AND p.value = ?2 ORDER BY r.id',
+        variables: [Variable.withString(key), Variable.withString(jsonEncode(value))],
+        readsFrom: {_db.roomPrefs, _db.rooms},
+      )
+      .map((row) => RoomRef(row.read<String>('platform'), row.read<String>('room_id')));
+
+  /// Rooms whose [key] is [value] (compared as JSON text).
+  Future<Set<RoomRef>> roomsWith(String key, Object value) async => (await _roomsWith(key, value).get()).toSet();
+
+  /// Emits the rooms whose [key] is [value], and the set after each change.
+  Stream<Set<RoomRef>> watchRoomsWith(String key, Object value) =>
+      _roomsWith(key, value).watch().map((rooms) => rooms.toSet());
+
+  /// Rooms that opted out of live alerts.
+  Future<Set<RoomRef>> liveAlertsOff() => roomsWith(liveAlert, false);
+
+  /// Emits the rooms that opted out of live alerts, and each change.
+  Stream<Set<RoomRef>> watchLiveAlertsOff() => watchRoomsWith(liveAlert, false);
+
+  /// Turns live alerts of [ref] on (follow the global setting) or off.
+  Future<void> setLiveAlert(RoomRef ref, {required bool enabled}) => set(ref, liveAlert, enabled ? null : false);
 
   /// The stored volume of [ref] (0–1), or null.
   Future<double?> volumeOf(RoomRef ref) async {

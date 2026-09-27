@@ -222,6 +222,32 @@ void main() {
       await store.roomPrefs.setVolume(ref, null);
       expect(await store.roomPrefs.volumeOf(ref), isNull);
     });
+
+    test('live alert opt-outs are stored per room and only as false (F-NEW-01)', () async {
+      final muted = RoomRef('douyu', 'AbC');
+      final other = RoomRef('douyu', 'abc');
+      await store.follows.follow(snapshot('douyu', 'AbC'));
+      await store.follows.follow(snapshot('douyu', 'abc'));
+      final changes = store.roomPrefs.watchLiveAlertsOff();
+      final seen = <Set<RoomRef>>[];
+      final subscription = changes.listen(seen.add);
+      addTearDown(subscription.cancel);
+      await pumpEventQueue();
+
+      await store.roomPrefs.setLiveAlert(muted, enabled: false);
+      expect(await store.roomPrefs.liveAlertsOff(), {muted}, reason: 'room ids keep their case');
+      expect(await store.roomPrefs.get(muted, RoomPrefStore.liveAlert), isFalse);
+      await store.roomPrefs.setLiveAlert(muted, enabled: true);
+      expect(await store.roomPrefs.liveAlertsOff(), isEmpty);
+      expect(await store.roomPrefs.get(muted, RoomPrefStore.liveAlert), isNull, reason: 'on means "follow the global"');
+      await store.roomPrefs.setLiveAlert(other, enabled: true);
+      expect(await store.roomPrefs.get(other, RoomPrefStore.liveAlert), isNull);
+
+      await pumpEventQueue();
+      expect(seen.first, isEmpty);
+      expect(seen, contains(equals({muted})));
+      expect(seen.last, isEmpty);
+    });
   });
 
   test('prune removes only unreferenced rooms', () async {

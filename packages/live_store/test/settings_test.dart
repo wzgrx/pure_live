@@ -61,6 +61,8 @@ void main() {
       expect(Settings.windowWidth.scope, SettingScope.device);
       expect(Settings.launchAtStartup.scope, SettingScope.device);
       expect(Settings.launchAtStartup.defaultValue, isFalse);
+      expect(Settings.liveAlerts.scope, SettingScope.device, reason: 'the notification permission is per device');
+      expect(Settings.liveAlerts.defaultValue, isFalse, reason: 'F-NEW-01 is opt-in');
     });
   });
 

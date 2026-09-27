@@ -25,11 +25,17 @@
 | [spec/modules/](../../spec/modules/) | 播放、弹幕、直播间、多画面、录制、存储（含 230 个旧设置键的逐项清单和导入规则） |
 | [spec/regressions.md](../../spec/regressions.md) | 211 条回归条目（13 个领域）和 23 项没有自动化测试的缺口 |
 
+样本（ADR 0009）：
+
+- 录制工具 `live_cli fixture capture`（脱敏、防泄漏自检）和期望值测试框架 `test/fixtures_expected/` 已完成；斗鱼 S05 已录制。
+- 5 个平台的 HTTP 样本正在录制。
+- 播放器事件轨迹：Linux 无视频输出的 8 个场景已录入 `fixtures/player/`，补出播放规格 EVT-13～EVT-19。
+- `spec/regressions.md` 的平台编号已回填。
+
 还没做：
 
-- 5 个平台的接口和弹幕样本，以及用旧版解析器生成的 `expected.json`。
-- 用真实 libmpv 录制播放器事件轨迹。
-- `spec/regressions.md` 中 `REG-<平台>-*` 引用回填为各平台规格里的编号。
+- 弹幕二进制帧、FLV 文件头、续期时间线的样本（需要给 `live_cli` 增加对应的录制方式）。
+- Windows 和 K90 上带真实视频输出的播放器轨迹。
 - 各规格的 [待确认] 逐项查证。
 
 ## 第 3 阶段：工程底座
@@ -94,3 +100,4 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 - 2026-09-27：第 1 阶段规格写完（产品、5 个平台、6 个模块、回归清单）。第 3 阶段开工：workspace、`live_core`、`live_cli`、`check_latest`、依赖方向检查、门禁脚本、CI、hooks。
 - 2026-09-27：第 2 阶段设计原则定稿（[spec/design/principles.md](../../spec/design/principles.md)）：品牌蓝 `#2E6FE0`，一级入口为关注、发现、搜索、我的，PLAN 第 07–09 节与它冲突处以它为准。
 - 2026-09-27：工具链升级到最新：JDK 27、NDK 30.0.16248370、Kotlin 2.4.20、compileSdk 37.2；ADR 0008 保留越过 SDK 锁定的依赖覆盖。
+- 2026-09-27：样本工具与斗鱼试点；播放器事件轨迹 8 个场景；回归清单平台编号回填。CI 在 d2b96603 全绿。

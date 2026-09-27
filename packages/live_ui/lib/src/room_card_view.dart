@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/badges.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/tv/focus_frame.dart';
+import 'package:live_ui/src/ui_text.dart';
 
 /// Card density (principles §4.3).
 enum CardDensity {
@@ -85,8 +86,13 @@ class RoomCardView extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final text = theme.textTheme;
-    final state = isLive ? '直播中' : '未开播';
-    final label = recording ? '$anchorName，$state，录制中，$title' : '$anchorName，$state，$title';
+    final words = LiveUiText.current;
+    final label = [
+      anchorName,
+      if (isLive) words.liveNow else words.offline,
+      if (recording) words.recording,
+      title,
+    ].join(words.separator);
     // The frame is the card's only focus target: keyboard and remote focus
     // draw its ring (and grow the card on TV), OK opens, long OK is the menu.
     return FocusFrame(

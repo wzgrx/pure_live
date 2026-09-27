@@ -74,6 +74,35 @@ void main() {
     expect(find.text('录制中'), findsOneWidget);
   });
 
+  testWidgets('F-APP-06: the card, badges and default buttons use the injected language', (tester) async {
+    addTearDown(() => LiveUiText.current = LiveUiText.simplifiedChinese);
+    LiveUiText.current = LiveUiText(
+      live: 'LIVE',
+      liveFor: (duration) => 'LIVE $duration',
+      liveNow: 'live',
+      offline: 'offline',
+      recording: 'Recording',
+      separator: ', ',
+      retry: 'Retry',
+      ok: 'OK',
+      cancel: 'Cancel',
+      justNow: 'just now',
+      minutesAgo: (minutes) => '$minutes min ago',
+      hoursAgo: (hours) => '$hours hr ago',
+      daysAgo: (days) => '$days d ago',
+      countBase: 1000,
+      countUnits: const ['K', 'M', 'B'],
+    );
+    await tester.pumpWidget(
+      host(const RoomCardView(platformId: 'douyu', anchorName: 'Host', title: 'Title', isLive: true, recording: true)),
+    );
+    expect(find.text('Recording'), findsOneWidget);
+    expect(find.bySemanticsLabel('Host, live, Recording, Title'), findsOneWidget);
+    await tester.pumpWidget(host(MessageView.error(title: 'Failed', onAction: () {}, onSecondary: () {})));
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+  });
+
   testWidgets('the shell switches between bar and rails with the width', (tester) async {
     const destinations = [
       NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: '关注'),

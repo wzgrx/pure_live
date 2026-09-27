@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/theme.dart';
+import 'package:live_ui/src/ui_text.dart';
 
 /// Platforms that ship a logo in this package; others fall back to a letter tile.
 const _logos = {
@@ -83,7 +84,7 @@ class LiveBadge extends StatelessWidget {
       decoration: BoxDecoration(color: live.live, borderRadius: BorderRadius.circular(Radii.r1)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Space.s1 + 2, vertical: 1),
-        child: Text(duration == null ? '直播' : '直播 $duration', style: style),
+        child: Text(duration == null ? LiveUiText.current.live : LiveUiText.current.liveFor(duration!), style: style),
       ),
     );
   }
@@ -111,7 +112,7 @@ class RecordingBadge extends StatelessWidget {
               child: SizedBox.square(dimension: 6),
             ),
             const SizedBox(width: Space.s1),
-            Text('录制中', style: style),
+            Text(LiveUiText.current.recording, style: style),
           ],
         ),
       ),
@@ -123,13 +124,13 @@ class RecordingBadge extends StatelessWidget {
 /// fill and text, no colour-only meaning.
 class StatusTag extends StatelessWidget {
   /// Creates the tag; [recording] puts the recording dot before the text.
-  const new(this.text, {this.recording = false, super.key});
+  const new(String this.text, {this.recording = false, super.key});
 
-  /// The recording mark for list rows ("录制中").
-  const new recording({Key? key}) : this('录制中', recording: true, key: key);
+  /// The recording mark for list rows ("录制中" in the interface language).
+  const new recording({super.key}) : text = null, recording = true;
 
-  /// The label.
-  final String text;
+  /// The label; null for [LiveUiText.recording].
+  final String? text;
 
   /// Whether to show the recording dot.
   final bool recording;
@@ -152,7 +153,7 @@ class StatusTag extends StatelessWidget {
               ),
               const SizedBox(width: Space.s1),
             ],
-            Text(text, style: style),
+            Text(text ?? LiveUiText.current.recording, style: style),
           ],
         ),
       ),

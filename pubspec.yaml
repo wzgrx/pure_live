@@ -11,6 +11,7 @@ workspace:
   - apps/pure_live
   - packages/live_core
   - packages/live_net
+  - packages/live_store
   - packages/live_ui
   - tools/live_cli
   - tools/check_latest

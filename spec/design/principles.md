@@ -67,7 +67,7 @@
 - 理由：默认的 tonalSpot 会把主色压成灰蓝，品牌辨识度低；fidelity 保留种子色，同时由色调算法保证对比度。
 - 放弃：tonalSpot（太灰）；vibrant（色相偏移，表面偏彩）；content（跟着封面变色，列表里不稳定）。
 - **第三色改用品牌青**（设计系统阶段补充）：fidelity 的第三色是种子色的暖色补色（浅色 `#964200`，橙色），会和“直播中”及平台色混淆。改为用品牌青 `#45D4EA` 的色板生成第三色一组（浅色 tertiary `#006572`），实现上是 `fromSeed` 之后用 `copyWith` 替换 tertiary 四个角色。
-- 生成结果和 157 组对比度检查见 [tokens.json](tokens.json)、[contrast-report.txt](contrast-report.txt)；设计系统页面：https://claude.ai/artifact/JA858yzW77FSJ9mMdNz7LK 。
+- 生成结果和 157 组对比度检查见 [tokens.json](tokens.json)、[contrast-report.txt](contrast-report.txt)；设计系统页面：https://claude.ai/artifact/JA858yzW77FSJ9mMdNz7LK ；页面稿：https://claude.ai/artifact/PAavLD9hN6VdLFgNYXkEr4 。
 
 **语义色**：固定值，不随主题色和动态取色变化。
 

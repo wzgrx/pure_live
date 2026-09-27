@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0 诊断与基线 | **完成**（2026-09-27） | `docs/rewrite/DIAGNOSIS.md`、`docs/rewrite/BASELINE.md` | 诊断报告和基线数据落档 |
 | 1 规格与样本 | 进行中：规格已写完，样本未开始 | `spec/`、`spec/regressions.md`、`fixtures/` | 每条结论附旧代码位置；待确认项清零 |
-| 2 设计方向与设计系统 | 进行中：设计原则定稿，设计系统第一版已发布，页面稿未开始 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
+| 2 设计方向与设计系统 | 进行中：原则、设计系统、第一批页面稿已完成，待独立复核和图标重绘 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 进行中：workspace、门禁、CI 已建 | workspace、CI、hooks、`live_cli`、`check_latest` | 旧应用照常构建发布，CI 全绿 |
 | 4 平台与网络层 | 未开始 | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过；旧应用接入后发布 3.3.x |
 | 5 播放、弹幕、录制层 | 未开始 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
@@ -102,3 +102,4 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 - 2026-09-27：工具链升级到最新：JDK 27、NDK 30.0.16248370、Kotlin 2.4.20、compileSdk 37.2；ADR 0008 保留越过 SDK 锁定的依赖覆盖。
 - 2026-09-27：样本工具与斗鱼试点；播放器事件轨迹 8 个场景；回归清单平台编号回填。CI 在 d2b96603 全绿。
 - 2026-09-27：设计系统第一版（https://claude.ai/artifact/JA858yzW77FSJ9mMdNz7LK）：令牌按 fromSeed(#2E6FE0, fidelity) 生成，157 组对比度全部达标；第三色改用品牌青，浅色成功和警告色加深；17 个组件预览和封面。令牌同步到 `spec/design/tokens.json`。
+- 2026-09-27：第一批页面稿（https://claude.ai/artifact/PAavLD9hN6VdLFgNYXkEr4）：关注和直播间（手机、桌面大）、多画面 2×2、TV 首页；设计系统按原则更正了导航轨宽度、TV 焦点和聊天栏宽度。

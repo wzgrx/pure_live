@@ -7,11 +7,11 @@
 ## Secrets and signing material
 
 - Android JKS、`key.properties`、Windows PFX/私钥和 WebDAV/Cookie 配置均不得提交。
-- 发布密钥应保存在仓库外，并通过本机安全目录或 GitHub Actions Secrets 注入。
+- 发布密钥应保存在仓库外，只在本机构建时从安全目录读取（构建不在 GitHub Actions 上进行，ADR 0014）。
 - 若密钥曾进入 Git 历史，应立即轮换；仅删除当前分支文件不会清除历史对象。
 - 曾经提交到历史中的测试签名材料均视为已退役。发布 Android 版本前应核验 APK 证书指纹，并确认其与当前受控的发布密钥一致。
 - `.gitleaks.toml` 仅排除构建产物和 Firebase 官方定义为客户端公开配置的两个固定文件；提交前仍应运行 Gitleaks 检查工作树和 Git 历史。
 
 ## Supported versions
 
-仅最新 GitHub Release 和 `master` 当前版本接受安全修复。
+3.x 已停止开发（v3.2.11 是最后一个版本，源码归档在 `legacy/`），不再接受安全修复。安全修复只进入 v4（`master`）和之后发布的 v4 版本。

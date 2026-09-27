@@ -48,10 +48,13 @@ int followAudience(StoredRoom room) =>
 
 /// The live follows by audience, as the follows page shows them: the list
 /// for rooms opened from a link, search history or elsewhere (T-05).
-List<RoomEntry> liveFollowEntries(Iterable<FollowedRoom> follows) {
+/// [isLive] decides from this run's refresh (F-FAV-03: a state stored by an
+/// earlier run is not trusted before the first check); by default the
+/// stored state.
+List<RoomEntry> liveFollowEntries(Iterable<FollowedRoom> follows, {bool Function(FollowedRoom follow)? isLive}) {
   final live = [
     for (final follow in follows)
-      if (follow.room.lastState == LiveState.live) follow.room,
+      if (isLive?.call(follow) ?? follow.room.lastState == LiveState.live) follow.room,
   ]..sort((a, b) => followAudience(b).compareTo(followAudience(a)));
   return [for (final room in live) RoomEntry(room.ref, name: room.anchorName, title: room.title)];
 }

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart' show AudienceKind, DanmakuEvent;
 import 'package:live_media/live_media.dart';
+import 'package:live_net/live_net.dart' show TransportFailure;
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
@@ -24,6 +25,7 @@ import 'package:pure_live_app/features/danmaku/on_video.dart';
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
 import 'package:pure_live_app/features/follows/follow_actions.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
+import 'package:pure_live_app/features/follows/follow_status.dart';
 import 'package:pure_live_app/features/iptv/iptv_room.dart';
 import 'package:pure_live_app/features/room/gestures.dart';
 import 'package:pure_live_app/features/room/playback.dart';
@@ -53,7 +55,13 @@ final FutureProviderFamily<RoomDetail, RoomRef> roomDetailProvider = FutureProvi
       if (room.platform != 'iptv') await store.history.record(snapshot);
       await store.rooms.update([snapshot]);
       return detail;
-    });
+    }, retry: roomDetailRetry);
+
+/// Only a network failure is worth another try, twice at most (1 s, 2 s);
+/// a missing room or an unsupported platform is final (Riverpod would
+/// otherwise retry every error ten times).
+Duration? roomDetailRetry(int count, Object error) =>
+    count < 2 && (error is NetworkFailure || error is TransportFailure) ? Duration(seconds: 1 << count) : null;
 
 /// Whether a room is followed.
 final StreamProviderFamily<bool, RoomRef> isFollowedProvider = StreamProvider.autoDispose.family<bool, RoomRef>(
@@ -512,7 +520,13 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   List<RoomEntry> _switchEntries() {
     final origin = widget.origin;
     if (origin != null && origin.entries.isNotEmpty) return origin.entries;
-    return liveFollowEntries(ref.read(followsProvider).value ?? const []);
+    final session = FollowSession.of(ref.read(followRefreshProvider));
+    final sites = ref.read(sitesProvider);
+    return liveFollowEntries(
+      ref.read(followsProvider).value ?? const [],
+      isLive: (follow) =>
+          session.statusOf(follow, supported: sites.containsKey(follow.ref.platform)) == FollowStatus.live,
+    );
   }
 
   /// F-NEW-04: the previous (-1) or next (+1) live room of the list, in
@@ -754,10 +768,12 @@ class _RoomPageState extends ConsumerState<RoomPage> {
             if (room != _room) setState(() => _room = room);
           },
           followed: followed,
-          onFollow: () {
-            final follows = ref.read(storeProvider).follows;
-            unawaited(followed ? follows.unfollow(detail.ref) : follows.follow(RoomSnapshot.fromDetail(detail)));
-          },
+          // F-FAV-02: the write is awaited and a failure is said.
+          onFollow: () => unawaited(
+            followed
+                ? unfollowWithNotice(context, ref, detail.ref)
+                : followWithNotice(context, ref, RoomSnapshot.fromDetail(detail)),
+          ),
           child: body,
         );
       }

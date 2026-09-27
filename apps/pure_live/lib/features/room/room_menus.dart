@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
+import 'package:pure_live_app/features/follows/follow_status.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -452,6 +453,8 @@ class _SwitchRoomPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final follows = ref.watch(followsProvider);
     final history = ref.watch(historyProvider);
+    final session = FollowSession.of(ref.watch(followRefreshProvider));
+    final sites = ref.watch(sitesProvider);
     // F-ROOM-11: rooms being recorded now (a snapshot; the panel is short-lived).
     final recording = [
       for (final task in ref.read(recordManagerProvider).tasks)
@@ -511,9 +514,12 @@ class _SwitchRoomPanel extends ConsumerWidget {
               children: [
                 list(
                   follows.whenData(
+                    // F-FAV-03: live as this run checked it, not as stored.
                     (all) => [
                       for (final follow in all)
-                        if (follow.room.lastState == LiveState.live) follow.room,
+                        if (session.statusOf(follow, supported: sites.containsKey(follow.ref.platform)) ==
+                            FollowStatus.live)
+                          follow.room,
                     ],
                   ),
                   '没有开播的关注',

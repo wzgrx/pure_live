@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Page;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
@@ -91,5 +92,34 @@ void main() {
     expect(find.text('标题bilibili-1'), findsWidgets);
     expect(find.text('打开原站'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
+  });
+
+  testWidgets('§6.2: Ctrl+F opens search with its box focused', (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final store = (await tester.runAsync(LiveStore.inMemory))!;
+    addTearDown(() => tester.runAsync(store.close));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sitesProvider.overrideWithValue({for (final id in platformOrder) id: PlatformSite(FakeSite(id))}),
+          storeProvider.overrideWithValue(store),
+          recordManagerProvider.overrideWithValue(fakeRecordManager()),
+          followsProvider.overrideWith((ref) => Stream.value(const [])),
+          followRefreshProvider.overrideWith(_NoRefresh.new),
+        ],
+        child: const PureLiveApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchPage), findsNothing);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchPage), findsOneWidget);
+    final bar = tester.widget<SearchBar>(find.byType(SearchBar));
+    expect(bar.focusNode!.hasFocus, isTrue);
   });
 }

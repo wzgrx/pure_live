@@ -28,8 +28,21 @@ class SearchPage extends ConsumerStatefulWidget {
   ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
+/// Asks the search page to focus its box (Ctrl+F, principles §6.2); the
+/// value counts the requests.
+class SearchFocusRequest extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void request() => state++;
+}
+
+/// Focus requests for the search box.
+final searchFocusRequestProvider = NotifierProvider<SearchFocusRequest, int>(SearchFocusRequest.new);
+
 class _SearchPageState extends ConsumerState<SearchPage> {
   final _controller = TextEditingController();
+  final _focus = FocusNode(debugLabel: 'search box');
   String _keyword = '';
   bool _liveOnly = false;
   SearchSort _sort = SearchSort.smart;
@@ -62,6 +75,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -87,11 +101,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Widget build(BuildContext context) {
     final layout = WindowLayout(MediaQuery.sizeOf(context));
     final voice = TvScope.of(context).enabled && ref.watch(tvDeviceProvider).voiceSearch;
+    ref.listen(searchFocusRequestProvider, (_, _) {
+      _focus.requestFocus();
+      _controller.selection = TextSelection(baseOffset: 0, extentOffset: _controller.text.length);
+    });
     return Scaffold(
       appBar: AppBar(
         titleSpacing: TvScope.of(context).enabled ? Space.s2 : layout.margin,
         title: SearchBar(
           controller: _controller,
+          focusNode: _focus,
           hintText: S.searchHint,
           elevation: const WidgetStatePropertyAll(0),
           leading: const Icon(Icons.search),

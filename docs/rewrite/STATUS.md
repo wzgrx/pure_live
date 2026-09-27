@@ -11,9 +11,9 @@
 | 2 设计方向与设计系统 | 进行中：原则、设计系统、第一批页面稿已完成，待独立复核和图标重绘 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 完成：workspace、本机门禁、hooks、`live_cli`、`check_latest`；旧应用收进 `legacy/` | workspace、门禁、hooks、`live_cli`、`check_latest` | 本机门禁全绿（ADR 0014：构建和门禁在本机运行） |
 | 4 平台与网络层 | **完成**：5 个平台的解析器、适配器、`live_net` 和真实网络探针全部完成；3.x 不再发布（ADR 0014） | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过 |
-| 5 播放、弹幕、录制层 | 进行中：`live_media`、`live_player`（ADR 0018，斗鱼续期真实网络 0 断档）、`live_danmaku`（ADR 0019，5 个平台真实网络连通并录制样本）完成；弹幕渲染和 `live_record` 在做 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
-| 6 新应用界面 | 进行中：`live_ui`、应用骨架（关注、发现、搜索、我的、直播间布局）、`live_store` 接入（关注、历史、设置、备份与恢复）已完成；播放和弹幕接入中 | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
-| 7 其余平台、TV、桌面 | 未开始 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
+| 5 播放、弹幕、录制层 | 代码完成，待真机：`live_media`、`live_player`（ADR 0018）、`live_danmaku`（ADR 0019，现 17 个平台有弹幕）、弹幕渲染（ADR 0020）、`live_record`（ADR 0021，纯 Dart FLV→MP4、后台录制 ADR 0029）、`live_cast`（ADR 0027）；HLS 录制在做 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
+| 6 新应用界面 | 代码基本完成，待真机：全部一级页面、直播间（ADR 0023）、多画面、录制中心、IPTV（ADR 0024）、系统集成（ADR 0025）、开播提醒（ADR 0028）、账号与网页组件（ADR 0032）、设置八个分组；多语言在做 | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
+| 7 其余平台、TV、桌面 | 进行中：第二批 5 个、第三批前半 9 个平台完成并保留；TV 模式完成（ADR 0026）；Windows 外壳完成；第三批后半在做 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
 | 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除 `legacy/` |
 
 ## 第 1 阶段：规格

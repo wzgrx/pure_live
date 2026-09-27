@@ -30,6 +30,7 @@ dependencies:
   live_record: any
   live_store: any
   live_ui: any
+  lpinyin: ^2.0.3
   path_provider: ^2.1.6
   qr: ^4.0.0
   screen_retriever: ^0.2.2

@@ -8,6 +8,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
+import 'package:lpinyin/lpinyin.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
@@ -131,6 +132,8 @@ final Provider<RecordManager> recordManagerProvider = Provider<RecordManager>((r
     opener: httpRecordOpener(proxy: ref.watch(proxyPolicyProvider)),
     // Finished segments to MP4 in a background isolate (ADR 0021).
     remuxer: const IsolateRemuxer(FlvToMp4Remuxer()),
+    // Read per session, so switching the setting applies to the next one.
+    transliterate: (text) => settings.get(Settings.recordPinyinFolders) ? pinyinFolderName(text) : text,
     chat: DanmakuRecordChat(sites, ref.watch(cookieVaultProvider), ref.watch(proxyPolicyProvider)),
   );
   unawaited(manager.init());
@@ -151,3 +154,21 @@ final StreamProviderFamily<RecordTask?, String> recordTaskProvider = StreamProvi
       yield manager.tasks.where((t) => t.key == key).firstOrNull;
       yield* manager.watch(key);
     });
+
+/// A streamer name as a pinyin folder name (F-REC-03, record.md §path): no
+/// tones, no separators, lower case, ASCII letters, digits and `_` only
+/// (3.x `PathHelper.toSafePinyin`); `unknown` when nothing is left.
+String pinyinFolderName(String text) {
+  final String pinyin;
+  try {
+    pinyin = PinyinHelper.getPinyinE(text, separator: '', defPinyin: '');
+  } on Object {
+    return 'unknown';
+  }
+  final ascii = pinyin
+      .replaceAll(RegExp(r'\s+'), '_')
+      .replaceAll(RegExp('[^a-zA-Z0-9_]'), '')
+      .replaceAll(RegExp('_+'), '_')
+      .toLowerCase();
+  return ascii.replaceAll('_', '').isEmpty ? 'unknown' : ascii;
+}

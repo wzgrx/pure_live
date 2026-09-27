@@ -242,6 +242,11 @@ class SettingsGroupBody extends StatelessWidget {
         const SwitchSettingTile(setting: Settings.recordDanmaku, title: '同时保存弹幕', subtitle: '与视频同名的 XML 文件'),
         const SwitchSettingTile(setting: Settings.recordRemuxToMp4, title: '录完转成 MP4'),
         const SwitchSettingTile(setting: Settings.recordKeepSourceAfterRemux, title: '转成 MP4 后保留原始 FLV'),
+        const SwitchSettingTile(
+          setting: Settings.recordPinyinFolders,
+          title: '文件夹名用拼音',
+          subtitle: '主播名转成拼音作文件夹名，方便在不支持中文的设备上查看',
+        ),
         const SwitchSettingTile(setting: Settings.recordResumeOnLaunch, title: '启动时继续未完成的录制'),
       ],
       SettingsGroup.accounts => [

@@ -4,7 +4,7 @@
 
 - 平台 id：`sixroom`，显示名“六间房”。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/sixroom/`（A = sixroom_api.dart，S = sixroom_site.dart，L = sixroom_link.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆）实测：移动端列表接口、搜索页、房间页和 FLV 媒体都能匿名访问。不满足 ADR 0003 的任何下线条件。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：移动端列表接口、搜索页、房间页和 FLV 媒体都能匿名访问。不满足 ADR 0003 的任何下线条件。
 - 能力：目录（4 个分区 + 推荐，分页）、搜索（主播，含未开播，一页）、详情、取流（HTTP-FLV，AVC）、链接解析。
 - 不提供：弹幕（旧版未接入；聊天走私有 WebSocket，见 §7）；画质选择；登录。
 
@@ -121,7 +121,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/sixroom.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/sixroom_test.dart 直接对照正文。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/sixroom.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/sixroom_test.dart 直接对照正文。
 
 | # | 样本 | 覆盖 |
 |---|---|---|

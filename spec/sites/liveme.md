@@ -4,7 +4,7 @@
 
 - 平台 id：`liveme`，显示名 `LiveMe`（legacy/lib/core/site/liveme/liveme_site.dart:30-33）。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/liveme/`（A = liveme_api.dart，S = liveme_site.dart，L = liveme_link.dart，G = liveme_signer.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆）实测：精选目录、搜索、三个详情接口、签名的直播信息接口和 FLV/HLS 媒体都能匿名访问。不满足 ADR 0003 的任何下线条件。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：精选目录、搜索、三个详情接口、签名的直播信息接口和 FLV/HLS 媒体都能匿名访问。不满足 ADR 0003 的任何下线条件。
 - 能力：推荐（精选目录，分页）、搜索（主播，含未开播）、详情、取流（原画 FLV + HLS、360p FLV，AVC）、链接解析（短号、主页、分享页）。
 - 不提供：分类；弹幕（旧版未接入，zh.json `liveme_chat_notice`；直播间 `chatSystem=3` 走私有 IM，匿名没有找到可用的通道，见 §7）；登录。
 
@@ -146,7 +146,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（`live_cli fixture capture`，规则 tools/live_cli/lib/src/fixture/rules/liveme.dart）。没有旧版期望值（ADR 0016），v4 测试 packages/live_core/test/sites/liveme_test.dart 直接对照正文。
+2026-09-27 本机默认出口录制（`live_cli fixture capture`，规则 tools/live_cli/lib/src/fixture/rules/liveme.dart）。没有旧版期望值（ADR 0016），v4 测试 packages/live_core/test/sites/liveme_test.dart 直接对照正文。
 
 | # | 样本 | 请求 | 覆盖 |
 |---|---|---|---|

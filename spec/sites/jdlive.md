@@ -4,7 +4,7 @@
 
 - 平台 id：`jdlive`，显示名“京东直播”。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/jdlive/`（A = jd_live_api.dart，S = jd_live_site.dart，L = jd_live_link.dart）。样本编号见 §11。
-- 状态：**保留（能力受限）**。2026-09-27 直连实测：精选列表和播放接口 `getImmediatePlayToM` 匿名可用，FLV/HLS 可播；详情接口 `liveDetailToM` 需要京东的 h5st 签名（匿名请求返回空的 403，S03-detail-403），所以详情没有标题和主播名。不满足 ADR 0003 的下线条件（有公开目录、取流匿名可用）。
+- 状态：**保留（能力受限）**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：精选列表和播放接口 `getImmediatePlayToM` 匿名可用，FLV/HLS 可播；详情接口 `liveDetailToM` 需要京东的 h5st 签名（匿名请求返回空的 403，S03-detail-403），所以详情没有标题和主播名。不满足 ADR 0003 的下线条件（有公开目录、取流匿名可用）。
 - 能力：推荐（精选直播购物，分页）、详情（只有状态和封面）、取流（`_fhd` 的 FLV + HLS，AVC）、链接解析。
 - 不提供：分类、搜索（旧版的“搜索”只在当前页本地筛选，zh.json `jdlive_directory_scope`）、弹幕、登录。
 
@@ -89,7 +89,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/jdlive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/jdlive_test.dart 直接对照正文。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/jdlive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/jdlive_test.dart 直接对照正文。
 
 | # | 样本 | 覆盖 |
 |---|---|---|

@@ -4,7 +4,7 @@
 
 - 平台 id：`weibo`（legacy/lib/core/sites.dart），显示名“微博直播”（legacy/assets/translations/zh.json `site_weibo`）。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/weibo/`（A = weibo_api.dart，S = weibo_site.dart，L = weibo_link.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆）实测：推荐列表、房间接口、FLV 媒体都能匿名访问，不需要 Cookie、签名或特殊请求头。不满足 ADR 0003 的任何下线条件（有公开推荐列表；直播链接稳定；取流匿名可用）。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：推荐列表、房间接口、FLV 媒体都能匿名访问，不需要 Cookie、签名或特殊请求头。不满足 ADR 0003 的任何下线条件（有公开推荐列表；直播链接稳定；取流匿名可用）。
 - 能力：推荐（一页快照）、详情、取流（HTTP-FLV，AVC）、链接解析。
 - 不提供：分类（平台网页没有分类目录）；搜索（没有匿名搜索接口，旧版只是在推荐快照里按昵称过滤，A:196-201、zh.json `search_coverage_weibo`，v4 不做这种伪搜索）；弹幕（旧版未接入，v4 本阶段也不做，见 §7）；回放播放。
 
@@ -128,7 +128,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（`live_cli fixture capture`，规则 tools/live_cli/lib/src/fixture/rules/weibo.dart）。旧应用已归档、不能再运行（ADR 0016），没有旧版期望值 `expected.json`；v4 测试（packages/live_core/test/sites/weibo_test.dart）直接对照样本正文断言。
+2026-09-27 本机默认出口录制（`live_cli fixture capture`，规则 tools/live_cli/lib/src/fixture/rules/weibo.dart）。旧应用已归档、不能再运行（ADR 0016），没有旧版期望值 `expected.json`；v4 测试（packages/live_core/test/sites/weibo_test.dart）直接对照样本正文断言。
 
 | # | 样本 | 请求 | 覆盖 |
 |---|---|---|---|

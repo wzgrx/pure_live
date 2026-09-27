@@ -4,7 +4,7 @@
 
 - 平台 id：`steambroadcast`，显示名“Steam 直播”。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/steambroadcast/`（A = steam_broadcast_api.dart，S = steam_broadcast_site.dart，L = steam_broadcast_link.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆）实测：热门直播页、广播信息、迷你资料、HLS 主播放列表和分片、聊天日志都能匿名访问。不满足 ADR 0003 的任何下线条件。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连；Steam 社区在中国大陆直连常不稳定，是否需要代理 [待确认]）：热门直播页、广播信息、迷你资料、HLS 主播放列表和分片、聊天日志都能匿名访问。不满足 ADR 0003 的任何下线条件。
 - 能力：推荐（热门直播，分页）、详情、取流（HLS 主播放列表，AVC）、弹幕（聊天日志 HTTP 轮询，只读）、链接解析。
 - 不提供：分类（按游戏的直播在各游戏社区页，匿名接口未确认，[待确认]）；搜索（没有匿名直播搜索）；发送弹幕、登录。
 
@@ -128,7 +128,7 @@ Steam 直播的聊天很少：2026-09-27 对热门页前 10 个直播各观察 6
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/steambroadcast.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/steambroadcast_test.dart 和 packages/live_danmaku/test/steambroadcast_test.dart 直接对照正文。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/steambroadcast.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/steambroadcast_test.dart 和 packages/live_danmaku/test/steambroadcast_test.dart 直接对照正文。
 
 | # | 样本 | 请求 | 覆盖 |
 |---|---|---|---|

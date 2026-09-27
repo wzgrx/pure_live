@@ -4,7 +4,7 @@
 
 - 平台 id：`baidulive`，显示名“百度直播”。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/baidulive/`（A = baidu_live_api.dart，S = baidu_live_site.dart，L = baidu_live_link.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆）实测：签名的频道推荐流、房间命令接口和各档 FLV/HLS 都能匿名访问。不满足 ADR 0003 的任何下线条件。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：签名的频道推荐流、房间命令接口和各档 FLV/HLS 都能匿名访问。不满足 ADR 0003 的任何下线条件。
 - 能力：目录（频道 → 推荐流，无限翻页）、推荐、详情、取流（原画 + 720p/480p，FLV 两个 CDN + HLS，AVC）、链接解析。
 - 不提供：搜索（没有匿名搜索接口，旧版只接受房间号，S:190-206）；弹幕（本阶段未做，协议见 §7）；登录。
 
@@ -111,7 +111,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/baidulive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/baidulive_test.dart 直接对照正文。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/baidulive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/baidulive_test.dart 直接对照正文。
 
 | # | 样本 | 覆盖 |
 |---|---|---|

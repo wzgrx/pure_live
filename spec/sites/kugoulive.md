@@ -4,7 +4,7 @@
 
 - 平台 id：`kugoulive`，显示名“酷狗直播”（legacy/assets/translations/zh.json `site_kugoulive`）。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/kugoulive/`（A = kugou_live_api.dart，S = kugou_live_site.dart，L = kugou_live_link.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆）实测：首页分区、推荐和分区列表、搜索、房间信息、多线路 FLV 都能匿名访问。不满足 ADR 0003 的任何下线条件。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：首页分区、推荐和分区列表、搜索、房间信息、多线路 FLV 都能匿名访问。不满足 ADR 0003 的任何下线条件。
 - 能力：目录（首页分区 → 分区房间，另有推荐）、搜索（主播，含未开播，一页）、详情、取流（两条线路的 HTTP-FLV，AVC）、链接解析。
 - 不提供：弹幕（旧版未接入，zh.json `kugoulive_chat_notice`；聊天走繁星私有 WebSocket 协议，v4 本阶段不做，见 §7）；画质选择（接口只给主播推流的那一档）；登录。
 
@@ -122,7 +122,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/kugoulive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/kugoulive_test.dart 直接对照正文。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/kugoulive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/kugoulive_test.dart 直接对照正文。
 
 | # | 样本 | 覆盖 |
 |---|---|---|

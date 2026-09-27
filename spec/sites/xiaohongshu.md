@@ -4,7 +4,7 @@
 
 - 平台 id：`xiaohongshu`，显示名“小红书”。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/xiaohongshu/`（A = xiaohongshu_api.dart，S = xiaohongshu_site.dart，L = xiaohongshu_link.dart，H = xiaohongshu_share.dart）。样本编号见 §11。
-- 状态：**仅链接，保留**。2026-09-27 直连实测：直播分享页 `www.xiaohongshu.com/livestream/<房间号>` 匿名可读，页面状态里有拉流配置，FLV/HLS 匿名可播。网页直播列表 `www.xiaohongshu.com/livelist` 是客户端渲染，接口要网页签名（`x-s`），匿名拿不到目录——这正是“仅链接”的原因。
+- 状态：**仅链接，保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：直播分享页 `www.xiaohongshu.com/livestream/<房间号>` 匿名可读，页面状态里有拉流配置，FLV/HLS 匿名可播。网页直播列表 `www.xiaohongshu.com/livelist` 是客户端渲染，接口要网页签名（`x-s`），匿名拿不到目录——这正是“仅链接”的原因。
 - 能力：链接解析（房间号、分享页、`xhslink.com` 短链、App 深链、分享文本）、详情、取流（原画，FLV 三个 CDN + HLS，AVC）。
 - 不提供：目录、搜索、弹幕、登录。
 
@@ -92,7 +92,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/xiaohongshu.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/xiaohongshu_test.dart 直接对照正文。直播间号取自网页搜索到的公开分享页及其 `nextRoomInfo`。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/xiaohongshu.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/xiaohongshu_test.dart 直接对照正文。直播间号取自网页搜索到的公开分享页及其 `nextRoomInfo`。
 
 | # | 样本 | 覆盖 |
 |---|---|---|

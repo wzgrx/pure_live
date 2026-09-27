@@ -4,7 +4,7 @@
 
 - 平台 id：`looklive`，显示名“LOOK 直播”（网易云音乐旗下）。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/looklive/`（A = look_live_api.dart，S = look_live_site.dart，L = look_live_link.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆）实测：`weapi` 加密的推荐接口、房间接口和网易云信的 FLV/HLS 媒体都能匿名访问。不满足 ADR 0003 的任何下线条件。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连）：`weapi` 加密的推荐接口、房间接口和网易云信的 FLV/HLS 媒体都能匿名访问。不满足 ADR 0003 的任何下线条件。
 - 能力：目录（视频直播、声音直播两个分区）、推荐（视频直播）、详情、取流（FLV + HLS；视频 AVC，声音直播只有音频）、链接解析。
 - 不提供：搜索（没有匿名接口）；弹幕（网易云信 IM，见 §7）；登录。
 
@@ -104,7 +104,7 @@ v4 在 live_core 里自带 AES 加密实现（packages/live_core/lib/src/crypto/
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/looklive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/looklive_test.dart 直接对照正文；请求表单由 Python + OpenSSL 生成，Dart 的加密实现必须逐字节复现才能匹配回放。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/looklive.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/looklive_test.dart 直接对照正文；请求表单由 Python + OpenSSL 生成，Dart 的加密实现必须逐字节复现才能匹配回放。
 
 | # | 样本 | 覆盖 |
 |---|---|---|

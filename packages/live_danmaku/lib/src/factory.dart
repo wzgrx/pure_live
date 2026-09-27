@@ -10,6 +10,7 @@ import 'package:live_danmaku/src/sites/kilakila.dart';
 import 'package:live_danmaku/src/sites/kuaishou.dart';
 import 'package:live_danmaku/src/sites/missevan.dart';
 import 'package:live_danmaku/src/sites/picarto.dart';
+import 'package:live_danmaku/src/sites/showroom.dart';
 import 'package:live_danmaku/src/sites/twitcasting.dart';
 import 'package:live_danmaku/src/transport.dart';
 
@@ -24,6 +25,7 @@ const danmakuPlatforms = {
   'kuaishou',
   'missevan',
   'picarto',
+  'showroom',
   'twitcasting',
 };
 
@@ -65,6 +67,7 @@ DanmakuConnector? danmakuConnectorFor(
   'chzzk' => ChzzkConnector(detail: room, transport: transport, session: session, clock: clock),
   'kilakila' => KilakilaConnector(detail: room, transport: transport, session: session, clock: clock),
   'picarto' => PicartoConnector(detail: room, transport: transport, session: session, clock: clock),
+  'showroom' => ShowroomConnector(detail: room, transport: transport, session: session, clock: clock),
   'twitcasting' => TwitcastingConnector(detail: room, transport: transport, session: session, clock: clock),
   'missevan' => MissevanConnector(
     detail: room,

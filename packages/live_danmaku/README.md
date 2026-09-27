@@ -37,7 +37,7 @@ await session.close();                      // 5 s 内返回
 | `DanmakuConnector`、`danmakuConnectorFor(room, transport:, credentials:)` | 一个房间的连接：`events`、`connect()`（加入后返回 true，终态失败返回 false）、`close()`（5 s 内） |
 | `DouyuConnector`、`HuyaConnector`、`BilibiliConnector`、`DouyinConnector`、`KuaishouConnector` | 各平台连接；前四个共用 `SocketConnector` 的重连循环，快手是 HTTP 串行轮询 |
 | `DouyuProtocol`、`HuyaProtocol`、`HuyaHeadlines`、`BilibiliProtocol`、`DouyinProtocol`、`KuaishouProtocol` | 纯函数：封包、心跳、签名、解码；测试直接用录制帧调用 |
-| 第三批：`ChzzkConnector`/`ChzzkProtocol`、`KilakilaConnector`/`KilakilaProtocol`、`MissevanConnector`/`MissevanProtocol`、`PicartoConnector`/`PicartoProtocol`、`TwitcastingConnector`/`TwitcastingProtocol` | CHZZK：JSON 消息，匿名 accessToken；克拉克拉：Socket.IO 2 游客房间（文本帧）；猫耳：游客会话 Cookie，Brotli 压缩的 JSON（`package:brotli`，纯 Dart，MIT）；Picarto：GraphQL 匿名 JWT；TwitCasting：签名的评论推送地址。这两个客户端不发心跳（`heartbeat()` 返回 null，只靠静默看门狗）。都用 `SocketConnector` 的重连循环 |
+| 第三批：`ChzzkConnector`/`ChzzkProtocol`、`KilakilaConnector`/`KilakilaProtocol`、`MissevanConnector`/`MissevanProtocol`、`PicartoConnector`/`PicartoProtocol`、`TwitcastingConnector`/`TwitcastingProtocol`、`ShowroomConnector`/`ShowroomProtocol` | CHZZK：JSON 消息，匿名 accessToken；克拉克拉：Socket.IO 2 游客房间（文本帧）；猫耳：游客会话 Cookie，Brotli 压缩的 JSON（`package:brotli`，纯 Dart，MIT）；Picarto：GraphQL 匿名 JWT；TwitCasting：签名的评论推送地址；SHOWROOM：`SUB`/`PING` 制表符文本帧。这两个客户端不发心跳（`heartbeat()` 返回 null，只靠静默看门狗）。都用 `SocketConnector` 的重连循环 |
 | `TextFrame` | 让 `DanmakuSocket.send` 发 WebSocket 文本帧（Socket.IO 这类协议不认二进制帧）；字节仍是 UTF-8，测试替身和录制不受影响 |
 | `DanmakuCredentials`、`SiteDanmakuCredentials` | 连接需要的凭据，由界面 isolate 上的站点适配器提供 |
 | `DanmakuTransport`、`IoDanmakuTransport` | WebSocket（`dart:io`，按平台走代理）和 `LiveHttp` |
@@ -69,6 +69,7 @@ await session.close();                      // 5 s 内返回
 | 克拉克拉 | 通过（游客） | `fixtures/kilakila/danmaku/S07-live`（59 帧，聊天和礼物；非聊天、礼物消息脱敏后只留类型） | 聊天、礼物 |
 | Picarto | 通过（匿名） | `fixtures/picarto/danmaku/S07-live`（9 帧：令牌、进入、频道状态、1 条聊天） | 聊天、在线人数（频道状态） |
 | TwitCasting | 通过（匿名） | `fixtures/twitcasting/danmaku/S08-live`（14 帧，12 条评论，含 `[]` 保活） | 评论、礼物（按推断构造） |
+| SHOWROOM | 通过（匿名） | `fixtures/showroom/danmaku/S06-live`（25 帧，18 条评论） | 评论、礼物（只有 id） |
 
 ## 录制样本
 

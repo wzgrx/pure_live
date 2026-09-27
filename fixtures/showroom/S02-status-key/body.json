@@ -1,0 +1,32 @@
+{
+  "did_send_live_bad_report": false,
+  "is_enquete": false,
+  "room_url_key": "0c1c310117354",
+  "is_owner": false,
+  "share": {
+    "twitter": {
+      "text": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍 Broadcasting!\nhttps://www.showroom-live.com/r/0c1c310117354?t=1790532886",
+      "url": "https://www.showroom-live.com/r/0c1c310117354?t=1790532886"
+    }
+  },
+  "can_comment": true,
+  "started_at": 1790516942,
+  "is_live": true,
+  "live_id": 23483509,
+  "room_name": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+  "background_image_url": "https://static.showroom-live.com/image/room_background/default.png?v=169",
+  "broadcast_key": "6e6c686835796846:23483509",
+  "is_official": false,
+  "video_type": 0,
+  "broadcast_port": 8080,
+  "image_s": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_s.jpeg?v=1790516941",
+  "live_type": 0,
+  "broadcast_host": "online.showroom-live.com",
+  "live_user_key": null,
+  "genre_id": 112,
+  "is_fav": false,
+  "youtube_id": "",
+  "live_status": 2,
+  "room_id": 577362,
+  "nsta_owner": false
+}

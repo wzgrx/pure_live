@@ -317,6 +317,45 @@ class TwitcastingFrameScrubber extends JsonFrameScrubber {
   }
 }
 
+/// SHOWROOM (spec/sites/showroom.md §11): `MSG\t<key>\t<json>` frames.
+/// Comments (t 1) and gifts (t 2) keep their text and gift with the
+/// viewer's id, name and avatar replaced; other types (visits, telops,
+/// notices naming viewers) keep only their type.
+class ShowroomFrameScrubber extends FrameScrubber {
+  /// Creates the scrubber.
+  new(super.detail, {super.seed});
+
+  @override
+  List<int>? scrubFrame(CapturedFrame frame) {
+    final text = utf8.decode(frame.bytes, allowMalformed: true);
+    if (!text.startsWith('MSG\t')) return frame.bytes;
+    final parts = text.split('\t');
+    if (parts.length < 3) return frame.bytes;
+    final Object? message;
+    try {
+      message = jsonDecode(parts.sublist(2).join('\t'));
+    } on FormatException {
+      return frame.bytes;
+    }
+    if (message is! Map<String, dynamic>) return frame.bytes;
+    final type = '${message['t']}';
+    Map<String, dynamic> kept;
+    if (type == '1' || type == '2') {
+      kept = {
+        for (final key in const ['t', 'cm', 'g', 'n', 'created_at'])
+          if (message.containsKey(key)) key: message[key],
+        if (message['u'] != null) 'u': int.tryParse(names.digits('${message['u']}')) ?? 0,
+        if (message['ac'] is String) 'ac': names.person(message['ac'] as String),
+      };
+      record(r'$[t=1,2].u/ac', 'person');
+    } else {
+      kept = {'t': message['t']};
+      record(r'$[other t]', 'dropped');
+    }
+    return utf8.encode(_elsewhere(names, 'MSG\t${parts[1]}\t${jsonEncode(kept)}'));
+  }
+}
+
 /// CHZZK (spec/sites/chzzk.md §11): the access token and session ids in
 /// the join, the recent-chat request and the token response; viewers' ids,
 /// hashes, nicknames, images and per-message tokens in chat items, whose

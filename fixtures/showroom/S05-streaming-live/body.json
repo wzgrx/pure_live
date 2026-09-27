@@ -1,0 +1,68 @@
+{
+  "streaming_url_list": [
+    {
+      "id": 200,
+      "is_default": true,
+      "label": "Automatic",
+      "quality": 0,
+      "type": "webrtc",
+      "url": "webrtc://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main?tabr_bitrates=ss,mm,ll&tabr_start_bitrate=ll&tabr_control=auto"
+    },
+    {
+      "id": 201,
+      "is_default": false,
+      "label": "original quality",
+      "quality": 1000,
+      "type": "webrtc",
+      "url": "webrtc://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ss"
+    },
+    {
+      "id": 202,
+      "is_default": false,
+      "label": "Medium quality",
+      "quality": 200,
+      "type": "webrtc",
+      "url": "webrtc://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_mm"
+    },
+    {
+      "id": 203,
+      "is_default": false,
+      "label": "low quality",
+      "quality": 100,
+      "type": "webrtc",
+      "url": "webrtc://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ll"
+    },
+    {
+      "id": 100,
+      "is_default": false,
+      "label": "Automatic",
+      "quality": 0,
+      "type": "hls_all",
+      "url": "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_abr202510.m3u8"
+    },
+    {
+      "id": 2,
+      "is_default": false,
+      "label": "original quality",
+      "quality": 1000,
+      "type": "hls",
+      "url": "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ss.m3u8"
+    },
+    {
+      "id": 6,
+      "is_default": false,
+      "label": "Medium quality",
+      "quality": 200,
+      "type": "hls",
+      "url": "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_mm.m3u8"
+    },
+    {
+      "id": 4,
+      "is_default": false,
+      "label": "low quality",
+      "quality": 100,
+      "type": "hls",
+      "url": "https://shard902-cdn.showroom-txlive.com/live/20007330_sr_0a8fecfd74d88242ded2baf7eeeb04b997bc63b359d27d23_577362_main_ll.m3u8"
+    }
+  ]
+}

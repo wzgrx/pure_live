@@ -32,6 +32,8 @@ export 'src/sites/missevan/missevan_parse.dart';
 export 'src/sites/missevan/missevan_site.dart';
 export 'src/sites/picarto/picarto_parse.dart';
 export 'src/sites/picarto/picarto_site.dart';
+export 'src/sites/showroom/showroom_parse.dart';
+export 'src/sites/showroom/showroom_site.dart';
 export 'src/sites/twitcasting/twitcasting_parse.dart';
 export 'src/sites/twitcasting/twitcasting_site.dart';
 export 'src/stream.dart';

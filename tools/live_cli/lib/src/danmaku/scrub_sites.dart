@@ -113,6 +113,7 @@ class HuyaFrameScrubber extends FrameScrubber {
   @override
   List<int>? scrubFrame(CapturedFrame frame) {
     if (frame.direction == 'out') return frame.bytes;
+    if (frame.url != null) return _board(frame.bytes);
     final outer = TarsStruct.decode(frame.bytes);
     final payload = outer.bytes(1);
     if (payload == null) return frame.bytes;
@@ -133,6 +134,45 @@ class HuyaFrameScrubber extends FrameScrubber {
     }
     if (scrubbed == null) return frame.bytes;
     return TarsStruct({...outer.fields, 1: scrubbed}).encode();
+  }
+
+  /// A `getHeadLineMessageBoard` WUP response: each item's user (tag 0:
+  /// nick 1, avatar 2) rebuilt.
+  Uint8List _board(List<int> bytes) {
+    final packet = TarsStruct.decode(bytes.sublist(4));
+    final buffer = TarsStruct.decode(packet.bytes(7)!);
+    final params = Map<Object?, Object?>.of(buffer.fields[0]! as Map<Object?, Object?>);
+    final response = TarsStruct.decode(params['tRsp']! as Uint8List);
+    final rsp = response.struct(0)!;
+    final panel = rsp.struct(1);
+    if (panel != null) {
+      final items = [
+        for (final item in panel.list(1).whereType<TarsStruct>())
+          TarsStruct({
+            ...item.fields,
+            0: TarsStruct({
+              1: names.person(item.struct(0)?.string(1) ?? ''),
+              2: names.secret(item.struct(0)?.string(2) ?? ''),
+            }),
+          }),
+      ];
+      if (items.isNotEmpty) record('headline.user', 'person');
+      params['tRsp'] = TarsStruct({
+        ...response.fields,
+        0: TarsStruct({
+          ...rsp.fields,
+          1: TarsStruct({...panel.fields, 1: items}),
+        }),
+      }).encode();
+    }
+    final body = TarsStruct({
+      ...packet.fields,
+      7: TarsStruct({...buffer.fields, 0: params}).encode(),
+    }).encode();
+    return (BytesBuilder()
+          ..add((ByteData(4)..setInt32(0, body.length + 4)).buffer.asUint8List())
+          ..add(body))
+        .takeBytes();
   }
 
   Uint8List _body(int? uri, Uint8List? body) {

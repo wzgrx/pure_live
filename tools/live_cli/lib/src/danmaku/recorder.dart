@@ -160,7 +160,14 @@ final class _RecordingHttp implements LiveHttp {
   @override
   Future<LiveResponse> send(LiveRequest request) async {
     final response = await _inner.send(request);
-    _recorder._add('in', response.bytes, text: true, url: request.url);
+    // Text bodies stay readable; binary ones (Huya's WUP) go in as base64.
+    var text = true;
+    try {
+      utf8.decode(response.bytes);
+    } on FormatException {
+      text = false;
+    }
+    _recorder._add('in', response.bytes, text: text, url: request.url);
     return response;
   }
 

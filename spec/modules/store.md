@@ -443,7 +443,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
     "history": [],
     "blockRules": [],
     "roomPrefs": [],
-    "recordTasks": [],
+    "recordTasks": [{"platform": "douyu", "roomId": "5526219", "nick": "…", "title": "…", "quality": "original", "autoReconnect": true, "monitor": true, "createdAt": 0, "order": 0}],
     "webdavProfiles": [{"name": "…", "baseUrl": "…", "username": "…"}],
     "iptv": {"playlists": [{"name": "…", "url": "…", "autoSync": true, "order": 0}], "epgSources": [{"name": "…", "url": "…", "autoSync": true, "selected": true, "order": 0}]}
   },
@@ -456,6 +456,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 - settings 只含注册表中 `synced` 和 `device` 作用域的键；`device` 只在同一平台家族之间恢复。
 - 不含：签名 URL、Cookie、密码（除非 §7.3）、EPG 节目数据、缓存、录制文件本身。
 - iptv 分区包含网址来源的播放列表和节目单源（名称、地址、播放列表 UA、自动同步、当前节目单、顺序）**[决定]**（旧备份没有 IPTV 数据：诊断 05 ⑦-7）。文件来源、频道和节目不进备份，换设备后重新同步；收藏列表、备用组已合并进关注和线路（product F-IPTV-08、F-IPTV-11），节目单匹配每次自动计算，都不需要备份（2026-09-28 修订，见 iptv.md §7）。读取时 `providers` 是 `playlists` 的别名；Xtream 以后加入时密码仍不进备份。
+- recordTasks 分区 **[决定 2026-09-28]**：录制任务（record.md §2），每项是房间（platform + roomId）、展示快照（nick、title、avatar、cover）、任务画质（`QualityPreference` 的名字，null 用 `record.defaultQuality`）、autoReconnect、monitor、createdAt（毫秒）、order。`monitor` 表示用户想在开播时录它：导出时任务正在排队、解析、录制、重连、收尾、等待开播，或因轮询关闭、应用退出而停止。不含会话信息（目录、分段、MP4）、游标、失败原因和错误文本：这些只对本机的文件有意义，录制文件本身也不进备份。录制任务不在数据库里（应用用 `<数据根>/DB/record_tasks.json`，record.md §13），`BackupService` 通过应用提供的 `RecordTaskBackup` 读写；没有提供时不导出这个分区，恢复时记 `unsupported` 并保持本机任务不变。任务不是设备设置，跨平台家族也恢复。只在完整备份里。
 - 文件名：`purelive_v4_<yyyy-MM-ddTHH_mm_ss>_<uuid>.json`，关注专用为 `purelive_v4_follows_…json` **[决定]**。写 `.part` 后改名，替换已有文件时先保留 `.previous`，与旧版一致（backup_controller.dart:363-405）。
 - 旧版遇到 v4 文件会因为找不到已识别的分区而拒绝，不会写坏数据（backup_controller.dart:146-168）。
 
@@ -466,6 +467,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 - `version` > 4 → 拒绝并提示更新应用。
 - 完整恢复：文件里有的分区整体替换本机对应数据；**文件里没有的分区保持本机不变** **[决定]**（旧版缺少的分区会被重置为默认值：backup_controller.dart:241-281）。
 - 仅关注恢复：只替换 follows 和 followAreas，其它全部不动（ISSUE_865 审计；backup_controller.dart:414-433）。
+- 录制任务 **[决定 2026-09-28]**：和其它分区一样先整体校验（房间无效、重复的项丢弃并记入报告，未知画质按默认画质并记 `invalidValue`，分区不是列表 → 整个文件报格式错误、什么都不写），数据库事务提交后（和密钥一样在事务外）交给录制器：“整体替换”任务列表，但正在排队、解析、录制、重连、收尾的任务不动（不打断录制；文件里的同一房间也跳过），其余本机任务不在文件里的删除（文件保留），文件里的任务以“已停止”写入；`monitor` 的任务在开播监控打开时进入等待开播（首次检查按 `record.liveCheckInterval`），关闭时为“已停止（开播监控已关闭）”，打开监控后开始等待。同一房间的本机任务保留它的会话信息。录制器写入失败时报告记 `writeFailed`，已提交的数据库部分不回滚。
 - 完整恢复入口选到关注专用文件 → 在写入前报格式错误（backup_controller.dart:171-173, 408-410）。
 
 ### 7.3 密钥部分

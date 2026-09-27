@@ -25,6 +25,25 @@ Future<void> seed(LiveStore store) async {
   await store.roomPrefs.setVolume(RoomRef('douyu', '5526219'), 0.3);
 }
 
+/// The recorder's side of a backup, in memory.
+final class _Tasks implements RecordTaskBackup {
+  new([this.tasks = const []]);
+
+  List<BackupRecordTask> tasks;
+  List<BackupRecordTask>? restored;
+  Error? failure;
+
+  @override
+  Future<List<BackupRecordTask>> exportTasks() async => tasks;
+
+  @override
+  Future<int> restoreTasks(List<BackupRecordTask> tasks) async {
+    if (failure case final Error error) throw error;
+    restored = tasks;
+    return tasks.where((task) => task.ref.roomId != 'busy').length;
+  }
+}
+
 void main() {
   // Two stores (source and target) are open on purpose.
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -270,5 +289,114 @@ void main() {
     final document = await service(source, sourceSecrets).export();
     await service(target, targetSecrets).restore({'type': 'pure_live_sync', 'version': 2, 'backup': document});
     expect(await target.follows.count(), 2);
+  });
+
+  group('recording tasks (store.md §7.1 recordTasks, F-BAK-01)', () {
+    final tasks = [
+      BackupRecordTask(
+        ref: RoomRef('douyu', '9999'),
+        createdAt: DateTime.utc(2026, 9),
+        anchorName: '甲',
+        title: '标题',
+        avatar: Uri.parse('https://img.test/a.png'),
+        quality: QualityPreference.bluRay4M,
+        monitor: true,
+      ),
+      BackupRecordTask(ref: RoomRef('huya', '998'), createdAt: DateTime.utc(2026, 9, 2), autoReconnect: false),
+    ];
+
+    BackupService withTasks(LiveStore store, _Tasks recorder) =>
+        BackupService(store, recordTasks: recorder, platform: 'android', kdfIterations: 1000);
+
+    Map<String, Object?> document(Object? recordTasks, {String scope = 'full'}) => {
+      'format': 'pure_live.backup',
+      'version': 4,
+      'createdAt': '2026-09-27T02:00:00Z',
+      'app': {'version': '4.0.0', 'platform': 'android'},
+      'scope': scope,
+      'sections': {'recordTasks': recordTasks, 'follows': <Object?>[]},
+      'secrets': null,
+    };
+
+    test('export writes the tasks in order without files or sessions; restore hands them back', () async {
+      final exported = await withTasks(source, _Tasks(tasks)).export(now: DateTime.utc(2026, 9, 27));
+      final items = (exported['sections']! as Map<String, Object?>)['recordTasks']! as List<Object?>;
+      expect(items.first, {
+        'platform': 'douyu',
+        'roomId': '9999',
+        'nick': '甲',
+        'title': '标题',
+        'avatar': 'https://img.test/a.png',
+        'quality': 'bluRay4M',
+        'autoReconnect': true,
+        'monitor': true,
+        'createdAt': DateTime.utc(2026, 9).millisecondsSinceEpoch,
+        'order': 0,
+      });
+      expect((items.last! as Map)['order'], 1);
+      final follows = await withTasks(source, _Tasks(tasks)).export(scope: BackupScope.follows);
+      expect(follows['sections'], isNot(contains('recordTasks')), reason: 'follows-only backups hold follows only');
+
+      final recorder = _Tasks();
+      final report = await withTasks(target, recorder).restore(jsonDecode(jsonEncode(exported)));
+      expect(recorder.restored, tasks);
+      expect(report.counts['recordTasks']!.read, 2);
+      expect(report.counts['recordTasks']!.written, 2);
+    });
+
+    test('items are checked: bad rooms and duplicates dropped, unknown quality falls back, order kept', () async {
+      final recorder = _Tasks();
+      final report = await withTasks(target, recorder).restore(
+        document([
+          {'platform': 'douyu', 'roomId': '2', 'order': 1, 'quality': 'best', 'monitor': 'yes'},
+          {'platform': 'douyu', 'roomId': '0'},
+          {'platform': 'huya', 'roomId': '1', 'order': 0, 'autoReconnect': false},
+          {'platform': 'douyu', 'roomId': '2', 'order': 2, 'nick': 'later'},
+          {'platform': 'douyu', 'roomId': 'busy', 'order': 3, 'monitor': true},
+          'not an object',
+        ]),
+      );
+      expect(recorder.restored!.map((task) => task.ref.key), ['huya:1', 'douyu:2', 'douyu:busy']);
+      final douyu = recorder.restored![1];
+      expect(douyu.quality, isNull);
+      expect(douyu.monitor, isFalse, reason: 'only true means monitor');
+      expect(douyu.anchorName, '', reason: 'the first occurrence wins');
+      expect(recorder.restored!.first.autoReconnect, isFalse);
+      expect(report.counts['recordTasks']!.read, 6);
+      expect(report.counts['recordTasks']!.written, 2, reason: 'the recorder kept a busy task');
+      expect(report.counts['recordTasks']!.dropped, 3);
+      expect(
+        report.issues.where((issue) => issue.section == 'recordTasks').map((issue) => issue.reason),
+        containsAll(['invalidRoom', 'duplicate', 'invalidItem', 'invalidValue']),
+      );
+    });
+
+    test('follows-only restores, a broken section and a missing recorder leave the tasks alone', () async {
+      final recorder = _Tasks();
+      final items = [
+        {'platform': 'douyu', 'roomId': '1'},
+      ];
+      await withTasks(target, recorder).restore(document(items), mode: RestoreMode.follows);
+      expect(recorder.restored, isNull);
+
+      await expectLater(withTasks(target, recorder).restore(document({'platform': 'douyu'})), throwsFormatException);
+      expect(recorder.restored, isNull, reason: 'a bad file writes nothing');
+
+      final report = await service(target, targetSecrets).restore(document(items));
+      expect(report.issues.map((issue) => '${issue.section}:${issue.reason}'), contains('recordTasks:unsupported'));
+    });
+
+    test('a failing recorder is reported; the database part stays restored', () async {
+      final recorder = _Tasks()..failure = StateError('disposed');
+      final full = document([
+        {'platform': 'douyu', 'roomId': '1'},
+      ]);
+      (full['sections']! as Map<String, Object?>)['follows'] = [
+        {'platform': 'douyu', 'roomId': '7'},
+      ];
+      final report = await withTasks(target, recorder).restore(full);
+      expect(await target.follows.count(), 1);
+      expect(report.issues.map((issue) => '${issue.section}:${issue.reason}'), contains('recordTasks:writeFailed'));
+    });
   });
 }

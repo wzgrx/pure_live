@@ -1,5 +1,6 @@
 import 'package:live_core/live_core.dart';
 import 'package:live_store/src/backup/import_report.dart';
+import 'package:live_store/src/backup/record_tasks.dart';
 import 'package:live_store/src/block_rules.dart';
 import 'package:live_store/src/follow_areas.dart';
 import 'package:live_store/src/rooms.dart';
@@ -193,6 +194,10 @@ final class ImportPlan {
   @internal
   PlannedIptv? iptv;
 
+  /// Recording tasks in order, for the app's recorder (store.md §7.1).
+  @internal
+  List<BackupRecordTask>? recordTasks;
+
   /// Keeps only follows and followed areas (follows-only restore).
   @internal
   void restrictToFollows() {
@@ -204,6 +209,7 @@ final class ImportPlan {
     roomPrefs = null;
     secrets = null;
     iptv = null;
+    recordTasks = null;
   }
 }
 

@@ -16,15 +16,27 @@ import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 
+/// The recorder's quality for a stored preference (spec/modules/record.md §20).
+RecordQuality recordQualityOf(QualityPreference preference) => switch (preference) {
+  QualityPreference.original => RecordQuality.original,
+  QualityPreference.bluRay8M => RecordQuality.bluRay8M,
+  QualityPreference.bluRay4M => RecordQuality.bluRay4M,
+  QualityPreference.superHigh => RecordQuality.superHd,
+  QualityPreference.smooth => RecordQuality.smooth,
+};
+
+/// The stored preference for a recorder quality.
+QualityPreference qualityPreferenceOf(RecordQuality quality) => switch (quality) {
+  RecordQuality.original => QualityPreference.original,
+  RecordQuality.bluRay8M => QualityPreference.bluRay8M,
+  RecordQuality.bluRay4M => QualityPreference.bluRay4M,
+  RecordQuality.superHd => QualityPreference.superHigh,
+  RecordQuality.smooth => QualityPreference.smooth,
+};
+
 /// Recorder settings from the registry (spec/modules/record.md §20).
 RecordSettings recordSettingsFrom(SettingsStore s) => RecordSettings(
-  defaultQuality: switch (s.get(Settings.recordDefaultQuality)) {
-    QualityPreference.original => RecordQuality.original,
-    QualityPreference.bluRay8M => RecordQuality.bluRay8M,
-    QualityPreference.bluRay4M => RecordQuality.bluRay4M,
-    QualityPreference.superHigh => RecordQuality.superHd,
-    QualityPreference.smooth => RecordQuality.smooth,
-  },
+  defaultQuality: recordQualityOf(s.get(Settings.recordDefaultQuality)),
   maxConcurrent: s.get(Settings.recordMaxConcurrent),
   autoReconnect: s.get(Settings.recordAutoReconnect),
   maxRetries: s.get(Settings.recordMaxRetries),
@@ -298,6 +310,65 @@ final class RecordKeepAlive {
       await _channel.stop();
     }
   }
+}
+
+/// Recording tasks in backups (F-BAK-01; store.md §7.1 `recordTasks`): the
+/// room, its display fields, quality and auto-reconnect, and whether the user
+/// wants it recorded when live ("monitor": recording, queued, waiting, or
+/// stopped only because polling or the app was off). Sessions and file paths
+/// stay on the device. Restoring replaces the idle tasks and leaves running
+/// ones alone (`RecordManager.importTasks`); monitored rooms wait for their
+/// room while `record.polling` is on.
+final class RecordTaskBackupAdapter implements RecordTaskBackup {
+  /// Reads the recorder through the given function only when a backup runs.
+  const new(this._manager);
+
+  final RecordManager Function() _manager;
+
+  @override
+  Future<List<BackupRecordTask>> exportTasks() async => [
+    for (final task in _manager().tasks)
+      BackupRecordTask(
+        ref: task.room,
+        createdAt: task.createdAt,
+        anchorName: task.snapshot.anchorName,
+        title: task.snapshot.title,
+        avatar: task.snapshot.avatar,
+        cover: task.snapshot.cover,
+        quality: switch (task.quality) {
+          final quality? => qualityPreferenceOf(quality),
+          null => null,
+        },
+        autoReconnect: task.autoReconnect,
+        monitor:
+            task.state.active ||
+            task.state == RecordState.waitingLive ||
+            (task.state == RecordState.stopped &&
+                (task.stopCause == StopCause.pollingOff || task.stopCause == StopCause.appRestart)),
+      ),
+  ];
+
+  @override
+  Future<int> restoreTasks(List<BackupRecordTask> tasks) => _manager().importTasks([
+    for (final task in tasks)
+      RecordTask(
+        room: task.ref,
+        createdAt: task.createdAt,
+        state: RecordState.stopped,
+        stopCause: task.monitor ? StopCause.pollingOff : StopCause.user,
+        snapshot: RecordRoomSnapshot(
+          anchorName: task.anchorName,
+          title: task.title,
+          avatar: task.avatar,
+          cover: task.cover,
+        ),
+        quality: switch (task.quality) {
+          final quality? => recordQualityOf(quality),
+          null => null,
+        },
+        autoReconnect: task.autoReconnect,
+      ),
+  ]);
 }
 
 /// Watches the recording state of one room, for the room page's button.

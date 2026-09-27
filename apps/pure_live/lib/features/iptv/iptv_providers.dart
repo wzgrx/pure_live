@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pure_live_app/core/secrets.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/iptv/iptv_repository.dart';
 import 'package:pure_live_app/features/iptv/iptv_sync.dart';
+import 'package:pure_live_app/features/iptv/xtream.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 
 /// The "网络电视" source over the app database (spec/modules/iptv.md §5).
@@ -37,6 +39,7 @@ final iptvSyncProvider = Provider<IptvSync>((ref) {
     fetcher: IptvFetcher(ref.watch(liveHttpProvider)),
     settings: store.settings,
     directory: ref.watch(iptvDirectoryProvider),
+    xtream: XtreamVault(ref.watch(secretStoreProvider)),
     onChanged: () {
       ref
         ..invalidate(categoriesProvider(IptvSite.platformId))

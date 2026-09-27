@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
@@ -8,6 +9,7 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/features/iptv/iptv_repository.dart';
+import 'package:pure_live_app/features/iptv/xtream.dart';
 
 /// Runs a parse off the UI isolate; tests run it inline.
 typedef IptvCompute = Future<R> Function<R>(R Function() task);
@@ -55,6 +57,8 @@ String iptvErrorText(Object error) => switch (error) {
   IptvEmptyError(guide: true) => '没有识别出节目单，确认是 XMLTV 或 JSON 格式',
   IptvEmptyError() => '没有识别出频道，确认是 M3U、TXT 或 JSON 播放列表',
   IptvBadUrlError() => '请输入 http 或 https 开头的网址',
+  XtreamRejectedError(:final message) => message,
+  XtreamMissingError() => '找不到这个 Xtream 账号的登录信息，删除后重新登录',
   NotFound() => '地址不存在（404），检查网址是否还有效',
   NetworkFailure() || TransportFailure() => '网络连接失败，检查网络或代理后重试',
   FileSystemException() => '读不到文件，重新导入一次',
@@ -72,6 +76,7 @@ final class IptvSync {
     required this.settings,
     required this.directory,
     this.onChanged,
+    this.xtream,
     DateTime Function()? now,
     IptvCompute? compute,
   }) : _now = now ?? DateTime.now,
@@ -86,6 +91,19 @@ final class IptvSync {
 
   /// Called after stored channels or programmes changed.
   final void Function()? onChanged;
+
+  /// Xtream accounts (F-IPTV-07); null where the secret store is missing.
+  final XtreamVault? xtream;
+
+  /// The address to download [source] from: itself, or an Xtream account's
+  /// playlist or guide.
+  Uri _remote(String source) {
+    final id = xtreamIdOf(source);
+    if (id == null) return Uri.parse(source);
+    final account = xtream?.read(id);
+    if (account == null) throw const XtreamMissingError();
+    return source.endsWith('#guide') ? account.guideUri : account.playlistUri;
+  }
 
   final DateTime Function() _now;
   final IptvCompute _compute;
@@ -135,7 +153,7 @@ final class IptvSync {
   Future<IptvSyncResult> syncPlaylist(IptvPlaylistRecord playlist) => _once('playlist:${playlist.id}', () async {
     try {
       final bytes = playlist.isRemote
-          ? await fetcher.download(Uri.parse(playlist.source), userAgent: playlist.userAgent ?? _globalAgent)
+          ? await fetcher.download(_remote(playlist.source), userAgent: playlist.userAgent ?? _globalAgent)
           : await File(playlist.source).readAsBytes();
       return await _storePlaylist(playlist.id, await _parsePlaylist(bytes));
     } on Object catch (error) {
@@ -144,11 +162,50 @@ final class IptvSync {
     }
   });
 
-  /// Deletes [playlist] and the file kept for it.
+  /// Deletes [playlist] and the file kept for it; an Xtream playlist also
+  /// takes its guide and its stored account.
   Future<void> deletePlaylist(IptvPlaylistRecord playlist) async {
     await store.deletePlaylist(playlist.id);
     if (!playlist.isRemote) await _discard(playlist.source);
+    if (xtreamIdOf(playlist.source) case final id?) {
+      for (final guide in await store.guideSources()) {
+        if (guide.source == '$xtreamScheme$id#guide') await store.deleteGuideSource(guide.id);
+      }
+      await xtream?.delete(id);
+    }
     onChanged?.call();
+  }
+
+  /// F-IPTV-07: checks [account] with the provider, keeps it in the secret
+  /// store and adds its line-up and guide. Throws [XtreamRejectedError] when
+  /// the provider refuses the account.
+  Future<IptvSyncResult> importXtream(XtreamAccount account, {String? name}) async {
+    final vault = xtream;
+    if (vault == null) throw const XtreamMissingError();
+    final Object? answer;
+    try {
+      answer = jsonDecode(utf8.decode(await fetcher.download(account.authUri, userAgent: _globalAgent)));
+    } on FormatException {
+      throw const XtreamRejectedError('服务器的回应不是 Xtream 接口，检查服务器地址');
+    }
+    final status = parseXtreamStatus(answer);
+    if (!status.usable) throw XtreamRejectedError(status.problem);
+    final parsed = await _parsePlaylist(await fetcher.download(account.playlistUri, userAgent: _globalAgent));
+    final key =
+        '${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}${_random.nextInt(1 << 20).toRadixString(36)}';
+    await vault.save(key, account);
+    // The host as is: _name would take `.com` for a file extension.
+    final title = name == null || name.trim().isEmpty ? account.defaultName : name.trim();
+    final id = await store.addPlaylist(name: title, source: '$xtreamScheme$key');
+    // The provider's own guide, never the credentialed url-tvg of the file.
+    final result = await _storePlaylist(id, parsed, adoptGuide: false);
+    final guideId = await store.addGuideSource(name: '$title 节目单', source: '$xtreamScheme$key#guide');
+    try {
+      await syncGuide((await store.guideSources()).firstWhere((source) => source.id == guideId));
+    } on Object {
+      // The guide keeps its error; the guide page offers a retry.
+    }
+    return result;
   }
 
   Future<ParsedPlaylist> _parsePlaylist(List<int> bytes) async {
@@ -157,15 +214,17 @@ final class IptvSync {
     return parsed;
   }
 
-  Future<IptvSyncResult> _storePlaylist(int id, ParsedPlaylist parsed) async {
+  Future<IptvSyncResult> _storePlaylist(int id, ParsedPlaylist parsed, {bool adoptGuide = true}) async {
+    final xtreamPlaylist = !adoptGuide || isXtreamSource((await store.playlist(id))?.source ?? '');
     await store.replaceEntries(
       id,
       [for (final entry in parsed.entries) StoreIptvRepository.recordOf(entry)],
       syncedAt: _now(),
-      guideUrl: parsed.guideUrls.firstOrNull?.toString(),
+      // An Xtream file names its guide with the password in the URL.
+      guideUrl: xtreamPlaylist ? null : parsed.guideUrls.firstOrNull?.toString(),
     );
     onChanged?.call();
-    await _adoptGuide(parsed.guideUrls);
+    if (!xtreamPlaylist) await _adoptGuide(parsed.guideUrls);
     return IptvSyncResult(
       id: id,
       items: parsed.entries.length,
@@ -214,7 +273,7 @@ final class IptvSync {
   Future<IptvSyncResult> syncGuide(IptvGuideSourceRecord source) => _once('guide:${source.id}', () async {
     try {
       final bytes = source.isRemote
-          ? await fetcher.download(Uri.parse(source.source), userAgent: _globalAgent)
+          ? await fetcher.download(_remote(source.source), userAgent: _globalAgent)
           : await File(source.source).readAsBytes();
       return await _storeGuide(source.id, await _parseGuide(bytes));
     } on Object catch (error) {
@@ -366,4 +425,23 @@ final class IptvSync {
       // Already gone.
     }
   }
+}
+
+/// The Xtream account of a source is not in the secret store (restored on
+/// another device without secrets, or the store is unavailable).
+final class XtreamMissingError implements Exception {
+  const new();
+
+  @override
+  String toString() => '找不到这个 Xtream 账号的登录信息，删除后重新登录';
+}
+
+/// The provider refused the account.
+final class XtreamRejectedError implements Exception {
+  const new(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }

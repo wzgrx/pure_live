@@ -7,7 +7,8 @@ import 'package:meta/meta.dart';
 /// Whether [source] is a downloadable URL rather than the path of a kept file.
 bool isRemoteSource(String source) {
   final lower = source.trim().toLowerCase();
-  return lower.startsWith('http://') || lower.startsWith('https://');
+  // `xtream:<id>` is an account in the secret store (F-IPTV-07).
+  return lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('xtream:');
 }
 
 /// A stored IPTV playlist (spec/modules/iptv.md §7).

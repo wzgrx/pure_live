@@ -179,7 +179,7 @@ gzip（`1f 8b`）先解压；UTF-8 BOM、UTF-16 LE/BE BOM 决定编码并去掉�
 
 1. GBK 等非 UTF 编码的 TXT 列表：纯 Dart 没有现成解码，引入依赖前先确认用户量。
 2. DIYP 节目单接口（`…?ch={name}&date={date}` 按频道按天查询）：只支持单日文件，按频道实时查询的接口未做。
-3. Xtream Codes 导入（F-IPTV-07）、定时录制（F-IPTV-10 并入录制中心）未做。节目提醒（F-IPTV-09 并入 F-NEW-01）已做：节目单里未开始的节目可“提醒我”，开始前 1 分钟通知，只在进程存活期间有效（ADR 草稿 ADR 0028）。
+3. Xtream Codes 导入（F-IPTV-07）已做（2026-09-28）：填服务器、用户名、密码，先用 `player_api.php` 校验账号（过期、封禁、密码错各有提示），通过后导入 `get.php?type=m3u_plus` 的频道和 `xmltv.php` 的节目单；账号只存在加密的密钥库（`iptv/xtream/<id>`），数据库和备份里的来源是 `xtream:<id>`（节目单 `xtream:<id>#guide`），不保存文件自带的带密码 url-tvg，也不提供“复制来源地址”；删除列表时一并删除节目单源和账号。换设备恢复备份而没有密钥库时提示重新登录。定时录制（F-IPTV-10 并入录制中心）未做。节目提醒（F-IPTV-09 并入 F-NEW-01）已做：节目单里未开始的节目可“提醒我”，开始前 1 分钟通知，只在进程存活期间有效（ADR 草稿 ADR 0028）。
 4. live_core 的流格式只有 flv / hls：MPEG-TS、RTSP、UDP 等线路暂标为 flv（没有租期，直连播放，不影响播放）；录制接入 IPTV 前需要在 live_core 增加格式。
 5. 旧版 IPTV 库（`IPTV_CACHE/pure_live_tv/pure_live_tv.db`）的迁移：v4 数据在主库，旧库只读导入（播放列表来源、节目单源；不升级旧库结构，回退安全），随 store.md §6 的迁移实现。
 6. 全屏时控制层还没有“节目单”按钮，全屏下要先退出全屏再打开节目单。

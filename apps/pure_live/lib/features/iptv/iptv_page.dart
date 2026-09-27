@@ -12,6 +12,7 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_sync.dart';
 import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
+import 'package:pure_live_app/features/iptv/xtream.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 
 /// Location of the IPTV page; a full-screen route above the tabs.
@@ -76,6 +77,18 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       final result = await _sync.importUrl(source.url, name: source.name);
       final name = (await ref.read(storeProvider).iptv.playlist(result.id))?.name ?? '';
       return '已导入${_summary(name, result)}';
+    });
+  }
+
+  /// F-IPTV-07: an Xtream Codes account; the password goes to the secret
+  /// store only.
+  Future<void> _importXtream() async {
+    final account = await showDialog<XtreamAccount>(context: context, builder: (context) => const _XtreamDialog());
+    if (account == null || !mounted) return;
+    await _run('import', () async {
+      final result = await _sync.importXtream(account);
+      final name = (await ref.read(storeProvider).iptv.playlist(result.id))?.name ?? account.defaultName;
+      return '已登录并导入${_summary(name, result)}';
     });
   }
 
@@ -213,6 +226,11 @@ class _IptvPageState extends ConsumerState<IptvPage> {
                       label: const Text('从文件导入'),
                       onPressed: _busy.contains('import') ? null : _importFile,
                     ),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.vpn_key_outlined, size: 18),
+                      label: const Text('Xtream 账号'),
+                      onPressed: _busy.contains('import') ? null : _importXtream,
+                    ),
                   ],
                 ),
               ),
@@ -306,7 +324,9 @@ class _PlaylistTile extends StatelessWidget {
                     checked: playlist.autoSync,
                     child: const Text('自动同步'),
                   ),
-                  const PopupMenuItem(value: _PlaylistAction.copySource, child: Text('复制来源地址')),
+                  // An Xtream source is a reference; its address holds the password.
+                  if (!isXtreamSource(playlist.source))
+                    const PopupMenuItem(value: _PlaylistAction.copySource, child: Text('复制来源地址')),
                 ],
                 const PopupMenuItem(value: _PlaylistAction.delete, child: Text('删除')),
               ],
@@ -330,4 +350,86 @@ IptvImportRequest? iptvShareRequest(String text) {
   final path = uri.path.toLowerCase();
   const extensions = ['.m3u', '.m3u8', '.txt', '.json'];
   return extensions.any(path.endsWith) ? IptvImportRequest(url: trimmed) : null;
+}
+
+class _XtreamDialog extends StatefulWidget {
+  const new();
+
+  @override
+  State<_XtreamDialog> createState() => _XtreamDialogState();
+}
+
+class _XtreamDialogState extends State<_XtreamDialog> {
+  final _server = TextEditingController();
+  final _user = TextEditingController();
+  final _password = TextEditingController();
+  bool _hidden = true;
+  String? _error;
+
+  @override
+  void dispose() {
+    _server.dispose();
+    _user.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final account = XtreamAccount.tryParse(server: _server.text, username: _user.text, password: _password.text);
+    if (account == null) {
+      setState(() => _error = '填写服务器地址（例如 http://example.com:8080）、用户名和密码');
+      return;
+    }
+    Navigator.pop(context, account);
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('登录 Xtream 账号'),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            key: const ValueKey('xtream-server'),
+            controller: _server,
+            keyboardType: TextInputType.url,
+            decoration: const InputDecoration(labelText: '服务器地址', hintText: 'http://example.com:8080'),
+          ),
+          TextField(
+            key: const ValueKey('xtream-user'),
+            controller: _user,
+            decoration: const InputDecoration(labelText: '用户名'),
+          ),
+          TextField(
+            key: const ValueKey('xtream-password'),
+            controller: _password,
+            obscureText: _hidden,
+            decoration: InputDecoration(
+              labelText: '密码',
+              suffixIcon: IconButton(
+                tooltip: _hidden ? '显示密码' : '隐藏密码',
+                icon: Icon(_hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                onPressed: () => setState(() => _hidden = !_hidden),
+              ),
+            ),
+            onSubmitted: (_) => _submit(),
+          ),
+          const SizedBox(height: Space.s2),
+          Text(
+            _error ?? '用户名和密码只加密保存在本机，备份和同步里不含明文。',
+            style: TextStyle(
+              color: _error == null
+                  ? Theme.of(context).colorScheme.onSurfaceVariant
+                  : Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+      FilledButton(onPressed: _submit, child: const Text('登录并导入')),
+    ],
+  );
 }

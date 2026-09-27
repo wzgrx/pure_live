@@ -16,7 +16,7 @@ void main() {
     SettingsGroup.playback: ['默认画质（Wi-Fi）', '网络不稳时自动降低画质', '硬件解码', '竖屏全屏上下滑切换直播间', '竖屏直播适配', '全屏方向'],
     SettingsGroup.danmaku: ['显示弹幕', '字号'],
     SettingsGroup.recording: ['录制中心', '录制保存位置', '开播监控'],
-    SettingsGroup.accounts: ['平台账号'],
+    SettingsGroup.accounts: ['首页平台', '平台账号'],
     SettingsGroup.network: ['使用代理', '代理地址', '代理端口'],
     SettingsGroup.data: ['观看历史最多保留'],
   };

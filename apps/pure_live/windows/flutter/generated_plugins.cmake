@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   battery_plus
   connectivity_plus
+  dynamic_color
   media_kit_video
   screen_brightness_windows
   screen_retriever_windows

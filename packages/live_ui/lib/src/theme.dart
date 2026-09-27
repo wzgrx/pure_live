@@ -83,8 +83,11 @@ final class LiveTheme extends ThemeExtension<LiveTheme> {
 
 /// Builds [ThemeData] from the design tokens.
 abstract final class PureTheme {
-  /// The theme for [appearance] on [platform].
-  static ThemeData of(Appearance appearance, {TargetPlatform? platform}) => _build(appearance, platform, tv: false);
+  /// The theme for [appearance] on [platform]. [seed] (wallpaper or system
+  /// accent colour, principles §2.2 动态取色) replaces the primary, secondary,
+  /// tertiary and neutral roles; semantic colours and pure black stay.
+  static ThemeData of(Appearance appearance, {TargetPlatform? platform, Color? seed}) =>
+      _build(appearance, platform, tv: false, seed: seed);
 
   /// The TV theme (principles §5.3): dark or pure black only (a light
   /// [appearance] gets dark), type one step larger with body text at least
@@ -93,14 +96,56 @@ abstract final class PureTheme {
   static ThemeData tv(Appearance appearance, {TargetPlatform? platform}) =>
       _build(appearance == Appearance.light ? Appearance.dark : appearance, platform, tv: true);
 
-  static ThemeData _build(Appearance appearance, TargetPlatform? platform, {required bool tv}) {
+  /// Dynamic colour: the seed's fidelity scheme for the colour and neutral
+  /// roles; error roles from the tokens; pure black keeps its surfaces.
+  static ColorScheme _seeded(ColorScheme base, Color seed, {required bool black}) {
+    final seeded = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: base.brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+    );
+    final colors = base.copyWith(
+      primary: seeded.primary,
+      onPrimary: seeded.onPrimary,
+      primaryContainer: seeded.primaryContainer,
+      onPrimaryContainer: seeded.onPrimaryContainer,
+      secondary: seeded.secondary,
+      onSecondary: seeded.onSecondary,
+      secondaryContainer: seeded.secondaryContainer,
+      onSecondaryContainer: seeded.onSecondaryContainer,
+      tertiary: seeded.tertiary,
+      onTertiary: seeded.onTertiary,
+      tertiaryContainer: seeded.tertiaryContainer,
+      onTertiaryContainer: seeded.onTertiaryContainer,
+      inversePrimary: seeded.inversePrimary,
+    );
+    if (black) return colors;
+    return colors.copyWith(
+      surface: seeded.surface,
+      onSurface: seeded.onSurface,
+      surfaceDim: seeded.surfaceDim,
+      surfaceBright: seeded.surfaceBright,
+      surfaceContainerLowest: seeded.surfaceContainerLowest,
+      surfaceContainerLow: seeded.surfaceContainerLow,
+      surfaceContainer: seeded.surfaceContainer,
+      surfaceContainerHigh: seeded.surfaceContainerHigh,
+      surfaceContainerHighest: seeded.surfaceContainerHighest,
+      onSurfaceVariant: seeded.onSurfaceVariant,
+      outline: seeded.outline,
+      outlineVariant: seeded.outlineVariant,
+      inverseSurface: seeded.inverseSurface,
+      onInverseSurface: seeded.onInverseSurface,
+    );
+  }
+
+  static ThemeData _build(Appearance appearance, TargetPlatform? platform, {required bool tv, Color? seed}) {
     final tokens = switch (appearance) {
       Appearance.light => ColorTokens.light,
       Appearance.dark => ColorTokens.dark,
       Appearance.black => ColorTokens.black,
     };
     final brightness = appearance == Appearance.light ? Brightness.light : Brightness.dark;
-    final scheme = ColorScheme(
+    final base = ColorScheme(
       brightness: brightness,
       primary: tokens.primary,
       onPrimary: tokens.onPrimary,
@@ -136,6 +181,7 @@ abstract final class PureTheme {
       shadow: const Color(0xFF000000),
       scrim: const Color(0xFF000000),
     );
+    final scheme = seed == null ? base : _seeded(base, seed, black: appearance == Appearance.black);
     final target = platform ?? defaultTargetPlatform;
     final text = _textTheme(target, tv: tv).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
     final numeric = text.labelMedium!.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);

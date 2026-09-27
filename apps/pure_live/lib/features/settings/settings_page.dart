@@ -186,6 +186,7 @@ class SettingsGroupBody extends StatelessWidget {
           },
         ),
         SwitchSettingTile(setting: Settings.pureBlack, title: S.themeBlack, subtitle: '深色时用纯黑背景，适合 OLED 屏幕'),
+        DynamicColorTile(),
         _TvThemeNote(),
         SwitchSettingTile(setting: Settings.denseFollows, title: '关注页紧凑卡片', subtitle: '主播名和标题放在一行'),
         SliderSettingTile(setting: Settings.textScale, title: '文字大小', min: 0.85, max: 1.3, divisions: 9),
@@ -320,6 +321,12 @@ class SettingsGroupBody extends StatelessWidget {
       ],
       SettingsGroup.accounts => [
         ListTile(
+          title: const Text('首页平台'),
+          subtitle: const Text('显示哪些平台、顺序和发现页默认打开的平台'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.go('/me/platforms'),
+        ),
+        ListTile(
           title: const Text('平台账号'),
           subtitle: const Text('登录或退出各平台账号'),
           trailing: const Icon(Icons.chevron_right),
@@ -396,5 +403,26 @@ class PlaybackOutputTiles extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+/// 动态取色 (F-SET-01): Android 12+ follows the wallpaper, Windows the system
+/// accent colour; hidden elsewhere.
+class DynamicColorTile extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (Platform.isWindows) {
+      return const SwitchSettingTile(setting: Settings.dynamicColor, title: '跟随系统强调色', subtitle: '主题色改用 Windows 的强调色');
+    }
+    if (Platform.isAndroid) {
+      return const SwitchSettingTile(
+        setting: Settings.dynamicColor,
+        title: '跟随壁纸取色',
+        subtitle: 'Android 12 及以上，主题色取自壁纸',
+      );
+    }
+    return const SizedBox.shrink();
   }
 }

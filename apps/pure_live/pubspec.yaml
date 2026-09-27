@@ -15,6 +15,7 @@ dependencies:
   cached_network_image: ^4.0.2
   connectivity_plus: ^7.3.1
   crypto: ^3.0.7
+  dynamic_color: ^2.1.0
   ffi: ^2.2.0
   file_picker: ^13.1.0
   flutter:

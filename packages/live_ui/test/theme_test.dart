@@ -23,6 +23,17 @@ void main() {
       'Microsoft YaHei UI',
     );
   });
+
+  test('principles §2.2: a dynamic seed recolours the roles, keeps error colours and pure black', () {
+    const seed = Color(0xFF2EA043);
+    final brand = PureTheme.of(Appearance.light);
+    final seeded = PureTheme.of(Appearance.light, seed: seed);
+    expect(seeded.colorScheme.primary, isNot(brand.colorScheme.primary));
+    expect(seeded.colorScheme.error, brand.colorScheme.error);
+    final black = PureTheme.of(Appearance.black, seed: seed);
+    expect(black.colorScheme.surface, PureTheme.of(Appearance.black).colorScheme.surface);
+    expect(black.colorScheme.primary, isNot(PureTheme.of(Appearance.black).colorScheme.primary));
+  });
 }
 
 extension LiveThemeTester on LiveTheme {

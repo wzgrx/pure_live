@@ -6,6 +6,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/discover/followed_areas.dart';
 import 'package:pure_live_app/features/iptv/iptv_discover.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
@@ -20,8 +21,11 @@ class DiscoverPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final platforms = ref.watch(enabledPlatformsProvider);
+    // F-DSC-03: opens on the preferred platform.
+    final preferred = platforms.indexOf(ref.watch(catalogPreferredSetting));
     return DefaultTabController(
       length: platforms.length,
+      initialIndex: preferred < 0 ? 0 : preferred,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(S.discover),

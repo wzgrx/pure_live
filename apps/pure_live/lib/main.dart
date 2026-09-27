@@ -16,6 +16,7 @@ import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/diagnostics/app_log.dart';
 import 'package:pure_live_app/features/diagnostics/crash_handler.dart';
 import 'package:pure_live_app/features/onboarding/startup.dart';
+import 'package:pure_live_app/features/settings/platforms_page.dart';
 import 'package:pure_live_app/features/system/launch_args.dart';
 import 'package:pure_live_app/features/system/system_integration.dart';
 import 'package:pure_live_app/features/system/windows_native.dart';
@@ -37,6 +38,8 @@ Future<void> main(List<String> args) async {
   // An extra window shares the data root and the encrypted secret store.
   final store = await LiveStore.open(root.path, log: StoreLog((message) => log.warning('store', message)));
   final secrets = await openSecretStore(root.path);
+  // F-DSC-03: platforms this version added join the user's list.
+  await appendNewPlatforms(store);
   final recordPaths = await RecordPaths.resolve(root.path);
   final prefs = await AppPrefs.load(store.meta);
   // Known before the first frame, so a TV never flashes the phone layout.

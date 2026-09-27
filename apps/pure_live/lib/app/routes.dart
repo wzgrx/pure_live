@@ -9,6 +9,7 @@ import 'package:pure_live_app/features/backup/backup_page.dart';
 import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
+import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/features/me/appearance_page.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/me/me_page.dart';
@@ -38,7 +39,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: '/follows', builder: (context, state) => const FollowsPage())],
+            routes: [
+              GoRoute(
+                path: '/follows',
+                builder: (context, state) => const FollowsPage(),
+                routes: [GoRoute(path: 'groups', builder: (context, state) => const GroupsPage())],
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [

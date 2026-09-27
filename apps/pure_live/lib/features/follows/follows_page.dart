@@ -11,10 +11,11 @@ import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
+import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
-/// Which follows to show.
-enum _Filter { live, all }
+/// Which follows to show: live, all, or one group.
+enum _Filter { live, all, group }
 
 /// Followed streamers: live ones as cover cards sorted by audience, offline
 /// ones as compact rows without covers (principles §4.1, §4.3).
@@ -27,6 +28,7 @@ class FollowsPage extends ConsumerStatefulWidget {
 
 class _FollowsPageState extends ConsumerState<FollowsPage> {
   _Filter _filter = _Filter.all;
+  String? _groupId;
 
   @override
   Widget build(BuildContext context) {
@@ -75,18 +77,25 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
               onAction: () => context.go('/discover'),
             );
           }
-          final live = rooms.where((f) => f.room.lastState == LiveState.live).toList()
+          final shown = _filter == _Filter.group && _groupId != null
+              ? rooms.where((f) => f.tagIds.contains(_groupId)).toList()
+              : rooms;
+          final live = shown.where((f) => f.room.lastState == LiveState.live).toList()
             ..sort((a, b) => _audience(b.room).compareTo(_audience(a.room)));
-          final offline = rooms.where((f) => f.room.lastState != LiveState.live).toList()
+          final offline = shown.where((f) => f.room.lastState != LiveState.live).toList()
             ..sort((a, b) => (b.room.lastLiveAt ?? DateTime(0)).compareTo(a.room.lastLiveAt ?? DateTime(0)));
           return RefreshIndicator(
             onRefresh: () => ref.read(followRefreshProvider.notifier).refresh(),
             child: _FollowList(
               live: live,
-              offline: _filter == _Filter.all ? offline : const [],
+              offline: _filter == _Filter.live ? const [] : offline,
               filter: _filter,
+              groupId: _groupId,
               failedPlatforms: failed,
-              onFilter: (filter) => setState(() => _filter = filter),
+              onFilter: (filter, {groupId}) => setState(() {
+                _filter = filter;
+                _groupId = groupId;
+              }),
             ),
           );
         },
@@ -103,6 +112,7 @@ class _FollowList extends ConsumerWidget {
     required this.live,
     required this.offline,
     required this.filter,
+    required this.groupId,
     required this.failedPlatforms,
     required this.onFilter,
   });
@@ -110,8 +120,9 @@ class _FollowList extends ConsumerWidget {
   final List<FollowedRoom> live;
   final List<FollowedRoom> offline;
   final _Filter filter;
+  final String? groupId;
   final Set<String> failedPlatforms;
-  final ValueChanged<_Filter> onFilter;
+  final void Function(_Filter filter, {String? groupId}) onFilter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -157,6 +168,17 @@ class _FollowList extends ConsumerWidget {
                       label: const Text('全部'),
                       selected: filter == _Filter.all,
                       onSelected: (_) => onFilter(_Filter.all),
+                    ),
+                    for (final tag in ref.watch(tagsProvider).value ?? const <Tag>[])
+                      ChoiceChip(
+                        label: Text(tag.name),
+                        selected: filter == _Filter.group && groupId == tag.id,
+                        onSelected: (_) => onFilter(_Filter.group, groupId: tag.id),
+                      ),
+                    ActionChip(
+                      avatar: const Icon(Icons.folder_outlined, size: 18),
+                      label: const Text('管理分组'),
+                      onPressed: () => context.push('/follows/groups'),
                     ),
                   ],
                 ),
@@ -235,6 +257,21 @@ class _FollowList extends ConsumerWidget {
           children: [
             ListTile(title: Text(follow.room.anchorName), subtitle: Text(platformNames[follow.ref.platform] ?? '')),
             ListTile(
+              leading: const Icon(Icons.folder_outlined),
+              title: const Text('设置分组'),
+              onTap: () => Navigator.pop(context, 'groups'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.grid_view),
+              title: const Text('加入多画面'),
+              onTap: () => Navigator.pop(context, 'multiview'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.tag),
+              title: const Text('复制房间号'),
+              onTap: () => Navigator.pop(context, 'copy'),
+            ),
+            ListTile(
               leading: const Icon(Icons.heart_broken_outlined),
               title: const Text('取消关注'),
               onTap: () => Navigator.pop(context, 'unfollow'),
@@ -243,7 +280,22 @@ class _FollowList extends ConsumerWidget {
         ),
       ),
     );
-    if (action != 'unfollow' || !context.mounted) return;
+    if (!context.mounted) return;
+    switch (action) {
+      case 'groups':
+        await editRoomGroups(context, ref, follow.ref, follow.room.anchorName);
+        return;
+      case 'multiview':
+        unawaited(context.push('/multiview', extra: [follow.ref]));
+        return;
+      case 'copy':
+        await copyWithToast(context, follow.ref.roomId, '房间号已复制');
+        return;
+      case 'unfollow':
+        break;
+      default:
+        return;
+    }
     final store = ref.read(storeProvider);
     final removed = await store.follows.unfollow(follow.ref);
     if (removed == null || !context.mounted) return;

@@ -32,7 +32,15 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final sites = {
-      for (final id in platformOrder) id: PlatformSite(FakeSite(id, pages: [Page([FakeSite(id).card('$id-1')])])),
+      for (final id in platformOrder)
+        id: PlatformSite(
+          FakeSite(
+            id,
+            pages: [
+              Page([FakeSite(id).card('$id-1')]),
+            ],
+          ),
+        ),
     };
     final store = (await tester.runAsync(LiveStore.inMemory))!;
     addTearDown(() => tester.runAsync(store.close));

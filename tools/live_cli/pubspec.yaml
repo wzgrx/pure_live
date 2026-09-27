@@ -10,9 +10,11 @@ resolution: workspace
 
 dependencies:
   args: ^2.7.0
+  crypto: ^3.0.7
   live_core: any
 
 dev_dependencies:
+  test: ^1.32.0
   very_good_analysis: ^11.0.0
 
 executables:

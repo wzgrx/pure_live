@@ -14,6 +14,7 @@
 | [0006](0006-license-compliance.md) | 许可证合规：保留 AGPL-3.0，移除不兼容组件 | 已接受 |
 | [0007](0007-repo-layout-workspace.md) | 仓库布局：旧应用留在根目录作为 workspace 根 | 已接受 |
 | [0008](0008-dependency-overrides.md) | 依赖覆盖的去留：保留越过 SDK 锁定的最新版覆盖，升级 Flutter 时复查 | 已接受 |
+| [0009](0009-fixture-format.md) | 平台样本的格式、录制与期望值 | 已接受 |
 
 ## 模板
 

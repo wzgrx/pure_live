@@ -13,6 +13,7 @@ workspace:
   - packages/live_net
   - packages/live_store
   - packages/live_ui
+  - packages/live_media
   - tools/live_cli
   - tools/check_latest
 

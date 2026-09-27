@@ -27,7 +27,7 @@
 
 | 事项 | 决定 |
 |---|---|
-| 仓库方式 | 原仓库 `master` 原地替换；旧应用留在根目录作为 workspace 根，新应用在 `apps/pure_live`（ADR 0007） |
+| 仓库方式 | 原仓库 `master` 原地替换；旧应用收进 `legacy/`，根目录只放 v4，新应用在 `apps/pure_live`（ADR 0013） |
 | 首批平台 | 5 个主力：B 站、斗鱼、虎牙、抖音、快手；其余逐个评估后迁移或下线 |
 | 播放内核 | 全平台只用 mpv；去掉 IJK、Exo 和 fvp（2026-09-27 由 ADR 0006 修订：fvp 的 libmdk 是专有库，与 AGPL 冲突） |
 | 录制 | 去掉 FFmpegKit，改走本地中继直写，转封装共用一份 FFmpeg |

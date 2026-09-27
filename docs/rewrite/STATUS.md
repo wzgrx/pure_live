@@ -14,7 +14,7 @@
 | 5 播放、弹幕、录制层 | 未开始 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | 未开始 | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
 | 7 其余平台、TV、桌面 | 未开始 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
-| 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除根目录的旧应用代码 |
+| 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除 `legacy/` |
 
 ## 第 1 阶段：规格
 
@@ -42,14 +42,14 @@
 
 已完成：
 
-- pub workspace：旧应用留在根目录作为 workspace 根（ADR 0007），成员 `packages/live_core`、`tools/live_cli`、`tools/check_latest`，共用一个 `pubspec.lock`。加入 workspace 后旧应用 `flutter analyze` 无问题，全量测试 4954 个通过、90 个跳过。
+- pub workspace：最初旧应用留在根目录作为 workspace 根（ADR 0007）；现在旧应用收进 `legacy/`，根目录只放 v4 和仓库级文件，根 `pubspec.yaml` 只声明 workspace（ADR 0013）。成员 `legacy`、`packages/live_core`、`packages/live_net`、`tools/live_cli`、`tools/check_latest`，共用一个 `pubspec.lock`。已安装的 3.x 检查更新读的 `assets/version.json`、`assets/releases.json` 留在根目录，旧应用测试检查它和 `legacy/assets/` 里的副本一致。加入 workspace 后旧应用 `flutter analyze` 无问题，全量测试 4954 个通过、90 个跳过。
 - `toolchain.env`：工具链版本的唯一来源，CI 从这里读取 Flutter 版本。
 - `live_core`：第一个类型 `RoomRef`（房间身份的规范化和校验）。
 - `live_cli`：命令骨架（probe、record、danmaku、lease），第 4 阶段实现。
 - `check_latest`：对比工具链、media_kit 上游和全部直接依赖的官方最新稳定版。
-- `tool/check_deps.py`：依赖方向检查，纯 Dart 包禁止依赖 Flutter。
-- `tool/gate.sh`：格式、依赖方向、静态检查、测试，带锁，同一时间只跑一个。
-- `.github/workflows/ci.yml`：push 到 master 和 PR 时运行 `tool/gate.sh --all`。
+- `tools/gate/check_deps.py`：依赖方向检查，纯 Dart 包禁止依赖 Flutter，旧应用只能依赖允许的 v4 包。
+- `tools/gate/gate.sh`：格式、依赖方向、静态检查、测试，带锁，同一时间只跑一个。
+- `.github/workflows/ci.yml`：push 到 master 和 PR 时运行 `tools/gate/gate.sh --all`；其余旧应用工作流默认在 `legacy/` 下运行。
 - `.github/workflows/weekly.yml`：每周运行 `check_latest`。
 - `.claude/settings.json` hooks：编辑后格式化 v4 的 Dart 文件；会话结束时运行门禁。
 - `dependency_overrides` 复查：9 个越过 SDK 锁定的覆盖删掉会让 8 个包降到非最新版，保留；路径覆盖按替代进度移除（ADR 0008）。
@@ -124,3 +124,4 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 - 2026-09-27：第一批页面稿（https://claude.ai/artifact/PAavLD9hN6VdLFgNYXkEr4）：关注和直播间（手机、桌面大）、多画面 2×2、TV 首页；设计系统按原则更正了导航轨宽度、TV 焦点和聊天栏宽度。
 - 2026-09-27：5 个平台 128 个 HTTP 样本录完；`live_cli fixture` 支持响应头、JSON 路径和已知值替换。第 4 阶段开工：`live_core` 领域模型与类型化错误（ADR 0010），斗鱼解析器用全部斗鱼样本验证。
 - 2026-09-27：第 4 阶段主体完成：5 个平台解析器、`live_net`、4 个适配器和真实网络探针；旧应用的斗鱼列表、搜索、链接接到 v4（ADR 0012）。
+- 2026-09-27：旧应用整体收进 `legacy/`（ADR 0013），根目录只放 v4 和仓库级文件，README 换成 v4 版；门禁移到 `tools/gate/`，旧应用工作流默认在 `legacy/` 下运行。

@@ -55,8 +55,10 @@ const platformNames = {
   'iptv': '网络电视',
 };
 
-/// Whether [platform] has accounts to sign in to (IPTV has none).
-bool platformHasAccount(String platform) => platform != 'iptv';
+/// Whether [platform] has accounts to sign in to (F-ACC-01). IPTV has none;
+/// CC and AcFun are anonymous in v4 (spec/sites/cc.md §8, acfun.md §8) and
+/// their adapters never read a cookie.
+bool platformHasAccount(String platform) => !const {'iptv', 'cc', 'acfun'}.contains(platform);
 
 /// The user's platform cookies. In memory until live_store's encrypted vault
 /// is wired in.

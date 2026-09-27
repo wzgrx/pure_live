@@ -6,7 +6,7 @@ import 'package:live_net/live_net.dart';
 ({String title, String message, bool retryable}) describeError(Object error) => switch (error) {
   NotFound(site: 'iptv') => (title: '频道不存在', message: '播放列表里已经没有这个频道，可能改名或被删除了。', retryable: false),
   NotFound() => (title: '直播间不存在', message: '房间号可能已经失效，或者主播换了房间。', retryable: false),
-  NeedsLogin() => (title: '需要登录', message: '这个内容要登录平台账号后才能看，平台账号登录会在后续预览版开放。', retryable: false),
+  NeedsLogin() => (title: '需要登录', message: '这个内容要登录平台账号后才能看，可以在“我的 → 平台账号”里登录。', retryable: false),
   RateLimited() => (title: '请求太频繁', message: '平台限制了访问频率，等一会儿再试。', retryable: true),
   RiskControl() => (title: '被平台风控拦截', message: '平台暂时拒绝了请求，稍后重试，或换个网络。', retryable: true),
   RegionBlocked() => (title: '当前地区看不了', message: '平台限制了这个地区的访问，可以在设置里给这个平台配置代理。', retryable: false),

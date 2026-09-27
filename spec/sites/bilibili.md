@@ -477,6 +477,8 @@
   - 凭据加密保存（宪法原则 8）；
   - 适配器只通过只读的 CredentialStore 取凭据，不直接读设置（01-sites ②）；
   - uid 必须和 Cookie 来自同一份凭据。
+  - 校验结果按类型处理（2026-09-28，F-ACC-01）：只有 `code -101`（NeedsLogin）算登录失效，清空 Cookie 和 uid；用户退出登录时同时清空内置浏览器的 Cookie。-352（RiskControl）、-412（RateLimited）、网络错误和其它 `code != 0`（ApiChanged）只提示“校验失败”，不登出——旧版遇到任何 `code != 0` 都登出，风控时会把有效的登录清掉。
+  - 账号页进入时自动校验一次；未校验前只显示同一份 Cookie 里的 `DedeUserID`。界面和日志都不显示 Cookie。
 
 ### 8.3 二维码登录（lib/modules/account/bilibili/qr_login_controller.dart）
 
@@ -494,11 +496,13 @@
   代码位置：:161-177、:184-210。
 - 外层 `code != 0` 或网络错误时退避，间隔分别为 2、3、4 倍；连续 3 次失败后停止（:212-220）。
 - 刷新二维码会作废旧二维码的轮询结果（:80-99；test/bilibili_login_lifecycle_test.dart:51-82）。
+- **v4**（apps/pure_live/lib/features/accounts/bilibili_qr_login.dart）：按失败类型区分。没有得到答复的轮询——网络错误、RateLimited（-412、HTTP 412）、RiskControl（-352）——退避 2 倍、3 倍，第 3 次连续失败停止（4 倍用不到）；ApiChanged（未知的 `data.code`，或其它外层 `code != 0`）立即失败，不再重试。确认后先校验（§8.2）再保存；校验不通过不保存。
 
 ### 8.4 网页登录（lib/modules/account/bilibili/web_login_controller.dart）
 
 - 在 WebView 中打开 `https://passport.bilibili.com/login`（:331）。
 - 导航到 HTTPS 的 `m.bilibili.com` 或 `www.bilibili.com` 时，读取 WebView 中该地址的 Cookie，拼接后去校验（:374-388、:498-504）。
+- **v4**（apps/pure_live/lib/features/accounts/web_login.dart；网页组件见 docs/adr/draft-webview.md）：取消这次导航，读该地址的全部 Cookie（含 HttpOnly 的 `SESSDATA`），拼成 `name=value; …`，校验通过才保存；失败回到网页并提示。Android 用 webview_flutter，Windows 用 WebView2（缺运行时时提示安装），其它平台不显示网页登录。
 
 ---
 

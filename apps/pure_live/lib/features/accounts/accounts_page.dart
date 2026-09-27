@@ -2,14 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:live_store/live_store.dart';
+import 'package:go_router/go_router.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live_app/core/secrets.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/features/accounts/account_services.dart';
+import 'package:pure_live_app/features/accounts/account_status.dart';
+import 'package:pure_live_app/features/accounts/platform_account_page.dart';
 
-/// Platform accounts (principles §4.4 "平台与账号"): sign in by pasting the
-/// site's cookie, sign out. Cookies are encrypted with the device key and are
-/// not part of backups unless the user adds a passphrase (store.md §4, §7.3).
+/// Platform accounts (principles §4.4 "平台与账号", F-ACC-01): every platform
+/// with an account, what its stored login is worth, and the way to its page.
+/// Cookies are encrypted with the device key and are not part of backups
+/// unless the user adds a passphrase (store.md §4, §7.3).
 class AccountsPage extends ConsumerStatefulWidget {
   const new({super.key});
 
@@ -18,66 +21,28 @@ class AccountsPage extends ConsumerStatefulWidget {
 }
 
 class _AccountsPageState extends ConsumerState<AccountsPage> {
-  StreamSubscription<String>? _changes;
-
   @override
   void initState() {
     super.initState();
-    _changes = ref.read(secretStoreProvider).cookieChanges.listen((_) {
-      if (mounted) setState(() {});
+    // Names come from the platforms: check each stored cookie that has a
+    // user-info endpoint once per run.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final store = ref.read(accountStoreProvider);
+      for (final platform in ref.read(enabledPlatformsProvider).where(platformHasAccount)) {
+        if (store.cookie(platform) == null || ref.read(accountVerifierProvider(platform)) == null) continue;
+        if (ref.read(accountCheckProvider(platform)) is! AccountUnchecked) continue;
+        unawaited(ref.read(accountCheckProvider(platform).notifier).verify());
+      }
     });
   }
 
   @override
-  void dispose() {
-    unawaited(_changes?.cancel());
-    super.dispose();
-  }
-
-  Future<void> _signIn(String platform) async {
-    final controller = TextEditingController();
-    final cookie = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('登录${platformNames[platform]}'),
-        content: SizedBox(
-          width: 480,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('在电脑浏览器登录该平台网页版后，从开发者工具里复制请求头中的 Cookie，粘贴到下面。'),
-              const SizedBox(height: Space.s3),
-              TextField(
-                controller: controller,
-                minLines: 3,
-                maxLines: 6,
-                decoration: const InputDecoration(hintText: 'Cookie'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('保存')),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (cookie == null || cookie.isEmpty) return;
-    await ref.read(secretStoreProvider).write(SecretRefs.cookie(platform), cookie);
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已保存，重新进入直播间后生效')));
-  }
-
-  Future<void> _signOut(String platform) async {
-    await ref.read(secretStoreProvider).write(SecretRefs.cookie(platform), null);
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已退出登录')));
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final secrets = ref.watch(secretStoreProvider);
+    ref.watch(accountRevisionProvider);
+    final store = ref.watch(accountStoreProvider);
     final platforms = ref.watch(enabledPlatformsProvider).where(platformHasAccount);
+    final now = DateTime.now();
     return Scaffold(
       appBar: AppBar(title: const Text('平台账号')),
       body: Align(
@@ -91,10 +56,9 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
                 ListTile(
                   leading: PlatformLogo(platformId: platform, size: Sizes.iconLg),
                   title: Text(platformNames[platform] ?? platform),
-                  subtitle: Text(secrets.cookieFor(platform) == null ? '未登录' : '已登录'),
-                  trailing: secrets.cookieFor(platform) == null
-                      ? FilledButton.tonal(onPressed: () => _signIn(platform), child: const Text('登录'))
-                      : TextButton(onPressed: () => _signOut(platform), child: const Text('退出登录')),
+                  subtitle: Text(accountSummary(platform, store, ref.watch(accountCheckProvider(platform)), now: now)),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(accountLocation(platform)),
                 ),
             ],
           ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,6 +37,18 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
       appBar: AppBar(
         title: const Text(S.follows),
         actions: [
+          IconButton(
+            tooltip: '一键多画面',
+            icon: const Icon(Icons.grid_view),
+            onPressed: () {
+              // Live follows in their shown order fill the grid (ENT-1).
+              final live = [
+                for (final follow in follows.value ?? const <FollowedRoom>[])
+                  if (follow.room.lastState == LiveState.live) follow,
+              ]..sort((a, b) => _audience(b.room).compareTo(_audience(a.room)));
+              unawaited(context.push('/multiview', extra: [for (final f in live) f.ref]));
+            },
+          ),
           if (refresh.isLoading)
             const Padding(
               padding: EdgeInsets.all(Space.s4),

@@ -24,8 +24,9 @@ final Provider<PlaybackSession> playbackSessionProvider = Provider.autoDispose<P
 /// platform's list is best first, the preference names a relative level.
 Quality? preferredQuality(List<Quality> offered, QualityPreference preference) {
   if (offered.isEmpty || preference == QualityPreference.original) return null;
-  final index = preference.index.clamp(0, offered.length - 1);
-  return offered[index];
+  // "流畅" always means the platform's lowest; the others count down from the best.
+  if (preference == QualityPreference.smooth) return offered.last;
+  return offered[preference.index.clamp(0, offered.length - 1)];
 }
 
 /// Opens [detail] in [session] at the stored default quality: resolves once,
@@ -36,9 +37,10 @@ Future<void> openRoom({
   required SettingsStore settings,
   required PlaybackSession session,
   required RoomDetail detail,
+  QualityPreference? preference,
 }) async {
   final initial = await site.streams.streams(detail);
-  final wanted = preferredQuality(initial.qualities, settings.get(Settings.qualityWifi));
+  final wanted = preferredQuality(initial.qualities, preference ?? settings.get(Settings.qualityWifi));
   await session.open(
     wanted == null || wanted == initial.selected
         ? PlaybackRequest.room(site.streams, detail, initial: initial)

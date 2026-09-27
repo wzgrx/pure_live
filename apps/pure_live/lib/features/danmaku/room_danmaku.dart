@@ -212,13 +212,16 @@ final class RoomDanmaku {
   Future<void> _disconnect() async {
     _generation++;
     final feed = _feed;
-    final cancelled = _subscription?.cancel();
     _feed = null;
-    _subscription = null;
     if (!_disposed) connection.value = ChatConnection.off;
     _overlay?.clear();
+    // Close first: the worker stops the connection even if the cancel below
+    // takes its time.
+    final closing = feed?.close();
+    final cancelled = _subscription?.cancel();
+    _subscription = null;
     await cancelled;
-    await feed?.close();
+    await closing;
   }
 
   void _receive(DanmakuBatch batch) {

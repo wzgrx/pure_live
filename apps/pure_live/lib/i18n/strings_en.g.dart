@@ -2665,7 +2665,8 @@ class _Translations$recording$failure$en implements Translations$recording$failu
   @override
   String get noStream => 'No recordable stream';
   @override
-  String get hlsOnly => 'This room only has HLS streams, which cannot be recorded yet';
+  String get unsupportedFormat =>
+      'This stream\'s format cannot be recorded yet (such as SAMPLE-AES encryption or HLS with separate audio)';
   @override
   String get diskFull => 'Not enough storage';
   @override
@@ -3232,7 +3233,7 @@ class _Translations$settings$record$en implements Translations$settings$record$z
   @override
   String get remuxMp4 => 'Convert to MP4 when done';
   @override
-  String get keepFlv => 'Keep the original FLV after converting';
+  String get keepSource => 'Keep the original recording after converting';
   @override
   String get pinyinFolders => 'Pinyin folder names';
   @override

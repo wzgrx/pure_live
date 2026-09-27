@@ -132,7 +132,7 @@
     "saveDanmaku": "Save danmaku too",
     "saveDanmakuSubtitle": "An XML file named like the video",
     "remuxMp4": "Convert to MP4 when done",
-    "keepFlv": "Keep the original FLV after converting",
+    "keepSource": "Keep the original recording after converting",
     "pinyinFolders": "Pinyin folder names",
     "pinyinFoldersSubtitle": "Use streamer names in pinyin for folders, for devices that cannot show Chinese",
     "resumeOnStart": "Resume unfinished recordings at start",

@@ -1,6 +1,6 @@
 # live_record
 
-Pure Live v4 的录制层（纯 Dart）：FLV 写入器、带租期拼接的录制会话、任务管理器、崩溃恢复、FLV → MP4 转封装。行为依据 [spec/modules/record.md](../../spec/modules/record.md)（文中 §编号指它），方案依据 [ADR 0005](../../docs/adr/0005-recording-without-ffmpegkit.md)，实现上的选择见 [ADR 0021](../../docs/adr/0021-recording.md)。依赖 `live_media`（`FlvSplicer`、`FlvFramer`、`openHttpFlv`）、`live_core`、`live_net`。
+Pure Live v4 的录制层（纯 Dart）：FLV 写入器、带租期拼接的录制会话、HLS 下载器与写入器、任务管理器、崩溃恢复、FLV / MPEG-TS / fMP4 → MP4 转封装。行为依据 [spec/modules/record.md](../../spec/modules/record.md)（文中 §编号指它），方案依据 [ADR 0005](../../docs/adr/0005-recording-without-ffmpegkit.md)，实现上的选择见 [ADR 0021](../../docs/adr/0021-recording.md) 和 [ADR 0035](../../docs/adr/0035-hls-record.md)（HLS 录制）。依赖 `live_media`（`FlvSplicer`、`FlvFramer`、`openHttpFlv`）、`live_core`、`live_net`。
 
 ## 应用怎么用
 
@@ -10,8 +10,8 @@ final manager = RecordManager(
   store: myLiveStoreTaskStore,                                 // RecordTaskStore；内置 MemoryRecordTaskStore、JsonFileRecordTaskStore
   root: RecordRoot.resolve(defaultRoot: '$dataDir/RECORDS', chosen: settings.recordDirectory),
   settings: RecordSettings(maxConcurrent: 3, polling: true, danmaku: true),   // 由应用的 record.* 设置映射
-  opener: httpRecordOpener(proxy: proxyPolicy, readTimeout: const Duration(seconds: 15)),
-  remuxer: const IsolateRemuxer(FlvToMp4Remuxer()),           // 可选：纯 Dart 转封装，在后台 isolate 运行；不给则保留 FLV
+  opener: httpRecordOpener(proxy: proxyPolicy, readTimeout: const Duration(seconds: 15)),   // FLV 连接和 HLS 请求都走代理
+  remuxer: const IsolateRemuxer(Mp4Remuxer()),                // 可选：纯 Dart 转封装（FLV、TS、fMP4），在后台 isolate 运行；不给则保留源文件
   chat: danmakuChatSource,                                     // 可选：RecordChatSource（live_danmaku 适配）
 );
 await manager.init();                  // 读取任务；后台做崩溃恢复（每次启动）和开机恢复（record.resumeOnLaunch）
@@ -44,7 +44,8 @@ await manager.dispose();
 
 ```
 <根>/<平台>/<主播>/<yyyy-MM-dd>/
-  20260927_101530_123_001.flv        分段（写入中是 .flv.part，关闭时改名）
+  20260927_101530_123_001.flv        FLV 分段（写入中是 .flv.part，关闭时改名）
+  20260927_101530_123_002.ts         HLS（MPEG-TS）分段：分片按序整片相接；fMP4 为 .m4s（初始化段 + 分片）
   20260927_101530_123_001.xml        弹幕（开 record.danmaku 时，与分段同名）
   20260927_101530_123_001.mp4        转封装结果（写入中是 .mp4.partial）
   20260927_101530_123.gaps.json      缺口记录（没有缺口也写空数组）
@@ -52,11 +53,11 @@ await manager.dispose();
 
 - 根目录按 §15：默认应用数据目录的 `RECORDS`；用户选的目录只当父目录，写进 `<选定目录>/PureLiveRecords/`，放 `.pure_live_recording_root` 标记。`RecordRoot.prepare` 写探针验证可写。
 - 路径组件按 §9 清洗；`transliterate` 参数可接拼音转换（`record.pinyinFolders`）。
-- 一次会话一个写入器：重连、续期都写同一个文件；只有编解码配置变化、`record.splitMinutes`、`record.splitMegabytes` 才开新分段，在关键帧处切，每个分段的时间戳从 0 开始、都能独立播放。
+- 一次会话一个写入器：重连、续期都写同一个文件；只有编解码配置变化、`record.splitMinutes`、`record.splitMegabytes` 才开新分段，在关键帧处切，每个分段都能独立播放（FLV 的时间戳从 0 开始；TS、fMP4 保留上游时间戳，转封装时连成一条）。会话在 FLV 与 HLS 线路之间切换时关旧文件、开新文件，编号接着往后。
 
 ## 接转封装和弹幕
 
-- **转封装**：实现 `Remuxer.remux(RemuxJob job)`：把 `job.input` 以 stream copy（`+faststart`，不解码）写到 `job.output`（`.partial` 路径），通过 `job.onProgress(已读字节)` 报进度，`job.cancelled` 完成后尽快返回；任何解复用或复用错误都要抛 `RemuxException`（退出码 0 不能说明输入完整，REG-RECORD-008）。提交、改名、删源、60 s 无进度看门狗、失败保留源都由本包处理。本包自带实现 `FlvToMp4Remuxer`（见下文“转封装”），应用用 `IsolateRemuxer` 把它放到后台 isolate；`tools/live_cli` 里的 `FfmpegProcessRemuxer` 调用 `ffmpeg` 可执行文件，只用来对照。
+- **转封装**：本包自带 `Mp4Remuxer`（FLV、MPEG-TS、fMP4 都能转，按内容分派），应用用 `IsolateRemuxer(Mp4Remuxer())`。自己实现时照 `Remuxer.remux(RemuxJob job)`：把 `job.input` 以 stream copy（`+faststart`，不解码）写到 `job.output`（`.partial` 路径），通过 `job.onProgress(已读字节)` 报进度，`job.cancelled` 完成后尽快返回；任何解复用或复用错误都要抛 `RemuxException`（退出码 0 不能说明输入完整，REG-RECORD-008）。提交、改名、删源、60 s 无进度看门狗、失败保留源都由本包处理。`tools/live_cli` 里的 `FfmpegProcessRemuxer` 调用 `ffmpeg` 可执行文件，只用来对照。
 - **弹幕**：实现 `RecordChatSource.connect(RoomDetail room)`，返回 `Stream<RecordChatMessage>`（id、userId、userName、text、color、sentAt）。用 `live_danmaku` 按 `room.danmakuKeys` 连接，只转普通聊天。流出错或结束时录制器 30 s 后重连；弹幕失败不影响视频。时间按写入器的“墙钟 ↔ 文件时间”锚点换算（§17）。
 
 ## 设计要点
@@ -72,9 +73,38 @@ await manager.dispose();
 - **容量上限（`enforceStorageLimit`，§15）**：`RecordSettings.storageLimitMegabytes`（应用的 `record.cacheLimitEnabled` + `record.cacheLimitMB`）大于 0 时，管理器每分钟扫描一次根目录：总量（标记文件除外）超过上限就按修改时间从旧到新删除，解析、录制、重连、收尾中的会话目录只计入不删除，删不掉的文件跳过；删了文件后从深到浅清理空目录。
 - **管理器（`RecordManager`，§2、§3、§11–§14）**：每个房间一个任务；同一任务的意图串行；过期代次的结果丢弃；并发槽先进先出，新会话之间至少 5 s，重连期间不释放槽；状态变化 2 s 合并写入、进度最多 10 s 写一次、终态立即写；崩溃恢复每次启动都在后台做，用户这时点开始会等它完成；等待开播只在轮询打开时存在，关闭轮询时转为“已停止（轮询已关闭）”，再打开时回到等待并立刻检查。
 
-## 转封装（`FlvToMp4Remuxer`）
+## HLS 录制（§7）
 
-纯 Dart 把录好的 FLV 分段复制成 faststart MP4（`ftyp`、`moov`、`mdat`，`moov` 在前），不解码，Android、Windows 同一份代码（[ADR 0021](../../docs/adr/0021-recording.md) 补充决定，取代 ADR 0005 §4 的原生垫片）。代码在 `lib/src/remux/`：
+同一画质先用 FLV 线路，没有或都在录到媒体前失败时用 HLS 线路（SOOP、Twitch、TwitCasting、PandaTV 只有 HLS；B 站、虎牙等 FLV 之外还有 HLS）。一条 HLS 连接是一个 `HlsFeed`，写进会话的 `HlsSessionWriter`。
+
+- **列表**：`M3u8Playlist.parse` 解析 master 和媒体列表：隐式 BYTERANGE 在解析时算成绝对范围；EXT-X-KEY 按格式分开，`identity` 的 AES-128 可录，SAMPLE-AES 和 DRM 格式标为不支持；EXT-X-MAP 记住当时的密钥；LL-HLS 的 PART / PRELOAD-HINT 不算分片；含 EXT-X-SKIP 的增量列表直接报错。master 取带宽最高的变体，之后直接轮询变体地址；AUDIO 组带独立地址（音视频分离）暂不支持。
+- **节奏**：首次立即请求；列表全文变了等 1 个 TARGETDURATION，没变等半个，从请求开始计时，同一时间只有一个列表请求。第一个列表从倒数第 3 个分片开始录。4xx 经适配器续签一次再试；5xx、网络、解析失败连续 3 次结束连接；`max(readTimeout, 4 × TARGETDURATION)` 没有新分片结束连接；ENDLIST 写完即结束。
+- **分片**：在内存里整片下载（核对 `Content-Length`，上限 64 MiB），AES-128 在内存解密（key 按地址缓存，不落盘），按序号顺序写；最多 2 个在下载或等写，写入器的 8 MiB 队列满时不再开始新下载。失败的分片重试 2 次后记缺口，连续 3 个失败结束连接。
+- **序号**：`HlsFeedState` 跨重连保留最后处理的序号：重连后列表仍含下一片时无缝接上；跳号记 `sequenceJump`（fromSeq、toSeq、片数 × TARGETDURATION）；序号回退或跳得远超离开的时间视为重新编号，从新直播边缘接着录，记 `reset`（换地址引起的记 `lease`）。
+- **租期**：线路带租期时在 refreshAt 续签同画质同格式的线路，下一次轮询换地址（master 重新选变体）。
+- **Cookie**：`IoHlsClient` 按源站（scheme、主机、端口）在内存里保存 Set-Cookie 并回传（TwitCasting 的 `lvhls_ssid_*`），每个源站最多 64 条 / 16 KiB；请求都走代理策略，TLS 照常校验。
+- **写文件**：TS 分片整片相接写成 `.ts`（去掉末尾不足 188 字节的残余），fMP4 写成 `.m4s`（初始化段 + 分片）；编码配置（PMT 流类型、SPS/PPS/VPS、AAC 配置、初始化段）变化、TS 与 fMP4 交替、按时长或大小切分时开新文件。文件从关键帧开始：分片不以关键帧开头（Amazon IVS）时在分片内第一个关键帧处切开，新文件带上该分片的 PAT/PMT。文件时间是已写分片的 EXTINF 之和（缺口 `atMs`、进度、弹幕时间都用它）。
+- **停止**：不再请求列表和开始新下载，在途分片最多等 1 个 TARGETDURATION（≤10 s）写完，剩下的记一条 `stop` 缺口。
+- **崩溃恢复**：`.ts.part` 截到整包并去掉最后一个分片（崩溃可能写了一半），`.m4s.part` 截到最后一个完整 moof + mdat；没有媒体的删除。
+
+2026-09-28 真实录制（`live_cli record <平台> <房间> --duration 60 --remux`，本包的写入器和转封装；“包数”是 ffprobe 读到的视频 / 音频包，`.ts`、`.m4s` 和 MP4 都用 `ffmpeg -v error -i … -f null -` 全解码）：
+
+| 平台 | 线路 | 编码 | 源文件 | 包数（源 = MP4） | 缺口 | 解码错误 | 备注 |
+|---|---|---|---|---|---|---|---|
+| SOOP devil0108 | HLS TS（gcp_cdn） | H.264 1080p60，AAC 48 kHz | 54.5 MiB `.ts` | 3600 / 2813 | 0 | 0 | 转封装解码画面、音频逐帧相同 |
+| Twitch caedrel（代理 127.0.0.1:7897） | HLS TS（usher 变体） | H.264 1080p60，AAC 48 kHz | 45.8 MiB `.ts` | 3600 / 2813 | 0 | 0 | 访问单元跨 PES（REG-RECORD-042）；画面逐帧相同，最后一个 AAC 帧按容器末尾截断（ffmpeg 自己的 `-c copy` 也一样） |
+| TwitCasting nabo66game | HLS fMP4（会话 Cookie） | H.264，AAC | 35.4 MiB `.m4s` | 3857 / 3014 | 0 | 0 | 负载 MD5 与源相同 |
+| B 站 22603245 | HLS fMP4（`--line fmp4`） | H.264，AAC | 13.7 MiB `.m4s` | 1840 / 2875 | 0 | 0 | |
+| B 站 22603245 | HLS TS（`--line '\|ts\|'`） | H.264，AAC | 12.6 MiB `.ts` | 1875 / 2930 | 0 | 0 | |
+| PandaTV moonmerry1225 | Amazon IVS HLS TS，`--renew-after 20`（90 s 内续签 3 次） | H.264 1080p60，AAC | 70.2 MiB `.ts` | 5520 / 4313 | 0 | 0 | master 一次性令牌，每次续签重新选变体，序号连续无缝 |
+| CHZZK 458f6ec2… | HLS fMP4 | H.264 1080p60，AAC | 52.7 MiB `.m4s` | 3240 / 2532 | 0 | 0 | |
+| SHOWROOM 538344 | HLS TS | H.264，AAC | 7.8 MiB `.ts` | 1801 / 2813 | 0 | 0 | |
+
+转封装速度（WSL）：SOOP 51 MiB 0.59 s（86 MiB/s），Twitch 46 MiB 0.64 s，TwitCasting 35 MiB 0.38 s。
+
+## 转封装（`Mp4Remuxer`）
+
+纯 Dart 把录好的分段复制成 faststart MP4（`ftyp`、`moov`、`mdat`，`moov` 在前），不解码，Android、Windows 同一份代码（[ADR 0021](../../docs/adr/0021-recording.md) 补充决定，取代 ADR 0005 §4 的原生垫片）。`Mp4Remuxer` 按文件内容分派：FLV → `remuxFlvToMp4`，MPEG-TS → `remuxTsToMp4`，fMP4 → `remuxFmp4ToMp4`。代码在 `lib/src/remux/`。下面先写 FLV，TS 和 fMP4 在本节末尾：
 
 - **两遍读、一遍写**：第一遍逐 tag 解复用、建样本表；据此排好 `moov`；第二遍再解复用一次，按第一遍定好的块顺序把负载写进 `mdat`。不写临时文件，磁盘只多占一份输出。第二遍核对每个样本的大小和块的位置，输入在两遍之间变了就报错。
 - **内存有界**：样本表用 64 KiB 分块的 `Uint32List`，每个样本约 4 字节（大小），`stts`/`ctts` 游程编码，`stss` 只记关键帧，`stsc` 只记变化。6 小时 60 fps 视频 + 48 kHz AAC（230 万样本）的表约 28 MiB（单元测试）；2.1 GiB、1 小时 51 分的 1440p60 文件进程峰值 RSS 88 MiB。第二遍每条轨最多缓存一个块（半秒媒体，最多 4 MiB）。
@@ -83,6 +113,13 @@ await manager.dispose();
 - **时间戳**：视频毫秒 ×90 原样换算，显示时间（DTS + CTS）不变；重复的 DTS 往后挪 1 tick（CTS 相应减小，可为负）；回退超过 1 s 报错。音频每帧按 1024（或 960）个采样累加，只有时间戳偏离一帧以上（缺口、时钟漂移）才跟随时间戳，避免 FLV 毫秒取整造成逐帧抖动。最后一个样本的时长取最近 64 个的中位数。影片从最早显示的样本开始（与 `ffmpeg -c copy` 相同），晚开始的轨和 B 帧造成的首帧延迟用 `elst`（空编辑 + 媒体编辑）表达。
 - **报错**（`RemuxException`，源文件保留，未完成的输出删除）：不是 FLV、tag 类型不对、末尾 tag 不完整、加密 tag、不支持的编码（MP3、VP6、AV1…）、多轨 Enhanced FLV、配置记录损坏、NAL 长度越界、文件中途配置变化（参数集相同的重复序列头可以）、没有配置的媒体、时间戳回退超过 1 s、没有音视频、取消。
 - **进度与取消**：进度是已读输入字节（两遍各算一半），每读 1 MiB 报一次；每个 tag 之间检查取消。`IsolateRemuxer` 用 `Isolate.run` 运行任意可发送的 `Remuxer`，进度和取消跨 isolate 传递。
+
+**MPEG-TS 与 fMP4**（`ts_demux.dart`、`ts_to_mp4.dart`、`fmp4_to_mp4.dart`，共用 `mp4_remux.dart` 的两遍驱动和 FLV 的 MP4 写入部分）：
+
+- TS：PAT/PMT 选第一个 H.264（0x1B）/ H.265（0x24）视频和第一个 ADTS AAC（0x0F）音频，跟随 PMT 变化；没有可复制的同类流时其它音视频（MP3、AC-3、MPEG-2…）报错，ID3、SCTE-35 忽略。一个 PES 是一个访问单元，PES 开头在第一个起始码之前的字节接回上一个单元（Twitch / Amazon IVS）；起始码改为 4 字节长度，与 `avcC`/`hvcC` 相同的参数集从样本里去掉，AUD、SEI 保留；ADTS 帧逐帧拆开去头，跨 PES 的帧接起来。连续计数器断在单元中间、PES 长度不符、失去同步、截断的包都报错；文件末尾被截断的最后一个音频 PES 丢弃。重复包只认逐字节相同的包（拼接的分片会把计数器从头开始）。
+- fMP4：初始化段里每条音视频轨的样本描述原样复制（`Mp4RawCodec`），样本表按 `tfhd`/`tfdt`/`trun`（含 default-base-is-moof、多个 trun）重建；读完一个 moof 后一次读出它引用的数据。加密轨、第二个初始化段、引用到文件外的数据、截断的盒子都报错。
+- 时间线（`TimelineJoiner`）：TS 的 33 位时间戳先展开回绕；某条轨时间戳后退超过 1 s 或前进超过 60 s 就是新的一段，接在已写的所有轨之后，另一条轨跳到同一段时跟着接上；更小的前跳保留（漏掉的分片在文件时间里是空档）。视频 DTS 严格递增（重复的往后挪 1 tick），音频按帧长累加、偏离一帧以上才跟随时间戳。
+- 夹具（`test/fixtures/remux/`、`test/fixtures/hls/`）：ffmpeg 生成的 x264 / x265 + AAC 的 TS、HLS TS 分片和 fMP4 分片；测试把输出与 `ffmpeg -c copy` 的 MP4 逐样本比对（NAL 单元、同步样本、显示时间），并用 ffprobe 和 ffmpeg 全解码检查。
 
 2026-09-28 真实录制（`live_cli record` 录约 60 s FLV，`live_cli remux` 转换并用 ffprobe、ffmpeg 检查；“时长”是 ffprobe 的容器时长，`ffmpeg -c copy` 转出的 MP4 与本实现相同）：
 
@@ -101,16 +138,16 @@ await manager.dispose();
 
 ## 还没做
 
-- HLS 下载器（§7）、HTTP 连续 TS（§8）：首批 5 个平台都有 FLV 线路，录制器只选 FLV；某画质只有 HLS 时跳到下一画质，全部没有 FLV 时报 `unsupportedProtocol`。
+- HLS：SAMPLE-AES、音视频分离的 master、packed audio 分片报 `unsupportedProtocol` 并换线路；会话型输入（Bigo、FC2、niconico，§7.9）和 HTTP 连续 TS（IPTV，§8）未做。
 - 桌面退出提示（§16.2，应用层）、旧版 TS 遗留合并（§14.3）。
 - 任务持久化接 `live_store` 的 `record_tasks` 表（应用目前用 `JsonFileRecordTaskStore` 写 `<数据根>/DB/record_tasks.json`）。
-- 转封装只接受 FLV 里的 H.264、H.265 和 AAC；HLS 本地归档、旧 TS 的转封装在录制器产出它们时再加；文件中途编解码配置变化时报错（写入器本来就会在配置变化处切分段）。
+- 转封装只复制 H.264、H.265 和 AAC（fMP4 的样本描述原样复制，不限编码）；文件中途编解码配置变化时报错（写入器本来就会在配置变化处切分段）；旧 TS 遗留合并（§14.3）不走这里。
 
 ## 测试
 
-`dart test`：写入器（分段结构、时间戳、重定基准、按时长/大小/配置切分、codec 12、SEI 尾、`.part` 与重名、背压与磁盘卡住、磁盘满、刷盘、弹幕锚点、gaps.json）、恢复（扫描截断、改名、XML 补尾、crash 缺口）、重试与游标、命名与根目录、错误分类与脱敏、会话（斗鱼两次续期无缝、EOF 续接、下播、断网有界退避、4xx、5xx、全部线路失败、停止、磁盘满、关闭自动重连、画质偏好、HLS 跳过、预取、弹幕 XML）、管理器（开始/停止/持久化不含密钥、并发与间隔、强制开始、容量上限清理、备份导入、等待开播轮询、REG-RECORD-033、轮询开关、迟到结果、意图串行、崩溃恢复、开机恢复、退出与后台中断、转封装失败与重试、进度、写入合并、删除、弹幕重连、JSON 存储）、容量上限（`storage_test.dart`：从旧到新删除、受保护目录、被占用的文件、空目录清理、真实磁盘）、转封装（`test/remux/`：两个 ffmpeg testsrc 生成的小 FLV 夹具（x264 带 B 帧、x265 Enhanced FLV）的黄金字节；逐样本比对负载、显示时间、同步样本；盒子结构；`stts`/`ctts` 游程、`stss`、`stsc` 分块、`co64` 切换；负 CTS 与重复时间戳；纯音频、纯视频；旧式 codec 12 与 Annex B（H.264、H.265）；ADTS；配置变化与各种损坏输入；取消、进度、两遍之间输入变化；`remuxFiles` 集成；写入器输出再转封装；6 小时 60 fps 样本表的内存；`IsolateRemuxer`）。除 `IsolateRemuxer` 用临时目录外，全部在 `fake_async` 和内存文件系统上运行，事件顺序与真实上游一致。
+`dart test`（268 个）：HLS（`test/hls/`：列表解析、AES-128 与 NIST 向量 / live_core / openssl 对照、刷新节奏与慢响应、起点、并发与背压、分片重试与缺口、跳号、重连无缝、重新编号、EXT-X-GAP、ENDLIST、卡住、AES-128 两种 IV、SAMPLE-AES、BYTERANGE、fMP4 初始化段、LL-HLS、master 与分离音频、4xx 续签、连续失败、租期换地址、停止、Cookie；写入器的连续文件、切分、配置变化、关键帧切开、残余字节、缺口、弹幕时间、背压、磁盘满；崩溃恢复；会话里 FLV 与 HLS 的顺序和切换、重连、下播、不支持的线路、密钥不落盘；管理器端到端和崩溃恢复后转封装）、TS / fMP4 转封装（`test/remux/ts_to_mp4_test.dart`、`fmp4_to_mp4_test.dart`：与 ffmpeg 逐样本比对、时间线连接、33 位回绕、跨 PES 的访问单元与 ADTS 帧、分片计数器重置、各种损坏输入）、写入器（分段结构、时间戳、重定基准、按时长/大小/配置切分、codec 12、SEI 尾、`.part` 与重名、背压与磁盘卡住、磁盘满、刷盘、弹幕锚点、gaps.json）、恢复（扫描截断、改名、XML 补尾、crash 缺口）、重试与游标、命名与根目录、错误分类与脱敏、会话（斗鱼两次续期无缝、EOF 续接、下播、断网有界退避、4xx、5xx、全部线路失败、停止、磁盘满、关闭自动重连、画质偏好、HLS 跳过、预取、弹幕 XML）、管理器（开始/停止/持久化不含密钥、并发与间隔、强制开始、容量上限清理、备份导入、等待开播轮询、REG-RECORD-033、轮询开关、迟到结果、意图串行、崩溃恢复、开机恢复、退出与后台中断、转封装失败与重试、进度、写入合并、删除、弹幕重连、JSON 存储）、容量上限（`storage_test.dart`：从旧到新删除、受保护目录、被占用的文件、空目录清理、真实磁盘）、转封装（`test/remux/`：两个 ffmpeg testsrc 生成的小 FLV 夹具（x264 带 B 帧、x265 Enhanced FLV）的黄金字节；逐样本比对负载、显示时间、同步样本；盒子结构；`stts`/`ctts` 游程、`stss`、`stsc` 分块、`co64` 切换；负 CTS 与重复时间戳；纯音频、纯视频；旧式 codec 12 与 Annex B（H.264、H.265）；ADTS；配置变化与各种损坏输入；取消、进度、两遍之间输入变化；`remuxFiles` 集成；写入器输出再转封装；6 小时 60 fps 样本表的内存；`IsolateRemuxer`）。除 `IsolateRemuxer` 用临时目录外，全部在 `fake_async` 和内存文件系统上运行，事件顺序与真实上游一致。
 
-真实网络：`dart run tools/live_cli/bin/live_cli.dart record douyu <房间> --duration 600 --remux --out <目录>`（默认用 `FlvToMp4Remuxer`，`--remuxer ffmpeg` 换成 ffmpeg 对照），录完用 `lease` 同一套规则检查每个 FLV 的时间戳，用 ffprobe 检查 FLV 和 MP4 的视频 DTS 与盒子顺序，并读 `gaps.json`。已有的 FLV 用 `live_cli remux <文件>…` 转换并检查（包数、DTS、时长、完整解码、负载 MD5、`moov` 在 `mdat` 前）。
+真实网络：`dart run tools/live_cli/bin/live_cli.dart record douyu <房间> --duration 600 --remux --out <目录>`（默认用 `Mp4Remuxer`，`--remuxer ffmpeg` 换成 ffmpeg 对照；`--format hls`、`--line <线路 id 片段>` 只给录制器某些线路，`--renew-after <秒>` 让线路按间隔续签，用来验证 HLS 换地址），录完用 `lease` 同一套规则检查每个 FLV 的时间戳，用 ffprobe 检查 FLV 和 MP4 的视频 DTS 与盒子顺序，并读 `gaps.json`。已有的录制文件（FLV、TS、fMP4）用 `live_cli remux <文件>…` 转换并检查（包数、DTS、时长、完整解码、负载 MD5 或解码后的逐帧 MD5、`moov` 在 `mdat` 前）。HLS 分段（`.ts`、`.m4s`）在 `record` 报告里用 ffprobe 数包并全解码。
 
 2026-09-27 斗鱼 9999 房间（匿名，1080p30 H.264 + AAC，`expire=300`）录制 600 s：
 

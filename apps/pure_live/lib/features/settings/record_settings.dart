@@ -118,7 +118,7 @@ class RecordSettingsTiles extends StatelessWidget {
         subtitle: t.settings.record.saveDanmakuSubtitle,
       ),
       SwitchSettingTile(setting: Settings.recordRemuxToMp4, title: t.settings.record.remuxMp4),
-      SwitchSettingTile(setting: Settings.recordKeepSourceAfterRemux, title: t.settings.record.keepFlv),
+      SwitchSettingTile(setting: Settings.recordKeepSourceAfterRemux, title: t.settings.record.keepSource),
       SwitchSettingTile(
         setting: Settings.recordPinyinFolders,
         title: t.settings.record.pinyinFolders,

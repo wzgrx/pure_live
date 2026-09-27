@@ -3465,8 +3465,8 @@ class Translations$recording$failure$zh_Hans {
   /// zh-Hans: '拿不到可录制的直播流'
   String get noStream => '拿不到可录制的直播流';
 
-  /// zh-Hans: '这个直播间只有暂不支持录制的 HLS 流'
-  String get hlsOnly => '这个直播间只有暂不支持录制的 HLS 流';
+  /// zh-Hans: '直播流的格式暂不支持录制（如 SAMPLE-AES 加密、音视频分开的 HLS）'
+  String get unsupportedFormat => '直播流的格式暂不支持录制（如 SAMPLE-AES 加密、音视频分开的 HLS）';
 
   /// zh-Hans: '存储空间不足'
   String get diskFull => '存储空间不足';
@@ -4227,8 +4227,8 @@ class Translations$settings$record$zh_Hans {
   /// zh-Hans: '录完转成 MP4'
   String get remuxMp4 => '录完转成 MP4';
 
-  /// zh-Hans: '转成 MP4 后保留原始 FLV'
-  String get keepFlv => '转成 MP4 后保留原始 FLV';
+  /// zh-Hans: '转成 MP4 后保留原始录制文件'
+  String get keepSource => '转成 MP4 后保留原始录制文件';
 
   /// zh-Hans: '文件夹名用拼音'
   String get pinyinFolders => '文件夹名用拼音';

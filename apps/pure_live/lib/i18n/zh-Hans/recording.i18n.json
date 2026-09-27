@@ -36,7 +36,7 @@
     "needsLogin": "需要登录平台账号",
     "region": "当前地区无法观看",
     "noStream": "拿不到可录制的直播流",
-    "hlsOnly": "这个直播间只有暂不支持录制的 HLS 流",
+    "unsupportedFormat": "直播流的格式暂不支持录制（如 SAMPLE-AES 加密、音视频分开的 HLS）",
     "diskFull": "存储空间不足",
     "noPermission": "没有录制目录的写入权限",
     "directory": "录制目录不可用",

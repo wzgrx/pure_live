@@ -148,7 +148,7 @@ final Provider<RecordManager> recordManagerProvider = Provider<RecordManager>((r
     settings: recordSettingsFrom(settings),
     opener: httpRecordOpener(proxy: ref.watch(proxyPolicyProvider)),
     // Finished segments to MP4 in a background isolate (ADR 0021).
-    remuxer: const IsolateRemuxer(FlvToMp4Remuxer()),
+    remuxer: const IsolateRemuxer(Mp4Remuxer()),
     // Read per session, so switching the setting applies to the next one.
     transliterate: (text) => settings.get(Settings.recordPinyinFolders) ? pinyinFolderName(text) : text,
     chat: DanmakuRecordChat(sites, ref.watch(cookieVaultProvider), ref.watch(proxyPolicyProvider)),

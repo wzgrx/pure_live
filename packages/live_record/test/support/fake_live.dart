@@ -237,7 +237,9 @@ final class FakeRooms implements RecordRooms {
       lines: [
         for (final id in lines)
           StreamLine(
-            url: Uri.parse('https://$id.cdn.test/live/${requested.id}.flv?serial=$serial&token=secret'),
+            url: formats[id] == StreamFormat.hls
+                ? Uri.parse('https://$id.cdn.test/live/index.m3u8?serial=$serial&token=secret')
+                : Uri.parse('https://$id.cdn.test/live/${requested.id}.flv?serial=$serial&token=secret'),
             format: formats[id] ?? StreamFormat.flv,
             lineId: id,
             requested: requested,

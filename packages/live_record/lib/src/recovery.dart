@@ -4,6 +4,7 @@ import 'package:live_record/src/chat.dart';
 import 'package:live_record/src/files.dart';
 import 'package:live_record/src/flv/flv_repair.dart';
 import 'package:live_record/src/gaps.dart';
+import 'package:live_record/src/hls/hls_repair.dart';
 import 'package:live_record/src/naming.dart';
 import 'package:path/path.dart' as p;
 
@@ -17,11 +18,12 @@ Future<String> _freeName(RecordFiles files, String path) async {
 }
 
 /// Finishes the files of a session the app did not close (spec §14.1): every
-/// `<prefix>_NNN.flv.part` is cut after its last complete tag and renamed
-/// (one without media is deleted), every chat `.xml.part` gets its closing
-/// `</i>` and is renamed, an unfinished `.mp4.partial` is deleted, and
-/// `gaps.json` gets a `crash` entry of unknown length. Returns the session's
-/// FLV segments in order.
+/// `<prefix>_NNN.flv.part` is cut after its last complete tag, every
+/// `.ts.part` after its last whole HLS segment and every `.m4s.part` after
+/// its last whole fragment, and renamed (one without media is deleted);
+/// every chat `.xml.part` gets its closing `</i>` and is renamed, an
+/// unfinished `.mp4.partial` is deleted, and `gaps.json` gets a `crash`
+/// entry of unknown length. Returns the session's segments in order.
 Future<List<String>> recoverSession(RecordFiles files, SessionLayout layout, {required String room}) async {
   final names = (await files.list(layout.directory)).where((name) => name.startsWith('${layout.prefix}_')).toList()
     ..sort();
@@ -39,7 +41,17 @@ Future<List<String>> recoverSession(RecordFiles files, SessionLayout layout, {re
       await files.rename(path, target);
       segments.add(target);
       lastTimestamp = scan.lastTimestamp;
-    } else if (name.endsWith('.flv')) {
+    } else if (name.endsWith('.ts$partSuffix') || name.endsWith('.m4s$partSuffix')) {
+      final scan = await repairHlsRecording(files, path, fmp4: name.endsWith('.m4s$partSuffix'));
+      if (scan.media == 0) {
+        await files.delete(path);
+        continue;
+      }
+      final target = await _freeName(files, path.substring(0, path.length - partSuffix.length));
+      await files.rename(path, target);
+      segments.add(target);
+      lastTimestamp = scan.durationMs;
+    } else if (name.endsWith('.flv') || name.endsWith('.ts') || name.endsWith('.m4s')) {
       segments.add(path);
     } else if (name.endsWith('.xml$partSuffix')) {
       final text = utf8.decode(await files.read(path), allowMalformed: true);

@@ -38,7 +38,7 @@
     "needsLogin": "Sign in to the platform",
     "region": "Not available in your region",
     "noStream": "No recordable stream",
-    "hlsOnly": "This room only has HLS streams, which cannot be recorded yet",
+    "unsupportedFormat": "This stream's format cannot be recorded yet (such as SAMPLE-AES encryption or HLS with separate audio)",
     "diskFull": "Not enough storage",
     "noPermission": "No permission to write to the recording folder",
     "directory": "The recording folder is unavailable",

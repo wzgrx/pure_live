@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:clock/clock.dart';
@@ -10,117 +9,8 @@ import 'package:live_record/src/files.dart';
 import 'package:live_record/src/flv/flv_codec.dart';
 import 'package:live_record/src/gaps.dart';
 import 'package:live_record/src/naming.dart';
-import 'package:path/path.dart' as p;
-
-/// Limits of the FLV writer (spec §6.8). Defaults follow the spec.
-final class FlvWriterLimits {
-  /// Creates the limits.
-  const new({
-    this.queueBytes = 8 * 1024 * 1024,
-    this.flushInterval = const Duration(seconds: 1),
-    this.flushBytes = 1024 * 1024,
-    this.stallTimeout = const Duration(seconds: 30),
-    this.alignmentWindow = const Duration(seconds: 60),
-    this.audioOnlyAfter = 200,
-  });
-
-  /// Queued bytes above which [FlvSessionWriter.ready] makes the reader wait.
-  final int queueBytes;
-
-  /// Longest time between flushes while data arrives.
-  final Duration flushInterval;
-
-  /// Unflushed bytes that trigger a flush.
-  final int flushBytes;
-
-  /// A write or flush slower than this is a fatal disk stall.
-  final Duration stallTimeout;
-
-  /// A new connection whose first timestamp lies ahead of the written position
-  /// by at most this much keeps its timeline (spec §6.3).
-  final Duration alignmentWindow;
-
-  /// Audio tags without any video tag after which a stream announcing video
-  /// is recorded as audio only.
-  final int audioOnlyAfter;
-}
-
-/// One output file of a session.
-final class RecordedSegment {
-  new _(this.index, this.plannedPath);
-
-  /// 1-based segment number.
-  final int index;
-
-  /// Path the segment was planned under (`<prefix>_<NNN>.flv`).
-  final String plannedPath;
-
-  /// Final path; differs from [plannedPath] when that name was taken (`-1`, `-2`…).
-  String? _path;
-
-  /// Final path once the file is created.
-  String get path => _path ?? plannedPath;
-
-  /// File name of [path].
-  String get name => p.basename(path);
-
-  /// Bytes written (or queued for writing) to the file.
-  int bytes = 0;
-
-  /// Largest media timestamp in the file, in ms (file time starts at 0).
-  int durationMs = 0;
-
-  /// Whether the file was closed and renamed to [path].
-  bool closed = false;
-}
-
-/// Segment lifecycle notifications for companions such as the chat XML.
-sealed class SegmentEvent {
-  const new(this.segment);
-
-  /// The segment.
-  final RecordedSegment segment;
-}
-
-/// A segment started; its first media tag has file time 0.
-final class SegmentOpened extends SegmentEvent {
-  /// Creates the event.
-  const new(super.segment);
-}
-
-/// A segment was closed (its file is complete).
-final class SegmentClosed extends SegmentEvent {
-  /// Creates the event.
-  const new(super.segment);
-}
-
-sealed class _Op {
-  const new();
-}
-
-final class _Open extends _Op {
-  const new(this.segment);
-  final RecordedSegment segment;
-}
-
-final class _Write extends _Op {
-  const new(this.bytes);
-  final Uint8List bytes;
-}
-
-final class _Flush extends _Op {
-  const new();
-}
-
-final class _Close extends _Op {
-  const new(this.segment);
-  final RecordedSegment segment;
-}
-
-final class _Barrier extends _Op {
-  new();
-  final done = Completer<void>();
-}
+import 'package:live_record/src/segment_files.dart';
+import 'package:live_record/src/writer.dart';
 
 final class _Held {
   new(this.bytes, {required this.video, required this.fileTs});
@@ -144,8 +34,9 @@ final class _Held {
 /// file ends with them. Files are written as `<name>.part` and renamed when
 /// closed. Writes run in order in the background; [ready] applies
 /// backpressure past 8 MiB and a write stuck for 30 s is fatal.
-final class FlvSessionWriter {
-  /// Creates a writer for [layout]; nothing touches the disk until the first keyframe.
+final class FlvSessionWriter implements SessionWriter {
+  /// Creates a writer for [layout]; nothing touches the disk until the first
+  /// keyframe. Segments are numbered from [firstIndex].
   new({
     required this._files,
     required this.layout,
@@ -153,13 +44,13 @@ final class FlvSessionWriter {
     this.splitDuration,
     this.splitBytes,
     this.limits = const FlvWriterLimits(),
+    this.firstIndex = 1,
     this._onSegment,
-  }) {
-    _flushTimer = Timer.periodic(limits.flushInterval, (_) => _periodicFlush());
-  }
+  });
 
   final RecordFiles _files;
   final void Function(SegmentEvent event)? _onSegment;
+  late final _out = SegmentFiles(_files, limits, onClosed: (segment) => _onSegment?.call(SegmentClosed(segment)));
 
   /// Where the files go.
   final SessionLayout layout;
@@ -175,6 +66,9 @@ final class FlvSessionWriter {
 
   /// Limits.
   final FlvWriterLimits limits;
+
+  /// Number of the first segment (a session that switched from HLS continues its numbering).
+  final int firstIndex;
 
   final List<RecordedSegment> _segments = [];
   RecordedSegment? _segment;
@@ -208,38 +102,29 @@ final class FlvSessionWriter {
 
   final _anchors = <({DateTime wall, int fileTs})>[];
 
-  final _ops = ListQueue<_Op>();
-  var _queued = 0;
-  var _pumping = false;
-  RecordSink? _sink;
-  var _unflushed = 0;
-  DateTime _lastFlush = clock.now();
-  late final Timer _flushTimer;
-  Completer<void>? _readyWaiter;
-  final _failure = Completer<RecordFailure>();
-  RecordFailure? _failed;
   var _closed = false;
 
   /// Media tags written in the session.
+  @override
   int mediaTags = 0;
 
-  /// Bytes written (or queued) to segment files.
+  @override
   int get bytesWritten => _segments.fold(0, (sum, segment) => sum + segment.bytes);
 
-  /// Media time written, summed over segments.
+  @override
   Duration get mediaDuration => Duration(milliseconds: _segments.fold(0, (sum, segment) => sum + segment.durationMs));
 
-  /// Segments so far, the open one last.
+  @override
   List<RecordedSegment> get segments => List.unmodifiable(_segments);
 
   /// The segment being written, if any.
   RecordedSegment? get currentSegment => _segment;
 
-  /// Completes with the fatal error that stopped writing, if one happens.
-  Future<RecordFailure> get failure => _failure.future;
+  @override
+  Future<RecordFailure> get failure => _out.failure;
 
-  /// The fatal error, once there is one.
-  RecordFailure? get failed => _failed;
+  @override
+  RecordFailure? get failed => _out.failed;
 
   /// Typical frame duration from recent video timestamps (1000/30 ms by default).
   int get frameDuration {
@@ -248,16 +133,14 @@ final class FlvSessionWriter {
     return sorted[sorted.length ~/ 2];
   }
 
-  /// Completes when the write queue is below its limit (backpressure, §6.8).
-  Future<void> get ready {
-    if (_queued < limits.queueBytes || _failed != null || _closed) return Future.value();
-    return (_readyWaiter ??= Completer<void>()).future;
-  }
+  @override
+  Future<void> get ready => _closed ? Future.value() : _out.ready;
 
   /// Whether video tags without a picture are waiting for one (§6.7).
   bool get holdsPrefix => _held.any((held) => held.video);
 
   /// Completes when no prefix-only video tag is held, or after [max].
+  @override
   Future<void> waitForPicture(Duration max) {
     if (!holdsPrefix) return Future.value();
     final waiter = _pictureWaiter ??= Completer<void>();
@@ -266,6 +149,7 @@ final class FlvSessionWriter {
 
   /// Marks the start of a new upstream connection after the previous one was
   /// lost at [lostAt] for [reason]; its first media is aligned or rebased (§6.3).
+  @override
   void beginConnection({DateTime? lostAt, GapReason reason = GapReason.eof}) {
     if (_lastVideo == null && _lastAudio == null) return;
     // Prefix-only video of the lost connection has no picture to come.
@@ -307,6 +191,7 @@ final class FlvSessionWriter {
 
   /// File time in the current segment that corresponds to [wall] (chat
   /// timing, spec §17), clamped to what was written; null without a segment.
+  @override
   int? fileTimeAt(DateTime wall) {
     final segment = _segment;
     if (segment == null || _anchors.isEmpty) return null;
@@ -321,11 +206,11 @@ final class FlvSessionWriter {
 
   /// Adds one packet (a file header or a complete tag). Never throws.
   void add(Uint8List packet) {
-    if (_closed || _failed != null) return;
+    if (_closed || _out.failed != null) return;
     try {
       _add(packet);
     } on Object catch (error) {
-      _fail(RecordFailure(RecordErrorKind.inputDamaged, RecordStage.writer, 'bad packet: $error'));
+      _out.fail(RecordFailure(RecordErrorKind.inputDamaged, RecordStage.writer, 'bad packet: $error'));
     }
   }
 
@@ -533,14 +418,15 @@ final class FlvSessionWriter {
     _pendingVideoConfig = null;
     _pendingAudioConfig = null;
     _splitRequested = false;
-    final segment = RecordedSegment._(_segments.length + 1, layout.segment(_segments.length + 1));
+    final index = firstIndex + _segments.length;
+    final segment = RecordedSegment(index, layout.segment(index));
     _segments.add(segment);
     _segment = segment;
     _base = base;
     _anchors
       ..clear()
       ..add((wall: clock.now(), fileTs: 0));
-    _enqueue(_Open(segment));
+    _out.open(segment);
     _write(FlvTag.fileHeader(audio: _headerAudio ?? true, video: !_audioOnly && (_headerVideo ?? true)), 0);
     final script = _script;
     if (script != null) _write(FlvTag.withTimestamp(script, 0), 0);
@@ -551,9 +437,7 @@ final class FlvSessionWriter {
     _onSegment?.call(SegmentOpened(segment));
   }
 
-  void _closeSegment(RecordedSegment segment) {
-    _enqueue(_Close(segment));
-  }
+  void _closeSegment(RecordedSegment segment) => _out.close(segment);
 
   void _releaseHeld() {
     for (final held in _held) {
@@ -570,113 +454,17 @@ final class FlvSessionWriter {
     if (segment == null) return;
     segment.bytes += bytes.length;
     if (fileTs > segment.durationMs) segment.durationMs = fileTs;
-    _enqueue(_Write(bytes));
-  }
-
-  void _enqueue(_Op op) {
-    _ops.add(op);
-    if (op is _Write) _queued += op.bytes.length;
-    if (!_pumping) unawaited(_pump());
-  }
-
-  void _periodicFlush() {
-    if (_unflushed > 0 && _ops.isEmpty && !_pumping && _sink != null) _enqueue(const _Flush());
-  }
-
-  Future<void> _pump() async {
-    _pumping = true;
-    try {
-      while (_ops.isNotEmpty && _failed == null) {
-        final op = _ops.removeFirst();
-        final stall = Timer(limits.stallTimeout, () {
-          _fail(RecordFailure(RecordErrorKind.diskStalled, RecordStage.writer, 'write stalled'));
-        });
-        try {
-          await _run(op);
-        } on RecordFileExists catch (error) {
-          _fail(RecordFailure(RecordErrorKind.pathInvalid, RecordStage.writer, error.toString()));
-        } on FileSystemException catch (error) {
-          _fail(classifyFileError(error));
-        } on Object catch (error) {
-          _fail(RecordFailure(RecordErrorKind.pathInvalid, RecordStage.writer, error.toString()));
-        } finally {
-          stall.cancel();
-          if (op is _Write && _failed == null) {
-            _queued -= op.bytes.length;
-            if (_queued < limits.queueBytes) _wakeReady();
-          }
-        }
-      }
-    } finally {
-      _pumping = false;
-    }
-  }
-
-  Future<void> _run(_Op op) async {
-    switch (op) {
-      case _Open(:final segment):
-        final path = await uniquePath(_files, segment.plannedPath);
-        segment._path = path;
-        _sink = await _files.create('$path$partSuffix');
-        _unflushed = 0;
-        _lastFlush = clock.now();
-      case _Write(:final bytes):
-        final sink = _sink;
-        if (sink == null) return;
-        await sink.write(bytes);
-        _unflushed += bytes.length;
-        if (_unflushed >= limits.flushBytes || clock.now().difference(_lastFlush) >= limits.flushInterval) {
-          await sink.flush();
-          _unflushed = 0;
-          _lastFlush = clock.now();
-        }
-      case _Flush():
-        final sink = _sink;
-        if (sink == null || _unflushed == 0) return;
-        await sink.flush();
-        _unflushed = 0;
-        _lastFlush = clock.now();
-      case _Close(:final segment):
-        final sink = _sink;
-        _sink = null;
-        if (sink != null) {
-          await sink.flush();
-          await sink.close();
-          await _files.rename('${segment.path}$partSuffix', segment.path);
-        }
-        segment.closed = true;
-        _onSegment?.call(SegmentClosed(segment));
-      case _Barrier(:final done):
-        done.complete();
-    }
-  }
-
-  void _wakeReady() {
-    final waiter = _readyWaiter;
-    _readyWaiter = null;
-    if (waiter != null && !waiter.isCompleted) waiter.complete();
-  }
-
-  void _fail(RecordFailure failure) {
-    if (_failed != null) return;
-    _failed = failure;
-    for (final op in _ops) {
-      if (op is _Barrier && !op.done.isCompleted) op.done.complete();
-    }
-    _ops.clear();
-    _queued = 0;
-    _wakeReady();
-    _failure.complete(failure);
+    _out.write(bytes);
   }
 
   /// Ends the session's output: drops held prefix-only video tags (§6.7),
   /// drains the queue and closes and renames the open segment. After a fatal
   /// error it still tries to close and rename the open file, giving up after
   /// [giveUpAfter].
+  @override
   Future<List<RecordedSegment>> close({Duration giveUpAfter = const Duration(seconds: 10)}) async {
     if (_closed) return segments;
     _closed = true;
-    _flushTimer.cancel();
     for (final held in _held) {
       if (!held.video) _write(held.bytes, held.fileTs);
     }
@@ -686,29 +474,13 @@ final class FlvSessionWriter {
     if (waiter != null && !waiter.isCompleted) waiter.complete();
     final segment = _segment;
     _segment = null;
-    if (_failed == null) {
-      if (segment != null) _enqueue(_Close(segment));
-      final barrier = _Barrier();
-      _enqueue(barrier);
-      await barrier.done.future;
+    if (_out.failed == null) {
+      if (segment != null) _out.close(segment);
+      await _out.drain();
     }
-    if (_failed != null && segment != null && !segment.closed) {
-      // Best effort after a disk error: keep what reached the file.
-      try {
-        await Future(() async {
-          final sink = _sink;
-          _sink = null;
-          await sink?.close();
-          if (await _files.exists('${segment.path}$partSuffix')) {
-            await _files.rename('${segment.path}$partSuffix', segment.path);
-            segment.closed = true;
-          }
-        }).timeout(giveUpAfter);
-      } on Object {
-        // Left as .part; crash recovery finishes it at the next start.
-      }
-    }
-    _wakeReady();
+    // Best effort after a disk error: keep what reached the file.
+    if (_out.failed != null) await _out.salvage(segment, giveUpAfter);
+    _out.stop();
     return segments;
   }
 }

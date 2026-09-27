@@ -22,7 +22,7 @@ final class _Rig {
       root: '/rec',
       settings: settings,
       files: this.files,
-      opener: (_) => cdn.open,
+      opener: RecordOpener(flv: (_) => cdn.open),
       remuxer: remuxer,
       chat: chat,
     );

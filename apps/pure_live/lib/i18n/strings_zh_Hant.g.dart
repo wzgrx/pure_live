@@ -2577,7 +2577,7 @@ class Translations$recording$failure$zh_Hant implements Translations$recording$f
   @override
   String get noStream => '拿不到可錄製的直播串流';
   @override
-  String get hlsOnly => '這個直播間只有暫不支援錄製的 HLS 串流';
+  String get unsupportedFormat => '直播串流的格式暫不支援錄製（如 SAMPLE-AES 加密、影音分開的 HLS）';
   @override
   String get diskFull => '儲存空間不足';
   @override
@@ -3139,7 +3139,7 @@ class Translations$settings$record$zh_Hant implements Translations$settings$reco
   @override
   String get remuxMp4 => '錄完轉成 MP4';
   @override
-  String get keepFlv => '轉成 MP4 後保留原始 FLV';
+  String get keepSource => '轉成 MP4 後保留原始錄製檔案';
   @override
   String get pinyinFolders => '資料夾名稱使用拼音';
   @override

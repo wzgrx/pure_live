@@ -76,8 +76,9 @@ final class MediaCheck {
   final Map<String, String> payloadHashes;
 }
 
-/// MD5 of every decoded video frame of [path], in presentation order.
-Future<List<String>> decodedFrameHashes(String path) async {
+/// MD5 of every decoded video frame (or audio frame with [audio]) of
+/// [path], in presentation order.
+Future<List<String>> decodedFrameHashes(String path, {bool audio = false}) async {
   final result = await Process.run('ffmpeg', [
     '-v',
     'error',
@@ -85,7 +86,7 @@ Future<List<String>> decodedFrameHashes(String path) async {
     '-i',
     path,
     '-map',
-    '0:v',
+    if (audio) '0:a' else '0:v',
     '-fps_mode',
     'passthrough',
     '-f',
@@ -202,9 +203,9 @@ Future<MediaCheck?> checkMedia(String path) async {
   }
 }
 
-/// `live_cli remux <file.flv>…`: converts recorded FLV files to MP4 with the
-/// pure-Dart remuxer (or ffmpeg) and checks the result against the source
-/// with ffprobe and a full ffmpeg decode.
+/// `live_cli remux <file>…`: converts recordings (FLV, MPEG-TS, fragmented
+/// MP4) to MP4 with the pure-Dart remuxer (or ffmpeg) and checks the result
+/// against the source with ffprobe and a full ffmpeg decode.
 class RemuxCommand extends Command<int> {
   /// Creates the command.
   new() {
@@ -218,15 +219,15 @@ class RemuxCommand extends Command<int> {
   String get name => 'remux';
 
   @override
-  String get description => 'Remux FLV recordings to MP4 and check the result.';
+  String get description => 'Remux recordings (FLV, MPEG-TS, fragmented MP4) to MP4 and check the result.';
 
   @override
-  String get invocation => 'live_cli remux <file.flv>... [options]';
+  String get invocation => 'live_cli remux <file.flv|file.ts|file.m4s>... [options]';
 
   @override
   Future<int> run() async {
     final options = argResults!;
-    if (options.rest.isEmpty) usageException('Expected at least one FLV file.');
+    if (options.rest.isEmpty) usageException('Expected at least one recording.');
     final useFfmpeg = options.option('remuxer') == 'ffmpeg';
     final check = options.flag('check');
     var clean = true;
@@ -239,7 +240,7 @@ class RemuxCommand extends Command<int> {
       if (existing.existsSync()) existing.deleteSync();
       final size = File(input).lengthSync();
       final watch = Stopwatch()..start();
-      FlvRemuxResult? result;
+      RemuxResult? result;
       try {
         if (useFfmpeg) {
           await const FfmpegProcessRemuxer().remux(
@@ -252,7 +253,7 @@ class RemuxCommand extends Command<int> {
             ),
           );
         } else {
-          result = await remuxFlvToMp4(input: input, output: output);
+          result = await remuxRecording(input: input, output: output);
         }
       } on RemuxException catch (error) {
         stdout.writeln('${p.basename(input)}: FAIL $error');
@@ -282,59 +283,62 @@ class RemuxCommand extends Command<int> {
       stdout.writeln('  boxes         $order${faststart ? '' : '  ← moov not before mdat'}');
       clean = clean && faststart;
       if (!check) continue;
-      final flv = await checkMedia(input);
+      final source = await checkMedia(input);
       final mp4 = await checkMedia(output);
-      if (flv == null || mp4 == null) {
+      if (source == null || mp4 == null) {
         stdout.writeln('  check         skipped (ffprobe/ffmpeg not installed)');
         continue;
       }
       var ok = faststart;
       for (final type in const ['video', 'audio']) {
-        final a = flv.packets[type];
+        final a = source.packets[type];
         final b = mp4.packets[type];
         if (a == null && b == null) continue;
         final same = a == b;
         final back = mp4.backwards[type] ?? 0;
         ok = ok && same && back == 0;
         stdout.writeln(
-          '${'  $type'.padRight(16)}${mp4.codecs[type]} packets FLV $a / MP4 $b${same ? '' : ' ← differ'}, '
+          '${'  $type'.padRight(16)}${mp4.codecs[type]} packets source $a / MP4 $b${same ? '' : ' ← differ'}, '
           'MP4 duration ${mp4.durations[type]?.toStringAsFixed(3)} s, DTS backwards $back',
         );
       }
-      final delta = (flv.formatDuration - mp4.formatDuration).abs();
+      final delta = (source.formatDuration - mp4.formatDuration).abs();
       stdout
         ..writeln(
-          '  duration      FLV ${flv.formatDuration.toStringAsFixed(3)} s, MP4 ${mp4.formatDuration.toStringAsFixed(3)} s '
-          '(Δ ${(delta * 1000).round()} ms)',
+          '  duration      source ${source.formatDuration.toStringAsFixed(3)} s, '
+          'MP4 ${mp4.formatDuration.toStringAsFixed(3)} s (Δ ${(delta * 1000).round()} ms)',
         )
-        ..writeln('  decode        FLV ${_lines(flv.decodeErrors)}, MP4 ${_lines(mp4.decodeErrors)}')
-        ..writeln('  plain decode  FLV ${_lines(flv.plainOutput)}, MP4 ${_lines(mp4.plainOutput)} (-f null - as is)');
+        ..writeln('  decode        source ${_lines(source.decodeErrors)}, MP4 ${_lines(mp4.decodeErrors)}')
+        ..writeln(
+          '  plain decode  source ${_lines(source.plainOutput)}, MP4 ${_lines(mp4.plainOutput)} (-f null - as is)',
+        );
       for (final type in const ['video', 'audio']) {
-        final a = flv.payloadHashes[type];
+        final a = source.payloadHashes[type];
         if (a == null) continue;
         if (a == mp4.payloadHashes[type]) {
           stdout.writeln('${'  $type payload'.padRight(16)}identical (${a.split('=').last})');
-        } else if (type == 'video') {
-          // Annex B input: samples get length prefixes; compare the pictures instead.
-          final before = await decodedFrameHashes(input);
-          final after = await decodedFrameHashes(output);
+        } else {
+          // Annex B or ADTS input: samples get length prefixes, parameter sets
+          // move to the sample entry, ADTS headers go; compare what decodes.
+          final before = await decodedFrameHashes(input, audio: type == 'audio');
+          final after = await decodedFrameHashes(output, audio: type == 'audio');
+          // The decoder trims the last AAC frame by the container's end
+          // (ffmpeg's own -c copy MP4 differs there too): compare the others.
+          final compared = type == 'audio' ? before.length - 1 : before.length;
           final same =
-              before.length == after.length &&
-              Iterable<int>.generate(before.length).every((i) => before[i] == after[i]);
+              before.length == after.length && Iterable<int>.generate(compared).every((i) => before[i] == after[i]);
+          final last = type == 'audio' && same && before.isNotEmpty && before.last != after.last;
           stdout.writeln(
-            '${'  video payload'.padRight(16)}rewritten; decoded frames ${same ? 'identical' : 'DIFFER'} '
-            '(${before.length} / ${after.length})',
+            '${'  $type payload'.padRight(16)}rewritten; decoded frames ${same ? 'identical' : 'DIFFER'} '
+            '(${before.length} / ${after.length})${last ? ', the last one trimmed at the end' : ''}',
           );
           ok = ok && same;
-        } else {
-          stdout.writeln('${'  $type payload'.padRight(16)}DIFFER');
-          ok = false;
         }
       }
       for (final line in mp4.decodeErrors.split('\n').where((line) => line.isNotEmpty).take(5)) {
         stdout.writeln('    $line');
       }
-      ok = ok && mp4.decodeErrors.isEmpty && _count(mp4.plainOutput) <= _count(flv.plainOutput);
+      ok = ok && mp4.decodeErrors.isEmpty && _count(mp4.plainOutput) <= _count(source.plainOutput);
       stdout.writeln('  result        ${ok ? 'PASS' : 'FAIL'}');
       clean = clean && ok;
     }

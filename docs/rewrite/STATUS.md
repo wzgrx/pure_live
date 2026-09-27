@@ -11,7 +11,7 @@
 | 2 设计方向与设计系统 | 进行中：原则、设计系统、第一批页面稿已完成，待独立复核和图标重绘 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 完成：workspace、本机门禁、hooks、`live_cli`、`check_latest`；旧应用收进 `legacy/` | workspace、门禁、hooks、`live_cli`、`check_latest` | 本机门禁全绿（ADR 0014：构建和门禁在本机运行） |
 | 4 平台与网络层 | **完成**：5 个平台的解析器、适配器、`live_net` 和真实网络探针全部完成；3.x 不再发布（ADR 0014） | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过 |
-| 5 播放、弹幕、录制层 | 代码完成，待真机：`live_media`、`live_player`（ADR 0018）、`live_danmaku`（ADR 0019，现 17 个平台有弹幕）、弹幕渲染（ADR 0020）、`live_record`（ADR 0021，纯 Dart FLV→MP4、后台录制 ADR 0029）、`live_cast`（ADR 0027）；HLS 录制在做 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
+| 5 播放、弹幕、录制层 | 代码完成，待真机：`live_media`、`live_player`（ADR 0018）、`live_danmaku`（ADR 0019，现 17 个平台有弹幕）、弹幕渲染（ADR 0020）、`live_record`（ADR 0021，纯 Dart FLV→MP4、后台录制 ADR 0029）、`live_cast`（ADR 0027）；HLS 录制完成（ADR 0035） | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | 代码基本完成，待真机：全部一级页面、直播间（ADR 0023）、多画面、录制中心、IPTV（ADR 0024）、系统集成（ADR 0025）、开播提醒（ADR 0028）、账号与网页组件（ADR 0032）、设置八个分组；多语言完成（简体、繁体、英文，ADR 0034） | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
 | 7 其余平台、TV、桌面 | 进行中：第二批 5 个、第三批 23 个平台完成并接入（Bigo 有条件保留，经 HLS 中继解扰，ADR 0033）；TV 模式完成（ADR 0026）；Windows 外壳完成 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
 | 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除 `legacy/` |
@@ -100,6 +100,7 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 | 代理设置（统一代理、按平台）、关注分组、收藏分区、综合搜索 | 完成（播放器代理随直播间合并接入） | 主会话 |
 | 直播间完整化：弹幕列表与画面弹幕接入、屏蔽词、定时关闭、房间音量、纯音频、锁定、手势、快捷面板、切换直播间、竖屏适配、剧场模式、菜单 | 完成（ADR 0023）；录制按钮、本地弹幕输入、屏蔽即时移除在屏弹幕、画中画和后台返回重连弹幕已补；投屏在做 | 子代理 → 主会话 |
 | 录制（`live_record`）与录制中心、录制设置 | 完成（斗鱼真实录制 600 s 两次续期 0 缺口；回放不录）；纯 Dart 转 MP4 完成并接入（斗鱼、虎牙含 H.265、B 站真实录制验证，负载与原文件一致） | 子代理 → 主会话 |
+| HLS 录制（ADR 0035） | 完成：TS、fMP4、AES-128（内存解密）、BYTERANGE、LL-HLS 取整片，连续文件，纯 Dart 转 MP4；SOOP、Twitch、TwitCasting、B 站、PandaTV（强制续签）、CHZZK、SHOWROOM 实录 60–90 s 0 缺口、全解码无错；带配方的线路（Bigo 还原分片、按路径 Cookie）在下载器里处理。未做：SAMPLE-AES、音视频分离（niconico）、IPTV 连续 TS（§8）、10 分钟门禁 | 子代理 → 主会话 |
 | IPTV（独立模块 `live_iptv`，ADR 0024） | 完成 | 子代理 |
 | WebDAV、局域网同步、诊断包、首次启动向导、应用内更新、关于、分享口令 | 完成 | 子代理 |
 | Android 画中画、后台播放与通知、应用内小窗；Windows 单实例、新窗口、托盘、关闭行为、开机自启、系统媒体控制 | 完成（ADR 0025），已接入直播间 | 子代理 → 主会话 |

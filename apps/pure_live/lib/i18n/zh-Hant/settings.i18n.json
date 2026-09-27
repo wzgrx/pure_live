@@ -132,7 +132,7 @@
     "saveDanmaku": "同時儲存彈幕",
     "saveDanmakuSubtitle": "與影片同名的 XML 檔案",
     "remuxMp4": "錄完轉成 MP4",
-    "keepFlv": "轉成 MP4 後保留原始 FLV",
+    "keepSource": "轉成 MP4 後保留原始錄製檔案",
     "pinyinFolders": "資料夾名稱使用拼音",
     "pinyinFoldersSubtitle": "主播名稱轉成拼音作為資料夾名稱，方便在不支援中文的裝置上查看",
     "resumeOnStart": "啟動時繼續未完成的錄製",

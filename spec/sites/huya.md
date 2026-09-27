@@ -21,11 +21,12 @@
 | 房间号 | 链接路径第一段；列表 `profileRoom`；搜索 `room_id` | 房间身份、详情请求参数、网页链接 | huya_site.dart:221, 585, 728 |
 | 主播 UID | 详情 `profileInfo.uid` | 弹幕分组 `live:{uid}`、`chat:{uid}` | huya_site.dart:723-727；huya_danmaku.dart:135-149 |
 | 流的主播 UID | `baseSteamInfoList[].lPresenterUid`；缺失时依次用 `profileInfo.uid`、`lChannelId` | 原生 FLV 的签名 UID（第 6.2 节） | huya_site.dart:646-649, 394 |
-| topSid / subSid | `baseSteamInfoList[].lChannelId` / `lSubChannelId` | topSid 是头条留言板的 `lPid`；subSid 用于 App 深链 | huya_site.dart:632-637, 1056-1057；room_external_opener.dart:160-169 |
+| topSid / subSid | `baseSteamInfoList[]` 中第一个为正的 `lChannelId` / `lSubChannelId`，不管这条 CDN 在不在 `multiLine` 里；都没有时用顶层 `data.chTopId` / `data.subChId` | topSid 是头条留言板的 `lPid`；subSid 用于 App 深链 | huya_site.dart:632-637, 1056-1057；room_external_opener.dart:160-169；huya_parse.dart:285-295 |
 | yyid | 搜索结果 `yyid` | 把搜索里的直播间和主播条目对上 | huya_site.dart:858-868, 901 |
 
 - 旧实现直接用输入值作为详情里的房间号，不做规范化（huya_site.dart:711, 728）。
-- 旧实现的 topSid/subSid 取自最后一条匹配上的线路（huya_site.dart:632-637, 665-670）。同一房间各 CDN 的值是否总是相同 [待确认]。
+- 旧实现的 topSid/subSid 取自最后一条**在 `multiLine` 里匹配上**的线路（huya_site.dart:632-637, 665-670）。直播中但没有 `multiLine` 的房间因此取不到 topSid/subSid（都成了 0），头条留言也不拉（S05-ratearray，房间 30925595；DIAGNOSIS.md:94）。下播和回放房间没有 `stream`，只能用 `chTopId`/`subChId`（S06-off、S06-replay）。
+- 录到的 3 个直播间里，同一房间所有 CDN 的 `lChannelId`、`lSubChannelId` 都相同，并且等于 `chTopId`/`subChId`（S05-multicdn 6 条、S05-xingxiu 3 条、S05-ratearray 1 条）。是否总是如此 [待确认]。
 
 **可接受的输入**
 
@@ -36,9 +37,11 @@
 | 别名 | `https://www.huya.com/abc_1` | 接受 `[A-Za-z0-9_-]+` | web_search_room_parser.dart:138 |
 
 - `huya.com.example` 这类主机不是虎牙（web_search_room_parser.dart:171；huya_transport_policy_test.dart:56-62 对媒体主机做了同样的限制）。
-- 以下 [待确认]：别名能否直接请求详情，响应里哪个字段是规范的数字房间号；分享短链、`?roomid=` 查询参数形式、App 分享口令的真实格式。
+- 字母别名不能直接请求详情：`profileRoom&roomid=lpl` 返回 HTTP 200、`{"status":422,"message":"该主播不存在！","data":[]}`，和不存在的房间一样（S06-alias、S06-notfound）。
+- 规范的数字房间号在详情的 `data.profileInfo.profileRoom`，`data.liveData.profileRoom` 与它相同；可能是数字，也可能是数字字符串（S06-off 是 `"441195"`）（huya_parse.dart:305）。
+- 以下 [待确认]：别名怎样换成数字房间号（例如房间页是否跳转）；分享短链、`?roomid=` 查询参数形式、App 分享口令的真实格式。
 
-**归一流程**：去掉空白；拿到详情后，把房间身份换成规范的数字房间号，避免同一房间在关注和历史里出现两份（依赖上面的 [待确认]）。
+**归一流程**：去掉空白；拿到详情后，把房间身份换成 `profileInfo.profileRoom`，其次 `liveData.profileRoom`，都没有才用输入值，避免同一房间在关注和历史里出现两份。别名输入在找到换号办法之前按不存在处理（NotFound）。
 
 **外部打开**
 - 网页：`https://www.huya.com/{roomId}`（huya_site.dart:728；room_external_opener.dart:163）。
@@ -53,6 +56,7 @@
 
 - 一级分类固定四个：`1` 网游、`2` 单机、`8` 娱乐、`3` 手游（huya_site.dart:156-161）。
 - 二级分区：`GET https://live.cdn.huya.com/liveconfig/game/bussLive?bussType={一级 id}`。`data[]` 里每一项：`gid` 是数字，转成字符串作为分区 id；`gameFullName` 是名称（huya_site.dart:173-194）。
+- 数字可能写成小数：bussType 2、3、8 的 `gid`、`totalCount` 等字段是 `2165.0` 这样的浮点数，bussType 1 是整数（S01-buss2、S01-buss3、S01-buss8、S01-buss1）。分区 id 取整数部分，`2165.0` 记为 `"2165"`，不能写成 `"2165.0"`（huya_parse.dart:152-172）。
 - 分区图标：`https://huyaimg.msstatic.com/cdnimage/game/{gid}-MS.jpg`（huya_site.dart:187）。
 - 没有分页，一次返回全部。旧实现串行请求四个一级分类，并忽略分页参数（huya_site.dart:155-168）。v4 可以并发请求；任何一个失败，整体返回相应的 SiteFailure，不返回缺了一块的分类树。
 - `gid == 1663`（星秀）在旧实现里有标记（huya_site.dart:703），但全仓没有使用方。v4 不保留 [待确认是否有产品用途]。
@@ -60,7 +64,8 @@
 ### 2.2 分区房间与推荐
 
 - 请求：`GET https://www.huya.com/cache.php?m=LiveList&do=getLiveListByPage&tagAll=0&page={n}`。分区房间另加 `gameId={gid}`（huya_site.dart:198-206, 521-523）。推荐就是不带 `gameId` 的全站列表；排序依据 [待确认]。
-- 请求头：移动版 Chrome UA（huya_request_params.dart:5-6）；推荐另加 `Origin`、`Referer: https://www.huya.com/`（huya_site.dart:524-529）。旧实现还带了用户 Cookie。公开列表是否需要 Cookie [待确认]；v4 默认不带。
+- 请求头：移动版 Chrome UA（huya_request_params.dart:5-6）；推荐另加 `Origin`、`Referer: https://www.huya.com/`（huya_site.dart:524-529）。旧实现还带了用户 Cookie。公开列表不需要 Cookie：S02、S03 都是不带 Cookie 录的，正常返回。v4 不带。
+- 响应顶层 `status == 200`、`message`；`data` 有 `page`、`pageSize`、`totalPage`、`totalCount`、`time`、`datas`。`datas[]` 里的 `profileRoom`、`totalCount`、`gid` 是字符串（S02-page1）。
 - 响应 `data.datas[]` 转为房间卡片：
 
 | 卡片字段 | 来源 | 规则 | 证据 |
@@ -70,14 +75,20 @@
 | 封面 | `screenshot` | 不含 `?` 时追加 `?x-oss-process=style/w338_h190&`，取缩略图 | :212-215 |
 | 主播 | `nick`、`avatar180` | | :224, 228 |
 | 分区 | `gameFullName` | | :229 |
-| 人数 | `totalCount` | 这是热度，不是在线人数（第 4.3 节） | :225-227 |
+| 人数 | `datas[].totalCount` | 这是热度，不是在线人数（第 4.3 节） | :225-227 |
 | 状态 | — | 列表里的都算直播中 | :230-231 |
 
 ### 2.3 分页与结束判断
 
 - 页码从 1 开始。
-- 旧界面假定服务端每页固定 120 条，在本地切片显示（area_rooms_binding.dart:33-35；popular_controller.dart:69-71）。实际每页条数，以及 `data` 里有没有总页数字段 [待确认]。
-- v4 的游标是下一页页码。结束条件：到达服务端给出的总页数，或者 `datas` 为空。不按“条数少于某值”判断（01-sites.md ⑥）。
+- 旧界面假定服务端每页固定 120 条，在本地切片显示（area_rooms_binding.dart:33-35；popular_controller.dart:69-71）。
+- 实测每页 120 条（`data.pageSize` 为 120），`data.totalPage` 是总页数：
+  - 推荐：`totalPage` 73，第 1、2 页各 120 条，第 73 页 24 条（S02-page1、S02-page2、S02-last）；
+  - 热门分区（gameId 1）：`totalPage` 5，`totalCount` 544（S03-hot-page1、S03-hot-page2）；
+  - 冷门分区（gameId 1579）：`totalPage` 1，只有 1 条（S03-cold-page1）。
+- 越过最后一页：`datas` 为 `[]`，`totalPage` 变成 1（S02-beyond 第 74 页、S03-cold-page2 第 2 页）。所以越界页的 `totalPage` 不可信，只看 `datas` 是否为空。
+- 推荐列表的 `data.totalCount` 恒为 0（S02 四页都是）；分区列表的 `totalCount` 才是房间总数。v4 不用 `totalCount` 判断结束。
+- v4 的游标是下一页页码。结束条件：页码到达 `totalPage`，或者 `datas` 为空。不按“条数少于某值”判断（01-sites.md ⑥；huya_parse.dart:174-197）。
 - 旧推荐把所有异常包成 `Exception(e.toString())`（huya_site.dart:560-562）。v4 按第 9 节分类。
 
 ---
@@ -94,9 +105,13 @@
   - 分区 `gameName`；
   - 热度 `game_total_count`；
   - 另有 `uid`、`yyid`、`room_id`（huya_site.dart:891-918）。
-- 房间号：先在主播条目里找 `uid` 和 `yyid` 都相同的一项，用它的 `room_id`；找不到才用直播间条目自己的 `room_id`（huya_site.dart:858-868, 901；6c85c874“修复虎牙搜索”）。两者什么时候不同 [待确认]。
+- 房间号：先在主播条目里找 `uid` 和 `yyid` 都相同的一项，用它的 `room_id`；找不到才用直播间条目自己的 `room_id`（huya_site.dart:858-868, 901；6c85c874“修复虎牙搜索”）。录到的 3 个响应里能对上的条目（S04-results 20 条中 5 条、S04-fallback 15 条中 5 条），两边的 `room_id` 都相同；两者什么时候不同 [待确认]。
 - 只覆盖直播中的房间（search_capability.dart:123 `liveOnly`），结果都标为直播中（huya_site.dart:909-910）。
-- 游标是下一个 `start`。结束条件取决于响应里的总数字段（例如 `numFound`）[待确认]。`docs` 为空表示无结果，不是失败。
+- `response["3"]` 还有 `numFound`（总数）和 `start`（回显请求的偏移）（S04-results：“英雄联盟”共 101 条）。
+- **第 2 页会重复第 1 页**：`rows=20&start=20` 时，`docs` 有 40 条，前 20 条就是第 1 页的房间（S04-page2）。旧版把 40 条全部显示，第 2 页带回第 1 页的 20 个房间（DIAGNOSIS.md:92）。v4 的做法（huya_parse.dart:202-259）：
+  - `docs` 多于 `rows` 条时，跳过前 `start` 条；
+  - 同一个响应里重复的房间只保留第一次。
+- 游标是下一个 `start`（`start + rows`）。结束条件：`start + rows ≥ numFound`（S04-fallback 共 15 条，一页结束），或者跳过之后没有新条目。`docs` 为空表示无结果，不是失败（S04-empty）。
 
 ---
 
@@ -113,6 +128,10 @@
 ### 4.2 字段与直播状态
 
 成功条件：顶层 `status == 200`，并且 `data` 是对象（huya_site.dart:606-607）。
+
+房间不存在：HTTP 仍是 200，正文是 `{"status":422,"message":"该主播不存在！","data":[]}`，映射为 NotFound（S06-notfound，房间 999999999；huya_parse.dart:264-274）。字母别名也是 422（S06-alias，见第 1 节）。其它非 200 的 `status` 是 ApiChanged。旧版对 422 得到“状态未知”的房间或 FormatException。
+
+公开详情不需要 Cookie：S05、S06 都是不带 Cookie 录的。
 
 | 详情字段 | 来源 |
 |---|---|
@@ -131,14 +150,18 @@
 
 | 值 | 房间状态 |
 |---|---|
-| `ON` | 直播中 |
-| `REPLAY` | 回放（不算直播中） |
-| `OFF`、`OFFLINE`、`CLOSED` | 已下播，权威结论 |
-| 其它值或缺失 | 未知；不能当作下播 |
+| `ON` | 直播中（S05-multicdn 等） |
+| `REPLAY` | 回放（不算直播中）（S06-replay，房间 102411） |
+| `OFF`、`OFFLINE`、`CLOSED` | 已下播，权威结论（S06-off 是 `OFF`，房间 441195） |
+| 其它值或缺失 | **ApiChanged**。ADR 0010 的房间状态里没有“未知”，所以不返回房间，报接口变化；绝不能当作下播（huya_parse.dart:276-283） |
+
+- 响应还有 `realLiveStatus`，录到的样本里与 `liveStatus` 相同。
 
 - 只有表中明确的下播值，才能让录制停止、让关注标为未开播（huya_site.dart:745-749；233d858d；RECORDING_AUDIT_3_0_13.md:44）。
-- 下播时不解析线路，只返回元数据（huya_site.dart:609-611, 761-786）。
-- `ON` 但没有 `data.stream`：旧实现在录制路径抛格式错误（huya_site.dart:731-733），在普通路径退回播放器里上一次的房间（:734-741；01-sites.md ② 要求去掉）。v4 返回 StreamUnavailable。这种情况实际是否出现，`REPLAY` 是否带 `stream`、能否播放 [待确认]。
+- 下播时不解析线路，只返回元数据（huya_site.dart:609-611, 761-786）。下播响应没有 `stream`（S06-off）。
+- `REPLAY` 的响应没有 `stream`（S06-replay）。`liveData.hls` 和 `liveData.hlsUrl` 是一段录像的 m3u8（`videotx-platform.cdn.huya.com/…/liverecord/…m3u8?…scene=livereplay…&srckey=…`），v4 不播放它：取流返回 StreamUnavailable（huya_parse.dart:334-342）。旧版对 REPLAY 在三个入口得到三种结果：状态未知、FormatException、回放（DIAGNOSIS.md:93）。
+- `ON` 但没有 `data.stream`：旧实现在录制路径抛格式错误（huya_site.dart:731-733），在普通路径退回播放器里上一次的房间（:734-741；01-sites.md ② 要求去掉）。v4 返回 StreamUnavailable。这种情况实际是否出现 [待确认]，录到的直播间都有 `stream`。
+- `ON`、有 `stream` 但没有 `multiLine`：真实存在（S05-ratearray，房间 30925595）。`flv`、`hls` 下只有 `rateArray`，`baseSteamInfoList` 只有一条 AL。这时没有线路，取流返回 StreamUnavailable（第 5.2 节）；弹幕的 topSid/subSid 仍按第 1 节取得。
 - 请求失败、`status ≠ 200`、结构缺失都必须作为失败传出去，不能返回“状态未知的房间”（01-sites.md ③-1）。映射见第 9 节。
 
 ### 4.3 人数字段的含义
@@ -157,7 +180,8 @@
 
 ### 5.1 画质
 
-- 来源：`data.liveData.bitRateInfo`，可能是 JSON 字符串，也可能是数组。解析失败或缺失时用 `data.stream.flv.rateArray`（huya_site.dart:689-702）。
+- 来源：`data.liveData.bitRateInfo`，可能是 JSON 字符串，也可能是数组。解析失败或缺失时用 `data.stream.flv.rateArray`（huya_site.dart:689-702）。录到的是字符串（S05-multicdn、S05-xingxiu）和缺失（S05-ratearray，走 `rateArray`）；数组形式没有遇到。
+- 码率 0 的档位名称由服务端给，例如 `蓝光10M`、`蓝光8M`、`蓝光`（S05-multicdn、S05-xingxiu、S05-ratearray），不一定叫“原画”。每项还有 `iCodecType`、`iCompatibleFlag`、`iHEVCBitRate`，v4 不读。
 - 每一项有 `sDisplayName`（名称）和 `iBitRate`（kbps）。名称为空或码率为负的丢弃；同一码率只保留第一个（huya_site.dart:788-800）。
 - 列表为空时只提供一个“原画”（码率 0），不自己编造其它档位（huya_site.dart:246-252；huya_play_url_test.dart:537-544；cafdf384）。
 - 排序：码率 0（原画）在最前，其余按码率降序（huya_site.dart:268, 273）。
@@ -177,9 +201,10 @@
   - `sFlvAntiCode`、`sHlsAntiCode`；
   - `lPresenterUid`、`lChannelId`、`lSubChannelId`。
   - 证据：huya_site.dart:620-688。
-- 不在 `multiLine` 里的 `baseSteamInfoList` 项不列出，例如优先级为 −1 的 AL13（SESSION §11）。
+- 不在 `multiLine` 里的 `baseSteamInfoList` 项不列出，例如优先级为 −1 的 AL13（SESSION §11；S05-multicdn），以及 880351 的 AL（S05-xingxiu：`baseSteamInfoList` 有 AL、TX、HS，`multiLine` 只有 TX、HS）。
+- 直播中的房间也可能完全没有 `multiLine`（S05-ratearray）。一条线路都没有时返回 StreamUnavailable，不返回空列表（huya_parse.dart:389-430）。旧版静默返回 0 条线路（DIAGNOSIS.md:94）。
 - 顺序保留服务端给出的顺序。旧实现先列全部 FLV，再列全部 HLS（huya_site.dart:624-688）。不因平台不同就擅自改成 HLS 优先（SESSION §2 第 7 条）。
-- 已观测到的 CDN：AL、TX、HS、TX15、HS24，每个都同时提供 FLV 和 HLS（SESSION §11）。
+- 已观测到的 CDN：AL、TX、HS、TX15、HS24，每个都同时提供 FLV 和 HLS（SESSION §11；S05-multicdn 的顺序是 FLV 的 AL、TX、HS、TX15、HS24，再是 HLS 的同样 5 条）。
 - 媒体地址：`{基址}/{sStreamName}.{flv 或 m3u8}?{签名后的 AntiCode}`（huya_site.dart:437-445）。
 - 基址是 `http://` 并且主机属于 `huya.com` 时改成 `https://`；其它主机不改（huya_site.dart:510-516；huya_play_url_test.dart:81-84）。
 
@@ -254,6 +279,13 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 **与网页身份隔离**：原生契约的 UID、tId 不能和网页后备的观众身份、Cookie 混用（huya_site.dart:430-431；SESSION 开头的说明）。
 
 ### 6.3 网页后备（仅 FLV）
+
+**房间 AntiCode 的现状**（2026-09-27 录制）：`sFlvAntiCode` 和 `sHlsAntiCode` 都是 `wsSecret=…&wsTime=…&fm=…&ctype=tars_mp&fs=bgct&t=102` 的形式（S05-multicdn、S05-xingxiu、S05-ratearray）。
+- `wsSecret` 已经由服务端签好，同时仍带 `fm` 模板。同一房间不同 CDN 的 `wsSecret` 不全相同（S05-multicdn 的 6 条里有两组）。
+- `wsTime` 约为请求时刻 + 86400 秒（S05-multicdn：`6aba3701`，比请求时刻晚 86401 秒）。
+- `ctype=tars_mp`、`t=102` 不满足原生条件（第 5.3 节），属于网页家族。
+- 因为带 `fm`，下面第 1 步“原样使用”不适用，照第 2 步用观众身份重新签名，服务端的 `wsSecret` 在第 6.4 节第 9 步被替换。
+- 服务端签好的原样地址能不能直接播放、能维持多久 [待确认]。`multiLine[].url` 里就是服务端拼好的完整地址，v4 只用它判断线路是否存在（第 5.2 节）。
 
 原生失败时按下面顺序处理（huya_site.dart:402-435）：
 
@@ -442,11 +474,12 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 |---|---|---|
 | 连接、DNS、TLS 失败或超时（HTTP、WUP、WebSocket） | 各处抛通用异常 | Network |
 | 用户取消 | 没有统一的取消 | Cancelled；取消只关闭自己的请求 |
-| 详情 `status ≠ 200` 或 `data` 缺失 | 录制路径抛 FormatException；普通路径退回旧房间（huya_site.dart:731-741, 828-830） | 房间不存在 → NotFound（响应特征 [待确认]）；其余 → ApiChanged |
+| 详情 `status ≠ 200` 或 `data` 缺失 | 录制路径抛 FormatException；普通路径退回旧房间（huya_site.dart:731-741, 828-830）；422 时得到“状态未知”的房间 | `status == 422`（HTTP 200，`该主播不存在！`；不存在的房间和字母别名都是）→ NotFound（S06-notfound、S06-alias）；其余 → ApiChanged |
+| 列表、详情等接口返回 HTTP 429 / 5xx / 其它非 200 | 通用异常 | RateLimited / Network / ApiChanged（huya_parse.dart:56-62）。虎牙的业务错误都在 HTTP 200 的正文里 |
 | `liveStatus` 是 OFF/OFFLINE/CLOSED | 返回下播房间 | 房间状态“下播”，不是失败 |
-| `liveStatus` 是 REPLAY | 标为回放 | 房间状态“回放”，不是失败 |
-| `liveStatus` 是其它值 | 状态未知 | 房间状态“未知”；既不是失败，也不是下播 |
-| `ON` 但没有 `stream`，或者一条可用线路都没有 | 抛错或返回空列表（huya_site.dart:731-733, 301-305） | StreamUnavailable |
+| `liveStatus` 是 REPLAY | 三个入口三种结果（DIAGNOSIS.md:93） | 房间状态“回放”，不是失败；取流 → StreamUnavailable（响应没有 `stream`，S06-replay） |
+| `liveStatus` 是其它值或缺失 | 状态未知 | ApiChanged（ADR 0010 没有“未知”状态）；绝不是下播 |
+| `ON` 但没有 `stream`，或者一条可用线路都没有（例如没有 `multiLine`，S05-ratearray） | 抛错或返回空列表（huya_site.dart:731-733, 301-305） | StreamUnavailable |
 | 单条线路签名失败：模板缺占位符、没有 wsTime、`sFlvToken` 为空、Tars 解码失败、WUP 返回码 ≠ 0 | 丢弃这条线路（huya_site.dart:291-300） | 只丢这一条。全部失败时：原因属于结构问题 → ApiChanged；否则 → StreamUnavailable |
 | AntiCode 已过期 | 抛 StateError，走后备（huya_site.dart:1087-1089） | 重新取详情再签；仍然过期 → ApiChanged。是否可能是本机时钟偏差 [待确认] |
 | 原生 WUP 失败 | 回退网页（huya_site.dart:398-400） | 不上报，回退网页，记一次诊断计数 |
@@ -501,24 +534,26 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 - 每个样本记录：URL、抓取时间、直连还是经 Clash、原始内容的 SHA-256、做过脱敏的字段（06-tests.md ⑥-1）。
 - 媒体数据本身不入库，只保存首字节和统计值（06-tests.md:108）。
 
-**要录制的样本**
+**样本清单与录制情况**
 
-| 编号 | 内容 | 请求 | 份数 | 用途 |
-|---|---|---|---|---|
-| S01 | 分区 | `bussLive`，bussType = 1、2、8、3 | 4 | 分类树 |
-| S02 | 推荐 | `getLiveListByPage` 第 1、2 页和末页 | 3 | 卡片字段；每页条数；有无总页数字段 |
-| S03 | 分区房间 | 同上加 `gameId`，一个热门分区、一个冷门分区 | 各 2 页 | 同上 |
-| S04 | 搜索 | `getSearchContent v=4`：有结果、无结果、第 2 页；尽量包含 `room_id` 与主播条目不一致的例子 | 3–4 | 房间号映射；结束条件 |
-| S05 | 详情（直播中） | `profileRoom`：多 CDN 房间（如 660000）；`bitRateInfo` 为字符串、为数组、缺失（走 `rateArray`）各一 | 3 | 线路、画质、状态、热度 |
-| S06 | 详情（非直播） | OFF、REPLAY、不存在的房间、字母别名房间 | 4 | 状态；NotFound；规范房间号 |
-| S07 | 匿名登录 | `anonymousLogin` 成功的响应 | 1 | 观众身份 |
-| S08 | 原生 WUP | `getCdnTokenInfoEx` 的请求字节和响应字节：至少两个不同流名；另录一个返回码 ≠ 0 的 | ≥3 | Tars 编解码；租期 |
-| S09 | 网页 WUP | `getCdnTokenInfoEx`：匿名、账号各一 | 2 | 网页后备 |
-| S10 | 头条留言板 | `getHeadLineMessageBoard`：空的、有条目的 | 2 | 醒目留言解析 |
-| S11 | 弹幕 | 高密度房间 60 秒原始帧：客户端的 16、20；服务端的 7 和 22（uri 1400、8006、2001314 以及未知 uri） | ≥1 | 解码；分组 id 的实际取值 |
-| S12 | 各线路地址 | 每个 CDN 分别取原生 FLV、网页 FLV、HLS：最终地址（查询串脱敏）、HTTP 状态、Content-Type、前 16 字节；HLS 的 Range 响应 | 每房间 3 × CDN 数 | 线路身份；格式识别 |
-| S13 | 连接寿命 | 同一房间：网页 FLV 和 HLS 单连接读到结束；原生 FLV 读 ≥ 420 秒；签发 90 秒后才打开的网页地址 | 各 1 次，只存时长、字节数、状态码 | 租期参数 |
-| S14 | 房间页（可选） | `https://www.huya.com/{room}` 里的 `stream:` 数据块 | 1 | 探针用的备用来源（tool/probes/huya_native_transport_probe_test.dart:28-48） |
+2026-09-27 直连录制，共 23 个目录，都不带 Cookie。每个样本都有 `body.json`、`meta.json` 和旧版期望值 `expected.json`（生成入口见 test/fixtures_expected/huya_test.dart）；v4 解析器的测试是 packages/live_core/test/sites/huya_parse_test.dart。
+
+| 编号 | 内容 | 请求 | 份数 | 用途 | 已录制 |
+|---|---|---|---|---|---|
+| S01 | 分区 | `bussLive`，bussType = 1、2、8、3 | 4 | 分类树 | `S01-buss1`、`S01-buss2`、`S01-buss8`、`S01-buss3` |
+| S02 | 推荐 | `getLiveListByPage` 第 1、2 页和末页 | 3 | 卡片字段；每页条数；有无总页数字段 | `S02-page1`、`S02-page2`、`S02-last`（第 73 页）、`S02-beyond`（第 74 页） |
+| S03 | 分区房间 | 同上加 `gameId`，一个热门分区、一个冷门分区 | 各 2 页 | 同上 | `S03-hot-page1`、`S03-hot-page2`（gameId 1）、`S03-cold-page1`、`S03-cold-page2`（gameId 1579） |
+| S04 | 搜索 | `getSearchContent v=4`：有结果、无结果、第 2 页；尽量包含 `room_id` 与主播条目不一致的例子 | 3–4 | 房间号映射；结束条件 | `S04-results`、`S04-page2`、`S04-empty`、`S04-fallback`（有条目对不上主播、退回自身 `room_id`）。**缺** `room_id` 不一致的例子：没有遇到 |
+| S05 | 详情（直播中） | `profileRoom`：多 CDN 房间（如 660000）；`bitRateInfo` 为字符串、为数组、缺失（走 `rateArray`）各一 | 3 | 线路、画质、状态、热度 | `S05-multicdn`（660000）、`S05-xingxiu`（880351，星秀）、`S05-ratearray`（30925595，缺 `bitRateInfo`，也没有 `multiLine`）。**缺** `bitRateInfo` 为数组的房间：没有遇到 |
+| S06 | 详情（非直播） | OFF、REPLAY、不存在的房间、字母别名房间 | 4 | 状态；NotFound；规范房间号 | `S06-off`（441195）、`S06-replay`（102411）、`S06-notfound`（999999999）、`S06-alias`（lpl） |
+| S07 | 匿名登录 | `anonymousLogin` 成功的响应 | 1 | 观众身份 | **缺**：响应里匿名 UID 的键也叫 `uid`，和要保留的主播 UID 同名，现有脱敏规则按键替换会误伤主播数据（tools/live_cli/lib/src/fixture/rules/huya.dart:18-19） |
+| S08 | 原生 WUP | `getCdnTokenInfoEx` 的请求字节和响应字节：至少两个不同流名；另录一个返回码 ≠ 0 的 | ≥3 | Tars 编解码；租期 | **缺**：`live_cli fixture capture` 的请求体是文本参数（tools/live_cli/lib/src/fixture/command.dart:30），响应按 UTF-8 文本保存（capture.dart:159），还录不了 Tars 二进制 |
+| S09 | 网页 WUP | `getCdnTokenInfoEx`：匿名、账号各一 | 2 | 网页后备 | **缺**：同 S08；账号那一份还需要登录 Cookie |
+| S10 | 头条留言板 | `getHeadLineMessageBoard`：空的、有条目的 | 2 | 醒目留言解析 | **缺**：同 S08 |
+| S11 | 弹幕 | 高密度房间 60 秒原始帧：客户端的 16、20；服务端的 7 和 22（uri 1400、8006、2001314 以及未知 uri） | ≥1 | 解码；分组 id 的实际取值 | **缺**：还没有 WebSocket 帧的录制方式（docs/rewrite/STATUS.md:37） |
+| S12 | 各线路地址 | 每个 CDN 分别取原生 FLV、网页 FLV、HLS：最终地址（查询串脱敏）、HTTP 状态、Content-Type、前 16 字节；HLS 的 Range 响应 | 每房间 3 × CDN 数 | 线路身份；格式识别 | **缺**：需要先签名（原生地址还依赖 S08 的 WUP），也还没有媒体首字节的录制方式（STATUS.md:37） |
+| S13 | 连接寿命 | 同一房间：网页 FLV 和 HLS 单连接读到结束；原生 FLV 读 ≥ 420 秒；签发 90 秒后才打开的网页地址 | 各 1 次，只存时长、字节数、状态码 | 租期参数 | **缺**：同 S12 |
+| S14 | 房间页（可选） | `https://www.huya.com/{room}` 里的 `stream:` 数据块 | 1 | 探针用的备用来源（tool/probes/huya_native_transport_probe_test.dart:28-48） | 未录（可选） |
 
 **脱敏**
 - 删除：Cookie（请求头里的和 tId.sCookie 里的）、yyuid、匿名 UID、sGuid、wsSecret、seqid、u、uid、uuid。
@@ -526,6 +561,10 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
   - `fm` 换成人工模板，保留 base64 编码、分隔符和 `$0`–`$3` 的位置。解码后的真实模板里有没有敏感内容 [待确认]；
   - `sFlvToken` 和各 AntiCode 按同样方式重建；
   - wsTime 平移到样本的固定时钟，保留十六进制格式和它与 iExpireTime 的相对关系。
+- 实际录制与上面的差别（tools/live_cli/lib/src/fixture/rules/huya.dart:6-40）：
+  - `fm` 和 `wsSecret` 按字符替换，保留长度和字符类别，但替换后的 `fm` 已经不是能解码的模板；需要可签名的模板时，测试里另行构造；
+  - `wsTime` 保留真实值，没有平移，因为租期要按它计算；
+  - 另外替换了 REPLAY 录像 m3u8 的 `srckey`（S06-replay）和封面地址里的 COS `sign`。
 - 保留（公开数据）：CDN 类型和主机、流名、主播 UID、lChannelId、lSubChannelId、房间号、热度、分区。
 - 弹幕：发送者 uid 和昵称换成稳定的假名；保留消息 id 的顺序。
 
@@ -550,7 +589,7 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 | `HuyaDanmaku().getJoinData(uid)`、`heartbeatData`、`decodeMessage(帧)` 加 onMessage 收集 | huya_danmaku.dart:77-83, 135-149, 171-228 | 弹幕编解码 |
 | `getHuyaSuperChatMessageList(lPid:, first:, clientFactory:)` | huya_utils.dart:31-97 | 注入客户端即可回放 S10 |
 
-分类、列表、搜索、详情的解析写在联网方法内部，没有静态入口（huya_site.dart:173-237, 519-743, 870-920）。要用旧代码生成期望值，需要替换全局 HTTP 客户端的 Dio 适配器来回放样本（做法见 test/cc_catalog_test.dart:58-75），并注册设置服务提供空 Cookie。成本是否值得 [待确认]；不值得的话按本规格手写期望值。
+分类、列表、搜索、详情的解析写在联网方法内部，没有静态入口（huya_site.dart:173-237, 519-743, 870-920）。期望值已按“替换 Dio 适配器回放样本”的办法生成：test/fixtures_expected/huya_test.dart 调用 `getCategores`、`getCategoryRooms`、`getRecommendRooms`、`searchRooms`、`getRoomDetail`、`getRoomDetailForRecording`、`getRoomDetailForRefresh`（见各样本 expected.json 的 `generator`）。
 
 ---
 
@@ -558,23 +597,23 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 
 | # | 问题 | 怎么查 |
 |---|---|---|
-| 1 | 字母别名能否直接请求详情，响应里哪个字段是规范的数字房间号；分享短链、`?roomid=` 形式、App 分享口令 | S06，并收集真实分享文本 |
-| 2 | 列表每页的实际条数；有无总页数字段；推荐的排序依据 | S02、S03 |
-| 3 | 搜索的总数字段；`livestate`、`typ`、`v` 的含义；直播间条目的 `room_id` 何时和主播条目不同 | S04 |
-| 4 | 房间不存在时 `profileRoom` 的响应；`ON` 却没有 `stream` 是否真实出现；`REPLAY` 是否带 `stream`、能否播放 | S05、S06 |
-| 5 | 同一房间各 CDN 的 `lChannelId`、`lSubChannelId` 是否总相同；头条留言的 `lPid` 用 topSid 是否正确 | S05、S10 |
+| 1 | ~~字母别名能否直接请求详情~~：不能，返回 `status:422`（S06-alias）。~~哪个字段是规范房间号~~：`profileInfo.profileRoom`（第 1 节）。仍待确认：别名怎样换成数字房间号；分享短链、`?roomid=` 形式、App 分享口令 | 试房间页跳转；收集真实分享文本 |
+| 2 | ~~列表每页的实际条数；有无总页数字段~~：每页 120 条，`data.totalPage` 是总页数，越界页 `datas` 为空、`totalPage` 为 1；推荐的 `totalCount` 恒为 0（S02、S03，第 2.3 节）。仍待确认：推荐的排序依据 | — |
+| 3 | ~~搜索的总数字段~~：`response["3"].numFound`；第 2 页会带回第 1 页，要跳过前 `start` 条（S04，第 3 节）。仍待确认：`livestate`、`typ`、`v` 的含义；直播间条目的 `room_id` 何时和主播条目不同（录到的都相同） | 补录 S04 |
+| 4 | ~~房间不存在时 `profileRoom` 的响应~~：HTTP 200 加 `status:422`（S06-notfound）。~~`REPLAY` 是否带 `stream`~~：不带，`liveData.hls` 是录像 m3u8，v4 不播（S06-replay）。另发现 `ON` 但没有 `multiLine` 的房间（S05-ratearray）。仍待确认：`ON` 却完全没有 `stream` 是否真实出现 | S05 |
+| 5 | 同一房间各 CDN 的 `lChannelId`、`lSubChannelId` 是否总相同：录到的 3 个房间都相同，且等于 `chTopId`/`subChId`（第 1 节），还需更多房间确认；头条留言的 `lPid` 用 topSid 是否正确 | 更多 S05；S10 |
 | 6 | App 深链里 channelid、liveuid 是否应分别是 topSid 和主播 UID（旧实现都填 subSid） | 用真实 App 测试 |
 | 7 | 原生签名必须用主播 UID 吗；用观众 UID 或 0 会怎样 | S12、S13 的对照变体 |
 | 8 | 原生 `sFlvToken` 的完整字段；`iExpireTime` 在不同房间和 CDN 下的取值 | S08 |
 | 9 | WUP 返回码表，以及各码对应的 SiteFailure | S08、S09 |
 | 10 | HTTP UA 的 `7090000` 和 tId 的 `7060000` 是否需要一致；网页 FLV 和 HLS 是否要用浏览器 UA | S12，换 UA 对照 |
-| 11 | CDN 是否需要 Referer 和 Cookie；列表、详情接口是否需要 Cookie。不需要的话 v4 不再发送账号 Cookie | S02、S05、S12，带与不带对照 |
+| 11 | CDN 是否需要 Referer 和 Cookie。~~列表、详情接口是否需要 Cookie~~：不需要，S01～S06 都不带 Cookie 录制 | S12，带与不带对照 |
 | 12 | 100/125 秒在其它房间、其它 CDN、登录状态下是否成立；原生 FLV 的连接最长能维持多久 | S13，多房间、多 CDN |
 | 13 | 本机时钟偏差超过 5 分钟时会误判“已过期”，是否需要用服务器时间校准 | 人为调整时钟做实验 |
 | 14 | CDN 403 能否区分为签名错误、风控或 IP 限制；有没有限流信号（#846 的连续失败） | S12 故障变体；批量刷新关注时抓包 |
 | 15 | 有没有密码房、付费房、地区限制房，以及它们的响应（对应 NeedLogin、AgeOrPaid、RegionRestricted） | 找真实房间 |
 | 16 | 弹幕：命令 22 的分组 id 实际取值；握手是否必须带 `Origin`；主播 UID 缺失时怎么办；聊天发送者结构里 `lMid` 的正确 tag；礼物、进场等 uri 是否需要 | S11 |
 | 17 | 有没有接口可以校验 Cookie 是否仍然有效 | 用维护者账号抓包 |
-| 18 | 解码后的真实 `fm` 模板有没有敏感内容，决定脱敏方式 | S05、S08 |
+| 18 | 解码后的真实 `fm` 模板有没有敏感内容。录制时 `fm` 按秘密值整体替换（第 11 节），这个问题没有回答；另外房间 AntiCode 现在自带服务端签好的 `wsSecret`（第 6.3 节），原样地址能否直接播放 | S05、S08；S12 |
 | 19 | 星秀（gid 1663）的标记有没有产品用途 | 产品确认 |
 | 20 | 是否需要“包含未开播主播”的搜索（旧的 `v=1` 接口，字段 `gameLiveOn`） | 产品确认 |

@@ -27,12 +27,12 @@
 
 - 保留段不是房间，例如 `search`、`topic`、`directory`、`video`、`user`、`index`、`login`（web_search_room_parser.dart:40-59；web_search_room_parser_test.dart:37；toolbox_link_detection_test.dart:45）。
 - 斗鱼没有短链跳转。
+- 别名不能直接用于详情接口：`betard/lpl` 返回 HTTP 403 的 Tengine HTML 页（S05-alias-betard）。别名的房间页 `https://www.douyu.com/<别名>` 返回 302，`Location` 是相对路径 `/<rid>`（S05-alias-redirect：`/lpl` → `/288016`）。
 - 以下几点 [待确认]：
-  - 别名能否直接用于详情接口，并换回数字 `room_id`。
   - App 分享、`m.douyu.com` 分享的真实格式。
   - `…/topic/…?rid=` 这类专题页链接。
 
-**归一流程**：去掉空白；如果是别名，先请求详情换成数字 rid；之后一律使用数字 rid。
+**归一流程**：去掉空白；如果是别名，请求房间页、不跟随跳转，从 302 的 `Location` 取第一段数字作为 rid（相对路径按 `https://www.douyu.com/` 解析）；不是 302 或取不到数字时报 NotFound（douyu_site.dart:275-290）。之后一律使用数字 rid。旧版把别名直接传给 betard，别名链接必然打不开（docs/rewrite/DIAGNOSIS.md:89）。
 
 **外部打开**（room_external_opener.dart:170-173；room_external_opener_test.dart:60）：
 - 网页：`https://www.douyu.com/<rid>`
@@ -53,7 +53,9 @@
 ### 2.2 分区房间
 
 - 请求：GET `https://www.douyu.com/gapi/rkc/directory/mixList/2_<cate2Id>/<page>`，page 从 1 开始（:126-154）。
-- 只保留 `data.rl[]` 中 `type == 1` 的条目。其它 type 的含义 [待确认]。
+- 响应顶层是 `code`、`msg`、`data`；`data` 有 `ct`、`rl`、`pgcnt`。
+- 每页 120 条；`data.pgcnt` 是总页数（英雄联盟分区：第 1 页 120 条、第 6 页 24 条、第 7 页 `rl` 为空，三页的 `pgcnt` 都是 6；S02-mixlist-page1、S02-mixlist-last、S02-mixlist-beyond）。
+- 只保留 `data.rl[]` 中 `type == 1` 的条目。录到的两页 144 条全是 `type == 1`，其它 type 的含义 [待确认]。
 - 字段：
 
 | 字段 | 含义 |
@@ -64,23 +66,26 @@
 | `rs16` | 封面 |
 | `ol` | 热度（见 §4） |
 | `c2name` | 分区名 |
-| `av` | 头像路径，拼成 `https://apic.douyucdn.cn/upload/<av>_middle.jpg`；为空则没有头像 |
+| `av` | 头像路径，例如 `avatar_v3/202602/ba65…`，拼成 `https://apic.douyucdn.cn/upload/<av>_middle.jpg`；为空则没有头像（S02-mixlist-page1） |
 
 - 列表中的条目一律视为直播中。
 
 ### 2.3 推荐
 
 - 请求：GET `https://www.douyu.com/japi/weblist/apinc/allpage/6/<page>`（:446-479）。
-- 与分区房间相同：取 `rl`，过滤 `type == 1`，字段一致。
-- 旧实现把推荐页的 `av` 原样当作头像 URL（:468），与分区页的处理不一致。`av` 在这里是否已经是完整 URL [待确认]。
+- 响应顶层是 `error`、`msg`、`data`、`redirectUrl`；`data` 只有 `pgcnt`、`rl`。
+- 与分区房间相同：取 `rl`，过滤 `type == 1`，字段一致，只有 `av` 不同。
+- 每页 40 条；`pgcnt` 恒为 0（第 1 页 40 条、第 218 页 12 条、第 1000 页 `rl` 为空，三页都是 0；S03-allpage-page1、S03-allpage-last、S03-allpage-beyond）。
+- `av` 在这里已经是完整 URL，例如 `https://apic.douyucdn.cn/upload/avatar_v3/202505/6db2…_middle.jpg`，原样使用，不再拼接（S03-allpage-page1）。旧实现原样使用是对的（:468）。
 
 ### 2.4 分页与结束判断
 
 - 游标内部保存页号，对外是不透明游标。
 - 旧应用的做法有缺陷，v4 不沿用：它假设服务端每页固定 40 条，过滤后不足 40 条就判定到底（area_rooms_binding.dart:30-31；popular_controller.dart:65-66；server_fixed_page_controller.dart:153-166）。由于先过滤掉了 `type != 1`，这样会提前结束。
-- v4 只根据服务端信号判断结束，不按条数判断（01-sites.md ⑥）：
+- v4 只根据服务端信号判断结束，不按条数判断（01-sites.md ⑥；douyu_parse.dart:65-84）：
   - `rl` 为空；
-  - 或页号达到服务端给出的总页数。总页数字段疑似 `data.pgcnt` [待确认，需要样本]。
+  - 或页号达到 `data.pgcnt`（只对 mixList 有效）。`pgcnt` 为 0 时（allpage）只能靠空 `rl` 结束。
+  - 两个接口每页条数不同（120 和 40），这也说明不能按固定条数判断。
 - 某一页请求失败时，已加载的页保留，报告失败，不当作“已到底”（server_fixed_page_controller.dart:142-149）。
 
 ---
@@ -96,25 +101,41 @@
 | 字段 | 含义 |
 |---|---|
 | `rid` | 房间号 |
-| `roomName` | 标题 |
+| `roomName` | 标题。可能含 HTML 实体，例如 `【CSTG】今天休&nbsp;陪家人过节`，必须先解码（S04-search-page2）。旧版没有解码（DIAGNOSIS.md:91） |
 | `roomSrc` | 封面 |
 | `cateName` | 分区 |
 | `avatar` | 头像 |
 | `nickName` | 主播名 |
-| `hot` | 热度 |
+| `hot` | 热度，是文本，例如 `"353.9万"`、`"24"`，按中文数量解析（S04-search-page1、S04-search-mixed） |
 | `isLive`、`roomType` | 直播状态，见下 |
 
-- 直播状态：`isLive == 1 && roomType == 0` 为直播中，其余为未开播。未开播的结果也返回，能力标为“直播与未开播”（search_capability.dart:122）。`roomType` 非 0 的含义 [待确认]。
-- 分页：页号从 1 开始。以下任一情况即结束：本页为空；请求失败；连续 2 页没有新的 rid（search_controller.dart:14, 341-368）。服务端是否返回总数 [待确认]。
-- 部分关键词（包括空关键词）会返回非 0 的 error。线上探针因此轮换三个关键词（tool/interface_probe.py:289-306）。具体错误码 [待确认]。
+- 直播状态（douyu_parse.dart:102-106）：
+
+| 条件 | 状态 |
+|---|---|
+| `isLive == 1 && roomType == 0` | 直播中 |
+| `isLive == 1 && roomType == 3` | 回放轮播。S04-search-mixed（关键词“测试”）的 20 条里有 18 条是这种。录制时对照过，同一房间的 betard 是 `videoLoop == 1`（douyu_parse.dart:86-88）；样本里没有同一房间的 betard，S05-replay-videoloop 是另一个轮播房间 |
+| 其它 | 未开播 |
+
+  - 未开播的结果也返回，能力标为“直播与未开播”（search_capability.dart:122）。
+  - 旧版把 `roomType == 3` 当作未开播，v4 改为回放。
+  - `roomType` 其它取值的含义 [待确认]，录到的只有 0 和 3。
+- 分页：页号从 1 开始。以下任一情况即结束：本页为空；请求失败；连续 2 页没有新的 rid（search_controller.dart:14, 341-368）。
+  - 服务端在 `data.total` 给出总数，同时回显 `data.pageSize`（S04-search-page1：“英雄联盟”共 803 条；S04-search-empty：0 条）。v4 以空页结束，不依赖 `total`（douyu_parse.dart:112）。
+- 错误：顶层 `error == 1`，`data` 为空数组，原因写在 `msg` 里：
+  - 空关键词：`【kw】kw不能为空 | 【kw】个数必须在1和20之间`（S04-search-error-blank）。
+  - 非空关键词也会间歇出现 `【kw】kw不能为空`：同一个 URL（kw=阿冷），先返回这个错误（S04-search-error-kw），约 30 s 后正常返回空结果（S04-search-empty）。线上探针轮换三个关键词（tool/interface_probe.py:289-306）大概就是这个原因。
+  - 映射见 §9。
 
 ---
 
 ## 4. 房间详情
 
 - 请求：GET `https://www.douyu.com/betard/<rid>`（douyu_site.dart:517-537）。
-  - 请求头：`referer: https://www.douyu.com/<rid>` 和一个桌面 UA。旧实现这里用的是 Edge/114 的 UA，和其它请求不同。是否必须用这个 UA [待确认]。
-  - 响应可能是 JSON 字符串，需要先解码，再取 `room` 对象（:531-535）。
+  - 请求头：`referer: https://www.douyu.com/<rid>` 和一个桌面 UA。旧实现这里用的是 Edge/114 的 UA，和其它请求不同。不必用这个 UA：样本用的是和其它请求相同的 Chrome/140 UA，直播、未开播、回放三种房间都正常返回（S05-live、S05-offline、S05-replay-videoloop）。
+  - 响应可能是 JSON 字符串，需要先解码，再取 `room` 对象（:531-535）。录到的 3 个响应都是 JSON 对象，`content-type` 为 `application/json`；字符串形式没有遇到，解码规则保留（douyu_parse.dart:123-124）。
+  - 房间不存在时返回 **HTTP 200 加 HTML 页**，页面正文是“该房间目前没有开放”，不是 404，也不是空 `room`（S05-not-found，rid 999999999）。正文以 `<` 开头即判为不存在，映射为 NotFound（douyu_parse.dart:117-121）。旧版在这里抛 FormatException（DIAGNOSIS.md:88）。
+  - 别名会被拒绝，返回 HTTP 403（S05-alias-betard）。别名要先按 §1 换成数字 rid。
 
 **字段**（:539-563）
 
@@ -135,16 +156,16 @@
 
 | 状态 | 条件 |
 |---|---|
-| 直播中 | `show_status == 1`，且 `videoLoop != 1`，且标题不以 `【回放】` 开头 |
-| 回放轮播 | `videoLoop == 1`，或标题以 `【回放】` 开头。房间状态记为“回放”，不能当直播录制（:541, 561） |
-| 未开播 | 其它情况。已观察到 `show_status == 2` 表示未开播（docs/ISSUE_871_DOUYU_CHAT_COMPLETENESS_AUDIT_2026_09_19.md:31）；其它取值 [待确认] |
+| 直播中 | `show_status == 1`，且 `videoLoop != 1`，且标题不以 `【回放】` 开头（S05-live） |
+| 回放轮播 | `videoLoop == 1`，或标题以 `【回放】` 开头。房间状态记为“回放”，不能当直播录制（:541, 561）。轮播房间的 `show_status` 也是 1，所以必须先看 `videoLoop`（S05-replay-videoloop，rid 9804176，“24小时不间断”的斗地主轮播） |
+| 未开播 | 其它情况。`show_status == 2` 表示未开播（S05-offline，rid 71415；docs/ISSUE_871_DOUYU_CHAT_COMPLETENESS_AUDIT_2026_09_19.md:31）；1、2 以外的取值 [待确认] |
 
 **人数字段**：详情的 `room_biz_all.hot`、列表的 `ol`、搜索的 `hot` 都是**热度**，不是同时在线人数，界面按“热度”显示（RELEASE_NOTES.md:1284, 2128；live_room_audience_metric_test.dart:8）。
 
 **失败处理**
 - 详情请求失败必须作为失败返回，不能转成“未开播”或“状态未知”的房间。
 - 旧的界面路径会吞掉错误（:481-499），严格路径则把错误传出去（:501-515）。录制曾因此被误停，修复见 233d858d（01-sites.md:139）。
-- 房间不存在时接口返回 HTTP 404 还是空 `room` [待确认]。
+- 房间不存在：HTTP 200 加 HTML 页，映射为 NotFound（见上，S05-not-found）。
 
 ---
 
@@ -167,8 +188,10 @@
 - 取 `data.cdnsWithName[].cdn`，保持顺序并去重（:380-394）。
 - 当前 CDN `data.rtmp_cdn` 如果不在列表中，插到最前面。
 - 列表为空时，生成一条 `cdn=''` 的线路，由服务端挑选 CDN（:392；douyu_playback_parser_test.dart:74-87）。
-- 以 `scdn` 开头的 CDN 码稳定地排到最后（:161-168），原因 [待确认]。
-- **线路身份是 CDN 码，不是下标**。`cdnsWithName[].name` 能否作为显示名 [待确认]。
+- 以 `scdn` 开头的 CDN 码稳定地排到最后（:161-168），原因 [待确认]。录到的响应里没有 `scdn*`。
+- **线路身份是 CDN 码，不是下标**。`cdnsWithName[].name` 是“线路7”“线路13”这样的编号（S08-meta-24422），可以显示，但不能当身份。
+- `cdnsWithName[]` 还有 `isH265`（24422 两条线路为 true，4489985 为 false）和 `re-weight`（S08-meta-24422、S08-meta-4489985）。v4 请求 `hevc=0`，不读这两个字段。
+- 请求列表以外的 CDN 码时，服务端不报错，改给列表里的另一条：24422 请求 `cdn=tct-h5`，响应的 `rtmp_cdn`、`selected_cdn` 都是 `hs-h5`，地址也是 hs 的主机（S09-24422-r0-tct-h5）。所以线路实际走的是响应里的 `rtmp_cdn`，不一定是请求的码。线路身份是否应改用响应的 `rtmp_cdn` [待确认]。
 
 ### 5.3 服务端确认的 rate
 
@@ -176,9 +199,11 @@
 - 以下情况视为**已确认**：整数，可以是数字或整数字符串（`"0"` 也算），且大于等于 0。
 - 以下情况一律视为**未确认**：缺失、负数、小数（例如 1.5）、非数字。不能截断成 0 冒充原画（:310-321；douyu_quality_ack_test.dart:114-128）。
 - 匿名请求原画可能被服务端降档，这是平台限制，不是客户端缺陷：
-  - 房间 24422 请求 rate 0，服务端确认为 4；
-  - 房间 4489985 请求 0，确认为 0。
-  - 证据：ISSUE_873…md:9-15；docs/ISSUE_TRIAGE_LEDGER_3_2_0.md:13, 20, 23。
+  - 房间 24422（原画2K60）请求 rate 0，服务端确认为 4（S09-24422-r0-hw-h5、S09-24422-r0-hs-h5）；
+  - 房间 4489985（原画1080P30）请求 0，现在也确认为 4（S09-4489985-r0-hw-h5，2026-09-27）。ISSUE_873 记录时这个房间确认为 0，说明降档不只针对 2K 房间，而且会随时间变化；
+  - 元数据请求（`rate=-1`）两个房间也都给 4（S08-meta-24422、S08-meta-4489985）；
+  - 请求 rate 2 确认为 2，没有降档（S09-24422-r2-hw-h5）。
+  - 证据：以上样本；ISSUE_873…md:9-15；docs/ISSUE_TRIAGE_LEDGER_3_2_0.md:13, 20, 23。
 
 ### 5.4 按确认 rate 给线路分组
 
@@ -264,7 +289,8 @@ tt     = 当前 Unix 秒
 - 字段值必须 URL 编码，因为 `enc_data` 可能含 `+`、`/`、`=`（platform_signing_utils_test.dart:32）。
 - 成功条件：`error` 为 0（没有 `error` 时看 `code`；数字或字符串都可以），并且 `data` 是对象（douyu_site.dart:363-378；douyu_playback_parser_test.dart:57-72）。
 - 用到的 `data` 字段：`multirates`、`cdnsWithName`、`rtmp_cdn`、`rate`、`rtmp_url`、`rtmp_live`、`flv_url`，以及兜底用的 `player_1`、`stream_url`、`url`。
-- `hevc=0` 表示只要 AVC。探针显示斗鱼所有画质都是 AVC（docs/PLATFORM_PROBE_2026_09_25.md:87）。设 `hevc=1` 时服务端怎样响应 [待确认]。
+- 录到的响应还有这些字段，v4 不使用（S08-meta-24422、S09-*）：`client_ip`（客户端公网 IP，样本里已替换）、`p2pMeta`（P2P 参数，内含 `txSecret` 等签名，样本里已替换）、`selected_cdn`（与 `rtmp_cdn` 相同）、`show_id`（本场直播 id，与 URL 里的 `sid` 相同）、`cdnsWithName[].isH265`，以及 `h265_p2p*`、`av1_url`、`mixed_*`、`rtc_stream_*`、`streamStatus` 等。
+- `hevc=0` 表示只要 AVC。探针显示斗鱼所有画质都是 AVC（docs/PLATFORM_PROBE_2026_09_25.md:87）。24422 的两条线路 `isH265` 为 true，但设 `hevc=1` 时服务端怎样响应 [待确认]。
 
 ### 6.4 重试
 
@@ -272,6 +298,7 @@ tt     = 当前 Unix 秒
 1. 第 1 次之前，按需续期会话（§8.2）。
 2. 第 1 次失败后强制续期会话；第 2 次强制刷新描述符。
 3. 仍然失败，则这条 CDN 记为失败。
+4. 接口明确返回 `error != 0` 时不重试，直接失败。例如 `error=-5`（`房间未开播`，S10-offline）是下播，重试也不会成功（douyu_site.dart:205-206）。旧版对 `-5` 也重试，多发一次 H5 请求、一次续期和一次描述符刷新（DIAGNOSIS.md:90）。
 
 日志只记录“请求形状”：出现了哪些 Cookie 字段名、DID 从哪里来。不记录任何值（douyu_utils.dart:544-568）。
 
@@ -284,7 +311,7 @@ tt     = 当前 Unix 秒
 3. `player_1`、`stream_url`、`url` 中的绝对地址。
 4. `flv_url` 本身的路径以 `.flv`、`.m3u8` 或 `.mp4` 结尾时，直接使用。
 
-以上都不满足，就是“没有可播地址”。**CDN 基址绝不能直接当作媒体输入**（douyu_playback_parser_test.dart:120-127）。目前只观察到 HTTP-FLV，是否会返回 m3u8 [待确认]。
+以上都不满足，就是“没有可播地址”。**CDN 基址绝不能直接当作媒体输入**（douyu_playback_parser_test.dart:120-127）。录到的 7 个成功响应都是第 2 种：`rtmp_url` 基址加相对的 `rtmp_live`，扩展名 `.flv`，没有 `&amp;`（S08、S09 全部样本）。目前只观察到 HTTP-FLV，是否会返回 m3u8 [待确认]。
 
 ### 6.6 DID 一致性
 
@@ -324,9 +351,12 @@ tt     = 当前 Unix 秒
 ### 6.8 租期
 
 **何时有租期**
-- 媒体 URL 的查询串里带 `expire=<秒>` 且大于 0 时，才有租期（douyu_site.dart:36-39）。
-- 目前只在匿名原画上观察到 `expire=300`（:30-32；RELEASE_NOTES.md:36）。其它档位、登录后是否也带、时长是多少 [待确认]。
-- 没有 `expire` 的地址没有租期，不做定时续期，连接 EOF 后再重新取流。
+- 媒体 URL 的查询串里带 `expire=<秒>` 且大于 0 时，才有租期（douyu_site.dart:36-39；douyu_parse.dart:247-249）。
+- 匿名时按确认档位区分（2026-09-27 样本）：
+  - rate 4（文件名 `_4000.flv`）带 `expire=300`：24422 的 hw-h5、hs-h5 两条线路，4489985 的 hw-h5，以及两个房间的元数据响应（S09-24422-r0-hw-h5、S09-24422-r0-hs-h5、S09-4489985-r0-hw-h5、S08-meta-*）。以前说的“匿名原画 `expire=300`”，其实是原画被降到 4 以后的地址。
+  - rate 2（文件名 `_900.flv`）带 `expire=0`，没有租期（S09-24422-r2-hw-h5）。
+  - rate 0 未降档的地址、rate 3、登录后是否带 `expire`、时长多少 [待确认]（RELEASE_NOTES.md:36 说登录后链接更长）。
+- `expire` 缺失或为 0 的地址没有租期，不做定时续期，连接 EOF 后再重新取流。
 
 **Lease 的取值**（:50-64）
 
@@ -571,17 +601,19 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 | 情况 | 证据 | 映射 |
 |---|---|---|
 | 网络错误、超时、HTTP 5xx（任何接口） | — | Network |
-| H5 接口返回 HTTP 403，响应只有 4 字节，没有 API error | 01-sites.md:126；douyu_utils.dart:165-167, 544-548 | 先按 §6.4 做一次“强制续期 + 刷新描述符”的重试；仍然 403 就是 **RiskControl**。附上请求形状（DID 来源、Cookie 字段名），不附任何值。响应体的具体内容 [待确认] |
+| H5 接口返回 HTTP 403，没有 API error | 01-sites.md:126；douyu_utils.dart:165-167, 544-548；S10-wrong-did | 正文是 JSON 字符串 `"鉴权失败"`：4 个汉字，加引号和换行共 15 字节，`content-type` 为 `application/json`（S10-wrong-did，故意用错 DID 触发）。以前说的“4 字节”应是 4 个字。先按 §6.4 做一次“强制续期 + 刷新描述符”的重试；仍然 403 就是 **RiskControl**（douyu_parse.dart:157）。附上请求形状（DID 来源、Cookie 字段名），不附任何值 |
 | CDN 上的媒体返回 403 或 404 | flv_splice_relay.dart:396-398；04-recorder.md:105 | 不重试旧地址，重新取流。重新取流后仍然 403 时映射为 RiskControl [待确认] |
-| H5 返回 `error != 0` | douyu_site.dart:368-372 | 按错误码映射。已知 `-5`：房间 71415 当时下播（DOUYU_QUALITY_ACK…md:20），先结合详情判断，下播属于房间状态，否则是 StreamUnavailable。错误码表 [待确认]。未知错误码暂按 StreamUnavailable 处理，保留原始 `error` 和 `msg` |
+| H5 返回 `error != 0` | douyu_site.dart:368-372；douyu_parse.dart:161-164 | 不重试（§6.4），映射为 StreamUnavailable，保留原始 `error` 和 `msg`。`-5` 是 `房间未开播`（S10-offline，房间 71415，同时 betard 为 `show_status == 2`，S05-offline），属于房间状态：已知下播时由详情给出未开播，取流只报 StreamUnavailable。其它错误码 [待确认] |
 | H5 成功，但没有 `data` 或没有可播地址 | :373-376, 426 | ApiChanged |
 | 描述符缺字段、`enc_time` 越界或已过期 | douyu_utils.dart:174-181 | ApiChanged |
 | 全部 CDN 都失败 | douyu_site.dart:273-275 | 用最后一条 CDN 的失败类型 |
-| 详情接口找不到房间 | [待确认] | NotFound |
+| 详情接口找不到房间：HTTP 200 加 HTML 页“该房间目前没有开放” | S05-not-found；douyu_parse.dart:117-121 | NotFound |
+| 详情接口返回 HTTP 403 | S05-alias-betard；douyu_parse.dart:122 | RiskControl。目前只见过别名输入引起的 403，v4 不会把别名发给 betard（§1） |
+| 别名房间页没有 302 到数字 rid | douyu_site.dart:283-290 | NotFound |
 | 详情接口结构变化（没有 `room` 或缺关键字段） | :531-535 | ApiChanged |
 | 未开播、回放轮播 | §4 | 不是失败，是房间状态 |
 | 匿名请求被降档（请求 0，确认 4） | §5.3 | 不是失败，用确认 rate 标注画质 |
-| 搜索返回 `error != 0` | :583-585 | 暂按 ApiChanged 处理，附原始 `error` 和 `msg`；拿到样本后细分 [待确认] |
+| 搜索返回 `error != 0` | :583-585；S04-search-error-blank、S04-search-error-kw；douyu_parse.dart:91-92 | 录到的只有 `error == 1`，`msg` 为 `【kw】kw不能为空`（空关键词还附 `个数必须在1和20之间`）。按 ApiChanged 处理，附原始 `error` 和 `msg`。非空关键词也会间歇返回这个错误（§3），是否应该对它自动重试一次 [待确认] |
 | 续期失败 | douyu_utils.dart:456-477 | 不报错，继续以当前身份请求 |
 | 弹幕连接失败、重连超过次数 | web_socket_util.dart:276-280 | Network，同时在连接状态流里报告 |
 | 调用方取消 | 01-sites.md:145 | Cancelled。取消只影响本次请求 |
@@ -595,7 +627,7 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 |---|---|---|---|---|
 | REG-DOUYU-001 | 原画每 5 分钟断一次；3.2.10 在到期时卡 1～2 秒 | 匿名原画地址带 `expire=300`，CDN 在第 300 秒断开连接 | 租期从签发时刻算，提前 45 s 续签同画质同线路，在新连接的关键帧处拼接 | 31982153（01-sites.md:125）；flv_splice_relay_test；RELEASE_NOTES.md:7, 26, 55 |
 | REG-DOUYU-002 | 多画面的斗鱼格子在 300 s 后冻结，不再恢复 | 流结束时 mpv 先发 `playing=false`、再发 `completed=true`，被当成用户暂停；恢复次数一辈子只有 2 次 | 按每一格的播放意图判断是否恢复；恢复次数改为 3 分钟内最多 2 次（由播放层规格承接） | bf570796、42cbded2；02-player.md:164；03-live-room…md:137；RELEASE_NOTES.md:63 |
-| REG-DOUYU-003 | H5 接口返回 403，响应只有 4 字节 | 描述符、签名、Cookie 用了不同的 DID；LTP0 或 passport 字段混进了播放 Cookie | 三处统一 DID，描述符随 DID 失效；LTP0 只发给 passport；passport Cookie 不当作播放 Cookie | 2c378d76（01-sites.md:126）；douyu_utils.dart:164-185, 534-538；douyu_cookie_controller.dart:85-99 |
+| REG-DOUYU-003 | H5 接口返回 403，正文只有 JSON 字符串 `"鉴权失败"`（S10-wrong-did） | 描述符、签名、Cookie 用了不同的 DID；LTP0 或 passport 字段混进了播放 Cookie | 三处统一 DID，描述符随 DID 失效；LTP0 只发给 passport；passport Cookie 不当作播放 Cookie | 2c378d76（01-sites.md:126）；douyu_utils.dart:164-185, 534-538；douyu_cookie_controller.dart:85-99 |
 | REG-DOUYU-004 | 已登录却被当成游客 | 签名时用进程 DID 覆盖了 Cookie 里登录所属的 `dy_did`（3.2.0 的做法，ISSUE_873…md:21） | Cookie 有 `dy_did` 就用它，没有才用进程 DID | 上游 2e2cb0d4（UPSTREAM_PORT_2026_09_27.md:69）；platform_signing_utils_test.dart:62-77 |
 | REG-DOUYU-005 | 画质顺序颠倒 | 把 rate 当码率降序排列，原画（0）排到了最后 | 保持 `multirates` 的原始顺序 | douyu_site.dart:172-175；douyu_playback_parser_test.dart:130-146；RELEASE_NOTES.md:964 |
 | REG-DOUYU-006 | 实际拿到的是 4M，界面却显示原画；同一画质下的线路档位不一致 | 丢掉了响应里的 `rate`；把各个 CDN 的地址合并成一个列表 | 按确认 rate 给线路分组，界面显示确认的档位 | 03234c7d（ISSUE_TRIAGE_LEDGER_3_2_0.md:33）；DOUYU_QUALITY_ACK…md:8-10；douyu_quality_ack_test.dart |
@@ -650,24 +682,26 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 
 分类、分区房间、推荐、搜索、详情字段映射没有静态入口。要把样本注入 `HttpClient.instance.dio` 的拦截器，再调用实例方法，做法同 douyu_quality_ack_test.dart:27-68。
 
-**需要录制的样本**
+**样本清单与录制情况**
 
-| 编号 | 接口或场景 | 需要覆盖的情况 | 生成期望值的旧入口 |
-|---|---|---|---|
-| S01 | `m.douyu.com/api/cate/list` | 全量 | `getCategores`（实例方法，注入 Dio） |
-| S02 | `mixList/2_<cid>/<page>` | 第 1 页、最后一页、越界页，用来确认总页数字段和空 `rl`；包含 `type != 1` 条目的页 | `getCategoryRooms` |
-| S03 | `allpage/6/<page>` | 第 1 页、最后一页；确认 `av` 的形态 | `getRecommendRooms` |
-| S04 | `searchShow` | 同时有直播中和未开播的结果；第 2 页；会返回 `error != 0` 的关键词 | `searchRooms` |
-| S05 | `betard/<rid>` | 直播中；未开播（`show_status=2`）；回放（`videoLoop=1`）；标题以【回放】开头；不存在的房间；别名房间；响应为 JSON 字符串 | `isLiveRoomPayload`（静态）；字段映射用 `getRoomDetailForRefresh` |
-| S06 | `getEncryption` | 正常；如果能遇到，再录一个 `is_special=1` | `isEncryptionKeyUsable` |
-| S07 | 签名向量 | 描述符 + rid + tt + did → 表单（使用合成的描述符） | `buildSignedData` |
-| S08 | `getH5PlayV1`（`rate=-1`、`cdn=''`） | 元数据：`multirates`、`cdnsWithName`、`rtmp_cdn` | `parsePlayResponse`、`parseCdnCodes`、`parsePlayQualities` |
-| S09 | `getH5PlayV1`（逐个 CDN） | 确认档位与请求相同；被降档（请求 0、确认 4）；缺少 `rate`；`rtmp_live` 是绝对地址；基址 + 相对 `rtmp_live`；含 `&amp;` | `parsePlayUrl`；分组规则用 `resolvePlayUrlsRaw`（注入 Dio） |
-| S10 | H5 错误 | 未开播房间（`error=-5`？）；故意用错 DID 触发的 403，记录状态码、响应长度、响应内容和响应头 | `parsePlayResponse` |
-| S11 | **两次续签** | 见下 | 没有静态入口。期望值按 §6.8 的规则计算，可复用 flv_splice_relay.dart:39-82 的 tag 解析 |
-| S12 | passport `safeAuth` | Set-Cookie 列表，全部用合成值 | `mergeSetCookieLines`、`sessionExpiry`、`sessionState` |
-| S13 | 弹幕二进制帧 | `loginres`；`chatmsg` 的各种情况（有 `dms`、没有 `dms`、`if=1`、别的房间的 `rid`、空 `txt`）；`comm_chatmsg`；`voice_trlt`；一帧多包；心跳回应；`uenter`、`dgb` 等其它类型 | `decodeMessage`、`deserializeDouyuPackets`、`sttToJObject` |
-| S14 | CDN 上 FLV 的前 32 字节 | 用 Range 请求，只保存文件头 | —（参照 tool/interface_probe.py:256-268） |
+2026-09-27 直连录制，共 31 个目录，其中 S07、S12 是合成向量（见各自的 README.md）。每个录制样本都有 `body.*`、`meta.json` 和旧版期望值 `expected.json`；v4 解析器的测试是 packages/live_core/test/sites/douyu_parse_test.dart 和 douyu_site_test.dart。
+
+| 编号 | 接口或场景 | 需要覆盖的情况 | 生成期望值的旧入口 | 已录制 |
+|---|---|---|---|---|
+| S01 | `m.douyu.com/api/cate/list` | 全量 | `getCategores`（实例方法，注入 Dio） | `S01-cate-list`（10 个一级、496 个二级分类） |
+| S02 | `mixList/2_<cid>/<page>` | 第 1 页、最后一页、越界页，用来确认总页数字段和空 `rl`；包含 `type != 1` 条目的页 | `getCategoryRooms` | `S02-mixlist-page1`、`S02-mixlist-last`（第 6 页）、`S02-mixlist-beyond`（第 7 页）。**缺**含 `type != 1` 的页：录到的条目全是 1 |
+| S03 | `allpage/6/<page>` | 第 1 页、最后一页；确认 `av` 的形态 | `getRecommendRooms` | `S03-allpage-page1`、`S03-allpage-last`（第 218 页）、`S03-allpage-beyond`（第 1000 页） |
+| S04 | `searchShow` | 同时有直播中和未开播的结果；第 2 页；会返回 `error != 0` 的关键词 | `searchRooms` | `S04-search-page1`、`S04-search-page2`、`S04-search-mixed`（直播中和 `roomType == 3` 轮播）、`S04-search-empty`、`S04-search-error-kw`、`S04-search-error-blank`。**缺**真正未开播（`isLive != 1`）的结果：录到的关键词没有返回这种条目 |
+| S05 | `betard/<rid>` | 直播中；未开播（`show_status=2`）；回放（`videoLoop=1`）；标题以【回放】开头；不存在的房间；别名房间；响应为 JSON 字符串 | `isLiveRoomPayload`（静态）；字段映射用 `getRoomDetailForRefresh` | `S05-live`、`S05-offline`、`S05-replay-videoloop`、`S05-not-found`、`S05-alias-betard`、`S05-alias-redirect`（别名房间页的 302）。**缺**标题以【回放】开头的房间（录制时没找到）；**缺** JSON 字符串形式的响应（录到的都是 JSON 对象） |
+| S06 | `getEncryption` | 正常；如果能遇到，再录一个 `is_special=1` | `isEncryptionKeyUsable` | `S06-encryption`。**缺** `is_special=1`：没有遇到 |
+| S07 | 签名向量 | 描述符 + rid + tt + did → 表单（使用合成的描述符） | `buildSignedData` | `S07-vectors`（合成，按设计不录制） |
+| S08 | `getH5PlayV1`（`rate=-1`、`cdn=''`） | 元数据：`multirates`、`cdnsWithName`、`rtmp_cdn` | `parsePlayResponse`、`parseCdnCodes`、`parsePlayQualities` | `S08-meta-24422`（2 条线路、原画2K60）、`S08-meta-4489985`（1 条线路、原画1080P30） |
+| S09 | `getH5PlayV1`（逐个 CDN） | 确认档位与请求相同；被降档（请求 0、确认 4）；缺少 `rate`；`rtmp_live` 是绝对地址；基址 + 相对 `rtmp_live`；含 `&amp;` | `parsePlayUrl`；分组规则用 `resolvePlayUrlsRaw`（注入 Dio） | `S09-24422-r0-hw-h5`、`S09-24422-r0-hs-h5`、`S09-4489985-r0-hw-h5`（降档 0 → 4）；`S09-24422-r2-hw-h5`（请求与确认相同）；`S09-24422-r0-tct-h5`（请求不在列表里的 CDN）。**缺**缺少 `rate`、绝对 `rtmp_live`、含 `&amp;` 三种：线上响应没有出现，由 douyu_parse_test.dart 的无样本规则测试覆盖 |
+| S10 | H5 错误 | 未开播房间（`error=-5`？）；故意用错 DID 触发的 403，记录状态码、响应长度、响应内容和响应头 | `parsePlayResponse` | `S10-offline`（`error=-5`，`房间未开播`）、`S10-wrong-did`（403，`"鉴权失败"`） |
+| S11 | **两次续签** | 见下 | 没有静态入口。期望值按 §6.8 的规则计算，可复用 flv_splice_relay.dart:39-82 的 tag 解析 | **缺**：`live_cli fixture` 只录单次 HTTP 请求，还没有录制 FLV tag 索引和续签时间线的方式（docs/rewrite/STATUS.md:37） |
+| S12 | passport `safeAuth` | Set-Cookie 列表，全部用合成值 | `mergeSetCookieLines`、`sessionExpiry`、`sessionState` | `S12-synthetic`（合成）。**缺**真实响应：没有可用的登录账号，真实 Set-Cookie 的字段组合 [待确认] |
+| S13 | 弹幕二进制帧 | `loginres`；`chatmsg` 的各种情况（有 `dms`、没有 `dms`、`if=1`、别的房间的 `rid`、空 `txt`）；`comm_chatmsg`；`voice_trlt`；一帧多包；心跳回应；`uenter`、`dgb` 等其它类型 | `decodeMessage`、`deserializeDouyuPackets`、`sttToJObject` | **缺**：还没有 WebSocket 帧的录制方式（STATUS.md:37） |
+| S14 | CDN 上 FLV 的前 32 字节 | 用 Range 请求，只保存文件头 | —（参照 tool/interface_probe.py:256-268） | **缺**：还没有媒体文件头的录制方式（STATUS.md:37） |
 
 **S11 两次续签的录法**
 - 同一个房间、同一个 rate、同一个 CDN，在 t0、t0+255 s、t0+510 s 各签一次。
@@ -679,7 +713,7 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 - Cookie 的所有值：`dy_auth`、`acf_jwt_token`、`acf_auth`、`LTP0`、`acf_stk`、`acf_ccn`、`acf_ltkid`、`acf_ssid`、`acf_uid`、`dy_did`、`acf_did`、`game_did`、`HMACCOUNT`、`_ga`、`dy_teen_mode` 里的 uid，以及 Set-Cookie 中的所有值。
 - 签名材料：`key`、`rand_str`、`enc_data`、`auth`、`did`、`tt`。替换为合成值后，要用合成的描述符重新计算 `auth`，保证签名测试能离线复算。
 - 媒体 URL：替换签名查询参数（参数名以样本为准），**保留 `expire`**。CDN 主机名可以换成 `example.test`，但要保留 CDN 码。
-- 响应里可能出现的客户端 IP、请求头 `x-request-id` [待确认具体字段]。
+- H5 响应里的客户端 IP 在 `data.client_ip`，P2P 签名在 `data.p2pMeta.stream_props[].txSecret` 和 `data.p2pMeta.xp2p_txSecret`；媒体 URL 的签名参数是 `wsAuth`、`token`、`did`。这些都已替换（S08、S09 各样本 meta.json 的 `scrubbed`）。响应头 `x-request-id` 是每次请求的 UUID，不含身份，原样保留。
 - 弹幕中观众的 `uid`、`nn`、`ic`、`uat`：按“同一个人对应同一个假名”替换。
 - 房间的公开信息（标题、主播名、头像、封面）：按现有 fixtures README 的做法，统一替换或统一保留（06-tests.md:96-106）。
 - 旧测试的 `webCookie` 常量里有 `dy_teen_mode` 的 uid 明文（douyu_cookie_session_test.dart:34-38），新样本不要沿用。
@@ -690,15 +724,15 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 
 | # | 问题 | 怎么查 |
 |---|---|---|
-| 1 | 别名能否直接请求 `betard/<别名>` 并换回数字 `room_id`；App 分享和 `m.douyu.com` 分享的真实格式；带 `?rid=` 的专题页 | S05，并收集真实分享文本 |
-| 2 | 分页的总页数字段（疑似 `pgcnt`）；`rl` 中 `type != 1` 的含义 | S02、S03 |
-| 3 | 推荐页的 `av` 是不是完整 URL | S03 |
-| 4 | 搜索是否返回总数；`roomType` 的取值含义；搜索的错误码 | S04 |
-| 5 | 房间不存在时 `betard` 的响应；`show_status` 除 1、2 以外的取值 | S05 |
-| 6 | 为什么把 `scdn*` 排在最后；`cdnsWithName[].name` 能否作为显示名 | S08，对比各线路的可用率 |
-| 7 | H5 接口的错误码表（`-5` 等），以及每个码对应的 SiteFailure | S10 |
-| 8 | 403 那 4 字节响应的具体内容，以及 CDN 上 403 是否应映射为 RiskControl | S10 |
-| 9 | 租期从签发起算还是从连接起算；非原画档位和登录后是否也带 `expire`、时长多少（RELEASE_NOTES.md:36 说登录后链接更长，但没有测量） | S11 |
+| 1 | ~~别名能否直接请求 `betard/<别名>`~~：不能，返回 403；别名房间页 302 到 `/<rid>`（S05-alias-betard、S05-alias-redirect，§1）。仍待确认：App 分享和 `m.douyu.com` 分享的真实格式；带 `?rid=` 的专题页 | 收集真实分享文本 |
+| 2 | ~~分页的总页数字段~~：mixList 是 `data.pgcnt`，每页 120 条；allpage 的 `pgcnt` 恒为 0，每页 40 条，只能靠空 `rl` 结束（S02、S03，§2）。仍待确认：`rl` 中 `type != 1` 的含义，录到的条目全是 1 | 找含其它 type 的分区补录 S02 |
+| 3 | ~~推荐页的 `av` 是不是完整 URL~~：是；分区页的 `av` 是路径（S03-allpage-page1、S02-mixlist-page1，§2.3） | — |
+| 4 | ~~搜索是否返回总数~~：返回 `data.total`。~~`roomType == 3`~~：轮播，按回放处理。~~搜索的错误码~~：`error == 1`，`msg` 为 `【kw】kw不能为空`，非空关键词也会间歇出现（S04，§3）。仍待确认：`roomType` 其它取值；非空关键词的 `error == 1` 要不要自动重试一次 | 补录 S04 |
+| 5 | ~~房间不存在时 `betard` 的响应~~：HTTP 200 加 HTML 页“该房间目前没有开放”，映射为 NotFound（S05-not-found，§4）。仍待确认：`show_status` 除 1、2 以外的取值 | S05 |
+| 6 | 为什么把 `scdn*` 排在最后（录到的响应里没有 `scdn*`）。~~`cdnsWithName[].name` 能否作为显示名~~：是“线路7”这样的编号，可以显示（S08-meta-24422）。新增：请求列表外的 CDN 会被换成别的线路（S09-24422-r0-tct-h5），线路身份是否改用响应的 `rtmp_cdn` | S08，对比各线路的可用率 |
+| 7 | H5 接口的错误码表。~~`-5`~~：`房间未开播`，不重试，StreamUnavailable（S10-offline，§6.4、§9）。其它错误码仍待确认 | S10 |
+| 8 | ~~403 响应的具体内容~~：JSON 字符串 `"鉴权失败"`，4 个字、15 字节（S10-wrong-did，§9）。仍待确认：CDN 上 403 是否应映射为 RiskControl | S14 之后对照 |
+| 9 | 租期从签发起算还是从连接起算。~~非原画档位是否带 `expire`~~：匿名 rate 4 带 `expire=300`，rate 2 是 `expire=0`（S09，§6.8）。仍待确认：未降档的 rate 0、rate 3、登录后是否带、时长多少（RELEASE_NOTES.md:36 说登录后链接更长，但没有测量） | S11；登录账号补录 S09 |
 | 10 | 不同 CDN 是否共享时间线；新连接是否从 CDN 缓存的 GOP 开始、落后于旧连接（这是测试替身的假设，flv_splice_relay_test.dart:81） | S11 |
 | 11 | CDN 是否需要 Referer 和 Cookie。探针不带请求头也能拉流；如果不需要，v4 不再把账号 Cookie 发给 CDN | S14，对比带头与不带头 |
 | 12 | `hevc=1` 时服务端的行为；H5 接口会不会返回 m3u8 | 做一次 S09 变体 |
@@ -708,7 +742,7 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 | 16 | DID 来源不统一：签名只看 Cookie 里的 `dy_did`（douyu_utils.dart:361-365），续期还会用单独保存的 DID（:305-310）。Cookie 里没有 `dy_did`、但单独保存了 DID 时，签名用进程 DID，续期用保存的 DID。v4 是否应该让单独保存的 DID 也参与签名 | 用只有 passport 字段的账号做对照 |
 | 17 | 旧实现续期时按下标选线（player_controller.dart:347-354；multiview_controller.dart:224-231）。v4 已规定按 CDN 码选线；旧做法是否实际导致过串线，目前不知道 | S11 的换 CDN 变体 |
 | 18 | 3.2.11 之后，多画面斗鱼格子开播约 30 s 会重新取流一次，原因没查。来源是维护者记录，仓库里没有文档 | 在 Windows 上复现并查日志 |
-| 19 | 元数据请求（`rate=-1`）本身返回的地址能否直接当默认线路用，从而省一次签名 | S08 与 S09 对比 |
+| 19 | 元数据请求（`rate=-1`）本身返回的地址能否直接当默认线路用，从而省一次签名。S08 显示元数据响应确实带完整地址（确认 rate 4、`expire=300`，线路是 `rtmp_cdn`），还没有验证能否播放 | S08 与 S09 对比 |
 | 20 | 描述符请求失败时有没有降级办法；`is_special=1` 在什么条件下出现 | S06 |
-| 21 | `betard` 是否必须用 Edge/114 的 UA | S05，用统一 UA 对照 |
+| 21 | ~~`betard` 是否必须用 Edge/114 的 UA~~：不必，Chrome/140 的 UA 正常返回（S05-live 等，§4） | — |
 | 22 | 30 分钟录制、DTS 最大间隔不超过一帧的门禁（ADR 0005 决定 6）还没有执行 | 第 5 阶段录制验收 |

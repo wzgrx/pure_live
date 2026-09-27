@@ -1,6 +1,6 @@
 # 平台规格：bilibili（哔哩哔哩直播）
 
-- 阶段：第 1 阶段草案（从旧代码反推，未做在线复核）。
+- 阶段：第 1 阶段草案（从旧代码反推；2026-09-27 用录制样本复核了一部分，样本编号写作 `S06-live` 这样的目录名，见第 11 节）。
 - 证据基线：`master@c28c17fb`。行号都指这个提交。
 - 缩写：`S` = `lib/core/site/bilibili/bilibili_site.dart`，`D` = `lib/core/danmaku/bilibili_danmaku.dart`，`WS` = `lib/core/common/web_socket_util.dart`，`P` = `tool/interface_probe.py`。其它文件写全路径。
 - 规则：本文只写行为和外部契约。“旧代码”指 v3 的现状；标“v4 规则”的是新实现必须遵守的约定；拿不准的写 [待确认]，统一汇总在第 12 节。
@@ -15,12 +15,12 @@
 | 形式 | 说明 | 证据 |
 |---|---|---|
 | 长号 `room_id` | 平台内部的真实房间号，详情接口 `data.room_info.room_id` 返回。弹幕凭据和弹幕认证必须用它 | S:634-635、S:641、S:581、D:187 |
-| 短号 | 部分房间有较短的号码，例如分享链接 `live.bilibili.com/6`。[待确认：详情里对应的字段是否是 `room_info.short_id`，以及 6 对应长号 7734200] | test/shared_media_intake_test.dart:303；docs/ISSUE_872_BILIBILI_LOGGED_IN_DANMAKU_AUDIT_2026_09_19.md（公开房间 7734200）；P:730、P:753（用 `id=6` 请求弹幕凭据） |
+| 短号 | 部分房间有较短的号码，例如分享链接 `live.bilibili.com/6`。详情里是 `room_info.short_id`，没有短号时为 0。6 对应长号 7734200：`getInfoByRoom?room_id=6` 返回 `room_id: 7734200, short_id: 6`，与用长号请求的结果相同（S06-short-id、S06-short-id-long） | test/shared_media_intake_test.dart:303；docs/ISSUE_872_BILIBILI_LOGGED_IN_DANMAKU_AUDIT_2026_09_19.md（公开房间 7734200）；P:730、P:753（用 `id=6` 请求弹幕凭据） |
 
 - 旧代码：房间身份就是用户输入的字符串，短号和长号都有可能。卡片、链接、收藏、取流和醒目留言都用输入值（S:661、S:699-713、S:157、S:812），只有弹幕换成长号。所以同一房间的短号和长号会成为两个身份。[待确认：旧版收藏里是否真的出现过这种重复]
-- 旧代码默认详情和取流接口都接受短号，但没有测试证明这一点。[待确认]
+- 详情和取流接口都接受短号：`getInfoByRoom?room_id=6`（S06-short-id）和 `getRoomPlayInfo?room_id=6`（S07-short-id）都正常返回，响应里的 `room_id` 是长号 7734200。`SuperChat/getMessageList` 是否接受短号 [待确认]。
 - 身份比较：平台 id 不区分大小写，房间号去掉首尾空白（test/live_room_error_fallback_test.dart:6-10）。
-- **v4 规则**：规范身份是十进制的长号（`room_info.room_id`）。输入的短号先经详情解析，并保存为别名，用于链接回显和迁移旧数据。之后的取流、醒目留言、弹幕和 Referer 一律用长号。
+- **v4 规则**：规范身份是十进制的长号（`room_info.room_id`）。输入的短号先经详情解析，并保存为别名，用于链接回显和迁移旧数据。之后的取流、醒目留言、弹幕和 Referer 一律用长号（bilibili_parse.dart:125-137）。旧版用短号 6 作房间身份和链接，只有弹幕换成长号（DIAGNOSIS.md:100）。
 
 ### 1.2 链接格式与归一
 
@@ -76,6 +76,7 @@
   - `w_webid`：来自 `https://live.bilibili.com/lol` 页面 HTML 里的 `"access_id":"…"`，去掉反斜杠后使用（S:853-867；38ad5b42）
   - 另加 WBI 的 `wts`、`w_rid`。
 - 没有条数参数，每页条数由服务端决定。[待确认：每页条数]
+- **游客拿不到数据**：带齐 WBI 签名、buvid3/buvid4 Cookie 和 `w_webid`，第 1 页仍返回 HTTP 200、`{"code":-352,"message":"-352"}`，响应头带 `x-bili-gaia-vvoucher: voucher_…` 和 `bili-status-code: -352`（S02-signed-risk352）；不签名时同样如此（S02-risk352）。DIAGNOSIS.md:99 记录第 1–3 页都是这样。是否要先做 buvid 激活才能拿到数据，是未解决的问题（§8.1、第 12 节第 18 条）。
 - 卡片字段来自 `data.list[]`（S:108-124）：
   - `roomid`、`title`
   - `cover`：拼上 `@400w.jpg`
@@ -104,7 +105,9 @@
   - 热度取 `online`。
   - 最后按热度稳定降序排列。
 - `code != 0` 时报平台拒绝，不能变成空列表（test/bilibili_recommend_test.dart:58-60）。
-- 结束判断：没有明确的结束字段，旧代码靠空页结束。[待确认：两个接口的末页形态]
+- 结束判断：没有明确的结束字段，旧代码靠空页结束（bilibili_parse.dart:77-91）。
+  - `getListByAreaID`：越界页（page=10000）返回 `code 0`、`data: []`（S03-out-of-range）；第 1 页 30 条（S03-page1，`pageSize=30`）。
+  - `getMoreRecList`：只录了第 1 页，`data` 里只有 `recommend_room_list`（12 条）和 `top_room_id`，没有结束字段（S04-page1）。末页形态 [待确认]。
 - 已有探针：P:773-797。
 
 ---
@@ -113,21 +116,29 @@
 
 - `GET https://api.bilibili.com/x/web-interface/search/type?context=&search_type=live&cover_type=user_cover`，不签名（S:721-764）。
 - 其余参数：`order=`、`keyword`、`category_id=`、`__refresh__=`、`_extra=`、`highlight=0`、`single_column=0`、`page`（从 1 开始）、`page_size`（限制在 1–50，应用传 20）（S:723；4047cfba；lib/modules/search/search_controller.dart:380）。
-- 请求头用 §6.3 的接口头，会带上 buvid 的 Cookie。[待确认：不带 buvid3 时是否返回 -412]
-- 结果取 `data.result.live_room[]`，缺失时当作空（S:741）：
+- 请求头用 §6.3 的接口头，会带上 buvid 的 Cookie。不带 Cookie（没有 buvid3）也返回 `code 0`，结果与带 Cookie 时相同，不是 -412（S05-no-buvid3 对照 S05-live-results）。
+- 结果分两组（S05-live-results，关键词“哔哩哔哩直播”）：
+  - `data.result.live_room[]`：**只有在播的房间**，14 条的 `live_status` 全是 1。
+  - `data.result.live_user[]`：名字命中的主播，**未开播和轮播的主播只在这里**（6 条的 `live_status` 是 2、2、0、0、0、0）。
+  - 旧代码只读 `live_room`（S:741），未开播和轮播的主播永远搜不到（DIAGNOSIS.md:95）。
+- `live_room[]` 的字段：
   - `roomid`
-  - `title`：去掉 `<em …>` 高亮标签（S:745）
-  - `cover`：协议相对地址，补 `https:` 后拼 `@400w.jpg`（S:749）
+  - `title`：去掉 `<em class="keyword">` 高亮标签（S:745），再解码 HTML 实体（样本里没有出现实体，v4 仍然解码）
+  - `user_cover`：**房间封面**。`cover` 是直播关键帧截图（`/bfs/live-key-frame/keyframe…`），不是封面；旧代码用了 `cover`（S:749；DIAGNOSIS.md:96）。v4 取 `user_cover`，没有时才退回 `cover`。都是协议相对地址，补 `https:` 后拼 `@400w.jpg`
   - `uname`
   - `uface`：头像，处理同封面
   - `online`：热度
   - `attentions`：粉丝数（S:753）
-  - `live_status`：等于 1 是在播，其它都是未开播（S:755-757）
+  - `live_status`：见下
   - `cate_name`：分区
+- `live_user[]` 的字段：`roomid`、`uname`（带高亮标签）、`uface`、`live_status`、`cate_name`、`live_time` 等，**没有**标题、封面和热度。v4 把它们转成卡片，排在 `live_room` 之后，房间已经在 `live_room` 里的跳过；标题留空，不显示封面和热度（bilibili_parse.dart:93-123, 417-427）。
+- `live_status`：1 在播，2 轮播（按 §4.3 记为回放），其它为未开播（bilibili_parse.dart:429-434）。
 - 在播和未开播房间都会返回（lib/modules/search/search_capability.dart:121；docs/PLATFORM_COMPATIBILITY.md:42）。
-- 分页：返回空页或请求失败就停止该平台的翻页（search_controller.dart:342-356）。[待确认：响应里的总页数字段]
+- 分页（bilibili_parse.dart:120-122）：
+  - 房间的总页数是 `data.pageinfo.live_room.numPages`（S05-live-results 共 14 条，为 1）。顶层的 `data.numPages`（50）和 `numResults`（1000）是全部类型的汇总，不能用。
+  - 第 2 页的 `live_room` 为空，`live_user` 原样重复第 1 页的 6 条（S05-out-of-range）。所以 `live_user` 只取第 1 页的。
+  - 结束条件：页号达到 `numPages`，或 `live_room` 为空。无结果时两组都为空、`numPages` 为 0（S05-no-results）。
 - 旧代码没有检查 `code`：`code != 0` 时直接访问 `data` 会抛类型错误。v4 按 §9 处理。
-- `title` 里的 HTML 实体是否需要反转义 [待确认]。
 
 ---
 
@@ -137,8 +148,10 @@
 
 - `GET https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={id}`，需要 WBI 签名（S:397-419）。
 - 重试：最多 2 次。第 2 次先强制刷新 WBI 密钥，并间隔 180 ms。签名密钥和 buvid 的准备并行进行（S:400-410；8a57bbb2、d6c3d8df）。
+- 必须签名：不签名的请求返回 `code -352`，响应头带 `x-bili-gaia-vvoucher`（S06-risk352）；签名后正常（S06-live）。
+- 房间不存在：HTTP 200，`{"code":19002000,"message":"获取初始化数据失败","data":null}`，映射为 NotFound（S06-not-found，房间 999999999；bilibili_parse.dart:130）。旧代码抛 StateError。
 - 响应校验（S:421-431；test/bilibili_recommend_test.dart:76-99）：
-  - `code` 不为 0：报拒绝。
+  - `code` 不为 0：报拒绝（19002000 除外，见上）。
   - `data.room_info` 或 `data.anchor_info` 不是对象：报结构错误。
   - 必须先校验再取字段。
 
@@ -151,10 +164,10 @@
 | 主播名 | `anchor_info.base_info.uname` |
 | 头像 | `anchor_info.base_info.face` + `@100w.jpg` |
 | 分区 | `room_info.area_name` |
-| 简介 | `room_info.description`（是否含 HTML [待确认]） |
+| 简介 | `room_info.description`。可能含 HTML，例如 `<p>凡人线下嘉年华</p>`（S06-replay），要转成纯文本：`<br>` 和段落结束换行，其余标签去掉，再解码实体（bilibili_parse.dart:472-484）。旧代码保留了标签 |
 | 热度 | `room_info.online` |
 | 网页链接 | `https://live.bilibili.com/{房间号}`，旧代码用输入值，v4 用长号 |
-| 长号 | `room_info.room_id`（S:635） |
+| 长号 | `room_info.room_id`（S:635）；短号在 `room_info.short_id`，没有时为 0 |
 
 ### 4.3 直播状态
 
@@ -162,8 +175,9 @@
 |---|---|---|
 | 在播 | `room_info.live_status` 等于 1；数字和字符串都接受 | S:700；233d858d |
 | 未开播 | `live_status` 为 0 | S:700、S:712 |
-| 轮播 / 回放 | `live_status` 为 2。旧代码当作未开播。**v4 规则**：单独作为“轮播”状态，不可按直播播放。[待确认：2 的确切含义和能否取流] | S:700 |
-| 封禁 / 锁定 | 旧代码不识别。[待确认：用 `room_info.lock_status`、`lock_time`，还是专用错误码] | — |
+| 轮播 / 回放 | `live_status` 为 2，是轮播：房间 5440 的标题是活动预告，`online` 为 0（S06-replay）。旧代码当作未开播。**v4 规则**：记为回放（ADR 0010 的 replay），不可按直播播放。游客取流时 `playurl_info` 为 `null`，映射为 StreamUnavailable（S07-replay；§9） | S:700；bilibili_parse.dart:139-144, 169-182 |
+| 其它取值 | ApiChanged。ADR 0010 没有“未知”状态 | bilibili_parse.dart:143 |
+| 封禁 / 锁定 | 旧代码不识别。`room_info` 里有 `lock_status`、`lock_time`，录到的房间都是 0。[待确认：封禁时用这两个字段，还是专用错误码] | — |
 | 请求失败 | 不是房间状态，按 §9 报失败 | 1f7ac128 |
 
 - 旧代码进房时会吞掉所有错误，返回“当前房间的错误快照”或空房间（S:662-671）。收藏刷新和录制走严格路径，会把错误抛出去（S:683-697；233d858d）。**v4 规则**：详情永不吞错；下播、轮播、封禁是状态，不是失败。
@@ -177,7 +191,9 @@
 | 弹幕 op=3 心跳回复里的 4 字节整数 | **热度** | D:315-327；test/bilibili_danmaku_protocol_test.dart:29-50 |
 | 弹幕 `WATCHED_CHANGE` 的 `data.num` | **本场累计看过** | D:398-410；test/bilibili_danmaku_protocol_test.dart:107-121 |
 | 同时在线人数 | 公开接口里没有；能力标为“不支持” | live_room.dart:43-47 |
+| 详情 `watched_show`（`switch` 为 true 时的“N人看过”） | **本场累计看过**；未开播时不用 | S06-live；bilibili_parse.dart（v4 记为累计人数） |
 
+- 搜索 `live_room[].live_time` 是开播时间（北京时间字符串），v4 记为开播时刻（S05-live-results）。
 - 详情偶尔会返回热度 `1`。如果已有热度不小于 1000，新值不大于 1，并且小于已有值的 1%，就保留已有值；之后合理的新值照常接受（live_room.dart:739-755；1a2c4fa2；test/live_room_audience_metric_test.dart:221-250）。
 
 ---
@@ -190,6 +206,7 @@
 - 选项是所有 `stream[].format[].codec[]` 的 `accept_qn` 与 `current_qn` 的并集，只保留正数，按 qn 从高到低排列（S:176-208）。
 - 不能用全局的 `g_qn_desc` 当选项。它会列出不可用的档位，这些按钮永远取不到流（cafdf384；test/bilibili_play_quality_test.dart:6-11）。
 - 名称优先查固定表：30000 杜比、20000 4K、10000 原画、400 蓝光、250 超清、150 高清、80 流畅。表里没有的，用 `g_qn_desc[].desc`；再没有，就显示“清晰度 {qn}”（lib/core/utils/live_quality_label.dart:37-49；test/live_quality_label_test.dart:26-28）。
+- 现在的 `g_qn_desc` 多了 15000 `2K`（S07 全部样本：30000 杜比、20000 4K、15000 2K、10000 原画、400 蓝光、250 超清、150 高清、80 流畅）。15000 不在固定表里，名称取 `g_qn_desc` 的 `2K`。
 
 ### 5.2 服务端降档与确认
 
@@ -203,8 +220,12 @@
   6. 最后按 URL 字典序。
 - 实际画质取排序后第一条的 `current_qn`。只保留这个档位的 URL，并去重（S:257-264）。
 - 游客可能在请求 10000 时拿到 250。这时界面和录制都必须显示 250，不能假装切换成功（S:210-213；test/bilibili_play_quality_test.dart:13-22；docs/RECORDING_AND_QUALITY_AUDIT_3_0_12.md:13）。
+- 游客实测（2026-09-27）：
+  - `accept_qn` 是 `[10000, 400, 250]`（房间 42062），有的房间多一个 150（7734200 是 `[10000, 400, 250, 150]`）；
+  - `qn=0` 和 `qn=10000` 的 `current_qn` 都是 250（S07-guest-qn0、S07-guest-qn10000），也就是游客最高只能拿到超清；
+  - 带 `codec=0,1` 时，250 档同时给出 AVC 和 HEVC，FLV、TS、fMP4 三种格式都有（S07-hevc-qn10000）。v4 只保留排第一的编码（AVC），同一组线路不混用 AVC 和 HEVC（bilibili_parse.dart:203-213）。
 - **v4 规则**：每条线路都记录请求档位、实际档位（`current_qn`）和“是否已确认”。
-- 当前 UA 和 Cookie 下哪些 qn 需要登录或大会员 [待确认]。
+- 登录后哪些 qn 能拿到、哪些需要大会员 [待确认]（没有登录样本）。
 
 ### 5.3 线路（CDN）标识
 
@@ -236,8 +257,9 @@
   - `url_info[]`：`host`、`extra`
   - 取值逻辑见 S:267-293。
 - `code != 0` 报拒绝；`playurl` 缺失报结构错误（S:267-277）。
+- 未开播（`live_status` 0）和轮播（`live_status` 2）的房间返回 `code 0`，但 `playurl_info` 是 `null`（S07-offline、S07-replay）。这是 StreamUnavailable，不是结构错误（bilibili_parse.dart:169-182）。旧代码抛 FormatException，游客无法播放轮播（DIAGNOSIS.md:97）。
 - 在播房间也可能短时间没有播放描述，探针因此会轮询多个房间（P:810-813）。
-- 旧代码不请求 HEVC（`codec=1`）。探针普查显示 B 站各档 FLV 都是 AVC（docs/PLATFORM_PROBE_2026_09_25.md:87）。[待确认：4K、杜比等档位是否只有 HEVC]
+- 旧代码不请求 HEVC（`codec=1`）。探针普查显示 B 站各档 FLV 都是 AVC（docs/PLATFORM_PROBE_2026_09_25.md:87）。游客请求 `codec=0,1` 时 250 档 AVC、HEVC 都有（S07-hevc-qn10000）。[待确认：4K、杜比等档位是否只有 HEVC；游客的 `accept_qn` 里没有这些档位，需要登录样本]
 
 ### 6.2 格式
 
@@ -266,7 +288,7 @@
 - 不签名的接口：取流、分类、推荐、搜索、醒目留言、spi、nav、二维码、账号（S:102、S:408、S:581）。
 - 密钥：
   - 从 `GET https://api.bilibili.com/x/web-interface/nav` 的 `data.wbi_img.img_url` 和 `sub_url` 中，取文件名去掉扩展名，分别得到 imgKey 和 subKey（S:524-541）。
-  - 未登录时 nav 的 `code` 不为 0，但仍返回 `wbi_img`；旧代码不检查 `code`。[待确认]
+  - 未登录时 nav 返回 `code -101`（`账号未登录`），但 `data.wbi_img.img_url`、`sub_url` 照样给出，`data.isLogin` 为 false（S11-guest）。所以取密钥时不能因为 `code != 0` 就放弃；旧代码不检查 `code`，结果是对的。
   - 缓存 6 小时，并发请求合并（S:503-522；bbc69d58、d6c3d8df）。
 - mixinKey：按固定的 64 项置换表重排 imgKey + subKey，取前 32 个字符（S:437-502、S:543-546；P:746-752 有一份独立实现）。
 - 签名步骤（S:548-572）：
@@ -281,14 +303,18 @@
 ### 6.5 租期
 
 - 旧代码没有给 B 站实现租期和恢复接口：`S:17` 没有实现 `LivePlayLeaseMetadata` 或 `LivePlayRecoveryResolver`（lib/core/interface/live_site.dart:163-193）。线路按“长期有效”处理；出错后重新取流（录制遇 403、404、EIO 会重新解析：docs/ISSUE_AUDIT_2026_08_25.md:19）。
-- **v4 规则**（先按保守值实现，第 12 节确认后再调整）：
+- 样本（S07 的 5 个在播响应）：
+  - 每条 `url_info[].extra` 都有 `expires=<Unix 秒>`，等于签发时刻 + 3600 秒（例如 S07-guest-qn0 在 09:53:23 录制，`expires=1790506404` 是 10:53:24）；
+  - 部分 FLV 线路另有 `deadline=`，值与 `expires` 相同（S07-guest-qn10000、S07-hevc-qn10000）；
+  - `url_info[].stream_ttl` 恒为 0，没有意义。
+- **v4 规则**（bilibili_parse.dart:292-313）：
 
 | Lease 字段 | 取值 |
 |---|---|
 | `issuedAt` | 取流响应的时刻 |
-| `invalidAt` | [待确认] URL 的 `extra` 里是否有 `expires=`（Unix 秒），或 `url_info[].stream_ttl`；确认前为空 |
-| `refreshAt` | 确认前为空，不主动续期 |
-| `cutsConnection` | [待确认] 旧代码按 false 处理；仓库里没有超过 10 分钟的 B 站连续播放或录制证据（docs/PERFORMANCE.md:113 为 6.5 分钟） |
+| `invalidAt` | `extra` 里的 `expires`（Unix 秒）。没有 `expires`，或已经过期，就没有租期 |
+| `refreshAt` | `invalidAt` − 60 秒；寿命不到 4 分钟时改为 `invalidAt` − 寿命的 1/4 |
+| `cutsConnection` | false：到期只预取新地址，不重开正在播放的连接。到期后已建立的连接会不会被断开 [待确认]：旧代码按 false 处理；仓库里没有超过 10 分钟的 B 站连续播放或录制证据（docs/PERFORMANCE.md:113 为 6.5 分钟），需要样本 #8 的长连接记录 |
 
 - 恢复（`recover`）必须重新请求详情和取流，不能复用缓存的 URL（live_site.dart:163-169）。
 
@@ -306,6 +332,7 @@
 - 端点列表（S:598-609）：
   1. 固定先放通用网关 `wss://broadcastlv.chat.bilibili.com/sub`；
   2. 再按 `data.host_list[]` 生成 `wss://{host}[:{wss_port}]/sub`：端口 443 时省略，缺省按 443，去重。
+  - 实测 `host_list` 的 `wss_port` 都是 2245（`port` 2243、`ws_port` 2244），6 项里也包括 `broadcastlv.chat.bilibili.com`；所以生成的是 `wss://…:2245/sub`（S09-guest）。游客的 `getDanmuInfo` 也返回 `code 0` 和非空 `token`。
   - 原因：部分运营商和移动网络的 DNS 解析不到区域节点（docs/ISSUE_AUDIT_2026_08_16.md:9）。
 
 ### 7.2 连接与认证
@@ -420,7 +447,7 @@
   - 公开弹幕（uid=0，已实连验证：docs/ISSUE_AUDIT_2026_08_16.md:35）；
   - 目录、搜索、详情、取流。
 - 游客受到的限制：昵称和 uid 被打码；画质可能被降档。
-- 未做 buvid 激活（ExClimbWuzhi 接口）和 `b_nut`、`_uuid` 等字段。[待确认：这些是否会降低 -352 的概率]
+- 未做 buvid 激活（ExClimbWuzhi 接口）和 `b_nut`、`_uuid` 等字段。游客请求分区房间时，带齐 WBI、buvid3/buvid4 和 `w_webid` 仍然 -352（S02-signed-risk352，§2.2）。[待确认：buvid 激活能否让游客拿到分区房间]
 
 ### 8.2 登录凭据
 
@@ -489,15 +516,14 @@
 | 触发条件 | SiteFailure | 处理 | 证据 |
 |---|---|---|---|
 | DNS、TLS、连接或读超时（20 秒）、5xx | Network | 可重试 | http_client.dart:11-13 |
-| 签名接口返回 JSON `code == -352` | 先强制刷新 WBI（和 buvid），重试 1 次；仍为 -352 就是 **RiskControl** | 界面不能再显示“需要登录” | S:104；S:405-417；area_rooms_controller.dart:25；test/bilibili_recommend_test.dart:58-60、:90-99；RELEASE_NOTES.md:1875 |
+| 签名接口返回 JSON `code == -352`（HTTP 200，响应头带 `x-bili-gaia-vvoucher` 和 `bili-status-code: -352`） | 先强制刷新 WBI（和 buvid），重试 1 次；仍为 -352 就是 **RiskControl** | 界面不能再显示“需要登录”。旧代码把它包成两层异常（`Exception: Exception: …`），界面拿不到类型（DIAGNOSIS.md:98） | S:104；S:405-417；area_rooms_controller.dart:25；test/bilibili_recommend_test.dart:58-60、:90-99；RELEASE_NOTES.md:1875；S02-risk352、S02-signed-risk352、S06-risk352 |
 | HTTP 412，或 JSON `code == -412` | **RateLimited**：退避，不立即重试，不刷新签名 | [待确认：412 是频率风控还是设备风控] | 旧代码无处理 |
-| `code == -101`（未登录），或账号校验 `code != 0` | **NeedLogin**；如果已存有 Cookie，视为登录失效并清除凭据 | | bilibili_account_service.dart:105-108 |
-| 详情显示房间不存在 | **NotFound** | [待确认：错误码，如 19002000 或 60004] | — |
-| `code == -404` | NotFound | [待确认] | — |
+| `code == -101`（未登录），或账号校验 `code != 0` | **NeedLogin**；如果已存有 Cookie，视为登录失效并清除凭据。例外：nav 的 -101 仍带 `wbi_img`，取密钥时照常使用（§6.4） | | bilibili_account_service.dart:105-108；S16-no-cookie；S11-guest |
+| 详情显示房间不存在：HTTP 200，`code 19002000`，`message` 为 `获取初始化数据失败`，`data` 为 null | **NotFound** | 60004 和 -404 在详情接口上也按 NotFound 处理，但没有样本 [待确认] | S06-not-found；bilibili_parse.dart:125-130 |
 | 房间封禁或锁定 | 不是失败：房间状态“封禁” | [待确认：判定字段] | 01-sites ⑥ |
 | 付费直播、大航海专属 | **AgeOrPaid** | [待确认：B 站是否有这类房间以及如何识别] | — |
 | 港澳台或海外限制 | **RegionRestricted** | [待确认：返回形态] | — |
-| 在播，但 `playurl_info` 为空或没有线路 | **StreamUnavailable**，可稍后重试 | | S:254-256、S:275；P:810-813 |
+| 在播，但 `playurl_info` 为空或没有线路；轮播（`live_status` 2）的 `playurl_info` 为 null | **StreamUnavailable**，可稍后重试 | | S:254-256、S:275；P:810-813；S07-replay |
 | 未开播时取流 | 不是失败：先看详情状态，不去取流 | | S:700 |
 | `current_qn` 低于请求 qn | 不是失败：记为画质降档 | | S:210-213 |
 | 媒体 403、404、连接提前结束 | 重新取流一次后仍失败：**StreamUnavailable** | | docs/ISSUE_AUDIT_2026_08_25.md:19 |
@@ -545,6 +571,7 @@
 - 根因：分区接口要求 WBI 签名、buvid3/buvid4 Cookie，以及 `w_webid`。
 - 正确做法：三者都要带（§2.2）。
 - 证据：a035ebd6、e7c9f284、38ad5b42。
+- 注意：2026-09-27 游客三者都带仍然返回 -352（S02-signed-risk352），这条回归目前只能在登录态或解决 buvid 激活之后验证（第 12 节第 18 条）。
 
 **REG-BILIBILI-006 风控被显示成“未登录”**
 - 现象：分区页出现 -352 后提示登录，登录后照样不行。
@@ -681,29 +708,30 @@
 
 ## 11. 样本清单
 
-- 录制条件：直连（DIRECT）的中国大陆网络；除注明“登录”的样本外，都用游客身份。[待确认：录制所用的网络环境]
+- 录制条件：直连（DIRECT）的中国大陆网络，游客身份。2026-09-27 录制，每个样本的 meta.json 里 `route` 都是 `direct`，nav 返回 `ip_region: CN`（S11-guest）。没有登录账号，注明“登录”的样本都没有录。
+- 样本放在 `fixtures/bilibili/`，目录名 `S<编号>-<情况>`，编号就是下表的 #。共 32 个目录，每个都有旧版期望值 `expected.json`；v4 解析器的测试是 packages/live_core/test/sites/bilibili_parse_test.dart。
 - 每个样本附带：来源 URL、时间、路由、原始 SHA-256、脱敏字段列表（docs/rewrite/diagnosis/06-tests.md ⑥-1）。
 - 所有样本的请求侧都要去掉：`Cookie`、`w_rid`、`wts`、`w_webid`。
 
-| # | 接口 | 条件 | 需脱敏 | 生成期望值的旧版入口 |
-|---|---|---|---|---|
-| 1 | `room/v1/Area/getList` | 游客 | 无 | 没有静态入口；在 HTTP 替身下调用 `getCategores`（S:65） |
-| 2 | `second/getList` | 热门分区第 1 页；末页（`has_more=0` 或空页）；-352 响应 | 主播 uid 可保留 | 没有静态入口；在 HTTP 替身下调用 `getCategoryRooms`（S:96） |
-| 3 | `getListByAreaID` | 第 1 页；越界页 | 无 | `BiliBiliSite.parseRecommendRooms`（S:348） |
-| 4 | `webMain/getMoreRecList` | 第 1 页 | 无 | 同上 |
-| 5 | `search/type?search_type=live` | 有在播和未开播结果的关键词；无结果；越界页；不带 buvid3 | 无 | 没有静态入口；在 HTTP 替身下调用 `searchRooms`（S:722） |
-| 6 | `getInfoByRoom` | 在播；未开播；`live_status=2`；用短号请求；不存在的房间；封禁房间；-352 | 无 | `parseRoomInfoResponse`（S:422，只做校验）；字段映射在私有的 `_buildRoom`（S:699），需要在替身下调用 `getRoomDetailForRefresh`（S:684） |
-| 7 | `getRoomPlayInfo` | 游客 `qn=0`；游客 `qn=10000`（降档）；登录 `qn=10000`；未开播；`codec=0,1`（HEVC 对照） | `url_info[].extra` 中的签名、客户端 IP、uid 等参数，如 `sign`、`trid`、`oi`、`mid`（[待确认：实际参数名]）；保留 `expires` 类字段，供分析租期 | `parsePlayQualities`（S:176）、`parsePlayUrlResolution`（S:214）、`LiveQualityLabel.normalize`（live_quality_label.dart） |
-| 8 | 媒体首部 | 每种格式各一条：FLV 前 64 KiB、HLS 播放列表（TS 和 fMP4 各一份）；另录一段超过 60 分钟的连接，观察是否会被断开 | 同上 | 没有入口；用于确定 §6.5 的租期 |
-| 9 | `getDanmuInfo` | 游客；登录 | `token` | 无（凭据字段） |
-| 10 | `finger/spi` | 游客 | `b_3`、`b_4` | 无 |
-| 11 | `x/web-interface/nav` | 未登录（-101，带 `wbi_img`） | 无（密钥公开；如需固定测试向量，改用合成值） | `getMixinKey`（S:543）；签名向量用 P:737-757 的独立实现固定 `wts` 生成，两份实现结果必须一致 |
-| 12 | `live.bilibili.com/lol` | 游客 | `access_id` | 无 |
-| 13 | 弹幕二进制帧 | op=8 认证回复；op=3；**brotli**（protover 3）打包的 `DANMU_MSG`，游客打码和登录完整各一份；`WATCHED_CHANGE`；`SUPER_CHAT_MESSAGE`；带 `p_is_ack` 的消息；一条消息含多个包 | 观众 uid、昵称、头像、粉丝牌和 rich user 对象；发出的认证包里的 token 和 buvid | `BiliBiliDanmaku.decodeMessage`，通过 `onMessage` 收集输出（D:260）；ACK 用 `BiliBiliDanmaku(packetSender:)` 捕获（D:51）；认证包用 `buildJoinPayload(args, queueUuid:)`（D:184）。现有测试只构造了 zlib，brotli 路径缺覆盖（06-tests.md ⑤-4） |
-| 14 | `SuperChat/getMessageList` | 有留言的房间 | 用户昵称、头像 | 没有静态入口 |
-| 15 | 二维码 `generate` 和 `poll` | 86101、86090、86038、0 | `qrcode_key`、`url`；`Set-Cookie` 中的所有值；`refresh_token` | 没有静态入口（解析为私有，:272-302） |
-| 16 | `x/member/web/account` | 登录；失效（-101） | `mid`、`uname`、`userid`、`birthday`、`sign` 等全部个人字段 | `BiliBiliUserInfoModel.fromJson`（lib/common/models/bilibili_user_info_page.dart:22） |
-| 17 | `b23.tv` 重定向 | 直播间短链；视频短链 | 无 | `LiveUrlTool.parseLiveUrl`，可沿用 test/live_short_link_test.dart 的替身写法 |
+| # | 接口 | 条件 | 需脱敏 | 生成期望值的旧版入口 | 已录制 |
+|---|---|---|---|---|---|
+| 1 | `room/v1/Area/getList` | 游客 | 无 | 没有静态入口；在 HTTP 替身下调用 `getCategores`（S:65） | `S01-guest`（12 个一级、462 个二级分区） |
+| 2 | `second/getList` | 热门分区第 1 页；末页（`has_more=0` 或空页）；-352 响应 | 主播 uid 可保留 | 没有静态入口；在 HTTP 替身下调用 `getCategoryRooms`（S:96） | `S02-risk352`（不签名）、`S02-signed-risk352`（带齐 WBI、buvid、`w_webid`）。**缺**第 1 页和末页：游客一律 -352（§2.2），要等登录或 buvid 激活 |
+| 3 | `getListByAreaID` | 第 1 页；越界页 | 无 | `BiliBiliSite.parseRecommendRooms`（S:348） | `S03-page1`、`S03-out-of-range`（page=10000，`data: []`） |
+| 4 | `webMain/getMoreRecList` | 第 1 页 | 无 | 同上 | `S04-page1` |
+| 5 | `search/type?search_type=live` | 有在播和未开播结果的关键词；无结果；越界页；不带 buvid3 | 无 | 没有静态入口；在 HTTP 替身下调用 `searchRooms`（S:722） | `S05-live-results`、`S05-no-results`、`S05-out-of-range`（第 2 页）、`S05-no-buvid3` |
+| 6 | `getInfoByRoom` | 在播；未开播；`live_status=2`；用短号请求；不存在的房间；封禁房间；-352 | 无 | `parseRoomInfoResponse`（S:422，只做校验）；字段映射在私有的 `_buildRoom`（S:699），需要在替身下调用 `getRoomDetailForRefresh`（S:684） | `S06-live`（42062）、`S06-offline`（22647871）、`S06-replay`（5440）、`S06-short-id`（6）、`S06-short-id-long`（7734200）、`S06-not-found`（999999999）、`S06-risk352`（不签名）。**缺**封禁房间：没有找到 |
+| 7 | `getRoomPlayInfo` | 游客 `qn=0`；游客 `qn=10000`（降档）；登录 `qn=10000`；未开播；`codec=0,1`（HEVC 对照） | `url_info[].extra` 中的签名、客户端 IP、uid 等参数：实际是 `sign`、`upsig`、`sk`、`flvsk`、`trid`、`oi`（十进制的客户端 IP）、`pv`、`rg`、`isp`、`zoneid_l`、`ld`、`site`、`mid`（tools/live_cli/lib/src/fixture/rules/bilibili.dart:58-69）；保留 `expires`、`deadline`、`stream_ttl`，供分析租期 | `parsePlayQualities`（S:176）、`parsePlayUrlResolution`（S:214）、`LiveQualityLabel.normalize`（live_quality_label.dart） | `S07-guest-qn0`、`S07-guest-qn10000`、`S07-hevc-qn10000`、`S07-offline`、`S07-replay`、`S07-short-id`、`S07-short-id-long`。**缺**登录 `qn=10000`：没有登录账号 |
+| 8 | 媒体首部 | 每种格式各一条：FLV 前 64 KiB、HLS 播放列表（TS 和 fMP4 各一份）；另录一段超过 60 分钟的连接，观察是否会被断开 | 同上 | 没有入口；用于确定 §6.5 的租期 | **缺**：还没有媒体首部和长连接的录制方式（docs/rewrite/STATUS.md:37） |
+| 9 | `getDanmuInfo` | 游客；登录 | `token` | 无（凭据字段） | `S09-guest`。**缺**登录：没有登录账号 |
+| 10 | `finger/spi` | 游客 | `b_3`、`b_4` | 无 | `S10-guest` |
+| 11 | `x/web-interface/nav` | 未登录（-101，带 `wbi_img`） | 无（密钥公开；如需固定测试向量，改用合成值） | `getMixinKey`（S:543）；签名向量用 P:737-757 的独立实现固定 `wts` 生成，两份实现结果必须一致 | `S11-guest` |
+| 12 | `live.bilibili.com/lol` | 游客 | `access_id` | 无 | `S12-guest` |
+| 13 | 弹幕二进制帧 | op=8 认证回复；op=3；**brotli**（protover 3）打包的 `DANMU_MSG`，游客打码和登录完整各一份；`WATCHED_CHANGE`；`SUPER_CHAT_MESSAGE`；带 `p_is_ack` 的消息；一条消息含多个包 | 观众 uid、昵称、头像、粉丝牌和 rich user 对象；发出的认证包里的 token 和 buvid | `BiliBiliDanmaku.decodeMessage`，通过 `onMessage` 收集输出（D:260）；ACK 用 `BiliBiliDanmaku(packetSender:)` 捕获（D:51）；认证包用 `buildJoinPayload(args, queueUuid:)`（D:184）。现有测试只构造了 zlib，brotli 路径缺覆盖（06-tests.md ⑤-4） | **缺**：还没有 WebSocket 帧的录制方式（STATUS.md:37） |
+| 14 | `SuperChat/getMessageList` | 有留言的房间 | 用户昵称、头像 | 没有静态入口 | **缺**：未录，录制时没有记下原因；需要找一个正有醒目留言的房间 |
+| 15 | 二维码 `generate` 和 `poll` | 86101、86090、86038、0 | `qrcode_key`、`url`；`Set-Cookie` 中的所有值；`refresh_token` | 没有静态入口（解析为私有，:272-302） | `S15-generate`、`S15-poll-86101`、`S15-poll-86038`。**缺** 86090 和 0：需要用手机登录账号扫码、确认 |
+| 16 | `x/member/web/account` | 登录；失效（-101） | `mid`、`uname`、`userid`、`birthday`、`sign` 等全部个人字段 | `BiliBiliUserInfoModel.fromJson`（lib/common/models/bilibili_user_info_page.dart:22） | `S16-no-cookie`（不带 Cookie，-101）。**缺**登录：没有登录账号 |
+| 17 | `b23.tv` 重定向 | 直播间短链；视频短链 | 无 | `LiveUrlTool.parseLiveUrl`，可沿用 test/live_short_link_test.dart 的替身写法 | **缺**：未录，录制时没有记下原因（工具能录 302，见斗鱼 S05-alias-redirect） |
 
 其它可直接复用的旧版纯函数：
 - `resolveDanmakuUid`（S:675）
@@ -715,25 +743,25 @@
 
 ## 12. 待确认
 
-1. 短号：`getInfoByRoom`、`getRoomPlayInfo`、`SuperChat/getMessageList` 是否都接受短号；详情里短号字段的名称；6→7734200 的映射（§1.1）。
+1. 短号：~~`getInfoByRoom`、`getRoomPlayInfo` 是否接受短号；短号字段名；6→7734200~~ 已查明：两个接口都接受，字段是 `room_info.short_id`，6 → 7734200（S06-short-id、S07-short-id）。仍待确认：`SuperChat/getMessageList` 是否接受短号（§1.1）。
 2. 旧收藏里是否同时存在同一房间的短号和长号；v4 迁移时如何合并（§1.1）。
 3. 是否支持 `live.bilibili.com/h5/{id}`、`/blanc/{id}`，以及输入 `bilibili://live/{id}` 深链接（§1.2）。
 4. `Area/getList` 的 `need_entrance=1` 的含义（§2.1）。
-5. `second/getList` 每页的条数，以及是否仍返回 `has_more`（§2.2）。
-6. `getListByAreaID` 和 `getMoreRecList` 末页的形态和结束字段（§2.3）。
-7. 搜索：总页数字段；不带 buvid3 是否返回 -412；`title` 是否需要反转义 HTML 实体（§3）。
-8. `live_status=2` 的确切含义和能否取流；封禁 / 锁定的判定字段；`description` 是否含 HTML（§4）。
-9. 当前 UA 和 Cookie 下，哪些 qn 需要登录或大会员；4K、杜比是否只提供 HEVC（§5.2、§6.1）。
+5. `second/getList` 每页的条数，以及是否仍返回 `has_more`（§2.2）。游客请求都是 -352，样本没能回答（见第 18 条）。
+6. ~~`getListByAreaID` 末页的形态~~：越界页 `data: []`，没有结束字段（S03-out-of-range）。仍待确认：`getMoreRecList` 的末页形态（§2.3）。
+7. ~~搜索：总页数字段；不带 buvid3 是否返回 -412~~ 已查明：房间页数是 `data.pageinfo.live_room.numPages`；不带 buvid3 仍返回 0（S05）。`title` 的 HTML 实体：样本里没有出现，v4 照样解码（§3）。
+8. ~~`live_status=2` 的含义和能否取流；`description` 是否含 HTML~~ 已查明：2 是轮播，游客取流 `playurl_info` 为 null（S06-replay、S07-replay）；`description` 会含 `<p>` 等标签（S06-replay）。仍待确认：封禁 / 锁定的判定字段（`lock_status`、`lock_time` 在录到的房间里都是 0）（§4）。
+9. 游客部分已查明：`accept_qn` 是 10000、400、250（有的房间加 150），`qn` 0 和 10000 实际都给 250（S07）。仍待确认：登录后哪些 qn 可用、哪些需要大会员；4K、杜比是否只提供 HEVC（§5.2、§6.1）。
 10. `gotcha104`、`mcdn` 线路现在是否仍不稳定（§5.3、REG-023）。
 11. 媒体 CDN 实际需要哪些请求头（§6.3）。
-12. WBI：未登录时 nav 的 `code` 值；签名值里的空格编码成 `%20` 还是 `+`（§6.4）。
-13. 租期：`extra` 里的 `expires`、`url_info[].stream_ttl` 是否存在及其含义；到期是否断开已建立的连接（`cutsConnection`）；需要样本 #8 的长连接记录（§6.5）。
+12. WBI：~~未登录时 nav 的 `code` 值~~：-101，仍带 `wbi_img`（S11-guest）。仍待确认：签名值里的空格编码成 `%20` 还是 `+`（§6.4）。
+13. 租期：~~`extra` 里的 `expires`、`stream_ttl` 是否存在及其含义~~：`expires`（有时还有同值的 `deadline`）是签发 + 3600 秒，`stream_ttl` 恒为 0（S07）。仍待确认：到期是否断开已建立的连接（`cutsConnection`）；需要样本 #8 的长连接记录（§6.5）。
 14. 弹幕 token 的有效期；认证回复 `code != 0` 时各个码的含义（§7.6、§9）。
 15. v4 需要解码哪些弹幕 cmd：礼物、进场、开播 / 下播、房间封禁等（§7.4）。
 16. 是否继续声明 `protover: 3`（brotli），还是改为 2（zlib）以去掉 brotli 依赖（docs/rewrite/diagnosis/07-dependencies.md:14），服务端是否仍支持 2（§7.3）。
 17. 登录 Cookie 的最小必需字段；二维码轮询实际返回的 `Set-Cookie` 字段（§8.2、§8.3）。
-18. buvid 激活和补齐 `b_nut`、`_uuid` 等字段，能否降低 -352（§8.1）。
-19. 错误码：房间不存在、-404、付费房、地区限制各自的返回形态；HTTP 412 应归 RateLimited 还是 RiskControl（§9）。
+18. buvid 激活和补齐 `b_nut`、`_uuid` 等字段，能否降低 -352。现状：游客分区页带齐 WBI、buvid 和 `w_webid` 仍是 -352，并带 `x-bili-gaia-vvoucher`（S02-signed-risk352），游客的分区页现在取不到数据（§2.2、§8.1）。
+19. 错误码：~~房间不存在~~：HTTP 200、`code 19002000`（S06-not-found）。仍待确认：-404、60004、付费房、地区限制各自的返回形态；HTTP 412 应归 RateLimited 还是 RiskControl（§9）。
 20. #872 登录态弹幕修复是否已在真机上复现通过（REG-011）。
-21. `getRoomPlayInfo` 返回的 `extra` 中签名、IP、uid 相关参数的实际名称，用于确定脱敏规则（§11 #7）。
-22. 样本的录制网络环境：国内直连，还是需要海外对照（§11）。
+21. ~~`getRoomPlayInfo` 返回的 `extra` 中签名、IP、uid 相关参数的实际名称~~ 已查明，见 §11 #7。
+22. 样本的录制网络环境：~~国内直连~~ 已按国内直连录制（S11-guest 的 `ip_region` 为 CN）。仍待确认：是否需要海外对照（§11）。

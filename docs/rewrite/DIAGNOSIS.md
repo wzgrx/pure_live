@@ -75,6 +75,34 @@
 | 多画面声音焦点格和选台目标格的描边参数没被使用，用户看不出下一个选台填到哪一格 | [multiview.md](../../spec/modules/multiview.md) AUD-4 | v4 |
 | IPTV 的 Xtream、频道收藏夹、节目提醒、定时录制、故障切换只有数据模型，从未上线 | [product.md](../../spec/product.md) | v4 按规格并入其它功能 |
 
+## 样本录制中发现的问题
+
+第 1 阶段录制真实接口样本（`fixtures/`，ADR 0009）时，用旧版解析器生成期望值，又发现下列问题。期望值按旧版现状冻结，v4 按规格的正确做法实现；标“3.3.x”的影响用户。
+
+| 平台 | 问题 | 位置 | 处理 |
+|---|---|---|---|
+| 抖音 | 不看 `room_view_stats.display_type`，把在线人数（display_type=1，“713在线观众”）当累计观看；规格 §4 也按累计写错了 | `lib/core/site/douyin/douyin_audience.dart:42` | 3.3.x；修正规格 |
+| 抖音 | enter 没有 `room.user_count` 时取分档文本“2000+”，没用 `stats.user_count_str` 的精确值 | `douyin_audience.dart:15` | v4 |
+| 抖音 | 房间不存在（4001038）时下标出错，掉进 HTML 兜底，不报“房间不存在” | `douyin_site.dart:479` | v4 |
+| 抖音 | 未登录（20003）时把错误数据当成用户信息 | `douyin_site.dart:98-103` | 3.3.x |
+| 斗鱼 | 不存在的房间返回 HTTP 200 加 HTML 页，旧版抛 FormatException 而不是“房间不存在” | `douyu_site.dart:532` | v4 |
+| 斗鱼 | 别名链接（`douyu.com/lpl`）把别名当房间号传给 betard，必然失败；页面其实 302 到数字房间号 | `live_url_tool.dart:309-311` | 3.3.x |
+| 斗鱼 | 未开播（`error=-5`）也重试，多发一次 H5 请求、一次续期和一次描述符刷新 | `douyu_site.dart:335-357` | v4 |
+| 斗鱼 | 标题和简介里的 HTML 实体（`&nbsp;`、`&mdash;`）没有解码 | `douyu_site.dart:552,600` | 3.3.x |
+| 虎牙 | 搜索第 2 页带回第 1 页的 20 个房间（接口每页多给一倍） | `huya_site.dart:884,889` | 3.3.x |
+| 虎牙 | REPLAY 房间在三个入口得到三种结果：状态未知、FormatException、回放 | `huya_site.dart:609-616,731-733,741` | v4 |
+| 虎牙 | 在播但没有 multiLine 的房间：线路为 0，topSid/subSid 取不到，头条留言不拉 | `huya_site.dart:632-637,665-670,1056` | v4 |
+| B 站 | 搜索只读 `live_room`，未开播和轮播主播在 `live_user` 里被忽略；规格 §3 需修正 | `bilibili_site.dart` 搜索 | v4；修正规格 |
+| B 站 | 搜索卡片用直播关键帧截图当封面，真正的房间封面是 `user_cover` | `bilibili_site.dart:749` | 3.3.x |
+| B 站 | 轮播（live_status=2）取流返回 `playurl_info: null`，旧版抛异常，游客无法播放轮播 | `bilibili_site.dart:214-265` | v4 |
+| B 站 | -352 被包成两层异常（`Exception: Exception: …`），界面拿不到错误类型 | `bilibili_site.dart:104,127` | v4 |
+
+实测回答的待确认项（详见各平台录制报告，已写进对应样本的 README 或期望值）：
+- 斗鱼：mixList 每页 120 条、`pgcnt` 是总页数；allpage 每页 40 条、只能靠空页判断结束；匿名 rate 4 带 `expire=300`、rate 2 带 `expire=0`；DID 不一致的 403 正文是 4 个汉字“鉴权失败”。
+- 虎牙：房间不存在返回 HTTP 200、`status:422`；字母别名不能直接查详情；推荐列表 `totalCount` 恒为 0；每页 120 条。
+- B 站：`getRoomPlayInfo` 接受短号（6 → 7734200）；未登录的 nav 仍带 `wbi_img`；不带 buvid3 的搜索仍返回 0；游客 qn 0 和 10000 实际都给 250。
+- 抖音：enter 不签名也能拿到数据，但必须带 ttwid；分区接口不签名返回滑块验证头（应归为风控）；expire 为签发时间加 7 天。
+
 ## 待确认事项
 
 诊断报告中标为 [待确认] 的条目由第 1 阶段逐项查证；影响决定的几项：

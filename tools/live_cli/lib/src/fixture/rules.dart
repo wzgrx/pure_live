@@ -6,6 +6,7 @@ import 'package:live_cli/src/fixture/rules/huya.dart';
 import 'package:live_cli/src/fixture/rules/kuaishou.dart';
 import 'package:live_cli/src/fixture/rules/kugoulive.dart';
 import 'package:live_cli/src/fixture/rules/liveme.dart';
+import 'package:live_cli/src/fixture/rules/looklive.dart';
 import 'package:live_cli/src/fixture/rules/sixroom.dart';
 import 'package:live_cli/src/fixture/rules/steambroadcast.dart';
 import 'package:live_cli/src/fixture/rules/weibo.dart';
@@ -23,6 +24,7 @@ const Map<String, ScrubRules> platformRules = {
   'kuaishou': kuaishouRules,
   'kugoulive': kugouliveRules,
   'liveme': livemeRules,
+  'looklive': lookliveRules,
   'sixroom': sixroomRules,
   'steambroadcast': steambroadcastRules,
   'weibo': weiboRules,

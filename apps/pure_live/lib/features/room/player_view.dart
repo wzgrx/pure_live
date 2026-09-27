@@ -1061,8 +1061,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // F-ROOM-17: the time in the fullscreen top bar (battery:
-                    // no plugin in v4 yet).
+                    // F-ROOM-17: phones show the time (and battery) next to
+                    // the back button; desktops at the right end.
                     if (_fullscreen && _touch) ...[
                       const _ClockText(color: ink),
                       // F-ROOM-17: the battery next to the time on phones.
@@ -1124,6 +1124,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         newWindow: newWindowSupported,
                       ),
                     ),
+                    if (_fullscreen && !_touch) const _ClockText(color: ink),
                   ],
                 ),
                 const Spacer(),

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S01-cate-esports",
+  "capturedAt": "2026-09-27T16:27:00.582911Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.cc.163.com/v1/wapcc/gamecategory?catetype=4",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://cc.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 16:27:01 GMT",
+      "content-encoding": "gzip",
+      "x-app-server-addr": "7.56.75.3:10000",
+      "vary": "Origin",
+      "x-apisix-traceid": "164d11d19cd47623",
+      "content-type": "application/json",
+      "server": "APISIX",
+      "x-ms-service": "wapcc",
+      "x-b3-traceid": "164d11d19cd47623",
+      "x-b3-sampled": "0",
+      "x-b3-version": "1.1.68",
+      "x-apisix-response-start": "1790526421092",
+      "x-apisix-ms-service": "wapcc",
+      "x-apisix-routename": "webccms consul.api.wapcc"
+    }
+  },
+  "raw": {
+    "sha256": "664a025a954b42189cf06478652bfc758d34291b3ce586f92c05a6b2e2542c0e",
+    "length": 1878
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

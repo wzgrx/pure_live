@@ -3,7 +3,7 @@ import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/theme.dart';
 
 /// Platforms that ship a logo in this package; others fall back to a letter tile.
-const _logos = {'bilibili', 'douyu', 'huya', 'douyin', 'kuaishou'};
+const _logos = {'bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'yy', 'soop', 'acfun', 'twitch'};
 
 /// A platform's logo, used as is (principles §3.4).
 class PlatformLogo extends StatelessWidget {

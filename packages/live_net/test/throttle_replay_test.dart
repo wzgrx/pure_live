@@ -75,6 +75,44 @@ void main() {
     );
   });
 
+  test('replay matches JSON bodies structurally, ignoring listed keys at any depth', () async {
+    final root = await Directory.systemTemp.createTemp('replay-json');
+    addTearDown(() => root.delete(recursive: true));
+    for (final (name, gear) in [('S01-g1', 1), ('S01-g4', 4)]) {
+      final sample = Directory('${root.path}/$name')..createSync();
+      File('${sample.path}/body.json').writeAsStringSync('{"gear":$gear}');
+      File('${sample.path}/meta.json').writeAsStringSync(
+        jsonEncode({
+          'request': {
+            'method': 'POST',
+            'url': 'https://api.example.test/streams?seq=1',
+            'body': jsonEncode({
+              'head': {'seq': 1, 'cid': '9'},
+              'avp': {'gear': gear, 'send_time': 1},
+            }),
+          },
+          'response': {'status': 200, 'headers': <String, Object>{}},
+          'body': 'body.json',
+        }),
+      );
+    }
+    final http = ReplayHttp.fixtures(root.path, ['S01-g1', 'S01-g4'], ignoredQuery: {'seq', 'send_time'});
+    LiveRequest post(int gear, int time) => LiveRequest(
+      site: 'x',
+      url: Uri.parse('https://api.example.test/streams?seq=$time'),
+      method: 'POST',
+      body: utf8.encode(
+        jsonEncode({
+          'avp': {'send_time': time, 'gear': gear},
+          'head': {'cid': '9', 'seq': time},
+        }),
+      ),
+    );
+    expect((await http.send(post(4, 77))).text, '{"gear":4}');
+    expect((await http.send(post(1, 78))).text, '{"gear":1}');
+    await expectLater(http.send(post(2, 79)), throwsA(isA<StateError>()));
+  });
+
   test('the cookie vault notifies changes only', () async {
     final vault = MemoryCookieVault();
     final changes = <String>[];

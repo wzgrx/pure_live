@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S07-mobile-hls-offline",
+  "capturedAt": "2026-09-27T16:57:09.227199Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://interface.yy.com/hls/new/get/85520900/85520900/1200?source=wapyy&callback=",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://wap.yy.com/mobileweb/85520900/85520900"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-headers": "X-Requested-With",
+      "access-control-allow-credentials": "true",
+      "date": "Sun, 27 Sep 2026 16:57:09 GMT",
+      "access-control-allow-methods": "GET,POST",
+      "content-length": "55",
+      "content-type": "text/plain;charset=ISO-8859-1"
+    }
+  },
+  "raw": {
+    "sha256": "5ae80eba0aea452f81afac8bcdab6ae607356c25f85171e3478ecd006646b9c4",
+    "length": 55
+  },
+  "body": "body.txt",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

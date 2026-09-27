@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:live_danmaku/live_danmaku.dart';
@@ -27,8 +28,11 @@ final class FakeClock implements DanmakuClock {
 final class FakeSocket implements DanmakuSocket {
   final StreamController<Object?> _incoming = StreamController<Object?>();
 
-  /// Frames the connector sent.
+  /// Frames the connector sent (text frames as their UTF-8 bytes).
   final List<List<int>> sent = [];
+
+  /// Text frames the connector sent.
+  final List<String> sentText = [];
 
   /// Whether the connector closed the socket.
   bool closed = false;
@@ -49,6 +53,13 @@ final class FakeSocket implements DanmakuSocket {
   @override
   void send(List<int> frame) {
     if (!closed) sent.add(frame);
+  }
+
+  @override
+  void sendText(String text) {
+    if (closed) return;
+    sentText.add(text);
+    sent.add(utf8.encode(text));
   }
 
   @override
@@ -76,6 +87,9 @@ final class FakeTransport implements DanmakuTransport {
   /// Headers of each handshake.
   final List<Map<String, String>> headers = [];
 
+  /// Subprotocols and exact-header flag of each handshake.
+  final List<({List<String> protocols, bool exactHeaders})> options = [];
+
   @override
   final LiveHttp http;
 
@@ -85,9 +99,12 @@ final class FakeTransport implements DanmakuTransport {
     required String site,
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 10),
+    List<String> protocols = const [],
+    bool exactHeaders = false,
   }) async {
     urls.add(url);
     this.headers.add(headers);
+    options.add((protocols: protocols, exactHeaders: exactHeaders));
     final socket = plan.isEmpty ? null : plan.removeAt(0);
     if (socket == null) throw const SocketLikeFailure();
     return socket;

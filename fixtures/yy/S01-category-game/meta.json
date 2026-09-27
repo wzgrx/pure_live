@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S01-category-game",
+  "capturedAt": "2026-09-27T16:55:56.456517Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.yy.com/c/yycom/category/getCategory.action?parentId=2",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.yy.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "connection": "keep-alive",
+      "access-control-allow-headers": "X-Requested-With",
+      "date": "Sun, 27 Sep 2026 16:55:57 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "access-control-allow-methods": "GET,POST",
+      "p3p": "CP=CAO PSA OUR",
+      "content-type": "text/html;charset=UTF-8",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "498290083a01497a588e9e5e128e8ac80d380c6cf83b14cf511ff68aed7c00e1",
+    "length": 1785
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

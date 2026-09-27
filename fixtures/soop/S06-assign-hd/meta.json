@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "sample": "S06-assign-hd",
+  "capturedAt": "2026-09-27T17:31:19.214795Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://livestream-manager.sooplive.com/broad_stream_assign.html?return_type=gcp_cdn&broad_key=297314125-common-hd-hls",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://play.sooplive.co.kr/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "close",
+      "content-type": "text/html; charset=utf-8",
+      "accept-ranges": "bytes",
+      "date": "Sun, 27 Sep 2026 17:31:17 GMT",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "ce17d84da9fa631b208d25a17f5c1c340dc37ca465e12dfe1417d831771252d1",
+    "length": 144
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

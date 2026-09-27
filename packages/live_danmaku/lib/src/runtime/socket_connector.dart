@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:live_danmaku/src/connector.dart';
 import 'package:live_danmaku/src/model.dart';
@@ -11,13 +12,20 @@ import 'package:meta/meta.dart';
 @immutable
 final class SocketPlan {
   /// Creates a plan.
-  const new({required this.endpoints, this.headers = const {}});
+  const new({required this.endpoints, this.headers = const {}, this.protocols = const [], this.exactHeaders = false});
 
   /// Endpoints in the order to try.
   final List<Uri> endpoints;
 
   /// Handshake headers.
   final Map<String, String> headers;
+
+  /// Subprotocols to offer (SOOP `chat`).
+  final List<String> protocols;
+
+  /// Whether the handshake must be sent exactly as written (YY, SOOP; see
+  /// `ExactWebSocket`).
+  final bool exactHeaders;
 }
 
 enum _End { failed, closed, silent, authTimeout, rejected, stopped }
@@ -76,6 +84,11 @@ abstract base class SocketConnector extends ConnectorBase {
   /// One heartbeat frame.
   @protected
   List<int> heartbeat();
+
+  /// Whether frames go out as text (UTF-8 of each frame) instead of binary:
+  /// Twitch IRC.
+  @protected
+  bool get textFrames => false;
 
   /// Silence that counts as a dead connection: max(3 × heartbeat, 90 s).
   @protected
@@ -161,7 +174,17 @@ abstract base class SocketConnector extends ConnectorBase {
   }) async {
     final _Handle socket;
     try {
-      socket = _Handle(await transport.connect(url, site: site, headers: plan.headers, timeout: connectTimeout));
+      socket = _Handle(
+        await transport.connect(
+          url,
+          site: site,
+          headers: plan.headers,
+          timeout: connectTimeout,
+          protocols: plan.protocols,
+          exactHeaders: plan.exactHeaders,
+        ),
+        text: textFrames,
+      );
     } on Object {
       return (_End.failed, false, false);
     }
@@ -242,9 +265,12 @@ abstract base class SocketConnector extends ConnectorBase {
 
 /// A socket whose close is bounded and idempotent.
 final class _Handle {
-  new(this._socket);
+  new(this._socket, {this.text = false});
 
   final DanmakuSocket _socket;
+
+  /// Whether frames are sent as text.
+  final bool text;
   var _closed = false;
 
   Stream<Object?> get messages => _socket.messages;
@@ -252,7 +278,11 @@ final class _Handle {
   void send(List<int> frame) {
     if (_closed) return;
     try {
-      _socket.send(frame);
+      if (text) {
+        _socket.sendText(utf8.decode(frame, allowMalformed: true));
+      } else {
+        _socket.send(frame);
+      }
     } on Object {
       // A socket failing mid-send reports through its stream.
     }

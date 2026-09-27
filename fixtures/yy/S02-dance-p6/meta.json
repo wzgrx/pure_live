@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S02-dance-p6",
+  "capturedAt": "2026-09-27T16:56:11.486155Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.yy.com/more/page.action?page=6&pageSize=30&biz=dance&subBiz=idx&moduleId=313",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.yy.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "connection": "keep-alive",
+      "access-control-allow-headers": "X-Requested-With",
+      "date": "Sun, 27 Sep 2026 16:56:12 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "access-control-allow-methods": "GET,POST",
+      "p3p": "CP=CAO PSA OUR",
+      "content-type": "application/json;charset=UTF-8",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "1df267207aac4030fdfebf9e47bf6a21882472b62dd313a0de064ee1f30888b4",
+    "length": 52
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

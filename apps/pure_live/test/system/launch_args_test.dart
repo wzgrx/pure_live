@@ -20,7 +20,7 @@ void main() {
         '--open-room=',
         '--open-room=douyu',
         '--open-room=:1',
-        '--open-room=twitch:abc',
+        '--open-room=kick:abc',
         '--open-room=DOUYU:1',
         '--open-room=douyu:0',
         '--open-room=douyu:../../etc',

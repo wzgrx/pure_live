@@ -23,9 +23,22 @@ final class PlatformSite {
   LinkResolver get links => _site as LinkResolver;
 }
 
-/// Platform ids in display order (constitution: first five platforms), then
-/// the IPTV source (spec/modules/iptv.md §5).
-const platformOrder = ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'iptv'];
+/// Platform ids in display order (constitution: first five platforms, then
+/// the later batches of ADR 0003), then the IPTV source (spec/modules/iptv.md §5).
+const platformOrder = [
+  'bilibili',
+  'douyu',
+  'huya',
+  'douyin',
+  'kuaishou',
+  // Batch 2 (ADR 0003): all kept.
+  'cc',
+  'yy',
+  'soop',
+  'acfun',
+  'twitch',
+  'iptv',
+];
 
 /// Short display names for tabs and badges.
 const platformNames = {
@@ -34,6 +47,11 @@ const platformNames = {
   'huya': '虎牙',
   'douyin': '抖音',
   'kuaishou': '快手',
+  'cc': '网易CC',
+  'yy': 'YY',
+  'soop': 'SOOP',
+  'acfun': 'AcFun',
+  'twitch': 'Twitch',
   'iptv': '网络电视',
 };
 
@@ -65,6 +83,11 @@ final sitesProvider = Provider<Map<String, PlatformSite>>((ref) {
     'huya': PlatformSite(HuyaSite(http, cookies: cookies)),
     'douyin': PlatformSite(DouyinSite(http, cookies: cookies)),
     'kuaishou': PlatformSite(KuaishouSite(http, cookies: cookies)),
+    'cc': PlatformSite(CcSite(http)),
+    'yy': PlatformSite(YySite(http, cookies: cookies)),
+    'soop': PlatformSite(SoopSite(http, cookies: cookies)),
+    'acfun': PlatformSite(AcfunSite(http)),
+    'twitch': PlatformSite(TwitchSite(http, cookies: cookies)),
     'iptv': PlatformSite(ref.watch(iptvSiteProvider)),
   };
 });

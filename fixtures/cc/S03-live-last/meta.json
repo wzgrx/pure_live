@@ -1,0 +1,487 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S03-live-last",
+  "capturedAt": "2026-09-27T16:28:04.050343Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://cc.163.com/api/category/live/?format=json&start=90&size=30",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://cc.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "VISITOR=88ia5192-4632-7t33-u63z-h794a4472921; Domain=.cc.163.com; expires=Wed, 24-Sep-2036 16:28:04 GMT; Max-Age=315360000; Path=/",
+      "date": "Sun, 27 Sep 2026 16:28:04 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "vary": "Cookie",
+      "x-apisix-upstream-node": "cclive",
+      "x-apisix-traceid": "81810cecdd0b6f32",
+      "content-type": "application/json",
+      "server": "APISIX",
+      "x-b3-traceid": "81810cecdd0b6f32",
+      "x-b3-version": "1.1.55",
+      "x-frame-options": "ALLOWALL",
+      "x-apisix-response-start": "1790526484560",
+      "x-apisix-routename": "CC main site api"
+    }
+  },
+  "raw": {
+    "sha256": "41ac82ac10e537e1490e0acb97242a37ffc416c96285770c9cca37bfa2e9e095",
+    "length": 43357
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.lives[0].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[0].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[0].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[0].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[0].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[0].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[0].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[1].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[1].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[1].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[1].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[1].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[1].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[1].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[2].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[2].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[2].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[2].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[2].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[2].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[2].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[3].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[3].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[3].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[3].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[3].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[3].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[3].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[4].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[4].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[4].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[4].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[4].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[4].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[4].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[5].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[5].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[5].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[5].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[5].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[5].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[5].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[6].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[6].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[6].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[6].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[6].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[6].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[6].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[7].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[7].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[7].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[7].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[7].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[7].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[7].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[8].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[8].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[8].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[8].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[8].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[8].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[8].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[9].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[9].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[9].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[9].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[9].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[9].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[9].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[10].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[10].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[10].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[10].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[10].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[10].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[10].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[11].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[11].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[11].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[11].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[11].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[12].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[12].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[12].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[12].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[12].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[12].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[12].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[13].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[13].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[13].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[13].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[13].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[13].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[13].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[14].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[14].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[14].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[14].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[14].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[14].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[14].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[15].swf:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[15].stream_list.medium.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[15].stream_list.low.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[15].stream_list.original.CDN_FMT.fws:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.lives[15].stream_list.original.CDN_FMT.ali:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[15].sharefile:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.lives[15].m3u8:secret",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:VISITOR",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

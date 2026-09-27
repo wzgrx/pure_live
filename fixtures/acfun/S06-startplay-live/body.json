@@ -1,0 +1,31 @@
+{
+  "result": 1,
+  "data": {
+    "liveId": "29RchpoKMpA",
+    "availableTickets": [
+      "Bt0eUR4gQAizRZc8XdGqQxATBd==",
+      "QeyyQK3iVp7wEoSkYuBWWn==",
+      "Ia3oPO4oCMyjTKh4OcPkXXSJ",
+      "Zb3jLM1qKKezMYg4VxLoSxWBXw=="
+    ],
+    "enterRoomAttach": "tHq6iZXqIxpQydQTUVP6KasPDobuF3L9rJvVYykjvz30c8foUdZPDxcNYOR+OWt0q+NiG8T4xieMPjqhUtw9GP==",
+    "videoPlayRes": "{\"liveAdaptiveManifest\":[{\"freeTrafficCdn\":false,\"version\":\"2.0\",\"type\":\"dynamic\",\"hideAuto\":false,\"adaptationSet\":{\"gopDuration\":3000,\"representation\":[{\"id\":0,\"url\":\"https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8_sd1000.flv?auth_key=1793123185-0-8-3ey79836qg03vp3t2750n9553604npy8&oidc=alihb&tsc=origin\",\"bitrate\":1000,\"qualityType\":\"STANDARD\",\"mediaType\":\"HYBRID\",\"level\":30,\"name\":\"高清\",\"hidden\":false,\"enableAdaptive\":true,\"defaultSelect\":false},{\"id\":1,\"url\":\"https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8_hd2000.flv?auth_key=1793123185-3-6-4d9i88j4081b9mn250949u1735len213&oidc=alihb&tsc=origin\",\"bitrate\":2000,\"qualityType\":\"HIGH\",\"mediaType\":\"HYBRID\",\"level\":50,\"name\":\"超清\",\"hidden\":false,\"enableAdaptive\":true,\"defaultSelect\":true},{\"id\":2,\"url\":\"https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8_hd4000.flv?auth_key=1793123185-4-3-839s499yu7l56447j9p9hg8y02328bo8&oidc=alihb&tsc=origin\",\"bitrate\":4000,\"qualityType\":\"SUPER\",\"mediaType\":\"HYBRID\",\"level\":70,\"name\":\"蓝光 4M\",\"hidden\":false,\"enableAdaptive\":true,\"defaultSelect\":false},{\"id\":3,\"url\":\"https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8.flv?auth_key=1793123185-4-6-9r3x152m6u95u4a403y1b2n10f9qa016&oidc=alihb\",\"bitrate\":8000,\"qualityType\":\"BLUE_RAY\",\"mediaType\":\"HYBRID\",\"level\":130,\"name\":\"蓝光 8M\",\"hidden\":false,\"enableAdaptive\":true,\"defaultSelect\":false}]}}],\"liveAdaptiveConfig\":\"{\\\"ver\\\":1,\\\"buffer_init\\\":7000,\\\"stable_buffer_switch_up_cnt\\\":3,\\\"stable_buffer_diff\\\":240,\\\"stable_buffer_cnt\\\":16,\\\"last_high_water_mark_in_ms\\\":2000,\\\"speed_down_threshold\\\":1000,\\\"min_state_cycle\\\":1,\\\"max_switching_time\\\":8000,\\\"initiative_switching_time\\\":8000,\\\"switch_pts_diff\\\":-200,\\\"max_retry_cnt\\\":0,\\\"normal_config\\\":{\\\"switch_down_q\\\":2000,\\\"switch_down_bw_frag\\\":100,\\\"switch_up_bw_frag\\\":200,\\\"switch_up_q\\\":3000,\\\"switch_time\\\":0,\\\"continuous_switch_time\\\":0,\\\"switch_up_bw_frag1\\\":300,\\\"switch_up_bw_frag2\\\":250,\\\"switch_up_bw_frag2_cnt\\\":3,\\\"speed_up_threshold\\\":7000},\\\"state_config\\\":{\\\"frag_bw_window\\\":10,\\\"ls_sample_cnt\\\":2294967290,\\\"ls_steps\\\":20},\\\"liveshow_config\\\":{\\\"buffer_init\\\":3000,\\\"mobile_init_index\\\":1,\\\"speed_up_threshold\\\":4999,\\\"switch_down_q\\\":1500,\\\"switch_down_bw_frag\\\":100,\\\"switch_up_bw_frag\\\":200,\\\"switch_up_q\\\":1600,\\\"switch_time\\\":0,\\\"continuous_switch_time\\\":0,\\\"switch_up_bw_frag1\\\":300,\\\"switch_up_bw_frag2\\\":250,\\\"switch_up_bw_frag2_cnt\\\":3}}\",\"streamName\":\"kszt_BkwgFx_iyC8\"}",
+    "caption": "西八！",
+    "ticketRetryCount": 2,
+    "ticketRetryIntervalMs": 2000,
+    "notices": [
+      {
+        "userId": 3387944,
+        "userName": "AcFun直播巡场",
+        "userGender": "male",
+        "notice": "欢迎来到直播间，如直播间出现违法违规行为，请及时举报。感谢你与AC娘一起努力，守护我们共同的社区。AC在，爱一直在！"
+      }
+    ],
+    "config": {
+      "giftSlotSize": 2
+    },
+    "liveStartTime": 1790519855941,
+    "panoramic": false
+  },
+  "host": "mwteqc-qqe-a00-kfm-fptw1915.mezjt0di2.vn4.rgunga.lrh"
+}

@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "platform": "acfun",
+  "sample": "S06-startplay-live",
+  "capturedAt": "2026-09-27T17:46:25.057974Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId=8616574607448506&did=onh_T49z4OPxIGE7yvW9&acfun.api.visitor_st=EzHnJ7U9zo0irSzandiqoVOtdx9vdIYcA3NTHph_u8UsUQXU2otRDv_nZMtm49eLpCBDastQp-YqG921X62Arzy4dypCJGxYfpql1w-XAOVNlh2T2Sf1L3-WbTL28yI3S08Pa_qbQ-C3zIza4vrfHL8aSOcNq4xziO-RkEF4FAZjeNh9oZayOihGlwsIpHHOjlXeQiXv5-X5wxyrPjCg5hpMNIQOpDzL3TWeRJ-ylt-ngUXQda-H8mW_Qqv8RotULNR",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Referer": "https://live.acfun.cn/"
+    },
+    "body": "authorId=40740702&pullStreamType=FLV"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "alt-svc": "quic=\":8443\";ma=2592000;v=\"43\"",
+      "date": "Sun, 27 Sep 2026 17:46:25 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "x-ksclient-ip": "203.0.113.7",
+      "content-type": "application/json;charset=UTF-8",
+      "ks-arg-cprs": "clear",
+      "x-kslogid": "790531185634128327",
+      "x-kquic-trace-id": ",4122865363,4123772757",
+      "server": "Tengine/2.3.2",
+      "nginx-process-time": "0.057"
+    }
+  },
+  "raw": {
+    "sha256": "c02705dabeb17ab6ac25789bd415a2611b6e273b105a7e9ebea038aebad3de01",
+    "length": 3840
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.availableTickets[0]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.availableTickets[1]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.availableTickets[2]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.availableTickets[3]",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.enterRoomAttach",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.videoPlayRes.liveAdaptiveManifest[0].adaptationSet.representation[0].url:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.data.videoPlayRes.liveAdaptiveManifest[0].adaptationSet.representation[1].url:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.data.videoPlayRes.liveAdaptiveManifest[0].adaptationSet.representation[2].url:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.data.videoPlayRes.liveAdaptiveManifest[0].adaptationSet.representation[3].url:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.host",
+      "rule": "secret"
+    },
+    {
+      "where": "url:userId",
+      "rule": "person"
+    },
+    {
+      "where": "url:did",
+      "rule": "secret"
+    },
+    {
+      "where": "url:acfun.api.visitor_st",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

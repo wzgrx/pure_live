@@ -103,7 +103,7 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 | IPTV（独立模块 `live_iptv`，ADR 0024） | 完成 | 子代理 |
 | WebDAV、局域网同步、诊断包、首次启动向导、应用内更新、关于、分享口令 | 完成 | 子代理 |
 | Android 画中画、后台播放与通知、应用内小窗；Windows 单实例、新窗口、托盘、关闭行为、开机自启、系统媒体控制 | 完成（ADR 0025），已接入直播间 | 子代理 → 主会话 |
-| 第二批平台：cc、yy、soop、acfun、twitch | 进行中 | 子代理 |
+| 第二批平台：cc、yy、soop、acfun、twitch | 完成，五个都保留并接入应用（CC 暂无弹幕；Twitch 列表只有第一页，翻页要 WebView 完整性令牌） | 子代理 → 主会话 |
 | 第三批平台前半：chzzk、missevan、kilakila、inke、picarto、twitcasting、showroom、pandalive、17live | 进行中 | 子代理 |
 | 第三批平台后半：liveme、steambroadcast、sixroom、kugoulive、jdlive、baidulive、looklive、weibo；niconico；候选下线 tiktok、youtube、bigo、fc2live；小红书仅链接 | 进行中 | 子代理 |
 | 缓存清理、平台健康状态 | 完成 | 主会话 |

@@ -545,7 +545,7 @@ abstract final class Settings {
   /// the "网络电视" platform (iptv.md §5), as it did in 3.x.
   static const catalogPlatforms = StringListSetting(
     'catalog.platforms',
-    ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'iptv'],
+    ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'yy', 'soop', 'acfun', 'twitch', 'iptv'],
     lowerCase: true,
     legacy: [LegacyKey('hotAreasList')],
   );

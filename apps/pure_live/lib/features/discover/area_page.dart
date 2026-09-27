@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/discover/discover_refresh.dart';
 import 'package:pure_live_app/features/discover/followed_areas.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
@@ -42,7 +43,7 @@ class AreaPage extends ConsumerWidget {
       ),
       body: area == null
           ? MessageView(title: '分区信息已失效', actionLabel: '返回', onAction: () => context.pop())
-          : RoomGrid(query: AreaQuery(platform, area)),
+          : RoomGrid(query: AreaQuery(platform, area), refreshOn: discoverRefreshProvider),
     );
   }
 }

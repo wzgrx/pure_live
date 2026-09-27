@@ -9,6 +9,7 @@ import 'package:live_danmaku/live_danmaku.dart' show DanmakuStatus, DanmakuSyste
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart' show Appearance, PureTheme;
+import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
@@ -21,6 +22,7 @@ import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 
 import '../danmaku/fake_danmaku.dart';
+import '../fakes.dart' show fakeRecordManager;
 
 final class _QuietSite implements RoomSource, StreamSource {
   @override
@@ -69,6 +71,7 @@ void main() {
           blockRuleWriterProvider.overrideWithValue(writer),
           playbackSessionProvider.overrideWith((ref) => session),
           followsProvider.overrideWith((ref) => Stream.value(const [])),
+          recordManagerProvider.overrideWithValue(fakeRecordManager()),
           historyProvider.overrideWith(
             (ref) => Stream.value([
               HistoryEntry(

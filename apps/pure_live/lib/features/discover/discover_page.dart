@@ -12,7 +12,7 @@ import 'package:pure_live_app/features/discover/followed_areas.dart';
 import 'package:pure_live_app/features/iptv/iptv_discover.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Discover: platform tabs, each with recommended rooms and areas
 /// (principles §4.1; "热门" and "分区" are one entry).
@@ -29,7 +29,7 @@ class DiscoverPage extends ConsumerWidget {
       initialIndex: preferred < 0 ? 0 : preferred,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(S.discover),
+          title: Text(t.app.tabs.discover),
           bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
@@ -69,13 +69,13 @@ class _PlatformDiscover extends StatelessWidget {
     length: 2,
     child: Column(
       children: [
-        const TabBar(
+        TabBar(
           isScrollable: true,
           tabAlignment: TabAlignment.start,
           dividerHeight: 0,
           tabs: [
-            Tab(text: S.recommended, height: 40),
-            Tab(text: S.areas, height: 40),
+            Tab(text: t.discover.recommended, height: 40),
+            Tab(text: t.discover.areas, height: 40),
           ],
         ),
         Expanded(
@@ -119,7 +119,11 @@ class _Categories extends ConsumerWidget {
             if (followed.isNotEmpty)
               _CategorySection(
                 platform: platform,
-                category: Category(id: '_followed', name: '已收藏', areas: [for (final (area, _) in followed) area]),
+                category: Category(
+                  id: '_followed',
+                  name: t.discover.savedAreas,
+                  areas: [for (final (area, _) in followed) area],
+                ),
               ),
             for (final category in categories) _CategorySection(platform: platform, category: category),
           ],

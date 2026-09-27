@@ -6,6 +6,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The platforms of this build in the user's order: the stored ones first,
 /// then the rest; with whether each one shows.
@@ -65,11 +66,11 @@ class _PlatformsPageState extends ConsumerState<PlatformsPage> {
     final preferred = ref.watch(catalogPreferredSetting);
     final shown = _rows.where((row) => row.$2).length;
     return Scaffold(
-      appBar: AppBar(title: const Text('首页平台')),
+      appBar: AppBar(title: Text(t.settings.accounts.platforms)),
       body: ReorderableListView.builder(
-        header: const Padding(
-          padding: EdgeInsets.fromLTRB(Space.s4, Space.s3, Space.s4, Space.s2),
-          child: Text('勾选要在发现、搜索和平台账号里显示的平台，拖动调整顺序；点星标设为发现页默认打开的平台。'),
+        header: Padding(
+          padding: const EdgeInsets.fromLTRB(Space.s4, Space.s3, Space.s4, Space.s2),
+          child: Text(t.settings.platformsHint),
         ),
         itemCount: _rows.length,
         onReorderItem: (from, to) {
@@ -101,7 +102,7 @@ class _PlatformsPageState extends ConsumerState<PlatformsPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  tooltip: preferred == id ? '发现页默认打开' : '设为发现页默认打开',
+                  tooltip: preferred == id ? t.settings.discoverDefault : t.settings.setDiscoverDefault,
                   isSelected: preferred == id,
                   icon: const Icon(Icons.star_border),
                   selectedIcon: const Icon(Icons.star),

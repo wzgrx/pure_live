@@ -14,6 +14,7 @@ import 'package:pure_live_app/features/iptv/iptv_sync.dart';
 import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
 import 'package:pure_live_app/features/iptv/xtream.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of the IPTV page; a full-screen route above the tabs.
 const iptvLocation = '/iptv';
@@ -67,16 +68,17 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     }
   }
 
-  static String _summary(String name, IptvSyncResult result) =>
-      '“$name”：${result.channels} 个频道，${result.items} 条线路${result.issues > 0 ? '，跳过 ${result.issues} 行' : ''}';
+  static String _summary(String name, IptvSyncResult result) => result.issues > 0
+      ? t.iptv.importSummarySkipped(name: name, channels: result.channels, lines: result.items, skipped: result.issues)
+      : t.iptv.importSummary(name: name, channels: result.channels, lines: result.items);
 
   Future<void> _importUrl({String url = ''}) async {
-    final source = await askSource(context, title: '从网址导入', url: url);
+    final source = await askSource(context, title: t.iptv.importFromUrl, url: url);
     if (source == null || source.url.isEmpty) return;
     await _run('import', () async {
       final result = await _sync.importUrl(source.url, name: source.name);
       final name = (await ref.read(storeProvider).iptv.playlist(result.id))?.name ?? '';
-      return '已导入${_summary(name, result)}';
+      return t.iptv.imported(summary: _summary(name, result));
     });
   }
 
@@ -88,18 +90,18 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     await _run('import', () async {
       final result = await _sync.importXtream(account);
       final name = (await ref.read(storeProvider).iptv.playlist(result.id))?.name ?? account.defaultName;
-      return '已登录并导入${_summary(name, result)}';
+      return t.iptv.signedInAndImported(summary: _summary(name, result));
     });
   }
 
   Future<void> _importFile() async {
-    final picked = await FilePicker.pickFiles(dialogTitle: '选择播放列表（M3U、TXT、JSON）');
+    final picked = await FilePicker.pickFiles(dialogTitle: t.iptv.pickPlaylist);
     if (picked.isEmpty || !mounted) return;
     final file = picked.single;
     await _run('import', () async {
       final result = await _sync.importFile(fileName: file.name, bytes: await file.readAsBytes());
       final name = (await ref.read(storeProvider).iptv.playlist(result.id))?.name ?? file.name;
-      return '已导入${_summary(name, result)}';
+      return t.iptv.imported(summary: _summary(name, result));
     });
   }
 
@@ -108,28 +110,30 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     if (url != null) return await _importUrl(url: url);
     final bytes = request.bytes;
     if (bytes == null) return;
-    final fileName = request.fileName ?? '分享的播放列表.m3u';
+    final fileName = request.fileName ?? t.iptv.sharedFileName;
     final dot = fileName.lastIndexOf('.');
     final source = await askSource(
       context,
-      title: '导入分享的播放列表',
+      title: t.iptv.importShared,
       name: dot > 0 ? fileName.substring(0, dot) : fileName,
       askUrl: false,
     );
     if (source == null) return;
     await _run('import', () async {
       final result = await _sync.importFile(fileName: fileName, bytes: bytes, name: source.name);
-      return '已导入${_summary(source.name.isEmpty ? fileName : source.name, result)}';
+      return t.iptv.imported(summary: _summary(source.name.isEmpty ? fileName : source.name, result));
     });
   }
 
   Future<void> _syncAll() => _run('all', () async {
     final failed = await _sync.syncAll();
-    return failed == 0 ? '全部同步完成' : '同步完成，$failed 个来源失败';
+    return failed == 0 ? t.iptv.allSynced : t.iptv.syncedWithFailures(n: failed);
   });
 
-  Future<void> _syncOne(IptvPlaylistRecord playlist) =>
-      _run('p${playlist.id}', () async => '已同步${_summary(playlist.name, await _sync.syncPlaylist(playlist))}');
+  Future<void> _syncOne(IptvPlaylistRecord playlist) => _run(
+    'p${playlist.id}',
+    () async => t.iptv.syncedPlaylist(summary: _summary(playlist.name, await _sync.syncPlaylist(playlist))),
+  );
 
   Future<void> _menu(IptvPlaylistRecord playlist, _PlaylistAction action) async {
     final iptv = ref.read(storeProvider).iptv;
@@ -137,27 +141,27 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       case _PlaylistAction.sync:
         await _syncOne(playlist);
       case _PlaylistAction.rename:
-        final name = await askText(context, title: '重命名', initial: playlist.name);
+        final name = await askText(context, title: t.common.rename, initial: playlist.name);
         if (name != null && name.isNotEmpty) await iptv.renamePlaylist(playlist.id, name);
       case _PlaylistAction.userAgent:
         final agent = await askText(
           context,
-          title: '这个列表的 User-Agent',
+          title: t.iptv.playlistUserAgent,
           initial: playlist.userAgent ?? '',
-          hint: '留空则用全局设置',
-          helper: '下载列表和播放频道时发送；频道自己指定的优先',
+          hint: t.iptv.userAgentEmpty,
+          helper: t.iptv.playlistUserAgentHint,
         );
         if (agent != null) await iptv.setPlaylistUserAgent(playlist.id, agent);
       case _PlaylistAction.autoSync:
         await iptv.setPlaylistAutoSync(playlist.id, enabled: !playlist.autoSync);
       case _PlaylistAction.copySource:
         await Clipboard.setData(ClipboardData(text: playlist.source));
-        _toast('已复制来源地址');
+        _toast(t.iptv.sourceCopied);
       case _PlaylistAction.delete:
         final confirmed = await confirm(
           context,
-          title: '删除播放列表',
-          message: '删除“${playlist.name}”和它的 ${playlist.channelCount} 个频道？关注的频道会保留，但会显示“频道不存在”。',
+          title: t.iptv.deletePlaylist,
+          message: t.iptv.deletePlaylistConfirm(name: playlist.name, n: playlist.channelCount),
         );
         if (confirmed) await _sync.deletePlaylist(playlist);
     }
@@ -171,10 +175,10 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     final busy = _busy.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('网络电视'),
+        title: Text(t.iptv.title),
         actions: [
           IconButton(
-            tooltip: '全部同步',
+            tooltip: t.iptv.syncAll,
             icon: const Icon(Icons.sync),
             onPressed: _busy.contains('all') || (playlists.value?.isEmpty ?? true) ? null : _syncAll,
           ),
@@ -189,13 +193,13 @@ class _IptvPageState extends ConsumerState<IptvPage> {
           constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
           child: ListView(
             children: [
-              const SettingsHeader('播放列表'),
+              SettingsHeader(t.iptv.playlists),
               ...switch (playlists) {
                 AsyncData(:final value) when value.isEmpty => [
-                  const ListTile(
-                    leading: Icon(Icons.live_tv_outlined),
-                    title: Text('还没有播放列表'),
-                    subtitle: Text('从文件或网址导入 M3U、TXT、JSON 播放列表，频道会出现在“发现 › 网络电视”里'),
+                  ListTile(
+                    leading: const Icon(Icons.live_tv_outlined),
+                    title: Text(t.iptv.noPlaylists),
+                    subtitle: Text(t.iptv.playlistsHint),
                   ),
                 ],
                 AsyncData(:final value) => [
@@ -207,7 +211,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
                       onAction: (action) => _menu(playlist, action),
                     ),
                 ],
-                AsyncError() => [const ListTile(title: Text('读取播放列表失败'))],
+                AsyncError() => [ListTile(title: Text(t.iptv.playlistsLoadFailed))],
                 _ => [const Padding(padding: EdgeInsets.all(Space.s4), child: LinearProgressIndicator())],
               },
               Padding(
@@ -218,54 +222,61 @@ class _IptvPageState extends ConsumerState<IptvPage> {
                   children: [
                     FilledButton.tonalIcon(
                       icon: const Icon(Icons.link, size: 18),
-                      label: const Text('从网址导入'),
+                      label: Text(t.iptv.importFromUrl),
                       onPressed: _busy.contains('import') ? null : _importUrl,
                     ),
                     OutlinedButton.icon(
                       icon: const Icon(Icons.folder_open, size: 18),
-                      label: const Text('从文件导入'),
+                      label: Text(t.iptv.importFromFile),
                       onPressed: _busy.contains('import') ? null : _importFile,
                     ),
                     OutlinedButton.icon(
                       icon: const Icon(Icons.vpn_key_outlined, size: 18),
-                      label: const Text('Xtream 账号'),
+                      label: Text(t.iptv.xtreamAccount),
                       onPressed: _busy.contains('import') ? null : _importXtream,
                     ),
                   ],
                 ),
               ),
-              const SettingsHeader('节目单'),
+              SettingsHeader(t.iptv.guide),
               ListTile(
                 leading: const Icon(Icons.event_note_outlined),
-                title: const Text('节目单源'),
+                title: Text(t.iptv.guideSources),
                 subtitle: Text(
                   selectedGuide == null
-                      ? (guides.isEmpty ? '未添加，导入 XMLTV 或 JSON 节目单后可以看节目和回看' : '未选择')
-                      : '当前：${selectedGuide.name}',
+                      ? (guides.isEmpty ? t.iptv.noGuideAdded : t.iptv.noGuideSelected)
+                      : t.iptv.currentGuide(name: selectedGuide.name),
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push(iptvGuideLocation),
               ),
-              const SettingsHeader('同步'),
-              const SwitchSettingTile(setting: Settings.iptvAutoSync, title: '自动同步', subtitle: '启动 3 秒后同步到期的网址列表和节目单'),
-              const ChoiceSettingTile<int>(
+              SettingsHeader(t.common.sync),
+              SwitchSettingTile(setting: Settings.iptvAutoSync, title: t.iptv.autoSync, subtitle: t.iptv.autoSyncHint),
+              ChoiceSettingTile<int>(
                 setting: Settings.iptvAutoSyncHours,
-                title: '同步间隔',
-                labels: {6: '每 6 小时', 12: '每 12 小时', 24: '每天', 48: '每 2 天', 72: '每 3 天', 168: '每周'},
+                title: t.iptv.syncInterval,
+                labels: {
+                  6: t.iptv.every6h,
+                  12: t.iptv.every12h,
+                  24: t.iptv.daily,
+                  48: t.iptv.every2d,
+                  72: t.iptv.every3d,
+                  168: t.iptv.weekly,
+                },
               ),
               SettingBuilder<String>(
                 setting: Settings.iptvUserAgent,
                 builder: (context, value, set) => ListTile(
-                  title: const Text('自定义 User-Agent'),
-                  subtitle: Text(value.isEmpty ? '未设置（使用播放器默认值）' : value, maxLines: 2),
+                  title: Text(t.iptv.customUserAgent),
+                  subtitle: Text(value.isEmpty ? t.iptv.userAgentUnset : value, maxLines: 2),
                   trailing: const Icon(Icons.edit_outlined),
                   onTap: () async {
                     final agent = await askText(
                       context,
-                      title: '自定义 User-Agent',
+                      title: t.iptv.customUserAgent,
                       initial: value,
-                      hint: '例如 okhttp/4.12.0',
-                      helper: '下载列表、节目单和播放频道时发送；列表或频道自己指定的优先',
+                      hint: t.iptv.userAgentExample,
+                      helper: t.iptv.userAgentHint,
                     );
                     if (agent != null) set(agent);
                   },
@@ -295,8 +306,8 @@ class _PlaylistTile extends StatelessWidget {
     final theme = Theme.of(context);
     final error = playlist.lastError;
     final status = playlist.lastSyncAt == null && error == null
-        ? '未同步，点同步获取频道'
-        : '${playlist.channelCount} 个频道 · ${syncedText(playlist.lastSyncAt)}';
+        ? t.iptv.notSyncedHint
+        : t.iptv.channelsAndSynced(n: playlist.channelCount, synced: syncedText(playlist.lastSyncAt));
     return ListTile(
       leading: Icon(playlist.isRemote ? Icons.cloud_outlined : Icons.description_outlined),
       title: Text(playlist.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -304,31 +315,35 @@ class _PlaylistTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(status),
-          if (error != null) Text('上次同步失败：$error', style: TextStyle(color: theme.colorScheme.error)),
-          if (playlist.isRemote && !playlist.autoSync) const Text('不参与自动同步'),
+          if (error != null)
+            Text(
+              t.iptv.lastSyncFailed(error: error),
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+          if (playlist.isRemote && !playlist.autoSync) Text(t.iptv.noAutoSync),
         ],
       ),
       isThreeLine: error != null || (playlist.isRemote && !playlist.autoSync),
       trailing: busy
           ? const SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2))
           : PopupMenuButton<_PlaylistAction>(
-              tooltip: '更多',
+              tooltip: t.common.more,
               onSelected: onAction,
               itemBuilder: (context) => [
-                const PopupMenuItem(value: _PlaylistAction.sync, child: Text('同步')),
-                const PopupMenuItem(value: _PlaylistAction.rename, child: Text('重命名')),
+                PopupMenuItem(value: _PlaylistAction.sync, child: Text(t.common.sync)),
+                PopupMenuItem(value: _PlaylistAction.rename, child: Text(t.common.rename)),
                 const PopupMenuItem(value: _PlaylistAction.userAgent, child: Text('User-Agent')),
                 if (playlist.isRemote) ...[
                   CheckedPopupMenuItem(
                     value: _PlaylistAction.autoSync,
                     checked: playlist.autoSync,
-                    child: const Text('自动同步'),
+                    child: Text(t.iptv.autoSync),
                   ),
                   // An Xtream source is a reference; its address holds the password.
                   if (!isXtreamSource(playlist.source))
-                    const PopupMenuItem(value: _PlaylistAction.copySource, child: Text('复制来源地址')),
+                    PopupMenuItem(value: _PlaylistAction.copySource, child: Text(t.iptv.copySource)),
                 ],
-                const PopupMenuItem(value: _PlaylistAction.delete, child: Text('删除')),
+                PopupMenuItem(value: _PlaylistAction.delete, child: Text(t.common.delete)),
               ],
             ),
       onTap: busy ? null : onSync,
@@ -342,7 +357,7 @@ class _PlaylistTile extends StatelessWidget {
 IptvImportRequest? iptvShareRequest(String text) {
   final trimmed = text.trim();
   if (trimmed.startsWith('#EXTM3U') || trimmed.contains('\n#EXTINF:')) {
-    return IptvImportRequest(bytes: utf8.encode(trimmed), fileName: '分享的播放列表.m3u');
+    return IptvImportRequest(bytes: utf8.encode(trimmed), fileName: t.iptv.sharedFileName);
   }
   if (trimmed.contains(RegExp(r'\s'))) return null;
   final uri = Uri.tryParse(trimmed);
@@ -377,7 +392,7 @@ class _XtreamDialogState extends State<_XtreamDialog> {
   void _submit() {
     final account = XtreamAccount.tryParse(server: _server.text, username: _user.text, password: _password.text);
     if (account == null) {
-      setState(() => _error = '填写服务器地址（例如 http://example.com:8080）、用户名和密码');
+      setState(() => _error = t.iptv.xtreamHint);
       return;
     }
     Navigator.pop(context, account);
@@ -385,7 +400,7 @@ class _XtreamDialogState extends State<_XtreamDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('登录 Xtream 账号'),
+    title: Text(t.iptv.xtreamSignIn),
     content: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -394,21 +409,21 @@ class _XtreamDialogState extends State<_XtreamDialog> {
             key: const ValueKey('xtream-server'),
             controller: _server,
             keyboardType: TextInputType.url,
-            decoration: const InputDecoration(labelText: '服务器地址', hintText: 'http://example.com:8080'),
+            decoration: InputDecoration(labelText: t.iptv.serverAddress, hintText: 'http://example.com:8080'),
           ),
           TextField(
             key: const ValueKey('xtream-user'),
             controller: _user,
-            decoration: const InputDecoration(labelText: '用户名'),
+            decoration: InputDecoration(labelText: t.common.username),
           ),
           TextField(
             key: const ValueKey('xtream-password'),
             controller: _password,
             obscureText: _hidden,
             decoration: InputDecoration(
-              labelText: '密码',
+              labelText: t.common.password,
               suffixIcon: IconButton(
-                tooltip: _hidden ? '显示密码' : '隐藏密码',
+                tooltip: _hidden ? t.iptv.showPassword : t.iptv.hidePassword,
                 icon: Icon(_hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                 onPressed: () => setState(() => _hidden = !_hidden),
               ),
@@ -417,7 +432,7 @@ class _XtreamDialogState extends State<_XtreamDialog> {
           ),
           const SizedBox(height: Space.s2),
           Text(
-            _error ?? '用户名和密码只加密保存在本机，备份和同步里不含明文。',
+            _error ?? t.iptv.xtreamStorageNote,
             style: TextStyle(
               color: _error == null
                   ? Theme.of(context).colorScheme.onSurfaceVariant
@@ -428,8 +443,8 @@ class _XtreamDialogState extends State<_XtreamDialog> {
       ),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-      FilledButton(onPressed: _submit, child: const Text('登录并导入')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+      FilledButton(onPressed: _submit, child: Text(t.iptv.signInAndImport)),
     ],
   );
 }

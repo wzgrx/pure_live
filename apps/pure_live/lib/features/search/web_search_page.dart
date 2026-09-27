@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/web/web_engine.dart';
 import 'package:pure_live_app/core/web/web_prompt.dart';
 import 'package:pure_live_app/features/search/web_search_links.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of the web search for [keyword] on [platform].
 String webSearchLocation(String platform, String keyword) =>
@@ -40,7 +41,7 @@ class WebSearchButton extends ConsumerWidget {
     final availability = ref.watch(webAvailabilityProvider).value ?? WebAvailability.unsupported;
     if (platforms.isEmpty || availability == WebAvailability.unsupported) return const SizedBox.shrink();
     return IconButton(
-      tooltip: '网页搜索',
+      tooltip: t.search.web.title,
       icon: const Icon(Icons.travel_explore),
       onPressed: () => _open(context, ref, platforms),
     );
@@ -49,7 +50,7 @@ class WebSearchButton extends ConsumerWidget {
   Future<void> _open(BuildContext context, WidgetRef ref, List<String> platforms) async {
     final text = keyword.text.trim();
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('先输入要搜索的关键词')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.search.web.enterKeyword)));
       return;
     }
     if (!await ensureWebAvailable(context, ref) || !context.mounted) return;
@@ -58,7 +59,7 @@ class WebSearchButton extends ConsumerWidget {
         : await showDialog<String>(
             context: context,
             builder: (context) => SimpleDialog(
-              title: const Text('在哪个平台的网页里搜索'),
+              title: Text(t.search.web.pickPlatform),
               children: [
                 for (final id in platforms)
                   SimpleDialogOption(onPressed: () => Navigator.pop(context, id), child: Text(platformNames[id] ?? id)),
@@ -167,7 +168,7 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
           children: [
             ListTile(
               leading: PlatformLogo(platformId: room.platform, size: Sizes.iconLg),
-              title: const Text('识别到直播间'),
+              title: Text(t.search.web.roomFound),
               subtitle: Text('${platformNames[room.platform] ?? room.platform} · ${room.roomId}'),
             ),
             Padding(
@@ -175,9 +176,9 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('留在网页')),
+                  TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.search.web.stay)),
                   const SizedBox(width: Space.s2),
-                  FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('打开直播间')),
+                  FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(t.common.openRoom)),
                 ],
               ),
             ),
@@ -234,11 +235,15 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('网页搜索 · $name'),
+          title: Text(t.search.web.titleFor(name: name)),
           actions: [
             if (page != null) ...[
-              IconButton(tooltip: '本页的房间', icon: const Icon(Icons.format_list_bulleted), onPressed: _listRooms),
-              IconButton(tooltip: '刷新', icon: const Icon(Icons.refresh), onPressed: page.reload),
+              IconButton(
+                tooltip: t.search.web.pageRooms,
+                icon: const Icon(Icons.format_list_bulleted),
+                onPressed: _listRooms,
+              ),
+              IconButton(tooltip: t.common.refresh, icon: const Icon(Icons.refresh), onPressed: page.reload),
             ],
           ],
           bottom: page != null && _progress < 100
@@ -249,11 +254,11 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
               : null,
         ),
         body: page == null
-            ? const MessageView(icon: Icons.public_off, title: '这里用不了网页搜索')
+            ? MessageView(icon: Icons.public_off, title: t.search.web.unavailable)
             : _failed
             ? MessageView.error(
-                title: '网页没有打开',
-                message: '检查网络或代理设置后重试。',
+                title: t.search.web.notOpened,
+                message: t.errors.networkDetail,
                 onAction: () {
                   setState(() => _failed = false);
                   unawaited(page.reload());
@@ -279,15 +284,15 @@ class _PageRoomsSheet extends StatelessWidget {
         builder: (context, snapshot) {
           final rooms = snapshot.data;
           if (rooms == null) {
-            return const SizedBox(height: 200, child: LoadingView(label: '正在识别本页的直播间'));
+            return SizedBox(height: 200, child: LoadingView(label: t.search.web.scanning));
           }
           if (rooms.isEmpty) {
-            return const SizedBox(height: 200, child: MessageView(title: '本页没有识别出直播间链接'));
+            return SizedBox(height: 200, child: MessageView(title: t.search.web.noRooms));
           }
           return ListView(
             shrinkWrap: true,
             children: [
-              const ListTile(title: Text('本页的直播间')),
+              ListTile(title: Text(t.search.web.pageRoomsTitle)),
               for (final (:link, :room) in rooms)
                 ListTile(
                   leading: PlatformLogo(platformId: room.platform, size: Sizes.iconLg),

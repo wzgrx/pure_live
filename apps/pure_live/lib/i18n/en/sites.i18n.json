@@ -1,0 +1,42 @@
+{
+  "names(map)": {
+    "bilibili": "Bilibili",
+    "douyu": "Douyu",
+    "huya": "Huya",
+    "douyin": "Douyin",
+    "kuaishou": "Kuaishou",
+    "cc": "NetEase CC",
+    "yy": "YY",
+    "soop": "SOOP",
+    "acfun": "AcFun",
+    "twitch": "Twitch",
+    "chzzk": "CHZZK",
+    "missevan": "MissEvan",
+    "kilakila": "KilaKila",
+    "inke": "Inke",
+    "picarto": "Picarto",
+    "twitcasting": "TwitCasting",
+    "showroom": "SHOWROOM",
+    "pandalive": "PandaTV",
+    "17live": "17LIVE",
+    "liveme": "LiveMe",
+    "steambroadcast": "Steam Broadcasting",
+    "sixroom": "6.cn",
+    "kugoulive": "Kugou Live",
+    "jdlive": "JD Live",
+    "baidulive": "Baidu Live",
+    "looklive": "LOOK Live",
+    "weibo": "Weibo Live",
+    "niconico": "niconico",
+    "xiaohongshu": "REDnote",
+    "youtube": "YouTube Live",
+    "tiktok": "TikTok LIVE",
+    "fc2live": "FC2 Live",
+    "bigo": "Bigo Live",
+    "iptv": "IPTV"
+  },
+  "otherNames(map)": {
+    "huajiao": "Huajiao",
+    "kick": "Kick"
+  }
+}

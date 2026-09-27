@@ -11,6 +11,7 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/web/cookie_text.dart';
 import 'package:pure_live_app/core/web/web_engine.dart';
 import 'package:pure_live_app/features/accounts/account_services.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// How a platform signs in on its own web page (F-ACC-01).
 @immutable
@@ -134,12 +135,12 @@ final class WebLoginFlow extends ChangeNotifier {
     try {
       cookie = cookieHeader(await cookies(url));
     } on Object {
-      if (!_disposed) _set(WebLoginPhase.browsing, message: '读取登录信息失败，请重新登录');
+      if (!_disposed) _set(WebLoginPhase.browsing, message: t.accounts.webReadFailed);
       return;
     }
     if (_disposed) return;
     if (cookie.isEmpty) {
-      _set(WebLoginPhase.browsing, message: '没有拿到登录信息，请重新登录');
+      _set(WebLoginPhase.browsing, message: t.accounts.webNoCookie);
       return;
     }
     try {
@@ -149,9 +150,11 @@ final class WebLoginFlow extends ChangeNotifier {
       _identity = identity;
       _set(WebLoginPhase.done);
     } on NeedsLogin {
-      if (!_disposed) _set(WebLoginPhase.browsing, message: '登录校验没有通过，请重新登录');
+      if (!_disposed) _set(WebLoginPhase.browsing, message: t.accounts.webRejected);
     } on Object catch (error) {
-      if (!_disposed) _set(WebLoginPhase.browsing, message: '登录校验失败：${describeError(error).title}');
+      if (!_disposed) {
+        _set(WebLoginPhase.browsing, message: t.accounts.qrVerifyFailed(reason: describeError(error).title));
+      }
     }
   }
 
@@ -207,7 +210,8 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage> {
     final flow = _flow!;
     if (!mounted) return;
     if (flow.phase == WebLoginPhase.done) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('已登录：${flow.identity?.name ?? ''}')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.accounts.signedInName(name: flow.identity?.name ?? ''))));
       context.pop(true);
       return;
     }
@@ -236,9 +240,10 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('网页登录 · $name'),
+          title: Text(t.accounts.webTitle(name: name)),
           actions: [
-            if (page != null) IconButton(tooltip: '刷新', icon: const Icon(Icons.refresh), onPressed: page.reload),
+            if (page != null)
+              IconButton(tooltip: t.common.refresh, icon: const Icon(Icons.refresh), onPressed: page.reload),
           ],
           bottom: _progress < 100
               ? PreferredSize(
@@ -248,13 +253,17 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage> {
               : null,
         ),
         body: flow == null || page == null
-            ? const MessageView(icon: Icons.public_off, title: '这里用不了网页登录', message: '请改用扫码登录或手动填写 Cookie。')
+            ? MessageView(
+                icon: Icons.public_off,
+                title: t.accounts.webUnavailable,
+                message: t.accounts.webUnavailableHint,
+              )
             : Column(
                 children: [
                   if (flow.message != null)
                     MaterialBanner(
                       content: Text(flow.message!),
-                      actions: [TextButton(onPressed: page.reload, child: const Text('重新加载'))],
+                      actions: [TextButton(onPressed: page.reload, child: Text(t.accounts.reload))],
                     ),
                   Expanded(
                     child: Stack(
@@ -264,7 +273,7 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage> {
                         if (flow.phase == WebLoginPhase.verifying)
                           ColoredBox(
                             color: Theme.of(context).colorScheme.surface,
-                            child: const LoadingView(label: '正在校验登录'),
+                            child: LoadingView(label: t.accounts.verifyingSignIn),
                           ),
                       ],
                     ),

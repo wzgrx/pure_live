@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_ui/live_ui.dart' show Sizes, Space;
 import 'package:pure_live_app/features/room/presentation.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// What happens when the sleep timer ends (F-TMR-01/02 merged: pause, or
 /// quit the app).
@@ -207,45 +208,53 @@ class _SleepTimerPanelState extends ConsumerState<SleepTimerPanel> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('定时关闭', style: theme.textTheme.titleMedium),
+            Text(t.room.sleepTimer, style: theme.textTheme.titleMedium),
             const SizedBox(height: Space.s2),
             if (state.active)
               Row(
                 children: [
                   Expanded(
                     child: Text(
-                      '${formatRemaining(state.remaining(DateTime.now()))} 后'
-                      '${state.action == SleepAction.exit ? '退出应用' : '暂停播放'}',
+                      state.action == SleepAction.exit
+                          ? t.room.sleep.exitIn(time: formatRemaining(state.remaining(DateTime.now())))
+                          : t.room.sleep.pauseIn(time: formatRemaining(state.remaining(DateTime.now()))),
                       style: theme.textTheme.bodyLarge!.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                     ),
                   ),
                   TextButton(
                     onPressed: () => ref.read(sleepTimerProvider.notifier).cancel(),
-                    child: const Text('取消定时'),
+                    child: Text(t.room.sleep.cancel),
                   ),
                 ],
               )
             else
-              Text('到时间后暂停播放，并停止后台声音', style: theme.textTheme.bodyMedium),
+              Text(t.room.sleep.hint, style: theme.textTheme.bodyMedium),
             const SizedBox(height: Space.s3),
             Wrap(
               spacing: Space.s2,
               runSpacing: Space.s2,
               children: [
                 for (final minutes in sleepPresets)
-                  ActionChip(label: Text('$minutes 分钟'), onPressed: () => _start(minutes)),
+                  ActionChip(
+                    label: Text(t.common.minutes(n: minutes)),
+                    onPressed: () => _start(minutes),
+                  ),
                 ActionChip(
                   avatar: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text('自定义'),
+                  label: Text(t.room.sleep.custom),
                   onPressed: _custom,
                 ),
               ],
             ),
             const SizedBox(height: Space.s3),
             SegmentedButton<SleepAction>(
-              segments: const [
-                ButtonSegment(value: SleepAction.pause, label: Text('暂停播放'), icon: Icon(Icons.pause)),
-                ButtonSegment(value: SleepAction.exit, label: Text('退出应用'), icon: Icon(Icons.exit_to_app)),
+              segments: [
+                ButtonSegment(value: SleepAction.pause, label: Text(t.room.sleep.pause), icon: const Icon(Icons.pause)),
+                ButtonSegment(
+                  value: SleepAction.exit,
+                  label: Text(t.room.sleep.exit),
+                  icon: const Icon(Icons.exit_to_app),
+                ),
               ],
               selected: {state.action},
               onSelectionChanged: (value) => ref.read(sleepTimerProvider.notifier).setAction(value.first),
@@ -253,8 +262,8 @@ class _SleepTimerPanelState extends ConsumerState<SleepTimerPanel> {
             if (widget.onAudioOnly != null)
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('同时切换为纯音频'),
-                subtitle: const Text('助眠：只保留声音'),
+                title: Text(t.room.sleep.audioOnly),
+                subtitle: Text(t.room.sleep.audioOnlySubtitle),
                 value: _audioOnly,
                 onChanged: (value) => setState(() => _audioOnly = value),
               ),
@@ -285,7 +294,7 @@ class _MinutesDialogState extends State<_MinutesDialog> {
   void _submit() {
     final minutes = int.tryParse(_text.text.trim());
     if (minutes == null || minutes < 1 || minutes > maxSleepMinutes) {
-      setState(() => _error = '请输入 1 到 $maxSleepMinutes 之间的分钟数');
+      setState(() => _error = t.room.sleep.invalidMinutes(max: maxSleepMinutes));
       return;
     }
     Navigator.pop(context, minutes);
@@ -293,18 +302,18 @@ class _MinutesDialogState extends State<_MinutesDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('自定义时长'),
+    title: Text(t.room.sleep.customTitle),
     content: TextField(
       controller: _text,
       autofocus: true,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      decoration: InputDecoration(suffixText: '分钟', errorText: _error),
+      decoration: InputDecoration(suffixText: t.room.sleep.minutesSuffix, errorText: _error),
       onSubmitted: (_) => _submit(),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-      FilledButton(onPressed: _submit, child: const Text('开始')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+      FilledButton(onPressed: _submit, child: Text(t.common.start)),
     ],
   );
 }

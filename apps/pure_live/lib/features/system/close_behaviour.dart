@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// What closing the window does now (F-WIN-04).
 enum CloseChoice {
@@ -43,19 +44,19 @@ class _CloseDialogState extends State<_CloseDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('关闭窗口'),
+    title: Text(t.system.closeWindow),
     content: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('退出纯粹直播，还是最小化到托盘继续运行？'),
+        Text(t.system.closeQuestion),
         const SizedBox(height: 8),
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           controlAffinity: ListTileControlAffinity.leading,
           value: _remember,
-          title: const Text('不再询问'),
-          subtitle: const Text('可以在 设置 › 通用 里修改'),
+          title: Text(t.system.dontAskAgain),
+          subtitle: Text(t.system.changeInSettings),
           onChanged: (value) => setState(() => _remember = value ?? false),
         ),
       ],
@@ -63,11 +64,11 @@ class _CloseDialogState extends State<_CloseDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context, (action: CloseAction.minimize, remember: _remember)),
-        child: const Text('最小化到托盘'),
+        child: Text(t.system.minimizeToTray),
       ),
       FilledButton(
         onPressed: () => Navigator.pop(context, (action: CloseAction.exit, remember: _remember)),
-        child: const Text('退出'),
+        child: Text(t.common.exit),
       ),
     ],
   );
@@ -79,10 +80,10 @@ class CloseBehaviourTile extends StatelessWidget {
   /// Creates the tile.
   const new({super.key});
 
-  static const Map<CloseAction?, String> _labels = {
-    null: '每次询问',
-    CloseAction.minimize: '最小化到托盘',
-    CloseAction.exit: '退出应用',
+  static Map<CloseAction?, String> get _labels => {
+    null: t.system.askEveryTime,
+    CloseAction.minimize: t.system.minimizeToTray,
+    CloseAction.exit: t.system.quitApp,
   };
 
   @override
@@ -93,14 +94,14 @@ class CloseBehaviourTile extends StatelessWidget {
       builder: (context, action, setAction) {
         final current = dontAsk ? action : null;
         return ListTile(
-          title: const Text('关闭窗口时'),
+          title: Text(t.system.onClose),
           subtitle: Text(_labels[current]!),
           trailing: const Icon(Icons.chevron_right),
           onTap: () async {
             final chosen = await showDialog<({CloseAction? action})>(
               context: context,
               builder: (context) => SimpleDialog(
-                title: const Text('关闭窗口时'),
+                title: Text(t.system.onClose),
                 children: [
                   for (final entry in _labels.entries)
                     ListTile(

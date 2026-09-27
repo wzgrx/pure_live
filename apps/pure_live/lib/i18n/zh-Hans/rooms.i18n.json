@@ -1,0 +1,12 @@
+{
+  "setGroups": "设置分组",
+  "streamLink": "获取直链",
+  "openInNewWindow": "在新窗口打开",
+  "followedName": "已关注 {name}",
+  "notLive": "主播现在没有开播，拿不到直链。",
+  "loadingLines": "正在获取线路",
+  "linesTapToCopy": "线路（点一下复制）",
+  "noLinesForQuality": "这个画质没有可用的线路",
+  "clipboardFailed": "没能写入剪贴板，再试一次",
+  "streamLinkFor": "获取直链 · {title}"
+}

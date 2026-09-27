@@ -14,6 +14,7 @@ import 'package:pure_live_app/features/accounts/cookie_editor.dart';
 import 'package:pure_live_app/features/accounts/douyu_account.dart';
 import 'package:pure_live_app/features/accounts/web_login.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of one platform's account page.
 String accountLocation(String platform) => '/me/accounts/${Uri.encodeComponent(platform)}';
@@ -26,11 +27,11 @@ Future<bool> confirmSignOut(BuildContext context, String platform, {required boo
     await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('退出${platformNames[platform] ?? platform}账号？'),
-        content: Text('会删除本机保存的登录信息${clearsBrowser ? '，并清除内置浏览器里的登录状态' : ''}。'),
+        title: Text(t.accounts.signOutTitle(name: platformNames[platform] ?? platform)),
+        content: Text(clearsBrowser ? t.accounts.signOutBodyBrowser : t.accounts.signOutBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('退出')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.common.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(t.accounts.signOut)),
         ],
       ),
     ) ??
@@ -87,7 +88,7 @@ class _PlatformAccountPageState extends ConsumerState<PlatformAccountPage> {
         // The stored cookie is gone either way.
       }
     }
-    if (mounted) _toast('已退出登录');
+    if (mounted) _toast(t.accounts.signedOutToast);
   }
 
   Future<void> _renew() async {
@@ -121,7 +122,7 @@ class _PlatformAccountPageState extends ConsumerState<PlatformAccountPage> {
         : WebAvailability.unsupported;
     final name = platformNames[_platform] ?? _platform;
     return Scaffold(
-      appBar: AppBar(title: Text('$name账号')),
+      appBar: AppBar(title: Text(t.accounts.accountTitle(name: name))),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -145,40 +146,41 @@ class _PlatformAccountPageState extends ConsumerState<PlatformAccountPage> {
                           onPressed: check is AccountChecking
                               ? null
                               : () => ref.read(accountCheckProvider(_platform).notifier).verify(),
-                          child: const Text('校验'),
+                          child: Text(t.accounts.verify),
                         ),
                       if (douyu != null && douyu.renewable)
-                        OutlinedButton(onPressed: _renewing ? null : _renew, child: const Text('立即续期')),
-                      TextButton(onPressed: _signOut, child: const Text('退出登录')),
+                        OutlinedButton(onPressed: _renewing ? null : _renew, child: Text(t.accounts.renewNow)),
+                      TextButton(onPressed: _signOut, child: Text(t.accounts.signOutAction)),
                     ],
                   ),
                 ),
               if (_platform == 'bilibili') ...[
-                SettingsHeader(signedIn ? '换个账号登录' : '登录'),
+                SettingsHeader(signedIn ? t.accounts.switchAccount : t.accounts.signIn),
                 if (_qr)
                   // Keyed: the list above it grows when the sign-in lands.
-                  BilibiliQrPanel(key: const ValueKey('bilibili-qr'), onDone: () => _toast('已登录'))
+                  BilibiliQrPanel(key: const ValueKey('bilibili-qr'), onDone: () => _toast(t.accounts.signedInToast))
                 else
                   ListTile(
                     leading: const Icon(Icons.qr_code_2),
-                    title: const Text('扫码登录'),
-                    subtitle: const Text('用哔哩哔哩手机客户端扫码'),
+                    title: Text(t.accounts.qrSignIn),
+                    subtitle: Text(t.accounts.qrSignInSubtitle),
                     onTap: () => setState(() => _qr = true),
                   ),
                 if (web != WebAvailability.unsupported)
                   ListTile(
                     leading: const Icon(Icons.public),
-                    title: const Text('网页登录'),
-                    subtitle: const Text('在内置网页里用账号密码或短信登录'),
+                    title: Text(t.accounts.webSignIn),
+                    subtitle: Text(t.accounts.webSignInSubtitle),
                     onTap: _webLogin,
                   ),
               ],
-              SettingsHeader(_platform == 'bilibili' ? '手动填写 Cookie' : (signedIn ? '更换 Cookie' : '填写 Cookie')),
-              CookieEditor(platform: _platform),
-              const Padding(
-                padding: EdgeInsets.all(Space.s4),
-                child: Text('登录信息用本机的系统密钥加密保存，不会上传，界面和日志里都不显示；默认也不写进备份文件。'),
+              SettingsHeader(
+                _platform == 'bilibili'
+                    ? t.accounts.manualCookie
+                    : (signedIn ? t.accounts.replaceCookie : t.accounts.enterCookie),
               ),
+              CookieEditor(platform: _platform),
+              Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.accounts.storageNoteFull)),
             ],
           ),
         ),

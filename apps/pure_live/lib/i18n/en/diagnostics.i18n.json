@@ -1,0 +1,11 @@
+{
+  "saveBundle": "Save diagnostics bundle",
+  "bundleSaved": "Diagnostics bundle saved",
+  "exportFailed": "Export failed: {error}",
+  "exportBundle": "Export diagnostics bundle",
+  "exportBundleSubtitle": "Version, device details, settings and recent logs in one JSON file; no cookies, passwords or other account data",
+  "crashReportsSubtitle": "After a crash, offer to export a diagnostics bundle at the next start. Nothing is uploaded.",
+  "recentLogs": "Recent logs",
+  "recentLogsSubtitle": "Kept on this device only, up to about 768 KB; cookies and tokens are removed before writing",
+  "noLogs": "No logs in this run yet"
+}

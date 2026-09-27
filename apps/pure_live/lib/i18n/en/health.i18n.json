@@ -1,0 +1,13 @@
+{
+  "imageCacheCleared": "Image cache cleared",
+  "clearImageCache": "Clear image cache",
+  "calculating": "Calculating",
+  "imageCacheSize": "Covers and avatars use {size} MB; follows, history and recordings are not affected",
+  "timeout": "No response within 15 seconds",
+  "checkAgain": "Check again",
+  "checkingAll": "Checking platforms",
+  "checkFailed": "Check failed",
+  "ok": "OK · {ms} ms",
+  "failed": "Failing",
+  "method": "How it checks: each platform's category list is requested. When a platform fails, Following and Discover show what they had last time, and its rooms may not open."
+}

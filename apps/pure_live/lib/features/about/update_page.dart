@@ -11,6 +11,7 @@ import 'package:pure_live_app/app/version.dart';
 import 'package:pure_live_app/core/bytes.dart';
 import 'package:pure_live_app/features/about/releases.dart';
 import 'package:pure_live_app/features/about/update_state.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// SHA-256 of a byte stream as lower-case hex.
@@ -44,7 +45,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
   }
 
   Future<void> _open(Uri url) async {
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) _toast('无法打开链接');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) _toast(t.common.couldNotOpenLink);
   }
 
   Future<void> _copy(String text, String message) async {
@@ -53,7 +54,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
   }
 
   Future<void> _verify(Release release) async {
-    final picked = await FilePicker.pickFiles(dialogTitle: '选择下载好的安装包');
+    final picked = await FilePicker.pickFiles(dialogTitle: t.about.pickInstaller);
     if (picked.isEmpty) return;
     final file = picked.single;
     setState(() {
@@ -66,14 +67,14 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
       final expected = release.assets.where((asset) => asset.name == file.name).firstOrNull?.sha256;
       setState(() {
         _verifyResult = switch ((match, expected)) {
-          (final asset?, _) => '校验通过：${file.name} 与 ${asset.name} 完全一致。',
-          (null, final String _) => '校验失败：${file.name} 的 SHA-256 与发布页公布的不一致，请重新下载，不要安装。',
-          _ when release.assets.every((asset) => asset.sha256 == null) => '这个版本没有公布 SHA-256，无法校验。文件的 SHA-256 是 $hash',
-          _ => '没有找到对应的文件：${file.name} 的 SHA-256 是 $hash，与这个版本的任何文件都不一致。',
+          (final asset?, _) => t.about.verifyMatch(file: file.name, asset: asset.name),
+          (null, final String _) => t.about.verifyMismatch(file: file.name),
+          _ when release.assets.every((asset) => asset.sha256 == null) => t.about.verifyNoHashes(hash: hash),
+          _ => t.about.verifyUnknown(file: file.name, hash: hash),
         };
       });
     } on FileSystemException catch (error) {
-      setState(() => _verifyResult = '读取文件失败：${error.message}');
+      setState(() => _verifyResult = t.about.readFileFailed(message: error.message));
     } finally {
       if (mounted) setState(() => _verifying = false);
     }
@@ -86,7 +87,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
     final theme = Theme.of(context);
     final checking = status == null || status.checking;
     return Scaffold(
-      appBar: AppBar(title: const Text('版本与更新')),
+      appBar: AppBar(title: Text(t.about.versionAndUpdates)),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -96,11 +97,11 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
               if (checking) const LinearProgressIndicator(),
               ListTile(
                 leading: const Icon(Icons.info_outline),
-                title: const Text('当前版本 $appVersion'),
-                subtitle: Text(currentVersion.isPreRelease ? '预览版：检查更新时也包含预览版' : '正式版：只检查正式版'),
+                title: Text(t.about.currentVersion(version: appVersion)),
+                subtitle: Text(currentVersion.isPreRelease ? t.about.channelPreview : t.about.channelStable),
                 trailing: TextButton(
                   onPressed: checking ? null : () => ref.read(updateProvider.notifier).check(),
-                  child: const Text('检查更新'),
+                  child: Text(t.about.checkForUpdates),
                 ),
               ),
               if (status?.error case final error?)
@@ -109,15 +110,15 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
                   title: Text(updateErrorText(error)),
                   trailing: TextButton(
                     onPressed: () => _open(ref.read(updateCheckerProvider).releasesUrl),
-                    child: const Text('打开发布页'),
+                    child: Text(t.about.openReleasePage),
                   ),
                 )
               else if (status != null && !status.checking && latest == null)
-                const ListTile(leading: Icon(Icons.check_circle_outline), title: Text('已是最新版本')),
+                ListTile(leading: const Icon(Icons.check_circle_outline), title: Text(t.about.upToDate)),
               if (latest != null) ..._latestSection(context, latest),
               if (status != null && status.releases.isNotEmpty) ...[
                 const Divider(),
-                const ListTile(dense: true, title: Text('历史版本')),
+                ListTile(dense: true, title: Text(t.about.olderReleases)),
                 for (final release in status.releases.where((release) => release != latest))
                   ExpansionTile(
                     title: Text(release.tag),
@@ -125,8 +126,8 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
                     childrenPadding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s3),
                     expandedCrossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SelectableText(release.notes.trim().isEmpty ? '（没有更新说明）' : release.notes.trim()),
-                      TextButton(onPressed: () => _open(release.pageUrl), child: const Text('打开发布页')),
+                      SelectableText(release.notes.trim().isEmpty ? t.about.noNotes : release.notes.trim()),
+                      TextButton(onPressed: () => _open(release.pageUrl), child: Text(t.about.openReleasePage)),
                     ],
                   ),
               ],
@@ -142,7 +143,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
     final day = date == null
         ? ''
         : '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    return [if (day.isNotEmpty) day, if (release.preRelease) '预览版'].join(' · ');
+    return [if (day.isNotEmpty) day, if (release.preRelease) t.about.preview].join(' · ');
   }
 
   List<Widget> _latestSection(BuildContext context, Release release) {
@@ -155,16 +156,16 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
       const Divider(),
       ListTile(
         leading: Icon(Icons.new_releases_outlined, color: theme.colorScheme.primary),
-        title: Text('新版本 ${release.version}', style: theme.textTheme.titleMedium),
+        title: Text(t.about.newRelease(version: release.version), style: theme.textTheme.titleMedium),
         subtitle: Text(_describe(release)),
-        trailing: TextButton(onPressed: () => _open(release.pageUrl), child: const Text('发布页')),
+        trailing: TextButton(onPressed: () => _open(release.pageUrl), child: Text(t.about.releasePage)),
       ),
       if (recommended.isNotEmpty) ...[
-        const ListTile(dense: true, title: Text('适合本机的下载')),
+        ListTile(dense: true, title: Text(t.about.recommendedDownloads)),
         for (final asset in recommended) _assetTile(asset, highlight: asset == recommended.first),
       ],
       if (others.isNotEmpty)
-        ExpansionTile(title: const Text('其它平台和文件'), children: [for (final asset in others) _assetTile(asset)]),
+        ExpansionTile(title: Text(t.about.otherDownloads), children: [for (final asset in others) _assetTile(asset)]),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
         child: Column(
@@ -173,7 +174,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
             OutlinedButton.icon(
               onPressed: _verifying ? null : () => _verify(release),
               icon: const Icon(Icons.verified_outlined),
-              label: Text(_verifying ? '正在计算…' : '校验下载的文件'),
+              label: Text(_verifying ? t.about.calculating : t.about.verifyDownload),
             ),
             if (_verifyResult case final result?)
               Padding(
@@ -181,27 +182,27 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
                 child: Text(result),
               ),
             const SizedBox(height: Space.s2),
-            Text('Android 预览版的包名带 .next，可以和 3.x 同时安装；下载后在系统里打开安装包即可覆盖安装。', style: theme.textTheme.bodySmall),
+            Text(t.about.androidPreviewNote, style: theme.textTheme.bodySmall),
           ],
         ),
       ),
-      const ListTile(dense: true, title: Text('更新说明')),
+      ListTile(dense: true, title: Text(t.about.releaseNotes)),
       Padding(
         padding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s4),
-        child: SelectableText(release.notes.trim().isEmpty ? '（没有更新说明）' : release.notes.trim()),
+        child: SelectableText(release.notes.trim().isEmpty ? t.about.noNotes : release.notes.trim()),
       ),
     ];
   }
 
   Widget _assetTile(ReleaseAsset asset, {bool highlight = false}) {
     final label = switch (asset.kind) {
-      AssetKind.androidApk => 'Android · ${asset.abi == 'universal' ? '通用' : asset.abi}',
-      AssetKind.windowsSetup => 'Windows · 安装包',
-      AssetKind.windowsPortable => 'Windows · 便携版',
+      AssetKind.androidApk => asset.abi == 'universal' ? t.about.androidUniversal : 'Android · ${asset.abi}',
+      AssetKind.windowsSetup => t.about.windowsSetup,
+      AssetKind.windowsPortable => t.about.windowsPortable,
       AssetKind.macos => 'macOS',
       AssetKind.linux => 'Linux',
-      AssetKind.checksums => '校验值列表',
-      AssetKind.other => '其它文件',
+      AssetKind.checksums => t.about.checksums,
+      AssetKind.other => t.about.otherFile,
     };
     final sha = asset.sha256;
     return ListTile(
@@ -216,14 +217,14 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
       ),
       onTap: () => _open(asset.url),
       trailing: PopupMenuButton<String>(
-        tooltip: '更多',
+        tooltip: t.common.more,
         onSelected: (value) => switch (value) {
-          'link' => _copy(asset.url.toString(), '下载链接已复制'),
-          _ => _copy(sha!, 'SHA-256 已复制'),
+          'link' => _copy(asset.url.toString(), t.about.downloadLinkCopied),
+          _ => _copy(sha!, t.about.hashCopied),
         },
         itemBuilder: (context) => [
-          const PopupMenuItem(value: 'link', child: Text('复制下载链接')),
-          if (sha != null) const PopupMenuItem(value: 'sha', child: Text('复制 SHA-256')),
+          PopupMenuItem(value: 'link', child: Text(t.about.copyDownloadLink)),
+          if (sha != null) PopupMenuItem(value: 'sha', child: Text(t.about.copyHash)),
         ],
       ),
     );

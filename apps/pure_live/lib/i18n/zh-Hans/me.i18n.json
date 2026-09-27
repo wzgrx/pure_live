@@ -1,0 +1,10 @@
+{
+  "pureBlackSubtitle": "深色时用纯黑背景，适合 OLED 屏幕",
+  "denseFollows": "关注页紧凑卡片",
+  "denseFollowsSubtitle": "主播名和标题放在一行，一屏显示更多直播间",
+  "historyCleared": "已清空观看历史",
+  "noHistory": "还没有观看记录",
+  "iptvSubtitle": "IPTV 播放列表、节目单和自动同步",
+  "backupSubtitle": "备份文件、WebDAV、局域网同步；可以导入 3.x 的备份",
+  "aboutSubtitle": "版本 {version} · 更新、开源许可"
+}

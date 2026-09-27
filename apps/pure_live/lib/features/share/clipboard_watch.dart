@@ -11,6 +11,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/share/share_text.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Offers rooms found in the clipboard (F-SHR-02, store.md §8): when the app
 /// returns to the foreground the caller runs [check]; a share code or room
@@ -110,9 +111,9 @@ class SharedRoomDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final platform = platformNames[room.ref.platform] ?? room.ref.platform;
-    final who = room.anchorName.isNotEmpty ? room.anchorName : '房间 ${room.ref.roomId}';
+    final who = room.anchorName.isNotEmpty ? room.anchorName : t.share.roomN(id: room.ref.roomId);
     return AlertDialog(
-      title: Text(room.fromShareCode ? '收到分享口令' : '发现直播间链接'),
+      title: Text(room.fromShareCode ? t.share.shareCodeReceived : t.share.roomLinkFound),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,12 +121,12 @@ class SharedRoomDialog extends StatelessWidget {
           Text('$platform · $who', style: Theme.of(context).textTheme.titleMedium),
           if (room.title.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 4), child: Text(room.title)),
           const SizedBox(height: 12),
-          Text('来自剪贴板。可以在 设置 › 通用 里关闭剪贴板识别。', style: Theme.of(context).textTheme.bodySmall),
+          Text(t.share.fromClipboard, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-        FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('进入直播间')),
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.common.cancel)),
+        FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(t.share.enterRoom)),
       ],
     );
   }

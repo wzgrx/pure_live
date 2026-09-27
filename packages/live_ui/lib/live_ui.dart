@@ -17,4 +17,5 @@ export 'src/tv/focus_frame.dart';
 export 'src/tv/tv_grid.dart';
 export 'src/tv/tv_nav_scaffold.dart';
 export 'src/tv/tv_scope.dart';
+export 'src/ui_text.dart';
 export 'src/window_class.dart';

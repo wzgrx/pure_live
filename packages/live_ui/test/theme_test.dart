@@ -24,6 +24,30 @@ void main() {
     );
   });
 
+  test('principles §2.3: text styles carry the language; Traditional Chinese uses JhengHei on Windows', () {
+    const hant = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
+    const hans = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
+    final traditional = PureTheme.of(Appearance.light, platform: TargetPlatform.windows, locale: hant).textTheme;
+    expect(traditional.bodyMedium!.fontFamily, 'Microsoft JhengHei UI');
+    expect(traditional.bodyMedium!.fontFamilyFallback!.take(2), ['Microsoft JhengHei UI', 'Microsoft JhengHei']);
+    expect(traditional.bodyMedium!.locale, hant);
+    final simplified = PureTheme.of(Appearance.light, platform: TargetPlatform.windows, locale: hans).textTheme;
+    expect(simplified.titleLarge!.fontFamily, 'Microsoft YaHei UI');
+    expect(simplified.titleLarge!.locale, hans);
+    // A downloaded font still wins; the Traditional fallbacks stay behind it.
+    final custom = PureTheme.tv(
+      Appearance.dark,
+      platform: TargetPlatform.windows,
+      fontFamily: 'Noto Sans TC',
+      locale: hant,
+    );
+    expect(custom.textTheme.bodyMedium!.fontFamily, 'Noto Sans TC');
+    expect(custom.textTheme.bodyMedium!.fontFamilyFallback!.first, 'Microsoft JhengHei UI');
+    expect(PureTheme.isTraditionalChinese(const Locale('zh', 'TW')), isTrue);
+    expect(PureTheme.isTraditionalChinese(const Locale('zh', 'CN')), isFalse);
+    expect(PureTheme.isTraditionalChinese(const Locale('en')), isFalse);
+  });
+
   test('principles §2.2: a dynamic seed recolours the roles, keeps error colours and pure black', () {
     const seed = Color(0xFF2EA043);
     final brand = PureTheme.of(Appearance.light);

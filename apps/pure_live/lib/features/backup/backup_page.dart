@@ -5,6 +5,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/backup/backup_flow.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Backup and sync (spec/modules/store.md §7, product §14): export a v4 backup
 /// to a file, import a v4 or 3.x backup, and the WebDAV and LAN sync pages.
@@ -39,7 +40,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     final options = await showExportOptions(context);
     if (options == null) return;
     await _run(() async {
-      if (await exportBackupToFile(ref.read(backupServiceProvider), options)) _toast('备份已保存');
+      if (await exportBackupToFile(ref.read(backupServiceProvider), options)) _toast(t.backup.saved);
     });
   }
 
@@ -51,7 +52,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('备份与同步')),
+    appBar: AppBar(title: Text(t.app.backup)),
     body: Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
@@ -61,38 +62,38 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           child: ListView(
             children: [
               if (_busy) const LinearProgressIndicator(),
-              const SettingsHeader('本地文件'),
+              SettingsHeader(t.backup.localFiles),
               ListTile(
                 leading: const Icon(Icons.upload_file),
-                title: const Text('导出备份'),
-                subtitle: const Text('完整备份或仅关注；平台登录信息默认不包含，需要时用口令加密'),
+                title: Text(t.backup.exportTitle),
+                subtitle: Text(t.backup.exportSubtitle),
                 onTap: _export,
               ),
               ListTile(
                 leading: const Icon(Icons.download),
-                title: const Text('仅恢复关注'),
-                subtitle: const Text('支持 v4 和 3.x 的备份文件，只导入关注和关注的分区'),
+                title: Text(t.backup.restoreFollows),
+                subtitle: Text(t.backup.restoreFollowsSubtitle),
                 onTap: () => _import(RestoreMode.follows),
               ),
               ListTile(
                 leading: const Icon(Icons.restore),
-                title: const Text('完整恢复'),
-                subtitle: const Text('导入备份里的全部内容，备份里没有的部分保持不变'),
+                title: Text(t.backup.restoreFull),
+                subtitle: Text(t.backup.restoreFullSubtitle),
                 onTap: () => _import(RestoreMode.full),
               ),
               const Divider(),
-              const SettingsHeader('同步'),
+              SettingsHeader(t.common.sync),
               ListTile(
                 leading: const Icon(Icons.cloud_outlined),
                 title: const Text('WebDAV'),
-                subtitle: const Text('把备份上传到坚果云、Nextcloud、群晖等网盘，在其它设备上恢复'),
+                subtitle: Text(t.backup.webdavSubtitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/backup/webdav'),
               ),
               ListTile(
                 leading: const Icon(Icons.devices_other_outlined),
-                title: const Text('局域网同步'),
-                subtitle: const Text('同一网络下的两台设备直接传输，接收方确认后才会导入'),
+                title: Text(t.backup.lanSync),
+                subtitle: Text(t.backup.lanSyncSubtitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/me/backup/lan'),
               ),

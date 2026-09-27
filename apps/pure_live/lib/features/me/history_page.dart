@@ -9,7 +9,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/rooms/room_card_menu.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Watch history, newest first.
 final historyProvider = StreamProvider<List<HistoryEntry>>((ref) => ref.watch(storeProvider).history.watchAll());
@@ -26,11 +26,11 @@ class HistoryPage extends ConsumerWidget {
     final now = DateTime.now();
     return Scaffold(
       appBar: AppBar(
-        title: const Text(S.history),
+        title: Text(t.app.history),
         actions: [
           if (entries.isNotEmpty)
             IconButton(
-              tooltip: '清空',
+              tooltip: t.common.clear,
               icon: const Icon(Icons.delete_sweep_outlined),
               onPressed: () async {
                 final store = ref.read(storeProvider);
@@ -38,8 +38,8 @@ class HistoryPage extends ConsumerWidget {
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('已清空观看历史'),
-                    action: SnackBarAction(label: '撤销', onPressed: () => store.history.restore(removed)),
+                    content: Text(t.me.historyCleared),
+                    action: SnackBarAction(label: t.common.undo, onPressed: () => store.history.restore(removed)),
                   ),
                 );
               },
@@ -49,7 +49,7 @@ class HistoryPage extends ConsumerWidget {
       body: async.isLoading && entries.isEmpty
           ? const LoadingView()
           : entries.isEmpty
-          ? const MessageView(icon: Icons.history, title: '还没有观看记录')
+          ? MessageView(icon: Icons.history, title: t.me.noHistory)
           : ListView.builder(
               itemCount: entries.length,
               itemBuilder: (context, index) {

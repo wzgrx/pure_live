@@ -1,0 +1,34 @@
+{
+  "voice": "語音搜尋",
+  "clear": "清除",
+  "results": "搜尋結果",
+  "all": "綜合",
+  "failedTag": "失敗",
+  "allFailed": "搜尋失敗，檢查網路後下拉重試",
+  "someFailed": "{platforms} 搜尋失敗，下拉可以重試",
+  "hint": "搜尋主播、直播間，或貼上直播間連結",
+  "liveOnly": "只看開播",
+  "resolvingLink": "正在辨識連結",
+  "noLinkMatch": "沒有辨識出直播間連結",
+  "empty": "沒有找到相關的直播間",
+  "sort": {
+    "smart": "智慧",
+    "platform": "按平台",
+    "audience": "按人數",
+    "followers": "按粉絲"
+  },
+  "web": {
+    "title": "網頁搜尋",
+    "enterKeyword": "請先輸入要搜尋的關鍵字",
+    "pickPlatform": "在哪個平台的網頁裡搜尋",
+    "roomFound": "辨識到直播間",
+    "stay": "留在網頁",
+    "titleFor": "網頁搜尋 · {name}",
+    "pageRooms": "本頁的房間",
+    "unavailable": "這裡無法使用網頁搜尋",
+    "notOpened": "網頁沒有開啟",
+    "scanning": "正在辨識本頁的直播間",
+    "noRooms": "本頁沒有辨識出直播間連結",
+    "pageRoomsTitle": "本頁的直播間"
+  }
+}

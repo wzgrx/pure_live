@@ -1,0 +1,8 @@
+{
+  "roomN": "房间 {id}",
+  "shareCodeReceived": "收到分享口令",
+  "roomLinkFound": "发现直播间链接",
+  "fromClipboard": "来自剪贴板。可以在 设置 › 通用 里关闭剪贴板识别。",
+  "enterRoom": "进入直播间",
+  "codeCopied": "分享口令已复制。对方复制后打开纯粹直播（3.x 或 v4），即可进入这个直播间"
+}

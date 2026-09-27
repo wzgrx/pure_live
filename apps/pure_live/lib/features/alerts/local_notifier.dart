@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pure_live_app/features/alerts/alert_notifier.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// System notifications through flutter_local_notifications on Android and
 /// Windows (ADR ADR 0028).
@@ -22,17 +23,17 @@ final class LocalAlertNotifier implements AlertNotifier {
   /// COM activator of the preview's toasts (generated for v4, 2026-09-28).
   static const windowsGuid = '80b8bd95-5a1b-451f-91bf-f0ca23a581a1';
 
-  static const _liveChannel = AndroidNotificationChannel(
+  static AndroidNotificationChannel get _liveChannel => AndroidNotificationChannel(
     'live_alerts',
-    '开播提醒',
-    description: '关注的主播开播时提醒',
+    t.alerts.liveAlerts,
+    description: t.alerts.liveChannelDescription,
     importance: Importance.high,
   );
 
-  static const _programmeChannel = AndroidNotificationChannel(
+  static AndroidNotificationChannel get _programmeChannel => AndroidNotificationChannel(
     'programme_reminders',
-    '节目提醒',
-    description: '网络电视节目开始前 1 分钟提醒',
+    t.alerts.programmeReminders,
+    description: t.alerts.programmeChannelDescription,
     importance: Importance.high,
   );
 
@@ -50,11 +51,11 @@ final class LocalAlertNotifier implements AlertNotifier {
 
   Future<String?> _start() async {
     await _plugin.initialize(
-      settings: const InitializationSettings(
+      settings: InitializationSettings(
         // Status bar icon: the launcher's monochrome layer.
-        android: AndroidInitializationSettings('ic_launcher_monochrome'),
+        android: const AndroidInitializationSettings('ic_launcher_monochrome'),
         windows: WindowsInitializationSettings(
-          appName: '纯粹直播 预览',
+          appName: t.app.previewName,
           appUserModelId: windowsAppUserModelId,
           guid: windowsGuid,
         ),

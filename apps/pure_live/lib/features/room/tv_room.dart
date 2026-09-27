@@ -15,6 +15,7 @@ import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
 import 'package:pure_live_app/features/room/player_view.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The side panel open over the picture on TV (principles §6.3).
 enum TvPanel {
@@ -119,7 +120,7 @@ class TvRoomLayerState extends ConsumerState<TvRoomLayer> {
       if (ref.read(appPrefsProvider.notifier).takeTip(Tip.tvRoom)) {
         widget.player.currentState?.showHint(
           Icons.settings_remote_outlined,
-          '上下键换台，左键直播间列表，右键播放设置，确认键显示控制',
+          t.room.tv.hint,
           duration: const Duration(seconds: 4),
         );
       }
@@ -254,7 +255,7 @@ class TvRoomLayerState extends ConsumerState<TvRoomLayer> {
               alignment: Alignment.centerLeft,
               child: _SidePanel(
                 left: true,
-                title: widget.listLabel ?? '直播间列表',
+                title: widget.listLabel ?? t.room.tv.roomList,
                 child: _RoomList(
                   entries: widget.entries(),
                   current: widget.detail.ref,
@@ -270,7 +271,7 @@ class TvRoomLayerState extends ConsumerState<TvRoomLayer> {
               alignment: Alignment.centerRight,
               child: _SidePanel(
                 left: false,
-                title: '播放设置',
+                title: t.room.tv.playbackSettings,
                 child: _PlaybackSettings(
                   session: widget.session,
                   state: _state,
@@ -385,22 +386,30 @@ class _ControlBar extends ConsumerWidget {
                       children: [
                         button(
                           paused ? Icons.play_arrow : Icons.pause,
-                          paused ? '播放' : '暂停',
+                          paused ? t.common.play : t.common.pause,
                           () => player.currentState?.togglePlay(),
                           focusNode: firstFocus,
                         ),
-                        button(Icons.refresh, '刷新', () => player.currentState?.refresh()),
+                        button(Icons.refresh, t.common.refresh, () => player.currentState?.refresh()),
                         if (prefs.enabled && card.state == LiveState.live)
                           button(
                             prefs.hidden ? Icons.subtitles_off_outlined : Icons.subtitles,
-                            prefs.hidden ? '打开弹幕' : '关闭弹幕',
+                            prefs.hidden ? t.danmaku.turnOn : t.multiview.danmakuOff,
                             () => player.currentState?.toggleDanmaku(),
                           ),
-                        button(Icons.tune, '画质线路', () => onPanel(TvPanel.settings)),
-                        button(Icons.format_list_bulleted, '直播间列表', () => onPanel(TvPanel.rooms)),
+                        button(Icons.tune, t.room.tv.qualityLine, () => onPanel(TvPanel.settings)),
+                        button(Icons.format_list_bulleted, t.room.tv.roomList, () => onPanel(TvPanel.rooms)),
                         if (onFollow != null)
-                          button(followed ? Icons.favorite : Icons.favorite_border, followed ? '已关注' : '关注', onFollow!),
-                        button(Icons.bedtime_outlined, '定时关闭', () => unawaited(player.currentState?.openSleepTimer())),
+                          button(
+                            followed ? Icons.favorite : Icons.favorite_border,
+                            followed ? t.common.followed : t.common.follow,
+                            onFollow!,
+                          ),
+                        button(
+                          Icons.bedtime_outlined,
+                          t.room.sleepTimer,
+                          () => unawaited(player.currentState?.openSleepTimer()),
+                        ),
                       ],
                     ),
                   ),
@@ -461,7 +470,7 @@ class _RoomList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (entries.isEmpty) return const MessageView(title: '没有开播的直播间');
+    if (entries.isEmpty) return MessageView(title: t.room.tv.noLiveRooms);
     final here = entries.indexWhere((entry) => entry.ref == current);
     return ListView.builder(
       itemCount: entries.length,
@@ -474,7 +483,7 @@ class _RoomList extends StatelessWidget {
           leading: PlatformLogo(platformId: entry.ref.platform, size: 24),
           title: Text(entry.label, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: entry.title.isEmpty ? null : Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-          trailing: playing ? const Text('正在看') : null,
+          trailing: playing ? Text(t.room.tv.watching) : null,
           onTap: () => onPick(entry.ref),
         );
       },
@@ -516,12 +525,12 @@ class _PlaybackSettings extends ConsumerWidget {
         if (danmaku)
           SwitchListTile(
             autofocus: true,
-            title: const Text('显示弹幕'),
+            title: Text(t.danmaku.show),
             value: !prefs.hidden,
             onChanged: (_) => player.currentState?.toggleDanmaku(),
           ),
         if (state.qualities.isNotEmpty) ...[
-          header('画质'),
+          header(t.multiview.quality),
           for (final (index, quality) in state.qualities.indexed)
             choice(
               quality.label,
@@ -532,16 +541,20 @@ class _PlaybackSettings extends ConsumerWidget {
             ),
         ],
         if (state.lines.length > 1) ...[
-          header('线路'),
+          header(t.multiview.line),
           for (final (index, line) in state.lines.indexed)
             choice(
-              '线路 ${index + 1}',
+              t.multiview.lineN(n: index + 1),
               selected: line.lineId == state.line?.lineId,
               onTap: () => unawaited(session.selectLine(line.lineId)),
             ),
         ],
-        header('画面比例'),
-        for (final (value, label) in const [(VideoFit.contain, '适应'), (VideoFit.cover, '填充'), (VideoFit.fill, '拉伸')])
+        header(t.room.aspect),
+        for (final (value, label) in [
+          (VideoFit.contain, t.room.fit.contain),
+          (VideoFit.cover, t.room.fit.cover),
+          (VideoFit.fill, t.room.fit.fill),
+        ])
           choice(
             label,
             selected: fit == value,

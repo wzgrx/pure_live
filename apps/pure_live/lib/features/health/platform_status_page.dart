@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// One platform's check result.
 @immutable
@@ -34,7 +35,7 @@ final FutureProvider<List<PlatformHealth>> platformHealthProvider = FutureProvid
           await sites[id]!.catalog.categories().timeout(const Duration(seconds: 15));
           return PlatformHealth(platform: id, ok: true, elapsed: watch.elapsed);
         } on TimeoutException {
-          return PlatformHealth(platform: id, ok: false, elapsed: watch.elapsed, problem: '15 秒内没有响应');
+          return PlatformHealth(platform: id, ok: false, elapsed: watch.elapsed, problem: t.health.timeout);
         } on Object catch (error) {
           return PlatformHealth(platform: id, ok: false, elapsed: watch.elapsed, problem: describeError(error).title);
         }
@@ -53,34 +54,33 @@ class PlatformStatusPage extends ConsumerWidget {
     final live = LiveTheme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('平台状态'),
+        title: Text(t.about.platformStatus),
         actions: [
           IconButton(
-            tooltip: '重新检查',
+            tooltip: t.health.checkAgain,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(platformHealthProvider),
           ),
         ],
       ),
       body: async.when(
-        loading: () => const LoadingView(label: '正在检查各平台'),
-        error: (error, _) => MessageView.error(title: '检查失败', message: '$error'),
+        loading: () => LoadingView(label: t.health.checkingAll),
+        error: (error, _) => MessageView.error(title: t.health.checkFailed, message: '$error'),
         data: (results) => ListView(
           children: [
             for (final result in results)
               ListTile(
                 leading: PlatformLogo(platformId: result.platform, size: Sizes.iconLg),
                 title: Text(platformNames[result.platform] ?? result.platform),
-                subtitle: Text(result.ok ? '正常 · ${result.elapsed.inMilliseconds} ms' : result.problem ?? '异常'),
+                subtitle: Text(
+                  result.ok ? t.health.ok(ms: result.elapsed.inMilliseconds) : result.problem ?? t.health.failed,
+                ),
                 trailing: Icon(
                   result.ok ? Icons.check_circle : Icons.error,
                   color: result.ok ? live.success : Theme.of(context).colorScheme.error,
                 ),
               ),
-            const Padding(
-              padding: EdgeInsets.all(Space.s4),
-              child: Text('检查方式：请求各平台的分区列表。某个平台异常时，关注页和发现页会显示上次的内容，直播间可能打不开。'),
-            ),
+            Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.health.method)),
           ],
         ),
       ),

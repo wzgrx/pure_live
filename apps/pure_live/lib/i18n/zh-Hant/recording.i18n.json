@@ -1,0 +1,90 @@
+{
+  "notice": {
+    "finishingTitle": "正在處理錄製檔案",
+    "finishingText(param=n)": {
+      "other": "{n} 個錄製正在收尾，完成後通知會消失"
+    },
+    "namesAndMore": "{names} 等",
+    "recordingTitle(param=n)": {
+      "other": "正在錄製 {n} 個直播間"
+    },
+    "recordingText(param=n)": {
+      "other": "{shown}；{n} 個正在收尾"
+    }
+  },
+  "cancelSchedule": "取消預約錄製",
+  "schedule": "預約錄製",
+  "state": {
+    "queued": "排隊中",
+    "resolving": "準備中",
+    "recording": "錄製中",
+    "reconnecting": "重新連線中",
+    "finalizing": "處理中",
+    "remuxing": "轉封裝 {percent}%",
+    "waitingLive": "等待開播",
+    "completed": "已完成",
+    "failed": "失敗",
+    "stoppedPollingOff": "已停止（開播監控已關閉）",
+    "stoppedAppExit": "已停止（應用程式結束）",
+    "stopped": "已停止"
+  },
+  "failure": {
+    "offline": "主播已下播",
+    "banned": "直播間被封鎖",
+    "missing": "直播間不存在",
+    "unsupported": "這個平台暫不支援錄製",
+    "needsLogin": "需要登入平台帳號",
+    "region": "目前地區無法觀看",
+    "noStream": "拿不到可錄製的直播串流",
+    "hlsOnly": "這個直播間只有暫不支援錄製的 HLS 串流",
+    "diskFull": "儲存空間不足",
+    "noPermission": "沒有錄製目錄的寫入權限",
+    "directory": "錄製目錄無法使用",
+    "writeStalled": "磁碟寫入卡住了",
+    "background": "背景執行時間被系統用盡",
+    "remux": "轉成 MP4 失敗，原始檔案已保留",
+    "corrupt": "錄製檔案損壞",
+    "retries": "多次重試都沒有成功",
+    "stream": "網路或直播串流出錯"
+  },
+  "stage": {
+    "check": "房間檢查",
+    "quality": "選畫質",
+    "resolve": "取流",
+    "connect": "連線",
+    "write": "寫檔案",
+    "remux": "轉封裝",
+    "queue": "排隊排程",
+    "background": "背景執行",
+    "poll": "開播檢查"
+  },
+  "stopTitle": "停止錄製",
+  "stopConfirm": "停止錄製「{name}」？已錄的部分會儲存。",
+  "removeWatch": "移除監控",
+  "removeWatchConfirm": "不再等待「{name}」開播？已錄的檔案會保留。",
+  "deleteTask": "刪除錄製任務",
+  "deleteTaskRunning": "刪除「{name}」的錄製任務？正在進行的錄製會先停止，已錄的檔案會保留。",
+  "deleteTaskConfirm": "刪除「{name}」的錄製任務？已錄的檔案會保留。",
+  "recordFromRoomHint": "也可以在直播間裡點錄製按鈕。",
+  "pickFromFollows": "從追蹤裡選擇",
+  "settings": "錄製設定",
+  "add": "新增錄製",
+  "noTasks": "還沒有錄製任務",
+  "noTasksHint": "在直播間點錄製，或從追蹤裡新增。開啟開播監控後，主播開播會自動開始錄製。",
+  "scheduled": "定時錄製",
+  "tasks": "錄製任務",
+  "folderCopied": "已複製資料夾路徑：{path}",
+  "gaps": "缺口 {n}",
+  "problemWithStage": "{problem} · 出錯環節：{stage}",
+  "nextCheck": "下次檢查 {time}",
+  "stopWatch": "停止監控",
+  "cancelQueue": "取消排隊",
+  "start": "開始錄製",
+  "restart": "重新錄製",
+  "checkNow": "立即檢查開播",
+  "forceStart": "強制開始",
+  "retryRemux": "重試轉封裝",
+  "openFolder": "開啟資料夾",
+  "deleteKeepFiles": "刪除任務（保留檔案）",
+  "cancelScheduled": "取消定時錄製"
+}

@@ -1,0 +1,34 @@
+{
+  "voice": "语音搜索",
+  "clear": "清除",
+  "results": "搜索结果",
+  "all": "综合",
+  "failedTag": "失败",
+  "allFailed": "搜索失败，检查网络后下拉重试",
+  "someFailed": "{platforms} 搜索失败，下拉可以重试",
+  "hint": "搜索主播、直播间，或粘贴直播间链接",
+  "liveOnly": "只看开播",
+  "resolvingLink": "正在识别链接",
+  "noLinkMatch": "没有识别出直播间链接",
+  "empty": "没有找到相关的直播间",
+  "sort": {
+    "smart": "智能",
+    "platform": "按平台",
+    "audience": "按人数",
+    "followers": "按粉丝"
+  },
+  "web": {
+    "title": "网页搜索",
+    "enterKeyword": "先输入要搜索的关键词",
+    "pickPlatform": "在哪个平台的网页里搜索",
+    "roomFound": "识别到直播间",
+    "stay": "留在网页",
+    "titleFor": "网页搜索 · {name}",
+    "pageRooms": "本页的房间",
+    "unavailable": "这里用不了网页搜索",
+    "notOpened": "网页没有打开",
+    "scanning": "正在识别本页的直播间",
+    "noRooms": "本页没有识别出直播间链接",
+    "pageRoomsTitle": "本页的直播间"
+  }
+}

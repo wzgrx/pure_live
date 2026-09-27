@@ -1,0 +1,26 @@
+{
+  "name": "Pure Live",
+  "previewName": "Pure Live Preview",
+  "tabs": {
+    "follows": "Following",
+    "discover": "Discover",
+    "search": "Search",
+    "me": "Me"
+  },
+  "history": "Watch history",
+  "recordings": "Recordings",
+  "multiview": "Multi-view",
+  "accounts": "Platform accounts",
+  "backup": "Backup and sync",
+  "settings": "Settings",
+  "about": "About",
+  "comingSoon": "Not available in the preview yet",
+  "appearance": "Appearance",
+  "themeSystem": "Follow system",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeBlack": "Pure black",
+  "version": "Version",
+  "previewNotice": "This is the v4 preview. It installs alongside 3.x.",
+  "offlineBanner": "You are offline. Lists and playback reload when the connection is back."
+}

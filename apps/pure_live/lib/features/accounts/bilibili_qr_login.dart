@@ -5,6 +5,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/features/accounts/account_services.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Where a B 站 QR sign-in stands (spec/sites/bilibili.md §8.3).
 enum QrLoginPhase {
@@ -99,7 +100,9 @@ final class BilibiliQrLogin extends ChangeNotifier {
       _set(QrLoginPhase.waiting);
       _schedule(generation);
     } on Object catch (error) {
-      if (_current(generation)) _set(QrLoginPhase.failed, message: '获取二维码失败：${describeError(error).title}');
+      if (_current(generation)) {
+        _set(QrLoginPhase.failed, message: t.accounts.qrFetchFailed(reason: describeError(error).title));
+      }
     }
   }
 
@@ -124,7 +127,7 @@ final class BilibiliQrLogin extends ChangeNotifier {
         _schedule(generation);
       } else {
         _key = null;
-        _set(QrLoginPhase.failed, message: '检查扫码状态失败：${describeError(error).title}');
+        _set(QrLoginPhase.failed, message: t.accounts.qrPollFailed(reason: describeError(error).title));
       }
       return;
     }
@@ -156,9 +159,11 @@ final class BilibiliQrLogin extends ChangeNotifier {
       _identity = identity;
       _set(QrLoginPhase.done);
     } on NeedsLogin {
-      if (_current(generation)) _set(QrLoginPhase.failed, message: '登录校验没有通过，请刷新二维码重新扫码');
+      if (_current(generation)) _set(QrLoginPhase.failed, message: t.accounts.qrVerifyRejected);
     } on Object catch (error) {
-      if (_current(generation)) _set(QrLoginPhase.failed, message: '登录校验失败：${describeError(error).title}');
+      if (_current(generation)) {
+        _set(QrLoginPhase.failed, message: t.accounts.qrVerifyFailed(reason: describeError(error).title));
+      }
     }
   }
 

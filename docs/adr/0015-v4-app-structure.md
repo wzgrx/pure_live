@@ -1,6 +1,6 @@
 # 0015 v4 应用与播放层的包结构
 
-- 状态：已接受
+- 状态：已接受（决定 4 被 0034 取代）
 - 日期：2026-09-27
 
 ## 背景
@@ -27,7 +27,7 @@
    - 应用包名 `pure_live_app`，目录 `apps/pure_live`。
    - Android `applicationId` 为 `com.mystyle.purelive.next`，`namespace` 为 `com.mystyle.purelive`；切换到正式版时只改 `applicationId`。
    - 版本号 `4.0.0-preview.N`。
-4. **多语言。** 预览版只有中文，界面文字集中在应用的 `lib/l10n/` 里，不散落在页面中。加第二种语言时再引入 slang（PLAN 第 04 节）。
+4. ~~**多语言。** 预览版只有中文，界面文字集中在应用的 `lib/l10n/` 里，不散落在页面中。加第二种语言时再引入 slang（PLAN 第 04 节）。~~ 被 ADR 0034 取代：界面有简体、繁体、英文，文字在 `apps/pure_live/lib/i18n/`。
 5. **设计令牌由脚本生成。** `live_ui` 的颜色令牌由 `packages/live_ui/tool/generate_tokens.py` 从 `spec/design/tokens.json` 生成，测试检查两者一致。
 
 ## 备选方案与放弃理由

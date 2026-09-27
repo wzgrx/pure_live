@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// 清理缓存 (spec/product.md F-SET-09): covers and avatars cached on disk and
 /// decoded in memory. Follows, history, settings and recordings are untouched.
@@ -43,7 +44,7 @@ class _CacheTileState extends State<CacheTile> {
       ..clear()
       ..clearLiveImages();
     await _measure();
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('图片缓存已清理')));
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.health.imageCacheCleared)));
   }
 
   @override
@@ -51,8 +52,10 @@ class _CacheTileState extends State<CacheTile> {
     final bytes = _bytes;
     return ListTile(
       leading: const Icon(Icons.cleaning_services_outlined),
-      title: const Text('清理图片缓存'),
-      subtitle: Text(bytes == null ? '正在计算' : '封面和头像缓存 ${(bytes / 1024 / 1024).toStringAsFixed(1)} MB；关注、历史和录制不受影响'),
+      title: Text(t.health.clearImageCache),
+      subtitle: Text(
+        bytes == null ? t.health.calculating : t.health.imageCacheSize(size: (bytes / 1024 / 1024).toStringAsFixed(1)),
+      ),
       onTap: bytes == null ? null : _clear,
     );
   }

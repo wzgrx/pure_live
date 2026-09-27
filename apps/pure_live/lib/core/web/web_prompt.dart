@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pure_live_app/core/web/web_engine.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Microsoft's WebView2 download page (the Evergreen Bootstrapper is there).
@@ -24,21 +25,16 @@ class WebView2MissingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('需要 WebView2 运行时'),
-    content: const SizedBox(
-      width: 440,
-      child: Text(
-        '网页登录和网页搜索要用微软的 Microsoft Edge WebView2 运行时，这台电脑上没有找到它。Windows 11 和更新过的 Windows 10 一般已经自带。\n\n安装方法：打开微软的下载页，下载“常青版引导程序”（Evergreen Bootstrapper）并运行，装好后重新打开纯粹直播。',
-      ),
-    ),
+    title: Text(t.web.webView2Title),
+    content: SizedBox(width: 440, child: Text(t.web.webView2Body)),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
       FilledButton(
         onPressed: () async {
           Navigator.pop(context);
           await launchUrl(webView2DownloadPage, mode: LaunchMode.externalApplication);
         },
-        child: const Text('打开下载页'),
+        child: Text(t.web.openDownloadPage),
       ),
     ],
   );

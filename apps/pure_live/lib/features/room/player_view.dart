@@ -32,23 +32,24 @@ import 'package:pure_live_app/features/room/sleep_timer.dart';
 import 'package:pure_live_app/features/room/weak_network.dart';
 import 'package:pure_live_app/features/system/launch_args.dart';
 import 'package:pure_live_app/features/system/pip.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// What the user reads when playback fails, by failure kind (principles rule 3:
 /// say what happened in place and offer the next step).
 String failureText(PlaybackFailure failure) => switch (failure.kind) {
-  FailureKind.network => '网络中断了',
-  FailureKind.source => '直播流打不开，可以换条线路试试',
-  FailureKind.bufferingStall => '缓冲太久了，可以换条线路或降低画质',
-  FailureKind.liveCompleted => '直播流中断了',
-  FailureKind.unexpectedPause => '播放意外停止了',
-  FailureKind.frameStall => '画面卡住了',
-  FailureKind.videoDecode => '视频解码失败，可以在设置里关闭硬件解码',
-  FailureKind.audioDecode => '音频解码失败',
-  FailureKind.engine => '播放器出错了',
-  FailureKind.unavailable => '拿不到直播流',
-  FailureKind.exhausted => '多次重试都没有成功',
+  FailureKind.network => t.room.failure.network,
+  FailureKind.source => t.room.failure.source,
+  FailureKind.bufferingStall => t.room.failure.buffering,
+  FailureKind.liveCompleted => t.room.failure.ended,
+  FailureKind.unexpectedPause => t.room.failure.paused,
+  FailureKind.frameStall => t.room.failure.frozen,
+  FailureKind.videoDecode => t.room.failure.videoDecode,
+  FailureKind.audioDecode => t.room.failure.audioDecode,
+  FailureKind.engine => t.room.failure.engine,
+  FailureKind.unavailable => t.room.failure.unavailable,
+  FailureKind.exhausted => t.room.failure.exhausted,
 };
 
 /// The room's single video surface with its layers (LAY-2): video, on-video
@@ -290,7 +291,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     if (lower != null && ref.read(storeProvider).settings.get(store.Settings.autoLowerQuality)) {
       // F-NEW-10: keeps stalling, one step down.
       unawaited(_session.selectQuality(lower));
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text('网络不稳，已切到${lower.label}，可以在画质里换回')));
+      ScaffoldMessenger.maybeOf(context)
+          ?.showSnackBar(SnackBar(content: Text(t.room.autoLowered(quality: lower.label))));
     }
     final wasPlaying = _state.phase == PlaybackPhase.playing;
     setState(() => _state = state);
@@ -298,7 +300,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     final notice = state.notice;
     if (notice != null) {
       _session.clearNotice();
-      final text = notice == 'audio_only_failed' ? '切换纯音频失败，已恢复画面' : '恢复画面失败，仍为纯音频';
+      final text = notice == 'audio_only_failed' ? t.room.audioOnlyFailed : t.room.restoreVideoFailed;
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(text)));
     }
   }
@@ -360,7 +362,9 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       if (next > 0) _lastAudible = next;
     });
     unawaited(_session.setVolume(next));
-    if (hint) showHint(next == 0 ? Icons.volume_off : Icons.volume_up, '音量 ${(next * 100).round()}%');
+    if (hint) {
+      showHint(next == 0 ? Icons.volume_off : Icons.volume_up, t.room.volumeHint(percent: (next * 100).round()));
+    }
     if (!touched) return;
     _volumeTouched = true;
     if (!_touch) {
@@ -406,7 +410,10 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     final prefs = ref.read(danmakuPrefsProvider);
     if (!prefs.enabled) return;
     ref.read(danmakuPrefsProvider.notifier).setHidden(hidden: !prefs.hidden);
-    showHint(prefs.hidden ? Icons.subtitles : Icons.subtitles_off_outlined, prefs.hidden ? '弹幕已打开' : '弹幕已关闭');
+    showHint(
+      prefs.hidden ? Icons.subtitles : Icons.subtitles_off_outlined,
+      prefs.hidden ? t.room.danmakuShown : t.room.danmakuHidden,
+    );
   }
 
   /// P and the picture-in-picture button (F-PIP-01, F-PIP-02): only the
@@ -423,7 +430,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     }
     final entered = await ref.read(pipProvider.notifier).enter(_session, sourceRect: source);
     if (!entered && mounted && ref.read(pipProvider).mode == PipMode.off) {
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('画面出来后才能进入画中画')));
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(t.room.pipNeedsVideo)));
     }
   }
 
@@ -439,14 +446,14 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       }
     }
     if (opened || !mounted) return;
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('没有找到对应的 App，改用浏览器打开')));
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(t.room.noApp)));
     await launchUrl(widget.detail.link, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _openNewWindow() async {
     final opened = await ref.read(newWindowProvider)(widget.detail.ref);
     if (!opened && mounted) {
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('没能打开新窗口')));
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(t.common.couldNotOpenWindow)));
     }
   }
 
@@ -459,7 +466,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     if (_systemBrightness) {
       unawaited(ScreenBrightness.instance.setApplicationScreenBrightness(next).catchError((Object _) {}));
     }
-    showHint(Icons.brightness_medium, '亮度 ${(next * 100).round()}%');
+    showHint(Icons.brightness_medium, t.room.brightnessHint(percent: (next * 100).round()));
   }
 
   /// Audio only on or off, in place (F-ROOM-9, AUD-1). Restoring the picture
@@ -568,9 +575,9 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   void setFit(store.VideoFit fit) {
     setState(() => _fit = fit);
     showHint(Icons.aspect_ratio, switch (fit) {
-      store.VideoFit.cover => '填充',
-      store.VideoFit.fill => '拉伸',
-      _ => '适应',
+      store.VideoFit.cover => t.room.fit.cover,
+      store.VideoFit.fill => t.room.fit.fill,
+      _ => t.room.fit.contain,
     });
     unawaited(ref.read(videoFitSetting.notifier).set(fit).catchError((Object _) {}));
   }
@@ -790,9 +797,11 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     final messenger = ScaffoldMessenger.of(context);
     try {
       final file = await saveScreenshot(_session, widget.detail);
-      messenger.showSnackBar(SnackBar(content: Text(file == null ? '当前没有画面可以截图' : '截图已保存：${file.path}')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(file == null ? t.room.noFrameToCapture : t.room.screenshotSaved(path: file.path))),
+      );
     } on Object catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text('截图失败：$error')));
+      messenger.showSnackBar(SnackBar(content: Text(t.room.screenshotFailed(error: error))));
     }
   }
 
@@ -851,8 +860,9 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     ref.listen(sleepTimerProvider, (previous, next) {
       if (next.fired <= (previous?.fired ?? 0)) return;
       unawaited(_session.pause());
-      ScaffoldMessenger.maybeOf(context)
-          ?.showSnackBar(SnackBar(content: Text(next.action == SleepAction.exit ? '定时关闭：正在退出应用' : '定时关闭：已暂停播放')));
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text(next.action == SleepAction.exit ? t.room.sleep.exiting : t.room.sleep.paused)),
+      );
     });
     ref.listen(videoFitSetting, (_, next) {
       if (next != _fit) setState(() => _fit = next);
@@ -938,7 +948,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                   if (_state.showsPaused && _openError == null)
                     Center(
                       child: IconButton.filled(
-                        tooltip: '继续播放',
+                        tooltip: t.room.resumePlayback,
                         iconSize: 40,
                         onPressed: _session.play,
                         icon: const Icon(Icons.play_arrow),
@@ -964,7 +974,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       message = text.message;
     } else {
       title = failureText(_state.failure!);
-      message = _state.lines.length > 1 ? '当前线路出错，可以重试或换线路' : '可以稍后重试';
+      message = _state.lines.length > 1 ? t.room.lineFailedMany : t.room.lineFailedOne;
     }
     return Stack(
       fit: StackFit.expand,
@@ -991,12 +1001,12 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                 Wrap(
                   spacing: Space.s2,
                   children: [
-                    FilledButton(onPressed: _openError != null ? _open : _session.retry, child: const Text('重试')),
+                    FilledButton(onPressed: _openError != null ? _open : _session.retry, child: Text(t.common.retry)),
                     if (_state.lines.length > 1)
                       OutlinedButton(
                         style: OutlinedButton.styleFrom(foregroundColor: Colors.white),
                         onPressed: chooseQualityLine,
-                        child: const Text('换线路'),
+                        child: Text(t.room.switchLine),
                       ),
                   ],
                 ),
@@ -1027,7 +1037,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                 padding: const EdgeInsets.only(right: Space.s2),
                 child: IconButton.filledTonal(
                   key: const ValueKey('room-lock'),
-                  tooltip: _locked ? '解锁' : '锁定',
+                  tooltip: _locked ? t.room.unlock : t.room.lock,
                   icon: Icon(_locked ? Icons.lock : Icons.lock_open),
                   onPressed: () => _setLocked(locked: !_locked),
                 ),
@@ -1070,7 +1080,12 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                 Row(
                   key: const ValueKey('room-top-bar'),
                   children: [
-                    IconButton(tooltip: '返回', color: ink, icon: const Icon(Icons.arrow_back), onPressed: widget.onBack),
+                    IconButton(
+                      tooltip: t.common.back,
+                      color: ink,
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: widget.onBack,
+                    ),
                     Expanded(
                       child: Text(
                         _fullscreen ? '${card.anchorName} · ${card.title}' : card.anchorName,
@@ -1089,14 +1104,14 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     SleepTimerChip(color: ink, onTap: openSleepTimer),
                     if (_fullscreen && widget.onSwitchRoom != null)
                       IconButton(
-                        tooltip: '切换直播间',
+                        tooltip: t.room.switchRoom,
                         color: ink,
                         icon: const Icon(Icons.swap_horiz),
                         onPressed: widget.onSwitchRoom,
                       ),
                     if (_fullscreen && widget.onToggleChat != null)
                       IconButton(
-                        tooltip: widget.chatOpen ? '收起聊天' : '聊天',
+                        tooltip: widget.chatOpen ? t.room.hideChat : t.room.chat,
                         color: ink,
                         isSelected: widget.chatOpen,
                         icon: const Icon(Icons.chat_bubble_outline),
@@ -1105,7 +1120,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                       ),
                     if (_live)
                       IconButton(
-                        tooltip: _state.audioOnly ? '恢复画面' : '纯音频',
+                        tooltip: _state.audioOnly ? t.room.restoreVideo : t.room.audioOnly,
                         color: ink,
                         isSelected: _state.audioOnly,
                         icon: const Icon(Icons.headphones_outlined),
@@ -1115,13 +1130,13 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     // LAY-4: casting in the top bar on Android (the menu has it everywhere).
                     if (_live && Platform.isAndroid)
                       IconButton(
-                        tooltip: '投屏',
+                        tooltip: t.room.cast,
                         color: ink,
                         icon: const Icon(Icons.cast),
                         onPressed: () => unawaited(_onMenu(RoomMenuAction.cast)),
                       ),
                     PopupMenuButton<RoomMenuAction>(
-                      tooltip: '更多',
+                      tooltip: t.common.more,
                       icon: const Icon(Icons.more_vert, color: ink),
                       onOpened: () {
                         _panels++;
@@ -1158,20 +1173,20 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                             if (_live) ...[
                               if (_state.phase == PlaybackPhase.paused)
                                 IconButton(
-                                  tooltip: '播放',
+                                  tooltip: t.common.play,
                                   color: ink,
                                   icon: const Icon(Icons.play_arrow),
                                   onPressed: _session.play,
                                 )
                               else
                                 IconButton(
-                                  tooltip: '暂停',
+                                  tooltip: t.common.pause,
                                   color: ink,
                                   icon: const Icon(Icons.pause),
                                   onPressed: _session.pause,
                                 ),
                               IconButton(
-                                tooltip: '刷新',
+                                tooltip: t.common.refresh,
                                 color: ink,
                                 icon: const Icon(Icons.refresh),
                                 onPressed: refresh,
@@ -1180,7 +1195,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                             if (danmakuButton) ...[
                               IconButton(
                                 key: const ValueKey('room-danmaku-toggle'),
-                                tooltip: prefs.hidden ? '打开弹幕 (D)' : '关闭弹幕 (D)',
+                                tooltip: prefs.hidden ? t.room.danmakuOnKey : t.room.danmakuOffKey,
                                 color: ink,
                                 isSelected: !prefs.hidden,
                                 icon: const Icon(Icons.subtitles_off_outlined),
@@ -1189,7 +1204,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                               ),
                               if (widget.onOpenDanmakuSettings != null)
                                 IconButton(
-                                  tooltip: '弹幕设置',
+                                  tooltip: t.danmaku.settings,
                                   color: ink,
                                   icon: const Icon(Icons.tune),
                                   onPressed: widget.onOpenDanmakuSettings,
@@ -1197,7 +1212,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                             ],
                             if (!_touch) ...[
                               IconButton(
-                                tooltip: _volume == 0 ? '取消静音 (M)' : '静音 (M)',
+                                tooltip: _volume == 0 ? t.room.unmuteKey : t.room.muteKey,
                                 color: ink,
                                 icon: Icon(_volume == 0 ? Icons.volume_off : Icons.volume_up),
                                 onPressed: toggleMute,
@@ -1223,7 +1238,9 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                             if (widget.presentation == RoomPresentation.portraitFullscreen)
                               IconButton(
                                 key: const ValueKey('room-portrait-fit'),
-                                tooltip: _portraitFit == store.PortraitFit.cover ? '完整显示画面' : '铺满屏幕',
+                                tooltip: _portraitFit == store.PortraitFit.cover
+                                    ? t.room.showWholePicture
+                                    : t.room.fillScreen,
                                 color: ink,
                                 icon: Icon(
                                   _portraitFit == store.PortraitFit.cover ? Icons.fit_screen : Icons.crop_portrait,
@@ -1242,31 +1259,42 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                             if (widget.onPortraitOverride case final onOverride?)
                               PopupMenuButton<store.PortraitOverride>(
                                 key: const ValueKey('room-orientation'),
-                                tooltip: '画面方向',
+                                tooltip: t.room.orientation,
                                 icon: const Icon(Icons.screen_rotation_alt, color: ink),
                                 initialValue: widget.portraitOverride,
                                 onSelected: onOverride,
-                                itemBuilder: (context) => const [
-                                  PopupMenuItem(value: store.PortraitOverride.automatic, child: Text('自动识别')),
-                                  PopupMenuItem(value: store.PortraitOverride.portrait, child: Text('按竖屏处理')),
-                                  PopupMenuItem(value: store.PortraitOverride.landscape, child: Text('按横屏处理')),
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                    value: store.PortraitOverride.automatic,
+                                    child: Text(t.room.orientationAuto),
+                                  ),
+                                  PopupMenuItem(
+                                    value: store.PortraitOverride.portrait,
+                                    child: Text(t.room.orientationPortrait),
+                                  ),
+                                  PopupMenuItem(
+                                    value: store.PortraitOverride.landscape,
+                                    child: Text(t.room.orientationLandscape),
+                                  ),
                                 ],
                               ),
                             if (wide)
                               PopupMenuButton<store.VideoFit>(
-                                tooltip: '画面比例',
+                                tooltip: t.room.aspect,
                                 icon: const Icon(Icons.aspect_ratio, color: ink),
                                 initialValue: _fit,
                                 onSelected: setFit,
-                                itemBuilder: (context) => const [
-                                  PopupMenuItem(value: store.VideoFit.contain, child: Text('适应')),
-                                  PopupMenuItem(value: store.VideoFit.cover, child: Text('填充')),
-                                  PopupMenuItem(value: store.VideoFit.fill, child: Text('拉伸')),
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(value: store.VideoFit.contain, child: Text(t.room.fit.contain)),
+                                  PopupMenuItem(value: store.VideoFit.cover, child: Text(t.room.fit.cover)),
+                                  PopupMenuItem(value: store.VideoFit.fill, child: Text(t.room.fit.fill)),
                                 ],
                               ),
                             if (widget.onToggleTheater != null)
                               IconButton(
-                                tooltip: widget.presentation == RoomPresentation.theater ? '退出剧场 (T)' : '剧场模式 (T)',
+                                tooltip: widget.presentation == RoomPresentation.theater
+                                    ? t.room.exitTheaterKey
+                                    : t.room.theaterKey,
                                 color: ink,
                                 isSelected: widget.presentation == RoomPresentation.theater,
                                 icon: const Icon(Icons.crop_7_5),
@@ -1274,7 +1302,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                               ),
                             if (!_fullscreen && widget.onToggleChat != null)
                               IconButton(
-                                tooltip: widget.chatOpen ? '收起聊天栏 (C)' : '显示聊天栏 (C)',
+                                tooltip: widget.chatOpen ? t.room.hideChatKey : t.room.showChatKey,
                                 color: ink,
                                 isSelected: widget.chatOpen,
                                 icon: const Icon(Icons.view_sidebar_outlined),
@@ -1288,7 +1316,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     if (_live && _pipSupported)
                       IconButton(
                         key: const ValueKey('room-pip'),
-                        tooltip: '画中画 (P)',
+                        tooltip: t.room.pipKey,
                         color: ink,
                         icon: const Icon(Icons.picture_in_picture_alt_outlined),
                         onPressed: () => unawaited(enterPip()),
@@ -1296,7 +1324,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     // REG-ROOM-017: fullscreen stays outside the scrolling row.
                     IconButton(
                       key: const ValueKey('room-fullscreen'),
-                      tooltip: _fullscreen ? '退出全屏 (F)' : '全屏 (F)',
+                      tooltip: _fullscreen ? t.room.exitFullscreenKey : t.room.fullscreenKey,
                       color: ink,
                       icon: Icon(_fullscreen ? Icons.fullscreen_exit : Icons.fullscreen),
                       onPressed: widget.onToggleFullscreen,
@@ -1356,11 +1384,11 @@ class _AudioOnlyCover extends StatelessWidget {
           children: [
             const Icon(Icons.headphones, color: Colors.white, size: 48),
             const SizedBox(height: Space.s2),
-            const Text('纯音频播放中', style: TextStyle(color: Colors.white)),
+            Text(t.room.audioOnlyPlaying, style: const TextStyle(color: Colors.white)),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.white),
               onPressed: onRestore,
-              child: const Text('恢复画面'),
+              child: Text(t.room.restoreVideo),
             ),
           ],
         ),
@@ -1518,7 +1546,10 @@ class _OfflineCover extends StatelessWidget {
             children: [
               const Icon(Icons.tv_off_outlined, color: Colors.white, size: 48),
               const SizedBox(height: Space.s2),
-              Text(detail.state == LiveState.replay ? '回放中' : '未开播', style: const TextStyle(color: Colors.white)),
+              Text(
+                detail.state == LiveState.replay ? t.common.replay : t.common.offline,
+                style: const TextStyle(color: Colors.white),
+              ),
             ],
           ),
         ),

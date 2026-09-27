@@ -11,7 +11,7 @@ import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/features/search/search_results.dart';
 import 'package:pure_live_app/features/search/web_search_page.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Looks like a link or share text rather than a keyword.
 bool looksLikeLink(String input) =>
@@ -112,16 +112,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         title: SearchBar(
           controller: _controller,
           focusNode: _focus,
-          hintText: S.searchHint,
+          hintText: t.search.hint,
           elevation: const WidgetStatePropertyAll(0),
           leading: const Icon(Icons.search),
           textInputAction: TextInputAction.search,
           onSubmitted: _submit,
           trailing: [
-            if (voice) IconButton(tooltip: '语音搜索', icon: const Icon(Icons.mic_none), onPressed: _voice),
+            if (voice) IconButton(tooltip: t.search.voice, icon: const Icon(Icons.mic_none), onPressed: _voice),
             if (_controller.text.isNotEmpty)
               IconButton(
-                tooltip: '清除',
+                tooltip: t.search.clear,
                 icon: const Icon(Icons.close),
                 onPressed: () => setState(() {
                   _controller.clear();
@@ -141,7 +141,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Widget _keywordResults() {
     final platforms = ref.watch(searchablePlatformsProvider);
     if (_keyword.isEmpty) {
-      return const MessageView(icon: Icons.search, title: S.searchHint);
+      return MessageView(icon: Icons.search, title: t.search.hint);
     }
     final size = MediaQuery.sizeOf(context);
     final layout = WindowLayout(size);
@@ -159,12 +159,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             query: SearchQuery(platform, keyword),
             where: where,
             arrange: (cards) => sortSearch(cards, sort, platforms: platforms),
-            emptyText: S.searchEmpty,
-            originLabel: '搜索结果',
+            emptyText: t.search.empty,
+            originLabel: t.search.results,
           );
     final tools = [
       PopupMenuButton<SearchSort>(
-        tooltip: '排序',
+        tooltip: t.follows.sortTooltip,
         initialValue: sort,
         onSelected: (value) => setState(() => _sort = value),
         itemBuilder: (context) => [
@@ -186,7 +186,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       Padding(
         padding: const EdgeInsets.only(right: Space.s2),
         child: FilterChip(
-          label: const Text(S.liveOnly),
+          label: Text(t.search.liveOnly),
           selected: _liveOnly,
           onSelected: (value) => setState(() => _liveOnly = value),
         ),
@@ -215,7 +215,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: layout.margin),
                       child: Text(
-                        platform == null ? '综合' : platformName(platform),
+                        platform == null ? t.search.all : platformName(platform),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
@@ -243,7 +243,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
                   tabs: [
-                    const Tab(text: '综合'),
+                    Tab(text: t.search.all),
                     for (final id in platforms) Tab(text: platformNames[id]),
                   ],
                 ),
@@ -278,7 +278,7 @@ class _PlatformRail extends ConsumerWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.travel_explore),
-          title: const Text('综合'),
+          title: Text(t.search.all),
           trailing: combined == null ? null : Text('${combined.items.length}'),
           selected: selected == null,
           onTap: () => onSelected(null),
@@ -287,7 +287,9 @@ class _PlatformRail extends ConsumerWidget {
           ListTile(
             leading: PlatformLogo(platformId: id, size: Sizes.iconDense),
             title: Text(platformName(id)),
-            trailing: combined == null ? null : Text(combined.failed.contains(id) ? '失败' : count(counts[id]) ?? '0'),
+            trailing: combined == null
+                ? null
+                : Text(combined.failed.contains(id) ? t.search.failedTag : count(counts[id]) ?? '0'),
             selected: selected == id,
             onTap: () => onSelected(id),
           ),
@@ -305,20 +307,20 @@ class _LinkResult extends StatelessWidget {
   Widget build(BuildContext context) => FutureBuilder<RoomRef?>(
     future: future,
     builder: (context, snapshot) {
-      if (snapshot.connectionState != ConnectionState.done) return const LoadingView(label: S.resolvingLink);
+      if (snapshot.connectionState != ConnectionState.done) return LoadingView(label: t.search.resolvingLink);
       if (snapshot.hasError) {
         final text = describeError(snapshot.error!);
         return MessageView.error(title: text.title, message: text.message);
       }
       final room = snapshot.data;
-      if (room == null) return const MessageView(title: S.noLinkMatch);
+      if (room == null) return MessageView(title: t.search.noLinkMatch);
       return ListView(
         padding: const EdgeInsets.all(Space.s4),
         children: [
           Card(
             child: ListTile(
               leading: PlatformLogo(platformId: room.platform, size: Sizes.iconLg),
-              title: const Text(S.openRoom),
+              title: Text(t.common.openRoom),
               subtitle: Text('${platformNames[room.platform] ?? room.platform} · ${room.roomId}'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(roomLocation(room)),
@@ -354,14 +356,14 @@ class _CombinedResults extends ConsumerWidget {
           items: sortSearch(found, sort, platforms: platforms),
           hasMore: state.hasMore,
           moreError: state.moreError,
-          emptyText: failed.length == platforms.length ? '搜索失败，检查网络后下拉重试' : S.searchEmpty,
-          originLabel: '搜索结果',
+          emptyText: failed.length == platforms.length ? t.search.allFailed : t.search.empty,
+          originLabel: t.search.results,
           header: failed.isEmpty || failed.length == platforms.length
               ? null
               : Padding(
                   padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
                   child: Text(
-                    '${failed.map(platformName).join('、')} 搜索失败，下拉可以重试',
+                    t.search.someFailed(platforms: failed.map(platformName).join(t.common.listSeparator)),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),

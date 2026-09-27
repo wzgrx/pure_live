@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/alerts/alert_notifier.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A reminder for an upcoming IPTV programme (F-IPTV-09, part of F-NEW-01).
 @immutable
@@ -46,8 +47,8 @@ final class ProgrammeReminder {
   AlertNotice get notice => AlertNotice(
     id: alertIdOf('programme:$key'),
     channel: AlertChannel.programme,
-    title: '$title 即将开始',
-    body: '${room.roomId} · ${clockText(start)} 开始',
+    title: t.alerts.programmeStarting(title: title),
+    body: t.alerts.programmeBody(channel: room.roomId, time: clockText(start)),
     payload: roomLocation(room),
   );
 

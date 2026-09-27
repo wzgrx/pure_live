@@ -19,20 +19,24 @@ import 'package:pure_live_app/features/multiview/multiview_danmaku.dart';
 import 'package:pure_live_app/features/room/playback.dart';
 import 'package:pure_live_app/features/room/presentation.dart' show touchPlatform;
 import 'package:pure_live_app/features/system/mini_player.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Grid layouts (spec/modules/multiview.md §2).
 enum MultiviewLayout {
   one(1, '1×1'),
   two(2, '1×2'),
   four(4, '2×2'),
-  onePlusN(4, '一大多小'),
+  onePlusN(4, null),
   nine(9, '3×3');
 
-  new(this.cells, this.label);
+  new(this.cells, this._grid);
 
   /// Cells the layout starts with (1+N grows up to the capacity).
   final int cells;
-  final String label;
+  final String? _grid;
+
+  /// The menu label: the grid, or 1+N's name in the interface language.
+  String get label => _grid ?? t.multiview.onePlusN;
 }
 
 /// What a cell shows (CEL-1).

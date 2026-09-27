@@ -3,6 +3,7 @@ import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/web/cookie_text.dart';
 import 'package:pure_live_app/features/accounts/account_services.dart';
 import 'package:pure_live_app/features/accounts/account_status.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Saves what the Douyu editor holds (spec/sites/douyu.md §8.4) and says what
 /// happened. [pasted] is a page cookie or the passport request's cookie;
@@ -26,22 +27,20 @@ Future<String> saveDouyuInput(
   final stored = store.cookie('douyu');
   final storedLogin = stored != null && DouyuSession.sessionToken(stored) != null;
   if (cookie.isEmpty) {
-    if (ltp0 == null && did == null) return '没有要保存的内容';
+    if (ltp0 == null && did == null) return t.accounts.nothingToSave;
     await store.saveDouyu(ltp0: ltp0, did: did);
-    return '已保存续期用的 LTP0 和 dy_did';
+    return t.accounts.douyuKeysSaved;
   }
   if (DouyuSession.isPassportCookie(cookie)) {
     await store.saveDouyu(ltp0: ltp0, did: did);
-    return storedLogin
-        ? '这是 passport 请求的 Cookie：已保存 LTP0 和 dy_did，原来的登录保留'
-        : '这是 passport 请求的 Cookie：已保存 LTP0 和 dy_did。还要粘贴 www.douyu.com 页面的 Cookie 才算登录';
+    return storedLogin ? t.accounts.passportKept : t.accounts.passportNeedsLogin;
   }
   if (DouyuSession.sessionToken(cookie) == null && storedLogin) {
     await store.saveDouyu(ltp0: ltp0, did: did);
-    return '粘贴的 Cookie 里没有登录信息，原来的登录保留';
+    return t.accounts.noLoginKept;
   }
   await store.saveDouyu(cookie: cookie, ltp0: ltp0, did: did, savedAt: now);
-  return '已保存。${accountSummary('douyu', store, const AccountUnchecked(), now: now)}';
+  return t.accounts.savedWith(summary: accountSummary('douyu', store, const AccountUnchecked(), now: now));
 }
 
 /// "立即续期" (spec/sites/douyu.md §8.4): renews the stored login with the
@@ -49,20 +48,20 @@ Future<String> saveDouyuInput(
 /// work, and says what happened.
 Future<String> renewDouyuNow(AccountStore store, DouyuRenewer renew, {required DateTime now}) async {
   final cookie = store.cookie('douyu');
-  if (cookie == null) return '还没有保存斗鱼 Cookie';
+  if (cookie == null) return t.accounts.noDouyuCookie;
   final keys = DouyuSession.credentials(cookie, storedLtp0: store.douyuLtp0, storedDid: store.douyuDid);
   final ltp0 = keys.ltp0;
   final did = keys.did;
-  if (ltp0 == null || did == null) return '缺少 LTP0 或 dy_did，没法续期';
-  if (DouyuSession.sessionToken(cookie) == null) return 'Cookie 里没有登录信息，没法续期';
+  if (ltp0 == null || did == null) return t.accounts.renewMissingKeys;
+  if (DouyuSession.sessionToken(cookie) == null) return t.accounts.renewNoLogin;
   try {
     final renewed = await renew(cookie: cookie, ltp0: ltp0, did: did);
-    if (renewed == null) return '斗鱼没有返回新的登录信息，续期没有生效';
+    if (renewed == null) return t.accounts.renewNoResult;
     await store.saveDouyu(cookie: renewed, savedAt: now);
     final end = DouyuSession.expiry(renewed, savedAt: now);
-    return end == null ? '已续期' : '已续期，新的有效期到 ${formatAccountTime(end)}';
+    return end == null ? t.accounts.renewed : t.accounts.renewedUntil(end: formatAccountTime(end));
   } on Object catch (error) {
-    return '续期失败：${describeError(error).title}';
+    return t.accounts.renewFailed(reason: describeError(error).title);
   }
 }
 

@@ -11,6 +11,7 @@ import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_sync.dart';
 import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Programme guide sources (F-IPTV-02): add from a URL or file, choose the
 /// current one, sync, rename, delete; guides that playlists name are offered.
@@ -48,21 +49,27 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
     }
   }
 
-  static String _summary(IptvSyncResult result) => '${result.channels} 个频道，${result.items} 个节目';
+  static String _summary(IptvSyncResult result) =>
+      t.iptv.guideSummary(channels: result.channels, programmes: result.items);
 
   Future<void> _addUrl({String url = ''}) async {
-    final source = await askSource(context, title: '添加节目单', url: url, action: '添加');
+    final source = await askSource(context, title: t.iptv.addGuide, url: url, action: t.common.add);
     if (source == null || source.url.isEmpty) return;
-    await _run('add', () async => '已添加：${_summary(await _sync.addGuideUrl(source.url, name: source.name))}');
+    await _run(
+      'add',
+      () async => t.iptv.guideAdded(summary: _summary(await _sync.addGuideUrl(source.url, name: source.name))),
+    );
   }
 
   Future<void> _addFile() async {
-    final picked = await FilePicker.pickFiles(dialogTitle: '选择节目单（XMLTV、JSON，可以是 .gz）');
+    final picked = await FilePicker.pickFiles(dialogTitle: t.iptv.pickGuide);
     if (picked.isEmpty || !mounted) return;
     final file = picked.single;
     await _run(
       'add',
-      () async => '已添加：${_summary(await _sync.addGuideFile(fileName: file.name, bytes: await file.readAsBytes()))}',
+      () async => t.iptv.guideAdded(
+        summary: _summary(await _sync.addGuideFile(fileName: file.name, bytes: await file.readAsBytes())),
+      ),
     );
   }
 
@@ -70,17 +77,21 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
     final iptv = ref.read(storeProvider).iptv;
     switch (action) {
       case _GuideAction.sync:
-        await _run('g${source.id}', () async => '已同步：${_summary(await _sync.syncGuide(source))}');
+        await _run('g${source.id}', () async => t.iptv.guideSynced(summary: _summary(await _sync.syncGuide(source))));
       case _GuideAction.rename:
-        final name = await askText(context, title: '重命名', initial: source.name);
+        final name = await askText(context, title: t.common.rename, initial: source.name);
         if (name != null && name.isNotEmpty) await iptv.renameGuideSource(source.id, name);
       case _GuideAction.autoSync:
         await iptv.setGuideAutoSync(source.id, enabled: !source.autoSync);
       case _GuideAction.copySource:
         await Clipboard.setData(ClipboardData(text: source.source));
-        _toast('已复制来源地址');
+        _toast(t.iptv.sourceCopied);
       case _GuideAction.delete:
-        if (await confirm(context, title: '删除节目单', message: '删除“${source.name}”和它的节目？')) {
+        if (await confirm(
+          context,
+          title: t.iptv.deleteGuide,
+          message: t.iptv.deleteGuideConfirm(name: source.name),
+        )) {
           await _sync.deleteGuide(source);
         }
     }
@@ -98,7 +109,7 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
     final selected = (sources.value ?? const []).where((source) => source.selected).firstOrNull?.id ?? _none;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('节目单'),
+        title: Text(t.iptv.guide),
         bottom: _busy.isEmpty
             ? null
             : const PreferredSize(preferredSize: Size.fromHeight(2), child: LinearProgressIndicator(minHeight: 2)),
@@ -109,11 +120,11 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
           constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
           child: ListView(
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
-                child: Text('选一个节目单作为当前节目单；频道会按 tvg-id 和名称自动匹配。节目单只保存前后两天的节目。'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
+                child: Text(t.iptv.guideHint),
               ),
-              const SettingsHeader('节目单源'),
+              SettingsHeader(t.iptv.guideSources),
               RadioGroup<int>(
                 groupValue: selected,
                 onChanged: (id) {
@@ -129,18 +140,18 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
                         onAction: (action) => _menu(source, action),
                       ),
                     if (sources.value?.isNotEmpty ?? false)
-                      const RadioListTile<int>(value: _none, title: Text('不使用节目单')),
+                      RadioListTile<int>(value: _none, title: Text(t.iptv.noGuide)),
                   ],
                 ),
               ),
               if (sources.value?.isEmpty ?? false)
-                const ListTile(
-                  leading: Icon(Icons.event_note_outlined),
-                  title: Text('还没有节目单'),
-                  subtitle: Text('支持 XMLTV（.xml、.xml.gz）和 JSON 节目单'),
+                ListTile(
+                  leading: const Icon(Icons.event_note_outlined),
+                  title: Text(t.iptv.noGuides),
+                  subtitle: Text(t.iptv.guideFormats),
                 ),
               if (offered.isNotEmpty) ...[
-                const SettingsHeader('播放列表提供的节目单'),
+                SettingsHeader(t.iptv.playlistGuide),
                 for (final url in offered)
                   ListTile(
                     leading: const Icon(Icons.add_circle_outline),
@@ -156,12 +167,12 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
                   children: [
                     FilledButton.tonalIcon(
                       icon: const Icon(Icons.link, size: 18),
-                      label: const Text('从网址添加'),
+                      label: Text(t.iptv.addFromUrl),
                       onPressed: _busy.contains('add') ? null : _addUrl,
                     ),
                     OutlinedButton.icon(
                       icon: const Icon(Icons.folder_open, size: 18),
-                      label: const Text('从文件添加'),
+                      label: Text(t.iptv.addFromFile),
                       onPressed: _busy.contains('add') ? null : _addFile,
                     ),
                   ],
@@ -192,28 +203,32 @@ class _GuideTile extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${source.channelCount} 个频道 · ${syncedText(source.lastSyncAt)}'),
-          if (error != null) Text('上次同步失败：$error', style: TextStyle(color: theme.colorScheme.error)),
+          Text(t.iptv.channelsAndSynced(n: source.channelCount, synced: syncedText(source.lastSyncAt))),
+          if (error != null)
+            Text(
+              t.iptv.lastSyncFailed(error: error),
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
         ],
       ),
       isThreeLine: error != null,
       secondary: busy
           ? const SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2))
           : PopupMenuButton<_GuideAction>(
-              tooltip: '更多',
+              tooltip: t.common.more,
               onSelected: onAction,
               itemBuilder: (context) => [
-                const PopupMenuItem(value: _GuideAction.sync, child: Text('同步')),
-                const PopupMenuItem(value: _GuideAction.rename, child: Text('重命名')),
+                PopupMenuItem(value: _GuideAction.sync, child: Text(t.common.sync)),
+                PopupMenuItem(value: _GuideAction.rename, child: Text(t.common.rename)),
                 if (source.isRemote) ...[
                   CheckedPopupMenuItem(
                     value: _GuideAction.autoSync,
                     checked: source.autoSync,
-                    child: const Text('自动同步'),
+                    child: Text(t.iptv.autoSync),
                   ),
-                  const PopupMenuItem(value: _GuideAction.copySource, child: Text('复制来源地址')),
+                  PopupMenuItem(value: _GuideAction.copySource, child: Text(t.iptv.copySource)),
                 ],
-                const PopupMenuItem(value: _GuideAction.delete, child: Text('删除')),
+                PopupMenuItem(value: _GuideAction.delete, child: Text(t.common.delete)),
               ],
             ),
     );

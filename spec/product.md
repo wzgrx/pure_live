@@ -47,7 +47,7 @@
 | F-APP-03 | 回到前台时，如果离开 ≥ 15 秒，450 ms 后刷新当前首页标签 | P2 | 保留：关注由关注刷新负责（“回到应用时刷新关注”开启、距上次刷新 ≥ 15 秒时，450 ms 后刷新，不论当前是哪个标签，开播提醒也靠它）；当前标签是发现时，刷新正在看的推荐或分区列表（2026-09-28） | `lib/modules/home/home_page.dart:141-160` |
 | F-APP-04 | 冷启动带房间参数（Windows `--open-room=`）时首帧后直接进房 | P2 | 保留：并入统一的深链路由 | `lib/modules/home/home_page.dart:83-93`；`lib/common/utils/windows_multi_instance_launcher.dart:19-66` |
 | F-APP-05 | Android Manifest 声明 `purelive://`、`mystyle://`、m3u 的 VIEW 过滤器，但 Dart 侧没有处理代码（点击无效果） | P2 | **重新设计**：实现 `purelive://` 房间深链和 m3u/EPG 文件打开，统一走路由重定向；`mystyle://` **删除**（上游遗留，从未生效，无用户行为可对齐） | `android/app/src/main/AndroidManifest.xml:66-76` |
-| F-APP-06 | 界面语言：简体中文、English（英文不完整）；语言存了两份（Hive 与 SharedPreferences） | P2 | 保留并扩展：简体、繁体、英文，缺失翻译 CI 报错；语言只存一份（PLAN §12） | `assets/translations/zh.json`、`en.json`；`lib/modules/settings/pages/theme_settings_page.dart` |
+| F-APP-06 | 界面语言：简体中文、English（英文不完整）；语言存了两份（Hive 与 SharedPreferences） | P2 | 保留并扩展：简体、繁体、英文，缺失翻译 CI 报错；语言只存一份（PLAN §12）。实现（2026-09-28，ADR 0034）：slang，基础语言简体（原中文文案不改意思），另有繁体（台湾用语）和英文，按功能分 32 个命名空间，在 `apps/pure_live/lib/i18n/`；设置 › 通用 › 语言：跟随系统、简体中文、繁體中文、English，只存 `theme.locale`（3.x 的 `language` / `languageName` 导入时换算）；跟随系统取系统语言列表里第一个中文或英文：Hant 文字或台湾、香港、澳门地区为繁体，其它中文为简体，没有中文和英文时为英文，系统语言改变时立即生效；切换后当前页面原地换成新语言，不丢页面状态；Material 自带文字随所选语言（繁体按台湾习惯）；文字样式带界面语言的 locale，Windows 繁体用正黑体（principles §2.3）；人数写成“1.2万”“1.2萬”“12K”；少键的译文不能编译，`test/i18n_test.dart` 拦下缺键、多键、空文案、占位符不一致、繁体混入简体字、英文混入汉字和过期的生成代码。与平台画质名比对的“原画 / 蓝光8M …”是数据，保持中文 | `assets/translations/zh.json`、`en.json`；`lib/modules/settings/pages/theme_settings_page.dart` |
 
 ## 3 关注、分组与标签
 

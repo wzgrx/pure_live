@@ -14,6 +14,7 @@ import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
 import 'package:pure_live_app/features/rooms/stream_link.dart';
 import 'package:pure_live_app/features/system/launch_args.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// What the card menu offers (principles §4.2).
@@ -88,7 +89,11 @@ Future<void> showRoomCardMenu(
           children: [
             ListTile(
               title: Text(anchorName),
-              subtitle: Text(supported ? platformName(room.platform) : '${platformName(room.platform)} · 暂不支持'),
+              subtitle: Text(
+                supported
+                    ? platformName(room.platform)
+                    : t.follows.unsupportedPlatform(name: platformName(room.platform)),
+              ),
             ),
             // F-NEW-01: per-room live alerts for followed rooms (not IPTV channels).
             if (followed && room.platform != 'iptv') RoomAlertSwitch(room: room),
@@ -106,15 +111,15 @@ Future<void> showRoomCardMenu(
                   RoomCardAction.openSite => Icons.open_in_new,
                 }),
                 title: Text(switch (action) {
-                  RoomCardAction.follow => '关注',
-                  RoomCardAction.unfollow => '取消关注',
-                  RoomCardAction.groups => '设置分组',
-                  RoomCardAction.multiview => '加入多画面',
-                  RoomCardAction.share => '分享',
-                  RoomCardAction.copyLink => '复制链接',
-                  RoomCardAction.streamLink => '获取直链',
-                  RoomCardAction.newWindow => '在新窗口打开',
-                  RoomCardAction.openSite => '打开原站',
+                  RoomCardAction.follow => t.common.follow,
+                  RoomCardAction.unfollow => t.common.unfollow,
+                  RoomCardAction.groups => t.rooms.setGroups,
+                  RoomCardAction.multiview => t.room.addToMultiview,
+                  RoomCardAction.share => t.room.share,
+                  RoomCardAction.copyLink => t.common.copyLink,
+                  RoomCardAction.streamLink => t.rooms.streamLink,
+                  RoomCardAction.newWindow => t.rooms.openInNewWindow,
+                  RoomCardAction.openSite => t.common.openSite,
                 }),
                 onTap: () => Navigator.pop(context, action),
               ),
@@ -141,7 +146,7 @@ Future<void> showRoomCardMenu(
       final stored = snapshot ?? (await detail()).let(RoomSnapshot.fromDetail);
       if (stored == null || !context.mounted) return;
       // F-FAV-02: the write is awaited; a failure changes nothing and is said.
-      if (await followWithNotice(context, ref, stored)) say('已关注 $anchorName');
+      if (await followWithNotice(context, ref, stored)) say(t.rooms.followedName(name: anchorName));
     case RoomCardAction.unfollow:
       await unfollowWithUndo(context, ref, room, anchorName);
     case RoomCardAction.groups:
@@ -153,11 +158,11 @@ Future<void> showRoomCardMenu(
       if (loaded != null && context.mounted) await shareRoom(context, loaded);
     case RoomCardAction.copyLink:
       final loaded = await detail();
-      if (loaded != null && context.mounted) await copyWithToast(context, loaded.link.toString(), '链接已复制');
+      if (loaded != null && context.mounted) await copyWithToast(context, loaded.link.toString(), t.common.linkCopied);
     case RoomCardAction.streamLink:
       await showStreamLinkPicker(context, ref, room, title: anchorName);
     case RoomCardAction.newWindow:
-      if (!await ref.read(newWindowProvider)(room)) say('没能打开新窗口');
+      if (!await ref.read(newWindowProvider)(room)) say(t.common.couldNotOpenWindow);
     case RoomCardAction.openSite:
       final loaded = await detail();
       if (loaded != null) await launchUrl(loaded.link, mode: LaunchMode.externalApplication);

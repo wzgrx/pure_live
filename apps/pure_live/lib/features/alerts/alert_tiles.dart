@@ -10,9 +10,10 @@ import 'package:pure_live_app/features/alerts/alert_notifier.dart';
 import 'package:pure_live_app/features/alerts/live_alerts.dart';
 import 'package:pure_live_app/features/alerts/programme_reminders.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Text shown when the system refuses notifications.
-const notificationsDeniedText = '没有通知权限，开播提醒保持关闭。可以在系统设置里允许本应用的通知后再打开';
+String get notificationsDeniedText => t.alerts.notificationsDenied;
 
 /// The global live alert switch (F-NEW-01). Turning it on asks for the
 /// notification permission first (Android 13+); when refused the switch stays
@@ -39,7 +40,7 @@ class _LiveAlertsTileState extends ConsumerState<LiveAlertsTile> {
     }
     if (mounted) setState(() => _asking = false);
     set(granted);
-    if (!granted) messenger?.showSnackBar(const SnackBar(content: Text(notificationsDeniedText)));
+    if (!granted) messenger?.showSnackBar(SnackBar(content: Text(notificationsDeniedText)));
   }
 
   @override
@@ -48,8 +49,8 @@ class _LiveAlertsTileState extends ConsumerState<LiveAlertsTile> {
     return SettingBuilder<bool>(
       setting: Settings.liveAlerts,
       builder: (context, value, set) => SwitchListTile(
-        title: const Text('开播提醒'),
-        subtitle: Text(supported ? '关注的主播开播时发通知，应用在后台运行时按刷新间隔检查；可在关注页对单个主播关闭' : '这个系统上不支持通知'),
+        title: Text(t.alerts.liveAlerts),
+        subtitle: Text(supported ? t.alerts.liveAlertsSubtitle : t.alerts.notificationsUnsupported),
         value: supported && value,
         onChanged: !supported || _asking
             ? null
@@ -82,13 +83,13 @@ class RoomAlertSwitch extends ConsumerWidget {
     final off = ref.watch(liveAlertsOffProvider).value?.contains(room) ?? false;
     return SwitchListTile(
       secondary: Icon(global && !off ? Icons.notifications_active_outlined : Icons.notifications_off_outlined),
-      title: const Text('开播提醒'),
+      title: Text(t.alerts.liveAlerts),
       subtitle: Text(
         !global
-            ? '先在 设置 › 通用 打开开播提醒'
+            ? t.alerts.enableAlertsFirst
             : off
-            ? '这个主播开播时不提醒'
-            : '开播时发通知',
+            ? t.alerts.roomAlertOff
+            : t.alerts.roomAlertOn,
       ),
       value: global && !off,
       onChanged: global ? (on) => unawaited(ref.read(storeProvider).roomPrefs.setLiveAlert(room, enabled: on)) : null,
@@ -114,7 +115,7 @@ class ProgrammeReminderButton extends ConsumerWidget {
     final on = ref.watch(programmeRemindersProvider).any((item) => item.key == reminder.key);
     return TextButton.icon(
       icon: Icon(on ? Icons.notifications_active : Icons.notifications_none, size: 18),
-      label: Text(on ? '已提醒' : '提醒我'),
+      label: Text(on ? t.alerts.reminderSet : t.alerts.remindMe),
       onPressed: () => unawaited(toggleProgrammeReminder(context, ref, reminder)),
     );
   }
@@ -137,9 +138,9 @@ Future<void> toggleProgrammeReminder(BuildContext context, WidgetRef ref, Progra
         await showDialog<void>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('无法提醒'),
-            content: const Text('没有通知权限。可以在系统设置里允许本应用的通知后再设置节目提醒。'),
-            actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('知道了'))],
+            title: Text(t.alerts.cannotRemind),
+            content: Text(t.alerts.reminderDenied),
+            actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.gotIt))],
           ),
         );
       }

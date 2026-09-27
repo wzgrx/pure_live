@@ -10,6 +10,7 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/core/data_root.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A font the app can download (F-DM-06, F-SET-01): only fonts with a clear
 /// licence that allows redistribution (SIL OFL 1.1, IPA Font License 1.0),
@@ -176,7 +177,7 @@ final class FontDownloadError implements Exception {
   final Object? cause;
 
   @override
-  String toString() => '“$font”下载失败，检查网络或代理后重试';
+  String toString() => t.fonts.downloadFailed(font: font);
 }
 
 /// The app's font files.

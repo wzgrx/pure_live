@@ -1,27 +1,28 @@
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_ui/live_ui.dart' show formatCount;
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Status line text of the chat panel; null when nothing needs saying.
 String? connectionText(ChatConnection connection) => switch (connection) {
   ChatConnection.off => null,
-  ChatConnection.connecting => '正在连接弹幕…',
+  ChatConnection.connecting => t.danmaku.connecting,
   ChatConnection.connected => null,
-  ChatConnection.reconnecting => '弹幕连接断开，正在重连…',
-  ChatConnection.closed => '弹幕已断开',
-  ChatConnection.unsupported => '这个平台暂不支持弹幕',
+  ChatConnection.reconnecting => t.danmaku.reconnecting,
+  ChatConnection.closed => t.danmaku.disconnected,
+  ChatConnection.unsupported => t.danmaku.unsupported,
 };
 
 /// Text for a notice (spec §1 system: codes are mapped here, never sent as
 /// prose); null for the ones the status line already covers.
 String? noticeText(DanmakuSystem notice) => switch (notice.status) {
-  DanmakuStatus.replayMode => '正在播放录像，弹幕来自录像',
-  DanmakuStatus.bilibiliGuestMasked => '未登录 B 站账号，观众昵称会被平台隐藏',
-  DanmakuStatus.timeout => '弹幕连接超时',
+  DanmakuStatus.replayMode => t.danmaku.replayMode,
+  DanmakuStatus.bilibiliGuestMasked => t.danmaku.bilibiliGuest,
+  DanmakuStatus.timeout => t.danmaku.timeout,
   DanmakuStatus.closed => switch (notice.args.firstOrNull) {
-    'credentials' => '弹幕连接失败：取不到平台凭据',
-    'rejected' => '弹幕连接被平台拒绝',
-    _ => '弹幕多次重连失败',
+    'credentials' => t.danmaku.noCredentials,
+    'rejected' => t.danmaku.rejected,
+    _ => t.danmaku.retriesFailed,
   },
   DanmakuStatus.connecting ||
   DanmakuStatus.connected ||
@@ -31,9 +32,9 @@ String? noticeText(DanmakuSystem notice) => switch (notice.status) {
 
 /// Short name of an audience figure.
 String audienceLabel(AudienceKind kind) => switch (kind) {
-  AudienceKind.online => '在线',
-  AudienceKind.popularity => '人气',
-  AudienceKind.cumulative => '看过',
+  AudienceKind.online => t.danmaku.audience.online,
+  AudienceKind.popularity => t.danmaku.audience.popularity,
+  AudienceKind.cumulative => t.danmaku.audience.cumulative,
 };
 
 /// "在线 3.5万" for a figure.
@@ -43,4 +44,5 @@ String audienceText(AudienceKind kind, int value) => '${audienceLabel(kind)} ${f
 String priceText(int yuan) => '¥$yuan';
 
 /// A gift line: "送出 小心心 ×3".
-String giftText(DanmakuGift gift) => gift.count > 1 ? '送出 ${gift.giftName} ×${gift.count}' : '送出 ${gift.giftName}';
+String giftText(DanmakuGift gift) =>
+    gift.count > 1 ? t.danmaku.giftMany(gift: gift.giftName, count: gift.count) : t.danmaku.gift(gift: gift.giftName);

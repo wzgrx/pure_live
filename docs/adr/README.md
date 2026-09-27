@@ -39,6 +39,7 @@
 | [0031](0031-platform-batch3.md) | 第三批平台迁移的共用决定 | 已接受 |
 | [0032](0032-webview.md) | 内置网页组件：接口隔离，Android 用 webview_flutter，Windows 用 webview_all_windows | 已接受 |
 | [0033](0033-hls-relay.md) | HLS 中继：线路带配方，回环中继改写播放列表 | 已接受 |
+| [0034](0034-i18n.md) | 界面多语言：slang 按功能分命名空间，全局 t 加整树重建，live_ui 文案注入 | 已接受 |
 
 ## 模板
 

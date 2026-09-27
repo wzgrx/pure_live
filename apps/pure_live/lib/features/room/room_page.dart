@@ -40,7 +40,7 @@ import 'package:pure_live_app/features/system/mini_player.dart';
 import 'package:pure_live_app/features/system/now_playing.dart';
 import 'package:pure_live_app/features/system/pip.dart';
 import 'package:pure_live_app/features/system/pip_view.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A room's details.
@@ -356,7 +356,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     _follow(detail, switched: previous != null && previous.ref != detail.ref);
     if (!_adoptedOnce) {
       _adoptedOnce = true;
-      if (!_touch && !_tv) _tip(Tip.desktopRoom, '按 C 收起或展开聊天栏，按 T 进入剧场模式，按 ? 查看全部快捷键');
+      if (!_touch && !_tv) _tip(Tip.desktopRoom, t.room.tip.desktop);
       // F-ROOM-15: fullscreen 1 s after entering, when the setting is on.
       if (live && !_tv && ref.read(storeProvider).settings.get(Settings.fullScreenDefault)) {
         _defaultFullscreen = Timer(const Duration(seconds: 1), () {
@@ -432,7 +432,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     );
     setState(() => _presentation = next);
     if (next == RoomPresentation.portraitFullscreen) _offerSwitchGesture();
-    if (next.isFullscreen && _touch && !_tv) _tip(Tip.fullscreen, '双指缩放切换画面比例，长按画面打开快捷面板');
+    if (next.isFullscreen && _touch && !_tv) _tip(Tip.fullscreen, t.room.tip.touch);
     try {
       // A platform that never answers must not block every later change.
       await applyPresentation(
@@ -537,7 +537,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     final target = neighborRoom(entries, _room, step);
     final player = _videoKey.currentState;
     if (target == null) {
-      final text = entries.isEmpty ? '没有可以切换的开播直播间' : (step < 0 ? '已经是第一个了' : '已经是最后一个了');
+      final text = entries.isEmpty ? t.room.noRoomsToSwitch : (step < 0 ? t.room.firstRoom : t.room.lastRoom);
       player?.showHint(step < 0 ? Icons.vertical_align_top : Icons.vertical_align_bottom, text);
       return;
     }
@@ -556,11 +556,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     if (!_touch || ref.read(switchRoomGestureSetting) || ref.read(appPrefsProvider).switchGestureHinted) return;
     unawaited(ref.read(appPrefsProvider.notifier).markSwitchGestureHinted().catchError((Object _) {}));
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _videoKey.currentState?.showHint(
-        Icons.swipe_vertical,
-        '可以在 设置 › 播放 里开启上下滑切换直播间',
-        duration: const Duration(seconds: 3),
-      );
+      _videoKey.currentState?.showHint(Icons.swipe_vertical, t.room.swipeHint, duration: const Duration(seconds: 3));
     });
   }
 
@@ -685,7 +681,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
               title: text.title,
               message: text.message,
               onAction: text.retryable ? () => ref.invalidate(roomDetailProvider(_room)) : null,
-              secondaryLabel: '返回',
+              secondaryLabel: t.common.back,
               onSecondary: () => context.pop(),
             ),
           ),
@@ -764,7 +760,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
           session: _session,
           player: _videoKey,
           entries: _switchEntries,
-          listLabel: (widget.origin?.entries.isNotEmpty ?? false) ? widget.origin!.label : '开播的关注',
+          listLabel: (widget.origin?.entries.isNotEmpty ?? false) ? widget.origin!.label : t.follows.liveFollows,
           onStep: _stepRoom,
           onPick: (room) {
             if (room != _room) setState(() => _room = room);
@@ -813,7 +809,7 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Align(
     alignment: Alignment.centerLeft,
-    child: IconButton(tooltip: '返回', icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+    child: IconButton(tooltip: t.common.back, icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
   );
 }
 
@@ -897,41 +893,41 @@ class _RoomInfo extends ConsumerWidget {
               if (followed)
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.favorite, size: 18),
-                  label: const Text(S.unfollow),
+                  label: Text(t.common.followed),
                   // F-FAV-02: the write is awaited; a failure is said.
                   onPressed: () => unfollowWithNotice(context, ref, card.ref),
                 )
               else
                 FilledButton.icon(
                   icon: const Icon(Icons.favorite_border, size: 18),
-                  label: const Text(S.follow),
+                  label: Text(t.common.follow),
                   onPressed: () => followWithNotice(context, ref, RoomSnapshot.fromDetail(detail)),
                 ),
               // F-ROOM-14; IPTV channels record from the recording center.
               if (card.ref.platform != 'iptv') RoomRecordButton(detail: detail),
               OutlinedButton.icon(
                 icon: const Icon(Icons.grid_view, size: 18),
-                label: const Text('加入多画面'),
+                label: Text(t.room.addToMultiview),
                 onPressed: () => context.push('/multiview', extra: [card.ref]),
               ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text(S.openSite),
+                label: Text(t.common.openSite),
                 onPressed: () => launchUrl(detail.link, mode: LaunchMode.externalApplication),
               ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.link, size: 18),
-                label: const Text(S.copyLink),
+                label: Text(t.common.copyLink),
                 onPressed: () async {
                   await Clipboard.setData(ClipboardData(text: detail.link.toString()));
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.linkCopied)));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.common.linkCopied)));
                   }
                 },
               ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.share_outlined, size: 18),
-                label: const Text('分享'),
+                label: Text(t.room.share),
                 onPressed: () => shareRoom(context, detail),
               ),
             ],

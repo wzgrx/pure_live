@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:live_core/live_core.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Orders of the search results (spec/product.md F-SRC-01). "粉丝" waits for
 /// a follower count in the card model.
@@ -22,11 +23,11 @@ enum SearchSort {
 }
 
 /// Menu labels of [SearchSort].
-const Map<SearchSort, String> searchSortLabels = {
-  SearchSort.smart: '智能',
-  SearchSort.platform: '按平台',
-  SearchSort.audience: '按人数',
-  SearchSort.followers: '按粉丝',
+Map<SearchSort, String> get searchSortLabels => {
+  SearchSort.smart: t.search.sort.smart,
+  SearchSort.platform: t.search.sort.platform,
+  SearchSort.audience: t.search.sort.audience,
+  SearchSort.followers: t.search.sort.followers,
 };
 
 int _audience(RoomCard card) => card.audience.online ?? card.audience.popularity ?? card.audience.cumulative ?? 0;

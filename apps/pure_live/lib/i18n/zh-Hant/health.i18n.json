@@ -1,0 +1,13 @@
+{
+  "imageCacheCleared": "圖片快取已清除",
+  "clearImageCache": "清除圖片快取",
+  "calculating": "正在計算",
+  "imageCacheSize": "封面和頭像快取 {size} MB；追蹤、紀錄和錄製不受影響",
+  "timeout": "15 秒內沒有回應",
+  "checkAgain": "重新檢查",
+  "checkingAll": "正在檢查各平台",
+  "checkFailed": "檢查失敗",
+  "ok": "正常 · {ms} ms",
+  "failed": "異常",
+  "method": "檢查方式：請求各平台的分區清單。某個平台異常時，追蹤頁和探索頁會顯示上次的內容，直播間可能打不開。"
+}

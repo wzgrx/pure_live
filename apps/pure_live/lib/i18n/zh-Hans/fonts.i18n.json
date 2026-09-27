@@ -1,0 +1,23 @@
+{
+  "downloadFailed": "“{font}”下载失败，检查网络或代理后重试",
+  "downloaded": "“{name}”已下载",
+  "deleted": "已删除“{name}”，重启后不再占用内存",
+  "title": "字体",
+  "listFailed": "读不到字体列表",
+  "systemFont": "系统字体",
+  "inUse": "正在使用",
+  "appFont": "界面字体",
+  "danmakuFont": "弹幕字体",
+  "resetAppFont": "界面改回系统字体",
+  "resetDanmakuFont": "弹幕改回系统字体",
+  "downloadable": "可下载的字体",
+  "downloadableNote": "只列出允许自由使用和分发的字体（SIL OFL 1.1、IPA 字体许可）。字体文件较大，建议在 Wi-Fi 下下载。",
+  "useInterface": "界面",
+  "useDanmaku": "弹幕",
+  "usedFor": "用于{uses}",
+  "and": "和",
+  "download": "下载",
+  "use": "使用",
+  "useForInterface": "用作界面字体",
+  "useForDanmaku": "用作弹幕字体"
+}

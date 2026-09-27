@@ -7,6 +7,7 @@ import 'package:live_media/live_media.dart';
 import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/features/system/now_playing.dart';
 import 'package:pure_live_app/features/system/pip.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Lays out a room normally, or only its video while picture-in-picture is
 /// entering or active (PIP-2). The room page wraps its layout with it and
@@ -70,7 +71,7 @@ class _PipVideoFrameState extends ConsumerState<PipVideoFrame> {
   Future<void> _exit() async {
     final restored = await ref.read(pipProvider.notifier).exit();
     if (!restored && mounted) {
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('没能恢复窗口，请手动调整窗口大小')));
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(t.system.restoreWindowFailed)));
     }
   }
 
@@ -97,7 +98,7 @@ class _PipVideoFrameState extends ConsumerState<PipVideoFrame> {
                   children: [
                     Center(
                       child: IconButton(
-                        tooltip: paused ? '播放' : '暂停',
+                        tooltip: paused ? t.common.play : t.common.pause,
                         color: Colors.white,
                         iconSize: 36,
                         icon: Icon(paused ? Icons.play_arrow : Icons.pause),
@@ -107,7 +108,7 @@ class _PipVideoFrameState extends ConsumerState<PipVideoFrame> {
                     Align(
                       alignment: Alignment.topRight,
                       child: IconButton(
-                        tooltip: '退出画中画（双击画面）',
+                        tooltip: t.system.exitPip,
                         color: Colors.white,
                         icon: const Icon(Icons.close_fullscreen),
                         onPressed: () => unawaited(_exit()),

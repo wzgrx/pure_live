@@ -8,6 +8,7 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/accounts/account_services.dart';
 import 'package:pure_live_app/features/accounts/account_status.dart';
 import 'package:pure_live_app/features/accounts/platform_account_page.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Platform accounts (principles §4.4 "平台与账号", F-ACC-01): every platform
 /// with an account, what its stored login is worth, and the way to its page.
@@ -44,14 +45,14 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
     final platforms = ref.watch(enabledPlatformsProvider).where(platformHasAccount);
     final now = DateTime.now();
     return Scaffold(
-      appBar: AppBar(title: const Text('平台账号')),
+      appBar: AppBar(title: Text(t.app.accounts)),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
           child: ListView(
             children: [
-              const Padding(padding: EdgeInsets.all(Space.s4), child: Text('登录信息用本机的系统密钥加密保存，不会上传，默认也不会写进备份文件。')),
+              Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.accounts.storageNote)),
               for (final platform in platforms)
                 ListTile(
                   leading: PlatformLogo(platformId: platform, size: Sizes.iconLg),

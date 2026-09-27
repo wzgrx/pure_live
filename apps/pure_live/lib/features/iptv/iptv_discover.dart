@@ -9,6 +9,7 @@ import 'package:pure_live_app/features/iptv/iptv_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The "网络电视" tab of 发现 (F-IPTV-05): every channel, or channels by
 /// playlist group; without playlists, the way to import one.
@@ -20,9 +21,9 @@ class IptvDiscover extends ConsumerWidget {
     if (ref.watch(iptvPlaylistsProvider).value?.isEmpty ?? false) {
       return MessageView(
         icon: Icons.live_tv_outlined,
-        title: '还没有播放列表',
-        message: '导入 M3U、TXT 或 JSON 播放列表后，频道会按分组出现在这里，可以像直播间一样关注。',
-        actionLabel: '导入播放列表',
+        title: t.iptv.noPlaylists,
+        message: t.iptv.noPlaylistsHint,
+        actionLabel: t.iptv.importPlaylist,
         onAction: () => context.push(iptvLocation),
       );
     }
@@ -32,29 +33,29 @@ class IptvDiscover extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: TabBar(
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
                   dividerHeight: 0,
                   tabs: [
-                    Tab(text: '全部频道', height: 40),
-                    Tab(text: '分组', height: 40),
+                    Tab(text: t.iptv.allChannels, height: 40),
+                    Tab(text: t.iptv.groups, height: 40),
                   ],
                 ),
               ),
               IconButton(
-                tooltip: '管理播放列表',
+                tooltip: t.iptv.managePlaylists,
                 icon: const Icon(Icons.playlist_add),
                 onPressed: () => context.push(iptvLocation),
               ),
             ],
           ),
-          const Expanded(
+          Expanded(
             child: TabBarView(
               children: [
-                RoomGrid(query: RecommendedQuery(IptvSite.platformId), emptyText: '播放列表里还没有频道'),
-                _Groups(),
+                RoomGrid(query: const RecommendedQuery(IptvSite.platformId), emptyText: t.iptv.noChannels),
+                const _Groups(),
               ],
             ),
           ),
@@ -96,7 +97,7 @@ class _Groups extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(vertical: Space.s2),
                         child: Text(playlist.name, style: Theme.of(context).textTheme.titleSmall),
                       ),
-                      if (playlist.areas.isEmpty) const Text('这个播放列表还没有同步'),
+                      if (playlist.areas.isEmpty) Text(t.iptv.playlistNotSynced),
                       Wrap(
                         spacing: Space.s2,
                         runSpacing: Space.s2,

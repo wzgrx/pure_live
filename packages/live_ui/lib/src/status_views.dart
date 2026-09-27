@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/metrics.dart';
+import 'package:live_ui/src/ui_text.dart';
 
 /// Centered progress for a page or panel that has nothing to show yet.
 class LoadingView extends StatelessWidget {
@@ -37,18 +38,20 @@ class MessageView extends StatelessWidget {
     this.secondaryLabel,
     this.onSecondary,
     super.key,
-  });
+  }) : _error = false;
 
-  /// An error state with a retry button.
+  /// An error state with a retry button ("重试" unless [actionLabel] says
+  /// otherwise).
   const new error({
     required this.title,
     this.message,
     this.onAction,
-    this.actionLabel = '重试',
+    this.actionLabel,
     this.secondaryLabel,
     this.onSecondary,
     super.key,
-  }) : icon = Icons.error_outline;
+  }) : icon = Icons.error_outline,
+       _error = true;
 
   /// Headline.
   final String title;
@@ -71,9 +74,12 @@ class MessageView extends StatelessWidget {
   /// Secondary action.
   final VoidCallback? onSecondary;
 
+  final bool _error;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final words = LiveUiText.current;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(Space.s6),
@@ -100,9 +106,10 @@ class MessageView extends StatelessWidget {
                   runSpacing: Space.s2,
                   alignment: WrapAlignment.center,
                   children: [
-                    if (onAction != null) FilledButton(onPressed: onAction, child: Text(actionLabel ?? '确定')),
+                    if (onAction != null)
+                      FilledButton(onPressed: onAction, child: Text(actionLabel ?? (_error ? words.retry : words.ok))),
                     if (onSecondary != null)
-                      OutlinedButton(onPressed: onSecondary, child: Text(secondaryLabel ?? '取消')),
+                      OutlinedButton(onPressed: onSecondary, child: Text(secondaryLabel ?? words.cancel)),
                   ],
                 ),
               ],

@@ -12,24 +12,35 @@ import 'package:pure_live_app/features/settings/network_settings.dart';
 import 'package:pure_live_app/features/settings/record_settings.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/features/system/system_settings.dart';
-import 'package:pure_live_app/l10n/strings.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Settings groups of principles §4.4. Groups whose features are not in the
 /// preview yet say so instead of showing dead switches.
 enum SettingsGroup {
-  general('通用', Icons.tune),
-  appearance(S.appearance, Icons.palette_outlined),
-  playback('播放', Icons.play_circle_outline),
-  danmaku('弹幕', Icons.subtitles_outlined),
-  recording('录制', Icons.fiber_manual_record_outlined),
-  accounts('平台与账号', Icons.account_circle_outlined),
-  network('网络', Icons.lan_outlined),
-  data('数据与同步', Icons.cloud_sync_outlined);
+  general(Icons.tune),
+  appearance(Icons.palette_outlined),
+  playback(Icons.play_circle_outline),
+  danmaku(Icons.subtitles_outlined),
+  recording(Icons.fiber_manual_record_outlined),
+  accounts(Icons.account_circle_outlined),
+  network(Icons.lan_outlined),
+  data(Icons.cloud_sync_outlined);
 
-  new(this.label, this.icon);
+  new(this.icon);
 
-  final String label;
   final IconData icon;
+
+  /// The group's name in the interface language.
+  String get label => switch (this) {
+    general => t.settings.group.general,
+    appearance => t.app.appearance,
+    playback => t.settings.group.playback,
+    danmaku => t.settings.group.danmaku,
+    recording => t.settings.group.recording,
+    accounts => t.settings.group.accounts,
+    network => t.settings.group.network,
+    data => t.settings.group.data,
+  };
 }
 
 /// The settings list; from expanded width the chosen group opens beside it.
@@ -68,7 +79,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       );
       return Scaffold(
-        appBar: AppBar(title: const Text(S.settings)),
+        appBar: AppBar(title: Text(t.app.settings)),
         body: twoPane
             ? Row(
                 children: [
@@ -110,12 +121,12 @@ class SettingsGroupPage extends StatelessWidget {
   );
 }
 
-const Map<QualityPreference, String> _quality = {
-  QualityPreference.original: '原画',
-  QualityPreference.bluRay8M: '蓝光 8M',
-  QualityPreference.bluRay4M: '蓝光 4M',
-  QualityPreference.superHigh: '超清',
-  QualityPreference.smooth: '流畅',
+Map<QualityPreference, String> get _quality => {
+  QualityPreference.original: t.quality.original,
+  QualityPreference.bluRay8M: t.quality.bluRay8M,
+  QualityPreference.bluRay4M: t.quality.bluRay4M,
+  QualityPreference.superHigh: t.quality.superHigh,
+  QualityPreference.smooth: t.quality.smooth,
 };
 
 /// The tiles of one group.
@@ -127,38 +138,43 @@ class SettingsGroupBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListView(
     children: switch (group) {
-      SettingsGroup.general => const [
+      SettingsGroup.general => [
+        const LanguageTile(),
         ChoiceSettingTile<StartPage>(
           setting: Settings.startPage,
-          title: '启动页',
-          labels: {StartPage.follows: S.follows, StartPage.discover: S.discover},
+          title: t.settings.general.startPage,
+          labels: {StartPage.follows: t.app.tabs.follows, StartPage.discover: t.app.tabs.discover},
         ),
-        SwitchSettingTile(setting: Settings.screenKeepOn, title: '播放时屏幕常亮'),
+        SwitchSettingTile(setting: Settings.screenKeepOn, title: t.settings.general.keepScreenOn),
         ChoiceSettingTile<RefreshRateMode>(
           setting: Settings.refreshRateMode,
-          title: '刷新率',
+          title: t.settings.general.refreshRate,
           labels: {
-            RefreshRateMode.powerSaving: '省电',
-            RefreshRateMode.balanced: '均衡',
-            RefreshRateMode.performance: '最高',
+            RefreshRateMode.powerSaving: t.settings.general.refreshPowerSaving,
+            RefreshRateMode.balanced: t.settings.general.refreshBalanced,
+            RefreshRateMode.performance: t.settings.general.refreshHighest,
           },
         ),
-        SwitchSettingTile(setting: Settings.autoCheckUpdate, title: '自动检查更新'),
-        ClipboardRecognitionTile(),
-        SystemSettingTiles(SystemSettingsSection.general),
-        SettingsHeader('电视'),
+        SwitchSettingTile(setting: Settings.autoCheckUpdate, title: t.settings.general.autoCheckUpdate),
+        const ClipboardRecognitionTile(),
+        const SystemSettingTiles(SystemSettingsSection.general),
+        SettingsHeader(t.settings.general.tv),
         ChoiceSettingTile<TvMode>(
           setting: Settings.tvMode,
-          title: '电视模式',
-          labels: {TvMode.auto: '自动（检测到电视时开启）', TvMode.on: '开启', TvMode.off: '关闭'},
+          title: t.settings.general.tvMode,
+          labels: {TvMode.auto: t.settings.general.tvModeAuto, TvMode.on: t.common.on, TvMode.off: t.common.off},
         ),
-        SwitchSettingTile(setting: Settings.tvPerformanceMode, title: '电视焦点只描边', subtitle: '性能优先：焦点不放大，适合低端电视盒子'),
-        SettingsHeader('关注刷新'),
-        SwitchSettingTile(setting: Settings.autoRefreshFollows, title: '定时刷新关注的开播状态'),
-        SwitchSettingTile(setting: Settings.refreshFollowsOnResume, title: '回到应用时刷新关注'),
+        SwitchSettingTile(
+          setting: Settings.tvPerformanceMode,
+          title: t.settings.general.tvFocusOutline,
+          subtitle: t.settings.general.tvFocusOutlineSubtitle,
+        ),
+        SettingsHeader(t.settings.general.followRefresh),
+        SwitchSettingTile(setting: Settings.autoRefreshFollows, title: t.settings.general.autoRefreshFollows),
+        SwitchSettingTile(setting: Settings.refreshFollowsOnResume, title: t.settings.general.refreshOnResume),
         SliderSettingTile(
           setting: Settings.autoRefreshInterval,
-          title: '定时刷新间隔',
+          title: t.settings.general.refreshInterval,
           // F-FAV-04: 3.x offered 5 minutes to 6 hours.
           min: 5,
           max: 360,
@@ -167,113 +183,150 @@ class SettingsGroupBody extends StatelessWidget {
         ),
         SliderSettingTile(
           setting: Settings.maxConcurrentRefresh,
-          title: '同时刷新的直播间数',
+          title: t.settings.general.maxConcurrentRefresh,
           min: 1,
           max: 16,
           divisions: 15,
           format: _integer,
         ),
         // F-FAV-04: covers of live cards downloaded again on a timer.
-        SwitchSettingTile(setting: Settings.autoRefreshCovers, title: '定时刷新封面', subtitle: '开播卡片的封面按间隔重新下载，看到的画面更新'),
+        SwitchSettingTile(
+          setting: Settings.autoRefreshCovers,
+          title: t.settings.general.refreshCovers,
+          subtitle: t.settings.general.refreshCoversSubtitle,
+        ),
         SliderSettingTile(
           setting: Settings.coverRefreshInterval,
-          title: '封面刷新间隔',
+          title: t.settings.general.coverInterval,
           min: 5,
           max: 360,
           divisions: 71,
           format: _minutes,
         ),
-        SettingsHeader('通知'),
-        LiveAlertsTile(),
+        SettingsHeader(t.settings.general.notifications),
+        const LiveAlertsTile(),
       ],
-      SettingsGroup.appearance => const [
+      SettingsGroup.appearance => [
         ChoiceSettingTile<AppThemeMode>(
           setting: Settings.themeMode,
-          title: '主题',
+          title: t.settings.appearance.theme,
           labels: {
-            AppThemeMode.system: S.themeSystem,
-            AppThemeMode.light: S.themeLight,
-            AppThemeMode.dark: S.themeDark,
+            AppThemeMode.system: t.app.themeSystem,
+            AppThemeMode.light: t.app.themeLight,
+            AppThemeMode.dark: t.app.themeDark,
           },
         ),
-        SwitchSettingTile(setting: Settings.pureBlack, title: S.themeBlack, subtitle: '深色时用纯黑背景，适合 OLED 屏幕'),
-        DynamicColorTile(),
-        _TvThemeNote(),
-        SwitchSettingTile(setting: Settings.denseFollows, title: '关注页紧凑卡片', subtitle: '主播名和标题放在一行'),
-        CardPresetTile(),
-        FontsTile(),
-        SliderSettingTile(setting: Settings.textScale, title: '文字大小', min: 0.85, max: 1.3, divisions: 9),
+        SwitchSettingTile(setting: Settings.pureBlack, title: t.app.themeBlack, subtitle: t.me.pureBlackSubtitle),
+        const DynamicColorTile(),
+        const _TvThemeNote(),
+        SwitchSettingTile(
+          setting: Settings.denseFollows,
+          title: t.me.denseFollows,
+          subtitle: t.settings.appearance.denseSubtitle,
+        ),
+        const CardPresetTile(),
+        const FontsTile(),
+        SliderSettingTile(
+          setting: Settings.textScale,
+          title: t.settings.appearance.textSize,
+          min: 0.85,
+          max: 1.3,
+          divisions: 9,
+        ),
       ],
-      SettingsGroup.playback => const [
-        ChoiceSettingTile<QualityPreference>(setting: Settings.qualityWifi, title: '默认画质（Wi-Fi）', labels: _quality),
-        ChoiceSettingTile<QualityPreference>(setting: Settings.qualityMobile, title: '默认画质（移动网络）', labels: _quality),
+      SettingsGroup.playback => [
+        ChoiceSettingTile<QualityPreference>(
+          setting: Settings.qualityWifi,
+          title: t.settings.playback.qualityWifi,
+          labels: _quality,
+        ),
+        ChoiceSettingTile<QualityPreference>(
+          setting: Settings.qualityMobile,
+          title: t.settings.playback.qualityMobile,
+          labels: _quality,
+        ),
         SwitchSettingTile(
           setting: Settings.autoLowerQuality,
-          title: '网络不稳时自动降低画质',
-          subtitle: '一分钟内卡顿 3 次就降一档；手动选过画质后不再自动调整',
+          title: t.settings.playback.autoLower,
+          subtitle: t.settings.playback.autoLowerSubtitle,
         ),
-        PlaybackOutputTiles(),
+        const PlaybackOutputTiles(),
         ChoiceSettingTile<VideoFit>(
           setting: Settings.videoFit,
-          title: '画面比例',
-          labels: {VideoFit.contain: '适应', VideoFit.cover: '填充（裁切）', VideoFit.fill: '拉伸'},
+          title: t.room.aspect,
+          labels: {
+            VideoFit.contain: t.room.fit.contain,
+            VideoFit.cover: t.settings.playback.fitCover,
+            VideoFit.fill: t.room.fit.fill,
+          },
         ),
-        SwitchSettingTile(setting: Settings.fullScreenDefault, title: '进入直播间自动全屏'),
+        SwitchSettingTile(setting: Settings.fullScreenDefault, title: t.settings.playback.autoFullscreen),
         SwitchSettingTile(
           setting: Settings.switchRoomGesture,
-          title: '竖屏全屏上下滑切换直播间',
-          subtitle: '上滑下一个、下滑上一个；开启后竖屏全屏里不再上下滑调亮度和音量',
+          title: t.settings.playback.swipeRooms,
+          subtitle: t.settings.playback.swipeRoomsSubtitle,
         ),
-        SettingsHeader('竖屏直播'),
+        SettingsHeader(t.settings.playback.portrait),
         SwitchSettingTile(
           setting: Settings.portraitAdaptation,
-          title: '竖屏直播适配',
-          subtitle: '自动识别竖屏直播，手机上用竖屏全屏和可拖动的信息面板',
+          title: t.settings.playback.portraitAdaptation,
+          subtitle: t.settings.playback.portraitAdaptationSubtitle,
         ),
         ChoiceSettingTile<PortraitFullscreenPolicy>(
           setting: Settings.portraitFullscreenPolicy,
-          title: '全屏方向',
+          title: t.settings.playback.fullscreenOrientation,
           labels: {
-            PortraitFullscreenPolicy.followSource: '跟随画面（竖屏直播竖着全屏）',
-            PortraitFullscreenPolicy.followSystem: '跟随手机方向',
-            PortraitFullscreenPolicy.landscape: '总是横屏',
+            PortraitFullscreenPolicy.followSource: t.settings.playback.orientationSource,
+            PortraitFullscreenPolicy.followSystem: t.settings.playback.orientationSystem,
+            PortraitFullscreenPolicy.landscape: t.settings.playback.orientationLandscape,
           },
         ),
         ChoiceSettingTile<PortraitFit>(
           setting: Settings.portraitFit,
-          title: '竖屏全屏画面',
-          labels: {PortraitFit.contain: '完整显示', PortraitFit.cover: '铺满屏幕（裁掉边缘）'},
+          title: t.settings.playback.portraitFit,
+          labels: {
+            PortraitFit.contain: t.settings.playback.portraitFitContain,
+            PortraitFit.cover: t.settings.playback.portraitFitCover,
+          },
         ),
         ChoiceSettingTile<PortraitDanmakuArea>(
           setting: Settings.portraitDanmakuArea,
-          title: '竖屏全屏弹幕区域',
+          title: t.settings.playback.portraitDanmaku,
           labels: {
-            PortraitDanmakuArea.followGlobal: '跟随弹幕设置',
-            PortraitDanmakuArea.upperQuarter: '只在上方四分之一',
-            PortraitDanmakuArea.reduced: '减半',
-            PortraitDanmakuArea.hidden: '不显示',
+            PortraitDanmakuArea.followGlobal: t.settings.playback.danmakuFollow,
+            PortraitDanmakuArea.upperQuarter: t.settings.playback.danmakuUpperQuarter,
+            PortraitDanmakuArea.reduced: t.settings.playback.danmakuHalf,
+            PortraitDanmakuArea.hidden: t.settings.playback.danmakuHidden,
           },
         ),
         SwitchSettingTile(
           setting: Settings.rememberPortraitOverride,
-          title: '记住每个直播间的画面方向',
-          subtitle: '在直播间手动选的“按竖屏/横屏处理”下次进房仍然生效',
+          title: t.settings.playback.rememberOrientation,
+          subtitle: t.settings.playback.rememberOrientationSubtitle,
         ),
-        SwitchSettingTile(setting: Settings.backgroundPlay, title: '后台播放', subtitle: '离开应用后继续播放声音'),
-        SettingsHeader('助眠'),
-        SwitchSettingTile(setting: Settings.asmrSleepMode, title: '助眠模式', subtitle: '进入直播间自动只播声音并开始定时关闭；恢复画面时取消这次定时'),
+        SwitchSettingTile(
+          setting: Settings.backgroundPlay,
+          title: t.settings.playback.background,
+          subtitle: t.settings.playback.backgroundSubtitle,
+        ),
+        SettingsHeader(t.settings.playback.sleep),
+        SwitchSettingTile(
+          setting: Settings.asmrSleepMode,
+          title: t.settings.playback.sleepMode,
+          subtitle: t.settings.playback.sleepModeSubtitle,
+        ),
         SliderSettingTile(
           setting: Settings.asmrSleepMinutes,
-          title: '助眠定时',
+          title: t.settings.playback.sleepMinutes,
           min: 5,
           max: 180,
           divisions: 35,
           format: _minutes,
         ),
-        SystemSettingTiles(SystemSettingsSection.playback),
+        const SystemSettingTiles(SystemSettingsSection.playback),
         SliderSettingTile(
           setting: Settings.defaultMobileVolume,
-          title: '手机默认音量',
+          title: t.settings.playback.phoneVolume,
           min: 0,
           max: 1,
           divisions: 20,
@@ -281,40 +334,57 @@ class SettingsGroupBody extends StatelessWidget {
         ),
       ],
       SettingsGroup.danmaku => const [DanmakuSettingsTiles(), PipDanmakuTiles()],
-      SettingsGroup.data => const [
+      SettingsGroup.data => [
         SliderSettingTile(
           setting: Settings.historyLimit,
-          title: '观看历史最多保留',
+          title: t.settings.data.historyLimit,
           min: 0,
           max: 500,
           divisions: 50,
           format: _historyLimit,
         ),
-        DataSyncTiles(),
-        CacheTile(),
+        const DataSyncTiles(),
+        const CacheTile(),
       ],
       SettingsGroup.recording => const [RecordSettingsTiles()],
       SettingsGroup.accounts => [
         ListTile(
-          title: const Text('首页平台'),
-          subtitle: const Text('显示哪些平台、顺序和发现页默认打开的平台'),
+          title: Text(t.settings.accounts.platforms),
+          subtitle: Text(t.settings.accounts.platformsSubtitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go('/me/platforms'),
         ),
         ListTile(
-          title: const Text('观众数口径'),
-          subtitle: const Text('卡片显示热度还是在线人数，以及各平台数字的含义'),
+          title: Text(t.settings.accounts.audience),
+          subtitle: Text(t.settings.accounts.audienceSubtitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go('/me/audience'),
         ),
         ListTile(
-          title: const Text('平台账号'),
-          subtitle: const Text('登录或退出各平台账号'),
+          title: Text(t.app.accounts),
+          subtitle: Text(t.settings.accounts.accountsSubtitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go('/me/accounts'),
         ),
       ],
       SettingsGroup.network => const [NetworkSettings()],
+    },
+  );
+}
+
+/// 语言 (F-APP-06): follow the system, or Simplified Chinese, Traditional
+/// Chinese or English; stored once in [Settings.locale]. Each language shows
+/// its own name.
+class LanguageTile extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) => ChoiceSettingTile<String>(
+    setting: Settings.locale,
+    title: t.settings.language,
+    labels: {
+      'system': t.settings.languageSystem,
+      for (final tag in const ['zh-Hans', 'zh-Hant', 'en']) tag: t.settings.languageNames[tag] ?? tag,
     },
   );
 }
@@ -325,14 +395,19 @@ class _TvThemeNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TvScope.of(context).enabled
-      ? const ListTile(leading: Icon(Icons.tv), title: Text('电视模式下只用深色'), subtitle: Text('纯黑背景开关仍然有效'))
+      ? ListTile(
+          leading: const Icon(Icons.tv),
+          title: Text(t.settings.tvDarkOnly),
+          subtitle: Text(t.settings.tvDarkOnlySubtitle),
+        )
       : const SizedBox.shrink();
 }
 
 String _integer(double value) => value.round().toString();
-String _minutes(double value) => '${value.round()} 分钟';
+String _minutes(double value) => t.common.minutes(n: value.round());
 String _percent(double value) => '${(value * 100).round()}%';
-String _historyLimit(double value) => value.round() == 0 ? '不限' : '${value.round()} 条';
+String _historyLimit(double value) =>
+    value.round() == 0 ? t.common.unlimited : t.settings.historyEntries(n: value.round());
 
 /// F-SET-05, F-SET-06: volume defaults and the decoding and output options
 /// of this device; each platform lists its own decoders and outputs.
@@ -347,36 +422,57 @@ class PlaybackOutputTiles extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SettingsHeader('音量'),
-        const SwitchSettingTile(setting: Settings.globalMute, title: '进入直播间时静音', subtitle: '所有直播间都从静音开始'),
+        SettingsHeader(t.settings.output.volume),
+        SwitchSettingTile(
+          setting: Settings.globalMute,
+          title: t.settings.output.startMuted,
+          subtitle: t.settings.output.startMutedSubtitle,
+        ),
         SliderSettingTile(
           setting: touch ? Settings.defaultMobileVolume : Settings.defaultDesktopVolume,
-          title: touch ? '默认音量' : '默认音量（没有记住音量的直播间）',
+          title: touch ? t.settings.output.defaultVolume : t.settings.output.defaultVolumeDesktop,
           min: 0,
           max: 1,
           divisions: 20,
           format: (value) => '${(value * 100).round()}%',
         ),
-        const SettingsHeader('解码与输出'),
-        const SwitchSettingTile(setting: Settings.hardwareDecoding, title: '硬件解码', subtitle: '画面异常时关闭试试'),
+        SettingsHeader(t.settings.output.decoding),
+        SwitchSettingTile(
+          setting: Settings.hardwareDecoding,
+          title: t.settings.output.hardwareDecoding,
+          subtitle: t.settings.output.hardwareDecodingSubtitle,
+        ),
         ChoiceSettingTile<String>(
           setting: Settings.hardwareDecoder,
-          title: '硬件解码方式',
+          title: t.settings.output.decoder,
           labels: {
-            'auto-safe': '自动',
-            if (android) ...{'mediacodec': 'MediaCodec', 'mediacodec-copy': 'MediaCodec（复制）'},
-            if (windows) ...{'d3d11va': 'D3D11', 'd3d11va-copy': 'D3D11（复制）', 'dxva2': 'DXVA2', 'nvdec': 'NVDEC（英伟达）'},
+            'auto-safe': t.common.auto,
+            if (android) ...{'mediacodec': 'MediaCodec', 'mediacodec-copy': t.settings.output.mediacodecCopy},
+            if (windows) ...{
+              'd3d11va': 'D3D11',
+              'd3d11va-copy': t.settings.output.d3d11Copy,
+              'dxva2': 'DXVA2',
+              'nvdec': t.settings.output.nvdec,
+            },
             if (!android) 'vulkan': 'Vulkan',
           },
         ),
         if (android)
-          const SwitchSettingTile(setting: Settings.androidCompatibility, title: '兼容模式', subtitle: '部分机型黑屏、花屏或卡住时打开'),
-        const SwitchSettingTile(setting: Settings.lowLatency, title: '低延迟', subtitle: '缓冲更少、延迟更低，网络差时更容易卡'),
+          SwitchSettingTile(
+            setting: Settings.androidCompatibility,
+            title: t.settings.output.compatibility,
+            subtitle: t.settings.output.compatibilitySubtitle,
+          ),
+        SwitchSettingTile(
+          setting: Settings.lowLatency,
+          title: t.settings.output.lowLatency,
+          subtitle: t.settings.output.lowLatencySubtitle,
+        ),
         ChoiceSettingTile<String>(
           setting: Settings.audioOutput,
-          title: '音频输出',
+          title: t.settings.output.audio,
           labels: {
-            '': '自动',
+            '': t.common.auto,
             if (android) ...{'aaudio': 'AAudio', 'opensles': 'OpenSL ES', 'audiotrack': 'AudioTrack'},
             if (windows) ...{'wasapi': 'WASAPI', 'openal': 'OpenAL'},
             if (!android && !windows) ...{'pulse': 'PulseAudio', 'pipewire': 'PipeWire', 'alsa': 'ALSA'},
@@ -395,13 +491,17 @@ class DynamicColorTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Platform.isWindows) {
-      return const SwitchSettingTile(setting: Settings.dynamicColor, title: '跟随系统强调色', subtitle: '主题色改用 Windows 的强调色');
+      return SwitchSettingTile(
+        setting: Settings.dynamicColor,
+        title: t.settings.appearance.accentColor,
+        subtitle: t.settings.appearance.accentColorSubtitle,
+      );
     }
     if (Platform.isAndroid) {
-      return const SwitchSettingTile(
+      return SwitchSettingTile(
         setting: Settings.dynamicColor,
-        title: '跟随壁纸取色',
-        subtitle: 'Android 12 及以上，主题色取自壁纸',
+        title: t.settings.appearance.wallpaperColor,
+        subtitle: t.settings.appearance.wallpaperColorSubtitle,
       );
     }
     return const SizedBox.shrink();
@@ -420,8 +520,8 @@ class CardPresetTile extends StatelessWidget {
     return SettingBuilder<CardPreset>(
       setting: touch ? Settings.cardPresetMobile : Settings.cardPresetDesktop,
       builder: (context, value, set) => SwitchListTile(
-        title: Text(touch ? '发现和搜索用紧凑卡片（手机）' : '发现和搜索用紧凑卡片（桌面）'),
-        subtitle: const Text('主播名和标题放在一行'),
+        title: Text(touch ? t.settings.appearance.compactCardsPhone : t.settings.appearance.compactCardsDesktop),
+        subtitle: Text(t.settings.appearance.denseSubtitle),
         value: value == CardPreset.compact,
         onChanged: (compact) => set(compact ? CardPreset.compact : CardPreset.normal),
       ),
@@ -435,8 +535,8 @@ class FontsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-    title: const Text('字体'),
-    subtitle: const Text('下载开源字体，用作界面或弹幕字体'),
+    title: Text(t.fonts.title),
+    subtitle: Text(t.settings.appearance.fontsSubtitle),
     trailing: const Icon(Icons.chevron_right),
     onTap: () => context.go('/me/fonts'),
   );

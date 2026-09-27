@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// A playlist or guide to import, handed over by a share or a deep link
 /// (spec/modules/iptv.md §6): a URL, the text of a playlist, or file bytes.
@@ -18,14 +19,17 @@ final class IptvImportRequest {
 
 /// "刚刚同步", "3 小时前同步", "9月27日 08:00 同步", or "未同步".
 String syncedText(DateTime? at, {DateTime? now}) {
-  if (at == null) return '未同步';
+  if (at == null) return t.iptv.notSynced;
   final local = at.toLocal();
   final elapsed = (now ?? DateTime.now()).difference(at);
-  if (elapsed < const Duration(minutes: 1)) return '刚刚同步';
-  if (elapsed < const Duration(hours: 1)) return '${elapsed.inMinutes} 分钟前同步';
-  if (elapsed < const Duration(days: 1)) return '${elapsed.inHours} 小时前同步';
+  if (elapsed < const Duration(minutes: 1)) return t.iptv.syncedJustNow;
+  if (elapsed < const Duration(hours: 1)) return t.iptv.syncedMinutesAgo(n: elapsed.inMinutes);
+  if (elapsed < const Duration(days: 1)) return t.iptv.syncedHoursAgo(n: elapsed.inHours);
   String two(int value) => value.toString().padLeft(2, '0');
-  return '${local.month}月${local.day}日 ${two(local.hour)}:${two(local.minute)} 同步';
+  return t.iptv.syncedAt(
+    date: t.common.monthDay(month: local.month, day: local.day),
+    time: '${two(local.hour)}:${two(local.minute)}',
+  );
 }
 
 /// `HH:mm` in local time.
@@ -41,10 +45,11 @@ Future<({String name, String url})?> askSource(
   String url = '',
   String name = '',
   bool askUrl = true,
-  String action = '导入',
+  String? action,
 }) => showDialog<({String name, String url})>(
   context: context,
-  builder: (context) => _SourceDialog(title: title, url: url, name: name, askUrl: askUrl, action: action),
+  builder: (context) =>
+      _SourceDialog(title: title, url: url, name: name, askUrl: askUrl, action: action ?? t.common.import),
 );
 
 class _SourceDialog extends StatefulWidget {
@@ -84,18 +89,18 @@ class _SourceDialogState extends State<_SourceDialog> {
             controller: _url,
             autofocus: widget.url.isEmpty,
             keyboardType: TextInputType.url,
-            decoration: const InputDecoration(labelText: '网址', hintText: 'https://…'),
+            decoration: InputDecoration(labelText: t.iptv.url, hintText: 'https://…'),
             onSubmitted: (_) => _submit(),
           ),
         TextField(
           controller: _name,
-          decoration: const InputDecoration(labelText: '名称（可不填）'),
+          decoration: InputDecoration(labelText: t.iptv.nameOptional),
           onSubmitted: (_) => _submit(),
         ),
       ],
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
       FilledButton(onPressed: _submit, child: Text(widget.action)),
     ],
   );
@@ -144,27 +149,22 @@ class _TextDialogState extends State<_TextDialog> {
       onSubmitted: (value) => Navigator.pop(context, value.trim()),
     ),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-      FilledButton(onPressed: () => Navigator.pop(context, _text.text.trim()), child: const Text('保存')),
+      TextButton(onPressed: () => Navigator.pop(context), child: Text(t.common.cancel)),
+      FilledButton(onPressed: () => Navigator.pop(context, _text.text.trim()), child: Text(t.common.save)),
     ],
   );
 }
 
 /// Asks to confirm a destructive action.
-Future<bool> confirm(
-  BuildContext context, {
-  required String title,
-  required String message,
-  String action = '删除',
-}) async =>
+Future<bool> confirm(BuildContext context, {required String title, required String message, String? action}) async =>
     await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(action)),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.common.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(action ?? t.common.delete)),
         ],
       ),
     ) ??

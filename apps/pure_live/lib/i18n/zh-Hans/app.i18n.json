@@ -1,0 +1,26 @@
+{
+  "name": "纯粹直播",
+  "previewName": "纯粹直播 预览",
+  "tabs": {
+    "follows": "关注",
+    "discover": "发现",
+    "search": "搜索",
+    "me": "我的"
+  },
+  "history": "观看历史",
+  "recordings": "录制中心",
+  "multiview": "多画面",
+  "accounts": "平台账号",
+  "backup": "备份与同步",
+  "settings": "设置",
+  "about": "关于",
+  "comingSoon": "预览版暂未开放",
+  "appearance": "外观",
+  "themeSystem": "跟随系统",
+  "themeLight": "浅色",
+  "themeDark": "深色",
+  "themeBlack": "纯黑",
+  "version": "版本",
+  "previewNotice": "这是 v4 预览版，可以和 3.x 同时安装。",
+  "offlineBanner": "网络已断开，恢复后列表和播放会重新加载"
+}

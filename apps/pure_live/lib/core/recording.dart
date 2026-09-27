@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// The recorder's quality for a stored preference (spec/modules/record.md §20).
 RecordQuality recordQualityOf(QualityPreference preference) => switch (preference) {
@@ -183,11 +184,18 @@ RecordNotice? recordServiceNotice(Iterable<RecordTask> tasks) {
   ];
   final finishing = tasks.where((task) => task.state == RecordState.finalizing).length;
   if (recording.isEmpty) {
-    return finishing == 0 ? null : (title: '正在处理录制文件', text: '$finishing 个录制正在收尾，完成后通知会消失');
+    return finishing == 0
+        ? null
+        : (title: t.recording.notice.finishingTitle, text: t.recording.notice.finishingText(n: finishing));
   }
   final names = [for (final task in recording) _taskName(task)];
-  final shown = names.length > 3 ? '${names.take(3).join('、')} 等' : names.join('、');
-  return (title: '正在录制 ${recording.length} 个直播间', text: finishing == 0 ? shown : '$shown；$finishing 个正在收尾');
+  final shown = names.length > 3
+      ? t.recording.notice.namesAndMore(names: names.take(3).join(t.common.listSeparator))
+      : names.join(t.common.listSeparator);
+  return (
+    title: t.recording.notice.recordingTitle(n: recording.length),
+    text: finishing == 0 ? shown : t.recording.notice.recordingText(shown: shown, n: finishing),
+  );
 }
 
 String _taskName(RecordTask task) => task.snapshot.anchorName.isEmpty ? task.room.roomId : task.snapshot.anchorName;

@@ -1,0 +1,40 @@
+{
+  "noAddressYet": "No stream address yet. Cast once the video is playing.",
+  "notHttp": "The current line is not an http(s) address, so the TV cannot open it",
+  "invalidAddress": "The current line's address is invalid",
+  "localAddress": "The current line is a local address the TV cannot reach",
+  "defaultTitle": "Live stream",
+  "failure": {
+    "unreachable": "Cannot reach this device. Make sure it is on and on the same Wi-Fi as your phone.",
+    "busy": "The device is busy. Try again later.",
+    "format": "The device does not support this stream format. Try another line.",
+    "unplayable": "The device cannot open this stream. Try another line.",
+    "refused": "The device refused to cast (error {code})",
+    "http": "The device returned an error (HTTP {status})",
+    "protocol": "The device's reply was not understood",
+    "generic": "Cast failed"
+  },
+  "tv": {
+    "playing": "Playing on the TV",
+    "loading": "Loading on the TV",
+    "paused": "Paused on the TV",
+    "stopped": "Stopped on the TV"
+  },
+  "stopNotDelivered": "The stop command did not arrive; the TV may still be playing",
+  "title": "Cast",
+  "searchAgain": "Search again",
+  "cannotCast": "This address cannot be cast",
+  "headersHint": "This platform's streams may need special request headers; the TV might not play them",
+  "expiresHint": "Stream addresses expire. When the TV stops, cast again.",
+  "failedWith": "Cast failed: {reason}",
+  "searching": "Searching for TVs and boxes on this Wi-Fi…",
+  "searchInterrupted": "Search interrupted; the list may be incomplete",
+  "searchFailed": "Search failed",
+  "searchFailedHint": "Check that your phone is on Wi-Fi, then try again",
+  "noDevices": "No devices found",
+  "noDevicesHint": "Make sure the TV or box is on, has casting (DLNA) enabled and is on the same Wi-Fi as your phone",
+  "castingThisRoom": "Casting this room",
+  "castingOther": "Casting: {title}",
+  "castTo": "Cast to {device}",
+  "stop": "Stop casting"
+}

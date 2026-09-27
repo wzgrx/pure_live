@@ -8,12 +8,13 @@ import 'package:pure_live_app/core/web/cookie_text.dart';
 import 'package:pure_live_app/features/accounts/account_services.dart';
 import 'package:pure_live_app/features/accounts/account_status.dart';
 import 'package:pure_live_app/features/accounts/douyu_account.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Where to copy the cookie from, per platform.
-const _cookieTips = {
-  'douyu': '在电脑浏览器登录 www.douyu.com 后，从开发者工具里复制请求头中的 Cookie 粘贴到下面。要能续期，再复制 passport.douyu.com 请求的 Cookie（含 LTP0）粘贴进来，应用会取出 LTP0 和 dy_did。',
-  'twitch': '在电脑浏览器登录 twitch.tv 后复制 Cookie。只会用到其中的 auth-token，用于订阅专属直播和免广告。',
-  'soop': '在电脑浏览器登录 sooplive.co.kr 后复制 Cookie。只在打开 19 禁直播时随取流请求发送。',
+Map<String, String> get _cookieTips => {
+  'douyu': t.accounts.cookieTip.douyu,
+  'twitch': t.accounts.cookieTip.twitch,
+  'soop': t.accounts.cookieTip.soop,
 };
 
 /// Pastes a cookie by hand (F-ACC-01). The stored cookie is never shown
@@ -76,15 +77,15 @@ class _CookieEditorState extends ConsumerState<CookieEditor> {
       } else {
         final cookie = normalizeCookie(_cookie.text);
         if (cookie.isEmpty) {
-          message = '先粘贴 Cookie';
+          message = t.accounts.pasteCookieFirst;
         } else {
           await store.saveCookie(widget.platform, cookie);
-          message = '已保存，重新进入直播间后生效';
+          message = t.accounts.cookieSavedRejoin;
           unawaited(ref.read(accountCheckProvider(widget.platform).notifier).verify());
         }
       }
     } on Object {
-      message = '保存失败，请重试';
+      message = t.accounts.saveFailed;
     }
     if (!mounted) return;
     setState(() {
@@ -109,7 +110,7 @@ class _CookieEditorState extends ConsumerState<CookieEditor> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            _cookieTips[widget.platform] ?? '在电脑浏览器登录该平台网页版后，从开发者工具里复制请求头中的 Cookie，粘贴到下面。',
+            _cookieTips[widget.platform] ?? t.accounts.cookieTip.other,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: Space.s3),
@@ -122,7 +123,7 @@ class _CookieEditorState extends ConsumerState<CookieEditor> {
             enableSuggestions: false,
             decoration: InputDecoration(
               labelText: 'Cookie',
-              hintText: hasCookie ? '已保存的 Cookie 不显示；粘贴新的会替换它' : null,
+              hintText: hasCookie ? t.accounts.cookieHidden : null,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -134,8 +135,8 @@ class _CookieEditorState extends ConsumerState<CookieEditor> {
               autocorrect: false,
               enableSuggestions: false,
               decoration: InputDecoration(
-                labelText: 'LTP0（续期用）',
-                hintText: store.douyuLtp0 == null ? null : '已保存；留空保持不变',
+                labelText: t.accounts.ltp0Label,
+                hintText: store.douyuLtp0 == null ? null : t.accounts.keptIfEmpty,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -146,8 +147,8 @@ class _CookieEditorState extends ConsumerState<CookieEditor> {
               autocorrect: false,
               enableSuggestions: false,
               decoration: InputDecoration(
-                labelText: 'dy_did（设备标识）',
-                hintText: store.douyuDid == null ? null : '已保存；留空保持不变',
+                labelText: t.accounts.didLabel,
+                hintText: store.douyuDid == null ? null : t.accounts.keptIfEmpty,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -155,7 +156,7 @@ class _CookieEditorState extends ConsumerState<CookieEditor> {
           const SizedBox(height: Space.s3),
           Align(
             alignment: Alignment.centerRight,
-            child: FilledButton(onPressed: _saving ? null : _save, child: const Text('保存')),
+            child: FilledButton(onPressed: _saving ? null : _save, child: Text(t.common.save)),
           ),
         ],
       ),

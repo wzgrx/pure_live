@@ -87,16 +87,29 @@ abstract final class PureTheme {
   /// accent colour, principles §2.2 动态取色) replaces the primary, secondary,
   /// tertiary and neutral roles; semantic colours and pure black stay.
   /// [fontFamily] replaces the platform font (a font the user downloaded,
-  /// F-SET-01); the platform fonts stay as the fallback.
-  static ThemeData of(Appearance appearance, {TargetPlatform? platform, Color? seed, String? fontFamily}) =>
-      _build(appearance, platform, tv: false, seed: seed, fontFamily: fontFamily);
+  /// F-SET-01); the platform fonts stay as the fallback. [locale] is the
+  /// interface language (principles §2.3): text styles carry it so the
+  /// font fallback picks Simplified or Traditional glyphs, and Traditional
+  /// Chinese on Windows uses Microsoft JhengHei UI instead of YaHei UI.
+  static ThemeData of(
+    Appearance appearance, {
+    TargetPlatform? platform,
+    Color? seed,
+    String? fontFamily,
+    Locale? locale,
+  }) => _build(appearance, platform, tv: false, seed: seed, fontFamily: fontFamily, locale: locale);
 
   /// The TV theme (principles §5.3): dark or pure black only (a light
   /// [appearance] gets dark), type one step larger with body text at least
   /// 14 sp, 32 dp icons, a near-white focus ring and focus that shows on
   /// buttons, chips, tabs, list rows and fields at ten feet.
-  static ThemeData tv(Appearance appearance, {TargetPlatform? platform, String? fontFamily}) =>
-      _build(appearance == Appearance.light ? Appearance.dark : appearance, platform, tv: true, fontFamily: fontFamily);
+  static ThemeData tv(Appearance appearance, {TargetPlatform? platform, String? fontFamily, Locale? locale}) => _build(
+    appearance == Appearance.light ? Appearance.dark : appearance,
+    platform,
+    tv: true,
+    fontFamily: fontFamily,
+    locale: locale,
+  );
 
   /// Dynamic colour: the seed's fidelity scheme for the colour and neutral
   /// roles; error roles from the tokens; pure black keeps its surfaces.
@@ -146,6 +159,7 @@ abstract final class PureTheme {
     required bool tv,
     Color? seed,
     String? fontFamily,
+    Locale? locale,
   }) {
     final tokens = switch (appearance) {
       Appearance.light => ColorTokens.light,
@@ -195,6 +209,7 @@ abstract final class PureTheme {
       target,
       tv: tv,
       fontFamily: fontFamily,
+      locale: locale,
     ).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
     final numeric = text.labelMedium!.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     final desktop =
@@ -355,10 +370,26 @@ abstract final class PureTheme {
   /// fallbacks (principles §2.3). On TV every role is one step larger and
   /// body text is at least 14 sp (principles §5.3), with the same ≥ 1.4
   /// line height rounded up to an even number.
-  static TextTheme _textTheme(TargetPlatform platform, {bool tv = false, String? fontFamily}) {
-    final family = fontFamily ?? (platform == TargetPlatform.windows ? 'Microsoft YaHei UI' : null);
-    const fallback = ['Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Noto Sans CJK SC'];
+  /// Whether [locale] reads Traditional Chinese: script Hant, or Chinese of
+  /// Taiwan, Hong Kong or Macau without a script.
+  static bool isTraditionalChinese(Locale? locale) {
+    if (locale == null || locale.languageCode != 'zh') return false;
+    final script = locale.scriptCode;
+    if (script != null) return script == 'Hant';
+    return const {'TW', 'HK', 'MO'}.contains(locale.countryCode);
+  }
+
+  static TextTheme _textTheme(TargetPlatform platform, {bool tv = false, String? fontFamily, Locale? locale}) {
+    // Principles §2.3: the UI variants of the Windows CJK fonts; Traditional
+    // Chinese swaps YaHei for JhengHei and the SC fallbacks for TC ones.
+    final traditional = isTraditionalChinese(locale);
+    final windowsFont = traditional ? 'Microsoft JhengHei UI' : 'Microsoft YaHei UI';
+    final family = fontFamily ?? (platform == TargetPlatform.windows ? windowsFont : null);
+    final fallback = traditional
+        ? const ['Microsoft JhengHei UI', 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', 'Noto Sans CJK TC']
+        : const ['Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Noto Sans CJK SC'];
     TextStyle style(double size, double height, FontWeight weight) => TextStyle(
+      locale: locale,
       fontFamily: family,
       fontFamilyFallback: fallback,
       fontSize: size,

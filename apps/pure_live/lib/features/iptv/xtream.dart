@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Prefix of an Xtream playlist or guide source (F-IPTV-07): `xtream:<id>`
 /// for the playlist, `xtream:<id>#guide` for its guide. The server, user
@@ -96,11 +97,11 @@ final class XtreamStatus {
 
   /// Why it cannot, in words.
   String get problem => switch (status?.toLowerCase()) {
-    _ when !authorized => '用户名或密码不对',
-    'expired' => '账号已过期',
-    'banned' => '账号被封禁',
-    'disabled' => '账号已停用',
-    _ => '账号不可用（${status ?? '未知状态'}）',
+    _ when !authorized => t.iptv.xtream.wrongCredentials,
+    'expired' => t.iptv.xtream.expired,
+    'banned' => t.iptv.xtream.banned,
+    'disabled' => t.iptv.xtream.disabled,
+    _ => t.iptv.xtream.unavailable(status: status ?? t.iptv.xtream.unknownStatus),
   };
 }
 

@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/cast/cast_controller.dart';
+import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// F-CAST-01: the cast sheet of the room ⋮ menu ("投屏"). It searches the
 /// local network on open, lists renderers, casts the upstream URL of the
@@ -108,7 +109,7 @@ class _CastPanelState extends ConsumerState<CastPanel> {
   Future<void> _stop() async {
     final confirmed = await ref.read(castProvider.notifier).stop();
     if (!mounted) return;
-    setState(() => _notice = confirmed ? null : '停止命令没有送达，电视可能还在播放');
+    setState(() => _notice = confirmed ? null : t.cast.stopNotDelivered);
   }
 
   @override
@@ -126,10 +127,10 @@ class _CastPanelState extends ConsumerState<CastPanel> {
           children: [
             Row(
               children: [
-                Expanded(child: Text('投屏', style: theme.textTheme.titleMedium)),
+                Expanded(child: Text(t.cast.title, style: theme.textTheme.titleMedium)),
                 if (source.media != null)
                   IconButton(
-                    tooltip: '重新搜索',
+                    tooltip: t.cast.searchAgain,
                     icon: const Icon(Icons.refresh),
                     onPressed: _searching || connecting ? null : _restart,
                   ),
@@ -138,25 +139,24 @@ class _CastPanelState extends ConsumerState<CastPanel> {
             if (cast.casting) _CastingCard(cast: cast, room: widget.room, onStop: _stop),
             if (_notice case final notice?) _Hint(icon: Icons.info_outline, text: notice),
             if (source.media == null)
-              MessageView(icon: Icons.link_off, title: '当前地址不能投屏', message: source.problem)
+              MessageView(icon: Icons.link_off, title: t.cast.cannotCast, message: source.problem)
             else ...[
-              if (source.needsHeaders)
-                const _Hint(icon: Icons.warning_amber_rounded, text: '这个平台的直播流可能需要特殊请求头，电视上不一定能播'),
-              if (source.expires) const _Hint(icon: Icons.schedule, text: '直播地址有时效，过期后电视会停止播放，重新投屏即可'),
+              if (source.needsHeaders) _Hint(icon: Icons.warning_amber_rounded, text: t.cast.headersHint),
+              if (source.expires) _Hint(icon: Icons.schedule, text: t.cast.expiresHint),
               if (_attempted && cast.phase == CastPhase.failed && cast.failure != null)
                 _Hint(
                   icon: Icons.error_outline,
-                  text: '投屏失败：${castFailureText(cast.failure!)}',
+                  text: t.cast.failedWith(reason: castFailureText(cast.failure!)),
                   color: theme.colorScheme.error,
                 ),
               if (_searching) ...[
                 const SizedBox(height: Space.s2),
                 const LinearProgressIndicator(),
                 const SizedBox(height: Space.s2),
-                Text('正在搜索同一 Wi-Fi 下的电视和盒子…', style: theme.textTheme.bodySmall),
+                Text(t.cast.searching, style: theme.textTheme.bodySmall),
               ],
               if (_devices.isNotEmpty) ...[
-                if (_searchError != null) const _Hint(icon: Icons.info_outline, text: '搜索中断，列表可能不完整'),
+                if (_searchError != null) _Hint(icon: Icons.info_outline, text: t.cast.searchInterrupted),
                 Flexible(
                   child: ListView(
                     shrinkWrap: true,
@@ -173,13 +173,13 @@ class _CastPanelState extends ConsumerState<CastPanel> {
                   ),
                 ),
               ] else if (!_searching && _searchError != null)
-                MessageView.error(title: '搜索失败', message: '检查手机是否连着 Wi-Fi，然后重试', onAction: _restart)
+                MessageView.error(title: t.cast.searchFailed, message: t.cast.searchFailedHint, onAction: _restart)
               else if (!_searching)
                 MessageView(
                   icon: Icons.tv_off_outlined,
-                  title: '没有找到可投屏的设备',
-                  message: '确认电视或盒子已开机、打开了投屏（DLNA）功能，并且和手机连着同一个 Wi-Fi',
-                  actionLabel: '重新搜索',
+                  title: t.cast.noDevices,
+                  message: t.cast.noDevicesHint,
+                  actionLabel: t.cast.searchAgain,
                   onAction: _restart,
                 ),
             ],
@@ -200,7 +200,7 @@ class _CastingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final what = cast.room == room ? '正在投这个直播间' : '正在投：${cast.roomTitle ?? ''}';
+    final what = cast.room == room ? t.cast.castingThisRoom : t.cast.castingOther(title: cast.roomTitle ?? '');
     final status = tvStateText(cast.tvState);
     return Card(
       margin: const EdgeInsets.symmetric(vertical: Space.s2),
@@ -214,13 +214,13 @@ class _CastingCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('已投到 ${cast.device?.name ?? ''}', style: theme.textTheme.titleSmall),
+                  Text(t.cast.castTo(device: cast.device?.name ?? ''), style: theme.textTheme.titleSmall),
                   Text(status == null ? what : '$what · $status', style: theme.textTheme.bodySmall),
                 ],
               ),
             ),
             const SizedBox(width: Space.s2),
-            FilledButton.tonal(onPressed: onStop, child: const Text('停止投屏')),
+            FilledButton.tonal(onPressed: onStop, child: Text(t.cast.stop)),
           ],
         ),
       ),

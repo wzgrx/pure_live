@@ -15,6 +15,7 @@ final class ReplaySample {
     required this.bytes,
     this.headers = const {},
     this.form,
+    this.json,
   });
 
   /// Loads `<directory>/meta.json` and its body (docs/adr/0009-fixture-format.md).
@@ -22,6 +23,8 @@ final class ReplaySample {
     final meta = jsonDecode(File('$directory/meta.json').readAsStringSync()) as Map<String, dynamic>;
     final request = meta['request'] as Map<String, dynamic>;
     final response = meta['response'] as Map<String, dynamic>;
+    final body = request['body'];
+    final json = body is String ? _decodeJson(body) : null;
     return ReplaySample(
       method: request['method'] as String,
       url: Uri.parse(request['url'] as String),
@@ -33,8 +36,20 @@ final class ReplaySample {
               : ['${entry.value}'],
       },
       bytes: File('$directory/${meta['body']}').readAsBytesSync(),
-      form: request['body'] is String ? Uri.splitQueryString(request['body'] as String) : null,
+      form: body is String && json == null ? Uri.splitQueryString(body) : null,
+      json: json,
     );
+  }
+
+  /// [body] decoded when it is a JSON object or array, else null.
+  static Object? _decodeJson(String body) {
+    final trimmed = body.trimLeft();
+    if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return null;
+    try {
+      return jsonDecode(trimmed);
+    } on FormatException {
+      return null;
+    }
   }
 
   /// Recorded method.
@@ -54,12 +69,15 @@ final class ReplaySample {
 
   /// Recorded form fields of a form POST, or null.
   final Map<String, String>? form;
+
+  /// Recorded JSON body (an object or array), or null.
+  final Object? json;
 }
 
 /// Replays recorded samples (ADR 0011, rule 5): a request matches a sample by
-/// method, host, path, and the query parameters and form fields other than
-/// [ignoredQuery] (the signature and session parameters whose recorded
-/// values were scrubbed).
+/// method, host, path, and the query parameters, form fields and JSON body
+/// fields (at any depth) other than [ignoredQuery] (the signature, session
+/// and clock values whose recorded values were scrubbed or differ per run).
 /// A request without a sample throws, failing the test.
 final class ReplayHttp implements LiveHttp {
   /// Replays [samples].
@@ -87,10 +105,30 @@ final class ReplayHttp implements LiveHttp {
     if (sample.method.toUpperCase() != request.method.toUpperCase()) return false;
     if (sample.url.host != request.url.host || sample.url.path != request.url.path) return false;
     if (!_same(_query(sample.url.queryParameters), _query(request.url.queryParameters))) return false;
+    final json = sample.json;
+    if (json != null) {
+      final body = request.body;
+      if (body == null) return false;
+      final sent = ReplaySample._decodeJson(utf8.decode(body, allowMalformed: true));
+      return sent != null && jsonEncode(_strip(sent)) == jsonEncode(_strip(json));
+    }
     final form = sample.form;
     if (form == null) return true;
     final body = request.body;
     return body != null && _same(_query(form), _query(Uri.splitQueryString(utf8.decode(body))));
+  }
+
+  /// [value] without the [ignoredQuery] keys, with object keys sorted.
+  Object? _strip(Object? value) {
+    if (value is Map) {
+      final keys = [
+        for (final key in value.keys)
+          if (!ignoredQuery.contains(key)) '$key',
+      ]..sort();
+      return {for (final key in keys) key: _strip(value[key])};
+    }
+    if (value is List) return [for (final item in value) _strip(item)];
+    return value;
   }
 
   static bool _same(Map<String, String> a, Map<String, String> b) =>

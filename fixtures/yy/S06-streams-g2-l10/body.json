@@ -1,0 +1,329 @@
+{
+  "head": {
+    "seq": 1790528216103,
+    "appidstr": "15013",
+    "bidstr": "121",
+    "cidstr": "22490906",
+    "sidstr": "22490906",
+    "client_type": 108,
+    "client_ver": "5.23.0-beta.2",
+    "stream_sys_ver": 1,
+    "app": "yylive_web",
+    "playersdk_ver": "5.23.0-beta.2",
+    "thundersdk_ver": "0",
+    "streamsdk_ver": "5.23.0-beta.2"
+  },
+  "cid": 22490906,
+  "sid": 22490906,
+  "businessid": 121,
+  "sequence": 1790528216103,
+  "channel_stream_info": {
+    "version": 1790527826410200,
+    "streams": [
+      {
+        "stream_name": "a_22490906_22490906_107923068_0_0",
+        "appid": 15013,
+        "bid": 1002,
+        "uid": 107923068,
+        "cid": 22490906,
+        "sid": 22490906,
+        "json": "{\"busi_label\":{\"encrypt_room\":\"0\",\"fetch\":1},\"businessInfo\":{\"backExt\":1,\"background\":\"\",\"biztype\":\"\",\"busi_extend\":{\"yule_auth_newsvr\":\"999999\"},\"clientType\":0,\"ext_input_list\":[],\"filter\":[],\"foreground\":\"\",\"gear_name\":\"\",\"lianmaiParams\":{},\"lianmaiType\":0,\"mixPlayOption\":{},\"room_type\":1,\"seat\":0,\"seq\":0,\"stage\":1},\"encoderType\":80,\"rate\":128,\"src_cid\":22490906,\"src_sid\":22490906,\"thunder_stream\":{\"idx\":0,\"thunder_room\":\"22490906\",\"thunder_uid\":\"107923068\",\"type\":1}}",
+        "metadata": "{\"83\":0}",
+        "mix": 1,
+        "extend": "{\"client\":\"pc\",\"thunder_sys_ver\":\"1\",\"token\":\"1790525893176_6462d233-1bf5-4db8-af2e-13d404ef9716\",\"ver\":\"3.29.0\"}",
+        "type": 1,
+        "ver": 1790525893176005,
+        "thunder_stream": {
+          "type": 1,
+          "thunder_uid": "107923068",
+          "thunder_room": "22490906"
+        },
+        "uid64": 107923068,
+        "cidstr": "22490906",
+        "sidstr": "22490906",
+        "appidstr": "15013",
+        "bidstr": "1002"
+      },
+      {
+        "stream_name": "v_22490906_22490906_107923068_0_0",
+        "appid": 15013,
+        "bid": 1002,
+        "uid": 107923068,
+        "cid": 22490906,
+        "sid": 22490906,
+        "json": "{\"busi_label\":{\"encrypt_room\":\"0\",\"fetch\":1},\"businessInfo\":{\"backExt\":1,\"background\":\"\",\"biztype\":\"\",\"busi_extend\":{\"yule_auth_newsvr\":\"999999\"},\"clientType\":0,\"ext_input_list\":[],\"filter\":[],\"foreground\":\"\",\"gear_name\":\"\",\"lianmaiParams\":{},\"lianmaiType\":0,\"mixPlayOption\":{},\"room_type\":1,\"seat\":0,\"seq\":0,\"stage\":1},\"def_gear\":0,\"encoderType\":101,\"fps\":24,\"gear_info\":{\"gear\":3,\"name\":\"超清\",\"seq\":300},\"height\":1280,\"origGear\":[{\"encoderType\":100,\"gear\":0,\"video_gear\":2},{\"encoderType\":101,\"gear\":10,\"video_gear\":2},{\"encoderType\":100,\"gear\":1,\"video_gear\":1},{\"encoderType\":101,\"gear\":11,\"video_gear\":1}],\"rate\":2100,\"src_cid\":22490906,\"src_sid\":22490906,\"thunder_stream\":{\"idx\":0,\"thunder_room\":\"22490906\",\"thunder_uid\":\"107923068\",\"type\":2},\"width\":720}",
+        "metadata": "{\"83\":0}",
+        "mix": 1,
+        "extend": "{\"client\":\"pc\",\"thunder_sys_ver\":\"1\",\"token\":\"1790525893176_6462d233-1bf5-4db8-af2e-13d404ef9716\",\"ver\":\"3.29.0\"}",
+        "type": 2,
+        "ver": 1790525893176005,
+        "thunder_stream": {
+          "type": 2,
+          "thunder_uid": "107923068",
+          "thunder_room": "22490906"
+        },
+        "uid64": 107923068,
+        "cidstr": "22490906",
+        "sidstr": "22490906",
+        "appidstr": "15013",
+        "bidstr": "1002"
+      },
+      {
+        "stream_name": "xv_22490906_22490906_0_0_0",
+        "appid": 15013,
+        "bid": 1002,
+        "uid": 107923068,
+        "cid": 22490906,
+        "sid": 22490906,
+        "json": "{\"busi_label\":{\"encrypt_room\":\"0\",\"fetch\":1},\"businessInfo\":{\"backExt\":1,\"background\":\"\",\"biztype\":\"\",\"busi_extend\":{\"yule_auth_newsvr\":\"999999\"},\"clientType\":0,\"ext_input_list\":[],\"filter\":[],\"foreground\":\"\",\"gear_name\":\"\",\"lianmaiParams\":{},\"lianmaiType\":0,\"mixPlayOption\":{},\"room_type\":1,\"seat\":0,\"seq\":0,\"stage\":1},\"crop\":1,\"def_gear\":1,\"encoderType\":100,\"fps\":24,\"gear_info\":{\"gear\":2,\"name\":\"高清\",\"seq\":200},\"gop\":48,\"height\":1280,\"is_bc_lines\":1,\"is_cdn\":1,\"is_line_mix\":0,\"is_trans\":0,\"layout\":[{\"h\":1280,\"mic\":0,\"name\":\"v_22490906_22490906_107923068_0_0\",\"thunder_stream\":{\"thunder_room\":\"22490906\",\"thunder_uid\":\"107923068\",\"type\":2},\"uid\":107923068,\"w\":720,\"x\":0,\"y\":0}],\"mix_token\":\"PPmO3cQLU5DX610Tuwe/f/O+eB925lF6xLoeXMfs4k4=\",\"rate\":2300,\"src_stream\":\"v_22490906_22490906_107923068_0_0\",\"stage\":\"1790527819379770\",\"task_type\":3,\"to_line_mix\":0,\"width\":720}",
+        "audio_video_group": 2,
+        "metadata": "{\"83\":0}",
+        "mix": 3,
+        "extend": "{\"client\":\"pc\",\"thunder_sys_ver\":\"1\",\"token\":\"1790525893176_6462d233-1bf5-4db8-af2e-13d404ef9716\",\"ver\":\"3.29.0\"}",
+        "type": 2,
+        "ver": 1790527826410200,
+        "mix_group_no": 1,
+        "uid64": 107923068,
+        "cidstr": "22490906",
+        "sidstr": "22490906",
+        "appidstr": "15013",
+        "bidstr": "1002",
+        "stream_key": "15013_xv_22490906_22490906_0_0_0",
+        "line_list": {
+          "line_infos": [
+            {
+              "line_seq": 10,
+              "line_type": 1,
+              "line_print_name": "线路10",
+              "line_print_sort": 10
+            },
+            {
+              "line_seq": 14,
+              "line_type": 1,
+              "line_print_name": "线路14",
+              "line_print_sort": 14
+            }
+          ]
+        }
+      },
+      {
+        "stream_name": "xa_22490906_22490906_0_0_0",
+        "appid": 15013,
+        "bid": 1002,
+        "uid": 107923068,
+        "cid": 22490906,
+        "sid": 22490906,
+        "json": "{\"busi_label\":{\"encrypt_room\":\"0\",\"fetch\":1},\"channel\":2,\"encoderType\":35,\"is_bc_lines\":1,\"is_cdn\":1,\"is_line_mix\":0,\"is_trans\":0,\"mix_token\":\"PPmO3cQLU5DX610Tuwe/f/O+eB925lF6xLoeXMfs4k4=\",\"rate\":128,\"sample_rate\":44100,\"src_stream\":\"v_22490906_22490906_107923068_0_0\",\"stage\":\"1790527819379770\",\"task_type\":3,\"to_line_mix\":0}",
+        "audio_video_group": 2,
+        "metadata": "{\"83\":0}",
+        "mix": 3,
+        "extend": "{\"client\":\"pc\",\"thunder_sys_ver\":\"1\",\"token\":\"1790525893176_6462d233-1bf5-4db8-af2e-13d404ef9716\",\"ver\":\"3.29.0\"}",
+        "type": 1,
+        "ver": 1790527826410200,
+        "mix_group_no": 1,
+        "uid64": 107923068,
+        "cidstr": "22490906",
+        "sidstr": "22490906",
+        "appidstr": "15013",
+        "bidstr": "1002",
+        "stream_key": "15013_xa_22490906_22490906_0_0_0",
+        "line_list": {
+          "line_infos": [
+            {
+              "line_seq": 10,
+              "line_type": 1,
+              "line_print_name": "线路10",
+              "line_print_sort": 10
+            },
+            {
+              "line_seq": 14,
+              "line_type": 1,
+              "line_print_name": "线路14",
+              "line_print_sort": 14
+            }
+          ]
+        }
+      },
+      {
+        "stream_name": "xv_22490906_22490906_0_1_0",
+        "appid": 15013,
+        "bid": 1002,
+        "uid": 107923068,
+        "cid": 22490906,
+        "sid": 22490906,
+        "json": "{\"busi_label\":{\"encrypt_room\":\"0\",\"fetch\":1},\"businessInfo\":{\"backExt\":1,\"background\":\"\",\"biztype\":\"\",\"busi_extend\":{\"yule_auth_newsvr\":\"999999\"},\"clientType\":0,\"ext_input_list\":[],\"filter\":[],\"foreground\":\"\",\"gear_name\":\"\",\"lianmaiParams\":{},\"lianmaiType\":0,\"mixPlayOption\":{},\"room_type\":1,\"seat\":0,\"seq\":0,\"stage\":1},\"crop\":1,\"def_gear\":0,\"encoderType\":100,\"fps\":24,\"gear_info\":{\"gear\":1,\"name\":\"流畅\",\"seq\":100},\"gop\":48,\"height\":640,\"is_bc_lines\":1,\"is_cdn\":1,\"is_line_mix\":0,\"is_trans\":0,\"layout\":[{\"h\":640,\"mic\":0,\"name\":\"v_22490906_22490906_107923068_0_0\",\"thunder_stream\":{\"thunder_room\":\"22490906\",\"thunder_uid\":\"107923068\",\"type\":2},\"uid\":107923068,\"w\":360,\"x\":0,\"y\":0}],\"mix_token\":\"PPmO3cQLU5DX610Tuwe/f/O+eB925lF6xLoeXMfs4k4=\",\"rate\":600,\"src_stream\":\"v_22490906_22490906_107923068_0_0\",\"stage\":\"1790527819379770\",\"task_type\":2,\"to_line_mix\":0,\"tv_upstream\":\"xv_22490906_22490906_0_0_0\",\"width\":360}",
+        "audio_video_group": 3,
+        "metadata": "{\"83\":0}",
+        "mix": 3,
+        "extend": "{\"client\":\"pc\",\"thunder_sys_ver\":\"1\",\"token\":\"1790525893176_6462d233-1bf5-4db8-af2e-13d404ef9716\",\"ver\":\"3.29.0\"}",
+        "type": 2,
+        "ver": 1790527826410200,
+        "gear": 1,
+        "mix_group_no": 1,
+        "uid64": 107923068,
+        "cidstr": "22490906",
+        "sidstr": "22490906",
+        "appidstr": "15013",
+        "bidstr": "1002",
+        "stream_key": "15013_xv_22490906_22490906_0_1_0",
+        "line_list": {
+          "line_infos": [
+            {
+              "line_seq": 10,
+              "line_type": 1,
+              "line_print_name": "线路10",
+              "line_print_sort": 10
+            },
+            {
+              "line_seq": 14,
+              "line_type": 1,
+              "line_print_name": "线路14",
+              "line_print_sort": 14
+            }
+          ]
+        }
+      },
+      {
+        "stream_name": "g_22490906_0_1",
+        "cid": 22490906,
+        "sid": 22490906,
+        "stream_group": "g_22490906_0_1",
+        "mix": 1,
+        "type": 5,
+        "thunder_stream": {},
+        "cidstr": "22490906",
+        "sidstr": "22490906",
+        "appidstr": "0",
+        "bidstr": "0"
+      }
+    ]
+  },
+  "client_capacity": {
+    "stream_visibility_rules": [
+      {
+        "type": {
+          "integer": {
+            "discrete": {
+              "values": [
+                3,
+                4,
+                5
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": {
+          "integer": {
+            "discrete": {
+              "values": [
+                1
+              ]
+            }
+          }
+        }
+      },
+      {
+        "type": {
+          "integer": {
+            "discrete": {
+              "values": [
+                2
+              ]
+            }
+          }
+        },
+        "json": {
+          "fields": {
+            "rate": {
+              "integer": {
+                "range": {
+                  "min_value": 250,
+                  "max_value": 102400
+                }
+              }
+            },
+            "tag": {
+              "vtype": 1,
+              "str": {
+                "values": [
+                  "web"
+                ]
+              }
+            },
+            "abtest": {
+              "vtype": 1,
+              "str": {
+                "values": [
+                  "0"
+                ]
+              }
+            },
+            "encoderType": {
+              "integer": {
+                "discrete": {
+                  "values": [
+                    100
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "avp_info_res": {
+    "stream_line_addr": {
+      "15013_xv_22490906_22490906_0_0_0": {
+        "line_seq": 10,
+        "reason": "enter",
+        "cdn_info": {
+          "url_id": 1206,
+          "url_type": 1,
+          "url": "https://tx-flv-web.yy.com/live/15013_xv_22490906_22490906_0_0_0-15013_xa_22490906_22490906_0_0_0-0-0-0-0-0-1790527819379770.flv?codec=orig&appid=15013&rts_tk=4c13dce1d66a9048855b4ce5dce4d120&secret=bbd9402c2e55a35bc1e5ae898510c7a4&t=1790528819&stream_key=15013_xv_22490906_22490906_0_0_0&r_stream_key=15013_xa_22490906_22490906_0_0_0&channelid=22490906&mtk=1&line_seq=10&cp_id=9&rts=1&ctx=eyJydHNfYXV0aCI6MiwiZGVmX3Bhc3MiOjF9&r=enter",
+          "is_p2p": 1,
+          "json": "{\"audio_only_flag\":\"&audio-only=1\"}",
+          "report_json": "{\"reason\":\"enter\"}"
+        },
+        "weight": 100,
+        "stage": "1790527819379770"
+      }
+    },
+    "stream_line_list": {
+      "15013_xv_22490906_22490906_0_0_0": {
+        "line_infos": [
+          {
+            "line_seq": 10,
+            "line_type": 1,
+            "line_print_name": "线路10",
+            "line_print_sort": 10
+          },
+          {
+            "line_seq": 14,
+            "line_type": 1,
+            "line_print_name": "线路14",
+            "line_print_sort": 14
+          }
+        ]
+      },
+      "15013_xv_22490906_22490906_0_1_0": {
+        "line_infos": [
+          {
+            "line_seq": 10,
+            "line_type": 1,
+            "line_print_name": "线路10",
+            "line_print_sort": 10
+          },
+          {
+            "line_seq": 14,
+            "line_type": 1,
+            "line_print_name": "线路14",
+            "line_print_sort": 14
+          }
+        ]
+      }
+    }
+  }
+}

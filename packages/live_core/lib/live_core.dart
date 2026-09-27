@@ -21,5 +21,7 @@ export 'src/sites/huya/huya_parse.dart';
 export 'src/sites/huya/huya_site.dart';
 export 'src/sites/kuaishou/kuaishou_parse.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/sites/yy/yy_parse.dart';
+export 'src/sites/yy/yy_site.dart';
 export 'src/stream.dart';
 export 'src/text.dart';

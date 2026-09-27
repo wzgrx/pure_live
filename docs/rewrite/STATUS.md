@@ -11,7 +11,7 @@
 | 2 设计方向与设计系统 | 进行中：原则、设计系统、第一批页面稿已完成，待独立复核和图标重绘 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 完成：workspace、本机门禁、hooks、`live_cli`、`check_latest`；旧应用收进 `legacy/` | workspace、门禁、hooks、`live_cli`、`check_latest` | 本机门禁全绿（ADR 0014：构建和门禁在本机运行） |
 | 4 平台与网络层 | **完成**：5 个平台的解析器、适配器、`live_net` 和真实网络探针全部完成；3.x 不再发布（ADR 0014） | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过 |
-| 5 播放、弹幕、录制层 | 进行中：与第 6 阶段合并，先做预览版纵切片（ADR 0014） | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
+| 5 播放、弹幕、录制层 | 进行中：`live_media`、`live_player`（ADR 0018，斗鱼续期真实网络 0 断档）、`live_danmaku`（ADR 0019，5 个平台真实网络连通并录制样本）完成；弹幕渲染和 `live_record` 在做 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | 进行中：`live_ui`、应用骨架（关注、发现、搜索、我的、直播间布局）、`live_store` 接入（关注、历史、设置、备份与恢复）已完成；播放和弹幕接入中 | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
 | 7 其余平台、TV、桌面 | 未开始 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
 | 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除 `legacy/` |
@@ -127,3 +127,4 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 - 2026-09-27：旧应用整体收进 `legacy/`（ADR 0013），根目录只放 v4 和仓库级文件，README 换成 v4 版；门禁移到 `tools/gate/`，旧应用工作流默认在 `legacy/` 下运行。
 - 2026-09-27：3.x 停止构建和发布（ADR 0014），全部归档进 `legacy/` 并移出 workspace（ADR 0016）；构建和门禁改在本机运行。第 5、6 阶段合并推进：`live_ui` 设计系统完成（令牌、尺寸等级、自适应导航、卡片）。
 - 2026-09-27：v3 在 GitHub、WSL、Windows 全面清理归档（ADR 0016 执行记录）。`live_store` 完成（ADR 0017），应用接入关注、观看历史、设置、备份与恢复（可导入 3.x 备份）。
+- 2026-09-27：`live_media`、`live_player`、`live_danmaku` 完成（ADR 0018、0019）；应用接入播放、多画面、平台账号（系统密钥加密）、分享接收、桌面窗口与快捷键。

@@ -24,6 +24,7 @@
 | [0016](0016-archive-v3.md) | v3 全部归档：旧应用移出 workspace，3.x 的仓库级文件移进 legacy/ | 已接受 |
 | [0017](0017-live-store.md) | live_store 的实现选择：库结构、加密接口、设置常驻内存、备份细节 | 已接受 |
 | [0018](0018-playback-layer.md) | 播放层的实现方式：事件契约、回环中继与恢复分类 | 已接受 |
+| [0019](0019-danmaku-layer.md) | 弹幕包 live_danmaku 的结构与协议选择 | 已接受 |
 
 ## 模板
 

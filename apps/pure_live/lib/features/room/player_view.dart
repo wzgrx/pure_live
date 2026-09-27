@@ -427,6 +427,22 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     }
   }
 
+  /// F-ROOM-18: the platform's app, else its site in the browser.
+  Future<void> _openApp() async {
+    final link = nativeAppLink(widget.detail);
+    var opened = false;
+    if (link != null) {
+      try {
+        opened = await launchUrl(link, mode: LaunchMode.externalNonBrowserApplication);
+      } on Object {
+        opened = false;
+      }
+    }
+    if (opened || !mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('没有找到对应的 App，改用浏览器打开')));
+    await launchUrl(widget.detail.link, mode: LaunchMode.externalApplication);
+  }
+
   Future<void> _openNewWindow() async {
     final opened = await ref.read(newWindowProvider)(widget.detail.ref);
     if (!opened && mounted) {
@@ -819,6 +835,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         await context.push('/multiview', extra: [widget.detail.ref]);
       case RoomMenuAction.keys:
         await withPanel(() => showKeyHelp(context));
+      case RoomMenuAction.openApp:
+        await _openApp();
       case RoomMenuAction.cast:
         await withPanel(() => showCastSheet(context, ref, detail: widget.detail, state: _state));
       case RoomMenuAction.newWindow:
@@ -1122,6 +1140,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         desktop: !_touch,
                         danmakuAvailable: prefs.enabled,
                         newWindow: newWindowSupported,
+                        openApp: Platform.isAndroid && nativeAppLink(widget.detail) != null,
                       ),
                     ),
                     if (_fullscreen && !_touch) const _ClockText(color: ink),

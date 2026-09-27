@@ -327,6 +327,9 @@ enum RoomMenuAction {
   /// 投屏 (F-CAST-01).
   cast,
 
+  /// 在 App 中打开 (F-ROOM-18, Android).
+  openApp,
+
   /// 新窗口打开 (F-WIN-02, Windows).
   newWindow,
 }
@@ -336,6 +339,7 @@ List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({
   required bool desktop,
   required bool danmakuAvailable,
   bool newWindow = false,
+  bool openApp = false,
 }) {
   PopupMenuItem<RoomMenuAction> item(RoomMenuAction value, IconData icon, String label) => PopupMenuItem(
     value: value,
@@ -344,6 +348,7 @@ List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({
   return [
     item(RoomMenuAction.switchRoom, Icons.swap_horiz, '切换直播间'),
     item(RoomMenuAction.openSite, Icons.open_in_new, '打开原站'),
+    if (openApp) item(RoomMenuAction.openApp, Icons.launch, '在 App 中打开'),
     item(RoomMenuAction.share, Icons.share_outlined, '分享'),
     item(RoomMenuAction.cast, Icons.cast, '投屏'),
     item(RoomMenuAction.copyStreamUrl, Icons.link, '复制直链'),
@@ -618,3 +623,39 @@ Future<void> showKeyHelp(BuildContext context) => showDialog<void>(
     actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭'))],
   ),
 );
+
+/// F-ROOM-18: the room in the platform's own Android app, where 3.x knew
+/// how (its `RoomExternalOpener` links); null otherwise.
+Uri? nativeAppLink(RoomDetail detail) {
+  final room = detail.ref;
+  final id = Uri.encodeComponent(room.roomId);
+  final keys = detail.danmakuKeys;
+  String? key(String name) {
+    final value = keys[name]?.trim();
+    return value == null || value.isEmpty ? null : Uri.encodeQueryComponent(value);
+  }
+
+  final link = switch (room.platform) {
+    'bilibili' => 'bilibili://live/$id',
+    'douyu' => 'douyulink://?type=90001&schemeUrl=douyuapp%3A%2F%2Froom%3FliveType%3D0%26rid%3D$id',
+    'douyin' => switch (key('roomId')) {
+      final roomId? => 'snssdk1128://webcast_room?room_id=$roomId',
+      null => null,
+    },
+    'huya' => switch (int.tryParse(keys['subSid'] ?? '')) {
+      final sid? when sid > 0 =>
+        'yykiwi://homepage/index.html?banneraction=https%3A%2F%2Fdiy-front.cdn.huya.com%2Fzt%2Ffrontpage%2Fcc%2Fupdate.html'
+            '%3Fhyaction%3Dlive%26channelid%3D$sid%26subid%3D$sid%26liveuid%3D$sid%26screentype%3D1%26sourcetype%3D0'
+            '%26fromapp%3Dhuya_wap%252Fclick%252Fopen_app_guide%26&fromapp=huya_wap/click/open_app_guide',
+      _ => null,
+    },
+    'kuaishou' => switch (key('liveStreamId')) {
+      final stream? =>
+        'kwai://liveaggregatesquare?liveStreamId=$stream&recoStreamId=$stream&recoLiveStreamId=$stream'
+            '&liveSquareSource=28&path=/rest/n/live/feed/sharePage/slide/more&mt_product=H5_OUTSIDE_CLIENT_SHARE',
+      null => null,
+    },
+    _ => null,
+  };
+  return link == null ? null : Uri.parse(link);
+}

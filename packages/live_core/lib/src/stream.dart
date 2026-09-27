@@ -34,6 +34,11 @@ enum StreamFormat {
 
   /// HLS playlist.
   hls,
+
+  /// One HTTP(S) response that is the whole stream, its container told by
+  /// its first bytes (IPTV MPEG-TS, udpxy, FLV without a `.flv` path). The
+  /// player opens it directly; the recorder sniffs it (record spec §8).
+  other,
 }
 
 /// When a stream URL must be renewed (ADR 0010, rule 5).

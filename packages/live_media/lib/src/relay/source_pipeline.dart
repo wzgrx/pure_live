@@ -13,7 +13,8 @@ enum PipelineMode {
   /// loopback relay rewrites and forwards it.
   hls,
 
-  /// Everything else: the engine connects to the CDN itself.
+  /// Everything else, single HTTP streams (`StreamFormat.other`) included:
+  /// the engine connects to the CDN itself.
   direct;
 
   /// The mode for [line]. Splicing needs a way to renew the line. Codec-12

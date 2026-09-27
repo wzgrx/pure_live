@@ -22,6 +22,14 @@ Future<bool> _systemClipboard(String text) async {
   }
 }
 
+/// Technical label of a line's format; a single HTTP stream (IPTV `.ts`,
+/// udpxy) is labelled by its transport, its container is only known once read.
+String _formatLabel(StreamFormat format) => switch (format) {
+  StreamFormat.flv => 'FLV',
+  StreamFormat.hls => 'HLS',
+  StreamFormat.other => 'HTTP',
+};
+
 /// 获取直链 from a card (spec/product.md F-SRC-04): loads the room and its
 /// stream lines, lets the user pick a quality and a line, and copies that
 /// URL. Returns the copied URL, or null when nothing was copied.
@@ -187,7 +195,7 @@ class _StreamLinkDialogState extends ConsumerState<StreamLinkDialog> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.content_copy),
-                title: Text('${t.multiview.lineN(n: index + 1)} · ${line.format == StreamFormat.flv ? 'FLV' : 'HLS'}'),
+                title: Text('${t.multiview.lineN(n: index + 1)} · ${_formatLabel(line.format)}'),
                 subtitle: Text(line.url.host, maxLines: 1, overflow: TextOverflow.ellipsis),
                 onTap: () => _copy(line),
               ),

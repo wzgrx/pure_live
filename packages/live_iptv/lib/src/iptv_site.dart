@@ -87,6 +87,19 @@ final class IptvSite implements LiveSite, CatalogSource, SearchSource, RoomSourc
     }
   }
 
+  /// The line format of a source at [url] (spec/modules/iptv.md §5), by its
+  /// path, ignoring case and the query: `.m3u8` / `.m3u` is HLS, `.flv` is
+  /// FLV, any other http(s) address is a single HTTP stream whose container
+  /// the recorder reads from its first bytes (`.ts`, udpxy `/udp/…`, no
+  /// extension). Other schemes (rtmp, rtsp, udp, rtp) stay FLV: the player
+  /// opens them directly and the recorder skips them.
+  static StreamFormat formatOf(Uri url) {
+    final path = url.path.toLowerCase();
+    if (path.endsWith('.m3u8') || path.endsWith('.m3u')) return StreamFormat.hls;
+    if (path.endsWith('.flv')) return StreamFormat.flv;
+    return url.isScheme('http') || url.isScheme('https') ? StreamFormat.other : StreamFormat.flv;
+  }
+
   /// The channel name of [ref] (the inverse of [refOf]).
   static String nameOf(RoomRef ref) {
     final id = ref.roomId;
@@ -227,12 +240,9 @@ final class IptvSite implements LiveSite, CatalogSource, SearchSource, RoomSourc
     if (!headers.containsKey('user-agent') && agent != null && agent.trim().isNotEmpty) {
       headers['user-agent'] = agent.trim();
     }
-    final path = url.path.toLowerCase();
     return StreamLine(
       url: url,
-      // live_core has no MPEG-TS / RTSP format yet: every non-HLS line is
-      // played directly and marked flv (it has no lease, so nothing splices).
-      format: path.endsWith('.m3u8') || path.endsWith('.m3u') ? StreamFormat.hls : StreamFormat.flv,
+      format: formatOf(url),
       lineId: 'line${index + 1}',
       requested: original,
       confirmed: original,

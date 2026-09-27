@@ -6,6 +6,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:pure_live/common/services/settings_service.dart';
 import 'package:pure_live/common/utils/hive_pref_util.dart';
 import 'package:pure_live/core/common/core_error.dart';
+import 'package:pure_live/core/danmaku/bilibili_danmaku.dart';
 import 'package:pure_live/core/interface/live_site.dart';
 import 'package:pure_live/core/site/bilibili/bilibili_site.dart';
 import 'package:pure_live/get/get.dart';
@@ -81,3 +82,17 @@ Map<String, Object?> resolutionProjection(LivePlayUrlResolution resolution) => {
   'appliedQualityData': resolution.appliedQualityData,
   'qualityUnconfirmed': resolution.qualityUnconfirmed,
 };
+
+/// Everything the danmaku connection receives from room entry.
+Map<String, Object?> danmakuArgsProjection(Object? args) => args is BiliBiliDanmakuArgs
+    ? {
+        'roomId': args.roomId,
+        'uid': args.uid,
+        'token': args.token,
+        'serverUrls': args.serverUrls,
+        'buvid': args.buvid,
+        'cookie': args.cookie,
+        'headers': args.headers,
+        'hasRefresh': args.refresh != null,
+      }
+    : {'type': args.runtimeType.toString()};

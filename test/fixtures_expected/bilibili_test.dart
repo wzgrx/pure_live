@@ -1,9 +1,8 @@
 // Legacy expected values for the recorded Bilibili samples (spec/sites/bilibili.md §11).
 //
-// Not recorded yet: the WBI-signed samples (second/getList pages, every
-// getInfoByRoom case except -352, getDanmuInfo). The server echoes `w_rid` in
-// the `x-client-sign` response header, which ScrubRules cannot reach, so
-// live_cli refuses to write them.
+// second/getList has no page samples: the legacy guest request (valid WBI
+// signature, x-rid-result 0) was answered with -352 every time on 2026-09-27
+// (S02-signed-risk352).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/common/services/settings/bilibili_account_service.dart';
@@ -31,19 +30,24 @@ void main() {
     ]);
   });
 
-  test('S02-risk352', () async {
-    // Recorded without wts/w_rid: the natural -352 of an unsigned request.
-    final fixture = bilibiliSample('S02-risk352');
-    replayBilibili([fixture]);
-    final query = fixture.url.queryParameters;
-    final area = LiveArea(platform: 'bilibili', areaType: query['parent_area_id'], areaId: query['area_id']);
-    final result = await settle(
-      () async => [
-        for (final room in await BiliBiliSite().getCategoryRooms(area, page: int.parse(query['page']!)))
-          roomProjection(room),
-      ],
-    );
-    expectRecorded(fixture, 'BiliBiliSite.getCategoryRooms', result);
+  group('S02 second/getList', () {
+    // S02-risk352 was requested without wts/w_rid; S02-signed-risk352 is the
+    // legacy signed request (2/86 page 1), rejected by risk control anyway.
+    for (final sample in ['S02-risk352', 'S02-signed-risk352']) {
+      test(sample, () async {
+        final fixture = bilibiliSample(sample);
+        replayBilibili([fixture]);
+        final query = fixture.url.queryParameters;
+        final area = LiveArea(platform: 'bilibili', areaType: query['parent_area_id'], areaId: query['area_id']);
+        final result = await settle(
+          () async => [
+            for (final room in await BiliBiliSite().getCategoryRooms(area, page: int.parse(query['page']!)))
+              roomProjection(room),
+          ],
+        );
+        expectRecorded(fixture, 'BiliBiliSite.getCategoryRooms', result);
+      });
+    }
   });
 
   group('S03/S04 recommend', () {
@@ -75,6 +79,33 @@ void main() {
           ],
         );
         expectRecorded(fixture, 'BiliBiliSite.searchRooms', result);
+      });
+    }
+  });
+
+  group('S06 getInfoByRoom', () {
+    for (final sample in [
+      'S06-live',
+      'S06-offline',
+      'S06-replay',
+      'S06-short-id',
+      'S06-short-id-long',
+      'S06-not-found',
+    ]) {
+      test(sample, () async {
+        final fixture = bilibiliSample(sample);
+        replayBilibili([fixture]);
+        final roomId = fixture.url.queryParameters['room_id']!;
+        expectRecorded(fixture, 'BiliBiliSite.parseRoomInfoResponse + BiliBiliSite.getRoomDetailForRefresh', {
+          // The long id the legacy code uses for danmaku (S:634-635).
+          'parseRoomInfoResponse.room_info.room_id': await settle(
+            () => (BiliBiliSite.parseRoomInfoResponse(fixture.json)['room_info'] as Map)['room_id'],
+          ),
+          'getRoomDetailForRefresh': await settle(
+            () async =>
+                roomProjection(await BiliBiliSite().getRoomDetailForRefresh(platform: 'bilibili', roomId: roomId)),
+          ),
+        });
       });
     }
   });
@@ -124,6 +155,18 @@ void main() {
         );
       });
     }
+  });
+
+  test('S09-guest', () async {
+    // Room entry: getInfoByRoom (S06-live) plus one danmaku discovery.
+    final fixture = bilibiliSample('S09-guest');
+    replayBilibili([bilibiliSample('S06-live'), fixture]);
+    final roomId = fixture.url.queryParameters['id']!;
+    final room = await BiliBiliSite().getRoomDetail(platform: 'bilibili', roomId: roomId);
+    expectRecorded(fixture, 'BiliBiliSite.getRoomDetail (_discoverDanmaku)', {
+      'room': roomProjection(room),
+      'danmakuArgs': danmakuArgsProjection(room.danmakuData),
+    });
   });
 
   test('S10-guest', () async {

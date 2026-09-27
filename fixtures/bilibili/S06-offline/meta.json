@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "sample": "S06-offline",
+  "capturedAt": "2026-09-27T10:16:26.193294Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=22647871&wts=0362457235&w_rid=6dbbe5a3961a16c0d9b1f841cce7d2df",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://live.bilibili.com/",
+      "Cookie": "buvid3=T2D88L68-X7Q0-8OT7-H80K-20R30X226W1346960xhiql;buvid4=63R292GO-2719-1T17-DN7E-4DQ82U6OK9KC54380-554797314-6MEehdAbQRM7e8f56UU1WZ==;"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-bili-trace-id": "42683ef8789bda044d265d7c5d6ab8ec",
+      "cache-control": "no-cache",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 10:16:26 GMT",
+      "vary": "Accept-Encoding,Origin,Accept",
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=utf-8",
+      "x-client-sign": "6dbbe5a3961a16c0d9b1f841cce7d2df",
+      "bili-trace-id": "4d265d7c5d6ab8ec",
+      "x-cache-webcdn": "BYPASS from blzone01",
+      "x-ticket-status": "1",
+      "x-rid-result": "0",
+      "bili-status-code": "0",
+      "cpu_usage": "79",
+      "expires": "Sun, 27 Sep 2026 10:16:25 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "ab2c227fc4056b791426719c28e73eeff78a27ef07892e2ebb4799943866c59a",
+    "length": 18707
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:buvid3",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:buvid4",
+      "rule": "secret"
+    },
+    {
+      "where": "url:wts",
+      "rule": "secret"
+    },
+    {
+      "where": "url:w_rid",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

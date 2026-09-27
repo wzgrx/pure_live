@@ -1,0 +1,146 @@
+{
+  "generator": "DouyinSite.extractCategoryDataJson + DouyinSite.getCategores",
+  "value": {
+    "categoryDataFound": true,
+    "categories": [
+      {
+        "id": "101,4",
+        "name": "聊天",
+        "children": [
+          {
+            "areaId": "101,4",
+            "areaType": "101,4",
+            "typeName": "聊天",
+            "areaName": "聊天"
+          }
+        ]
+      },
+      {
+        "id": "102,4",
+        "name": "音乐",
+        "children": [
+          {
+            "areaId": "102,4",
+            "areaType": "102,4",
+            "typeName": "音乐",
+            "areaName": "音乐"
+          }
+        ]
+      },
+      {
+        "id": "103,4",
+        "name": "游戏",
+        "children": [
+          {
+            "areaId": "103,4",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "游戏"
+          },
+          {
+            "areaId": "1,1",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "射击游戏"
+          },
+          {
+            "areaId": "2,1",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "竞技游戏"
+          },
+          {
+            "areaId": "3,1",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "单机游戏"
+          },
+          {
+            "areaId": "4,1",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "棋牌游戏"
+          },
+          {
+            "areaId": "5,1",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "休闲益智"
+          },
+          {
+            "areaId": "6,1",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "角色扮演"
+          },
+          {
+            "areaId": "7,1",
+            "areaType": "103,4",
+            "typeName": "游戏",
+            "areaName": "策略卡牌"
+          }
+        ]
+      },
+      {
+        "id": "104,4",
+        "name": "二次元",
+        "children": [
+          {
+            "areaId": "104,4",
+            "areaType": "104,4",
+            "typeName": "二次元",
+            "areaName": "二次元"
+          }
+        ]
+      },
+      {
+        "id": "105,4",
+        "name": "舞蹈",
+        "children": [
+          {
+            "areaId": "105,4",
+            "areaType": "105,4",
+            "typeName": "舞蹈",
+            "areaName": "舞蹈"
+          }
+        ]
+      },
+      {
+        "id": "106,4",
+        "name": "文化",
+        "children": [
+          {
+            "areaId": "106,4",
+            "areaType": "106,4",
+            "typeName": "文化",
+            "areaName": "文化"
+          }
+        ]
+      },
+      {
+        "id": "107,4",
+        "name": "生活",
+        "children": [
+          {
+            "areaId": "107,4",
+            "areaType": "107,4",
+            "typeName": "生活",
+            "areaName": "生活"
+          }
+        ]
+      },
+      {
+        "id": "108,4",
+        "name": "运动",
+        "children": [
+          {
+            "areaId": "108,4",
+            "areaType": "108,4",
+            "typeName": "运动",
+            "areaName": "运动"
+          }
+        ]
+      }
+    ]
+  }
+}

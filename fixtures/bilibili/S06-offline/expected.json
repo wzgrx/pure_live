@@ -1,0 +1,28 @@
+{
+  "generator": "BiliBiliSite.parseRoomInfoResponse + BiliBiliSite.getRoomDetailForRefresh",
+  "value": {
+    "parseRoomInfoResponse.room_info.room_id": 22647871,
+    "getRoomDetailForRefresh": {
+      "roomId": "22647871",
+      "title": "小年YEAH直播推流测试",
+      "nick": "哔哩哔哩直播运营团队",
+      "avatar": "http://i2.hdslb.com/bfs/face/5950fdd8adfaba39821cb09b7f04eaed0f32c725.jpg@100w.jpg",
+      "cover": "https://i0.hdslb.com/bfs/live/user_cover/6c6cd5a85e2401d73bc23aa89e7f88e43919a27a.jpg",
+      "area": "聊天室",
+      "watching": "0",
+      "audienceMetricType": "popularity",
+      "popularity": "0",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "bilibili",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "https://live.bilibili.com/22647871"
+    }
+  }
+}

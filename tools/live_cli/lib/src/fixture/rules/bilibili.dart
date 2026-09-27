@@ -3,6 +3,9 @@ import 'package:live_cli/src/fixture/scrub.dart';
 const ScrubRule _secret = ScrubRule.secret;
 const ScrubRule _person = ScrubRule.person;
 
+const _rankItem = r'$.data.room_rank_info.user_rank_entry.user_contribution_rank_entry.item[*]';
+const _superChat = r'$.data.super_chat_info.message_list[*]';
+
 /// Bilibili: spec/sites/bilibili.md §11 "需要脱敏的字段".
 ///
 /// Streamer public data (room id, anchor uid, name, face, title, cover) stays
@@ -20,6 +23,37 @@ const ScrubRules bilibiliRules = ScrubRules(
     'SESSDATA': _secret, 'DedeUserID__ckMd5': _secret,
     // Logged-in identity (§11 #16).
     'DedeUserID': _person, 'mid': _person,
+  },
+  // Viewers inside getInfoByRoom (§11 #6, same identity fields as §11 #13/#14):
+  // the top guard, the contribution ranking and the super chat snapshot. Their
+  // keys (uid, name, face) are shared with the anchor's public fields
+  // (room_info.uid, anchor_info.base_info), so they are listed by path.
+  jsonPaths: {
+    r'$.data.guard_leader.uid': _person,
+    r'$.data.guard_leader.name': _person,
+    r'$.data.guard_leader.face': _person,
+    r'$.data.voice_join_info.status.uid': _person,
+    r'$.data.voice_join_info.status.user_name': _person,
+    '$_rankItem.uid': _person,
+    '$_rankItem.name': _person,
+    '$_rankItem.face': _person,
+    '$_rankItem.uinfo.uid': _person,
+    '$_rankItem.uinfo.base.name': _person,
+    '$_rankItem.uinfo.base.face': _person,
+    '$_rankItem.uinfo.base.*.name': _person,
+    '$_rankItem.uinfo.base.*.face': _person,
+    '$_rankItem.uinfo.base.official_info.title': _person,
+    '$_rankItem.uinfo.base.official_info.desc': _person,
+    '$_superChat.uid': _person,
+    '$_superChat.user_info.uname': _person,
+    '$_superChat.user_info.face': _person,
+    '$_superChat.uinfo.uid': _person,
+    '$_superChat.uinfo.base.name': _person,
+    '$_superChat.uinfo.base.face': _person,
+    '$_superChat.uinfo.base.*.name': _person,
+    '$_superChat.uinfo.base.*.face': _person,
+    '$_superChat.uinfo.base.official_info.title': _person,
+    '$_superChat.uinfo.base.official_info.desc': _person,
   },
   queryParams: {
     // WBI signing material on the request side (§11 preamble).

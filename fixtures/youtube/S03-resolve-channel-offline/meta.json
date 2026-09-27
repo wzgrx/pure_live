@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S03-resolve-channel-offline",
+  "capturedAt": "2026-09-27T19:01:16.490107Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://www.youtube.com/youtubei/v1/navigation/resolve_url?prettyPrint=false",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Content-Type": "application/json",
+      "Origin": "https://www.youtube.com",
+      "Cookie": "SOCS=TXE"
+    },
+    "body": "{\"context\":{\"client\":{\"clientName\":\"WEB\",\"clientVersion\":\"2.20260925.01.00\",\"hl\":\"en\",\"gl\":\"US\"}},\"url\":\"https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA/live\"}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 19:01:17 GMT",
+      "vary": [
+        "Origin",
+        "X-Origin",
+        "Referer"
+      ],
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=UTF-8",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "0",
+      "x-content-type-options": "nosniff",
+      "server": "scaffolding on HTTPServer2"
+    }
+  },
+  "raw": {
+    "sha256": "9cb76007220dda579dbf031710c91ba30be52d2d2043791d2e144ad911e5b367",
+    "length": 1136
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:SOCS",
+      "rule": "secret"
+    },
+    {
+      "where": "$.responseContext.visitorData",
+      "rule": "secret"
+    },
+    {
+      "where": "body:elsewhere",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

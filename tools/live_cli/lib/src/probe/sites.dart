@@ -21,4 +21,5 @@ final Map<String, SiteFactory> siteFactories = {
   'steambroadcast': SteamBroadcastSite.new,
   'weibo': WeiboSite.new,
   'xiaohongshu': XiaohongshuSite.new,
+  'youtube': YouTubeSite.new,
 };

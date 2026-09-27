@@ -12,3 +12,4 @@ export 'src/fixture/scrub.dart';
 export 'src/lease/lease_command.dart';
 export 'src/probe/probe_command.dart';
 export 'src/probe/sites.dart';
+export 'src/record/record_command.dart';

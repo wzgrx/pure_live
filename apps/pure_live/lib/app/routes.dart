@@ -35,6 +35,10 @@ import 'package:pure_live_app/features/sync/webdav_page.dart';
 /// (principles §4.1).
 String roomLocation(RoomRef room) => '/room/${Uri.encodeComponent(room.platform)}/${Uri.encodeComponent(room.roomId)}';
 
+/// The follows page on its live tab; the combined live alert opens it
+/// (F-NEW-01).
+const followsLiveLocation = '/follows?filter=live';
+
 /// Search with [text] filled in and submitted.
 String searchLocation(String text) => Uri(path: '/search', queryParameters: {'q': text}).toString();
 
@@ -55,7 +59,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/follows',
-                builder: (context, state) => const FollowsPage(),
+                builder: (context, state) =>
+                    FollowsPage(filter: state.uri.queryParameters['filter'], request: state.uri.queryParameters['at']),
                 routes: [GoRoute(path: 'groups', builder: (context, state) => const GroupsPage())],
               ),
             ],

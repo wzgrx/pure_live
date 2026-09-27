@@ -11,6 +11,7 @@ import 'package:live_media/live_media.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/alerts/alert_tiles.dart';
 import 'package:pure_live_app/features/iptv/iptv_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
@@ -274,7 +275,8 @@ class _IptvRoomPanelState extends ConsumerState<IptvRoomPanel> {
 }
 
 /// The programme guide sheet: days as headings, the programme on air marked
-/// and scrolled to; returns the programme the user tapped.
+/// and scrolled to, "提醒我" on upcoming ones; returns the programme the user
+/// tapped.
 class IptvGuideSheet extends ConsumerStatefulWidget {
   const new({required this.room, required this.now, this.replaying, super.key});
 
@@ -372,12 +374,13 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
                   phase == ProgrammePhase.past &&
                   channel != null &&
                   site.availability(channel, programme) == CatchupAvailability.available;
-              final Widget? trailing = switch (phase) {
+              final trailing = switch (phase) {
                 _ when replaying => const Text('回看中'),
                 ProgrammePhase.live => const LiveBadge(),
                 ProgrammePhase.past when available => const Icon(Icons.replay, size: 20),
                 ProgrammePhase.past => Text('不可回看', style: theme.textTheme.bodySmall),
-                ProgrammePhase.upcoming => null,
+                // F-IPTV-09: a reminder 1 minute before the start.
+                ProgrammePhase.upcoming => ProgrammeReminderButton(room: widget.room, programme: programme),
               };
               return SizedBox(
                 height: _rowHeight,

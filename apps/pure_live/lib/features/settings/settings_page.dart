@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/features/alerts/alert_tiles.dart';
 import 'package:pure_live_app/features/backup/data_settings.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/health/cache_tile.dart';
@@ -137,6 +138,14 @@ class SettingsGroupBody extends StatelessWidget {
         SwitchSettingTile(setting: Settings.autoRefreshFollows, title: '定时刷新关注的开播状态'),
         SwitchSettingTile(setting: Settings.refreshFollowsOnResume, title: '回到应用时刷新关注'),
         SliderSettingTile(
+          setting: Settings.autoRefreshInterval,
+          title: '定时刷新间隔',
+          min: 5,
+          max: 120,
+          divisions: 23,
+          format: _minutes,
+        ),
+        SliderSettingTile(
           setting: Settings.maxConcurrentRefresh,
           title: '同时刷新的直播间数',
           min: 1,
@@ -144,6 +153,8 @@ class SettingsGroupBody extends StatelessWidget {
           divisions: 15,
           format: _integer,
         ),
+        SettingsHeader('通知'),
+        LiveAlertsTile(),
       ],
       SettingsGroup.appearance => const [
         ChoiceSettingTile<AppThemeMode>(
@@ -250,5 +261,6 @@ class SettingsGroupBody extends StatelessWidget {
 }
 
 String _integer(double value) => value.round().toString();
+String _minutes(double value) => '${value.round()} 分钟';
 String _percent(double value) => '${(value * 100).round()}%';
 String _historyLimit(double value) => value.round() == 0 ? '不限' : '${value.round()} 条';

@@ -7,6 +7,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/about/update_state.dart';
+import 'package:pure_live_app/features/alerts/alert_startup.dart';
 import 'package:pure_live_app/features/diagnostics/crash_handler.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
 import 'package:pure_live_app/features/onboarding/first_run.dart';
@@ -27,13 +28,15 @@ final firstRunGateProvider = Provider<FirstRunGate>(
 );
 
 /// Work that starts after the first frame (the router's navigator exists
-/// then): the first-run wizard, the crash prompt, the automatic update
-/// check 2 s later and the clipboard check 1 s after each return to the
-/// foreground. Timers and listeners end with the provider.
+/// then): the first-run wizard, the crash prompt, notifications (live alerts
+/// and programme reminders), the automatic update check 2 s later and the
+/// clipboard check 1 s after each return to the foreground. Timers and
+/// listeners end with the provider.
 final startupTasksProvider = Provider<void>((ref) {
   final router = ref.read(routerProvider);
   unawaited(_offerFirstRun(ref, router));
   _offerCrashReport(ref, router);
+  ref.read(alertStartupProvider);
 
   final update = scheduleAutoUpdateCheck(ref, router);
   Timer? clipboard;

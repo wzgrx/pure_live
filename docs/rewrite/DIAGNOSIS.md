@@ -96,12 +96,20 @@
 | B 站 | 搜索卡片用直播关键帧截图当封面，真正的房间封面是 `user_cover` | `bilibili_site.dart:749` | 3.3.x |
 | B 站 | 轮播（live_status=2）取流返回 `playurl_info: null`，旧版抛异常，游客无法播放轮播 | `bilibili_site.dart:214-265` | v4 |
 | B 站 | -352 被包成两层异常（`Exception: Exception: …`），界面拿不到错误类型 | `bilibili_site.dart:104,127` | v4 |
+| B 站 | 游客请求分区房间：即使带齐 WBI 签名、buvid 和 w_webid，第 1–3 页也全部返回 -352 并带 `x-bili-gaia-vvoucher`，游客的分区页取不到数据 | `bilibili_site.dart` 分区 | 3.3.x（查证 buvid 激活，规格 §12 Q18） |
+| B 站 | 短号输入（如 6）被当作房间号和链接，只有弹幕换成长号；接口实际接受短号并返回长号 7734200 | `bilibili_site.dart` 详情 | v4（`RoomRef` 用长号） |
+| 快手 | 非游戏分区翻页忽略 `cursor`，第 2 页和第 1 页完全相同（REG-KUAISHOU-022） | `kuaishou_site.dart:137-144` | 3.3.x |
+| 快手 | 下播和不存在的主播页抛 `TypeError`（REG-KUAISHOU-020）；界面路径把错误吞成“状态未知” | `kuaishou_site.dart:402-406,463` | 3.3.x |
+| 快手 | 房间页人数取分区统计 `gameInfo.watchingCount`（“1万+”），不是本房间的人数（REG-KUAISHOU-016） | `kuaishou_site.dart:464-465` | 3.3.x |
+| 快手 | 推荐页封面用游戏海报、标题用主播简介、不去重（REG-KUAISHOU-017） | `kuaishou_site.dart:286,292` | 3.3.x |
 
 实测回答的待确认项（详见各平台录制报告，已写进对应样本的 README 或期望值）：
 - 斗鱼：mixList 每页 120 条、`pgcnt` 是总页数；allpage 每页 40 条、只能靠空页判断结束；匿名 rate 4 带 `expire=300`、rate 2 带 `expire=0`；DID 不一致的 403 正文是 4 个汉字“鉴权失败”。
 - 虎牙：房间不存在返回 HTTP 200、`status:422`；字母别名不能直接查详情；推荐列表 `totalCount` 恒为 0；每页 120 条。
 - B 站：`getRoomPlayInfo` 接受短号（6 → 7734200）；未登录的 nav 仍带 `wbi_img`；不带 buvid3 的搜索仍返回 0；游客 qn 0 和 10000 实际都给 250。
 - 抖音：enter 不签名也能拿到数据，但必须带 ttwid；分区接口不签名返回滑块验证头（应归为风控）；expire 为签发时间加 7 天。
+- 快手：非游戏分区用上一页的 `data.cursor` 翻页；`search/author` 的限流按接口计，同时段 `search/liveStream` 仍返回 10；每个响应的 `x-ksclient-ip` 头带客户端公网 IP（样本里已替换）。
+- B 站：`getInfoByRoom` 接受短号；房间不存在是 HTTP 200 加 code 19002000；弹幕 `host_list` 的 `wss_port` 是 2245。
 
 ## 待确认事项
 

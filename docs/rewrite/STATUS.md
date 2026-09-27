@@ -10,7 +10,7 @@
 | 1 规格与样本 | 进行中：规格已写完，样本未开始 | `spec/`、`spec/regressions.md`、`fixtures/` | 每条结论附旧代码位置；待确认项清零 |
 | 2 设计方向与设计系统 | 进行中：原则、设计系统、第一批页面稿已完成，待独立复核和图标重绘 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 进行中：workspace、门禁、CI 已建 | workspace、CI、hooks、`live_cli`、`check_latest` | 旧应用照常构建发布，CI 全绿 |
-| 4 平台与网络层 | 未开始 | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过；旧应用接入后发布 3.3.x |
+| 4 平台与网络层 | 进行中：`live_core` 领域模型（ADR 0010）和斗鱼解析器已完成，其余 4 个平台的解析器在写 | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过；旧应用接入后发布 3.3.x |
 | 5 播放、弹幕、录制层 | 未开始 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | 未开始 | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
 | 7 其余平台、TV、桌面 | 未开始 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
@@ -28,7 +28,7 @@
 样本（ADR 0009）：
 
 - 录制工具 `live_cli fixture capture`（脱敏、防泄漏自检）和期望值测试框架 `test/fixtures_expected/` 已完成；斗鱼 S05 已录制。
-- HTTP 样本：斗鱼 31、虎牙 23、B 站 24、抖音 19 个已录制并生成旧版期望值（CI 中比对）；快手在录，B 站签名接口和抖音页面样本在补录。
+- HTTP 样本：5 个平台共 128 个（斗鱼 31、虎牙 23、B 站 32、抖音 20、快手 22），每个都有旧版期望值，CI 中比对。需要登录、需要特定房间状态或被限流的少数样本未录，列在各平台录制报告里。
 - 播放器事件轨迹：Linux 无视频输出的 8 个场景已录入 `fixtures/player/`，补出播放规格 EVT-13～EVT-19。
 - `spec/regressions.md` 的平台编号已回填。
 
@@ -104,3 +104,4 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 - 2026-09-27：样本工具与斗鱼试点；播放器事件轨迹 8 个场景；回归清单平台编号回填。CI 在 d2b96603 全绿。
 - 2026-09-27：设计系统第一版（https://claude.ai/artifact/JA858yzW77FSJ9mMdNz7LK）：令牌按 fromSeed(#2E6FE0, fidelity) 生成，157 组对比度全部达标；第三色改用品牌青，浅色成功和警告色加深；17 个组件预览和封面。令牌同步到 `spec/design/tokens.json`。
 - 2026-09-27：第一批页面稿（https://claude.ai/artifact/PAavLD9hN6VdLFgNYXkEr4）：关注和直播间（手机、桌面大）、多画面 2×2、TV 首页；设计系统按原则更正了导航轨宽度、TV 焦点和聊天栏宽度。
+- 2026-09-27：5 个平台 128 个 HTTP 样本录完；`live_cli fixture` 支持响应头、JSON 路径和已知值替换。第 4 阶段开工：`live_core` 领域模型与类型化错误（ADR 0010），斗鱼解析器用全部斗鱼样本验证。

@@ -19,8 +19,8 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 
 限制：中国大陆直连不可用，必须给 `youtube` 配代理（应用的按平台代理，ADR 0011 第 3 条）；媒体地址绑定请求方 IP（§5），播放器的媒体代理必须与接口走同一出口。
 
-- 能力：推荐（直播频道页，一页）、搜索（直播，续页令牌分页）、详情、取流（HLS 变体主列表，AVC）、链接解析（视频、频道、`@handle`）。
-- 不提供：分类；弹幕（直播聊天走 `live_chat/get_live_chat` 轮询，本阶段未做，见 §7）；登录。
+- 能力：推荐（直播频道页，一页）、搜索（直播，续页令牌分页）、详情、取流（HLS 变体主列表，AVC）、链接解析（视频、频道、`@handle`）、弹幕（直播聊天轮询，§7）。
+- 不提供：分类；登录。
 
 ---
 
@@ -90,7 +90,17 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 
 ## 7. 弹幕
 
-本阶段未做（缺口）。YouTube 直播聊天：观看页的 `continuation` → `POST youtubei/v1/live_chat/get_live_chat` 轮询（`liveChatTextMessageRenderer`），与 HTTP 轮询的连接器结构相同，[待确认] 匿名是否需要额外参数。
+匿名可用（2026-09-28 经代理实测，S06-live）。请求头同 §2（WEB 上下文、`SOCS=CAI`），走 `youtube` 的平台路由。
+
+1. `POST …/youtubei/v1/next`，正文 `{"context":<WEB>,"videoId":"<在播视频>"}` → `contents.twoColumnWatchNextResults.conversationBar.liveChatRenderer.continuations[0].reloadContinuationData.continuation`。没有 `liveChatRenderer`（不在播、关闭了聊天）→ 结束，原因 `offline`。视频 id 取 `danmakuKeys.videoId`（频道房间在播时由 §4.1 给出；不在播时没有，直接结束）。
+2. `POST …/youtubei/v1/live_chat/get_live_chat`，正文 `{"context":<WEB>,"continuation":"<上一次的>"}` → `continuationContents.liveChatContinuation`：
+   - `actions[].addChatItemAction.item.liveChatTextMessageRenderer`：`message.runs[]`（`text`，或 `emoji.shortcuts[0]`）、`authorName.simpleText`、`authorExternalChannelId`、`id`、`timestampUsec`（微秒）。消息 id = `youtube:<id>`。
+   - `liveChatPaidMessageRenderer`（付费留言）：按聊天行发出，正文前加 `purchaseAmountText`（如 `$5.00`）。不做醒目留言：金额是各国货币，醒目留言模型的价格是人民币元，[待确认] 是否换算。
+   - 其它（删除、置顶、会员、互动提示）不解码。
+   - `continuations[0]`：`invalidationContinuationData` 或 `timedContinuationData`，带下一次的 `continuation` 和 `timeoutMs`；没有续页 → 聊天结束（`offline`）。
+3. 第一次回答是最近的历史（S06-live 77 个动作，73 条聊天），不发出；之后每次回答都发出。
+4. 间隔：按 `timeoutMs`，但不超过 5 秒、不少于 1 秒。网页客户端拿到的是 `invalidationContinuationData`（10 秒）配合推送通知；v4 不接推送，缩短轮询间隔来接近网页的延迟（S06-live：45 秒 8 次轮询，之后每次 1–5 条）。
+5. 失败重试间隔 2 秒，连续 8 次失败结束。
 
 ## 8. 登录与 Cookie
 
@@ -128,6 +138,7 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 | S03 | `S03-resolve-channel-live`、`-offline`、`S03-resolve-handle` | 频道直播页指向视频/频道；handle → 频道 |
 | S04 | `S04-player-live`、`-missing` | ANDROID 播放器：直播；不存在 |
 | S05 | `S05-feed-offline` | 频道 RSS（名称） |
+| S06 | `danmaku/S06-live` | 直播聊天：`next`（只保留 `conversationBar`）+ 8 次 `get_live_chat`（只保留续页和动作；作者名、频道号换成化名，头像、追踪参数删去），45 秒 21 条新消息（`live_cli danmaku youtube xd_fJRWZuVI --proxy 127.0.0.1:7897 --seconds 45 --record S06-live`） |
 
 普通视频（非直播）的 `player` 样本没有录下：录制工具的防泄漏检查拒绝写入（有一个被替换的值出现在 meta.json 里，没能定位），测试用直播样本改 `isLive` 覆盖“未直播”。
 
@@ -135,7 +146,7 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 
 ## 12. 待确认
 
-1. 直播聊天（§7）。
+1. 付费留言是否换算成醒目留言（§7）。
 2. 是否按 HLS 变体提供可选画质。
 3. ANDROID 客户端将来是否也要求 PO Token；届时需要备用客户端。
 4. 同一频道多场同时直播时，频道房间取哪一场（现在取频道 `/live` 指向的那场）。

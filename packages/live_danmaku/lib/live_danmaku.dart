@@ -26,5 +26,6 @@ export 'src/sites/fc2live.dart';
 export 'src/sites/huya.dart';
 export 'src/sites/kuaishou.dart';
 export 'src/sites/steambroadcast.dart';
+export 'src/sites/youtube.dart';
 export 'src/transport.dart';
 export 'src/worker.dart';

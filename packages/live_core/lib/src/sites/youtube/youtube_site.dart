@@ -32,9 +32,7 @@ final class YouTubeSite implements LiveSite, CatalogSource, SearchSource, RoomSo
   @override
   String get name => 'YouTube';
 
-  static const _web = {
-    'client': {'clientName': 'WEB', 'clientVersion': '2.20260925.01.00', 'hl': 'en', 'gl': 'US'},
-  };
+  static const Map<String, Object?> _web = YouTubeParse.webContext;
   static const _android = {
     'client': {'clientName': 'ANDROID', 'clientVersion': '21.08.266', 'hl': 'en', 'gl': 'US'},
   };

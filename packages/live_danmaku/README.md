@@ -64,6 +64,7 @@ await session.close();                      // 5 s 内返回
 | 快手 | 通过（匿名） | `fixtures/kuaishou/danmaku/S16-live`（10 次轮询，42 条评论） | 评论、在线人数 |
 | FC2 ライブ | 通过（匿名，控制连接 WebSocket，JSON 命令走二进制帧） | `fixtures/fc2live/danmaku/S06-live`（53 帧：30 条历史评论不发出，20 条新评论，4 次心跳） | 评论、在线人数、累计人数 |
 | Steam 直播 | 通过（匿名，HTTP 轮询聊天日志） | `fixtures/steambroadcast/danmaku/S07-live`（146 帧：历史 50 条 + 约 140 个时间窗，录制期间无新消息） | 聊天（历史只用于对时，不发出） |
+| YouTube | 通过（匿名，经代理，InnerTube 聊天轮询） | `fixtures/youtube/danmaku/S06-live`（9 帧：`next` + 8 次轮询；历史 73 条不发出，21 条新消息） | 聊天、付费留言（按聊天行，带金额） |
 
 ## 录制样本
 

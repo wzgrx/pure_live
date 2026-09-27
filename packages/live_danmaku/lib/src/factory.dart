@@ -8,10 +8,11 @@ import 'package:live_danmaku/src/sites/fc2live.dart';
 import 'package:live_danmaku/src/sites/huya.dart';
 import 'package:live_danmaku/src/sites/kuaishou.dart';
 import 'package:live_danmaku/src/sites/steambroadcast.dart';
+import 'package:live_danmaku/src/sites/youtube.dart';
 import 'package:live_danmaku/src/transport.dart';
 
 /// Platforms with a chat connector.
-const danmakuPlatforms = {'bilibili', 'douyin', 'douyu', 'fc2live', 'huya', 'kuaishou', 'steambroadcast'};
+const danmakuPlatforms = {'bilibili', 'douyin', 'douyu', 'fc2live', 'huya', 'kuaishou', 'steambroadcast', 'youtube'};
 
 /// The chat connector for [room]'s platform, or null when the platform has
 /// none (the UI shows [DanmakuStatus.unsupported] once, REG-DANMAKU-021).
@@ -50,5 +51,6 @@ DanmakuConnector? danmakuConnectorFor(
     clock: clock,
   ),
   'steambroadcast' => SteamBroadcastConnector(detail: room, transport: transport, session: session, clock: clock),
+  'youtube' => YouTubeChatConnector(detail: room, transport: transport, session: session, clock: clock),
   _ => null,
 };

@@ -32,6 +32,12 @@ abstract final class YouTubeParse {
   /// §3 the search filter "Live".
   static const liveFilter = 'EgJAAQ%3D%3D';
 
+  /// §2 the InnerTube context of the web client (browse, search, resolve,
+  /// next, live chat).
+  static const Map<String, Object?> webContext = {
+    'client': {'clientName': 'WEB', 'clientVersion': '2.20260925.01.00', 'hl': 'en', 'gl': 'US'},
+  };
+
   /// §5 the only quality: the HLS variant playlist.
   static const auto = Quality(id: 'hls', label: '自动', rank: 1);
 

@@ -5,6 +5,7 @@ import 'package:live_cli/src/danmaku/recorder.dart';
 import 'package:live_cli/src/danmaku/scrub_fc2live.dart';
 import 'package:live_cli/src/danmaku/scrub_sites.dart';
 import 'package:live_cli/src/danmaku/scrub_steambroadcast.dart';
+import 'package:live_cli/src/danmaku/scrub_youtube.dart';
 import 'package:live_core/live_core.dart';
 
 /// What [FrameScrubber.scrub] produced.
@@ -135,6 +136,7 @@ abstract class FrameScrubber {
     'douyin' => DouyinFrameScrubber(detail, seed: seed),
     'kuaishou' => KuaishouFrameScrubber(detail, seed: seed),
     'steambroadcast' => SteamBroadcastFrameScrubber(detail, seed: seed),
+    'youtube' => YouTubeFrameScrubber(detail, seed: seed),
     _ => throw ArgumentError.value(platform, 'platform', 'no frame scrubber'),
   };
 

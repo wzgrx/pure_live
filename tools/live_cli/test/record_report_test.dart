@@ -29,4 +29,17 @@ void main() {
     expect(report.maxVideoStep, 1000);
     expect(report.gaps, hasLength(1));
   });
+
+  test('topLevelBoxes lists boxes in file order, with 64-bit sizes', () async {
+    final dir = await Directory.systemTemp.createTemp('live_cli_remux');
+    addTearDown(() => dir.delete(recursive: true));
+    final file = File('${dir.path}/a.mp4');
+    await file.writeAsBytes([
+      ...[0, 0, 0, 16, ...'ftyp'.codeUnits, ...'isom'.codeUnits, 0, 0, 2, 0],
+      ...[0, 0, 0, 8, ...'moov'.codeUnits],
+      ...[0, 0, 0, 1, ...'mdat'.codeUnits, 0, 0, 0, 0, 0, 0, 0, 20, 1, 2, 3, 4],
+    ]);
+    final boxes = await topLevelBoxes(file.path);
+    expect(boxes.map((box) => (box.type, box.offset, box.size)), [('ftyp', 0, 16), ('moov', 16, 8), ('mdat', 24, 20)]);
+  });
 }

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:live_cli/src/lease/lease_command.dart';
 import 'package:live_cli/src/probe/sites.dart';
+import 'package:live_cli/src/record/remux_command.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
@@ -63,8 +64,9 @@ Future<List<double>?> ffprobeVideoDts(String path) async {
   }
 }
 
-/// A [Remuxer] over the `ffmpeg` executable (desktop tools only; the app
-/// uses a libavformat shim, ADR 0005 §4). Any error output fails the job.
+/// A [Remuxer] over the `ffmpeg` executable, for comparison with the
+/// pure-Dart [FlvToMp4Remuxer] the app uses (ADR 0021). Any error output
+/// fails the job.
 final class FfmpegProcessRemuxer implements Remuxer {
   /// Creates the remuxer; [executable] defaults to `ffmpeg` on PATH.
   const new({this.executable = 'ffmpeg'});
@@ -152,7 +154,13 @@ class RecordCommand extends Command<int> {
       ..addOption('proxy', help: 'host:port of an HTTP proxy for this platform; direct by default.')
       ..addOption('quality', allowed: [for (final q in RecordQuality.values) q.name], help: 'Quality preference.')
       ..addOption('split-minutes', defaultsTo: '0', help: 'Split segments every N minutes (0: never).')
-      ..addFlag('remux', help: 'Remux to MP4 with ffmpeg afterwards (sources kept for the check).')
+      ..addFlag('remux', help: 'Remux to MP4 afterwards (sources kept for the check).')
+      ..addOption(
+        'remuxer',
+        allowed: ['dart', 'ffmpeg'],
+        defaultsTo: 'dart',
+        help: 'With --remux: the pure-Dart remuxer the app uses, or the ffmpeg executable.',
+      )
       ..addOption('gap-ms', defaultsTo: '500', help: 'A timestamp step above this counts as a gap.');
   }
 
@@ -213,7 +221,11 @@ class RecordCommand extends Command<int> {
           keepSourceAfterRemux: true,
         ),
         opener: httpRecordOpener(proxy: policy),
-        remuxer: remux ? const FfmpegProcessRemuxer() : null,
+        remuxer: !remux
+            ? null
+            : options.option('remuxer') == 'ffmpeg'
+            ? const FfmpegProcessRemuxer()
+            : const FlvToMp4Remuxer(),
       );
       await manager.init();
       RecordState? lastState;
@@ -292,11 +304,14 @@ class RecordCommand extends Command<int> {
       for (final path in session.outputs) {
         final dts = await ffprobeVideoDts(path);
         final steps = dts == null ? null : stepReport(dts);
+        final boxes = [for (final box in await topLevelBoxes(path)) box.type];
+        final faststart = boxes.contains('moov') && boxes.indexOf('moov') < boxes.indexOf('mdat');
         stdout.writeln(
-          '  mp4             ${p.basename(path)}'
+          '  mp4             ${p.basename(path)} · ${boxes.join(' ')}'
           '${steps == null ? '' : ' · ${steps.count} packets, max DTS step ${(steps.maxStep * 1000).round()} ms, '
                     '${steps.backwards} backwards'}',
         );
+        clean = clean && faststart && (steps == null || steps.backwards == 0);
       }
       final gapsFile = File(session.layout.gaps);
       if (gapsFile.existsSync()) {

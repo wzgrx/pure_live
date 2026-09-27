@@ -657,6 +657,10 @@ final class RecordManager {
     await _flush();
   }
 
+  /// Writes pending task state now; completes when it is stored. The Android
+  /// keep-alive awaits this before letting go of the process (§13, §16.1).
+  Future<void> flush() => _flush();
+
   /// Stops polling and sessions, writes pending state and releases resources.
   Future<void> dispose() async {
     if (_disposed) return;

@@ -31,7 +31,8 @@ await manager.importTasks(tasksFromBackup);       // 恢复备份：替换空闲
 manager.tasks;                          // 按添加顺序的快照列表（顺序稳定）
 manager.listChanges;                    // 增删任务时发出整个列表
 manager.watch(key);                     // 单个任务的快照流：状态立即推送，进度每秒最多一次
-manager.activeCountChanges;             // 有活跃会话时 Android 前台服务保持运行（§16.1）
+manager.activeCountChanges;             // 有活跃会话时 Android 前台服务保持运行（§16.1，应用的 RecordKeepAlive）
+await manager.flush();                  // 立即落盘；Android 保活在活跃数归零后先等它再停服务
 await manager.interruptAll();           // Android onTimeout：有界收尾，标“后台时间用尽”失败
 await manager.stopAll();                // 桌面退出：10 s 内收尾（不转封装），下次启动可开机恢复
 await manager.dispose();

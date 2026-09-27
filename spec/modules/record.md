@@ -458,12 +458,14 @@ refreshAt 前重新解析同画质同线路，拿到新列表地址后在下一�
 
 ### 16.1 Android
 
-- 有活跃会话时运行独立的录制前台服务（与播放的后台服务分开），保活 Flutter 引擎（绑定音频服务），持有 CPU 部分唤醒锁和高性能 Wi-Fi 锁；最后一个会话结束才释放（recorder_background_service.dart:15-18, 53-77；RecorderBackgroundPlugin.kt:291-305, 417-440；9a512919、f4d40174）。
-- 按任务租约计数，旧会话的释放不能停掉新会话的保活（recorder_background_service.dart:15-16, 72-77）。
-- 前台服务启动超时 15 s、停止超时 15 s（RecorderBackgroundPlugin.kt:90-91）。
-- 系统中断（Android 15 起 dataSync 类型 24 h 内限 6 h，onTimeout）：通知 Dart 在 45 s 内有界收尾，受影响的任务按用户停止收尾后标失败（原因：后台时间用尽）。之后只允许用户手动重新开始，自动重连和开机恢复都不重启前台服务（RecorderForegroundService.kt:188-197；RecorderBackgroundPlugin.kt:93, 217-225；recorder_controller.dart:1038-1057；recorder_background_service.dart:44-45, 108-109）。
-- 释放保活前先把最终状态落盘，再解绑引擎（recorder_controller.dart:1027-1033）。
-- **[待确认]** 服务类型：第 5 阶段真机评估 specialUse / mediaProcessing，避开 6 h 上限（ADR 0005 §5）。
+- 有活跃会话时运行独立的录制前台服务（与播放的后台服务分开），保活 Flutter 引擎（绑定音频服务），持有 CPU 部分唤醒锁和高性能 Wi-Fi 锁；最后一个会话结束才释放（recorder_background_service.dart:15-18, 53-77；RecorderBackgroundPlugin.kt:291-305, 417-440；9a512919、f4d40174）。“活跃会话”= 排队、解析、录制中、重连中、收尾（含转封装）的任务，即 `RecordManager.activeCount` > 0；等待开播不算。
+- 旧会话的释放不能停掉新会话的保活（recorder_background_service.dart:15-16, 72-77）。v4 由 Dart 按活跃任务数驱动一个进程级的保活（数量从 0 变正启动、变回 0 停止，中间只更新通知），不再按任务发租约，所以不存在“旧租约释放”这回事 **[决定]**。
+- 实现（`RecordService.kt`，方法通道 `purelive/record`；Dart 侧 `lib/core/recording.dart` 的 `RecordKeepAlive`）**[决定 2026-09-28]**：`update(title, text)` 启动或刷新服务，`stop` 停止并释放锁和引擎绑定；原生回调 `onTimeout`。服务在 `onStartCommand` 里立即 `startForeground`，不再需要 3.x 的 15 s 启动/停止超时状态机（RecorderBackgroundPlugin.kt:90-91）。
+- 通知：渠道“录制”（低重要度，不响铃、不显示角标），标题“正在录制 N 个直播间”，正文是主播名（最多 3 个，多了加“等”），有任务在收尾时附“M 个正在收尾”；只剩收尾的任务时标题为“正在处理录制文件”。点通知回到应用。Android 13 起通知要通知权限：第一次启动服务且应用在前台时请求一次；拒绝也照常录制，只是通知只出现在系统的前台服务管理里。
+- 释放保活前先把最终状态落盘，再解绑引擎（recorder_controller.dart:1027-1033）：Dart 在活跃数归零后先 `RecordManager.flush()` 再发 `stop`。
+- 服务类型 **[决定 2026-09-28]**：`specialUse`（子类型说明：直播录制，把用户选择录制的直播流写成本地文件，直到下播或用户停止），Android 14 起 `startForeground` 传这个类型，更早的系统用 manifest 里的类型。不用 `dataSync`：目标 Android 15 及以上时，`dataSync` 和 `mediaProcessing` 前台服务 24 小时内合计只能运行 6 小时（两种类型分别计时，同类型的所有服务共用），到时系统调用 `Service.onTimeout(int, int)`，服务必须在几秒内 `stopSelf()`，否则应用崩溃（`RemoteServiceException: A foreground service of type dataSync did not stop within its timeout`）；此后在用户把应用切回前台之前，再启动同类型服务会抛 `ForegroundServiceStartNotAllowedException`（“Time limit already exhausted”）；用户把应用切到前台会重置计时。一场直播常超过 6 小时，开播监控加过夜录制更长，所以 `dataSync` 不适合。`specialUse` 没有时间上限，只在上架 Google Play 时审核 manifest 里的用途说明；本应用不在 Google Play 发布。`mediaPlayback` 语义不符，用户发起的数据传输作业（UIDT）要求用户手势当场启动、面向有限大小的传输，也不保活 Flutter 引擎。详见 docs/adr/draft-record-service.md。
+- 系统中断（`onTimeout`：`specialUse` 不会触发，保留作防御，例如以后的系统版本或厂商改动）：服务立即 `stopForeground` + `stopSelf`（系统只给几秒），唤醒锁再保留最多 45 s；Dart 收到后对所有活跃任务 `interruptAll`（按用户停止收尾后标失败，原因：后台运行时间被系统用尽），然后 `stop`。之后在应用回到前台之前不再启动服务（与系统“切回前台才重置计时”一致），自动重连和开播监控触发的录制照常进行但没有保活（RecorderForegroundService.kt:188-197；RecorderBackgroundPlugin.kt:93, 217-225；recorder_controller.dart:1038-1057）**[决定]**：3.x 是“之后只允许用户手动重新开始”。
+- 后台启动限制：Android 12 起应用在后台不能启动前台服务（`ForegroundServiceStartNotAllowedException`）。用户在前台开始录制时服务随之启动；开播监控在后台检测到开播、要启动服务时可能被拒，此时录制照常进行，但进程随时可能被冻结或回收。**[待确认]** 开播监控是否也要在等待期间运行服务（`specialUse` 没有时间限制，但要常驻通知和唤醒锁，耗电），第 5 阶段真机评估。
 
 ### 16.2 Windows 与桌面
 
@@ -581,7 +583,7 @@ refreshAt 前重新解析同画质同线路，拿到新列表地址后在下一�
 4. Twitch 广告 DATERANGE 是否剔除（§7.5）。
 5. IPTV 连续 TS 断流后的时间戳处理（§8）。
 6. Android 默认录制目录和存储权限方案（§15）。
-7. Android 前台服务类型（§16.1）。
+7. ~~Android 前台服务类型（§16.1）~~：2026-09-28 定为 `specialUse`。新增：开播监控在后台是否也运行前台服务（§16.1）。
 8. 旧版弹幕时间基的实际偏差量（§17，只影响回归说明）。
 
 ## 24. 必须继承的坑

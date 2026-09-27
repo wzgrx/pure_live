@@ -38,6 +38,8 @@ RecordSettings recordSettingsFrom(SettingsStore s) => RecordSettings(
   splitMegabytes: s.get(Settings.recordSplitMegabytes),
   remuxToMp4: s.get(Settings.recordRemuxToMp4),
   keepSourceAfterRemux: s.get(Settings.recordKeepSourceAfterRemux),
+  // The "cache limit" caps the recording folder (§15).
+  storageLimitMegabytes: s.get(Settings.recordCacheLimitEnabled) ? s.get(Settings.recordCacheLimitMb) : 0,
 );
 
 /// Chat for recordings through live_danmaku's connectors (§17): plain chats only.

@@ -51,6 +51,7 @@ class ProxyWrapperTests(unittest.TestCase):
             (root / 'tool/android_configure_proxy.ps1').write_text(CONFIGURE, encoding='utf-8')
             (root / 'tool/android_recording_smoke.ps1').write_text(SMOKE, encoding='utf-8')
             env = os.environ.copy()
+            env.setdefault('LOCALAPPDATA', temp)  # the wrapper's default ADB path; Windows-only variable
             env.update(FAIL_SETUP=setup, FAIL_SMOKE=str(int(smoke)), FAIL_RESTORE=str(int(restore)))
             run = subprocess.run([PWSH, '-NoProfile', '-File', str(root / 'tool/android_foreign_recording_smoke.ps1'),
                                   '-Serial', '192.0.2.10:5555', '-Platform', 'picarto', '-ProxyPort', '7909'],

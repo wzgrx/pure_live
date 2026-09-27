@@ -49,7 +49,8 @@ class ScrubRules {
   /// appears in URLs, form bodies, header values and text: signatures that
   /// sit inside a path segment or a compound value (Akamai
   /// `hdnts=st=…~exp=…~hmac=<hex>`), where [queryParams] cannot reach them
-  /// without also replacing the expiry next to them.
+  /// without also replacing the expiry next to them. The context goes
+  /// before the group; after it, at most a delimiter (`"`, `.m3u8`).
   final Map<String, ScrubRule> textPatterns;
 }
 
@@ -213,9 +214,11 @@ class Scrubber {
         final whole = match.group(0)!;
         final value = match.group(1);
         if (value == null || value.length <= 1) return whole;
-        // The group's first occurrence in the match; patterns put a literal
-        // prefix (`hmac=`) before it.
-        final offset = whole.indexOf(value);
+        // The group's last occurrence in the match: patterns put the context
+        // before the group (`hmac=`, `DATA-ID="USER-COUNTRY",VALUE="`, which
+        // may contain a short value such as `US`) and at most a delimiter
+        // after it.
+        final offset = whole.lastIndexOf(value);
         final replaced = replace(value, rule, '$where:/$source/');
         return '${whole.substring(0, offset)}$replaced${whole.substring(offset + value.length)}';
       });

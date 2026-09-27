@@ -268,4 +268,14 @@ void main() {
     expect(text, isNot(contains('fedcba9876543210fedc')));
     expect(scrubber.leaks('$url$text'), isEmpty);
   });
+
+  test('a text pattern replaces its group even when the value also occurs in the context', () {
+    final scrubber = Scrubber(
+      const ScrubRules(textPatterns: {'DATA-ID="USER-COUNTRY",VALUE="([^"]+)"': ScrubRule.secret}),
+      seed: 3,
+    );
+    final text = scrubber.scrubText('#EXT-X-SESSION-DATA:DATA-ID="USER-COUNTRY",VALUE="US"\n');
+    expect(text, startsWith('#EXT-X-SESSION-DATA:DATA-ID="USER-COUNTRY",VALUE="'));
+    expect(text, isNot(contains('VALUE="US"')));
+  });
 }

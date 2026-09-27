@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "pandalive",
+  "case": "S07-live",
+  "room": "pandalive:daisy00",
+  "danmakuKeys": {
+    "userId": "daisy00",
+    "channel": "24133575"
+  },
+  "capturedAt": "2026-09-27T19:14:36.113453Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chat-ws.neolive.kr/connection/websocket",
+      "headers": {
+        "origin": "https://www.pandalive.co.kr",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 36,
+  "raw": {
+    "sha256": "0002a1ab76a1990ec651ad1df25a4e9e80c0b57b492355c7941ad66eb77b8d9f",
+    "length": 20376
+  },
+  "scrubbed": [
+    {
+      "where": "$ (live/play)",
+      "rule": "reduced"
+    },
+    {
+      "where": "$.params.token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.result.client",
+      "rule": "secret"
+    },
+    {
+      "where": "$.result.subs",
+      "rule": "secret"
+    },
+    {
+      "where": "$.result.data.data[chat]",
+      "rule": "person"
+    },
+    {
+      "where": "$.result.data.data[other]",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

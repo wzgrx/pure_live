@@ -15,6 +15,7 @@ final Map<String, SiteFactory> siteFactories = {
   'kilakila': KilakilaSite.new,
   'kuaishou': KuaishouSite.new,
   'missevan': MissevanSite.new,
+  'pandalive': PandaliveSite.new,
   'picarto': PicartoSite.new,
   'showroom': ShowroomSite.new,
   'twitcasting': TwitcastingSite.new,

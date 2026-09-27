@@ -7,6 +7,7 @@ import 'package:live_cli/src/fixture/rules/inke.dart';
 import 'package:live_cli/src/fixture/rules/kilakila.dart';
 import 'package:live_cli/src/fixture/rules/kuaishou.dart';
 import 'package:live_cli/src/fixture/rules/missevan.dart';
+import 'package:live_cli/src/fixture/rules/pandalive.dart';
 import 'package:live_cli/src/fixture/rules/picarto.dart';
 import 'package:live_cli/src/fixture/rules/showroom.dart';
 import 'package:live_cli/src/fixture/rules/twitcasting.dart';
@@ -25,6 +26,7 @@ const Map<String, ScrubRules> platformRules = {
   'kilakila': kilakilaRules,
   'kuaishou': kuaishouRules,
   'missevan': missevanRules,
+  'pandalive': pandaliveRules,
   'picarto': picartoRules,
   'showroom': showroomRules,
   'twitcasting': twitcastingRules,

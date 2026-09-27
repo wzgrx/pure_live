@@ -380,3 +380,120 @@ class ChzzkFrameScrubber extends JsonFrameScrubber {
   @override
   Set<String> get kept => const {'streamingChannelId', 'channelId', 'cid'};
 }
+
+/// PandaTV (spec/sites/pandalive.md §11). The `live/play` answer keeps only
+/// what the connector reads (result, channel, the broadcaster's `media`
+/// identity) with the chat token replaced; its fan list, viewer network,
+/// session key and playback tokens are dropped. Centrifugo frames: the
+/// token in the connect command, the client id and the viewer's personal
+/// channel in its reply; chat keeps type, text, emoticon and time with the
+/// sender's login id, index and nickname replaced and the rest (the
+/// viewer's address hash, device, level, languages) dropped; heart gifts
+/// keep their count; other pushes keep only their type (their messages
+/// name viewers).
+class PandaliveFrameScrubber extends FrameScrubber {
+  /// Creates the scrubber.
+  new(super.detail, {super.seed});
+
+  @override
+  List<int>? scrubFrame(CapturedFrame frame) {
+    final text = utf8.decode(frame.bytes, allowMalformed: true);
+    if (frame.url != null) return utf8.encode(_play(text));
+    final lines = [for (final line in const LineSplitter().convert(text)) _line(line)];
+    return utf8.encode(_elsewhere(names, lines.join('\n')));
+  }
+
+  String _play(String text) {
+    final Object? root;
+    try {
+      root = jsonDecode(text);
+    } on FormatException {
+      return text;
+    }
+    if (root is! Map<String, dynamic>) return text;
+    final media = root['media'];
+    record(r'$ (live/play)', 'reduced');
+    return jsonEncode({
+      'result': root['result'],
+      'message': root['message'],
+      if (root['errorData'] != null) 'errorData': root['errorData'],
+      if (root['channel'] != null) 'channel': root['channel'],
+      if (root['token'] is String) 'token': names.secret(root['token'] as String),
+      if (media is Map) 'media': {'userId': media['userId'], 'userIdx': media['userIdx'], 'isLive': media['isLive']},
+    });
+  }
+
+  String _line(String line) {
+    final Object? reply;
+    try {
+      reply = jsonDecode(line);
+    } on FormatException {
+      return line;
+    }
+    if (reply is! Map<String, dynamic>) return line;
+    final params = reply['params'];
+    if (params is Map<String, dynamic> && params['token'] is String) {
+      params['token'] = names.secret(params['token'] as String);
+      record(r'$.params.token', 'secret');
+    }
+    final result = reply['result'];
+    if (result is Map<String, dynamic>) {
+      if (result['client'] is String) {
+        result['client'] = names.secret(result['client'] as String);
+        record(r'$.result.client', 'secret');
+      }
+      final subs = result['subs'];
+      if (subs is Map<String, dynamic>) {
+        result['subs'] = {for (final entry in subs.entries) names.secret(entry.key): entry.value};
+        record(r'$.result.subs', 'secret');
+      }
+      final publication = result['data'];
+      if (publication is Map<String, dynamic> && publication['data'] is Map<String, dynamic>) {
+        publication['data'] = _message(publication['data'] as Map<String, dynamic>);
+      }
+    }
+    return jsonEncode(reply);
+  }
+
+  Map<String, dynamic> _message(Map<String, dynamic> message) {
+    final type = '${message['type']}';
+    if (PandaliveProtocol.chatTypes.contains(type)) {
+      record(r'$.result.data.data[chat]', 'person');
+      return {
+        for (final key in const ['type', 'message', 'emoticon', 'filtered', 'created_at'])
+          if (message.containsKey(key)) key: message[key],
+        if (message['id'] is String) 'id': names.secret(message['id'] as String),
+        if (message['idx'] != null) 'idx': int.tryParse(names.digits('${message['idx']}')) ?? 0,
+        if (message['nk'] is String) 'nk': names.person(message['nk'] as String),
+      };
+    }
+    if (type == 'SponCoin' || type == 'ItemCoin') {
+      final raw = message['message'];
+      Object? body;
+      try {
+        body = raw is String ? jsonDecode(raw) : raw;
+      } on FormatException {
+        body = null;
+      }
+      if (body is Map<String, dynamic>) {
+        record(r'$.result.data.data[gift]', 'person');
+        final kept = {
+          if (body['coin'] != null) 'coin': body['coin'],
+          if (body.containsKey('heart')) 'heart': const <String, Object?>{},
+          if (body['id'] is String) 'id': names.secret(body['id'] as String),
+          if (body['idx'] != null) 'idx': int.tryParse(names.digits('${body['idx']}')) ?? 0,
+          if (body['nick'] is String) 'nick': names.person(body['nick'] as String),
+        };
+        return {'type': type, 'message': jsonEncode(kept), 'created_at': message['created_at']};
+      }
+    }
+    record(r'$.result.data.data[other]', 'dropped');
+    return {'type': type, 'created_at': message['created_at']};
+  }
+
+  @override
+  List<int> plain(CapturedFrame frame) {
+    final text = utf8.decode(frame.bytes, allowMalformed: true);
+    return utf8.encode('$text\n${text.replaceAll(r'\"', '"').replaceAll(r'\/', '/')}');
+  }
+}

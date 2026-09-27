@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "platform": "pandalive",
+  "sample": "S01-index-hot-last",
+  "capturedAt": "2026-09-27T18:47:54.347177Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://api.pandalive.co.kr/v1/live/index",
+    "headers": {
+      "Origin": "https://www.pandalive.co.kr",
+      "Referer": "https://www.pandalive.co.kr/live",
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "offset=120&limit=30&orderBy=hot"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "X-Device-Info",
+      "connection": "keep-alive",
+      "set-cookie": [
+        "sessKey=h75yg5e9-8o0s-8v64-u9zv-4e41uwpg8e1p; path=/; domain=.pandalive.co.kr; secure; SameSite=None",
+        "79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee=kXlBnrMimeMLw5IV%8NoEEztAmU8cULzR50jED%3W3Vf896zeqkIsUzTXqnVRqi8hl20uvIeckOZFpW8f0wwiCQSrpXgni4x3pYL%3POgIOHN4YnCqeVMPO%1ZGEkpIX8DCTTWxa; path=/; domain=.pandalive.co.kr",
+        "partner=evldkbd; path=/; domain=.pandalive.co.kr"
+      ],
+      "access-control-allow-origin": "https://www.pandalive.co.kr",
+      "date": "Sun, 27 Sep 2026 18:47:54 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "content-type": "application/json",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "acd321c2d7c6583ab49581b053c6d326d1e42a62db39fa989a6667b5b7a90375",
+    "length": 10094
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.userIp",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:sessKey",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:partner",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

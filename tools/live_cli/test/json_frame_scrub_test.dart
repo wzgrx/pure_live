@@ -121,4 +121,61 @@ void main() {
     expect(other, isNot(contains('userName')));
     expect(scrubber.findLeak([_in(utf8.encode(chat), text: true)], ''), isNull);
   });
+
+  test('pandalive: live/play is reduced, tokens and viewers are replaced, chat still decodes', () {
+    final scrubber = FrameScrubber.forPlatform('pandalive', _room('pandalive', 'daisy00'), seed: 4);
+    final play = jsonEncode({
+      'result': true,
+      'message': 'ok',
+      'channel': '24133575',
+      'token': 'eyJhbGciOi.eyJzdWIiOiJ2X2RhYTE2NjBjLTIi.nImVCxnSz1ZbSkjKNJDj9R6pGA',
+      'userIp': '203.0.113.9',
+      'loginInfo': {'sessKey': 'daa1660c-289b-4050-b19a-1948de0c0ae8'},
+      'fanList': [
+        {'userId': 'fanlogin77', 'userNick': '팬닉네임'},
+      ],
+      'media': {'userId': 'daisy00', 'userIdx': 24133575, 'isLive': true, 'title': 't'},
+    });
+    final reduced = utf8.decode(
+      scrubber.scrubFrame(
+        CapturedFrame(direction: 'in', millis: 0, bytes: utf8.encode(play), text: true, url: PandaliveProtocol.play),
+      )!,
+    );
+    for (final gone in ['nImVCxnSz1ZbSkjKNJDj9R6pGA', '203.0.113.9', 'daa1660c', 'fanlogin77', '팬닉네임']) {
+      expect(reduced, isNot(contains(gone)));
+    }
+    final session = PandaliveProtocol.session(reduced)!;
+    expect(session.channel, '24133575');
+    final chat = [
+      '{"id":1,"result":{"client":"1527999c-5cc0-45a9-bb41-3382e4e5c08f","subs":{"_person:#v_fbd920d6-a":{}}}}',
+      jsonEncode({
+        'result': {
+          'channel': '24133575',
+          'data': {
+            'data': {
+              'type': 'chatter',
+              'message': 'hello',
+              'created_at': 1790533910,
+              'id': 'viewer4411',
+              'idx': 29069412,
+              'nk': '시청자닉',
+              'ip': 'kDin96VidKQRZufEdHGRNw==',
+              'sex': 'U',
+            },
+            'offset': 1532,
+          },
+        },
+      }),
+    ].join('\n');
+    final out = utf8.decode(scrubber.scrubFrame(_in(utf8.encode(chat), text: true))!);
+    for (final gone in ['1527999c', 'fbd920d6', 'viewer4411', '29069412', '시청자닉', 'kDin96VidKQRZufEdHGRNw', '"sex"']) {
+      expect(out, isNot(contains(gone)));
+    }
+    final decoded = PandaliveProtocol.decode(
+      out,
+      channel: '24133575',
+      context: DecodeContext(room: 'pandalive:daisy00', session: 0, receivedAt: 0, now: DateTime.utc(2026)),
+    );
+    expect(decoded.events.whereType<DanmakuChat>().single.text, 'hello');
+  });
 }

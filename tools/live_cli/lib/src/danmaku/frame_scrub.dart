@@ -135,6 +135,7 @@ abstract class FrameScrubber {
     'douyin' => DouyinFrameScrubber(detail, seed: seed),
     'kuaishou' => KuaishouFrameScrubber(detail, seed: seed),
     'missevan' => MissevanFrameScrubber(detail, seed: seed),
+    'pandalive' => PandaliveFrameScrubber(detail, seed: seed),
     'picarto' => PicartoFrameScrubber(detail, seed: seed),
     'showroom' => ShowroomFrameScrubber(detail, seed: seed),
     'twitcasting' => TwitcastingFrameScrubber(detail, seed: seed),

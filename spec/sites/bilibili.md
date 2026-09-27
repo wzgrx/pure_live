@@ -345,7 +345,7 @@
 |---|---|
 | `uid` | §8.2 的 uid；游客为 0 |
 | `roomid` | 长号 |
-| `protover` | 3 |
+| `protover` | 2（v4，2026-09-27 实测服务端回 zlib 包；旧版为 3 即 brotli，v4 不引入 brotli 包，见 docs/adr/draft-danmaku.md） |
 | `buvid` | 当前 buvid3 |
 | `support_ack` | true |
 | `queue_uuid` | 每次认证新生成的 8 位小写十六进制随机数 |
@@ -727,7 +727,7 @@
 | 10 | `finger/spi` | 游客 | `b_3`、`b_4` | 无 | `S10-guest` |
 | 11 | `x/web-interface/nav` | 未登录（-101，带 `wbi_img`） | 无（密钥公开；如需固定测试向量，改用合成值） | `getMixinKey`（S:543）；签名向量用 P:737-757 的独立实现固定 `wts` 生成，两份实现结果必须一致 | `S11-guest` |
 | 12 | `live.bilibili.com/lol` | 游客 | `access_id` | 无 | `S12-guest` |
-| 13 | 弹幕二进制帧 | op=8 认证回复；op=3；**brotli**（protover 3）打包的 `DANMU_MSG`，游客打码和登录完整各一份；`WATCHED_CHANGE`；`SUPER_CHAT_MESSAGE`；带 `p_is_ack` 的消息；一条消息含多个包 | 观众 uid、昵称、头像、粉丝牌和 rich user 对象；发出的认证包里的 token 和 buvid | `BiliBiliDanmaku.decodeMessage`，通过 `onMessage` 收集输出（D:260）；ACK 用 `BiliBiliDanmaku(packetSender:)` 捕获（D:51）；认证包用 `buildJoinPayload(args, queueUuid:)`（D:184）。现有测试只构造了 zlib，brotli 路径缺覆盖（06-tests.md ⑤-4） | **缺**：还没有 WebSocket 帧的录制方式（STATUS.md:37） |
+| 13 | 弹幕二进制帧 | op=8 认证回复；op=3；**brotli**（protover 3）打包的 `DANMU_MSG`，游客打码和登录完整各一份；`WATCHED_CHANGE`；`SUPER_CHAT_MESSAGE`；带 `p_is_ack` 的消息；一条消息含多个包 | 观众 uid、昵称、头像、粉丝牌和 rich user 对象；发出的认证包里的 token 和 buvid | `BiliBiliDanmaku.decodeMessage`，通过 `onMessage` 收集输出（D:260）；ACK 用 `BiliBiliDanmaku(packetSender:)` 捕获（D:51）；认证包用 `buildJoinPayload(args, queueUuid:)`（D:184）。现有测试只构造了 zlib，brotli 路径缺覆盖（06-tests.md ⑤-4） | `fixtures/bilibili/danmaku/S13-live`（2026-09-27，`live_cli danmaku --record`，游客，房间 5050，60 s）：op 8、op 3、protover 2 的 zlib 包、44 条打码的 `DANMU_MSG`、`WATCHED_CHANGE`、醒目留言快照（空）。v4 改用 protover 2，所以没有 brotli 包。**缺**：登录的完整昵称、`SUPER_CHAT_MESSAGE`、`p_is_ack`（录制时没有出现） |
 | 14 | `SuperChat/getMessageList` | 有留言的房间 | 用户昵称、头像 | 没有静态入口 | **缺**：未录，录制时没有记下原因；需要找一个正有醒目留言的房间 |
 | 15 | 二维码 `generate` 和 `poll` | 86101、86090、86038、0 | `qrcode_key`、`url`；`Set-Cookie` 中的所有值；`refresh_token` | 没有静态入口（解析为私有，:272-302） | `S15-generate`、`S15-poll-86101`、`S15-poll-86038`。**缺** 86090 和 0：需要用手机登录账号扫码、确认 |
 | 16 | `x/member/web/account` | 登录；失效（-101） | `mid`、`uname`、`userid`、`birthday`、`sign` 等全部个人字段 | `BiliBiliUserInfoModel.fromJson`（lib/common/models/bilibili_user_info_page.dart:22） | `S16-no-cookie`（不带 Cookie，-101）。**缺**登录：没有登录账号 |

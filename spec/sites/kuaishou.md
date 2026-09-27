@@ -487,7 +487,7 @@ cookie: {Cookie}   （有才带）
 | S13 | `room-replay.html` + 对应的 `home-list` 卡片 | 卡片带流但房间页下播 | 回放判定 | 手写 | 录到的回放是另一种情况：卡片标题 `【回放】`、房间页在播（S02-gameboard-p1 + S09-room-live-replay，第 4 节）。**缺**“房间页下播、卡片还带流”的情况：没有遇到 |
 | S14 | `room-riskcontrol.html` | 风控或验证码页 | 风控识别 | 手写 [待确认 能否复现] | **缺**：录制时没有遇到风控或验证码页 |
 | S15 | `room-set-cookie.txt` | 房间页响应头 | 匿名会话下发的 Cookie 名称和属性 | 手写 | 不单独录：S09、S11、S12 的 `meta.json` 响应头里有完整的 `set-cookie`（名称和属性原样，值已替换） |
-| S16 | `feed-first.json`、`feed-next.json`、`feed-comments.json`、`feed-rejected.json`、`feed-offline.json` | `wap/live/feed` | 首轮无 cursor、带 cursor、评论和其它 type、`result≠1`、下播后 | 旧版 `parseFeedPayload` | **缺**：未录，录制时没有记下原因 |
+| S16 | `feed-first.json`、`feed-next.json`、`feed-comments.json`、`feed-rejected.json`、`feed-offline.json` | `wap/live/feed` | 首轮无 cursor、带 cursor、评论和其它 type、`result≠1`、下播后 | 旧版 `parseFeedPayload` | `fixtures/kuaishou/danmaku/S16-live`（2026-09-27，`live_cli danmaku --record`，匿名，10 次轮询）：首轮无 cursor、之后带 cursor，42 条评论（作者和文本已替换），响应体是 1 层 JSON 字符串，评论没有 `id` 字段。**缺**：其它 type、`result≠1`、下播后 |
 | S17 | `media-codec.json` | 每档 FLV 前若干字节 | 视频 codec id、首帧编码、分辨率 | 探针输出（docs/PLATFORM_PROBE_2026_09_25.md:87 的做法） | **缺**：还没有媒体首部的录制方式（docs/rewrite/STATUS.md:37） |
 
 **脱敏字段**

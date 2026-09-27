@@ -409,13 +409,14 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 
 | uri | 含义 | 消息体 | 输出 |
 |---|---|---|---|
-| 1400 | 聊天 | tag0 发送者（tag0 uid、tag2 昵称、tag3 性别）；tag3 内容；tag6 格式（tag0 颜色、tag1 字号、tag2 速度、tag3 过渡方式） | 聊天事件；颜色 ≤ 0 时用白色（huya_danmaku.dart:193-206, 389-470） |
+| 1400 | 聊天 | tag0 发送者（tag0 uid、tag2 昵称、tag3 性别、tag4 头像）；tag1 主播 UID（系统消息为 -1）；tag3 内容；tag6 格式（tag0 颜色、tag1 字号、tag2 速度、tag3 过渡方式）；tag20 消息 id（十进制字符串，命令 7 也有） | 聊天事件；颜色 ≤ 0 时用白色（huya_danmaku.dart:193-206, 389-470） |
 | 8006 | 热度 | tag0 `iAttendeeCount` | 热度更新，不是在线人数（:207-220） |
 | 2001314 | 头条留言（醒目留言）通知 | 不需要解码 | 后台拉取留言板（7.5） |
 | 其它 | — | — | 忽略。礼物、进场、贵宾席等是否需要 [待确认] |
 
 - 分组推送里每条消息的 id 记为 `huya:{消息 id}`，用来去重（huya_danmaku.dart:184, 204, 218）。
-- 旧实现读发送者时，把 `lMid` 也从 tag0 读（huya_danmaku.dart:398），这是错的，v4 不沿用。正确的 tag [待确认]。
+- 旧实现读发送者时，把 `lMid` 也从 tag0 读（huya_danmaku.dart:398），这是错的，v4 不沿用。2026-09-27 录制的发送者 tag1 都是 0。
+- v4 的消息 id 取 1400 的 tag20，没有时用命令 22 条目的 tag2；tag1 大于 0 且不等于本房间主播 UID 的聊天丢弃（命令 7 也能防串房）。
 
 ### 7.5 头条留言
 
@@ -441,7 +442,7 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 ### 7.6 丢弃跨房间消息
 
 - 以连接会话为界：切房、停止或重新开始后，上一会话的帧、重连回调、还没返回的留言板结果全部丢弃（huya_danmaku.dart:86-127, 156-169, 253-260；huya_danmaku_protocol_test.dart:178-209）。
-- 命令 22 带分组 id。v4 只接受分组 id 等于本连接注册的 `live:{UID}` 或 `chat:{UID}` 的条目，其余丢弃。旧实现读了分组 id 但没有校验（huya_danmaku.dart:341）。06-tests.md:57 说测试覆盖了“丢弃跨房间消息”，实际只覆盖了会话隔离。服务端实际的分组 id 取值 [待确认]；测试夹具用的是 `live:2272316519`（huya_danmaku_protocol_test.dart:28-29）。
+- 命令 22 带分组 id。v4 只接受分组 id 等于本连接注册的 `live:{UID}` 或 `chat:{UID}` 的条目，其余丢弃。旧实现读了分组 id 但没有校验（huya_danmaku.dart:341）。06-tests.md:57 说测试覆盖了“丢弃跨房间消息”，实际只覆盖了会话隔离。2026-09-27 录制（S11）：服务端的分组 id 就是 `live:{主播UID}`，与注册的一致。
 - 命令 7 不带分组信息，只能靠会话隔离。
 
 ---
@@ -550,7 +551,7 @@ tId 是 `HuyaUserId`（tag：0 lUid、1 sGuid、2 sToken、3 sHuYaUA、4 sCookie
 | S08 | 原生 WUP | `getCdnTokenInfoEx` 的请求字节和响应字节：至少两个不同流名；另录一个返回码 ≠ 0 的 | ≥3 | Tars 编解码；租期 | **缺**：`live_cli fixture capture` 的请求体是文本参数（tools/live_cli/lib/src/fixture/command.dart:30），响应按 UTF-8 文本保存（capture.dart:159），还录不了 Tars 二进制 |
 | S09 | 网页 WUP | `getCdnTokenInfoEx`：匿名、账号各一 | 2 | 网页后备 | **缺**：同 S08；账号那一份还需要登录 Cookie |
 | S10 | 头条留言板 | `getHeadLineMessageBoard`：空的、有条目的 | 2 | 醒目留言解析 | **缺**：同 S08 |
-| S11 | 弹幕 | 高密度房间 60 秒原始帧：客户端的 16、20；服务端的 7 和 22（uri 1400、8006、2001314 以及未知 uri） | ≥1 | 解码；分组 id 的实际取值 | **缺**：还没有 WebSocket 帧的录制方式（docs/rewrite/STATUS.md:37） |
+| S11 | 弹幕 | 高密度房间 60 秒原始帧：客户端的 16、20；服务端的 7 和 22（uri 1400、8006、2001314 以及未知 uri） | ≥1 | 解码；分组 id 的实际取值 | `fixtures/huya/danmaku/S11-live`（2026-09-27，`live_cli danmaku --record`，房间 998，40 s）：16、20、命令 7 和 22、110 条 1400、8006、未知 uri（负载已清空）、一次头条留言板 WUP 响应（空）。**缺**：2001314 通知和有条目的留言板（录制时没有出现） |
 | S12 | 各线路地址 | 每个 CDN 分别取原生 FLV、网页 FLV、HLS：最终地址（查询串脱敏）、HTTP 状态、Content-Type、前 16 字节；HLS 的 Range 响应 | 每房间 3 × CDN 数 | 线路身份；格式识别 | **缺**：需要先签名（原生地址还依赖 S08 的 WUP），也还没有媒体首字节的录制方式（STATUS.md:37） |
 | S13 | 连接寿命 | 同一房间：网页 FLV 和 HLS 单连接读到结束；原生 FLV 读 ≥ 420 秒；签发 90 秒后才打开的网页地址 | 各 1 次，只存时长、字节数、状态码 | 租期参数 | **缺**：同 S12 |
 | S14 | 房间页（可选） | `https://www.huya.com/{room}` 里的 `stream:` 数据块 | 1 | 探针用的备用来源（tool/probes/huya_native_transport_probe_test.dart:28-48） | 未录（可选） |

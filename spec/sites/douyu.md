@@ -468,7 +468,8 @@ len = 8 + body 的 UTF-8 字节数 + 1
 | `chatmsg` | 见下 | :123-144；测试 :7-46, 75-85 |
 | `comm_chatmsg` | 醒目留言，见下 | :159-178；测试 :87-104 |
 | `voice_trlt` | 语音醒目留言，见下 | :180-201 |
-| 其它（`loginres`、`mrkl`、`uenter`、`dgb` 等） | 忽略。礼物、进场消息要不要处理 [待确认] | :121-150 |
+| `dgb` | 礼物（v4）：`gfn` 名称、`gfid`、`gfcnt` 数量、`nn`/`uid`；`rid` 不同则丢弃；没有价格字段 | 2026-09-27 录制（S13） |
+| 其它（`loginres`、`mrkl`、`uenter` 等） | 忽略 | :121-150 |
 
 **`chatmsg`**
 - `rid` 不为空且与当前房间不同时丢弃；`rid` 为空时保留。
@@ -483,6 +484,7 @@ len = 8 + body 的 UTF-8 字节数 + 1
 - `cprice`：价格，单位是分，除以 100 得到元。
 - 嵌套的 `chatmsg{nn, txt, ic}`；头像为 `https://apic.douyucdn.cn/upload/<ic>_small.jpg`。
 - 缺少任一必需字段时忽略这条。
+- 价格或时长为 0 的不是醒目留言：2026-09-27 录到同类型的开箱通知（`btype@=pandora`、`cprice@=0`、`cet@=0`、`txt@=-`），旧实现会把它们当成 0 元醒目留言。
 
 **`voice_trlt`**（语音醒目留言）
 - 取 `list[0]` 的字段：`acptime` 开始时间（秒）、`etime` 结束时间（秒）、`realPrice`（分，除以 100 得元）、`content`、`un`。
@@ -700,7 +702,7 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 | S10 | H5 错误 | 未开播房间（`error=-5`？）；故意用错 DID 触发的 403，记录状态码、响应长度、响应内容和响应头 | `parsePlayResponse` | `S10-offline`（`error=-5`，`房间未开播`）、`S10-wrong-did`（403，`"鉴权失败"`） |
 | S11 | **两次续签** | 见下 | 没有静态入口。期望值按 §6.8 的规则计算，可复用 flv_splice_relay.dart:39-82 的 tag 解析 | **缺**：`live_cli fixture` 只录单次 HTTP 请求，还没有录制 FLV tag 索引和续签时间线的方式（docs/rewrite/STATUS.md:37） |
 | S12 | passport `safeAuth` | Set-Cookie 列表，全部用合成值 | `mergeSetCookieLines`、`sessionExpiry`、`sessionState` | `S12-synthetic`（合成）。**缺**真实响应：没有可用的登录账号，真实 Set-Cookie 的字段组合 [待确认] |
-| S13 | 弹幕二进制帧 | `loginres`；`chatmsg` 的各种情况（有 `dms`、没有 `dms`、`if=1`、别的房间的 `rid`、空 `txt`）；`comm_chatmsg`；`voice_trlt`；一帧多包；心跳回应；`uenter`、`dgb` 等其它类型 | `decodeMessage`、`deserializeDouyuPackets`、`sttToJObject` | **缺**：还没有 WebSocket 帧的录制方式（STATUS.md:37） |
+| S13 | 弹幕二进制帧 | `loginres`；`chatmsg` 的各种情况（有 `dms`、没有 `dms`、`if=1`、别的房间的 `rid`、空 `txt`）；`comm_chatmsg`；`voice_trlt`；一帧多包；心跳回应；`uenter`、`dgb` 等其它类型 | `decodeMessage`、`deserializeDouyuPackets`、`sttToJObject` | `fixtures/douyu/danmaku/S13-live`（2026-09-27，`live_cli danmaku --record`，房间 9999，30 s）：`loginres`（客户端 IP 已替换）、147 条 `chatmsg`（含没有 `dms` 的和超过 45 s 的积压）、125 个 `dgb`、一帧多包、`uenter` 等。**缺**：付费的 `comm_chatmsg`、`voice_trlt`、别的房间的 `rid`（录制时没有出现） |
 | S14 | CDN 上 FLV 的前 32 字节 | 用 Range 请求，只保存文件头 | —（参照 tool/interface_probe.py:256-268） | **缺**：还没有媒体文件头的录制方式（STATUS.md:37） |
 
 **S11 两次续签的录法**

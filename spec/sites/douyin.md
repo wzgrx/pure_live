@@ -294,8 +294,8 @@
 
 | method | 处理 | 规则 |
 |---|---|---|
-| `WebcastChatMessage` | 聊天 | 内容 `content`，用户 `user.nickName` / `user.id`；消息 id 优先 `common.msgId`，为 0 时用外层 `msgId`，都没有则为空，输出加前缀 `douyin:`；时间 `common.createTime`，>1e11 视为毫秒，否则秒，≤0 为空；`common.roomId` 非 0 且不等于当前 room_id 时丢弃（dm:226-253；test/douyin_danmaku_protocol_test.dart:18-48） |
-| `WebcastRoomUserSeqMessage` | 在线人数 | 用 `onlineUserForAnchor`（并发）；`totalUser` 是累计，不得当在线；文本不含数字时忽略（dm:255-272；proto:65-80） |
+| `WebcastChatMessage` | 聊天 | 内容 `content`，用户 `user.nickName` / `user.id`；消息 id 优先 `common.msgId`，为 0 时用外层 `msgId`，都没有则为空，输出加前缀 `douyin:`；时间 `common.createTime`，>1e11 视为毫秒，否则秒，≤0 为空；v4 在它缺失时用 `ChatMessage.eventTime`（字段 15，秒；2026-09-27 录制的帧只有这个）；`common.roomId` 非 0 且不等于当前 room_id 时丢弃（dm:226-253；test/douyin_danmaku_protocol_test.dart:18-48） |
+| `WebcastRoomUserSeqMessage` | 在线人数 | v4 先用精确整数 `total`（字段 3），没有时解析 `onlineUserForAnchor`（字段 10，如 `30.6万`）；`totalUser`（字段 7）是累计，不得当在线；都没有数字时忽略（dm:255-272；proto:65-80；2026-09-27 录制：`total` 305503 对应 `30.6万`） |
 | 其它（礼物 `GiftMessage`、进场 `MemberMessage`、点赞 `LikeMessage`、关注 `SocialMessage` 等，proto 已有定义 proto:106,200,316,331） | 旧实现忽略 | v4 是否输出 [待确认] |
 | 下播控制消息 | 旧实现无定义 | 是否有 `WebcastControlMessage` 及其字段 [待确认] |
 
@@ -382,9 +382,9 @@
 | S9 | `user/me`：有效 Cookie、失效 Cookie、无 Cookie | 账号状态 | 无静态入口 | `S09-user-me-invalid-cookie`、`S09-user-me-no-cookie`。**缺**有效 Cookie：没有登录账号 |
 | S10 | 每档播放地址的前 64 KB 媒体头（或 ffprobe 摘要） | 编码、FLV HEVC 形态 | 不适用 | **缺**：还没有媒体首部的录制方式（docs/rewrite/STATUS.md:37） |
 | S11 | 一段跨过 `expire` 的长时 FLV 拉流记录（时间戳、断开时刻、错误码） | 租期、cutsConnection | 不适用 | **缺**：同 S10；到期在 7 天后，需要专门安排 |
-| S12 | 弹幕握手 URL（签名脱敏）与握手响应头、关闭码 | 连接契约 | `DouyinDanmaku.buildServerUrls` / `buildHandshakeHeaders`（dm:168-192） | **缺**：还没有 WebSocket 的录制方式（STATUS.md:37） |
-| S13 | 弹幕下行二进制帧：gzip 与非 gzip 各一；`needAck=true`；聊天；在线人数；礼物、进场、点赞、关注；下播控制消息（如能录到）；他房 roomId 的聊天 | 解码、ACK、分发、过滤 | `DouyinDanmaku` 设置参数后调用 `decodeMessage`/`unPackWebcastChatMessage`/`unPackWebcastRoomUserSeqMessage`（dm:201-272；用法见 test/douyin_danmaku_protocol_test.dart:11-48） | **缺**：同 S12 |
-| S14 | 上行帧：心跳、ACK | 编码契约 | 旧实现 `heartbeat`/`sendAck` 生成的字节（dm:194-199,274-280） | **缺**：同 S12 |
+| S12 | 弹幕握手 URL（签名脱敏）与握手响应头、关闭码 | 连接契约 | `DouyinDanmaku.buildServerUrls` / `buildHandshakeHeaders`（dm:168-192） | 在 S13 的 meta.json（握手 URL，签名和访客 ID 已替换，Cookie 为 `<redacted>`）。**缺**：握手响应头和关闭码 |
+| S13 | 弹幕下行二进制帧：gzip 与非 gzip 各一；`needAck=true`；聊天；在线人数；礼物、进场、点赞、关注；下播控制消息（如能录到）；他房 roomId 的聊天 | 解码、ACK、分发、过滤 | `DouyinDanmaku` 设置参数后调用 `decodeMessage`/`unPackWebcastChatMessage`/`unPackWebcastRoomUserSeqMessage`（dm:201-272；用法见 test/douyin_danmaku_protocol_test.dart:11-48） | `fixtures/douyin/danmaku/S13-live`（2026-09-27，`live_cli danmaku --record`，匿名，30 s）：78 个 `needAck` 的 gzip 推送（`payloadEncoding` 为 `pb` 但负载是 gzip）、215 条聊天、16 条在线人数，其它 method 的负载已清空。**缺**：非 gzip、礼物、下播控制、他房 roomId |
+| S14 | 上行帧：心跳、ACK | 编码契约 | 旧实现 `heartbeat`/`sendAck` 生成的字节（dm:194-199,274-280） | 在 S13（上行的 `hb` 和 `ack`） |
 | S15 | 签名金样本：固定输入下的 a_bogus、X-Bogus、msToken、访客 ID | 签名算法 | 访客 ID：`DouyinSite.generateAnonymousUserUniqueId(random:)`（site/douyin_site.dart:884-892）。a_bogus 只有指纹可注入（utils/abogus.dart:610-617），时间和随机前缀不可注入；X-Bogus 用安全随机（xb:99-102）。需要临时改造的旧算法副本才能出金样本 [待确认 做法] | **缺**：旧算法的时间和随机数不能注入，还没做 |
 
 ## 12. 待确认

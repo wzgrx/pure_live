@@ -10,6 +10,7 @@ resolution: workspace
 
 dependencies:
   cached_network_image: ^4.0.2
+  crypto: ^3.0.7
   ffi: ^2.2.0
   file_picker: ^13.1.0
   flutter:

@@ -31,7 +31,8 @@ final class Page<T> {
   /// An empty last page.
   const new empty() : items = const [], next = null;
 
-  /// Items in platform order.
+  /// Items in the order the platform spec defines (platform order unless the
+  /// spec re-sorts).
   final List<T> items;
 
   /// Cursor for the following page, or null when this is the last one.

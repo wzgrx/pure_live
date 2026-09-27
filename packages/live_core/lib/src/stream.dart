@@ -107,6 +107,6 @@ final class StreamSet {
   /// The quality these lines were requested at.
   final Quality selected;
 
-  /// Lines in the platform's order.
+  /// Lines in the order the platform spec defines.
   final List<StreamLine> lines;
 }

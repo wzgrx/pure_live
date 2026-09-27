@@ -79,7 +79,8 @@ final class RegionBlocked extends SiteError {
   String get kind => 'RegionBlocked';
 }
 
-/// The room is live but offers no playable video stream.
+/// No playable stream right now: offline, a loop or replay without a stream,
+/// or live without video (ADR 0010, revision).
 final class StreamUnavailable extends SiteError {
   /// Creates the error.
   const new(super.site, [super.detail]);

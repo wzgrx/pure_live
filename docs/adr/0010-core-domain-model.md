@@ -38,6 +38,14 @@
    - `NetworkFailure`：网络层失败，可重试。
 7. **能力接口**按能力拆分，平台只实现自己支持的部分：`LiveSite`（身份和能力）、`CatalogSource`、`SearchSource`、`RoomSource`、`StreamSource`、`LinkResolver`。弹幕接口放在 `live_danmaku`，不进 `live_core`。
 
+## 修订（2026-09-27，四个平台解析器完成后）
+
+- **顺序**：`Page.items` 和 `StreamSet.lines` 按平台规格规定的顺序排列：规格没有要求重排时保持平台顺序，要求重排时照规格（例如 B 站列表按热度，线路按规则排序）。
+- **`StreamUnavailable`** 的含义扩为“现在没有可播放的流”：未开播、轮播或回放没有流、在播但没有视频流。界面结合房间状态显示原因。
+- **未知的开播状态**抛 `ApiChanged`，不当作未开播（规则 2）。
+- **封禁或锁定的房间**（B 站 `lock_status`）暂不建模。有样本后再决定，是加一个状态，还是映射成错误。
+- **短号和别名**不进 `RoomDetail`：适配器比较输入的 `RoomRef` 和 `detail.ref`，自行记录对应关系。
+
 ## 备选方案与放弃理由
 
 - **沿用旧版 `LiveRoom`**：一个类同时承担卡片、详情、收藏、历史和 IPTV，有 40 多个可空字段，还有 `status` 和 `liveStatus` 两套状态。

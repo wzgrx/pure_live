@@ -10,7 +10,7 @@ import 'package:live_cli/live_cli.dart';
 /// mistake them for a passing probe.
 Future<void> main(List<String> arguments) async {
   final runner = CommandRunner<int>('live_cli', 'Pure Live v4 probes and sample recording.')
-    ..addCommand(_PendingCommand('probe', 'Resolve a room through its adapter and read the first media packets.'))
+    ..addCommand(ProbeCommand())
     ..addCommand(FixtureCommand())
     ..addCommand(_PendingCommand('danmaku', 'Connect to a room chat and print decoded messages.'))
     ..addCommand(_PendingCommand('lease', 'Follow a leased stream across renewals and report timestamp gaps.'));

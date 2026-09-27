@@ -61,6 +61,7 @@ class MainActivity : FlutterActivity() {
                 result.error("keystore", error.javaClass.simpleName, null)
             }
         }
+        flutterEngine.plugins.add(TvSupport())
         EventChannel(messenger, "purelive/share/events").setStreamHandler(
             object : EventChannel.StreamHandler {
                 override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {

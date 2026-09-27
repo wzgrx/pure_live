@@ -29,3 +29,25 @@ ADR 0014 冻结了旧应用，但它还是 workspace 成员。它有一百多个
 
 - v4 的依赖只受 v4 自己约束，升级不再迁就旧应用。
 - `legacy/` 下的脚本、测试和工作流引用的路径不再维护，可能失效。
+
+## 执行记录（2026-09-27 全面清理）
+
+- **GitHub**：
+  - 只剩 `master` 分支；根目录只有 v4 和仓库级文件；只注册了手动触发的 CI 和每周版本检查两个工作流；没有自托管运行器。
+  - 已删除 3.x 的构建产物（5 个，812 MB）和 Actions 缓存（6 个，5.4 GB）。
+  - 仓库简介改为 v4。
+  - 保留：
+    - 全部 Release 和标签：3.2.11 是现在可下载的版本，已安装的 3.x 从这里检查更新；
+    - `native-*` 预发布：原生库和对应源码，v4 的 media_kit 也用；
+    - 4 个签名 Secret：只能写不能读，可能是某个旧签名密钥仅存的副本，v4 定签名和密钥轮换时再处理。
+- **WSL**：
+  - 删除：3.x 构建输出和缓存，`pure_live-linux` 工作树，`upstream` 远程，自编 libmpv/FFmpeg 构建目录，FFmpeg 7.1 复现工具，NDK 27.3 和 30.0.14904198，3.x 的 Gradle 缓存（21 GB），Linux 构建镜像，会话临时文件（7.6 GB）。
+  - 环境脚本 `~/tools/purelive-env.sh` 改为 v4 环境，使用新的 Gradle 目录 `~/.gradle-purelive-v4`。
+  - 不能从 GitHub 重新得到的 3.x 文件（设置备份、容器定义、手机拉取的设置文件）移到 `~/archive/pure_live-v3/`。
+- **Windows**：
+  - `claude-work` 下删除：3.x 构建输出、三个 3.x 测试安装目录、JDK 25 和 26、截图和日志。
+  - `claude-work\pure_live` 更新到最新 `master`，供 v4 的 Windows 构建使用；Windows 的 Flutter 改用 JDK 27。
+- **保留**：
+  - 用户自己安装、正在使用的 3.x（手机和 `D:\Soft\PureLive`）；
+  - 其它项目共用的工具（NDK 28.2、Temurin 25/26、`~/.gradle`、pub 缓存）。
+- **待用户确认**：Codex 的 3.x 工作目录 `Documents\Codex\2026-08-12\https-github-com-liuchuancong-pure-live`（132 GB）。其中的 Git 仓库（全部分支、标签和 3 个 stash）已打包成 `C:\Users\123\claude-work\codex-pure_live-v3.bundle`（100 MB，已校验）；目录里没有签名密钥。删除这个目录要用户确认。

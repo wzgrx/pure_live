@@ -11,12 +11,14 @@ import 'package:live_danmaku/src/sites/kuaishou.dart';
 import 'package:live_danmaku/src/sites/missevan.dart';
 import 'package:live_danmaku/src/sites/pandalive.dart';
 import 'package:live_danmaku/src/sites/picarto.dart';
+import 'package:live_danmaku/src/sites/seventeenlive.dart';
 import 'package:live_danmaku/src/sites/showroom.dart';
 import 'package:live_danmaku/src/sites/twitcasting.dart';
 import 'package:live_danmaku/src/transport.dart';
 
 /// Platforms with a chat connector.
 const danmakuPlatforms = {
+  '17live',
   'bilibili',
   'chzzk',
   'douyin',
@@ -66,6 +68,7 @@ DanmakuConnector? danmakuConnectorFor(
     session: session,
     clock: clock,
   ),
+  '17live' => SeventeenliveConnector(detail: room, transport: transport, session: session, clock: clock),
   'chzzk' => ChzzkConnector(detail: room, transport: transport, session: session, clock: clock),
   'kilakila' => KilakilaConnector(detail: room, transport: transport, session: session, clock: clock),
   'pandalive' => PandaliveConnector(detail: room, transport: transport, session: session, clock: clock),

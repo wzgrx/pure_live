@@ -137,6 +137,7 @@ abstract class FrameScrubber {
     'missevan' => MissevanFrameScrubber(detail, seed: seed),
     'pandalive' => PandaliveFrameScrubber(detail, seed: seed),
     'picarto' => PicartoFrameScrubber(detail, seed: seed),
+    '17live' => SeventeenliveFrameScrubber(detail, seed: seed),
     'showroom' => ShowroomFrameScrubber(detail, seed: seed),
     'twitcasting' => TwitcastingFrameScrubber(detail, seed: seed),
     _ => throw ArgumentError.value(platform, 'platform', 'no frame scrubber'),

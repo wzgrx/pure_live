@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:live_cli/src/danmaku/frame_scrub.dart';
 import 'package:live_cli/src/danmaku/recorder.dart';
@@ -495,5 +496,122 @@ class PandaliveFrameScrubber extends FrameScrubber {
   List<int> plain(CapturedFrame frame) {
     final text = utf8.decode(frame.bytes, allowMalformed: true);
     return utf8.encode('$text\n${text.replaceAll(r'\"', '"').replaceAll(r'\/', '/')}');
+  }
+}
+
+/// 17LIVE (spec/sites/17live.md §11): the anonymous Ably token (auth
+/// answer and handshake URL), the connection's id, key and server; message
+/// payloads are gunzipped, reduced and gzipped again: comments keep their
+/// text and time, gifts their id, live info its viewer count, each with the
+/// sender's id and name replaced; other types keep only their type (their
+/// payloads name viewers and supporters).
+class SeventeenliveFrameScrubber extends FrameScrubber {
+  /// Creates the scrubber.
+  new(super.detail, {super.seed});
+
+  @override
+  Uri scrubUrl(Uri url) {
+    final token = url.queryParameters['access_token'];
+    if (token == null) return url;
+    record('handshake.access_token', 'secret');
+    return url.replace(queryParameters: {...url.queryParameters, 'access_token': names.secret(token)});
+  }
+
+  @override
+  List<int>? scrubFrame(CapturedFrame frame) {
+    final Object? root;
+    try {
+      root = jsonDecode(utf8.decode(frame.bytes));
+    } on FormatException {
+      return frame.bytes;
+    }
+    if (root is! Map<String, dynamic>) return frame.bytes;
+    if (root['token'] is String) {
+      root['token'] = names.secret(root['token'] as String);
+      record(r'$.token', 'secret');
+    }
+    if (root['connectionId'] is String) {
+      root['connectionId'] = names.secret(root['connectionId'] as String);
+      record(r'$.connectionId', 'secret');
+    }
+    final details = root['connectionDetails'];
+    if (details is Map<String, dynamic>) {
+      for (final key in const ['connectionKey', 'serverId']) {
+        if (details[key] is String) {
+          details[key] = names.secret(details[key] as String);
+          record('\$.connectionDetails.$key', 'secret');
+        }
+      }
+    }
+    final messages = root['messages'];
+    if (messages is List) {
+      for (final message in messages) {
+        if (message is! Map<String, dynamic>) continue;
+        final payload = SeventeenliveProtocol.payload(message['data']);
+        if (payload == null) continue;
+        message['data'] = base64.encode(gzip.encode(utf8.encode(jsonEncode(_reduce(payload)))));
+      }
+    }
+    return utf8.encode(_elsewhere(names, jsonEncode(root)));
+  }
+
+  Map<String, Object?> _user(Object? user) {
+    if (user is! Map) return const {};
+    return {
+      if (user['userID'] is String) 'userID': names.secret(user['userID'] as String),
+      if (user['displayName'] is String) 'displayName': names.person(user['displayName'] as String),
+    };
+  }
+
+  Map<String, Object?> _reduce(Map<String, dynamic> payload) {
+    final type = payload['type'];
+    final comment = payload['commentMsg'];
+    if (type == 3 && comment is Map) {
+      record(r'$.messages[*].data[type 3]', 'person');
+      final body = comment['comment'];
+      return {
+        'type': type,
+        'commentMsg': {
+          'comment': {'text': body is Map ? body['text'] : null},
+          'content': comment['content'],
+          'sendTime': comment['sendTime'],
+          'displayUser': _user(comment['displayUser']),
+        },
+      };
+    }
+    final gift = payload['giftMsg'];
+    if (type == 13 && gift is Map) {
+      record(r'$.messages[*].data[type 13]', 'person');
+      return {
+        'type': type,
+        'giftMsg': {'giftID': gift['giftID'], 'displayUser': _user(gift['displayUser'])},
+      };
+    }
+    final info = payload['liveinfo'];
+    if (type == 38 && info is Map) {
+      return {
+        'type': type,
+        'liveinfo': {'liveViewerCount': info['liveViewerCount']},
+      };
+    }
+    record(r'$.messages[*].data[other]', 'dropped');
+    return {'type': type};
+  }
+
+  @override
+  List<int> plain(CapturedFrame frame) {
+    final text = utf8.decode(frame.bytes, allowMalformed: true);
+    final decoded = StringBuffer(text);
+    try {
+      final root = jsonDecode(text);
+      final messages = root is Map ? root['messages'] : null;
+      for (final message in messages is List ? messages : const <Object?>[]) {
+        final payload = message is Map ? SeventeenliveProtocol.payload(message['data']) : null;
+        if (payload != null) decoded.write('\n${jsonEncode(payload)}');
+      }
+    } on FormatException {
+      // Not JSON: the text alone.
+    }
+    return utf8.encode(decoded.toString());
   }
 }

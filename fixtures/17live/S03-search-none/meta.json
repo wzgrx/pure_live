@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "sample": "S03-search-none",
+  "capturedAt": "2026-09-27T19:52:51.180384Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api-dsa.17app.co/api/v1/liveStreams/search?query=zxqvnothingfixture",
+    "headers": {
+      "Origin": "https://17.live",
+      "Referer": "https://17.live/",
+      "Accept": "application/json, text/plain, */*"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "alt-svc": "h3=\":443\"; ma=2592000",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://17.live",
+      "date": "Sun, 27 Sep 2026 19:52:51 GMT",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "content-type": "application/json; charset=utf-8",
+      "via": "1.1 google"
+    }
+  },
+  "raw": {
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "length": 2
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

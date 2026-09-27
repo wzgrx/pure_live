@@ -9,6 +9,7 @@ import 'package:live_cli/src/fixture/rules/kuaishou.dart';
 import 'package:live_cli/src/fixture/rules/missevan.dart';
 import 'package:live_cli/src/fixture/rules/pandalive.dart';
 import 'package:live_cli/src/fixture/rules/picarto.dart';
+import 'package:live_cli/src/fixture/rules/seventeenlive.dart';
 import 'package:live_cli/src/fixture/rules/showroom.dart';
 import 'package:live_cli/src/fixture/rules/twitcasting.dart';
 import 'package:live_cli/src/fixture/scrub.dart';
@@ -17,6 +18,7 @@ import 'package:live_cli/src/fixture/scrub.dart';
 /// "需要脱敏的字段" list in `spec/sites/<platform>.md` §11. Cookie headers,
 /// Set-Cookie values and Authorization headers are always scrubbed.
 const Map<String, ScrubRules> platformRules = {
+  '17live': seventeenliveRules,
   'bilibili': bilibiliRules,
   'chzzk': chzzkRules,
   'douyin': douyinRules,

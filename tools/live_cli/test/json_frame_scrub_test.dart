@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:brotli/brotli.dart';
 import 'package:live_cli/live_cli.dart';
@@ -175,6 +176,83 @@ void main() {
       out,
       channel: '24133575',
       context: DecodeContext(room: 'pandalive:daisy00', session: 0, receivedAt: 0, now: DateTime.utc(2026)),
+    );
+    expect(decoded.events.whereType<DanmakuChat>().single.text, 'hello');
+  });
+
+  test('17live: gzip payloads are reduced and packed again; tokens and connection ids are replaced', () {
+    final scrubber = FrameScrubber.forPlatform('17live', _room('17live', '29046769'), seed: 5);
+    String pack(Map<String, Object?> payload) => base64.encode(gzip.encode(utf8.encode(jsonEncode(payload))));
+    final auth = utf8.decode(
+      scrubber.scrubFrame(
+        CapturedFrame(
+          direction: 'in',
+          millis: 0,
+          bytes: utf8.encode('{"provider":1,"token":"qvDtFQ.DDC0-eGrme5ctrBQSFzNHT1fQZ4Q8gE2"}'),
+          text: true,
+          url: SeventeenliveProtocol.auth,
+        ),
+      )!,
+    );
+    expect(auth, isNot(contains('DDC0-eGrme5ctrBQSFzNHT1fQZ4Q8gE2')));
+    final connected = utf8.decode(
+      scrubber.scrubFrame(
+        _in(
+          utf8.encode(
+            jsonEncode({
+              'action': 4,
+              'connectionId': 'GSKpfkxteF',
+              'connectionDetails': {'connectionKey': '4ab-NrJ6QyWxOQ!GSKpfkxteFAWtC0', 'serverId': 'frontdoor.a1eb'},
+            }),
+          ),
+          text: true,
+        ),
+      )!,
+    );
+    for (final gone in ['GSKpfkxteF', 'NrJ6QyWxOQ', 'frontdoor.a1eb']) {
+      expect(connected, isNot(contains(gone)));
+    }
+    final message = jsonEncode({
+      'action': 15,
+      'channel': '29046769',
+      'messages': [
+        {
+          'id': 'm:0',
+          'data': pack({
+            'type': 3,
+            'commentMsg': {
+              'comment': {'text': 'hello'},
+              'content': 'hello',
+              'sendTime': 1790539305272,
+              'level': 70,
+              'displayUser': {'userID': '42813249-17ed-4d5a-acb7-73e247e648be', 'displayName': 'みかさ'},
+            },
+          }),
+        },
+        {
+          'id': 'm:1',
+          'data': pack({
+            'type': 79,
+            'laborReceiveRewardMsg': {
+              'userInfo': {'displayName': '別の観客'},
+            },
+          }),
+        },
+      ],
+    });
+    final out = utf8.decode(scrubber.scrubFrame(_in(utf8.encode(message), text: true))!);
+    final payloads = [
+      for (final m in (jsonDecode(out) as Map)['messages'] as List) SeventeenliveProtocol.payload((m as Map)['data']),
+    ];
+    final text = jsonEncode(payloads);
+    for (final gone in ['42813249', 'みかさ', '別の観客', '"level"']) {
+      expect(text, isNot(contains(gone)));
+    }
+    expect(payloads[1], {'type': 79});
+    final decoded = SeventeenliveProtocol.decode(
+      out,
+      roomId: '29046769',
+      context: DecodeContext(room: '17live:29046769', session: 0, receivedAt: 0, now: DateTime.utc(2026)),
     );
     expect(decoded.events.whereType<DanmakuChat>().single.text, 'hello');
   });

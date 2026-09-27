@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "sample": "S01-sections-jp-p2",
+  "capturedAt": "2026-09-27T19:52:41.534438Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=JP&cursor=1790538478401563328%3A32%3A20%3A10-HSvb1ip49VilQh7pGZZSKqhtQrU%3D",
+    "headers": {
+      "Origin": "https://17.live",
+      "Referer": "https://17.live/",
+      "Accept": "application/json, text/plain, */*"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "trace-id": "c35f5fe0da3ca53c14dfaf0a8601df73",
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://17.live",
+      "date": "Sun, 27 Sep 2026 19:52:42 GMT",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "via": "1.1 google",
+      "content-type": "application/json"
+    }
+  },
+  "raw": {
+    "sha256": "f0ae7570ef4374968e737d9d567b32e906110fcf4da9eedfd2b2c5a08dcfdd65",
+    "length": 17712
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.sections[*].grids[*].groupCallInfo.viewerToken",
+      "rule": "synthetic (M4.33)"
+    },
+    {
+      "where": "$.sections[*].grids[*].groupCallInfo.referralCode",
+      "rule": "synthetic (M4.33)"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

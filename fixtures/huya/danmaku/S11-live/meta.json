@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "case": "S11-live",
+  "room": "huya:998",
+  "danmakuKeys": {
+    "uid": "294636272",
+    "topSid": "294636272",
+    "subSid": "294636272"
+  },
+  "capturedAt": "2026-09-27T14:31:49.431913Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://wsapi.huya.com",
+      "headers": {
+        "Origin": "https://www.huya.com"
+      }
+    }
+  ],
+  "frames": 218,
+  "raw": {
+    "sha256": "fe2fe75363903623b9e194eb6f0616b6117329a5fab4563ff18dfb90c7baa23e",
+    "length": 87524
+  },
+  "scrubbed": [
+    {
+      "where": "1400.sender",
+      "rule": "person"
+    },
+    {
+      "where": "uri 6501 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6111 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 7708 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6211 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6110 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6892 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 1031020 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6480 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 7108 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 1010003 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6481 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 7109 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6479 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 7107 body",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

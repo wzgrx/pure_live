@@ -79,6 +79,9 @@ class PlayerView extends ConsumerStatefulWidget {
     this.onOpenDanmakuSettings,
     this.resume = false,
     this.surfaceReady = true,
+    this.portraitOverride = store.PortraitOverride.automatic,
+    this.onPortraitOverride,
+    this.portraitDanmakuHidden = false,
     this.tv = false,
     super.key,
   });
@@ -134,6 +137,15 @@ class PlayerView extends ConsumerStatefulWidget {
   /// let go of it (SURF-5).
   final bool surfaceReady;
 
+  /// The room's orientation override (GEO-7).
+  final store.PortraitOverride portraitOverride;
+
+  /// Sets the override (LAY-4: on touch devices); null hides the control.
+  final ValueChanged<store.PortraitOverride>? onPortraitOverride;
+
+  /// Portrait fullscreen with the danmaku area set to hidden (F-ROOM-06).
+  final bool portraitDanmakuHidden;
+
   /// TV mode (live-room §3.5): the room page draws the remote's info bar,
   /// control row and side panels; this view keeps the picture, danmaku,
   /// hints and failure overlay, without the touch bars and the lock.
@@ -167,6 +179,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   Timer? _volumeSave;
   double _brightness = 1;
   bool _pipSupported = false;
+  store.PortraitFit _portraitFit = store.PortraitFit.contain;
   final StallWatch _stallWatch = StallWatch();
   late store.VideoFit _fit;
 
@@ -781,12 +794,16 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     });
     final prefs = ref.watch(danmakuPrefsProvider);
     final keepOn = ref.watch(screenKeepOnSetting);
-    final fit = switch (_fit) {
-      store.VideoFit.cover => player.VideoFit.cover,
-      store.VideoFit.fill => player.VideoFit.fill,
-      _ => player.VideoFit.contain,
-    };
-    final danmakuShown = prefs.enabled && !prefs.hidden && _live;
+    final portraitFit = _portraitFit = ref.watch(portraitFitSetting);
+    final fit = widget.presentation == RoomPresentation.portraitFullscreen
+        // F-ROOM-06: portrait fullscreen has its own fit.
+        ? (portraitFit == store.PortraitFit.cover ? player.VideoFit.cover : player.VideoFit.contain)
+        : switch (_fit) {
+            store.VideoFit.cover => player.VideoFit.cover,
+            store.VideoFit.fill => player.VideoFit.fill,
+            _ => player.VideoFit.contain,
+          };
+    final danmakuShown = prefs.enabled && !prefs.hidden && _live && !widget.portraitDanmakuHidden;
     final video = !_live
         ? _OfflineCover(detail: widget.detail)
         : widget.surfaceReady
@@ -1119,6 +1136,38 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                                 style: TextButton.styleFrom(foregroundColor: ink),
                                 onPressed: chooseQualityLine,
                                 child: Text(qualityLineLabel(_state)),
+                              ),
+                            if (widget.presentation == RoomPresentation.portraitFullscreen)
+                              IconButton(
+                                key: const ValueKey('room-portrait-fit'),
+                                tooltip: _portraitFit == store.PortraitFit.cover ? '完整显示画面' : '铺满屏幕',
+                                color: ink,
+                                icon: Icon(
+                                  _portraitFit == store.PortraitFit.cover ? Icons.fit_screen : Icons.crop_portrait,
+                                ),
+                                onPressed: () {
+                                  final notifier = ref.read(portraitFitSetting.notifier);
+                                  unawaited(
+                                    notifier.set(
+                                      ref.read(portraitFitSetting) == store.PortraitFit.cover
+                                          ? store.PortraitFit.contain
+                                          : store.PortraitFit.cover,
+                                    ),
+                                  );
+                                },
+                              ),
+                            if (widget.onPortraitOverride case final onOverride?)
+                              PopupMenuButton<store.PortraitOverride>(
+                                key: const ValueKey('room-orientation'),
+                                tooltip: '画面方向',
+                                icon: const Icon(Icons.screen_rotation_alt, color: ink),
+                                initialValue: widget.portraitOverride,
+                                onSelected: onOverride,
+                                itemBuilder: (context) => const [
+                                  PopupMenuItem(value: store.PortraitOverride.automatic, child: Text('自动识别')),
+                                  PopupMenuItem(value: store.PortraitOverride.portrait, child: Text('按竖屏处理')),
+                                  PopupMenuItem(value: store.PortraitOverride.landscape, child: Text('按横屏处理')),
+                                ],
                               ),
                             if (wide)
                               PopupMenuButton<store.VideoFit>(

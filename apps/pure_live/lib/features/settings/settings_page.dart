@@ -197,6 +197,41 @@ class SettingsGroupBody extends StatelessWidget {
           title: '竖屏全屏上下滑切换直播间',
           subtitle: '上滑下一个、下滑上一个；开启后竖屏全屏里不再上下滑调亮度和音量',
         ),
+        SettingsHeader('竖屏直播'),
+        SwitchSettingTile(
+          setting: Settings.portraitAdaptation,
+          title: '竖屏直播适配',
+          subtitle: '自动识别竖屏直播，手机上用竖屏全屏和可拖动的信息面板',
+        ),
+        ChoiceSettingTile<PortraitFullscreenPolicy>(
+          setting: Settings.portraitFullscreenPolicy,
+          title: '全屏方向',
+          labels: {
+            PortraitFullscreenPolicy.followSource: '跟随画面（竖屏直播竖着全屏）',
+            PortraitFullscreenPolicy.followSystem: '跟随手机方向',
+            PortraitFullscreenPolicy.landscape: '总是横屏',
+          },
+        ),
+        ChoiceSettingTile<PortraitFit>(
+          setting: Settings.portraitFit,
+          title: '竖屏全屏画面',
+          labels: {PortraitFit.contain: '完整显示', PortraitFit.cover: '铺满屏幕（裁掉边缘）'},
+        ),
+        ChoiceSettingTile<PortraitDanmakuArea>(
+          setting: Settings.portraitDanmakuArea,
+          title: '竖屏全屏弹幕区域',
+          labels: {
+            PortraitDanmakuArea.followGlobal: '跟随弹幕设置',
+            PortraitDanmakuArea.upperQuarter: '只在上方四分之一',
+            PortraitDanmakuArea.reduced: '减半',
+            PortraitDanmakuArea.hidden: '不显示',
+          },
+        ),
+        SwitchSettingTile(
+          setting: Settings.rememberPortraitOverride,
+          title: '记住每个直播间的画面方向',
+          subtitle: '在直播间手动选的“按竖屏/横屏处理”下次进房仍然生效',
+        ),
         SwitchSettingTile(setting: Settings.backgroundPlay, title: '后台播放', subtitle: '离开应用后继续播放声音'),
         SystemSettingTiles(SystemSettingsSection.playback),
         SliderSettingTile(

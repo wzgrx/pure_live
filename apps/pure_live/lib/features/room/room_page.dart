@@ -95,8 +95,9 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   bool _transitioning = false;
   bool _restorePortrait = false;
   bool _rotationFullscreen = false;
-  bool _portraitSource = false;
-  bool _landscapeSource = false;
+  VideoOrientation _geometry = VideoOrientation.unknown;
+  PortraitOverride _override = PortraitOverride.automatic;
+  DanmakuStyle? _appliedStyle;
   bool _chatOpen = true;
   bool _fullscreenChat = false;
   double _chatWidth = Sizes.chatWidth;
@@ -157,6 +158,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     _states = _session.states.listen(_onPlayback);
     _lifecycle = AppLifecycleListener(onResume: _presentationRestored);
     final prefs = ref.read(danmakuPrefsProvider);
+    _appliedStyle = prefs.style;
     _overlayController
       ..style = prefs.style
       ..budget = prefs.budget;
@@ -236,22 +238,68 @@ class _RoomPageState extends ConsumerState<RoomPage> {
 
   // ------------------------------------------------------------- playback
 
+  /// F-ROOM-06, GEO-7: the source as the room treats it. The room's override
+  /// wins over the detected geometry; with adaptation off every source is
+  /// landscape.
+  ({bool portrait, bool landscape}) get _shape =>
+      sourceShape(adaptation: ref.read(portraitAdaptationSetting), override: _override, geometry: _geometry);
+
+  bool get _portraitSource => _shape.portrait;
+
+  bool get _landscapeSource => _shape.landscape;
+
+  PortraitFullscreenPolicy get _policy => ref.read(portraitFullscreenPolicySetting);
+
   void _onPlayback(PlaybackState state) {
     if (!mounted) return;
     _danmaku?.setPlaying(playing: state.phase == PlaybackPhase.playing);
     final orientation = state.geometry.orientation;
-    final portrait = orientation == VideoOrientation.portrait;
-    final landscape = orientation == VideoOrientation.landscape;
-    if (portrait != _portraitSource || landscape != _landscapeSource) {
-      setState(() {
-        _portraitSource = portrait;
-        _landscapeSource = landscape;
-      });
-      // REG-ROOM-029: a portrait fullscreen whose source turns landscape leaves.
-      if (landscape && _presentation == RoomPresentation.portraitFullscreen) {
-        unawaited(_present(RoomPresentation.inline));
-      }
+    if (orientation != _geometry) {
+      setState(() => _geometry = orientation);
+      _sourceChanged();
     }
+  }
+
+  /// REG-ROOM-029: a portrait fullscreen whose source is now landscape leaves.
+  void _sourceChanged() {
+    if (_landscapeSource && _presentation == RoomPresentation.portraitFullscreen) {
+      unawaited(_present(RoomPresentation.inline));
+    }
+  }
+
+  /// GEO-7: the room's orientation override, remembered per room when the
+  /// setting is on.
+  void _setOverride(PortraitOverride value) {
+    if (value == _override) return;
+    setState(() => _override = value);
+    _sourceChanged();
+    final settings = ref.read(storeProvider).settings;
+    if (settings.get(Settings.rememberPortraitOverride)) {
+      unawaited(ref.read(storeProvider).roomPrefs.setPortraitOverride(_room, value).catchError((Object _) {}));
+    }
+  }
+
+  void _loadOverride(RoomRef room) {
+    _override = PortraitOverride.automatic;
+    final store = ref.read(storeProvider);
+    if (!store.settings.get(Settings.rememberPortraitOverride)) return;
+    unawaited(
+      store.roomPrefs.portraitOverrideOf(room).then((value) {
+        if (!mounted || _room != room || value == _override) return;
+        setState(() => _override = value);
+        _sourceChanged();
+      }, onError: (Object _) {}),
+    );
+  }
+
+  /// The on-video style: portrait fullscreen narrows the area (F-ROOM-06).
+  DanmakuStyle _overlayStyle(DanmakuPrefs prefs, RoomPresentation effective) {
+    if (effective != RoomPresentation.portraitFullscreen) return prefs.style;
+    return switch (ref.read(portraitDanmakuAreaSetting)) {
+      PortraitDanmakuArea.upperQuarter => prefs.style.copyWith(area: 0.25),
+      PortraitDanmakuArea.reduced => prefs.style.copyWith(area: prefs.style.area / 2),
+      _ => prefs.style,
+    };
   }
 
   // ------------------------------------------------------------- detail
@@ -264,6 +312,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     final prefs = ref.read(danmakuPrefsProvider);
     final live = detail.state != LiveState.offline;
     if (previous == null || previous.ref != detail.ref) {
+      _loadOverride(detail.ref);
       final old = _danmaku;
       if (old != null) {
         old.overlay = null;
@@ -350,6 +399,13 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     _restorePortrait = next == RoomPresentation.fullscreen && forceLandscape;
     _rotationFullscreen = byRotation && next == RoomPresentation.fullscreen;
     final phone = _isPhone;
+    final locks = orientationLocks(
+      policy: _policy,
+      next: next,
+      portraitSource: _portraitSource,
+      forceLandscape: forceLandscape,
+      byRotation: byRotation,
+    );
     setState(() => _presentation = next);
     if (next == RoomPresentation.portraitFullscreen) _offerSwitchGesture();
     try {
@@ -357,9 +413,9 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       await applyPresentation(
         PresentationEffects(
           presentation: next,
-          lockLandscape:
-              phone && next == RoomPresentation.fullscreen && !byRotation && (forceLandscape || !_portraitSource),
-          lockPortrait: phone && next == RoomPresentation.portraitFullscreen,
+          // F-ROOM-06: follow the source, follow the phone, or always landscape.
+          lockLandscape: phone && locks.landscape,
+          lockPortrait: phone && locks.portrait,
           restorePortrait: phone && restore,
         ),
         desktop: !_touch,
@@ -375,7 +431,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     final target = doubleTapTarget(
       current: _presentation,
       locked: false,
-      portraitCondition: _touch && _portraitSource,
+      portraitCondition: _touch && _portraitSource && _policy != PortraitFullscreenPolicy.landscape,
       returnTo: _returnTo,
     );
     if (target != null) unawaited(_present(target));
@@ -537,9 +593,8 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   Widget build(BuildContext context) {
     ref.watch(playbackSessionProvider);
     ref.listen(danmakuPrefsProvider, (previous, next) {
-      _overlayController
-        ..style = next.style
-        ..budget = next.budget;
+      // The style follows in build: portrait fullscreen narrows its area.
+      _overlayController.budget = next.budget;
       final danmaku = _danmaku;
       if (danmaku == null) return;
       danmaku
@@ -566,6 +621,18 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     final detail = _detail;
     final prefs = ref.watch(danmakuPrefsProvider);
     final effective = _effective;
+    ref
+      ..listen(portraitAdaptationSetting, (_, _) => _sourceChanged())
+      ..watch(portraitAdaptationSetting)
+      ..watch(portraitFullscreenPolicySetting);
+    final portraitArea = ref.watch(portraitDanmakuAreaSetting);
+    final style = _overlayStyle(prefs, effective);
+    if (style != _appliedStyle) {
+      _appliedStyle = style;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && identical(_appliedStyle, style)) _overlayController.style = style;
+      });
+    }
     final dark = effective.isFullscreen || _presentation == RoomPresentation.theater;
     Widget body;
     if (async.hasError && (detail == null || detail.ref != _room)) {
@@ -627,6 +694,10 @@ class _RoomPageState extends ConsumerState<RoomPage> {
         surfaceReady: _surfaceReady,
         onStepRoom: switchGesture && !_tv ? _stepRoom : null,
         tv: _tv,
+        portraitOverride: _override,
+        onPortraitOverride: _touch && !_tv ? _setOverride : null,
+        portraitDanmakuHidden:
+            effective == RoomPresentation.portraitFullscreen && portraitArea == PortraitDanmakuArea.hidden,
       );
       // PIP-2: only the video while picture-in-picture enters or shows; the
       // same keyed video moves between the two layouts (SURF-5).

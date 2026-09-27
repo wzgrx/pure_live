@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:live_media/live_media.dart' show VideoOrientation;
+import 'package:live_store/live_store.dart' show PortraitFullscreenPolicy, PortraitOverride;
 import 'package:window_manager/window_manager.dart';
 
 /// How the room is presented (spec/modules/live-room.md §2.1): one value from
@@ -89,3 +91,42 @@ Future<void> applyPresentation(PresentationEffects effects, {required bool deskt
     debugPrint('presentation: $error');
   }
 }
+
+/// The source as the room treats it (F-ROOM-06, GEO-7): the room's override
+/// wins over the detected [geometry]; with [adaptation] off every source is
+/// landscape. Neither while the geometry is unknown or square.
+({bool portrait, bool landscape}) sourceShape({
+  required bool adaptation,
+  required PortraitOverride override,
+  required VideoOrientation geometry,
+}) {
+  if (!adaptation) return (portrait: false, landscape: true);
+  return switch (override) {
+    PortraitOverride.portrait => (portrait: true, landscape: false),
+    PortraitOverride.landscape => (portrait: false, landscape: true),
+    PortraitOverride.automatic => (
+      portrait: geometry == VideoOrientation.portrait,
+      landscape: geometry == VideoOrientation.landscape,
+    ),
+  };
+}
+
+/// The orientation locks of a presentation change on a phone (F-ROOM-06):
+/// follow the source (portrait sources lock portrait, others landscape),
+/// follow the phone (no lock unless the user forced landscape), or always
+/// landscape. Turning the phone sideways never locks (T-09).
+({bool landscape, bool portrait}) orientationLocks({
+  required PortraitFullscreenPolicy policy,
+  required RoomPresentation next,
+  required bool portraitSource,
+  bool forceLandscape = false,
+  bool byRotation = false,
+}) => (
+  landscape:
+      next == RoomPresentation.fullscreen &&
+      !byRotation &&
+      (forceLandscape ||
+          policy == PortraitFullscreenPolicy.landscape ||
+          (policy == PortraitFullscreenPolicy.followSource && !portraitSource)),
+  portrait: next == RoomPresentation.portraitFullscreen && policy != PortraitFullscreenPolicy.followSystem,
+);

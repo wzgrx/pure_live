@@ -61,3 +61,24 @@ final tvPerformanceSetting = NotifierProvider<SettingNotifier<bool>, bool>(
 final switchRoomGestureSetting = NotifierProvider<SettingNotifier<bool>, bool>(
   () => SettingNotifier(Settings.switchRoomGesture),
 );
+
+/// Portrait stream adaptation (F-ROOM-06, GEO-7).
+final portraitAdaptationSetting = NotifierProvider<SettingNotifier<bool>, bool>(
+  () => SettingNotifier(Settings.portraitAdaptation),
+);
+
+/// Fullscreen orientation on phones (F-ROOM-06).
+final portraitFullscreenPolicySetting =
+    NotifierProvider<SettingNotifier<PortraitFullscreenPolicy>, PortraitFullscreenPolicy>(
+      () => SettingNotifier(Settings.portraitFullscreenPolicy),
+    );
+
+/// How portrait sources fill portrait fullscreen (F-ROOM-06).
+final portraitFitSetting = NotifierProvider<SettingNotifier<PortraitFit>, PortraitFit>(
+  () => SettingNotifier(Settings.portraitFit),
+);
+
+/// Danmaku area in portrait fullscreen (F-ROOM-06).
+final portraitDanmakuAreaSetting = NotifierProvider<SettingNotifier<PortraitDanmakuArea>, PortraitDanmakuArea>(
+  () => SettingNotifier(Settings.portraitDanmakuArea),
+);

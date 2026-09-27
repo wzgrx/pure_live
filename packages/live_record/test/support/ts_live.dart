@@ -59,6 +59,7 @@ final class TsLive {
     this.otherSpsFromMs,
     this.audioRateIndexFromMs,
     this.audioPidFromMs,
+    this.splitAudio = false,
   }) {
     _generate();
   }
@@ -86,6 +87,9 @@ final class TsLive {
 
   /// From this stream time on, the audio moves to another PID (a new PMT).
   final int? audioPidFromMs;
+
+  /// Each audio PES ends inside its last frame; the next PES starts with the rest.
+  final bool splitAudio;
 
   final List<TsLivePacket> packets = [];
 
@@ -190,12 +194,22 @@ final class TsLive {
       }
     }
     if (audio) {
+      Uint8List? rest;
       for (var n = 0; n * audioMs < durationMs; n++) {
         final ms = n * audioMs;
         final rate = audioRateIndexFromMs != null && ms >= audioRateIndexFromMs! ? 4 : 3;
         final es = BytesBuilder();
+        if (rest != null) es.add(rest);
+        rest = null;
         for (var i = 0; i < 3; i++) {
-          es.add(_adts(audioFrameSize, rate, 0x20 + (serial++ & 0x3F)));
+          final frame = _adts(audioFrameSize, rate, 0x20 + (serial++ & 0x3F));
+          if (splitAudio && i == 2) {
+            // The frame's second half opens the next PES.
+            es.add(frame.sublist(0, audioFrameSize ~/ 2));
+            rest = frame.sublist(audioFrameSize ~/ 2);
+          } else {
+            es.add(frame);
+          }
         }
         final pid = audioPidFromMs != null && ms >= audioPidFromMs! ? TsLivePids.audio + 0x10 : TsLivePids.audio;
         pes(pid, ms * 1000, audioMs * 1000, _pes(0xC0, base + ms * 90, es.takeBytes(), bounded: true), order: 3);

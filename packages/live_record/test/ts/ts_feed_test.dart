@@ -397,6 +397,26 @@ void main() {
     });
   });
 
+  test('AAC frames split across PES: files cut at a reconnection and a split still remux (§8.2, §10)', () {
+    fakeAsync((async) {
+      final live = TsLive(splitAudio: true, audioFrameSize: 450);
+      final rig = _Rig(live: live, split: const Duration(seconds: 3));
+      final lostAt = rig.record(async, 5);
+      async.elapse(const Duration(seconds: 2));
+      rig
+        ..record(async, 5, lostAt: lostAt)
+        ..close(async);
+      expect(rig.writer.segments.length, greaterThanOrEqualTo(3));
+      for (final segment in rig.writer.segments) {
+        final check = TsCheck.of(rig.bytes(segment.index));
+        expect(check.problems, isEmpty, reason: segment.name);
+        final result = rig.remux(async, segment.index);
+        expect(result.videoSamples, check.videoStarts.length);
+        expect(result.audioSamples, greaterThan(0));
+      }
+    });
+  });
+
   test('stop waits for the frame being received, then ends with whole units and no gap', () {
     fakeAsync((async) {
       final rig = _Rig()..connect(async);

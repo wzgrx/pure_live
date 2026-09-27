@@ -325,6 +325,41 @@ void main() {
     expect([for (final unit in units) unit.pts], [9000, 9000 + 1920, 9000 + 3840, 9000 + 5760]);
   });
 
+  test('a frame split across PES and cut by a gap or the file start is dropped, not joined (§8.2)', () {
+    List<int> run(Uint8List ts, TsDemuxer demuxer) {
+      final units = <TsSample>[];
+      for (var at = 0; at < ts.length; at += 188) {
+        demuxer.add(Uint8List.sublistView(ts, at, at + 188), at, units.add);
+      }
+      demuxer.finish(units.add);
+      return [for (final unit in units) unit.pts];
+    }
+
+    /// [ts] without the packets of its audio PES number [from] up to [to].
+    Uint8List without(Uint8List ts, int from, int to) {
+      final starts = [
+        for (var at = 0; at < ts.length; at += 188)
+          if (((ts[at + 1] & 0x1F) << 8 | ts[at + 2]) == TsBuild.audioPid && (ts[at + 1] & 0x40) != 0) at,
+      ];
+      return Uint8List.fromList([...ts.sublist(0, starts[from]), ...ts.sublist(starts[to])]);
+    }
+
+    // A reconnection lost the PES that held the end of A's last frame; C
+    // starts with the rest of B's last frame.
+    final gap = buildTs([
+      TsUnit.audio(pts: 9000, frames: 3, splitLast: true),
+      TsUnit.audio(pts: 9000 + 3 * 1920, frames: 2, splitLast: true),
+      TsUnit.audio(pts: 909000, frames: 2),
+    ]);
+    final strict = TsDemuxer();
+    expect(run(without(gap, 1, 2), strict), [9000, 9000 + 1920, 909000, 909000 + 1920]);
+    expect(strict.damaged, 2, reason: 'the carried half frame and the rest in front of C');
+    // A file that starts inside a split frame (a continuous recording split at a keyframe).
+    final start = TsDemuxer();
+    expect(run(without(gap, 0, 1), start), [9000 + 3 * 1920, 909000, 909000 + 1920]);
+    expect(start.damaged, 3, reason: 'the rest of A in front of B, then the gap before C as above');
+  });
+
   test('Mp4Remuxer picks the format by content (FLV, MPEG-TS, fragmented MP4)', () async {
     final files = MemoryRecordFiles()
       ..put('/a.flv', _fixture('avc_aac.flv'))

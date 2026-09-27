@@ -157,6 +157,23 @@ void main() {
     expect(result.handshakes.single['url'], isNot(contains('c0ffee00')));
   });
 
+  test('soop: chat senders get pseudonyms, viewer lists lose their bodies', () {
+    final scrubber = FrameScrubber.forPlatform('soop', _room('soop', 'khm11903', {'chatNo': '4172'}), seed: 4);
+    final chat = SoopProtocol.packet(5, ['', '와 대박', 'realviewer77(2)', '0', '0', '3', '진짜닉네임', '1769504']);
+    final list = SoopProtocol.packet(4, ['', '1', 'someviewer99', '다른시청자', '65536']);
+    final result = scrubber.scrub([
+      CapturedFrame(direction: 'in', millis: 0, bytes: [...chat, ...list]),
+    ], const []);
+    expect(scrubber.findLeak(result.frames, ''), isNull);
+    final packets = SoopProtocol.packets(result.frames.single.bytes);
+    expect(packets.map((p) => p.service), [5, 4]);
+    expect(packets.first.fields[1], '와 대박', reason: 'chat text is public');
+    expect(packets.first.fields[2], endsWith('(2)'));
+    expect(packets.first.fields[2], isNot(startsWith('realviewer77')));
+    expect(packets.first.fields[6], startsWith('观众'));
+    expect(packets.last.fields, ['']);
+  });
+
   test('a masked name keeps its mask', () {
     final names = Pseudonyms(seed: 2);
     expect(names.person('尘***'), endsWith('***'));

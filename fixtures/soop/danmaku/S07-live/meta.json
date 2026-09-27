@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "case": "S07-live",
+  "room": "soop:khm11903",
+  "danmakuKeys": {
+    "bj": "khm11903",
+    "bno": "297314125",
+    "chatNo": "4172",
+    "chatHost": "chat-6E0A4C63.sooplive.com",
+    "chatPort": "9000"
+  },
+  "capturedAt": "2026-09-27T17:38:37.375013Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chat-6e0a4c63.sooplive.com:9001/Websocket/khm11903",
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "Origin": "https://play.sooplive.co.kr"
+      }
+    },
+    {
+      "url": "ws://chat-6e0a4c63.sooplive.com:9000/Websocket/khm11903",
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "Origin": "https://play.sooplive.co.kr"
+      }
+    }
+  ],
+  "frames": 3589,
+  "raw": {
+    "sha256": "e9b65e9c96af62c41f2b80f849a4ead88158ca8d9b02c1ab50c2082c2a81acb5",
+    "length": 1875167
+  },
+  "scrubbed": [
+    {
+      "where": "service.4",
+      "rule": "dropped"
+    },
+    {
+      "where": "service.127",
+      "rule": "dropped"
+    },
+    {
+      "where": "service.110",
+      "rule": "dropped"
+    },
+    {
+      "where": "service.19",
+      "rule": "dropped"
+    },
+    {
+      "where": "service.21",
+      "rule": "dropped"
+    },
+    {
+      "where": "service.54",
+      "rule": "dropped"
+    },
+    {
+      "where": "service.90",
+      "rule": "dropped"
+    },
+    {
+      "where": "service.94",
+      "rule": "dropped"
+    },
+    {
+      "where": "chat.sender",
+      "rule": "person"
+    },
+    {
+      "where": "service.12",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

@@ -1,0 +1,797 @@
+{
+  "result": 1,
+  "data": {
+    "is_more": false,
+    "offset": 120,
+    "list": [
+      {
+        "category_no": "00360097",
+        "vod_category_no": "00360096",
+        "category_name": "아스달 연대기: 세 개의 세력",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "MMORPG",
+          "액션"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/3552670d91369a652.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360098",
+        "vod_category_no": "00360097",
+        "category_name": "서머너즈 워: 천공의 아레나",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "RPG",
+          "전략"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/730769034a9824552.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360099",
+        "vod_category_no": "00360098",
+        "category_name": "레이븐2",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "MMORPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/3819670d9138ae176.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360101",
+        "vod_category_no": "00360100",
+        "category_name": "로드나인",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "MMORPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/5369670d913abedf2.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360102",
+        "vod_category_no": "00360101",
+        "category_name": "젠레스 존 제로",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "RPG",
+          "HoYoverse"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/29/71806901c21d19b49.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360103",
+        "vod_category_no": "00360103",
+        "category_name": "콜 오브 듀티: 모바일",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "액션"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/3436670d913ccf4f3.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360104",
+        "vod_category_no": "00360104",
+        "category_name": "에이지 오브 엠파이어 모바일",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "전략"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/800369034d26c7894.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360106",
+        "vod_category_no": "00360106",
+        "category_name": "지천",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/632469034d4785b30.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360107",
+        "vod_category_no": "00360107",
+        "category_name": "명일방주",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "전략"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/651769034d586fb40.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360108",
+        "vod_category_no": "00360108",
+        "category_name": "발할라 서바이벌",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "무한파밍",
+          "핵앤슬래시RPG",
+          "다크판타지",
+          "고퀄리티로그라이크",
+          "모바일게임"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/01/24/5339679321dcb78dd.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360109",
+        "vod_category_no": "00360109",
+        "category_name": "레이튼 교수와 이상한 마을 HD",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "어드벤처",
+          "판타지",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/975569034dbf467b3.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360110",
+        "vod_category_no": "00360110",
+        "category_name": "레이튼 교수와 악마의 상자 HD",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "어드벤처",
+          "판타지",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/686769034d6ac2016.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360111",
+        "vod_category_no": "00360111",
+        "category_name": "레전드 오브 이미르",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG",
+          "액션",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/02/21/812567b7e329d7238.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360115",
+        "vod_category_no": "00360115",
+        "category_name": "쿠키런: 오븐스매시",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "배틀",
+          "액션",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/04/25/9210680b163a5ce93.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360116",
+        "vod_category_no": "00360116",
+        "category_name": "작혼: 리치 마작",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일",
+          "보드게임"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/149969034dd9cabbf.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360117",
+        "vod_category_no": "00360117",
+        "category_name": "세븐나이츠 리버스",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "RPG",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/05/15/845868259f4c15ece.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360118",
+        "vod_category_no": "00360118",
+        "category_name": "제5인격",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "서바이벌",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/29/79726901c258a08e4.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360119",
+        "vod_category_no": "00360119",
+        "category_name": "EA SPORTS FC 모바일",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "넥슨",
+          "스포츠",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/08/12/3567689ad4c385b29.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360120",
+        "vod_category_no": "00360120",
+        "category_name": "메이플스토리M",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "넥슨",
+          "MMORPG",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/08/12/1285689ad7ceacc2c.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360121",
+        "vod_category_no": "00360121",
+        "category_name": "뱀피르",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG",
+          "뱀파이어"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/08/20/324568a5586865f24.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360122",
+        "vod_category_no": "00360122",
+        "category_name": "아키텍트",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG",
+          "크로스플랫폼"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/12/10/737369390d302edce.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360123",
+        "vod_category_no": "00360123",
+        "category_name": "로스트아크 모바일",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/11/11/20636912c1d02d43a.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360124",
+        "vod_category_no": "00360124",
+        "category_name": "아스텔리아 M",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/14/976968ee0fca3fca3.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360125",
+        "vod_category_no": "00360125",
+        "category_name": "듀엣 나이트 어비스",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "RPG",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/28/239269007de0d2252.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360127",
+        "vod_category_no": "00360127",
+        "category_name": "카오스 제로 나이트메어",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "RPG",
+          "로그라이트",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/30/85646902f41054a43.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360128",
+        "vod_category_no": "00360128",
+        "category_name": "스텔라 소라",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "어드벤처",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/01/21/1137697039410c87e.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360129",
+        "vod_category_no": "00360129",
+        "category_name": "명일방주: 엔드필드",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "RPG",
+          "어드벤처"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/07/15/19806a56ee5aa3cb9.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360130",
+        "vod_category_no": "00360130",
+        "category_name": "블루 프로토콜: 스타 레조넌스",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG",
+          "오픈월드"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/03/19/888669bb84b9a8ac6.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360131",
+        "vod_category_no": "00360131",
+        "category_name": "몬길: STAR DIVE",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "액션",
+          "서브컬쳐",
+          "RPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/04/08/602369d5dcb27b8ca.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360132",
+        "vod_category_no": "00360132",
+        "category_name": "메이플 키우기",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "넥슨",
+          "RPG",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/04/10/651769d884d9a96dd.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360133",
+        "vod_category_no": "00360133",
+        "category_name": "이환",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "오픈월드",
+          "RPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/04/15/229269df19ac23cf7.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360134",
+        "vod_category_no": "00360134",
+        "category_name": "아주르 프로밀리아",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "서브컬쳐",
+          "RPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/05/15/92376a067b9161913.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360135",
+        "vod_category_no": "00360135",
+        "category_name": "브롤스타즈",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "슈팅",
+          "액션"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/05/15/42306a06bb30a5b2d.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360136",
+        "vod_category_no": "00360136",
+        "category_name": "브레이커스 모바일",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모바일게임",
+          "RPG",
+          "액션"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/06/11/66546a2a3467406e1.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360137",
+        "vod_category_no": "00360137",
+        "category_name": "솔: 인챈트",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/06/17/60536a3238f8bab09.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360138",
+        "vod_category_no": "00360138",
+        "category_name": "삼국지: 천하결전",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "전략",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/07/03/77626a471f2cb7603.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360139",
+        "vod_category_no": "00360139",
+        "category_name": "히간: 이루실",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "RPG",
+          "모바일"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/08/12/28986a7bfd412cba9.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360141",
+        "vod_category_no": "00360141",
+        "category_name": "도깨비의세계",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG",
+          "RPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/09/07/39746a9e1c5945fbb.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360143",
+        "vod_category_no": "00360143",
+        "category_name": "뱅드림! 아워 노트",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "리듬"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/09/22/76396ab20a21ecdf5.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00360144",
+        "vod_category_no": "00360144",
+        "category_name": "템빨: 오버기어드",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MMORPG"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/09/22/97266ab20c17925c9.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00370010",
+        "vod_category_no": "00370010",
+        "category_name": "챔피언스리그",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "챔피언스리그",
+          "축구"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/9127670d913ee2874.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00370011",
+        "vod_category_no": "00370011",
+        "category_name": "프리미어리그",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "프리미어리그",
+          "축구"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/4284670d913fea5c0.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00370014",
+        "vod_category_no": "00370014",
+        "category_name": "국가대표",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "월드컵",
+          "국대",
+          "대한민국",
+          "국가대표"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/06/08/18716a2633c22e70b.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00370015",
+        "vod_category_no": "00370015",
+        "category_name": "Dailynews Cup",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "축구"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/06/15/92996a2f90ea1f3f9.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00370016",
+        "vod_category_no": "00370016",
+        "category_name": "축구 콘텐츠",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "축구콘텐츠"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/09/03/27066a98e18eca359.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00390029",
+        "vod_category_no": "00390029",
+        "category_name": "KTV 국민방송",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "케이티비"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/08/11/74566a7ab23b4c3b1.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00410000",
+        "vod_category_no": "00410000",
+        "category_name": "2026 전국체전",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "전국체육대회",
+          "전국장애인체육대회",
+          "장애인체전",
+          "전국체전",
+          "대한체육회"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/08/19/52906a85449d66d2d.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00570006",
+        "vod_category_no": "00570006",
+        "category_name": "볼링",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "볼링"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/3466670d914d78a2a.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00570017",
+        "vod_category_no": "00570017",
+        "category_name": "배드민턴",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "배드민턴"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/08/08/718468958ddd32126.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00570019",
+        "vod_category_no": "00570019",
+        "category_name": "수영",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "수영",
+          "SWIMMING"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/09/03/227968b7c8995a77e.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00570020",
+        "vod_category_no": "00570020",
+        "category_name": "미식축구",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "미식축구",
+          "플래그풋볼",
+          "풋볼",
+          "NFL",
+          "대한미식축구",
+          "김치볼"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/12/04/347569312a5a5c258.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00570021",
+        "vod_category_no": "00570021",
+        "category_name": "육상",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "육상",
+          "트랙"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/01/12/21686964760a342e2.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00570022",
+        "vod_category_no": "00570022",
+        "category_name": "다트",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "DARTS"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/07/08/71516a4e0e1a372fb.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00690000",
+        "vod_category_no": "00690000",
+        "category_name": "해외프로농구",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "농구"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/10/01/676768dc96b9aaad7.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00720000",
+        "vod_category_no": "00720000",
+        "category_name": "LCK",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "MOBA"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/1707670d9156ca223.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00840001",
+        "vod_category_no": "00850001",
+        "category_name": "아마 야구",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "야구",
+          "유소년",
+          "아마"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/12/04/447669312a0ca40da.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00840002",
+        "vod_category_no": "00850002",
+        "category_name": "아마 축구",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "축구",
+          "유소년",
+          "아마"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/12/04/633869312a156903b.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00840003",
+        "vod_category_no": "00850003",
+        "category_name": "아마 배구",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "배구",
+          "유소년",
+          "아마"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/12/04/534269312a1f5261b.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00840004",
+        "vod_category_no": "00850004",
+        "category_name": "아마 농구",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "농구",
+          "유소년",
+          "아마"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/12/04/868469312a2aec156.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00880000",
+        "vod_category_no": "00890000",
+        "category_name": "SOOPER LEAGUE",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "SOOPERLEAGUE"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2024/10/15/3303670d916232e49.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00940014",
+        "vod_category_no": "00940014",
+        "category_name": "기타 드라마",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "드라마",
+          "같이보기"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/12/18/8978694398295738d.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00970000",
+        "vod_category_no": "00970000",
+        "category_name": "장애인스포츠",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "장애인스포츠",
+          "대한장애인체육회",
+          "대한체육회",
+          "휠체어농구",
+          "파라하키"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2025/03/25/384567e20c5e69234.jpg",
+        "is_drops": 0
+      },
+      {
+        "category_no": "00980000",
+        "vod_category_no": "00980000",
+        "category_name": "모터스포츠",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "모터스포츠",
+          "MOTORSPORTS"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/04/13/883369dc6e933cef8.png",
+        "is_drops": 0
+      },
+      {
+        "category_no": "01050000",
+        "vod_category_no": "01050000",
+        "category_name": "KBO",
+        "view_cnt": 0,
+        "fixed_tags": [
+          "baseball"
+        ],
+        "cate_img": "https://admin.img.sooplive.com/category_img/2026/03/09/531169ae2ef17e392.jpg",
+        "is_drops": 0
+      }
+    ]
+  }
+}

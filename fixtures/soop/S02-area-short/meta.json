@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "sample": "S02-area-short",
+  "capturedAt": "2026-09-27T17:30:27.478121Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://sch.sooplive.co.kr/api.php?m=categoryContentsList&szType=live&nPageNo=1&nListCnt=60&szPlatform=pc&szOrder=view_cnt_desc&szCateNo=00040070",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.sooplive.co.kr/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "content-type": "application/json; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:30:27 GMT",
+      "origin-agent-cluster": "?0",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "d7d1fd94e852a39ca72e81d87a22146458d179e60d38cd446c7d077ab433f797",
+    "length": 33475
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

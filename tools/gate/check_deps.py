@@ -31,8 +31,6 @@ ALLOWED = {
     },
     'tools/live_cli': {'live_core', 'live_net', 'live_danmaku', 'live_media', 'live_record'},
     'tools/check_latest': set(),
-    # The legacy app in legacy/ is a transitional consumer (ADR 0013).
-    'legacy': {'live_core', 'live_net', 'live_danmaku', 'live_media', 'live_record', 'live_store'},
 }
 
 # Must run under plain `dart test` and be callable from live_cli.
@@ -84,7 +82,7 @@ def pubspec_dependencies(pubspec):
 
 
 def dart_files(member_dir, member):
-    folders = ['lib', 'bin', 'test', 'tool', 'integration_test'] if member != 'legacy' else ['lib']
+    folders = ['lib', 'bin', 'test', 'tool', 'integration_test']
     for folder in folders:
         base = member_dir / folder
         if base.is_dir():

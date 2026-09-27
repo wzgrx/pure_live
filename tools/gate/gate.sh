@@ -3,19 +3,17 @@
 #
 #   tools/gate/gate.sh           v4 workspace members changed against origin/master, plus uncommitted work
 #   tools/gate/gate.sh --all     every v4 member and the gate's own tests; required before every push
-#   tools/gate/gate.sh --legacy  the frozen 3.x app's analyze and tests (docs/adr/0014-v4-first.md)
 #   tools/gate/gate.sh --hook    Claude Code Stop hook: silent when no v4 code changed, exit 2 on failure
 #
-# One gate runs at a time (legacy/BUILD_POLICY.md); a second caller waits for the lock.
+# One heavy task at a time: a second caller waits for the lock.
 set -uo pipefail
 
 mode=changed
 case "${1:-}" in
   --all) mode=all ;;
-  --legacy) mode=legacy ;;
   --hook) mode=hook ;;
   '') ;;
-  *) echo "usage: tools/gate/gate.sh [--all|--legacy|--hook]" >&2; exit 64 ;;
+  *) echo "usage: tools/gate/gate.sh [--all|--hook]" >&2; exit 64 ;;
 esac
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -41,14 +39,12 @@ fi
 
 members=()
 while IFS= read -r member; do members+=("$member"); done < <(
-  awk '/^workspace:/{on=1; next} on && /^[^ #]/{exit} on && /^[[:space:]]+-[[:space:]]/{sub(/^[[:space:]]+-[[:space:]]+/, ""); sub(/\/$/, ""); print}' pubspec.yaml | grep -vx legacy
+  awk '/^workspace:/{on=1; next} on && /^[^ #]/{exit} on && /^[[:space:]]+-[[:space:]]/{sub(/^[[:space:]]+-[[:space:]]+/, ""); sub(/\/$/, ""); print}' pubspec.yaml
 )
 
 selected=()
 if [[ $mode == all ]]; then
   selected=("${members[@]}")
-elif [[ $mode == legacy ]]; then
-  :
 else
   base=HEAD
   git rev-parse -q --verify origin/master >/dev/null && base="$(git merge-base HEAD origin/master)"
@@ -103,12 +99,6 @@ done
 
 if [[ $mode == all ]]; then
   step "gate tests" python3 -m unittest discover -s tools/gate/tests
-fi
-# 3.x is frozen and no longer built (ADR 0014); its checks run only on request.
-if [[ $mode == legacy ]]; then
-  step "legacy analyze" in_dir legacy flutter analyze
-  step "legacy test" in_dir legacy flutter test --concurrency="${GATE_TEST_CONCURRENCY:-8}"
-  step "legacy tool tests" in_dir legacy python3 -m unittest discover -s tool/tests
 fi
 
 if [[ ${#failures[@]} -gt 0 ]]; then

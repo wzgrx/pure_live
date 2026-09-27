@@ -20,6 +20,8 @@
 | [0012](0012-legacy-bridge.md) | 旧应用接入 v4：3.3.x 只接列表、搜索和链接，标识与旧版逐字段一致 | 已接受（发布 3.3.x 被 0014 取消） |
 | [0013](0013-legacy-folder.md) | 旧应用整体收进 `legacy/`，根目录只放 v4 和仓库级文件 | 已接受 |
 | [0014](0014-v4-first.md) | 停止构建 3.x，直接推进 v4；构建和门禁改在本机运行 | 已接受 |
+| [0015](0015-v4-app-structure.md) | v4 应用与播放层的包结构：live_media 纯 Dart + live_player，手写 Riverpod provider | 已接受 |
+| [0016](0016-archive-v3.md) | v3 全部归档：旧应用移出 workspace，3.x 的仓库级文件移进 legacy/ | 已接受 |
 
 ## 模板
 

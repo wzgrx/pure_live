@@ -40,6 +40,7 @@ v4 从头重新设计界面、布局、交互、各尺寸设备的适配和性�
 |---|---|
 | [`packages/live_core`](packages/live_core) | 领域模型、类型化错误、5 个平台的解析器和适配器（纯 Dart） |
 | [`packages/live_net`](packages/live_net) | 网络层：按平台的代理和 Cookie、节流、样本回放 |
+| [`packages/live_ui`](packages/live_ui) | 设计系统：主题令牌、尺寸等级、自适应导航、直播间卡片 |
 | `apps/pure_live` | v4 应用（第 6 阶段建立） |
 | [`tools/live_cli`](tools/live_cli) | 命令行工具：真实网络探针、接口样本录制、弹幕和续期检查 |
 | [`tools/check_latest`](tools/check_latest) | 对比工具链和依赖与官方最新稳定版 |
@@ -49,7 +50,7 @@ v4 从头重新设计界面、布局、交互、各尺寸设备的适配和性�
 | [`docs/rewrite/`](docs/rewrite/PLAN.md) | 重写方案、诊断、基线、进度 |
 | [`docs/adr/`](docs/adr/README.md) | 架构决策记录 |
 | [`third_party/`](third_party) | media_kit 自维护分支（[ADR 0002](docs/adr/0002-media-kit-fork.md)） |
-| [`legacy/`](legacy/README.md) | 3.x 应用（已冻结，只作对照） |
+| [`legacy/`](legacy/README.md) | 3.x 的归档：应用代码、发布工作流和维护规范，不再构建（[ADR 0016](docs/adr/0016-archive-v3.md)） |
 | `assets/` | 只有 `version.json` 和 `releases.json`：已安装的 3.x 从这里检查更新 |
 | [`toolchain.env`](toolchain.env) | Flutter、JDK、NDK、Gradle 等版本的唯一来源 |
 

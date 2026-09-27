@@ -61,15 +61,6 @@ class CheckDepsTest(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("ALLOWED", errors[0])
 
-    def test_legacy_app_may_only_use_allowed_v4_packages(self):
-        root = self.workspace(["legacy", "packages/live_ui"])
-        write(root / "legacy/pubspec.yaml", "name: pure_live\n")
-        write(root / "packages/live_ui/pubspec.yaml", "name: live_ui\n")
-        write(root / "legacy/lib/main.dart", "import 'package:live_ui/live_ui.dart';\nimport 'package:live_core/live_core.dart';\n")
-        errors, _ = deps.check(root)
-        self.assertEqual(len(errors), 1, errors)
-        self.assertTrue(errors[0].startswith("legacy/lib/main.dart:1"))
-
 
 if __name__ == "__main__":
     unittest.main()

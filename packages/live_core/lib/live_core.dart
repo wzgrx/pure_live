@@ -22,6 +22,8 @@ export 'src/sites/kuaishou/kuaishou_site.dart';
 export 'src/sites/liveme/liveme_parse.dart';
 export 'src/sites/liveme/liveme_sign.dart';
 export 'src/sites/liveme/liveme_site.dart';
+export 'src/sites/steambroadcast/steambroadcast_parse.dart';
+export 'src/sites/steambroadcast/steambroadcast_site.dart';
 export 'src/sites/weibo/weibo_parse.dart';
 export 'src/sites/weibo/weibo_site.dart';
 export 'src/stream.dart';

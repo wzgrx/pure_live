@@ -6,10 +6,11 @@ import 'package:live_danmaku/src/sites/douyin.dart';
 import 'package:live_danmaku/src/sites/douyu.dart';
 import 'package:live_danmaku/src/sites/huya.dart';
 import 'package:live_danmaku/src/sites/kuaishou.dart';
+import 'package:live_danmaku/src/sites/steambroadcast.dart';
 import 'package:live_danmaku/src/transport.dart';
 
 /// Platforms with a chat connector.
-const danmakuPlatforms = {'bilibili', 'douyin', 'douyu', 'huya', 'kuaishou'};
+const danmakuPlatforms = {'bilibili', 'douyin', 'douyu', 'huya', 'kuaishou', 'steambroadcast'};
 
 /// The chat connector for [room]'s platform, or null when the platform has
 /// none (the UI shows [DanmakuStatus.unsupported] once, REG-DANMAKU-021).
@@ -46,5 +47,6 @@ DanmakuConnector? danmakuConnectorFor(
     session: session,
     clock: clock,
   ),
+  'steambroadcast' => SteamBroadcastConnector(detail: room, transport: transport, session: session, clock: clock),
   _ => null,
 };

@@ -24,5 +24,6 @@ export 'src/sites/douyin.dart';
 export 'src/sites/douyu.dart';
 export 'src/sites/huya.dart';
 export 'src/sites/kuaishou.dart';
+export 'src/sites/steambroadcast.dart';
 export 'src/transport.dart';
 export 'src/worker.dart';

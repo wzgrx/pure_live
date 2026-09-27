@@ -62,6 +62,7 @@ await session.close();                      // 5 s 内返回
 | B 站 | 通过（游客） | `fixtures/bilibili/danmaku/S13-live`（166 帧，44 条聊天，昵称被平台打码） | 聊天、人气（op 3）、累计观看、醒目留言、礼物、ACK、醒目留言快照 |
 | 抖音 | 通过（匿名） | `fixtures/douyin/danmaku/S13-live`（163 帧，215 条聊天） | 聊天、在线人数、礼物、ACK |
 | 快手 | 通过（匿名） | `fixtures/kuaishou/danmaku/S16-live`（10 次轮询，42 条评论） | 评论、在线人数 |
+| Steam 直播 | 通过（匿名，HTTP 轮询聊天日志） | `fixtures/steambroadcast/danmaku/S07-live`（146 帧：历史 50 条 + 约 140 个时间窗，录制期间无新消息） | 聊天（历史只用于对时，不发出） |
 
 ## 录制样本
 

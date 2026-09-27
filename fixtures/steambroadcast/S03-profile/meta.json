@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S03-profile",
+  "capturedAt": "2026-09-27T17:33:15.951143Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://steamcommunity.com/miniprofile/1524949844/json",
+    "headers": {
+      "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+      "Accept": "application/json, text/javascript, */*; q=0.8",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": [
+        "sessionid=d2a44cb1d9dcee30c8d52135; Path=/; Secure; SameSite=None",
+        "steamCountry=MQ%0Md5y33l3254b6ouse9371w6rn9221x7rw; path=/; secure; HttpOnly; SameSite=None"
+      ],
+      "cache-control": "private,max-age=120",
+      "date": "Sun, 27 Sep 2026 17:33:16 GMT",
+      "vary": [
+        "Accept-Encoding, Origin",
+        "Accept-Encoding"
+      ],
+      "content-encoding": "gzip",
+      "content-length": "392",
+      "content-type": "application/json; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN",
+      "server": "nginx",
+      "expires": "Mon, 26 Jul 1997 05:00:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "a3941671d67450d8793327f43ce4d48fff4f1ed5dbc721c36c9fb8bfc4727e81",
+    "length": 796
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:sessionid",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:steamCountry",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

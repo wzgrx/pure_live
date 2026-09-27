@@ -187,7 +187,15 @@ final class KuaishouConnector extends ConnectorBase {
   /// failed. Events are emitted here.
   Future<KuaishouFeed?> _poll(int generation, String stream, Map<String, String> headers) async {
     final cancel = CancelToken();
-    unawaited(stopped.then((_) => cancel.cancel()));
+    final removeStop = onStop(cancel.cancel);
+    try {
+      return await _round(generation, stream, headers, cancel);
+    } finally {
+      removeStop();
+    }
+  }
+
+  Future<KuaishouFeed?> _round(int generation, String stream, Map<String, String> headers, CancelToken cancel) async {
     for (final endpoint in KuaishouProtocol.endpoints) {
       if (isStale(generation)) return null;
       try {

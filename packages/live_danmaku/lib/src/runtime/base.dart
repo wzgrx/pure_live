@@ -33,7 +33,7 @@ abstract base class ConnectorBase implements DanmakuConnector {
   var _closed = false;
   Future<void>? _run;
   Completer<bool>? _ready;
-  final Completer<void> _stop = Completer<void>();
+  final Set<void Function()> _stopHooks = {};
 
   @override
   Stream<DanmakuEvent> get events => _events.stream;
@@ -42,9 +42,18 @@ abstract base class ConnectorBase implements DanmakuConnector {
   @protected
   bool isStale(int generation) => _closed || generation != _generation;
 
-  /// Completes when [close] is called.
+  /// Runs [hook] when [close] is called (at once when already closed);
+  /// the returned function unregisters it. Hooks are removed after use, so
+  /// long polling does not pile up listeners.
   @protected
-  Future<void> get stopped => _stop.future;
+  void Function() onStop(void Function() hook) {
+    if (_closed) {
+      hook();
+      return () {};
+    }
+    _stopHooks.add(hook);
+    return () => _stopHooks.remove(hook);
+  }
 
   /// A decode context stamped now.
   @protected
@@ -85,7 +94,18 @@ abstract base class ConnectorBase implements DanmakuConnector {
   @protected
   Future<bool> pause(int generation, Duration delay) async {
     if (isStale(generation)) return false;
-    if (delay > Duration.zero) await Future.any([Future<void>.delayed(delay), stopped]);
+    if (delay > Duration.zero) {
+      final wake = Completer<void>();
+      void done() {
+        if (!wake.isCompleted) wake.complete();
+      }
+
+      final timer = Timer(delay, done);
+      final remove = onStop(done);
+      await wake.future;
+      timer.cancel();
+      remove();
+    }
     return !isStale(generation);
   }
 
@@ -120,7 +140,10 @@ abstract base class ConnectorBase implements DanmakuConnector {
     if (_closed) return;
     _closed = true;
     _generation++;
-    if (!_stop.isCompleted) _stop.complete();
+    for (final hook in [..._stopHooks]) {
+      hook();
+    }
+    _stopHooks.clear();
     final ready = _ready;
     if (ready != null && !ready.isCompleted) ready.complete(false);
     final run = _run;

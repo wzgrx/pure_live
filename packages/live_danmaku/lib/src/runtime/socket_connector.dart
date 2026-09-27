@@ -226,7 +226,9 @@ abstract base class SocketConnector extends ConnectorBase {
     } else {
       auth = Timer(authTimeout, () => finish(_End.authTimeout));
     }
-    final end = await Future.any([done.future, stopped.then((_) => _End.stopped)]);
+    final removeStop = onStop(() => finish(_End.stopped));
+    final end = await done.future;
+    removeStop();
     beat?.cancel();
     auth?.cancel();
     silence?.cancel();

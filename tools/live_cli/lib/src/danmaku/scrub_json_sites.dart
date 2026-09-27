@@ -253,6 +253,32 @@ class KilakilaFrameScrubber extends FrameScrubber {
   }
 }
 
+/// Picarto (spec/sites/picarto.md §11): the anonymous chat JWT (token
+/// response and handshake path); viewers' ids, names and avatar paths in
+/// chat (`c`) and join (`un`) messages. Stream updates name public
+/// channels under other keys and stay.
+class PicartoFrameScrubber extends JsonFrameScrubber {
+  /// Creates the scrubber.
+  new(super.detail, {super.seed});
+
+  @override
+  Set<String> get secrets => const {'key', 'i'};
+
+  @override
+  Set<String> get ids => const {'u'};
+
+  @override
+  Set<String> get people => const {'n'};
+
+  @override
+  Uri scrubUrl(Uri url) {
+    final match = RegExp('token=([A-Za-z0-9_.-]+)').firstMatch(url.path);
+    if (match == null) return url;
+    record('handshake.token', 'secret');
+    return url.replace(path: url.path.replaceFirst(match.group(1)!, names.secret(match.group(1)!)));
+  }
+}
+
 /// CHZZK (spec/sites/chzzk.md §11): the access token and session ids in
 /// the join, the recent-chat request and the token response; viewers' ids,
 /// hashes, nicknames, images and per-message tokens in chat items, whose

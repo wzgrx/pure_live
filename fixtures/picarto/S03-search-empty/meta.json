@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "sample": "S03-search-empty",
+  "capturedAt": "2026-09-27T17:43:16.849908Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://ptvintern.picarto.tv/api/search?first=20&page=1&q=zxqvnoresultfixture&type=searchProfiles&tag_search=false",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://picarto.tv/",
+      "Origin": "https://picarto.tv"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "public, s-maxage=60",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:43:17 GMT",
+      "access-control-allow-origin": "*",
+      "vary": [
+        "Accept-Encoding",
+        "Accept-Encoding"
+      ],
+      "content-encoding": "gzip",
+      "cf-cache-status": "DYNAMIC",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cf-ray": "a41c4f16e93cb5f2-SJC",
+      "x-cacheable": "1",
+      "x-cache": "MISS",
+      "expires": "-1"
+    }
+  },
+  "raw": {
+    "sha256": "cf9a3666fa80990c95faea8e5001feac673334283243e07fcc117530d30a5404",
+    "length": 40
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

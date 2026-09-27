@@ -1,0 +1,225 @@
+{
+  "channel": {
+    "online": true,
+    "color": "#1da456",
+    "dm_setting": {
+      "allow_message_every_one": false
+    },
+    "created_at": "2019-08-24 16:43:22",
+    "notification": false,
+    "gifted": true,
+    "gifted_channel_name": "Lerohunter",
+    "id": 942670,
+    "account_type": "PREMIUM",
+    "adult": false,
+    "avatar": "https://images.picarto.tv/ptvimages/9/94/942670/avatars/036c33e82faefebd20d731b2c866aaac.jpg",
+    "bio": "",
+    "columns": 2,
+    "commissions": true,
+    "enable_subscription": false,
+    "gaming": false,
+    "name": "allatir",
+    "private": false,
+    "show_subscriber_count": true,
+    "title": "STREAM COMMISSIONS OPEN",
+    "verified": false,
+    "streaming": true,
+    "total_views": 61071,
+    "viewers": 52,
+    "descriptions": [
+      {
+        "id": 229191,
+        "channel_id": 942670,
+        "title": "I'm Allatir",
+        "body": "Hi!\nI'm Allatir and I'm freelance digital artist and I make ART here! &lt;3\nMy InStream commissions open every weekend!\n\nMY FURAFFINITY: https://www.furaffinity.net/user/allatir\nMY PATREON:\nhttps://www.patreon.com/c/raidfonder",
+        "image": "https://images.picarto.tv/ptvimages/9/94/942670/panels/0c070281e1b0292ada11dabd.png",
+        "button_enabled": 0,
+        "button_text": null,
+        "button_link": null,
+        "position": 1,
+        "image_link": null,
+        "background": false,
+        "shadow": false,
+        "hide": false,
+        "icon_id": null
+      },
+      {
+        "id": 229190,
+        "channel_id": 942670,
+        "title": "Donate",
+        "body": "YOU CAN SUPPORT AND DONATE ME HERE!\nhttps://www.patreon.com/c/raidfonder\nThank you~",
+        "image": "https://images.picarto.tv/ptvimages/9/94/942670/panels/573b36e4acffc7d0e7c1a278.png",
+        "button_enabled": 0,
+        "button_text": null,
+        "button_link": null,
+        "position": 2,
+        "image_link": null,
+        "background": false,
+        "shadow": false,
+        "hide": false,
+        "icon_id": null
+      }
+    ],
+    "banners": [],
+    "categories": [
+      {
+        "id": 8,
+        "name": "Furry"
+      }
+    ],
+    "languages": [
+      {
+        "id": 19,
+        "name": "English",
+        "code": "en",
+        "image": "http://ptvintern.picarto.tv/images/languages/en.svg"
+      },
+      {
+        "id": 64,
+        "name": "Russian",
+        "code": "ru",
+        "image": "http://ptvintern.picarto.tv/images/languages/ru.svg"
+      }
+    ],
+    "social_medias": [
+      {
+        "icon": "https://s3.picarto.tv/settings/socialmedias/patreon.png",
+        "link": "https://patreon.com/raidfonder"
+      },
+      {
+        "icon": "https://s3.picarto.tv/settings/socialmedias/twitter.png",
+        "link": "https://x.com/AllatirArt"
+      },
+      {
+        "icon": "https://s3.picarto.tv/settings/socialmedias/ec271d9c5321dd38850ae2b1.png",
+        "link": "http://www.furaffinity.net/user/allatir"
+      },
+      {
+        "icon": "https://s3.picarto.tv/settings/socialmedias/a1c271d886dab435fe87e142.png",
+        "link": "https://bsky.app/profile/allatir.bsky.social"
+      }
+    ],
+    "softwares": [
+      {
+        "id": 20,
+        "name": "Clip Studio Paint"
+      }
+    ],
+    "tags": [],
+    "tools": [
+      {
+        "id": 1695,
+        "name": "Wacom Cintiq 16"
+      }
+    ],
+    "followers_count": 653,
+    "videos_count": 0,
+    "subscribers_count": 0
+  },
+  "getLoadBalancerUrl": {
+    "url": "http://edge1-eu-west.picarto.tv",
+    "origin": "edge1-eu-west"
+  },
+  "getMultiStreams": {
+    "name": "allatir",
+    "streaming": true,
+    "online": true,
+    "viewers": 52,
+    "multistream": true,
+    "streams": [
+      {
+        "id": 11748,
+        "user_id": 11748,
+        "name": "FR95",
+        "account_type": "FREE",
+        "avatar": "https://images.picarto.tv/ptvimages/1/11/11748/avatars/aa663f1d740c1fc0bbf26987.png",
+        "offline_image": null,
+        "streaming": false,
+        "adult": true,
+        "multistream": true,
+        "viewers": 0,
+        "hosted": false,
+        "host": false,
+        "following": false,
+        "subscription": false,
+        "online": false,
+        "channelId": 11748,
+        "stream_name": "golive+FR95",
+        "color": "#35A775",
+        "webrtc": false,
+        "subscription_enabled": false,
+        "thumbnail_image": "https://thumb-eu-west1.picarto.tv/thumbnail/FR95.jpg"
+      },
+      {
+        "id": 122866,
+        "user_id": 122866,
+        "name": "Rezenfurd",
+        "account_type": "PREMIUM",
+        "avatar": "https://images.picarto.tv/ptvimages/1/12/122866/avatars/KG9Ts2MWZzLdIzMfyikb5Pg7uTcclFIYZdmrY41H.png",
+        "offline_image": null,
+        "streaming": true,
+        "adult": true,
+        "multistream": true,
+        "viewers": 36,
+        "hosted": false,
+        "host": true,
+        "following": false,
+        "subscription": false,
+        "online": true,
+        "channelId": 122866,
+        "stream_name": "golive+Rezenfurd",
+        "color": "#35A775",
+        "webrtc": false,
+        "subscription_enabled": false,
+        "thumbnail_image": "https://thumb-eu-west1.picarto.tv/thumbnail/Rezenfurd.jpg"
+      },
+      {
+        "id": 281192,
+        "user_id": 281192,
+        "name": "KyotoLeopard",
+        "account_type": "FREE",
+        "avatar": "https://images.picarto.tv/ptvimages/2/28/281192/avatars/Sx0Drz9ogeuqvuepwlacBsUqinkcdKVU1aKfbzJr.png",
+        "offline_image": null,
+        "streaming": true,
+        "adult": true,
+        "multistream": true,
+        "viewers": 40,
+        "hosted": false,
+        "host": false,
+        "following": false,
+        "subscription": false,
+        "online": true,
+        "channelId": 281192,
+        "stream_name": "golive+KyotoLeopard",
+        "color": "#35A775",
+        "webrtc": false,
+        "subscription_enabled": true,
+        "thumbnail_image": "https://thumb-eu-west1.picarto.tv/thumbnail/KyotoLeopard.jpg"
+      },
+      {
+        "id": 942670,
+        "user_id": 942670,
+        "name": "allatir",
+        "account_type": "PREMIUM",
+        "avatar": "https://images.picarto.tv/ptvimages/9/94/942670/avatars/036c33e82faefebd20d731b2c866aaac.jpg",
+        "offline_image": null,
+        "streaming": true,
+        "adult": false,
+        "multistream": true,
+        "viewers": 52,
+        "hosted": false,
+        "host": false,
+        "following": false,
+        "subscription": false,
+        "online": true,
+        "channelId": 942670,
+        "stream_name": "golive+allatir",
+        "color": "#1da456",
+        "webrtc": false,
+        "subscription_enabled": false,
+        "thumbnail_image": "https://thumb-eu-west1.picarto.tv/thumbnail/allatir.jpg"
+      }
+    ],
+    "displayName": "allatir"
+  }
+}

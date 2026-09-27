@@ -41,10 +41,11 @@ void main() {
     screenshot('discover', ShotScreen.extraLarge, discover);
     screenshot('discover-loading', ShotScreen.phone, discover, world: loading);
     screenshot('discover-loading', ShotScreen.large, discover, world: loading, theme: ShotTheme.dark);
-    // Riverpod retries a failed list with backoff before the error shows.
+    // The app retries a network failure twice (1 s, 2 s), then explains it:
+    // the error must be on screen within 4 s (networkRetry).
     Future<void> failed(ShotApp app) async {
       await discover(app);
-      await app.frames(60, const Duration(seconds: 1));
+      await app.frames(4, const Duration(seconds: 1));
     }
 
     screenshot('discover-error', ShotScreen.phone, failed, world: failing);

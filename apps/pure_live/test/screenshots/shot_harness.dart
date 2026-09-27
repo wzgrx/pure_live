@@ -18,6 +18,7 @@ import 'package:pure_live_app/core/clock.dart';
 import 'package:pure_live_app/core/engine.dart';
 import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/recording.dart';
+import 'package:pure_live_app/core/retry.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/core/tv.dart';
@@ -231,6 +232,8 @@ final class ShotApp {
     final sites = {for (final id in platformOrder) id: PlatformSite(ShotSite(id, world))};
     await tester.pumpWidget(
       ProviderScope(
+        // The app's retry policy (main.dart).
+        retry: networkRetry,
         overrides: [
           // Past the first run: no one-time tips over the pages (principles §6.5).
           appPrefsProvider.overrideWith(

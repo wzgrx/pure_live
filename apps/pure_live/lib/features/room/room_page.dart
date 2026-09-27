@@ -8,12 +8,12 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart' show AudienceKind, DanmakuEvent;
 import 'package:live_media/live_media.dart';
-import 'package:live_net/live_net.dart' show TransportFailure;
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
+import 'package:pure_live_app/core/retry.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/chat_actions.dart';
@@ -55,13 +55,7 @@ final FutureProviderFamily<RoomDetail, RoomRef> roomDetailProvider = FutureProvi
       if (room.platform != 'iptv') await store.history.record(snapshot);
       await store.rooms.update([snapshot]);
       return detail;
-    }, retry: roomDetailRetry);
-
-/// Only a network failure is worth another try, twice at most (1 s, 2 s);
-/// a missing room or an unsupported platform is final (Riverpod would
-/// otherwise retry every error ten times).
-Duration? roomDetailRetry(int count, Object error) =>
-    count < 2 && (error is NetworkFailure || error is TransportFailure) ? Duration(seconds: 1 << count) : null;
+    }, retry: networkRetry);
 
 /// Whether a room is followed.
 final StreamProviderFamily<bool, RoomRef> isFollowedProvider = StreamProvider.autoDispose.family<bool, RoomRef>(

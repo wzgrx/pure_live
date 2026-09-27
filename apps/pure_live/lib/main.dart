@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/data_root.dart';
 import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/core/recording.dart';
+import 'package:pure_live_app/core/retry.dart';
 import 'package:pure_live_app/core/secrets.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -58,6 +59,8 @@ Future<void> main(List<String> args) async {
   );
   runApp(
     ProviderScope(
+      // Errors show within seconds instead of after ten automatic retries.
+      retry: networkRetry,
       overrides: [
         storeProvider.overrideWithValue(store),
         dataRootProvider.overrideWithValue(root),

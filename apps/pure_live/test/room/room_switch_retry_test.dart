@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart' show TransportFailure, TransportReason;
 import 'package:live_store/live_store.dart';
-import 'package:pure_live_app/features/room/room_page.dart';
+import 'package:pure_live_app/core/retry.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
 
 FollowedRoom _follow(String id, LiveState state) => FollowedRoom(
@@ -19,12 +19,12 @@ FollowedRoom _follow(String id, LiveState state) => FollowedRoom(
 
 void main() {
   test('room details retry only network failures, twice', () {
-    expect(roomDetailRetry(0, const NetworkFailure('x')), const Duration(seconds: 1));
-    expect(roomDetailRetry(1, const NetworkFailure('x')), const Duration(seconds: 2));
-    expect(roomDetailRetry(2, const NetworkFailure('x')), isNull);
-    expect(roomDetailRetry(0, const NotFound('x')), isNull);
-    expect(roomDetailRetry(0, StateError('x')), isNull);
-    expect(roomDetailRetry(0, const TransportFailure('douyu', TransportReason.timeout)), isNotNull);
+    expect(networkRetry(0, const NetworkFailure('x')), const Duration(seconds: 1));
+    expect(networkRetry(1, const NetworkFailure('x')), const Duration(seconds: 2));
+    expect(networkRetry(2, const NetworkFailure('x')), isNull);
+    expect(networkRetry(0, const NotFound('x')), isNull);
+    expect(networkRetry(0, StateError('x')), isNull);
+    expect(networkRetry(0, const TransportFailure('douyu', TransportReason.timeout)), isNotNull);
   });
 
   test('F-FAV-03: the switch list follows what this run checked', () {

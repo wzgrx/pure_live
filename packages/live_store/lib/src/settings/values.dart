@@ -86,3 +86,13 @@ enum CardPreset {
   /// Custom.
   custom,
 }
+
+/// What closing the main desktop window does (spec/product.md F-WIN-04);
+/// names match 3.x `exitChoose`.
+enum CloseAction {
+  /// Quit the app.
+  exit,
+
+  /// Hide the window; the tray icon brings it back.
+  minimize,
+}

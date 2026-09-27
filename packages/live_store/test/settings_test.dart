@@ -52,6 +52,11 @@ void main() {
       expect(convert(Settings.refreshRateMode, 'enableHighRefreshRate', false), RefreshRateMode.powerSaving);
       expect(convert(Settings.catalogPreferred, 'preferPlatform', ' HUYA '), 'huya');
       expect(convert(Settings.danmakuPipNoEmoji, 'pipDanmaNoEmojiMode', true), isTrue);
+      expect(convert(Settings.closeAction, 'exitChoose', 'minimize'), CloseAction.minimize);
+      expect(convert(Settings.closeAction, 'exitChoose', 'tray'), isNull);
+      expect(convert(Settings.closeDontAsk, 'dontAskExit', true), isTrue);
+      expect(convert(Settings.miniPlayerOnLeave, 'floatPlay', true), isTrue);
+      expect(convert(Settings.pipAlwaysOnTop, 'windowsPipAlwaysOnTop', true), isTrue);
     });
 
     test('scopes follow store.md §5', () {

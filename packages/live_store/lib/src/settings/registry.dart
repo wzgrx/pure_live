@@ -158,6 +158,27 @@ abstract final class Settings {
   /// Mute every room.
   static const globalMute = BoolSetting('volume.globalVolumeMute', false, legacy: [LegacyKey('globalVolumeMute')]);
 
+  /// Leaving a playing room shrinks it to the in-app mini window (F-PIP-03,
+  /// principles.md §6.1; 3.x default off).
+  static const miniPlayerOnLeave = BoolSetting(
+    'player.miniPlayerOnLeave',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('floatPlay')],
+  );
+
+  /// Enter system picture-in-picture when the user leaves the app from a
+  /// playing room (Android; new in v4, default off, principles.md §6.1).
+  static const autoPip = BoolSetting('player.autoPip', false, scope: SettingScope.device);
+
+  /// Keep the Windows picture-in-picture window above other windows (F-PIP-02).
+  static const pipAlwaysOnTop = BoolSetting(
+    'player.pipAlwaysOnTop',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('windowsPipAlwaysOnTop')],
+  );
+
   // Danmaku.
 
   /// Danmaku enabled at all; off hides the button and skips the connection.
@@ -698,6 +719,30 @@ abstract final class Settings {
     scope: SettingScope.device,
   );
 
+  /// Main window position as `x,y` in logical pixels; empty until the window
+  /// first moves (F-WIN-06).
+  static const windowPosition = StringSetting('window.position', '', maxLength: 64, scope: SettingScope.device);
+
+  /// The main window was maximised when last used (F-WIN-06).
+  static const windowMaximized = BoolSetting('window.maximized', false, scope: SettingScope.device);
+
+  /// Closing the main window does [closeAction] without asking (F-WIN-04).
+  static const closeDontAsk = BoolSetting(
+    'exit.dontAsk',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('dontAskExit')],
+  );
+
+  /// What closing the main window does once the user chose "不再询问".
+  static const closeAction = EnumSetting<CloseAction>(
+    'exit.choice',
+    CloseAction.exit,
+    CloseAction.values,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('exitChoose')],
+  );
+
   /// Every registered setting.
   static const List<Setting<Object>> all = [
     themeMode,
@@ -722,6 +767,9 @@ abstract final class Settings {
     defaultMobileVolume,
     defaultDesktopVolume,
     globalMute,
+    miniPlayerOnLeave,
+    autoPip,
+    pipAlwaysOnTop,
     danmakuEnabled,
     danmakuHidden,
     danmakuFontSize,
@@ -791,6 +839,10 @@ abstract final class Settings {
     proxyHost,
     proxyPort,
     proxyPlatforms,
+    windowPosition,
+    windowMaximized,
+    closeDontAsk,
+    closeAction,
   ];
 
   static final Map<String, Setting<Object>> _byId = {for (final setting in all) setting.id: setting};

@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S06-usher-live",
+  "capturedAt": "2026-09-27T18:44:00.785140Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://usher.ttvnw.net/api/channel/hls/zarbex.m3u8?allow_source=true&fast_bread=true&p=3081169&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&reassignments_supported=true&supported_codecs=avc1&cdm=wv&sig=ae05a6b246ff6fa610d4fc1d8957cc1c2a679634&token=%7B%22mhsalzt%22%3Avfydr%2C%22vpuauvuzcasdt%22%3A%7B%22lhnshfgxr%22%3Apsqkq%2C%22ojdmzp%22%3A%22%22%7D%2C%22esnjnbkq_ebdybtd%22%3Ajvagp%2C%22vnecegj%22%3A%22lmokgx%22%2C%22iawfumc_hv%22%3A864036682%2C%22iqcwldc%22%3A%7B%22lxqqgeplrt_hcszgsnr%22%3A%5B%5D%2C%22cusp_swhqe%22%3A1092739083%7D%2C%22fe_uc%22%3Awbmmm%2C%22wqilcvcz_kdaqbq%22%3A%22%22%2C%22yvtuoj_nz%22%3A%22b747df3674058r72588jj41ir300259o%22%2C%22xocctii%22%3A7344907833%2C%22gdohirgo_spghima_rxhxehs%22%3Aznetp%2C%22hglx%22%3A%22%22%2C%22anjf_crv%22%3Ayksva%2C%22ghmqc_brvbxslm%22%3Amyee%2C%22xilnqd%22%3Ahfysg%2C%22tdtqvrqxwxrh_cq%22%3Actkv%2C%22vpngkgv%22%3Abulne%2C%22zfdkgpar%22%3A%22mwmi%22%2C%22zwmrog_spoj%22%3A%22btal%22%2C%22foythso%22%3A%7B%22vcclbuv_hi_deho%22%3Armvx%7D%2C%22ocfiolmlto%22%3Acpxpc%2C%22jyvz%22%3A%22%22%2C%22pcxeuw_vsd%22%3Atgkl%2C%22hlsx_wiy%22%3Ajifz%2C%22kklpilvsss%22%3Axfupx%2C%22pmrif%22%3Aebume%2C%22bxtq_xc%22%3Abtkp%2C%22zkjg_ng%22%3A%22826.996.328.856%22%2C%22xdbsdpx%22%3A7%2C%22vpjvtwb_fzbcisrvcb%22%3A%22WEEP_MQ%22%2C%22czixzeu_ukiky_baxjbpp_ocwn%22%3A03205%2C%22ucpbkdy_uhvhfiuhqu_mivsnia%22%3A%7B%22HHEQ_YP%22%3A%5B%22BBZBY_VVN_WGESNV_DL%22%5D%2C%22ZZMKG_BR%22%3A%5B%22ZMSEA_YFP_NOUZWO_RT%22%5D%7D%2C%22ntsmgfu_egahs_npbmcnr_kccf_oqyzjoa%22%3A%5B%22NECDG_VHKXYCXMUL_NCWUCIC%22%5D%7D",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-amzn-trace-id": "Root=1-6ab963f1-4aef4568615127af71834142",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 18:44:01 GMT",
+      "access-control-allow-origin": "https://www.twitch.tv",
+      "x-amz-cf-pop": "SFO53-P12",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "x-amz-cf-id": "DdgBYwzQWRW8unxNmGYKPqNWlMiwMrQH2WyNkCil_9l1pwAibBkc0w==",
+      "via": "1.1 dc57b5444a071059b2ef28809c851662.cloudfront.net (CloudFront)",
+      "content-type": "application/vnd.apple.mpegurl",
+      "x-cache": "Miss from cloudfront"
+    }
+  },
+  "raw": {
+    "sha256": "c2f91cb30240d53cd69222e429237409b308e6dc22753aeaa470b0af44222ddf",
+    "length": 8910
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "text:/USER-IP=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/SERVING-ID=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/VIDEO-SESSION-ID=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/[,:]C=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/[,:]E=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text://v1/playlist/([A-Za-z0-9_-]+)\\.m3u8/",
+      "rule": "secret"
+    },
+    {
+      "where": "url:sig",
+      "rule": "secret"
+    },
+    {
+      "where": "url:token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

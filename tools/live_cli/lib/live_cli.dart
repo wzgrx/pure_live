@@ -7,6 +7,7 @@ export 'src/danmaku/recorder.dart';
 export 'src/danmaku/scrub_acfun.dart';
 export 'src/danmaku/scrub_sites.dart';
 export 'src/danmaku/scrub_soop.dart';
+export 'src/danmaku/scrub_twitch.dart';
 export 'src/danmaku/scrub_yy.dart';
 export 'src/fixture/capture.dart';
 export 'src/fixture/command.dart';

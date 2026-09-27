@@ -340,6 +340,56 @@ void main() {
     expect(chat.userId, hasLength(9));
   });
 
+  test("twitch: senders and their mentions get pseudonyms; other viewers' notices are dropped", () {
+    final scrubber = FrameScrubber.forPlatform('twitch', _room('twitch', 'zarbex', {'login': 'zarbex'}), seed: 6);
+    List<int> text(String value) => utf8.encode(value);
+    final frames = [
+      CapturedFrame(direction: 'out', millis: 0, text: true, bytes: text('NICK justinfan12345')),
+      CapturedFrame(
+        direction: 'in',
+        millis: 1,
+        text: true,
+        bytes: text(
+          '@display-name=AlanBowgen;id=m-1;user-id=1246260645;client-nonce=413E0BAE;color=#8A2BE2 '
+          ':alanbowgen!alanbowgen@alanbowgen.tmi.twitch.tv PRIVMSG #zarbex :@Schmalooten wie gross?\r\n',
+        ),
+      ),
+      CapturedFrame(
+        direction: 'in',
+        millis: 2,
+        text: true,
+        bytes: text(
+          '@display-name=Schmalooten;id=m-2;user-id=555666777 '
+          ':schmalooten!schmalooten@schmalooten.tmi.twitch.tv PRIVMSG #zarbex :@alanbowgen 191\r\n'
+          '@login=someone;display-name=Someone;msg-id=sub :tmi.twitch.tv USERNOTICE #zarbex :hi\r\n'
+          'PING :tmi.twitch.tv\r\n',
+        ),
+      ),
+    ];
+    final result = scrubber.scrub(frames, const []);
+    expect(scrubber.findLeak(result.frames, ''), isNull);
+    final all = result.frames.map((frame) => utf8.decode(frame.bytes)).join('\n');
+    for (final original in ['AlanBowgen', 'alanbowgen', 'Schmalooten', 'schmalooten', '1246260645', '413E0BAE']) {
+      expect(all, isNot(contains(original)));
+    }
+    expect(all, isNot(contains('USERNOTICE')));
+    expect(all, contains('PING :tmi.twitch.tv'));
+    expect(utf8.decode(result.frames.first.bytes), 'NICK justinfan12345');
+    final context = DecodeContext(room: 'twitch:zarbex', session: 0, receivedAt: 0, now: DateTime.utc(2026));
+    final chats = [
+      for (final frame in result.frames.skip(1))
+        for (final message in TwitchProtocol.messages(utf8.decode(frame.bytes)))
+          ?TwitchProtocol.chat(message, channel: 'zarbex', context: context),
+    ];
+    expect(chats, hasLength(2));
+    expect(chats.first.userName, hasLength('AlanBowgen'.length));
+    expect(chats.first.text, '@${chats.last.userName} wie gross?', reason: 'a mention before the sender speaks');
+    expect(chats.last.text, endsWith(' 191'));
+    expect(chats.last.text, isNot(contains('alanbowgen')));
+    expect(chats.first.id, 'twitch:m-1');
+    expect(chats.first.color, 0x8A2BE2);
+  });
+
   test('a masked name keeps its mask', () {
     final names = Pseudonyms(seed: 2);
     expect(names.person('尘***'), endsWith('***'));

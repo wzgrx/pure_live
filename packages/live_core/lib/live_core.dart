@@ -25,6 +25,8 @@ export 'src/sites/kuaishou/kuaishou_parse.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
 export 'src/sites/soop/soop_parse.dart';
 export 'src/sites/soop/soop_site.dart';
+export 'src/sites/twitch/twitch_parse.dart';
+export 'src/sites/twitch/twitch_site.dart';
 export 'src/sites/yy/yy_parse.dart';
 export 'src/sites/yy/yy_site.dart';
 export 'src/stream.dart';

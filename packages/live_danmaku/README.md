@@ -35,8 +35,8 @@ await session.close();                      // 5 s 内返回
 |---|---|
 | `DanmakuEvent`（`DanmakuChat`、`DanmakuGift`、`DanmakuSuperChat`、`DanmakuOnline`、`DanmakuSystem`） | §1 统一消息。都带房间键、会话令牌、带平台前缀的消息 ID、平台时间、单调接收时间（`Timeline.now`，各 isolate 共用）、是否本地 |
 | `DanmakuConnector`、`danmakuConnectorFor(room, transport:, credentials:)` | 一个房间的连接：`events`、`connect()`（加入后返回 true，终态失败返回 false）、`close()`（5 s 内） |
-| `DouyuConnector`、`HuyaConnector`、`BilibiliConnector`、`DouyinConnector`、`KuaishouConnector`、`YyConnector`、`SoopConnector`、`AcfunConnector` | 各平台连接；除快手（HTTP 串行轮询）外都用 `SocketConnector` 的重连循环 |
-| `DouyuProtocol`、`HuyaProtocol`、`HuyaHeadlines`、`BilibiliProtocol`、`DouyinProtocol`、`KuaishouProtocol`、`YyProtocol`、`SoopProtocol`、`AcfunProtocol`、`AcfunLink` | 纯函数（`AcfunLink` 是一个连接的序号和密钥状态）：封包、心跳、签名、解码；测试直接用录制帧调用 |
+| `DouyuConnector`、`HuyaConnector`、`BilibiliConnector`、`DouyinConnector`、`KuaishouConnector`、`YyConnector`、`SoopConnector`、`AcfunConnector`、`TwitchConnector` | 各平台连接；除快手（HTTP 串行轮询）外都用 `SocketConnector` 的重连循环 |
+| `DouyuProtocol`、`HuyaProtocol`、`HuyaHeadlines`、`BilibiliProtocol`、`DouyinProtocol`、`KuaishouProtocol`、`YyProtocol`、`SoopProtocol`、`AcfunProtocol`、`AcfunLink`、`TwitchProtocol` | 纯函数（`AcfunLink` 是一个连接的序号和密钥状态）：封包、心跳、签名、解码；测试直接用录制帧调用 |
 | `DanmakuCredentials`、`SiteDanmakuCredentials` | 连接需要的凭据，由界面 isolate 上的站点适配器提供 |
 | `DanmakuTransport`、`IoDanmakuTransport`、`ExactWebSocket` | WebSocket（`dart:io`，按平台走代理）和 `LiveHttp`；`ExactWebSocket` 按原样发送握手头（YY、SOOP 的服务端不接受 `dart:io` 小写的升级头），支持 HTTP CONNECT 代理、TLS、文本帧和子协议 |
 | `DanmakuPipeline`、`DanmakuBatch` | §2–§4：过滤链、抽样、64 ms 批次 |
@@ -55,6 +55,7 @@ await session.close();                      // 5 s 内返回
 - YY：匿名登录 → AP 登录 → 进频道，15 s 内没有进频道应答就换连接；5 s 心跳。
 - SOOP：先连 TLS 端口（`CHPT + 1`），不通再连明文端口；子协议 `chat`；登录应答后加入；20 s 心跳。
 - AcFun：先走 HTTP（访客会话、`startPlay` 票据、礼物表），再注册、进房；房间心跳用进房应答给的间隔（10 s），另每 50 s 保活；每条推送都要确认；进房被拒、票据失效或下播时重新走 HTTP，房间不在播则终态 `noRoom`。
+- Twitch：匿名 IRC（文本帧），收到本频道的 `ROOMSTATE` 或自己的 `JOIN` 即加入；服务端 `PING` 立即回 `PONG`；客户端 60 s 一次 `PING`；`RECONNECT` 时重连。
 
 ## 各平台状态（2026-09-27/28 实网）
 
@@ -68,6 +69,7 @@ await session.close();                      // 5 s 内返回
 | YY | 通过（匿名） | `fixtures/yy/danmaku/S08-live`（594 帧，2 条聊天，完整握手） | 频道聊天（CONN-5 只收本频道） |
 | SOOP | 通过（明文端口） | `fixtures/soop/danmaku/S07-live`（3589 帧，约 140 条聊天） | 聊天（服务 5） |
 | AcFun | 通过（访客） | `fixtures/acfun/danmaku/S07-live`（784 帧，1 条聊天；平台聊天很少） | 聊天、礼物（名字查礼物表）、香蕉、在线人数 |
+| Twitch | 通过（匿名，经代理） | `fixtures/twitch/danmaku/S07-live`（27 帧，18 条聊天） | 聊天（消息 id、颜色、发送时间） |
 | 网易 CC | 未接（匿名进房无应答，spec/sites/cc.md §7） | — | — |
 
 ## 录制样本
@@ -92,3 +94,4 @@ dart run tools/live_cli/bin/live_cli.dart danmaku bilibili 5050 --pipeline    # 
 - SOOP 的 TLS 聊天端口在本机网络（直连、代理）都握手失败，只实测了明文端口。
 - AcFun 的礼物、香蕉只在一次未录制的连接里实测到，样本里只有构造的单元测试；连击礼物（`comboCount`）的合计方式未确认。
 - 网易 CC 没有弹幕：协议已查明大半，但匿名加入房间没有任何应答。
+- Twitch 的订阅、突袭通知（`USERNOTICE`）、打赏（bits）和管理员删除消息（`CLEARMSG`）不解码。

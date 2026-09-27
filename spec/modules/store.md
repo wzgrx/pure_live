@@ -177,9 +177,9 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 | page_show_size_selector / page_show_goto_button / page_show_scroll_top | bool | true | page.* |
 | page_default_size | int | 按屏幕宽度计算 | page.defaultSize（设备相关默认） |
 | page_size_options_raw | String | '' | page.sizeOptions |
-| autoRefreshFavorite / autoRefreshThumbnails | bool | false | |
-| refreshFavoriteOnResume | bool | true | |
-| autoRefreshInterval / thumbnailRefreshInterval / maxConcurrentRefresh | int | 30 / 30 / 4 | |
+| autoRefreshFavorite / autoRefreshThumbnails | bool | false | refresh.autoRefreshFavorite / refresh.autoRefreshThumbnails（封面定时刷新，F-FAV-04） |
+| refreshFavoriteOnResume | bool | true | refresh.refreshFavoriteOnResume |
+| autoRefreshInterval / thumbnailRefreshInterval / maxConcurrentRefresh | int | 30 / 30 / 4 | refresh.autoRefreshInterval / refresh.thumbnailRefreshInterval（夹紧到 5–360 分钟，同旧版）/ refresh.maxConcurrentRefresh |
 
 **网络、窗口、退出、启动（proxy_settings_controller.dart:9-18；window_size_controller.dart:8-107；exit_settings_controller.dart:10-26；startup_controller.dart:25）**
 
@@ -316,7 +316,7 @@ v4 设置 id 的默认规则：`<分组>.<旧键>`，旧键里的 `_` 改为驼�
 
 由注册表派生：设置页的重置、备份范围、导入映射、同步范围、未知键的处理（导入时忽略并写进报告）。
 
-作用域分配 **[决定]**：弹幕、主题（字体文件名除外）、卡片、分页、刷新、播放的通用项、目录平台为 `synced`；窗口、代理、路径类、退出、开机自启、播放输出驱动和硬解选项、字体文件名、本地互动、录制为 `device`；迁移计数、设备 id、缓存为 `internal`；Cookie 和密码为 `secret`。TV 模式（`app.tvMode` 自动 / 开启 / 关闭，`app.tvPerformanceMode`）是 v4 新增、没有旧键的 `device` 设置：电视上的选择不能随备份跑到手机上；竖屏全屏上下滑换台（`player.switchRoomGesture`，默认关）属于播放的通用项，为 `synced`（2026-09-28，ADR 0026）。
+作用域分配 **[决定]**：弹幕、主题（字体文件名除外）、卡片、分页、刷新、播放的通用项、目录平台为 `synced`；窗口、代理、路径类、退出、开机自启、播放输出驱动和硬解选项、字体文件名、本地互动、录制为 `device`；迁移计数、设备 id、缓存为 `internal`；Cookie 和密码为 `secret`。TV 模式（`app.tvMode` 自动 / 开启 / 关闭，`app.tvPerformanceMode`）是 v4 新增、没有旧键的 `device` 设置：电视上的选择不能随备份跑到手机上；竖屏全屏上下滑换台（`player.switchRoomGesture`，默认关）属于播放的通用项，为 `synced`（2026-09-28，ADR 0026）。关注页排序（`follows.sort`：人数 / 开播时间 / 平台 / 自定义，默认人数，与旧版固定按人数一致）是 v4 新增、没有旧键的 `synced` 设置（2026-09-28，F-FAV-01）。
 
 ## 6. 旧数据导入（迁移）
 

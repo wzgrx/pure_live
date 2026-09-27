@@ -12,7 +12,7 @@
 
 | 方面 | 决定（推荐） | 理由 |
 |----|----|----|
-| 仓库与分支 | 原仓库、只用 `master`；改成 Dart pub workspace，旧应用移到 `apps/legacy`，新应用在 `apps/pure_live` | 保留 stars、issues、发布记录和应用内更新地址；底层包可以先接回旧应用，边重写边发布 |
+| 仓库与分支 | 原仓库、只用 `master`；改成 Dart pub workspace，旧应用留在根目录作为 workspace 根，新应用在 `apps/pure_live`（ADR 0007） | 保留 stars、issues、发布记录和应用内更新地址；底层包可以先接回旧应用，边重写边发布 |
 | 替换方式 | 底层（平台接口、网络、播放中继、弹幕协议、存储）先抽成独立包，旧应用改为依赖它们；界面层在新应用里整体重做，功能对齐后一次切换 | 底层可以逐个开关验证；界面两套并存的成本太高 |
 | 技术栈 | Flutter 3.47.5 / Dart 3.13.4、Riverpod 3、go_router 18、drift 2.35、dio 5 + 原生网络栈、libmpv（自编 FFmpeg 9） | 全部为官方最新稳定版；去掉内置的 GetX |
 | 播放内核 | 全平台只用 mpv；去掉 IJK、Exo 和 fvp（libmdk 是专有库，见 ADR 0006） | 一个 APK 里有三份独立的 FFmpeg 库（合计约 49 MB），libmpv 内还静态链接了一份 |
@@ -180,10 +180,10 @@ media_kit 不使用 pub.dev 上的版本，而是基于 <a href="https://github.
 ### 仓库结构
 
 ```text
-pure_live/                     ← pub workspace（只有 master 分支）
+pure_live/                     ← pub workspace 根，同时是旧应用（只有 master 分支，ADR 0007）
+  lib/ android/ windows/ …     旧应用：逐步改为依赖下面的包；第 8 阶段删除
   apps/
     pure_live/                 新应用：界面与视图模型（手机、平板、桌面、TV）
-    legacy/                    旧应用，逐步改为依赖下面的包；v4 发布后删除
   packages/
     live_core/                 纯 Dart：33 个平台适配器、模型、签名、错误分类
     live_net/                  网络：原生栈适配、代理策略、Cookie、限流、重试
@@ -210,7 +210,7 @@ flowchart TD
   app --> dm["live_danmaku"]
   app --> store["live_store"]
   app --> core["live_core"]
-  legacy["apps/legacy（过渡）"] -.-> core
+  legacy["根目录的旧应用（过渡）"] -.-> core
   legacy -.-> media
   record --> media
   media --> core
@@ -565,12 +565,12 @@ flowchart LR
 | 0 诊断与基线 | 子代理并行诊断各模块；测量旧版性能和体积基线 | `docs/rewrite/DIAGNOSIS.md` 和基线数据落档 |
 | 1 规格与样本 | 从旧代码反推规格；整理回归清单；为主力平台录制真实接口样本 | 每条结论附旧代码位置；待确认项由 Claude 查证后清零 |
 | 2 设计方向与设计系统 | 调研、设计原则、设计系统页面、关键页面稿 | 独立子代理对照原则复核通过 |
-| 3 工程底座 | workspace、旧应用移到 `apps/legacy`、最新工具链、lint、hooks、CI、`live_cli`、`check_latest` | 旧应用照常构建发布；CI 全绿 |
+| 3 工程底座 | workspace、旧应用留在根目录作为 workspace 根、最新工具链、lint、hooks、CI、`live_cli`、`check_latest` | 旧应用照常构建发布；CI 全绿 |
 | 4 平台与网络层 | `live_net` + `live_core`，先做 5 个主力平台，通过开关接回旧应用 | 样本测试和探针全过；旧应用发 3.3.x 验证 |
 | 5 播放、弹幕、录制层 | `live_media`、`live_danmaku`、`live_record`；去掉 FFmpegKit 和 IJK | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | `live_ui` 和各页面；预览版包名 `.next` | 截图测试、五个宽度等级、性能门禁；预览版试用 |
 | 7 其余平台、TV、桌面 | 其余 28 个平台逐个评估后批量迁移；TV 焦点体系；Windows 细节 | 每个平台探针通过或明确下线 |
-| 8 对齐验收与切换 | 对齐清单、旧数据迁移、正式签名、发布流水线 | 发布 v4.0.0，删除 `apps/legacy` |
+| 8 对齐验收与切换 | 对齐清单、旧数据迁移、正式签名、发布流水线 | 发布 v4.0.0，删除根目录的旧应用代码 |
 
 ## 14 验证体系
 
@@ -607,7 +607,7 @@ flowchart LR
 - 依赖方向：apps → packages；live_core、live_net、live_danmaku 禁止 import flutter。
 - 命令：dart test packages/<包>；flutter test apps/pure_live；dart run live_cli probe <平台> <房间号>
 - 修 bug 先写能复现的测试；测试替身必须按真实库的事件顺序。
-- 新代码不写进 apps/legacy/，那里只允许接线改动。
+- 新代码不写进 根目录旧应用的 lib/，那里只允许接线改动。
 - 工具链和依赖用官方最新稳定版；升级先跑 tool/check_latest。
 - 只有 master 分支；每个验证过的改动都推送；版本号只随正式发布修改。
 - 真机测试先拿设备租约，操作前确认前台应用。
@@ -704,7 +704,7 @@ Windows 11 设计规范。然后自行确定：整体风格、品牌色和 logo 
 根据 spec/ 设计 ARCHITECTURE.md：包划分和依赖方向（live_core、live_net、live_danmaku 只能是纯 Dart）、状态管理、
 路由、错误模型、日志、存储和旧数据迁移、测试分层。每个关键选择写一份 docs/adr/NNN-*.md。
 工具链和依赖全部用官方最新稳定版，版本从官方渠道现查，不凭记忆；列出与第 4 节基线不一致之处。
-先给方案等我确认；确认后：把旧应用原样移到 apps/legacy（单独一个提交，保证照常构建），建立 workspace、lint、
+先给方案等我确认；确认后：在根目录的旧应用上建立 workspace（ADR 0007，旧应用不搬家）、lint、
 hooks、CI、tools/live_cli 和 tools/check_latest。验证：旧应用构建和全部测试通过，CI 全绿。
 ```
 
@@ -713,7 +713,7 @@ hooks、CI、tools/live_cli 和 tools/check_latest。验证：旧应用构建和
 ```text
 实现 [斗鱼适配器]，位置 packages/live_core/lib/src/sites/douyu/。
 依据：spec/sites/douyu.md、spec/regressions.md 中标记 douyu 的条目、fixtures/douyu/。
-范围：只改这个目录和对应测试；不读 apps/legacy 中规格没有引用的文件；不动其它平台。
+范围：只改这个目录和对应测试；不读 根目录的旧应用 中规格没有引用的文件；不动其它平台。
 做法：先写测试——样本解析测试覆盖规格里每一条“坑”，测试替身按真实库的事件顺序；再实现。
 验证：
 - dart test packages/live_core --name douyu 全部通过
@@ -781,7 +781,7 @@ done
 
 2026-09-27 全部采用推荐值（每项第一个选项）。之后的技术选择由 Claude 决定，并写进 `docs/adr/`。
 
-- **仓库方式**：原仓库 master 原地替换，旧应用移到 `apps/legacy`
+- **仓库方式**：原仓库 master 原地替换，旧应用留在根目录作为 workspace 根（ADR 0007）
 - **首批平台**：5 个主力（B 站、斗鱼、虎牙、抖音、快手），其余逐个评估
 - **播放内核**：全平台只用 mpv，去掉 IJK、Exo 和 fvp（ADR 0006 取代原“mpv 为主、fvp 备用”）
 - **录制**：去掉 FFmpegKit，改走本地中继 + 共用 FFmpeg

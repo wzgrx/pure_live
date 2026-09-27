@@ -9,12 +9,12 @@
 | 0 诊断与基线 | **完成**（2026-09-27） | `docs/rewrite/DIAGNOSIS.md`、`docs/rewrite/BASELINE.md` | 诊断报告和基线数据落档 |
 | 1 规格与样本 | 进行中 | `spec/`、`spec/regressions.md`、`fixtures/` | 每条结论附旧代码位置；待确认项清零 |
 | 2 设计方向与设计系统 | 未开始 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
-| 3 工程底座 | 未开始 | workspace、`apps/legacy`、CI、hooks、`live_cli`、`check_latest` | 旧应用照常构建发布，CI 全绿 |
+| 3 工程底座 | 未开始 | workspace、CI、hooks、`live_cli`、`check_latest` | 旧应用照常构建发布，CI 全绿 |
 | 4 平台与网络层 | 未开始 | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过；旧应用接入后发布 3.3.x |
 | 5 播放、弹幕、录制层 | 未开始 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | 未开始 | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
 | 7 其余平台、TV、桌面 | 未开始 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
-| 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除 `apps/legacy` |
+| 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除根目录的旧应用代码 |
 
 ## 已完成的前置工作
 

@@ -16,6 +16,7 @@ final class RoomCard {
     this.area,
     this.audience = Audience.none,
     this.liveSince,
+    this.avatar,
   });
 
   /// Normalised room identity.
@@ -41,6 +42,10 @@ final class RoomCard {
 
   /// When the current broadcast started, if the platform says.
   final DateTime? liveSince;
+
+  /// Streamer's avatar when the list provides one (search results, the 3.3.x
+  /// bridge); v4 room cards do not show it.
+  final Uri? avatar;
 }
 
 /// A room's detail page data: the card plus what the room page needs.

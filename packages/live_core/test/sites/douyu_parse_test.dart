@@ -26,6 +26,7 @@ void main() {
     expect(rooms.map((r) => r.anchorName), legacy.map((r) => r['nick']));
     expect(rooms.map((r) => r.cover?.toString()), legacy.map((r) => r['cover']));
     expect(rooms.map((r) => r.audience.popularity), legacy.map((r) => parseChineseCount(r['popularity'])));
+    expect(rooms.map((r) => r.avatar?.toString() ?? ''), legacy.map((r) => r['avatar']));
   }
 
   group('S02/S03 room lists', () {

@@ -46,6 +46,10 @@ dependencies:
   synchronized: ^3.4.2
   meta: ^1.18.0 # Flutter 3.47.5 SDK pin
 
+  # v4 platform layer, used for lists, search and links in 3.3.x (ADR 0012).
+  live_core: any
+  live_net: any
+
   # -------------------------- 网络请求/网络状态 --------------------------
   http: ^1.1.0 # 基础HTTP请求
   dio: ^5.9.0 # 强大的Dart HTTP客户端

@@ -1,3 +1,5 @@
+import 'package:live_core/live_core.dart' show SiteError;
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:pure_live/core/site/niconico/niconico_link.dart';
 import 'package:pure_live/core/site/weibo/weibo_link.dart';
 import 'package:pure_live/core/site/xiaohongshu/xiaohongshu_link.dart';
@@ -309,6 +311,14 @@ class LiveUrlTool {
       } else if (_hostIs(host, 'douyu.com')) {
         platform = Sites.douyuSite;
         id = segments.first;
+        // An alias (靓号) page redirects to the numeric room; betard refuses aliases.
+        if (V4Bridge.handles(platform) && !RegExp(r'^\d+$').hasMatch(id)) {
+          try {
+            id = (await V4Bridge.instance.resolve(platform, realUrl))?.roomId;
+          } on SiteError {
+            id = null;
+          }
+        }
       } else if (host == 'www.douyin.com') {
         platform = Sites.douyinSite;
         id = _douyinWebRoomId(uri);

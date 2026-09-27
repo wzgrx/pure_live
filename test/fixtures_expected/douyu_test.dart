@@ -2,6 +2,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/common/models/live_area.dart';
 import 'package:pure_live/core/site/douyu/douyu_site.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:pure_live/core/site/douyu/douyu_utils.dart';
 import 'package:pure_live/modules/search/web_search_room_parser.dart';
 
@@ -9,6 +10,10 @@ import 'douyu_support.dart';
 import 'support.dart';
 
 void main() {
+  // These tests freeze the legacy parsers; keep lists off the v4 bridge.
+  setUpAll(() => V4Bridge.platformsOverride = const {});
+  tearDownAll(() => V4Bridge.platformsOverride = null);
+
   test('S01-cate-list', () async {
     final fixture = FixtureSample.load('douyu', 'S01-cate-list');
     replay([fixture]);

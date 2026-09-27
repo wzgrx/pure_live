@@ -34,6 +34,14 @@ abstract final class DouyuParse {
     throw ApiChanged(_site, '$what: expected a list');
   }
 
+  /// §2.2/§2.3 `av`: mixList gives a path (`avatar_v3/…`), allpage and
+  /// search give a full URL.
+  static Uri? _listAvatar(Object? value) {
+    final text = jsonString(value);
+    if (text == null) return null;
+    return jsonUrl(text) ?? Uri.tryParse('https://apic.douyucdn.cn/upload/${text}_middle.jpg');
+  }
+
   /// §2.1 `m.douyu.com/api/cate/list`: categories sorted by id, areas in order.
   static List<Category> categories(String body) {
     final data = _map(_map(_json(body, 'cate/list'), 'cate/list')['data'], 'cate/list.data');
@@ -76,6 +84,7 @@ abstract final class DouyuParse {
             cover: jsonUrl(item['rs16']),
             area: jsonString(item['c2name']),
             audience: Audience(popularity: jsonInt(item['ol'])),
+            avatar: _listAvatar(item['av']),
           ),
     ];
     final pages = jsonInt(data['pgcnt']) ?? 0;
@@ -107,6 +116,7 @@ abstract final class DouyuParse {
             cover: jsonUrl(item['roomSrc']),
             area: jsonString(item['cateName']),
             audience: Audience(popularity: parseChineseCount(item['hot'])),
+            avatar: _listAvatar(item['avatar']),
           ),
     ];
     return Page(rooms, next: rooms.isEmpty ? null : PageCursor('${page + 1}'));

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:pure_live/common/index.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:pure_live/model/live_category.dart';
+import 'package:pure_live/core/site/v4_bridge/v4_bridge.dart';
 import 'package:pure_live/model/live_anchor_item.dart';
 import 'package:pure_live/core/common/core_log.dart';
 import 'package:pure_live/core/common/core_error.dart';
@@ -73,6 +74,7 @@ class DouyuSite
 
   @override
   Future<List<LiveCategory>> getCategores(int page, int pageSize) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.categories(id);
     List<LiveCategory> categories = [];
     var result = await HttpClient.instance.getJson("https://m.douyu.com/api/cate/list");
     var subCateList = result["data"]["cate2Info"] as List;
@@ -124,6 +126,7 @@ class DouyuSite
 
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.areaRooms(id, category, page);
     var result = await HttpClient.instance.getJson(
       "https://www.douyu.com/gapi/rkc/directory/mixList/2_${category.areaId}/$page",
       queryParameters: {},
@@ -444,6 +447,7 @@ class DouyuSite
 
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.recommended(id, page);
     try {
       var result = await HttpClient.instance.getJson(
         "https://www.douyu.com/japi/weblist/apinc/allpage/6/$page",
@@ -571,6 +575,7 @@ class DouyuSite
 
   @override
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) async {
+    if (V4Bridge.handles(id)) return V4Bridge.instance.search(id, keyword, page);
     final effectivePageSize = pageSize.clamp(1, 50);
     final headers = DouyuUtils.requestHeaders()..['referer'] = 'https://www.douyu.com/search/';
 

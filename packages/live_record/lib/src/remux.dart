@@ -46,12 +46,12 @@ final class RemuxException implements Exception {
   String toString() => 'RemuxException($message)';
 }
 
-/// Converts a recorded file to MP4 by stream copy (spec §10, ADR 0005 §4).
+/// Converts a recorded file to MP4 by stream copy (spec §10, ADR 0021).
 ///
-/// `live_record` has no FFmpeg binding. The app provides the implementation:
-/// the planned one is a C shim modelled on FFmpeg's `doc/examples/remux.c`,
-/// linked against the libavformat that libmpv already ships, run in a
-/// background isolate. `tools/live_cli` uses the `ffmpeg` executable.
+/// The implementation is the pure-Dart `FlvToMp4Remuxer` (no FFmpeg; the
+/// same code on Android and Windows); the app wraps it in `IsolateRemuxer`
+/// to keep the work off the UI isolate. `tools/live_cli` can also run the
+/// `ffmpeg` executable for comparison.
 ///
 /// Contract: write [RemuxJob.output] (`-c copy`, `+faststart`, no decoding),
 /// throw [RemuxException] on any demux or mux error including invalid data,

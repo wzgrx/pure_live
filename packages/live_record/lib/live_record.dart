@@ -14,6 +14,8 @@ export 'src/naming.dart';
 export 'src/quality.dart';
 export 'src/recovery.dart';
 export 'src/remux.dart';
+export 'src/remux/codec_config.dart' show VideoCodec;
+export 'src/remux/flv_to_mp4.dart';
 export 'src/retry.dart';
 export 'src/rooms.dart';
 export 'src/session.dart';

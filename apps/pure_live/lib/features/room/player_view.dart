@@ -68,8 +68,10 @@ class PlayerView extends ConsumerStatefulWidget {
     this.onToggleChat,
     this.onToggleTheater,
     this.onSwitchRoom,
+    this.onStepRoom,
     this.onBlock,
     this.onOpenDanmakuSettings,
+    this.tv = false,
     super.key,
   });
 
@@ -105,11 +107,21 @@ class PlayerView extends ConsumerStatefulWidget {
   /// Opens the switch-room panel (F-ROOM-11).
   final VoidCallback? onSwitchRoom;
 
+  /// Steps to the previous (-1) or next (+1) room of the list; set when
+  /// “上下滑切换直播间” is on, used by vertical swipes in portrait
+  /// fullscreen (T-05).
+  final ValueChanged<int>? onStepRoom;
+
   /// Blocks a word or user from an on-video danmaku (REN-8).
   final BlockCallback? onBlock;
 
   /// Opens the danmaku settings panel.
   final VoidCallback? onOpenDanmakuSettings;
+
+  /// TV mode (live-room §3.5): the room page draws the remote's info bar,
+  /// control row and side panels; this view keeps the picture, danmaku,
+  /// hints and failure overlay, without the touch bars and the lock.
+  final bool tv;
 
   @override
   ConsumerState<PlayerView> createState() => PlayerViewState();
@@ -169,6 +181,9 @@ class PlayerViewState extends ConsumerState<PlayerView> {
 
   /// The picture fit.
   store.VideoFit get fit => _fit;
+
+  /// The session's latest state.
+  PlaybackState get playbackState => _state;
 
   @override
   void initState() {
@@ -254,6 +269,10 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     _volumeTouched = false;
     if (settings.get(store.Settings.globalMute)) {
       _volume = 0;
+    } else if (widget.tv) {
+      // The remote's volume keys set the TV's volume; the player stays at
+      // full level so they have the whole range (principles §6.3).
+      _volume = 1;
     } else if (_touch) {
       _volume = settings.get(store.Settings.defaultMobileVolume);
     } else {
@@ -277,7 +296,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       if (next > 0) _lastAudible = next;
     });
     unawaited(_session.setVolume(next));
-    if (hint) _showHint(next == 0 ? Icons.volume_off : Icons.volume_up, '音量 ${(next * 100).round()}%');
+    if (hint) showHint(next == 0 ? Icons.volume_off : Icons.volume_up, '音量 ${(next * 100).round()}%');
     if (!touched) return;
     _volumeTouched = true;
     if (!_touch) {
@@ -323,7 +342,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     final prefs = ref.read(danmakuPrefsProvider);
     if (!prefs.enabled) return;
     ref.read(danmakuPrefsProvider.notifier).setHidden(hidden: !prefs.hidden);
-    _showHint(prefs.hidden ? Icons.subtitles : Icons.subtitles_off_outlined, prefs.hidden ? '弹幕已打开' : '弹幕已关闭');
+    showHint(prefs.hidden ? Icons.subtitles : Icons.subtitles_off_outlined, prefs.hidden ? '弹幕已打开' : '弹幕已关闭');
   }
 
   /// Audio only on or off, in place (F-ROOM-9, AUD-1).
@@ -383,10 +402,13 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     }
   }
 
-  void _showHint(IconData icon, String text) {
+  /// A short message in the middle of the picture (volume, fit, room
+  /// switches), gone after [duration].
+  void showHint(IconData icon, String text, {Duration duration = const Duration(seconds: 1)}) {
+    if (!mounted) return;
     setState(() => _hint = (icon, text));
     _hintTimer?.cancel();
-    _hintTimer = Timer(const Duration(seconds: 1), () {
+    _hintTimer = Timer(duration, () {
       if (mounted) setState(() => _hint = null);
     });
   }
@@ -409,9 +431,10 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     });
   }
 
-  void _setFit(store.VideoFit fit) {
+  /// Sets and remembers the picture fit.
+  void setFit(store.VideoFit fit) {
     setState(() => _fit = fit);
-    _showHint(Icons.aspect_ratio, switch (fit) {
+    showHint(Icons.aspect_ratio, switch (fit) {
       store.VideoFit.cover => '填充',
       store.VideoFit.fill => '拉伸',
       _ => '适应',
@@ -517,7 +540,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         final next = pinchFit(_fit, details.scale);
         if (next != null) {
           _pinched = true;
-          _setFit(next);
+          setFit(next);
         }
       }
       return;
@@ -531,8 +554,14 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       if (dy < 12 && dx < 12) return;
       _swipeDecided = true;
       if (dy <= dx * 1.5) return;
-      _swipe = swipeTarget(x: _gestureStart.dx, width: _size.width, touch: _touch);
-      if (_swipe == SwipeTarget.none) return;
+      _swipe = swipeTarget(
+        x: _gestureStart.dx,
+        width: _size.width,
+        touch: _touch,
+        switchRooms: widget.onStepRoom != null && widget.presentation == RoomPresentation.portraitFullscreen,
+      );
+      // T-05: the room changes when the swipe ends.
+      if (_swipe == SwipeTarget.none || _swipe == SwipeTarget.switchRoom) return;
       _swipeFrom = _swipe == SwipeTarget.brightness ? _brightness : _volume;
       _hideTimer?.cancel();
       setState(() => _dragging = true);
@@ -544,8 +573,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       case SwipeTarget.brightness:
         final next = value.clamp(0.2, 1.0);
         setState(() => _brightness = next);
-        _showHint(Icons.brightness_medium, '亮度 ${(next * 100).round()}%');
-      case SwipeTarget.none:
+        showHint(Icons.brightness_medium, '亮度 ${(next * 100).round()}%');
+      case SwipeTarget.none || SwipeTarget.switchRoom:
         break;
     }
   }
@@ -556,6 +585,10 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       if (exitsPortraitFullscreen(upward: upward, velocity: details.velocity.pixelsPerSecond.dy)) {
         widget.onToggleFullscreen();
       }
+    }
+    if (_swipe == SwipeTarget.switchRoom && !_locked && !_pinched) {
+      final step = roomSwipeStep(dy: _gestureTravel.dy, velocity: details.velocity.pixelsPerSecond.dy);
+      if (step != null) widget.onStepRoom?.call(step);
     }
     _exitSwipe = false;
     _swipe = SwipeTarget.none;
@@ -602,7 +635,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     if (action == null || !mounted) return;
     final fit = fitOfQuickAction(action);
     if (fit != null) {
-      _setFit(fit);
+      setFit(fit);
       return;
     }
     switch (action) {
@@ -754,7 +787,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         icon: const Icon(Icons.play_arrow),
                       ),
                     ),
-                  RepaintBoundary(child: _controlsLayer(prefs)),
+                  // On TV the room page draws the remote's controls (§3.5).
+                  if (!widget.tv) RepaintBoundary(child: _controlsLayer(prefs)),
                 ],
               ),
             );
@@ -1016,7 +1050,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                                 tooltip: '画面比例',
                                 icon: const Icon(Icons.aspect_ratio, color: ink),
                                 initialValue: _fit,
-                                onSelected: _setFit,
+                                onSelected: setFit,
                                 itemBuilder: (context) => const [
                                   PopupMenuItem(value: store.VideoFit.contain, child: Text('适应')),
                                   PopupMenuItem(value: store.VideoFit.cover, child: Text('填充')),

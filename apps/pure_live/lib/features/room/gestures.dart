@@ -108,14 +108,31 @@ enum SwipeTarget {
 
   /// Playback volume.
   volume,
+
+  /// The previous or next room of the list (portrait fullscreen, with
+  /// “上下滑切换直播间” on; T-05).
+  switchRoom,
 }
 
 /// ZN-3: left half brightness, right half volume; desktops have no
-/// brightness.
-SwipeTarget swipeTarget({required double x, required double width, required bool touch}) {
+/// brightness. In portrait fullscreen with room switching on, the whole
+/// picture switches rooms and brightness and volume swipes are off there
+/// (principles §6.1; the exit zone at the bottom is decided before this).
+SwipeTarget swipeTarget({required double x, required double width, required bool touch, bool switchRooms = false}) {
+  if (switchRooms) return SwipeTarget.switchRoom;
   final left = x < width / 2;
   if (!left) return SwipeTarget.volume;
   return touch ? SwipeTarget.brightness : SwipeTarget.none;
+}
+
+/// T-05: the room step of a finished vertical swipe of [dy] logical pixels
+/// at [velocity] (negative is upward): up is the next room (+1), down the
+/// previous (-1), null when the swipe was too short and too slow.
+int? roomSwipeStep({required double dy, required double velocity}) {
+  final far = dy.abs() >= 80;
+  final flung = velocity.abs() >= 800 && dy.abs() >= 24 && velocity.sign == dy.sign;
+  if (!far && !flung) return null;
+  return dy < 0 ? 1 : -1;
 }
 
 /// T-03: a swipe over half the picture height changes the value by 25%;

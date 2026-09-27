@@ -116,6 +116,8 @@ class TvNavScaffoldState extends State<TvNavScaffold> {
       final toRail = wasRail && !_selecting;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || FocusManager.instance.primaryFocus != primary) return;
+        // Not under a page pushed over the shell (a room): its own focus rules.
+        if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
         if (toRail) {
           focusRail();
         } else {

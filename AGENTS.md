@@ -3,7 +3,8 @@
 ## v4 rewrite
 
 - A full rewrite is in progress on `master`: plan [docs/rewrite/PLAN.md](docs/rewrite/PLAN.md), rules and accepted decisions [spec/constitution.md](spec/constitution.md), decisions [docs/adr/](docs/adr/README.md), progress [docs/rewrite/STATUS.md](docs/rewrite/STATUS.md).
-- The current 3.x app keeps shipping until v4.0.0. New v4 code goes into `packages/` and `apps/pure_live` once the workspace exists (phase 3); until then only fixes and extraction work touch `lib/`.
+- The current 3.x app keeps shipping until v4.0.0. New v4 code goes into `packages/` and `apps/pure_live` (pub workspace rooted at the legacy app, ADR 0007); `lib/` only gets fixes and wiring.
+- v4 gate: `tool/gate.sh` (changed members) or `tool/gate.sh --all` (CI: every member plus legacy analyze/tests and `tool/tests`). Dependency direction lives in `tool/check_deps.py`; pinned toolchain in `toolchain.env`; `dart run tools/check_latest/bin/check_latest.dart` compares it with the latest official releases.
 
 ## Scope and execution
 

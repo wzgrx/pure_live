@@ -6,6 +6,13 @@ version: 3.2.11+4134
 environment:
   sdk: ^3.13.0
 
+# v4 packages and tools (docs/adr/0007-legacy-at-root.md). The legacy app stays
+# at the root and is the workspace root, so all members share one pubspec.lock.
+workspace:
+  - packages/live_core
+  - tools/live_cli
+  - tools/check_latest
+
 dependencies:
   flutter:
     sdk: flutter

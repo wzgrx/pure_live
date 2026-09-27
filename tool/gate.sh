@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# v4 quality gate (spec/constitution.md): format, dependency direction, analyze, tests.
+#
+#   tool/gate.sh           workspace members changed against origin/master, plus uncommitted work
+#   tool/gate.sh --all     every member, the legacy app's analyze and tests, and tool/tests (CI)
+#   tool/gate.sh --hook    Claude Code Stop hook: silent when no v4 code changed, exit 2 on failure
+#
+# One gate runs at a time (docs/BUILD_POLICY.md); a second caller waits for the lock.
+set -uo pipefail
+
+mode=changed
+case "${1:-}" in
+  --all) mode=all ;;
+  --hook) mode=hook ;;
+  '') ;;
+  *) echo "usage: tool/gate.sh [--all|--hook]" >&2; exit 64 ;;
+esac
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root" || exit 1
+
+if [[ $mode == hook ]]; then
+  input="$(cat || true)"
+  # A second Stop after a blocked one: report, but do not loop forever.
+  if grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true' <<<"$input"; then
+    hook_retry=1
+  fi
+fi
+
+if ! command -v dart >/dev/null 2>&1 && [[ -f "$HOME/tools/purelive-env.sh" ]]; then
+  # shellcheck disable=SC1091
+  source "$HOME/tools/purelive-env.sh" >/dev/null 2>&1
+fi
+if ! command -v dart >/dev/null 2>&1; then
+  [[ $mode == hook ]] && exit 0
+  echo "gate: dart is not on PATH" >&2
+  exit 1
+fi
+
+members=()
+while IFS= read -r member; do members+=("$member"); done < <(
+  awk '/^workspace:/{on=1; next} on && /^[^ #]/{exit} on && /^[[:space:]]+-[[:space:]]/{sub(/^[[:space:]]+-[[:space:]]+/, ""); sub(/\/$/, ""); print}' pubspec.yaml
+)
+
+selected=()
+if [[ $mode == all ]]; then
+  selected=("${members[@]}")
+else
+  base=HEAD
+  git rev-parse -q --verify origin/master >/dev/null && base="$(git merge-base HEAD origin/master)"
+  changed="$( { git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u)"
+  if grep -qxE 'pubspec\.(yaml|lock)|toolchain\.env|tool/gate\.sh|tool/check_deps\.py' <<<"$changed"; then
+    selected=("${members[@]}")
+  else
+    for member in "${members[@]}"; do
+      grep -q "^$member/" <<<"$changed" && selected+=("$member")
+    done
+  fi
+  if [[ ${#selected[@]} -eq 0 ]]; then
+    [[ $mode == hook ]] || echo "gate: no workspace member changed"
+    exit 0
+  fi
+fi
+
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"${TMPDIR:-/tmp}/pure_live-gate.lock"
+  flock -w 3600 9 || { echo "gate: timed out waiting for another gate" >&2; exit 1; }
+fi
+
+log="$(mktemp)"
+trap 'rm -f "$log"' EXIT
+failures=()
+
+step() {
+  local name="$1"; shift
+  if "$@" >"$log" 2>&1; then
+    echo "gate: ok   $name"
+  else
+    echo "gate: FAIL $name" >&2
+    tail -n 60 "$log" >&2
+    failures+=("$name")
+  fi
+}
+
+in_dir() { (cd "$1" && shift && "$@"); }
+
+step "dependency direction" python3 tool/check_deps.py
+for member in "${selected[@]}"; do
+  step "$member format" dart format --output=none --set-exit-if-changed "$member"
+  step "$member analyze" in_dir "$member" dart analyze --fatal-infos
+  if [[ -d $member/test ]]; then
+    if grep -qE '^[[:space:]]+sdk:[[:space:]]+flutter' "$member/pubspec.yaml"; then
+      step "$member test" in_dir "$member" flutter test
+    else
+      step "$member test" in_dir "$member" dart test
+    fi
+  fi
+done
+
+if [[ $mode == all ]]; then
+  step "legacy analyze" flutter analyze
+  step "legacy test" flutter test --concurrency="${GATE_TEST_CONCURRENCY:-8}"
+  step "tool tests" python3 -m unittest discover -s tool/tests
+fi
+
+if [[ ${#failures[@]} -gt 0 ]]; then
+  echo "gate: ${#failures[@]} failed: ${failures[*]}" >&2
+  if [[ $mode == hook ]]; then
+    [[ -n ${hook_retry:-} ]] && exit 0
+    exit 2
+  fi
+  exit 1
+fi
+[[ $mode == hook ]] || echo "gate: passed (${#selected[@]} members)"

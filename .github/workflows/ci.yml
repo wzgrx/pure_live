@@ -1,0 +1,45 @@
+name: CI
+
+# v4 gate on every push to master and every pull request (docs/rewrite/PLAN.md, phase 3).
+# Runs tool/gate.sh --all: dependency direction, format/analyze/tests for every
+# workspace member, the legacy app's analyze and tests, and tool/tests.
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Gate (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read pinned toolchain
+        run: grep -E '^[A-Z_]+=' toolchain.env >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve locked workspace
+        run: flutter pub get --enforce-lockfile
+
+      - name: Gate
+        run: bash tool/gate.sh --all
+        env:
+          GATE_TEST_CONCURRENCY: "4"

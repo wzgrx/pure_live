@@ -33,6 +33,14 @@
 
 > 本维护分支基于 [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live)，维护本机优先构建、正式签名、接口探测、Windows 数据迁移及高刷新率优化。上游变更按独立审查流程处理；3.2.0 周期不合并上游。
 
+## v4 重写进行中
+
+纯粹直播正在整体重写为 v4：界面、布局、交互、各尺寸设备适配、性能和工程全部重新设计，工具链和依赖统一使用官方最新稳定版。
+
+- **现在发布的仍是 3.x**，根目录的 `lib/` 等就是它的代码，会一直维护到 v4.0.0 切换那天再整体删除。
+- **v4 的新代码**在 `packages/`（`live_core` 等）、`tools/`（`live_cli`、`check_latest`）以及之后的 `apps/pure_live`；行为规格在 [`spec/`](spec/)。
+- 方案：[docs/rewrite/PLAN.md](docs/rewrite/PLAN.md) · 进度：[docs/rewrite/STATUS.md](docs/rewrite/STATUS.md) · 决策记录：[docs/adr/](docs/adr/README.md)
+
 ## 维护分支说明（请先阅读）
 
 <!-- maintenance-readme-markers: maintenance-scope; android-first; windows-maintained; upstream-feature-routing; bugfix-release-default -->

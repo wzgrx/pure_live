@@ -1,0 +1,19 @@
+name: live_cli
+description: Command-line probes and sample recording for Pure Live v4.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+
+resolution: workspace
+
+dependencies:
+  args: ^2.7.0
+  live_core: any
+
+dev_dependencies:
+  very_good_analysis: ^11.0.0
+
+executables:
+  live_cli: live_cli

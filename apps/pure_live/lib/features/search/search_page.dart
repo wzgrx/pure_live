@@ -7,6 +7,8 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/core/tv.dart';
+import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/l10n/strings.dart';
@@ -87,12 +89,22 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     });
   }
 
+  /// TV search by voice (principles §5.3): the platform's recognizer, when it
+  /// has one; the system keyboard's own microphone works as well.
+  Future<void> _voice() async {
+    final text = await TvDevice.recognizeSpeech();
+    if (text == null || !mounted) return;
+    setState(() => _controller.text = text);
+    _submit(text);
+  }
+
   @override
   Widget build(BuildContext context) {
     final layout = WindowLayout(MediaQuery.sizeOf(context));
+    final voice = TvScope.of(context).enabled && ref.watch(tvDeviceProvider).voiceSearch;
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: layout.margin,
+        titleSpacing: TvScope.of(context).enabled ? Space.s2 : layout.margin,
         title: SearchBar(
           controller: _controller,
           hintText: S.searchHint,
@@ -101,6 +113,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           textInputAction: TextInputAction.search,
           onSubmitted: _submit,
           trailing: [
+            if (voice) IconButton(tooltip: '语音搜索', icon: const Icon(Icons.mic_none), onPressed: _voice),
             if (_controller.text.isNotEmpty)
               IconButton(
                 tooltip: '清除',
@@ -203,41 +216,61 @@ class _LinkResult extends StatelessWidget {
   );
 }
 
-class _CombinedResults extends ConsumerWidget {
+class _CombinedResults extends ConsumerStatefulWidget {
   const new({required this.keyword, required this.liveOnly});
 
   final String keyword;
   final bool liveOnly;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(combinedSearchProvider(keyword));
-    final layout = WindowLayout(MediaQuery.sizeOf(context));
+  ConsumerState<_CombinedResults> createState() => _CombinedResultsState();
+}
+
+class _CombinedResultsState extends ConsumerState<_CombinedResults> {
+  final TvGridFocus _focus = TvGridFocus(debugLabel: 'search-grid');
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(combinedSearchProvider(widget.keyword));
     return async.when(
       loading: () => const LoadingView(),
       error: (error, _) => MessageView.error(title: describeError(error).title),
       data: (cards) {
-        final shown = liveOnly ? cards.where((c) => c.state == LiveState.live).toList() : cards;
+        final shown = widget.liveOnly ? cards.where((c) => c.state == LiveState.live).toList() : cards;
         if (shown.isEmpty) return const MessageView(title: S.searchEmpty);
         return LayoutBuilder(
           builder: (context, constraints) {
-            final inner = constraints.maxWidth - 2 * layout.margin;
-            final columns = layout.columnsFor(inner);
-            final cellWidth = (inner - (columns - 1) * layout.gap) / columns;
-            final textHeight = 44 * MediaQuery.textScalerOf(context).scale(1) + 12;
+            final grid = CardGridGeometry.of(context, constraints.maxWidth);
             final dpr = MediaQuery.devicePixelRatioOf(context);
             final now = DateTime.now();
             return GridView.builder(
-              padding: EdgeInsets.all(layout.margin),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: layout.gap,
-                crossAxisSpacing: layout.gap,
-                mainAxisExtent: cellWidth * 9 / 16 + textHeight,
-              ),
+              padding: grid.padding,
+              gridDelegate: grid.delegate,
               itemCount: shown.length,
-              itemBuilder: (context, index) =>
-                  RoomCardTile(card: shown[index], coverWidth: cellWidth, devicePixelRatio: dpr, now: now),
+              itemBuilder: (context, index) => RoomCardTile(
+                card: shown[index],
+                coverWidth: grid.cellWidth,
+                devicePixelRatio: dpr,
+                now: now,
+                origin: () => RoomOrigin.fromCards(shown, label: '搜索结果'),
+                focusNode: _focus.node(index),
+                onFocusChange: (focused) {
+                  if (focused) _focus.focused(index);
+                },
+                onKeyEvent: (node, event) => _focus.handleKey(
+                  index,
+                  event,
+                  count: shown.length,
+                  columns: grid.columns,
+                  rowExtent: grid.rowExtent,
+                ),
+              ),
             );
           },
         );

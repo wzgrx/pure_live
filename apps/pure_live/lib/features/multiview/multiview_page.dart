@@ -26,19 +26,26 @@ class MultiviewPage extends ConsumerStatefulWidget {
 class _MultiviewPageState extends ConsumerState<MultiviewPage> {
   bool _leaving = false;
 
+  /// Remote and keyboard focus of the cells (TV: the D-pad moves between them).
+  final TvGridFocus _cells = TvGridFocus(debugLabel: 'multiview-cell');
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final compact = WindowLayout(MediaQuery.sizeOf(context)).width == WidthClass.compact;
-      // Default layout by window class (ENT-3): 1×2 on phones, 2×2 elsewhere.
-      unawaited(
-        ref
-            .read(multiviewProvider.notifier)
-            .start(layout: compact ? MultiviewLayout.two : MultiviewLayout.four, rooms: widget.rooms),
-      );
+      // Default layout by window class (ENT-3): 1×2 on phones, 2×2 elsewhere;
+      // TV is always 2×2 (principles §5.3).
+      final layout = compact && !TvScope.of(context).enabled ? MultiviewLayout.two : MultiviewLayout.four;
+      unawaited(ref.read(multiviewProvider.notifier).start(layout: layout, rooms: widget.rooms));
     });
+  }
+
+  @override
+  void dispose() {
+    _cells.dispose();
+    super.dispose();
   }
 
   /// Unmount every video, let two frames go by, then leave (EXT-2).
@@ -57,6 +64,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     final controller = ref.read(multiviewProvider.notifier);
     final capacity = multiviewCapacity();
     final window = WindowLayout(MediaQuery.sizeOf(context));
+    final tv = TvScope.of(context).enabled;
     final layouts = [
       MultiviewLayout.one,
       MultiviewLayout.two,
@@ -82,19 +90,21 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
               icon: Icon(state.muteAll ? Icons.volume_off : Icons.volume_up),
               onPressed: controller.toggleMuteAll,
             ),
-            PopupMenuButton<MultiviewLayout>(
-              tooltip: '布局',
-              icon: const Icon(Icons.grid_view),
-              onSelected: controller.setLayout,
-              itemBuilder: (context) => [
-                for (final layout in layouts)
-                  CheckedPopupMenuItem(value: layout, checked: layout == state.layout, child: Text(layout.label)),
-              ],
-            ),
+            // TV keeps the fixed 2×2 (principles §5.3).
+            if (!tv)
+              PopupMenuButton<MultiviewLayout>(
+                tooltip: '布局',
+                icon: const Icon(Icons.grid_view),
+                onSelected: controller.setLayout,
+                itemBuilder: (context) => [
+                  for (final layout in layouts)
+                    CheckedPopupMenuItem(value: layout, checked: layout == state.layout, child: Text(layout.label)),
+                ],
+              ),
           ],
         ),
         body: SafeArea(
-          child: _Grid(state: state, compact: window.width == WidthClass.compact),
+          child: _Grid(state: state, compact: window.width == WidthClass.compact && !tv, focus: _cells, tv: tv),
         ),
       ),
     );
@@ -102,15 +112,34 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
 }
 
 class _Grid extends StatelessWidget {
-  const new({required this.state, required this.compact});
+  const new({required this.state, required this.compact, required this.focus, required this.tv});
 
   final MultiviewState state;
   final bool compact;
+  final TvGridFocus focus;
+  final bool tv;
+
+  /// Cells per row for D-pad moves; null where the layout is not a grid (1+N).
+  int? get _columns => switch (state.layout) {
+    MultiviewLayout.one => 1,
+    MultiviewLayout.two => compact ? 1 : 2,
+    MultiviewLayout.four => 2,
+    MultiviewLayout.nine => 3,
+    MultiviewLayout.onePlusN => null,
+  };
 
   @override
   Widget build(BuildContext context) {
-    Widget cell(int index) => _CellView(index: index);
+    final columns = _columns;
     final count = state.cells.length;
+    Widget cell(int index) => _CellView(
+      index: index,
+      focusNode: focus.node(index),
+      autofocus: tv && index == 0,
+      onKeyEvent: columns == null
+          ? null
+          : (node, event) => focus.handleKey(index, event, count: count, columns: columns),
+    );
     const gap = 2.0;
     switch (state.layout) {
       case MultiviewLayout.one:
@@ -169,9 +198,16 @@ class _Grid extends StatelessWidget {
 }
 
 class _CellView extends ConsumerWidget {
-  const new({required this.index});
+  const new({required this.index, required this.focusNode, this.autofocus = false, this.onKeyEvent});
 
   final int index;
+
+  /// The cell's focus: the D-pad moves between cells, OK acts like a tap
+  /// (OPS-1: sound focus on a playing cell, the picker on a free one) and a
+  /// long OK opens the cell menu (OPS-2). Up and down never switch rooms.
+  final FocusNode focusNode;
+  final bool autofocus;
+  final FocusOnKeyEventCallback? onKeyEvent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -196,42 +232,55 @@ class _CellView extends ConsumerWidget {
     }
 
     final session = cell.session;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      onLongPress: cell.status == CellStatus.playing ? () => _cellMenu(context, ref, index) : null,
-      onSecondaryTap: cell.status == CellStatus.playing ? () => _cellMenu(context, ref, index) : null,
-      child: DecoratedBox(
-        // Sound focus and pick target are both visible (AUD-4).
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          border: focused
-              ? Border.all(color: scheme.primary, width: 2)
-              : targeted
-              ? Border.all(color: scheme.tertiary, width: 2)
-              : Border.all(color: const Color(0xFF222222)),
-        ),
-        child: ColoredBox(
-          color: Colors.black,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (session != null && cell.status == CellStatus.playing)
-                LiveVideoView(key: GlobalObjectKey(session), session: session),
-              _CellOverlay(
-                cell: cell,
-                focused: focused,
-                muteAll: state.muteAll,
-                onRetry: () {
-                  final room = cell.room;
-                  if (room != null) {
-                    unawaited(controller.assign(index, room));
-                  } else {
-                    unawaited(_pickRoom(context, ref, index));
-                  }
-                },
-              ),
-            ],
+    final menu = cell.status == CellStatus.playing ? () => unawaited(_cellMenu(context, ref, index)) : null;
+    // The remote's ring (3 dp, near-white, inside the cell) differs from the
+    // sound focus (2 dp primary with the speaker badge; AUD-4).
+    return FocusFrame(
+      focusNode: focusNode,
+      autofocus: autofocus,
+      onActivate: onTap,
+      onMenu: menu,
+      onKeyEvent: onKeyEvent,
+      grow: false,
+      ringInside: true,
+      radius: 0,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        onLongPress: menu,
+        onSecondaryTap: menu,
+        child: DecoratedBox(
+          // Sound focus and pick target are both visible (AUD-4).
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            border: focused
+                ? Border.all(color: scheme.primary, width: 2)
+                : targeted
+                ? Border.all(color: scheme.tertiary, width: 2)
+                : Border.all(color: const Color(0xFF222222)),
+          ),
+          child: ColoredBox(
+            color: Colors.black,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (session != null && cell.status == CellStatus.playing)
+                  LiveVideoView(key: GlobalObjectKey(session), session: session),
+                _CellOverlay(
+                  cell: cell,
+                  focused: focused,
+                  muteAll: state.muteAll,
+                  onRetry: () {
+                    final room = cell.room;
+                    if (room != null) {
+                      unawaited(controller.assign(index, room));
+                    } else {
+                      unawaited(_pickRoom(context, ref, index));
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

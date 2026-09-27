@@ -96,3 +96,17 @@ enum CloseAction {
   /// Hide the window; the tray icon brings it back.
   minimize,
 }
+
+/// TV mode (spec/design/principles.md §5.1 rule 1): follow the device, or
+/// force it on (projectors, boxes that misreport their type) or off.
+enum TvMode {
+  /// On when the platform reports a television (Android UI mode or the
+  /// leanback feature); the default.
+  auto,
+
+  /// Always on.
+  on,
+
+  /// Always off.
+  off,
+}

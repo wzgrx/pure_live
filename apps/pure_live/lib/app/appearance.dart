@@ -3,13 +3,20 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 
 /// Themes for the stored choice: (light theme, dark theme, mode). Pure black is
-/// a variant of dark, not a fourth mode (principles §2.2).
-(ThemeData, ThemeData, ThemeMode) themesFor(AppThemeMode mode, {required bool pureBlack}) => (
-  PureTheme.of(Appearance.light),
-  PureTheme.of(pureBlack ? Appearance.black : Appearance.dark),
-  switch (mode) {
-    AppThemeMode.system => ThemeMode.system,
-    AppThemeMode.light => ThemeMode.light,
-    AppThemeMode.dark => ThemeMode.dark,
-  },
-);
+/// a variant of dark, not a fourth mode (principles §2.2). TV mode has only
+/// dark and pure black, with the TV type scale and focus (principles §5.3).
+(ThemeData, ThemeData, ThemeMode) themesFor(AppThemeMode mode, {required bool pureBlack, bool tv = false}) {
+  if (tv) {
+    final dark = PureTheme.tv(pureBlack ? Appearance.black : Appearance.dark);
+    return (dark, dark, ThemeMode.dark);
+  }
+  return (
+    PureTheme.of(Appearance.light),
+    PureTheme.of(pureBlack ? Appearance.black : Appearance.dark),
+    switch (mode) {
+      AppThemeMode.system => ThemeMode.system,
+      AppThemeMode.light => ThemeMode.light,
+      AppThemeMode.dark => ThemeMode.dark,
+    },
+  );
+}

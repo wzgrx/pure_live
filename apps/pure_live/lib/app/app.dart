@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/appearance.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/share_intake.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_share.dart';
 import 'package:pure_live_app/features/system/mini_player_host.dart';
@@ -28,7 +30,13 @@ class PureLiveApp extends ConsumerWidget {
       // Known before the first room opens (Q-2); listened, so a network
       // change does not rebuild the app.
       ..listen(networkKindProvider, (_, _) {});
-    final (light, dark, mode) = themesFor(ref.watch(themeModeSetting), pureBlack: ref.watch(pureBlackSetting));
+    final tv = ref.watch(tvConfigProvider);
+    final textScale = ref.watch(textScaleSetting);
+    final (light, dark, mode) = themesFor(
+      ref.watch(themeModeSetting),
+      pureBlack: ref.watch(pureBlackSetting),
+      tv: tv.enabled,
+    );
     return MaterialApp.router(
       title: S.appName,
       debugShowCheckedModeBanner: false,
@@ -36,15 +44,22 @@ class PureLiveApp extends ConsumerWidget {
       darkTheme: dark,
       themeMode: mode,
       routerConfig: ref.watch(routerProvider),
-      builder: (context, child) {
-        final media = MediaQuery.of(context);
-        final scale = media.textScaler.scale(1) * ref.watch(textScaleSetting);
-        return MediaQuery(
-          data: media.copyWith(textScaler: TextScaler.linear(scale)),
-          // The in-app mini window floats above every page (F-PIP-03).
-          child: MiniPlayerHost(child: child!),
-        );
-      },
+      // TV mode: the 960×540 canvas, overscan margins and remote focus
+      // (principles §5.3); off, only the scope that says so. The text scale
+      // applies inside, on top of the canvas' media query.
+      builder: (context, child) => TvRoot(
+        config: tv,
+        child: Builder(
+          builder: (context) {
+            final media = MediaQuery.of(context);
+            return MediaQuery(
+              data: media.copyWith(textScaler: TextScaler.linear(media.textScaler.scale(1) * textScale)),
+              // The in-app mini window floats above every page (F-PIP-03).
+              child: MiniPlayerHost(child: child!),
+            );
+          },
+        ),
+      ),
     );
   }
 }

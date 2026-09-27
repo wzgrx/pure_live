@@ -48,3 +48,16 @@ final videoFitSetting = NotifierProvider<SettingNotifier<VideoFit>, VideoFit>(()
 
 /// Keep the screen on while playing.
 final screenKeepOnSetting = NotifierProvider<SettingNotifier<bool>, bool>(() => SettingNotifier(Settings.screenKeepOn));
+
+/// TV mode: auto, on or off (principles §5.1).
+final tvModeSetting = NotifierProvider<SettingNotifier<TvMode>, TvMode>(() => SettingNotifier(Settings.tvMode));
+
+/// TV focus without growth (performance mode, principles §5.3).
+final tvPerformanceSetting = NotifierProvider<SettingNotifier<bool>, bool>(
+  () => SettingNotifier(Settings.tvPerformanceMode),
+);
+
+/// Vertical swipes in portrait fullscreen switch rooms (F-NEW-04; off by default).
+final switchRoomGestureSetting = NotifierProvider<SettingNotifier<bool>, bool>(
+  () => SettingNotifier(Settings.switchRoomGesture),
+);

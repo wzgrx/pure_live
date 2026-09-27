@@ -13,4 +13,8 @@ export 'src/metrics.dart';
 export 'src/room_card_view.dart';
 export 'src/status_views.dart';
 export 'src/theme.dart';
+export 'src/tv/focus_frame.dart';
+export 'src/tv/tv_grid.dart';
+export 'src/tv/tv_nav_scaffold.dart';
+export 'src/tv/tv_scope.dart';
 export 'src/window_class.dart';

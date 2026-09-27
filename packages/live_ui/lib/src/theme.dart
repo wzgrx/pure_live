@@ -84,7 +84,16 @@ final class LiveTheme extends ThemeExtension<LiveTheme> {
 /// Builds [ThemeData] from the design tokens.
 abstract final class PureTheme {
   /// The theme for [appearance] on [platform].
-  static ThemeData of(Appearance appearance, {TargetPlatform? platform}) {
+  static ThemeData of(Appearance appearance, {TargetPlatform? platform}) => _build(appearance, platform, tv: false);
+
+  /// The TV theme (principles §5.3): dark or pure black only (a light
+  /// [appearance] gets dark), type one step larger with body text at least
+  /// 14 sp, 32 dp icons, a near-white focus ring and focus that shows on
+  /// buttons, chips, tabs, list rows and fields at ten feet.
+  static ThemeData tv(Appearance appearance, {TargetPlatform? platform}) =>
+      _build(appearance == Appearance.light ? Appearance.dark : appearance, platform, tv: true);
+
+  static ThemeData _build(Appearance appearance, TargetPlatform? platform, {required bool tv}) {
     final tokens = switch (appearance) {
       Appearance.light => ColorTokens.light,
       Appearance.dark => ColorTokens.dark,
@@ -128,13 +137,16 @@ abstract final class PureTheme {
       scrim: const Color(0xFF000000),
     );
     final target = platform ?? defaultTargetPlatform;
-    final text = _textTheme(target).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
+    final text = _textTheme(target, tv: tv).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
     final numeric = text.labelMedium!.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     final desktop =
-        target == TargetPlatform.windows || target == TargetPlatform.linux || target == TargetPlatform.macOS;
+        !tv && (target == TargetPlatform.windows || target == TargetPlatform.linux || target == TargetPlatform.macOS);
     final overlayRadius = BorderRadius.circular(desktop ? Radii.r2 : Radii.r4);
+    // On TV the ring is near-white onSurface: ≥ 3:1 against every surface
+    // and against the unfocused state (principles §5.3).
+    final focusRing = tv ? scheme.onSurface : tokens.focusRing;
 
-    return ThemeData(
+    final theme = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       brightness: brightness,
@@ -223,16 +235,69 @@ abstract final class PureTheme {
           onLive: FixedColors.onLive,
           success: tokens.success,
           warning: tokens.warning,
-          focusRing: tokens.focusRing,
+          focusRing: focusRing,
           numeric: numeric,
         ),
       ],
     );
+    return tv ? _tvFocus(theme, scheme, focusRing) : theme;
+  }
+
+  /// Focus that reads from the sofa: list rows and ink get a stronger focus
+  /// fill, buttons, chips and fields a 3 dp ring (a fill alone disappears on
+  /// buttons that set their own colours).
+  static ThemeData _tvFocus(ThemeData theme, ColorScheme scheme, Color ring) {
+    final focusFill = scheme.onSurface.withValues(alpha: 0.24);
+    final side = WidgetStateProperty.resolveWith<BorderSide?>(
+      (states) => states.contains(WidgetState.focused) ? BorderSide(color: ring, width: 3) : null,
+    );
+    final overlay = WidgetStateProperty.resolveWith<Color?>(
+      (states) => states.contains(WidgetState.focused) ? focusFill : null,
+    );
+    final buttons = ButtonStyle(side: side, overlayColor: overlay);
+    final outlined = ButtonStyle(
+      overlayColor: overlay,
+      side: WidgetStateProperty.resolveWith<BorderSide?>(
+        (states) => states.contains(WidgetState.focused)
+            ? BorderSide(color: ring, width: 3)
+            : BorderSide(color: states.contains(WidgetState.disabled) ? scheme.outlineVariant : scheme.outline),
+      ),
+    );
+    return theme.copyWith(
+      focusColor: focusFill,
+      iconTheme: theme.iconTheme.copyWith(size: Sizes.iconLg),
+      iconButtonTheme: IconButtonThemeData(
+        style: buttons.copyWith(iconSize: const WidgetStatePropertyAll(Sizes.iconLg)),
+      ),
+      textButtonTheme: TextButtonThemeData(style: buttons),
+      filledButtonTheme: FilledButtonThemeData(style: buttons),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: buttons),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: outlined),
+      segmentedButtonTheme: SegmentedButtonThemeData(style: ButtonStyle(overlayColor: overlay)),
+      chipTheme: theme.chipTheme.copyWith(
+        side: WidgetStateBorderSide.resolveWith(
+          (states) => states.contains(WidgetState.focused)
+              ? BorderSide(color: ring, width: 3)
+              : BorderSide(color: scheme.outlineVariant),
+        ),
+      ),
+      tabBarTheme: theme.tabBarTheme.copyWith(overlayColor: overlay),
+      searchBarTheme: SearchBarThemeData(side: side, overlayColor: overlay),
+      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Radii.full),
+          borderSide: BorderSide(color: ring, width: 3),
+        ),
+      ),
+      listTileTheme: theme.listTileTheme.copyWith(minVerticalPadding: Space.s2),
+    );
   }
 
   /// Type scale of spec/design/tokens.json; the system font with explicit CJK
-  /// fallbacks (principles §2.3).
-  static TextTheme _textTheme(TargetPlatform platform) {
+  /// fallbacks (principles §2.3). On TV every role is one step larger and
+  /// body text is at least 14 sp (principles §5.3), with the same ≥ 1.4
+  /// line height rounded up to an even number.
+  static TextTheme _textTheme(TargetPlatform platform, {bool tv = false}) {
     final family = platform == TargetPlatform.windows ? 'Microsoft YaHei UI' : null;
     const fallback = ['Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Noto Sans CJK SC'];
     TextStyle style(double size, double height, FontWeight weight) => TextStyle(
@@ -246,6 +311,25 @@ abstract final class PureTheme {
     );
     const semibold = FontWeight.w600;
     const regular = FontWeight.w400;
+    if (tv) {
+      return TextTheme(
+        displayLarge: style(64, 90, regular),
+        displayMedium: style(57, 80, regular),
+        displaySmall: style(45, 64, semibold),
+        headlineLarge: style(36, 52, semibold),
+        headlineMedium: style(32, 46, semibold),
+        headlineSmall: style(28, 40, semibold),
+        titleLarge: style(24, 34, semibold),
+        titleMedium: style(18, 26, semibold),
+        titleSmall: style(16, 24, semibold),
+        bodyLarge: style(18, 26, regular),
+        bodyMedium: style(16, 24, regular),
+        bodySmall: style(14, 20, regular),
+        labelLarge: style(16, 24, semibold),
+        labelMedium: style(14, 20, semibold),
+        labelSmall: style(14, 20, semibold),
+      );
+    }
     return TextTheme(
       displayLarge: style(57, 64, regular),
       displayMedium: style(45, 52, regular),

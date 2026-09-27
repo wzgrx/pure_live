@@ -9,7 +9,12 @@ import 'package:pure_live_app/core/store.dart';
 @immutable
 final class AppPrefs {
   /// Creates preferences; the defaults are a fresh installation's.
-  const new({this.clipboardRecognition = true, this.crashReports = false, this.firstRunDone = false});
+  const new({
+    this.clipboardRecognition = true,
+    this.crashReports = false,
+    this.firstRunDone = false,
+    this.switchGestureHinted = false,
+  });
 
   /// Look for share codes and room links in the clipboard when the app
   /// returns to the foreground (F-SHR-02; on by default as in 3.x, can be
@@ -23,6 +28,10 @@ final class AppPrefs {
   /// The first-run wizard (F-NEW-08) was offered.
   final bool firstRunDone;
 
+  /// The one-time tip that portrait fullscreen can switch rooms by swiping
+  /// was shown (principles §6.1, §6.5).
+  final bool switchGestureHinted;
+
   /// Meta key of [clipboardRecognition].
   static const clipboardKey = 'app.clipboardRecognition';
 
@@ -32,6 +41,9 @@ final class AppPrefs {
   /// Meta key of [firstRunDone].
   static const firstRunKey = 'app.firstRunDone';
 
+  /// Meta key of [switchGestureHinted].
+  static const switchGestureHintKey = 'app.switchGestureHinted';
+
   /// Reads the stored preferences.
   static Future<AppPrefs> load(MetaStore meta) async {
     bool? flag(String? value) => value == null ? null : value == '1';
@@ -40,15 +52,18 @@ final class AppPrefs {
       clipboardRecognition: flag(await meta.get(clipboardKey)) ?? defaults.clipboardRecognition,
       crashReports: flag(await meta.get(crashReportsKey)) ?? defaults.crashReports,
       firstRunDone: flag(await meta.get(firstRunKey)) ?? defaults.firstRunDone,
+      switchGestureHinted: flag(await meta.get(switchGestureHintKey)) ?? defaults.switchGestureHinted,
     );
   }
 
   /// A copy with the given fields replaced.
-  AppPrefs copyWith({bool? clipboardRecognition, bool? crashReports, bool? firstRunDone}) => AppPrefs(
-    clipboardRecognition: clipboardRecognition ?? this.clipboardRecognition,
-    crashReports: crashReports ?? this.crashReports,
-    firstRunDone: firstRunDone ?? this.firstRunDone,
-  );
+  AppPrefs copyWith({bool? clipboardRecognition, bool? crashReports, bool? firstRunDone, bool? switchGestureHinted}) =>
+      AppPrefs(
+        clipboardRecognition: clipboardRecognition ?? this.clipboardRecognition,
+        crashReports: crashReports ?? this.crashReports,
+        firstRunDone: firstRunDone ?? this.firstRunDone,
+        switchGestureHinted: switchGestureHinted ?? this.switchGestureHinted,
+      );
 }
 
 /// [AppPrefs] as state; main() overrides it with the loaded values.
@@ -70,6 +85,10 @@ class AppPrefsNotifier extends Notifier<AppPrefs> {
 
   /// Records that the first-run wizard was offered.
   Future<void> markFirstRunDone() => _save(state.copyWith(firstRunDone: true), AppPrefs.firstRunKey, value: true);
+
+  /// Records that the room-switch swipe tip was shown.
+  Future<void> markSwitchGestureHinted() =>
+      _save(state.copyWith(switchGestureHinted: true), AppPrefs.switchGestureHintKey, value: true);
 
   Future<void> _save(AppPrefs next, String key, {required bool value}) async {
     state = next;

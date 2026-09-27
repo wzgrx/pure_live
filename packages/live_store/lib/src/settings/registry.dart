@@ -93,6 +93,15 @@ abstract final class Settings {
     legacy: [LegacyKey('preferRealOnlineCounts')],
   );
 
+  /// TV mode: automatic by device, or forced on or off (principles.md §5.1).
+  /// Device scope: a TV's choice must not follow a backup onto a phone of
+  /// another family; 3.x had no TV mode.
+  static const tvMode = EnumSetting<TvMode>('app.tvMode', TvMode.auto, TvMode.values, scope: SettingScope.device);
+
+  /// TV performance mode: focus shows the ring only, without the 1.05× growth
+  /// and lift (principles.md §5.3, for low-end boxes).
+  static const tvPerformanceMode = BoolSetting('app.tvPerformanceMode', false, scope: SettingScope.device);
+
   // Playback.
 
   /// Preferred quality on Wi-Fi and wired networks.
@@ -139,6 +148,12 @@ abstract final class Settings {
     false,
     legacy: [LegacyKey('enableFullScreenDefault')],
   );
+
+  /// Vertical swipes in portrait fullscreen switch to the previous or next
+  /// live room of the list the room was opened from (F-NEW-04). Off by
+  /// default: it replaces the brightness and volume swipes there
+  /// (principles.md §6.1).
+  static const switchRoomGesture = BoolSetting('player.switchRoomGesture', false);
 
   /// Default volume on phones and tablets (0–1).
   static const defaultMobileVolume = DoubleSetting(
@@ -761,6 +776,8 @@ abstract final class Settings {
     autoCheckUpdate,
     refreshRateMode,
     preferRealOnlineCounts,
+    tvMode,
+    tvPerformanceMode,
     qualityWifi,
     qualityMobile,
     autoLowerQuality,
@@ -768,6 +785,7 @@ abstract final class Settings {
     videoFit,
     backgroundPlay,
     fullScreenDefault,
+    switchRoomGesture,
     defaultMobileVolume,
     defaultDesktopVolume,
     globalMute,

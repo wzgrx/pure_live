@@ -26,6 +26,7 @@ import 'package:pure_live_app/features/multiview/multiview_page.dart';
 import 'package:pure_live_app/features/onboarding/onboarding_page.dart';
 import 'package:pure_live_app/features/recording/recording_page.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
+import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
 import 'package:pure_live_app/features/settings/settings_page.dart';
 import 'package:pure_live_app/features/sync/lan_sync_page.dart';
@@ -154,8 +155,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/room/:platform/:roomId',
-        builder: (context, state) =>
-            RoomPage(room: RoomRef(state.pathParameters['platform']!, state.pathParameters['roomId']!)),
+        builder: (context, state) => RoomPage(
+          room: RoomRef(state.pathParameters['platform']!, state.pathParameters['roomId']!),
+          // The list the room was opened from, for switching (F-NEW-04).
+          origin: state.extra is RoomOrigin ? state.extra! as RoomOrigin : null,
+        ),
       ),
     ],
   );

@@ -10,6 +10,7 @@ import 'package:live_danmaku/live_danmaku.dart' show AudienceKind, DanmakuEvent;
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/app_prefs.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
@@ -21,6 +22,7 @@ import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_source.dart';
 import 'package:pure_live_app/features/danmaku/on_video.dart';
 import 'package:pure_live_app/features/danmaku/room_danmaku.dart';
+import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/iptv/iptv_room.dart';
 import 'package:pure_live_app/features/room/gestures.dart';
 import 'package:pure_live_app/features/room/playback.dart';
@@ -29,6 +31,8 @@ import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/features/room/record_button.dart';
 import 'package:pure_live_app/features/room/room_layout.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
+import 'package:pure_live_app/features/room/room_switch.dart';
+import 'package:pure_live_app/features/room/tv_room.dart';
 import 'package:pure_live_app/features/system/mini_player.dart';
 import 'package:pure_live_app/features/system/now_playing.dart';
 import 'package:pure_live_app/features/system/pip.dart';
@@ -61,10 +65,15 @@ final StreamProviderFamily<bool, RoomRef> isFollowedProvider = StreamProvider.au
 /// (§3.6: panel → fullscreen or theater → leave). Switching rooms happens in
 /// place: same session and surface, new source and chat.
 class RoomPage extends ConsumerStatefulWidget {
-  const new({required this.room, super.key});
+  const new({required this.room, this.origin, super.key});
 
   /// The room.
   final RoomRef room;
+
+  /// The list the room was opened from; up and down, PageUp and PageDown and
+  /// the optional portrait swipe switch within it (F-NEW-04). Null: the live
+  /// follows.
+  final RoomOrigin? origin;
 
   @override
   ConsumerState<RoomPage> createState() => _RoomPageState();
@@ -106,6 +115,9 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   bool _surfaceReady = true;
   AppLifecycleListener? _lifecycle;
   Timer? _restoreDanmaku;
+
+  /// TV mode (live-room §3.5): always fullscreen, the remote layer on top.
+  bool _tv = false;
 
   bool get _touch => touchPlatform;
 
@@ -149,11 +161,22 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       ..style = prefs.style
       ..budget = prefs.budget;
     _rules = ref.read(blockRulesProvider).value ?? const [];
+    // Without a list of its own the room switches in the live follows; keep
+    // them loaded so the first switch finds them (T-05).
+    if (widget.origin == null) ref.listenManual(followsProvider, (_, _) {});
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final tv = TvScope.of(context).enabled;
+    if (tv != _tv) {
+      // The room is always fullscreen on TV; there is nothing to lock or
+      // hide on the platform side.
+      _tv = tv;
+      _presentation = tv ? RoomPresentation.fullscreen : RoomPresentation.inline;
+      _returnTo = RoomPresentation.inline;
+    }
     // T-09: on a phone, turning a landscape stream sideways enters
     // fullscreen; turning back leaves a fullscreen entered that way.
     final orientation = MediaQuery.orientationOf(context);
@@ -176,7 +199,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     }
   }
 
-  bool get _isPhone => _touch && MediaQuery.sizeOf(context).shortestSide < 600;
+  bool get _isPhone => !_tv && _touch && MediaQuery.sizeOf(context).shortestSide < 600;
 
   @override
   void dispose() {
@@ -200,7 +223,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       unawaited(danmaku.dispose());
     }
     _overlayController.dispose();
-    if (_presentation != RoomPresentation.inline) {
+    if (_presentation != RoomPresentation.inline && !_tv) {
       unawaited(
         applyPresentation(
           PresentationEffects(presentation: RoomPresentation.inline, restorePortrait: _restorePortrait),
@@ -258,8 +281,9 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       _danmaku?.setEnabled(enabled: prefs.enabled && live);
     }
     if (detail.state == LiveState.offline) {
-      // LAY-5: offline or banned leaves fullscreen and theater.
-      if (_presentation != RoomPresentation.inline) {
+      // LAY-5: offline or banned leaves fullscreen and theater (not on TV,
+      // where the room is always fullscreen).
+      if (_presentation != RoomPresentation.inline && !_tv) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) unawaited(_present(RoomPresentation.inline));
         });
@@ -272,7 +296,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     if (!_adoptedOnce) {
       _adoptedOnce = true;
       // F-ROOM-15: fullscreen 1 s after entering, when the setting is on.
-      if (live && ref.read(storeProvider).settings.get(Settings.fullScreenDefault)) {
+      if (live && !_tv && ref.read(storeProvider).settings.get(Settings.fullScreenDefault)) {
         _defaultFullscreen = Timer(const Duration(seconds: 1), () {
           if (mounted && _presentation == RoomPresentation.inline) _toggleFullscreen();
         });
@@ -316,7 +340,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   /// Changes the presentation. INV-ROOM-07: a change in progress ignores new
   /// requests. PS-2: the lock resets (the player does it on the new value).
   Future<void> _present(RoomPresentation next, {bool forceLandscape = false, bool byRotation = false}) async {
-    if (_transitioning || next == _presentation) return;
+    if (_tv || _transitioning || next == _presentation) return;
     _transitioning = true;
     final previous = _presentation;
     if (next.isFullscreen && !previous.isFullscreen) _returnTo = previous;
@@ -327,6 +351,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     _rotationFullscreen = byRotation && next == RoomPresentation.fullscreen;
     final phone = _isPhone;
     setState(() => _presentation = next);
+    if (next == RoomPresentation.portraitFullscreen) _offerSwitchGesture();
     try {
       // A platform that never answers must not block every later change.
       await applyPresentation(
@@ -346,6 +371,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
 
   /// T-02 / D-02 / F / the fullscreen button.
   void _toggleFullscreen() {
+    if (_tv) return;
     final target = doubleTapTarget(
       current: _presentation,
       locked: false,
@@ -385,6 +411,11 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   /// §3.6 after the panels (the navigator closes those first): fullscreen
   /// returns to where it came from, theater to inline, inline leaves.
   void _back() {
+    if (_tv) {
+      // TV-06: the remote layer closes its panel or control row first.
+      Navigator.of(context).maybePop();
+      return;
+    }
     switch (_presentation) {
       case RoomPresentation.fullscreen || RoomPresentation.portraitFullscreen:
         unawaited(_present(_returnTo));
@@ -401,6 +432,49 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     final room = await showSwitchRoomSheet(context, current: _room);
     if (room == null || !mounted || room == _room) return;
     setState(() => _room = room);
+  }
+
+  /// The list to switch in: where the room was opened from, else the live
+  /// follows in the follows page's order (T-05). Only what is loaded.
+  List<RoomEntry> _switchEntries() {
+    final origin = widget.origin;
+    if (origin != null && origin.entries.isNotEmpty) return origin.entries;
+    return liveFollowEntries(ref.read(followsProvider).value ?? const []);
+  }
+
+  /// F-NEW-04: the previous (-1) or next (+1) live room of the list, in
+  /// place like [_switchRoom], with a short hint; the ends say so and do not
+  /// wrap around.
+  void _stepRoom(int step) {
+    final entries = _switchEntries();
+    final target = neighborRoom(entries, _room, step);
+    final player = _videoKey.currentState;
+    if (target == null) {
+      final text = entries.isEmpty ? '没有可以切换的开播直播间' : (step < 0 ? '已经是第一个了' : '已经是最后一个了');
+      player?.showHint(step < 0 ? Icons.vertical_align_top : Icons.vertical_align_bottom, text);
+      return;
+    }
+    final position = entries.indexOf(target) + 1;
+    player?.showHint(
+      Icons.swap_vert,
+      '${target.label}  $position/${entries.length}',
+      duration: const Duration(seconds: 2),
+    );
+    setState(() => _room = target.ref);
+  }
+
+  /// principles §6.1: the first portrait fullscreen with the swipe off says
+  /// once that it can be turned on.
+  void _offerSwitchGesture() {
+    if (!_touch || ref.read(switchRoomGestureSetting) || ref.read(appPrefsProvider).switchGestureHinted) return;
+    unawaited(ref.read(appPrefsProvider.notifier).markSwitchGestureHinted().catchError((Object _) {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _videoKey.currentState?.showHint(
+        Icons.swipe_vertical,
+        '可以在 设置 › 播放 里开启上下滑切换直播间',
+        duration: const Duration(seconds: 3),
+      );
+    });
   }
 
   void _block(BlockKind kind, String value) {
@@ -429,13 +503,17 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       const SingleActivator(LogicalKeyboardKey.mediaPlayPause): () => player()?.togglePlay(),
       const SingleActivator(LogicalKeyboardKey.mediaPlay): () => unawaited(_session.play()),
       const SingleActivator(LogicalKeyboardKey.mediaPause): () => unawaited(_session.pause()),
-      const SingleActivator(LogicalKeyboardKey.keyF): _toggleFullscreen,
       const SingleActivator(LogicalKeyboardKey.escape, includeRepeats: false): _back,
-      const SingleActivator(LogicalKeyboardKey.keyT): _toggleTheater,
-      const SingleActivator(LogicalKeyboardKey.keyC): _toggleChat,
+      // TV: the room is always fullscreen and the D-pad switches rooms
+      // (D-10 "TV 模式除外"; the remote layer takes the arrows).
+      if (!_tv) ...{
+        const SingleActivator(LogicalKeyboardKey.keyF): _toggleFullscreen,
+        const SingleActivator(LogicalKeyboardKey.keyT): _toggleTheater,
+        const SingleActivator(LogicalKeyboardKey.keyC): _toggleChat,
+        const SingleActivator(LogicalKeyboardKey.arrowUp): () => player()?.changeVolume(0.05),
+        const SingleActivator(LogicalKeyboardKey.arrowDown): () => player()?.changeVolume(-0.05),
+      },
       const SingleActivator(LogicalKeyboardKey.keyM): () => player()?.toggleMute(),
-      const SingleActivator(LogicalKeyboardKey.arrowUp): () => player()?.changeVolume(0.05),
-      const SingleActivator(LogicalKeyboardKey.arrowDown): () => player()?.changeVolume(-0.05),
       const SingleActivator(LogicalKeyboardKey.keyD): () => player()?.toggleDanmaku(),
       const SingleActivator(LogicalKeyboardKey.keyQ): () => unawaited(player()?.chooseQualityLine()),
       const SingleActivator(LogicalKeyboardKey.keyL): () => unawaited(player()?.chooseQualityLine()),
@@ -444,6 +522,12 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       const SingleActivator(LogicalKeyboardKey.keyP): () => unawaited(player()?.enterPip()),
       const SingleActivator(LogicalKeyboardKey.f5): () => player()?.refresh(),
       const CharacterActivator('?'): () => unawaited(showKeyHelp(context)),
+      // F-NEW-04: the previous or next room of the list; PageUp and PageDown
+      // on keyboards (principles §6.2), the channel keys of TV remotes (§6.3).
+      const SingleActivator(LogicalKeyboardKey.pageUp, includeRepeats: false): () => _stepRoom(-1),
+      const SingleActivator(LogicalKeyboardKey.pageDown, includeRepeats: false): () => _stepRoom(1),
+      const SingleActivator(LogicalKeyboardKey.channelUp, includeRepeats: false): () => _stepRoom(-1),
+      const SingleActivator(LogicalKeyboardKey.channelDown, includeRepeats: false): () => _stepRoom(1),
     };
   }
 
@@ -483,7 +567,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     final prefs = ref.watch(danmakuPrefsProvider);
     final effective = _effective;
     final dark = effective.isFullscreen || _presentation == RoomPresentation.theater;
-    final Widget body;
+    Widget body;
     if (async.hasError && (detail == null || detail.ref != _room)) {
       final text = describeError(async.error!);
       body = Column(
@@ -520,6 +604,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
         onEnable: () => ref.read(danmakuPrefsProvider.notifier).setEnabled(enabled: true),
         onOpenSettings: () => unawaited(_openDanmakuSettings()),
       );
+      final switchGesture = ref.watch(switchRoomGestureSetting);
       final toggleChat = effective.isFullscreen
           ? (effective == RoomPresentation.portraitFullscreen ? null : _toggleChat)
           : (wide && !WindowLayout(size).isShortLandscape ? _toggleChat : null);
@@ -540,6 +625,8 @@ class _RoomPageState extends ConsumerState<RoomPage> {
         onOpenDanmakuSettings: prefs.enabled ? () => unawaited(_openDanmakuSettings()) : null,
         resume: _resumed,
         surfaceReady: _surfaceReady,
+        onStepRoom: switchGesture && !_tv ? _stepRoom : null,
+        tv: _tv,
       );
       // PIP-2: only the video while picture-in-picture enters or shows; the
       // same keyed video moves between the two layouts (SURF-5).
@@ -559,12 +646,33 @@ class _RoomPageState extends ConsumerState<RoomPage> {
           chat: chat,
         ),
       );
+      if (_tv) {
+        final followed = ref.watch(isFollowedProvider(detail.ref)).value ?? false;
+        body = TvRoomLayer(
+          detail: detail,
+          session: _session,
+          player: _videoKey,
+          entries: _switchEntries,
+          listLabel: (widget.origin?.entries.isNotEmpty ?? false) ? widget.origin!.label : '开播的关注',
+          onStep: _stepRoom,
+          onPick: (room) {
+            if (room != _room) setState(() => _room = room);
+          },
+          followed: followed,
+          onFollow: () {
+            final follows = ref.read(storeProvider).follows;
+            unawaited(followed ? follows.unfollow(detail.ref) : follows.follow(RoomSnapshot.fromDetail(detail)));
+          },
+          child: body,
+        );
+      }
     }
     return PopScope(
-      // §3.6: back leaves fullscreen and theater before the room.
-      canPop: _presentation == RoomPresentation.inline,
+      // §3.6: back leaves fullscreen and theater before the room; on TV the
+      // remote layer holds back for its panels (TV-06).
+      canPop: _tv || _presentation == RoomPresentation.inline,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _back();
+        if (!didPop && !_tv) _back();
       },
       child: CallbackShortcuts(
         bindings: _keys,

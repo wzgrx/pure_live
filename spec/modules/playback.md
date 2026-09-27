@@ -67,7 +67,7 @@
   证据：PST:188-303。验收：【单元】沿用 `test/playback_source_transport_test.dart` 的事务样本。
 - **SRC-2 管线选择**（互斥，按顺序判断）：
   1. 租期会断开连接的 FLV（`cutsConnection=true`）→ FLV 拼接续流；
-  2. 旧式 codec 12 HEVC 的 FLV → 标签转写 [待确认：Android/Linux 的 libmpv 已是 FFmpeg 9.0.2，能识别 codec 12；确认 Windows 版 FFmpeg ≥ 8 后删除此项]；
+  2. ~~旧式 codec 12 HEVC 的 FLV → 标签转写~~：不做。所有平台的 libmpv 都是 FFmpeg ≥ 8（Android/Linux 为 9.0.2，Windows 为 FFmpeg master Lavc63.13，见 DIAGNOSIS），能直接识别 codec 12（2026-09-28 结清）；
   3. 需要改写的 HLS（带查询策略，或自有源配方）→ HLS 中继；
   4. 其它 → 直连。
 
@@ -307,7 +307,7 @@
 
 ## 12 待确认汇总
 
-1. Windows 版 libmpv 的 FFmpeg 版本；≥ 8 则删除 codec 12 HEVC 转写（SRC-2）。
+1. ~~Windows 版 libmpv 的 FFmpeg 版本~~：已查明为 FFmpeg master（Lavc63.13），≥ 8，codec 12 HEVC 转写不做（SRC-2）。
 2. HLS 查询策略是否还有站点产出（SRC-10）；Windows 虎牙短连接经验值是否仍需要（SRC-7）。
 3. 回环中继读取上游的空闲超时数值（SRC-4）。
 4. Android 帧进度能否在补丁中实现；实现前首帧栅栏的替代条件（MON-5）。

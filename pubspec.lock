@@ -81,6 +81,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.4"
+  battery_plus:
+    dependency: transitive
+    description:
+      name: battery_plus
+      sha256: "3853aa1e18ea1d15493dd1d3edac05770b4b95c1e691fb85934c5fd3b1ac0fcc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.1.1"
+  battery_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: battery_plus_platform_interface
+      sha256: e8342c0f32de4b1dfd0223114b6785e48e579bfc398da9471c9179b907fa4910
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -899,6 +915,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.6"
+  screen_brightness:
+    dependency: transitive
+    description:
+      name: screen_brightness
+      sha256: e0edf92c08889e8f493cde291e7c687db2b4a1471f2371c074070b75d7c7d79b
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.11"
+  screen_brightness_android:
+    dependency: transitive
+    description:
+      name: screen_brightness_android
+      sha256: "2008ad8e9527cc968f7a4de1ec58b476d495b3c612a149dbd6550c4f046da147"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.6"
+  screen_brightness_ios:
+    dependency: transitive
+    description:
+      name: screen_brightness_ios
+      sha256: "352d355e8523a186ba1e494b74218e5ca96e51975a0630b8ed89fbb7ff609762"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.4"
+  screen_brightness_macos:
+    dependency: transitive
+    description:
+      name: screen_brightness_macos
+      sha256: b0957237b842d846a84363b69f229b339a8f91faced55041e245b2ebff7b0142
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.4"
+  screen_brightness_ohos:
+    dependency: transitive
+    description:
+      name: screen_brightness_ohos
+      sha256: "569a2c97909a50894b81487619eb7654f5358443a5af05f840c19261f49c0940"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.4"
+  screen_brightness_platform_interface:
+    dependency: transitive
+    description:
+      name: screen_brightness_platform_interface
+      sha256: "2de60c0ba569b898950029cc1f7e9dd72bda44a22beb5054aac331cb6fce2ff2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
+  screen_brightness_windows:
+    dependency: transitive
+    description:
+      name: screen_brightness_windows
+      sha256: "368b9c822e1671de81616e48150006e39eff2a434957e47ee638b09a32b2297c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
   screen_retriever:
     dependency: transitive
     description:
@@ -939,6 +1011,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
+  share_plus:
+    dependency: transitive
+    description:
+      name: share_plus
+      sha256: "34f00f9becd2743c1fb05363d624f9f70d37f7ccdcdda47450bc0b8c9d327b8c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.3.0"
+  share_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: share_plus_platform_interface
+      sha256: "365ef7379fc22507256adda3385152942ffce08935452bc972c2e52a0bebae41"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.2.0"
   shelf:
     dependency: transitive
     description:
@@ -1160,6 +1248,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  upower:
+    dependency: transitive
+    description:
+      name: upower
+      sha256: cf042403154751180affa1d15614db7fa50234bc2373cd21c3db666c38543ebf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.0"
   uri_parser:
     dependency: transitive
     description:

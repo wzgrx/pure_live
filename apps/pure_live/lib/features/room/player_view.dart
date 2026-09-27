@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +31,7 @@ import 'package:pure_live_app/features/room/sleep_timer.dart';
 import 'package:pure_live_app/features/room/weak_network.dart';
 import 'package:pure_live_app/features/system/launch_args.dart';
 import 'package:pure_live_app/features/system/pip.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// What the user reads when playback fails, by failure kind (principles rule 3:
@@ -178,6 +180,10 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   bool _volumeTouched = false;
   Timer? _volumeSave;
   double _brightness = 1;
+
+  /// Phones set the window brightness (T-03); elsewhere a dimming layer.
+  final bool _systemBrightness = Platform.isAndroid || Platform.isIOS;
+  bool _brightnessChanged = false;
   bool _pipSupported = false;
   store.PortraitFit _portraitFit = store.PortraitFit.contain;
   final StallWatch _stallWatch = StallWatch();
@@ -223,6 +229,13 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     _state = _session.state;
     _subscription = _session.states.listen(_onState);
     _initVolume();
+    if (_systemBrightness) {
+      unawaited(
+        ScreenBrightness.instance.application.then((value) {
+          if (mounted && !_brightnessChanged) _brightness = value.clamp(0.0, 1.0);
+        }, onError: (Object _) {}),
+      );
+    }
     if (!widget.resume) {
       if (_live) unawaited(_open());
     } else if (!_live) {
@@ -263,6 +276,10 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     _suppressTimer?.cancel();
     _volumeSave?.cancel();
     unawaited(_subscription?.cancel());
+    // Leaving the room gives the screen its system brightness back.
+    if (_systemBrightness && _brightnessChanged) {
+      unawaited(ScreenBrightness.instance.resetApplicationScreenBrightness().catchError((Object _) {}));
+    }
     super.dispose();
   }
 
@@ -412,6 +429,18 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     if (!opened && mounted) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('没能打开新窗口')));
     }
+  }
+
+  /// T-03: the window brightness on phones (the system one comes back when
+  /// the room closes); a dimming layer down to 20% elsewhere.
+  void _setBrightness(double value) {
+    final next = value.clamp(_systemBrightness ? 0.02 : 0.2, 1.0);
+    _brightnessChanged = true;
+    setState(() => _brightness = next);
+    if (_systemBrightness) {
+      unawaited(ScreenBrightness.instance.setApplicationScreenBrightness(next).catchError((Object _) {}));
+    }
+    showHint(Icons.brightness_medium, '亮度 ${(next * 100).round()}%');
   }
 
   /// Audio only on or off, in place (F-ROOM-9, AUD-1).
@@ -640,9 +669,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       case SwipeTarget.volume:
         _applyVolume(value, hint: true);
       case SwipeTarget.brightness:
-        final next = value.clamp(0.2, 1.0);
-        setState(() => _brightness = next);
-        showHint(Icons.brightness_medium, '亮度 ${(next * 100).round()}%');
+        _setBrightness(value);
       case SwipeTarget.none || SwipeTarget.switchRoom:
         break;
     }
@@ -833,7 +860,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                   Positioned.fill(
                     child: DanmakuOverlay(controller: widget.overlay, visible: danmakuShown),
                   ),
-                  if (_brightness < 1)
+                  if (!_systemBrightness && _brightness < 1)
                     IgnorePointer(child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 1 - _brightness))),
                   if (_live && _state.showsBuffering && _openError == null)
                     const IgnorePointer(
@@ -1004,7 +1031,11 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     ),
                     // F-ROOM-17: the time in the fullscreen top bar (battery:
                     // no plugin in v4 yet).
-                    if (_fullscreen && _touch) const _ClockText(color: ink),
+                    if (_fullscreen && _touch) ...[
+                      const _ClockText(color: ink),
+                      // F-ROOM-17: the battery next to the time on phones.
+                      if (_systemBrightness) const _BatteryText(color: ink),
+                    ],
                     SleepTimerChip(color: ink, onTap: openSleepTimer),
                     if (_fullscreen && widget.onSwitchRoom != null)
                       IconButton(
@@ -1330,6 +1361,84 @@ class _ClockTextState extends State<_ClockText> {
         '${two(now.hour)}:${two(now.minute)}',
         style: TextStyle(color: widget.color, fontFeatures: const [FontFeature.tabularFigures()]),
       ),
+    );
+  }
+}
+
+/// F-ROOM-17: battery level, refreshed with the clock's minute and on
+/// charging changes.
+class _BatteryText extends StatefulWidget {
+  const new({required this.color});
+
+  final Color color;
+
+  @override
+  State<_BatteryText> createState() => _BatteryTextState();
+}
+
+class _BatteryTextState extends State<_BatteryText> {
+  final Battery _battery = Battery();
+  StreamSubscription<BatteryState>? _states;
+  Timer? _timer;
+  int? _level;
+  BatteryState _state = BatteryState.unknown;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_read());
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) => unawaited(_read()));
+    try {
+      _states = _battery.onBatteryStateChanged.listen((state) {
+        if (!mounted) return;
+        setState(() => _state = state);
+        unawaited(_read());
+      }, onError: (Object _) {});
+    } on Object {
+      // No battery plugin here.
+    }
+  }
+
+  Future<void> _read() async {
+    try {
+      final level = await _battery.batteryLevel;
+      if (mounted && level != _level) setState(() => _level = level);
+    } on Object {
+      // No battery (or no plugin): nothing to show.
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    unawaited(_states?.cancel());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final level = _level;
+    if (level == null || level < 0) return const SizedBox.shrink();
+    final charging = _state == BatteryState.charging || _state == BatteryState.full;
+    final icon = charging
+        ? Icons.battery_charging_full
+        : switch (level) {
+            >= 90 => Icons.battery_full,
+            >= 60 => Icons.battery_5_bar,
+            >= 35 => Icons.battery_3_bar,
+            >= 15 => Icons.battery_2_bar,
+            _ => Icons.battery_alert,
+          };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: widget.color),
+        Text(
+          '$level%',
+          style: TextStyle(color: widget.color, fontFeatures: const [FontFeature.tabularFigures()]),
+        ),
+        const SizedBox(width: Space.s2),
+      ],
     );
   }
 }

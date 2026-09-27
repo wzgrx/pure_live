@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// Q-12: quality and line in one panel, two columns when there is room. The
 /// panel follows the session, so a switch in progress shows.
@@ -356,7 +357,8 @@ List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({
   ];
 }
 
-/// F-SHR-01: the room's share code (3.x-compatible) on the clipboard.
+/// F-SHR-01: the room's share code (3.x-compatible): the system share sheet
+/// on phones, the clipboard on desktops (and when the sheet fails).
 Future<void> shareRoom(BuildContext context, RoomDetail detail) async {
   final card = detail.card;
   final code = ShareCode(
@@ -367,6 +369,22 @@ Future<void> shareRoom(BuildContext context, RoomDetail detail) async {
     cover: card.cover?.toString() ?? '',
     avatar: (detail.avatar ?? card.avatar)?.toString() ?? '',
   ).encode();
+  if (Platform.isAndroid || Platform.isIOS) {
+    try {
+      final box = context.findRenderObject();
+      await SharePlus.instance.share(
+        ShareParams(
+          text: code,
+          subject: '${card.anchorName}的直播间',
+          // iPad anchors the sheet to the button.
+          sharePositionOrigin: box is RenderBox && box.hasSize ? box.localToGlobal(Offset.zero) & box.size : null,
+        ),
+      );
+      return;
+    } on Object {
+      // No share sheet: fall back to the clipboard.
+    }
+  }
   await Clipboard.setData(ClipboardData(text: code));
   if (context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('分享口令已复制，对方在纯粹直播里粘贴即可打开')));

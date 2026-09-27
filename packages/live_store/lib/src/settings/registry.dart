@@ -469,6 +469,45 @@ abstract final class Settings {
     legacy: [LegacyKey('window_height')],
   );
 
+  // Network proxy (spec/modules/store.md §1.5 "网络"; product F-SET-07). 3.x kept
+  // an app proxy and a player proxy; v4 has one, applied to adapters, chat,
+  // playback and recording, optionally only for some platforms.
+
+  /// Use the proxy.
+  static const proxyEnabled = BoolSetting(
+    'network.proxyEnabled',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('enableAppProxy'), LegacyKey('enableProxy')],
+  );
+
+  /// Proxy host.
+  static const proxyHost = StringSetting(
+    'network.proxyHost',
+    '',
+    maxLength: 255,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('appProxyHost'), LegacyKey('proxyHost')],
+  );
+
+  /// Proxy port.
+  static const proxyPort = IntSetting(
+    'network.proxyPort',
+    7897,
+    min: 1,
+    max: 65535,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('appProxyPort'), LegacyKey('proxyPort')],
+  );
+
+  /// Platforms that go through the proxy; empty means every platform.
+  static const proxyPlatforms = StringListSetting(
+    'network.proxyPlatforms',
+    [],
+    lowerCase: true,
+    scope: SettingScope.device,
+  );
+
   // Recording (spec/modules/record.md §20); device scope, never synced.
 
   /// Default recording quality.
@@ -722,6 +761,10 @@ abstract final class Settings {
     recordSplitMegabytes,
     recordRemuxToMp4,
     recordKeepSourceAfterRemux,
+    proxyEnabled,
+    proxyHost,
+    proxyPort,
+    proxyPlatforms,
   ];
 
   static final Map<String, Setting<Object>> _byId = {for (final setting in all) setting.id: setting};

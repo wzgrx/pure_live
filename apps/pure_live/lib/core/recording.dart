@@ -9,6 +9,7 @@ import 'package:live_net/live_net.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 
@@ -40,17 +41,18 @@ RecordSettings recordSettingsFrom(SettingsStore s) => RecordSettings(
 
 /// Chat for recordings through live_danmaku's connectors (§17): plain chats only.
 final class DanmakuRecordChat implements RecordChatSource {
-  const new(this._sites, this._cookies);
+  const new(this._sites, this._cookies, [this._proxy = const FixedProxyPolicy()]);
 
   final Map<String, PlatformSite> _sites;
   final CookieVault _cookies;
+  final ProxyPolicy _proxy;
 
   @override
   Stream<RecordChatMessage> connect(RoomDetail room) {
     final raw = _sites[room.ref.platform]?.raw;
     final connector = danmakuConnectorFor(
       room,
-      transport: IoDanmakuTransport(),
+      transport: IoDanmakuTransport(proxy: _proxy),
       credentials: SiteDanmakuCredentials(
         bilibiliSite: raw is BilibiliSite ? raw : null,
         douyinSite: raw is DouyinSite ? raw : null,
@@ -126,8 +128,8 @@ final Provider<RecordManager> recordManagerProvider = Provider<RecordManager>((r
     ),
     root: RecordRoot.resolve(defaultRoot: paths.defaultRecordRoot, chosen: chosen.isEmpty ? null : chosen),
     settings: recordSettingsFrom(settings),
-    opener: httpRecordOpener(),
-    chat: DanmakuRecordChat(sites, ref.watch(cookieVaultProvider)),
+    opener: httpRecordOpener(proxy: ref.watch(proxyPolicyProvider)),
+    chat: DanmakuRecordChat(sites, ref.watch(cookieVaultProvider), ref.watch(proxyPolicyProvider)),
   );
   unawaited(manager.init());
   final changes = settings.changes.where((id) => id.startsWith('record.')).listen((_) {

@@ -62,7 +62,9 @@ void main() {
         for (final issue in report.issues)
           if (issue.reason == 'unknownKey') issue.detail,
       };
-      expect(unknown, containsAll(['crossAxisSpacing', 'proxyPort', 'cornerRadius']));
+      expect(unknown, containsAll(['crossAxisSpacing', 'cornerRadius']));
+      // 3.x proxy settings map onto network.proxy* (F-SET-07).
+      expect(unknown, isNot(contains('proxyPort')));
       expect(unknown, isNot(contains('videoPlayerKey')), reason: 'dropped on purpose, not unknown');
       expect(unknown, isNot(contains('enableHighRefreshRate')));
     });

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
+import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/store.dart';
 
 /// A platform adapter seen through its capabilities (ADR 0010, rule 7). The
@@ -37,7 +38,7 @@ final cookieVaultProvider = Provider<CookieVault>((ref) {
 
 /// Shared HTTP transport for every adapter.
 final liveHttpProvider = Provider<LiveHttp>((ref) {
-  final http = IoLiveHttp();
+  final http = IoLiveHttp(proxy: ref.watch(proxyPolicyProvider));
   ref.onDispose(http.close);
   return http;
 });

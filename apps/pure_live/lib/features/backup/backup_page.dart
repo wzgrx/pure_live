@@ -1,16 +1,15 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/backup/backup_flow.dart';
+import 'package:pure_live_app/features/settings/setting_tiles.dart';
 
-/// Backup and restore (spec/modules/store.md §7): export a v4 backup, import a
-/// v4 or 3.x backup. 3.x users bring their follows into the preview this way,
-/// since a separately installed preview cannot read the 3.x app's files.
+/// Backup and sync (spec/modules/store.md §7, product §14): export a v4 backup
+/// to a file, import a v4 or 3.x backup, and the WebDAV and LAN sync pages.
+/// 3.x users bring their follows into the preview this way, since a
+/// separately installed preview cannot read the 3.x app's files.
 class BackupPage extends ConsumerStatefulWidget {
   const new({super.key});
 
@@ -21,18 +20,12 @@ class BackupPage extends ConsumerStatefulWidget {
 class _BackupPageState extends ConsumerState<BackupPage> {
   bool _busy = false;
 
-  BackupService get _service => BackupService(ref.read(storeProvider), appVersion: '4.0.0-preview.1');
-
   Future<void> _run(Future<void> Function() action) async {
     setState(() => _busy = true);
     try {
       await action();
-    } on FormatException catch (error) {
-      _toast('这个文件不是可以识别的备份：${error.message}');
-    } on BackupTooNewException {
-      _toast('这个备份来自更新的版本，请先升级应用');
     } on Object catch (error) {
-      _toast('操作失败：$error');
+      _toast(backupErrorText(error));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -42,66 +35,23 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  Future<void> _export() => _run(() async {
-    final document = await _service.export();
-    final now = DateTime.now();
-    String two(int value) => value.toString().padLeft(2, '0');
-    final name =
-        'PureLive-v4-backup-${now.year}${two(now.month)}${two(now.day)}-${two(now.hour)}${two(now.minute)}.json';
-    final saved = await FilePicker.saveFile(
-      dialogTitle: '保存备份',
-      fileName: name,
-      mimeType: 'application/json',
-      type: FileType.custom,
-      allowedExtensions: const ['json'],
-      bytes: Uint8List.fromList(utf8.encode(const JsonEncoder.withIndent('  ').convert(document))),
-    );
-    if (saved != null) _toast('备份已保存');
-  });
+  Future<void> _export() async {
+    final options = await showExportOptions(context);
+    if (options == null) return;
+    await _run(() async {
+      if (await exportBackupToFile(ref.read(backupServiceProvider), options)) _toast('备份已保存');
+    });
+  }
 
   Future<void> _import(RestoreMode mode) => _run(() async {
-    final picked = await FilePicker.pickFiles(
-      dialogTitle: '选择备份文件',
-      type: FileType.custom,
-      allowedExtensions: const ['json', 'txt'],
-    );
-    if (picked.isEmpty) return;
-    final bytes = await picked.single.readAsBytes();
-    final Object? document;
-    try {
-      document = jsonDecode(utf8.decode(bytes));
-    } on FormatException {
-      throw const FormatException('不是 JSON 文件');
-    }
-    final plan = await _service.plan(document, mode: mode);
-    if (!mounted) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认导入'),
-        content: _ReportSummary(report: plan.report, planned: true),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('导入')),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    final report = await _service.apply(plan);
-    if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('导入完成'),
-        content: _ReportSummary(report: report, planned: false),
-        actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('好'))],
-      ),
-    );
+    final document = await pickBackupFile();
+    if (document == null || !mounted) return;
+    await confirmAndRestore(context, service: ref.read(backupServiceProvider), document: document, mode: mode);
   });
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('备份与恢复')),
+    appBar: AppBar(title: const Text('备份与同步')),
     body: Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
@@ -111,23 +61,40 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           child: ListView(
             children: [
               if (_busy) const LinearProgressIndicator(),
+              const SettingsHeader('本地文件'),
               ListTile(
                 leading: const Icon(Icons.upload_file),
                 title: const Text('导出备份'),
-                subtitle: const Text('关注、分组、历史、屏蔽词和设置；不含平台登录信息'),
+                subtitle: const Text('完整备份或仅关注；平台登录信息默认不包含，需要时用口令加密'),
                 onTap: _export,
               ),
               ListTile(
                 leading: const Icon(Icons.download),
-                title: const Text('导入关注'),
+                title: const Text('仅恢复关注'),
                 subtitle: const Text('支持 v4 和 3.x 的备份文件，只导入关注和关注的分区'),
                 onTap: () => _import(RestoreMode.follows),
               ),
               ListTile(
                 leading: const Icon(Icons.restore),
                 title: const Text('完整恢复'),
-                subtitle: const Text('导入备份里的全部内容，文件里没有的部分保持不变'),
+                subtitle: const Text('导入备份里的全部内容，备份里没有的部分保持不变'),
                 onTap: () => _import(RestoreMode.full),
+              ),
+              const Divider(),
+              const SettingsHeader('同步'),
+              ListTile(
+                leading: const Icon(Icons.cloud_outlined),
+                title: const Text('WebDAV'),
+                subtitle: const Text('把备份上传到坚果云、Nextcloud、群晖等网盘，在其它设备上恢复'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/me/backup/webdav'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.devices_other_outlined),
+                title: const Text('局域网同步'),
+                subtitle: const Text('同一网络下的两台设备直接传输，接收方确认后才会导入'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/me/backup/lan'),
               ),
             ],
           ),
@@ -135,46 +102,4 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       ),
     ),
   );
-}
-
-const _sectionNames = {
-  'follows': '关注',
-  'followAreas': '关注的分区',
-  'tags': '分组',
-  'roomTags': '分组成员',
-  'history': '观看历史',
-  'blockRules': '屏蔽词',
-  'settings': '设置',
-  'roomPrefs': '直播间偏好',
-};
-
-class _ReportSummary extends StatelessWidget {
-  const new({required this.report, required this.planned});
-
-  final ImportReport report;
-  final bool planned;
-
-  @override
-  Widget build(BuildContext context) {
-    final lines = [
-      for (final entry in report.counts.entries)
-        if (entry.value.read > 0 || entry.value.written > 0) _line(_sectionNames[entry.key] ?? entry.key, entry.value),
-    ];
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('备份格式：${report.format}'),
-        const SizedBox(height: Space.s2),
-        if (lines.isEmpty) const Text('文件里没有可以导入的内容') else ...lines.map(Text.new),
-        if (report.secretsPresent) ...[const SizedBox(height: Space.s2), const Text('备份里的平台登录信息这次不导入。')],
-      ],
-    );
-  }
-
-  String _line(String section, ImportCount count) {
-    final main = planned ? '读到 ${count.read} 项' : '写入 ${count.written} 项';
-    final dropped = count.dropped > 0 ? '，跳过 ${count.dropped} 项' : '';
-    return '$section：$main$dropped';
-  }
 }

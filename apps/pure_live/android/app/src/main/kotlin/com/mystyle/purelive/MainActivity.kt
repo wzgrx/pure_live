@@ -1,12 +1,13 @@
 package com.mystyle.purelive
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
@@ -22,18 +23,23 @@ import javax.crypto.spec.GCMParameterSpec
  * to Dart: the text of the launching intent once, later shares as events.
  * Playlist files shared into the app or opened with it (spec/modules/iptv.md
  * §6) go the same way as `{name, bytes}` on their own channel.
+ *
+ * Extends audio_service's activity so the media service and the activity share
+ * one Flutter engine (background play, F-BG-01); the engine outlives the
+ * activity while background audio plays. Picture-in-picture is
+ * [PictureInPicture]; the Wi-Fi lock is [PlaybackLocks].
  */
-class MainActivity : FlutterActivity() {
+class MainActivity : AudioServiceActivity() {
     private var pendingText: String? = null
     private var pendingFile: Map<String, Any>? = null
-    private var events: EventChannel.EventSink? = null
-    private var fileEvents: EventChannel.EventSink? = null
+    private var pip: PictureInPicture? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        pendingText = sharedText(intent)
-        if (pendingText == null) pendingFile = sharedFile(intent)
         val messenger = flutterEngine.dartExecutor.binaryMessenger
+        pip?.detach()
+        pip = PictureInPicture(this, messenger)
+        PlaybackLocks.attach(applicationContext, messenger)
         MethodChannel(messenger, "purelive/share").setMethodCallHandler { call, result ->
             when (call.method) {
                 "takePendingText" -> {
@@ -64,11 +70,11 @@ class MainActivity : FlutterActivity() {
         EventChannel(messenger, "purelive/share/events").setStreamHandler(
             object : EventChannel.StreamHandler {
                 override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {
-                    events = sink
+                    shareEvents = sink
                 }
 
                 override fun onCancel(arguments: Any?) {
-                    events = null
+                    shareEvents = null
                 }
             },
         )
@@ -83,14 +89,38 @@ class MainActivity : FlutterActivity() {
                 }
             },
         )
+        // The engine outlives the activity (audio_service caches it), so Dart
+        // may already listen: a share that starts a new activity goes out as
+        // an event, otherwise it waits for takePendingText / takePendingFile.
+        deliver(intent)
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        pip?.onUserLeaveHint()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        pip?.onModeChanged(isInPictureInPictureMode)
+    }
+
+    override fun onDestroy() {
+        pip?.detach()
+        pip = null
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        deliver(intent)
+    }
+
+    private fun deliver(intent: Intent?) {
         val text = sharedText(intent)
         if (text != null) {
-            val sink = events
+            val sink = shareEvents
             if (sink != null) sink.success(text) else pendingText = text
             return
         }
@@ -188,5 +218,15 @@ class MainActivity : FlutterActivity() {
 
         /** Largest playlist file handed to Dart (spec/modules/iptv.md §6). */
         const val MAX_SHARED_FILE = 32 * 1024 * 1024
+
+        /**
+         * Dart's share listener. Kept per process, not per activity: the cached
+         * engine keeps its subscription when a new activity registers the channel
+         * again, and that subscription's sink stays valid.
+         */
+        var shareEvents: EventChannel.EventSink? = null
+
+        /** Dart's playlist-file listener, kept per process like [shareEvents]. */
+        var fileEvents: EventChannel.EventSink? = null
     }
 }

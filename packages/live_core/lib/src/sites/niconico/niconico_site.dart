@@ -151,6 +151,19 @@ final class NiconicoSite implements LiveSite, CatalogSource, SearchSource, RoomS
   @override
   Future<RoomDetail> detail(RoomRef ref) async => (await _watch(ref.roomId)).detail;
 
+  /// §6.2 the seat socket URL of [ref]'s program on air. The chat connector
+  /// uses it to open a seat of its own (the comment server is announced on
+  /// the seat, §7).
+  Future<Uri> seatSocket(RoomRef ref) async {
+    final watch = await _watch(ref.roomId);
+    if (watch.detail.state != LiveState.live) throw const StreamUnavailable(_site, 'not on air');
+    final denied = watch.denied;
+    if (denied != null) throw denied;
+    final socket = watch.webSocket;
+    if (socket == null) throw const ApiChanged(_site, 'watch page: no webSocketUrl');
+    return socket;
+  }
+
   /// §6.4 the open seat for [program], extended to [holdFor].
   NiconicoSeat? _reuse(String? program) {
     if (program == null) return null;

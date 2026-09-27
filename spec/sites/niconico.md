@@ -4,9 +4,9 @@
 
 - 平台 id：`niconico`，显示名 `niconico`。
 - 证据写法：`文件:行号` 相对 `legacy/lib/core/site/niconico/`（W = niconico_watch.dart，SS = niconico_session.dart，ST = niconico_stream.dart，D = niconico_directory.dart，Q = niconico_quality_catalog.dart，L = niconico_link.dart）。样本编号见 §11。
-- 状态：**保留**。2026-09-27 直连（中国大陆，无需代理）实测：最近节目列表、搜索、观看页、观看座位 WebSocket、HLS（LL-HLS、fMP4、AES-128）都能匿名使用。
-- 能力：目录（7 个标签页 → 在播节目，分页）、推荐（“一般”标签页）、搜索（在播节目）、详情、取流（HLS 主列表 + 座位租期）、链接解析。
-- 不提供：弹幕（本阶段未做，协议已查明，见 §7）；时移回放；登录（会员限定、付费节目报 NeedsLogin）。
+- 状态：**保留**。2026-09-27 本机默认出口实测（2026-09-28 查明本机默认出口经系统层隧道在境外，不是中国大陆直连；中国大陆直连是否需要代理 [待确认]）：最近节目列表、搜索、观看页、观看座位 WebSocket、HLS（LL-HLS、fMP4、AES-128）都能匿名使用。
+- 能力：目录（7 个标签页 → 在播节目，分页）、推荐（“一般”标签页）、搜索（在播节目）、详情、取流（HLS 主列表 + 座位租期）、链接解析、弹幕（评论服务器 NDGR，§7）。
+- 不提供：时移回放；登录（会员限定、付费节目报 NeedsLogin）。
 - **播放层缺口**（§6.3、§6.5）：HLS 的 Cookie 按路径区分，`StreamLine.headers` 只能带一组，`live_media`/`live_player` 需要按路径发 Cookie 才能真正播放。
 
 ---
@@ -113,15 +113,32 @@
 
 ## 7. 弹幕
 
-本阶段未做（缺口）。协议已查明，可以用 HTTP 实现：
+评论服务器（NDGR）走 HTTP，但它的地址只在座位上给出（S04-seat 的 `messageServer`）。
 
-1. 座位的 `messageServer.viewUri`（`https://mpn.live.nicovideo.jp/api/view/v4/<令牌>`）。
-2. `GET <viewUri>?at=now` → 一条 `ChunkedEntry{next{at}}`（长度前缀的 protobuf）。
-3. `GET <viewUri>?at=<at>`（长轮询约 25–30 秒）→ 若干条目：`backward{until, backward_uri, snapshot_uri}`、`previous{from, until, uri}`（已结束的窗口）、`segment{from, until, uri}`（当前和之后的 16 秒窗口）、`next{at}`。
-4. `GET <segment.uri>` → 长度前缀的 `ChunkedMessage` 序列：`meta{id, at, origin{chat{live_id}}}`，`message{chat{content, name, vpos, hashed_user_id, no}}` 或 `state{statistics{viewers, comments, adPoints, giftPoints}}`。
-5. 以 `next.at` 继续第 3 步。
+### 7.1 座位
 
-需要一个座位取 `viewUri`（弹幕连接在后台 isolate，需要自己的座位），HTTP 超时要大于长轮询时长；`live_danmaku` 的 `DanmakuSocket.send` 只发二进制帧，不能直接用来开座位（§6.2），要用 `live_core` 的座位实现。
+弹幕连接器在后台 isolate，自己开一个座位：先取观看页（§4）的 `webSocketUrl`（`NiconicoSite.seatSocket`；不在播 → 结束，原因 `offline`；会员限定等 → `credentials`），再按 §6.2 开座位、应答 `ping`、定时 `keepSeat`。座位服务器**只收文本帧**（发二进制帧会被断开：`1003 This WebSocket only supports text frames`，2026-09-28 实测），`live_danmaku` 的 `DanmakuSocket.send` 只发二进制帧，所以座位用 `live_core` 的实现，经 `dart:io` 走 `niconico` 的平台路由（`IoDanmakuTransport.proxy`）。座位给出 `messageServer.viewUri` 后开始读评论，最多等 10 秒。
+
+### 7.2 评论服务器
+
+全部是长度前缀（varint）的 protobuf 序列（S07-live）：
+
+1. `GET <viewUri>?at=now` → 一条 `{4: next{1: at}}`。
+2. `GET <viewUri>?at=<at>`（长轮询，实测 12–30 秒才回答）→ 若干条目：`1: segment{1: from, 2: until, 3: uri}`（进行中和下一个 16 秒窗口）、`3: previous{…}`（已结束的窗口）、`2: backward{until, backward_uri, snapshot_uri}`（历史，不用）、`4: next{at}`。时间是 `{1: 秒, 2: 纳秒}`。
+3. `GET <segment.uri>`：窗口进行中时，回答一直持续到窗口结束（`until`）；内容是 `ChunkedMessage` 序列：`1: meta{1: id, 2: at, 3: origin}`，以及 `2: message{1: chat{1: content, 2: name, 3: vpos, 5: raw_user_id, 6: hashed_user_id, 7: modifier, 8: no}, 23: 系统通知, …}` 或 `4: state{1: statistics{1: viewers, 2: comments, 3: adPoints, 4: giftPoints}}`。
+4. 以 `next.at` 回到第 2 步。
+
+### 7.3 解码
+
+- `chat` → 聊天行：消息 id = `niconico:<meta.id>`；时间 `meta.at`；用户 id = `hashed_user_id`（匿名用户 `a:…`），没有时用 `raw_user_id`；昵称 `name`（匿名为空）。颜色、位置（`modifier`）本阶段不用，[待确认] 颜色表。
+- `statistics.viewers` → 在线人数。
+- 系统通知（如“「アニメ」が好きな1人が来場しました”）、礼物、广告、信号不解码。
+
+### 7.4 读取与节奏
+
+- 第一次 `view` 回答里已结束的窗口（`previous`）是历史，不读；之后每个新出现的进行中窗口各读一次（并发，窗口读取的超时 = 距 `until` 的时间 + 20 秒；`view` 超时 60 秒）。
+- 窗口的回答在窗口结束时才完整（`LiveHttp` 不流式读取），所以评论晚一个窗口（约 16 秒）到达；连接器按每条的 `meta.at` 相对窗口开始的偏移依次发出，保持原来的节奏，整体延迟约 16 秒（与 `latency: high` 的 HLS 延迟相近）。
+- 失败：`view` 连续失败 6 次或座位断开 → 重开座位（连续 6 次失败结束）；座位断开原因含 `END_PROGRAM` → 结束，原因 `offline`。
 
 ## 8. 登录与 Cookie
 
@@ -152,7 +169,7 @@
 
 ## 11. 样本清单
 
-2026-09-27 直连录制（规则 tools/live_cli/lib/src/fixture/rules/niconico.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/niconico_test.dart 直接对照正文。
+2026-09-27 本机默认出口录制（规则 tools/live_cli/lib/src/fixture/rules/niconico.dart）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/niconico_test.dart 直接对照正文。
 
 | # | 样本 | 覆盖 |
 |---|---|---|
@@ -160,15 +177,16 @@
 | S02 | `S02-search` | 在播搜索 |
 | S03 | `S03-watch-user-live`、`-program-live`、`-user-ended`、`-channel`、`-notfound` | 观看页：用户在播、同一节目按 `lv` 访问、用户最近节目已结束、频道（付费试看）、404 |
 | S04 | `seat/S04-seat`（`frames.jsonl`，与弹幕帧同格式） | 座位会话：`startWatching`、`seat`、`stream`（Cookie）、`messageServer`、`statistics`、`ping`/`pong`/`keepSeat`，约 65 秒 |
+| S07 | `danmaku/S07-live` | 评论服务器（`live_cli danmaku niconico lv351482215 --seconds 75 --record S07-live`）：3 次 `view`、4 个进行中窗口，15 条评论和在线人数；观看页帧删去，座位不经 `DanmakuTransport`、没有录入（测试用 S04-seat 回放座位） |
 
 `seat/S04-seat` 不是 `live_cli fixture` 录的（该工具只录 HTTP），由本次迁移时的录制脚本写成与 `live_cli danmaku --record` 相同的帧格式，脚本在写入前检查原值已全部消失。
 
-**需要脱敏的字段**：观看页的匿名 `audience_token`（座位地址里和 `audienceToken`）、`csrfToken`、`nicosid`；列表里的广告赞助人 `nicoad.userName`/`userIcon`；座位帧里 `stream.cookies[].value`、`messageServer`/`akashicMessageServer` 的 `viewUri` 令牌、握手地址的 `audience_token`。主播公开信息保留。
+**需要脱敏的字段**：观看页的匿名 `audience_token`（座位地址里和 `audienceToken`）、`csrfToken`、`nicosid`；列表里的广告赞助人 `nicoad.userName`/`userIcon`；座位帧里 `stream.cookies[].value`、`messageServer`/`akashicMessageServer` 的 `viewUri` 令牌、握手地址的 `audience_token`；评论服务器路径里的令牌（`/api/view/v4/…`、`/data/{segment,backward,snapshot}/v4/…`，地址和 protobuf 回答里都有，换成等长同形值）、评论作者 `name`、`raw_user_id`、`hashed_user_id`（重建 protobuf）。主播公开信息保留。
 
 ## 12. 待确认
 
 1. 播放层按路径发 Cookie 的实现方式（§6.3）。
-2. 弹幕（§7）。
+2. 评论颜色、位置（`modifier`）和礼物（§7.3）。
 3. `changeStream` 按档切换画质。
 4. 付费频道试看的时长和结束时的座位消息。
 5. 座位中途换 `stream` 地址时播放器的处理。

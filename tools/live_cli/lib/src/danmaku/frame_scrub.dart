@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:live_cli/src/danmaku/recorder.dart';
 import 'package:live_cli/src/danmaku/scrub_fc2live.dart';
+import 'package:live_cli/src/danmaku/scrub_niconico.dart';
 import 'package:live_cli/src/danmaku/scrub_sites.dart';
 import 'package:live_cli/src/danmaku/scrub_steambroadcast.dart';
 import 'package:live_cli/src/danmaku/scrub_youtube.dart';
@@ -135,6 +136,7 @@ abstract class FrameScrubber {
     'bilibili' => BilibiliFrameScrubber(detail, seed: seed),
     'douyin' => DouyinFrameScrubber(detail, seed: seed),
     'kuaishou' => KuaishouFrameScrubber(detail, seed: seed),
+    'niconico' => NiconicoFrameScrubber(detail, seed: seed),
     'steambroadcast' => SteamBroadcastFrameScrubber(detail, seed: seed),
     'youtube' => YouTubeFrameScrubber(detail, seed: seed),
     _ => throw ArgumentError.value(platform, 'platform', 'no frame scrubber'),

@@ -324,6 +324,10 @@ abstract final class Settings {
   /// Fixed frame rate when [danmakuAutoFps] is off.
   static const danmakuFps = IntSetting('danmaku.fps', 60, min: 30, max: 240, legacy: [LegacyKey('danmakuFps')]);
 
+  /// The user's saved danmaku style (F-DM-02): 3.x's JSON template, kept in
+  /// its format so 3.x backups restore it as is; empty when none.
+  static const danmakuTemplate = StringSetting('danmaku.template', '', legacy: [LegacyKey('savedDanmakuTemplate')]);
+
   /// Tapping a danmaku opens its actions.
   static const danmakuTapInteraction = BoolSetting(
     'danmaku.tapInteraction',
@@ -858,6 +862,7 @@ abstract final class Settings {
     danmakuNoEmoji,
     danmakuAutoFps,
     danmakuFps,
+    danmakuTemplate,
     danmakuTapInteraction,
     danmakuLongPressInteraction,
     danmakuCollapseRepeated,

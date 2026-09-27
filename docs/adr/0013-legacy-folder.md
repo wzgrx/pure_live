@@ -32,4 +32,5 @@ ADR 0007 为了少改构建链路，把旧应用留在仓库根目录，并让�
 - 旧应用的脚本、测试里引用根目录路径的地方（`.github`、`third_party`、`fixtures`、`pubspec.lock`）要改成 `../` 开头。workspace 的 `.dart_tool`（`package_config.json` 和原生库钩子缓存）在仓库根目录，Windows 构建脚本用 `$workspaceRoot` 指向它。
 - 规格、诊断和基线里引用的旧代码路径（`lib/`、`test/`、`tool/`、`android/`、旧 `docs/` 文档等）写于迁移之前，现在对应 `legacy/` 下的同名路径，不逐一改写。
 - 发布工作流更新 `releases.json` 时同时写两份。
+- 读取“应用根目录 pubspec”的构建钩子现在读到的是 workspace 根的 `pubspec.yaml`。`ffmpeg_kit_extended_flutter` 的 `ffmpeg_kit_extended_config` 因此移到根 `pubspec.yaml`；留在 `legacy/pubspec.yaml` 时钩子不报错，直接打包它默认的精简版 FFmpeg（搬家后第一次构建的 APK 里是 `9d4ca21`，不是 n9.0.2，由 `verify_ffmpeg_native.py` 查出）。旧应用测试 `test/workspace_hook_config_test.dart` 检查配置位置。钩子不把 pubspec 记为依赖，改配置后要删掉 `.dart_tool/hooks_runner/ffmpeg_kit_extended_flutter` 缓存才会重新运行。
 - Windows 本地构建和发布脚本的工作目录变成 `legacy/`，发布 3.3.x 前要在 Windows 上完整跑一遍构建。

@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "platform": "acfun",
+  "sample": "S04-search-p4",
+  "capturedAt": "2026-09-27T17:44:49.468075Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.acfun.cn/search?keyword=%E6%B8%B8%E6%88%8F&type=user&pCursor=4&quickViewId=up-list&reqID=1&ajaxpipe=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.acfun.cn/search"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": [
+        "csrfToken=CCD5d-na7aeEpigpNmAE4XjY; path=/",
+        "_did=ubd_8209890253K8GL01; path=/; expires=Mon, 27 Sep 2027 17:44:49 GMT; domain=.acfun.cn"
+      ],
+      "date": "Sun, 27 Sep 2026 17:44:50 GMT",
+      "transfer-encoding": "chunked",
+      "ali-swift-global-savetime": "1790531090",
+      "strict-transport-security": "max-age=172800",
+      "content-type": "application/octet-stream",
+      "x-xss-protection": "1; mode=block",
+      "x-swift-cachetime": "0",
+      "server": "Tengine",
+      "timing-allow-origin": "*",
+      "x-readtime": "126",
+      "accept-ranges": "bytes",
+      "x-swift-savetime": "Sun, 27 Sep 2026 17:44:50 GMT",
+      "x-download-options": "noopen",
+      "via": "cache43.l2cm9-5[145,145,200-0,M], cache10.l2cm9-5[147,0], ens-cache4.cn5873[247,246,200-0,M], ens-cache1.cn5873[248,0]",
+      "x-frame-options": "SAMEORIGIN",
+      "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' *.acfun.tv https://*.acfun.cn http://*.acfun.cn http://*.aixifan.com https://*.aixifan.com wx.qq.com *.gifshow.com *.yximgs.com *.kuaishou.com http://*.etoote.com https://*.etoote.com fonts.gstatic.com at.alicdn.com cdnjs.cloudflare.com translate.googleapis.com http://fanyi.youdao.com fonts.googleapis.com http://*.aixifan.com data: blob: chrome-extension: ms-appx-web:;font-src 'self' 'unsafe-inline' * data: blob: http: https: safari-extension: chrome-extension:;img-src * data: blob: http: https: android-webview-video-poster:;media-src * data: blob: http: https: android-webview-video-poster: chrome-extension: ms-appx-web:;script-src 'self' 'unsafe-eval' 'unsafe-inline' http://*.acfun.cn https://*.acfun.cn http://*.yximgs.com https://*.yximgs.com *.acfun.tv *.gifshow.com *.kuaishou.com https://*.aixifan.com http://*.aixifan.com http://*.acfun.cn https://*.acfun.cn https://*.bfdcdn.com http://*.bfdcdn.com hm.baidu.com a.alipayobjects.com http://res.wx.qq.com https://res.wx.qq.com open.mobile.qq.com tjs.sjs.sinajs.cn cdnjs.cloudflare.com translate.google.com translate.google.cn translate.googleapis.com http://fanyi.youdao.com www.pagespeed-mod.com blob: data: chrome-extension:;connect-src 'self' * http: https: wss: data: blob: chrome-extension:;frame-src 'self' https://*.kuaishou.com http://fanyi.youdao.com *.acfun.cn https://*.acfun.cn http://*.acfun.cn jsbridge: bdvideo: sinaweibo: qqvideo: blob:;form-action 'self' *.acfun.cn http://*.acfun.cn https://*.acfun.cn;report-uri https://csplog.kuaishou.com/log/acfun",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "eagleid": "7d487c1517905310898008190e"
+    }
+  },
+  "raw": {
+    "sha256": "acc1a6e46c36aec7adb91592614c035e3325006914bd5267869f6c3d58dca74b",
+    "length": 32656
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:csrfToken",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:_did",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

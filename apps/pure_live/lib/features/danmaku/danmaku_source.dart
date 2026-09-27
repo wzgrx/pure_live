@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 
 /// One room's chat connection as the room page sees it: batches in, filter
@@ -81,8 +82,11 @@ final Provider<DanmakuSource> danmakuSourceProvider = Provider<DanmakuSource>((r
   final cookies = ref.watch(cookieVaultProvider);
   final bilibili = sites['bilibili']?.info;
   final douyin = sites['douyin']?.info;
+  // Chat goes through the same proxy as the adapters (F-SET-07).
+  final proxy = ref.watch(proxyPolicyProvider);
   final source = WorkerDanmakuSource(
     () => DanmakuWorker.spawn(
+      proxy: proxy,
       credentials: SiteDanmakuCredentials(
         bilibiliSite: bilibili is BilibiliSite ? bilibili : null,
         douyinSite: douyin is DouyinSite ? douyin : null,

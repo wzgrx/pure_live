@@ -4,6 +4,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/src/backup/import_plan.dart';
 import 'package:live_store/src/backup/import_report.dart';
 import 'package:live_store/src/backup/json_read.dart';
+import 'package:live_store/src/backup/record_tasks.dart';
 import 'package:live_store/src/backup/secret_envelope.dart';
 import 'package:live_store/src/block_rules.dart';
 import 'package:live_store/src/follow_areas.dart';
@@ -13,6 +14,7 @@ import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets/secret_store.dart';
 import 'package:live_store/src/settings/registry.dart';
 import 'package:live_store/src/settings/setting.dart';
+import 'package:live_store/src/settings/values.dart';
 import 'package:live_store/src/tags.dart';
 import 'package:meta/meta.dart';
 
@@ -57,11 +59,12 @@ abstract final class V4Format {
     'blockRules',
     'roomPrefs',
     'iptv',
+    'recordTasks',
   };
 
   /// Sections of the format this app does not store yet; restoring leaves
   /// them out (and local data unchanged).
-  static const _later = {'recordTasks', 'webdavProfiles'};
+  static const _later = {'webdavProfiles'};
 
   /// Whether [json] is a v4 document.
   static bool recognizes(Map<String, Object?> json) => json['format'] == format;
@@ -76,6 +79,7 @@ abstract final class V4Format {
     SecretStore? secrets,
     String? passphrase,
     int iterations = SecretEnvelope.defaultIterations,
+    RecordTaskBackup? recordTasks,
   }) async {
     final created = '${createdAt.toUtc().toIso8601String().substring(0, 19)}Z';
     final sections = <String, Object?>{
@@ -143,6 +147,12 @@ abstract final class V4Format {
             'value': jsonDecode(row.read<String>('value')),
           },
       ];
+      // Recording tasks live in the recorder's own file (spec/modules/record.md §13).
+      if (recordTasks != null) {
+        sections['recordTasks'] = [
+          for (final (index, task) in (await recordTasks.exportTasks()).indexed) task.toJson(order: index),
+        ];
+      }
       // URL playlists and guides only: an imported file stays on its device,
       // and channels and programmes come back with the next sync (iptv.md §7).
       sections['iptv'] = {
@@ -326,6 +336,16 @@ abstract final class V4Format {
       }
     }
     if (sections['iptv'] case final Object iptv) plan.iptv = _iptv(iptv, report);
+    final recordTasks = _list(sections, 'recordTasks', report, (item) => _recordTask(item, report));
+    if (recordTasks != null) {
+      final sorted = [...recordTasks.indexed]
+        ..sort((a, b) => a.$2.$2 != b.$2.$2 ? a.$2.$2.compareTo(b.$2.$2) : a.$1.compareTo(b.$1));
+      final seen = <RoomRef>{};
+      plan.recordTasks = [
+        for (final (_, (task, _)) in sorted)
+          if (seen.add(task.ref)) task else ?_dropTask(task, report),
+      ];
+    }
     plan.roomPrefs = _list(sections, 'roomPrefs', report, (item) {
       final ref = _ref(item, report, 'roomPrefs');
       final key = JsonRead.nonEmpty(item['key']);
@@ -471,6 +491,35 @@ abstract final class V4Format {
   }
 
   static int _order(Map<String, Object?> item) => JsonRead.count(item['order']) ?? 0;
+
+  /// One `recordTasks` item (store.md §7.1): a room and how to record it.
+  /// An unknown quality falls back to the default quality.
+  static (BackupRecordTask, int)? _recordTask(Map<String, Object?> item, ImportReport report) {
+    final ref = _ref(item, report, 'recordTasks');
+    if (ref == null) return null;
+    final name = item['quality'];
+    final quality = QualityPreference.values.asNameMap()[name];
+    if (name != null && quality == null) report.note('recordTasks', 'invalidValue', ref.key);
+    return (
+      BackupRecordTask(
+        ref: ref,
+        createdAt: JsonRead.millis(item['createdAt']) ?? DateTime.utc(1970),
+        anchorName: JsonRead.text(item['nick']) ?? '',
+        title: JsonRead.text(item['title']) ?? '',
+        avatar: JsonRead.uri(item['avatar']),
+        cover: JsonRead.uri(item['cover']),
+        quality: quality,
+        autoReconnect: item['autoReconnect'] != false,
+        monitor: item['monitor'] == true,
+      ),
+      _order(item),
+    );
+  }
+
+  static BackupRecordTask? _dropTask(BackupRecordTask task, ImportReport report) {
+    report.drop('recordTasks', 'duplicate', task.ref.key);
+    return null;
+  }
 
   static RoomRef? _ref(Map<String, Object?> item, ImportReport report, String section) {
     final platform = JsonRead.text(item['platform']) ?? '';

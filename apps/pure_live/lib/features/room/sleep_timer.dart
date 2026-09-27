@@ -20,7 +20,7 @@ enum SleepAction {
 /// The sleep timer (F-TMR-01, F-TMR-02 merged into one "定时关闭").
 @immutable
 final class SleepTimerState {
-  const new({this.endsAt, this.duration, this.action = SleepAction.pause, this.fired = 0});
+  const new({this.endsAt, this.duration, this.action = SleepAction.pause, this.fired = 0, this.asmr = false});
 
   /// When it ends; null when not running.
   final DateTime? endsAt;
@@ -33,6 +33,9 @@ final class SleepTimerState {
 
   /// How many times it has ended; the room pauses on each increase.
   final int fired;
+
+  /// Started by 助眠模式 (F-ROOM-10): restoring the picture ends it.
+  final bool asmr;
 
   /// Whether it is running.
   bool get active => endsAt != null;
@@ -70,8 +73,9 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
     return const SleepTimerState();
   }
 
-  /// Starts (or restarts) the timer for [duration].
-  void start(Duration duration, {SleepAction action = SleepAction.pause}) {
+  /// Starts (or restarts) the timer for [duration]; [asmr] marks a timer
+  /// that 助眠模式 started.
+  void start(Duration duration, {SleepAction action = SleepAction.pause, bool asmr = false}) {
     _timer?.cancel();
     _timer = Timer(duration, _fire);
     state = SleepTimerState(
@@ -79,7 +83,14 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
       duration: duration,
       action: action,
       fired: state.fired,
+      asmr: asmr,
     );
+  }
+
+  /// F-ROOM-10: the picture came back; a 助眠模式 timer ends, a timer the
+  /// user set stays.
+  void pictureRestored() {
+    if (state.active && state.asmr) cancel();
   }
 
   /// Changes what happens at the end without restarting.

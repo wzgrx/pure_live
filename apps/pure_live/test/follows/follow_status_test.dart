@@ -39,7 +39,7 @@ void main() {
       final session = FollowSession.of(const AsyncLoading<FollowRefreshResult?>());
       expect(session.checking, isTrue);
       expect(session.statusOf(follow('1'), supported: true), FollowStatus.checking);
-      expect(session.statusOf(follow('2', platform: 'cc'), supported: false), FollowStatus.unsupported);
+      expect(session.statusOf(follow('2', platform: 'huajiao'), supported: false), FollowStatus.unsupported);
     });
 
     test('after it publishes, failures are unknown and missing rooms say so; later data wins', () {
@@ -89,7 +89,7 @@ void main() {
     final a = entry(follow('a', online: 10, order: 2));
     final b = entry(follow('b', platform: 'huya', online: 30));
     final c = entry(follow('c', platform: 'bilibili', online: 20, order: 1));
-    final d = entry(follow('d', platform: 'cc', online: 99, order: 3));
+    final d = entry(follow('d', platform: 'huajiao', online: 99, order: 3));
 
     test('audience, platform and custom', () {
       expect(ids(sortLive([a, b, c, d], FollowSort.audience, platforms: platforms)), ['d', 'b', 'c', 'a']);

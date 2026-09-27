@@ -1,0 +1,23 @@
+{
+  "data": {
+    "user": {
+      "id": "112568845",
+      "login": "minecraft",
+      "displayName": "Minecraft",
+      "description": "Survive the night, or build a work of art. Watch and join us in Minecraft!",
+      "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/c6284d38-5148-424b-a6cc-be06d2fc4aec-profile_image-300x300.png",
+      "stream": null,
+      "lastBroadcast": {
+        "title": "Minecraft LIVE - September 2026",
+        "game": {
+          "name": "Minecraft",
+          "displayName": "Minecraft"
+        }
+      }
+    }
+  },
+  "extensions": {
+    "durationMilliseconds": 60,
+    "requestID": "01M3J2SCJ8AV02GDMEESZZZZ13"
+  }
+}

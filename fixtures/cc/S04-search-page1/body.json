@@ -1,0 +1,1408 @@
+{
+  "webcc_anchor": {
+    "count": 22946,
+    "result": [
+      {
+        "province": 110000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 12240737,
+        "game_tags": [
+          {
+            "id": "726",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 97,
+        "vbr": 3000000,
+        "gametype": 3,
+        "cuteid": 700700,
+        "big_anchor": 1,
+        "cancel_status": "normal",
+        "portrait": "http://cc.fp.ps.netease.com/file/5e7395f58b7427d5bd670e2ftEqOBJyg02",
+        "horizontal": 1,
+        "city": 110113,
+        "title": "姑苏跑玉山河",
+        "stream_list": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/5e7395f58b7427d5bd670e2ftEqOBJyg02",
+        "swf": null,
+        "score": 0,
+        "room_id": 90068,
+        "portraittype": 2,
+        "poster": null,
+        "game_name": "《梦幻西游》电脑版",
+        "status": null,
+        "is_auth": 1,
+        "startat": "2026-05-06 09:58:56",
+        "anchor_type": "E",
+        "follower_num": 2929971,
+        "big_anchor_show": 0,
+        "birthday": "1990-08-01",
+        "follow_state": 0,
+        "capture_type": 1,
+        "anchor_tags": [
+          "老王",
+          "梦幻老王",
+          "梦幻西游老王",
+          "扛揍",
+          "抗揍"
+        ],
+        "nickname": "【谜底】老王2026",
+        "tags": null,
+        "channel_id": 3163427,
+        "gender": "male",
+        "streamname": "",
+        "cover": null,
+        "livetype": null,
+        "game_sign_info": {
+          "signtime": "2023-09-26 14:17:58",
+          "topcid": 3146286
+        },
+        "playgame": 0,
+        "dating_sign_info": {
+          "signtime": "2016-06-09 18:36:24",
+          "topcid": 4372106
+        },
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "12240737",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2014-10-14 13:58:42",
+          "roomid": 5268
+        },
+        "checkstate": 1
+      },
+      {
+        "province": 0,
+        "hot_score": 222646,
+        "anchor_realname": 1,
+        "uid": 11037011,
+        "game_tags": [
+          {
+            "id": "4",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 56,
+        "gametype": 3,
+        "cuteid": 163163,
+        "big_anchor": 1,
+        "checkstate": 1,
+        "portrait": "http://cc.res.netease.com/webcc/portrait/nsep/22_v2",
+        "city": 100,
+        "nickname_highlight": "《<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游》电脑版",
+        "title": "【重播】第242届武神坛-淘汰赛",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.res.netease.com/webcc/portrait/nsep/22_v2",
+        "swf": "http://service.hi.163.com/static/v/CCMediaPlayer.swf?v=0.4.0&geturl=1&secret=Ysjm&defaultip=106.2.41.192&file=163163&provider=rhttp&debug=true&maskinterval=30&autoplay=true",
+        "topcid": 1944016,
+        "score": 222646,
+        "room_id": 520,
+        "portraittype": 2,
+        "poster": null,
+        "mode": -1,
+        "status": 1,
+        "is_auth": 1,
+        "stream_list": {
+          "high": {
+            "vbr": 2000,
+            "CDN_FMT": {
+              "hs": "volcSecret=3d800c77ef12b4588c2372b50a9b8457&volcTime=1793118481",
+              "ali": "auth_key=1790612881-h4v23gdz6ky95405jrnj44987j14e63x-9-2hihh677w5n7oe1nw56csfr6527v8u0y",
+              "fws": "wsSecret=02013cf3350a4936761d949e2e1998c3&wsTime=6ab94411"
+            },
+            "streamname": "8fad2fcd90bec0c2f70611037011tc1"
+          },
+          "medium": {
+            "vbr": 1000,
+            "CDN_FMT": {
+              "hs": "volcSecret=6eb5c6c785255fdcd47ea5164afba0cc&volcTime=1793118481",
+              "ali": "auth_key=1790612881-2lcq0844p83161354223623998x1932c-8-g510292lh64sm960328q77u6m2o2i29z",
+              "fws": "wsSecret=349069c6695b3eca18c4ebb0beca8a5d&wsTime=6ab94411"
+            },
+            "streamname": "8fad2fcd90bec0c2f70611037011tc2"
+          },
+          "low": {
+            "vbr": 600,
+            "CDN_FMT": {
+              "hs": "volcSecret=f990ceec2d16e95dc4de8fe829ce9f32&volcTime=1793118481",
+              "ali": "auth_key=1790612881-27j49359249490e0299md3589456xiy0-3-t4rjj89z49ztqkt98615y2244486f43l",
+              "fws": "wsSecret=ba0bcb7c9ac4f9b09153f2c5f08d4128&wsTime=6ab94411"
+            },
+            "streamname": "8fad2fcd90bec0c2f70611037011tc4"
+          },
+          "original": {
+            "vbr": 7999,
+            "CDN_FMT": {
+              "ali": "auth_key=1790612881-j6h06a09o80b4q14ey9i69l9a136w813-5-l4eb7r6r2108286sepv44915g5ko3805",
+              "fws": "wsSecret=24f2a36502db343b20853b1232648c52&wsTime=6ab94411"
+            },
+            "streamname": "8fad2fcd90bec0c2f70611037011"
+          }
+        },
+        "startat": "2026-07-26 17:40:29",
+        "anchor_type": "E",
+        "follower_num": 1682378,
+        "big_anchor_show": 1,
+        "birthday": "1900-01-01",
+        "follow_state": 0,
+        "livetype": "game",
+        "capture_type": 9,
+        "horizontal": 1,
+        "nickname": "《梦幻西游》电脑版",
+        "tags": {
+          "total": 0,
+          "4": 0
+        },
+        "roomtype": -1,
+        "channel_id": 3021843,
+        "gender": "male",
+        "cover": "http://cc.fp.ps.netease.com/file/6ab9436643f99b2fadba9ccbYS2mI8DL07",
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2017-11-24 17:53:34",
+          "topcid": 1944016
+        },
+        "vbr": 7999488,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "gamename": "《梦幻西游》电脑版",
+        "mobile_vbr_sel": "low",
+        "_id": "11037011",
+        "videoconnmic": 0
+      },
+      {
+        "province": 440000,
+        "hot_score": 201034,
+        "anchor_realname": 1,
+        "uid": 109179004,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 130,
+        "gametype": 25,
+        "cuteid": 2345678,
+        "big_anchor": 1,
+        "checkstate": 0,
+        "portrait": "http://cc.fp.ps.netease.com/file/5f6892a996dee43e61527ef9iWSd1UXq02",
+        "city": 440100,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游手游官方号",
+        "title": "【重播】《梦幻西游》手游-124届武神坛",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/5f6892a996dee43e61527ef9iWSd1UXq02",
+        "swf": "http://service.hi.163.com/static/v/CCMediaPlayer.swf?v=0.4.0&geturl=1&secret=Ysjm&defaultip=106.2.41.192&file=2345678&provider=rhttp&debug=true&maskinterval=30&autoplay=true",
+        "topcid": 3630745,
+        "score": 201034,
+        "room_id": 518,
+        "portraittype": 2,
+        "poster": "http://cc.fp.ps.netease.com/file/6a1551aa96b9f56581791f7eSmgQMhBM07",
+        "mode": -1,
+        "status": 1,
+        "is_auth": 1,
+        "stream_list": {
+          "high": {
+            "vbr": 2000,
+            "CDN_FMT": {
+              "hs": "volcSecret=cc2025b18331f7cc908bb75fa01d4e35&volcTime=1793118482",
+              "ali": "auth_key=1790612882-s25z172209082j164v5b7j47254b2c1y-1-y3700wi6763x630rc092j1566335f55j",
+              "fws": "wsSecret=466459eea246cbbf9fd0fdcf9dbbc969&wsTime=6ab94412"
+            },
+            "streamname": "0d63ad0a9672a2f267dc109179004tc1"
+          },
+          "medium": {
+            "vbr": 1000,
+            "CDN_FMT": {
+              "hs": "volcSecret=a66fb3f52b39db45ffc663fc8a4dd17a&volcTime=1793118482",
+              "ali": "auth_key=1790612882-5oe0di11k8q1842757887bgd7v9df0ml-4-t00ug7ar0q0q209t8cz6c22l02837263",
+              "fws": "wsSecret=2074ec17d6321d2ab2e48f8295068856&wsTime=6ab94412"
+            },
+            "streamname": "0d63ad0a9672a2f267dc109179004tc2"
+          },
+          "low": {
+            "vbr": 600,
+            "CDN_FMT": {
+              "hs": "volcSecret=5c8a1dff8f6c91045d87b39a8ec5a764&volcTime=1793118482",
+              "ali": "auth_key=1790612882-6790im9bdcl2149046huz07q2ld88gic-8-eh63486ejimfshb770b6b92c9f288z60",
+              "fws": "wsSecret=200ba72bf401ec04afa8aedfa7dbafef&wsTime=6ab94412"
+            },
+            "streamname": "0d63ad0a9672a2f267dc109179004tc4"
+          },
+          "original": {
+            "vbr": 7999,
+            "CDN_FMT": {
+              "ali": "auth_key=1790612882-7u8cq8nh51290816r6g49f6u3l21099j-1-s8o5k49vl9r42a1svd374c02v40106m6",
+              "fws": "wsSecret=97e9354168b56db23c9dee1fbe57c1e9&wsTime=6ab94412"
+            },
+            "streamname": "0d63ad0a9672a2f267dc109179004"
+          }
+        },
+        "startat": "2026-08-21 19:32:08",
+        "anchor_type": "E",
+        "follower_num": 1325149,
+        "big_anchor_show": 0,
+        "birthday": "2015-03-26",
+        "follow_state": 0,
+        "livetype": "game",
+        "capture_type": 9,
+        "horizontal": 1,
+        "nickname": "梦幻西游手游官方号",
+        "tags": {
+          "total": 0
+        },
+        "roomtype": -1,
+        "channel_id": 4351581,
+        "gender": "male",
+        "cover": "http://cc.fp.ps.netease.com/file/6ab943638e988f865351a6e42qJIlet807",
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2017-09-20 17:58:02",
+          "topcid": 3630745
+        },
+        "vbr": 7999488,
+        "game_name": "《梦幻西游》手游",
+        "anchor_style": "other",
+        "ban": 0,
+        "gamename": "《梦幻西游》手游",
+        "mobile_vbr_sel": "low",
+        "_id": "109179004",
+        "videoconnmic": 0
+      },
+      {
+        "province": 0,
+        "hot_score": 135162,
+        "anchor_realname": 1,
+        "uid": 115257834,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 30,
+        "gametype": 25,
+        "cuteid": 1234567,
+        "big_anchor": 1,
+        "checkstate": 0,
+        "portrait": "http://cc.fp.ps.netease.com/file/64bb7b92f9f0a4380bbbafa4iVzlNTth05",
+        "horizontal": 1,
+        "city": 100,
+        "nickname_highlight": "《<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游》手游赛事",
+        "title": "第十一届指挥学院",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/64bb7b92f9f0a4380bbbafa4iVzlNTth05",
+        "swf": "http://service.hi.163.com/static/v/CCMediaPlayer.swf?v=0.4.0&geturl=1&secret=Ysjm&defaultip=106.2.41.192&file=1234567&provider=rhttp&debug=true&maskinterval=30&autoplay=true",
+        "topcid": 3630745,
+        "score": 135162,
+        "room_id": 518,
+        "portraittype": 2,
+        "poster": "http://cc.fp.ps.netease.com/file/64fbee1925d14827e4bea0d31FrGeNKI05",
+        "mode": -1,
+        "status": 1,
+        "is_auth": 1,
+        "stream_list": {
+          "medium": {
+            "vbr": 1000,
+            "CDN_FMT": {
+              "hs": "volcSecret=fd5dc0c7c18d2d4dfff96f6acbf85b9d&volcTime=1793118481",
+              "ali": "auth_key=1790612881-r34275fv0b6y6i0ccy1z1189xb6f5l43-8-qse85p79k5883f4s16j0013b01y0337r",
+              "fws": "wsSecret=ba0de7153b1a470220167bdfb49e5ae4&wsTime=6ab94411"
+            },
+            "streamname": "f01da0070d2ebd7b8d54115257834tc2"
+          },
+          "low": {
+            "vbr": 600,
+            "CDN_FMT": {
+              "hs": "volcSecret=c2a379f1046957d012354d7bf31fce35&volcTime=1793118481",
+              "ali": "auth_key=1790612881-w2wztnmyj5q7412g4ylefapt3z719f53-9-9655eba97084rfo3je7970792g54t62y",
+              "fws": "wsSecret=711f4891a934203d1fa5994062521d98&wsTime=6ab94411"
+            },
+            "streamname": "f01da0070d2ebd7b8d54115257834tc4"
+          },
+          "original": {
+            "vbr": 7999,
+            "CDN_FMT": {
+              "ali": "auth_key=1790612881-6i349384h1e39m8bo2727f85mp44vbc8-1-hy7011n474sa4mtaz693r5to16838c54",
+              "fws": "wsSecret=2c1e03474fc8344f79ac2eccbfc6777e&wsTime=6ab94411"
+            },
+            "streamname": "f01da0070d2ebd7b8d54115257834"
+          }
+        },
+        "startat": "2026-03-17 18:19:01",
+        "anchor_type": "E",
+        "follower_num": 577617,
+        "big_anchor_show": 0,
+        "birthday": "2015-03-26",
+        "follow_state": 0,
+        "livetype": "game",
+        "capture_type": 9,
+        "anchor_tags": [
+          "1频道",
+          "1房间"
+        ],
+        "nickname": "《梦幻西游》手游赛事",
+        "tags": {
+          "total": 0
+        },
+        "roomtype": -1,
+        "channel_id": 4337173,
+        "gender": "male",
+        "cover": "http://cc.fp.ps.netease.com/file/6ab94365872957e682cd1a06uyshcEeY07",
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2016-09-30 19:44:52",
+          "topcid": 4416476
+        },
+        "vbr": 7999488,
+        "game_name": "《梦幻西游》手游",
+        "anchor_style": "other",
+        "ban": 0,
+        "gamename": "《梦幻西游》手游",
+        "mobile_vbr_sel": "low",
+        "_id": "115257834",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2016-09-06 20:48:52",
+          "roomid": 0
+        }
+      },
+      {
+        "province": 370000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 14477070,
+        "game_tags": [
+          {
+            "id": "5",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 41,
+        "gametype": 3,
+        "cuteid": 250250,
+        "big_anchor": 1,
+        "checkstate": 2,
+        "portrait": "http://cc.fp.ps.netease.com/file/65d017b80551323db7286797UQPu4DeB05",
+        "city": 371500,
+        "nickname_highlight": "蚊子：DY搜<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>蚊子",
+        "title": "推广免费 透明资源群",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/65d017b80551323db7286797UQPu4DeB05",
+        "swf": null,
+        "score": 0,
+        "room_id": 3999,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2026-07-21 09:26:48",
+        "anchor_type": "E",
+        "follower_num": 411813,
+        "big_anchor_show": 0,
+        "birthday": "1993-03-09",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 4,
+        "horizontal": 1,
+        "nickname": "蚊子：DY搜梦幻蚊子",
+        "tags": null,
+        "channel_id": 7479054,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2021-10-09 15:44:36",
+          "topcid": 6301231
+        },
+        "vbr": 3072000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "14477070",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2015-11-05 23:51:44",
+          "roomid": 5268
+        }
+      },
+      {
+        "province": 310000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 112065514,
+        "game_tags": [
+          {
+            "id": "5",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 0,
+        "gametype": 3,
+        "cuteid": 213182370,
+        "big_anchor": 1,
+        "checkstate": 0,
+        "portrait": "http://cc.fp.ps.netease.com/file/650c1210e7a93e98c77c2697QIubAV1R05",
+        "city": 310110,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>找配估服务一条龙",
+        "title": "木喜估价包卖找号，回归脱坑玩家推荐主播",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/650c1210e7a93e98c77c2697QIubAV1R05",
+        "swf": null,
+        "score": 0,
+        "room_id": 6080,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2024-03-08 20:43:10",
+        "anchor_type": "E",
+        "follower_num": 183814,
+        "big_anchor_show": 0,
+        "birthday": "1997-11-22",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 4,
+        "horizontal": 1,
+        "nickname": "梦幻找配估服务一条龙",
+        "tags": null,
+        "channel_id": 7403548,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2023-09-01 17:10:46",
+          "topcid": 6918705
+        },
+        "vbr": 900000000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "blueray_20M",
+        "_id": "112065514",
+        "videoconnmic": 0
+      },
+      {
+        "province": null,
+        "hot_score": 0,
+        "uid": 442891747,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          },
+          {
+            "id": "430",
+            "value": 0
+          }
+        ],
+        "visitor": 58,
+        "gametype": 3,
+        "cuteid": 586101410,
+        "big_anchor": 1,
+        "checkstate": 1,
+        "portrait": "http://cc.res.netease.com/webcc/portrait/nsep/22_v1",
+        "city": null,
+        "nickname_highlight": "<span class=\"highlight\"></span>路人1410",
+        "title": "梦幻西游区更新下",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.res.netease.com/webcc/portrait/nsep/22_v1",
+        "swf": null,
+        "score": 0,
+        "room_id": 9527,
+        "portraittype": 2,
+        "poster": null,
+        "is_masked": 1,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2024-02-03 21:18:18",
+        "anchor_type": "E",
+        "follower_num": 141465,
+        "big_anchor_show": 0,
+        "birthday": null,
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 1,
+        "horizontal": 1,
+        "nickname": "路人1410",
+        "tags": null,
+        "channel_id": 7443980,
+        "gender": "secret",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2024-01-01 13:33:04",
+          "topcid": 7066637
+        },
+        "vbr": 3000000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "442891747",
+        "videoconnmic": 0
+      },
+      {
+        "province": 130000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 14500267,
+        "game_tags": [
+          {
+            "id": "5",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 5,
+        "gametype": 3,
+        "cuteid": 17193818,
+        "big_anchor": 1,
+        "checkstate": 0,
+        "portrait": "http://cc.fp.ps.netease.com/file/60fd50ec8b74274aeb1699a1i415mevx03",
+        "city": 130400,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>专注（明细估价）",
+        "title": "藏宝阁估价上号估价推广坚持最后一岗",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/60fd50ec8b74274aeb1699a1i415mevx03",
+        "swf": null,
+        "score": 0,
+        "room_id": 520,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2026-09-12 21:15:43",
+        "anchor_type": "E",
+        "follower_num": 133262,
+        "big_anchor_show": 0,
+        "birthday": "1991-01-01",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 1,
+        "horizontal": 1,
+        "nickname": "梦幻专注（明细估价）",
+        "tags": null,
+        "channel_id": 6980139,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2022-10-24 15:18:07",
+          "topcid": 6918705
+        },
+        "vbr": 3000000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "14500267",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2016-10-01 23:09:55",
+          "roomid": 0
+        }
+      },
+      {
+        "province": 110000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 14972503,
+        "visitor": 2,
+        "gametype": 0,
+        "cuteid": 90068,
+        "big_anchor": 1,
+        "cancel_status": "normal",
+        "portrait": "http://cc.res.netease.com/webcc/portrait/nsep/38_v1",
+        "city": 110105,
+        "nickname_highlight": "【谜底】<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游",
+        "title": "【谜底】ゞ冥想(90068)的直播",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.res.netease.com/webcc/portrait/nsep/38_v1",
+        "swf": null,
+        "room_id": 90068,
+        "portraittype": 2,
+        "poster": null,
+        "game_name": "其他游戏",
+        "status": 0,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2017-02-23 19:23:52",
+        "anchor_type": "E",
+        "follower_num": 132889,
+        "big_anchor_show": 0,
+        "birthday": "2016-08-08",
+        "follow_state": 0,
+        "nickname": "【谜底】梦幻西游",
+        "tags": null,
+        "channel_id": 3163482,
+        "gender": "male",
+        "cover": null,
+        "livetype": null,
+        "game_sign_info": {
+          "signtime": "2018-04-14 13:42:23",
+          "topcid": 3146286
+        },
+        "vbr": 1200000,
+        "dating_sign_info": {
+          "signtime": "2016-03-31 15:06:21",
+          "topcid": 4372106
+        },
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "14972503",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2014-08-26 17:23:16",
+          "roomid": 90068
+        }
+      },
+      {
+        "province": 530000,
+        "hot_score": 0,
+        "uid": 272533734,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          },
+          {
+            "id": "430",
+            "value": 0
+          }
+        ],
+        "visitor": 15,
+        "gametype": 3,
+        "cuteid": 241538,
+        "big_anchor": 1,
+        "checkstate": 0,
+        "portrait": "http://cc.fp.ps.netease.com/file/65b6634bdad827a2dfb3307cwksyNufh05",
+        "city": 530100,
+        "nickname_highlight": "ジ<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>第一养号大神",
+        "title": "免费教你白嫖养号了",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/65b6634bdad827a2dfb3307cwksyNufh05",
+        "swf": null,
+        "score": 0,
+        "room_id": 81188,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2024-07-16 13:12:21",
+        "anchor_type": "E",
+        "follower_num": 125089,
+        "big_anchor_show": 0,
+        "birthday": "1991-03-14",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 4,
+        "horizontal": 1,
+        "nickname": "ジ梦幻第一养号大神",
+        "tags": null,
+        "channel_id": 7475238,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2022-11-23 16:42:37",
+          "topcid": 6301231
+        },
+        "vbr": 2560000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "272533734",
+        "videoconnmic": 0
+      },
+      {
+        "province": null,
+        "hot_score": 215332,
+        "uid": 270276501,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 189,
+        "gametype": 3,
+        "cuteid": 5201,
+        "big_anchor": 1,
+        "checkstate": 1,
+        "portrait": "http://cc.res.netease.com/webcc/portrait/nsep/22_v2",
+        "city": null,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游赛事直播",
+        "title": "【重播】第45联帮派联赛-夺旗模式",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.res.netease.com/webcc/portrait/nsep/22_v2",
+        "swf": "http://service.hi.163.com/static/v/CCMediaPlayer.swf?v=0.4.0&geturl=1&secret=Ysjm&defaultip=106.2.41.192&file=5201&provider=rhttp&debug=true&maskinterval=30&autoplay=true",
+        "topcid": 1944016,
+        "score": 215332,
+        "room_id": 520,
+        "portraittype": 2,
+        "poster": null,
+        "mode": -1,
+        "status": 1,
+        "is_auth": 0,
+        "stream_list": {
+          "high": {
+            "vbr": 2000,
+            "CDN_FMT": {
+              "hs": "volcSecret=bedf2bba144fad78d85afcfb581f9683&volcTime=1793118482",
+              "ali": "auth_key=1790612882-3w27y3i7jf354yebpl881a83jq8n92po-1-c7lcuu56i39254803es3t44r17m35444",
+              "fws": "wsSecret=1bf2fdb6b6c193310212aa4f6318f455&wsTime=6ab94412"
+            },
+            "streamname": "eee1d6456b4b0301b8de270276501tc1"
+          },
+          "medium": {
+            "vbr": 1000,
+            "CDN_FMT": {
+              "hs": "volcSecret=5bd5b348b765c975f22d0ad888ac0f49&volcTime=1793118482",
+              "ali": "auth_key=1790612882-5ytlu426595764of23z54hy05658zy80-2-91u5b19z8187pf5m8oz8338h253f9gt7",
+              "fws": "wsSecret=4a73462e71db185d9e29ef1a322406d0&wsTime=6ab94412"
+            },
+            "streamname": "eee1d6456b4b0301b8de270276501tc2"
+          },
+          "low": {
+            "vbr": 600,
+            "CDN_FMT": {
+              "hs": "volcSecret=2e6a29b6bf147d72b661b0da6b73f120&volcTime=1793118482",
+              "ali": "auth_key=1790612882-gon4kc0nhp2612ti8yb6y3fu313w99t3-0-316j84c6777t3805444449773ik0n01v",
+              "fws": "wsSecret=114e87902bfa3d62f16968502aacc9de&wsTime=6ab94412"
+            },
+            "streamname": "eee1d6456b4b0301b8de270276501tc4"
+          },
+          "original": {
+            "vbr": 7999,
+            "CDN_FMT": {
+              "ali": "auth_key=1790612882-6470r0e7p0gi5l01v6o88dea21b65995-2-s6s783mv9c271kcfh68a21nkmkr6r177",
+              "fws": "wsSecret=e26ce3b370e0ee07b88b352f0c90aa45&wsTime=6ab94412"
+            },
+            "streamname": "eee1d6456b4b0301b8de270276501"
+          }
+        },
+        "startat": "2026-08-22 22:24:55",
+        "anchor_type": "E",
+        "follower_num": 108258,
+        "big_anchor_show": 0,
+        "birthday": null,
+        "follow_state": 0,
+        "livetype": "game",
+        "capture_type": 9,
+        "horizontal": 1,
+        "nickname": "梦幻西游赛事直播",
+        "tags": {
+          "total": 0
+        },
+        "roomtype": -1,
+        "channel_id": 3796767,
+        "gender": "female",
+        "cover": "http://cc.fp.ps.netease.com/file/6ab94362e19a83f0ff5bc8afmDKhXsqd07",
+        "cancel_status": "normal",
+        "vbr": 7999488,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "gamename": "《梦幻西游》电脑版",
+        "mobile_vbr_sel": "low",
+        "_id": "270276501",
+        "videoconnmic": 0
+      },
+      {
+        "province": 410000,
+        "hot_score": 0,
+        "anchor_realname": 0,
+        "uid": 37467181,
+        "game_tags": [
+          {
+            "id": "42",
+            "value": 0
+          },
+          {
+            "id": "182",
+            "value": 0
+          },
+          {
+            "id": "2",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 3,
+        "gametype": 3,
+        "cuteid": 45308664,
+        "big_anchor": 1,
+        "checkstate": 1,
+        "portrait": "http://cc.fp.ps.netease.com/file/58cfbdb20699e25908743b06LriHMN8l",
+        "city": 410100,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>芯碎",
+        "title": "北京一区恭王府",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/58cfbdb20699e25908743b06LriHMN8l",
+        "swf": null,
+        "room_id": 10082,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2021-04-19 19:59:07",
+        "anchor_type": "E",
+        "follower_num": 107560,
+        "big_anchor_show": 0,
+        "birthday": "1988-09-18",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 2,
+        "horizontal": 1,
+        "nickname": "梦幻芯碎",
+        "tags": null,
+        "channel_id": 6741604,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2021-03-16 20:29:07",
+          "topcid": 6153155
+        },
+        "vbr": 2000000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "37467181",
+        "videoconnmic": 0
+      },
+      {
+        "province": 140000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 42210197,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 0,
+        "gametype": 25,
+        "cuteid": 889234,
+        "big_anchor": 1,
+        "cancel_status": "normal",
+        "portrait": "http://cc.fp.ps.netease.com/file/5c7f63666f04942ea0abfda0ERJosoXM02",
+        "city": 140200,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>情感电台-纳兰叔",
+        "title": "梦幻情感电台181期",
+        "playgame": 0,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/5c7f63666f04942ea0abfda0ERJosoXM02",
+        "swf": null,
+        "score": 0,
+        "room_id": 9918,
+        "portraittype": 2,
+        "poster": null,
+        "game_name": "《梦幻西游》手游",
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2021-12-09 13:52:17",
+        "anchor_type": "E",
+        "follower_num": 104923,
+        "big_anchor_show": 0,
+        "birthday": "1900-01-01",
+        "follow_state": 0,
+        "capture_type": 4,
+        "horizontal": 1,
+        "nickname": "梦幻情感电台-纳兰叔",
+        "tags": null,
+        "is_peiwan": 1,
+        "channel_id": 5664716,
+        "gender": "male",
+        "cover": null,
+        "livetype": null,
+        "game_sign_info": {
+          "signtime": "2021-01-15 16:37:04",
+          "topcid": 5578605
+        },
+        "vbr": 900000000,
+        "dating_sign_info": {
+          "signtime": "2016-04-06 20:09:28",
+          "topcid": 2293009
+        },
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "blueray_20M",
+        "_id": "42210197",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2015-12-21 16:10:32",
+          "roomid": 0
+        },
+        "checkstate": 1
+      },
+      {
+        "province": 0,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 54079937,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          },
+          {
+            "id": "475",
+            "value": 0
+          },
+          {
+            "id": "484",
+            "value": 0
+          }
+        ],
+        "visitor": 13,
+        "gametype": 25,
+        "cuteid": 64018161,
+        "big_anchor": 1,
+        "checkstate": 1,
+        "portrait": "http://cc.fp.ps.netease.com/file/5b389de46f0494775083f0c8HiZvy88E",
+        "city": 100,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游你的小白",
+        "title": "LAST DANCE",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/5b389de46f0494775083f0c8HiZvy88E",
+        "swf": null,
+        "score": 0,
+        "room_id": 9666,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2021-09-30 19:54:19",
+        "anchor_type": "E",
+        "follower_num": 101413,
+        "big_anchor_show": 0,
+        "birthday": "1919-11-11",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 1,
+        "horizontal": 1,
+        "nickname": "梦幻西游你的小白",
+        "tags": null,
+        "channel_id": 6150784,
+        "gender": "female",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2021-09-03 21:54:31",
+          "topcid": 6742453
+        },
+        "vbr": 2000000,
+        "game_name": "《梦幻西游》手游",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "54079937",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2017-03-19 17:38:06",
+          "roomid": 0
+        }
+      },
+      {
+        "province": 440000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 14547891,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 4,
+        "gametype": 3,
+        "cuteid": 163520,
+        "big_anchor": 0,
+        "checkstate": 1,
+        "portrait": "http://cc.res.netease.com/webcc/portrait/nsep/22_v1",
+        "city": 440100,
+        "nickname_highlight": "<span class=\"highlight\"></span>路人3520",
+        "title": "1",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.res.netease.com/webcc/portrait/nsep/22_v1",
+        "swf": null,
+        "score": 0,
+        "room_id": 870090,
+        "portraittype": 2,
+        "poster": null,
+        "is_masked": 1,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2022-09-02 11:11:11",
+        "anchor_type": "E",
+        "follower_num": 91590,
+        "big_anchor_show": 0,
+        "birthday": "1992-06-25",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 1,
+        "horizontal": 1,
+        "nickname": "路人3520",
+        "tags": null,
+        "channel_id": 2284391,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2017-11-24 18:11:04",
+          "topcid": 1944016
+        },
+        "vbr": 1200000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "14547891",
+        "videoconnmic": 0
+      },
+      {
+        "province": 0,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 183330879,
+        "game_tags": [
+          {
+            "id": "726",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 0,
+        "gametype": 3,
+        "cuteid": 243006346,
+        "big_anchor": 0,
+        "checkstate": 1,
+        "portrait": "http://cc.res.netease.com/webcc/portrait/nsep/22_v1",
+        "city": 100,
+        "nickname_highlight": "<span class=\"highlight\"></span>路人6346",
+        "title": "...",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.res.netease.com/webcc/portrait/nsep/22_v1",
+        "swf": null,
+        "score": 0,
+        "room_id": 7999,
+        "portraittype": 2,
+        "poster": null,
+        "is_masked": 1,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2024-05-17 15:48:32",
+        "anchor_type": "E",
+        "follower_num": 73034,
+        "big_anchor_show": 0,
+        "birthday": "1990-03-01",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 14,
+        "horizontal": 1,
+        "nickname": "路人6346",
+        "tags": null,
+        "channel_id": 6967413,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2021-04-03 11:10:32",
+          "topcid": 6301231
+        },
+        "vbr": 3000000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "183330879",
+        "videoconnmic": 0
+      },
+      {
+        "province": 370000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 30556001,
+        "game_tags": [
+          {
+            "id": "563",
+            "value": 0
+          },
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 2,
+        "gametype": 3,
+        "cuteid": 37148068,
+        "big_anchor": 0,
+        "checkstate": 1,
+        "portrait": "http://cc.fp.ps.netease.com/file/58cf4d79bd6cdf57f3094b89PWzDIziq",
+        "city": 371300,
+        "nickname_highlight": "韩飞[<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游]",
+        "title": "2万一组五方寸",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/58cf4d79bd6cdf57f3094b89PWzDIziq",
+        "swf": null,
+        "score": 0,
+        "room_id": 89898,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2026-06-12 13:43:08",
+        "anchor_type": "E",
+        "follower_num": 70743,
+        "big_anchor_show": 0,
+        "birthday": "1991-01-25",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 1,
+        "horizontal": 1,
+        "nickname": "韩飞[梦幻西游]",
+        "tags": null,
+        "channel_id": 4250788,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2023-12-14 13:21:56",
+          "topcid": 3174893
+        },
+        "vbr": 2000000,
+        "game_name": "《梦幻西游》电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "30556001",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2017-12-01 09:56:19",
+          "roomid": 0
+        }
+      },
+      {
+        "province": 440000,
+        "hot_score": 0,
+        "uid": 289952874,
+        "game_tags": [
+          {
+            "id": "total",
+            "value": 0
+          }
+        ],
+        "visitor": 1,
+        "gametype": 9075,
+        "cuteid": 368404536,
+        "big_anchor": 0,
+        "checkstate": 1,
+        "portrait": "http://cc.fp.ps.netease.com/file/60cc0feb96dee4072577ddafBczINvtc03",
+        "city": 440100,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>三维群雄逐鹿",
+        "title": "【重播】第三十八届群雄逐鹿跨服精英赛",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/60cc0feb96dee4072577ddafBczINvtc03",
+        "swf": null,
+        "score": 0,
+        "room_id": 68,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 0,
+        "stream_list": null,
+        "startat": "2023-05-06 16:48:01",
+        "anchor_type": "E",
+        "follower_num": 63668,
+        "big_anchor_show": 0,
+        "birthday": "2021-01-01",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 9,
+        "horizontal": 1,
+        "nickname": "梦幻三维群雄逐鹿",
+        "tags": null,
+        "channel_id": 6840905,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "vbr": 7999488,
+        "game_name": "《梦幻西游三维版》",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "289952874",
+        "videoconnmic": 0
+      },
+      {
+        "province": null,
+        "hot_score": 0,
+        "uid": 15843470,
+        "visitor": 31,
+        "gametype": 3,
+        "cuteid": 18907168,
+        "big_anchor": 0,
+        "checkstate": 1,
+        "portrait": "http://cc.fp.ps.netease.com/file/6491479f950304c3dedfd92bOIJeePWU04",
+        "city": null,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>西游星海",
+        "title": "09团队招封系队友！4=1",
+        "playgame": null,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/6491479f950304c3dedfd92bOIJeePWU04",
+        "swf": null,
+        "room_id": 520,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2020-04-06 12:31:54",
+        "anchor_type": "E",
+        "follower_num": 44313,
+        "big_anchor_show": 0,
+        "birthday": null,
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 4,
+        "horizontal": 1,
+        "nickname": "梦幻西游星海",
+        "tags": null,
+        "channel_id": 6032400,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2019-10-11 16:31:08",
+          "topcid": 1944016
+        },
+        "vbr": 3000000,
+        "game_name": "梦幻西游电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "15843470",
+        "videoconnmic": 0
+      },
+      {
+        "province": 130000,
+        "hot_score": 0,
+        "anchor_realname": 1,
+        "uid": 18536060,
+        "visitor": 316,
+        "gametype": 3,
+        "cuteid": 22492536,
+        "big_anchor": 0,
+        "checkstate": 1,
+        "portrait": "http://cc.fp.ps.netease.com/file/6a43b13937a12e4c725ec4e2xD15gk4b07",
+        "city": 130300,
+        "nickname_highlight": "<span class=\"highlight\">梦</span><span class=\"highlight\">幻</span>玮哥",
+        "title": "玮哥：爆炸109阵容,找号卖号",
+        "playgame": 400019,
+        "panorama": 0,
+        "portraiturl": "http://cc.fp.ps.netease.com/file/6a43b13937a12e4c725ec4e2xD15gk4b07",
+        "swf": null,
+        "room_id": 1544320,
+        "portraittype": 2,
+        "poster": null,
+        "status": null,
+        "is_auth": 1,
+        "stream_list": null,
+        "startat": "2018-11-09 21:29:28",
+        "anchor_type": "E",
+        "follower_num": 43399,
+        "big_anchor_show": 0,
+        "birthday": "1992-08-03",
+        "follow_state": 0,
+        "livetype": null,
+        "capture_type": 1,
+        "horizontal": 1,
+        "nickname": "梦幻玮哥",
+        "tags": null,
+        "channel_id": 5474549,
+        "gender": "male",
+        "cover": null,
+        "cancel_status": "normal",
+        "game_sign_info": {
+          "signtime": "2018-07-19 00:41:03",
+          "topcid": 5452047
+        },
+        "vbr": 1200000,
+        "game_name": "梦幻西游电脑版",
+        "anchor_style": "other",
+        "ban": 0,
+        "mobile_vbr_sel": "low",
+        "_id": "18536060",
+        "videoconnmic": 0,
+        "ent_sign_info": {
+          "signtime": "2017-12-01 09:56:44",
+          "roomid": 0
+        }
+      }
+    ]
+  }
+}

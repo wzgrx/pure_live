@@ -100,6 +100,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   VideoOrientation _geometry = VideoOrientation.unknown;
   PortraitOverride _override = PortraitOverride.automatic;
   DanmakuStyle? _appliedStyle;
+  DanmakuBudget? _appliedBudget;
   bool _chatOpen = true;
   bool _fullscreenChat = false;
   double _chatWidth = Sizes.chatWidth;
@@ -161,6 +162,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     _lifecycle = AppLifecycleListener(onResume: _presentationRestored);
     final prefs = ref.read(danmakuPrefsProvider);
     _appliedStyle = prefs.style;
+    _appliedBudget = prefs.budget;
     _overlayController
       ..style = prefs.style
       ..budget = prefs.budget;
@@ -608,8 +610,8 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   Widget build(BuildContext context) {
     ref.watch(playbackSessionProvider);
     ref.listen(danmakuPrefsProvider, (previous, next) {
-      // The style follows in build: portrait fullscreen narrows its area.
-      _overlayController.budget = next.budget;
+      // Style and budget follow in build: portrait fullscreen narrows the
+      // area, picture-in-picture has its own (F-DM-07).
       final danmaku = _danmaku;
       if (danmaku == null) return;
       danmaku
@@ -641,11 +643,18 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       ..watch(portraitAdaptationSetting)
       ..watch(portraitFullscreenPolicySetting);
     final portraitArea = ref.watch(portraitDanmakuAreaSetting);
-    final style = _overlayStyle(prefs, effective);
-    if (style != _appliedStyle) {
+    final pip = ref.watch(pipProvider.select((pip) => pip.videoOnly));
+    final pipLook = pip ? ref.watch(pipDanmakuProvider) : null;
+    final style = pipLook?.style ?? _overlayStyle(prefs, effective);
+    final budget = pipLook?.budget ?? prefs.budget;
+    if (style != _appliedStyle || budget != _appliedBudget) {
       _appliedStyle = style;
+      _appliedBudget = budget;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && identical(_appliedStyle, style)) _overlayController.style = style;
+        if (!mounted || !identical(_appliedStyle, style)) return;
+        _overlayController
+          ..style = style
+          ..budget = budget;
       });
     }
     final dark = effective.isFullscreen || _presentation == RoomPresentation.theater;

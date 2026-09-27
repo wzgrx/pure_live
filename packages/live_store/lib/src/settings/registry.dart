@@ -124,6 +124,60 @@ abstract final class Settings {
     legacy: [LegacyKey('preferResolutionCellular', convert: _quality)],
   );
 
+  /// mpv's hardware decoder (F-SET-06; device scope: decoders differ per
+  /// machine). 3.x's `auto` becomes the safe list.
+  static const hardwareDecoder = StringSetting(
+    'player.hardwareDecoder',
+    'auto-safe',
+    allowed: {
+      'auto-safe',
+      'auto',
+      'auto-copy',
+      'mediacodec',
+      'mediacodec-copy',
+      'd3d11va',
+      'd3d11va-copy',
+      'dxva2',
+      'nvdec',
+      'vulkan',
+    },
+    scope: SettingScope.device,
+    legacy: [LegacyKey('videoHardwareDecoder', convert: _hardwareDecoder)],
+  );
+
+  /// Android compatibility output (F-SET-06, SURF-6): mediacodec_embed.
+  static const androidCompatibility = BoolSetting(
+    'player.androidCompatibility',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('playerCompatMode')],
+  );
+
+  /// Smaller caches and probes for a lower delay (F-SET-06, PERF-4).
+  static const lowLatency = BoolSetting('player.lowLatency', false, scope: SettingScope.device);
+
+  /// mpv audio output; empty is the platform default (F-SET-06).
+  static const audioOutput = StringSetting(
+    'player.audioOutput',
+    '',
+    allowed: {'', 'aaudio', 'opensles', 'audiotrack', 'wasapi', 'openal', 'pulse', 'alsa', 'pipewire'},
+    scope: SettingScope.device,
+    legacy: [LegacyKey('audioOutputDriver', convert: _audioOutput)],
+  );
+
+  /// 助眠模式 (F-ROOM-10): entering a room plays audio only and starts the
+  /// sleep timer; restoring the picture ends that timer.
+  static const asmrSleepMode = BoolSetting('player.asmrSleepMode', false, legacy: [LegacyKey('enableAsmrSleepMode')]);
+
+  /// Minutes of the 助眠模式 timer.
+  static const asmrSleepMinutes = IntSetting(
+    'player.asmrSleepMinutes',
+    60,
+    min: 1,
+    max: 720,
+    legacy: [LegacyKey('asmrSleepMinutes')],
+  );
+
   /// Lower the quality by one step when playback keeps stalling (F-NEW-10).
   static const autoLowerQuality = BoolSetting('player.autoLowerQuality', true);
 
@@ -328,6 +382,10 @@ abstract final class Settings {
   /// Fixed frame rate when [danmakuAutoFps] is off.
   static const danmakuFps = IntSetting('danmaku.fps', 60, min: 30, max: 240, legacy: [LegacyKey('danmakuFps')]);
 
+  /// The user's saved danmaku style (F-DM-02): 3.x's JSON template, kept in
+  /// its format so 3.x backups restore it as is; empty when none.
+  static const danmakuTemplate = StringSetting('danmaku.template', '', legacy: [LegacyKey('savedDanmakuTemplate')]);
+
   /// Tapping a danmaku opens its actions.
   static const danmakuTapInteraction = BoolSetting(
     'danmaku.tapInteraction',
@@ -522,7 +580,7 @@ abstract final class Settings {
   /// the "网络电视" platform (iptv.md §5), as it did in 3.x.
   static const catalogPlatforms = StringListSetting(
     'catalog.platforms',
-    ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'iptv'],
+    ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'yy', 'soop', 'acfun', 'twitch', 'iptv'],
     lowerCase: true,
     legacy: [LegacyKey('hotAreasList')],
   );
@@ -638,6 +696,10 @@ abstract final class Settings {
     lowerCase: true,
     scope: SettingScope.device,
   );
+
+  /// Follow the operating system's proxy while the manual proxy is off
+  /// (F-SET-07, PLAN §12; on by default).
+  static const followSystemProxy = BoolSetting('network.followSystemProxy', true, scope: SettingScope.device);
 
   // Recording (spec/modules/record.md §20); device scope, never synced.
 
@@ -851,6 +913,12 @@ abstract final class Settings {
     qualityWifi,
     qualityMobile,
     autoLowerQuality,
+    asmrSleepMode,
+    asmrSleepMinutes,
+    hardwareDecoder,
+    androidCompatibility,
+    lowLatency,
+    audioOutput,
     hardwareDecoding,
     videoFit,
     backgroundPlay,
@@ -881,6 +949,7 @@ abstract final class Settings {
     danmakuNoEmoji,
     danmakuAutoFps,
     danmakuFps,
+    danmakuTemplate,
     danmakuTapInteraction,
     danmakuLongPressInteraction,
     danmakuCollapseRepeated,
@@ -939,6 +1008,7 @@ abstract final class Settings {
     proxyHost,
     proxyPort,
     proxyPlatforms,
+    followSystemProxy,
     windowPosition,
     windowMaximized,
     closeDontAsk,
@@ -968,6 +1038,10 @@ Object? _locale(Object? value) {
 }
 
 Object? _portraitFit(Object? value) => value == 'cover' ? 'cover' : 'contain';
+
+Object? _hardwareDecoder(Object? value) => value == 'auto' || value is! String ? 'auto-safe' : value;
+
+Object? _audioOutput(Object? value) => value == 'auto' || value is! String ? '' : value;
 
 Object? _quality(Object? value) => switch (value is String ? value.trim() : null) {
   '蓝光8M' => 'bluRay8M',

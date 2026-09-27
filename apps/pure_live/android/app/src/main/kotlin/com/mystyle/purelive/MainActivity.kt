@@ -40,9 +40,15 @@ class MainActivity : AudioServiceActivity() {
         val messenger = flutterEngine.dartExecutor.binaryMessenger
         // DLNA search needs the Wi-Fi multicast lock (F-CAST-01).
         CastMulticast(applicationContext).register(messenger)
+        // The system proxy for "跟随系统代理" (F-SET-07).
+        SystemNet(applicationContext).register(messenger)
+        // The refresh-rate hint of the 刷新率 setting (F-SET-08).
+        DisplayRate(this).register(messenger)
         pip?.detach()
         pip = PictureInPicture(this, messenger)
         PlaybackLocks.attach(applicationContext, messenger)
+        // Background recording (F-REC-06): foreground service and locks on purelive/record.
+        RecordKeepAlive.attach(this, messenger)
         MethodChannel(messenger, "purelive/share").setMethodCallHandler { call, result ->
             when (call.method) {
                 "takePendingText" -> {

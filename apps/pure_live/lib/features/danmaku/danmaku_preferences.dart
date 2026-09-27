@@ -203,3 +203,41 @@ DanmakuFilterSettings filterSettingsFor(DanmakuPrefs prefs, List<BlockRule> rule
       if (rule.kind == BlockKind.keyword) rule.value,
   ],
 );
+
+/// Danmaku in picture-in-picture (F-DM-07, F-PIP-01, REN-6): a lighter
+/// look of its own.
+@immutable
+final class PipDanmakuLook {
+  const new({required this.enabled, required this.style, required this.budget});
+
+  /// Read from [settings].
+  factory of(SettingsStore settings) => PipDanmakuLook(
+    enabled: settings.get(Settings.danmakuPipEnabled),
+    style: DanmakuStyle.pip(
+      fontSize: settings.get(Settings.danmakuPipFontSize),
+      speed: settings.get(Settings.danmakuPipSpeed),
+      opacity: settings.get(Settings.danmakuPipOpacity),
+      area: settings.get(Settings.danmakuPipArea),
+      noEmoji: settings.get(Settings.danmakuPipNoEmoji),
+    ),
+    budget: DanmakuBudget.pip(maxVisible: settings.get(Settings.danmakuPipMaxVisibleCount)),
+  );
+
+  /// Danmaku shows in picture-in-picture.
+  final bool enabled;
+
+  /// Its look.
+  final DanmakuStyle style;
+
+  /// Its limits.
+  final DanmakuBudget budget;
+}
+
+/// The picture-in-picture danmaku look; one value until a `danmaku.pip*`
+/// setting changes.
+final Provider<PipDanmakuLook> pipDanmakuProvider = Provider<PipDanmakuLook>((ref) {
+  final settings = ref.watch(storeProvider).settings;
+  final subscription = settings.changes.where((id) => id.startsWith('danmaku.pip')).listen((_) => ref.invalidateSelf());
+  ref.onDispose(subscription.cancel);
+  return PipDanmakuLook.of(settings);
+});

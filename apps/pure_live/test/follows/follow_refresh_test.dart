@@ -62,7 +62,7 @@ void main() {
   }
 
   test('F-FAV-03, F-FAV-08: failures, missing rooms and other platforms are marked, not guessed', () async {
-    for (final (platform, id) in [('douyu', 'a'), ('douyu', 'gone'), ('huya', 'bad'), ('cc', '1')]) {
+    for (final (platform, id) in [('douyu', 'a'), ('douyu', 'gone'), ('huya', 'bad'), ('huajiao', '1')]) {
       await follow(platform, id);
     }
     final douyu = _Site('douyu');
@@ -70,7 +70,7 @@ void main() {
     final c = container({'douyu': douyu, 'huya': huya});
 
     final result = (await c.read(followRefreshProvider.future))!;
-    expect(result.skipped, {'cc:1'}, reason: 'no adapter, never requested');
+    expect(result.skipped, {'huajiao:1'}, reason: 'no adapter, never requested');
     expect(result.missing, {'douyu:gone'});
     expect(result.failed, {'huya:bad'});
     expect(result.failedPlatforms, {'huya'});

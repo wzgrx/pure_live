@@ -58,6 +58,16 @@ class RoomRecordButton extends ConsumerWidget {
   final RoomDetail detail;
 
   Future<void> _run(BuildContext context, WidgetRef ref, RoomRecordAction action, RecordTask? task) async {
+    // Stopping a writing session and removing a task ask first (F-REC-02,
+    // spec/modules/record.md §2), as in the recording center.
+    if (task != null) {
+      final confirmed = await switch (action) {
+        RoomRecordAction.stop => confirmRecordStop(context, task),
+        RoomRecordAction.remove => confirmRecordRemove(context, task),
+        _ => Future.value(true),
+      };
+      if (!confirmed || !context.mounted) return;
+    }
     final manager = ref.read(recordManagerProvider);
     final key = detail.ref.key;
     final messenger = ScaffoldMessenger.maybeOf(context);

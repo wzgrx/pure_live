@@ -82,3 +82,12 @@ final portraitFitSetting = NotifierProvider<SettingNotifier<PortraitFit>, Portra
 final portraitDanmakuAreaSetting = NotifierProvider<SettingNotifier<PortraitDanmakuArea>, PortraitDanmakuArea>(
   () => SettingNotifier(Settings.portraitDanmakuArea),
 );
+
+/// The platform discover opens on (F-DSC-03).
+final catalogPreferredSetting = NotifierProvider<SettingNotifier<String>, String>(
+  () => SettingNotifier(Settings.catalogPreferred),
+);
+
+/// Dynamic colour: wallpaper (Android 12+) or system accent (Windows),
+/// off by default (principles §2.2).
+final dynamicColorSetting = NotifierProvider<SettingNotifier<bool>, bool>(() => SettingNotifier(Settings.dynamicColor));

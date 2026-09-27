@@ -22,7 +22,7 @@
 | [0014](0014-v4-first.md) | 停止构建 3.x，直接推进 v4；构建和门禁改在本机运行 | 已接受 |
 | [0015](0015-v4-app-structure.md) | v4 应用与播放层的包结构：live_media 纯 Dart + live_player，手写 Riverpod provider | 已接受 |
 | [0016](0016-archive-v3.md) | v3 全部归档：旧应用移出 workspace，3.x 的仓库级文件移进 legacy/ | 已接受 |
-| [0017](0017-live-store.md) | live_store 的实现选择：库结构、加密接口、设置常驻内存、备份细节 | 已接受 |
+| [0017](0017-live-store.md) | live_store 的实现选择：库结构、加密接口、设置常驻内存、备份细节 | 已接受（recordTasks 一项被 0030 取代） |
 | [0018](0018-playback-layer.md) | 播放层的实现方式：事件契约、回环中继与恢复分类 | 已接受 |
 | [0019](0019-danmaku-layer.md) | 弹幕包 live_danmaku 的结构与协议选择 | 已接受 |
 | [0020](0020-danmaku-render.md) | 画面弹幕渲染：单一 RenderBox、统一速度与按需排版 | 已接受 |
@@ -34,6 +34,8 @@
 | [0026](0026-tv-mode.md) | Android TV 模式：同一安装包内的检测、画布、焦点体系与换台 | 已接受 |
 | [0027](0027-dlna-cast.md) | DLNA 投屏：自写 live_cast 包，投上游原始地址 | 已接受 |
 | [0028](0028-live-alerts.md) | 开播提醒与节目提醒：检测规则、存储、通知插件和进程内定时 | 已接受 |
+| [0029](0029-record-service.md) | Android 后台录制：specialUse 前台服务，按活跃任务数保活 | 已接受 |
+| [0030](0030-record-backup.md) | 录制任务进备份：数据库外的分区经应用提供的接口读写 | 已接受（部分取代 0017） |
 
 ## 模板
 

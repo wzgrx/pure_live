@@ -238,7 +238,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       );
     }
     if (!widget.resume) {
-      if (_live) unawaited(_open());
+      if (_live) unawaited(_open(fresh: true));
     } else if (!_live) {
       // Went offline while the mini window played it.
       unawaited(_session.close());
@@ -256,7 +256,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       _stallWatch.reset();
       _initVolume();
       if (_live) {
-        unawaited(_open());
+        unawaited(_open(fresh: true));
       } else {
         unawaited(_session.close());
       }
@@ -303,7 +303,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     }
   }
 
-  Future<void> _open() async {
+  /// Opens the room; [fresh] on entering or switching rooms (not on a retry).
+  Future<void> _open({bool fresh = false}) async {
     final detail = widget.detail;
     setState(() => _openError = null);
     try {
@@ -315,6 +316,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         proxiedHosts: ref.read(proxiedHostsProvider),
         cellular: ref.read(networkKindProvider).value == NetworkKind.cellular,
       );
+      if (fresh && mounted && widget.detail.ref == detail.ref) _startAsmr();
     } on Object catch (error) {
       if (mounted && widget.detail.ref == detail.ref) setState(() => _openError = error);
     }
@@ -425,6 +427,22 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     }
   }
 
+  /// F-ROOM-18: the platform's app, else its site in the browser.
+  Future<void> _openApp() async {
+    final link = nativeAppLink(widget.detail);
+    var opened = false;
+    if (link != null) {
+      try {
+        opened = await launchUrl(link, mode: LaunchMode.externalNonBrowserApplication);
+      } on Object {
+        opened = false;
+      }
+    }
+    if (opened || !mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('没有找到对应的 App，改用浏览器打开')));
+    await launchUrl(widget.detail.link, mode: LaunchMode.externalApplication);
+  }
+
   Future<void> _openNewWindow() async {
     final opened = await ref.read(newWindowProvider)(widget.detail.ref);
     if (!opened && mounted) {
@@ -444,8 +462,24 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     showHint(Icons.brightness_medium, '亮度 ${(next * 100).round()}%');
   }
 
-  /// Audio only on or off, in place (F-ROOM-9, AUD-1).
-  void toggleAudioOnly() => unawaited(_session.setAudioOnly(enabled: !_state.audioOnly));
+  /// Audio only on or off, in place (F-ROOM-9, AUD-1). Restoring the picture
+  /// ends a 助眠模式 timer (F-ROOM-10).
+  void toggleAudioOnly() {
+    final restoring = _state.audioOnly;
+    unawaited(_session.setAudioOnly(enabled: !restoring));
+    if (restoring) ref.read(sleepTimerProvider.notifier).pictureRestored();
+  }
+
+  /// F-ROOM-10 助眠模式: a room that starts playing goes audio only and
+  /// starts the sleep timer, once per open.
+  void _startAsmr() {
+    final settings = ref.read(storeProvider).settings;
+    if (!settings.get(store.Settings.asmrSleepMode)) return;
+    unawaited(_session.setAudioOnly(enabled: true));
+    ref
+        .read(sleepTimerProvider.notifier)
+        .start(Duration(minutes: settings.get(store.Settings.asmrSleepMinutes)), asmr: true);
+  }
 
   /// Q / L: the quality and line panel.
   Future<void> chooseQualityLine() async {
@@ -801,6 +835,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         await context.push('/multiview', extra: [widget.detail.ref]);
       case RoomMenuAction.keys:
         await withPanel(() => showKeyHelp(context));
+      case RoomMenuAction.openApp:
+        await _openApp();
       case RoomMenuAction.cast:
         await withPanel(() => showCastSheet(context, ref, detail: widget.detail, state: _state));
       case RoomMenuAction.newWindow:
@@ -840,7 +876,19 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         : const ColoredBox(color: Colors.black);
     // PIP-2: from the request on only the video shows, so the system's
     // entry animation captures no controls.
-    if (ref.watch(pipProvider.select((pip) => pip.videoOnly))) return RepaintBoundary(child: video);
+    if (ref.watch(pipProvider.select((pip) => pip.videoOnly))) {
+      // F-PIP-01: the video and, if on, light danmaku (F-DM-07).
+      final pipDanmaku = danmakuShown && ref.watch(pipDanmakuProvider).enabled;
+      return RepaintBoundary(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            video,
+            if (pipDanmaku) DanmakuOverlay(controller: widget.overlay, visible: true),
+          ],
+        ),
+      );
+    }
     _pipSupported = ref.watch(pipProvider.select((pip) => pip.supported));
     return MouseRegion(
       onHover: _onHover,
@@ -1031,8 +1079,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // F-ROOM-17: the time in the fullscreen top bar (battery:
-                    // no plugin in v4 yet).
+                    // F-ROOM-17: phones show the time (and battery) next to
+                    // the back button; desktops at the right end.
                     if (_fullscreen && _touch) ...[
                       const _ClockText(color: ink),
                       // F-ROOM-17: the battery next to the time on phones.
@@ -1092,8 +1140,10 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         desktop: !_touch,
                         danmakuAvailable: prefs.enabled,
                         newWindow: newWindowSupported,
+                        openApp: Platform.isAndroid && nativeAppLink(widget.detail) != null,
                       ),
                     ),
+                    if (_fullscreen && !_touch) const _ClockText(color: ink),
                   ],
                 ),
                 const Spacer(),

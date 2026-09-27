@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:live_core/live_core.dart';
@@ -14,15 +16,27 @@ import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 
+/// The recorder's quality for a stored preference (spec/modules/record.md §20).
+RecordQuality recordQualityOf(QualityPreference preference) => switch (preference) {
+  QualityPreference.original => RecordQuality.original,
+  QualityPreference.bluRay8M => RecordQuality.bluRay8M,
+  QualityPreference.bluRay4M => RecordQuality.bluRay4M,
+  QualityPreference.superHigh => RecordQuality.superHd,
+  QualityPreference.smooth => RecordQuality.smooth,
+};
+
+/// The stored preference for a recorder quality.
+QualityPreference qualityPreferenceOf(RecordQuality quality) => switch (quality) {
+  RecordQuality.original => QualityPreference.original,
+  RecordQuality.bluRay8M => QualityPreference.bluRay8M,
+  RecordQuality.bluRay4M => QualityPreference.bluRay4M,
+  RecordQuality.superHd => QualityPreference.superHigh,
+  RecordQuality.smooth => QualityPreference.smooth,
+};
+
 /// Recorder settings from the registry (spec/modules/record.md §20).
 RecordSettings recordSettingsFrom(SettingsStore s) => RecordSettings(
-  defaultQuality: switch (s.get(Settings.recordDefaultQuality)) {
-    QualityPreference.original => RecordQuality.original,
-    QualityPreference.bluRay8M => RecordQuality.bluRay8M,
-    QualityPreference.bluRay4M => RecordQuality.bluRay4M,
-    QualityPreference.superHigh => RecordQuality.superHd,
-    QualityPreference.smooth => RecordQuality.smooth,
-  },
+  defaultQuality: recordQualityOf(s.get(Settings.recordDefaultQuality)),
   maxConcurrent: s.get(Settings.recordMaxConcurrent),
   autoReconnect: s.get(Settings.recordAutoReconnect),
   maxRetries: s.get(Settings.recordMaxRetries),
@@ -38,6 +52,8 @@ RecordSettings recordSettingsFrom(SettingsStore s) => RecordSettings(
   splitMegabytes: s.get(Settings.recordSplitMegabytes),
   remuxToMp4: s.get(Settings.recordRemuxToMp4),
   keepSourceAfterRemux: s.get(Settings.recordKeepSourceAfterRemux),
+  // The "cache limit" caps the recording folder (§15).
+  storageLimitMegabytes: s.get(Settings.recordCacheLimitEnabled) ? s.get(Settings.recordCacheLimitMb) : 0,
 );
 
 /// Chat for recordings through live_danmaku's connectors (§17): plain chats only.
@@ -140,12 +156,220 @@ final Provider<RecordManager> recordManagerProvider = Provider<RecordManager>((r
   final changes = settings.changes.where((id) => id.startsWith('record.')).listen((_) {
     unawaited(manager.updateSettings(recordSettingsFrom(settings)));
   });
+  // Android: a foreground service keeps recordings going in the background
+  // (F-REC-06, spec/modules/record.md §16.1).
+  final keepAlive = Platform.isAndroid ? RecordKeepAlive(manager, MethodRecordServiceChannel()) : null;
+  final lifecycle = keepAlive == null ? null : AppLifecycleListener(onResume: keepAlive.resumed);
   ref.onDispose(() {
     unawaited(changes.cancel());
+    lifecycle?.dispose();
+    unawaited(keepAlive?.dispose());
     unawaited(manager.dispose());
   });
   return manager;
 });
+
+/// The notification of the Android recording service: title and text.
+typedef RecordNotice = ({String title, String text});
+
+/// What the Android recording service shows for [tasks] (spec/modules/record.md
+/// §16.1): "正在录制 N 个直播间" with the streamers' names, or
+/// "正在处理录制文件" while only finalizing tasks are left; null when no task
+/// holds a session, which stops the service.
+RecordNotice? recordServiceNotice(Iterable<RecordTask> tasks) {
+  final recording = [
+    for (final task in tasks)
+      if (task.state.active && task.state != RecordState.finalizing) task,
+  ];
+  final finishing = tasks.where((task) => task.state == RecordState.finalizing).length;
+  if (recording.isEmpty) {
+    return finishing == 0 ? null : (title: '正在处理录制文件', text: '$finishing 个录制正在收尾，完成后通知会消失');
+  }
+  final names = [for (final task in recording) _taskName(task)];
+  final shown = names.length > 3 ? '${names.take(3).join('、')} 等' : names.join('、');
+  return (title: '正在录制 ${recording.length} 个直播间', text: finishing == 0 ? shown : '$shown；$finishing 个正在收尾');
+}
+
+String _taskName(RecordTask task) => task.snapshot.anchorName.isEmpty ? task.room.roomId : task.snapshot.anchorName;
+
+/// The native side of background recording (Android `RecordService.kt`).
+abstract interface class RecordServiceChannel {
+  /// Starts or refreshes the service with [notice]; false when Android
+  /// refused to start it (for example from the background).
+  Future<bool> update(RecordNotice notice);
+
+  /// Stops the service and releases the locks.
+  Future<void> stop();
+
+  /// Sets what runs when the system timed the service out (Android 15+
+  /// `onTimeout`); null removes it.
+  void handleTimeout(Future<void> Function()? handler);
+}
+
+/// [RecordServiceChannel] over the method channel `purelive/record`.
+final class MethodRecordServiceChannel implements RecordServiceChannel {
+  /// Creates the channel.
+  new([this._channel = const MethodChannel('purelive/record')]);
+
+  final MethodChannel _channel;
+
+  @override
+  Future<bool> update(RecordNotice notice) async =>
+      await _channel.invokeMethod<bool>('update', {'title': notice.title, 'text': notice.text}) ?? false;
+
+  @override
+  Future<void> stop() => _channel.invokeMethod<void>('stop');
+
+  @override
+  void handleTimeout(Future<void> Function()? handler) => _channel.setMethodCallHandler(
+    handler == null
+        ? null
+        : (call) async {
+            if (call.method == 'onTimeout') await handler();
+          },
+  );
+}
+
+/// Keeps Android recordings alive in the background (F-REC-06,
+/// spec/modules/record.md §16.1): the service runs while any task holds a
+/// session (`RecordManager.activeCountChanges`), its notification follows the
+/// tasks, and it stops once the last task's final state is stored. Driven by
+/// the count, not by per-task leases, so an old session ending never stops a
+/// new one.
+///
+/// If the system times the service out, every active task is finished as
+/// "后台运行时间被系统用尽" (`interruptAll`) while the native side still holds
+/// the wake lock, then the service stops; it starts again only after the app
+/// has been in front (which also resets Android's timer).
+final class RecordKeepAlive {
+  /// Starts following the manager's tasks.
+  new(this._manager, this._channel) {
+    _channel.handleTimeout(_timedOut);
+    _subscriptions = [_manager.activeCountChanges.listen((_) => _sync()), _manager.updates.listen((_) => _sync())];
+    _sync();
+  }
+
+  final RecordManager _manager;
+  final RecordServiceChannel _channel;
+  late final List<StreamSubscription<Object?>> _subscriptions;
+  RecordNotice? _shown;
+  Future<void> _calls = Future.value();
+  bool _blocked = false;
+  bool _draining = false;
+
+  /// Whether the system timed the service out and the app has not been in
+  /// front since.
+  bool get blocked => _blocked;
+
+  void _sync() {
+    if (_draining) return;
+    final notice = _blocked ? null : recordServiceNotice(_manager.tasks);
+    if (notice == _shown) return;
+    _shown = notice;
+    _calls = _calls
+        .then((_) async {
+          if (notice != null) {
+            await _channel.update(notice);
+          } else {
+            // The final state is stored before the process may lose its keep-alive (§13).
+            await _manager.flush();
+            if (_shown == null) await _channel.stop();
+          }
+        })
+        .catchError((Object _) {});
+  }
+
+  Future<void> _timedOut() async {
+    _blocked = true;
+    _draining = true;
+    try {
+      await _manager.interruptAll();
+    } finally {
+      _draining = false;
+    }
+    _sync();
+    await _calls;
+  }
+
+  /// The app is in front again: the service may start again.
+  void resumed() {
+    if (!_blocked) return;
+    _blocked = false;
+    _sync();
+  }
+
+  /// Stops following the manager and the service.
+  Future<void> dispose() async {
+    for (final subscription in _subscriptions) {
+      await subscription.cancel();
+    }
+    _channel.handleTimeout(null);
+    if (_shown != null) {
+      _shown = null;
+      await _calls;
+      await _channel.stop();
+    }
+  }
+}
+
+/// Recording tasks in backups (F-BAK-01; store.md §7.1 `recordTasks`): the
+/// room, its display fields, quality and auto-reconnect, and whether the user
+/// wants it recorded when live ("monitor": recording, queued, waiting, or
+/// stopped only because polling or the app was off). Sessions and file paths
+/// stay on the device. Restoring replaces the idle tasks and leaves running
+/// ones alone (`RecordManager.importTasks`); monitored rooms wait for their
+/// room while `record.polling` is on.
+final class RecordTaskBackupAdapter implements RecordTaskBackup {
+  /// Reads the recorder through the given function only when a backup runs.
+  const new(this._manager);
+
+  final RecordManager Function() _manager;
+
+  @override
+  Future<List<BackupRecordTask>> exportTasks() async => [
+    for (final task in _manager().tasks)
+      BackupRecordTask(
+        ref: task.room,
+        createdAt: task.createdAt,
+        anchorName: task.snapshot.anchorName,
+        title: task.snapshot.title,
+        avatar: task.snapshot.avatar,
+        cover: task.snapshot.cover,
+        quality: switch (task.quality) {
+          final quality? => qualityPreferenceOf(quality),
+          null => null,
+        },
+        autoReconnect: task.autoReconnect,
+        monitor:
+            task.state.active ||
+            task.state == RecordState.waitingLive ||
+            (task.state == RecordState.stopped &&
+                (task.stopCause == StopCause.pollingOff || task.stopCause == StopCause.appRestart)),
+      ),
+  ];
+
+  @override
+  Future<int> restoreTasks(List<BackupRecordTask> tasks) => _manager().importTasks([
+    for (final task in tasks)
+      RecordTask(
+        room: task.ref,
+        createdAt: task.createdAt,
+        state: RecordState.stopped,
+        stopCause: task.monitor ? StopCause.pollingOff : StopCause.user,
+        snapshot: RecordRoomSnapshot(
+          anchorName: task.anchorName,
+          title: task.title,
+          avatar: task.avatar,
+          cover: task.cover,
+        ),
+        quality: switch (task.quality) {
+          final quality? => recordQualityOf(quality),
+          null => null,
+        },
+        autoReconnect: task.autoReconnect,
+      ),
+  ]);
+}
 
 /// Watches the recording state of one room, for the room page's button.
 final StreamProviderFamily<RecordTask?, String> recordTaskProvider = StreamProvider.autoDispose

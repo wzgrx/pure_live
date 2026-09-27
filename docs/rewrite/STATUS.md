@@ -103,13 +103,15 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 | IPTV（独立模块 `live_iptv`，ADR 0024） | 完成 | 子代理 |
 | WebDAV、局域网同步、诊断包、首次启动向导、应用内更新、关于、分享口令 | 完成 | 子代理 |
 | Android 画中画、后台播放与通知、应用内小窗；Windows 单实例、新窗口、托盘、关闭行为、开机自启、系统媒体控制 | 完成（ADR 0025），已接入直播间 | 子代理 → 主会话 |
-| 第二批平台：cc、yy、soop、acfun、twitch | 进行中 | 子代理 |
+| 第二批平台：cc、yy、soop、acfun、twitch | 完成，五个都保留并接入应用（CC 暂无弹幕；Twitch 列表只有第一页，翻页要 WebView 完整性令牌） | 子代理 → 主会话 |
 | 第三批平台前半：chzzk、missevan、kilakila、inke、picarto、twitcasting、showroom、pandalive、17live | 进行中 | 子代理 |
 | 第三批平台后半：liveme、steambroadcast、sixroom、kugoulive、jdlive、baidulive、looklive、weibo；niconico；候选下线 tiktok、youtube、bigo、fc2live；小红书仅链接 | 进行中 | 子代理 |
 | 缓存清理、平台健康状态 | 完成 | 主会话 |
 | 深链 `purelive://`、按网络选画质与卡顿自动降一档、断网提示、录制拼音文件夹 | 完成 | 主会话 |
 | DLNA 投屏（`live_cast`，ADR 0027） | 完成，已接入直播间菜单和 Android 顶栏 | 子代理 → 主会话 |
 | 开播提醒（含 IPTV 节目提醒，ADR 0028） | 完成；Android desugaring 和 Windows 通知待统一构建时验证 | 子代理 |
+| 多画面补全：常驻选台侧板、每格音量和暂停、多画面弹幕、沉浸和全屏、1–9 快捷键 | 完成 | 子代理 |
+| 录制补全：强制开始、重新录制、出错环节、确认框、录制设置全部上界面、录制目录容量上限、Android 后台录制（specialUse 前台服务，ADR 0029）、录制任务进备份（ADR 0030） | 完成；前台服务待统一构建后真机验证 | 子代理 → 主会话 |
 | TV 模式（遥控器焦点、10 英尺界面、换台） | 完成（ADR 0026），Kotlin 和 TV 真机待统一构建时验证 | 子代理 |
 | 多语言（简体、繁体、英文） | 界面稳定后统一做 | 主会话 |
 | 统一构建：Android（WSL）、Windows（本机），真机检查 | 全部功能完成后 | 主会话 |

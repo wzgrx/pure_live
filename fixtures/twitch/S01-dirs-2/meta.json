@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S01-dirs-2",
+  "capturedAt": "2026-09-27T18:43:15.896698Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Device-Id": "1b5236087a1363792487fe206e5b001a",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "[{\"operationName\":\"BrowsePage_AllDirectories\",\"variables\":{\"limit\":30,\"options\":{\"recommendationsContext\":{\"platform\":\"web\"},\"requestID\":\"JIRA-VXP-2397\",\"sort\":\"VIEWER_COUNT\",\"tags\":[\"cad488fb-c95c-4be1-b197-5b851d3a12fa\"]}},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"2f67f71ba89f3c0ed26a141ec00da1defecb2303595f5cda4298169549783d9e\"}}},{\"operationName\":\"BrowsePage_AllDirectories\",\"variables\":{\"limit\":30,\"options\":{\"recommendationsContext\":{\"platform\":\"web\"},\"requestID\":\"JIRA-VXP-2397\",\"sort\":\"VIEWER_COUNT\",\"tags\":[\"0c99bf18-5a92-4257-8974-d7a60088d1e8\"]}},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"2f67f71ba89f3c0ed26a141ec00da1defecb2303595f5cda4298169549783d9e\"}}},{\"operationName\":\"BrowsePage_AllDirectories\",\"variables\":{\"limit\":30,\"options\":{\"recommendationsContext\":{\"platform\":\"web\"},\"requestID\":\"JIRA-VXP-2397\",\"sort\":\"VIEWER_COUNT\",\"tags\":[\"5d289cf9-d75a-42b5-a635-0d117609e6a6\"]}},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"2f67f71ba89f3c0ed26a141ec00da1defecb2303595f5cda4298169549783d9e\"}}},{\"operationName\":\"BrowsePage_AllDirectories\",\"variables\":{\"limit\":30,\"options\":{\"recommendationsContext\":{\"platform\":\"web\"},\"requestID\":\"JIRA-VXP-2397\",\"sort\":\"VIEWER_COUNT\",\"tags\":[\"0d4233af-7ac6-49da-937d-e0f42b7db187\"]}},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"2f67f71ba89f3c0ed26a141ec00da1defecb2303595f5cda4298169549783d9e\"}}},{\"operationName\":\"BrowsePage_AllDirectories\",\"variables\":{\"limit\":30,\"options\":{\"recommendationsContext\":{\"platform\":\"web\"},\"requestID\":\"JIRA-VXP-2397\",\"sort\":\"VIEWER_COUNT\",\"tags\":[\"2ab93d0f-a3c1-4bb1-aeb0-bfee1bb81e3a\"]}},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"2f67f71ba89f3c0ed26a141ec00da1defecb2303595f5cda4298169549783d9e\"}}},{\"operationName\":\"BrowsePage_AllDirectories\",\"variables\":{\"limit\":30,\"options\":{\"recommendationsContext\":{\"platform\":\"web\"},\"requestID\":\"JIRA-VXP-2397\",\"sort\":\"VIEWER_COUNT\",\"tags\":[\"643fe658-c4fc-45f0-9aed-cbe54a7c1d10\"]}},\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"2f67f71ba89f3c0ed26a141ec00da1defecb2303595f5cda4298169549783d9e\"}}}]"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-served-by": "gateway",
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "*",
+      "x-amzn-trace-id": "Self=1-6ab963c4-4b36664a145ad86a604e6eba;Root=1-6ab963c4-2d38a5f1c28cf1913b19a74c",
+      "date": "Sun, 27 Sep 2026 18:43:16 GMT",
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=utf-8",
+      "x-gateway-trace": "7687125c9da290bdedc59e11f8c40f49"
+    }
+  },
+  "raw": {
+    "sha256": "df75bdd3d82c122a625b9ed11ade4964a72917474f54fdd2c75e79ac29ab5ee3",
+    "length": 177226
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

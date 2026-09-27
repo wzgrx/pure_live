@@ -7,6 +7,7 @@ import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/features/room/record_button.dart';
 
 import '../danmaku/fake_danmaku.dart';
+import '../fakes.dart';
 
 RecordTask _task(RecordState state) => RecordTask(room: RoomRef('douyu', '1'), createdAt: DateTime(2026), state: state);
 
@@ -41,7 +42,10 @@ void main() {
   Future<void> pumpButton(WidgetTester tester, RecordTask? task, {LiveState state = LiveState.live}) =>
       tester.pumpWidget(
         ProviderScope(
-          overrides: [recordTaskProvider.overrideWith((ref, key) => Stream.value(task))],
+          overrides: [
+            recordTaskProvider.overrideWith((ref, key) => Stream.value(task)),
+            recordManagerProvider.overrideWithValue(fakeRecordManager()),
+          ],
           child: MaterialApp(
             home: Scaffold(
               body: Center(
@@ -81,5 +85,46 @@ void main() {
     await tester.pump();
     expect(find.text('立即检查开播'), findsOneWidget);
     expect(find.text('移除监控'), findsOneWidget);
+  });
+
+  Future<void> settle(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+  }
+
+  testWidgets('stopping a recording asks first; cancel keeps it recording (F-REC-02)', (tester) async {
+    await pumpButton(tester, _task(RecordState.recording));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('room-record')));
+    await settle(tester);
+    await tester.tap(find.text('停止录制'));
+    await settle(tester);
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.tap(find.text('取消'));
+    await settle(tester);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('正在停止录制，已录的文件会保留'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('room-record')));
+    await settle(tester);
+    await tester.tap(find.text('停止录制'));
+    await settle(tester);
+    await tester.tap(find.text('停止'));
+    await settle(tester);
+    expect(find.text('正在停止录制，已录的文件会保留'), findsOneWidget);
+  });
+
+  testWidgets('removing a watch asks first (F-REC-02)', (tester) async {
+    await pumpButton(tester, _task(RecordState.waitingLive), state: LiveState.offline);
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('room-record')));
+    await settle(tester);
+    await tester.tap(find.text('移除监控'));
+    await settle(tester);
+    expect(find.text('不再等待“1”开播？已录的文件会保留。'), findsOneWidget);
+    await tester.tap(find.text('移除'));
+    await settle(tester);
+    expect(find.text('已移除录制任务，已录的文件会保留'), findsOneWidget);
   });
 }

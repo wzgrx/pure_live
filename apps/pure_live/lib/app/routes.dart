@@ -29,6 +29,7 @@ import 'package:pure_live_app/features/recording/recording_page.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
+import 'package:pure_live_app/features/settings/platforms_page.dart';
 import 'package:pure_live_app/features/settings/settings_page.dart';
 import 'package:pure_live_app/features/sync/lan_sync_page.dart';
 import 'package:pure_live_app/features/sync/webdav_page.dart';
@@ -134,6 +135,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(path: 'recordings', builder: (context, state) => const RecordingPage()),
                   GoRoute(path: 'accounts', builder: (context, state) => const AccountsPage()),
+                  GoRoute(path: 'platforms', builder: (context, state) => const PlatformsPage()),
                   GoRoute(
                     path: 'settings',
                     builder: (context, state) => const SettingsPage(),

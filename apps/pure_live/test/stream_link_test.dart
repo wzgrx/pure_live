@@ -89,7 +89,7 @@ void main() {
   });
 
   testWidgets('F-FAV-08: a platform without an adapter says so', (tester) async {
-    await open(tester, RoomRef('cc', '1'));
+    await open(tester, RoomRef('huajiao', '1'));
     expect(find.text('平台暂不支持'), findsOneWidget);
     expect(find.text('重试'), findsNothing);
   });

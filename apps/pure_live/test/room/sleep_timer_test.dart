@@ -128,4 +128,19 @@ void main() {
     await tester.pump();
     expect(find.byIcon(Icons.bedtime_outlined), findsNothing);
   });
+
+  test('F-ROOM-10: restoring the picture ends a 助眠模式 timer, not one the user set', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final timer = container.read(sleepTimerProvider.notifier)..start(const Duration(minutes: 60), asmr: true);
+    expect(container.read(sleepTimerProvider).asmr, isTrue);
+    timer.pictureRestored();
+    expect(container.read(sleepTimerProvider).active, isFalse);
+
+    timer
+      ..start(const Duration(minutes: 30))
+      ..pictureRestored();
+    expect(container.read(sleepTimerProvider).active, isTrue);
+    timer.cancel();
+  });
 }

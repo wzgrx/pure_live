@@ -18,17 +18,21 @@ await manager.init();                  // 读取任务；后台做崩溃恢复�
 
 await manager.add(roomDetail);                    // 添加并立即录制（“立即录制”由严格检查决定是否开播）
 await manager.add(roomDetail, start: false);      // 只添加：轮询开 → 等待开播；轮询关 → 已停止（原因：轮询已关闭）
-await manager.start(key);                         // key = RoomRef.key，例如 'douyu:9999'
+await manager.start(key);                         // key = RoomRef.key，例如 'douyu:9999'；终态任务即“重新录制”
+await manager.forceStart(key);                    // 强制开始：排队中或等待开播的任务不等并发槽和启动间隔（§2）
 await manager.stop(key);                          // 用户停止：收尾（含转封装）完成后返回
 await manager.remove(key);                        // 先按用户停止收尾，再删任务；文件保留
 await manager.checkNow(key);                      // 手动检查等待中的房间
 await manager.retryRemux(key);                    // 转封装失败后重试
-await manager.updateSettings(newSettings);        // 轮询开关、并发数等立即生效
+await manager.updateSettings(newSettings);        // 轮询开关、并发数、容量上限等立即生效
+await manager.sweepStorage();                     // 立即按容量上限清理录制目录（开关打开时每分钟自动做，§15）
+await manager.importTasks(tasksFromBackup);       // 恢复备份：替换空闲任务，活跃任务不动（store.md §7.2）
 
 manager.tasks;                          // 按添加顺序的快照列表（顺序稳定）
 manager.listChanges;                    // 增删任务时发出整个列表
 manager.watch(key);                     // 单个任务的快照流：状态立即推送，进度每秒最多一次
-manager.activeCountChanges;             // 有活跃会话时 Android 前台服务保持运行（§16.1）
+manager.activeCountChanges;             // 有活跃会话时 Android 前台服务保持运行（§16.1，应用的 RecordKeepAlive）
+await manager.flush();                  // 立即落盘；Android 保活在活跃数归零后先等它再停服务
 await manager.interruptAll();           // Android onTimeout：有界收尾，标“后台时间用尽”失败
 await manager.stopAll();                // 桌面退出：10 s 内收尾（不转封装），下次启动可开机恢复
 await manager.dispose();
@@ -65,6 +69,7 @@ await manager.dispose();
   - 网络、解析失败：常规退避（`retryDelay`，开 `backoff` 时翻倍到 `maxCheckInterval`），`maxRetries` 用尽即结束——轮询开转等待开播，轮询关标失败（不会 2 s 无限重试，REG-RECORD-034；不会停在等待开播，REG-RECORD-033）；
   - 连续录到 10 s 媒体后计数清零。
 - **写入器（`FlvSessionWriter`，§6）**：分段开头依次是头、首个连接的脚本 tag、视频配置、音频配置、关键帧；时间戳单调；新连接与已写位置相差 60 s 内且在其后就沿用时间线，否则平移到“已写末尾 + 1 帧”（中位帧间隔），缺口写 `gaps.json`；旧式 codec 12 HEVC 改写为 Enhanced FLV `hvc1`；只含 SEI/SPS/PPS/AUD 的视频 tag 先扣住，等到画面再写，停止时最多等 3 s，否则丢掉，文件不会以它结尾；写入队列超过 8 MiB 时读上游暂停；至少每秒刷盘一次；单次写入卡住 30 s 或写入出错按磁盘错误致命失败（`diskFull`、`permissionDenied`、`readOnly`、`pathInvalid`、`diskStalled`）。
+- **容量上限（`enforceStorageLimit`，§15）**：`RecordSettings.storageLimitMegabytes`（应用的 `record.cacheLimitEnabled` + `record.cacheLimitMB`）大于 0 时，管理器每分钟扫描一次根目录：总量（标记文件除外）超过上限就按修改时间从旧到新删除，解析、录制、重连、收尾中的会话目录只计入不删除，删不掉的文件跳过；删了文件后从深到浅清理空目录。
 - **管理器（`RecordManager`，§2、§3、§11–§14）**：每个房间一个任务；同一任务的意图串行；过期代次的结果丢弃；并发槽先进先出，新会话之间至少 5 s，重连期间不释放槽；状态变化 2 s 合并写入、进度最多 10 s 写一次、终态立即写；崩溃恢复每次启动都在后台做，用户这时点开始会等它完成；等待开播只在轮询打开时存在，关闭轮询时转为“已停止（轮询已关闭）”，再打开时回到等待并立刻检查。
 
 ## 转封装（`FlvToMp4Remuxer`）
@@ -97,13 +102,13 @@ await manager.dispose();
 ## 还没做
 
 - HLS 下载器（§7）、HTTP 连续 TS（§8）：首批 5 个平台都有 FLV 线路，录制器只选 FLV；某画质只有 HLS 时跳到下一画质，全部没有 FLV 时报 `unsupportedProtocol`。
-- 录制目录的容量限制和清理（§15）、Android 前台服务和桌面退出提示（§16，应用层）、旧版 TS 遗留合并（§14.3）。
-- 任务持久化接 `live_store` 的 `record_tasks` 表，`live_danmaku` 的弹幕适配（都在应用侧）。
+- 桌面退出提示（§16.2，应用层）、旧版 TS 遗留合并（§14.3）。
+- 任务持久化接 `live_store` 的 `record_tasks` 表（应用目前用 `JsonFileRecordTaskStore` 写 `<数据根>/DB/record_tasks.json`）。
 - 转封装只接受 FLV 里的 H.264、H.265 和 AAC；HLS 本地归档、旧 TS 的转封装在录制器产出它们时再加；文件中途编解码配置变化时报错（写入器本来就会在配置变化处切分段）。
 
 ## 测试
 
-`dart test`：写入器（分段结构、时间戳、重定基准、按时长/大小/配置切分、codec 12、SEI 尾、`.part` 与重名、背压与磁盘卡住、磁盘满、刷盘、弹幕锚点、gaps.json）、恢复（扫描截断、改名、XML 补尾、crash 缺口）、重试与游标、命名与根目录、错误分类与脱敏、会话（斗鱼两次续期无缝、EOF 续接、下播、断网有界退避、4xx、5xx、全部线路失败、停止、磁盘满、关闭自动重连、画质偏好、HLS 跳过、预取、弹幕 XML）、管理器（开始/停止/持久化不含密钥、并发与间隔、等待开播轮询、REG-RECORD-033、轮询开关、迟到结果、意图串行、崩溃恢复、开机恢复、退出与后台中断、转封装失败与重试、进度、写入合并、删除、弹幕重连、JSON 存储）、转封装（`test/remux/`：两个 ffmpeg testsrc 生成的小 FLV 夹具（x264 带 B 帧、x265 Enhanced FLV）的黄金字节；逐样本比对负载、显示时间、同步样本；盒子结构；`stts`/`ctts` 游程、`stss`、`stsc` 分块、`co64` 切换；负 CTS 与重复时间戳；纯音频、纯视频；旧式 codec 12 与 Annex B（H.264、H.265）；ADTS；配置变化与各种损坏输入；取消、进度、两遍之间输入变化；`remuxFiles` 集成；写入器输出再转封装；6 小时 60 fps 样本表的内存；`IsolateRemuxer`）。除 `IsolateRemuxer` 用临时目录外，全部在 `fake_async` 和内存文件系统上运行，事件顺序与真实上游一致。
+`dart test`：写入器（分段结构、时间戳、重定基准、按时长/大小/配置切分、codec 12、SEI 尾、`.part` 与重名、背压与磁盘卡住、磁盘满、刷盘、弹幕锚点、gaps.json）、恢复（扫描截断、改名、XML 补尾、crash 缺口）、重试与游标、命名与根目录、错误分类与脱敏、会话（斗鱼两次续期无缝、EOF 续接、下播、断网有界退避、4xx、5xx、全部线路失败、停止、磁盘满、关闭自动重连、画质偏好、HLS 跳过、预取、弹幕 XML）、管理器（开始/停止/持久化不含密钥、并发与间隔、强制开始、容量上限清理、备份导入、等待开播轮询、REG-RECORD-033、轮询开关、迟到结果、意图串行、崩溃恢复、开机恢复、退出与后台中断、转封装失败与重试、进度、写入合并、删除、弹幕重连、JSON 存储）、容量上限（`storage_test.dart`：从旧到新删除、受保护目录、被占用的文件、空目录清理、真实磁盘）、转封装（`test/remux/`：两个 ffmpeg testsrc 生成的小 FLV 夹具（x264 带 B 帧、x265 Enhanced FLV）的黄金字节；逐样本比对负载、显示时间、同步样本；盒子结构；`stts`/`ctts` 游程、`stss`、`stsc` 分块、`co64` 切换；负 CTS 与重复时间戳；纯音频、纯视频；旧式 codec 12 与 Annex B（H.264、H.265）；ADTS；配置变化与各种损坏输入；取消、进度、两遍之间输入变化；`remuxFiles` 集成；写入器输出再转封装；6 小时 60 fps 样本表的内存；`IsolateRemuxer`）。除 `IsolateRemuxer` 用临时目录外，全部在 `fake_async` 和内存文件系统上运行，事件顺序与真实上游一致。
 
 真实网络：`dart run tools/live_cli/bin/live_cli.dart record douyu <房间> --duration 600 --remux --out <目录>`（默认用 `FlvToMp4Remuxer`，`--remuxer ffmpeg` 换成 ffmpeg 对照），录完用 `lease` 同一套规则检查每个 FLV 的时间戳，用 ffprobe 检查 FLV 和 MP4 的视频 DTS 与盒子顺序，并读 `gaps.json`。已有的 FLV 用 `live_cli remux <文件>…` 转换并检查（包数、DTS、时长、完整解码、负载 MD5、`moov` 在 `mdat` 前）。
 

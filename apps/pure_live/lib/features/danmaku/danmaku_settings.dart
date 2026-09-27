@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show Sizes;
+import 'package:live_ui/live_ui.dart' show Sizes, Space;
+import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/danmaku/danmaku_presets.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 
 /// Location of the block-list page.
@@ -21,6 +25,7 @@ class DanmakuSettingsTiles extends StatelessWidget {
     children: [
       const SwitchSettingTile(setting: Settings.danmakuEnabled, title: '显示弹幕', subtitle: '关闭后不再连接弹幕'),
       const SettingsHeader('样式'),
+      const DanmakuPresetRow(),
       const DanmakuSliderTile(
         setting: Settings.danmakuFontSize,
         title: '字号',
@@ -290,3 +295,133 @@ Future<void> showDanmakuSettingsSheet(BuildContext context) => showModalBottomSh
     ),
   ),
 );
+
+/// F-DM-02: one-tap looks and the user's own saved style.
+class DanmakuPresetRow extends ConsumerStatefulWidget {
+  const new({super.key});
+
+  @override
+  ConsumerState<DanmakuPresetRow> createState() => _DanmakuPresetRowState();
+}
+
+class _DanmakuPresetRowState extends ConsumerState<DanmakuPresetRow> {
+  StreamSubscription<Object?>? _changes;
+
+  @override
+  void initState() {
+    super.initState();
+    // The chips show which preset is in force; any danmaku change may alter it.
+    _changes = ref.read(storeProvider).settings.changes.where((id) => id.startsWith('danmaku.')).listen((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_changes?.cancel());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = ref.watch(storeProvider).settings;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    void say(String text) => messenger?.showSnackBar(SnackBar(content: Text(text)));
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
+      child: Wrap(
+        spacing: Space.s2,
+        runSpacing: Space.s2,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          for (final preset in danmakuPresets)
+            ChoiceChip(
+              label: Text(preset.name),
+              selected: preset.matches(settings),
+              onSelected: (_) async {
+                await preset.apply(settings);
+                say('已应用“${preset.name}”');
+              },
+            ),
+          TextButton.icon(
+            icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+            label: const Text('保存为我的样式'),
+            onPressed: () async {
+              await DanmakuTemplate.save(settings);
+              say('已保存当前弹幕样式');
+            },
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.bookmark_outline, size: 18),
+            label: const Text('恢复我的样式'),
+            onPressed: DanmakuTemplate.exists(settings)
+                ? () async {
+                    final restored = await DanmakuTemplate.restore(settings);
+                    say(restored ? '已恢复保存的弹幕样式' : '保存的样式已损坏，没能恢复');
+                  }
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 画中画弹幕 (F-DM-07): the light danmaku of picture-in-picture, on the
+/// platforms that have it.
+class PipDanmakuTiles extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Platform.isAndroid && !Platform.isWindows) return const SizedBox.shrink();
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsHeader('画中画弹幕'),
+        SwitchSettingTile(setting: Settings.danmakuPipEnabled, title: '画中画里显示弹幕'),
+        SliderSettingTile(
+          setting: Settings.danmakuPipFontSize,
+          title: '字号',
+          min: 8,
+          max: 24,
+          divisions: 16,
+          format: _integer,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipSpeed,
+          title: '速度',
+          min: 20,
+          max: 400,
+          divisions: 38,
+          format: _integer,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipOpacity,
+          title: '不透明度',
+          min: 0.1,
+          max: 1,
+          divisions: 9,
+          format: _percent,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipArea,
+          title: '显示区域',
+          min: 0.1,
+          max: 1,
+          divisions: 9,
+          format: _percent,
+        ),
+        SliderSettingTile(
+          setting: Settings.danmakuPipMaxVisibleCount,
+          title: '同屏最多',
+          min: 1,
+          max: 20,
+          divisions: 19,
+          format: _integer,
+        ),
+        SwitchSettingTile(setting: Settings.danmakuPipNoEmoji, title: '不显示表情'),
+      ],
+    );
+  }
+}

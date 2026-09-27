@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S05-page-offline",
+  "capturedAt": "2026-09-27T16:56:39.669107Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.yy.com/85520900",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.yy.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "date": "Sun, 27 Sep 2026 16:56:40 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=UTF-8",
+      "content-language": "en-US",
+      "server": "nginx",
+      "x-cache": "EXPIRED"
+    }
+  },
+  "raw": {
+    "sha256": "5e50cf9cc70754570d6aeb254dce18ad07c6a41bc341c172b370b625598ac005",
+    "length": 34489
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

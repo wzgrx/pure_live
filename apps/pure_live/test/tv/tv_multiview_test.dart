@@ -11,6 +11,7 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/multiview/multiview_controller.dart';
 import 'package:pure_live_app/features/multiview/multiview_page.dart';
+import 'package:pure_live_app/features/multiview/multiview_sheets.dart';
 
 import '../fakes.dart';
 
@@ -41,6 +42,9 @@ void main() {
     final container = ProviderScope.containerOf(tester.element(find.byType(MultiviewPage)));
     expect(container.read(multiviewProvider).layout, MultiviewLayout.four);
     expect(find.byTooltip('布局'), findsNothing, reason: 'no other layouts on TV');
+    expect(find.byTooltip('沉浸模式'), findsNothing, reason: 'TV is fullscreen already (OPS-6)');
+    expect(find.byTooltip('全屏'), findsNothing);
+    expect(find.byType(MultiviewRoomPicker), findsNothing, reason: 'TV picks in a sheet, no panel (LYT-7)');
     expect(find.text('添加直播间'), findsNWidgets(4));
 
     String? focused() => FocusManager.instance.primaryFocus?.debugLabel;

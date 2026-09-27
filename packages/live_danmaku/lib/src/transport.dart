@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:live_danmaku/src/runtime/exact_websocket.dart';
 import 'package:live_net/live_net.dart';
 
 /// Time for the connectors and the pipeline; injectable for tests.
@@ -34,6 +35,9 @@ abstract interface class DanmakuSocket {
   /// Sends a binary frame; ignored after the socket closed.
   void send(List<int> frame);
 
+  /// Sends a text frame (Twitch IRC); ignored after the socket closed.
+  void sendText(String text);
+
   /// Closes the socket.
   Future<void> close();
 
@@ -46,12 +50,17 @@ abstract interface class DanmakuTransport {
   /// HTTP for polling and snapshots.
   LiveHttp get http;
 
-  /// Opens a WebSocket to [url] for [site]'s chat within [timeout].
+  /// Opens a WebSocket to [url] for [site]'s chat within [timeout],
+  /// offering [protocols]. [exactHeaders] sends the handshake exactly as
+  /// written ([ExactWebSocket]), for edges that refuse `dart:io`'s
+  /// lower-cased upgrade headers.
   Future<DanmakuSocket> connect(
     Uri url, {
     required String site,
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 10),
+    List<String> protocols = const [],
+    bool exactHeaders = false,
   });
 }
 
@@ -75,14 +84,24 @@ final class IoDanmakuTransport implements DanmakuTransport {
     required String site,
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 10),
+    List<String> protocols = const [],
+    bool exactHeaders = false,
   }) async {
     final route = proxy.routeFor(site, url);
+    if (exactHeaders) {
+      return await ExactWebSocket.connect(url, route: route, headers: headers, protocols: protocols, timeout: timeout);
+    }
     // The client only carries the upgrade handshake; closing it with force
     // aborts a handshake that outlived [timeout].
     final client = HttpClient()
       ..connectionTimeout = timeout
       ..findProxy = (_) => route.directive;
-    final connecting = WebSocket.connect(url.toString(), headers: headers, customClient: client);
+    final connecting = WebSocket.connect(
+      url.toString(),
+      headers: headers,
+      protocols: protocols.isEmpty ? null : protocols,
+      customClient: client,
+    );
     try {
       final socket = await connecting.timeout(timeout);
       // The upgraded socket is detached from the client.
@@ -108,6 +127,11 @@ final class _IoSocket implements DanmakuSocket {
   @override
   void send(List<int> frame) {
     if (_socket.readyState == WebSocket.open) _socket.add(frame);
+  }
+
+  @override
+  void sendText(String text) {
+    if (_socket.readyState == WebSocket.open) _socket.add(text);
   }
 
   @override

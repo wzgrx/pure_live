@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:live_store/src/backup/import_plan.dart';
 import 'package:live_store/src/backup/import_report.dart';
 import 'package:live_store/src/backup/legacy_format.dart';
+import 'package:live_store/src/backup/record_tasks.dart';
 import 'package:live_store/src/backup/v4_format.dart';
 import 'package:live_store/src/database/database.dart';
 import 'package:live_store/src/follow_areas.dart';
@@ -33,11 +34,18 @@ enum RestoreMode {
 /// then write it in one database transaction: a bad file writes nothing
 /// (REG-STORE-009). Only one restore runs at a time.
 final class BackupService {
-  /// Backs up [_store]; [secrets] is needed to export or restore accounts.
-  /// [platform] is the platform family for device-scope settings (default:
-  /// the running operating system).
-  new(this._store, {this.secrets, this.appVersion = '4.0.0', String? platform, this.kdfIterations = 600000})
-    : platform = platform ?? Platform.operatingSystem;
+  /// Backs up [_store]; [secrets] is needed to export or restore accounts,
+  /// [recordTasks] to export or restore recording tasks (they live in the
+  /// recorder's own file). [platform] is the platform family for
+  /// device-scope settings (default: the running operating system).
+  new(
+    this._store, {
+    this.secrets,
+    this.recordTasks,
+    this.appVersion = '4.0.0',
+    String? platform,
+    this.kdfIterations = 600000,
+  }) : platform = platform ?? Platform.operatingSystem;
 
   final LiveStore _store;
 
@@ -54,6 +62,10 @@ final class BackupService {
   /// PBKDF2 iterations for new encrypted secrets sections.
   final int kdfIterations;
 
+  /// The recorder's tasks; without it the `recordTasks` section is neither
+  /// exported nor restored.
+  final RecordTaskBackup? recordTasks;
+
   bool _restoring = false;
 
   /// Builds a v4 backup document. Secrets are included only when
@@ -68,6 +80,7 @@ final class BackupService {
         secrets: secrets,
         passphrase: passphrase,
         iterations: kdfIterations,
+        recordTasks: recordTasks,
       );
 
   /// Writes a v4 backup into [directory] and returns the file.
@@ -176,6 +189,11 @@ final class BackupService {
       throw const FormatException('Follows-only backup: use "restore follows"');
     }
     if (followsOnly) plan.restrictToFollows();
+    if (recordTasks == null && plan.recordTasks != null) {
+      plan
+        ..recordTasks = null
+        ..report.note('recordTasks', 'unsupported');
+    }
     if (secrets == null && plan.secrets != null) {
       plan
         ..secrets = null
@@ -338,6 +356,15 @@ final class BackupService {
     if (plan.secrets case final values? when store != null && values.isNotEmpty) {
       await store.writeAll(values);
       plan.report.written('secrets', values.length);
+    }
+    // Outside the transaction, like secrets: the recorder keeps its own file.
+    final recorder = recordTasks;
+    if (plan.recordTasks case final tasks? when recorder != null) {
+      try {
+        plan.report.written('recordTasks', await recorder.restoreTasks(tasks));
+      } on Object catch (error) {
+        plan.report.note('recordTasks', 'writeFailed', error.runtimeType.toString());
+      }
     }
   }
 

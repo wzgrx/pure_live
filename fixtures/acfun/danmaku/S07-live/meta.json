@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "platform": "acfun",
+  "case": "S07-live",
+  "room": "acfun:41254970",
+  "danmakuKeys": {
+    "author": "41254970",
+    "liveId": "8T5Zd4n34aI"
+  },
+  "capturedAt": "2026-09-27T18:15:25.375726Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://link.xiatou.com/",
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "Origin": "https://live.acfun.cn"
+      }
+    }
+  ],
+  "frames": 784,
+  "raw": {
+    "sha256": "fd3a551232151b427f5fbea0fc1644d569debf42d4e219bea53fc1e4c65572cb",
+    "length": 263799
+  },
+  "scrubbed": [
+    {
+      "where": "visitor/login",
+      "rule": "secret"
+    },
+    {
+      "where": "http.$.host",
+      "rule": "secret"
+    },
+    {
+      "where": "startPlay.data",
+      "rule": "secret"
+    },
+    {
+      "where": "startPlay.videoPlayRes",
+      "rule": "dropped"
+    },
+    {
+      "where": "url.visitor",
+      "rule": "secret"
+    },
+    {
+      "where": "header.tokenInfo",
+      "rule": "secret"
+    },
+    {
+      "where": "register.answer",
+      "rule": "secret"
+    },
+    {
+      "where": "command.ticket",
+      "rule": "secret"
+    },
+    {
+      "where": "signal.CommonStateSignalCurrentRedpackList",
+      "rule": "dropped"
+    },
+    {
+      "where": "signal.CommonStateSignalArLiveTreasureBoxState",
+      "rule": "dropped"
+    },
+    {
+      "where": "signal.CommonStateSignalTopUsers",
+      "rule": "dropped"
+    },
+    {
+      "where": "signal.CommonStateSignalRecentComment",
+      "rule": "dropped"
+    },
+    {
+      "where": "signal.user",
+      "rule": "person"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

@@ -22,10 +22,13 @@ void main() {
   test('F-FAV-08: a missing adapter is a typed error with its own notice', () {
     final sites = {'douyu': PlatformSite(FakeSite('douyu'))};
     expect(sites.of('douyu'), same(sites['douyu']));
-    expect(() => sites.of('cc'), throwsA(isA<PlatformUnsupported>().having((e) => e.platform, 'platform', 'cc')));
-    final text = describeError(const PlatformUnsupported('cc'));
+    expect(
+      () => sites.of('huajiao'),
+      throwsA(isA<PlatformUnsupported>().having((e) => e.platform, 'platform', 'huajiao')),
+    );
+    final text = describeError(const PlatformUnsupported('huajiao'));
     expect(text.title, '平台暂不支持');
-    expect(text.message, contains('网易CC'));
+    expect(text.message, contains('花椒'));
     expect(text.retryable, isFalse);
   });
 
@@ -53,14 +56,14 @@ void main() {
         ],
         child: MaterialApp(
           theme: PureTheme.of(Appearance.light),
-          home: RoomPage(room: RoomRef('cc', '361433')),
+          home: RoomPage(room: RoomRef('huajiao', '361433')),
         ),
       ),
     );
     await tester.pump();
     await tester.pump();
     expect(find.text('平台暂不支持'), findsOneWidget);
-    expect(find.textContaining('网易CC已下线'), findsOneWidget);
+    expect(find.textContaining('花椒已下线'), findsOneWidget);
     expect(find.text('返回'), findsWidgets);
     expect(find.text('重试'), findsNothing, reason: 'retrying cannot help');
   });

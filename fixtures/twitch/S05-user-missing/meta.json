@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S05-user-missing",
+  "capturedAt": "2026-09-27T18:42:11.836562Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Device-Id": "b5651f8fb1994fc1e78a21bca61478d9",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "{\"query\":\"query($login: String!) { user(login: $login) { id login displayName description profileImageURL(width: 300) stream { id title type viewersCount createdAt previewImageURL(width: 640, height: 360) game { id name displayName slug } } lastBroadcast { title game { name displayName } } } }\",\"variables\":{\"login\":\"zzzznotachannelzzzz\"}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-served-by": "gateway",
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "date": "Sun, 27 Sep 2026 18:42:12 GMT",
+      "access-control-allow-origin": "*",
+      "x-amzn-trace-id": "Self=1-6ab96384-2f8352e92f5eb4442a0e8b61;Root=1-6ab96384-c5ce5a7e40f15cfdafe25d12",
+      "content-length": "104",
+      "content-type": "application/json; charset=utf-8",
+      "x-gateway-trace": "24048bae858bfcee83cc2b800b2eb598",
+      "x-router-config-version": "8bf4ae83-aec6-4ad1-9a79-f0e1c671027a"
+    }
+  },
+  "raw": {
+    "sha256": "9ab95e105a91e50e9c6eac3e83472066843ef0fb891e09e0abc31c4ce1ae496e",
+    "length": 104
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

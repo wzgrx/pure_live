@@ -175,24 +175,28 @@ final class PlaybackSession {
     _publish();
     final session = _session;
     final intent = _intent;
-    return _enqueue(() async {
+    return _enqueue(() => _start(request, session, intent));
+  }
+
+  /// Resolves (when no set is known yet), picks the line and opens it; stops
+  /// when a newer open, pause or close took over.
+  Future<void> _start(PlaybackRequest request, int session, int intent) async {
+    if (!_isCurrent(session, intent)) return;
+    var set = _set;
+    if (set == null) {
+      set = await _resolve(request.quality);
       if (!_isCurrent(session, intent)) return;
-      var set = _set;
-      if (set == null) {
-        set = await _resolve(request.quality);
-        if (!_isCurrent(session, intent)) return;
-        _resolving = false;
-        if (set == null) return;
-        _set = set;
-        _quality = set.selected;
-      }
-      final line = _pickLine(set, request.lineId);
-      if (line == null) {
-        _handleFailure(const PlaybackFailure(FailureKind.unavailable, 'no_lines'));
-        return;
-      }
-      await _openLine(line);
-    });
+      _resolving = false;
+      if (set == null) return;
+      _set = set;
+      _quality = set.selected;
+    }
+    final line = _pickLine(set, request.lineId);
+    if (line == null) {
+      _handleFailure(const PlaybackFailure(FailureKind.unavailable, 'no_lines'));
+      return;
+    }
+    await _openLine(line);
   }
 
   /// Resumes (SES-5). A source that had not finished opening is reopened
@@ -205,11 +209,19 @@ final class PlaybackSession {
     _suspensions.clear();
     _publish();
     final intent = _intent;
+    final session = _session;
     return _enqueue(() async {
       if (intent != _intent) return;
       final line = _line;
       if (!_sourceOpened) {
-        if (line != null && !_opening) await _openLine(line);
+        if (_opening) return;
+        if (line != null) {
+          await _openLine(line);
+        } else if (_request case final request?) {
+          // Paused while the open was still resolving or picking its line:
+          // that open stopped, so this one starts it again.
+          await _start(request, session, intent);
+        }
         return;
       }
       await _engine?.play();

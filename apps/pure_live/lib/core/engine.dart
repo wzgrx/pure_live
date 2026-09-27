@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_media/live_media.dart';
@@ -6,9 +7,11 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/core/system_proxy.dart';
 
 /// Creates playback engines: mpv on devices (ADR 0006), a fake in tests.
-/// Hardware decoding follows the setting at creation time; CDN hosts noted
+/// Decoding, output and latency follow the settings at creation time (the
+/// next room or cell picks up a change, F-SET-06); CDN hosts noted
 /// for proxied platforms go through the proxy (F-SET-07).
 final Provider<EngineFactory> engineFactoryProvider = Provider<EngineFactory>((ref) {
   final settings = ref.watch(storeProvider).settings;
@@ -16,7 +19,11 @@ final Provider<EngineFactory> engineFactoryProvider = Provider<EngineFactory>((r
   return () => mpvEngineFactory(
     MpvEngineConfig(
       hardwareDecoding: settings.get(Settings.hardwareDecoding),
-      httpProxy: (uri) => hosts.contains(uri) ? proxyUrl(settings) : null,
+      hardwareDecoder: settings.get(Settings.hardwareDecoder),
+      androidCompatibility: Platform.isAndroid && settings.get(Settings.androidCompatibility),
+      lowLatency: settings.get(Settings.lowLatency),
+      audioOutput: settings.get(Settings.audioOutput).isEmpty ? null : settings.get(Settings.audioOutput),
+      httpProxy: (uri) => hosts.contains(uri) ? proxyUrl(settings, system: ref.read(systemProxyProvider)) : null,
     ),
   )();
 });

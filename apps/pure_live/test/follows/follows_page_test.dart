@@ -120,7 +120,7 @@ void main() {
       follows: [
         _follow('douyu', 'a'),
         _follow('douyu', 'b', state: LiveState.offline),
-        _follow('cc', 'c', state: LiveState.offline),
+        _follow('huajiao', 'c', state: LiveState.offline),
       ],
       refresh: () => refresh,
     );
@@ -130,7 +130,7 @@ void main() {
     expect(find.text('未支持'), findsOneWidget, reason: 'known without the network (F-FAV-08)');
 
     refresh.result.complete(
-      FollowRefreshResult(checked: 2, failedPlatforms: const {}, skipped: const {'cc:c'}, at: _now),
+      FollowRefreshResult(checked: 2, failedPlatforms: const {}, skipped: const {'huajiao:c'}, at: _now),
     );
     await tester.pump();
     await tester.pump();
@@ -156,13 +156,13 @@ void main() {
   testWidgets('F-FAV-08: an unsupported platform says so instead of opening the room', (tester) async {
     await pumpPage(
       tester,
-      follows: [_follow('cc', 'c', state: LiveState.offline)],
+      follows: [_follow('huajiao', 'c', state: LiveState.offline)],
       refresh: () => _Done(null),
     );
     await tester.pump();
     await tester.tap(find.text('主播c'));
     await tester.pump();
-    expect(find.textContaining('网易CC已下线或这个版本还不支持'), findsOneWidget);
+    expect(find.textContaining('花椒已下线或这个版本还不支持'), findsOneWidget);
     expect(find.textContaining('直播间'), findsNothing);
     await tester.pump(const Duration(seconds: 5));
   });

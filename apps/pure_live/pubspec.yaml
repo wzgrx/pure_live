@@ -25,6 +25,7 @@ dependencies:
   live_store: any
   live_ui: any
   path_provider: ^2.1.6
+  qr: ^4.0.0
   url_launcher: ^6.3.2
   window_manager: ^0.5.2
 

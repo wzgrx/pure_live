@@ -6,13 +6,15 @@
 
 #include <memory>
 
+#include "system_bridge.h"
 #include "win32_window.h"
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
  public:
   // Creates a new FlutterWindow hosting a Flutter view running |project|.
-  explicit FlutterWindow(const flutter::DartProject& project);
+  // |primary| marks the main window of the single instance (F-WIN-01).
+  FlutterWindow(const flutter::DartProject& project, bool primary);
   virtual ~FlutterWindow();
 
  protected:
@@ -26,8 +28,16 @@ class FlutterWindow : public Win32Window {
   // The project to run.
   flutter::DartProject project_;
 
+  // Whether this is the single instance's main window.
+  bool primary_;
+
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
+
+  // Tray, SMTC, forwarded launches and window chrome (channel
+  // purelive/windows). Declared after the controller, so it is destroyed
+  // first: its channel uses the engine's messenger.
+  std::unique_ptr<SystemBridge> system_bridge_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

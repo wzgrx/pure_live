@@ -11,7 +11,7 @@ import 'package:pure_live_app/features/danmaku/on_video.dart';
 /// One change of the chat list, for incremental list updates (LST-1).
 @immutable
 final class ChatLogChange {
-  const new({this.appended = 0, this.trimmed = 0, this.removed, this.cleared = false});
+  const new({this.appended = 0, this.trimmed = 0, this.removed, this.cleared = false, this.local = false});
 
   /// Lines added at the end.
   final int appended;
@@ -25,6 +25,10 @@ final class ChatLogChange {
 
   /// Everything was cleared (room change).
   final bool cleared;
+
+  /// The appended line is the user's own local line: shown at once, and the
+  /// list follows again (LST-2).
+  final bool local;
 }
 
 /// The room's chat list: the 500-line history of `live_danmaku` (chats and
@@ -61,6 +65,12 @@ final class ChatLog {
     if (lines.isEmpty) return;
     final change = _history.addAll(lines);
     _notify(ChatLogChange(appended: change.appended, trimmed: change.trimmed));
+  }
+
+  /// Appends the user's own local [line] (F-LI-01).
+  void addLocal(DanmakuEvent line) {
+    final change = _history.addAll([line]);
+    _notify(ChatLogChange(appended: change.appended, trimmed: change.trimmed, local: true));
   }
 
   /// Removes the lines [test] matches, keeping the others in order.
@@ -354,6 +364,29 @@ final class RoomDanmaku {
     } else if (kind == BlockKind.keyword && !known(words)) {
       setFilters(_filters.copyWith(blockedWords: [...words, trimmed]));
     }
+  }
+
+  /// Longest local line (F-LI-01).
+  static const localMaxLength = 100;
+
+  /// F-LI-01: shows [text] as the user's own line, in the list and on the
+  /// video, on this device only; nothing is sent to the platform and no
+  /// filter applies (local lines are never filtered or sampled). False when
+  /// there is nothing to show.
+  bool sendLocal(String text, {String userName = '我'}) {
+    final value = text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (_disposed || value.isEmpty) return false;
+    final line = DanmakuChat(
+      room: room.ref.key,
+      session: 0,
+      receivedAt: _now().microsecondsSinceEpoch,
+      userName: userName,
+      text: String.fromCharCodes(value.runes.take(localMaxLength)),
+      isLocal: true,
+    );
+    chat.addLocal(line);
+    _feedOverlay([line]);
+    return true;
   }
 
   /// Whether [line] is blocked by the filters in force.

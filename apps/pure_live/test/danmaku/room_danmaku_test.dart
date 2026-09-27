@@ -183,6 +183,20 @@ void main() {
     expect(danmaku.chat.length, 1);
   });
 
+  test('F-LI-01: local lines go to the list and the video even while paused, never filtered', () async {
+    final danmaku = create(filters: const DanmakuFilterSettings(blockedWords: ['加油']));
+    addTearDown(danmaku.dispose);
+    await _settle();
+    expect(danmaku.sendLocal('  主播加油  '), isTrue);
+    final line = danmaku.chat.lines.single as DanmakuChat;
+    expect(line.text, '主播加油');
+    expect(line.isLocal, isTrue);
+    expect(overlay.items.map((item) => item.text), ['主播加油'], reason: 'REN-7: local lines always show');
+    expect(danmaku.sendLocal('   '), isFalse);
+    expect(danmaku.sendLocal('字' * 150), isTrue);
+    expect((danmaku.chat.lines.last as DanmakuChat).text.length, RoomDanmaku.localMaxLength);
+  });
+
   test('FLT-2: a block also takes the matching lines off the video at once', () async {
     final danmaku = create()..setPlaying(playing: true);
     addTearDown(danmaku.dispose);

@@ -63,9 +63,60 @@ class ChatPanel extends StatelessWidget {
         Expanded(
           child: ChatList(key: ObjectKey(danmaku), log: danmaku.chat, onLine: onLine),
         ),
+        LocalChatInput(danmaku: danmaku),
       ],
     );
   }
+}
+
+/// F-LI-01: a line only this device shows, in the list and on the video.
+/// Nothing reaches the platform or its account.
+class LocalChatInput extends StatefulWidget {
+  const new({required this.danmaku, super.key});
+
+  final RoomDanmaku danmaku;
+
+  @override
+  State<LocalChatInput> createState() => _LocalChatInputState();
+}
+
+class _LocalChatInputState extends State<LocalChatInput> {
+  final TextEditingController _text = TextEditingController();
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  void _send() {
+    if (widget.danmaku.sendLocal(_text.text)) _text.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(Space.s3, Space.s1, Space.s1, Space.s2),
+    child: Row(
+      children: [
+        Expanded(
+          child: TextField(
+            key: const ValueKey('local-chat-input'),
+            controller: _text,
+            maxLength: RoomDanmaku.localMaxLength,
+            textInputAction: TextInputAction.send,
+            onSubmitted: (_) => _send(),
+            decoration: const InputDecoration(
+              isDense: true,
+              counterText: '',
+              hintText: '发条本地弹幕（只在本机显示）',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        IconButton(tooltip: '发送', icon: const Icon(Icons.send), onPressed: _send),
+      ],
+    ),
+  );
 }
 
 class _StatusBar extends StatelessWidget {
@@ -274,6 +325,11 @@ class ChatListState extends State<ChatList> {
   }
 
   void _onChange(ChatLogChange change) {
+    if (change.local) {
+      // LST-2: the user's own line shows at once and the list follows it.
+      if (mounted) follow();
+      return;
+    }
     if (change.cleared) {
       _frozen = null;
       _unseen = 0;

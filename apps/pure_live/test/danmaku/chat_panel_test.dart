@@ -101,6 +101,28 @@ void main() {
     expect(find.textContaining('m45'), findsOneWidget, reason: 'following again');
   });
 
+  testWidgets('F-LI-01: a local line shows at once, on this device only, and the list follows it', (tester) async {
+    await pumpPanel(tester);
+    await deliver(tester, batchOf([for (var i = 0; i < 40; i++) chatLine('u$i', 'm$i')]));
+    await tester.drag(find.byType(ListView), const Offset(0, 300));
+    await tester.pumpAndSettle();
+    expect(list(tester).following, isFalse);
+
+    await tester.enterText(find.byKey(const ValueKey('local-chat-input')), '  主播  加油  ');
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    await tester.pumpAndSettle();
+    expect(list(tester).following, isTrue, reason: 'LST-2: a local line brings the list back to the newest');
+    expect(find.textContaining('主播 加油'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('local-chat-input'))).controller!.text, isEmpty);
+    expect(source.feeds.single.settings, isEmpty, reason: 'nothing goes to the worker or the platform');
+
+    // Blank input sends nothing.
+    await tester.enterText(find.byKey(const ValueKey('local-chat-input')), '   ');
+    await tester.tap(find.byTooltip('发送'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ChatLineTile).evaluate().length, lessThanOrEqualTo(41));
+  });
+
   testWidgets('LST-3: blocking while frozen removes the lines and keeps the position', (tester) async {
     final (danmaku, _) = await pumpPanel(tester);
     await deliver(tester, batchOf([for (var i = 0; i < 40; i++) chatLine(i.isEven ? 'even' : 'odd', 'm$i')]));
@@ -170,9 +192,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('屏蔽关键词'));
     await tester.pumpAndSettle();
-    final field = tester.widget<TextField>(find.byType(TextField));
+    final field = tester.widget<TextField>(find.descendant(of: find.byType(Dialog), matching: find.byType(TextField)));
     expect(field.controller!.text, '加群领福利 快来');
-    await tester.enterText(find.byType(TextField), '加群');
+    await tester.enterText(find.descendant(of: find.byType(Dialog), matching: find.byType(TextField)), '加群');
     await tester.tap(find.widgetWithText(FilledButton, '屏蔽'));
     await tester.pumpAndSettle();
 

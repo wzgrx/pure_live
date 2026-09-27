@@ -19,12 +19,14 @@ ALLOWED = {
     'packages/live_core': {'live_net'},
     'packages/live_danmaku': {'live_core', 'live_net'},
     'packages/live_media': {'live_core', 'live_net'},
+    # Flutter binding of live_media's engine interface to media_kit (ADR 0015).
+    'packages/live_player': {'live_media', 'live_core', 'live_net'},
     'packages/live_record': {'live_media', 'live_core', 'live_net'},
     'packages/live_store': {'live_core'},
     'packages/live_ui': set(),
     'packages/live_platform': set(),
     'apps/pure_live': {
-        'live_ui', 'live_media', 'live_record', 'live_danmaku', 'live_store', 'live_core', 'live_net',
+        'live_ui', 'live_media', 'live_player', 'live_record', 'live_danmaku', 'live_store', 'live_core', 'live_net',
         'live_platform',
     },
     'tools/live_cli': {'live_core', 'live_net', 'live_danmaku', 'live_media', 'live_record'},
@@ -34,7 +36,10 @@ ALLOWED = {
 }
 
 # Must run under plain `dart test` and be callable from live_cli.
-PURE_DART = {'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'tools/live_cli', 'tools/check_latest'}
+PURE_DART = {
+    'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'packages/live_media', 'packages/live_store',
+    'tools/live_cli', 'tools/check_latest',
+}
 
 IMPORT = re.compile(r"""^\s*(?:import|export)\s+['"]package:([a-z0-9_]+)/""", re.M)
 SECTION = re.compile(r'^(dependencies|dev_dependencies|dependency_overrides):\s*$')

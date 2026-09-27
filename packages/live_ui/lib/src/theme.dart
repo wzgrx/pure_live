@@ -1,0 +1,267 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:live_ui/src/color_tokens.dart';
+import 'package:live_ui/src/metrics.dart';
+
+/// The three appearances of spec/design/principles.md §2.2.
+enum Appearance {
+  /// Light surfaces.
+  light,
+
+  /// Dark surfaces.
+  dark,
+
+  /// Dark with pure black surfaces (OLED).
+  black,
+}
+
+/// Values the Material [ColorScheme] has no slot for (spec/design/tokens.json).
+@immutable
+final class LiveTheme extends ThemeExtension<LiveTheme> {
+  /// Creates the extension.
+  const new({
+    required this.live,
+    required this.onLive,
+    required this.success,
+    required this.warning,
+    required this.focusRing,
+    required this.numeric,
+  });
+
+  /// "Live" badge fill; semantic, not the brand colour.
+  final Color live;
+
+  /// Text on [live].
+  final Color onLive;
+
+  /// Success state.
+  final Color success;
+
+  /// Warning state.
+  final Color warning;
+
+  /// Keyboard and remote focus outline.
+  final Color focusRing;
+
+  /// Tabular figures for audience counts, durations and bit rates, so numbers
+  /// do not shift when they refresh.
+  final TextStyle numeric;
+
+  /// The extension of [context]'s theme.
+  static LiveTheme of(BuildContext context) => Theme.of(context).extension<LiveTheme>()!;
+
+  @override
+  LiveTheme copyWith({
+    Color? live,
+    Color? onLive,
+    Color? success,
+    Color? warning,
+    Color? focusRing,
+    TextStyle? numeric,
+  }) => LiveTheme(
+    live: live ?? this.live,
+    onLive: onLive ?? this.onLive,
+    success: success ?? this.success,
+    warning: warning ?? this.warning,
+    focusRing: focusRing ?? this.focusRing,
+    numeric: numeric ?? this.numeric,
+  );
+
+  @override
+  LiveTheme lerp(LiveTheme? other, double t) {
+    if (other == null) return this;
+    return LiveTheme(
+      live: Color.lerp(live, other.live, t)!,
+      onLive: Color.lerp(onLive, other.onLive, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      focusRing: Color.lerp(focusRing, other.focusRing, t)!,
+      numeric: TextStyle.lerp(numeric, other.numeric, t)!,
+    );
+  }
+}
+
+/// Builds [ThemeData] from the design tokens.
+abstract final class PureTheme {
+  /// The theme for [appearance] on [platform].
+  static ThemeData of(Appearance appearance, {TargetPlatform? platform}) {
+    final tokens = switch (appearance) {
+      Appearance.light => ColorTokens.light,
+      Appearance.dark => ColorTokens.dark,
+      Appearance.black => ColorTokens.black,
+    };
+    final brightness = appearance == Appearance.light ? Brightness.light : Brightness.dark;
+    final scheme = ColorScheme(
+      brightness: brightness,
+      primary: tokens.primary,
+      onPrimary: tokens.onPrimary,
+      primaryContainer: tokens.primaryContainer,
+      onPrimaryContainer: tokens.onPrimaryContainer,
+      secondary: tokens.secondary,
+      onSecondary: tokens.onSecondary,
+      secondaryContainer: tokens.secondaryContainer,
+      onSecondaryContainer: tokens.onSecondaryContainer,
+      tertiary: tokens.tertiary,
+      onTertiary: tokens.onTertiary,
+      tertiaryContainer: tokens.tertiaryContainer,
+      onTertiaryContainer: tokens.onTertiaryContainer,
+      error: tokens.error,
+      onError: tokens.onError,
+      errorContainer: tokens.errorContainer,
+      onErrorContainer: tokens.onErrorContainer,
+      surface: tokens.surface,
+      onSurface: tokens.onSurface,
+      surfaceDim: tokens.surfaceDim,
+      surfaceBright: tokens.surfaceBright,
+      surfaceContainerLowest: tokens.surfaceContainerLowest,
+      surfaceContainerLow: tokens.surfaceContainerLow,
+      surfaceContainer: tokens.surfaceContainer,
+      surfaceContainerHigh: tokens.surfaceContainerHigh,
+      surfaceContainerHighest: tokens.surfaceContainerHighest,
+      onSurfaceVariant: tokens.onSurfaceVariant,
+      outline: tokens.outline,
+      outlineVariant: tokens.outlineVariant,
+      inverseSurface: tokens.inverseSurface,
+      onInverseSurface: tokens.inverseOnSurface,
+      inversePrimary: tokens.inversePrimary,
+      shadow: const Color(0xFF000000),
+      scrim: const Color(0xFF000000),
+    );
+    final target = platform ?? defaultTargetPlatform;
+    final text = _textTheme(target).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
+    final numeric = text.labelMedium!.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+    final desktop =
+        target == TargetPlatform.windows || target == TargetPlatform.linux || target == TargetPlatform.macOS;
+    final overlayRadius = BorderRadius.circular(desktop ? Radii.r2 : Radii.r4);
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      brightness: brightness,
+      platform: target,
+      textTheme: text,
+      scaffoldBackgroundColor: scheme.surface,
+      visualDensity: desktop ? VisualDensity.compact : VisualDensity.standard,
+      materialTapTargetSize: desktop ? MaterialTapTargetSize.shrinkWrap : MaterialTapTargetSize.padded,
+      splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+      appBarTheme: AppBarTheme(
+        backgroundColor: scheme.surface,
+        foregroundColor: scheme.onSurface,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: text.titleLarge,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 64,
+        backgroundColor: scheme.surfaceContainer,
+        indicatorColor: scheme.secondaryContainer,
+        labelTextStyle: WidgetStatePropertyAll(text.labelMedium),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: scheme.surface,
+        indicatorColor: scheme.secondaryContainer,
+        selectedLabelTextStyle: text.labelMedium!.copyWith(color: scheme.onSurface),
+        unselectedLabelTextStyle: text.labelMedium!.copyWith(color: scheme.onSurfaceVariant),
+      ),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: scheme.surfaceContainerLow,
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.r3)),
+      ),
+      chipTheme: ChipThemeData(
+        shape: const StadiumBorder(),
+        labelStyle: text.labelLarge,
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: overlayRadius.topLeft)),
+        showDragHandle: true,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: scheme.surfaceContainerHigh,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: overlayRadius),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: scheme.surfaceContainer,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(desktop ? Radii.r2 : Radii.r3)),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.r3)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: scheme.surfaceContainerHigh,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.full), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s3),
+      ),
+      scrollbarTheme: ScrollbarThemeData(
+        // Desktop keeps a thin scrollbar visible (principles §2.1).
+        thumbVisibility: WidgetStatePropertyAll(desktop),
+        thickness: const WidgetStatePropertyAll(6),
+        radius: const Radius.circular(Radii.r1),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+          TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
+        },
+      ),
+      extensions: [
+        LiveTheme(
+          live: FixedColors.live,
+          onLive: FixedColors.onLive,
+          success: tokens.success,
+          warning: tokens.warning,
+          focusRing: tokens.focusRing,
+          numeric: numeric,
+        ),
+      ],
+    );
+  }
+
+  /// Type scale of spec/design/tokens.json; the system font with explicit CJK
+  /// fallbacks (principles §2.3).
+  static TextTheme _textTheme(TargetPlatform platform) {
+    final family = platform == TargetPlatform.windows ? 'Microsoft YaHei UI' : null;
+    const fallback = ['Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Noto Sans CJK SC'];
+    TextStyle style(double size, double height, FontWeight weight) => TextStyle(
+      fontFamily: family,
+      fontFamilyFallback: fallback,
+      fontSize: size,
+      height: height / size,
+      fontWeight: weight,
+      letterSpacing: 0,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
+    const semibold = FontWeight.w600;
+    const regular = FontWeight.w400;
+    return TextTheme(
+      displayLarge: style(57, 64, regular),
+      displayMedium: style(45, 52, regular),
+      displaySmall: style(36, 52, semibold),
+      headlineLarge: style(32, 40, semibold),
+      headlineMedium: style(28, 40, semibold),
+      headlineSmall: style(24, 34, semibold),
+      titleLarge: style(22, 32, semibold),
+      titleMedium: style(16, 24, semibold),
+      titleSmall: style(14, 20, semibold),
+      bodyLarge: style(16, 24, regular),
+      bodyMedium: style(14, 20, regular),
+      bodySmall: style(12, 18, regular),
+      labelLarge: style(14, 20, semibold),
+      labelMedium: style(12, 18, semibold),
+      labelSmall: style(12, 16, semibold),
+    );
+  }
+}

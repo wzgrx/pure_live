@@ -8,7 +8,7 @@
 |---|---|---|
 | [0001](0001-v4-rewrite-decisions.md) | v4 重写的 12 项基础决定 | 已接受（播放内核一项被 0006 取代，仓库布局被 0007 取代） |
 | [0002](0002-media-kit-fork.md) | media_kit 使用 Predidit 分支的自维护副本 | 已接受 |
-| [0003](0003-platform-batches.md) | 平台分批与去留标准 | 已接受 |
+| [0003](0003-platform-batches.md) | 平台分批与去留标准 | 已接受（IPTV 数据库一项被 0024 取代） |
 | [0004](0004-storage-and-migration.md) | 存储与旧数据迁移 | 已接受 |
 | [0005](0005-recording-without-ffmpegkit.md) | 去掉 FFmpegKit 后的录制方案 | 已接受 |
 | [0006](0006-license-compliance.md) | 许可证合规：保留 AGPL-3.0，移除不兼容组件 | 已接受 |
@@ -28,7 +28,8 @@
 | [0020](0020-danmaku-render.md) | 画面弹幕渲染：单一 RenderBox、统一速度与按需排版 | 已接受 |
 | [0021](0021-recording.md) | 录制：进程内拼接直写 FLV、任务管理与恢复、回放不录 | 已接受 |
 | [0022](0022-sync-and-updates.md) | 同步、备份扩展、诊断、更新、分享口令与首启向导 | 已接受 |
-| [0023](0023-room-page.md) | 直播间页面：展示状态、单一视频表面、弹幕接入与手势 | 已接受 |
+| [0023](0023-room-page.md) | 直播间页面的结构、手势层与平台插件 | 已接受 |
+| [0024](0024-iptv.md) | IPTV：独立模块 live_iptv，数据进主库，旧库只读导入 | 已接受 |
 
 ## 模板
 

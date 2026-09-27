@@ -7,7 +7,7 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 
 ## 0. 去留评估（ADR 0003 下线标准）
 
-2026-09-28 从中国大陆直连实测（不需要代理）：
+2026-09-28 实测。注意：本机“直连”经系统层隧道出口（`203.0.113.8`），与 Clash 代理出口（`203.0.113.9`）都在境外；中国大陆真实直连没有测，是否需要代理 [待确认]。
 
 | 标准 | 结论 | 证据 |
 |---|---|---|
@@ -73,7 +73,7 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 - v4 提供三档：`30` 高画質、`20` 標準、`10` 低画質（id 用低延迟 mode）；每档取高延迟一族的列表（mode + 1），没有时退回低延迟。不提供主列表：ffmpeg 打开主列表会同时拉全部变体，实测 150 秒内播不出 30 秒；单个变体正常。
 - 线路一条，id = 媒体主机（`us-west-1-media.live.fc2.com`）；编码 AVC（主列表 `CODECS="avc1…,mp4a.40.2"`）。
 - 媒体请求头不是必须的（ffmpeg 不带任何头也能播）；v4 带 `Origin`/`Referer`/UA 与网页一致。
-- 旧版诊断说分片签名绑定出口 IP（分片地址带 `time`、`hash`）。实测没有观察到：授权和控制连接走代理（美国出口），再分别用代理和直连（中国出口）取变体列表和全部分片，结果一样——列表 200，分片 200 与 403 交替（逐个顺序请求时，窗口两端的分片尚未生成或已过期，两种出口都如此）。v4 仍让接口、控制连接、媒体走同一平台路由（平台代理设置同时用于三者），避免依赖这个结论。
+- 旧版诊断说分片签名绑定出口 IP（分片地址带 `time`、`hash`）。实测没有观察到：授权和控制连接走 Clash 代理出口，再分别用同一出口和本机默认出口（另一个 IP）取变体列表和全部分片，结果一样——列表 200，分片 200 与 403 交替（逐个顺序请求时，窗口两端的分片尚未生成或已过期，两种出口都如此）。v4 仍让接口、控制连接、媒体走同一平台路由（平台代理设置同时用于三者），避免依赖这个结论。
 
 ## 6. 取流
 
@@ -147,7 +147,7 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 
 ## 11. 样本清单
 
-2026-09-28 直连录制（规则 tools/live_cli/lib/src/fixture/rules/fc2live.dart；控制连接帧由迁移会话的录制脚本写出，格式与 `live_cli danmaku --record` 相同；弹幕用 `live_cli danmaku fc2live --recommended --pick 1 --seconds 120 --record S06-live`，录下后把用例名从 S06-live-b 改回 S06-live）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/fc2live_test.dart、packages/live_danmaku/test/fc2live_test.dart 直接对照正文。
+2026-09-28 录制（本机默认出口；规则 tools/live_cli/lib/src/fixture/rules/fc2live.dart；控制连接帧由迁移会话的录制脚本写出，格式与 `live_cli danmaku --record` 相同；弹幕用 `live_cli danmaku fc2live --recommended --pick 1 --seconds 120 --record S06-live`，录下后把用例名从 S06-live-b 改回 S06-live）。没有旧版期望值（ADR 0016），测试 packages/live_core/test/sites/fc2live_test.dart、packages/live_danmaku/test/fc2live_test.dart 直接对照正文。
 
 | # | 样本 | 覆盖 |
 |---|---|---|

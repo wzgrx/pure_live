@@ -15,9 +15,8 @@ const _userAgent =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 
 /// The Bigo Live adapter (spec/sites/bigo.md): the public recommendation,
-/// details and HLS through the anonymous web token. Needs the platform's
-/// proxy route from mainland China (the studio answer asks for a login
-/// there, §9).
+/// details and HLS through the anonymous web token (§6.1). The segments are
+/// scrambled: playback needs a relay that applies [BigoProtection] (§5).
 final class BigoSite implements LiveSite, CatalogSource, RoomSource, StreamSource, LinkResolver {
   /// Creates the adapter; [random] seeds the token request (tests).
   new(this.http, {Random? random}) : _random = random ?? Random.secure();

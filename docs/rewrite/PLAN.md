@@ -15,7 +15,7 @@
 | 仓库与分支 | 原仓库、只用 `master`；改成 Dart pub workspace，旧应用移到 `apps/legacy`，新应用在 `apps/pure_live` | 保留 stars、issues、发布记录和应用内更新地址；底层包可以先接回旧应用，边重写边发布 |
 | 替换方式 | 底层（平台接口、网络、播放中继、弹幕协议、存储）先抽成独立包，旧应用改为依赖它们；界面层在新应用里整体重做，功能对齐后一次切换 | 底层可以逐个开关验证；界面两套并存的成本太高 |
 | 技术栈 | Flutter 3.47.5 / Dart 3.13.4、Riverpod 3、go_router 18、drift 2.35、dio 5 + 原生网络栈、libmpv（自编 FFmpeg 9） | 全部为官方最新稳定版；去掉内置的 GetX |
-| 播放内核 | Android：mpv 为主、fvp 备用；Windows：mpv。去掉 IJK 和 Exo | 一个 APK 里有三份独立的 FFmpeg 库（合计约 49 MB），libmpv 内还静态链接了一份 |
+| 播放内核 | 全平台只用 mpv；去掉 IJK、Exo 和 fvp（libmdk 是专有库，见 ADR 0006） | 一个 APK 里有三份独立的 FFmpeg 库（合计约 49 MB），libmpv 内还静态链接了一份 |
 | 录制 | 复用播放的本地中继直写 FLV/TS，转封装共用一份 FFmpeg；去掉 FFmpegKit（29 MB） | 录制也能无缝续流，不再每 5 分钟切一段 |
 | 界面 | 重新设计信息架构、布局、视觉、美术和操作逻辑；先出设计系统和页面稿，自审和独立复核后再写代码 | 界面层整体重写，这时改设计几乎不增加成本 |
 | 适配 | 按窗口尺寸等级（紧凑 / 中等 / 展开 / 大 / 超大）设计布局，TV 用方向键焦点模型单独设计 | 手机、平板、折叠屏、桌面窗口、电视用同一套代码 |
@@ -88,6 +88,7 @@
 8.  **隐私默认安全**：Cookie 加密存储；不默认上报任何数据；局域网功能必须配对确认。
 9.  **只有 master**：小步提交、每个验证过的改动都推送；版本号只随正式发布修改。
 10. **Android + Windows 优先**：其它平台的能力保留，但不作为每一步的验收条件。
+11. **许可证**：项目保持 AGPL-3.0。发行物不得包含专有组件、GPL-2.0-only 或许可证不明的代码；每个发布附带原生库的对应源码（ADR 0006）。
 
 ## 04 工具链与依赖基线
 
@@ -106,7 +107,7 @@
 | compileSdk / targetSdk | 37 / 37 | 37（平台 37.2） | build-tools 37.0.0 |
 | minSdk | 26 | 26（待定） | 见第 17 节；影响签名密钥轮换 |
 | Windows 编译器 | MSVC 19.52 预览版 | Visual Studio 最新正式版 | 构建机当前用的是预览版编译器，不符合“最新稳定”原则 |
-| mpv / FFmpeg | 0.41.0 / 9.0.2 | 最新正式版 | 自编；Android 三个架构、Windows、Linux 统一版本 |
+| mpv / FFmpeg | 0.41.0 / 9.0.2 | 最新正式版 | Android、Linux 已自编（0.41.0 + FFmpeg 9.0.2）；Windows 目前是 Predidit 预编译的开发版（0.41.0-1049 + FFmpeg master），改为按正式版标签自编；全平台共享一份 FFmpeg |
 
 ### 核心依赖
 
@@ -119,14 +120,14 @@
 | 网络 | dio + native_dio_adapter（Android 用 cronet_http，Apple 用 cupertino_http） | 5.11.1 / 1.8.0 / 1.9.0 / 3.1.0 | 【重写】原生栈自动跟随系统代理，支持 HTTP/3 |
 | 模型与序列化 | freezed + json_serializable + build_runner | 4.0.2 / 6.14.1 / 2.16.1 | 【新增】 |
 | 多语言 | slang + slang_flutter | 4.19.2 / 4.19.0 | 【替换 easy_localization】类型安全 |
-| 播放 | media_kit（基于 Predidit/media-kit 的自维护分支）、fvp | pub 1.2.6（2025-12）/ 0.38.1 | 【保留】已同步到上游最新提交 803c4a27，见下方说明 |
+| 播放 | media_kit（基于 Predidit/media-kit 的自维护分支） | pub 1.2.6（2025-12） | 【保留】已同步到上游最新提交 803c4a27，见下方说明 |
 | 弹幕渲染 | canvas_danmaku（参考）或自研画布渲染 | 0.3.3 | 【替换 flame_barrage】 |
 | 图片 | extended_image 或 cached_network_image | 10.1.0 / 4.0.2 | 【二选一】必须支持按显示尺寸解码 |
 | TV 焦点 | dpad | 3.0.0 | 【评估】或基于官方 Focus 体系自研 |
 | 桌面窗口 | window_manager | 0.5.2 | 【保留】 |
 | 后台播放 | audio_service | 0.18.19 | 【保留】 |
 | 弹幕协议 | protobuf、web_socket_channel | 6.1.0 / 3.0.3 | 【保留】 |
-| 网页登录 | flutter_inappwebview | 6.1.5（2024-10） | 【隔离】超过一年未更新，封装在接口后面，评估替代 |
+| 网页登录 | flutter_inappwebview | 6.1.5（2024-10） | 【隔离】超过一年未发版，项目实际用的是第三方 6.2.0-beta.3 分支（违反“不用 beta”）；封装在接口后面，评估替代 |
 | 主题 | dynamic_color、flex_color_scheme（可选） | 2.1.0 / 9.0.0 | 【按设计定】 |
 | 日志 | talker_flutter | 5.1.20 | 【替换 logger】本地日志与导出 |
 | 崩溃上报 | sentry_flutter（可选，默认关闭） | 9.30.1 | 【待定】 |
@@ -156,7 +157,7 @@ media_kit 不使用 pub.dev 上的版本，而是基于 <a href="https://github.
 | string_similarity、fuzzywuzzy | 【合并】保留一个或自写 |
 | font_awesome_flutter、remixicon | 【删除】统一用 Material Symbols 可变图标字体 |
 | floating、flutter_floating | 【合并】小窗和画中画统一实现 |
-| better_player_plus、IJK | 【删除】内核只保留 mpv 和 fvp |
+| better_player_plus、IJK | 【删除】内核只保留 mpv |
 | ffmpeg_kit_extended_flutter | 【删除】录制改走本地中继 |
 | syncfusion_flutter_sliders | 【删除】商业许可；用 Material Slider |
 | firebase_core / auth / cloud_firestore | 【待定】国内经常无法访问；建议由 WebDAV 和局域网同步替代 |
@@ -170,7 +171,7 @@ media_kit 不使用 pub.dev 上的版本，而是基于 <a href="https://github.
 - **锁定**：`pubspec.lock`、Gradle 版本目录、`.fvmrc` 全部精确版本；CI 与本地使用同一套工具链。
 - **检查**：新增 `tool/check_latest`，从上面列出的官方渠道查询最新稳定版，与锁定版本比较。每周在 CI 跑一次，落后时自动开升级提交。
 - **升级门禁**：升级提交必须通过全部测试、探针、截图和性能门禁才能合入 `master`。
-- **例外登记**：自维护分支（media_kit、fvp、libmpv）和暂时不能升级的依赖，写进 `docs/adr/`，注明原因和复查日期。
+- **例外登记**：自维护分支（media_kit、libmpv）和暂时不能升级的依赖，写进 `docs/adr/`，注明原因和复查日期。
 
 ## 05 目标架构
 
@@ -196,16 +197,14 @@ pure_live/                     ← pub workspace（只有 master 分支）
     check_latest/              官方最新版本检查
   spec/                        规格：product、constitution、sites/*、modules/*、design/*、regressions
   docs/adr/                    架构决策记录
-  third_party/                 media_kit、fvp 自维护分支；libmpv 构建配方
+  third_party/                 media_kit 自维护分支；libmpv 与 FFmpeg 构建配方
 ```
 
 ### 依赖方向
 
 ```mermaid
 flowchart TD
-  app["apps/pure_live
-界面 · 视图模型"] --> ui["live_ui
-设计系统"]
+  app["apps/pure_live<br/>界面 · 视图模型"] --> ui["live_ui<br/>设计系统"]
   app --> media["live_media"]
   app --> record["live_record"]
   app --> dm["live_danmaku"]
@@ -264,23 +263,20 @@ final class StreamSet {                       // 画质 × 线路，每条带租
 
 ```mermaid
 flowchart LR
-  S["StreamSet
-画质 × 线路 × 租期"] --> R{"本地中继"}
+  S["StreamSet<br/>画质 × 线路 × 租期"] --> R{"本地中继"}
   R -->|expire 会断开| SP["FLV 拼接续流"]
   R -->|HLS 需要改写| HL["HLS 中继"]
   R -->|codec 12 HEVC| HV["HEVC 标签转写"]
   R -->|其它| D["直连"]
-  SP --> E["内核
-mpv / fvp"]
+  SP --> E["内核<br/>mpv"]
   HL --> E
   HV --> E
   D --> E
-  E --> T["纹理
-按显示尺寸"]
+  E --> T["纹理<br/>按显示尺寸"]
   SP --> REC["录制写入"]
 ```
 
-- **内核抽象**：统一的 `PlayerEngine` 接口，事件顺序按真实库定义并写进契约测试；Android 以 mpv 为主、fvp 备用，Windows 用 mpv。
+- **内核抽象**：统一的 `PlayerEngine` 接口，事件顺序按真实库定义并写进契约测试；全平台只用 mpv（fvp 因许可证移除，见 ADR 0006）；Android 的兜底是 mpv 自身的软解回退和 mediacodec 兼容模式。
 - **拆开 5028 行的 PlayerManager**：分成会话（打开 / 关闭）、恢复策略（按错误类型和时间窗口）、续期（交给中继）、画中画和小窗、Windows 热切换，各自独立测试。
 - **起播更快**：解析和连接并行；首屏先用可用的最快线路；支持低延迟模式（mpv 缓存参数按平台调优）。
 - **多画面资源调度**：每格按实际显示尺寸解码和渲染；小格自动降画质；不可见的格子暂停解码；硬件解码不足时按优先级降级。
@@ -531,7 +527,7 @@ mpv / fvp"]
 | 正式签名 | 现在发布的 APK 用调试证书签名，任何人都能用同一证书签出“更新”；也无法上架应用商店 | 换正式密钥，用 APK 签名 v3 的密钥轮换保证覆盖安装：Android 13 起完全支持，9–12 需实测，8 需要重装 |
 | 预览版并行安装 | 新应用测试期间不能影响正式版用户 | 预览版使用包名后缀 `.next`，可与正式版同时安装 |
 | 旧数据迁移 | 关注、历史、设置、Cookie 丢了用户就流失 | 首次启动自动从旧 Hive 数据迁移，保留备份，失败可回退；迁移过程写进测试 |
-| 许可证合规 | 项目是 AGPL-3.0；FFmpeg 以 v3 许可构建；Syncfusion 是商业许可 | 每个依赖登记许可证，CI 检查；应用内自动生成开源许可页 |
+| 许可证合规 | 项目是 AGPL-3.0；fvp 的 libmdk、Syncfusion、ML Kit、GMS 是专有组件；FFmpeg 以 LGPLv3 构建，发布时必须附对应源码 | 移除专有组件；每个发布附原生库源码包；CI 检查许可证；应用内自动生成开源许可页（ADR 0006） |
 | 供应链安全 | 依赖和构建产物被篡改的风险 | GitHub Actions 按提交哈希固定；发布产物附带构建来源证明和 SBOM；依赖审查 |
 | 隐私 | 各平台登录 Cookie 属于敏感信息 | Android Keystore / Windows DPAPI 加密存储；备份时默认不含 Cookie；不默认上报任何数据 |
 | 平台健康巡检 | 平台接口常常悄悄变更，用户先发现 | CI 每天用 `live_cli` 探测所有平台，生成状态 JSON；应用里可以显示“某平台当前异常” |
@@ -556,16 +552,12 @@ flowchart LR
   P0["0 诊断与基线"] --> P1["1 规格与样本"]
   P1 --> P3["3 工程底座"]
   P0 --> P2["2 设计方向与设计系统"]
-  P3 --> P4["4 平台与网络层
-回接旧应用"]
-  P4 --> P5["5 播放、弹幕、录制层
-回接旧应用"]
-  P2 --> P6["6 新应用界面
-预览版 .next"]
+  P3 --> P4["4 平台与网络层<br/>回接旧应用"]
+  P4 --> P5["5 播放、弹幕、录制层<br/>回接旧应用"]
+  P2 --> P6["6 新应用界面<br/>预览版 .next"]
   P5 --> P6
   P6 --> P7["7 其余平台、TV、桌面"]
-  P7 --> P8["8 对齐验收与切换
-v4.0.0"]
+  P7 --> P8["8 对齐验收与切换<br/>v4.0.0"]
 ```
 
 | 阶段 | 内容 | 完成标准 |
@@ -791,7 +783,7 @@ done
 
 - **仓库方式**：原仓库 master 原地替换，旧应用移到 `apps/legacy`
 - **首批平台**：5 个主力（B 站、斗鱼、虎牙、抖音、快手），其余逐个评估
-- **播放内核**：Android mpv 为主、fvp 备用，去掉 IJK 和 Exo
+- **播放内核**：全平台只用 mpv，去掉 IJK、Exo 和 fvp（ADR 0006 取代原“mpv 为主、fvp 备用”）
 - **录制**：去掉 FFmpegKit，改走本地中继 + 共用 FFmpeg
 - **状态管理**：Riverpod 3
 - **签名**：换正式密钥并做 v3 轮换

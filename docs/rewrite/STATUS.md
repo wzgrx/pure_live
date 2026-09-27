@@ -6,8 +6,8 @@
 
 | 阶段 | 状态 | 产出 | 完成标准 |
 |---|---|---|---|
-| 0 诊断与基线 | 进行中 | `docs/rewrite/DIAGNOSIS.md`、`docs/rewrite/BASELINE.md` | 诊断报告和基线数据落档 |
-| 1 规格与样本 | 未开始 | `spec/`、`spec/regressions.md`、`fixtures/` | 每条结论附旧代码位置；待确认项清零 |
+| 0 诊断与基线 | **完成**（2026-09-27） | `docs/rewrite/DIAGNOSIS.md`、`docs/rewrite/BASELINE.md` | 诊断报告和基线数据落档 |
+| 1 规格与样本 | 进行中 | `spec/`、`spec/regressions.md`、`fixtures/` | 每条结论附旧代码位置；待确认项清零 |
 | 2 设计方向与设计系统 | 未开始 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 未开始 | workspace、`apps/legacy`、CI、hooks、`live_cli`、`check_latest` | 旧应用照常构建发布，CI 全绿 |
 | 4 平台与网络层 | 未开始 | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过；旧应用接入后发布 3.3.x |
@@ -27,6 +27,17 @@
 - media_kit 同步到 Predidit `803c4a27`（ADR 0002）。
 - 仓库只保留 `master` 分支。
 
+## 旧应用（3.3.x）待办
+
+诊断发现、需要在 v4 切换前先修到旧应用里的事项：
+
+- 多画面屏蔽词大小写不一致（含大写的屏蔽词在多画面不生效）。
+- 移除 Syncfusion 滑块、fuzzywuzzy 和 13 个未使用的依赖（许可证合规，ADR 0006）。
+- 发布时附上原生库（FFmpeg、mpv 等）的对应源码包。
+- 增加“导出 v4 备份”，提示仅在 Firestore 上有配置的用户导出（ADR 0004）。
+- 录制改为本地中继直写，FFmpegKit 保留一个版本作为回退（ADR 0005）。
+
 ## 日志
 
 - 2026-09-27：方案批准；同步方案、宪法、决策记录到 `master`；开始第 0 阶段。
+- 2026-09-27：第 0 阶段完成：8 份模块诊断、旧版基线（Windows、K90）、决策记录 0003–0006；依据许可证诊断，播放内核改为全平台只用 mpv。进入第 1 阶段。

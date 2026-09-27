@@ -12,7 +12,7 @@
 | 录制 | `lib/recorder` 1.42 万行 | 每次续期都新开一次尝试，文件有缺口；FFmpegKit 截断输出衍生出约 4400 行 HLS 补丁；TS 分段拼接有约 90 ms 时钟阶跃 | 中继直写 FLV、自带 HLS 下载器、共享 libavformat 转封装；去掉 FFmpegKit | `live_record` |
 | 应用骨架与数据 | 内置 GetX 1.57 万行；`lib/common` 2 万行；约 230 个设置键 | GetX 渗透 43% 的文件；所有数据在一个 Hive box，Cookie 和密码明文；启动全程串行 | Riverpod + go_router 重写；drift 存储 + 加密密钥；旧数据只读导入 | `live_store`、`apps/pure_live` |
 | 测试 | 469 个文件、9.9 万行、3565 个用例 | 82% 绑定旧实现；5 个主力平台没有录制样本；替身事件顺序与真实库不一致；66 个 Windows 专属用例在 CI 上从不运行 | 行为转为规格和样本；替身改为回放真实内核录下的事件轨迹 | 各包测试、`tools/live_cli` |
-| 依赖 | 约 150 个 | 冗余组、陈旧依赖、许可证风险（详见依赖报告） | 按 PLAN 第 4 节瘦身 | — |
+| 依赖 | 143 个直接依赖（运行时 120 个） | 13 个完全未用；冗余组 18 类；flutter_inappwebview 实际用 beta 分支；fvp 的 libmdk、Syncfusion、ML Kit、GMS 是专有组件；FFmpeg（LGPLv3）发布时没有附对应源码；Windows 的 libmpv 是 Predidit 预编译的开发版 | 运行时依赖精简到约 60 个；移除专有组件；每个平台一份共享 FFmpeg | — |
 | 原生与工程 | Android 原生约 1600 行；`tool/` 174 个文件 2.56 万行；CI 11 个工作流 | CI 没有 push/PR 触发；发布工作流引用不存在的 Secret；近两个月工程维护提交占全仓的大头（tool 349、workflows 192、docs 913） | 新 CI（ci / nightly / weekly / release）；原生代码收进 `live_platform` 插件；脚本大部分删除 | `live_platform`、`tools/` |
 
 ## 跨模块结论
@@ -30,6 +30,7 @@
 - [0003](../adr/0003-platform-batches.md)：平台分批与去留标准。
 - [0004](../adr/0004-storage-and-migration.md)：存储与旧数据迁移。
 - [0005](../adr/0005-recording-without-ffmpegkit.md)：去掉 FFmpegKit 后的录制方案。
+- [0006](../adr/0006-license-compliance.md)：许可证合规——保留 AGPL-3.0，移除 fvp（libmdk）、Syncfusion、ML Kit、GMS 和 GPL-2.0 组件，发布附原生库源码。播放内核因此改为全平台只用 mpv。
 
 ## 计划调整
 
@@ -59,7 +60,7 @@
 
 诊断报告中标为 [待确认] 的条目由第 1 阶段逐项查证；影响决定的几项：
 
-- Windows 版 libmpv 的 FFmpeg 版本：决定旧式 HEVC 转写中继能否删除。
+- ~~Windows 版 libmpv 的 FFmpeg 版本~~：已查明是 FFmpeg master（Lavc63.13），所有平台都 ≥ 8，能直接识别 codec 12 HEVC，旧式 HEVC 转写中继可以删除。
 - HLS 查询策略是否还有平台产出（唯一产出者 TTingLive 已下线）。
 - 3.0.x 时代签名证书（`c0bb9574…`）的原始 keystore 是否仍在：决定签名轮换谱系怎么建。
 - Android 15 起 dataSync 前台服务每天限 6 小时：长时间录制是否改用其它服务类型。

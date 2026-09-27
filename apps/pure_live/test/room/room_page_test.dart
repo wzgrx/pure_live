@@ -133,15 +133,19 @@ void main() {
   });
 
   void background(WidgetTester tester) {
-    for (final state in [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.paused]) {
-      tester.binding.handleAppLifecycleStateChanged(state);
-    }
+    [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+    ].forEach(tester.binding.handleAppLifecycleStateChanged);
   }
 
   void foreground(WidgetTester tester) {
-    for (final state in [AppLifecycleState.hidden, AppLifecycleState.inactive, AppLifecycleState.resumed]) {
-      tester.binding.handleAppLifecycleStateChanged(state);
-    }
+    [
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ].forEach(tester.binding.handleAppLifecycleStateChanged);
   }
 
   testWidgets('LST-4: back from the background, a chat connection that gave up connects again', (tester) async {

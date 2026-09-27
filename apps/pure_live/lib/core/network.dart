@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The kind of network the device is on (live-room Q-2, F-NEW-10).
@@ -30,21 +31,27 @@ NetworkKind networkKindOf(List<ConnectivityResult> results) {
 /// The network the device is on; unmetered until the platform answers, so a
 /// missing plugin never blocks playback.
 final StreamProvider<NetworkKind> networkKindProvider = StreamProvider<NetworkKind>((ref) async* {
+  try {
+    // The plugin talks through the platform binding; unit tests have none.
+    final _ = ServicesBinding.instance;
+  } on Object {
+    yield NetworkKind.unmetered;
+    return;
+  }
   final connectivity = Connectivity();
   final changes = StreamController<NetworkKind>();
-  final subscription = connectivity.onConnectivityChanged.listen(
-    (results) => changes.add(networkKindOf(results)),
-    onError: (Object _) {},
-  );
-  ref.onDispose(() {
-    unawaited(subscription.cancel());
-    unawaited(changes.close());
-  });
+  ref.onDispose(() => unawaited(changes.close()));
   try {
+    final subscription = connectivity.onConnectivityChanged.listen(
+      (results) => changes.add(networkKindOf(results)),
+      onError: (Object _) {},
+    );
+    ref.onDispose(() => unawaited(subscription.cancel()));
     yield networkKindOf(await connectivity.checkConnectivity());
   } on Object {
     // No plugin on this platform: take the network as unmetered.
     yield NetworkKind.unmetered;
+    return;
   }
   yield* changes.stream;
 });

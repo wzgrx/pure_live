@@ -10,11 +10,16 @@ import 'package:live_record/src/errors.dart';
 import 'package:live_record/src/files.dart';
 import 'package:live_record/src/flv/flv_writer.dart';
 import 'package:live_record/src/gaps.dart';
+import 'package:live_record/src/hls/client.dart';
+import 'package:live_record/src/hls/feed.dart';
+import 'package:live_record/src/hls/hls_writer.dart';
 import 'package:live_record/src/naming.dart';
 import 'package:live_record/src/quality.dart';
 import 'package:live_record/src/retry.dart';
 import 'package:live_record/src/rooms.dart';
+import 'package:live_record/src/segment_files.dart';
 import 'package:live_record/src/settings.dart';
+import 'package:live_record/src/writer.dart';
 import 'package:meta/meta.dart';
 
 /// What a running session is doing (spec §3; the task adds queued, finalizing
@@ -129,7 +134,7 @@ final class _Paced implements FlvPacketSource {
   new(this._inner, this._writer);
 
   final FlvPacketSource _inner;
-  final FlvSessionWriter _writer;
+  final SessionWriter _writer;
 
   @override
   Future<Uint8List?> next() async {
@@ -141,15 +146,40 @@ final class _Paced implements FlvPacketSource {
   Future<void> cancel() => _inner.cancel();
 }
 
+/// Delivers an HLS feed into the writer and tells the session about media.
+final class _HlsTap implements HlsSink {
+  new(this._writer, this._onMedia);
+
+  final HlsSessionWriter _writer;
+  final void Function() _onMedia;
+
+  @override
+  Future<void> get ready => _writer.ready;
+
+  @override
+  void addMedia(HlsMedia media) {
+    _writer.addMedia(media);
+    _onMedia();
+  }
+
+  @override
+  void addMissing(HlsMissing missing) => _writer.addMissing(missing);
+}
+
 /// One recording session (spec §5.4): from start until the user stops it,
 /// the strict check confirms the room is offline, retries run out or a fatal
-/// error happens. It has one writer: reconnections continue the same files.
+/// error happens. It writes through one writer at a time: reconnections
+/// continue the same files; a switch between an FLV and an HLS line closes
+/// the file and continues the numbering.
 ///
 /// Every FLV connection runs through `FlvSplicer`: a lease that cuts the
 /// connection (Douyu `expire`) is renewed and spliced in without a gap; for
 /// other lines the splicer renews at once when the old connection ends, using
-/// a prefetched line when one is valid (§5.2). When the splicer gives up the
-/// outer loop reconnects after a strict room check.
+/// a prefetched line when one is valid (§5.2). An HLS connection runs an
+/// [HlsFeed] (§7): it follows the playlist by sequence number, so a
+/// reconnection continues without duplicates or gaps while the playlist
+/// still holds the next segment. When a connection gives up the outer loop
+/// reconnects after a strict room check. Lines are tried FLV first, then HLS.
 final class RecordSession {
   /// Creates a session for [room] writing into [layout].
   new({
@@ -159,11 +189,13 @@ final class RecordSession {
     required this._files,
     required RecordSettings settings,
     required this._opener,
+    this._hls,
     RecordQuality? quality,
     RecordCursor? cursor,
     bool? autoReconnect,
     this.spliceTimings = const SpliceTimings(),
     this.writerLimits = const FlvWriterLimits(),
+    this.hlsTimings = const HlsTimings(),
     this.requestTimeout = const Duration(seconds: 20),
     this.stopPictureWait = const Duration(seconds: 3),
     this.healthyMedia = const Duration(seconds: 10),
@@ -189,6 +221,9 @@ final class RecordSession {
   /// Writer limits.
   final FlvWriterLimits writerLimits;
 
+  /// HLS feed limits.
+  final HlsTimings hlsTimings;
+
   /// Limit of a strict room check or resolve.
   final Duration requestTimeout;
 
@@ -202,6 +237,7 @@ final class RecordSession {
   final RecordFiles _files;
   final RecordSettings _settings;
   final FlvSourceOpener _opener;
+  final HlsClient? _hls;
   final RecordQuality _quality;
   final RecordCursor? _startCursor;
   final bool _autoReconnect;
@@ -212,15 +248,10 @@ final class RecordSession {
   final RetryPolicy _policy;
 
   late final GapLedger _gaps = GapLedger(files: _files, path: layout.gaps, room: room.key, session: layout.prefix);
-  late final FlvSessionWriter _writer = FlvSessionWriter(
-    files: _files,
-    layout: layout,
-    gaps: _gaps,
-    splitDuration: _settings.splitDuration,
-    splitBytes: _settings.splitBytes,
-    limits: writerLimits,
-    onSegment: _onSegment,
-  );
+  final _retired = <SessionWriter>[];
+  SessionWriter? _writer;
+  final _hlsState = HlsFeedState();
+  HlsFeed? _feed;
   ChatXmlWriter? _chat;
 
   LineCursor? _cursor;
@@ -249,7 +280,7 @@ final class RecordSession {
   /// Current metrics.
   SessionProgress get progress {
     final now = clock.now();
-    final bytes = _writer.bytesWritten;
+    final bytes = _sum((writer) => writer.bytesWritten);
     _samples.add((at: now, bytes: bytes));
     while (_samples.length > 2 && now.difference(_samples.first.at) > const Duration(seconds: 10)) {
       _samples.removeFirst();
@@ -258,12 +289,12 @@ final class RecordSession {
     final span = now.difference(first.at).inMilliseconds;
     final rate = span <= 0 ? 0 : ((bytes - first.bytes) * 8000 / span).round();
     final wall = now.difference(layout.startedAt);
-    final media = _writer.mediaDuration;
+    final media = _mediaDuration;
     final gaps = _gaps.gaps;
     return SessionProgress(
       bytes: bytes,
       media: media > wall ? wall : media,
-      segments: _writer.segments.length,
+      segments: segments.length,
       connections: _connections,
       splices: _splices,
       gaps: gaps.length,
@@ -275,7 +306,55 @@ final class RecordSession {
   }
 
   /// Segments so far.
-  List<RecordedSegment> get segments => _writer.segments;
+  List<RecordedSegment> get segments => [
+    for (final writer in [..._retired, ?_writer]) ...writer.segments,
+  ];
+
+  int _sum(int Function(SessionWriter writer) value) =>
+      [..._retired, ?_writer].fold(0, (sum, writer) => sum + value(writer));
+
+  /// Media units written by every writer of the session.
+  int get _mediaTags => _sum((writer) => writer.mediaTags);
+
+  Duration get _mediaDuration => Duration(milliseconds: _sum((writer) => writer.mediaDuration.inMilliseconds));
+
+  /// The writer for [format]: the current one, or a new one after closing it
+  /// (numbering continues).
+  Future<SessionWriter> _use(StreamFormat format) async {
+    final current = _writer;
+    final wanted = format == StreamFormat.hls ? HlsSessionWriter : FlvSessionWriter;
+    if (current != null && current.runtimeType == wanted) return current;
+    if (current != null) {
+      await current.close();
+      _writer = null;
+      _retired.add(current);
+    }
+    final first = segments.length + 1;
+    final writer = format == StreamFormat.hls
+        ? HlsSessionWriter(
+            files: _files,
+            layout: layout,
+            gaps: _gaps,
+            splitDuration: _settings.splitDuration,
+            splitBytes: _settings.splitBytes,
+            limits: writerLimits,
+            firstIndex: first,
+            onSegment: _onSegment,
+          )
+        : FlvSessionWriter(
+            files: _files,
+            layout: layout,
+            gaps: _gaps,
+            splitDuration: _settings.splitDuration,
+            splitBytes: _settings.splitBytes,
+            limits: writerLimits,
+            firstIndex: first,
+            onSegment: _onSegment,
+          );
+    _writer = writer;
+    unawaited(writer.failure.then((_) => _interrupt()));
+    return writer;
+  }
 
   /// Records chat into the segment XML when chat recording is on (spec §17).
   void addChat(RecordChatMessage message) => _chat?.add(message);
@@ -291,9 +370,8 @@ final class RecordSession {
   Future<SessionResult> run() async {
     if (_started) throw StateError('A session runs once');
     _started = true;
-    if (_settings.danmaku) _chat = ChatXmlWriter(_files, _writer.fileTimeAt);
+    if (_settings.danmaku) _chat = ChatXmlWriter(_files, (wall) => _writer?.fileTimeAt(wall));
     await _gaps.write();
-    unawaited(_writer.failure.then((_) => _interrupt()));
     SessionEnd end;
     RecordFailure? failure;
     try {
@@ -303,10 +381,11 @@ final class RecordSession {
     }
     _setPhase(SessionPhase.finalizing);
     _prefetchTimer?.cancel();
-    final segments = await _writer.close();
+    await _writer?.close();
+    final segments = this.segments;
     await _chat?.close();
     await _gaps.write();
-    final writerFailure = _writer.failed;
+    final writerFailure = [..._retired, ?_writer].map((writer) => writer.failed).nonNulls.firstOrNull;
     if (writerFailure != null && end != SessionEnd.failed) {
       end = SessionEnd.failed;
       failure = writerFailure;
@@ -323,13 +402,15 @@ final class RecordSession {
     );
   }
 
-  /// Stops the session as the user asked (spec §6.7): waits up to 3 s for a
-  /// picture after held prefix-only tags, then stops feeding the writer and
-  /// drops the upstream. [run] completes after the files are closed.
+  /// Stops the session as the user asked (spec §6.7, §7.8): waits up to 3 s
+  /// for a picture after held prefix-only FLV tags, or lets HLS downloads in
+  /// flight finish (one target duration, at most 10 s); then stops feeding
+  /// the writer and drops the upstream. [run] completes after the files are closed.
   Future<void> stop() async {
     if (_stopping) return;
     _stopping = true;
-    await _writer.waitForPicture(stopPictureWait);
+    await _writer?.waitForPicture(stopPictureWait);
+    await _feed?.stop();
     _interrupt();
   }
 
@@ -343,6 +424,7 @@ final class RecordSession {
     _sleep = null;
     if (sleep != null && !sleep.isCompleted) sleep.complete();
     unawaited(_splicer?.cancel());
+    _feed?.cancel();
   }
 
   final _stopSignal = Completer<void>();
@@ -398,7 +480,7 @@ final class RecordSession {
     DateTime? lostAt;
     var lostReason = GapReason.eof;
     while (!_stopping) {
-      _setPhase(_writer.mediaTags == 0 && _connections == 0 ? SessionPhase.resolving : SessionPhase.reconnecting);
+      _setPhase(_mediaTags == 0 && _connections == 0 ? SessionPhase.resolving : SessionPhase.reconnecting);
       StreamLine target;
       if (reuse != null) {
         target = reuse;
@@ -426,22 +508,43 @@ final class RecordSession {
       }
       if (_stopping) break;
 
-      _writer.beginConnection(lostAt: lostAt, reason: lostReason);
-      _mediaAtConnect = _writer.mediaTags;
-      final durationBefore = _writer.mediaDuration;
-      _connections++;
-      final error = await _connect(target);
+      final writer = await _use(target.format);
       if (_stopping) break;
-      final gotMedia = _writer.mediaTags > _mediaAtConnect;
+      writer.beginConnection(lostAt: lostAt, reason: lostReason);
+      _mediaAtConnect = _mediaTags;
+      final durationBefore = _mediaDuration;
+      _connections++;
+      final error = target.format == StreamFormat.hls
+          ? await _connectHls(target, writer as HlsSessionWriter)
+          : await _connect(target, writer as FlvSessionWriter);
+      if (_stopping) break;
+      final gotMedia = _mediaTags > _mediaAtConnect;
       lostAt = clock.now();
       if (gotMedia) {
         _cursor?.succeed();
         _policy.connected();
-        if (_writer.mediaDuration - durationBefore >= healthyMedia) _policy.healthy();
+        _cycleFailures = 0;
+        _cycleUnsupported = 0;
+        if (_mediaDuration - durationBefore >= healthyMedia) _policy.healthy();
       }
       final failure = error == null || gotMedia
           ? RecordFailure(RecordErrorKind.upstreamEof, RecordStage.network, error?.toString())
           : classifyError(error, RecordStage.network);
+      if (failure.kind == RecordErrorKind.unsupportedProtocol) {
+        // This line cannot be recorded (SAMPLE-AES, separate audio…): the
+        // next line at once; only when every line of every quality is like
+        // that does the session fail (§21).
+        _cycleFailures++;
+        _cycleUnsupported++;
+        if (_advanceCursor()) continue;
+        final allUnsupported = _cycleUnsupported == _cycleFailures;
+        _cycleFailures = 0;
+        _cycleUnsupported = 0;
+        if (allUnsupported) return (SessionEnd.failed, failure);
+        final all = RecordFailure(RecordErrorKind.allLinesFailed, RecordStage.stream, failure.message);
+        if (!await _backoff(all)) return (SessionEnd.exhausted, all);
+        continue;
+      }
       if (failure.kind.fatal) return (SessionEnd.failed, failure);
       if (!_autoReconnect) return (SessionEnd.ended, null);
       switch (failure.kind.retry) {
@@ -476,7 +579,10 @@ final class RecordSession {
           // The line failed before delivering media: the next line at once;
           // once every line failed, regular backoff (§4.3).
           lostReason = GapReason.network;
+          _cycleFailures++;
           if (!_advanceCursor()) {
+            _cycleFailures = 0;
+            _cycleUnsupported = 0;
             final all = RecordFailure(RecordErrorKind.allLinesFailed, RecordStage.stream, failure.message);
             if (!await _backoff(all)) return (SessionEnd.exhausted, all);
           }
@@ -489,6 +595,11 @@ final class RecordSession {
   var _mediaAtConnect = 0;
   List<StreamLine> _lastLines = const [];
 
+  /// Line failures since the cursor last wrapped, and how many of them were
+  /// unsupported content.
+  var _cycleFailures = 0;
+  var _cycleUnsupported = 0;
+
   /// Moves the cursor past the failed line; false once every line failed.
   bool _advanceCursor() {
     final cursor = _cursor;
@@ -496,10 +607,18 @@ final class RecordSession {
     return cursor.fail(linesInQuality: _recordable(_lastLines).length);
   }
 
-  static List<StreamLine> _recordable(List<StreamLine> lines) => [
-    for (final line in lines)
-      if (line.format == StreamFormat.flv && (line.url.isScheme('http') || line.url.isScheme('https'))) line,
-  ];
+  /// Lines the recorder can write, FLV first (spliced without gaps, §5.5),
+  /// then HLS (§7) when the session has an HLS client.
+  List<StreamLine> _recordable(List<StreamLine> lines) {
+    bool http(StreamLine line) => line.url.isScheme('http') || line.url.isScheme('https');
+    return [
+      for (final line in lines)
+        if (line.format == StreamFormat.flv && http(line)) line,
+      if (_hls != null)
+        for (final line in lines)
+          if (line.format == StreamFormat.hls && http(line)) line,
+    ];
+  }
 
   /// Resolves the line at the cursor. Only the cursor's quality is requested
   /// (§4.3); a quality without a recordable line is skipped.
@@ -526,7 +645,7 @@ final class RecordSession {
         throw RecordException(
           RecordErrorKind.unsupportedProtocol,
           RecordStage.stream,
-          'no recordable FLV line (HLS recording is not built yet)',
+          'no line in a protocol the recorder writes (HTTP-FLV, HLS)',
         );
       }
     }
@@ -544,16 +663,16 @@ final class RecordSession {
 
   /// Runs one spliced connection; returns the error that ended it, or null
   /// when the upstream ended normally.
-  Future<Object?> _connect(StreamLine line) async {
+  Future<Object?> _connect(StreamLine line, FlvSessionWriter writer) async {
     _line = line;
     final splicer = FlvSplicer(
       line: line,
-      open: (line) async => _Paced(await _opener(line), _writer),
+      open: (line) async => _Paced(await _opener(line), writer),
       renew: _renew,
       emit: (packet) {
         if (_detached) return;
-        _writer.add(packet);
-        if (_phase != SessionPhase.recording && _writer.mediaTags > _mediaAtConnect) {
+        writer.add(packet);
+        if (_phase != SessionPhase.recording && _mediaTags > _mediaAtConnect) {
           _setPhase(SessionPhase.recording);
         }
       },
@@ -577,6 +696,36 @@ final class RecordSession {
     }
   }
 
+  /// Runs one HLS connection (§7); returns the error that ended it, or null
+  /// when the playlist ended (`EXT-X-ENDLIST`) or the session stopped.
+  Future<Object?> _connectHls(StreamLine line, HlsSessionWriter writer) async {
+    _line = line;
+    final feed = HlsFeed(
+      line: line,
+      client: _hls!,
+      sink: _HlsTap(writer, () {
+        if (!_detached && _phase != SessionPhase.recording) _setPhase(SessionPhase.recording);
+      }),
+      state: _hlsState,
+      renew: _renew,
+      onLine: (next) => _line = next,
+      readTimeout: _settings.readTimeout,
+      timings: hlsTimings,
+    );
+    _feed = feed;
+    try {
+      await _orStop(feed.run());
+      return null;
+    } on _Stopped {
+      return null;
+    } on Object catch (error) {
+      return error;
+    } finally {
+      _feed = null;
+      feed.cancel();
+    }
+  }
+
   void _onSpliceEvent(SpliceEvent event) {
     switch (event) {
       case SpliceRenewing(oldEnded: true):
@@ -584,8 +733,9 @@ final class RecordSession {
       case SpliceSwitched():
         _splices++;
         _line = event.line;
-        if (event.oldEnded) {
-          _writer.noteSplice(switchAt: event.switchAt, lostAt: _spliceLostAt ?? clock.now(), shifted: event.shifted);
+        final writer = _writer;
+        if (event.oldEnded && writer is FlvSessionWriter) {
+          writer.noteSplice(switchAt: event.switchAt, lostAt: _spliceLostAt ?? clock.now(), shifted: event.shifted);
         }
         _spliceLostAt = null;
         _schedulePrefetch(event.line);
@@ -609,7 +759,11 @@ final class RecordSession {
     final detail = _detail;
     if (detail == null) throw StateError('No room detail');
     final set = await _rooms.streams(detail, quality: current.requested).timeout(requestTimeout);
-    final lines = _recordable(set.lines);
+    // The same line, or another of the same format: an HLS feed cannot read FLV.
+    final lines = [
+      for (final line in _recordable(set.lines))
+        if (line.format == current.format) line,
+    ];
     if (lines.isEmpty) throw RecordException(RecordErrorKind.noQuality, RecordStage.stream, 'no line on renewal');
     return lines.firstWhere((line) => sameLine(line, current), orElse: () => lines.first);
   }
@@ -620,7 +774,8 @@ final class RecordSession {
   void _schedulePrefetch(StreamLine line) {
     _prefetchTimer?.cancel();
     final lease = line.lease;
-    if (lease == null || lease.cutsConnection) return;
+    // HLS feeds renew their playlist address themselves (§7.6).
+    if (lease == null || lease.cutsConnection || line.format != StreamFormat.flv) return;
     var delay = lease.refreshAt.subtract(const Duration(seconds: 5)).difference(clock.now());
     if (delay < Duration.zero) delay = Duration.zero;
     if (_prefetched != null && delay < const Duration(seconds: 30)) delay = const Duration(seconds: 30);

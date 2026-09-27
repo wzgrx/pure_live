@@ -7,65 +7,12 @@ import 'package:live_record/src/files.dart';
 import 'package:live_record/src/remux.dart';
 import 'package:live_record/src/remux/codec_config.dart';
 import 'package:live_record/src/remux/flv_demux.dart';
+import 'package:live_record/src/remux/mp4_remux.dart';
 import 'package:live_record/src/remux/mp4_writer.dart';
 import 'package:live_record/src/remux/sample_table.dart';
-import 'package:meta/meta.dart';
 
 /// What [remuxFlvToMp4] produced.
-@immutable
-final class FlvRemuxResult {
-  /// Creates a result.
-  const new({
-    required this.videoSamples,
-    required this.audioSamples,
-    required this.keyframes,
-    required this.videoCodec,
-    required this.audioSampleRate,
-    required this.duration,
-    required this.inputBytes,
-    required this.outputBytes,
-    required this.moovBytes,
-    required this.co64,
-    required this.droppedTags,
-    required this.tableBytes,
-  });
-
-  /// Video samples written.
-  final int videoSamples;
-
-  /// Audio samples written.
-  final int audioSamples;
-
-  /// Video sync samples.
-  final int keyframes;
-
-  /// Video codec, or null without video.
-  final VideoCodec? videoCodec;
-
-  /// Audio sampling rate, or null without audio.
-  final int? audioSampleRate;
-
-  /// Movie duration.
-  final Duration duration;
-
-  /// Size of the FLV.
-  final int inputBytes;
-
-  /// Size of the MP4.
-  final int outputBytes;
-
-  /// Size of the `moov` box.
-  final int moovBytes;
-
-  /// Whether chunk offsets needed 64 bits.
-  final bool co64;
-
-  /// Media tags dropped because no sequence header preceded them.
-  final int droppedTags;
-
-  /// Memory the sample tables held (bytes).
-  final int tableBytes;
-}
+typedef FlvRemuxResult = RemuxResult;
 
 /// [Remuxer] that converts FLV recordings to faststart MP4 in pure Dart
 /// ([remuxFlvToMp4]): same code on Android and Windows, no FFmpeg.
@@ -90,8 +37,8 @@ final class FlvToMp4Remuxer implements Remuxer {
   }
 }
 
-const _video = 0;
-const _audio = 1;
+const int _video = videoTrack;
+const int _audio = audioTrack;
 
 /// Seconds between 1904-01-01 (MP4 epoch) and 1970-01-01.
 const _mp4Epoch = 2082844800;

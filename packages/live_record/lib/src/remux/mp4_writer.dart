@@ -241,6 +241,12 @@ final class _Table extends _Node {
 /// Codec description of a track for its sample entry.
 sealed class Mp4Codec {
   const new();
+
+  /// Whether the track is video.
+  bool get isVideo;
+
+  /// Four-character type of the sample entry (`avc1`, `hvc1`, `mp4a`…).
+  String get entryType;
 }
 
 /// H.264 or H.265 video.
@@ -250,6 +256,12 @@ final class Mp4VideoCodec extends Mp4Codec {
 
   /// Decoder configuration (record, size, aspect ratio).
   final VideoConfig config;
+
+  @override
+  bool get isVideo => true;
+
+  @override
+  String get entryType => config.codec == VideoCodec.avc ? 'avc1' : 'hvc1';
 }
 
 /// AAC audio.
@@ -259,6 +271,34 @@ final class Mp4AacCodec extends Mp4Codec {
 
   /// AudioSpecificConfig.
   final AacConfig config;
+
+  @override
+  bool get isVideo => false;
+
+  @override
+  String get entryType => 'mp4a';
+}
+
+/// A sample entry copied as it is from another MP4 (fragmented MP4
+/// recordings keep their initialisation section's entry).
+final class Mp4RawCodec extends Mp4Codec {
+  /// Creates the description from a whole sample entry box ([entry]).
+  const new(this.entry, {required this.isVideo, this.width = 0, this.height = 0});
+
+  /// The sample entry box, header included.
+  final Uint8List entry;
+
+  @override
+  final bool isVideo;
+
+  /// Track width for `tkhd` (display size).
+  final int width;
+
+  /// Track height for `tkhd`.
+  final int height;
+
+  @override
+  String get entryType => String.fromCharCodes(entry, 4, 8);
 }
 
 /// One track of the MP4: its tables, codec and placement on the movie timeline.
@@ -288,7 +328,7 @@ final class Mp4Track {
   final int fallbackHeight;
 
   /// Whether this is a video track.
-  bool get isVideo => codec is Mp4VideoCodec;
+  bool get isVideo => codec.isVideo;
 
   /// Where the first sample is presented on the FLV timeline (ms).
   int get presentationStartMs => startMs + (table.firstOffset * movieTimescale / table.timescale).floor();
@@ -357,7 +397,13 @@ final class Mp4Header {
   static _Raw _fileType(List<Mp4Track> tracks) {
     final codecs = [
       for (final track in tracks)
-        if (track.codec case Mp4VideoCodec(:final config)) config.codec,
+        if (track.codec case Mp4VideoCodec(:final config))
+          config.codec
+        else if (track.codec case Mp4RawCodec(isVideo: true, :final entryType))
+          if (entryType == 'avc1' || entryType == 'avc3')
+            VideoCodec.avc
+          else if (entryType == 'hvc1' || entryType == 'hev1')
+            VideoCodec.hevc,
     ];
     final b = _Bytes();
     b.box('ftyp', () {
@@ -451,6 +497,9 @@ final class _Moov {
       width = config.width > 0 ? config.width : track.fallbackWidth;
       height = config.height > 0 ? config.height : track.fallbackHeight;
       if (config.sarWidth != config.sarHeight) width = (width * config.sarWidth / config.sarHeight).round();
+    } else if (track.codec case Mp4RawCodec(isVideo: true, width: final w, height: final h)) {
+      width = w;
+      height = h;
     }
 
     final head = _Bytes();
@@ -566,6 +615,8 @@ final class _Moov {
               });
             }
           });
+        case Mp4RawCodec(:final entry):
+          b.bytes(entry);
         case Mp4AacCodec(:final config):
           final table = track.table;
           final seconds = table.duration / table.timescale;

@@ -7,12 +7,12 @@ import 'package:live_media/live_media.dart';
 import 'package:live_record/src/chat.dart';
 import 'package:live_record/src/errors.dart';
 import 'package:live_record/src/files.dart';
-import 'package:live_record/src/flv/flv_writer.dart';
 import 'package:live_record/src/naming.dart';
 import 'package:live_record/src/recovery.dart';
 import 'package:live_record/src/remux.dart';
 import 'package:live_record/src/retry.dart';
 import 'package:live_record/src/rooms.dart';
+import 'package:live_record/src/segment_files.dart';
 import 'package:live_record/src/session.dart';
 import 'package:live_record/src/settings.dart';
 import 'package:live_record/src/storage.dart';
@@ -199,7 +199,7 @@ final class RecordManager {
   ///
   /// `rooms` gives strict room checks and stream sets (`SiteRecordRooms` over
   /// the live_core adapters); `store` persists tasks; `opener` connects
-  /// upstream FLV (default: `httpRecordOpener` with `record.readTimeout`);
+  /// upstream FLV and HLS (default: `httpRecordOpener` with `record.readTimeout`);
   /// `remuxer` converts finished segments to MP4 when `record.remuxToMp4` is
   /// on (none: the sources stay FLV); `chat` supplies chat when
   /// `record.danmaku` is on; `files` is the file system (tests pass
@@ -771,7 +771,9 @@ final class RecordManager {
       clock.now(),
       transliterate: _transliterate,
     );
-    final opener = (_opener ?? httpRecordOpener(readTimeout: _settings.readTimeout))(task.room.platform);
+    final upstream = _opener ?? httpRecordOpener(readTimeout: _settings.readTimeout);
+    final opener = upstream.flv(task.room.platform);
+    final hls = upstream.hls(task.room.platform);
     late final RecordSession session;
     session = RecordSession(
       room: task.room,
@@ -780,6 +782,7 @@ final class RecordManager {
       files: _files,
       settings: _settings,
       opener: opener,
+      hls: hls,
       quality: task.quality,
       cursor: task.cursor,
       autoReconnect: task.autoReconnect,
@@ -840,6 +843,7 @@ final class RecordManager {
       runtime.progressTimer = null;
       releaseSlot();
       _stopChat(runtime);
+      hls?.close();
     }
     _progress(runtime, session);
     final info = (runtime.task.session ?? RecordSessionInfo(layout: layout)).copyWith(

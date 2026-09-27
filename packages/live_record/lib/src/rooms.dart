@@ -2,6 +2,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_record/src/errors.dart';
+import 'package:live_record/src/hls/client.dart';
 
 /// What the recorder needs from the platform adapters: the strict room
 /// check (spec §4.1: errors are errors, never "offline") and stream sets.
@@ -36,15 +37,45 @@ final class SiteRecordRooms implements RecordRooms {
       _site<StreamSource>(room.ref.platform).streams(room, quality: quality);
 }
 
-/// Opens upstream FLV connections for a platform.
-typedef RecordOpener = FlvSourceOpener Function(String platform);
+/// The recorder's access to the upstream of one platform: FLV connections
+/// and HLS requests (spec §5, §7), both through the app's proxy policy and
+/// with the line's headers (§18).
+abstract interface class RecordOpener {
+  /// An opener from functions (tests, tools): [flv] opens FLV connections;
+  /// [hls] creates an HLS client for a session, or null when HLS lines
+  /// cannot be recorded.
+  factory({required FlvSourceOpener Function(String platform) flv, HlsClient Function(String platform)? hls}) =
+      _FunctionOpener;
 
-/// The default opener: `openHttpFlv` with [proxy]'s route for the platform and
-/// the `record.readTimeout` idle timeout (spec §5.4, §18).
+  /// Opens FLV connections for [platform].
+  FlvSourceOpener flv(String platform);
+
+  /// A new HLS client for one session of [platform] (it holds the session's
+  /// cookies, §7.7; the session closes it), or null when HLS is not recorded.
+  HlsClient? hls(String platform);
+}
+
+final class _FunctionOpener implements RecordOpener {
+  new({required this._flv, this._hls});
+
+  final FlvSourceOpener Function(String platform) _flv;
+  final HlsClient Function(String platform)? _hls;
+
+  @override
+  FlvSourceOpener flv(String platform) => _flv(platform);
+
+  @override
+  HlsClient? hls(String platform) => _hls?.call(platform);
+}
+
+/// The default opener: `openHttpFlv` and [IoHlsClient] with [proxy]'s route
+/// for the platform, and the `record.readTimeout` idle timeout (spec §5.4, §18).
 RecordOpener httpRecordOpener({
   ProxyPolicy proxy = const FixedProxyPolicy(),
   Duration readTimeout = const Duration(seconds: 15),
-}) =>
-    (platform) =>
-        (line) =>
-            openHttpFlv(line, proxyDirective: proxy.routeFor(platform, line.url).directive, idleTimeout: readTimeout);
+}) => RecordOpener(
+  flv: (platform) =>
+      (line) =>
+          openHttpFlv(line, proxyDirective: proxy.routeFor(platform, line.url).directive, idleTimeout: readTimeout),
+  hls: (platform) => IoHlsClient(findProxy: (url) => proxy.routeFor(platform, url).directive, idleTimeout: readTimeout),
+);

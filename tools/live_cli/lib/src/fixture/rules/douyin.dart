@@ -9,8 +9,9 @@ const ScrubRule _person = ScrubRule.person;
 /// JSON key it is the streamer's public bio, which the legacy parser reads.
 const ScrubRules douyinRules = ScrubRules(
   jsonKeys: {
-    // Anonymous visitor identity issued with ttwid (`odin` in page state).
-    'user_unique_id': _secret, 'user_id': _person,
+    // Anonymous visitor identity issued with ttwid (`odin` in page state; the
+    // room page repeats user_unique_id as `logOptions.device_id`).
+    'user_unique_id': _secret, 'user_id': _person, 'device_id': _secret,
     // Account identity; sec_uid also keys viewers in danmaku.
     'sec_uid': _person,
     // Cookies and signing material, when a page embeds them.

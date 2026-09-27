@@ -81,20 +81,22 @@ void main() {
     expect(setCookie, isNot(contains('TOKENVALUE123')));
   });
 
-  test('writeSample refuses to write when an original survives', () async {
+  test('writeSample refuses to write when an original survives in the request', () async {
     final temp = await Directory.systemTemp.createTemp('fixture-test');
     addTearDown(() => temp.delete(recursive: true));
     final exchange = RawExchange(
+      // The request form repeats the did under a name the rules do not list;
+      // request parts are scrubbed by rules only, so this must be refused.
       request: CaptureRequest(
         url: Uri.parse('https://example.test/api?did=abcdef123456'),
-        headers: const {'Cookie': 'dy_did=abcdef123456'},
+        method: 'POST',
+        body: 'device=abcdef123456',
       ),
       status: 200,
       headers: const {
         'content-type': ['application/json'],
       },
-      // The did also appears under a key the rules do not know.
-      body: utf8.encode('{"did":"abcdef123456","other":"abcdef123456"}'),
+      body: utf8.encode('{"ok":1}'),
       route: 'direct',
       capturedAt: DateTime.utc(2026, 9, 27),
     );
@@ -103,6 +105,26 @@ void main() {
       throwsA(isA<LeakException>()),
     );
     expect(temp.listSync(), isEmpty);
+  });
+
+  test('a body value under an unlisted key is replaced and noted', () async {
+    final temp = await Directory.systemTemp.createTemp('fixture-test');
+    addTearDown(() => temp.delete(recursive: true));
+    final exchange = RawExchange(
+      request: CaptureRequest(url: Uri.parse('https://example.test/api')),
+      status: 200,
+      headers: const {
+        'content-type': ['application/json'],
+      },
+      body: utf8.encode('{"did":"abcdef123456","other":"abcdef123456"}'),
+      route: 'direct',
+      capturedAt: DateTime.utc(2026, 9, 27),
+    );
+    await writeSample(exchange, Scrubber(_rules, seed: 5), directory: temp, platform: 'douyu', sample: 'S01-test');
+    final body = jsonDecode(File('${temp.path}/body.json').readAsStringSync()) as Map<String, Object?>;
+    expect(body['other'], body['did']);
+    expect(body['did'], isNot('abcdef123456'));
+    expect(File('${temp.path}/meta.json').readAsStringSync(), contains('body:elsewhere'));
   });
 
   test('writeSample writes body and meta without secrets', () async {
@@ -208,5 +230,27 @@ void main() {
     expect(meta, isNot(contains('TOKENtoken123456')));
     expect(meta, isNot(contains('DETAILvalue999')));
     expect(meta, contains('whirl'));
+  });
+
+  test('a known value in an unmatched spelling is replaced before the leak check', () async {
+    final temp = await Directory.systemTemp.createTemp('fixture-test');
+    addTearDown(() => temp.delete(recursive: true));
+    final quote = '${String.fromCharCode(92)}"';
+    final page =
+        '<script>var a={"did":"abcdef123456"};setPageViewLog({"odin":"{${quote}did$quote:${quote}abcdef123456$quote}"});</script>';
+    final exchange = RawExchange(
+      request: CaptureRequest(url: Uri.parse('https://live.example.test/room')),
+      status: 200,
+      headers: const {
+        'content-type': ['text/html'],
+      },
+      body: utf8.encode(page),
+      route: 'direct',
+      capturedAt: DateTime.utc(2026, 9, 27),
+    );
+    await writeSample(exchange, Scrubber(_rules, seed: 10), directory: temp, platform: 'x', sample: 'S01-page');
+    final body = File('${temp.path}/body.html').readAsStringSync();
+    expect(body, isNot(contains('abcdef123456')));
+    expect(body, contains('setPageViewLog'));
   });
 }

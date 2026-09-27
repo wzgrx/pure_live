@@ -157,7 +157,12 @@ Future<WrittenSample> writeSample(
     bodyBytes = exchange.body;
   } else {
     final text = utf8.decode(exchange.body, allowMalformed: true);
-    bodyText = ext == 'json' ? _scrubJsonText(text, scrubber) : scrubber.scrubText(text);
+    // Rules find each secret once; replaceKnown then removes the same value in
+    // any other spelling the rules missed (nested escapes, overlapping pairs).
+    final byRules = ext == 'json' ? _scrubJsonText(text, scrubber) : scrubber.scrubText(text);
+    bodyText = scrubber.replaceKnown(byRules);
+    // Visible in meta.json so a reviewer can extend the rules for that spot.
+    if (bodyText != byRules) scrubber.note('body:elsewhere');
   }
   final url = scrubber.scrubQuery(exchange.request.url.toString(), 'url');
   final requestBody = exchange.request.body == null ? null : scrubber.scrubQuery(exchange.request.body!, 'form');

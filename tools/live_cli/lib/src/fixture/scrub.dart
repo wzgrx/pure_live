@@ -263,6 +263,9 @@ class Scrubber {
     return scrubQuery(pairs(pairs(text, _textPair, '"'), _htmlPair, '&quot;'), 'text');
   }
 
+  /// Records that [where] was cleaned by [replaceKnown] rather than a rule.
+  void note(String where) => _records.add(ScrubRecord(where, ScrubRule.secret));
+
   /// Replaces every value already replaced elsewhere (length >= 6) wherever it
   /// appears in [text], with the same synthetic value.
   String replaceKnown(String text) {

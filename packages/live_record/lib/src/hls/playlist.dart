@@ -308,7 +308,8 @@ final class _Parser {
     try {
       return base.resolve(reference);
     } on FormatException {
-      throw FormatException('bad URI in the playlist: $reference');
+      // The reference may carry a token: not in the message (§13).
+      throw const FormatException('bad URI in the playlist');
     }
   }
 
@@ -537,7 +538,7 @@ final class _Parser {
   static Uint8List _iv(String value) {
     final hex = value.startsWith('0x') || value.startsWith('0X') ? value.substring(2) : value;
     if (hex.isEmpty || hex.length > 32 || !RegExp(r'^[0-9a-fA-F]+$').hasMatch(hex)) {
-      throw FormatException('bad IV "$value"');
+      throw const FormatException('bad IV in EXT-X-KEY');
     }
     final padded = hex.padLeft(32, '0');
     return Uint8List.fromList([for (var i = 0; i < 16; i++) int.parse(padded.substring(2 * i, 2 * i + 2), radix: 16)]);

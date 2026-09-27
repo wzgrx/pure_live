@@ -316,18 +316,20 @@ enum RoomMenuAction {
   /// 快捷键 (D-16).
   keys,
 
-  /// 新窗口打开 (Windows; the system agent builds it).
+  /// 新窗口打开 (F-WIN-02, Windows).
   newWindow,
 }
 
 /// The ⋮ menu entries for this platform.
-List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({required bool desktop, required bool danmakuAvailable}) {
-  PopupMenuItem<RoomMenuAction> item(RoomMenuAction value, IconData icon, String label, {bool enabled = true}) =>
-      PopupMenuItem(
-        value: value,
-        enabled: enabled,
-        child: ListTile(leading: Icon(icon), title: Text(label), contentPadding: EdgeInsets.zero),
-      );
+List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({
+  required bool desktop,
+  required bool danmakuAvailable,
+  bool newWindow = false,
+}) {
+  PopupMenuItem<RoomMenuAction> item(RoomMenuAction value, IconData icon, String label) => PopupMenuItem(
+    value: value,
+    child: ListTile(leading: Icon(icon), title: Text(label), contentPadding: EdgeInsets.zero),
+  );
   return [
     item(RoomMenuAction.switchRoom, Icons.swap_horiz, '切换直播间'),
     item(RoomMenuAction.openSite, Icons.open_in_new, '打开原站'),
@@ -337,10 +339,9 @@ List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({required bool desktop, req
     item(RoomMenuAction.volume, Icons.volume_up_outlined, '房间音量'),
     if (danmakuAvailable) item(RoomMenuAction.danmakuSettings, Icons.tune, '弹幕设置'),
     item(RoomMenuAction.multiview, Icons.grid_view, '加入多画面'),
-    if (desktop) ...[
-      item(RoomMenuAction.keys, Icons.keyboard_outlined, '快捷键'),
-      item(RoomMenuAction.newWindow, Icons.open_in_browser, '新窗口打开', enabled: false),
-    ],
+    if (desktop) item(RoomMenuAction.keys, Icons.keyboard_outlined, '快捷键'),
+    // F-WIN-02: Windows only.
+    if (newWindow) item(RoomMenuAction.newWindow, Icons.open_in_browser, '新窗口打开'),
   ];
 }
 

@@ -64,6 +64,8 @@ class NowPlayingNotifier extends Notifier<NowPlaying?> {
 
   /// Stops following [session] if it is the current one.
   void detach(PlaybackSession session) {
+    // Callers defer this past a frame; the app may be gone by then.
+    if (!ref.mounted) return;
     if (identical(state?.session, session)) state = null;
   }
 }

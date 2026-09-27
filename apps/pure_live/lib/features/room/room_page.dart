@@ -28,6 +28,10 @@ import 'package:pure_live_app/features/room/player_view.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/features/room/room_layout.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
+import 'package:pure_live_app/features/system/mini_player.dart';
+import 'package:pure_live_app/features/system/now_playing.dart';
+import 'package:pure_live_app/features/system/pip.dart';
+import 'package:pure_live_app/features/system/pip_view.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -90,13 +94,51 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   Timer? _defaultFullscreen;
   bool _adoptedOnce = false;
 
+  // System integration (ADR 0025). Notifiers are read in initState: ref is
+  // unusable in dispose, and provider changes wait for the next frame.
+  late final MiniPlayerController _mini;
+  late final NowPlayingNotifier _nowPlaying;
+  late final PipController _pip;
+  late final FrameScheduler _afterFrame;
+  NowPlaying? _playing;
+  bool _resumed = false;
+  bool _surfaceReady = true;
+
   bool get _touch => touchPlatform;
 
   @override
   void initState() {
     super.initState();
+    _mini = ref.read(miniPlayerProvider.notifier);
+    _nowPlaying = ref.read(nowPlayingProvider.notifier);
+    _pip = ref.read(pipProvider.notifier);
+    _afterFrame = ref.read(frameSchedulerProvider);
+    // SES-9: the mini window hands back the same room's playback.
+    final reclaimed = _mini.reclaim(widget.room);
+    final handoff = ref.read(sessionHandoffProvider);
+    if (reclaimed != null) handoff.pending = reclaimed.playing.session;
     // Listening keeps the auto-disposed session alive for the page's life.
     _session = ref.listenManual(playbackSessionProvider, (_, _) {}).read();
+    if (reclaimed != null) {
+      final session = reclaimed.playing.session;
+      if (identical(_session, session)) {
+        _resumed = true;
+        _playing = reclaimed.playing;
+        // SURF-5: the video mounts once the mini window let go of it.
+        _surfaceReady = false;
+        unawaited(
+          reclaimed.surfaceReleased.then((_) {
+            if (mounted) setState(() => _surfaceReady = true);
+          }),
+        );
+      } else {
+        // Another room page holds the page session: the hand-back is dropped.
+        handoff.pending = null;
+        final nowPlaying = _nowPlaying;
+        _afterFrame(() => nowPlaying.detach(session));
+        unawaited(session.close().then((_) => session.dispose()).catchError((Object _) {}));
+      }
+    }
     _states = _session.states.listen(_onPlayback);
     final prefs = ref.read(danmakuPrefsProvider);
     _overlayController
@@ -135,6 +177,15 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   @override
   void dispose() {
     _defaultFullscreen?.cancel();
+    // PIP-4: a playing room shrinks to the mini window, which then owns the
+    // session; otherwise the system stops following it.
+    final playing = _playing;
+    if (playing == null || !_mini.adopt(playing)) {
+      final session = _session;
+      final nowPlaying = _nowPlaying;
+      _afterFrame(() => nowPlaying.detach(session));
+    }
+    _afterFrame(_pip.cancel);
     unawaited(_states?.cancel());
     final danmaku = _danmaku;
     _danmaku = null;
@@ -211,6 +262,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
         unawaited(_session.close());
       }
     }
+    _follow(detail, switched: previous != null && previous.ref != detail.ref);
     if (!_adoptedOnce) {
       _adoptedOnce = true;
       // F-ROOM-15: fullscreen 1 s after entering, when the setting is on.
@@ -220,6 +272,24 @@ class _RoomPageState extends ConsumerState<RoomPage> {
         });
       }
     }
+  }
+
+  /// The system follows a live room's playback (background play, media
+  /// notification, SMTC, PiP); an offline room is not followed. Runs during
+  /// build, so the change waits for the next frame.
+  void _follow(RoomDetail detail, {required bool switched}) {
+    final playing = detail.state == LiveState.live ? NowPlaying.fromDetail(_session, detail) : null;
+    _playing = playing;
+    _afterFrame(() {
+      if (!mounted || !identical(_playing, playing)) return;
+      // PIP-2: a switch drops a picture-in-picture entry in progress.
+      if (switched) _pip.cancel();
+      if (playing != null) {
+        _nowPlaying.attach(playing);
+      } else {
+        _nowPlaying.detach(_session);
+      }
+    });
   }
 
   // ------------------------------------------------------------- presentation
@@ -352,6 +422,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       const SingleActivator(LogicalKeyboardKey.keyL): () => unawaited(player()?.chooseQualityLine()),
       const SingleActivator(LogicalKeyboardKey.keyR): () => player()?.refresh(),
       const SingleActivator(LogicalKeyboardKey.keyR, control: true): () => player()?.refresh(),
+      const SingleActivator(LogicalKeyboardKey.keyP): () => unawaited(player()?.enterPip()),
       const SingleActivator(LogicalKeyboardKey.f5): () => player()?.refresh(),
       const CharacterActivator('?'): () => unawaited(showKeyHelp(context)),
     };
@@ -430,32 +501,41 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       final toggleChat = effective.isFullscreen
           ? (effective == RoomPresentation.portraitFullscreen ? null : _toggleChat)
           : (wide && !WindowLayout(size).isShortLandscape ? _toggleChat : null);
-      body = RoomLayout(
+      final video = PlayerView(
+        key: _videoKey,
+        detail: detail,
+        session: _session,
         presentation: effective,
+        overlay: _overlayController,
+        danmaku: _danmaku,
         chatOpen: effective.isFullscreen ? _fullscreenChat : _chatOpen,
-        chatWidth: _chatWidth,
-        onChatWidth: (width) => setState(() => _chatWidth = width),
-        portraitPanel: _touch && _portraitSource && effective == RoomPresentation.inline,
-        onPortraitFullscreen: () => unawaited(_present(RoomPresentation.portraitFullscreen)),
-        onForceLandscape: () => unawaited(_present(RoomPresentation.fullscreen, forceLandscape: true)),
-        video: PlayerView(
-          key: _videoKey,
-          detail: detail,
-          session: _session,
+        onToggleChat: toggleChat,
+        onToggleTheater: canTheater && !effective.isFullscreen ? _toggleTheater : null,
+        onToggleFullscreen: _toggleFullscreen,
+        onBack: _back,
+        onSwitchRoom: () => unawaited(_switchRoom()),
+        onBlock: _block,
+        onOpenDanmakuSettings: prefs.enabled ? () => unawaited(_openDanmakuSettings()) : null,
+        resume: _resumed,
+        surfaceReady: _surfaceReady,
+      );
+      // PIP-2: only the video while picture-in-picture enters or shows; the
+      // same keyed video moves between the two layouts (SURF-5).
+      body = PipAwareLayout(
+        session: _session,
+        video: video,
+        builder: (context, video) => RoomLayout(
           presentation: effective,
-          overlay: _overlayController,
-          danmaku: _danmaku,
           chatOpen: effective.isFullscreen ? _fullscreenChat : _chatOpen,
-          onToggleChat: toggleChat,
-          onToggleTheater: canTheater && !effective.isFullscreen ? _toggleTheater : null,
-          onToggleFullscreen: _toggleFullscreen,
-          onBack: _back,
-          onSwitchRoom: () => unawaited(_switchRoom()),
-          onBlock: _block,
-          onOpenDanmakuSettings: prefs.enabled ? () => unawaited(_openDanmakuSettings()) : null,
+          chatWidth: _chatWidth,
+          onChatWidth: (width) => setState(() => _chatWidth = width),
+          portraitPanel: _touch && _portraitSource && effective == RoomPresentation.inline,
+          onPortraitFullscreen: () => unawaited(_present(RoomPresentation.portraitFullscreen)),
+          onForceLandscape: () => unawaited(_present(RoomPresentation.fullscreen, forceLandscape: true)),
+          video: video,
+          info: _RoomInfo(detail: detail, danmaku: _danmaku),
+          chat: chat,
         ),
-        info: _RoomInfo(detail: detail, danmaku: _danmaku),
-        chat: chat,
       );
     }
     return PopScope(

@@ -464,7 +464,7 @@ class PipController extends Notifier<PipState> {
 
   /// Drops an entry in progress (the room closed or switched, PIP-2).
   void cancel() {
-    if (state.mode != PipMode.entering) return;
+    if (!ref.mounted || state.mode != PipMode.entering) return;
     _serial++;
     _fallback?.cancel();
     state = state.copyWith(mode: PipMode.off);

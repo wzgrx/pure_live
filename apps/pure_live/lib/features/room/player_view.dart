@@ -24,6 +24,8 @@ import 'package:pure_live_app/features/room/playback.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
 import 'package:pure_live_app/features/room/sleep_timer.dart';
+import 'package:pure_live_app/features/system/launch_args.dart';
+import 'package:pure_live_app/features/system/pip.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// What the user reads when playback fails, by failure kind (principles rule 3:
@@ -70,6 +72,8 @@ class PlayerView extends ConsumerStatefulWidget {
     this.onSwitchRoom,
     this.onBlock,
     this.onOpenDanmakuSettings,
+    this.resume = false,
+    this.surfaceReady = true,
     super.key,
   });
 
@@ -111,6 +115,14 @@ class PlayerView extends ConsumerStatefulWidget {
   /// Opens the danmaku settings panel.
   final VoidCallback? onOpenDanmakuSettings;
 
+  /// The session already plays this room (taken back from the mini window,
+  /// SES-9): it is not opened again.
+  final bool resume;
+
+  /// Whether the video surface may mount; false until the mini window has
+  /// let go of it (SURF-5).
+  final bool surfaceReady;
+
   @override
   ConsumerState<PlayerView> createState() => PlayerViewState();
 }
@@ -138,6 +150,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   bool _volumeTouched = false;
   Timer? _volumeSave;
   double _brightness = 1;
+  bool _pipSupported = false;
   late store.VideoFit _fit;
 
   Size _size = Size.zero;
@@ -177,7 +190,12 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     _state = _session.state;
     _subscription = _session.states.listen(_onState);
     _initVolume();
-    if (_live) unawaited(_open());
+    if (!widget.resume) {
+      if (_live) unawaited(_open());
+    } else if (!_live) {
+      // Went offline while the mini window played it.
+      unawaited(_session.close());
+    }
     _scheduleHide();
   }
 
@@ -324,6 +342,31 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     if (!prefs.enabled) return;
     ref.read(danmakuPrefsProvider.notifier).setHidden(hidden: !prefs.hidden);
     _showHint(prefs.hidden ? Icons.subtitles : Icons.subtitles_off_outlined, prefs.hidden ? '弹幕已打开' : '弹幕已关闭');
+  }
+
+  /// P and the picture-in-picture button (F-PIP-01, F-PIP-02): only the
+  /// video shows from the request on (PIP-2).
+  Future<void> enterPip() async {
+    if (!_live || !ref.read(pipProvider).supported) return;
+    Rect? source;
+    final box = context.findRenderObject();
+    if (box is RenderBox && box.hasSize) {
+      // Where the video is, in physical pixels of the window.
+      final ratio = MediaQuery.devicePixelRatioOf(context);
+      final origin = box.localToGlobal(Offset.zero) * ratio;
+      source = origin & (box.size * ratio);
+    }
+    final entered = await ref.read(pipProvider.notifier).enter(_session, sourceRect: source);
+    if (!entered && mounted && ref.read(pipProvider).mode == PipMode.off) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('画面出来后才能进入画中画')));
+    }
+  }
+
+  Future<void> _openNewWindow() async {
+    final opened = await ref.read(newWindowProvider)(widget.detail.ref);
+    if (!opened && mounted) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text('没能打开新窗口')));
+    }
   }
 
   /// Audio only on or off, in place (F-ROOM-9, AUD-1).
@@ -671,7 +714,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       case RoomMenuAction.keys:
         await withPanel(() => showKeyHelp(context));
       case RoomMenuAction.newWindow:
-        break;
+        await _openNewWindow();
     }
   }
 
@@ -696,6 +739,15 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       _ => player.VideoFit.contain,
     };
     final danmakuShown = prefs.enabled && !prefs.hidden && _live;
+    final video = !_live
+        ? _OfflineCover(detail: widget.detail)
+        : widget.surfaceReady
+        ? player.LiveVideoView(session: _session, fit: fit, wakelock: keepOn)
+        : const ColoredBox(color: Colors.black);
+    // PIP-2: from the request on only the video shows, so the system's
+    // entry animation captures no controls.
+    if (ref.watch(pipProvider.select((pip) => pip.videoOnly))) return RepaintBoundary(child: video);
+    _pipSupported = ref.watch(pipProvider.select((pip) => pip.supported));
     return MouseRegion(
       onHover: _onHover,
       cursor: _controls || _touch ? MouseCursor.defer : SystemMouseCursors.none,
@@ -712,11 +764,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  RepaintBoundary(
-                    child: _live
-                        ? player.LiveVideoView(session: _session, fit: fit, wakelock: keepOn)
-                        : _OfflineCover(detail: widget.detail),
-                  ),
+                  RepaintBoundary(child: video),
                   Positioned.fill(
                     child: DanmakuOverlay(controller: widget.overlay, visible: danmakuShown),
                   ),
@@ -933,7 +981,11 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         _showControls();
                         unawaited(_onMenu(action));
                       },
-                      itemBuilder: (context) => roomMenuEntries(desktop: !_touch, danmakuAvailable: prefs.enabled),
+                      itemBuilder: (context) => roomMenuEntries(
+                        desktop: !_touch,
+                        danmakuAvailable: prefs.enabled,
+                        newWindow: newWindowSupported,
+                      ),
                     ),
                   ],
                 ),
@@ -1044,6 +1096,14 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         ),
                       ),
                     ),
+                    if (_live && _pipSupported)
+                      IconButton(
+                        key: const ValueKey('room-pip'),
+                        tooltip: '画中画 (P)',
+                        color: ink,
+                        icon: const Icon(Icons.picture_in_picture_alt_outlined),
+                        onPressed: () => unawaited(enterPip()),
+                      ),
                     // REG-ROOM-017: fullscreen stays outside the scrolling row.
                     IconButton(
                       key: const ValueKey('room-fullscreen'),

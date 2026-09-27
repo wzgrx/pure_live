@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/badges.dart';
 import 'package:live_ui/src/metrics.dart';
+import 'package:live_ui/src/tv/focus_frame.dart';
 
 /// Card density (principles §4.3).
 enum CardDensity {
@@ -28,6 +29,9 @@ class RoomCardView extends StatelessWidget {
     this.density = CardDensity.standard,
     this.onTap,
     this.onMenu,
+    this.focusNode,
+    this.onKeyEvent,
+    this.onFocusChange,
     super.key,
   });
 
@@ -58,8 +62,18 @@ class RoomCardView extends StatelessWidget {
   /// Opens the room.
   final VoidCallback? onTap;
 
-  /// Opens the card menu: long press on touch, right click on desktop.
+  /// Opens the card menu: long press on touch, right click on desktop, long
+  /// OK or the menu key on a remote (principles §4.2).
   final VoidCallback? onMenu;
+
+  /// The card's focus node; grids keep one per card (TV focus memory).
+  final FocusNode? focusNode;
+
+  /// Keys other than OK and menu while the card has focus (grid moves).
+  final FocusOnKeyEventCallback? onKeyEvent;
+
+  /// Focus gained or lost.
+  final ValueChanged<bool>? onFocusChange;
 
   @override
   Widget build(BuildContext context) {
@@ -67,83 +81,93 @@ class RoomCardView extends StatelessWidget {
     final scheme = theme.colorScheme;
     final text = theme.textTheme;
     final label = isLive ? '$anchorName，直播中，$title' : '$anchorName，未开播，$title';
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      child: GestureDetector(
-        onSecondaryTap: onMenu,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onMenu,
-          borderRadius: BorderRadius.circular(Radii.r2),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(Radii.r2),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ColoredBox(color: scheme.surfaceContainerHighest),
-                      if (cover != null)
-                        Image(
-                          image: cover!,
-                          fit: BoxFit.cover,
-                          gaplessPlayback: true,
-                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                        ),
-                      Positioned(
-                        left: Space.s1 + 2,
-                        top: Space.s1 + 2,
-                        child: PlatformLogo(platformId: platformId),
-                      ),
-                      if (isLive)
+    // The frame is the card's only focus target: keyboard and remote focus
+    // draw its ring (and grow the card on TV), OK opens, long OK is the menu.
+    return FocusFrame(
+      focusNode: focusNode,
+      onActivate: onTap,
+      onMenu: onMenu,
+      onKeyEvent: onKeyEvent,
+      onFocusChange: onFocusChange,
+      child: Semantics(
+        button: true,
+        label: label,
+        excludeSemantics: true,
+        child: GestureDetector(
+          onSecondaryTap: onMenu,
+          child: InkWell(
+            canRequestFocus: false,
+            onTap: onTap,
+            onLongPress: onMenu,
+            borderRadius: BorderRadius.circular(Radii.r2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(Radii.r2),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ColoredBox(color: scheme.surfaceContainerHighest),
+                        if (cover != null)
+                          Image(
+                            image: cover!,
+                            fit: BoxFit.cover,
+                            gaplessPlayback: true,
+                            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                          ),
                         Positioned(
                           left: Space.s1 + 2,
-                          bottom: Space.s1 + 2,
-                          child: LiveBadge(duration: liveFor),
+                          top: Space.s1 + 2,
+                          child: PlatformLogo(platformId: platformId),
                         ),
-                      if (audience != null)
-                        Positioned(right: Space.s1 + 2, bottom: Space.s1 + 2, child: CoverLabel(audience!)),
-                    ],
+                        if (isLive)
+                          Positioned(
+                            left: Space.s1 + 2,
+                            bottom: Space.s1 + 2,
+                            child: LiveBadge(duration: liveFor),
+                          ),
+                        if (audience != null)
+                          Positioned(right: Space.s1 + 2, bottom: Space.s1 + 2, child: CoverLabel(audience!)),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(Space.s1, Space.s2, Space.s1, Space.s1),
-                child: density == CardDensity.standard
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(anchorName, style: text.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text(
-                            title,
-                            style: text.bodySmall!.copyWith(color: scheme.onSurfaceVariant),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      )
-                    : Text.rich(
-                        TextSpan(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Space.s1, Space.s2, Space.s1, Space.s1),
+                  child: density == CardDensity.standard
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            TextSpan(text: anchorName, style: text.titleSmall),
-                            TextSpan(
-                              text: ' · $title',
+                            Text(anchorName, style: text.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text(
+                              title,
                               style: text.bodySmall!.copyWith(color: scheme.onSurfaceVariant),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
+                        )
+                      : Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: anchorName, style: text.titleSmall),
+                              TextSpan(
+                                text: ' · $title',
+                                style: text.bodySmall!.copyWith(color: scheme.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -180,25 +204,35 @@ class OfflineRoomRow extends StatelessWidget {
   /// Opens the room.
   final VoidCallback? onTap;
 
-  /// Opens the card menu.
+  /// Opens the card menu (long press, right click, long OK, menu key).
   final VoidCallback? onMenu;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onSecondaryTap: onMenu,
-      child: ListTile(
-        onTap: onTap,
-        onLongPress: onMenu,
-        leading: CircleAvatar(
-          backgroundColor: scheme.surfaceContainerHighest,
-          foregroundImage: avatar,
-          child: Text(anchorName.isEmpty ? '?' : anchorName.characters.first),
+    // One focus target with the card's remote keys; the row keeps its fill.
+    return FocusFrame(
+      onActivate: onTap,
+      onMenu: onMenu,
+      grow: false,
+      ringInside: true,
+      radius: 0,
+      child: GestureDetector(
+        onSecondaryTap: onMenu,
+        child: ExcludeFocus(
+          child: ListTile(
+            onTap: onTap,
+            onLongPress: onMenu,
+            leading: CircleAvatar(
+              backgroundColor: scheme.surfaceContainerHighest,
+              foregroundImage: avatar,
+              child: Text(anchorName.isEmpty ? '?' : anchorName.characters.first),
+            ),
+            title: Text(anchorName, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: subtitle == null ? null : Text(subtitle!, maxLines: 1),
+            trailing: PlatformLogo(platformId: platformId, size: Sizes.iconDense),
+          ),
         ),
-        title: Text(anchorName, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: subtitle == null ? null : Text(subtitle!, maxLines: 1),
-        trailing: PlatformLogo(platformId: platformId, size: Sizes.iconDense),
       ),
     );
   }

@@ -140,7 +140,7 @@ final class _RecordingSocket implements DanmakuSocket {
 
   @override
   void send(List<int> frame) {
-    _recorder._add('out', frame);
+    _recorder._add('out', frame, text: frame is TextFrame);
     _inner.send(frame);
   }
 

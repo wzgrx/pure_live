@@ -129,6 +129,7 @@ abstract class FrameScrubber {
   factory forPlatform(String platform, RoomDetail detail, {int? seed}) => switch (platform) {
     'douyu' => DouyuFrameScrubber(detail, seed: seed),
     'huya' => HuyaFrameScrubber(detail, seed: seed),
+    'kilakila' => KilakilaFrameScrubber(detail, seed: seed),
     'bilibili' => BilibiliFrameScrubber(detail, seed: seed),
     'chzzk' => ChzzkFrameScrubber(detail, seed: seed),
     'douyin' => DouyinFrameScrubber(detail, seed: seed),

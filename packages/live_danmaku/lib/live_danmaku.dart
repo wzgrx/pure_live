@@ -24,6 +24,7 @@ export 'src/sites/chzzk.dart';
 export 'src/sites/douyin.dart';
 export 'src/sites/douyu.dart';
 export 'src/sites/huya.dart';
+export 'src/sites/kilakila.dart';
 export 'src/sites/kuaishou.dart';
 export 'src/sites/missevan.dart';
 export 'src/transport.dart';

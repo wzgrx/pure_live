@@ -179,6 +179,80 @@ class MissevanFrameScrubber extends JsonFrameScrubber {
   }
 }
 
+/// KilaKila (spec/sites/kilakila.md §11): Socket.IO text frames whose
+/// `text_message` payload nests the message as a JSON string. Chat (200)
+/// and gift (220) messages keep their text and gift, with the sender's uid,
+/// name and avatar replaced and the viewer decorations (`ui`, `uc`)
+/// dropped; other message types keep only their type (their fields are
+/// not decoded and name viewers).
+class KilakilaFrameScrubber extends FrameScrubber {
+  /// Creates the scrubber.
+  new(super.detail, {super.seed});
+
+  static const _prefix = '42${KilakilaProtocol.namespace},';
+
+  @override
+  List<int>? scrubFrame(CapturedFrame frame) {
+    final text = utf8.decode(frame.bytes, allowMalformed: true);
+    if (!text.startsWith(_prefix)) return frame.bytes;
+    final Object? packet;
+    try {
+      packet = jsonDecode(text.substring(_prefix.length));
+    } on FormatException {
+      return frame.bytes;
+    }
+    if (packet is! List || packet.length < 2 || packet[0] != 'text_message' || packet[1] is! String) {
+      return frame.bytes;
+    }
+    final Map<String, dynamic> message;
+    try {
+      message = jsonDecode(packet[1] as String) as Map<String, dynamic>;
+    } on Object {
+      return frame.bytes;
+    }
+    final response = (message['body'] as Map<String, dynamic>?)?['response'];
+    if (response is Map<String, dynamic>) {
+      final sender = response['sender_info'];
+      if (sender is Map<String, dynamic>) {
+        if (sender['uid'] != null) sender['uid'] = int.tryParse(names.digits('${sender['uid']}')) ?? 0;
+        for (final key in const ['nickname', 'avatar']) {
+          if (sender[key] is String) sender[key] = names.secret(sender[key] as String);
+        }
+        record(r'$.body.response.sender_info', 'person');
+      }
+      final content = response['content'] is String ? jsonDecode(response['content'] as String) : null;
+      if (content is Map<String, dynamic>) {
+        final type = content['t'];
+        if (type == 200 || type == 220) {
+          if (content['u'] != null) {
+            final id = names.digits('${content['u']}');
+            content['u'] = content['u'] is int ? int.parse(id) : id;
+          }
+          if (content['n'] is String) content['n'] = names.person(content['n'] as String);
+          if (content['a'] is String) content['a'] = names.secret(content['a'] as String);
+          content
+            ..remove('ui')
+            ..remove('uc');
+          record(r'$.content[t=200,220]', 'person');
+          response['content'] = jsonEncode(content);
+        } else {
+          response['content'] = jsonEncode({'t': type});
+          record(r'$.content[other t]', 'dropped');
+        }
+      }
+      response.remove('user_group_ratio');
+    }
+    final out = '$_prefix${jsonEncode([packet[0], jsonEncode(message)])}';
+    return utf8.encode(_elsewhere(names, out));
+  }
+
+  @override
+  List<int> plain(CapturedFrame frame) {
+    final text = utf8.decode(frame.bytes, allowMalformed: true);
+    return utf8.encode('$text\n${text.replaceAll(r'\\\"', '"').replaceAll(r'\"', '"')}');
+  }
+}
+
 /// CHZZK (spec/sites/chzzk.md §11): the access token and session ids in
 /// the join, the recent-chat request and the token response; viewers' ids,
 /// hashes, nicknames, images and per-message tokens in chat items, whose

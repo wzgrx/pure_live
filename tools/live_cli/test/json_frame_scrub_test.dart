@@ -72,4 +72,53 @@ void main() {
     expect(scrubber.findLeak([_in(out)], ''), isNull);
     expect(utf8.decode(scrubber.scrubFrame(_in(utf8.encode('❤️'), text: true))!), '❤️');
   });
+
+  test('kilakila: chat senders are replaced, other message types keep only their type', () {
+    final scrubber = FrameScrubber.forPlatform('kilakila', _room('kilakila', '1', const {'roomId': '9'}), seed: 3);
+    String frame(Map<String, Object?> content) =>
+        '42/live_chat_room_guest,${jsonEncode([
+          'text_message',
+          jsonEncode({
+            'body': {
+              'response': {
+                'room_id': '9',
+                'sender_info': {'uid': 3632776065087, 'nickname': 'viewer_nick', 'avatar': 'https://a.example.test/x.png'},
+                'content': jsonEncode(content),
+              },
+            },
+          }),
+        ])}';
+    final chat = utf8.decode(
+      scrubber.scrubFrame(
+        _in(
+          utf8.encode(
+            frame({
+              't': 200,
+              'u': 3632776065087,
+              'n': '月月月月月亮',
+              'c': '你好',
+              'a': 'https://a.example.test/x.png',
+              'ui': {'gn': '粉丝团'},
+            }),
+          ),
+          text: true,
+        ),
+      )!,
+    );
+    expect(chat, isNot(contains('3632776065087')));
+    expect(chat, isNot(contains('月月月月月亮')));
+    expect(chat, isNot(contains('粉丝团')));
+    expect(chat, contains('你好'));
+    final decoded = KilakilaProtocol.decode(
+      chat,
+      roomId: '9',
+      context: DecodeContext(room: 'kilakila:1', session: 0, receivedAt: 0, now: DateTime.utc(2026)),
+    );
+    expect(decoded.events.whereType<DanmakuChat>().single.text, '你好');
+    final other = utf8.decode(
+      scrubber.scrubFrame(_in(utf8.encode(frame({'t': 621, 'c': '%7B%22userName%22%3A%22x%22%7D'})), text: true))!,
+    );
+    expect(other, isNot(contains('userName')));
+    expect(scrubber.findLeak([_in(utf8.encode(chat), text: true)], ''), isNull);
+  });
 }

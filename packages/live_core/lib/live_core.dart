@@ -1,6 +1,7 @@
 /// Platform-independent domain types for Pure Live v4 (docs/adr/0010-core-domain-model.md).
 library;
 
+export 'src/aes.dart';
 export 'src/audience.dart';
 export 'src/hls_playlist.dart';
 export 'src/live_state.dart';
@@ -20,6 +21,9 @@ export 'src/sites/douyu/douyu_sign.dart';
 export 'src/sites/douyu/douyu_site.dart';
 export 'src/sites/huya/huya_parse.dart';
 export 'src/sites/huya/huya_site.dart';
+export 'src/sites/kilakila/kilakila_link.dart';
+export 'src/sites/kilakila/kilakila_parse.dart';
+export 'src/sites/kilakila/kilakila_site.dart';
 export 'src/sites/kuaishou/kuaishou_parse.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
 export 'src/sites/missevan/missevan_parse.dart';

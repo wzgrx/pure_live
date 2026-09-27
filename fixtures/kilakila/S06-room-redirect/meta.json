@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "kilakila",
+  "sample": "S06-room-redirect",
+  "capturedAt": "2026-09-27T17:09:44.516682Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.kilakila.cn/room/2268450556051718173",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://live.kilakila.cn/"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "HDSESSION=lrqo64wttc2l585b9b4wibtq64; expires=Sun, 04-Oct-2026 17:09:44 GMT; Max-Age=604800; path=/; domain=kilakila.cn",
+      "cache-control": "no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:09:45 GMT",
+      "access-control-allow-origin": "*",
+      "content-type": "text/html; charset=UTF-8",
+      "pragma": "no-cache",
+      "server": "openresty/1.9.15.1",
+      "access-control-allow-headers": "x-auth-token,DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,xAuthToken",
+      "x-powered-by": "PHP/5.6.40",
+      "location": "https://live.kilakila.cn/PcLive/index/detail?_specific_parameter=Ceod-rFJtYAjgFtqCMHPAVD0FSVNE8yPzDVGdy39tphK4O_P0LK1gMIMpDp_wqdyC6IhknN6fgSmjOQRlEoWQw==",
+      "access-control-allow-methods": "GET,POST",
+      "expires": "Thu, 19 Nov 1981 08:52:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "set-cookie:HDSESSION",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

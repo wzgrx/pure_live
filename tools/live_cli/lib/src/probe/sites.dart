@@ -11,6 +11,7 @@ final Map<String, SiteFactory> siteFactories = {
   'douyin': DouyinSite.new,
   'douyu': DouyuSite.new,
   'huya': HuyaSite.new,
+  'kilakila': KilakilaSite.new,
   'kuaishou': KuaishouSite.new,
   'missevan': MissevanSite.new,
 };

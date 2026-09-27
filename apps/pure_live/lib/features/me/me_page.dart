@@ -20,17 +20,22 @@ class MePage extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
           child: ListView(
             children: [
-              later(Icons.history, S.history),
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text(S.history),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/me/history'),
+              ),
               later(Icons.fiber_manual_record_outlined, S.recordings),
               later(Icons.grid_view, S.multiview),
               later(Icons.account_circle_outlined, S.accounts),
               later(Icons.cloud_sync_outlined, S.backup),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.palette_outlined),
-                title: const Text(S.appearance),
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text(S.settings),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.go('/me/appearance'),
+                onTap: () => context.go('/me/settings'),
               ),
               ListTile(
                 leading: const Icon(Icons.info_outline),

@@ -4,16 +4,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A room's details.
 final FutureProviderFamily<RoomDetail, RoomRef> roomDetailProvider = FutureProvider.autoDispose
-    .family<RoomDetail, RoomRef>((ref, room) => ref.watch(sitesProvider)[room.platform]!.rooms.detail(room));
+    .family<RoomDetail, RoomRef>((ref, room) async {
+      final detail = await ref.watch(sitesProvider)[room.platform]!.rooms.detail(room);
+      // Opening a room records it in the history and refreshes a followed card.
+      final store = ref.read(storeProvider);
+      final snapshot = RoomSnapshot.fromDetail(detail);
+      await store.history.record(snapshot);
+      await store.rooms.update([snapshot]);
+      return detail;
+    });
+
+/// Whether a room is followed.
+final StreamProviderFamily<bool, RoomRef> isFollowedProvider = StreamProvider.autoDispose.family<bool, RoomRef>(
+  (ref, room) => ref.watch(storeProvider).follows.watchContains(room),
+);
 
 /// The room page: video on top at compact width, video plus chat panel from
 /// expanded width (principles §5.2). No navigation bar inside a room.
@@ -125,15 +140,16 @@ class _PlayerArea extends StatelessWidget {
   }
 }
 
-class _RoomInfo extends StatelessWidget {
+class _RoomInfo extends ConsumerWidget {
   const new({required this.detail});
 
   final RoomDetail detail;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final card = detail.card;
+    final followed = ref.watch(isFollowedProvider(card.ref)).value ?? false;
     final audience = card.audience.online ?? card.audience.popularity ?? card.audience.cumulative;
     final avatar = networkImage(
       detail.avatar ?? card.avatar,
@@ -191,7 +207,18 @@ class _RoomInfo extends StatelessWidget {
             spacing: Space.s2,
             runSpacing: Space.s2,
             children: [
-              const FilledButton.tonal(onPressed: null, child: Text(S.follow)),
+              if (followed)
+                FilledButton.tonalIcon(
+                  icon: const Icon(Icons.favorite, size: 18),
+                  label: const Text(S.unfollow),
+                  onPressed: () => ref.read(storeProvider).follows.unfollow(card.ref),
+                )
+              else
+                FilledButton.icon(
+                  icon: const Icon(Icons.favorite_border, size: 18),
+                  label: const Text(S.follow),
+                  onPressed: () => ref.read(storeProvider).follows.follow(RoomSnapshot.fromDetail(detail)),
+                ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.open_in_new, size: 18),
                 label: const Text(S.openSite),

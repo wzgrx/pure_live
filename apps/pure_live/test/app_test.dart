@@ -2,8 +2,10 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/app/app.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
 
 import 'fakes.dart';
@@ -31,8 +33,13 @@ void main() {
           ),
         ),
     };
+    final store = await tester.runAsync(LiveStore.inMemory);
+    addTearDown(() => tester.runAsync(store!.close));
     await tester.pumpWidget(
-      ProviderScope(overrides: [sitesProvider.overrideWithValue(sites)], child: const PureLiveApp()),
+      ProviderScope(
+        overrides: [sitesProvider.overrideWithValue(sites), storeProvider.overrideWithValue(store!)],
+        child: const PureLiveApp(),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('还没有关注的主播'), findsOneWidget);

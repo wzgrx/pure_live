@@ -16,6 +16,7 @@ dependencies:
   go_router: ^18.0.1
   live_core: any
   live_net: any
+  live_store: any
   live_ui: any
   path_provider: ^2.1.6
   url_launcher: ^6.3.2

@@ -1,5 +1,9 @@
 // AGP built-in Kotlin, with the Kotlin Gradle Plugin pinned to toolchain.env KOTLIN_VERSION.
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20")
     }

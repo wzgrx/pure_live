@@ -197,6 +197,16 @@ Win32Window::MessageHandler(HWND hwnd,
 
       return 0;
     }
+    case WM_GETMINMAXINFO: {
+      // Smallest window that still lays out as a compact page
+      // (spec/design/principles.md §5.4): 360 x 400 logical pixels.
+      auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      const double scale = FlutterDesktopGetDpiForHWND(hwnd) / 96.0;
+      info->ptMinTrackSize.x = static_cast<LONG>(360 * scale);
+      info->ptMinTrackSize.y = static_cast<LONG>(400 * scale);
+      return 0;
+    }
+
     case WM_SIZE: {
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {

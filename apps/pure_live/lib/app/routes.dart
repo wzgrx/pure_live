@@ -6,9 +6,11 @@ import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
 import 'package:pure_live_app/features/me/appearance_page.dart';
+import 'package:pure_live_app/features/me/history_page.dart';
 import 'package:pure_live_app/features/me/me_page.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
+import 'package:pure_live_app/features/settings/settings_page.dart';
 
 /// Location of a room page; the room is a full-screen route outside the shell
 /// (principles §4.1).
@@ -52,7 +54,21 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/me',
                 builder: (context, state) => const MePage(),
-                routes: [GoRoute(path: 'appearance', builder: (context, state) => const AppearancePage())],
+                routes: [
+                  GoRoute(path: 'appearance', builder: (context, state) => const AppearancePage()),
+                  GoRoute(path: 'history', builder: (context, state) => const HistoryPage()),
+                  GoRoute(
+                    path: 'settings',
+                    builder: (context, state) => const SettingsPage(),
+                    routes: [
+                      GoRoute(
+                        path: ':group',
+                        builder: (context, state) =>
+                            SettingsGroupPage(group: SettingsGroup.values.byName(state.pathParameters['group']!)),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

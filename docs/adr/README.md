@@ -22,6 +22,7 @@
 | [0014](0014-v4-first.md) | 停止构建 3.x，直接推进 v4；构建和门禁改在本机运行 | 已接受 |
 | [0015](0015-v4-app-structure.md) | v4 应用与播放层的包结构：live_media 纯 Dart + live_player，手写 Riverpod provider | 已接受 |
 | [0016](0016-archive-v3.md) | v3 全部归档：旧应用移出 workspace，3.x 的仓库级文件移进 legacy/ | 已接受 |
+| [0017](0017-live-store.md) | live_store 的实现选择：库结构、加密接口、设置常驻内存、备份细节 | 已接受 |
 
 ## 模板
 

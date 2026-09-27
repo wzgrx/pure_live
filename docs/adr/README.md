@@ -16,6 +16,7 @@
 | [0008](0008-dependency-overrides.md) | 依赖覆盖的去留：保留越过 SDK 锁定的最新版覆盖，升级 Flutter 时复查 | 已接受 |
 | [0009](0009-fixture-format.md) | 平台样本的格式、录制与期望值 | 已接受 |
 | [0010](0010-core-domain-model.md) | live_core 的领域模型与错误类型 | 已接受 |
+| [0011](0011-live-net.md) | 网络层 live_net：dart:io 实现、按平台的代理与凭据、样本回放 | 已接受 |
 
 ## 模板
 

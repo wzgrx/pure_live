@@ -1,3 +1,4 @@
+import 'package:live_cli/src/fixture/rules/baidulive.dart';
 import 'package:live_cli/src/fixture/rules/bilibili.dart';
 import 'package:live_cli/src/fixture/rules/douyin.dart';
 import 'package:live_cli/src/fixture/rules/douyu.dart';
@@ -14,6 +15,7 @@ import 'package:live_cli/src/fixture/scrub.dart';
 /// "需要脱敏的字段" list in `spec/sites/<platform>.md` §11. Cookie headers,
 /// Set-Cookie values and Authorization headers are always scrubbed.
 const Map<String, ScrubRules> platformRules = {
+  'baidulive': baiduliveRules,
   'bilibili': bilibiliRules,
   'douyin': douyinRules,
   'douyu': douyuRules,

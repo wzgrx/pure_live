@@ -8,6 +8,8 @@ export 'src/room.dart';
 export 'src/room_ref.dart';
 export 'src/site.dart';
 export 'src/site_error.dart';
+export 'src/sites/baidulive/baidulive_parse.dart';
+export 'src/sites/baidulive/baidulive_site.dart';
 export 'src/sites/bilibili/bilibili_parse.dart';
 export 'src/sites/bilibili/bilibili_site.dart';
 export 'src/sites/douyin/douyin_parse.dart';

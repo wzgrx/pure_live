@@ -159,9 +159,10 @@ class SettingsGroupBody extends StatelessWidget {
         SliderSettingTile(
           setting: Settings.autoRefreshInterval,
           title: '定时刷新间隔',
+          // F-FAV-04: 3.x offered 5 minutes to 6 hours.
           min: 5,
-          max: 120,
-          divisions: 23,
+          max: 360,
+          divisions: 71,
           format: _minutes,
         ),
         SliderSettingTile(
@@ -171,6 +172,16 @@ class SettingsGroupBody extends StatelessWidget {
           max: 16,
           divisions: 15,
           format: _integer,
+        ),
+        // F-FAV-04: covers of live cards downloaded again on a timer.
+        SwitchSettingTile(setting: Settings.autoRefreshCovers, title: '定时刷新封面', subtitle: '开播卡片的封面按间隔重新下载，看到的画面更新'),
+        SliderSettingTile(
+          setting: Settings.coverRefreshInterval,
+          title: '封面刷新间隔',
+          min: 5,
+          max: 360,
+          divisions: 71,
+          format: _minutes,
         ),
         SettingsHeader('通知'),
         LiveAlertsTile(),

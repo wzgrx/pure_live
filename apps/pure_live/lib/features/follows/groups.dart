@@ -13,42 +13,104 @@ final StreamProvider<List<Tag>> tagsProvider = StreamProvider<List<Tag>>(
   (ref) => ref.watch(storeProvider).tags.watchAll(),
 );
 
-/// Asks for a group name; null when cancelled.
-Future<String?> askGroupName(BuildContext context, {String initial = '', String title = '新建分组'}) async {
-  final controller = TextEditingController(text: initial);
-  final name = await showDialog<String>(
+/// A group's name and description as entered.
+typedef GroupFields = ({String name, String description});
+
+/// Asks for a group's name and description (F-FAV-05); null when cancelled
+/// or the name is empty.
+Future<GroupFields?> askGroupFields(
+  BuildContext context, {
+  String name = '',
+  String description = '',
+  String title = '新建分组',
+}) async {
+  final result = await showDialog<GroupFields>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        maxLength: 20,
-        decoration: const InputDecoration(hintText: '分组名称'),
-        onSubmitted: (value) => Navigator.pop(context, value.trim()),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-        FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('确定')),
-      ],
-    ),
+    builder: (context) => _GroupEditor(title: title, name: name, description: description),
   );
-  controller.dispose();
-  return name == null || name.isEmpty ? null : name;
+  return result == null || result.name.isEmpty ? null : result;
 }
 
-/// Creates or renames a group and reports a duplicate name in place.
+/// The fields of [askGroupFields]; the controllers live as long as the dialog,
+/// including its closing animation.
+class _GroupEditor extends StatefulWidget {
+  const new({required this.title, required this.name, required this.description});
+
+  final String title;
+  final String name;
+  final String description;
+
+  @override
+  State<_GroupEditor> createState() => _GroupEditorState();
+}
+
+class _GroupEditorState extends State<_GroupEditor> {
+  late final _name = TextEditingController(text: widget.name);
+  late final _description = TextEditingController(text: widget.description);
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _description.dispose();
+    super.dispose();
+  }
+
+  void _done() => Navigator.pop(context, (name: _name.text.trim(), description: _description.text.trim()));
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(widget.title),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: _name,
+          autofocus: true,
+          maxLength: 20,
+          decoration: const InputDecoration(labelText: '分组名称'),
+          textInputAction: TextInputAction.next,
+        ),
+        TextField(
+          controller: _description,
+          maxLength: 60,
+          decoration: const InputDecoration(labelText: '描述（可选）', hintText: '比如：晚上常看的'),
+          onSubmitted: (_) => _done(),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+      FilledButton(onPressed: _done, child: const Text('确定')),
+    ],
+  );
+}
+
+void _say(BuildContext context, String text) {
+  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+}
+
+/// Creates a group and reports a duplicate name in place.
 Future<Tag?> createGroup(BuildContext context, WidgetRef ref) async {
-  final name = await askGroupName(context);
-  if (name == null) return null;
+  final fields = await askGroupFields(context);
+  if (fields == null || !context.mounted) return null;
   try {
-    return await ref.read(storeProvider).tags.create(name);
+    return await ref.read(storeProvider).tags.create(fields.name, description: fields.description);
   } on TagNameException catch (error) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error.duplicate ? '已经有叫“$name”的分组了' : '分组名称不能为空')));
-    }
+    if (context.mounted) _say(context, error.duplicate ? '已经有叫“${fields.name}”的分组了' : '分组名称不能为空');
     return null;
+  }
+}
+
+/// Edits the name and description of [tag] (F-FAV-05: 改名、描述).
+Future<void> editGroup(BuildContext context, WidgetRef ref, Tag tag) async {
+  final fields = await askGroupFields(context, name: tag.name, description: tag.description, title: '编辑分组');
+  if (fields == null || !context.mounted) return;
+  final tags = ref.read(storeProvider).tags;
+  try {
+    if (fields.name != tag.name) await tags.rename(tag.id, fields.name);
+    if (fields.description != tag.description) await tags.describe(tag.id, fields.description);
+  } on TagNameException {
+    if (context.mounted) _say(context, '已经有叫“${fields.name}”的分组了');
   }
 }
 
@@ -61,7 +123,13 @@ Future<void> editRoomGroups(BuildContext context, WidgetRef ref, RoomRef room, S
     context: context,
     builder: (context) => _GroupPicker(title: title, initial: current),
   );
-  if (chosen != null) await store.tags.setTagsOf(room, chosen);
+  if (chosen == null) return;
+  try {
+    await store.tags.setTagsOf(room, chosen);
+  } on Object {
+    // The write is one transaction: the groups stay as they were.
+    if (context.mounted) _say(context, '分组没有保存，请重试');
+  }
 }
 
 class _GroupPicker extends ConsumerStatefulWidget {
@@ -147,24 +215,14 @@ class GroupsPage extends ConsumerWidget {
                       key: ValueKey(tag.id),
                       leading: const Icon(Icons.drag_handle),
                       title: Text(tag.name),
+                      subtitle: tag.description.isEmpty ? null : Text(tag.description, maxLines: 2),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            tooltip: '改名',
+                            tooltip: '改名和描述',
                             icon: const Icon(Icons.edit_outlined),
-                            onPressed: () async {
-                              final name = await askGroupName(context, initial: tag.name, title: '分组改名');
-                              if (name == null) return;
-                              try {
-                                await store.tags.rename(tag.id, name);
-                              } on TagNameException {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(content: Text('已经有叫“$name”的分组了')));
-                                }
-                              }
-                            },
+                            onPressed: () => editGroup(context, ref, tag),
                           ),
                           IconButton(
                             tooltip: '删除',

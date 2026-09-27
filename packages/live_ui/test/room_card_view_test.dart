@@ -56,6 +56,24 @@ void main() {
     expect(find.textContaining('主播 · 标题', findRichText: true), findsOneWidget);
   });
 
+  testWidgets('F-FAV-01: a recording room carries 录制中 on its card and its row', (tester) async {
+    await tester.pumpWidget(
+      host(const RoomCardView(platformId: 'douyu', anchorName: '主播', title: '标题', isLive: true, recording: true)),
+    );
+    expect(find.byType(RecordingBadge), findsOneWidget);
+    expect(find.text('录制中'), findsOneWidget);
+    expect(find.bySemanticsLabel('主播，直播中，录制中，标题'), findsOneWidget);
+
+    await tester.pumpWidget(host(const RoomCardView(platformId: 'douyu', anchorName: '主播', title: '标题', isLive: true)));
+    expect(find.text('录制中'), findsNothing);
+
+    await tester.pumpWidget(
+      host(const OfflineRoomRow(platformId: 'cc', anchorName: '主播', tag: '未支持', recording: true), width: 360),
+    );
+    expect(find.text('未支持'), findsOneWidget);
+    expect(find.text('录制中'), findsOneWidget);
+  });
+
   testWidgets('the shell switches between bar and rails with the width', (tester) async {
     const destinations = [
       NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: '关注'),

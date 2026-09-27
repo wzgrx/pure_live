@@ -8,6 +8,7 @@ void main() {
       RoomCardAction.multiview,
       RoomCardAction.share,
       RoomCardAction.copyLink,
+      RoomCardAction.streamLink,
       RoomCardAction.openSite,
     ]);
     expect(roomCardActions(followed: true, newWindow: true), [
@@ -16,8 +17,16 @@ void main() {
       RoomCardAction.multiview,
       RoomCardAction.share,
       RoomCardAction.copyLink,
+      RoomCardAction.streamLink,
       RoomCardAction.newWindow,
       RoomCardAction.openSite,
+    ]);
+  });
+
+  test('F-FAV-08: a platform without an adapter keeps only following and groups', () {
+    expect(roomCardActions(followed: true, newWindow: true, supported: false), [
+      RoomCardAction.unfollow,
+      RoomCardAction.groups,
     ]);
   });
 }

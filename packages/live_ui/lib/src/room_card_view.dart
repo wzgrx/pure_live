@@ -26,6 +26,7 @@ class RoomCardView extends StatelessWidget {
     this.cover,
     this.audience,
     this.liveFor,
+    this.recording = false,
     this.density = CardDensity.standard,
     this.onTap,
     this.onMenu,
@@ -56,6 +57,10 @@ class RoomCardView extends StatelessWidget {
   /// Formatted live duration (`01:24`), shown next to the live badge.
   final String? liveFor;
 
+  /// Whether the recorder is saving this room: "录制中" top right
+  /// (spec/product.md F-FAV-01).
+  final bool recording;
+
   /// Text density.
   final CardDensity density;
 
@@ -80,7 +85,8 @@ class RoomCardView extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final text = theme.textTheme;
-    final label = isLive ? '$anchorName，直播中，$title' : '$anchorName，未开播，$title';
+    final state = isLive ? '直播中' : '未开播';
+    final label = recording ? '$anchorName，$state，录制中，$title' : '$anchorName，$state，$title';
     // The frame is the card's only focus target: keyboard and remote focus
     // draw its ring (and grow the card on TV), OK opens, long OK is the menu.
     return FocusFrame(
@@ -124,6 +130,8 @@ class RoomCardView extends StatelessWidget {
                           top: Space.s1 + 2,
                           child: PlatformLogo(platformId: platformId),
                         ),
+                        if (recording)
+                          const Positioned(right: Space.s1 + 2, top: Space.s1 + 2, child: RecordingBadge()),
                         if (isLive)
                           Positioned(
                             left: Space.s1 + 2,
@@ -184,6 +192,8 @@ class OfflineRoomRow extends StatelessWidget {
     required this.anchorName,
     this.avatar,
     this.subtitle,
+    this.tag,
+    this.recording = false,
     this.onTap,
     this.onMenu,
     super.key,
@@ -200,6 +210,12 @@ class OfflineRoomRow extends StatelessWidget {
 
   /// Secondary line (`上次开播 3 小时前`).
   final String? subtitle;
+
+  /// A state label after the name (`未支持`, `状态未知`).
+  final String? tag;
+
+  /// Whether the recorder is saving this room (F-FAV-01).
+  final bool recording;
 
   /// Opens the room.
   final VoidCallback? onTap;
@@ -228,7 +244,13 @@ class OfflineRoomRow extends StatelessWidget {
               foregroundImage: avatar,
               child: Text(anchorName.isEmpty ? '?' : anchorName.characters.first),
             ),
-            title: Text(anchorName, maxLines: 1, overflow: TextOverflow.ellipsis),
+            title: Row(
+              children: [
+                Flexible(child: Text(anchorName, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                if (tag != null) ...[const SizedBox(width: Space.s2), StatusTag(tag!)],
+                if (recording) ...[const SizedBox(width: Space.s2), const StatusTag.recording()],
+              ],
+            ),
             subtitle: subtitle == null ? null : Text(subtitle!, maxLines: 1),
             trailing: PlatformLogo(platformId: platformId, size: Sizes.iconDense),
           ),

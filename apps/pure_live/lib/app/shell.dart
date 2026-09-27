@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/network.dart';
+import 'package:pure_live_app/features/discover/discover_refresh.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 const _destinations = [
@@ -26,14 +27,18 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final offline = ref.watch(networkKindProvider).value == NetworkKind.offline;
-    final body = offline
-        ? Column(
-            children: [
-              const OfflineBar(),
-              Expanded(child: shell),
-            ],
-          )
-        : shell;
+    // F-APP-03: coming back after 15 s refreshes the current tab.
+    final body = HomeResumeRefresh(
+      tab: shell.currentIndex,
+      child: offline
+          ? Column(
+              children: [
+                const OfflineBar(),
+                Expanded(child: shell),
+              ],
+            )
+          : shell,
+    );
     return TvScope.of(context).enabled
         ? TvNavScaffold(destinations: _destinations, selectedIndex: shell.currentIndex, onSelected: _select, body: body)
         : AdaptiveNavScaffold(

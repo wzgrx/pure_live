@@ -1,5 +1,6 @@
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
+import 'package:pure_live_app/core/sites.dart';
 
 /// What to tell the user about a failure: the UI decides by type, never by
 /// message text (ADR 0010, rule 6; principles rule 3).
@@ -14,5 +15,11 @@ import 'package:live_net/live_net.dart';
   UnsupportedLink() => (title: '不支持这个链接', message: '目前支持斗鱼、虎牙、哔哩哔哩、抖音和快手的直播间链接。', retryable: false),
   ApiChanged() => (title: '平台接口变了', message: '需要更新应用才能继续使用这个平台。', retryable: true),
   NetworkFailure() || TransportFailure() => (title: '网络连接失败', message: '检查网络或代理设置后重试。', retryable: true),
+  // F-FAV-08: follows and history of other platforms stay; they just cannot open.
+  PlatformUnsupported(:final platform) => (
+    title: '平台暂不支持',
+    message: '${platformName(platform)}已下线或这个版本还不支持，关注和观看历史会一直保留。',
+    retryable: false,
+  ),
   _ => (title: '出错了', message: '$error', retryable: true),
 };

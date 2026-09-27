@@ -7,6 +7,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/discover/discover_refresh.dart';
 import 'package:pure_live_app/features/discover/followed_areas.dart';
 import 'package:pure_live_app/features/iptv/iptv_discover.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
@@ -80,7 +81,8 @@ class _PlatformDiscover extends StatelessWidget {
         Expanded(
           child: TabBarView(
             children: [
-              RoomGrid(query: RecommendedQuery(platform)),
+              // F-APP-03: reloads when the app comes back after a while.
+              RoomGrid(query: RecommendedQuery(platform), refreshOn: discoverRefreshProvider),
               _Categories(platform: platform),
             ],
           ),

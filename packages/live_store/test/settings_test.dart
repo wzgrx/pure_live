@@ -69,6 +69,15 @@ void main() {
       expect(convert(Settings.closeDontAsk, 'dontAskExit', true), isTrue);
       expect(convert(Settings.miniPlayerOnLeave, 'floatPlay', true), isTrue);
       expect(convert(Settings.pipAlwaysOnTop, 'windowsPipAlwaysOnTop', true), isTrue);
+      // F-FAV-04: 3.x thumbnail refresh keys, interval clamped to 5–360.
+      expect(convert(Settings.autoRefreshCovers, 'autoRefreshThumbnails', true), isTrue);
+      expect(convert(Settings.coverRefreshInterval, 'thumbnailRefreshInterval', 45), 45);
+      expect(convert(Settings.coverRefreshInterval, 'thumbnailRefreshInterval', 1), 5);
+      expect(convert(Settings.coverRefreshInterval, 'thumbnailRefreshInterval', 9000), 360);
+      expect(convert(Settings.autoRefreshInterval, 'autoRefreshInterval', 180), 180);
+      expect(convert(Settings.autoRefreshInterval, 'autoRefreshInterval', 1), 5);
+      expect(Settings.followSort.decode('custom'), FollowSort.custom);
+      expect(Settings.followSort.decode('fans'), isNull);
     });
 
     test('scopes follow store.md §5', () {

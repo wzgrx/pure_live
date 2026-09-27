@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
@@ -8,28 +7,10 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/tv.dart';
-import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
+import 'package:pure_live_app/features/search/search_results.dart';
 import 'package:pure_live_app/l10n/strings.dart';
-
-/// First page of every enabled platform for the keyword, merged: live rooms
-/// first, then by audience (spec/product.md F-SRC-01 "智能" order). A failing
-/// platform is left out instead of failing the whole list.
-final FutureProviderFamily<List<RoomCard>, String> combinedSearchProvider = FutureProvider.autoDispose
-    .family<List<RoomCard>, String>((ref, keyword) async {
-      final sites = ref.watch(sitesProvider);
-      final platforms = ref.watch(enabledPlatformsProvider);
-      final pages = await Future.wait([
-        for (final id in platforms)
-          sites[id]!.search.search(keyword).then((page) => page.items).catchError((Object _) => <RoomCard>[]),
-      ]);
-      int audience(RoomCard card) => card.audience.online ?? card.audience.popularity ?? card.audience.cumulative ?? 0;
-      return [for (final items in pages) ...items]..sort((a, b) {
-        final live = (b.state == LiveState.live ? 1 : 0) - (a.state == LiveState.live ? 1 : 0);
-        return live != 0 ? live : audience(b).compareTo(audience(a));
-      });
-    });
 
 /// Looks like a link or share text rather than a keyword.
 bool looksLikeLink(String input) =>
@@ -51,6 +32,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final _controller = TextEditingController();
   String _keyword = '';
   bool _liveOnly = false;
+  SearchSort _sort = SearchSort.smart;
+
+  /// The platform chosen in the wide layout's rail; null is 综合.
+  String? _platform;
   Future<RoomRef?>? _link;
 
   @override
@@ -137,6 +122,95 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     if (_keyword.isEmpty) {
       return const MessageView(icon: Icons.search, title: S.searchHint);
     }
+    final size = MediaQuery.sizeOf(context);
+    final layout = WindowLayout(size);
+    // principles §5.2: from the expanded class a filter rail replaces the
+    // platform tabs (not on TV, whose canvas has its own rules, nor on
+    // landscape phones).
+    final wide = !TvScope.of(context).enabled && layout.width.atLeast(WidthClass.expanded) && !layout.isShortLandscape;
+    final keyword = _keyword;
+    final sort = _sort;
+    bool Function(RoomCard card)? where;
+    if (_liveOnly) where = (card) => card.state == LiveState.live;
+    Widget results(String? platform) => platform == null
+        ? _CombinedResults(keyword: keyword, liveOnly: _liveOnly, sort: sort, platforms: platforms)
+        : RoomGrid(
+            query: SearchQuery(platform, keyword),
+            where: where,
+            arrange: (cards) => sortSearch(cards, sort, platforms: platforms),
+            emptyText: S.searchEmpty,
+            originLabel: '搜索结果',
+          );
+    final tools = [
+      PopupMenuButton<SearchSort>(
+        tooltip: '排序',
+        initialValue: sort,
+        onSelected: (value) => setState(() => _sort = value),
+        itemBuilder: (context) => [
+          for (final MapEntry(key: option, value: label) in searchSortLabels.entries)
+            CheckedPopupMenuItem(value: option, checked: option == sort, child: Text(label)),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.s2, vertical: Space.s2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.sort, size: Sizes.iconDense),
+              const SizedBox(width: Space.s1),
+              Text(searchSortLabels[sort]!),
+            ],
+          ),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(right: Space.s2),
+        child: FilterChip(
+          label: const Text(S.liveOnly),
+          selected: _liveOnly,
+          onSelected: (value) => setState(() => _liveOnly = value),
+        ),
+      ),
+    ];
+    if (wide) {
+      final platform = platforms.contains(_platform) ? _platform : null;
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 200,
+            child: _PlatformRail(
+              keyword: keyword,
+              platforms: platforms,
+              selected: platform,
+              onSelected: (value) => setState(() => _platform = value),
+            ),
+          ),
+          const VerticalDivider(width: 1),
+          Expanded(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: layout.margin),
+                      child: Text(
+                        platform == null ? '综合' : platformName(platform),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const Spacer(),
+                    ...tools,
+                  ],
+                ),
+                Expanded(
+                  child: KeyedSubtree(key: ValueKey(platform), child: results(platform)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
     return DefaultTabController(
       length: platforms.length + 1,
       child: Column(
@@ -153,31 +227,50 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: Space.s2),
-                child: FilterChip(
-                  label: const Text(S.liveOnly),
-                  selected: _liveOnly,
-                  onSelected: (value) => setState(() => _liveOnly = value),
-                ),
-              ),
+              ...tools,
             ],
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _CombinedResults(keyword: _keyword, liveOnly: _liveOnly),
-                for (final id in platforms)
-                  RoomGrid(
-                    query: SearchQuery(id, _keyword),
-                    where: _liveOnly ? (card) => card.state == LiveState.live : null,
-                    emptyText: S.searchEmpty,
-                  ),
-              ],
-            ),
-          ),
+          Expanded(child: TabBarView(children: [results(null), for (final id in platforms) results(id)])),
         ],
       ),
+    );
+  }
+}
+
+/// The filter rail of wide windows (principles §5.2): 综合 and each platform
+/// with the number of rooms the combined search found there so far.
+class _PlatformRail extends ConsumerWidget {
+  const new({required this.keyword, required this.platforms, required this.selected, required this.onSelected});
+
+  final String keyword;
+  final List<String> platforms;
+  final String? selected;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final combined = ref.watch(combinedSearchProvider(keyword)).value;
+    final counts = combined?.counts ?? const <String, int>{};
+    String? count(int? value) => value == null ? null : '$value';
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: Space.s2),
+      children: [
+        ListTile(
+          leading: const Icon(Icons.travel_explore),
+          title: const Text('综合'),
+          trailing: combined == null ? null : Text('${combined.items.length}'),
+          selected: selected == null,
+          onTap: () => onSelected(null),
+        ),
+        for (final id in platforms)
+          ListTile(
+            leading: PlatformLogo(platformId: id, size: Sizes.iconDense),
+            title: Text(platformName(id)),
+            trailing: combined == null ? null : Text(combined.failed.contains(id) ? '失败' : count(counts[id]) ?? '0'),
+            selected: selected == id,
+            onTap: () => onSelected(id),
+          ),
+      ],
     );
   }
 }
@@ -216,63 +309,42 @@ class _LinkResult extends StatelessWidget {
   );
 }
 
-class _CombinedResults extends ConsumerStatefulWidget {
-  const new({required this.keyword, required this.liveOnly});
+class _CombinedResults extends ConsumerWidget {
+  const new({required this.keyword, required this.liveOnly, required this.sort, required this.platforms});
 
   final String keyword;
   final bool liveOnly;
+  final SearchSort sort;
+  final List<String> platforms;
 
   @override
-  ConsumerState<_CombinedResults> createState() => _CombinedResultsState();
-}
-
-class _CombinedResultsState extends ConsumerState<_CombinedResults> {
-  final TvGridFocus _focus = TvGridFocus(debugLabel: 'search-grid');
-
-  @override
-  void dispose() {
-    _focus.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final async = ref.watch(combinedSearchProvider(widget.keyword));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = combinedSearchProvider(keyword);
+    final async = ref.watch(provider);
     return async.when(
+      skipLoadingOnRefresh: true,
       loading: () => const LoadingView(),
       error: (error, _) => MessageView.error(title: describeError(error).title),
-      data: (cards) {
-        final shown = widget.liveOnly ? cards.where((c) => c.state == LiveState.live).toList() : cards;
-        if (shown.isEmpty) return const MessageView(title: S.searchEmpty);
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final grid = CardGridGeometry.of(context, constraints.maxWidth);
-            final dpr = MediaQuery.devicePixelRatioOf(context);
-            final now = DateTime.now();
-            return GridView.builder(
-              padding: grid.padding,
-              gridDelegate: grid.delegate,
-              itemCount: shown.length,
-              itemBuilder: (context, index) => RoomCardTile(
-                card: shown[index],
-                coverWidth: grid.cellWidth,
-                devicePixelRatio: dpr,
-                now: now,
-                origin: () => RoomOrigin.fromCards(shown, label: '搜索结果'),
-                focusNode: _focus.node(index),
-                onFocusChange: (focused) {
-                  if (focused) _focus.focused(index);
-                },
-                onKeyEvent: (node, event) => _focus.handleKey(
-                  index,
-                  event,
-                  count: shown.length,
-                  columns: grid.columns,
-                  rowExtent: grid.rowExtent,
+      data: (state) {
+        final found = liveOnly ? state.items.where((card) => card.state == LiveState.live).toList() : state.items;
+        final failed = state.failed;
+        return RoomCardGrid(
+          items: sortSearch(found, sort, platforms: platforms),
+          hasMore: state.hasMore,
+          moreError: state.moreError,
+          emptyText: failed.length == platforms.length ? '搜索失败，检查网络后下拉重试' : S.searchEmpty,
+          originLabel: '搜索结果',
+          header: failed.isEmpty || failed.length == platforms.length
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
+                  child: Text(
+                    '${failed.map(platformName).join('、')} 搜索失败，下拉可以重试',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
-            );
-          },
+          onLoadMore: () => ref.read(provider.notifier).loadMore(),
+          onRefresh: () => ref.refresh(provider.future),
         );
       },
     );

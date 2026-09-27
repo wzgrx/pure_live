@@ -44,7 +44,7 @@
 |---|---|---|---|---|
 | F-APP-01 | 启动页：固定显示 1 秒，再最多等 350 ms 关注校验；可在设置关闭 | P2 | **删除**：改用系统启动页 API，冷启动不额外等待（PLAN §09、§10） | `lib/routes/app_pages.dart:189-235`；`lib/modules/splash/splash_screen.dart` |
 | F-APP-02 | 首页导航：手机底部栏，宽度 > 680 侧边导航；标签可在“导航显示设置”排序和隐藏（至少留一个） | P0 | **重新设计**：按窗口等级切换底部栏 / 导航轨 / 侧边栏；一级入口固定 4 个，删除自定义排序（入口从 4 个可变变为 4 个固定，录制移到“我的”后已无隐藏需求） | `lib/modules/home/home_page.dart:113-235`；`lib/modules/settings/pages/navigation_settings_page.dart` |
-| F-APP-03 | 回到前台时，如果离开 ≥ 15 秒，450 ms 后刷新当前首页标签 | P2 | 保留 | `lib/modules/home/home_page.dart:141-160` |
+| F-APP-03 | 回到前台时，如果离开 ≥ 15 秒，450 ms 后刷新当前首页标签 | P2 | 保留：关注由关注刷新负责（“回到应用时刷新关注”开启、距上次刷新 ≥ 15 秒时，450 ms 后刷新，不论当前是哪个标签，开播提醒也靠它）；当前标签是发现时，刷新正在看的推荐或分区列表（2026-09-28） | `lib/modules/home/home_page.dart:141-160` |
 | F-APP-04 | 冷启动带房间参数（Windows `--open-room=`）时首帧后直接进房 | P2 | 保留：并入统一的深链路由 | `lib/modules/home/home_page.dart:83-93`；`lib/common/utils/windows_multi_instance_launcher.dart:19-66` |
 | F-APP-05 | Android Manifest 声明 `purelive://`、`mystyle://`、m3u 的 VIEW 过滤器，但 Dart 侧没有处理代码（点击无效果） | P2 | **重新设计**：实现 `purelive://` 房间深链和 m3u/EPG 文件打开，统一走路由重定向；`mystyle://` **删除**（上游遗留，从未生效，无用户行为可对齐） | `android/app/src/main/AndroidManifest.xml:66-76` |
 | F-APP-06 | 界面语言：简体中文、English（英文不完整）；语言存了两份（Hive 与 SharedPreferences） | P2 | 保留并扩展：简体、繁体、英文，缺失翻译 CI 报错；语言只存一份（PLAN §12） | `assets/translations/zh.json`、`en.json`；`lib/modules/settings/pages/theme_settings_page.dart` |
@@ -53,14 +53,14 @@
 
 | 编号 | 功能与旧版行为 | 优先级 | v4 处置 | 旧代码入口 |
 |---|---|---|---|---|
-| F-FAV-01 | 关注列表：“开播 / 录制中 / 未开播”三个标签页；每页再按平台分标签；卡片显示直播状态、人数、平台 | P0 | **重新设计**：开播 / 全部 / 分组 三个视图，支持排序（PLAN §07）；“录制中”改为卡片状态标记，并可在录制中心查看 | `lib/modules/favorite/favorite_page.dart:33-35,106-117` |
-| F-FAV-02 | 关注 / 取消关注：直播间顶栏按钮；卡片长按对话框里关注（带确认）；写入等待落盘，失败回滚并提示 | P0 | 保留 | `lib/common/widgets/room_card.dart:141-170`；`lib/modules/live_play/widgets/layout/live_play_header.dart:68-92`；`lib/common/services/settings/favorite_room_controller.dart:404-436` |
-| F-FAV-03 | 启动校验：启动时全部关注显示为“校验中/未知”，校验结果一次性发布，避免卡片跳动 | P0 | 保留 | `lib/modules/favorite/favorite_controller.dart:639-706`；`favorite_startup_policy.dart`；提交 d6c3d8df |
-| F-FAV-04 | 自动刷新关注状态：开关（默认关）、间隔、最大并发（默认 4）；回前台刷新；封面缩略图定时刷新 | P0 | 保留 | `lib/modules/settings/pages/refresh_settings.dart`；`lib/modules/favorite/favorite_controller.dart:585-706` |
-| F-FAV-05 | 标签（即分组）：新建、改名、描述、拖动排序、删除；给已关注房间分配多个标签；关注页顶部按标签筛选；未关注房间不能打标签 | P0 | **重新设计**：v4 的“分组”就是标签，关注页“分组”视图按标签分区显示；映射以“平台:房间号”为键 | `lib/modules/tags/tag_management_page.dart`；`tag_management_controller.dart:9-10,78-121`；`lib/common/widgets/room_card.dart:224-236`；提交 4d8ed292 |
+| F-FAV-01 | 关注列表：“开播 / 录制中 / 未开播”三个标签页；每页再按平台分标签；卡片显示直播状态、人数、平台 | P0 | **重新设计**：开播 / 全部 / 分组 三个视图，支持排序（PLAN §07）；“录制中”改为卡片状态标记，并可在录制中心查看。细则（2026-09-28）：排序为人数（默认，与旧版一致）、开播时间（本次刷新得到的开播时刻，最近开播的在前；平台不给开播时刻的排在后面按人数）、平台（平台顺序，再按人数）、自定义（在“调整顺序”页拖动），选择记在设置 `follows.sort`；未开播的紧凑行除“平台”“自定义”外按上次开播时间排。录制器的任务处于准备、录制、重连时，卡片和紧凑行显示“录制中”。“分组”视图按标签分区：每个标签一节（标题带人数，下面是描述），开播的用卡片、未开播的用紧凑行，一个房间可以出现在多节，没有标签的放在最后的“未分组” | `lib/modules/favorite/favorite_page.dart:33-35,106-117` |
+| F-FAV-02 | 关注 / 取消关注：直播间顶栏按钮；卡片长按对话框里关注（带确认）；写入等待落盘，失败回滚并提示 | P0 | 保留：写库失败时不改变关注状态（事务回滚），提示“关注失败 / 取消关注失败”；撤销失败同样提示 | `lib/common/widgets/room_card.dart:141-170`；`lib/modules/live_play/widgets/layout/live_play_header.dart:68-92`；`lib/common/services/settings/favorite_room_controller.dart:404-436` |
+| F-FAV-03 | 启动校验：启动时全部关注显示为“校验中/未知”，校验结果一次性发布，避免卡片跳动 | P0 | 保留。细则（2026-09-28）：第一次刷新完成前，页面顶部显示“正在检查开播状态”，全部关注以紧凑行列出，不按上次保存的状态显示开播；刷新写库是一个事务，完成后一次性发布。获取失败的房间显示“状态未知”（不沿用上次的状态，store.md §6.4.10），直到下一次刷新成功或本次运行里打开过该房间；平台明确说房间不存在的显示“房间不存在” | `lib/modules/favorite/favorite_controller.dart:639-706`；`favorite_startup_policy.dart`；提交 d6c3d8df |
+| F-FAV-04 | 自动刷新关注状态：开关（默认关）、间隔、最大并发（默认 4）；回前台刷新；封面缩略图定时刷新 | P0 | 保留：封面定时刷新有独立的开关（默认关）和间隔（默认 30 分钟，5–360，沿用旧键 `autoRefreshThumbnails`、`thumbnailRefreshInterval`）；开启后开播卡片的封面按时间段换缓存键，每个间隔重新下载一次，旧图在新图到达前继续显示 | `lib/modules/settings/pages/refresh_settings.dart`；`lib/modules/favorite/favorite_controller.dart:585-706` |
+| F-FAV-05 | 标签（即分组）：新建、改名、描述、拖动排序、删除；给已关注房间分配多个标签；关注页顶部按标签筛选；未关注房间不能打标签 | P0 | **重新设计**：v4 的“分组”就是标签，关注页“分组”视图按标签分区显示；映射以“平台:房间号”为键；“管理分组”里可以新建、改名、编辑描述、拖动排序、删除（可撤销） | `lib/modules/tags/tag_management_page.dart`；`tag_management_controller.dart:9-10,78-121`；`lib/common/widgets/room_card.dart:224-236`；提交 4d8ed292 |
 | F-FAV-06 | 卡片长按或右键：对话框里有分享、设置标签、关注、房间号 | P0 | **重新设计**：长按改为静音预览（PLAN §07，见 F-NEW-03）；分享、设置标签、关注、复制房间号移到卡片的更多菜单和右键菜单 | `lib/common/widgets/room_card.dart:177-310,1077-1078` |
 | F-FAV-07 | 关注分区：在分区页收藏某平台的分区，单独页面查看 | P2 | **合并**到“发现”：分区列表内置“已收藏”分组 | `lib/modules/areas/areas_page.dart:58`；`lib/modules/areas/favorite_areas_page.dart` |
-| F-FAV-08 | 已下线或不支持的平台：关注和历史照常保留，打开时提示“平台已下线” | P0 | 保留：标记“未支持”，随备份导出，不因首批只做 5 个平台而删除数据 | `lib/routes/app_navigation.dart:40-44`；`lib/common/services/settings/favorite_room_controller.dart:58-120` |
+| F-FAV-08 | 已下线或不支持的平台：关注和历史照常保留，打开时提示“平台已下线” | P0 | 保留：标记“未支持”，随备份导出，不因首批只做 5 个平台而删除数据。关注页的紧凑行带“未支持”标记，点击只提示“这个平台暂不支持”，不进直播间；刷新跳过这些房间；从链接或历史进入时，直播间显示“平台暂不支持”提示页（类型化错误，不崩溃） | `lib/routes/app_navigation.dart:40-44`；`lib/common/services/settings/favorite_room_controller.dart:58-120` |
 
 ## 4 发现：热门与分区
 
@@ -76,10 +76,10 @@
 
 | 编号 | 功能与旧版行为 | 优先级 | v4 处置 | 旧代码入口 |
 |---|---|---|---|---|
-| F-SRC-01 | 跨平台搜索：关键词；平台筛选（全部/单个）；排序（智能、平台、人数、粉丝）；“包含未开播”开关；加载更多 | P0 | 保留；布局按窗口等级（单列 → 列表+详情+平台筛选侧栏） | `lib/modules/search/search_page.dart:26-256`；`search_controller.dart:175-370` |
+| F-SRC-01 | 跨平台搜索：关键词；平台筛选（全部/单个）；排序（智能、平台、人数、粉丝）；“包含未开播”开关；加载更多 | P0 | 保留；布局按窗口等级（紧凑、中等：顶部平台标签；展开及以上：左侧平台筛选栏，见 principles §5.2）。细则（2026-09-28）：排序沿用旧版 `search_ranking.dart` 的规则：开播的总在前；平台 = 平台顺序 → 人数，人数 = 人数 → 平台顺序，最后按标题和房间号稳定排序。**“粉丝”暂缺**：v4 卡片模型没有粉丝数（五个平台里只有 B 站、快手的搜索接口给出），模型加入后再提供。**“智能”改为按相关度**：旧版智能 = 人数 → 粉丝 → 平台，没有粉丝数后就和“人数”完全一样；v4 的智能改为保留各平台自己的相关度顺序，按名次轮流合并（各平台第 1 名、再各平台第 2 名……，同名次按平台顺序），这样搜主播名时精确匹配的小主播不会被人数多的无关房间挤到后面；默认用智能。“综合”对每个平台分别翻页，滚到底时只请求还有下一页的平台；单个平台失败不影响其它平台 | `lib/modules/search/search_page.dart:26-256`；`search_controller.dart:175-370` |
 | F-SRC-02 | 网页搜索兜底：没有原生搜索的平台，在内置网页打开平台搜索页并识别房间链接；Windows 需要 WebView2，缺失时提示 | P0 | 保留：网页组件封装在接口后面（PLAN §04 对 inappwebview 的评估） | `lib/modules/search/web_search_controller.dart`；`web_search_room_parser.dart`；`search_controller.dart:147,523-559` |
 | F-SRC-03 | 链接跳转：粘贴直播间链接或“平台+房间号”打开直播间；页面列出支持的链接格式 | P0 | **合并**到搜索框：输入识别为链接时直接给出“打开直播间” | `lib/modules/toolbox/toolbox_page.dart:23-41,140-147`；`toolbox_controller.dart:120` |
-| F-SRC-04 | 获取直链：解析链接 → 选画质、线路 → 复制播放地址（工具箱和直播间菜单两处入口） | P2 | 保留：入口为直播间菜单、搜索结果的更多菜单 | `lib/modules/toolbox/toolbox_controller.dart:129`；`lib/modules/live_play/dialogs/known_room_link_dialog.dart`；`lib/common/utils/live_url_tool.dart:388` |
+| F-SRC-04 | 获取直链：解析链接 → 选画质、线路 → 复制播放地址（工具箱和直播间菜单两处入口） | P2 | 保留：入口为直播间菜单、卡片的更多菜单（关注、发现、搜索、历史共用，principles §4.2）。卡片入口先加载详情和线路，再让用户选画质和线路，剪贴板写入成功后才提示已复制；未开播时提示拿不到直链 | `lib/modules/toolbox/toolbox_controller.dart:129`；`lib/modules/live_play/dialogs/known_room_link_dialog.dart`；`lib/common/utils/live_url_tool.dart:388` |
 | F-SRC-05 | 工具箱打开时自动读剪贴板识别链接 | P2 | **重新设计**：并入搜索页，读剪贴板可在设置关闭（PLAN §05 建议） | `lib/modules/toolbox/toolbox_controller.dart:250` |
 
 ## 6 直播间（详见 `spec/modules/live-room.md`）

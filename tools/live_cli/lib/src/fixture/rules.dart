@@ -11,6 +11,7 @@ import 'package:live_cli/src/fixture/rules/looklive.dart';
 import 'package:live_cli/src/fixture/rules/sixroom.dart';
 import 'package:live_cli/src/fixture/rules/steambroadcast.dart';
 import 'package:live_cli/src/fixture/rules/weibo.dart';
+import 'package:live_cli/src/fixture/rules/xiaohongshu.dart';
 import 'package:live_cli/src/fixture/scrub.dart';
 
 /// Sensitive fields per platform, one file each under rules/, taken from the
@@ -30,4 +31,5 @@ const Map<String, ScrubRules> platformRules = {
   'sixroom': sixroomRules,
   'steambroadcast': steambroadcastRules,
   'weibo': weiboRules,
+  'xiaohongshu': xiaohongshuRules,
 };

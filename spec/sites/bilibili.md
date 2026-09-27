@@ -345,7 +345,7 @@
 |---|---|
 | `uid` | §8.2 的 uid；游客为 0 |
 | `roomid` | 长号 |
-| `protover` | 2（v4，2026-09-27 实测服务端回 zlib 包；旧版为 3 即 brotli，v4 不引入 brotli 包，见 docs/adr/draft-danmaku.md） |
+| `protover` | 2（v4，2026-09-27 实测服务端回 zlib 包；旧版为 3 即 brotli，v4 不引入 brotli 包，见 docs/adr/0019-danmaku-layer.md） |
 | `buvid` | 当前 buvid3 |
 | `support_ack` | true |
 | `queue_uuid` | 每次认证新生成的 8 位小写十六进制随机数 |

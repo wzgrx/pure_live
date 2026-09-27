@@ -1,6 +1,6 @@
 # live_danmaku
 
-v4 的弹幕包（纯 Dart，不依赖 Flutter）：5 个首批平台的弹幕连接、统一消息、过滤链、抽样、按批送到界面线程的后台 isolate。行为规格见 [spec/modules/danmaku.md](../../spec/modules/danmaku.md) §1–§4、§6 的数据部分，各平台协议见 `spec/sites/<平台>.md` 第 7 节。设计决定见 [docs/adr/draft-danmaku.md](../../docs/adr/draft-danmaku.md)。
+v4 的弹幕包（纯 Dart，不依赖 Flutter）：5 个首批平台的弹幕连接、统一消息、过滤链、抽样、按批送到界面线程的后台 isolate。行为规格见 [spec/modules/danmaku.md](../../spec/modules/danmaku.md) §1–§4、§6 的数据部分，各平台协议见 `spec/sites/<平台>.md` 第 7 节。设计决定见 [docs/adr/0019-danmaku-layer.md](../../docs/adr/0019-danmaku-layer.md)。
 
 依赖方向：`live_danmaku → live_core → live_net`（`tools/gate/check_deps.py` 检查）。画面弹幕渲染（§5）和列表界面在应用里做，不在这个包里。
 

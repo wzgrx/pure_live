@@ -20,7 +20,7 @@ final class ProtoField {
 }
 
 /// A protobuf message decoded without a schema: the fields in wire order
-/// (docs/adr/draft-danmaku.md: a hand-written reader of the few fields the
+/// (docs/adr/0019-danmaku-layer.md: a hand-written reader of the few fields the
 /// connectors need instead of generated classes).
 @immutable
 final class ProtoMessage {

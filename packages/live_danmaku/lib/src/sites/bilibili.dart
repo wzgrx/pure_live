@@ -17,7 +17,7 @@ typedef BilibiliFrame = ({List<DanmakuEvent> events, List<Uint8List> acks, bool?
 ///
 /// The auth packet asks for `protover` 2 (zlib) instead of 3 (brotli): the
 /// server honours it, and `dart:io` inflates zlib without a brotli package
-/// (docs/adr/draft-danmaku.md). Brotli packets (protover 3) are skipped.
+/// (docs/adr/0019-danmaku-layer.md). Brotli packets (protover 3) are skipped.
 abstract final class BilibiliProtocol {
   /// Header length (§7.3).
   static const headerLength = 16;

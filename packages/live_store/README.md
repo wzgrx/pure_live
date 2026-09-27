@@ -1,6 +1,6 @@
 # live_store
 
-Pure Live v4 的存储层（纯 Dart）：drift 主库和各个数据仓库、设置注册表、加密的密钥库、v4 备份和 3.x 备份导入、分享口令。行为依据 [spec/modules/store.md](../../spec/modules/store.md)，决策见 [ADR 0004](../../docs/adr/0004-storage-and-migration.md) 和 [draft-store](../../docs/adr/draft-store.md)。只依赖 `live_core`。
+Pure Live v4 的存储层（纯 Dart）：drift 主库和各个数据仓库、设置注册表、加密的密钥库、v4 备份和 3.x 备份导入、分享口令。行为依据 [spec/modules/store.md](../../spec/modules/store.md)，决策见 [ADR 0004](../../docs/adr/0004-storage-and-migration.md) 和 [ADR 0017](../../docs/adr/0017-live-store.md)。只依赖 `live_core`。
 
 ## 打开
 

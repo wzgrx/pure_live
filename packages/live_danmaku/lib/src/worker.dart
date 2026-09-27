@@ -14,7 +14,7 @@ import 'package:live_net/live_net.dart';
 typedef DanmakuTransportFactory = DanmakuTransport Function();
 
 /// One background isolate that runs every chat session of the app (CONN-1;
-/// docs/adr/draft-danmaku.md: one worker for all sessions). Connections,
+/// docs/adr/0019-danmaku-layer.md: one worker for all sessions). Connections,
 /// heartbeats, decompression, decoding, filtering and sampling happen there;
 /// the calling isolate only receives [DanmakuBatch]es and answers credential
 /// requests with its [DanmakuCredentials].

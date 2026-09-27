@@ -1,6 +1,6 @@
 # live_iptv
 
-v4 的 IPTV 包（纯 Dart，不依赖 Flutter）：M3U / TXT / JSON 播放列表和 XMLTV / JSON 节目单的解析、频道与节目单匹配、回看地址规则、下载器，以及把频道当作“网络电视”平台的 `IptvSite`。行为规格见 [spec/modules/iptv.md](../../spec/modules/iptv.md)，决策见 [docs/adr/draft-iptv.md](../../docs/adr/draft-iptv.md)。
+v4 的 IPTV 包（纯 Dart，不依赖 Flutter）：M3U / TXT / JSON 播放列表和 XMLTV / JSON 节目单的解析、频道与节目单匹配、回看地址规则、下载器，以及把频道当作“网络电视”平台的 `IptvSite`。行为规格见 [spec/modules/iptv.md](../../spec/modules/iptv.md)，决策见 [docs/adr/0024-iptv.md](../../docs/adr/0024-iptv.md)。
 
 依赖方向：`live_iptv → live_core → live_net`（`tools/gate/check_deps.py` 检查）。存储不在这里：`IptvSite` 通过 `IptvRepository` 读数据，应用把 `live_store` 的 `IptvStore` 接到这个接口上。
 

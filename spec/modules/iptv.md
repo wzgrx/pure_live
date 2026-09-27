@@ -2,7 +2,7 @@
 
 - 状态：第 6 阶段，2026-09-28
 - 范围：播放列表和节目单的格式、频道与节目单匹配、回看地址规则、“网络电视”作为发现里的平台、同步、存储和备份
-- 依据：product.md §10（F-IPTV-01～11 的 v4 处置）；ADR 0003（IPTV 不再算站点，是独立的本地数据源模块）；决策草案 [draft-iptv](../../docs/adr/draft-iptv.md)。旧版代码 `legacy/lib/core/iptv/`、`legacy/lib/modules/iptv/` 和测试 `legacy/test/m3u_parser_test.dart` 只用来核对真实格式的坑，不照搬
+- 依据：product.md §10（F-IPTV-01～11 的 v4 处置）；ADR 0003（IPTV 不再算站点，是独立的本地数据源模块）；决策草案 [ADR 0024](../../docs/adr/0024-iptv.md)。旧版代码 `legacy/lib/core/iptv/`、`legacy/lib/modules/iptv/` 和测试 `legacy/test/m3u_parser_test.dart` 只用来核对真实格式的坑，不照搬
 - 代码：解析、匹配、回看、数据源在 `packages/live_iptv`（纯 Dart，只依赖 live_core、live_net）；存储在 `packages/live_store`；界面在 `apps/pure_live/lib/features/iptv/`
 - 只写行为和契约，不写类名和代码拆分
 

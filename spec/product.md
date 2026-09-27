@@ -152,7 +152,7 @@
 | F-IPTV-10 | 定时录制 | P2 | 【旧版未上线】只有表和增删接口（`tables.dart:171-184`；`database.dart:562-565`）。v4：**合并**到录制中心的定时任务，P2 | 同左 |
 | F-IPTV-11 | 故障切换组（同一频道多个源自动切换） | P2 | 【旧版未上线】只有表和增删接口（`tables.dart:154-169`；`database.dart:582-627`）。v4：**合并**为“同一频道的多个源 = 多条线路”，由播放层换线路步骤处理（playback REC-1） | 同左 |
 
-行为细节见 [spec/modules/iptv.md](modules/iptv.md)。**修订（2026-09-28，draft-iptv）**：v4 的 IPTV 数据放进主库（schema 2），旧版 IPTV 库只读导入、不升级结构，回退到 3.x 时旧库仍可用（原定“原样沿用、继续编号升级”会让回退后的旧版因 schemaVersion 过高报错，REG-STORE-021）。
+行为细节见 [spec/modules/iptv.md](modules/iptv.md)。**修订（2026-09-28，ADR 0024）**：v4 的 IPTV 数据放进主库（schema 2），旧版 IPTV 库只读导入、不升级结构，回退到 3.x 时旧库仍可用（原定“原样沿用、继续编号升级”会让回退后的旧版因 schemaVersion 过高报错，REG-STORE-021）。
 
 ## 11 弹幕设置与屏蔽（P0，详见 `spec/modules/danmaku.md`）
 

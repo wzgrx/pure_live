@@ -293,7 +293,7 @@
 
 ## 8 v4 预览实现记录（2026-09-28）
 
-`apps/pure_live/lib/features/room/` 和 `features/danmaku/` 按本规格实现，下面记录实现中做出的取舍和尚未做的部分，决定见 [docs/adr/draft-room-page.md](../../docs/adr/draft-room-page.md)。
+`apps/pure_live/lib/features/room/` 和 `features/danmaku/` 按本规格实现，下面记录实现中做出的取舍和尚未做的部分，决定见 [ADR 0023](../../docs/adr/0023-room-page.md)。
 
 - **展示状态**：内嵌、剧场（大、超大窗口）、全屏、竖屏全屏一个枚举；系统栏、方向锁、窗口全屏只由它派生（PS-1）。平台调用 1 s 内没有返回也放行下一次切换，避免平台无响应时所有切换被 INV-ROOM-07 永久挡住。平板（最短边 ≥ 600）不锁方向（principles §5.2）。
 - **手势层**在画面按钮之下而不是包住它们：包住按钮的双击识别器会让每个按钮的点击等待双击窗口（约 300 ms）。控制层的渐变遮罩不接收指针，ZN-1 由手势层判断。

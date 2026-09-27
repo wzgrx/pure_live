@@ -1,6 +1,6 @@
 # live_record
 
-Pure Live v4 的录制层（纯 Dart）：FLV 写入器、带租期拼接的录制会话、任务管理器、崩溃恢复、FLV → MP4 转封装。行为依据 [spec/modules/record.md](../../spec/modules/record.md)（文中 §编号指它），方案依据 [ADR 0005](../../docs/adr/0005-recording-without-ffmpegkit.md)，实现上的选择见 [draft-record](../../docs/adr/draft-record.md)。依赖 `live_media`（`FlvSplicer`、`FlvFramer`、`openHttpFlv`）、`live_core`、`live_net`。
+Pure Live v4 的录制层（纯 Dart）：FLV 写入器、带租期拼接的录制会话、任务管理器、崩溃恢复、FLV → MP4 转封装。行为依据 [spec/modules/record.md](../../spec/modules/record.md)（文中 §编号指它），方案依据 [ADR 0005](../../docs/adr/0005-recording-without-ffmpegkit.md)，实现上的选择见 [ADR 0021](../../docs/adr/0021-recording.md)。依赖 `live_media`（`FlvSplicer`、`FlvFramer`、`openHttpFlv`）、`live_core`、`live_net`。
 
 ## 应用怎么用
 

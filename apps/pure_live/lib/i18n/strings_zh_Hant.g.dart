@@ -1328,7 +1328,7 @@ class Translations$iptv$zh_Hant implements Translations$iptv$zh_Hans {
   @override
   String get guide => '節目表';
   @override
-  String get guideHint => '選一個節目表作為目前的節目表；頻道會按 tvg-id 和名稱自動比對。節目表只保存前後兩天的節目。';
+  String get guideHint => '選一個節目表作為目前的節目表；頻道會按 tvg-id 和名稱自動比對。節目表只保留前後兩天的節目。';
   @override
   String get guideSources => '節目表來源';
   @override

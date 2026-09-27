@@ -19,7 +19,7 @@
   "deleteGuide": "刪除節目表",
   "deleteGuideConfirm": "刪除「{name}」和它的節目？",
   "guide": "節目表",
-  "guideHint": "選一個節目表作為目前的節目表；頻道會按 tvg-id 和名稱自動比對。節目表只保存前後兩天的節目。",
+  "guideHint": "選一個節目表作為目前的節目表；頻道會按 tvg-id 和名稱自動比對。節目表只保留前後兩天的節目。",
   "guideSources": "節目表來源",
   "noGuide": "不使用節目表",
   "noGuides": "還沒有節目表",

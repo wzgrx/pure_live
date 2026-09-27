@@ -1928,7 +1928,7 @@ class _Translations$room$en implements Translations$room$zh_Hans {
   @override
   String get audioOnlyPlaying => 'Playing audio only';
   @override
-  String get enableMonitoringFirst => 'Turn on scheduled live checks in Recording settings first';
+  String get enableMonitoringFirst => 'Turn on live monitoring in Recording settings first';
   @override
   String get goToSettings => 'Settings';
   @override
@@ -2228,7 +2228,7 @@ class _Translations$system$en implements Translations$system$zh_Hans {
   @override
   String get changeInSettings => 'You can change this in Settings › General';
   @override
-  String get minimizeToTray => 'Minimize to tray';
+  String get minimizeToTray => 'Minimise to tray';
   @override
   String get askEveryTime => 'Ask every time';
   @override

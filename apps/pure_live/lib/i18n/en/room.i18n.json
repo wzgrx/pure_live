@@ -76,7 +76,7 @@
   "exitFullscreenKey": "Exit full screen (F)",
   "fullscreenKey": "Full screen (F)",
   "audioOnlyPlaying": "Playing audio only",
-  "enableMonitoringFirst": "Turn on scheduled live checks in Recording settings first",
+  "enableMonitoringFirst": "Turn on live monitoring in Recording settings first",
   "goToSettings": "Settings",
   "recordWhenLive": "Records automatically when live",
   "stoppingRecording": "Stopping the recording; recorded files are kept",

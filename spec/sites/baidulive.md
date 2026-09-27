@@ -82,6 +82,7 @@
 - 列表是 HLS 格式，每个分片是一个 JSON 文件（有时 gzip 压缩但不带 `Content-Encoding`）：`{list: [{messages: [{content: "{\"text\":\"<再编码的 JSON>\"}", ...}]}]}`。
 - 内层 JSON：`message_type == "0"` 是聊天（`name`、`content`、`bd_uk`、`portrait`）；`type == 107` 是系统通知（如 `mix_room_close`）。
 - 2026-09-27 观察 90 秒只有 1 条聊天（主播发的），量很小。
+- 2026-09-28 复查：推荐里在线最多的两个房间（显示 25384、10669 人）各轮询 120 秒，聊天 0 条；`chat_msg_hls_url` 只有 `type 101`（在线人数和在线用户列表）和 `type 107/10013`（`mix_room_close`）；`reliable_msg_hls_url` 有 `type 107/10024`（免费礼物“拍拍”）；`host_msg_hls_url` 一直 404。聊天量太小，连接器的价值不抵维护成本，暂不实现；以后要做时，在线人数取 `type 101` 的 `onlineusercnt`，礼物取 `10024`。
 
 ## 8. 登录与 Cookie
 

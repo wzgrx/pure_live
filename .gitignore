@@ -1,84 +1,45 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-__pycache__/
-*.swp
+# OS and editors
 .DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
+*.swp
 *.iml
 *.ipr
 *.iws
 .idea/
+.history
+__pycache__/
+*.pyc
+*.log
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Dart and Flutter, in every workspace member
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
-/android/build/
-/android/.gradle/
-/android/.kotlin/
-/local-artifacts/
-/local-smoke/
-/.local-build/
-/build-audit-*
-
-# Symbolication related
+build/
+**/doc/api/
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Android and Windows generated files
+**/android/.gradle/
+**/android/.kotlin/
+**/android/local.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/windows/flutter/ephemeral/
 
-/android/key.properties
+# Signing material never enters Git (SECURITY.md)
+**/key.properties
 **/*.jks
 **/*.keystore
 **/*.pfx
 **/*.key
 **/*.csr
-/assets/keystore/
 
-# /assets/keystore/
-/assets/pure_live_web/
+# Local build and release outputs
+/local-artifacts/
 
-# FVM Version Cache
-.fvm/
-**/.make_config.yaml
-
-# Legacy app build outputs and local artifacts (docs/adr/0013-legacy-folder.md)
-/legacy/build/
-/legacy/android/build/
-/legacy/android/.gradle/
-/legacy/android/.kotlin/
-/legacy/local-artifacts/
-/legacy/local-smoke/
-/legacy/.local-build/
-/legacy/build-audit-*
-/legacy/android/app/debug
-/legacy/android/app/profile
-/legacy/android/app/release
-/legacy/android/key.properties
-/legacy/assets/keystore/
-/legacy/assets/pure_live_web/
+# Agent worktrees (Claude Code)
+/.claude/worktrees/

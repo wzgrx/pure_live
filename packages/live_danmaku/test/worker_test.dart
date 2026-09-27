@@ -21,6 +21,8 @@ final class _ReplayTransport implements DanmakuTransport {
     required String site,
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 10),
+    List<String> protocols = const [],
+    bool exactHeaders = false,
   }) async {
     final socket = FakeSocket();
     if (site == 'bilibili') {

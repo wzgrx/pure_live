@@ -115,9 +115,21 @@ final class _RecordingTransport implements DanmakuTransport {
     required String site,
     Map<String, String> headers = const {},
     Duration timeout = const Duration(seconds: 10),
+    List<String> protocols = const [],
+    bool exactHeaders = false,
   }) async {
     _recorder._handshakes.add((url: url, headers: headers));
-    return _RecordingSocket(await _inner.connect(url, site: site, headers: headers, timeout: timeout), _recorder);
+    return _RecordingSocket(
+      await _inner.connect(
+        url,
+        site: site,
+        headers: headers,
+        timeout: timeout,
+        protocols: protocols,
+        exactHeaders: exactHeaders,
+      ),
+      _recorder,
+    );
   }
 }
 
@@ -142,6 +154,12 @@ final class _RecordingSocket implements DanmakuSocket {
   void send(List<int> frame) {
     _recorder._add('out', frame);
     _inner.send(frame);
+  }
+
+  @override
+  void sendText(String text) {
+    _recorder._add('out', utf8.encode(text), text: true);
+    _inner.sendText(text);
   }
 
   @override

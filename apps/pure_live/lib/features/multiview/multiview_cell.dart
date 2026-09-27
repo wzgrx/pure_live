@@ -1,0 +1,333 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_media/live_media.dart';
+import 'package:live_player/live_player.dart';
+import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
+import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
+import 'package:pure_live_app/features/multiview/multiview_controller.dart';
+import 'package:pure_live_app/features/multiview/multiview_sheets.dart';
+
+/// One cell (CEL-1): the video, the chat layer when the cell is the danmaku
+/// target (DM-3), the state overlay, the sound-focus and pick-target marks
+/// (AUD-4), and in 1+N's big cell the control bar (OPS-3).
+class MultiviewCellView extends ConsumerWidget {
+  const new({
+    required this.index,
+    required this.focusNode,
+    required this.onTap,
+    required this.onPick,
+    this.autofocus = false,
+    this.onKeyEvent,
+    this.covered = false,
+    this.danmaku,
+    this.controls,
+    this.big = false,
+    super.key,
+  });
+
+  final int index;
+
+  /// The cell's focus: the D-pad moves between cells, OK acts like a tap
+  /// (OPS-1: sound focus on a playing cell, the picker on a free one) and a
+  /// long OK opens the cell menu (OPS-2). Up and down never switch rooms.
+  final FocusNode focusNode;
+
+  /// OPS-1, decided by the page.
+  final VoidCallback onTap;
+
+  /// Opens the picker for this cell (retry without a room, CEL-5).
+  final VoidCallback onPick;
+
+  final bool autofocus;
+  final FocusOnKeyEventCallback? onKeyEvent;
+
+  /// An opaque page covers the multiview page (RS-3; SURF-1, SURF-4).
+  final bool covered;
+
+  /// The on-video chat layer, on the danmaku target only (DM-3).
+  final Widget? danmaku;
+
+  /// The big cell's control bar while shown (OPS-3).
+  final Widget? controls;
+
+  /// 1+N's big cell: its label also shows the quality.
+  final bool big;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(multiviewProvider);
+    if (index >= state.cells.length) return const SizedBox();
+    final cell = state.cells[index];
+    final controller = ref.read(multiviewProvider.notifier);
+    final scheme = Theme.of(context).colorScheme;
+    final focused = index == state.audioFocus && cell.status == CellStatus.playing;
+    final targeted = index == state.target && cell.assignable;
+    final session = cell.session;
+    final menu = cell.status == CellStatus.playing ? () => unawaited(showMultiviewCellMenu(context, ref, index)) : null;
+    final controls = this.controls;
+    // The remote's ring (3 dp, near-white, inside the cell) differs from the
+    // sound focus (2 dp primary with the speaker badge; AUD-4).
+    return FocusFrame(
+      focusNode: focusNode,
+      autofocus: autofocus,
+      onActivate: onTap,
+      onMenu: menu,
+      onKeyEvent: onKeyEvent,
+      grow: false,
+      ringInside: true,
+      radius: 0,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        onLongPress: menu,
+        onSecondaryTap: menu,
+        child: DecoratedBox(
+          // Sound focus and pick target are both visible (AUD-4).
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            border: focused
+                ? Border.all(color: scheme.primary, width: 2)
+                : targeted
+                ? Border.all(color: scheme.tertiary, width: 2)
+                : Border.all(color: const Color(0xFF222222)),
+          ),
+          child: ColoredBox(
+            color: Colors.black,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (session != null && cell.status == CellStatus.playing)
+                  LiveVideoView(key: GlobalObjectKey(session), session: session, occluded: covered),
+                ?danmaku,
+                _CellOverlay(
+                  cell: cell,
+                  focused: focused,
+                  targeted: targeted,
+                  muteAll: state.muteAll,
+                  big: big,
+                  label: controls == null,
+                  onRetry: () {
+                    if (cell.room != null) {
+                      unawaited(controller.refresh(index));
+                    } else {
+                      onPick();
+                    }
+                  },
+                ),
+                if (controls != null) Positioned(left: Space.s2, right: Space.s2, bottom: Space.s2, child: controls),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CellOverlay extends StatelessWidget {
+  const new({
+    required this.cell,
+    required this.focused,
+    required this.targeted,
+    required this.muteAll,
+    required this.big,
+    required this.label,
+    required this.onRetry,
+  });
+
+  final MultiviewCell cell;
+  final bool focused;
+  final bool targeted;
+  final bool muteAll;
+  final bool big;
+
+  /// The name label shows (hidden under the control bar, OPS-3).
+  final bool label;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    const ink = Colors.white;
+    final name = cell.detail?.card.anchorName;
+    switch (cell.status) {
+      case CellStatus.empty:
+        // The pick target is brighter; its border marks it too (AUD-4).
+        final tone = targeted ? ink : Colors.white54;
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.add_circle_outline, color: tone, size: 36),
+              const SizedBox(height: Space.s1),
+              Text('添加直播间', style: TextStyle(color: tone)),
+            ],
+          ),
+        );
+      case CellStatus.resolving:
+        return const Center(child: CircularProgressIndicator(color: ink));
+      case CellStatus.offline:
+        return Center(
+          child: Text(
+            '${name ?? ''} 未开播\n点这里换一个',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70),
+          ),
+        );
+      case CellStatus.error:
+        return _Failure(title: describeError(cell.error ?? 'error').title, onRetry: onRetry);
+      case CellStatus.playing:
+        final session = cell.session;
+        return StreamBuilder<PlaybackState>(
+          stream: session?.states,
+          initialData: session?.state,
+          builder: (context, snapshot) {
+            final playback = snapshot.data;
+            final quality = big ? playback?.quality?.label : null;
+            return Stack(
+              children: [
+                // REC-MV-6: recovery gave up; the cell says so and offers a retry.
+                if (playback?.phase == PlaybackPhase.error)
+                  _Failure(title: '播放中断', onRetry: onRetry)
+                else if (cell.paused || (playback?.showsPaused ?? false))
+                  const Center(child: Icon(Icons.pause_circle_outline, color: Colors.white70, size: 40))
+                else if (playback?.showsBuffering ?? false)
+                  const Center(
+                    child: SizedBox.square(dimension: 28, child: CircularProgressIndicator(color: ink, strokeWidth: 2)),
+                  ),
+                if (label)
+                  Positioned(
+                    left: Space.s1,
+                    bottom: Space.s1,
+                    right: Space.s1,
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: const Color(0x99000000),
+                          borderRadius: BorderRadius.circular(Radii.r1),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: Space.s1, vertical: 1),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (focused) Icon(muteAll ? Icons.volume_off : Icons.volume_up, size: 14, color: ink),
+                              if (focused) const SizedBox(width: 2),
+                              Flexible(
+                                child: Text(
+                                  [?name, ?quality].join(' · '),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: ink, fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
+    }
+  }
+}
+
+class _Failure extends StatelessWidget {
+  const new({required this.title, required this.onRetry});
+
+  final String title;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white),
+        ),
+        const SizedBox(height: Space.s2),
+        FilledButton.tonal(onPressed: onRetry, child: const Text('重试')),
+      ],
+    ),
+  );
+}
+
+/// The big cell's control bar in 1+N (OPS-3): play or pause, refresh,
+/// danmaku on or off and its settings, quality, line (more than one),
+/// volume, fullscreen.
+class MultiviewControlBar extends ConsumerWidget {
+  const new({required this.index, required this.fullscreen, this.onFullscreen, super.key});
+
+  final int index;
+
+  /// The page is in fullscreen.
+  final bool fullscreen;
+
+  /// Toggles fullscreen; null hides the button (TV).
+  final VoidCallback? onFullscreen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(multiviewProvider);
+    final cell = state.cells.elementAtOrNull(index);
+    final session = cell?.session;
+    if (cell == null || session == null || cell.status != CellStatus.playing) return const SizedBox.shrink();
+    final controller = ref.read(multiviewProvider.notifier);
+    final danmakuOn = ref.watch(danmakuPrefsProvider.select((prefs) => prefs.enabled));
+    const ink = Color(0xEBFFFFFF);
+    Widget button(IconData icon, String tooltip, VoidCallback onPressed, {Color? color}) => IconButton(
+      tooltip: tooltip,
+      icon: Icon(icon, size: Sizes.iconDense, color: color ?? ink),
+      onPressed: onPressed,
+    );
+    return StreamBuilder<PlaybackState>(
+      stream: session.states,
+      initialData: session.state,
+      builder: (context, snapshot) {
+        final playback = snapshot.data ?? session.state;
+        return DecoratedBox(
+          decoration: BoxDecoration(color: const Color(0x8C000000), borderRadius: BorderRadius.circular(Radii.r2)),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (cell.paused)
+                  button(Icons.play_arrow, '继续', () => controller.setPaused(index, paused: false))
+                else
+                  button(Icons.pause, '暂停', () => controller.setPaused(index, paused: true)),
+                button(Icons.refresh, '刷新', () => unawaited(controller.refresh(index))),
+                if (danmakuOn) ...[
+                  button(
+                    state.danmaku ? Icons.subtitles : Icons.subtitles_off_outlined,
+                    state.danmaku ? '关闭弹幕' : '开启弹幕',
+                    controller.toggleDanmaku,
+                    color: state.danmaku ? Theme.of(context).colorScheme.primary : null,
+                  ),
+                  button(Icons.tune, '弹幕设置', () => unawaited(showDanmakuSettingsSheet(context))),
+                ],
+                if (playback.qualities.length > 1)
+                  button(Icons.hd_outlined, '画质', () => unawaited(showMultiviewQualitySheet(context, ref, index))),
+                if (playback.lines.length > 1)
+                  button(Icons.alt_route, '线路', () => unawaited(showMultiviewLineSheet(context, ref, index))),
+                button(Icons.volume_up_outlined, '音量', () => unawaited(showMultiviewVolumeSheet(context, index))),
+                if (onFullscreen case final toggle?)
+                  button(fullscreen ? Icons.fullscreen_exit : Icons.fullscreen, fullscreen ? '退出全屏' : '全屏', toggle),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

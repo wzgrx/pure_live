@@ -24,4 +24,9 @@ Future<void> main(List<String> arguments) async {
     stderr.writeln(error);
     exitCode = 64;
   }
+  // A connection still in its TLS handshake after a timeout would keep the
+  // VM alive until the OS gives up; the command is done, so leave.
+  await stdout.flush();
+  await stderr.flush();
+  exit(exitCode);
 }

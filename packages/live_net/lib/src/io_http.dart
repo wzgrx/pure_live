@@ -39,9 +39,17 @@ final class IoLiveHttp implements LiveHttp {
     final client = _client(proxy.routeFor(request.site, request.url));
     HttpClientRequest? outgoing;
     var finished = false;
+    var abandoned = false;
 
     Future<LiveResponse> exchange() async {
       outgoing = await client.openUrl(request.method, request.url);
+      // Timed out or cancelled while the connection (or its TLS handshake)
+      // was still being made: drop it instead of sending a request nobody
+      // waits for.
+      if (abandoned) {
+        outgoing!.abort();
+        throw TransportFailure(request.site, TransportReason.cancelled);
+      }
       final open = outgoing!
         ..followRedirects = request.followRedirects
         ..maxRedirects = 5;
@@ -87,7 +95,10 @@ final class IoLiveHttp implements LiveHttp {
     } on HttpException catch (error) {
       throw TransportFailure(request.site, TransportReason.protocol, error.message);
     } finally {
-      if (!finished) outgoing?.abort();
+      if (!finished) {
+        abandoned = true;
+        outgoing?.abort();
+      }
     }
   }
 

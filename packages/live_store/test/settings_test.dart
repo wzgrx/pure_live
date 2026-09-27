@@ -62,6 +62,16 @@ void main() {
       expect(Settings.launchAtStartup.scope, SettingScope.device);
       expect(Settings.launchAtStartup.defaultValue, isFalse);
     });
+
+    test('TV mode and the room-switch swipe (principles.md §5.1, §6.1)', () {
+      expect(Settings.tvMode.defaultValue, TvMode.auto);
+      expect(Settings.tvMode.decode('on'), TvMode.on);
+      expect(Settings.tvMode.decode('tv'), isNull);
+      expect(Settings.tvMode.scope, SettingScope.device, reason: "a TV's choice stays on the TV");
+      expect(Settings.tvPerformanceMode.defaultValue, isFalse);
+      expect(Settings.switchRoomGesture.defaultValue, isFalse, reason: 'off by default (§6.1)');
+      expect(Settings.switchRoomGesture.scope, SettingScope.synced);
+    });
   });
 
   group('SettingsStore', () {

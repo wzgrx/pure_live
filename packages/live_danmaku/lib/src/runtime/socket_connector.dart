@@ -81,9 +81,11 @@ abstract base class SocketConnector extends ConnectorBase {
   @protected
   bool get heartbeatOnJoin => true;
 
-  /// One heartbeat frame.
+  /// One heartbeat frame, or null for a protocol whose server keeps the
+  /// connection alive itself (WebSocket pings; Picarto): then only the
+  /// silence watchdog runs.
   @protected
-  List<int> heartbeat();
+  List<int>? heartbeat();
 
   /// Whether frames go out as text (UTF-8 of each frame) instead of binary:
   /// Twitch IRC.
@@ -214,8 +216,13 @@ abstract base class SocketConnector extends ConnectorBase {
       onJoin();
       status(generation, DanmakuStatus.connected);
       joined(generation);
-      if (heartbeatOnJoin) socket.send(heartbeat());
-      beat = Timer.periodic(heartbeatInterval, (_) => socket.send(heartbeat()));
+      void beatOnce() {
+        final frame = heartbeat();
+        if (frame != null) socket.send(frame);
+      }
+
+      if (heartbeatOnJoin) beatOnce();
+      beat = Timer.periodic(heartbeatInterval, (_) => beatOnce());
       onJoined(generation);
     }
 

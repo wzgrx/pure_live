@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "platform": "twitcasting",
+  "sample": "S02-top-game",
+  "capturedAt": "2026-09-27T18:02:02.262080Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://frontendapi.twitcasting.tv/top/category?id=_system_channel_12&count=60",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://twitcasting.tv/",
+      "Accept-Language": "en"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "cache-control": "no-cache, must-revalidate",
+      "set-cookie": [
+        "hl=vw; expires=Mon, 27-Sep-2027 18:02:02 GMT; Max-Age=31536000; path=/; domain=.twitcasting.tv",
+        "did=32db15a42bd0ec2c68fe44934d46ae43; expires=Wed, 24-Sep-2036 18:02:02 GMT; Max-Age=315360000; path=/; domain=.twitcasting.tv"
+      ],
+      "access-control-allow-origin": "https://twitcasting.tv",
+      "date": "Sun, 27 Sep 2026 18:02:02 GMT",
+      "transfer-encoding": "chunked",
+      "strict-transport-security": "max-age=0",
+      "pragma": "no-cache",
+      "content-type": "application/json",
+      "server": "Apache",
+      "access-control-allow-headers": [
+        "Content-Type, Accept, Origin",
+        "WPass",
+        "X-Web-AuthorizeKey",
+        "X-Web-SessionId",
+        "X-CSRF-Token"
+      ],
+      "access-control-allow-credentials": "true",
+      "access-control-allow-methods": "OPTIONS, GET, HEAD",
+      "expires": "Thu, 01 Dec 1994 16:00:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "9a435bca7c79223dc90e0daadccf6e093f7ed41fd00d39002b9a7740b3abd71c",
+    "length": 46860
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:hl",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:did",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

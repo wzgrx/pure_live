@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "missevan",
+  "sample": "S02-list-catalog",
+  "capturedAt": "2026-09-27T16:39:31.602959Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fm.missevan.com/api/v2/chatroom/open/list?p=1&catalog_id=104",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Referer": "https://fm.missevan.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-bili-trace-id": "c41172eb2df8a505a56c2446036ab946:a56c2446036ab946:0:0",
+      "connection": "keep-alive",
+      "cache-control": "no-cache",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 16:39:32 GMT",
+      "vary": [
+        "Accept-Encoding",
+        "Origin"
+      ],
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=utf-8",
+      "bili-trace-id": "a56c2446036ab946:a56c2446036ab946:0:0",
+      "x-cache-webcdn": "BYPASS from blzone02",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "Accept, Accept-Encoding, Accept-Language, Connection, Content-Type, Cookie, Origin, Referer, User-Agent, X-M-Swimlane, X-Request-Body, Authorization, X-M-DeviceSign",
+      "access-control-allow-methods": "GET, POST, OPTIONS, PUT, DELETE",
+      "x-ticket-status": "1",
+      "expires": "Sun, 27 Sep 2026 16:39:31 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "bf384e048256bf970c0db0ec268a6b7b9fac5814475e3d9c9374c3e5c55bb6b4",
+    "length": 26475
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -37,6 +37,16 @@ const platformOrder = [
   'soop',
   'acfun',
   'twitch',
+  // Batch 3 (ADR 0003): all kept.
+  'chzzk',
+  'missevan',
+  'kilakila',
+  'inke',
+  'picarto',
+  'twitcasting',
+  'showroom',
+  'pandalive',
+  '17live',
   'iptv',
 ];
 
@@ -52,6 +62,15 @@ const platformNames = {
   'soop': 'SOOP',
   'acfun': 'AcFun',
   'twitch': 'Twitch',
+  'chzzk': 'CHZZK',
+  'missevan': '猫耳 FM',
+  'kilakila': '克拉克拉',
+  'inke': '映客',
+  'picarto': 'Picarto',
+  'twitcasting': 'TwitCasting',
+  'showroom': 'SHOWROOM',
+  'pandalive': 'PandaTV',
+  '17live': '17LIVE',
   'iptv': '网络电视',
 };
 
@@ -130,6 +149,15 @@ final sitesProvider = Provider<Map<String, PlatformSite>>((ref) {
     'soop': PlatformSite(SoopSite(http, cookies: cookies)),
     'acfun': PlatformSite(AcfunSite(http)),
     'twitch': PlatformSite(TwitchSite(http, cookies: cookies)),
+    'chzzk': PlatformSite(ChzzkSite(http)),
+    'missevan': PlatformSite(MissevanSite(http)),
+    'kilakila': PlatformSite(KilakilaSite(http)),
+    'inke': PlatformSite(InkeSite(http)),
+    'picarto': PlatformSite(PicartoSite(http)),
+    'twitcasting': PlatformSite(TwitcastingSite(http)),
+    'showroom': PlatformSite(ShowroomSite(http)),
+    'pandalive': PlatformSite(PandaliveSite(http)),
+    '17live': PlatformSite(SeventeenliveSite(http)),
     'iptv': PlatformSite(ref.watch(iptvSiteProvider)),
   };
 });

@@ -51,10 +51,13 @@ class ScrubRules {
   /// gets the same synthetic value (a signature echoed back, for example).
   final Map<String, ScrubRule> responseHeaders;
 
-  /// Regular expressions (source text) whose first group is replaced in text
-  /// bodies and JSON string values, for values that are neither a JSON key
-  /// nor a query parameter: an HLS attribute (`USER-IP="…"`) or a signed
-  /// path segment (`/v1/playlist/<token>.m3u8`).
+  /// Regular expressions whose first capture group is replaced wherever it
+  /// appears in URLs, form bodies, header values, text bodies and JSON string
+  /// values: signatures inside a path segment or a compound value (Akamai
+  /// `hdnts=st=…~exp=…~hmac=<hex>`, `/v1/playlist/<token>.m3u8`) or an HLS
+  /// attribute (`USER-IP="…"`), where [queryParams] cannot reach them without
+  /// also replacing the expiry next to them. The context goes before the
+  /// group; after it, at most a delimiter (`"`, `.m3u8`).
   final Map<String, ScrubRule> textPatterns;
 }
 
@@ -215,28 +218,26 @@ class Scrubber {
         // Not embedded JSON; fall through to URL scrubbing.
       }
     }
-    return scrubPatterns(scrubQuery(value, path), path);
+    return scrubQuery(value, path);
   }
 
   /// Replaces the first group of every [ScrubRules.textPatterns] match in
-  /// [text].
+  /// [text]. The group is taken at its last occurrence in the match: the
+  /// context comes before it and may contain a short value such as `US`
+  /// (`DATA-ID="USER-COUNTRY",VALUE="US"`).
   String scrubPatterns(String text, [String where = 'text']) {
-    var result = text;
+    var out = text;
     for (final MapEntry(key: pattern, value: rule) in _patterns.entries) {
-      result = result.replaceAllMapped(pattern, (match) {
-        final value = match.group(1);
-        if (value == null || value.isEmpty) return match.group(0)!;
+      out = out.replaceAllMapped(pattern, (match) {
         final whole = match.group(0)!;
-        // The group's first occurrence inside the match (RegExpMatch has no
-        // group offsets).
-        final offset = match.input.indexOf(value, match.start) - match.start;
+        final value = match.group(1);
+        if (value == null || value.length <= 1) return whole;
+        final offset = whole.lastIndexOf(value);
         final replaced = replace(value, rule, '$where:/${pattern.pattern}/');
-        return offset < 0
-            ? whole.replaceFirst(value, replaced)
-            : '${whole.substring(0, offset)}$replaced${whole.substring(offset + value.length)}';
+        return '${whole.substring(0, offset)}$replaced${whole.substring(offset + value.length)}';
       });
     }
-    return result;
+    return out;
   }
 
   // Separators: ? & ; (so &amp; works) and the JSON escape \u0026.
@@ -244,7 +245,9 @@ class Scrubber {
 
   /// Replaces listed query/form parameter values inside [text] (a URL, a form
   /// body or any text containing URLs).
-  String scrubQuery(String text, [String where = 'query']) {
+  String scrubQuery(String text, [String where = 'query']) => scrubPatterns(_scrubParams(text, where), where);
+
+  String _scrubParams(String text, String where) {
     if (rules.queryParams.isEmpty || !text.contains('=')) return text;
     return text.replaceAllMapped(_queryPair, (match) {
       final name = match.group(2)!;
@@ -308,7 +311,7 @@ class Scrubber {
       }
       return '${match.group(1)}${replace(match.group(3)!, rule, 'text:$key')}';
     });
-    return scrubPatterns(scrubQuery(pairs(pairs(text, _textPair, '"'), _htmlPair, '&quot;'), 'text'));
+    return scrubQuery(pairs(pairs(text, _textPair, '"'), _htmlPair, '&quot;'), 'text');
   }
 
   /// Records that [where] was cleaned by [replaceKnown] rather than a rule.

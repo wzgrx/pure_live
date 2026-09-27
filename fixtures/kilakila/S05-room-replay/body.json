@@ -1,0 +1,56 @@
+{
+  "h": {
+    "code": 200,
+    "msg": "操作成功",
+    "success": true,
+    "alert": true,
+    "flush": true,
+    "time": 1790528979672
+  },
+  "b": {
+    "userInfo": {
+      "id": 4222454968365,
+      "nickname": "一泽ᶻ💧『秦琅』",
+      "headPortraitUrl": "https://img.hongrenshuo.com.cn/4222454968365.png?t=1786584245000",
+      "introduction": "直播时间：早上7点\n                   下午4点\n助理：翎栀",
+      "status": 1,
+      "level": 24,
+      "userType": 0,
+      "privilegeResp": [],
+      "numberInfo": {
+        "id": 2213795293323853848,
+        "uid": 4222454968365,
+        "bindNumber": "54968365"
+      },
+      "statisticInfo": {
+        "uid": 4222454968365,
+        "diamondNumber": 23595717,
+        "concernNumber": 20,
+        "followerNumber": 1476,
+        "diamondSwitcher": true
+      }
+    },
+    "roomIdStr": "2261269383617708096",
+    "uid": 4222454968365,
+    "title": "2026/9/8早上",
+    "goldPrice": 0,
+    "status": 10,
+    "videoUrl": "http://hrslive.hongrenshuo.com.cn/record/hrs/2261269383617708096.m3u8",
+    "pushFlow": "tusp://gzhu.ekao.itlhqamsknu.dtk.di/gbt/5666533785646841675?hisa_wqw=7783696084-5-0-8sd9fk0226k522329f5326k1l5xja8pi",
+    "watchNumber": 409,
+    "diamonds": 23595717,
+    "diamondSwitcher": true,
+    "likeCount": 24595,
+    "flvPlayUrl": "https://pull.live.hongrenshuo.com.cn/hrs/2261269383617708096.flv?auth_key=1793120979-0-0-bc3bc234be78930ae5c97eca2393a550",
+    "rtmpPlayUrl": "rtmp://pull.live.hongrenshuo.com.cn/hrs/2261269383617708096?auth_key=1793120979-0-0-aa3af0471d4609feb366884d13a20a47",
+    "hlsPlayUrl": "https://pull.live.hongrenshuo.com.cn/hrs/2261269383617708096.m3u8?auth_key=1793120979-0-0-be8d1a8f44f4f232e7d6b9179d97de74",
+    "tagList": [],
+    "defaultBackgroundPicUrl": "https://img.hongrenshuo.com.cn/4222454968365178807692313974631135f0c6b261d939e5ede92d0266PC.gif",
+    "roomDiscountResp": {
+      "discountPrice": 0
+    },
+    "roomSourceType": 0,
+    "roomTypeId": 1,
+    "liveStartStr": "回放"
+  }
+}

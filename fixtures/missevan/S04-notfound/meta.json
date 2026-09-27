@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "missevan",
+  "sample": "S04-notfound",
+  "capturedAt": "2026-09-27T16:40:22.284162Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fm.missevan.com/api/v2/live/1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Referer": "https://fm.missevan.com/"
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "access-control-allow-headers": "Accept, Accept-Encoding, Accept-Language, Connection, Content-Type, Cookie, Origin, Referer, User-Agent, X-M-Swimlane, X-Request-Body, Authorization, X-M-DeviceSign",
+      "access-control-allow-credentials": "true",
+      "connection": "keep-alive",
+      "x-bili-trace-id": "ebb08cb0a49c144c62e2f179956ab946:62e2f179956ab946:0:0",
+      "date": "Sun, 27 Sep 2026 16:40:22 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "access-control-allow-methods": "GET, POST, OPTIONS, PUT, DELETE",
+      "vary": [
+        "Accept-Encoding",
+        "Origin"
+      ],
+      "x-ticket-status": "1",
+      "content-type": "application/json; charset=utf-8",
+      "bili-trace-id": "62e2f179956ab946:62e2f179956ab946:0:0"
+    }
+  },
+  "raw": {
+    "sha256": "a095a441c85fa2c4adba74ef0f732d049ac0540da98a311123b2c2a839568628",
+    "length": 52
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

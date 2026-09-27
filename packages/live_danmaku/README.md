@@ -37,6 +37,8 @@ await session.close();                      // 5 s 内返回
 | `DanmakuConnector`、`danmakuConnectorFor(room, transport:, credentials:)` | 一个房间的连接：`events`、`connect()`（加入后返回 true，终态失败返回 false）、`close()`（5 s 内） |
 | `DouyuConnector`、`HuyaConnector`、`BilibiliConnector`、`DouyinConnector`、`KuaishouConnector`、`YyConnector`、`SoopConnector`、`AcfunConnector`、`TwitchConnector` | 各平台连接；除快手（HTTP 串行轮询）外都用 `SocketConnector` 的重连循环 |
 | `DouyuProtocol`、`HuyaProtocol`、`HuyaHeadlines`、`BilibiliProtocol`、`DouyinProtocol`、`KuaishouProtocol`、`YyProtocol`、`SoopProtocol`、`AcfunProtocol`、`AcfunLink`、`TwitchProtocol` | 纯函数（`AcfunLink` 是一个连接的序号和密钥状态）：封包、心跳、签名、解码；测试直接用录制帧调用 |
+| 第三批：`SeventeenliveConnector`/`SeventeenliveProtocol`、`ChzzkConnector`/`ChzzkProtocol`、`KilakilaConnector`/`KilakilaProtocol`、`MissevanConnector`/`MissevanProtocol`、`PandaliveConnector`/`PandaliveProtocol`、`PicartoConnector`/`PicartoProtocol`、`ShowroomConnector`/`ShowroomProtocol`、`TwitcastingConnector`/`TwitcastingProtocol` | 17LIVE：Ably JSON 协议，匿名令牌，负载 gzip + base64（`dart:io`）；CHZZK：JSON 消息，匿名 accessToken；克拉克拉：Socket.IO 2 游客房间（文本帧）；猫耳：游客会话 Cookie，Brotli 压缩的 JSON（`package:brotli`，纯 Dart，MIT）；PandaTV：Centrifugo JSON 协议，每次连接用 `live/play` 的游客令牌；Picarto：GraphQL 匿名 JWT；SHOWROOM：`SUB`/`PING` 制表符文本帧；TwitCasting：签名的评论推送地址。17LIVE、Picarto 和 TwitCasting 的客户端不发心跳（`heartbeat()` 返回 null，只靠静默看门狗）。都用 `SocketConnector` 的重连循环 |
+| `TextFrame` | 让 `DanmakuSocket.send` 发 WebSocket 文本帧（Socket.IO 这类协议不认二进制帧）；字节仍是 UTF-8，测试替身和录制不受影响 |
 | `DanmakuCredentials`、`SiteDanmakuCredentials` | 连接需要的凭据，由界面 isolate 上的站点适配器提供 |
 | `DanmakuTransport`、`IoDanmakuTransport`、`ExactWebSocket` | WebSocket（`dart:io`，按平台走代理）和 `LiveHttp`；`ExactWebSocket` 按原样发送握手头（YY、SOOP 的服务端不接受 `dart:io` 小写的升级头），支持 HTTP CONNECT 代理、TLS、文本帧和子协议 |
 | `DanmakuPipeline`、`DanmakuBatch` | §2–§4：过滤链、抽样、64 ms 批次 |
@@ -71,6 +73,14 @@ await session.close();                      // 5 s 内返回
 | AcFun | 通过（访客） | `fixtures/acfun/danmaku/S07-live`（784 帧，1 条聊天；平台聊天很少） | 聊天、礼物（名字查礼物表）、香蕉、在线人数 |
 | Twitch | 通过（匿名，经代理） | `fixtures/twitch/danmaku/S07-live`（27 帧，18 条聊天） | 聊天（消息 id、颜色、发送时间） |
 | 网易 CC | 未接（匿名进房无应答，spec/sites/cc.md §7） | — | — |
+| CHZZK | 通过（匿名） | `fixtures/chzzk/danmaku/S09-live`（42 帧，125 条聊天，含最近聊天 15101） | 聊天、在线人数（`mbrCnt`）、치즈 捐赠（按规格构造，未录到） |
+| 猫耳 FM | 通过（游客会话） | `fixtures/missevan/danmaku/S06-live`（14 帧；Brotli 帧脱敏后以不压缩的 Brotli 块重新封装） | 聊天（等级、粉丝牌）、热度、礼物（`gift/send`，按规格构造；团播的 `cross_send` 丢弃） |
+| 克拉克拉 | 通过（游客） | `fixtures/kilakila/danmaku/S07-live`（59 帧，聊天和礼物；非聊天、礼物消息脱敏后只留类型） | 聊天、礼物 |
+| Picarto | 通过（匿名） | `fixtures/picarto/danmaku/S07-live`（9 帧：令牌、进入、频道状态、1 条聊天） | 聊天、在线人数（频道状态） |
+| TwitCasting | 通过（匿名） | `fixtures/twitcasting/danmaku/S08-live`（14 帧，12 条评论，含 `[]` 保活） | 评论、礼物（按推断构造） |
+| SHOWROOM | 通过（匿名） | `fixtures/showroom/danmaku/S06-live`（25 帧，18 条评论） | 评论、礼物（只有 id） |
+| PandaTV | 通过（游客令牌） | `fixtures/pandalive/danmaku/S07-live`（36 帧：`live/play`、连接、订阅、18 条聊天、心跳） | 聊天（含表情名）、送心/签名心/特别心（按实测结构构造，未录到） |
+| 17LIVE | 通过（匿名 Ably 令牌） | `fixtures/17live/danmaku/S05-live`（37 帧：令牌、ATTACH、8 条评论、服务端心跳；负载解压精简后重新压缩） | 评论、礼物（只有 id，按实测结构构造）、在线人数（按实测结构构造） |
 
 ## 录制样本
 

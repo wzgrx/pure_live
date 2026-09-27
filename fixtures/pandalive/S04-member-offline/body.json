@@ -1,0 +1,34 @@
+{
+  "runningMission": false,
+  "bjInfo": {
+    "idx": 28103135,
+    "id": "flffl369",
+    "nick": "데이지ෆ",
+    "thumbUrl": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F0.jpg",
+    "scoreTotal": 95708,
+    "scoreWatch": 5002,
+    "scoreLike": 188,
+    "scoreBookmark": 114,
+    "fanCnt": 9,
+    "channelTitle": "데이지ෆ님의 방송국",
+    "channelDesc": "데이지ෆ님의 방송국에 어서오세요.",
+    "isImgProfile": "N",
+    "isAsp": "N",
+    "isBJ": "Y",
+    "channelBannerUrl": "",
+    "bjAnni": null,
+    "playTime": {
+      "monthTime": 0,
+      "totalTime": 23818,
+      "month": "0시간 0분",
+      "total": "6시간 36분"
+    },
+    "rank": 0,
+    "vipDeco": 0,
+    "blockService": null,
+    "globalYN": "N"
+  },
+  "result": true,
+  "message": "",
+  "userIp": "904.195.150.505"
+}

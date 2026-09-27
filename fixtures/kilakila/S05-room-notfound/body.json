@@ -1,0 +1,19 @@
+{
+  "h": {
+    "code": 5201,
+    "msg": "直播间不存在",
+    "success": false,
+    "alert": true,
+    "flush": true,
+    "time": 1790528982345
+  },
+  "b": {
+    "userInfo": {
+      "statisticInfo": {
+        "diamondSwitcher": false
+      }
+    },
+    "diamonds": 0,
+    "liveStartStr": ""
+  }
+}

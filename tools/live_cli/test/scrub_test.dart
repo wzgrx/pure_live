@@ -285,4 +285,29 @@ void main() {
     expect(json['url'], isNot(contains('CsQFyMkKqLm2CQDJ')));
     expect(scrubber.leaks(text + (json['url'] as String)), isEmpty);
   });
+
+  test('text patterns replace a signature inside a path or a compound value and keep the expiry', () {
+    final scrubber = Scrubber(const ScrubRules(textPatterns: {'hmac=([0-9a-f]{16,})': ScrubRule.secret}), seed: 11);
+    const master =
+        'https://cdn.example.test/a/b_playlist.m3u8?hdnts=st=1790524222~exp=1790585432~hmac=0123456789abcdef0123';
+    const variant = '720p/hdntl=exp=1790585609~data=hdntl~hmac=fedcba9876543210fedc/b_chunklist.m3u8';
+    final url = scrubber.scrubQuery(master);
+    final text = scrubber.scrubText('#EXTM3U\n$variant\n');
+    expect(url, contains('exp=1790585432'));
+    expect(url, isNot(contains('0123456789abcdef0123')));
+    expect(RegExp('hmac=([0-9a-f]+)').firstMatch(url)!.group(1), hasLength(20));
+    expect(text, contains('exp=1790585609'));
+    expect(text, isNot(contains('fedcba9876543210fedc')));
+    expect(scrubber.leaks('$url$text'), isEmpty);
+  });
+
+  test('a text pattern replaces its group even when the value also occurs in the context', () {
+    final scrubber = Scrubber(
+      const ScrubRules(textPatterns: {'DATA-ID="USER-COUNTRY",VALUE="([^"]+)"': ScrubRule.secret}),
+      seed: 3,
+    );
+    final text = scrubber.scrubText('#EXT-X-SESSION-DATA:DATA-ID="USER-COUNTRY",VALUE="US"\n');
+    expect(text, startsWith('#EXT-X-SESSION-DATA:DATA-ID="USER-COUNTRY",VALUE="'));
+    expect(text, isNot(contains('VALUE="US"')));
+  });
 }

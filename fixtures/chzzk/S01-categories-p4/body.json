@@ -1,0 +1,517 @@
+{
+  "code": 200,
+  "message": null,
+  "content": {
+    "size": 50,
+    "page": {
+      "next": {
+        "concurrentUserCount": 12,
+        "openLiveCount": 3,
+        "categoryId": "Escape_the_Backrooms"
+      },
+      "prev": null
+    },
+    "data": [
+      {
+        "categoryType": "GAME",
+        "categoryId": "The_Kingdom_of_the_Wind",
+        "categoryValue": "바람의나라",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTNfMjI1/MDAxNzAyNDMzMTExOTE5.hOW6mSkLw5uuTFcf0PXRliPoaIg2TxyEgic-ref9-xYg.vKA02LGMuivS9V0jX6r9T9b3NSLg2gC0yOgjQ89JttYg.JPEG/416.%EB%B0%94%EB%9E%8C%EC%9D%98%EB%82%98%EB%9D%BC_%EC%99%84%EC%84%B1%EB%B3%B8_%EC%9D%B4%EB%8B%AC%EB%8B%98.jpg",
+        "openLiveCount": 2,
+        "concurrentUserCount": 24,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Heroes_of_Might_and_Magic_Olden_Era",
+        "categoryValue": "히어로즈 오브 마이트 앤 매직: 올든 에라",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA0MjFfMTg2/MDAxNzc2NzU0NTc2NDAz.y_H2kD-CcutEuVRoEFS1BQCsDTxIb1Zlw4zwrHs3Necg.dvp7spqCw0KpabdHlC7w3PbDPM4bZTQQxVry0QnCWpgg.PNG/Heroes-of-Might-and-Magic-Olden-Era-300-400.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 24,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "World_of_Tanks",
+        "categoryValue": "월드 오브 탱크",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTNfMTIg/MDAxNzAyNDMzMzMxMDgz.6dIMoVoqh2JNwF5bmlRda2yWSmLVLe9F19WckbbHyQUg.DGIImP3E9ai41RJn3wgOHh1rWHBZZI3gY_PzuINi9kwg.JPEG/418.%EC%9B%94%EB%93%9C%EC%98%A4%EB%B8%8C%ED%83%B1%ED%81%AC_%EC%99%84%EC%84%B1%EB%B3%B8_%EC%9D%B4%EB%8B%AC%EB%8B%98.jpg",
+        "openLiveCount": 1,
+        "concurrentUserCount": 23,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Dimraeth",
+        "categoryValue": "딤레이스",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA5MTFfMjcz/MDAxNzg5MTA3MjU1MzY3.OFlnBygMMXT-gXuXzlcJ6Gd9MNc1eroNtr5bAeV0Kr4g.-hDizJhHDH188GDQ9pHagMQKzcAUkQIn7tzmzta9Fy0g.PNG/%EB%94%A4%EB%A0%88%EC%9D%B4%EC%8A%A4.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 22,
+        "newCategory": true,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Com2us_ProBaseballV22",
+        "categoryValue": "컴투스프로야구V26",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA3MjlfMTky/MDAxNzg1MjkzNTMzMDU2.X2AIu1yWwLIzB6WWXujCuA_L-K0keG0-WBHeNHzCsmsg.YMWWDB5wG5erBWmwUo-_XrnaMhHt_To__361Morlsgcg.JPEG/260727_NVR_300_400.jpg",
+        "openLiveCount": 1,
+        "concurrentUserCount": 22,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "VRChat",
+        "categoryValue": "VR챗",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTNfMjI4/MDAxNzAyNDM0NjQ4OTY2.tvPfe5y8MUQzwUMFiH39fmvXfbYdd9RKRslr_K-YSI0g.m-w9T1AoaAxGrgtmWQvsYRsqL55GbiT2zlZSKSSJhUEg.JPEG/429.VR%EC%B1%97_%EC%9D%B4%EB%8B%AC%EB%8B%98.jpg",
+        "openLiveCount": 1,
+        "concurrentUserCount": 22,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Blue_Archive",
+        "categoryValue": "블루 아카이브",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTFfMTk1/MDAxNzAyMjYyNTkwNzYx.h9Zj8N9rDBooA5_-v_sMuGiAVlBnVzDXIwo3Y0FNMtIg.PUMyVeoBh-MItlKG5hC3DX8rr2a8V8ClqovB5zHMfzUg.JPEG/153.%EB%B8%94%EB%A3%A8-%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C_%EC%99%84%EC%84%B1%EB%B3%B8_%EC%8B%A0%EC%9D%B8%ED%98%B8.jpg",
+        "openLiveCount": 5,
+        "concurrentUserCount": 21,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Hero_Siege",
+        "categoryValue": "히어로 시즈",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAzMjhfMjAz/MDAxNzExNjA0NzE0NjMz.NO3K22yKrds7MwyyjZ3fMT3gXEaROY5CrKhNJoLpegsg.9tPAOtO6EayUvasoAWtlsmeoLXUVcAgEUJX2Cf0l-7cg.PNG/%ED%9E%88%EC%96%B4%EB%A1%9C_%EC%8B%9C%EC%A6%88.png",
+        "openLiveCount": 4,
+        "concurrentUserCount": 20,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Eslabong",
+        "categoryValue": "에슬라봉",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA4MjVfOTMg/MDAxNzg3NjQxNjI0MjUx.Wpg65T-B7DRdEnZVp5fvjfDkW51-mZd8CYrNKV-ufukg.M68NhyhQ4iZKP81zAsJPfXETVRzg5t_pLK8DyV5yjMYg.PNG/%EC%97%90%EC%8A%AC%EB%9D%BC%EB%B4%89_%ED%8F%AC%EC%8A%A4%ED%84%B0.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 20,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Team_Fortress2",
+        "categoryValue": "팀 포트리스 2",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjdfMjE2/MDAxNzA5MDAxOTkyOTAz.NTVm-In_sPUx0-pLexaV2QU-60f1ZSVDasShNlC-SvIg.xJGFpxPaw6kJpq9MOa9IFbXmfa8DgdBIvyaN1jkWgv8g.PNG/%ED%8C%80_%ED%8F%AC%ED%8A%B8%EB%A6%AC%EC%8A%A4_2.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 20,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Goose_Goose_Duck",
+        "categoryValue": "구스 구스 덕",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTJfMTYg/MDAxNzAyMzY5MjI3MTU5.02AzD0GjI4ZTFCu_qQgF3KCgGuQtSC2buFXcKXUz6K4g.qLdYmQgXY5aO6aLHU5AcZiP-i-k0O2lpFq8sGFwv3pMg.JPEG/296.%EA%B5%AC%EC%8A%A4%EA%B5%AC%EC%8A%A4%EB%8D%95_%EC%99%84%EC%84%B1%EB%B3%B8_%EC%9D%B4%EB%8B%AC%EB%8B%98.jpg",
+        "openLiveCount": 4,
+        "concurrentUserCount": 19,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "How_to_Fish",
+        "categoryValue": "낚시 방법",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA4MTlfMTk5/MDAxNzg3MTE2NzYxOTM0.TrHg2Ke80dHL8-Bz6lYshxbFFAU02o1PVkK89v3rmckg.lA1gy7YLT_NdvoA8Wxit9uIk0ihXD8uo1xycgxpAnHwg.PNG/%ED%95%98%EC%9A%B0_%ED%88%AC_%ED%94%BC%EC%8B%9C.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 19,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Sannabi",
+        "categoryValue": "산나비",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAzMTRfMTE1/MDAxNzEwMzg3MDI2Mzg2.HeWlYBP_bcNd1ghravcgOmgzUM8HuRV0MtJbjhrRTnsg.qkk1usNhf-Edkn8WZHY8u1T6AVnjmAKa7Z1reUrDmIcg.PNG/30.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 19,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "THE_KING_OF_FIGHTERS98",
+        "categoryValue": "더 킹 오브 파이터즈 '98",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjdfMTAg/MDAxNzA4OTk5OTA5MDU2.bqMLmg1ZR8h4vtZtlnb8ymHokxdD3IgeQqCnu68OBiAg.40DxD98y-cHpueekFIi457Q6VJ2927Eieg6KZ-T8GCwg.PNG/%EB%8D%94_%ED%82%B9_%EC%98%A4%EB%B8%8C_%ED%8C%8C%EC%9D%B4%ED%84%B0%EC%A6%88_98.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 19,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Jump_King",
+        "categoryValue": "점프 킹",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjdfNDYg/MDAxNzA5MDEwNjUyMTEw.4deRHLDPN4GZFbjt2_5MsP2sSwaGAZv2NaXNq0tSdyAg.hhvIp3iIMGaPP6srEleZSGqWu6WZ2cvfpPb_wKRjQAQg.PNG/%EC%A0%90%ED%94%84_%ED%82%B9.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 19,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Only_Up",
+        "categoryValue": "온리 업!",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjdfMjkg/MDAxNzA5MDMxMTc0OTE2.AXt5C0K_7LjDhmryL1fuUUhxavg5OiRS5hNQkZF_0jwg.eXohO2z5HkovDKg2aBSAEhmwoRpXJR7m0NEYYryz4k8g.PNG/%EC%98%A8%EB%A6%AC_%EC%97%85.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 18,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Marvel_Rivals",
+        "categoryValue": "마블 라이벌즈",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDEyMjZfMTM1/MDAxNzM1MjAwNjk2MDAz.H-ElsH-6xcmTfeNLwK56FMFu6SOudYvmPtB26kRaAZEg.9HszzjgweHJB8mtH4FyGArezFean9GBDO03UXs7WWvcg.PNG/Marvel_Rivals-300-400.png",
+        "openLiveCount": 5,
+        "concurrentUserCount": 17,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Russian_Fishing_4",
+        "categoryValue": "러시안 피싱 4",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA0MDRfMjk1/MDAxNzEyMjE4NDIyMDQw.NLvLg5c3PbmYlC6jXdDSC-qDqA9IKw8swLZyZj11D9Yg.6zHaGRX7x5_xZGcNIC4w12WW9PRWOflaEmPPmWoQd0cg.PNG/%EB%9F%AC%EC%8B%9C%EC%95%88_%ED%94%BC%EC%8B%B1_4.png",
+        "openLiveCount": 4,
+        "concurrentUserCount": 17,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Cyberpunk2077",
+        "categoryValue": "사이버펑크 2077",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA0MjJfMjI5/MDAxNzEzNzY5NTE5MTI5.k54WjGBaawTsr1i1wNvrhpocTt8GaW7opblMZ5yEvFog.938hjH4GWrvxThPofhNJHJ_mDzs8Bl2S-BvOByVSAlkg.PNG/%EC%82%AC%EC%9D%B4%EB%B2%84%ED%8E%91%ED%81%AC_2077.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 17,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Elsword",
+        "categoryValue": "엘소드",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTJfOTQg/MDAxNzAyMzQ0MDIwNzI5.QSOWky1_v7VmQ64Hs1NKyWvpkoUiW4_zWp5okkHJcLkg.QMGeF5d-_gpdGHphYlE4b7mDeFfRc0HAdaeoVqsrzQEg.JPEG/342.%EC%97%98%EC%86%8C%EB%93%9C_%EC%99%84%EC%84%B1%EB%B3%B8_%EA%B0%95%EB%AF%B8%EC%95%A0.jpg",
+        "openLiveCount": 2,
+        "concurrentUserCount": 17,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Umamusume",
+        "categoryValue": "우마무스메 프리티 더비",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTJfMjMw/MDAxNzAyMzQ2MzE1Mzgw.veL5jSxjlVqcAbSU71tZFcaNys2-d82pmerni9S9gFog.f0brI2uNXnDD0KS91OjscmtNcqkIB_uFK4oTUyi66x0g.JPEG/210.%EC%9A%B0%EB%A7%88%EB%AC%B4%EC%8A%A4%EB%A9%94_%ED%94%84%EB%A6%AC%ED%8B%B0_%EB%8D%94%EB%B9%84_%EC%99%84%EC%84%B1%EB%B3%B8_%EA%B9%80%EB%82%98%EC%9D%80.jpg",
+        "openLiveCount": 2,
+        "concurrentUserCount": 17,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Korea_Dynasty",
+        "categoryValue": "조선메타실록",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA0MTdfMTY3/MDAxNzEzMzMwODE0MDU3.ncrs0nXf5nY-wyKCML2z1-bpw-rV0Gjpab4gIWrbLOsg.cW29R7wpTHadu2Rzn0ezK81XG7LqkZPeNGTAC4H97aYg.PNG/%EC%A1%B0%EC%84%A0%EB%A9%94%ED%83%80%EC%8B%A4%EB%A1%9D.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 17,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Maple_Story_The_Girls_Fate",
+        "categoryValue": "메이플스토리 운명의 소녀",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA4MjFfMTEx/MDAxNzI0MjIyNDY4NTIz.qWCe6AWDiKkufGgi96YEvVxN8iDlBZ8R1tMMuVQjXpIg.ail9FtXvfk3Esh6SBWBXwl0BwEskKUkvVG70nOuOL2wg.PNG/%EB%A9%94%EC%9D%B4%ED%94%8C%EC%8A%A4%ED%86%A0%EB%A6%AC-%EC%9A%B4%EB%AA%85%EC%9D%98-%EC%86%8C%EB%85%80-300-400.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 17,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Dune_Awakening",
+        "categoryValue": "듄: 어웨이크닝",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA5MThfMTc0/MDAxNzg5NzAwMzA2MzYx.KrPJ26Z3W7-ci7NROOwHqsVTA9ZhC6R51UtyiQALrTgg.OMrmNNid3UUcvNboYM9QnnsB2i-rUcV12e3c8D7l1NYg.JPEG/300x400.jpg",
+        "openLiveCount": 3,
+        "concurrentUserCount": 16,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "EA_SPORTS_FC27",
+        "categoryValue": "EA 스포츠 FC 27",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA3MjRfOTYg/MDAxNzg0ODc1ODYzNzY5.gJ3heWaIJ46GiXLCL4gFwLqSJ8uG67nH99TYm_Xr6fkg.MUf_dDpOn_PvqnmxubKfIG12XSSWkyNm2JlZnIk6VLwg.PNG/fc27_%ED%8F%AC%EC%8A%A4%ED%84%B0.png",
+        "openLiveCount": 3,
+        "concurrentUserCount": 16,
+        "newCategory": true,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Call_of_Duty_Modern_Warfare3_2023",
+        "categoryValue": "콜 오브 듀티: 모던 워페어 III 2023",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAzMDVfMTYw/MDAxNzA5NjE3Mjg0NzM3.cJHX2uLu3q87b2_rA64ndJxFm2aMPPBL2e0NVkOa4Nog.IqAVa5XDwy-UFlqBKU_Dy5A_XVAO0Wnr0LStF6AOx_Ag.PNG/%EC%BD%9C_%EC%98%A4%EB%B8%8C_%EB%93%80%ED%8B%B0_%EB%AA%A8%EB%8D%98_%EC%9B%8C%ED%8E%98%EC%96%B4_III_2023.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 16,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Dungeon_Settlers_Seed_Edition",
+        "categoryValue": "던전 세틀러즈 : 시드 에디션",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNTEwMzFfMTU0/MDAxNzYxODk2NDU1MjIx.b9qSmP3D1JY0N2WFhCPNQBtJbm29eKmlItIKzOH1Ifsg._VIA8qD_HWxxzXIsSiXwqIsiEM5keTI-l-N7MgIOUvMg.PNG/%EB%8D%98%EC%A0%84_%EC%84%B8%ED%8B%80%EB%9F%AC%EC%A6%88_400.png",
+        "openLiveCount": 3,
+        "concurrentUserCount": 15,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Pokemon_Pokopia",
+        "categoryValue": "포켓몬 포코피아",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjAyMjZfMTA3/MDAxNzcyMDg5MjkwMjYx.kX821kkEsqxZGMMuUgiWKV4WErg48n-c2XmcZ3HNixUg.TO6IYU9Je46TpvmTWpiME_Y_D6hJIWGIRUF2qf6Icqcg.PNG/Pok%C3%A9mon-Pokopia-300-400.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 15,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Pokemon_Scarlet_Violet",
+        "categoryValue": "포켓몬스터 스칼렛 · 바이올렛",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTJfMjM4/MDAxNzAyMzQ2NjkyMTcy.AlNDBrnZdsA94lZUjKulGwr9BR9986oD0kPfhUAMImAg.pldvElcfqvgGTATPaWudqvIKdytcDVQTdCz9AMPmXTsg.JPEG/225.%ED%8F%AC%EC%BC%93%EB%AA%AC%EC%8A%A4%ED%84%B0_%EC%8A%A4%EC%B9%BC%EB%A0%9B_%EB%B0%94%EC%9D%B4%EC%98%AC%EB%A0%9B_%EC%99%84%EC%84%B1%EB%B3%B8_%EC%84%9D%EC%A7%80%EC%97%B0.jpg",
+        "openLiveCount": 2,
+        "concurrentUserCount": 15,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Dark_Souls_Remastered",
+        "categoryValue": "다크 소울 리마스터",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjZfOTEg/MDAxNzA4OTUxMzAyNTIz.tdPgf9mLYs7Xy7U5rxeA5mqU1rmwu2YvnOY3E_3g6c4g.ZtHvNrr_KCLHmzBNyDXIA-VTrp-FhtLG1S_v-BQz5pcg.PNG/%EB%8B%A4%ED%81%AC_%EC%86%8C%EC%9A%B8_%EB%A6%AC%EB%A7%88%EC%8A%A4%ED%84%B0.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 15,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "VINDICTUS",
+        "categoryValue": "마비노기 영웅전",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyMzEyMTJfMTE3/MDAxNzAyMzQzOTM4Njc0.Z8wYSaUxVWUk8OIARiHRl85RWLf82zfJvXOTcPIXZIgg.uyhFWPEpK5yyNL5ZECRZtPj2L5p1cP8SqEsnuBzykT0g.JPEG/337.%EB%A7%88%EB%B9%84%EB%85%B8%EA%B8%B0_%EC%98%81%EC%9B%85%EC%A0%84_%EC%99%84%EC%84%B1%EB%B3%B8_%EA%B0%95%EB%AF%B8%EC%95%A0.jpg",
+        "openLiveCount": 6,
+        "concurrentUserCount": 14,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "BanG_Dream_Our_Notes",
+        "categoryValue": "뱅드림! 아워 노트",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjAyMjRfMTI1/MDAxNzcxOTE5NDg2ODAx.8vZcC32x_KvNcdbs5zVueU8pWCfY2kRgwW-N4Z81Pgwg.edavfnLwog5nc4nDu0A0wfD6Sj-U1GPBVe95_yxuz60g.PNG/%EA%B7%B8%EB%A6%BC3_-_GM01_Latis.png",
+        "openLiveCount": 3,
+        "concurrentUserCount": 14,
+        "newCategory": true,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Danganronpa_Trigger_Happy_Havoc",
+        "categoryValue": "단간론파: 희망의 학원과 절망의 고교생",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA1MjJfNDEg/MDAxNzE2MzUxNzgxODY4.eRAhgdKB5ZbqicYdLJ2awsdcm7Z6iRZsDWisRemuLfAg.XtpTmuBpVh3WU3yVKba6dlnKBf90Hs5YwMAwmrxUXW4g.PNG/%EB%8B%A8%EA%B0%84%EB%A1%A0%ED%8C%8C_%ED%9D%AC%EB%A7%9D%EC%9D%98_%ED%95%99%EC%9B%90%EA%B3%BC_%EC%A0%88%EB%A7%9D%EC%9D%98_%EA%B3%A0%EA%B5%90%EC%83%9D.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 14,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "TEKKEN_TAG_TOURNAMENT2",
+        "categoryValue": "철권 태그 토너먼트 2",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA5MDNfMTA5/MDAxNzI1MzQxMzc1MjAw.-UKK9cy9DIm-8P6h55JI6V6LVU4hT5M6fQbwgsheyQ0g.NAglA6u06dNqlQs_w7GqXWYhsUOi2VqWxc05vkOn0egg.PNG/TEKKEN_TAG_TOURNAMENT2-300-400.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 14,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Terraria",
+        "categoryValue": "테라리아",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjdfMTUg/MDAxNzA5MDIyOTA3Mjgw.cfm6i-ZezTU_yMudpp7QJKzwI65eRCtjayYtcy_-jWEg.fpwaLvuQ-_3_UdXCABUCGbXPfCUoCCgVqZFm64as2WMg.PNG/%ED%85%8C%EB%9D%BC%EB%A6%AC%EC%95%84.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 14,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Resident_Evil5",
+        "categoryValue": "바이오하자드 5",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA1MDNfMjA2/MDAxNzE0NzE1MjY2NDM5.TdI5HPLPjjmYKldWOXIk2xXohgQkS7UG8_Lh1j9LRHUg.xIzK2nxCXn202D6u1l5SzyV8RehijSl6hRxxIuUVSPwg.JPEG/%EB%B0%94%EC%9D%B4%EC%98%A4%ED%95%98%EC%9E%90%EB%93%9C_5_%EC%B9%98%EC%A7%80%EC%A7%81.jpg",
+        "openLiveCount": 1,
+        "concurrentUserCount": 14,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Warhammer_40000_Dawn_of_War3",
+        "categoryValue": "워해머 40,000: 던 오브 워 3",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA0MjJfMTMg/MDAxNzEzNzY5MTkzMTQy.5W8LlCCEYOuQDI9llVbAwj7xi_2HiHpq2Ytk0NxCPcQg.ys1GmDMCeTVoau-x7XK2EVhUdFwCRqFFn2WOKoz6IBEg.PNG/%EC%9B%8C%ED%95%B4%EB%A8%B8_40%2C000_%EB%8D%98_%EC%98%A4%EB%B8%8C_%EC%9B%8C_3.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 14,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "REPO",
+        "categoryValue": "R.E.P.O.",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNTEyMDJfNzEg/MDAxNzY0NjYxODA2Nzc1.xXeObTRfijZR0P9YVYQTF8jqQ9VtT0J_f50E7Vt4VMgg.mGq4rJNXGTOm7ag68gNBD015Ezg0jzhudFzC7Bs5dI8g.PNG/R.E.P.O.-300-400.png",
+        "openLiveCount": 3,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "BIOHAZARD_requiem",
+        "categoryValue": "바이오하자드 레퀴엠",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNTEyMThfMTQ2/MDAxNzY2MDI1NTIyNDY1.F7quw7bm2Ni_7pR0HqXaav05hRvl50KQNmmfp0Bu4HEg.Dj6MnI_Oc1Zy0gB8KSkVlob7CWPXxvNEkhthoLWvlfQg.PNG/%EB%B0%94%EC%9D%B4%EC%98%A4%ED%95%98%EC%9E%90%EB%93%9C%EB%A0%88%ED%80%B4%EC%97%A0_%ED%8F%AC%EC%8A%A4%ED%84%B0.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Deadlock",
+        "categoryValue": "데드락",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjAzMDVfMjU4/MDAxNzcyNzAzNTQwMDk0.7bKQLFQJtTZysFJ44mu_3QpcrdIs1fLEQ5Bp-HhEOREg.BXboCvrhGzO-3S3HPvvwvAJVB0uekbwSuFXwH23HuWIg.PNG/Deadlock-300-400.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Dont_Starve_Together",
+        "categoryValue": "돈 스타브 투게더",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjdfMjM2/MDAxNzA4OTk4OTA1NTM4.P_0hELqsF1Oy5joL8u5NzDI3Asz5sjN5gXjYVTC7xiIg.LVPCHOc72SsR1wz8LSy53519o62Hu68yfZyMZHyPtysg.PNG/%EB%8F%88_%EC%8A%A4%ED%83%80%EB%B8%8C_%ED%88%AC%EA%B2%8C%EB%8D%94.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Split_Fiction",
+        "categoryValue": "스플릿 픽션",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDEyMTZfMTUw/MDAxNzM0MzM4MTE5ODUz.cU22yuHkpihoJHQ47NNPF6enE_Yk0i27dNfTg00yH90g.jTkh0RXGPK8y1pFEfPmsiyuQAsoSfmp4qI6rijNO1KIg.PNG/Split-Fiction-300-400.png",
+        "openLiveCount": 2,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "My_Little_Puppy",
+        "categoryValue": "마이 리틀 퍼피",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDExMTNfOTMg/MDAxNzMxNDg5OTQyMzA0.EBgQEXOHhTJpvtq_wwO_qSEalYmOB5cYbQCJn45re2wg.Pkvb84DCHyu3rtQx0vyobdyc9aB1vbJDO_15BLDQsaEg.PNG/My-Little-Puppy-300-400.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Oxygen_Not_Included",
+        "categoryValue": "산소미포함",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAzMDZfMjQ3/MDAxNzA5NzAwODc5NTI1.MHtAY6tKx7gqnnkEzux3Ts_B9BAUASNRlHZ6OH27_1cg.Ic1Ls7UiWKMU08Pa_qJMkwyiz789XH6EKzvb61Anmqcg.PNG/25.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Pocket_Rogues",
+        "categoryValue": "포켓로그",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA2MjVfOTYg/MDAxNzE5MjgxODIxNjg4.VZ3lEjzePZN75knj460yCULd1rQ6wLsZQQ1Zi8YvXqAg.Ujn5v63Aap4qX0WaEFZZ7v79bmVDUcd4QYtEFHBi0Aog.PNG/%ED%8F%AC%EC%BC%93%EB%A1%9C%EA%B7%B8.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Pokemon_GO",
+        "categoryValue": "포켓몬 GO",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA2MTJfMTMg/MDAxNzE4MTk5OTA5ODg2.gTeTC7_OHnsECYUP5gH2gQbcEFa8QXh4SK0i4BoGZL8g.DfrO6w-20OkbvzaqiQ3x3jmxyoiNdD-hwN1UAdqLNdUg.PNG/img.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "SD_Gundam_G_Generation_ETERNAL",
+        "categoryValue": "SD건담 지 제네레이션 이터널",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDA4MjZfMTc3/MDAxNzI0NjQwNzMxOTU3._qYzXcgcyIru9PQQtHZkx0Q8p7P-BJmLDfadh09G-Fcg.QXU2tBjkea95O6eq8pOyLq2-U0tz2TlZ-7jrVB8VT8cg.PNG/SD_Gundam_G_Generation_ETERNAL-300-400.png",
+        "openLiveCount": 1,
+        "concurrentUserCount": 13,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "CONTROL_Resonant",
+        "categoryValue": "컨트롤：레조넌트",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA1MjFfMTM3/MDAxNzc5MzMyNjE0MDI3.7_tPPbeOexsKNZUvxLO58n2tqH749eYMWtIhHZXZoPkg.oGfOU-4j8-3MqbdOw0uFf85SndTedfUmczsz04AN7YAg.PNG/%EC%BB%A8%ED%8A%B8%EB%A1%A4_%EB%A0%88%EC%A1%B0%EB%84%8C%ED%8A%B8.png",
+        "openLiveCount": 4,
+        "concurrentUserCount": 12,
+        "newCategory": true,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "The_Rhapsody_of_Zephyr_Remastered",
+        "categoryValue": "창세기전 외전: 서풍의 광시곡 리마스터",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNjA5MDdfNzQg/MDAxNzg4NzUzODYyNDcy.8IJkdwRudkvKu9nTJ05kOfUY0etCV0S63MkmUxfKFqog.HrdUeUCGN3aRIIbynPYLRK_YgtrxzqrsGgjUeknQyLUg.PNG/%EC%B0%BD%EC%84%B8%EA%B8%B0%EC%A0%84%EC%99%B8%EC%A0%84_%ED%8F%AC%EC%8A%A4%ED%84%B0.png",
+        "openLiveCount": 4,
+        "concurrentUserCount": 12,
+        "newCategory": true,
+        "dropsCampaignNos": []
+      },
+      {
+        "categoryType": "GAME",
+        "categoryId": "Escape_the_Backrooms",
+        "categoryValue": "이스케이프 더 백룸",
+        "posterImageUrl": "https://nng-phinf.pstatic.net/MjAyNDAyMjhfMjQ4/MDAxNzA5MDg1MzUzNzE4.Rh49GJ9niSPEmJ_c11Ujs3W8eIZD4PLQQqib84cqri4g.705WxYT_98TD6nJgwWdW9hOcUiZDveZbrD4llMjzB5Yg.PNG/%EC%9D%B4%EC%8A%A4%EC%BC%80%EC%9D%B4%ED%94%84_%EB%B0%B1%EB%A3%B8.png",
+        "openLiveCount": 3,
+        "concurrentUserCount": 12,
+        "newCategory": false,
+        "dropsCampaignNos": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "inke",
+  "sample": "S04-publish-offline",
+  "capturedAt": "2026-09-27T17:31:24.638326Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://service.inke.cn/api/live/now_publish?id=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.inke.cn/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": [
+        "content-type,x-requested-with",
+        "uberctx-_namespace_appkey_",
+        "ticket",
+        "User-Agent",
+        "Accept-Encoding",
+        "Referer",
+        "Uber-Trace-Id",
+        "X-Real-Ip",
+        "X-Forwarded-For"
+      ],
+      "date": "Sun, 27 Sep 2026 17:31:25 GMT",
+      "server-info": "ali-e-ops-inke-proxy04.bj_tcbb8f3c83e8f15edbad5dbf3e_2026-09-28-01:31:25:254",
+      "content-length": "54",
+      "x-trace-id": "bb8f3c83e8f15edbad5dbf3e",
+      "content-type": "text/plain; charset=utf-8",
+      "server": "openresty/1.13.6.1"
+    }
+  },
+  "raw": {
+    "sha256": "a304e03391bf5efbfc19a33e4c1638ce94c5ebd325d2db1fc46e1063ec09d1eb",
+    "length": 54
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

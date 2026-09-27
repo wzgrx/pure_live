@@ -1,0 +1,234 @@
+{
+  "code": 0,
+  "info": {
+    "pagination": {
+      "count": 565,
+      "maxpage": 29,
+      "p": 29,
+      "pagesize": 20
+    },
+    "Datas": [
+      {
+        "room_id": 869227909,
+        "catalog_id": 140,
+        "name": "好困，写作业中",
+        "announcement": "e人发疯区，别刷礼物（但可以投剑），刷了我也拿不到，会心疼的🤧，过来发发疯聊聊天^ ^",
+        "creator_id": 38296714,
+        "creator_username": "A_山林",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 4,
+          "open_time": 1790526901923,
+          "open_log_id": "6ab945b5fee3930012dc4cc3",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "android",
+            "time": 1790527041065
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/27/c5a678a5c2a96c0096a1066209b56770.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/23/6f922eb87999a338176ed16fa2f779cf204133.png",
+        "creator_introduction": "PK连线搞怪，没才艺闲聊抽象一主包，补药骂我呀?～",
+        "catalog_name": "闲聊",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 20010,
+          "tag_name": "e 人派对"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 4,
+          "team_live_revenue": 1,
+          "accumulation": 4,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 100
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":29,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"df6df068-d521-40f5-8836-930db81ea025\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869228152,
+        "catalog_id": 143,
+        "name": "卡泡届最会唱歌之人",
+        "announcement": "成为流行乐大王day1 ",
+        "creator_id": 38297377,
+        "creator_username": "亦骁_声演",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 26,
+          "open_time": 1790525108084,
+          "open_log_id": "6ab93eb41367280011809c20",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "win",
+            "time": 1790525136629
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/25/15d0fef393f32f54cec5dec84adffff4.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/23/a18816a2a12a45bc7ee2a4e9e241c7ae211403.png",
+        "catalog_name": "流行",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 10001,
+          "tag_name": "高冷禁欲"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 26,
+          "team_live_revenue": 0,
+          "accumulation": 22,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 100
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":29,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"6950d0f7-8faa-474c-8d9f-8f43c91a070b\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869228979,
+        "catalog_id": 145,
+        "name": "一起唱唱歌",
+        "announcement": "欢迎来到X_热茶的直播间！\n本次直播的主题是*&#￥(难以描述)…\n希望大家偷偷喜欢我，默默关注我(ゝ∀･)！",
+        "creator_id": 38334626,
+        "creator_username": "X_热茶",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 0,
+          "open_time": 1790526949346,
+          "open_log_id": "6ab945e51367280011809cd3",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "android",
+            "time": 1790526950573
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/avatars/icon01.png",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/27/bcee237218ba1bd25adf16b914614734213953.jpg",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20016,
+          "tag_name": "唱给你听"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 0,
+          "team_live_revenue": 0,
+          "accumulation": 1,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 100
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":29,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"bf2d65e0-e8b4-41d9-a41f-34e8a88fb213\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869221214,
+        "catalog_id": 145,
+        "name": "新人不会直播，求教~",
+        "announcement": "欢迎来到我的直播间！\r\n本次直播的主题是*&#￥(难以描述)…\r\n希望大家偷偷喜欢我，默默关注我(ゝ∀･)！",
+        "creator_id": 34932367,
+        "creator_username": "淞寻_声演",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 17640,
+          "open_time": 1790527118658,
+          "open_log_id": "6ab9468e94a9650011ec22f9",
+          "close_time": null,
+          "channel": {
+            "type": "open",
+            "time": 1790360590650
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/04/13c7ca4fae178b550a425984226c65f4.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/01/7067a54457556b559fb9b09c11c784c5223731.png",
+        "creator_introduction": "直播时间23-2 下午随机掉落  我们不见不散～",
+        "catalog_name": "点歌",
+        "catalog_color": "#6FEFEC",
+        "custom_tag": {
+          "tag_id": 20016,
+          "tag_name": "唱给你听"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 17640,
+          "team_live_revenue": 0,
+          "accumulation": 2,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 0
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":29,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"a137cfcc-8978-4089-81dd-35f224c1318b\",\"from\":2,\"is_exp_work\":0}"
+      },
+      {
+        "room_id": 869222128,
+        "catalog_id": 140,
+        "name": "我们争做熬夜冠军",
+        "announcement": "有瓜吗 一起吃瓜",
+        "creator_id": 38103914,
+        "creator_username": "尘歌_CG",
+        "status": {
+          "open": 1,
+          "open_mode": 0,
+          "open_revenue": 1447,
+          "open_time": 1790527119850,
+          "open_log_id": "6ab9468ffee3930012dc4cd1",
+          "close_time": null,
+          "channel": {
+            "type": "channel",
+            "event": "start",
+            "platform": "android",
+            "time": 1790527122178
+          },
+          "broadcasting": false,
+          "attention": false
+        },
+        "cover_url": "https://static.maoercdn.com/fmcovers/202609/19/8a3b6083da3bb14a0a89c278068268d3.jpg",
+        "creator_iconurl": "https://static.maoercdn.com/avatars/202609/18/5fcf14f114aaa262828584e3d6e448e5202828.png",
+        "creator_introduction": "愿做安静的倾听者。如果你愿意，万般琐事，尽可以娓娓道来。（凌晨播六小时）",
+        "catalog_name": "闲聊",
+        "catalog_color": "#9AACFF",
+        "custom_tag": {
+          "tag_id": 20014,
+          "tag_name": "沉浸陪伴"
+        },
+        "activity_catalog_id": 0,
+        "statistics": {
+          "revenue": 1447,
+          "team_live_revenue": 0,
+          "accumulation": 1,
+          "online": 0,
+          "attention": false,
+          "attention_count": 0,
+          "vip": 0,
+          "score": 0
+        },
+        "trace": "{\"refresh_type\":-1,\"refresh_num\":29,\"attr\":8,\"goto\":\"live\",\"open_mode\":0,\"request_id\":\"e0c0e9bf-0550-4cde-8d1c-a6635e1b69e0\",\"from\":2,\"is_exp_work\":0}"
+      }
+    ]
+  }
+}

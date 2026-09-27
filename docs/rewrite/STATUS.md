@@ -104,7 +104,7 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 | WebDAV、局域网同步、诊断包、首次启动向导、应用内更新、关于、分享口令 | 完成 | 子代理 |
 | Android 画中画、后台播放与通知、应用内小窗；Windows 单实例、新窗口、托盘、关闭行为、开机自启、系统媒体控制 | 完成（ADR 0025），已接入直播间 | 子代理 → 主会话 |
 | 第二批平台：cc、yy、soop、acfun、twitch | 完成，五个都保留并接入应用（CC 暂无弹幕；Twitch 列表只有第一页，翻页要 WebView 完整性令牌） | 子代理 → 主会话 |
-| 第三批平台前半：chzzk、missevan、kilakila、inke、picarto、twitcasting、showroom、pandalive、17live | 进行中 | 子代理 |
+| 第三批平台前半：chzzk、missevan、kilakila、inke、picarto、twitcasting、showroom、pandalive、17live | 完成，九个都保留并接入应用（ADR 0031；映客无匿名弹幕；17LIVE 手机开播的高画质是 codec 12，默认 H.264 档；TwitCasting 分片要带响应 Cookie） | 子代理 → 主会话 |
 | 第三批平台后半：liveme、steambroadcast、sixroom、kugoulive、jdlive、baidulive、looklive、weibo；niconico；候选下线 tiktok、youtube、bigo、fc2live；小红书仅链接 | 进行中 | 子代理 |
 | 缓存清理、平台健康状态 | 完成 | 主会话 |
 | 深链 `purelive://`、按网络选画质与卡顿自动降一档、断网提示、录制拼音文件夹 | 完成 | 主会话 |

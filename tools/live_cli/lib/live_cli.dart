@@ -5,6 +5,7 @@ export 'src/danmaku/danmaku_command.dart';
 export 'src/danmaku/frame_scrub.dart';
 export 'src/danmaku/recorder.dart';
 export 'src/danmaku/scrub_acfun.dart';
+export 'src/danmaku/scrub_json_sites.dart';
 export 'src/danmaku/scrub_sites.dart';
 export 'src/danmaku/scrub_soop.dart';
 export 'src/danmaku/scrub_twitch.dart';

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:collection';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -27,12 +29,24 @@ final class SystemDanmakuClock implements DanmakuClock {
   int micros() => Timeline.now;
 }
 
+/// A frame to send as a WebSocket text frame (socket.io, IRC-style
+/// protocols); its bytes are the UTF-8 of [text], so recorders and test
+/// doubles that only see `List<int>` keep working.
+final class TextFrame extends UnmodifiableListView<int> {
+  /// Wraps [text].
+  new(this.text) : super(utf8.encode(text));
+
+  /// The frame text.
+  final String text;
+}
+
 /// One open WebSocket.
 abstract interface class DanmakuSocket {
   /// Received messages: `List<int>` for binary frames, `String` for text.
   Stream<Object?> get messages;
 
-  /// Sends a binary frame; ignored after the socket closed.
+  /// Sends a binary frame, or a text frame for a [TextFrame]; ignored after
+  /// the socket closed.
   void send(List<int> frame);
 
   /// Sends a text frame (Twitch IRC); ignored after the socket closed.
@@ -126,7 +140,8 @@ final class _IoSocket implements DanmakuSocket {
 
   @override
   void send(List<int> frame) {
-    if (_socket.readyState == WebSocket.open) _socket.add(frame);
+    if (_socket.readyState != WebSocket.open) return;
+    _socket.add(frame is TextFrame ? frame.text : frame);
   }
 
   @override

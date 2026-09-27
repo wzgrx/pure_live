@@ -1,0 +1,100 @@
+{
+  "code": 0,
+  "info": {
+    "room": {
+      "room_id": 453091860,
+      "catalog_id": 167,
+      "custom_tag_id": 20005,
+      "name": "中秋快乐，花间陪你走花路",
+      "announcement": "祝大家九月快乐，欢迎来到猫耳第一家配音pia戏才艺厅",
+      "type": "connect",
+      "channel": {
+        "flv_pull_url": "http://d1-missevan04.bilivideo.com/live-bvc/944249/maoer_11875538_453091860.flv?cdn=missevan04&oi=6522856238&pt=web&expires=1790534410&qn=10000&len=0&trid=96827198643ca6dea282b3a5fe339c87&sigparams=cdn,oi,pt,expires,qn,len,trid&sign=9ee484e7c2fce6d2dc90b0e2f341986d&sk=df3458b065022135692b4465770737dbe746b047656ef6e0cc0ae497eb90edfa",
+        "hls_pull_url": "http://d1-missevan104.bilivideo.com/live-bvc/933146/maoer_11875538_453091860.m3u8?cdn=missevan104&oi=6522856238&pt=web&expires=1790534410&qn=10000&len=0&trid=96827198643ca6dea282b3a5fe339c87&sigparams=cdn,oi,pt,expires,qn,len,trid&sign=2e0210ed8418b9e98980659c55a719c8&sk=df3458b065022135692b4465770737dbe746b047656ef6e0cc0ae497eb90edfa"
+      },
+      "background": {
+        "enable": true,
+        "opacity": 0.699999988079071,
+        "image_url": "https://static.maoercdn.com/fmbackgrounds/202609/25/7570f659da0cf806707ced67575ed5e2.png"
+      },
+      "creator_id": 11875538,
+      "creator_username": "花间_配音pia戏点唱厅",
+      "status": {
+        "open": 1,
+        "open_mode": 1,
+        "open_revenue": 36592478,
+        "open_time": 1790481150876,
+        "open_log_id": "6ab892fe94a9650011ec10e9",
+        "close_time": null,
+        "channel": {
+          "type": "channel",
+          "event": "start",
+          "platform": "win",
+          "time": 1790481163677
+        },
+        "team_live": 1,
+        "broadcasting": true,
+        "attention": false
+      },
+      "notice": "",
+      "medal": {
+        "name": "在花间",
+        "default_frame_url": "https://static.maoercdn.com/live/medalframes/18241b2eac1d43c79f5e0389a31cfa16/level01_0_9_0_55.webp"
+      },
+      "statistics": {
+        "revenue": 36675258,
+        "team_live_revenue": 0,
+        "accumulation": 2422,
+        "online": 0,
+        "attention": false,
+        "attention_count": 2748,
+        "vip": 1,
+        "score": 5164
+      },
+      "connect": {
+        "provider": "bvclive",
+        "push_type": "pc",
+        "forbidden": true,
+        "queue": [],
+        "join": [],
+        "finish": []
+      },
+      "question": {
+        "min_price": 30,
+        "limit": 100,
+        "max_limit": 200,
+        "join": []
+      },
+      "activity_catalog_id": 105,
+      "cover_url": "https://static.maoercdn.com/fmcovers/202601/15/6d36e73673c411679a49601551872345.jpg"
+    },
+    "creator": {
+      "user_id": 11875538,
+      "accid": "11875538",
+      "username": "花间_配音pia戏点唱厅",
+      "iconurl": "https://static.maoercdn.com/avatars/202608/13/12b93163baf63c0038b795c2b0393696105704.png",
+      "confirm": 33554434,
+      "introduction": "这里是花间的第六个年头，开始新征程  约本/约歌/应聘考核可联系花间厅主：hlh6428 ",
+      "online": true,
+      "titles": [
+        {
+          "type": "level",
+          "level": 29
+        }
+      ]
+    },
+    "creator_card": {
+      "frame_url": "https://static.maoercdn.com/live/creatorcard/202609/04/a462dd89905b433e85ecee3c69480e83_0_90_0_162.png"
+    },
+    "websocket": [
+      "wss://im.missevan.com/ws?room_id=453091860"
+    ],
+    "welcome_entry": {
+      "effect_url": "https://static.maoercdn.com/liveactivity/effects/v2/2311_2_app.mp4;https://static.maoercdn.com/liveactivity/effects/v2/2311_2_app.png",
+      "web_effect_url": "https://static.maoercdn.com/liveactivity/effects/v2/2311_2_pc.mp4;https://static.maoercdn.com/liveactivity/effects/v2/2311_2_pc.webm;https://static.maoercdn.com/liveactivity/effects/v2/2311_2_pc.png"
+    },
+    "vtuber": {
+      "permission": 0
+    }
+  }
+}

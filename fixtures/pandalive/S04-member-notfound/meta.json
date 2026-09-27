@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "platform": "pandalive",
+  "sample": "S04-member-notfound",
+  "capturedAt": "2026-09-27T18:48:34.152907Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://api.pandalive.co.kr/v1/member/bj",
+    "headers": {
+      "Origin": "https://www.pandalive.co.kr",
+      "Referer": "https://www.pandalive.co.kr/play/zxqvnouserfix",
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "userId=zxqvnouserfix&info=media"
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "X-Device-Info",
+      "connection": "keep-alive",
+      "set-cookie": [
+        "sessKey=akkt7087-18o4-570z-08d6-471016906ugy; path=/; domain=.pandalive.co.kr; secure; SameSite=None",
+        "79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee=3vwNQTDFgm36wyqNfH32zVm5NBA6zjLTUyAirF%5QrqC4Uugl8AIvCvivhV57uo%0YzZfXZ%2BCqs%1TQiEb8JOoib2MMk5aGKv3uPMl9ud3tmHb1X7hp6W2JRZZ%1IRai0aJEF8Tz; path=/; domain=.pandalive.co.kr",
+        "partner=jodhgod; path=/; domain=.pandalive.co.kr"
+      ],
+      "date": "Sun, 27 Sep 2026 18:48:34 GMT",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://www.pandalive.co.kr",
+      "content-type": "application/json",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "93dabce72e202b177b0da0b485dc9ea0ce3b748ecaac9b071dc9b084981ed73c",
+    "length": 113
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.userIp",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:sessKey",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:partner",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

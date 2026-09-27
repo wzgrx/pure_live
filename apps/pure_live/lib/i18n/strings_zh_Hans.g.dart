@@ -3465,8 +3465,8 @@ class Translations$recording$failure$zh_Hans {
   /// zh-Hans: '拿不到可录制的直播流'
   String get noStream => '拿不到可录制的直播流';
 
-  /// zh-Hans: '直播流的格式暂不支持录制（如 SAMPLE-AES 加密、音视频分开的 HLS）'
-  String get unsupportedFormat => '直播流的格式暂不支持录制（如 SAMPLE-AES 加密、音视频分开的 HLS）';
+  /// zh-Hans: '直播流的格式暂不支持录制（如 RTSP、UDP 地址，SAMPLE-AES 加密，音视频分开的 HLS）'
+  String get unsupportedFormat => '直播流的格式暂不支持录制（如 RTSP、UDP 地址，SAMPLE-AES 加密，音视频分开的 HLS）';
 
   /// zh-Hans: '存储空间不足'
   String get diskFull => '存储空间不足';

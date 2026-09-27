@@ -2577,7 +2577,7 @@ class Translations$recording$failure$zh_Hant implements Translations$recording$f
   @override
   String get noStream => '拿不到可錄製的直播串流';
   @override
-  String get unsupportedFormat => '直播串流的格式暫不支援錄製（如 SAMPLE-AES 加密、影音分開的 HLS）';
+  String get unsupportedFormat => '直播串流的格式暫不支援錄製（如 RTSP、UDP 位址，SAMPLE-AES 加密，影音分開的 HLS）';
   @override
   String get diskFull => '儲存空間不足';
   @override

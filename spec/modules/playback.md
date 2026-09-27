@@ -69,7 +69,7 @@
   1. 租期会断开连接的 FLV（`cutsConnection=true`）→ FLV 拼接续流；
   2. ~~旧式 codec 12 HEVC 的 FLV → 标签转写~~：不做。所有平台的 libmpv 都是 FFmpeg ≥ 8（Android/Linux 为 9.0.2，Windows 为 FFmpeg master Lavc63.13，见 DIAGNOSIS），能直接识别 codec 12（2026-09-28 结清）；
   3. 带中继配方的 HLS（`StreamLine.hlsRelay`：按路径的 Cookie、分片还原）→ HLS 中继（ADR 0033）；
-  4. 其它 → 直连。
+  4. 其它 → 直连（包括 `other` 格式的单条 HTTP 流，如 IPTV 的 `.ts`、udpxy，record.md §8）。
 
   证据：PST:129-183；诊断 02 §1.4。验收：【单元】表驱动。
 - **SRC-3 本地输入不走代理**：内核打开本地回环地址时绕过 HTTP 代理；上游请求由中继按当前代理策略发出。

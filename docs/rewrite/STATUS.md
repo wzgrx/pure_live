@@ -100,7 +100,8 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 | 代理设置（统一代理、按平台）、关注分组、收藏分区、综合搜索 | 完成（播放器代理随直播间合并接入） | 主会话 |
 | 直播间完整化：弹幕列表与画面弹幕接入、屏蔽词、定时关闭、房间音量、纯音频、锁定、手势、快捷面板、切换直播间、竖屏适配、剧场模式、菜单 | 完成（ADR 0023）；录制按钮、本地弹幕输入、屏蔽即时移除在屏弹幕、画中画和后台返回重连弹幕已补；投屏在做 | 子代理 → 主会话 |
 | 录制（`live_record`）与录制中心、录制设置 | 完成（斗鱼真实录制 600 s 两次续期 0 缺口；回放不录）；纯 Dart 转 MP4 完成并接入（斗鱼、虎牙含 H.265、B 站真实录制验证，负载与原文件一致） | 子代理 → 主会话 |
-| HLS 录制（ADR 0035） | 完成：TS、fMP4、AES-128（内存解密）、BYTERANGE、LL-HLS 取整片，连续文件，纯 Dart 转 MP4；SOOP、Twitch、TwitCasting、B 站、PandaTV（强制续签）、CHZZK、SHOWROOM 实录 60–90 s 0 缺口、全解码无错；带配方的线路（Bigo 还原分片、按路径 Cookie）在下载器里处理。未做：SAMPLE-AES、音视频分离（niconico）、IPTV 连续 TS（§8）、10 分钟门禁 | 子代理 → 主会话 |
+| HLS 录制（ADR 0035） | 完成：TS、fMP4、AES-128（内存解密）、BYTERANGE、LL-HLS 取整片，连续文件，纯 Dart 转 MP4；SOOP、Twitch、TwitCasting、B 站、PandaTV（强制续签）、CHZZK、SHOWROOM 实录 60–90 s 0 缺口、全解码无错；带配方的线路（Bigo 还原分片、按路径 Cookie）在下载器里处理。未做：SAMPLE-AES、音视频分离（niconico）、10 分钟门禁 | 子代理 → 主会话 |
+| IPTV 连续 TS 录制（ADR 0035 修订） | 完成：`StreamFormat.other`（IPTV 的 `.ts`、udpxy），按开头字节分派 FLV / 连续 TS / HLS 列表；连续 TS 按单元完整写 `.ts`，断流、停止、丢包、切分不留半个单元，时间戳不改写由转封装连接；本地模拟 udpxy（断开、源重启、丢包、33 位回绕）和公网 Euronews Georgia 各录 60 s，`.ts` 与 MP4 全解码无错、包数一致。MPEG-2 频道能录 `.ts`，转不了 MP4 | 子代理 → 主会话 |
 | IPTV（独立模块 `live_iptv`，ADR 0024） | 完成 | 子代理 |
 | WebDAV、局域网同步、诊断包、首次启动向导、应用内更新、关于、分享口令 | 完成 | 子代理 |
 | Android 画中画、后台播放与通知、应用内小窗；Windows 单实例、新窗口、托盘、关闭行为、开机自启、系统媒体控制 | 完成（ADR 0025），已接入直播间 | 子代理 → 主会话 |

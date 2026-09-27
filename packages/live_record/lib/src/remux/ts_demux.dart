@@ -68,6 +68,18 @@ bool _isVideoType(int streamType) => const {0x01, 0x02, 0x10, 0x1B, 0x24, 0x42, 
 
 bool _isAudioType(int streamType) => const {0x03, 0x04, 0x0F, 0x11, 0x1C, 0x81, 0x87}.contains(streamType);
 
+/// Whether the PMT stream type [streamType] is a video stream (MPEG-1/2,
+/// MPEG-4, H.264, H.265, CAVS, Dirac, VC-1).
+bool isTsVideoType(int streamType) => _isVideoType(streamType);
+
+/// Whether the PMT stream type [streamType] is an audio stream (MPEG audio,
+/// AAC, LATM, AC-3, E-AC-3).
+bool isTsAudioType(int streamType) => _isAudioType(streamType);
+
+/// The codec the remux copies for video stream type [streamType] (H.264,
+/// H.265), or null.
+VideoCodec? tsVideoCodecOf(int streamType) => _videoCodecOf(streamType);
+
 final class _Pes {
   new(this.pid, this.offset);
 
@@ -143,6 +155,10 @@ final class TsDemuxer {
   Uint8List? _audioCarry;
   int _audioCarryPts = 0;
   int _audioRate = 0;
+
+  // No ADTS frame yet, or the carried frame was cut by a gap: the next PES
+  // may start with the rest of a frame whose start is not in the file.
+  var _audioResync = true;
 
   /// PID of the video stream, if any.
   int? get videoPid => _videoPid;
@@ -298,7 +314,10 @@ final class TsDemuxer {
     if (video == null && unsupportedVideo != null) unsupportedType ??= unsupportedVideo;
     if (audio == null && unsupportedAudio != null) unsupportedType ??= unsupportedAudio;
     if (strict && unsupportedType != null) {
-      throw RemuxException('unsupported MPEG-TS stream type 0x${unsupportedType!.toRadixString(16)} at offset $offset');
+      throw RemuxException(
+        'unsupported MPEG-TS stream type 0x${unsupportedType!.toRadixString(16)} at offset $offset',
+        unsupportedCodec: true,
+      );
     }
     // A stream that moved to another PID ends its last unit on the old one.
     if (video != _videoPid) {
@@ -311,6 +330,7 @@ final class TsDemuxer {
       final pes = _pes.remove(_audioPid);
       if (pes != null) _finishPes(pes, emit, atEnd: false);
       _audioCarry = null;
+      _audioResync = true;
       _audioPid = audio;
     }
     if (codec != null) videoCodec = codec;
@@ -459,11 +479,34 @@ final class TsDemuxer {
       (data[at + 3] << 7) +
       (data[at + 4] >> 1);
 
-  void _adts(Uint8List payload, int pts, _Pes pes, void Function(TsSample sample) emit) {
+  void _adts(Uint8List input, int pts, _Pes pes, void Function(TsSample sample) emit) {
     // A frame that began in the previous PES keeps its own time; the first
     // frame starting in this PES has this PES's time.
-    final carry = _audioCarry;
+    var carry = _audioCarry;
     _audioCarry = null;
+    var payload = input;
+    if (carry != null && _audioRate > 0) {
+      // Muxers may split a frame across PES. When this PES does not follow
+      // the carried frame (a reconnection or a split of a continuous
+      // recording in between, spec §8.2), the frame's end is not in the
+      // file: drop it rather than join it to foreign bytes.
+      final frame = (1024 * 90000 / _audioRate).round();
+      if ((pts - _audioCarryPts - frame).abs() > 2 * frame) {
+        carry = null;
+        damaged++;
+        _audioResync = true;
+      }
+    }
+    if (carry == null && _audioResync) {
+      // The rest of a frame begun before the file (or the gap) comes first.
+      final sync = _adtsSync(payload);
+      if (sync < 0) return;
+      if (sync > 0) {
+        damaged++;
+        payload = Uint8List.sublistView(payload, sync);
+      }
+      _audioResync = false;
+    }
     final boundary = carry?.length ?? 0;
     final data = carry == null ? payload : _join(carry, payload);
     var time = carry == null ? pts : _audioCarryPts;
@@ -502,6 +545,20 @@ final class TsDemuxer {
       time += _frameTicks(bytes);
       at += frame;
     }
+  }
+
+  /// Offset of the first ADTS frame in [data]: a sync word whose frame ends
+  /// at the end of [data], runs past it, or is followed by another sync word.
+  static int _adtsSync(Uint8List data) {
+    for (var at = 0; at + 7 <= data.length; at++) {
+      if (data[at] != 0xFF || (data[at + 1] & 0xF6) != 0xF0) continue;
+      final length = _frameLength(Uint8List.sublistView(data, at));
+      if (length < 7) continue;
+      final next = at + length;
+      if (next >= data.length) return at;
+      if (next + 1 < data.length && data[next] == 0xFF && (data[next + 1] & 0xF6) == 0xF0) return at;
+    }
+    return -1;
   }
 
   static Uint8List _join(Uint8List a, Uint8List b) => Uint8List(a.length + b.length)

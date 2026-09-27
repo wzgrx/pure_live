@@ -10,6 +10,7 @@ import 'package:live_record/testing.dart';
 import 'package:test/test.dart';
 
 import 'support/fake_live.dart';
+import 'support/ts_live.dart';
 
 final class _Rig {
   new({RecordSettings settings = const RecordSettings(), MemoryRecordTaskStore? store, MemoryRecordFiles? files})
@@ -413,6 +414,25 @@ void main() {
       expect(rig.task().state, RecordState.completed);
       expect(rig.task().session!.outputs, hasLength(1));
     });
+  });
+
+  test('a codec MP4 cannot hold (MPEG-2 on IPTV) keeps the source and is not a failure (§10)', () async {
+    // Through the app's isolate remuxer: the flag must survive the isolate.
+    final dir = await Directory.systemTemp.createTemp('remux_skip');
+    addTearDown(() => dir.delete(recursive: true));
+    final input = '${dir.path}${Platform.pathSeparator}a_001.ts';
+    await File(input).writeAsBytes(TsLive(videoType: 0x02, durationMs: 4000).bytes(0, 1 << 20));
+    final outcome = await remuxFiles(
+      files: const IoRecordFiles(),
+      remuxer: const IsolateRemuxer(Mp4Remuxer()),
+      inputs: [input],
+    );
+    expect(outcome.failure, isNull);
+    expect(outcome.outputs, isEmpty);
+    expect(outcome.skipped, [input]);
+    expect(outcome.kept, [input]);
+    expect(File(input).existsSync(), isTrue);
+    expect(dir.listSync().whereType<File>().map((f) => f.path), [input], reason: 'no partial MP4 left behind');
   });
 
   test('remux progress is reported, never decreasing, 1 only at the end', () async {

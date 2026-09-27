@@ -204,6 +204,29 @@ http://a.fixture/misc.ts
     expect(await site.resolve('https://www.douyu.com/1'), isNull);
   });
 
+  test('line formats: HLS and FLV by path, other http(s) addresses are single streams (§5)', () async {
+    final misc = await site.streams(await site.detail(RoomRef('iptv', '无分组')));
+    expect(misc.lines.single.format, StreamFormat.other, reason: 'a .ts line is recorded by its bytes');
+    StreamFormat of(String url) => IptvSite.formatOf(Uri.parse(url));
+    expect(of('http://a.fixture/live/INDEX.M3U8?token=1'), StreamFormat.hls);
+    expect(of('https://a.fixture/list.m3u'), StreamFormat.hls);
+    expect(of('http://b.fixture/live/cctv1.FLV?wsSecret=x'), StreamFormat.flv);
+    expect(of('http://b.fixture/live.flv.ts'), StreamFormat.other);
+    expect(of('http://192.168.1.1:4022/udp/239.3.1.1:8000'), StreamFormat.other, reason: 'udpxy');
+    expect(of('http://192.168.1.1:4022/rtp/239.3.1.1:8000'), StreamFormat.other);
+    expect(of('http://c.fixture/live/1?type=m3u8'), StreamFormat.other, reason: 'the query is not the path');
+    expect(of('https://c.fixture/play/cctv1'), StreamFormat.other);
+    expect(of('http://xc.fixture/live/user/pass/1.ts'), StreamFormat.other);
+    for (final url in [
+      'rtmp://d.fixture/live/1',
+      'rtsp://e.fixture/1.sdp',
+      'udp://239.1.1.1:5000',
+      'rtp://@239.1.1.1:5000',
+    ]) {
+      expect(of(url), StreamFormat.flv, reason: '$url: not HTTP, opened directly and not recorded');
+    }
+  });
+
   test('guide window, availability and catch-up lines', () async {
     final channel = await site.channel(RoomRef('iptv', 'CCTV-1 综合'));
     expect(channel.guideChannelId, 'CCTV1');

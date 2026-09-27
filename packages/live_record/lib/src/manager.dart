@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'package:clock/clock.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
+import 'package:live_net/live_net.dart';
 import 'package:live_record/src/chat.dart';
 import 'package:live_record/src/errors.dart';
 import 'package:live_record/src/files.dart';
@@ -199,7 +200,9 @@ final class RecordManager {
   ///
   /// `rooms` gives strict room checks and stream sets (`SiteRecordRooms` over
   /// the live_core adapters); `store` persists tasks; `opener` connects
-  /// upstream FLV and HLS (default: `httpRecordOpener` with `record.readTimeout`);
+  /// upstream FLV, HLS and single HTTP streams (default: `httpRecordOpener`
+  /// with `proxy` and the `record.readTimeout` in force when each session
+  /// starts);
   /// `remuxer` converts finished segments to MP4 when `record.remuxToMp4` is
   /// on (none: the sources stay FLV); `chat` supplies chat when
   /// `record.danmaku` is on; `files` is the file system (tests pass
@@ -212,6 +215,7 @@ final class RecordManager {
     RecordSettings settings = const RecordSettings(),
     this._files = const IoRecordFiles(),
     this._opener,
+    this.proxy = const FixedProxyPolicy(),
     this._remuxer,
     this._chat,
     this.spliceTimings = const SpliceTimings(),
@@ -223,6 +227,9 @@ final class RecordManager {
 
   /// Recording root.
   final String root;
+
+  /// Upstream proxy policy of the default opener.
+  final ProxyPolicy proxy;
 
   /// Splice limits for sessions.
   final SpliceTimings spliceTimings;
@@ -771,9 +778,10 @@ final class RecordManager {
       clock.now(),
       transliterate: _transliterate,
     );
-    final upstream = _opener ?? httpRecordOpener(readTimeout: _settings.readTimeout);
+    final upstream = _opener ?? httpRecordOpener(proxy: proxy, readTimeout: _settings.readTimeout);
     final opener = upstream.flv(task.room.platform);
     final hls = upstream.hls(task.room.platform);
+    final stream = upstream.stream(task.room.platform);
     late final RecordSession session;
     session = RecordSession(
       room: task.room,
@@ -783,6 +791,7 @@ final class RecordManager {
       settings: _settings,
       opener: opener,
       hls: hls,
+      stream: stream,
       quality: task.quality,
       cursor: task.cursor,
       autoReconnect: task.autoReconnect,

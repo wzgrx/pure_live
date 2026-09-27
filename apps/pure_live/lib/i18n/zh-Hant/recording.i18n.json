@@ -36,7 +36,7 @@
     "needsLogin": "需要登入平台帳號",
     "region": "目前地區無法觀看",
     "noStream": "拿不到可錄製的直播串流",
-    "unsupportedFormat": "直播串流的格式暫不支援錄製（如 SAMPLE-AES 加密、影音分開的 HLS）",
+    "unsupportedFormat": "直播串流的格式暫不支援錄製（如 RTSP、UDP 位址，SAMPLE-AES 加密，影音分開的 HLS）",
     "diskFull": "儲存空間不足",
     "noPermission": "沒有錄製目錄的寫入權限",
     "directory": "錄製目錄無法使用",

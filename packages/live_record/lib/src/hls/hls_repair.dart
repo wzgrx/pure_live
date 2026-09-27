@@ -27,9 +27,11 @@ final class HlsScan {
 }
 
 /// Scans an MPEG-TS recording: whole 188-byte packets up to the first lost
-/// sync; when the file holds more than one HLS segment (each starts with a
-/// PAT), the last one is dropped too, because a crash may have cut it
-/// anywhere and a cut unit would not decode (§14.1).
+/// sync. With more than one PAT the end is cut further, because a crash may
+/// have cut a unit anywhere and a cut unit would not decode (§14.1): when
+/// the last PAT sits on a video unit boundary (an HLS segment starts with
+/// one) the last segment goes; when it sits inside a frame (continuous TS,
+/// §8) the file ends before the last video PES instead.
 Future<HlsScan> scanTs(RecordFiles files, String path, {int blockSize = 1 << 20}) async {
   final reader = await files.open(path);
   try {
@@ -40,6 +42,11 @@ Future<HlsScan> scanTs(RecordFiles files, String path, {int blockSize = 1 << 20}
     final pats = <int>[];
     // Media PES starts and their PTS, with the offset of each.
     final starts = <({int offset, int? pts})>[];
+    // Video PIDs (PES stream ids 0xE0–0xEF), the last video PES start, and
+    // whether the first video packet after the last PAT starts a PES.
+    final videoPids = <int>{};
+    int? lastVideo;
+    bool? patOnBoundary;
     var synced = true;
     while (offset < length && synced) {
       final block = await reader.read(offset, length - offset < size ? length - offset : size);
@@ -54,18 +61,28 @@ Future<HlsScan> scanTs(RecordFiles files, String path, {int blockSize = 1 << 20}
         if (unitStart) {
           if (pid == 0) {
             pats.add(offset + at);
+            patOnBoundary = null;
           } else if (pid != 0x1FFF) {
             final pts = _pesPts(block, at);
-            if (pts != null || _isPesStart(block, at)) starts.add((offset: offset + at, pts: pts));
+            final pes = pts != null || _isPesStart(block, at);
+            if (pes) starts.add((offset: offset + at, pts: pts));
+            if (pes && _isVideoPes(block, at)) {
+              videoPids.add(pid);
+              lastVideo = offset + at;
+            }
           }
         }
+        if (videoPids.contains(pid) && pats.isNotEmpty && patOnBoundary == null) patOnBoundary = unitStart;
         valid = offset + at + tsPacketSize;
       }
       offset += block.length - block.length % tsPacketSize;
       if (block.length % tsPacketSize != 0) break;
     }
     var keep = valid;
-    if (pats.length > 1) keep = pats.last;
+    if (pats.length > 1) {
+      final video = lastVideo;
+      keep = patOnBoundary == false && video != null ? video : pats.last;
+    }
     final kept = starts.where((start) => start.offset < keep).toList();
     final times = [for (final start in kept) ?start.pts];
     var duration = 0;
@@ -87,6 +104,11 @@ bool _isPesStart(Uint8List packet, int at) {
       packet[payload] == 0 &&
       packet[payload + 1] == 0 &&
       packet[payload + 2] == 1;
+}
+
+bool _isVideoPes(Uint8List packet, int at) {
+  final payload = _payloadStart(packet, at);
+  return payload != null && payload + 4 <= at + tsPacketSize && (packet[payload + 3] & 0xF0) == 0xE0;
 }
 
 int? _payloadStart(Uint8List packet, int at) {

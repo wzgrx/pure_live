@@ -146,7 +146,8 @@ final Provider<RecordManager> recordManagerProvider = Provider<RecordManager>((r
     ),
     root: RecordRoot.resolve(defaultRoot: paths.defaultRecordRoot, chosen: chosen.isEmpty ? null : chosen),
     settings: recordSettingsFrom(settings),
-    opener: httpRecordOpener(proxy: ref.watch(proxyPolicyProvider)),
+    // The default opener takes record.readTimeout as each session starts.
+    proxy: ref.watch(proxyPolicyProvider),
     // Finished segments to MP4 in a background isolate (ADR 0021).
     remuxer: const IsolateRemuxer(Mp4Remuxer()),
     // Read per session, so switching the setting applies to the next one.

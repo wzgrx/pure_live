@@ -2666,7 +2666,7 @@ class _Translations$recording$failure$en implements Translations$recording$failu
   String get noStream => 'No recordable stream';
   @override
   String get unsupportedFormat =>
-      'This stream\'s format cannot be recorded yet (such as SAMPLE-AES encryption or HLS with separate audio)';
+      'This stream\'s format cannot be recorded yet (such as RTSP or UDP addresses, SAMPLE-AES encryption, or HLS with separate audio)';
   @override
   String get diskFull => 'Not enough storage';
   @override

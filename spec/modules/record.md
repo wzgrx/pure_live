@@ -14,7 +14,7 @@
 |---|---|
 | 任务 | 一个房间的录制意图。每个房间（RoomRef）最多一个任务（recorder_controller.dart:695-696；live_record_task.dart:180） |
 | 录制会话 | 用户看到的一次录制：从“开始”到用户停止、确认下播或致命错误。一次会话产出一组时间连续的文件 |
-| 连接 | 一次上游读取：一条 HTTP-FLV 连接、一个 HLS 播放列表地址或一个会话型输入。一次会话内可有多次连接 |
+| 连接 | 一次上游读取：一条 HTTP-FLV 连接、一个 HLS 播放列表地址、一条单条 HTTP 流（§8）或一个会话型输入。一次会话内可有多次连接 |
 | 分段 | 一个输出文件。只在编解码配置变化或按时间/大小切分时换分段 |
 | 缺口 | 会话内没有录到的媒体时间，记入 gaps.json |
 | 租期类型 | 取流地址自带的续期语义：到期断开 / 只限新建连接 / 无（§5） |
@@ -26,8 +26,8 @@
 - HTTP(S)-FLV，包括 Enhanced FLV 和旧式 codec 12 HEVC。
 - HLS：TS 分片、fMP4（EXT-X-MAP）、AES-128 / SAMPLE-AES、BYTERANGE、LL-HLS（只取完整分片）、音视频分离的 master。
 - 会话型输入：Bigo、FC2、niconico。平台适配器提供 HLS 地址、请求装饰和保活（live_input_recording_binding.dart:27-107）。
-- HTTP 连续 MPEG-TS（IPTV）：按字节原样写 `.ts` **[决定]**。
-- 实现进度（2026-09-28）：HTTP(S)-FLV 与 HLS（TS、fMP4、AES-128、BYTERANGE、LL-HLS 只取完整分片）都已实现；同一画质先用 FLV 线路，没有或都失败再用 HLS（§7.1）。未做：SAMPLE-AES 和音视频分离的 master（报 `unsupportedProtocol` 并换线路）、会话型输入（§7.9）、IPTV 连续 TS（§8）。
+- 单条 HTTP(S) 流（线路格式 `other`，IPTV 的 `.ts`、udpxy 等）：按开头的字节判断，连续 MPEG-TS 按包原样写 `.ts`，FLV 和 HLS 列表按对应的规则录（§8）**[决定]**。
+- 实现进度（2026-09-28）：HTTP(S)-FLV、HLS（TS、fMP4、AES-128、BYTERANGE、LL-HLS 只取完整分片）和单条 HTTP 流（§8）都已实现；同一画质先用 FLV 和单条 HTTP 流线路，没有或都失败再用 HLS（§7.1）。未做：SAMPLE-AES 和音视频分离的 master（报 `unsupportedProtocol` 并换线路）、会话型输入（§7.9）。
 
 **不支持**
 
@@ -131,7 +131,7 @@
 - 失败推进：同画质下一线路 → 下一画质第一线路（循环）→ 全部失败后回绕到原画质线路 1 并重新签名（:221-280）。
 - 判断“是不是同一条线路”只比较 scheme + host + path，忽略签名参数（:395-404）。
 - 全部失败 → “全部线路失败”，可重试（:282-285）。
-- 只接受 §1 支持的 scheme。同一画质里 FLV 线路排在 HLS 线路前面，线路序号按这个顺序（§7.1）。
+- 只接受 §1 支持的 scheme（http、https）。同一画质里 FLV 线路和单条 HTTP 流线路（`other`，§8）按原顺序排在前面，HLS 线路在后，线路序号按这个顺序（§7.1）。
 
 ## 5. 来源：按租期类型处理
 
@@ -233,7 +233,7 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
       "wallStart": "2026-09-27T02:17:33.120Z",
       "wallEnd": "2026-09-27T02:17:35.270Z",
       "missingMs": 2150,
-      "reason": "eof|network|lease|splice|http4xx|http5xx|sequenceJump|reset|stop|crash",
+      "reason": "eof|network|lease|splice|http4xx|http5xx|sequenceJump|reset|stop|crash|damaged",
       "source": "flv|hls:video|hls:audio|ts",
       "fromSeq": null,
       "toSeq": null
@@ -242,7 +242,8 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 }
 ```
 
-- `atMs` 是分段内的文件时间；`missingMs` 是估计值（FLV 用墙钟，HLS 用缺失分片的 EXTINF 或 TARGETDURATION 累加）。
+- `atMs` 是分段内的文件时间；`missingMs` 是估计值（FLV 用墙钟，HLS 用缺失分片的 EXTINF 或 TARGETDURATION 累加，连续 TS 见 §8）。
+- `damaged` 只用于连续 TS（§8）：上游丢包或失去同步，写入器丢到下一个关键帧。
 
 ### 6.5 分段：在关键帧处开新文件
 
@@ -280,7 +281,7 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 
 ### 7.1 选择
 
-- 同一画质的线路先用 FLV（拼接无缝，§5.5），没有 FLV 或 FLV 线路都在录到媒体前失败时再用 HLS；游标的线路序号按“FLV 在前、HLS 在后”编 **[决定 2026-09-28]**。
+- 同一画质的线路先用 FLV（拼接无缝，§5.5）和单条 HTTP 流（§8，平台线路不会有，IPTV 才有；两者按原顺序），都没有或都在录到媒体前失败时再用 HLS；游标的线路序号按“FLV 和单条 HTTP 流在前、HLS 在后”编 **[决定 2026-09-28]**。
 - 线路地址是 master 时取 `BANDWIDTH` 最高的变体（mpv 默认也这样），之后直接轮询这个变体地址；续签（§7.6）或重连时重新取一次 master。录制器只按解析结果选路，不自己跟随 master 换画质（hls_prefetch_scheduler.dart:40-42）。字幕和 I-frame 列表不录。
 - 暂不支持 **[决定 2026-09-28]**：选中变体的 AUDIO 组带独立地址（音视频分离，niconico）、`SAMPLE-AES` / `SAMPLE-AES-CTR` 和非 `identity` 的密钥格式（DRM）、既不是 MPEG-TS 也不是 fMP4 的分片（packed audio）。遇到时这条线路报 `unsupportedProtocol`，立即换下一条；所有画质的所有线路都这样才以 `unsupportedProtocol` 失败（§21）。
 
@@ -346,11 +347,40 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
   - FC2：普通 HLS 加租期，`HlsFeed` 按租期经适配器续签，控制连接随之保持，可以录（待实录验证）。
   - niconico：Cookie 已按路径发送，但主列表是音视频分离的，仍报 `unsupportedProtocol`（§23 第 9 项）。
 
-## 8. HTTP 连续 TS（IPTV）
+## 8. 单条 HTTP 流与连续 TS（IPTV）
 
-- 按字节原样写 `.ts`；关闭时截到 188 字节的整数倍 **[决定]**。文件格式与 HLS 的 `.ts`（§7.5）相同，转封装也相同（§10）。
-- 断流重连后接着写同一文件并记缺口；不做时间戳重定基准，由转封装处理不连续 **[待确认]**。
-- 实现进度（2026-09-28）：未做（IPTV 录制还没有入口）。
+实现：`live_record` 的 `TsFeed`（读连续 TS）写进 `HlsSessionWriter`（与 HLS 的 `.ts` 同一个写入器），2026-09-28 起可用（ADR 0035 修订）。一条连接就是一次 HTTP GET 的响应体；会话的外层循环（§5.4）照常处理它的结束原因。
+
+### 8.1 线路与嗅探
+
+- 线路格式 `other`（live_core `StreamFormat.other`）：一条 HTTP(S) 响应就是整条流，容器由内容决定。IPTV 的 `.ts`、udpxy 的 `/udp/…`、`/rtp/…`、没有扩展名的地址都是这种（spec/modules/iptv.md §5）；播放层直连（playback SRC-2 的“其它”）。rtmp、rtsp、udp 等非 HTTP 地址不是 `other`，录制照旧报 `unsupportedProtocol` 换线路（§1）。
+- 嗅探 **[决定 2026-09-28]**：每次连接先读开头的字节（最多 64 KiB），按内容分派：
+  - `FLV` 签名 → 按 FLV 线路录（§5.5、§6，续接时重新连接也照样嗅探）；
+  - 前 188 字节里某个位置起连续 5 个包的同步字节 `0x47` 都对齐 → 连续 MPEG-TS（§8.2），之前的字节丢掉；
+  - `#EXTM3U`（可带 BOM 和空白）→ 按 HLS 线路录（§7）：没有 `.m3u8` 扩展名的 IPTV 列表地址很常见；
+  - 其它（HTML 错误页、MP4 点播文件、192 字节包的 M2TS…）或读满 64 KiB 还判断不了 → `unsupportedProtocol`，立即换下一条线路（§21）。
+- 请求头、代理、TLS 与 FLV 相同（§18）；`record.readTimeout` 是读空闲超时；没有租期，EOF 按 §11.4 快速重连（每次先严格检查），4xx、5xx 按 §11.7、§5.4。
+
+### 8.2 连续 TS 写文件
+
+- 188 字节的包按收到的顺序原样写成 `<前缀>_<NNN>.ts`：与 HLS 的 `.ts`（§7.5）同一种文件，共用编号、`.part`、写入队列、背压、刷盘和磁盘错误（§6.8、§6.9），转封装相同（§10）。只写整包，关闭时自然是 188 字节的整数倍。
+- 单元完整 **[决定 2026-09-28]**：每个 PES 和 PSI 段要么整个写进文件，要么整个不写，写入器只丢整包、从不改写包。单元收完才写（视频 PES 到下一个视频 PES 开头为止，声明了长度的 PES 到收满为止），所以写入落后读取约一帧；一个单元压住的包超过 5 万个（约 9 MB，例如视频 PID 不再发送）时按现状处理：到下一个开头为止的算收完，声明了长度的丢掉。节目里所有音视频流（PMT 列出的）和 PAT/PMT 都这样；其它 PID（SDT、EIT、空包…）照原样跟着写。
+- 起点：录制开头和每次断流之后，从第一个视频关键帧的 PES 开始（带 SPS 的 H.264 IDR 或恢复点、带 SPS 的 H.265 IRAP、MPEG-1/2 序列头；其它视频编码看 `random_access_indicator`，一直没有这个标志时每个 PES 都算），前面的包丢掉；其它流各自从关键帧之后的第一个 PES 开头开始。关键帧前先写一份最近收到的 PAT 和 PMT。纯音频节目从第一个音频 PES 开始。
+- 断流（EOF、连接中断、读空闲超时）：已收完的单元照写，没收完的单元（通常是正在收的那一帧）丢掉。重连后接着写同一文件（§3 不变量），从新连接的第一个关键帧开始。
+- 停止：先等正在收的视频帧收完（下一个视频 PES 开头出现，最多 3 s，同 §6.7），然后按断流收尾；不记 `stop` 缺口（丢掉的最多一帧）。
+- 上游损坏：连续计数器跳变（`discontinuity_indicator` 标出的和逐字节重复的包不算）或失去同步。视频流损坏 → 按断流处理，丢到下一个关键帧，记 reason=`damaged` 的缺口；其它流损坏 → 只丢那个 PES；PAT/PMT 损坏 → 只丢那一段（下一份很快就来）。失去同步 → 重新找 5 个对齐的包，再按断流处理，同样记 `damaged`。udpxy 转发的组播丢包就是这种；不处理的话转封装会因“单元中间丢包”失败（§10）。
+- 开新文件（在关键帧处）：PMT 的音视频流类型、SPS/PPS/VPS、AAC 配置变化，或 `record.splitMinutes` / `record.splitMegabytes` 达到阈值（§6.5）。新文件以 PAT、PMT 和关键帧开头；在关键帧之前开始的其它流的 PES 整个留在旧文件（旧文件多写这几个包再关）。PMT 变了（流或 PID）或 AAC 配置变了，都按断流处理：丢到下一个关键帧（不记缺口），流类型或配置真的变了才在那里开新文件，只是 PID 变了仍写同一文件（转封装跟随 PMT）。
+- 文件时间：按视频 DTS（纯音频按 PTS）累加，相邻两个单元的差在 (0, 60 s] 内照加，回退或跳过 60 s 的按一帧计，与转封装连接时间线的规则一致（§10）；超过一帧的空档（断流）只在接着写同一文件时计入；33 位回绕照常跟上。用于进度（§19）、`gaps.json` 的 `atMs` 和弹幕时间（§17）。
+- 写文件不限编码：MPEG-2 视频、MP2 / AC-3 音频也照写；转封装只复制 H.264、H.265 和 AAC（§10），其它编码转封装失败、保留 `.ts`。
+
+### 8.3 断流与时间戳 [决定 2026-09-28，原“待确认”]
+
+- 不改写时间戳，由转封装连接时间线（§10）。实测（packages/live_record/README.md，本地 HTTP 服务按实时速率输出 H.264 + AAC 的 TS）：
+  - 上游不断、只是连接断了（udpxy 的组播源一直在跑）：新连接的时间戳比断开处前进了断流的时长，转封装在这里留下同样长的空档（视频最后一帧多显示这么久），不回退；
+  - 源重启、时间戳从头开始或跳变超过 60 s：转封装把新的一段接在已写内容之后；
+  - 33 位时间戳回绕：跟上，不算跳变。
+  三种情况 `.ts` 和转出的 MP4 都完整解码无错、DTS 无回退、包数相同；公网 Flussonic 的 `/mpegts` 流录 60 s 也一样。
+- 缺口：重连或损坏之后的第一个关键帧处记一条，source=`ts`，reason 按断开原因（`eof`、`network`、`http4xx`、`http5xx`；损坏为 `damaged`），`wallStart` 是断开时刻；missingMs 在 60 s 窗口内是 DTS 差减一帧，否则是墙钟时长；和 FLV 一样只有超过一帧才记（§6.3）。同一会话从别的线路格式（FLV、HLS）换到连续 TS 时不记。
 
 ## 9. 输出布局与命名
 
@@ -376,13 +406,14 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 - 触发：会话收尾时，由 `record.remuxToMp4` 决定（默认开，与旧版一致：旧版总是转 MP4）。转封装单独排队，默认同时 1 个，不占录制并发槽 **[决定]**。
 - 方式：stream copy 为 MP4（不解码、不转码），`+faststart`（`moov` 在 `mdat` 前）。纯 Dart 实现，在后台 isolate 运行（`IsolateRemuxer`；ADR 0021 补充决定，取代 ADR 0005 §4 的原生垫片）。`Mp4Remuxer` 按内容分派 **[决定 2026-09-28]**：
   - FLV 分段（H.264、H.265、AAC）：`FlvToMp4Remuxer` 的规则。
-  - MPEG-TS（§7.5、§8）：H.264（0x1B）、H.265（0x24）视频和 ADTS AAC（0x0F）音频，其它音视频流（MP3、AC-3、MPEG-2…）且没有可复制的同类流时报错；ID3、SCTE-35 等数据流忽略。一个 PES 是一个访问单元；PES 开头在第一个起始码之前的字节属于上一个访问单元（Twitch / Amazon IVS 把访问单元跨 PES 拆开，与 FFmpeg 的解析器一致）。起始码改为 4 字节长度，与 `avcC`/`hvcC` 相同的参数集从样本里去掉，ADTS 头去掉。第一个关键帧之前的视频丢弃。重复包只认逐字节相同的包：拼起来的 HLS 分片会把连续计数器从头开始。
+  - MPEG-TS（§7.5、§8）：H.264（0x1B）、H.265（0x24）视频和 ADTS AAC（0x0F）音频，其它音视频流（MP3、AC-3、MPEG-2…）且没有可复制的同类流时报错；ID3、SCTE-35 等数据流忽略。一个 PES 是一个访问单元；PES 开头在第一个起始码之前的字节属于上一个访问单元（Twitch / Amazon IVS 把访问单元跨 PES 拆开，与 FFmpeg 的解析器一致）。起始码改为 4 字节长度，与 `avcC`/`hvcC` 相同的参数集从样本里去掉，ADTS 头去掉。第一个关键帧之前的视频丢弃。重复包只认逐字节相同的包：拼起来的 HLS 分片会把连续计数器从头开始。ADTS 帧可以跨 PES：文件开头或缺口处接不上的半帧（下一个 PES 的时间不紧接这一帧，或 PES 以上一帧的剩余字节开头）丢掉，不算错误，连续 TS 在断流和切分处会遇到（§8.2）。
   - fMP4（§7.5）：样本描述（`avc1`/`hvc1`/`mp4a` 等及其配置盒）原样复制，样本表按 `trun` 重建；加密轨（`encv`/`enca`）报错。
   - 时间线：上游的多段时间戳（DISCONTINUITY、重新编号、广告）连成一条：某条轨的时间戳后退超过 1 s 或前进超过 60 s 视为新一段，接在已写的所有轨之后；另一条轨跳到同一段时跟着接上。更小的前跳保留（漏掉的分片在文件时间里是空档，与 §6.3 一致），33 位时间戳回绕照常跟上。
   - 旧 TS（仅迁移时用 concat，§14.3）不走这里。
 - 提交：写 `<目标>.partial`，成功后原子改名；不覆盖已有文件（video_processor_service.dart:206-209, 291-296, 347-355）。
 - 成功条件：转封装返回成功、没有任何解复用或复用错误（包括 invalid data、PES 长度不符、单元中间丢包、失去同步、截断的 tag 或包、不支持的编码、文件中途配置变化、写入失败）、输出大小 > 0。文件末尾被崩溃截断的最后一个音频 PES 丢弃，不算错误（§14.1 已截到完整分片）。stream copy 不解码，退出码为 0 不能说明输入完整（263e458a、a65638bd、9a588f4b；docs/HUYA_RECORDER_LEASE_AUDIT_2026_09_05.md §2）。
 - 失败：删 `.partial`，保留源文件，任务标失败（类型 remuxFailed），界面可重试（video_processor_service.dart:79-91）。
+- 编码不能放进 MP4（TS 里只有 MPEG-2 视频、MP2、AC-3 这类流，IPTV 常见）**[决定 2026-09-28]**：录制本身是好的，不算失败。删 `.partial`，保留源 `.ts` 作为结果，任务照常完成；`remuxFiles` 把它列在 `skipped` 里。解复用器用 `RemuxException.unsupportedCodec` 标出这种情况，`IsolateRemuxer` 把标记原样带回。
 - 成功后是否删源：`record.keepSourceAfterRemux`（默认关，即删除，与旧版一致：video_processor_service.dart:297-303）。删除失败（文件被占用）不影响成功结果，下次清理再删。
 - 可中断：取消后立即停止，删 `.partial`，保留源；进入“改名提交”后不可取消（:33-38, 291-294）。
 - 进度：已读输入字节 / 输入总字节，单调不减，最高 0.99，提交成功后才报 1（:385-405）。旧版合并进度没有订阅者，界面只能显示“处理中”（诊断 04 ①），v4 必须接到界面。
@@ -447,7 +478,7 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 
 1. 首帧之后在后台执行，不阻塞启动。
 2. 找出落盘时处于活跃态（排队、解析、录制中、重连中、收尾）的任务（recorder_controller.dart:1486-1503）。在任务显示出来之前先占住恢复锁；用户这时点“开始”要等恢复完成（:1516-1524）。
-3. FLV：从头按 tag 扫描到最后一个完整 tag（PreviousTagSize 也要对得上），截掉其后的残余字节，`.flv.part` 改为最终名；一个媒体 tag 都没有的分段删除。HLS：`.ts.part` 截到整包并去掉最后一个分片（从最后一个 PAT 起，崩溃可能写了一半；文件只有一个分片时保留），`.m4s.part` 截到最后一个完整的 moof + mdat，然后改名；没有媒体的删除。XML：补 `</i>`，`.xml.part` 改名。未完成的转封装 `.partial` 删除。gaps.json：补一条 reason=`crash`，时长未知。
+3. FLV：从头按 tag 扫描到最后一个完整 tag（PreviousTagSize 也要对得上），截掉其后的残余字节，`.flv.part` 改为最终名；一个媒体 tag 都没有的分段删除。HLS 与连续 TS：`.ts.part` 截到整包；有多个 PAT 时，最后一个 PAT 正好在视频单元边界上（HLS 分片以 PAT 开头）就从它截掉，即去掉最后一个分片（崩溃可能写了一半），否则（连续 TS 的 PAT 夹在帧中间，§8）从最后一个视频 PES 的开头截掉，即去掉没写完的那一帧；只有一个 PAT 时保留；`.m4s.part` 截到最后一个完整的 moof + mdat，然后改名；没有媒体的删除。XML：补 `</i>`，`.xml.part` 改名。未完成的转封装 `.partial` 删除。gaps.json：补一条 reason=`crash`，时长未知。
 4. 按 §10 转封装（若开启）。成功 → 状态“用户停止”（与旧版一致：:1586）；失败 → 失败，源文件保留。
 5. 已完成、已停止、失败的任务不会因为目录里还有文件而被重新处理（:1528-1530）。
 
@@ -528,7 +559,7 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 ## 19. 进度与指标
 
 - 字节：已写入各分段的总字节（包括正在写的 `.part`；HLS 不含还在下载的分片）。
-- 时长：按写入的媒体时间戳计算（FLV 各分段末 DTS − 首 DTS 累加；HLS 为已写分片 EXTINF 之和），以墙钟为上限；不用任何“统计时间”字段（INT32_MAX 哨兵值：e9d11a09；ffmpeg_service.dart:29-37）。
+- 时长：按写入的媒体时间戳计算（FLV 各分段末 DTS − 首 DTS 累加；HLS 为已写分片 EXTINF 之和；连续 TS 按 DTS 累加，§8.2），以墙钟为上限；不用任何“统计时间”字段（INT32_MAX 哨兵值：e9d11a09；ffmpeg_service.dart:29-37）。
 - 码率：最近一个时间窗内写入的字节 / 墙钟（ff0119b0；recording_bitrate_window.dart）。
 - 另有：连接次数、拼接次数、缺口数、最近一次缺口时长。
 - 每个任务每秒最多推送一次。
@@ -571,7 +602,7 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 | roomBanned、roomNotFound、platformUnsupported | 否 | 失败 |
 | loginRequired | 否 | 失败，提示登录 |
 | roomStateUnknown、network、noQuality、allLinesFailed | 是 | 常规退避 |
-| unsupportedProtocol | 推进游标 | 线路协议（rtmp 等）或内容（SAMPLE-AES、音视频分离、packed audio）录不了：立即换下一条；所有画质的所有线路都这样 → 失败 |
+| unsupportedProtocol | 推进游标 | 线路协议（rtmp 等）或内容（SAMPLE-AES、音视频分离、packed audio、单条 HTTP 流既不是 FLV 也不是 MPEG-TS 或 HLS 列表，§8.1）录不了：立即换下一条；所有画质的所有线路都这样 → 失败 |
 | upstreamEof、readTimeout、sessionLeaseLost | 是 | 快速重连 |
 | http4xx | 是 | 立即重新解析 |
 | http5xx | 是 | 同址重试后常规退避 |
@@ -591,6 +622,7 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 |---|---|---|
 | 斗鱼 30 分钟 | 匿名原画（expire=300），真实网络；`ffprobe -select_streams v -show_entries packet=dts_time` 检查 FLV 和转出的 MP4 | 相邻视频 DTS 最大间隔 ≤ 1 帧（按流帧率，允许 1 ms 取整）；DTS 无回退；拼接次数 ≥5；gaps.json 为空；全解码无错误 |
 | 虎牙 60 分钟 | WUP 原生 FLV | 应用主动断开次数 = 0；只在真正 EOF 时续接；gaps.json 为空；时长 ≥ 59:30 |
+| IPTV 连续 TS | 本地 HTTP 服务按实时速率持续输出 H.264 + AAC 的 TS（模拟 udpxy），中途断开一次；`live_cli record url <地址> --remux` 录 60 s | `.ts` 和 MP4 的 `ffmpeg -v error -i … -f null -` 输出都为空；两者的音视频包数相同；`gaps.json` 只有这次断开的一条 |
 | HLS 全解码 | 每个 HLS 平台（B 站 fMP4、Twitch、SOOP、TwitCasting、PandaTV、Bigo、FC2、niconico 分离音频、YouTube 等）录 ≥10 分钟 | `.ts` / `.m4s` 和 MP4 的 `ffmpeg -v error -i … -f null -` 输出都为空；分片序号无重复；每个缺口都记录在 gaps.json 且有原因 |
 | 杀进程后恢复 | 录制中 `kill -9`（Android 强行停止），重新启动 | 恢复后文件能被 ffprobe 完整读取、转封装成功；任务状态正确；开机恢复开启时无权限弹窗，60 s 内重新进入录制 |
 | 确定性测试 | 假 FLV / HLS 源按真实事件顺序：拼接、跨时间线、配置变化、codec 12、SEI 尾、背压、4xx / 5xx / EOF、序号跳号与回退、停止边界、迟到回调、意图竞态 | 全部通过 |
@@ -604,7 +636,7 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 2. 虎牙网页 FLV/HLS、酷狗、猫耳、YouTube 的租期是否断开连接（§5）。
 3. 会话中途新增音轨或视轨时是否开新分段（§6.1）。
 4. Twitch 广告 DATERANGE 是否剔除（§7.5）。目前照录，广告分辨率不同时会切出单独的文件。
-5. IPTV 连续 TS 断流后的时间戳处理（§8）。
+5. ~~IPTV 连续 TS 断流后的时间戳处理（§8）~~：2026-09-28 实测后定为不改写时间戳，由转封装连接（§8.3）。
 6. Android 默认录制目录和存储权限方案（§15）。
 7. ~~Android 前台服务类型（§16.1）~~：2026-09-28 定为 `specialUse`。新增：开播监控在后台是否也运行前台服务（§16.1）。
 8. 旧版弹幕时间基的实际偏差量（§17，只影响回归说明）。
@@ -658,3 +690,4 @@ EOF → 按 §11.4 重连，重新解析（续签优先原线路）。
 | REG-RECORD-042 | Twitch 录制转出的 MP4 画面花屏（ffmpeg 报 error while decoding MB），TS 本身正常 | Twitch / Amazon IVS 把访问单元拆到两个 PES：下一个 PES 以上一帧末尾的几十到上百字节开头，按 PES 切帧时这些字节被丢掉 | PES 开头、第一个起始码之前的字节接回上一个访问单元（与 FFmpeg 解析器一致） | v4 2026-09-28 `live_cli record twitch caedrel`：修复前 3600 帧中 828 帧样本变短，修复后解码画面逐帧相同 |
 | REG-RECORD-043 | SOOP 录制转 MP4 失败：PES of 1559 bytes, declared 868 | 分片首尾相接后各 PID 的连续计数器从 0 重新开始，恰好等于上一片最后的计数时被当成重复包丢掉 | 只有逐字节相同的包才是重复包 | v4 2026-09-28 `live_cli record soop devil0108` |
 | REG-RECORD-044 | PandaTV 录制的 TS 开头解码报 non-existing PPS 0 referenced | Amazon IVS 列表里较早的分片不以关键帧开头，录制从这样的分片开始 | 文件从关键帧开始：在分片内第一个关键帧处切开，之前的部分丢掉（切分时留在旧文件） | v4 2026-09-28 `live_cli record pandalive … --renew-after 20` |
+| REG-RECORD-045 | IPTV 的 `.ts`、udpxy 线路录制一连上就失败（按 FLV 解析） | live_core 只有 flv / hls 两种格式，IPTV 把非 HLS 的线路都标成 flv | 线路格式加 `other`，录制按开头的字节分派 FLV、连续 TS、HLS 列表；连续 TS 按单元完整写，断流、停止、丢包都不留半个单元 | v4 2026-09-28 `live_cli record url`（§8、§22） |

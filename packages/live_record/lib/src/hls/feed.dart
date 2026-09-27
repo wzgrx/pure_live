@@ -47,7 +47,7 @@ final class HlsMedia {
 @immutable
 final class HlsMissing {
   /// Creates a record.
-  const new({required this.reason, required this.missingMs, this.fromSeq, this.toSeq, this.wallStart});
+  const new({required this.reason, required this.missingMs, this.fromSeq, this.toSeq, this.wallStart, this.source});
 
   /// Why.
   final GapReason reason;
@@ -63,6 +63,9 @@ final class HlsMissing {
 
   /// When media stopped arriving, when known.
   final DateTime? wallStart;
+
+  /// `source` of the gap in `gaps.json`; null: the writer's (`hls:video`).
+  final String? source;
 }
 
 /// Where a feed delivers: the session's HLS writer.

@@ -198,6 +198,15 @@ void main() {
     );
     expect(PipelineMode.of(hls, canRenew: true), PipelineMode.direct);
     expect(PipelineMode.of(upstream.line(0), canRenew: false), PipelineMode.direct);
+    // A single HTTP stream (IPTV .ts, udpxy) is opened directly whatever its lease.
+    final other = StreamLine(
+      url: Uri.parse('http://192.168.1.1:4022/udp/239.1.1.1:5000'),
+      format: StreamFormat.other,
+      lineId: 'line1',
+      requested: _quality,
+      lease: Lease(refreshAt: DateTime.now(), cutsConnection: true),
+    );
+    expect(PipelineMode.of(other, canRenew: true), PipelineMode.direct);
     await spliced.close();
     await pipeline.close();
     expect(relay.isClosed, isFalse, reason: 'a shared relay belongs to its owner');

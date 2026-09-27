@@ -37,10 +37,15 @@ final class RemuxJob {
 /// Thrown by a [Remuxer] for any demux or mux error.
 final class RemuxException implements Exception {
   /// Creates the exception.
-  const new(this.message);
+  const new(this.message, {this.unsupportedCodec = false});
 
   /// What failed.
   final String message;
+
+  /// The recording is fine but uses a codec the MP4 remux does not copy
+  /// (MPEG-2 video, MP2, AC-3 on IPTV): the source is kept as the result
+  /// instead of failing the task (spec §10).
+  final bool unsupportedCodec;
 
   @override
   String toString() => 'RemuxException($message)';
@@ -67,13 +72,18 @@ abstract interface class Remuxer {
 @immutable
 final class RemuxOutcome {
   /// Creates an outcome.
-  const new({required this.outputs, required this.kept, this.failure});
+  const new({required this.outputs, required this.kept, this.failure, this.skipped = const []});
 
   /// Committed MP4 files.
   final List<String> outputs;
 
-  /// Sources that stay on disk (failed, or kept by `record.keepSourceAfterRemux`).
+  /// Sources that stay on disk (failed, skipped, or kept by
+  /// `record.keepSourceAfterRemux`).
   final List<String> kept;
+
+  /// Sources left as they are because their codec cannot go into MP4
+  /// ([RemuxException.unsupportedCodec]); not a failure.
+  final List<String> skipped;
 
   /// The first failure; null when every file converted.
   final RecordFailure? failure;
@@ -116,6 +126,7 @@ Future<RemuxOutcome> remuxFiles({
   unawaited(cancel?.then((_) => cancelled = true));
   final outputs = <String>[];
   final kept = <String>[];
+  final skipped = <String>[];
   RecordFailure? failure;
   for (final input in inputs) {
     final size = sizes[input];
@@ -189,11 +200,15 @@ Future<RemuxOutcome> remuxFiles({
         // Nothing to clean up.
       }
       kept.add(input);
-      failure ??= RecordFailure(RecordErrorKind.remuxFailed, RecordStage.remux, '${p.basename(input)}: $error');
+      if (error is RemuxException && error.unsupportedCodec) {
+        skipped.add(input);
+      } else {
+        failure ??= RecordFailure(RecordErrorKind.remuxFailed, RecordStage.remux, '${p.basename(input)}: $error');
+      }
     }
     done += size;
     report(0);
   }
   if (failure == null && !cancelled) onProgress?.call(1);
-  return RemuxOutcome(outputs: outputs, kept: kept, failure: failure);
+  return RemuxOutcome(outputs: outputs, kept: kept, failure: failure, skipped: skipped);
 }

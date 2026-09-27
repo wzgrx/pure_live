@@ -178,11 +178,63 @@ final class _LoggingRooms implements RecordRooms {
   }
 }
 
+/// The line format of a bare stream address, by the IPTV rule
+/// (spec/modules/iptv.md §5): `.m3u8` / `.m3u` is HLS, `.flv` FLV, any other
+/// http(s) address a single HTTP stream the recorder sniffs (§8).
+StreamFormat urlFormat(Uri url) {
+  final path = url.path.toLowerCase();
+  if (path.endsWith('.m3u8') || path.endsWith('.m3u')) return StreamFormat.hls;
+  if (path.endsWith('.flv')) return StreamFormat.flv;
+  return StreamFormat.other;
+}
+
+/// A "room" that is one stream address (`live_cli record url <address>`):
+/// always live, one quality, one line. For IPTV sources such as udpxy.
+final class UrlRecordRooms implements RecordRooms {
+  /// Creates the rooms for [url], with request [headers].
+  new(this.url, {this.headers = const {}});
+
+  /// The stream.
+  final Uri url;
+
+  /// Request headers of the line (lower-case names).
+  final Map<String, String> headers;
+
+  static const _original = Quality(id: 'original', label: '原画', rank: 0);
+
+  /// The room of [url].
+  RoomRef get ref => RoomRef('url', url.host.isEmpty ? 'stream' : url.host);
+
+  @override
+  Future<RoomDetail> detail(RoomRef room) async => RoomDetail(
+    card: RoomCard(ref: ref, title: url.path, anchorName: url.host, state: LiveState.live),
+    link: url,
+  );
+
+  @override
+  Future<StreamSet> streams(RoomDetail room, {Quality? quality}) async => StreamSet(
+    qualities: const [_original],
+    selected: _original,
+    lines: [
+      StreamLine(
+        url: url,
+        format: urlFormat(url),
+        lineId: 'url',
+        requested: _original,
+        confirmed: _original,
+        headers: headers,
+      ),
+    ],
+  );
+}
+
 /// `live_cli record <platform> <room>`: records a live room with the v4
 /// recorder (`live_record`) for a while, then checks the files: timestamp
 /// steps and gaps of each FLV segment (as `lease` does for the relay),
 /// packets and a full decode of HLS segments (`.ts`, `.m4s`), the
 /// session's `gaps.json`, and with ffprobe the video DTS of the segments and MP4.
+/// `live_cli record url <address>` records one stream address instead of a
+/// room (IPTV: udpxy, `.ts`, HLS).
 class RecordCommand extends Command<int> {
   /// Creates the command.
   new() {
@@ -191,7 +243,11 @@ class RecordCommand extends Command<int> {
       ..addOption('out', help: 'Recording root; a temporary folder by default.')
       ..addOption('proxy', help: 'host:port of an HTTP proxy for this platform; direct by default.')
       ..addOption('quality', allowed: [for (final q in RecordQuality.values) q.name], help: 'Quality preference.')
-      ..addOption('format', allowed: ['flv', 'hls'], help: 'Offer only lines of this format to the recorder.')
+      ..addOption(
+        'format',
+        allowed: ['flv', 'hls', 'other'],
+        help: 'Offer only lines of this format to the recorder (other: single HTTP streams).',
+      )
       ..addOption('line', help: 'Offer only lines whose id contains this text (Bilibili: fmp4).')
       ..addOption('renew-after', help: 'Seconds after each resolve at which the recorder renews the line (lease test).')
       ..addOption('split-minutes', defaultsTo: '0', help: 'Split segments every N minutes (0: never).')
@@ -202,7 +258,9 @@ class RecordCommand extends Command<int> {
         defaultsTo: 'dart',
         help: 'With --remux: the pure-Dart remuxer the app uses (FLV, MPEG-TS, fMP4), or the ffmpeg executable.',
       )
-      ..addOption('gap-ms', defaultsTo: '500', help: 'A timestamp step above this counts as a gap.');
+      ..addOption('gap-ms', defaultsTo: '500', help: 'A timestamp step above this counts as a gap.')
+      ..addOption('max-gaps', defaultsTo: '0', help: 'gaps.json entries a passing recording may have.')
+      ..addOption('user-agent', help: 'record url: User-Agent of the requests.');
   }
 
   @override
@@ -212,7 +270,7 @@ class RecordCommand extends Command<int> {
   String get description => 'Record a live room with the v4 recorder and check the files for gaps.';
 
   @override
-  String get invocation => 'live_cli record <platform> <room id or link> [options]';
+  String get invocation => 'live_cli record <platform> <room id or link> [options] | live_cli record url <address>';
 
   @override
   Future<int> run() async {
@@ -220,7 +278,13 @@ class RecordCommand extends Command<int> {
     if (options.rest.length != 2) usageException('Expected <platform> <room id or link>.');
     final [platform, input] = options.rest;
     final factory = siteFactories[platform];
-    if (factory == null) usageException('No v4 adapter for "$platform" (have: ${siteFactories.keys.join(', ')}).');
+    final address = platform == 'url' ? Uri.tryParse(input) : null;
+    if (platform == 'url' && (address == null || !(address.isScheme('http') || address.isScheme('https')))) {
+      usageException('record url needs an http(s) address.');
+    }
+    if (factory == null && address == null) {
+      usageException('No v4 adapter for "$platform" (have: url, ${siteFactories.keys.join(', ')}).');
+    }
     final duration = Duration(seconds: int.parse(options.option('duration')!));
     final gapMs = int.parse(options.option('gap-ms')!);
     final proxy = options.option('proxy');
@@ -229,7 +293,9 @@ class RecordCommand extends Command<int> {
         : HttpProxyRoute(proxy.split(':').first, int.parse(proxy.split(':').last));
     final policy = FixedProxyPolicy(global: route);
     final http = IoLiveHttp(proxy: policy);
-    final site = factory(http);
+    final site = factory?.call(http);
+    final agent = options.option('user-agent');
+    final urlRooms = address == null ? null : UrlRecordRooms(address, headers: {'user-agent': ?agent});
     final out = options.option('out') ?? (await Directory.systemTemp.createTemp('live_cli_record')).path;
     final remux = options.flag('remux');
     final wall = Stopwatch()..start();
@@ -238,12 +304,12 @@ class RecordCommand extends Command<int> {
 
     RecordManager? manager;
     try {
-      final ref = await (site as LinkResolver).resolve(input);
+      final ref = urlRooms?.ref ?? await (site! as LinkResolver).resolve(input);
       if (ref == null) {
         stderr.writeln('Not a $platform room: $input');
         return 1;
       }
-      final detail = await (site as RoomSource).detail(ref);
+      final detail = urlRooms != null ? await urlRooms.detail(ref) : await (site! as RoomSource).detail(ref);
       log('room     ${ref.key} · ${detail.card.state.name} · ${detail.card.anchorName} · ${detail.card.title}');
       if (detail.card.state == LiveState.offline) {
         log('stopped  the room is not live');
@@ -252,7 +318,7 @@ class RecordCommand extends Command<int> {
       final quality = options.option('quality');
       final format = options.option('format');
       final rooms = _LoggingRooms(
-        SiteRecordRooms((id) => id == platform ? site : null),
+        urlRooms ?? SiteRecordRooms((id) => id == platform ? site : null),
         log,
         format: format == null ? null : StreamFormat.values.byName(format),
         lineId: options.option('line'),
@@ -270,7 +336,7 @@ class RecordCommand extends Command<int> {
           remuxToMp4: remux,
           keepSourceAfterRemux: true,
         ),
-        opener: httpRecordOpener(proxy: policy),
+        proxy: policy,
         remuxer: !remux
             ? null
             : options.option('remuxer') == 'ffmpeg'
@@ -382,7 +448,7 @@ class RecordCommand extends Command<int> {
         for (final gap in gaps.take(10)) {
           stdout.writeln('    $gap');
         }
-        clean = clean && gaps.isEmpty;
+        clean = clean && gaps.length <= int.parse(options.option('max-gaps')!);
       }
       stdout.writeln('  result          ${clean ? 'PASS' : 'FAIL'}');
       return clean ? 0 : 1;

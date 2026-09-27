@@ -41,7 +41,7 @@ final class IsolateRemuxer implements Remuxer {
     );
     try {
       final failure = await _run(inner, events.sendPort, job.input, job.output, job.inputBytes);
-      if (failure != null) throw RemuxException(failure);
+      if (failure != null) throw failure;
     } finally {
       finished = true;
       await subscription.cancel();
@@ -49,9 +49,9 @@ final class IsolateRemuxer implements Remuxer {
     }
   }
 
-  /// Runs [inner] in a new isolate; returns the failure message, or null.
-  /// A separate function so the isolate closure captures only sendable values.
-  static Future<String?> _run(Remuxer inner, SendPort send, String input, String output, int inputBytes) =>
+  /// Runs [inner] in a new isolate; returns the failure, or null. A separate
+  /// function so the isolate closure captures only sendable values.
+  static Future<RemuxException?> _run(Remuxer inner, SendPort send, String input, String output, int inputBytes) =>
       Isolate.run(() async {
         final stop = ReceivePort();
         final cancelled = Completer<void>();
@@ -71,9 +71,9 @@ final class IsolateRemuxer implements Remuxer {
           );
           return null;
         } on RemuxException catch (error) {
-          return error.message;
+          return error;
         } on Object catch (error) {
-          return '$error';
+          return RemuxException('$error');
         } finally {
           stop.close();
         }

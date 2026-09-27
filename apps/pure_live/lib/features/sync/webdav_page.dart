@@ -116,6 +116,10 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
       setState(
         () => _listError = error.error == WebDavError.notFound ? '远端目录还不存在，第一次上传时会自动创建' : webDavErrorText(error),
       );
+    } on Object catch (error, stack) {
+      ref.read(appLogProvider).error('webdav', 'list failed', error, stack);
+      if (!mounted || generation != _generation) return;
+      setState(() => _listError = webDavErrorText(error));
     }
   }
 

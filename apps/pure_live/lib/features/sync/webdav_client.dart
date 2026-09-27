@@ -208,27 +208,36 @@ final class WebDavClient {
       throw const WebDavException(WebDavError.invalidResponse, detail: 'not a multistatus body');
     }
     final self = [..._baseSegments, ...directory.where((segment) => segment.isNotEmpty)];
-    final entries = <WebDavEntry>[];
-    for (final resource in parseMultistatus(text)) {
-      final segments = _segmentsOf(resource.href);
-      if (segments == null || listEquals(segments, self)) continue;
-      // Only direct children of the directory, as Depth 1 promises.
-      if (segments.length != self.length + 1 || !listEquals(segments.sublist(0, self.length), self)) continue;
-      entries.add(
+    final resources = [
+      for (final resource in parseMultistatus(text))
+        if (_segmentsOf(resource.href) case final segments? when segments.isNotEmpty) (resource, segments),
+    ];
+    // Only direct children of the directory, as Depth 1 promises.
+    bool isChild(List<String> segments) =>
+        segments.length == self.length + 1 && listEquals(segments.sublist(0, self.length), self);
+    var children = [
+      for (final (resource, segments) in resources)
+        if (isChild(segments)) (resource, segments.last),
+    ];
+    // A server behind a path-rewriting proxy may answer with hrefs of another
+    // root; then the first response is the directory itself (RFC 4918 lists
+    // the requested resource first) and the rest are its children.
+    if (children.isEmpty && resources.length > 1 && !resources.any((item) => listEquals(item.$2, self))) {
+      children = [for (final (resource, segments) in resources.skip(1)) (resource, segments.last)];
+    }
+    return [
+      for (final (resource, name) in children)
         WebDavEntry(
-          path: [...directory.where((segment) => segment.isNotEmpty), segments.last],
+          path: [...directory.where((segment) => segment.isNotEmpty), name],
           isDirectory: resource.isCollection,
           size: resource.size,
           modified: resource.modified,
         ),
-      );
-    }
-    entries.sort((a, b) {
+    ]..sort((a, b) {
       if (a.isDirectory != b.isDirectory) return a.isDirectory ? -1 : 1;
       final byTime = (b.modified ?? DateTime(0)).compareTo(a.modified ?? DateTime(0));
       return byTime != 0 ? byTime : a.name.compareTo(b.name);
     });
-    return entries;
   }
 
   List<String>? _segmentsOf(String href) {

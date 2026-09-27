@@ -248,6 +248,29 @@ void main() {
       expect(resource.isCollection, isFalse);
     });
 
+    test('hrefs rewritten by a proxy still list the children', () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() => server.close(force: true));
+      server.listen((request) async {
+        await request.drain<void>();
+        request.response
+          ..statusCode = 207
+          ..write(
+            '<d:multistatus xmlns:d="DAV:">\n'
+            '<d:response><d:href>/internal/root/backups/</d:href><d:propstat><d:prop>\n'
+            '<d:resourcetype><d:collection/></d:resourcetype></d:prop></d:propstat></d:response>\n'
+            '<d:response><d:href>/internal/root/backups/a.json</d:href><d:propstat><d:prop>\n'
+            '<d:resourcetype/></d:prop></d:propstat></d:response>\n'
+            '</d:multistatus>',
+          );
+        await request.response.close();
+      });
+      final webdav = WebDavClient(http, base: Uri.parse('http://127.0.0.1:${server.port}/dav/'));
+      final entries = await webdav.list(const ['backups']);
+      expect(entries.single.path, ['backups', 'a.json']);
+      expect(entries.single.isDirectory, isFalse);
+    });
+
     test('an HTML page is not a listing', () async {
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       addTearDown(() => server.close(force: true));

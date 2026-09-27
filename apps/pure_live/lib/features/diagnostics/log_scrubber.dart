@@ -26,9 +26,13 @@ abstract final class LogScrubber {
       'passwd|pwd|secret|passphrase|ltp0|acf_auth|acf_stk|acf_ltkid|dy_did|did|sessionid|session_id|sid|'
       'csrf|csrf_token|ticket|signature|sign|wssecret|txsecret|pairing|pairingcode|code_verifier|cookie|cookies';
 
-  // name=value, name: value, "name": "value" with a secret-looking name.
+  // "name": "value, spaces included" with a secret-looking name.
+  static final _quotedPairs = RegExp('\\b($_secretNames)\\b(["\']?\\s*[:=]\\s*)(["\'])(.*?)\\3', caseSensitive: false);
+
+  // name=value, name: value with a secret-looking name (not already
+  // quoted or redacted).
   static final _pairs = RegExp(
-    '\\b($_secretNames)\\b(["\']?\\s*[:=]\\s*["\']?)([^"\'&;,\\s}\\]]+)',
+    '\\b($_secretNames)\\b(["\']?\\s*[:=]\\s*)(?!["\'<])([^"\'&;,\\s}\\]]+)',
     caseSensitive: false,
   );
 
@@ -42,6 +46,7 @@ abstract final class LogScrubber {
         .replaceAllMapped(_headers, (m) => '${m[1]}${m[2]}$redacted')
         .replaceAllMapped(_userInfo, (m) => '${m[1]}$redacted@')
         .replaceAllMapped(_query, (m) => '${m[1]}?$redacted')
+        .replaceAllMapped(_quotedPairs, (m) => '${m[1]}${m[2]}${m[3]}$redacted${m[3]}')
         .replaceAllMapped(_pairs, (m) => '${m[1]}${m[2]}$redacted')
         .replaceAll(_opaque, redacted);
   }

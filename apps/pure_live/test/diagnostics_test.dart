@@ -26,7 +26,7 @@ void main() {
       final text = LogScrubber.scrub(
         'set $cookie and {"password": "hunter22", "token":"t0k3n", "passphrase": "open sesame"} acf_auth=zzz',
       );
-      for (final secret in ['abc123', '0123456789abcdef', 'hunter22', 't0k3n', 'open', 'zzz']) {
+      for (final secret in ['abc123', '0123456789abcdef', 'hunter22', 't0k3n', 'open', 'sesame', 'zzz']) {
         expect(text, isNot(contains(secret)), reason: secret);
       }
       expect(text, contains('"password": "<redacted>"'));

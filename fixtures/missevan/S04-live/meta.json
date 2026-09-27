@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "platform": "missevan",
+  "sample": "S04-live",
+  "capturedAt": "2026-09-27T16:40:09.589422Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fm.missevan.com/api/v2/live/453091860",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Referer": "https://fm.missevan.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "x-bili-trace-id": "533b1623c8bb78ae2e839f84066ab946:2e839f84066ab946:0:0",
+      "connection": "keep-alive",
+      "cache-control": "no-cache",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 16:40:10 GMT",
+      "vary": [
+        "Accept-Encoding",
+        "Origin"
+      ],
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=utf-8",
+      "bili-trace-id": "2e839f84066ab946:2e839f84066ab946:0:0",
+      "x-cache-webcdn": "BYPASS from blzone03",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "Accept, Accept-Encoding, Accept-Language, Connection, Content-Type, Cookie, Origin, Referer, User-Agent, X-M-Swimlane, X-Request-Body, Authorization, X-M-DeviceSign",
+      "access-control-allow-methods": "GET, POST, OPTIONS, PUT, DELETE",
+      "x-ticket-status": "1",
+      "expires": "Sun, 27 Sep 2026 16:40:09 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "7fce53bf54748565fe9a585e935095907ccea23b56ddb8e17c598613223af609",
+    "length": 3157
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.info.room.channel.flv_pull_url:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info.room.channel.flv_pull_url:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info.room.channel.flv_pull_url:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info.room.channel.flv_pull_url:sk",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info.room.channel.hls_pull_url:oi",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info.room.channel.hls_pull_url:trid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info.room.channel.hls_pull_url:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.info.room.channel.hls_pull_url:sk",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

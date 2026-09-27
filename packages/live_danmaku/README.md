@@ -37,7 +37,7 @@ await session.close();                      // 5 s 内返回
 | `DanmakuConnector`、`danmakuConnectorFor(room, transport:, credentials:)` | 一个房间的连接：`events`、`connect()`（加入后返回 true，终态失败返回 false）、`close()`（5 s 内） |
 | `DouyuConnector`、`HuyaConnector`、`BilibiliConnector`、`DouyinConnector`、`KuaishouConnector` | 各平台连接；前四个共用 `SocketConnector` 的重连循环，快手是 HTTP 串行轮询 |
 | `DouyuProtocol`、`HuyaProtocol`、`HuyaHeadlines`、`BilibiliProtocol`、`DouyinProtocol`、`KuaishouProtocol` | 纯函数：封包、心跳、签名、解码；测试直接用录制帧调用 |
-| 第三批：`ChzzkConnector`/`ChzzkProtocol` | CHZZK：JSON 消息，`SocketConnector` 重连循环，匿名 accessToken |
+| 第三批：`ChzzkConnector`/`ChzzkProtocol`、`MissevanConnector`/`MissevanProtocol` | CHZZK：JSON 消息，匿名 accessToken；猫耳：游客会话 Cookie，Brotli 压缩的 JSON（`package:brotli`，纯 Dart，MIT）。都用 `SocketConnector` 的重连循环 |
 | `DanmakuCredentials`、`SiteDanmakuCredentials` | 连接需要的凭据，由界面 isolate 上的站点适配器提供 |
 | `DanmakuTransport`、`IoDanmakuTransport` | WebSocket（`dart:io`，按平台走代理）和 `LiveHttp` |
 | `DanmakuPipeline`、`DanmakuBatch` | §2–§4：过滤链、抽样、64 ms 批次 |
@@ -64,6 +64,7 @@ await session.close();                      // 5 s 内返回
 | 抖音 | 通过（匿名） | `fixtures/douyin/danmaku/S13-live`（163 帧，215 条聊天） | 聊天、在线人数、礼物、ACK |
 | 快手 | 通过（匿名） | `fixtures/kuaishou/danmaku/S16-live`（10 次轮询，42 条评论） | 评论、在线人数 |
 | CHZZK | 通过（匿名） | `fixtures/chzzk/danmaku/S09-live`（42 帧，125 条聊天，含最近聊天 15101） | 聊天、在线人数（`mbrCnt`）、치즈 捐赠（按规格构造，未录到） |
+| 猫耳 FM | 通过（游客会话） | `fixtures/missevan/danmaku/S06-live`（14 帧；Brotli 帧脱敏后以不压缩的 Brotli 块重新封装） | 聊天（等级、粉丝牌）、热度、礼物（`gift/send`，按规格构造；团播的 `cross_send` 丢弃） |
 
 ## 录制样本
 

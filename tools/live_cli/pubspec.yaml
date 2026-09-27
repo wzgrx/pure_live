@@ -17,6 +17,7 @@ dependencies:
   live_net: any
 
 dev_dependencies:
+  brotli: ^0.6.0
   test: ^1.32.0
   very_good_analysis: ^11.0.0
 

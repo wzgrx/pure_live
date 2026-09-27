@@ -9,6 +9,7 @@ environment:
 resolution: workspace
 
 dependencies:
+  brotli: ^0.6.0
   crypto: ^3.0.7
   live_core: any
   live_net: any

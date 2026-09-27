@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:live_cli/src/danmaku/frame_scrub.dart';
 import 'package:live_cli/src/danmaku/recorder.dart';
+import 'package:live_danmaku/live_danmaku.dart';
 
 /// Replaces every remaining occurrence of a replaced original in [text]:
 /// names of two or more characters anywhere, numbers of five or more digits
@@ -94,6 +95,87 @@ abstract class JsonFrameScrubber extends FrameScrubber {
     final text = utf8.decode(frame.bytes, allowMalformed: true);
     // Nested JSON strings hold their values escaped once.
     return utf8.encode('$text\n${text.replaceAll(r'\"', '"').replaceAll(r'\/', '/')}');
+  }
+}
+
+/// A Brotli stream holding [data] in uncompressed meta-blocks (RFC 7932
+/// §9.2): the scrubbed frames stay decodable by the real decoder without a
+/// Brotli compressor.
+List<int> brotliStored(List<int> data) {
+  final out = <int>[];
+  var bits = 0;
+  var count = 0;
+  void write(int value, int width) {
+    for (var bit = 0; bit < width; bit++) {
+      bits |= ((value >> bit) & 1) << count;
+      count++;
+      if (count == 8) {
+        out.add(bits);
+        bits = 0;
+        count = 0;
+      }
+    }
+  }
+
+  void flush() {
+    if (count > 0) {
+      out.add(bits);
+      bits = 0;
+      count = 0;
+    }
+  }
+
+  write(0, 1); // WBITS = 16
+  for (var offset = 0; offset < data.length; offset += 65536) {
+    final length = data.length - offset < 65536 ? data.length - offset : 65536;
+    write(0, 1); // ISLAST
+    write(0, 2); // MNIBBLES = 4
+    write(length - 1, 16); // MLEN - 1
+    write(1, 1); // ISUNCOMPRESSED
+    flush();
+    out.addAll(data.sublist(offset, offset + length));
+  }
+  write(1, 1); // ISLAST
+  write(1, 1); // ISLASTEMPTY
+  flush();
+  return out;
+}
+
+/// Missevan (spec/sites/missevan.md §11): frames are Brotli JSON behind a
+/// four-byte header; they are decoded, scrubbed (viewers' ids, names and
+/// images, the join uuid) and stored again as uncompressed Brotli with the
+/// new length.
+class MissevanFrameScrubber extends JsonFrameScrubber {
+  /// Creates the scrubber.
+  new(super.detail, {super.seed});
+
+  @override
+  Set<String> get secrets => const {'uuid', 'iconurl'};
+
+  @override
+  Set<String> get ids => const {'user_id'};
+
+  @override
+  Set<String> get people => const {'username'};
+
+  @override
+  List<int>? scrubFrame(CapturedFrame frame) {
+    final json = MissevanProtocol.text(frame.bytes);
+    if (frame.text || frame.bytes.isEmpty || frame.bytes[0] != 1 || json == null) return super.scrubFrame(frame);
+    final Object? value;
+    try {
+      value = jsonDecode(json);
+    } on FormatException {
+      return frame.bytes;
+    }
+    final plain = utf8.encode(_elsewhere(names, jsonEncode(walk(value, r'$'))));
+    return [1, plain.length & 0xff, (plain.length >> 8) & 0xff, (plain.length >> 16) & 0xff, ...brotliStored(plain)];
+  }
+
+  @override
+  List<int> plain(CapturedFrame frame) {
+    final json = frame.text ? null : MissevanProtocol.text(frame.bytes);
+    return json == null ? super.plain(frame) : utf8.encode(json);
   }
 }
 

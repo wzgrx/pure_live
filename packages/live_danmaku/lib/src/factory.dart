@@ -7,10 +7,11 @@ import 'package:live_danmaku/src/sites/douyin.dart';
 import 'package:live_danmaku/src/sites/douyu.dart';
 import 'package:live_danmaku/src/sites/huya.dart';
 import 'package:live_danmaku/src/sites/kuaishou.dart';
+import 'package:live_danmaku/src/sites/missevan.dart';
 import 'package:live_danmaku/src/transport.dart';
 
 /// Platforms with a chat connector.
-const danmakuPlatforms = {'bilibili', 'chzzk', 'douyin', 'douyu', 'huya', 'kuaishou'};
+const danmakuPlatforms = {'bilibili', 'chzzk', 'douyin', 'douyu', 'huya', 'kuaishou', 'missevan'};
 
 /// The chat connector for [room]'s platform, or null when the platform has
 /// none (the UI shows [DanmakuStatus.unsupported] once, REG-DANMAKU-021).
@@ -48,5 +49,12 @@ DanmakuConnector? danmakuConnectorFor(
     clock: clock,
   ),
   'chzzk' => ChzzkConnector(detail: room, transport: transport, session: session, clock: clock),
+  'missevan' => MissevanConnector(
+    detail: room,
+    transport: transport,
+    credentials: credentials,
+    session: session,
+    clock: clock,
+  ),
   _ => null,
 };

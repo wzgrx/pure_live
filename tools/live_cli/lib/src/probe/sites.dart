@@ -9,5 +9,6 @@ final Map<String, SiteFactory> siteFactories = {
   'bilibili': BilibiliSite.new,
   'douyin': DouyinSite.new,
   'douyu': DouyuSite.new,
+  'huya': HuyaSite.new,
   'kuaishou': KuaishouSite.new,
 };

@@ -118,8 +118,8 @@ abstract final class BilibiliSession {
 
   /// §6.4 steps 1–4: [params] plus `wts`, sorted by key, `!'()*` removed from
   /// values, percent-encoded. Send this query with `&w_rid=` +
-  /// `md5(query + mixinKey)` appended; the md5 is the adapter's (no crypto
-  /// dependency here). Spaces encode as `%20`, like the browser's
+  /// `md5(query + mixinKey)` appended; the md5 is the adapter's
+  /// (`BilibiliSite.wbiSign`). Spaces encode as `%20`, like the browser's
   /// `encodeURIComponent` (legacy used `+`; no signed parameter has one).
   static String wbiQuery(Map<String, String> params, {required int wts}) {
     final all = {...params, 'wts': '$wts'};

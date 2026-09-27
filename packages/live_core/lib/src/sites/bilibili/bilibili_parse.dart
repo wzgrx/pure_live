@@ -18,9 +18,9 @@ const _site = 'bilibili';
 /// either returns domain values or throws a `SiteError`.
 ///
 /// Session plumbing (buvid, WBI keys, danmaku credentials, QR login, account)
-/// is in [BilibiliSession]. Hashing (the WBI `w_rid` md5) is not here: this
-/// package has no crypto dependency, so the adapter hashes
-/// [BilibiliSession.wbiQuery] + [BilibiliSession.mixinKey] itself.
+/// is in [BilibiliSession]. Hashing (the WBI `w_rid` md5) is not here: the
+/// adapter (`BilibiliSite.wbiSign`) hashes [BilibiliSession.wbiQuery] +
+/// [BilibiliSession.mixinKey].
 abstract final class BilibiliParse {
   /// Desktop Chrome 138, the UA of every Bilibili request (§6.3).
   static const userAgent =

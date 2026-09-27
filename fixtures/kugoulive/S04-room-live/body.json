@@ -1,0 +1,77 @@
+{
+  "code": 0,
+  "data": {
+    "liveSessionId": "6ab93a1bh56ef48b4",
+    "liveType": 0,
+    "normalRoomInfo": {
+      "fansCount": 10984,
+      "imgPath": "/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+      "kugouId": 1458522292,
+      "limitType": 0,
+      "limitValue": 0,
+      "nickName": "钱响响",
+      "officialMesg": {
+        "actionId": 0,
+        "appCllectionId": 0,
+        "appCllectionTitle": "",
+        "appLink": "",
+        "appLinkType": 0,
+        "appRoomId": 0,
+        "appRoomType": 0,
+        "appTopicNums": 0,
+        "broadcastId": 0,
+        "content": "",
+        "kugouId": 0,
+        "pid": "",
+        "privateChat": "",
+        "publicChat": "",
+        "showRoomTypes": "",
+        "specialCllectionId": 0
+      },
+      "privateMesg": "因为有你，世界才变得精彩",
+      "publicMesg": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+      "roomBroadCast": [
+        {
+          "delay": 1,
+          "text": "官方公告：营造绿色健康直播，酷狗直播提倡理性消费。严禁诱导未成年人上麦或消费，严禁任何黄赌毒等违法违规行为，不得发布不良内容，平台24小时巡查，发现请及时举报，核实违规者将被封号！"
+        },
+        {
+          "delay": 2,
+          "text": "倡导共同抵制网络水军，净化网络环境，共同营造清朗的网络空间。"
+        }
+      ],
+      "signType": 2,
+      "singerId": 1084156,
+      "singerInfo": {
+        "avatar": "http://singerimg.kugou.com/uploadpic/softhead/{size}/20200731/20200731165517453500.jpg",
+        "fansCount": 10984,
+        "intro": "福建泉州人，身高163！一个没有安全感且占有欲超强的女生！",
+        "singerExt": {
+          "duration": "2248",
+          "hot": "3",
+          "level": "0",
+          "nextHot": "1000"
+        },
+        "singerId": 1084156,
+        "singerName": "钱响响",
+        "verifyMsg": "认证歌手"
+      },
+      "specialType": 0,
+      "starLevel": 45,
+      "switchJsonStr": "",
+      "totalStarNum": 0,
+      "type": 0,
+      "url": "",
+      "userId": 1458522292,
+      "userLogo": "/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg"
+    },
+    "roomTag": [
+      0
+    ],
+    "roomType": 0,
+    "transientStatus": 0,
+    "type": 0
+  },
+  "msg": "",
+  "times": 1790531571370
+}

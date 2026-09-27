@@ -1,0 +1,64 @@
+{
+  "code": 0,
+  "data": {
+    "liveSessionId": "6ab8d6ech5bb5c377",
+    "liveType": 2,
+    "normalRoomInfo": {
+      "fansCount": 4061,
+      "imgPath": "/v2/fxroomcover/61b1dc71f6592d7153e67f575d619a7c.jpg",
+      "kugouId": 1538638711,
+      "limitType": 0,
+      "limitValue": 0,
+      "nickName": "夏夏很淑女i",
+      "officialMesg": {
+        "actionId": 0,
+        "appCllectionId": 0,
+        "appCllectionTitle": "",
+        "appLink": "",
+        "appLinkType": 0,
+        "appRoomId": 0,
+        "appRoomType": 0,
+        "appTopicNums": 0,
+        "broadcastId": 0,
+        "content": "",
+        "kugouId": 0,
+        "pid": "",
+        "privateChat": "",
+        "publicChat": "",
+        "showRoomTypes": "",
+        "specialCllectionId": 0
+      },
+      "privateMesg": "喜欢有太阳的早上，仿佛什么都可以重新开始~",
+      "publicMesg": "等一个心软的神哇 5级是愿望6级是遥不可及的愿望",
+      "roomBroadCast": [
+        {
+          "delay": 1,
+          "text": "官方公告：营造绿色健康直播，酷狗直播提倡理性消费。严禁诱导未成年人上麦或消费，严禁任何黄赌毒等违法违规行为，不得发布不良内容，平台24小时巡查，发现请及时举报，核实违规者将被封号！"
+        },
+        {
+          "delay": 2,
+          "text": "倡导共同抵制网络水军，净化网络环境，共同营造清朗的网络空间。"
+        }
+      ],
+      "signType": 2,
+      "singerId": 0,
+      "singerInfo": null,
+      "specialType": 0,
+      "starLevel": 39,
+      "switchJsonStr": "",
+      "totalStarNum": 0,
+      "type": 0,
+      "url": "",
+      "userId": 1538638711,
+      "userLogo": "/v2/fxuserlogo/bd7a2bd7e0b5a8af61c02026f125c461.jpg"
+    },
+    "roomTag": [
+      0
+    ],
+    "roomType": 0,
+    "transientStatus": 0,
+    "type": 0
+  },
+  "msg": "",
+  "times": 1790531522633
+}

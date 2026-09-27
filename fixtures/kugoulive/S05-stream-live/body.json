@@ -1,0 +1,108 @@
+{
+  "code": 0,
+  "time": 1790531573,
+  "msg": "success",
+  "data": {
+    "videoAppId": 10000,
+    "status": 1,
+    "clientType": 1,
+    "liveType": 1,
+    "defLine": 5,
+    "pushStreamId": 5,
+    "age": 60,
+    "width": 1440,
+    "height": 1080,
+    "lines": [
+      {
+        "sid": 5,
+        "freeTag": 0,
+        "defProtc": 5,
+        "defCodec": 1,
+        "defRate": 4,
+        "enableP2P": 0,
+        "streamProviderId": 5,
+        "autoRate": 1,
+        "streamProfiles": [
+          {
+            "layout": 2,
+            "codec": 1,
+            "streamName": "fx_hifi_1458522292",
+            "rate": 4,
+            "state": 0,
+            "hls": [],
+            "rtmp": [
+              "rtmp://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=7-7744742-6-9934-4-2004-0ds696s4-569926zzw3q620r49989606284eg7548",
+              "rtmp://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=7-7744742-6-9934-4-2004-0ds696s4-569926zzw3q620r49989606284eg7548"
+            ],
+            "flv": [
+              "http://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+              "http://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+            ],
+            "httpsFlv": [
+              "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+              "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+            ],
+            "httpsHls": [],
+            "httpsQuicFlv": [],
+            "webrtc": [
+              "webrtc://txfast.liveplay.live.kugou.com/live/fx_hifi_1458522292?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=7-7744742-6-9934-4-2004-0ds696s4-569926zzw3q620r49989606284eg7548"
+            ],
+            "httpDns": [],
+            "httpsDns": []
+          }
+        ]
+      },
+      {
+        "sid": 40,
+        "freeTag": 0,
+        "defProtc": 5,
+        "defCodec": 1,
+        "defRate": 4,
+        "enableP2P": 0,
+        "streamProviderId": 5,
+        "autoRate": 1,
+        "streamProfiles": [
+          {
+            "layout": 2,
+            "codec": 1,
+            "streamName": "fx_hifi_1458522292",
+            "rate": 4,
+            "state": 0,
+            "hls": [],
+            "rtmp": [
+              "rtmp://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=7-7744742-6-9934-4-2004-0ds696s4-569926zzw3q620r49989606284eg7548",
+              "rtmp://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=7-7744742-6-9934-4-2004-0ds696s4-569926zzw3q620r49989606284eg7548"
+            ],
+            "flv": [
+              "http://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+              "http://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+            ],
+            "httpsFlv": [
+              "https://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+              "https://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+            ],
+            "httpsHls": [],
+            "httpsQuicFlv": [],
+            "webrtc": [
+              "webrtc://txfast.liveplay.live.kugou.com/live/fx_hifi_1458522292?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=7-7744742-6-9934-4-2004-0ds696s4-569926zzw3q620r49989606284eg7548"
+            ],
+            "httpDns": [],
+            "httpsDns": []
+          }
+        ]
+      }
+    ],
+    "kugouId": 1458522292,
+    "roomId": 3197156,
+    "encryptMode": 0,
+    "expireTs": 0,
+    "enableSmartLine": 1,
+    "enableSmartRate": 0,
+    "maxDelay": 0,
+    "origin": 900007,
+    "camera": 0,
+    "playSpeedMode": 0,
+    "secStreamInfo": null,
+    "clientActionFlag": 0
+  }
+}

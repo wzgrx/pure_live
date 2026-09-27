@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "sample": "S04-room-offline",
+  "capturedAt": "2026-09-27T17:52:04.850037Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=1014306",
+    "headers": {
+      "Origin": "https://fanxing.kugou.com",
+      "Referer": "https://fanxing.kugou.com/",
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "max-age=60",
+      "last-modified": "Sun, 27 Sep 2026 17:52:05 GMT",
+      "access-control-allow-origin": "https://fanxing.kugou.com",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:52:05 GMT",
+      "content-encoding": "gzip",
+      "content-type": "application/json;charset=utf-8",
+      "server": "openresty",
+      "access-control-allow-credentials": "true",
+      "x-envoy-upstream-service-time": "16",
+      "x-via": "1.1 PS-CZX-01fx1147:8 (Cdn Cache Server V2.0), 1.1 PS-ZHY-01BNR40:12 (Cdn Cache Server V2.0)",
+      "x-ws-request-id": "6ab957c5_PS-ZHY-01BNR40_26592-57877",
+      "expires": "Sun, 27 Sep 2026 17:53:05 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "30f3045056bf86101d43325ec8f2ac1fc3e4858bc8806a14a49470d1fc8df1cf",
+    "length": 1345
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

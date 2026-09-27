@@ -19,6 +19,8 @@ export 'src/sites/huya/huya_parse.dart';
 export 'src/sites/huya/huya_site.dart';
 export 'src/sites/kuaishou/kuaishou_parse.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/sites/kugoulive/kugoulive_parse.dart';
+export 'src/sites/kugoulive/kugoulive_site.dart';
 export 'src/sites/liveme/liveme_parse.dart';
 export 'src/sites/liveme/liveme_sign.dart';
 export 'src/sites/liveme/liveme_site.dart';

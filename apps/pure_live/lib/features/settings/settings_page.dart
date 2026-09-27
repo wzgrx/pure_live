@@ -6,6 +6,7 @@ import 'package:pure_live_app/features/backup/data_settings.dart';
 import 'package:pure_live_app/features/health/cache_tile.dart';
 import 'package:pure_live_app/features/settings/network_settings.dart';
 import 'package:pure_live_app/features/settings/record_directory_tile.dart';
+import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
@@ -178,55 +179,7 @@ class SettingsGroupBody extends StatelessWidget {
           format: _percent,
         ),
       ],
-      SettingsGroup.danmaku => const [
-        SwitchSettingTile(setting: Settings.danmakuEnabled, title: '显示弹幕'),
-        SliderSettingTile(
-          setting: Settings.danmakuFontSize,
-          title: '字号',
-          min: 10,
-          max: 30,
-          divisions: 20,
-          format: _integer,
-        ),
-        SliderSettingTile(
-          setting: Settings.danmakuFontWeight,
-          title: '字重',
-          min: 100,
-          max: 900,
-          divisions: 8,
-          format: _integer,
-        ),
-        SliderSettingTile(
-          setting: Settings.danmakuOpacity,
-          title: '不透明度',
-          min: 0,
-          max: 1,
-          divisions: 20,
-          format: _percent,
-        ),
-        SliderSettingTile(
-          setting: Settings.danmakuSpeed,
-          title: '速度',
-          min: 20,
-          max: 400,
-          divisions: 38,
-          format: _integer,
-        ),
-        SliderSettingTile(
-          setting: Settings.danmakuArea,
-          title: '显示区域',
-          min: 0,
-          max: 1,
-          divisions: 20,
-          format: _percent,
-        ),
-        SwitchSettingTile(setting: Settings.danmakuStroke, title: '描边'),
-        SwitchSettingTile(setting: Settings.danmakuNoEmoji, title: '隐藏表情弹幕'),
-        SettingsHeader('过滤'),
-        SwitchSettingTile(setting: Settings.danmakuCollapseRepeated, title: '合并重复弹幕'),
-        SwitchSettingTile(setting: Settings.danmakuSimilarityFilter, title: '过滤相似弹幕'),
-        SwitchSettingTile(setting: Settings.danmakuFilterDouyuAutomated, title: '过滤斗鱼机器人弹幕'),
-      ],
+      SettingsGroup.danmaku => const [DanmakuSettingsTiles()],
       SettingsGroup.data => const [
         SliderSettingTile(
           setting: Settings.historyLimit,

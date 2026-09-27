@@ -9,6 +9,8 @@ import 'package:pure_live_app/features/about/update_page.dart';
 import 'package:pure_live_app/features/accounts/accounts_page.dart';
 import 'package:pure_live_app/features/backup/backup_page.dart';
 import 'package:pure_live_app/features/diagnostics/diagnostics_page.dart';
+import 'package:pure_live_app/features/danmaku/block_list_page.dart';
+import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
 import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
@@ -126,6 +128,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: welcomeLocation, builder: (context, state) => const OnboardingPage()),
+      GoRoute(path: blockListLocation, builder: (context, state) => const BlockListPage()),
       GoRoute(
         path: '/multiview',
         builder: (context, state) => MultiviewPage(rooms: (state.extra as List<RoomRef>?) ?? const []),

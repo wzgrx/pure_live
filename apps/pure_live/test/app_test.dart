@@ -7,10 +7,13 @@ import 'package:pure_live_app/app/app.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
+import 'package:pure_live_app/features/danmaku/danmaku_source.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
 
+import 'danmaku/fake_danmaku.dart';
 import 'fakes.dart';
 
 /// A refresh that finishes at once; widget tests run on a fake clock where the
@@ -55,6 +58,10 @@ void main() {
           followRefreshProvider.overrideWith(_NoRefresh.new),
           isFollowedProvider.overrideWith((ref, room) => Stream.value(false)),
           roomDetailProvider.overrideWith((ref, room) => sites[room.platform]!.rooms.detail(room)),
+          // The room page connects chat: no worker isolate and no drift
+          // streams on the fake clock.
+          danmakuSourceProvider.overrideWithValue(FakeDanmakuSource()),
+          blockRulesProvider.overrideWith((ref) => Stream.value(const [])),
         ],
         child: const PureLiveApp(),
       ),

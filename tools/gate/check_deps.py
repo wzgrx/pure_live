@@ -18,6 +18,8 @@ ALLOWED = {
     'packages/live_net': set(),
     'packages/live_core': {'live_net'},
     'packages/live_danmaku': {'live_core', 'live_net'},
+    # IPTV is a local data source, not a platform adapter (ADR 0003).
+    'packages/live_iptv': {'live_core', 'live_net'},
     'packages/live_media': {'live_core', 'live_net'},
     # Flutter binding of live_media's engine interface to media_kit (ADR 0015).
     'packages/live_player': {'live_media', 'live_core', 'live_net'},
@@ -26,8 +28,8 @@ ALLOWED = {
     'packages/live_ui': set(),
     'packages/live_platform': set(),
     'apps/pure_live': {
-        'live_ui', 'live_media', 'live_player', 'live_record', 'live_danmaku', 'live_store', 'live_core', 'live_net',
-        'live_platform',
+        'live_ui', 'live_media', 'live_player', 'live_record', 'live_danmaku', 'live_iptv', 'live_store', 'live_core',
+        'live_net', 'live_platform',
     },
     'tools/live_cli': {'live_core', 'live_net', 'live_danmaku', 'live_media', 'live_record'},
     'tools/check_latest': set(),
@@ -35,7 +37,8 @@ ALLOWED = {
 
 # Must run under plain `dart test` and be callable from live_cli.
 PURE_DART = {
-    'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'packages/live_media', 'packages/live_record',
+    'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'packages/live_iptv', 'packages/live_media',
+    'packages/live_record',
     'packages/live_store', 'tools/live_cli', 'tools/check_latest',
 }
 

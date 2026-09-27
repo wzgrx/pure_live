@@ -15,6 +15,7 @@ export 'src/pipeline/pipeline.dart';
 export 'src/pipeline/sampler.dart';
 export 'src/pipeline/settings.dart';
 export 'src/pipeline/similarity.dart' show isSimilar, partialRatio;
+export 'src/room_state.dart';
 export 'src/runtime/base.dart' show ConnectorBase;
 export 'src/runtime/reconnect.dart';
 export 'src/runtime/socket_connector.dart' show SocketConnector, SocketPlan;

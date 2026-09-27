@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/codec/tars.dart';
 import 'package:live_danmaku/src/connector.dart';
 import 'package:live_danmaku/src/model.dart';
 import 'package:live_danmaku/src/runtime/socket_connector.dart';
+import 'package:live_net/live_net.dart';
 
 /// What one Huya frame held besides events.
 typedef HuyaFrame = ({List<DanmakuEvent> events, bool headline});
@@ -131,15 +135,133 @@ abstract final class HuyaProtocol {
   }
 }
 
-/// Huya's chat connection: registers the streamer's groups, 60 s heartbeat.
-final class HuyaConnector extends SocketConnector {
-  /// Creates the connector; [detail]'s `danmakuKeys['uid']` is the streamer.
-  new({required super.detail, required super.transport, super.session, super.clock, super.policy, this.onHeadline});
+/// Huya's headline board (§7.5): super chats fetched over WUP, without I/O.
+abstract final class HuyaHeadlines {
+  /// The WUP endpoint.
+  static final Uri endpoint = Uri.https('wup.huya.com', '/');
 
-  /// Called when a headline (super chat) notification arrives.
-  final void Function()? onHeadline;
+  /// Request headers (§7.5): Origin, Referer and the HYSDK UA.
+  static const Map<String, String> headers = {
+    'Origin': 'https://www.huya.com',
+    'Referer': 'https://www.huya.com',
+    'User-Agent': HuyaParse.mediaUserAgent,
+  };
+
+  /// §7.5 retry schedule after a 2001314 notification.
+  static const List<Duration> retries = [
+    Duration.zero,
+    Duration(milliseconds: 600),
+    Duration(milliseconds: 1800),
+    Duration(milliseconds: 4000),
+  ];
+
+  /// §7.5 `wupui.getHeadLineMessageBoard` for channel [topSid]: a TUP3
+  /// packet whose `tReq` is {lPid, sOffset "", tId {sHuYaUA}, scope 0,
+  /// page size 10}.
+  static Uint8List request(int topSid) {
+    final request = TarsWriter()
+      ..struct(0, (writer) {
+        writer
+          ..integer(0, topSid)
+          ..string(1, '')
+          ..struct(2, (user) {
+            user
+              ..integer(0, 0)
+              ..string(1, '')
+              ..string(2, '')
+              ..string(3, HuyaParse.mediaUserAgent)
+              ..string(4, '')
+              ..integer(5, 0)
+              ..string(6, '')
+              ..string(7, '');
+          })
+          ..integer(3, 0)
+          ..integer(4, 10);
+      });
+    final buffer = TarsWriter()..value(0, <Object?, Object?>{'tReq': request.toBytes()});
+    final body = TarsWriter()
+      ..integer(1, 3)
+      ..integer(2, 0)
+      ..integer(3, 0)
+      ..integer(4, 0)
+      ..string(5, 'wupui')
+      ..string(6, 'getHeadLineMessageBoard')
+      ..bytes(7, buffer.toBytes())
+      ..integer(8, 0)
+      ..value(9, <Object?, Object?>{})
+      ..value(10, <Object?, Object?>{});
+    final bytes = body.toBytes();
+    return (BytesBuilder(copy: false)
+          ..add((ByteData(4)..setInt32(0, bytes.length + 4)).buffer.asUint8List())
+          ..add(bytes))
+        .toBytes();
+  }
+
+  /// §7.5 the super chats of a response received at [context]'s `now`:
+  /// empty content or no time left is dropped; price `iCost`, else
+  /// max(1, round(iCostPay / 100)); end = now + remaining, start = end −
+  /// total; id `huya:{lMessageId}`.
+  static List<DanmakuSuperChat> parse(List<int> response, {required DecodeContext context}) {
+    if (response.length < 4) throw const FormatException('WUP: shorter than its length prefix');
+    final packet = TarsStruct.decode(response.sublist(4));
+    final buffer = packet.bytes(7);
+    if (buffer == null) throw const FormatException('WUP: no sBuffer');
+    final params = TarsStruct.decode(buffer).fields[0];
+    final raw = params is Map ? params['tRsp'] : null;
+    if (raw is! Uint8List) throw const FormatException('WUP: no tRsp');
+    final panel = TarsStruct.decode(raw).struct(0)?.struct(1);
+    final now = context.now;
+    return [
+      for (final item in panel?.list(1).whereType<TarsStruct>() ?? const <TarsStruct>[])
+        if (_item(item, now, context) case final DanmakuSuperChat chat) chat,
+    ];
+  }
+
+  static DanmakuSuperChat? _item(TarsStruct item, DateTime now, DecodeContext context) {
+    final text = (item.string(1) ?? '').trim();
+    final countdown = item.integer(5) ?? 0;
+    final total = item.integer(4) ?? 0;
+    final remaining = countdown > 0 ? countdown : total;
+    if (text.isEmpty || remaining <= 0) return null;
+    var price = item.integer(2) ?? 0;
+    final paid = item.integer(12) ?? 0;
+    if (price <= 0 && paid > 0) price = max(1, (paid / 100).round());
+    final end = now.add(Duration(seconds: remaining));
+    final user = item.struct(0);
+    final id = item.integer(9) ?? 0;
+    final avatar = user?.string(2) ?? '';
+    return DanmakuSuperChat(
+      room: context.room,
+      session: context.session,
+      receivedAt: context.receivedAt,
+      id: id > 0 ? 'huya:$id' : null,
+      userName: (user?.string(1) ?? '').trim(),
+      avatar: avatar.isEmpty ? null : Uri.tryParse(avatar),
+      text: text,
+      price: price,
+      startAt: end.subtract(Duration(seconds: total > 0 ? total : remaining)),
+      endAt: end,
+      backgroundColor: 0xFFFFFF,
+      bottomColor: 0x246488,
+    );
+  }
+}
+
+/// Huya's chat connection: registers the streamer's groups, 60 s heartbeat,
+/// the headline board once joined and after every 2001314 notification.
+final class HuyaConnector extends SocketConnector {
+  /// Creates the connector; [detail]'s `danmakuKeys['uid']` is the streamer
+  /// and `topSid` the channel of the headline board.
+  new({required super.detail, required super.transport, super.session, super.clock, super.policy});
 
   int get _uid => int.tryParse(detail.danmakuKeys['uid'] ?? '') ?? 0;
+
+  int get _topSid => int.tryParse(detail.danmakuKeys['topSid'] ?? '') ?? 0;
+
+  final Set<String> _seen = {};
+  Future<void>? _refreshing;
+  var _queued = false;
+  var _generation = 0;
 
   @override
   Future<SocketPlan> plan({required bool refresh}) async {
@@ -158,10 +280,71 @@ final class HuyaConnector extends SocketConnector {
   List<int> heartbeat() => HuyaProtocol.heartbeat();
 
   @override
+  void onJoined(int generation) {
+    // §7.5: the whole board once on entry.
+    _generation = generation;
+    _refresh(generation, once: true);
+  }
+
+  @override
   FrameResult decode(Object? data, DecodeContext context) {
     if (data is! List<int>) return FrameResult.empty;
     final frame = HuyaProtocol.decode(data, uid: _uid, context: context);
-    if (frame.headline) onHeadline?.call();
+    if (frame.headline) _refresh(_generation, once: false);
     return FrameResult(events: frame.events);
+  }
+
+  /// §7.5 fetches the board in the background (never inside decoding); a
+  /// notification during a fetch queues one more.
+  void _refresh(int generation, {required bool once}) {
+    if (_topSid <= 0 || isStale(generation)) return;
+    if (_refreshing != null) {
+      _queued = true;
+      return;
+    }
+    final run = _fetch(generation, once: once);
+    _refreshing = run;
+    unawaited(
+      run.whenComplete(() {
+        _refreshing = null;
+        if (_queued && !isStale(generation)) {
+          _queued = false;
+          _refresh(generation, once: false);
+        }
+      }),
+    );
+  }
+
+  Future<void> _fetch(int generation, {required bool once}) async {
+    for (final delay in once ? const [Duration.zero] : HuyaHeadlines.retries) {
+      if (!await pause(generation, delay)) return;
+      final baseline = _seen.isNotEmpty;
+      try {
+        final response = await transport.http.send(
+          LiveRequest(
+            site: 'huya',
+            url: HuyaHeadlines.endpoint,
+            method: 'POST',
+            headers: HuyaHeadlines.headers,
+            body: HuyaHeadlines.request(_topSid),
+            timeout: const Duration(seconds: 3),
+          ),
+        );
+        if (isStale(generation) || !response.isSuccess) continue;
+        var fresh = false;
+        for (final chat in HuyaHeadlines.parse(response.bytes, context: context())) {
+          // Same content under another id is another message (§7.5).
+          final key = chat.id ?? '${chat.userName}\u0000${chat.text}\u0000${chat.price}';
+          if (!_seen.add(key)) continue;
+          if (_seen.length > 512) _seen.remove(_seen.first);
+          fresh = true;
+          emit(generation, chat);
+        }
+        // With a baseline, a new entry means the board caught up.
+        if (baseline && fresh) return;
+      } on Object {
+        // Best effort: the next notification tries again.
+      }
+    }
   }
 }

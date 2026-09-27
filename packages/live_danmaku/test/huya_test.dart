@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:test/test.dart';
 
@@ -155,11 +156,71 @@ void main() {
     });
   });
 
+  group('headline board (§7.5)', () {
+    Uint8List response(List<TarsStruct> items) {
+      final panel = TarsStruct({0: const TarsStruct({}), 1: items, 2: 0});
+      final rsp = (TarsWriter()..value(0, TarsStruct({1: panel}))).toBytes();
+      final buffer = (TarsWriter()..value(0, <Object?, Object?>{'': Uint8List(1), 'tRsp': rsp})).toBytes();
+      final body =
+          (TarsWriter()
+                ..integer(1, 3)
+                ..string(5, 'wupui')
+                ..string(6, 'getHeadLineMessageBoard')
+                ..bytes(7, buffer))
+              .toBytes();
+      return Uint8List.fromList([...(ByteData(4)..setInt32(0, body.length + 4)).buffer.asUint8List(), ...body]);
+    }
+
+    TarsStruct item({String text = '醒目', int cost = 30, int total = 60, int countdown = 40, int id = 9, int pay = 0}) =>
+        TarsStruct({
+          0: const TarsStruct({1: ' 付费观众 ', 2: 'https://huyaimg.msstatic.com/a.jpg'}),
+          1: text,
+          2: cost,
+          4: total,
+          5: countdown,
+          9: id,
+          12: pay,
+        });
+
+    test('request: TUP3 wupui.getHeadLineMessageBoard with tReq {lPid, tId.sHuYaUA, page size 10}', () {
+      final bytes = HuyaHeadlines.request(294636272);
+      expect(ByteData.sublistView(bytes).getInt32(0), bytes.length);
+      final packet = TarsStruct.decode(bytes.sublist(4));
+      expect((packet.integer(1), packet.string(5), packet.string(6)), (3, 'wupui', 'getHeadLineMessageBoard'));
+      final params = TarsStruct.decode(packet.bytes(7)!).fields[0]! as Map<Object?, Object?>;
+      final request = TarsStruct.decode(params['tReq']! as Uint8List).struct(0)!;
+      expect(request.integer(0), 294636272);
+      expect(request.struct(2)!.string(3), HuyaParse.mediaUserAgent);
+      expect(request.integer(4), 10);
+    });
+
+    test('items: countdown, price fallback, id; empty or finished ones are dropped', () {
+      final chats = HuyaHeadlines.parse(
+        response([
+          item(),
+          item(id: 10, cost: 0, pay: 1234, countdown: 0),
+          item(id: 11, text: ' '),
+          item(id: 12, total: 0, countdown: 0),
+        ]),
+        context: _context,
+      );
+      expect(chats.map((chat) => chat.id), ['huya:9', 'huya:10']);
+      final first = chats.first;
+      expect(first.userName, '付费观众');
+      expect(first.price, 30);
+      expect(first.endAt, _context.now.add(const Duration(seconds: 40)));
+      expect(first.startAt, _context.now.subtract(const Duration(seconds: 20)));
+      expect(chats.last.price, 12);
+      expect(chats.last.endAt, _context.now.add(const Duration(seconds: 60)));
+    });
+  });
+
   group('recorded frames (fixtures/huya/danmaku/S11-live)', () {
     final fixture = DanmakuFixture.load('huya', 'S11-live');
     final uid = int.parse(fixture.keys['uid']!);
+    final sockets = fixture.incoming.where((frame) => frame.url == null);
     final frames = [
-      for (final frame in fixture.incoming) HuyaProtocol.decode(frame.bytes, uid: uid, context: fixture.context(frame)),
+      for (final frame in sockets) HuyaProtocol.decode(frame.bytes, uid: uid, context: fixture.context(frame)),
     ];
     final events = [for (final frame in frames) ...frame.events];
 
@@ -171,19 +232,25 @@ void main() {
 
     test('chat and popularity decode; the server groups are live:<uid>', () {
       final chats = events.whereType<DanmakuChat>().toList();
-      expect(chats, hasLength(62));
+      expect(chats, hasLength(110));
       expect(chats.every((chat) => chat.id!.startsWith('huya:') && chat.text.isNotEmpty), isTrue);
-      expect(chats.first.text, '又是射程，你没有伤害有射程有什么用');
-      expect(chats.first.id, 'huya:2048896616064357376');
-      expect(chats.where((chat) => chat.color == 0xFF706E), isNotEmpty);
+      expect(chats.first.text, '？？？？？？？？？？？？？？？');
+      expect(chats.first.id, 'huya:2048912838642367488');
       final popularity = events.whereType<DanmakuOnline>().map((online) => online.value).toList();
-      expect(popularity, [5391195, 5392559]);
+      expect(popularity, hasLength(2));
+      expect(popularity.first, 5413644);
       final groups = {
-        for (final frame in fixture.incoming)
+        for (final frame in sockets)
           if (TarsStruct.decode(frame.bytes) case final outer when outer.integer(0) == 22)
             TarsStruct.decode(outer.bytes(1)!).string(0),
       };
       expect(groups, {'live:$uid'});
+    });
+
+    test('the headline board was fetched once on entry and was empty', () {
+      final board = fixture.incoming.singleWhere((frame) => frame.url != null);
+      expect(board.url, HuyaHeadlines.endpoint);
+      expect(HuyaHeadlines.parse(board.bytes, context: fixture.context(board)), isEmpty);
     });
   });
 }

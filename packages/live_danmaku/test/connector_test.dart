@@ -63,6 +63,35 @@ Uint8List _biliPacket(int op, List<int> body) {
 
 int _op(List<int> packet) => ByteData.sublistView(Uint8List.fromList(packet)).getUint32(8);
 
+/// A `getHeadLineMessageBoard` response listing message [ids].
+Uint8List _board(List<int> ids) {
+  final items = [
+    for (final id in ids)
+      TarsStruct({
+        0: const TarsStruct({1: 'u', 2: ''}),
+        1: 'sc $id',
+        2: 30,
+        4: 60,
+        5: 60,
+        9: id,
+      }),
+  ];
+  final rsp =
+      (TarsWriter()..value(
+            0,
+            TarsStruct({
+              1: TarsStruct({1: items}),
+            }),
+          ))
+          .toBytes();
+  final body =
+      (TarsWriter()
+            ..integer(1, 3)
+            ..bytes(7, (TarsWriter()..value(0, <Object?, Object?>{'tRsp': rsp})).toBytes()))
+          .toBytes();
+  return Uint8List.fromList([...(ByteData(4)..setInt32(0, body.length + 4)).buffer.asUint8List(), ...body]);
+}
+
 void main() {
   group('socket loop (CONN-3) on Douyu', () {
     test('joins on open, heartbeats every 45 s, decodes frames', () {
@@ -367,6 +396,54 @@ void main() {
         unawaited(missing.connect());
         async.flushMicrotasks();
         expect(none.urls, isEmpty);
+      });
+    });
+
+    test('headline board: once on entry, then 0, 0.6, 1.8, 4 s after a notification until a new entry', () {
+      fakeAsync((async) {
+        final boards = <List<int>>[
+          [1],
+          [1],
+          [1, 2],
+          [1, 2, 3],
+        ];
+        var served = 0;
+        final http = FakeHttp((request) async {
+          final ids = boards[served < boards.length ? served : boards.length - 1];
+          served++;
+          return LiveResponse(status: 200, url: request.url, bytes: _board(ids));
+        });
+        final socket = FakeSocket();
+        final connector = HuyaConnector(
+          detail: _room('huya', '998', {'uid': '294636272', 'topSid': '294636272'}),
+          transport: FakeTransport(plan: [socket], http: http),
+          clock: FakeClock(async, _start),
+        );
+        final events = <DanmakuEvent>[];
+        connector.events.listen(events.add);
+        unawaited(connector.connect());
+        async.flushMicrotasks();
+        expect(http.requests, hasLength(1));
+        expect(events.whereType<DanmakuSuperChat>().map((chat) => chat.id), ['huya:1']);
+        final push =
+            (TarsWriter()
+                  ..integer(0, 0)
+                  ..integer(1, 2001314)
+                  ..bytes(2, const []))
+                .toBytes();
+        socket.receive(
+          (TarsWriter()
+                ..integer(0, 7)
+                ..bytes(1, push))
+              .toBytes(),
+        );
+        async.flushMicrotasks();
+        expect(http.requests, hasLength(2));
+        async.elapse(const Duration(milliseconds: 600));
+        expect(http.requests, hasLength(3));
+        expect(events.whereType<DanmakuSuperChat>().map((chat) => chat.id), ['huya:1', 'huya:2']);
+        async.elapse(const Duration(seconds: 10));
+        expect(http.requests, hasLength(3));
       });
     });
   });

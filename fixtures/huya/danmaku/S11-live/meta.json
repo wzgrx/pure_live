@@ -8,7 +8,7 @@
     "topSid": "294636272",
     "subSid": "294636272"
   },
-  "capturedAt": "2026-09-27T14:31:49.431913Z",
+  "capturedAt": "2026-09-27T15:04:03.067670Z",
   "route": "direct",
   "handshakes": [
     {
@@ -18,12 +18,16 @@
       }
     }
   ],
-  "frames": 218,
+  "frames": 265,
   "raw": {
-    "sha256": "fe2fe75363903623b9e194eb6f0616b6117329a5fab4563ff18dfb90c7baa23e",
-    "length": 87524
+    "sha256": "791e50f6e730f9a3bb522f86d5e31b184230481eff6bf06a624438f372395c3c",
+    "length": 109779
   },
   "scrubbed": [
+    {
+      "where": "uri 6111 body",
+      "rule": "dropped"
+    },
     {
       "where": "1400.sender",
       "rule": "person"
@@ -33,15 +37,15 @@
       "rule": "dropped"
     },
     {
-      "where": "uri 6111 body",
-      "rule": "dropped"
-    },
-    {
-      "where": "uri 7708 body",
-      "rule": "dropped"
-    },
-    {
       "where": "uri 6211 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 24102901 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 100000 body",
       "rule": "dropped"
     },
     {
@@ -53,35 +57,23 @@
       "rule": "dropped"
     },
     {
+      "where": "uri 7708 body",
+      "rule": "dropped"
+    },
+    {
+      "where": "uri 6291 body",
+      "rule": "dropped"
+    },
+    {
       "where": "uri 1031020 body",
       "rule": "dropped"
     },
     {
-      "where": "uri 6480 body",
+      "where": "uri 3104 body",
       "rule": "dropped"
     },
     {
-      "where": "uri 7108 body",
-      "rule": "dropped"
-    },
-    {
-      "where": "uri 1010003 body",
-      "rule": "dropped"
-    },
-    {
-      "where": "uri 6481 body",
-      "rule": "dropped"
-    },
-    {
-      "where": "uri 7109 body",
-      "rule": "dropped"
-    },
-    {
-      "where": "uri 6479 body",
-      "rule": "dropped"
-    },
-    {
-      "where": "uri 7107 body",
+      "where": "uri 3102 body",
       "rule": "dropped"
     }
   ],

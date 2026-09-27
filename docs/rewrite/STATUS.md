@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0 诊断与基线 | **完成**（2026-09-27） | `docs/rewrite/DIAGNOSIS.md`、`docs/rewrite/BASELINE.md` | 诊断报告和基线数据落档 |
 | 1 规格与样本 | 进行中：规格已写完，样本未开始 | `spec/`、`spec/regressions.md`、`fixtures/` | 每条结论附旧代码位置；待确认项清零 |
-| 2 设计方向与设计系统 | 进行中 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
+| 2 设计方向与设计系统 | 进行中：设计原则已定稿，设计系统未开始 | `spec/design/`、设计系统、页面稿 | 独立复核通过 |
 | 3 工程底座 | 进行中：workspace、门禁、CI 已建 | workspace、CI、hooks、`live_cli`、`check_latest` | 旧应用照常构建发布，CI 全绿 |
 | 4 平台与网络层 | 未开始 | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过；旧应用接入后发布 3.3.x |
 | 5 播放、弹幕、录制层 | 未开始 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
@@ -90,3 +90,4 @@
 - 2026-09-27：方案批准；同步方案、宪法、决策记录到 `master`；开始第 0 阶段。
 - 2026-09-27：第 0 阶段完成：8 份模块诊断、旧版基线（Windows、K90）、决策记录 0003–0006；依据许可证诊断，播放内核改为全平台只用 mpv。进入第 1 阶段。
 - 2026-09-27：第 1 阶段规格写完（产品、5 个平台、6 个模块、回归清单）。第 3 阶段开工：workspace、`live_core`、`live_cli`、`check_latest`、依赖方向检查、门禁脚本、CI、hooks。
+- 2026-09-27：第 2 阶段设计原则定稿（[spec/design/principles.md](../../spec/design/principles.md)）：品牌蓝 `#2E6FE0`，一级入口为关注、发现、搜索、我的，PLAN 第 07–09 节与它冲突处以它为准。

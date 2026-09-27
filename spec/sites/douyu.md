@@ -580,6 +580,10 @@ len = 8 + body 的 UTF-8 字节数 + 1
 
 纯网页 Cookie 没有 LTP0，永远不会续期（测试 :133-155, 309-319）。
 
+**v4 实现状态（2026-09-28）**：
+- 令牌、到期、五种状态、续期凭据、合并 Set-Cookie 在 `DouyuSession`（packages/live_core/lib/src/sites/douyu/douyu_session.dart），续期请求是 `DouyuSite.renewSession`：只返回合并后的 Cookie，没有 Set-Cookie 或合并后没有令牌时返回 null，由调用方保留旧 Cookie；网络错误抛 NetworkFailure（手动续期要告诉用户）。
+- 账号页提供“立即续期”和状态显示（§8.4）。**取流前的自动续期还没有接入**：`CookieVault` 只读，适配器拿不到单独保存的 LTP0、dy_did，也写不回续期后的 Cookie；接入需要一个可写的凭据接口 [待实现]。
+
 ### 8.3 LTP0 只发给 passport
 
 LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）。
@@ -594,6 +598,8 @@ LTP0 不出现在任何其它请求的 Cookie 里（douyu_utils.dart:534-538）�
 - 保存登录 Cookie 时，同时记录保存时间（:107-111）。
 - 提供“立即续期”操作，用来检查 LTP0 和 DID 是否可用（:118-160）。
 - 存储：旧版是明文（docs/rewrite/diagnosis/05-app-shell-data.md:54），v4 加密存储（宪法原则 8）。备份和局域网同步都不包含 Cookie（ISSUE_873…md:20；docs/UPSTREAM_PORT_2026_09_27.md:34）。
+  - v4 的位置：登录 Cookie `cookie/douyu`、LTP0 `cookie/douyu.ltp0`、设备 id `cookie/douyu.did` 都在加密的 SecretStore；保存时间是设置 `account.douyu.cookieSavedAt`（秒，不是秘密）。退出登录三项一起删除，保存时间清零。
+  - 界面不回显已保存的 Cookie、LTP0 和 dy_did：输入框为空，填了才替换；留空的 LTP0、dy_did 保持不变。
 - 登录的作用：匿名请求原画可能被降为 4M，登录后能否拿到原画 [待确认]（ISSUE_873…md:26）。弹幕不需要登录。
 
 ---

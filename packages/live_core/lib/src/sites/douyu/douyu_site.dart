@@ -7,6 +7,7 @@ import 'package:live_core/src/room_ref.dart';
 import 'package:live_core/src/site.dart';
 import 'package:live_core/src/site_error.dart';
 import 'package:live_core/src/sites/douyu/douyu_parse.dart';
+import 'package:live_core/src/sites/douyu/douyu_session.dart';
 import 'package:live_core/src/sites/douyu/douyu_sign.dart';
 import 'package:live_core/src/stream.dart';
 import 'package:live_net/live_net.dart';
@@ -259,6 +260,30 @@ final class DouyuSite implements LiveSite, CatalogSource, SearchSource, RoomSour
     ];
     if (lines.isEmpty) throw const ApiChanged(_site, 'getH5PlayV1: no playable URL');
     return StreamSet(qualities: qualities, selected: requested, lines: lines);
+  }
+
+  /// §8.2 renews the login [cookie] at the passport with [ltp0] and [did]:
+  /// the request's cookie is only `dy_did` and `LTP0` (§8.3) and only the
+  /// response's `Set-Cookie` is read. Returns the merged cookie, or null when
+  /// nothing was renewed (no `Set-Cookie`, or no session token after the
+  /// merge); the caller then keeps the old cookie. Network errors throw.
+  Future<String?> renewSession({required String cookie, required String ltp0, required String did}) async {
+    final stamp = '${_now().millisecondsSinceEpoch}';
+    final headers = _headers()..['cookie'] = '${DouyuSession.deviceIdName}=$did;${DouyuSession.longTermName}=$ltp0';
+    final response = await _get(
+      Uri.https('passport.douyu.com', '/lapi/passport/iframe/safeAuth', {
+        'client_id': '1',
+        't': stamp,
+        '_': stamp,
+        'callback': 'axiosJsonpCallback',
+      }).toString(),
+      headers: headers,
+    );
+    _requireSuccess(response, 'safeAuth');
+    final lines = response.headers['set-cookie'] ?? const <String>[];
+    if (lines.isEmpty) return null;
+    final renewed = DouyuSession.merge(cookie, lines);
+    return DouyuSession.sessionToken(renewed) == null ? null : renewed;
   }
 
   @override

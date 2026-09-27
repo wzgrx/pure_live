@@ -2,8 +2,10 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_media/testing.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/app/app.dart';
+import 'package:pure_live_app/core/engine.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -54,6 +56,7 @@ void main() {
           sitesProvider.overrideWithValue(sites),
           storeProvider.overrideWithValue(store),
           recordManagerProvider.overrideWithValue(fakeRecordManager()),
+          engineFactoryProvider.overrideWithValue(FakeEngine.new),
           followsProvider.overrideWith((ref) => Stream.value(const [])),
           followRefreshProvider.overrideWith(_NoRefresh.new),
           isFollowedProvider.overrideWith((ref, room) => Stream.value(false)),
@@ -75,10 +78,16 @@ void main() {
     expect(find.text('主播bilibili-1'), findsOneWidget);
 
     await tester.tap(find.text('主播bilibili-1'));
-    await tester.pumpAndSettle();
+    // The room plays now (fake engine): a buffering spinner animates, so pump
+    // for a while instead of waiting for the tree to settle.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
     // Compact width: video on top, chat first, room info in the second tab.
     await tester.tap(find.text('直播间'));
-    await tester.pumpAndSettle();
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
     expect(find.text('标题bilibili-1'), findsWidgets);
     expect(find.text('打开原站'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);

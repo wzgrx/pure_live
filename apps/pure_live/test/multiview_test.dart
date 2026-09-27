@@ -23,19 +23,20 @@ void main() {
     store = await LiveStore.inMemory();
     site = FakeSite('douyu', offline: {'off'});
     engines = [];
-    container = ProviderContainer(
-      overrides: [
-        storeProvider.overrideWithValue(store),
-        sitesProvider.overrideWithValue({'douyu': PlatformSite(site)}),
-        engineFactoryProvider.overrideWithValue(() {
-          final engine = FakeEngine();
-          engines.add(engine);
-          return engine;
-        }),
-      ],
-    );
-    // Keep the auto-dispose controller alive for the test.
-    container.listen(multiviewProvider, (_, _) {});
+    container =
+        ProviderContainer(
+            overrides: [
+              storeProvider.overrideWithValue(store),
+              sitesProvider.overrideWithValue({'douyu': PlatformSite(site)}),
+              engineFactoryProvider.overrideWithValue(() {
+                final engine = FakeEngine();
+                engines.add(engine);
+                return engine;
+              }),
+            ],
+          )
+          // Keep the auto-dispose controller alive for the test.
+          ..listen(multiviewProvider, (_, _) {});
   });
 
   tearDown(() async {

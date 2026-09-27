@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/core/engine.dart';
+import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/room/playback.dart';
@@ -210,7 +211,7 @@ class MultiviewController extends Notifier<MultiviewState> {
         return;
       }
       final settings = ref.read(storeProvider).settings;
-      final session = PlaybackSession(engine: ref.read(engineFactoryProvider));
+      final session = newPlaybackSession(ref);
       // Start muted; sound comes with the focus (INV-MULTI-06).
       await session.setVolume(0);
       _setCell(index, MultiviewCell(status: CellStatus.playing, room: room, detail: detail, session: session));
@@ -220,6 +221,7 @@ class MultiviewController extends Notifier<MultiviewState> {
         session: session,
         detail: detail,
         preference: _smallCell(index) ? QualityPreference.smooth : null,
+        proxiedHosts: ref.read(proxiedHostsProvider),
       );
       if (!current()) {
         unawaited(session.dispose());

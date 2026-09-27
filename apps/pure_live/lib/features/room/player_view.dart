@@ -12,6 +12,7 @@ import 'package:live_store/live_store.dart' as store;
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
+import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/chat_actions.dart';
@@ -235,6 +236,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         settings: ref.read(storeProvider).settings,
         session: _session,
         detail: detail,
+        proxiedHosts: ref.read(proxiedHostsProvider),
       );
     } on Object catch (error) {
       if (mounted && widget.detail.ref == detail.ref) setState(() => _openError = error);

@@ -3,19 +3,16 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
-import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live_app/core/engine.dart';
+import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
-import 'package:pure_live_app/core/store.dart';
 
 /// The playback session of the open room page. One session per page; the
 /// engine is created on the first open and released when the page goes away
 /// (ADR 0018; mini player and multiview come later).
 final Provider<PlaybackSession> playbackSessionProvider = Provider.autoDispose<PlaybackSession>((ref) {
-  final settings = ref.read(storeProvider).settings;
-  final session = PlaybackSession(
-    engine: mpvEngineFactory(MpvEngineConfig(hardwareDecoding: settings.get(Settings.hardwareDecoding))),
-  );
+  final session = newPlaybackSession(ref);
   ref.onDispose(() => unawaited(session.dispose()));
   return session;
 });
@@ -38,8 +35,10 @@ Future<void> openRoom({
   required PlaybackSession session,
   required RoomDetail detail,
   QualityPreference? preference,
+  ProxiedHosts? proxiedHosts,
 }) async {
   final initial = await site.streams.streams(detail);
+  proxiedHosts?.note(settings, detail.ref.platform, initial);
   final wanted = preferredQuality(initial.qualities, preference ?? settings.get(Settings.qualityWifi));
   await session.open(
     wanted == null || wanted == initial.selected

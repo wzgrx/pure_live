@@ -161,6 +161,19 @@ abstract final class Settings {
     legacy: [LegacyKey('audioOutputDriver', convert: _audioOutput)],
   );
 
+  /// 助眠模式 (F-ROOM-10): entering a room plays audio only and starts the
+  /// sleep timer; restoring the picture ends that timer.
+  static const asmrSleepMode = BoolSetting('player.asmrSleepMode', false, legacy: [LegacyKey('enableAsmrSleepMode')]);
+
+  /// Minutes of the 助眠模式 timer.
+  static const asmrSleepMinutes = IntSetting(
+    'player.asmrSleepMinutes',
+    60,
+    min: 1,
+    max: 720,
+    legacy: [LegacyKey('asmrSleepMinutes')],
+  );
+
   /// Lower the quality by one step when playback keeps stalling (F-NEW-10).
   static const autoLowerQuality = BoolSetting('player.autoLowerQuality', true);
 
@@ -873,6 +886,8 @@ abstract final class Settings {
     qualityWifi,
     qualityMobile,
     autoLowerQuality,
+    asmrSleepMode,
+    asmrSleepMinutes,
     hardwareDecoder,
     androidCompatibility,
     lowLatency,

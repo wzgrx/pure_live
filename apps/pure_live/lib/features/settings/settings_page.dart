@@ -247,6 +247,16 @@ class SettingsGroupBody extends StatelessWidget {
           subtitle: '在直播间手动选的“按竖屏/横屏处理”下次进房仍然生效',
         ),
         SwitchSettingTile(setting: Settings.backgroundPlay, title: '后台播放', subtitle: '离开应用后继续播放声音'),
+        SettingsHeader('助眠'),
+        SwitchSettingTile(setting: Settings.asmrSleepMode, title: '助眠模式', subtitle: '进入直播间自动只播声音并开始定时关闭；恢复画面时取消这次定时'),
+        SliderSettingTile(
+          setting: Settings.asmrSleepMinutes,
+          title: '助眠定时',
+          min: 5,
+          max: 180,
+          divisions: 35,
+          format: _minutes,
+        ),
         SystemSettingTiles(SystemSettingsSection.playback),
         SliderSettingTile(
           setting: Settings.defaultMobileVolume,

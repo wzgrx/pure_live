@@ -238,7 +238,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       );
     }
     if (!widget.resume) {
-      if (_live) unawaited(_open());
+      if (_live) unawaited(_open(fresh: true));
     } else if (!_live) {
       // Went offline while the mini window played it.
       unawaited(_session.close());
@@ -256,7 +256,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       _stallWatch.reset();
       _initVolume();
       if (_live) {
-        unawaited(_open());
+        unawaited(_open(fresh: true));
       } else {
         unawaited(_session.close());
       }
@@ -303,7 +303,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     }
   }
 
-  Future<void> _open() async {
+  /// Opens the room; [fresh] on entering or switching rooms (not on a retry).
+  Future<void> _open({bool fresh = false}) async {
     final detail = widget.detail;
     setState(() => _openError = null);
     try {
@@ -315,6 +316,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         proxiedHosts: ref.read(proxiedHostsProvider),
         cellular: ref.read(networkKindProvider).value == NetworkKind.cellular,
       );
+      if (fresh && mounted && widget.detail.ref == detail.ref) _startAsmr();
     } on Object catch (error) {
       if (mounted && widget.detail.ref == detail.ref) setState(() => _openError = error);
     }
@@ -444,8 +446,24 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     showHint(Icons.brightness_medium, '亮度 ${(next * 100).round()}%');
   }
 
-  /// Audio only on or off, in place (F-ROOM-9, AUD-1).
-  void toggleAudioOnly() => unawaited(_session.setAudioOnly(enabled: !_state.audioOnly));
+  /// Audio only on or off, in place (F-ROOM-9, AUD-1). Restoring the picture
+  /// ends a 助眠模式 timer (F-ROOM-10).
+  void toggleAudioOnly() {
+    final restoring = _state.audioOnly;
+    unawaited(_session.setAudioOnly(enabled: !restoring));
+    if (restoring) ref.read(sleepTimerProvider.notifier).pictureRestored();
+  }
+
+  /// F-ROOM-10 助眠模式: a room that starts playing goes audio only and
+  /// starts the sleep timer, once per open.
+  void _startAsmr() {
+    final settings = ref.read(storeProvider).settings;
+    if (!settings.get(store.Settings.asmrSleepMode)) return;
+    unawaited(_session.setAudioOnly(enabled: true));
+    ref
+        .read(sleepTimerProvider.notifier)
+        .start(Duration(minutes: settings.get(store.Settings.asmrSleepMinutes)), asmr: true);
+  }
 
   /// Q / L: the quality and line panel.
   Future<void> chooseQualityLine() async {

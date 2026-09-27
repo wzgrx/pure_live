@@ -10,6 +10,7 @@ import 'package:live_player/live_player.dart' show MpvEngine;
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
@@ -446,6 +447,20 @@ class _SwitchRoomPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final follows = ref.watch(followsProvider);
     final history = ref.watch(historyProvider);
+    // F-ROOM-11: rooms being recorded now (a snapshot; the panel is short-lived).
+    final recording = [
+      for (final task in ref.read(recordManagerProvider).tasks)
+        if (task.state.active)
+          StoredRoom(
+            ref: task.room,
+            anchorName: task.snapshot.anchorName,
+            title: task.snapshot.title,
+            avatar: task.snapshot.avatar,
+            cover: task.snapshot.cover,
+            lastState: LiveState.live,
+            updatedAt: task.createdAt,
+          ),
+    ];
     Widget list(AsyncValue<List<StoredRoom>> rooms, String empty) => rooms.when(
       loading: () => const LoadingView(),
       error: (error, _) => MessageView.error(title: '读取失败', message: '$error'),
@@ -476,12 +491,13 @@ class _SwitchRoomPanel extends ConsumerWidget {
       },
     );
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Column(
         children: [
           const TabBar(
             tabs: [
               Tab(text: '开播的关注'),
+              Tab(text: '录制中'),
               Tab(text: '观看历史'),
             ],
           ),
@@ -497,6 +513,7 @@ class _SwitchRoomPanel extends ConsumerWidget {
                   ),
                   '没有开播的关注',
                 ),
+                list(AsyncValue.data(recording), '没有正在录制的直播间'),
                 list(history.whenData((all) => [for (final entry in all) entry.room]), '还没有观看历史'),
               ],
             ),

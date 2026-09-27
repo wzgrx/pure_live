@@ -230,7 +230,9 @@ abstract base class SocketConnector extends ConnectorBase {
     beat?.cancel();
     auth?.cancel();
     silence?.cancel();
-    await subscription.cancel().timeout(const Duration(seconds: 2), onTimeout: () {});
+    // Cancelling takes effect at once; its future is not awaited (a socket
+    // that never answers the cancel must not hold the loop).
+    unawaited(subscription.cancel());
     await socket.close();
     return (end, received, isJoined);
   }

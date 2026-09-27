@@ -229,11 +229,14 @@ abstract final class DouyinProtocol {
     );
   }
 
-  /// `RoomUserSeqMessage.onlineUserForAnchor` (10), the concurrent audience;
-  /// `totalUser` is cumulative and never used as online (REG-DOUYIN-008).
+  /// `RoomUserSeqMessage`: the concurrent audience is `total` (3), an exact
+  /// integer, else the display text `onlineUserForAnchor` (10, `30.6万`);
+  /// `totalUser` (7) is cumulative and never used as online
+  /// (REG-DOUYIN-008: exact figures before bucketed text).
   static DanmakuOnline? _online(Uint8List payload, DecodeContext context) {
-    final text = ProtoMessage.decode(payload).string(10) ?? '';
-    final value = audienceNumber(text);
+    final seq = ProtoMessage.decode(payload);
+    final total = seq.integer(3) ?? 0;
+    final value = total > 0 ? total : audienceNumber(seq.string(10) ?? '');
     if (value == null) return null;
     return DanmakuOnline(
       room: context.room,

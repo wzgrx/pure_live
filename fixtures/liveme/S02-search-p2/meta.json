@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "platform": "liveme",
+  "sample": "S02-search-p2",
+  "capturedAt": "2026-09-27T17:26:02.057647Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.liveme.com/search/searchKeyword?alias=liveme&tongdun_black_box=1&os=web&_time=1790530000000&h5=1&thirdchannel=6&type=1&page=2&pageSize=30&keyword=andre&tuid=&uid=&token=&androidid=",
+    "headers": {
+      "Origin": "https://www.liveme.com",
+      "Referer": "https://www.liveme.com/livehot",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-origin": "*",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:26:02 GMT",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "access-control-expose-headers": "*",
+      "content-type": "text/json;charset=UTF-8",
+      "access-control-max-age": "5",
+      "x-request-id": "5f164be8-fe76-448b-810e-1709a647ea7c",
+      "x-powered-by": "AtomCode v3.3.2",
+      "access-control-allow-headers": "*",
+      "access-control-allow-methods": "*"
+    }
+  },
+  "raw": {
+    "sha256": "cc03b7d3d0ffbc8bcbfa2804ee335e6a067ef15eb777894936ceaa72dd50cf76",
+    "length": 10053
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -199,7 +199,7 @@ final class RecordManager {
   ///
   /// `rooms` gives strict room checks and stream sets (`SiteRecordRooms` over
   /// the live_core adapters); `store` persists tasks; `opener` connects
-  /// upstream FLV and HLS (default: `httpRecordOpener` with `record.readTimeout`);
+  /// upstream FLV, HLS and single HTTP streams (default: `httpRecordOpener` with `record.readTimeout`);
   /// `remuxer` converts finished segments to MP4 when `record.remuxToMp4` is
   /// on (none: the sources stay FLV); `chat` supplies chat when
   /// `record.danmaku` is on; `files` is the file system (tests pass
@@ -774,6 +774,7 @@ final class RecordManager {
     final upstream = _opener ?? httpRecordOpener(readTimeout: _settings.readTimeout);
     final opener = upstream.flv(task.room.platform);
     final hls = upstream.hls(task.room.platform);
+    final stream = upstream.stream(task.room.platform);
     late final RecordSession session;
     session = RecordSession(
       room: task.room,
@@ -783,6 +784,7 @@ final class RecordManager {
       settings: _settings,
       opener: opener,
       hls: hls,
+      stream: stream,
       quality: task.quality,
       cursor: task.cursor,
       autoReconnect: task.autoReconnect,

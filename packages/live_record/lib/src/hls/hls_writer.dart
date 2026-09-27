@@ -9,6 +9,7 @@ import 'package:live_record/src/hls/feed.dart';
 import 'package:live_record/src/naming.dart';
 import 'package:live_record/src/remux/ts_demux.dart';
 import 'package:live_record/src/segment_files.dart';
+import 'package:live_record/src/ts/ts_feed.dart';
 import 'package:live_record/src/writer.dart';
 
 /// Extension of MPEG-TS segment files.
@@ -32,7 +33,10 @@ const fmp4Extension = 'm4s';
 /// of the written segments' `EXTINF`. Missing segments are
 /// recorded in `gaps.json` at the current file time; the files keep the
 /// upstream timestamps and the MP4 remux joins them (§10).
-final class HlsSessionWriter implements SessionWriter, HlsSink {
+///
+/// A continuous MPEG-TS stream (§8) arrives as a [TsSink]: its feed hands
+/// over whole packets and asks at each keyframe whether a new file starts.
+final class HlsSessionWriter implements SessionWriter, HlsSink, TsSink {
   /// Creates a writer for [layout]; segments are numbered from [firstIndex].
   new({
     required this._files,
@@ -220,12 +224,52 @@ final class HlsSessionWriter implements SessionWriter, HlsSink {
           wallStart: missing.wallStart,
           wallEnd: clock.now(),
           missingMs: missing.missingMs,
-          source: source,
+          source: missing.source ?? source,
           fromSeq: missing.fromSeq,
           toSeq: missing.toSeq,
         ),
       ),
     );
+  }
+
+  // Continuous MPEG-TS (§8.2).
+
+  @override
+  bool wantsFile(TsSignature signature) {
+    if (_closed || _out.failed != null) return false;
+    final current = _signature;
+    return _segment == null ||
+        _kind != tsExtension ||
+        current == null ||
+        !current.compatible(signature) ||
+        _limitReached;
+  }
+
+  @override
+  void startFile(TsSignature signature) {
+    if (_closed || _out.failed != null) return;
+    _open(tsExtension, null, signature);
+  }
+
+  @override
+  void noteSignature(TsSignature signature) {
+    final current = _signature;
+    if (current != null && current.compatible(signature)) _signature = current.merge(signature);
+  }
+
+  @override
+  void addPackets(Uint8List packets, {int durationMs = 0, int units = 0}) {
+    final segment = _segment;
+    if (_closed || _out.failed != null || segment == null) return;
+    final now = clock.now();
+    if (units > 0 && (_anchors.isEmpty || now.difference(_anchors.last.wall) >= const Duration(seconds: 1))) {
+      // Chat timing (§17): one anchor a second is plenty.
+      _anchors.add((wall: now, fileTs: segment.durationMs));
+      if (_anchors.length > 64) _anchors.removeAt(0);
+    }
+    if (packets.isNotEmpty) _write(segment, packets);
+    segment.durationMs += durationMs;
+    mediaTags += units;
   }
 
   bool get _limitReached {

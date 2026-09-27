@@ -68,6 +68,18 @@ bool _isVideoType(int streamType) => const {0x01, 0x02, 0x10, 0x1B, 0x24, 0x42, 
 
 bool _isAudioType(int streamType) => const {0x03, 0x04, 0x0F, 0x11, 0x1C, 0x81, 0x87}.contains(streamType);
 
+/// Whether the PMT stream type [streamType] is a video stream (MPEG-1/2,
+/// MPEG-4, H.264, H.265, CAVS, Dirac, VC-1).
+bool isTsVideoType(int streamType) => _isVideoType(streamType);
+
+/// Whether the PMT stream type [streamType] is an audio stream (MPEG audio,
+/// AAC, LATM, AC-3, E-AC-3).
+bool isTsAudioType(int streamType) => _isAudioType(streamType);
+
+/// The codec the remux copies for video stream type [streamType] (H.264,
+/// H.265), or null.
+VideoCodec? tsVideoCodecOf(int streamType) => _videoCodecOf(streamType);
+
 final class _Pes {
   new(this.pid, this.offset);
 

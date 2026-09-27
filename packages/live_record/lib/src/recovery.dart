@@ -19,7 +19,8 @@ Future<String> _freeName(RecordFiles files, String path) async {
 
 /// Finishes the files of a session the app did not close (spec §14.1): every
 /// `<prefix>_NNN.flv.part` is cut after its last complete tag, every
-/// `.ts.part` after its last whole HLS segment and every `.m4s.part` after
+/// `.ts.part` after its last whole HLS segment (continuous TS: before its
+/// last video frame, which may be cut) and every `.m4s.part` after
 /// its last whole fragment, and renamed (one without media is deleted);
 /// every chat `.xml.part` gets its closing `</i>` and is renamed, an
 /// unfinished `.mp4.partial` is deleted, and `gaps.json` gets a `crash`

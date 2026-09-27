@@ -35,6 +35,10 @@ enum GapReason {
 
   /// The app ended without finishing the session (recovered at the next start).
   crash,
+
+  /// A continuous MPEG-TS stream lost packets or its sync; the writer
+  /// dropped to the next keyframe (spec §8.2).
+  damaged,
 }
 
 /// One gap in a session's `gaps.json` (spec §6.4).

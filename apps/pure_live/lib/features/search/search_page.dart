@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
@@ -9,6 +10,24 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/l10n/strings.dart';
+
+/// First page of every enabled platform for the keyword, merged: live rooms
+/// first, then by audience (spec/product.md F-SRC-01 "智能" order). A failing
+/// platform is left out instead of failing the whole list.
+final FutureProviderFamily<List<RoomCard>, String> combinedSearchProvider = FutureProvider.autoDispose
+    .family<List<RoomCard>, String>((ref, keyword) async {
+      final sites = ref.watch(sitesProvider);
+      final platforms = ref.watch(enabledPlatformsProvider);
+      final pages = await Future.wait([
+        for (final id in platforms)
+          sites[id]!.search.search(keyword).then((page) => page.items).catchError((Object _) => <RoomCard>[]),
+      ]);
+      int audience(RoomCard card) => card.audience.online ?? card.audience.popularity ?? card.audience.cumulative ?? 0;
+      return [for (final items in pages) ...items]..sort((a, b) {
+        final live = (b.state == LiveState.live ? 1 : 0) - (a.state == LiveState.live ? 1 : 0);
+        return live != 0 ? live : audience(b).compareTo(audience(a));
+      });
+    });
 
 /// Looks like a link or share text rather than a keyword.
 bool looksLikeLink(String input) =>
@@ -106,7 +125,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       return const MessageView(icon: Icons.search, title: S.searchHint);
     }
     return DefaultTabController(
-      length: platforms.length,
+      length: platforms.length + 1,
       child: Column(
         children: [
           Row(
@@ -115,7 +134,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 child: TabBar(
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
-                  tabs: [for (final id in platforms) Tab(text: platformNames[id])],
+                  tabs: [
+                    const Tab(text: '综合'),
+                    for (final id in platforms) Tab(text: platformNames[id]),
+                  ],
                 ),
               ),
               Padding(
@@ -131,6 +153,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           Expanded(
             child: TabBarView(
               children: [
+                _CombinedResults(keyword: _keyword, liveOnly: _liveOnly),
                 for (final id in platforms)
                   RoomGrid(
                     query: SearchQuery(id, _keyword),
@@ -178,4 +201,47 @@ class _LinkResult extends StatelessWidget {
       );
     },
   );
+}
+
+class _CombinedResults extends ConsumerWidget {
+  const new({required this.keyword, required this.liveOnly});
+
+  final String keyword;
+  final bool liveOnly;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(combinedSearchProvider(keyword));
+    final layout = WindowLayout(MediaQuery.sizeOf(context));
+    return async.when(
+      loading: () => const LoadingView(),
+      error: (error, _) => MessageView.error(title: describeError(error).title),
+      data: (cards) {
+        final shown = liveOnly ? cards.where((c) => c.state == LiveState.live).toList() : cards;
+        if (shown.isEmpty) return const MessageView(title: S.searchEmpty);
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final inner = constraints.maxWidth - 2 * layout.margin;
+            final columns = layout.columnsFor(inner);
+            final cellWidth = (inner - (columns - 1) * layout.gap) / columns;
+            final textHeight = 44 * MediaQuery.textScalerOf(context).scale(1) + 12;
+            final dpr = MediaQuery.devicePixelRatioOf(context);
+            final now = DateTime.now();
+            return GridView.builder(
+              padding: EdgeInsets.all(layout.margin),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisSpacing: layout.gap,
+                crossAxisSpacing: layout.gap,
+                mainAxisExtent: cellWidth * 9 / 16 + textHeight,
+              ),
+              itemCount: shown.length,
+              itemBuilder: (context, index) =>
+                  RoomCardTile(card: shown[index], coverWidth: cellWidth, devicePixelRatio: dpr, now: now),
+            );
+          },
+        );
+      },
+    );
+  }
 }

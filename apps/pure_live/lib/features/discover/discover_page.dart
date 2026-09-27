@@ -6,6 +6,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/features/discover/followed_areas.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/l10n/strings.dart';
@@ -98,11 +99,20 @@ class _Categories extends ConsumerWidget {
           onAction: () => ref.invalidate(categoriesProvider(platform)),
         );
       },
-      data: (categories) => ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: layout.margin, vertical: Space.s2),
-        itemCount: categories.length,
-        itemBuilder: (context, index) => _CategorySection(platform: platform, category: categories[index]),
-      ),
+      data: (categories) {
+        final followed = followedAreasIn(ref.watch(followedAreasProvider).value ?? const [], platform, categories);
+        return ListView(
+          padding: EdgeInsets.symmetric(horizontal: layout.margin, vertical: Space.s2),
+          children: [
+            if (followed.isNotEmpty)
+              _CategorySection(
+                platform: platform,
+                category: Category(id: '_followed', name: '已收藏', areas: [for (final (area, _) in followed) area]),
+              ),
+            for (final category in categories) _CategorySection(platform: platform, category: category),
+          ],
+        );
+      },
     );
   }
 }

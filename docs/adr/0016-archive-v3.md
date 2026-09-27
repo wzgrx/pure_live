@@ -50,4 +50,7 @@ ADR 0014 冻结了旧应用，但它还是 workspace 成员。它有一百多个
 - **保留**：
   - 用户自己安装、正在使用的 3.x（手机和 `D:\Soft\PureLive`）；
   - 其它项目共用的工具（NDK 28.2、Temurin 25/26、`~/.gradle`、pub 缓存）。
-- **待用户确认**：Codex 的 3.x 工作目录 `Documents\Codex\2026-08-12\https-github-com-liuchuancong-pure-live`（132 GB）。其中的 Git 仓库（全部分支、标签和 3 个 stash）已打包成 `C:\Users\123\claude-work\codex-pure_live-v3.bundle`（100 MB，已校验）；目录里没有签名密钥。删除这个目录要用户确认。
+- **Codex 的 3.x 工作目录**（`Documents\Codex\2026-08-12\https-github-com-liuchuancong-pure-live`，132 GB）：用户确认后于 2026-09-27 删除。删除前核对过：
+  - 仓库是浅克隆加部分克隆，4 个本地分支的提交全部已在 GitHub；
+  - 只有 3 个 stash 是独有的，已打成增量包 `~/archive/pure_live-v3/codex-workspace/codex-stashes-v3.bundle`，并验证过能在 v4 仓库里完整还原；
+  - 目录里没有签名密钥。

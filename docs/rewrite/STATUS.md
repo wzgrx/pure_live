@@ -46,6 +46,7 @@
 - `.github/workflows/ci.yml`：push 到 master 和 PR 时运行 `tool/gate.sh --all`。
 - `.github/workflows/weekly.yml`：每周运行 `check_latest`。
 - `.claude/settings.json` hooks：编辑后格式化 v4 的 Dart 文件；会话结束时运行门禁。
+- `dependency_overrides` 复查：9 个越过 SDK 锁定的覆盖删掉会让 8 个包降到非最新版，保留；路径覆盖按替代进度移除（ADR 0008）。
 
 `check_latest` 首次结果（2026-09-27）：141 项中 137 项已是最新，以下 4 项落后，逐项升级并验证：
 
@@ -59,7 +60,6 @@
 还没做：
 
 - 以上 4 项升级。
-- 清理不再需要的 `dependency_overrides`。
 - 确认 CI 全绿。
 - 新增 `packages/live_platform`。
 

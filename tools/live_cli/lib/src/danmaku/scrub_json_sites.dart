@@ -279,6 +279,44 @@ class PicartoFrameScrubber extends JsonFrameScrubber {
   }
 }
 
+/// TwitCasting (spec/sites/twitcasting.md §11): the signed socket URL
+/// (`token`, `n`) in the pubsub answer and the handshake; comment authors'
+/// ids, names, screen names and images.
+class TwitcastingFrameScrubber extends JsonFrameScrubber {
+  /// Creates the scrubber.
+  new(super.detail, {super.seed});
+
+  @override
+  Set<String> get secrets => const {'profileImage', 'screenName'};
+
+  @override
+  Set<String> get ids => const {'id'};
+
+  @override
+  Set<String> get people => const {'name'};
+
+  @override
+  Uri scrubUrl(Uri url) {
+    if (!url.queryParameters.containsKey('token')) return url;
+    record('url.token', 'secret');
+    return url.replace(
+      queryParameters: {
+        for (final entry in url.queryParameters.entries)
+          entry.key: entry.key == 'token' || entry.key == 'n' ? names.secret(entry.value) : entry.value,
+      },
+    );
+  }
+
+  @override
+  Object? walk(Object? node, String path) {
+    if (node is Map && node['url'] is String && (node['url'] as String).contains('token=')) {
+      node['url'] = scrubUrl(Uri.parse(node['url'] as String)).toString();
+      return node;
+    }
+    return super.walk(node, path);
+  }
+}
+
 /// CHZZK (spec/sites/chzzk.md §11): the access token and session ids in
 /// the join, the recent-chat request and the token response; viewers' ids,
 /// hashes, nicknames, images and per-message tokens in chat items, whose

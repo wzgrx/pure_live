@@ -8,6 +8,7 @@ import 'package:live_cli/src/fixture/rules/kilakila.dart';
 import 'package:live_cli/src/fixture/rules/kuaishou.dart';
 import 'package:live_cli/src/fixture/rules/missevan.dart';
 import 'package:live_cli/src/fixture/rules/picarto.dart';
+import 'package:live_cli/src/fixture/rules/twitcasting.dart';
 import 'package:live_cli/src/fixture/scrub.dart';
 
 /// Sensitive fields per platform, one file each under rules/, taken from the
@@ -24,4 +25,5 @@ const Map<String, ScrubRules> platformRules = {
   'kuaishou': kuaishouRules,
   'missevan': missevanRules,
   'picarto': picartoRules,
+  'twitcasting': twitcastingRules,
 };

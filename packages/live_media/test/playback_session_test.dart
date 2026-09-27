@@ -75,6 +75,34 @@ void main() {
       });
     });
 
+    test('pause while the open is still resolving; play starts it again (SES-5)', () {
+      fakeAsync((async) {
+        final h = Harness(async);
+        final gate = Completer<StreamSet>();
+        var resolves = 0;
+        final request = PlaybackRequest(
+          site: 'douyu',
+          roomKey: 'douyu:1',
+          resolve: (quality) {
+            resolves++;
+            return resolves == 1 ? gate.future : h.resolve(quality);
+          },
+        );
+        unawaited(h.session.open(request));
+        h.settle();
+        unawaited(h.session.pause());
+        gate.complete(h.resolve(null));
+        h.settle();
+        expect(h.engines.isEmpty || h.engine.opened.isEmpty, isTrue, reason: 'the paused open went no further');
+        unawaited(h.session.play());
+        h.settle();
+        expect(h.engine.opened, hasLength(1));
+        h.engine.startStreaming();
+        h.settle();
+        expect(h.state.phase, PlaybackPhase.playing);
+      });
+    });
+
     test('soft stop keeps the engine for 45 s, then releases it; a new room within 45 s reuses it (SES-7, SES-8)', () {
       fakeAsync((async) {
         final h = Harness(async)..openAndPlay();

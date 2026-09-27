@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
+import 'package:pure_live_app/core/store.dart';
 
 /// A platform adapter seen through its capabilities (ADR 0010, rule 7). The
 /// first five platforms implement all of them.
@@ -62,4 +63,11 @@ final linkResolverProvider = Provider<Future<RoomRef?> Function(String input)>((
     }
     return null;
   };
+});
+
+/// Platforms to show, in the user's order: the stored list filtered to the
+/// platforms this build has adapters for (settings may name retired ones).
+final enabledPlatformsProvider = Provider<List<String>>((ref) {
+  final chosen = ref.watch(catalogPlatformsSetting).where(platformOrder.contains).toList();
+  return chosen.isEmpty ? platformOrder : chosen;
 });

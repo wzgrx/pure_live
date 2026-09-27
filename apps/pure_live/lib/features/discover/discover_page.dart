@@ -12,36 +12,39 @@ import 'package:pure_live_app/l10n/strings.dart';
 
 /// Discover: platform tabs, each with recommended rooms and areas
 /// (principles §4.1; "热门" and "分区" are one entry).
-class DiscoverPage extends StatelessWidget {
+class DiscoverPage extends ConsumerWidget {
   const new({super.key});
 
   @override
-  Widget build(BuildContext context) => DefaultTabController(
-    length: platformOrder.length,
-    child: Scaffold(
-      appBar: AppBar(
-        title: const Text(S.discover),
-        bottom: TabBar(
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          tabs: [
-            for (final id in platformOrder)
-              Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PlatformLogo(platformId: id, size: 18),
-                    const SizedBox(width: Space.s2),
-                    Text(platformNames[id]!),
-                  ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final platforms = ref.watch(enabledPlatformsProvider);
+    return DefaultTabController(
+      length: platforms.length,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(S.discover),
+          bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: [
+              for (final id in platforms)
+                Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PlatformLogo(platformId: id, size: 18),
+                      const SizedBox(width: Space.s2),
+                      Text(platformNames[id]!),
+                    ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
+        body: TabBarView(children: [for (final id in platforms) _PlatformDiscover(platform: id)]),
       ),
-      body: TabBarView(children: [for (final id in platformOrder) _PlatformDiscover(platform: id)]),
-    ),
-  );
+    );
+  }
 }
 
 class _PlatformDiscover extends StatelessWidget {

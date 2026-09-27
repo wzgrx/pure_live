@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
@@ -24,11 +25,36 @@ final class FollowRefreshResult {
 /// Refreshes the live state of every followed room and writes the results to
 /// the store; the list updates through [followsProvider].
 class FollowRefreshNotifier extends AsyncNotifier<FollowRefreshResult?> {
-  /// Requests in flight at once, so a long follow list does not trip rate limits.
-  static const concurrency = 4;
+  Timer? _timer;
 
   @override
-  Future<FollowRefreshResult?> build() => refresh();
+  Future<FollowRefreshResult?> build() {
+    final settings = ref.read(storeProvider).settings;
+    // Refresh when the app comes back (default on) and on a timer (default
+    // off), as the 3.x settings did; the interval is in minutes.
+    final lifecycle = AppLifecycleListener(
+      onResume: () {
+        if (settings.get(Settings.refreshFollowsOnResume)) unawaited(refresh());
+      },
+    );
+    void schedule() {
+      _timer?.cancel();
+      _timer = settings.get(Settings.autoRefreshFollows)
+          ? Timer.periodic(Duration(minutes: settings.get(Settings.autoRefreshInterval)), (_) => unawaited(refresh()))
+          : null;
+    }
+
+    schedule();
+    final changes = settings.changes
+        .where((id) => id == Settings.autoRefreshFollows.id || id == Settings.autoRefreshInterval.id)
+        .listen((_) => schedule());
+    ref.onDispose(() {
+      lifecycle.dispose();
+      _timer?.cancel();
+      unawaited(changes.cancel());
+    });
+    return refresh();
+  }
 
   /// Fetches every followed room's detail.
   Future<FollowRefreshResult> refresh() async {
@@ -53,6 +79,8 @@ class FollowRefreshNotifier extends AsyncNotifier<FollowRefreshResult?> {
       }
     }
 
+    // Requests in flight at once, so a long follow list does not trip rate limits.
+    final concurrency = store.settings.get(Settings.maxConcurrentRefresh);
     await Future.wait([for (var i = 0; i < concurrency; i++) worker()]);
     if (snapshots.isNotEmpty) await store.rooms.update(snapshots);
     final result = FollowRefreshResult(checked: snapshots.length, failedPlatforms: failed);

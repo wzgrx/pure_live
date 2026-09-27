@@ -21,6 +21,14 @@ class PureLiveApp extends ConsumerWidget {
       darkTheme: dark,
       themeMode: mode,
       routerConfig: ref.watch(routerProvider),
+      builder: (context, child) {
+        final media = MediaQuery.of(context);
+        final scale = media.textScaler.scale(1) * ref.watch(textScaleSetting);
+        return MediaQuery(
+          data: media.copyWith(textScaler: TextScaler.linear(scale)),
+          child: child!,
+        );
+      },
     );
   }
 }

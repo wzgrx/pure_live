@@ -101,11 +101,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   Widget _keywordResults() {
+    final platforms = ref.watch(enabledPlatformsProvider);
     if (_keyword.isEmpty) {
       return const MessageView(icon: Icons.search, title: S.searchHint);
     }
     return DefaultTabController(
-      length: platformOrder.length,
+      length: platforms.length,
       child: Column(
         children: [
           Row(
@@ -114,7 +115,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 child: TabBar(
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
-                  tabs: [for (final id in platformOrder) Tab(text: platformNames[id])],
+                  tabs: [for (final id in platforms) Tab(text: platformNames[id])],
                 ),
               ),
               Padding(
@@ -130,7 +131,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           Expanded(
             child: TabBarView(
               children: [
-                for (final id in platformOrder)
+                for (final id in platforms)
                   RoomGrid(
                     query: SearchQuery(id, _keyword),
                     where: _liveOnly ? (card) => card.state == LiveState.live : null,

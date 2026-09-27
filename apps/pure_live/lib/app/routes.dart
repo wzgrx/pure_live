@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/app/shell.dart';
+import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/backup/backup_page.dart';
 import 'package:pure_live_app/features/discover/area_page.dart';
 import 'package:pure_live_app/features/discover/discover_page.dart';
@@ -26,8 +28,9 @@ String areaLocation(String platform) => '/discover/area/${Uri.encodeComponent(pl
 /// The app's routes: four top-level destinations keep their own stacks and
 /// scroll positions; rooms open above them.
 final routerProvider = Provider<GoRouter>((ref) {
+  final startPage = ref.read(storeProvider).settings.get(Settings.startPage);
   final router = GoRouter(
-    initialLocation: '/follows',
+    initialLocation: startPage == StartPage.discover ? '/discover' : '/follows',
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(shell: shell),

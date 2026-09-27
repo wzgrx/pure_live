@@ -34,3 +34,11 @@ final pureBlackSetting = NotifierProvider<SettingNotifier<bool>, bool>(() => Set
 
 /// Compact cards on the follows page.
 final denseFollowsSetting = NotifierProvider<SettingNotifier<bool>, bool>(() => SettingNotifier(Settings.denseFollows));
+
+/// Interface text scale, multiplied with the system's.
+final textScaleSetting = NotifierProvider<SettingNotifier<double>, double>(() => SettingNotifier(Settings.textScale));
+
+/// Enabled platforms in the user's order (discover tabs, search).
+final catalogPlatformsSetting = NotifierProvider<SettingNotifier<List<String>>, List<String>>(
+  () => SettingNotifier(Settings.catalogPlatforms),
+);

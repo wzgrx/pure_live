@@ -183,6 +183,18 @@ void main() {
     expect(danmaku.chat.length, 1);
   });
 
+  test('FLT-2: a block also takes the matching lines off the video at once', () async {
+    final danmaku = create()..setPlaying(playing: true);
+    addTearDown(danmaku.dispose);
+    await _settle();
+    source.feeds.single.emit(batchOf([chatLine('Spammer', '加群领福利'), chatLine('viewer', '主播好')]));
+    await _settle();
+    expect(overlay.items.map((item) => item.text), ['加群领福利', '主播好']);
+
+    danmaku.block(BlockKind.keyword, '加群');
+    expect(overlay.items.map((item) => item.text), ['主播好']);
+  });
+
   test('INV-ROOM-11: a connection that opens after a reconnect started is closed, not used', () async {
     final gated = _GatedSource();
     final danmaku = RoomDanmaku(

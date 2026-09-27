@@ -334,7 +334,10 @@ final class RoomDanmaku {
       return;
     }
     _blocks = DanmakuBlockList(users: filters.blockedUsers, words: filters.blockedWords);
-    if (!_blocks.isEmpty) chat.removeWhere(_blocks.matches);
+    if (!_blocks.isEmpty) {
+      chat.removeWhere(_blocks.matches);
+      _overlay?.removeWhere(_blocks.matches);
+    }
   }
 
   /// Blocks [value] now, before the store confirms it: the list drops the

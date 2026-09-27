@@ -105,6 +105,13 @@ class DanmakuController {
     _update();
   }
 
+  /// Removes the items [test] matches, waiting and on screen: a block takes
+  /// effect on what is already flying (FLT-2).
+  void removeWhere(bool Function(DanmakuItem item) test) {
+    if (_engine.removeWhere(test) > 0) _host?.markNeedsPaint();
+    _update();
+  }
+
   /// Freezes the layer for [reason]; items keep their positions and new ones
   /// wait (within the waiting limits). Distinct reasons (for example `#video`
   /// and `#menu` for the REN-8 action menu) stack: the layer runs again only

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/live_danmaku.dart' show DanmakuStatus, DanmakuSystem;
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart' show Appearance, PureTheme;
@@ -128,6 +129,47 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RoomPage), findsNothing);
     expect(find.text('open'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  void background(WidgetTester tester) {
+    for (final state in [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.paused]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+  }
+
+  void foreground(WidgetTester tester) {
+    for (final state in [AppLifecycleState.hidden, AppLifecycleState.inactive, AppLifecycleState.resumed]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+  }
+
+  testWidgets('LST-4: back from the background, a chat connection that gave up connects again', (tester) async {
+    await openRoom(tester);
+    expect(source.feeds, hasLength(1));
+    const timeout = DanmakuSystem(room: 'douyu:1', session: 1, receivedAt: 1, status: DanmakuStatus.timeout);
+    source.feeds.single.emit(batchOf(const [], system: [timeout]));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    background(tester);
+    await tester.pump();
+    foreground(tester);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(source.feeds, hasLength(1), reason: 'the return settles first');
+    await tester.pump(const Duration(milliseconds: 200));
+    // A subscription's cancel completes on the real microtask queue.
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump();
+    expect(source.feeds, hasLength(2));
+    expect(source.feeds.first.closed, isTrue);
+
+    // A healthy connection is left alone.
+    background(tester);
+    await tester.pump();
+    foreground(tester);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(source.feeds, hasLength(2));
     await tester.pump(const Duration(seconds: 1));
   });
 

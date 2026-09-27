@@ -4,8 +4,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:live_ui/src/danmaku/danmaku_models.dart';
 
+// Tag characters (flag sequences). Kept out of the literal: the valid_regexps
+// lint reads patterns without unicode mode, where `\u{…}` is no escape.
+const String _tags = r'\u{E0020}-\u{E007F}';
 final RegExp _emoji = RegExp(
-  r'[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Regional_Indicator}‍︎️⃣\u{E0020}-\u{E007F}]',
+  '[\\p{Extended_Pictographic}\\p{Emoji_Modifier}\\p{Regional_Indicator}\u200d\ufe0e\ufe0f\u20e3$_tags]',
   unicode: true,
 );
 final RegExp _breaks = RegExp(r'[\r\n\t  ]+');

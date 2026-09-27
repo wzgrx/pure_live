@@ -104,6 +104,8 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   NowPlaying? _playing;
   bool _resumed = false;
   bool _surfaceReady = true;
+  AppLifecycleListener? _lifecycle;
+  Timer? _restoreDanmaku;
 
   bool get _touch => touchPlatform;
 
@@ -141,6 +143,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       }
     }
     _states = _session.states.listen(_onPlayback);
+    _lifecycle = AppLifecycleListener(onResume: _presentationRestored);
     final prefs = ref.read(danmakuPrefsProvider);
     _overlayController
       ..style = prefs.style
@@ -178,6 +181,8 @@ class _RoomPageState extends ConsumerState<RoomPage> {
   @override
   void dispose() {
     _defaultFullscreen?.cancel();
+    _restoreDanmaku?.cancel();
+    _lifecycle?.dispose();
     // PIP-4: a playing room shrinks to the mini window, which then owns the
     // session; otherwise the system stops following it.
     final playing = _playing;
@@ -290,6 +295,19 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       } else {
         _nowPlaying.detach(_session);
       }
+    });
+  }
+
+  /// LST-4, INV-ROOM-16: back from picture-in-picture or the background the
+  /// chat list is in the tree again and shows the latest lines; a chat
+  /// connection that gave up meanwhile connects again once the return has
+  /// settled (180 ms merges repeated signals). A healthy one is left alone.
+  void _presentationRestored() {
+    _restoreDanmaku?.cancel();
+    _restoreDanmaku = Timer(const Duration(milliseconds: 180), () {
+      final danmaku = _danmaku;
+      if (!mounted || danmaku == null) return;
+      if (danmaku.connection.value == ChatConnection.closed) unawaited(danmaku.reconnect());
     });
   }
 
@@ -450,6 +468,9 @@ class _RoomPageState extends ConsumerState<RoomPage> {
       if (rules == null) return;
       _rules = rules;
       _danmaku?.setFilters(filterSettingsFor(ref.read(danmakuPrefsProvider), rules));
+    });
+    ref.listen(pipProvider.select((pip) => pip.mode), (previous, next) {
+      if (previous != null && previous != PipMode.off && next == PipMode.off) _presentationRestored();
     });
     ref.listen(roomDetailProvider(_room), (_, next) {
       // A switch to a room that fails to load stops the previous room's stream.

@@ -12,6 +12,10 @@ abstract interface class OnVideoDanmaku {
   /// Removes everything waiting and on screen (room change, danmaku off).
   void clear();
 
+  /// Removes the chat lines [test] matches, waiting and on screen (a block
+  /// applies to what is already flying, FLT-2).
+  void removeWhere(bool Function(dm.DanmakuChat chat) test);
+
   /// Freezes the layer for [reason] (`#video`, `#menu`); reasons stack.
   void pause(Object reason);
 
@@ -35,6 +39,10 @@ final class ControllerOnVideo implements OnVideoDanmaku {
 
   @override
   void clear() => controller.clear();
+
+  @override
+  void removeWhere(bool Function(dm.DanmakuChat chat) test) =>
+      controller.removeWhere((item) => item.data is dm.DanmakuChat && test(item.data! as dm.DanmakuChat));
 
   @override
   void pause(Object reason) => controller.pause(reason);

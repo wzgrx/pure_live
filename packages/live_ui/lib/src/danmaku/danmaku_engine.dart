@@ -246,6 +246,27 @@ final class DanmakuEngine {
     _releaseScreen();
   }
 
+  /// Removes the items [test] matches, waiting and on screen (a block takes
+  /// effect at once, FLT-2). Returns how many left the screen.
+  int removeWhere(bool Function(DanmakuItem item) test) {
+    for (final queue in _waiting) {
+      queue.removeWhere((pending) => test(pending.item));
+    }
+    _local.removeWhere((pending) => test(pending.item));
+    var removed = 0;
+    for (final list in [_scroll, _top, _bottom]) {
+      list.removeWhere((entry) {
+        if (!test(entry.item)) return false;
+        _cache.release(entry.glyph);
+        if (entry.item.isLocal) _localVisible--;
+        removed++;
+        return true;
+      });
+    }
+    if (removed > 0) _dirty = true;
+    return removed;
+  }
+
   /// Removes what is on screen and frees every laid-out text (REN-9).
   void releaseScreen() {
     _releaseScreen();

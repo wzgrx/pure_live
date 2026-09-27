@@ -37,6 +37,18 @@ void main() {
 
   DanmakuHit only(DanmakuEngine e) => e.visibleItems.single;
 
+  test('FLT-2: removeWhere drops matching items on screen and waiting, others stay', () {
+    final e = engine()..addAll(const [DanmakuItem('加群领福利'), DanmakuItem('主播好'), DanmakuItem('加群看片')]);
+    run(e, 0.3);
+    expect(e.visibleCount, 3);
+    e.add(const DanmakuItem('加群最后一条'));
+    expect(e.removeWhere((item) => item.text.contains('加群')), 2);
+    expect(e.visibleItems.map((hit) => hit.item.text), ['主播好']);
+    run(e, 0.2);
+    expect(e.visibleItems.map((hit) => hit.item.text), ['主播好'], reason: 'the waiting one went too');
+    expect(e.removeWhere((item) => false), 0);
+  });
+
   group('motion', () {
     test('speed is px/s whatever the frame rate', () {
       for (final fps in [30, 60, 90, 144]) {

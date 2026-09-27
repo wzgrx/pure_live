@@ -80,6 +80,10 @@ final class RecordingOnVideo implements OnVideoDanmaku {
   }
 
   @override
+  void removeWhere(bool Function(DanmakuChat chat) test) =>
+      items.removeWhere((item) => item.data is DanmakuChat && test(item.data! as DanmakuChat));
+
+  @override
   DanmakuHit? itemAtGlobal(Offset globalPosition) => null;
 
   @override

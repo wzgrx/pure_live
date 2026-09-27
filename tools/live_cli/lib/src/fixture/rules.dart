@@ -3,6 +3,7 @@ import 'package:live_cli/src/fixture/rules/douyin.dart';
 import 'package:live_cli/src/fixture/rules/douyu.dart';
 import 'package:live_cli/src/fixture/rules/huya.dart';
 import 'package:live_cli/src/fixture/rules/kuaishou.dart';
+import 'package:live_cli/src/fixture/rules/weibo.dart';
 import 'package:live_cli/src/fixture/scrub.dart';
 
 /// Sensitive fields per platform, one file each under rules/, taken from the
@@ -14,4 +15,5 @@ const Map<String, ScrubRules> platformRules = {
   'douyu': douyuRules,
   'huya': huyaRules,
   'kuaishou': kuaishouRules,
+  'weibo': weiboRules,
 };

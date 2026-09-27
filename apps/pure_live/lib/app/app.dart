@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/refresh_rate.dart';
 import 'package:pure_live_app/core/share_intake.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/core/tv.dart';
+import 'package:pure_live_app/features/accounts/douyu_keeper.dart';
 import 'package:pure_live_app/features/fonts/fonts.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_share.dart';
@@ -35,6 +36,8 @@ class PureLiveApp extends ConsumerWidget {
       ..watch(chosenFontsProvider)
       // Scheduled recordings resume their timers (F-IPTV-10).
       ..watch(recordScheduleStartupProvider)
+      // Renews the Douyu login before it runs out (spec/sites/douyu.md §8.2).
+      ..watch(douyuSessionKeeperProvider)
       // Known before the first room opens (Q-2); listened, so a network
       // change does not rebuild the app.
       ..listen(networkKindProvider, (_, _) {});

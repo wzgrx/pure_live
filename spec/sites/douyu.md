@@ -582,7 +582,7 @@ len = 8 + body 的 UTF-8 字节数 + 1
 
 **v4 实现状态（2026-09-28）**：
 - 令牌、到期、五种状态、续期凭据、合并 Set-Cookie 在 `DouyuSession`（packages/live_core/lib/src/sites/douyu/douyu_session.dart），续期请求是 `DouyuSite.renewSession`：只返回合并后的 Cookie，没有 Set-Cookie 或合并后没有令牌时返回 null，由调用方保留旧 Cookie；网络错误抛 NetworkFailure（手动续期要告诉用户）。
-- 账号页提供“立即续期”和状态显示（§8.4）。**取流前的自动续期还没有接入**：`CookieVault` 只读，适配器拿不到单独保存的 LTP0、dy_did，也写不回续期后的 Cookie；接入需要一个可写的凭据接口 [待实现]。
+- 账号页提供“立即续期”和状态显示（§8.4）。**自动续期（2026-09-28）**：不在适配器里做（`CookieVault` 只读），由应用在启动时和每 6 小时检查一次：登录剩不到一天（§8.2 `shouldRenew`）且有 LTP0、dy_did 时静默续期并保存，失败保留原登录、只记日志；这样取流时拿到的总是有效会话。
 
 ### 8.3 LTP0 只发给 passport
 

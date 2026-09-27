@@ -1,0 +1,28 @@
+{
+  "themeMode": "Light",
+  "language": "简体中文",
+  "enableDynamicTheme": true,
+  "danmakuSpeed": 150.0,
+  "danmakuFontSize": 18.0,
+  "pipDanmaNoEmojiMode": true,
+  "preferResolution": "超清",
+  "videoPlayerKey": "ijk",
+  "enableHighRefreshRate": true,
+  "historyLimit": 0,
+  "shieldList": ["刷屏"],
+  "hotAreasList": ["bilibili", "douyu", "huya"],
+  "preferPlatform": "cc",
+  "favoriteRooms": [
+    "{\"roomId\":\"7734200\",\"platform\":\"bilibili\",\"nick\":\"Old format A\",\"title\":\"t\",\"status\":true}",
+    "{\"roomId\":\"288016\",\"platform\":\"douyu\",\"nick\":\"Old format B\",\"status\":false}",
+    "not json at all"
+  ],
+  "historyRooms": "{\"list\":[{\"roomId\":\"288016\",\"platform\":\"douyu\",\"nick\":\"Old format B\"},{\"roomId\":\"7734200\",\"platform\":\"bilibili\",\"nick\":\"Old format A\"}]}",
+  "custom_tags_data": {
+    "tags": [{"id": "legacy-1", "name": "Old tag", "description": "", "order": 0}],
+    "roomTagsMap": {"288016": ["legacy-1"]}
+  },
+  "bilibiliCookie": "SESSDATA=legacy",
+  "taobaoCookie": "dropped",
+  "someRemovedSetting": 1
+}

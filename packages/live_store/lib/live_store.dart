@@ -1,8 +1,13 @@
 /// Storage of Pure Live v4 (spec/modules/store.md, ADR 0004): the drift
-/// database with typed stores, the settings registry and encrypted secrets.
-/// Pure Dart.
+/// database with typed stores, the settings registry, encrypted secrets,
+/// backups and share codes. Pure Dart.
 library;
 
+export 'src/backup/backup_service.dart' show BackupService, RestoreMode;
+export 'src/backup/import_plan.dart' show ImportPlan;
+export 'src/backup/import_report.dart' show ImportCount, ImportIssue, ImportReport;
+export 'src/backup/secret_envelope.dart' show WrongPassphraseException;
+export 'src/backup/v4_format.dart' show BackupScope, BackupTooNewException;
 export 'src/block_rules.dart' show BlockKind, BlockRule, BlockRuleStore;
 export 'src/follow_areas.dart' show FollowAreaStore, FollowedArea;
 export 'src/follows.dart' show FollowSource, FollowStore, FollowedRoom;
@@ -30,5 +35,6 @@ export 'src/settings/setting.dart'
         StringSetting;
 export 'src/settings/settings_store.dart' show SettingsStore;
 export 'src/settings/values.dart';
+export 'src/share_code.dart' show ShareCode;
 export 'src/store_log.dart' show StoreLog;
 export 'src/tags.dart' show Tag, TagNameException, TagStore;

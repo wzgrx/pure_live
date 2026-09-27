@@ -45,6 +45,7 @@ final class RecordSettings {
     this.splitMegabytes = 0,
     this.remuxToMp4 = true,
     this.keepSourceAfterRemux = false,
+    this.storageLimitMegabytes = 0,
   });
 
   /// `record.defaultQuality`.
@@ -95,6 +96,13 @@ final class RecordSettings {
   /// `record.keepSourceAfterRemux`.
   final bool keepSourceAfterRemux;
 
+  /// Size cap of the recording root in MiB, 0 = none: `record.cacheLimitMB`
+  /// while `record.cacheLimitEnabled` is on (spec §15).
+  final int storageLimitMegabytes;
+
+  /// The size cap in bytes, or null when off.
+  int? get storageLimitBytes => storageLimitMegabytes <= 0 ? null : storageLimitMegabytes * 1024 * 1024;
+
   /// Split duration, or null when off.
   Duration? get splitDuration => splitMinutes <= 0 ? null : Duration(minutes: splitMinutes);
 
@@ -126,6 +134,7 @@ final class RecordSettings {
       splitMegabytes: splitMegabytes <= 0 ? 0 : (splitMegabytes < 64 ? 64 : splitMegabytes),
       remuxToMp4: remuxToMp4,
       keepSourceAfterRemux: keepSourceAfterRemux,
+      storageLimitMegabytes: storageLimitMegabytes <= 0 ? 0 : storageLimitMegabytes,
     );
   }
 
@@ -147,6 +156,7 @@ final class RecordSettings {
     int? splitMegabytes,
     bool? remuxToMp4,
     bool? keepSourceAfterRemux,
+    int? storageLimitMegabytes,
   }) => RecordSettings(
     defaultQuality: defaultQuality ?? this.defaultQuality,
     maxConcurrent: maxConcurrent ?? this.maxConcurrent,
@@ -164,5 +174,6 @@ final class RecordSettings {
     splitMegabytes: splitMegabytes ?? this.splitMegabytes,
     remuxToMp4: remuxToMp4 ?? this.remuxToMp4,
     keepSourceAfterRemux: keepSourceAfterRemux ?? this.keepSourceAfterRemux,
+    storageLimitMegabytes: storageLimitMegabytes ?? this.storageLimitMegabytes,
   );
 }

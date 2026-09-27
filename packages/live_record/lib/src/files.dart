@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// A file open for sequential writing.
@@ -40,6 +41,35 @@ final class RecordFileExists implements Exception {
 
   @override
   String toString() => 'RecordFileExists($path)';
+}
+
+/// A file found by [RecordFiles.scan].
+@immutable
+final class RecordFileEntry {
+  /// Creates an entry.
+  const new(this.path, this.size, this.modified);
+
+  /// Full path.
+  final String path;
+
+  /// Length in bytes.
+  final int size;
+
+  /// Last modification time.
+  final DateTime modified;
+}
+
+/// Everything under one directory, from one scan (spec §15 storage limit).
+@immutable
+final class RecordTree {
+  /// Creates a tree.
+  const new({this.files = const [], this.directories = const []});
+
+  /// Every file, at any depth.
+  final List<RecordFileEntry> files;
+
+  /// Every directory below the scanned one, at any depth (not the scanned one itself).
+  final List<String> directories;
 }
 
 /// File operations the recorder uses. [IoRecordFiles] works on disk;
@@ -82,6 +112,13 @@ abstract interface class RecordFiles {
 
   /// Names (not paths) of the files directly inside [directory]; empty when it does not exist.
   Future<List<String>> list(String directory);
+
+  /// Every file and directory below [directory], without following links;
+  /// empty when it does not exist. Files that vanish during the scan are left out.
+  Future<RecordTree> scan(String directory);
+
+  /// Deletes the directory [path] when it is empty; returns whether it did.
+  Future<bool> deleteDirectoryIfEmpty(String path);
 }
 
 /// [RecordFiles] on the local file system (`dart:io`).
@@ -172,6 +209,43 @@ final class IoRecordFiles implements RecordFiles {
       await for (final entity in dir.list(followLinks: false))
         if (entity is File) p.basename(entity.path),
     ];
+  }
+
+  @override
+  Future<RecordTree> scan(String directory) async {
+    final dir = Directory(directory);
+    if (!dir.existsSync()) return const RecordTree();
+    final files = <RecordFileEntry>[];
+    final directories = <String>[];
+    try {
+      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        if (entity is Directory) {
+          directories.add(entity.path);
+        } else if (entity is File) {
+          // A file renamed or deleted by a writer since the listing stats as notFound.
+          final stat = entity.statSync();
+          if (stat.type == FileSystemEntityType.file) {
+            files.add(RecordFileEntry(entity.path, stat.size, stat.modified));
+          }
+        }
+      }
+    } on FileSystemException {
+      // A directory vanished during the listing: use what was found.
+    }
+    return RecordTree(files: files, directories: directories);
+  }
+
+  @override
+  Future<bool> deleteDirectoryIfEmpty(String path) async {
+    final dir = Directory(path);
+    try {
+      if (!dir.existsSync() || !await dir.list(followLinks: false).isEmpty) return false;
+      await dir.delete();
+      return true;
+    } on FileSystemException {
+      // In use or filled meanwhile: keep it.
+      return false;
+    }
   }
 }
 

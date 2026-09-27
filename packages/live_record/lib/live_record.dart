@@ -21,5 +21,6 @@ export 'src/retry.dart';
 export 'src/rooms.dart';
 export 'src/session.dart';
 export 'src/settings.dart';
+export 'src/storage.dart';
 export 'src/store.dart';
 export 'src/task.dart';

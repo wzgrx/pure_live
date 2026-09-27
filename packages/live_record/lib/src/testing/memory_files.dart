@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
 import 'package:live_record/src/files.dart';
 import 'package:path/path.dart' as p;
 
@@ -10,6 +11,7 @@ import 'package:path/path.dart' as p;
 final class MemoryRecordFiles implements RecordFiles {
   final _files = <String, BytesBuilder>{};
   final _directories = <String>{};
+  final _modified = <String, DateTime>{};
 
   /// Error thrown by the next writes, when set.
   FileSystemException? writeError;
@@ -29,12 +31,33 @@ final class MemoryRecordFiles implements RecordFiles {
   /// Content of [path], or null.
   Uint8List? bytesOf(String path) => _files[p.normalize(path)]?.toBytes();
 
-  /// Writes [bytes] to [path] directly (test setup).
-  void put(String path, List<int> bytes) {
-    final key = p.normalize(path);
-    _directories.add(p.dirname(key));
-    _files[key] = BytesBuilder(copy: false)..add(bytes);
+  /// Paths that fail to delete (a file held open by another program).
+  final Set<String> locked = {};
+
+  /// Every directory that exists (created explicitly or for a file, with its parents).
+  Set<String> get directories => {..._directories};
+
+  void _addDirectory(String key) {
+    var dir = key;
+    while (_directories.add(dir)) {
+      final parent = p.dirname(dir);
+      if (parent == dir) break;
+      dir = parent;
+    }
   }
+
+  /// Writes [bytes] to [path] directly (test setup), modified at [modified] (default now).
+  void put(String path, List<int> bytes, {DateTime? modified}) {
+    final key = p.normalize(path);
+    _addDirectory(p.dirname(key));
+    _files[key] = BytesBuilder(copy: false)..add(bytes);
+    _modified[key] = modified ?? clock.now();
+  }
+
+  /// Last modification time of [path], or null.
+  DateTime? modifiedOf(String path) => _modified[p.normalize(path)];
+
+  void _touch(String key) => _modified[key] = clock.now();
 
   Future<void> _gate() async {
     final stalled = stall;
@@ -48,8 +71,9 @@ final class MemoryRecordFiles implements RecordFiles {
     final key = p.normalize(path);
     if (_files.containsKey(key)) throw RecordFileExists(path);
     await _gate();
-    _directories.add(p.dirname(key));
+    _addDirectory(p.dirname(key));
     _files[key] = BytesBuilder(copy: false);
+    _touch(key);
     openSinks.add(key);
     return _MemorySink(this, key);
   }
@@ -85,6 +109,7 @@ final class MemoryRecordFiles implements RecordFiles {
     final builder = _files[p.normalize(path)];
     if (builder == null) throw FileSystemException('No such file', path, const OSError('No such file', 2));
     builder.add(bytes);
+    _touch(p.normalize(path));
   }
 
   @override
@@ -93,6 +118,7 @@ final class MemoryRecordFiles implements RecordFiles {
     final bytes = bytesOf(key);
     if (bytes == null) throw FileSystemException('No such file', path, const OSError('No such file', 2));
     _files[key] = BytesBuilder(copy: false)..add(Uint8List.sublistView(bytes, 0, length));
+    _touch(key);
   }
 
   @override
@@ -101,18 +127,22 @@ final class MemoryRecordFiles implements RecordFiles {
     final builder = _files.remove(source);
     if (builder == null) throw FileSystemException('No such file', from, const OSError('No such file', 2));
     final target = p.normalize(to);
-    _directories.add(p.dirname(target));
+    _addDirectory(p.dirname(target));
     _files[target] = builder;
+    _modified[target] = _modified.remove(source) ?? clock.now();
   }
 
   @override
   Future<void> delete(String path) async {
-    _files.remove(p.normalize(path));
+    final key = p.normalize(path);
+    if (locked.contains(key)) throw FileSystemException('In use', path, const OSError('In use', 32));
+    _files.remove(key);
+    _modified.remove(key);
   }
 
   @override
   Future<void> createDirectory(String path) async {
-    _directories.add(p.normalize(path));
+    _addDirectory(p.normalize(path));
   }
 
   @override
@@ -122,6 +152,32 @@ final class MemoryRecordFiles implements RecordFiles {
       for (final path in _files.keys)
         if (p.dirname(path) == key) p.basename(path),
     ];
+  }
+
+  @override
+  Future<RecordTree> scan(String directory) async {
+    final root = p.normalize(directory);
+    bool below(String path) => p.isWithin(root, path);
+    return RecordTree(
+      files: [
+        for (final MapEntry(key: path, value: bytes) in _files.entries)
+          if (below(path)) RecordFileEntry(path, bytes.length, _modified[path] ?? clock.now()),
+      ],
+      directories: [
+        for (final path in directories)
+          if (below(path)) path,
+      ],
+    );
+  }
+
+  @override
+  Future<bool> deleteDirectoryIfEmpty(String path) async {
+    final key = p.normalize(path);
+    final all = directories;
+    if (!all.contains(key)) return false;
+    if (_files.keys.any((file) => p.isWithin(key, file)) || all.any((dir) => p.isWithin(key, dir))) return false;
+    _directories.remove(key);
+    return true;
   }
 }
 
@@ -142,6 +198,7 @@ final class _MemorySink implements RecordSink {
     final builder = _files._files[path];
     if (builder == null) throw FileSystemException('Deleted while open', path);
     builder.add(Uint8List.fromList(bytes));
+    _files._touch(path);
   }
 
   @override

@@ -12,6 +12,8 @@ import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/recording/record_schedule.dart';
+import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// State in words (spec/product.md F-REC-01).
@@ -208,6 +210,7 @@ class RecordingPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final manager = ref.watch(recordManagerProvider);
+    final schedule = ref.watch(recordScheduleProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('录制中心'),
@@ -229,17 +232,24 @@ class RecordingPage extends ConsumerWidget {
         initialData: manager.tasks,
         builder: (context, snapshot) {
           final tasks = snapshot.data ?? const <RecordTask>[];
-          if (tasks.isEmpty) {
+          if (tasks.isEmpty && schedule.isEmpty) {
             return const MessageView(
               icon: Icons.fiber_manual_record_outlined,
               title: '还没有录制任务',
               message: '在直播间点录制，或者从关注里添加。开启开播监控后，主播开播会自动开始录制。',
             );
           }
-          return ListView.builder(
+          return ListView(
             padding: const EdgeInsets.only(bottom: 96),
-            itemCount: tasks.length,
-            itemBuilder: (context, index) => _WatchedTask(initial: tasks[index]),
+            children: [
+              // F-IPTV-10: booked windows first.
+              if (schedule.isNotEmpty) ...[
+                const SettingsHeader('定时录制'),
+                for (final item in schedule) _ScheduledTile(item: item),
+                if (tasks.isNotEmpty) const SettingsHeader('录制任务'),
+              ],
+              for (final task in tasks) _WatchedTask(initial: task),
+            ],
           );
         },
       ),
@@ -390,6 +400,38 @@ class RecordTaskTile extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ScheduledTile extends ConsumerWidget {
+  const new({required this.item});
+
+  final ScheduledRecording item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = DateTime.now();
+    final running = !now.isBefore(item.start.toLocal()) && now.isBefore(item.stop.toLocal());
+    String at(DateTime time) {
+      final local = time.toLocal();
+      String two(int value) => value.toString().padLeft(2, '0');
+      final day = local.day == now.day && local.month == now.month ? '' : '${local.month}月${local.day}日 ';
+      return '$day${two(local.hour)}:${two(local.minute)}';
+    }
+
+    return ListTile(
+      leading: Icon(
+        running ? Icons.fiber_manual_record : Icons.schedule,
+        color: running ? Theme.of(context).colorScheme.error : null,
+      ),
+      title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text('${item.room.roomId} · ${at(item.start)}–${at(item.stop)}${running ? ' · 录制中' : ''}'),
+      trailing: IconButton(
+        tooltip: '取消定时录制',
+        icon: const Icon(Icons.close),
+        onPressed: () => unawaited(ref.read(recordScheduleProvider.notifier).remove(item)),
       ),
     );
   }

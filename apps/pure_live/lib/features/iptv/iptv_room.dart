@@ -15,6 +15,7 @@ import 'package:pure_live_app/features/alerts/alert_tiles.dart';
 import 'package:pure_live_app/features/iptv/iptv_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_widgets.dart';
+import 'package:pure_live_app/features/recording/record_schedule.dart';
 import 'package:pure_live_app/features/room/playback.dart';
 
 /// A channel with its sources and guide match.
@@ -380,7 +381,14 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
                 ProgrammePhase.past when available => const Icon(Icons.replay, size: 20),
                 ProgrammePhase.past => Text('不可回看', style: theme.textTheme.bodySmall),
                 // F-IPTV-09: a reminder 1 minute before the start.
-                ProgrammePhase.upcoming => ProgrammeReminderButton(room: widget.room, programme: programme),
+                ProgrammePhase.upcoming => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ProgrammeReminderButton(room: widget.room, programme: programme),
+                    // F-IPTV-10: record this programme when it airs.
+                    ProgrammeRecordButton(room: widget.room, programme: programme),
+                  ],
+                ),
               };
               return SizedBox(
                 height: _rowHeight,

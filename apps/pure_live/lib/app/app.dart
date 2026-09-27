@@ -13,6 +13,7 @@ import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/fonts/fonts.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_share.dart';
+import 'package:pure_live_app/features/recording/record_schedule.dart';
 import 'package:pure_live_app/features/system/mini_player_host.dart';
 import 'package:pure_live_app/features/system/system_integration.dart';
 import 'package:pure_live_app/l10n/strings.dart';
@@ -32,6 +33,8 @@ class PureLiveApp extends ConsumerWidget {
       ..watch(systemIntegrationProvider)
       // Registers the chosen interface and danmaku fonts (F-SET-01, F-DM-06).
       ..watch(chosenFontsProvider)
+      // Scheduled recordings resume their timers (F-IPTV-10).
+      ..watch(recordScheduleStartupProvider)
       // Known before the first room opens (Q-2); listened, so a network
       // change does not rebuild the app.
       ..listen(networkKindProvider, (_, _) {});

@@ -253,4 +253,36 @@ void main() {
     expect(body, isNot(contains('abcdef123456')));
     expect(body, contains('setPageViewLog'));
   });
+  test('expiry-prefixed signatures keep their leading Unix time', () {
+    final scrubber = Scrubber(const ScrubRules(queryParams: {'auth_key': ScrubRule.expiryPrefixed}), seed: 9);
+    const url = 'https://cdn.example.test/a.flv?auth_key=1790524556-70898322bb7841b4880225fe477b21dd-0-421b9a26';
+    final scrubbed = Uri.parse(scrubber.scrubQuery(url)).queryParameters['auth_key']!;
+    expect(scrubbed, startsWith('1790524556-'));
+    expect(scrubbed, hasLength('1790524556-70898322bb7841b4880225fe477b21dd-0-421b9a26'.length));
+    expect(scrubbed, isNot(contains('70898322bb7841b4880225fe477b21dd')));
+    expect(scrubber.leaks(scrubbed), isEmpty);
+    // Without the time prefix the whole value is a secret.
+    final plain = Scrubber(const ScrubRules(queryParams: {'k': ScrubRule.expiryPrefixed}), seed: 9);
+    expect(plain.scrubQuery('k=abcdefabcdef'), isNot('k=abcdefabcdef'));
+  });
+
+  test('text patterns replace their first group in text and JSON strings', () {
+    final scrubber = Scrubber(
+      const ScrubRules(
+        textPatterns: {'USER-IP="([^"]+)"': ScrubRule.secret, r'/v1/playlist/([A-Za-z0-9_-]+)\.m3u8': ScrubRule.secret},
+      ),
+      seed: 10,
+    );
+    const playlist =
+        '#EXT-X-TWITCH-INFO:NODE="a",USER-IP="203.0.113.9",B="false"\n'
+        'https://use22.playlist.ttvnw.net/v1/playlist/CsQFyMkKqLm2CQDJ.m3u8\n';
+    final text = scrubber.scrubText(playlist);
+    expect(text, isNot(contains('203.0.113.9')));
+    expect(text, isNot(contains('CsQFyMkKqLm2CQDJ')));
+    expect(text, contains('USER-IP="'));
+    expect(text, contains('/v1/playlist/'));
+    final json = scrubber.scrubJson({'url': 'https://x.test/v1/playlist/CsQFyMkKqLm2CQDJ.m3u8'})! as Map;
+    expect(json['url'], isNot(contains('CsQFyMkKqLm2CQDJ')));
+    expect(scrubber.leaks(text + (json['url'] as String)), isEmpty);
+  });
 }

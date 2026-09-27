@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S01-cate-online",
+  "capturedAt": "2026-09-27T16:26:36.206686Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.cc.163.com/v1/wapcc/gamecategory?catetype=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://cc.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 16:26:36 GMT",
+      "content-encoding": "gzip",
+      "x-app-server-addr": "7.60.1.55:10000",
+      "vary": "Origin",
+      "x-apisix-traceid": "e36f3b7449617161",
+      "content-type": "application/json",
+      "server": "APISIX",
+      "x-ms-service": "wapcc",
+      "x-b3-traceid": "e36f3b7449617161",
+      "x-b3-sampled": "0",
+      "x-b3-version": "1.1.68",
+      "x-apisix-ms-service": "wapcc",
+      "x-apisix-response-start": "1790526396743",
+      "x-apisix-routename": "webccms consul.api.wapcc"
+    }
+  },
+  "raw": {
+    "sha256": "854f75400acedaf02fee1eb4782257c7eeb79c4a3158ce19f622481dfbbe016a",
+    "length": 6672
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

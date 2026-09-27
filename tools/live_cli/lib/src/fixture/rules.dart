@@ -1,4 +1,5 @@
 import 'package:live_cli/src/fixture/rules/bilibili.dart';
+import 'package:live_cli/src/fixture/rules/cc.dart';
 import 'package:live_cli/src/fixture/rules/douyin.dart';
 import 'package:live_cli/src/fixture/rules/douyu.dart';
 import 'package:live_cli/src/fixture/rules/huya.dart';
@@ -10,6 +11,7 @@ import 'package:live_cli/src/fixture/scrub.dart';
 /// Set-Cookie values and Authorization headers are always scrubbed.
 const Map<String, ScrubRules> platformRules = {
   'bilibili': bilibiliRules,
+  'cc': ccRules,
   'douyin': douyinRules,
   'douyu': douyuRules,
   'huya': huyaRules,

@@ -14,6 +14,12 @@ enum ScrubRule {
   /// Public data at a specific JSON path that a key rule would otherwise
   /// scrub (an anchor's id under the same key name as a viewer's).
   keep,
+
+  /// A signature that starts with its Unix time (`<seconds>-<rest>`, the
+  /// Aliyun `auth_key` type A, CC `relaySecret`): the leading time and its
+  /// separator stay real because lease timing is derived from them; the
+  /// rest is replaced like [secret]. Values without the prefix are [secret].
+  expiryPrefixed,
 }
 
 /// What a platform declares as sensitive.
@@ -24,6 +30,7 @@ class ScrubRules {
     this.jsonPaths = const {},
     this.queryParams = const {},
     this.responseHeaders = const {},
+    this.textPatterns = const {},
   });
 
   /// JSON object keys (at any depth) whose values are replaced.
@@ -43,6 +50,12 @@ class ScrubRules {
   /// [jsonPaths] instead. Any header still holding a value replaced elsewhere
   /// gets the same synthetic value (a signature echoed back, for example).
   final Map<String, ScrubRule> responseHeaders;
+
+  /// Regular expressions (source text) whose first group is replaced in text
+  /// bodies and JSON string values, for values that are neither a JSON key
+  /// nor a query parameter: an HLS attribute (`USER-IP="…"`) or a signed
+  /// path segment (`/v1/playlist/<token>.m3u8`).
+  final Map<String, ScrubRule> textPatterns;
 }
 
 /// One replacement, recorded in meta.json without the original value.
@@ -70,13 +83,15 @@ class Scrubber {
         for (final entry in rules.jsonPaths.entries)
           RegExp('^${RegExp.escape(entry.key).replaceAll(r'\[\*\]', r'\[\d+\]').replaceAll(r'\*', r'[^.\[\]]+')}\$'):
               entry.value,
-      };
+      },
+      _patterns = {for (final entry in rules.textPatterns.entries) RegExp(entry.key): entry.value};
 
   /// Platform rules.
   final ScrubRules rules;
 
   final Random _random;
   final Map<RegExp, ScrubRule> _paths;
+  final Map<RegExp, ScrubRule> _patterns;
   final Map<String, String> _synthetic = {};
   final Map<String, String> _encoded = {};
   final Map<String, String> _people = {};
@@ -105,8 +120,20 @@ class Scrubber {
     if (rule == ScrubRule.person && value.runes.any((rune) => rune > 0x7f)) {
       return _people.putIfAbsent(value, () => '观众${_people.length + 1}');
     }
+    if (rule == ScrubRule.expiryPrefixed) {
+      final prefixed = _expiryPrefix.firstMatch(value);
+      if (prefixed != null) {
+        final tail = prefixed.group(2)!;
+        final synthetic = _synthetic.putIfAbsent(tail, () => _sameShape(tail));
+        if (tail.length > 1) _originals.add(tail);
+        return _synthetic.putIfAbsent(value, () => '${prefixed.group(1)}$synthetic');
+      }
+    }
     return _synthetic.putIfAbsent(value, () => _sameShape(value));
   }
+
+  /// `<9 to 11 digit Unix seconds><separator>` and the rest.
+  static final _expiryPrefix = RegExp(r'^(\d{9,11}[-_])(.+)$');
 
   String _sameShape(String value) {
     for (var attempt = 0; attempt < 8; attempt++) {
@@ -188,7 +215,28 @@ class Scrubber {
         // Not embedded JSON; fall through to URL scrubbing.
       }
     }
-    return scrubQuery(value, path);
+    return scrubPatterns(scrubQuery(value, path), path);
+  }
+
+  /// Replaces the first group of every [ScrubRules.textPatterns] match in
+  /// [text].
+  String scrubPatterns(String text, [String where = 'text']) {
+    var result = text;
+    for (final MapEntry(key: pattern, value: rule) in _patterns.entries) {
+      result = result.replaceAllMapped(pattern, (match) {
+        final value = match.group(1);
+        if (value == null || value.isEmpty) return match.group(0)!;
+        final whole = match.group(0)!;
+        // The group's first occurrence inside the match (RegExpMatch has no
+        // group offsets).
+        final offset = match.input.indexOf(value, match.start) - match.start;
+        final replaced = replace(value, rule, '$where:/${pattern.pattern}/');
+        return offset < 0
+            ? whole.replaceFirst(value, replaced)
+            : '${whole.substring(0, offset)}$replaced${whole.substring(offset + value.length)}';
+      });
+    }
+    return result;
   }
 
   // Separators: ? & ; (so &amp; works) and the JSON escape \u0026.
@@ -260,7 +308,7 @@ class Scrubber {
       }
       return '${match.group(1)}${replace(match.group(3)!, rule, 'text:$key')}';
     });
-    return scrubQuery(pairs(pairs(text, _textPair, '"'), _htmlPair, '&quot;'), 'text');
+    return scrubPatterns(scrubQuery(pairs(pairs(text, _textPair, '"'), _htmlPair, '&quot;'), 'text'));
   }
 
   /// Records that [where] was cleaned by [replaceKnown] rather than a rule.

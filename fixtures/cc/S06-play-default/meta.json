@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S06-play-default",
+  "capturedAt": "2026-09-27T16:30:20.396082Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://vapi.cc.163.com/video_play_url/341438909?src=webcc_h5&vbrmode=1&use_new_vbrmap=1&secure=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://cc.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-route-server-addr": "7.56.97.88",
+      "date": "Sun, 27 Sep 2026 16:30:20 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "vary": "Origin",
+      "x-app-server-addr": "7.56.106.52:10000",
+      "x-apisix-traceid": "b011c62f533d2b04",
+      "content-type": "application/json",
+      "x-route-request-start": "1790526620863",
+      "server": "APISIX",
+      "x-b3-traceid": "b011c62f533d2b04",
+      "x-ms-service": "vstream",
+      "x-route-response-start": "1790526620900",
+      "x-b3-version": "1.1.43",
+      "x-apisix-ms-service": "vstream",
+      "x-apisix-response-start": "1790526620905",
+      "x-apisix-routename": "vidoemsgateway"
+    }
+  },
+  "raw": {
+    "sha256": "1cd40eea8cb160ff1798022e1b10d752da07e8875782ec6aae7cec815a183203",
+    "length": 1351
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.videourl:volcSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.videourl:relaySecret",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.videourl:auth_key",
+      "rule": "expiryPrefixed"
+    },
+    {
+      "where": "$.bakvideourl:auth_key",
+      "rule": "expiryPrefixed"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

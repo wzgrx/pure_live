@@ -10,6 +10,8 @@ export 'src/site.dart';
 export 'src/site_error.dart';
 export 'src/sites/bilibili/bilibili_parse.dart';
 export 'src/sites/bilibili/bilibili_site.dart';
+export 'src/sites/cc/cc_parse.dart';
+export 'src/sites/cc/cc_site.dart';
 export 'src/sites/douyin/douyin_parse.dart';
 export 'src/sites/douyin/douyin_site.dart';
 export 'src/sites/douyu/douyu_parse.dart';

@@ -68,6 +68,9 @@ class _PlatformDiscover extends StatelessWidget {
   Widget build(BuildContext context) => DefaultTabController(
     length: 2,
     child: Column(
+      // Full width, so the scrollable tab bar starts at the edge instead of
+      // shrinking to its tabs and sitting in the middle.
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TabBar(
           isScrollable: true,

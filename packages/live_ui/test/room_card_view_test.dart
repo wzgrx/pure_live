@@ -27,6 +27,8 @@ void main() {
           onTap: () => taps++,
           onMenu: () => menus++,
         ),
+        // The test font draws every glyph a full em wide: room for both labels.
+        width: 260,
       ),
     );
     expect(find.text('直播 01:24'), findsOneWidget);
@@ -37,6 +39,61 @@ void main() {
     await tester.longPress(find.byType(RoomCardView));
     expect((taps, menus), (1, 1));
     expect(find.bySemanticsLabel('主播，直播中，标题'), findsOneWidget);
+  });
+
+  testWidgets('at twice the text size the live badge and the audience stay side by side', (tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: host(
+          const RoomCardView(
+            platformId: 'douyu',
+            anchorName: '主播',
+            title: '标题',
+            isLive: true,
+            // The test font draws every glyph a full em wide.
+            audience: '1.2万',
+            liveFor: '01:24',
+          ),
+          width: 172,
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text('直播'), findsOneWidget, reason: 'the duration goes first, the word stays');
+    final badge = tester.getRect(find.byType(LiveBadge));
+    final audience = tester.getRect(find.byType(CoverLabel));
+    final cover = tester.getRect(find.byType(AspectRatio));
+    expect(badge.right, lessThanOrEqualTo(audience.left), reason: 'no overlap');
+    expect(badge.left, greaterThanOrEqualTo(cover.left));
+    expect(audience.right, lessThanOrEqualTo(cover.right));
+  });
+
+  testWidgets("an offline row's initial reads on its circle in light and dark", (tester) async {
+    double contrast(Color a, Color b) {
+      final (la, lb) = (a.computeLuminance(), b.computeLuminance());
+      return (la > lb ? la + 0.05 : lb + 0.05) / (la > lb ? lb + 0.05 : la + 0.05);
+    }
+
+    for (final appearance in [Appearance.light, Appearance.dark]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: PureTheme.of(appearance, platform: TargetPlatform.android),
+          home: const Scaffold(
+            body: OfflineRoomRow(platformId: 'douyu', anchorName: '青柠'),
+          ),
+        ),
+      );
+      final circle = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+      final initial = tester.widget<RichText>(
+        find.descendant(of: find.byType(CircleAvatar), matching: find.byType(RichText)),
+      );
+      expect(
+        contrast(initial.text.style!.color!, circle.backgroundColor!),
+        greaterThanOrEqualTo(4.5),
+        reason: '$appearance (principles §2.2: text at least 4.5:1)',
+      );
+    }
   });
 
   testWidgets('compact density puts name and title on one line', (tester) async {

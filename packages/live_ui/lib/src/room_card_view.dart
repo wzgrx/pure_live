@@ -138,14 +138,26 @@ class RoomCardView extends StatelessWidget {
                         ),
                         if (recording)
                           const Positioned(right: Space.s1 + 2, top: Space.s1 + 2, child: RecordingBadge()),
-                        if (isLive)
+                        // One row, so large text shortens the badge instead
+                        // of drawing it under the audience.
+                        if (isLive || audience != null)
                           Positioned(
                             left: Space.s1 + 2,
+                            right: Space.s1 + 2,
                             bottom: Space.s1 + 2,
-                            child: LiveBadge(duration: liveFor),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Align(
+                                    alignment: AlignmentDirectional.bottomStart,
+                                    child: isLive ? LiveBadge(duration: liveFor) : null,
+                                  ),
+                                ),
+                                if (audience != null) ...[const SizedBox(width: Space.s1), CoverLabel(audience!)],
+                              ],
+                            ),
                           ),
-                        if (audience != null)
-                          Positioned(right: Space.s1 + 2, bottom: Space.s1 + 2, child: CoverLabel(audience!)),
                       ],
                     ),
                   ),
@@ -247,6 +259,9 @@ class OfflineRoomRow extends StatelessWidget {
             onLongPress: onMenu,
             leading: CircleAvatar(
               backgroundColor: scheme.surfaceContainerHighest,
+              // Material 3's default is onPrimaryContainer: white on this
+              // light grey in the fidelity scheme.
+              foregroundColor: scheme.onSurfaceVariant,
               foregroundImage: avatar,
               child: Text(anchorName.isEmpty ? '?' : anchorName.characters.first),
             ),

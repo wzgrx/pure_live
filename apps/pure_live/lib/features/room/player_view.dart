@@ -13,6 +13,7 @@ import 'package:live_player/live_player.dart' as player;
 import 'package:live_store/live_store.dart' as store;
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/app_prefs.dart';
+import 'package:pure_live_app/core/clock.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/network.dart';
@@ -1397,17 +1398,17 @@ class _AudioOnlyCover extends StatelessWidget {
   );
 }
 
-/// "21:07", updated on the minute.
-class _ClockText extends StatefulWidget {
+/// "21:07", updated on the minute; the time comes from [clockProvider].
+class _ClockText extends ConsumerStatefulWidget {
   const new({required this.color});
 
   final Color color;
 
   @override
-  State<_ClockText> createState() => _ClockTextState();
+  ConsumerState<_ClockText> createState() => _ClockTextState();
 }
 
-class _ClockTextState extends State<_ClockText> {
+class _ClockTextState extends ConsumerState<_ClockText> {
   Timer? _timer;
 
   @override
@@ -1417,7 +1418,7 @@ class _ClockTextState extends State<_ClockText> {
   }
 
   void _arm() {
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     _timer = Timer(Duration(seconds: 60 - now.second), () {
       if (!mounted) return;
       setState(() {});
@@ -1433,7 +1434,7 @@ class _ClockTextState extends State<_ClockText> {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
+    final now = ref.read(clockProvider)();
     String two(int value) => value.toString().padLeft(2, '0');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Space.s2),

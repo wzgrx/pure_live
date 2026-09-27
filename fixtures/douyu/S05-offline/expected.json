@@ -1,0 +1,29 @@
+{
+  "generator": "DouyuSite.getRoomDetailForRefresh + DouyuSite.isLiveRoomPayload",
+  "value": {
+    "isLiveRoomPayload": false,
+    "room": {
+      "roomId": "71415",
+      "title": "感谢大家帮我弄名人堂、、、、、",
+      "nick": "寅子",
+      "avatar": "https://apic.douyucdn.cn/upload/avatar/002/48/83/16_avatar_big.jpg",
+      "cover": "https://rpic.douyucdn.cn/asrpic/260924/71415_src_1849.avif/dy4",
+      "area": "主机其他游戏",
+      "watching": "0",
+      "audienceMetricType": "popularity",
+      "popularity": "0",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "douyu",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "https://www.douyu.com/71415",
+      "danmakuData": "71415"
+    }
+  }
+}

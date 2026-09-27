@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S05-alias-betard",
+  "capturedAt": "2026-09-27T09:40:19.870978Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.douyu.com/betard/lpl",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.douyu.com/lpl"
+    }
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "date": "Sun, 27 Sep 2026 09:40:20 GMT",
+      "content-length": "238",
+      "strict-transport-security": "max-age=86400",
+      "via": "ens-cache10.cn9479[,0]",
+      "content-type": "text/html",
+      "server": "Tengine",
+      "eagleid": "76b7ae1e17905020203885279e",
+      "c-via": "200"
+    }
+  },
+  "raw": {
+    "sha256": "6e1c38d044037281bc69275855c2951880dcf534f456035d0276a244a4a8c81f",
+    "length": 238
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

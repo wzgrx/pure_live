@@ -1,0 +1,61 @@
+{
+  "generator": "HuyaSite.getRoomDetail + getRoomDetailForRecording + getRoomDetailForRefresh",
+  "value": {
+    "getRoomDetail": {
+      "value": {
+        "roomId": "102411",
+        "title": "",
+        "nick": "",
+        "avatar": "",
+        "cover": "",
+        "watching": "",
+        "audienceMetricType": "popularity",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "huya",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "isCatchUp": false
+      }
+    },
+    "getRoomDetailForRecording": {
+      "error": "FormatException",
+      "message": "Huya room playback metadata is unavailable"
+    },
+    "getRoomDetailForRefresh": {
+      "value": {
+        "roomId": "102411",
+        "title": "打打排位的一天",
+        "nick": "神超",
+        "avatar": "https://huyaimg.msstatic.com/avatar/1072/bd/8c8dc2071fca5f917cc84372eed4cb_180_135.jpg?1585727771",
+        "cover": "https://v-huya-img2.msstatic.com/liveReplayClip/2638/40bacd1e-b3a1-478c-8567-fb310641fe27.jpg?x-oss-process=style/640x360",
+        "area": "英雄联盟",
+        "watching": "460318",
+        "audienceMetricType": "popularity",
+        "popularity": "460318",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "huya",
+        "liveStatus": 2,
+        "isRecord": true,
+        "status": false,
+        "notice": "下午4点准时直播！周二休息。合作V：yueguo2023 管理V：Godlike-shenchao",
+        "introduction": "打打排位的一天",
+        "isCatchUp": false,
+        "link": "https://www.huya.com/102411"
+      }
+    },
+    "helpers": {
+      "isExplicitOfflineState": false,
+      "parseHuyaLiveStatus": "replay",
+      "parseRoomAudience": {
+        "popularity": "460318",
+        "onlineViewers": ""
+      }
+    }
+  }
+}

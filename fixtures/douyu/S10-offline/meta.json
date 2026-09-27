@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S10-offline",
+  "capturedAt": "2026-09-27T09:49:41.587734Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://www.douyu.com/lapi/live/getH5PlayV1/71415",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+      "Origin": "https://www.douyu.com",
+      "Referer": "https://www.douyu.com/71415",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Cookie": "dy_did=cb200dab98d8dfa31f6536478743a346; acf_did=cb200dab98d8dfa31f6536478743a346"
+    },
+    "body": "enc_data=jsIutEdmjlTcFcwlYDVlOEhyfdEhItwlPgF6EXSdEFrgXlXTUCybSHdXTqSEIHC4SnqqOfayCuX3AtyjRFFjCyFpkpGxa2NnBsbjTeC4gIA2cLBBGFkEuXjYefIdQwTbM150gP4oVxmoIZPxoLYrgfBcTIRsEiJ5ZPC9WOIbTrCxBpScR47rAjWfNUO2TZEuKXDrOQzkI1YlTKUqPqdoIaZjNVnuH4MgHyVaSe5uXnc1IrMlMNW3JbQgMDVcMfUkYRAhWuGxSCMhRQe7HlN4MTFmUBQsWft2UndajJOyQrPaHSEpJYHuVwT2BF1tCAMnLYI0xmD8OAn0STBbOxR9CHyyvJWjRmXDh4igkEslYlEjWZBrQ2xpAZ42npCKXOWkUA5jKnPKnH90ZEfovUF2FVIVmYJqEUbwTanlxZ06NzmlEeOrZLeKPT4TODGimDcwDXazR4rbWZWIzAEbxHKyTKNlRqUrHF9lAIDmYkYvvM12XstoLnFnaAipN6RgYop5VyGzxb38Pul6WntkbI41XRZiZcAxXpDsGYApREqkYgDIC5p8YDXDZRMyVU93Fgd9C8UDTNN8MRZmJUOuiDXcECAyBbpxr2K2T3MsubB0DjUvKTOcQinlcVG8EcV6wxQVb9uqBKg3fCrCy2ZSDABWYf43xI%3D%3D&tt=7448289404&did=cb200dab98d8dfa31f6536478743a346&auth=445f15f116d5e88fddb3d956ba91f66d&cdn&rate=-1&hevc=0&fa=0&ive=0&ver=Douyu_new&iar=0"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-ratelimit-limit": "10000",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 09:49:42 GMT",
+      "access-control-allow-origin": "https://www.douyu.com",
+      "content-encoding": "gzip",
+      "vary": [
+        "Accept-Encoding",
+        "Origin"
+      ],
+      "strict-transport-security": "max-age=86400",
+      "access-control-expose-headers": "*",
+      "x-ratelimit-remaining": "9986",
+      "content-type": "application/json; charset=utf-8",
+      "access-control-max-age": "5",
+      "server": "Tengine",
+      "c-via": "200",
+      "x-request-id": "e09ee113-f042-47cf-aec7-59eade773d8e",
+      "timing-allow-origin": "*",
+      "access-control-allow-headers": "*",
+      "access-control-allow-methods": "*",
+      "via": "cache28.l2nm125-2[10,0], ens-cache7.cn9479[37,0]",
+      "eagleid": "76b7ae1b17905025820615666e"
+    }
+  },
+  "raw": {
+    "sha256": "7e4159899d550ba7a50ca6bf0e192d43d714e6fa2458a6b5922f878becc5eeec",
+    "length": 47
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:dy_did",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:acf_did",
+      "rule": "secret"
+    },
+    {
+      "where": "form:enc_data",
+      "rule": "secret"
+    },
+    {
+      "where": "form:tt",
+      "rule": "secret"
+    },
+    {
+      "where": "form:did",
+      "rule": "secret"
+    },
+    {
+      "where": "form:auth",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

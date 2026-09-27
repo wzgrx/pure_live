@@ -1,0 +1,108 @@
+{
+  "status": 200,
+  "message": "",
+  "data": {
+    "stream": {
+      "baseSteamInfoList": [
+        {
+          "sCdnType": "AL",
+          "iIsMaster": 0,
+          "lChannelId": 1319535174649,
+          "lSubChannelId": 1319535174649,
+          "lPresenterUid": 1319535174649,
+          "sStreamName": "1319535174649-1319535174649-7690142425511751941-2639070472754-10057-A-1790501710-1",
+          "sFlvUrl": "http://al.flv.huya.com/src",
+          "sFlvUrlSuffix": "flv",
+          "sFlvAntiCode": "wsSecret=4546b0c07ce82bd602202415c372b0ae&wsTime=6aba3708&fm=DEaqRJCvQoFpKeTMjJZICK4cSQ6vNH4vPu4fEf%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "sHlsUrl": "http://al.hls.huya.com/src",
+          "sHlsUrlSuffix": "m3u8",
+          "sHlsAntiCode": "wsSecret=4546b0c07ce82bd602202415c372b0ae&wsTime=6aba3708&fm=DEaqRJCvQoFpKeTMjJZICK4cSQ6vNH4vPu4fEf%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "iLineIndex": 3,
+          "iIsMultiStream": 1,
+          "iPCPriorityRate": -1,
+          "iWebPriorityRate": -1,
+          "iMobilePriorityRate": -1,
+          "newCFlvAntiCode": "wsSecret=4546b0c07ce82bd602202415c372b0ae&wsTime=6aba3708&fm=DEaqRJCvQoFpKeTMjJZICK4cSQ6vNH4vPu4fEf%3D%3D&ctype=tars_mp&fs=bgct&t=102"
+        }
+      ],
+      "hls": {
+        "rateArray": [
+          {
+            "sDisplayName": "蓝光",
+            "iBitRate": 0,
+            "iCodecType": 0,
+            "iCompatibleFlag": 0,
+            "iHEVCBitRate": -1
+          }
+        ]
+      },
+      "flv": {
+        "rateArray": [
+          {
+            "sDisplayName": "蓝光",
+            "iBitRate": 0,
+            "iCodecType": 0,
+            "iCompatibleFlag": 0,
+            "iHEVCBitRate": -1
+          }
+        ]
+      }
+    },
+    "liveStatus": "ON",
+    "profileInfo": {
+      "uid": 1319535174649,
+      "yyid": 35184705103241,
+      "nick": "三角洲行动赛事6",
+      "avatar180": "https://huyaimg.msstatic.com/avatar/1097/59/a582da9a87140f5aa4d84106b88e48_180_135.jpg?1754560541",
+      "activityId": 0,
+      "activityCount": 0,
+      "privateHost": 35184705103241,
+      "profileRoom": 30925595
+    },
+    "liveData": {
+      "uid": 1319535174649,
+      "sex": 0,
+      "gameFullName": "三角洲行动",
+      "gameHostName": 9449,
+      "startTime": 1790501710,
+      "activityId": 0,
+      "level": 14,
+      "totalCount": 0,
+      "roomName": "",
+      "isSecret": 0,
+      "cameraOpen": 0,
+      "liveChannel": 1319535174649,
+      "bussType": 3,
+      "yyid": 35184705103241,
+      "screenshot": "",
+      "activityCount": 0,
+      "privateHost": 35184705103241,
+      "recommendStatus": 0,
+      "nick": "三角洲行动赛事6",
+      "shortChannel": 0,
+      "avatar180": "https://huyaimg.msstatic.com/avatar/1097/59/a582da9a87140f5aa4d84106b88e48_180_135.jpg?1754560541",
+      "gid": 9449,
+      "channel": 1319535174649,
+      "introduction": "战队视角-JDG",
+      "profileHomeHost": 35184705103241,
+      "liveSourceType": 8,
+      "screenType": 0,
+      "bitRate": 3000,
+      "gameType": 3,
+      "attendeeCount": 0,
+      "multiStreamFlag": "0",
+      "codecType": 0,
+      "liveCompatibleFlag": "0",
+      "profileRoom": 30925595,
+      "liveId": 7690146286687351045,
+      "recommendTagName": null,
+      "contentIntro": null
+    },
+    "chTopId": 1319535174649,
+    "subChId": 1319535174649,
+    "welcomeText": "欢迎来到 三角洲行动赛事6 的直播间",
+    "roomPay": [],
+    "isRoomPay": false,
+    "realLiveStatus": "ON"
+  }
+}

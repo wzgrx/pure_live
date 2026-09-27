@@ -1,0 +1,195 @@
+{
+  "generator": "HuyaSite.getRoomDetail + getRoomDetailForRefresh + parsePlayQualities + parseBitRates + status/audience helpers",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "880351",
+      "title": "全天热舞 每日营业！",
+      "nick": "虎牙精舞门",
+      "avatar": "https://huyaimg.msstatic.com/avatar/1030/41/39fb2e647f3be3e7b28e56871abca3_180_135.jpg?1790073237",
+      "cover": "https://anchorpost.msstatic.com/cdnimage/anchorpost/1030/41/39fb2e647f3be3e7b28e56871abca3_0_1788488287.jpg?spformat=png,webp",
+      "area": "星秀",
+      "watching": "448580",
+      "audienceMetricType": "popularity",
+      "popularity": "448580",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "huya",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "复活了！每天24小时全天热舞中~",
+      "introduction": "全天热舞 每日营业！",
+      "isCatchUp": false,
+      "link": "https://www.huya.com/880351",
+      "danmakuData": "{\"uid\":1842414505,\"topSid\":1842414505,\"subSid\":1842414505}"
+    },
+    "data": {
+      "url": "",
+      "uid": "",
+      "isXingxiu": true,
+      "bitRates": [
+        {
+          "name": "蓝光8M",
+          "bitRate": 0
+        },
+        {
+          "name": "蓝光4M",
+          "bitRate": 4000
+        },
+        {
+          "name": "超清",
+          "bitRate": 2000
+        },
+        {
+          "name": "流畅",
+          "bitRate": 500
+        }
+      ],
+      "lines": [
+        {
+          "cdnType": "TX",
+          "lineType": "flv",
+          "line": "http://tx.flv.huya.com/src",
+          "secureHuyaCdnBase": "https://tx.flv.huya.com/src",
+          "streamName": "71862053-2645534014-11362482070585606144-3684952466-10057-A-0-1",
+          "presenterUid": 1842414505,
+          "flvAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "hlsAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "bitRate": 0
+        },
+        {
+          "cdnType": "HS",
+          "lineType": "flv",
+          "line": "http://hs.flv.huya.com/src",
+          "secureHuyaCdnBase": "https://hs.flv.huya.com/src",
+          "streamName": "71862053-2645534014-11362482070585606144-3684952466-10057-A-0-1",
+          "presenterUid": 1842414505,
+          "flvAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "hlsAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "bitRate": 0
+        },
+        {
+          "cdnType": "TX",
+          "lineType": "hls",
+          "line": "http://tx.hls.huya.com/src",
+          "secureHuyaCdnBase": "https://tx.hls.huya.com/src",
+          "streamName": "71862053-2645534014-11362482070585606144-3684952466-10057-A-0-1",
+          "presenterUid": 1842414505,
+          "flvAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "hlsAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "bitRate": 0
+        },
+        {
+          "cdnType": "HS",
+          "lineType": "hls",
+          "line": "http://hs.hls.huya.com/src",
+          "secureHuyaCdnBase": "https://hs.hls.huya.com/src",
+          "streamName": "71862053-2645534014-11362482070585606144-3684952466-10057-A-0-1",
+          "presenterUid": 1842414505,
+          "flvAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "hlsAntiCode": "wsSecret=e555680d991daa84abe0a369dd42294e&wsTime=6aba3704&fm=ECzdNMLwBxKwXzUGzDYTKV8uUP9uXT5xOz9bQw%3D%3D&ctype=tars_mp&fs=bgct&t=102",
+          "bitRate": 0
+        }
+      ]
+    },
+    "parsePlayQualities": [
+      {
+        "quality": "蓝光8M",
+        "id": 0,
+        "sort": 1073741824,
+        "bitRate": 0,
+        "lineCount": 4
+      },
+      {
+        "quality": "蓝光4M",
+        "id": 4000,
+        "sort": 4000,
+        "bitRate": 4000,
+        "lineCount": 4
+      },
+      {
+        "quality": "超清",
+        "id": 2000,
+        "sort": 2000,
+        "bitRate": 2000,
+        "lineCount": 4
+      },
+      {
+        "quality": "流畅",
+        "id": 500,
+        "sort": 500,
+        "bitRate": 500,
+        "lineCount": 4
+      }
+    ],
+    "parseBitRates": {
+      "bitRateInfo": [
+        {
+          "name": "蓝光8M",
+          "bitRate": 0
+        },
+        {
+          "name": "蓝光4M",
+          "bitRate": 4000
+        },
+        {
+          "name": "超清",
+          "bitRate": 2000
+        },
+        {
+          "name": "流畅",
+          "bitRate": 500
+        }
+      ],
+      "flvRateArray": [
+        {
+          "name": "蓝光8M",
+          "bitRate": 0
+        },
+        {
+          "name": "蓝光4M",
+          "bitRate": 4000
+        },
+        {
+          "name": "超清",
+          "bitRate": 2000
+        },
+        {
+          "name": "流畅",
+          "bitRate": 500
+        }
+      ]
+    },
+    "helpers": {
+      "isExplicitOfflineState": false,
+      "parseHuyaLiveStatus": "live",
+      "parseRoomAudience": {
+        "popularity": "448580",
+        "onlineViewers": ""
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "880351",
+      "title": "全天热舞 每日营业！",
+      "nick": "虎牙精舞门",
+      "avatar": "https://huyaimg.msstatic.com/avatar/1030/41/39fb2e647f3be3e7b28e56871abca3_180_135.jpg?1790073237",
+      "cover": "https://anchorpost.msstatic.com/cdnimage/anchorpost/1030/41/39fb2e647f3be3e7b28e56871abca3_0_1788488287.jpg?spformat=png,webp",
+      "area": "星秀",
+      "watching": "448580",
+      "audienceMetricType": "popularity",
+      "popularity": "448580",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "huya",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "复活了！每天24小时全天热舞中~",
+      "introduction": "全天热舞 每日营业！",
+      "isCatchUp": false,
+      "link": "https://www.huya.com/880351"
+    }
+  }
+}

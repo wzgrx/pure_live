@@ -1,0 +1,26 @@
+{
+  "generator": "HuyaSite.getCategoryRooms",
+  "value": {
+    "rooms": [
+      {
+        "roomId": "10515409",
+        "title": "静静等待",
+        "nick": "追随DANKING一辈子",
+        "avatar": "https://huyaimg.msstatic.com/avatar/1008/e4/7a3c85be25cdbe128d5433b3e046fc_180_135.jpg?1612426189",
+        "cover": "https://tx-live-cover.msstatic.com/huyalive/510153028-510153028-2191090571215372288-1020429512-10057-A-0-1/20260927174916.jpg?sign=7%2FTHZ0eddPk3AoaSA4VSwztUYIhaBZSfUCG2LVl3LKJyIi8rzBjvZRCxnpOklpLkk7UsBADtqhypmn8uPyRhTRh3AoKqXfg2YSxGLGVoqKYZhJTqG2f6MRbSOMQcAszHhBBiub6sV7OiQFeNPmG7WIzrTgX7MKU3JhB3ADS4MWK0YZU5RWqwsl0xVqL7DAB3KFNvLA7gsBmnnDk9TR97YHLoCIMcVotoOCYxJMXlSBX7PKRaGWMqECM9PeDmCGLtBvCnCXgpSABcHCEnEDFaIt7mHVK5Gr7WTCHuZY2gLVA0XDopZrI6DHizJx3dpKs%3D",
+        "area": "新倩女幽魂",
+        "watching": "41857",
+        "audienceMetricType": "popularity",
+        "popularity": "41857",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "huya",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false
+      }
+    ]
+  }
+}

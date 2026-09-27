@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S05-replay-videoloop",
+  "capturedAt": "2026-09-27T09:40:14.609119Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.douyu.com/betard/9804176",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.douyu.com/9804176"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "max-age=60",
+      "date": "Sun, 27 Sep 2026 09:40:15 GMT",
+      "transfer-encoding": "chunked",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "x-gw-cache-status": "MISS",
+      "ali-swift-global-savetime": "1790502015",
+      "strict-transport-security": "max-age=86400",
+      "content-type": "application/json;charset=UTF-8",
+      "x-swift-cachetime": "60",
+      "server": "Tengine",
+      "c-via": "200",
+      "x-request-id": "8bb39b6d-3f8e-44b8-8a7b-8881ceda9061",
+      "timing-allow-origin": "*",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:40:15 GMT",
+      "x-frame-options": "SAMEORIGIN",
+      "via": "cache39.l2nm125-2[234,234,200-0,M], cache17.l2nm125-2[236,0], ens-cache8.cn9479[265,265,200-0,M], ens-cache9.cn9479[267,0]",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "eagleid": "76b7ae1d17905020148474668e"
+    }
+  },
+  "raw": {
+    "sha256": "9e3de1e5a2c25ac2663ecb6c131f9ef6a3e0f031440d3dcfa2fd8a81f94cb9c1",
+    "length": 106829
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.room.did",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

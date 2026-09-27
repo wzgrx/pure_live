@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S04-search-empty",
+  "capturedAt": "2026-09-27T09:38:43.726615Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.douyu.com/japi/search/api/searchShow?kw=%E9%98%BF%E5%86%B7&page=1&pageSize=20",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+      "Origin": "https://www.douyu.com",
+      "Referer": "https://www.douyu.com/search/",
+      "Cookie": "dy_did=3be340009b0a9bd6d927f931cfc12e70; acf_did=3be340009b0a9bd6d927f931cfc12e70"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "date": "Sun, 27 Sep 2026 09:38:43 GMT",
+      "x-gw-cache-status": "MISS",
+      "strict-transport-security": "max-age=86400",
+      "ali-swift-global-savetime": "1790501924",
+      "content-type": "application/json;charset=UTF-8",
+      "x-swift-cachetime": "0",
+      "server": "Tengine",
+      "c-via": "200",
+      "x-request-id": "f482bf9a-dcdb-40b6-9d4b-99417841bac6",
+      "timing-allow-origin": "*",
+      "content-length": "81",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:38:44 GMT",
+      "via": "cache55.l2nm125-2[62,61,200-0,M], cache18.l2nm125-2[63,0], ens-cache8.cn9479[91,90,200-0,M], ens-cache11.cn9479[94,0]",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "eagleid": "76b7ae1f17905019241473433e"
+    }
+  },
+  "raw": {
+    "sha256": "b59a9b7523795e70a9d1077505b0ef833bdc86e7a3824bdb0206760dacabee18",
+    "length": 81
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:dy_did",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:acf_did",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

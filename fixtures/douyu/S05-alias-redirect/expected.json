@@ -1,0 +1,12 @@
+{
+  "generator": "WebSearchRoomParser.parse",
+  "value": {
+    "status": 302,
+    "location": "https://www.douyu.com/288016",
+    "aliasUrl": null,
+    "redirectTarget": {
+      "platform": "douyu",
+      "roomId": "288016"
+    }
+  }
+}

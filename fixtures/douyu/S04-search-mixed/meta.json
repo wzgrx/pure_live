@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S04-search-mixed",
+  "capturedAt": "2026-09-27T09:38:09.906600Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.douyu.com/japi/search/api/searchShow?kw=%E6%B5%8B%E8%AF%95&page=1&pageSize=20",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+      "Origin": "https://www.douyu.com",
+      "Referer": "https://www.douyu.com/search/",
+      "Cookie": "dy_did=2bb085427b3e6ac3e621a801fcf69b48; acf_did=2bb085427b3e6ac3e621a801fcf69b48"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "date": "Sun, 27 Sep 2026 09:38:10 GMT",
+      "transfer-encoding": "chunked",
+      "vary": "Accept-Encoding",
+      "x-gw-cache-status": "MISS",
+      "content-encoding": "gzip",
+      "strict-transport-security": "max-age=86400",
+      "ali-swift-global-savetime": "1790501890",
+      "content-type": "application/json;charset=UTF-8",
+      "x-swift-cachetime": "0",
+      "server": "Tengine",
+      "c-via": "200",
+      "x-request-id": "a372e634-0b93-416b-8980-5ff2bdf2e47a",
+      "timing-allow-origin": "*",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:38:10 GMT",
+      "via": "cache10.l2nm125-2[59,58,200-0,M], cache2.l2nm125-2[60,0], ens-cache4.cn9479[88,87,200-0,M], ens-cache1.cn9479[93,0]",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "eagleid": "76b7ae1517905018903211515e"
+    }
+  },
+  "raw": {
+    "sha256": "2d8414f7caf6192b94061b51945eee108d0ac2a6d6a3465e88df09a3b039e12c",
+    "length": 16522
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:dy_did",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:acf_did",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

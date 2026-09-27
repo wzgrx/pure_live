@@ -1,0 +1,1233 @@
+{
+  "generator": "HuyaSite.getCategores",
+  "value": {
+    "id": "2",
+    "name": "单机",
+    "children": [
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2793",
+        "areaName": "天天吃鸡",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2793-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "100032",
+        "areaName": "主机游戏",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/100032-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "1732",
+        "areaName": "我的世界",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/1732-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5907",
+        "areaName": "互动点播",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5907-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "1318",
+        "areaName": "部落：上升",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/1318-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "70953",
+        "areaName": "失控进化-RUST",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/70953-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4375",
+        "areaName": "精灵宝可梦Let's Go",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4375-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3493",
+        "areaName": "逃离塔科夫",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3493-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "100002",
+        "areaName": "单机热游",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/100002-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6219",
+        "areaName": "永劫无间",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6219-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "1997",
+        "areaName": "方舟",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/1997-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "9453",
+        "areaName": "恐怖游戏",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/9453-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2327",
+        "areaName": "彩虹六号",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2327-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6111",
+        "areaName": "黑神话：悟空",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6111-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5771",
+        "areaName": "罗布乐思",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5771-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "100125",
+        "areaName": "怀旧游戏",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/100125-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6919",
+        "areaName": "互动剧游",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6919-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "485",
+        "areaName": "植物大战僵尸",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/485-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5801",
+        "areaName": "艾尔登法环",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5801-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5011",
+        "areaName": "Apex英雄",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5011-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6479",
+        "areaName": "怪物猎人：崛起",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6479-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7101",
+        "areaName": "怪物猎人物语",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7101-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7859",
+        "areaName": "卧龙：苍天陨落",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7859-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6163",
+        "areaName": "Among Us",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6163-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7601",
+        "areaName": "Dread Hunger",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7601-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4783",
+        "areaName": "骑马与砍杀系列",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4783-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "554",
+        "areaName": "星球大战系列",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/554-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7857",
+        "areaName": "星空",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7857-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "73759",
+        "areaName": "流放之路：降临",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/73759-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "74",
+        "areaName": "饥荒",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/74-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "69105",
+        "areaName": "天国：拯救2",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/69105-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "100139",
+        "areaName": "育碧游戏",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/100139-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2634",
+        "areaName": "极限竞速：地平线",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2634-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2566",
+        "areaName": "无人深空",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2566-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "10199",
+        "areaName": "完蛋！我被美女包围了！",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/10199-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5097",
+        "areaName": "海贼王 寻秘世界",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5097-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6609",
+        "areaName": "英灵神殿",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6609-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3521",
+        "areaName": "全面战争",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3521-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7943",
+        "areaName": "森林之子",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7943-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "78211",
+        "areaName": "竞拍之王",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/78211-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6571",
+        "areaName": "鬼谷八荒",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6571-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5795",
+        "areaName": "仁王2",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5795-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "9961",
+        "areaName": "幻兽帕鲁",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/9961-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6739",
+        "areaName": "甜蜜之家",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6739-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7881",
+        "areaName": "霍格沃茨之遗",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7881-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7883",
+        "areaName": "塞尔达传说：王国之泪",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7883-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7771",
+        "areaName": "战神：诸神黄昏",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7771-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "69017",
+        "areaName": "怪物猎人：荒野",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/69017-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2096",
+        "areaName": "魔法门之英雄无敌系列",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2096-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4505",
+        "areaName": "只狼：影逝二度",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4505-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5495",
+        "areaName": "俄罗斯钓鱼4",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5495-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "62603",
+        "areaName": "冰汽时代2",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/62603-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7581",
+        "areaName": "消逝的光芒2",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7581-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "10013",
+        "areaName": "反转21克",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/10013-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "66125",
+        "areaName": "小游戏",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/66125-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6737",
+        "areaName": "双人成行",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6737-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "475",
+        "areaName": "欧洲卡车模拟",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/475-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4867",
+        "areaName": "了不起的修仙模拟器",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4867-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "8013",
+        "areaName": "生化危机4重制版",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/8013-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "70261",
+        "areaName": "矩阵：零日危机",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/70261-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2853",
+        "areaName": "过山车之星",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2853-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "70355",
+        "areaName": "双影奇境",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/70355-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2761",
+        "areaName": "音乐游戏",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2761-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5715",
+        "areaName": "宝可梦：剑盾",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5715-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2949",
+        "areaName": "归家异途",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2949-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "1962",
+        "areaName": "刺客信条",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/1962-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "72501",
+        "areaName": "泡姆泡姆",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/72501-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3601",
+        "areaName": "杀戮尖塔",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3601-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "10919",
+        "areaName": "中国式网游",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/10919-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5853",
+        "areaName": "港诡实录",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5853-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "1599",
+        "areaName": "真三国无双",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/1599-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6147",
+        "areaName": "博德之门3",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6147-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "82069",
+        "areaName": "控制共振",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/82069-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6231",
+        "areaName": "渡神记",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6231-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3641",
+        "areaName": "盗贼之海",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3641-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6509",
+        "areaName": "仙剑奇侠传七",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6509-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7609",
+        "areaName": "拳皇15",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7609-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6205",
+        "areaName": "恐鬼症",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6205-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6151",
+        "areaName": "恶魔之魂",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6151-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "74169",
+        "areaName": "雾影猎人",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/74169-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5809",
+        "areaName": "最终幻想7：重制版",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5809-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6103",
+        "areaName": "足球小将",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6103-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3991",
+        "areaName": "侏罗纪世界：进化",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3991-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "100137",
+        "areaName": "使命召唤系列",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/100137-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "73363",
+        "areaName": "橙光阅读器",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/73363-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3677",
+        "areaName": "猎杀：对决",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3677-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "14",
+        "areaName": "龙歌",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/14-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5947",
+        "areaName": "马里奥赛车8",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5947-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "18",
+        "areaName": "龙与地下城：匕首谷",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/18-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4319",
+        "areaName": "荒野大镖客2",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4319-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2303",
+        "areaName": "漫漫长夜",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2303-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6845",
+        "areaName": "沉浮",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6845-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6083",
+        "areaName": "糖豆人：终极淘汰赛",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6083-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7669",
+        "areaName": "幽灵线：东京",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7669-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5257",
+        "areaName": "纸人",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5257-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3101",
+        "areaName": "海底大作战",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3101-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4835",
+        "areaName": "帝国时代4",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4835-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "708",
+        "areaName": "帝国时代系列",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/708-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6199",
+        "areaName": "轩辕剑7",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6199-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6679",
+        "areaName": "恐惧之间",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6679-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7653",
+        "areaName": "最终幻想：起源",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7653-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "10821",
+        "areaName": "不祥之夜：回魂",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/10821-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7745",
+        "areaName": "Stray",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7745-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "64851",
+        "areaName": "FC系列",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/64851-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "1926",
+        "areaName": "赛车联盟",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/1926-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6165",
+        "areaName": "猛兽派对",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6165-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5995",
+        "areaName": "四海兄弟",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5995-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6153",
+        "areaName": "哈迪斯",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6153-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "68167",
+        "areaName": "界外狂潮",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/68167-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2585",
+        "areaName": "石油骚动",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2585-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2884",
+        "areaName": "缺氧",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2884-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2455",
+        "areaName": "瑞奇与叮当",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2455-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5743",
+        "areaName": "霓虹深渊",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5743-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6065",
+        "areaName": "禁闭求生",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6065-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3016",
+        "areaName": "战锤40K：暗潮",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3016-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4865",
+        "areaName": "环世界",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4865-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5895",
+        "areaName": "精灵与萤火意志",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5895-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "2966",
+        "areaName": "死亡细胞",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/2966-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "1125",
+        "areaName": "DayZ独立版",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/1125-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "22",
+        "areaName": "鼠的世界",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/22-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "5869",
+        "areaName": "碧蓝幻想：Versus",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/5869-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "38",
+        "areaName": "黑与白2",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/38-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "9471",
+        "areaName": "沉没之地",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/9471-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "30",
+        "areaName": "黑暗虚空",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/30-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3289",
+        "areaName": "人类一败涂地",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3289-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "7869",
+        "areaName": "最终幻想16",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/7869-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "10567",
+        "areaName": "剑星",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/10567-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4245",
+        "areaName": "SCUM",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4245-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "28",
+        "areaName": "黑色像素人",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/28-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6039",
+        "areaName": "对马岛之魂",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6039-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "4779",
+        "areaName": "边境",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/4779-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "31",
+        "areaName": "黑暗潜伏者",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/31-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "33",
+        "areaName": "黑暗史诗",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/33-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6155",
+        "areaName": "看门狗：军团",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6155-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "6105",
+        "areaName": "斩妖行",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/6105-MS.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "huya",
+        "areaType": "2",
+        "typeName": "单机",
+        "areaId": "3069",
+        "areaName": "其他单机",
+        "areaPic": "https://huyaimg.msstatic.com/cdnimage/game/3069-MS.jpg",
+        "shortName": null
+      }
+    ]
+  }
+}

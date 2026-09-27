@@ -1,5 +1,10 @@
 # Pure Live repository guidance
 
+## v4 rewrite
+
+- A full rewrite is in progress on `master`: plan [docs/rewrite/PLAN.md](docs/rewrite/PLAN.md), rules and accepted decisions [spec/constitution.md](spec/constitution.md), decisions [docs/adr/](docs/adr/README.md), progress [docs/rewrite/STATUS.md](docs/rewrite/STATUS.md).
+- The current 3.x app keeps shipping until v4.0.0. New v4 code goes into `packages/` and `apps/pure_live` once the workspace exists (phase 3); until then only fixes and extraction work touch `lib/`.
+
 ## Scope and execution
 
 - Follow the current user request within the active system/tool constraints. Repository policies are defaults; a narrower current request takes precedence. Carry authorized work through verification and delivery rather than stopping at a proposal.

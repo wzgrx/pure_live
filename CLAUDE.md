@@ -2,6 +2,10 @@
 
 [AGENTS.md](AGENTS.md) is the repository entrypoint. Follow its task-scoped links instead of loading every maintenance/build document for every edit. Verification and delivery routing is in [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md).
 
+## v4 rewrite
+
+- The rewrite plan is approved and Claude makes the remaining choices: record each lasting one in `docs/adr/`, update `docs/rewrite/STATUS.md` as phases move, and follow `spec/constitution.md`.
+
 ## Branch and WSL environment
 
 These points narrow AGENTS.md for Claude sessions only.

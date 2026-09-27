@@ -1,0 +1,27 @@
+name: live_player
+description: media_kit (mpv) binding of live_media's PlayerEngine and the video surface widget of Pure Live v4.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.5
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  live_core: any
+  live_media: any
+  # Self-maintained fork of Predidit/media-kit (docs/adr/0002-media-kit-fork.md);
+  # native libraries come from media_kit's build hook (hook/native_bundles.json).
+  media_kit:
+    path: ../../third_party/media_kit
+  media_kit_video:
+    path: ../../third_party/media_kit_video
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^11.0.0

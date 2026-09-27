@@ -14,6 +14,7 @@ workspace:
   - packages/live_store
   - packages/live_ui
   - packages/live_media
+  - packages/live_player
   - tools/live_cli
   - tools/check_latest
 
@@ -23,6 +24,12 @@ dependency_overrides:
   # Self-maintained fork of Predidit/media-kit (docs/adr/0002-media-kit-fork.md).
   media_kit:
     path: third_party/media_kit
+  # The fork pins these below their latest stable releases (media_kit_video:
+  # wakelock_plus 1.3.3; media_kit: xml ^6.5.0) while using only APIs that are
+  # unchanged in the latest ones (WakelockPlus.enable/disable; XmlDocument in
+  # the Apple hook). Overriding keeps the rest of the graph current (ADR 0008).
+  wakelock_plus: 1.8.0
+  xml: 7.0.1
   # Flutter 3.47.5 pins these below their latest stable releases; overriding
   # keeps test, analyzer and code generators current (ADR 0008).
   _fe_analyzer_shared: 108.0.0

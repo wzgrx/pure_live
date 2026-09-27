@@ -164,7 +164,20 @@ void main() {
     socket
       ..send([9, 8, 7])
       ..sendText('JOIN #room');
-    await Future<void>.delayed(const Duration(milliseconds: 200));
+    // Wait for the exchange itself, not a fixed time: a loaded machine (the
+    // gate runs suites side by side) can take longer than any fixed delay.
+    int clientFrames() {
+      try {
+        return _clientFrames(server.received.toBytes()).length;
+      } on Object {
+        return 0; // A frame still arriving.
+      }
+    }
+
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    while ((messages.length < 2 || clientFrames() < 3) && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
     expect(messages, [
       [1, 2, 3],
       'hello',

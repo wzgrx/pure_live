@@ -35,7 +35,7 @@
 | 真机 | patrol 集成测试或人工真机记录（K90、Windows 等），先拿设备租约 |
 | 门禁 | CI 或发布流水线里的脚本检查 |
 
-**平台条目**：B 站、斗鱼、虎牙、抖音、快手的平台坑由 `spec/sites/<平台>.md` 负责，编号为 `REG-BILIBILI-*`、`REG-DOUYU-*`、`REG-HUYA-*`、`REG-DOUYIN-*`、`REG-KUAISHOU-*`。本文只写跨平台和模块级的要求。平台坑影响模块时，本文写模块侧要求，并写成“平台侧：REG-DOUYU-*（主题）”。平台规格还在编写，具体编号待回填 [待确认]。平台坑与本文条目的对照见附录 B。
+**平台条目**：B 站、斗鱼、虎牙、抖音、快手的平台坑由 `spec/sites/<平台>.md` 负责，编号为 `REG-BILIBILI-*`、`REG-DOUYU-*`、`REG-HUYA-*`、`REG-DOUYIN-*`、`REG-KUAISHOU-*`。本文只写跨平台和模块级的要求。平台坑影响模块时，本文写模块侧要求，并写成“平台侧：REG-DOUYU-*（主题）”。编号已按各平台规格第 10 节回填（2026-09-27）；平台规格里没有单独编号的，写明所在章节。平台坑与本文条目的对照见附录 B。
 
 **证据写法**
 
@@ -77,7 +77,7 @@
 - 现象：录制被误停；关注列表把请求失败的房间显示成“未开播”。
 - 根因：7 个老站在详情请求失败时返回“状态未知”的房间（`live_room.dart:874`），调用方把它当成离线；B 站 -352 风控靠 `toString().contains` 判断。
 - 正确做法：详情只有一个入口，永不吞错。只有平台明确给出下播、封禁、回放，才改变房间状态；网络、风控、解析失败一律作为类型化错误上抛，状态保持“未知 / 待刷新”。录制、多画面、关注刷新、“立即录制”都用这个入口。
-- 证据：233d858d；`live_site.dart:314-331`；`douyu_site.dart:510-512`；`recorder_controller.dart:701-704`；`test/recorder_stream_resolver_test.dart:218`；`test/live_room_error_fallback_test.dart:13`；`test/sites_test.dart:55`；`test/multiview_test.dart:719`。平台侧：REG-BILIBILI-*（-352 风控），REG-HUYA-*（只有明确的非直播状态才算离线）。
+- 证据：233d858d；`live_site.dart:314-331`；`douyu_site.dart:510-512`；`recorder_controller.dart:701-704`；`test/recorder_stream_resolver_test.dart:218`；`test/live_room_error_fallback_test.dart:13`；`test/sites_test.dart:55`；`test/multiview_test.dart:719`。平台侧：REG-BILIBILI-003、REG-BILIBILI-006（-352 风控），REG-HUYA-015（只有明确的非直播状态才算离线）。
 - 验收：样本（各主力平台的失败、风控响应）＋单元。
 
 ### REG-COMMON-002 错误有类型，界面不解析文案
@@ -101,7 +101,7 @@
 - 现象：虎牙 8006、抖音 `total_user`、B 站人气被标成“在线人数”；未知时显示 0；在线排序被热度值压过。
 - 根因：模型只有一个“人数”字段。
 - 正确做法：每个数值带类型：在线、热度、累计、未知、待刷新。显式的 0 保留；未知不显示 0；平台已支持但值还没到时显示“待刷新”，不拿热度顶替。在线排序中，有真实在线值的平台排在只有热度的平台前面；值相同时按“平台＋房间号”稳定排序；一次刷新缺值不丢掉列表里已有的人气。
-- 证据：`test/live_room_audience_metric_test.dart:49,57,206`（共 17 个用例）；`test/popular_audience_ranking_test.dart`；`test/search_ranking_test.dart`；`test/huya_danmaku_protocol_test.dart:63`；`test/douyin_audience_metric_test.dart`；`docs/PLATFORM_COMPATIBILITY.md:100`。平台侧：REG-HUYA-*（8006 是热度），REG-DOUYIN-*（`total_user` 是累计），REG-BILIBILI-*（人气与累计观看）。
+- 证据：`test/live_room_audience_metric_test.dart:49,57,206`（共 17 个用例）；`test/popular_audience_ranking_test.dart`；`test/search_ranking_test.dart`；`test/huya_danmaku_protocol_test.dart:63`；`test/douyin_audience_metric_test.dart`；`docs/PLATFORM_COMPATIBILITY.md:100`。平台侧：REG-HUYA-014（8006 是热度），REG-DOUYIN-008（`total_user` 是累计），REG-BILIBILI-014、REG-BILIBILI-015（人气与累计观看）。
 - 验收：样本＋单元。
 
 ### REG-COMMON-005 画质以服务端确认为准
@@ -109,7 +109,7 @@
 - 现象：B 站选了高画质但没生效，界面仍显示高画质；斗鱼被降档后仍显示原画；缺少确认时冒充原画。
 - 根因：游客请求会被服务端降档；界面显示的是用户点击的标签。
 - 正确做法：取流结果带“请求画质、实际画质、是否已确认”。只有源提交成功后才更新显示；确认缺失或畸形时显示“未确认”，不冒充请求的画质。画质顺序保留接口给出的顺序，不对不透明的请求码排序；重复的显示标签加编号，但稳定 id 不变。
-- 证据：03234c7d；`test/bilibili_play_quality_test.dart:13`；`test/douyu_quality_ack_test.dart:114`（共 14 个用例）；`test/douyu_playback_parser_test.dart:130`；`test/stream_selection_controller_test.dart:284,379,601`。平台侧：REG-BILIBILI-*（`current_qn` / `accept_qn`），REG-DOUYU-*（rate 确认）。
+- 证据：03234c7d；`test/bilibili_play_quality_test.dart:13`；`test/douyu_quality_ack_test.dart:114`（共 14 个用例）；`test/douyu_playback_parser_test.dart:130`；`test/stream_selection_controller_test.dart:284,379,601`。平台侧：REG-BILIBILI-001、REG-BILIBILI-002（`current_qn` / `accept_qn`），REG-DOUYU-005、REG-DOUYU-006、REG-DOUYU-007（rate 确认）。
 - 验收：样本＋单元。
 
 ### REG-COMMON-006 线路按身份识别，不按下标
@@ -117,7 +117,7 @@
 - 现象：虎牙刷新后跳到别的线路；HLS 变体重排后选错。
 - 根因：按列表下标选线。
 - 正确做法：线路身份由 CDN 主机、格式、凭据类型（或平台给的稳定 id）组成。刷新、续期、恢复都按身份匹配；下标越界时钳制，但保留身份。
-- 证据：4df2f98d；`huya_transport_policy.dart:3-48`；`test/huya_transport_policy_test.dart`（表驱动）；`test/hls_master_selection_test.dart:33`；`test/stream_selection_controller_test.dart`（钳制过期的画质和线路下标）。平台侧：REG-HUYA-*（线路回退表）。
+- 证据：4df2f98d；`huya_transport_policy.dart:3-48`；`test/huya_transport_policy_test.dart`（表驱动）；`test/hls_master_selection_test.dart:33`；`test/stream_selection_controller_test.dart`（钳制过期的画质和线路下标）。平台侧：REG-HUYA-010、REG-HUYA-011（线路回退表）。
 - 验收：单元（表驱动用例直接转成 YAML）。
 
 ### REG-COMMON-007 画质列表只含视频档
@@ -125,7 +125,7 @@
 - 现象：抖音多画面小格黑屏。
 - 根因：纯音频档 `ao` 被当成最低画质。
 - 正确做法：画质列表过滤 `only_audio` / `ao`，“最低画质”永远是视频档。纯音频由播放层的纯音频模式提供（REG-PLAY-016）。
-- 证据：56cd4d97；`test/douyin_playback_parser_test.dart:144`；`test/multiview_test.dart:349`。平台侧：REG-DOUYIN-*（纯音频档）。
+- 证据：56cd4d97；`test/douyin_playback_parser_test.dart:144`；`test/multiview_test.dart:349`。平台侧：REG-DOUYIN-001（纯音频档）。
 - 验收：样本。
 
 ### REG-COMMON-008 请求头随取流结果走，播放与录制一致
@@ -422,7 +422,7 @@
 - 现象：斗鱼原画每 5 分钟断一次；多画面斗鱼格 300 秒后冻结；录制约每 255 秒换一个文件。
 - 根因：匿名 URL 带 `expire=300`，CDN 从签发时刻起算 300 秒断开；新旧两条连接的时间戳在同一条时间线上。
 - 正确做法：到期前 45 秒续签同线路同画质；新连接找到旧连接还没送出的关键帧后切过去，不留缺口也不重复；两条时间线相差超过 60 秒时平移时间戳；等旧流最多 10 秒，找关键帧最多 15 秒；切换后不再转发 script tag，编解码配置变了先补发；续签失败时把旧流播到结束；旧流提前结束时，在新流的下一个关键帧接上；续期不走恢复链，不占“签名刷新”次数。旧流先结束时拼接会话会直接退出（`flv_splice_relay.dart:146-147`），外面需要再套一层会话循环。
-- 证据：31982153；`flv_splice_relay.dart:94-320`；`test/flv_splice_relay_test.dart:70,180`（共 6 个用例）；`tool/probes/douyu_splice_probe_test.dart`；`test/player_error_recovery_test.dart:301`；`test/multiview_test.dart:1588`。平台侧：REG-DOUYU-*（`expire=300` 租期）。
+- 证据：31982153；`flv_splice_relay.dart:94-320`；`test/flv_splice_relay_test.dart:70,180`（共 6 个用例）；`tool/probes/douyu_splice_probe_test.dart`；`test/player_error_recovery_test.dart:301`；`test/multiview_test.dart:1588`。平台侧：REG-DOUYU-001、REG-DOUYU-002（`expire=300` 租期）。
 - 验收：单元（FLV tag 假源）＋样本（真实的两次续签 FLV）＋探针＋真机（斗鱼录 30 分钟，DTS 最大间隔不超过 1 帧）。
 
 ### REG-LEASE-003 只限新建连接的凭据：只预取
@@ -430,7 +430,7 @@
 - 现象：虎牙 FLV 约 2 分钟 EOF；虎牙录到约 270 秒被切断且尾部损坏；健康的连接被无谓重开。
 - 根因：把凭据到期当成连接截止；定时轮换取消了健康的连接。
 - 正确做法：原生凭据过期不断开已建立的连接，也不设提前计时器。到刷新时刻只预取下一份凭据：预取不占播放队列，慢预取不阻塞其它操作，playing 事件不触发重复预取。真正 EOF 时消费仍有效的预取凭据，已过期就重新获取；EOF 后即使签名 URL 没变也要重开。预取失败不影响正在播放的媒体；用户停止让挂起的预取和计时器失效；旧会话的预取不能在新会话里重新布置维护任务。
-- 证据：8a6fdce1、d6d4123c、f66cff51；`test/huya_transport_policy_test.dart`；`test/player_error_recovery_test.dart:2322,2364,2867`（仅 Windows）；`test/recorder_lease_lifecycle_test.dart:173,196,218`。平台侧：REG-HUYA-*（WUP 凭据与 wsTime）。
+- 证据：8a6fdce1、d6d4123c、f66cff51；`test/huya_transport_policy_test.dart`；`test/player_error_recovery_test.dart:2322,2364,2867`（仅 Windows）；`test/recorder_lease_lifecycle_test.dart:173,196,218`。平台侧：REG-HUYA-001、REG-HUYA-002、REG-HUYA-019（WUP 凭据与 wsTime）。
 - 验收：单元＋探针（虎牙连续 60 分钟不断开）＋真机。
 
 ### REG-LEASE-004 短租期网页源的提前交接 [待确认：是否仍有流量]
@@ -459,7 +459,7 @@
 ### REG-LEASE-007 每个会话独立签名
 
 - 正确做法：播放和录制分别打开同一个房间时，各自获取签名（虎牙每次打开都生成新的 seqid），不共享同一个签名地址。如果 v4 实现“录制复用播放连接”（可选），前提是画质和线路相同，共享的是中继输出，不是签名 URL。
-- 证据：`test/huya_play_url_test.dart:318`；`huya_site.dart:1063-1130`；04 ⑥（共用连接）。平台侧：REG-HUYA-*（seqid）。
+- 证据：`test/huya_play_url_test.dart:318`；`huya_site.dart:1063-1130`；04 ⑥（共用连接）。平台侧：REG-HUYA-007（seqid）。
 - 验收：单元。
 
 ### REG-LEASE-008 源事务：成功才替换
@@ -697,7 +697,7 @@
 - 现象：斗鱼格每 5 分钟冻结一次，几次之后永久冻结。
 - 根因：CDN 在 300 秒断开，播放器进入 completed 而不是卡顿，看门狗不触发；恢复次数一辈子只有 2 次。
 - 正确做法：订阅 completed 事件触发重载，并保持画质和线路；恢复次数按时间窗口计算，与单房间共用恢复策略（REG-PLAY-010）；紧密的失败循环必须停下；暂停中的格子不因源结束而重载。
-- 证据：bf570796；`test/multiview_test.dart:1540,1560,1610`；`multiview_controller.dart:355`。平台侧：REG-DOUYU-*（`expire=300` 租期）。关联 REG-PLAY-001。
+- 证据：bf570796；`test/multiview_test.dart:1540,1560,1610`；`multiview_controller.dart:355`。平台侧：REG-DOUYU-001、REG-DOUYU-002（`expire=300` 租期）。关联 REG-PLAY-001。
 - 验收：轨迹＋单元。
 
 ### REG-MULTI-003 租期续流交给每格的中继
@@ -799,7 +799,7 @@
 - 现象：斗鱼弹幕缺了一大部分。
 - 根因：上游重构把“疑似机器人过滤”的开关丢了，默认过滤了未标记的消息。
 - 正确做法：平台级过滤（斗鱼疑似机器人）默认关闭，弹幕默认完整；用户切换开关后立即生效，不重连；导入备份时保留用户的显式选择。
-- 证据：31ee5cd7、4cbb43ba；`douyu_danmaku.dart:128-129`；`test/douyu_danmaku_protocol_test.dart:34,60`；`test/danmaku_settings_controller_test.dart`（保留备份中的斗鱼过滤选择）。平台侧：REG-DOUYU-*（未标记房间消息）。
+- 证据：31ee5cd7、4cbb43ba；`douyu_danmaku.dart:128-129`；`test/douyu_danmaku_protocol_test.dart:34,60`；`test/danmaku_settings_controller_test.dart`（保留备份中的斗鱼过滤选择）。平台侧：REG-DOUYU-020（未标记房间消息）。
 - 验收：样本＋单元。
 
 ### REG-DANMAKU-004 过滤链只有一份，大小写一致
@@ -853,25 +853,25 @@
 
 - 现象（潜在）：连接卡住时房间无法退出；不支持弹幕的平台反复尝试连接。
 - 正确做法：连接启动卡住有上限，超时停止并允许重连；停止卡住不能永远阻塞房间销毁；不支持弹幕的平台只报告一次“不支持”，不伪造连接，画中画也不反复启动；重连和终止通知是类型化事件，与显示文案无关；轮询型实现（快手）在失败响应时不显示“已连接”，停止时取消挂起的请求。
-- 证据：`test/danmaku_controller_lifecycle_test.dart:14,46,141`；`test/kuaishou_danmaku_test.dart:46,92`。平台侧：REG-KUAISHOU-*（移动端 feed 轮询）。
+- 证据：`test/danmaku_controller_lifecycle_test.dart:14,46,141`；`test/kuaishou_danmaku_test.dart:46,92`。平台侧：REG-KUAISHOU-011～REG-KUAISHOU-014（移动端 feed 轮询）。
 - 验收：单元。
 
 ### REG-DANMAKU-012 WebSocket 通用行为
 
 - 正确做法：检测到静默的半开连接就关闭，并换下一个节点重连；收到服务器心跳保持同一连接；配置的代理用于握手，直连时用默认客户端；远端关闭的诊断带关闭码和原因；手动关闭能中止卡住的握手；重复连接请求加入正在进行的握手；关闭确认卡住时销毁有上限。
-- 证据：`test/web_socket_util_test.dart:9,68,216`（共 9 个用例）。平台侧：REG-DOUYIN-*（多个 webcast 节点故障切换，f491afd7）。
+- 证据：`test/web_socket_util_test.dart:9,68,216`（共 9 个用例）。平台侧：REG-DOUYIN-002、REG-DOUYIN-003（多个 webcast 节点故障切换，f491afd7）。
 - 验收：单元（本地 WebSocket 服务器）。
 
 ### REG-DANMAKU-013 协议解析健壮
 
 - 正确做法：一个帧里的嵌套包、拼接包全部解出；长度为 0 的畸形帧不能导致死循环，也不能丢掉前面已解出的消息；压缩包的递归层数有上限；空消息不影响下一个包；需要应答的协议（B 站 op24 ACK）由连接器回写应答，不丢消息。
-- 证据：`test/bilibili_danmaku_protocol_test.dart:52,71,157`；`test/douyu_danmaku_protocol_test.dart`。平台侧：REG-BILIBILI-*（认证包字段与 ACK），REG-DOUYU-*（STT 合包）。B 站实际走 brotli 的路径没有测试，见 G-11。
+- 证据：`test/bilibili_danmaku_protocol_test.dart:52,71,157`；`test/douyu_danmaku_protocol_test.dart`。平台侧：REG-BILIBILI-008、REG-BILIBILI-011、REG-BILIBILI-012（认证包字段与 ACK），REG-DOUYU-021（STT 合包）。B 站实际走 brotli 的路径没有测试，见 G-11。
 - 验收：样本（录制的真实弹幕帧）＋模糊测试。
 
 ### REG-DANMAKU-014 醒目留言的身份与过期
 
 - 正确做法：醒目留言用平台稳定的事件 id 去重，重复的快照合并为一个事件；内容相同但 id 不同的付费消息都保留；没有 id 的重复快照按模型身份去重，不按重建出来的时间；没有留言时不定时唤醒，只为最早的截止时间安排一次唤醒，过期的在下一轮事件循环中移除；平台颜色格式错误时用默认色，不隐藏付费消息。
-- 证据：`test/huya_danmaku_protocol_test.dart:153`；`test/super_chat_expiry_policy_test.dart:25`；`test/super_chat_page_test.dart:154`。平台侧：REG-HUYA-*（留言板轮询）。
+- 证据：`test/huya_danmaku_protocol_test.dart:153`；`test/super_chat_expiry_policy_test.dart:25`；`test/super_chat_page_test.dart:154`。平台侧：REG-HUYA-021、REG-HUYA-022（留言板轮询）。
 - 验收：单元。
 
 ### REG-DANMAKU-015 弹幕列表跟随与恢复
@@ -905,7 +905,7 @@
 - 现象：斗鱼录制约每 255 秒切成一个新文件，文件之间有缺口；虎牙网页源约每 100 秒一次。
 - 根因：每次续期都新开一次录制尝试（新目录、新前缀、新 MP4），中间有排空、重连、解析、探测的空档。
 - 正确做法：一次录制会话就是一个连续的文件（或按时间、大小在关键帧处切分的分段）；续期由中继完成（REG-LEASE-002、REG-LEASE-003），不打断写入；旧流先结束时由外层会话循环续接；无法避免的缺口写入 `gaps.json`。
-- 证据：31982153；`recorder_controller.dart:883-887,1080-1085`；`recorder_continuation_policy.dart:58-71`；04 ③-1；ADR 0005。平台侧：REG-DOUYU-*、REG-HUYA-*。
+- 证据：31982153；`recorder_controller.dart:883-887,1080-1085`；`recorder_continuation_policy.dart:58-71`；04 ③-1；ADR 0005。平台侧：REG-DOUYU-012～REG-DOUYU-014、REG-HUYA-015。
 - 验收：真机（斗鱼录 30 分钟，DTS 最大间隔不超过 1 帧；虎牙录 60 分钟无断开）＋单元（FLV 写入器）。
 
 ### REG-RECORD-002 流结束快速重连，不进慢轮询
@@ -1689,7 +1689,6 @@ Android 17 本地网络权限见 REG-ANDROID-001，Windows 系统代理见 REG-W
 
 | 条目 | 待确认的内容 |
 |---|---|
-| 全文 | 平台规格的具体编号（`REG-<平台>-NNN`），平台规格定稿后回填 |
 | REG-PLAY-010 | Android mediacodec 兼容模式是否作为恢复链里独立的一步 |
 | REG-PLAY-022 | 高通机型上 mpv 硬解 codec 12 流是否仍静默丢帧 |
 | REG-LEASE-004 | 虎牙网页回退源是否还有真实流量，决定是否保留 40 秒交接 |
@@ -1763,31 +1762,31 @@ rg -U -o --no-heading -N "\b(test|testWidgets)\(\s*['\"][^'\"]+" test/ \
 
 | 平台坑（诊断报告） | 平台规格 | 本文条目 |
 |---|---|---|
-| 斗鱼匿名原画 `expire=300`，每 5 分钟断一次 | REG-DOUYU-* | REG-LEASE-001、REG-LEASE-002、REG-MULTI-002、REG-MULTI-003、REG-RECORD-001 |
-| 斗鱼 rate 是不透明请求码，画质顺序与服务端确认 | REG-DOUYU-* | REG-COMMON-005、REG-RECORD-016 |
-| 斗鱼恢复不复用旧 URL，缺失确认保持未知 | REG-DOUYU-* | REG-LEASE-005 |
-| 斗鱼疑似机器人过滤默认关闭 | REG-DOUYU-* | REG-DANMAKU-003 |
-| 斗鱼会话同时影响签名、播放和录制请求头 | REG-DOUYU-* | REG-COMMON-008 |
-| 虎牙原生 FLV 凭据过期不断开已建立的连接 | REG-HUYA-* | REG-LEASE-001、REG-LEASE-003、REG-RECORD-001 |
-| 虎牙网页源短租期与 40 秒交接 | REG-HUYA-* | REG-LEASE-004 |
-| 虎牙每次打开生成新 seqid，播放与录制各自签名 | REG-HUYA-* | REG-LEASE-007 |
-| 虎牙按 CDN 主机、格式、凭据类型识别线路 | REG-HUYA-* | REG-COMMON-006 |
-| 虎牙 8006 是热度，不是在线人数 | REG-HUYA-* | REG-COMMON-004 |
-| 虎牙只有明确的非直播状态才算离线 | REG-HUYA-* | REG-COMMON-001 |
-| 虎牙录制只签当前线路 | REG-HUYA-* | REG-LEASE-006 |
-| B 站游客被降档，以 `current_qn` 为实际画质 | REG-BILIBILI-* | REG-COMMON-005 |
-| B 站 -352 风控 | REG-BILIBILI-* | REG-COMMON-001、REG-COMMON-002 |
-| B 站弹幕认证字段与 op24 ACK | REG-BILIBILI-* | REG-DANMAKU-013 |
-| B 站弹幕 brotli | REG-BILIBILI-* | G-11 |
-| 抖音纯音频档 `ao` | REG-DOUYIN-* | REG-COMMON-007 |
-| 抖音弹幕多节点故障切换 | REG-DOUYIN-* | REG-DANMAKU-012 |
-| 抖音 `total_user` 是累计人数 | REG-DOUYIN-* | REG-COMMON-004 |
-| 抖音、斗鱼协议层丢弃其它房间的消息 | REG-DOUYIN-*、REG-DOUYU-* | REG-DANMAKU-001 |
-| 快手弹幕改走移动端 feed 串行轮询 | REG-KUAISHOU-* | REG-DANMAKU-011 |
-| 快手匿名直播搜索改用主播搜索 | REG-KUAISHOU-* | 无模块侧要求 |
-| 斗鱼 DID 统一、`rtmp_live` 绝对地址、Cookie 令牌类型 | REG-DOUYU-* | 无模块侧要求 |
-| 虎牙 wsTime 不延长、fm 模板整体替换、HLS 与 FLV 令牌分开 | REG-HUYA-* | 无模块侧要求 |
-| 抖音签名 URL 编码 | REG-DOUYIN-* | 无模块侧要求 |
+| 斗鱼匿名原画 `expire=300`，每 5 分钟断一次 | REG-DOUYU-001、REG-DOUYU-002 | REG-LEASE-001、REG-LEASE-002、REG-MULTI-002、REG-MULTI-003、REG-RECORD-001 |
+| 斗鱼 rate 是不透明请求码，画质顺序与服务端确认 | REG-DOUYU-005～REG-DOUYU-007、REG-DOUYU-027 | REG-COMMON-005、REG-RECORD-016 |
+| 斗鱼恢复不复用旧 URL，缺失确认保持未知 | REG-DOUYU-011 | REG-LEASE-005 |
+| 斗鱼疑似机器人过滤默认关闭 | REG-DOUYU-018、REG-DOUYU-019 | REG-DANMAKU-003 |
+| 斗鱼会话同时影响签名、播放和录制请求头 | REG-DOUYU-004、REG-DOUYU-014、REG-DOUYU-022 | REG-COMMON-008 |
+| 虎牙原生 FLV 凭据过期不断开已建立的连接 | REG-HUYA-001、REG-HUYA-002 | REG-LEASE-001、REG-LEASE-003、REG-RECORD-001 |
+| 虎牙网页源短租期与 40 秒交接 | REG-HUYA-002、REG-HUYA-019 | REG-LEASE-004 |
+| 虎牙每次打开生成新 seqid，播放与录制各自签名 | REG-HUYA-007 | REG-LEASE-007 |
+| 虎牙按 CDN 主机、格式、凭据类型识别线路 | REG-HUYA-010、REG-HUYA-018 | REG-COMMON-006 |
+| 虎牙 8006 是热度，不是在线人数 | REG-HUYA-014 | REG-COMMON-004 |
+| 虎牙只有明确的非直播状态才算离线 | REG-HUYA-015 | REG-COMMON-001 |
+| 虎牙录制只签当前线路 | huya.md §5.3（无单独编号） | REG-LEASE-006 |
+| B 站游客被降档，以 `current_qn` 为实际画质 | REG-BILIBILI-001 | REG-COMMON-005 |
+| B 站 -352 风控 | REG-BILIBILI-003、REG-BILIBILI-006 | REG-COMMON-001、REG-COMMON-002 |
+| B 站弹幕认证字段与 op24 ACK | REG-BILIBILI-008、REG-BILIBILI-011、REG-BILIBILI-012 | REG-DANMAKU-013 |
+| B 站弹幕 brotli | bilibili.md §7、§12 第 16 项（无单独编号） | G-11 |
+| 抖音纯音频档 `ao` | REG-DOUYIN-001 | REG-COMMON-007 |
+| 抖音弹幕多节点故障切换 | REG-DOUYIN-002、REG-DOUYIN-003 | REG-DANMAKU-012 |
+| 抖音 `total_user` 是累计人数 | REG-DOUYIN-008 | REG-COMMON-004 |
+| 抖音、斗鱼协议层丢弃其它房间的消息 | douyin.md §7（无单独编号）、REG-DOUYU-020 | REG-DANMAKU-001 |
+| 快手弹幕改走移动端 feed 串行轮询 | REG-KUAISHOU-011～REG-KUAISHOU-014 | REG-DANMAKU-011 |
+| 快手匿名直播搜索改用主播搜索 | REG-KUAISHOU-009、REG-KUAISHOU-015 | 无模块侧要求 |
+| 斗鱼 DID 统一、`rtmp_live` 绝对地址、Cookie 令牌类型 | REG-DOUYU-003、REG-DOUYU-009、REG-DOUYU-010、REG-DOUYU-024、REG-DOUYU-025 | 无模块侧要求 |
+| 虎牙 wsTime 不延长、fm 模板整体替换、HLS 与 FLV 令牌分开 | REG-HUYA-004～REG-HUYA-006、REG-HUYA-026 | 无模块侧要求 |
+| 抖音签名 URL 编码 | REG-DOUYIN-002、REG-DOUYIN-015 | 无模块侧要求 |
 | FC2 播放列表没有 `.m3u8` 后缀（非首批） | 第三批以后 | REG-LEASE-013 |
 | Twitch 在 Android 代理下 TLS 被重置（第二批） | 第二批 | REG-NET-004 |
 | CHZZK 受限直播导致整页失败（非首批） | 第三批 | REG-COMMON-002（地区限制是类型化错误） |

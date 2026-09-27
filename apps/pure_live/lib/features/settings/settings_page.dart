@@ -200,6 +200,7 @@ class SettingsGroupBody extends StatelessWidget {
         DynamicColorTile(),
         _TvThemeNote(),
         SwitchSettingTile(setting: Settings.denseFollows, title: '关注页紧凑卡片', subtitle: '主播名和标题放在一行'),
+        CardPresetTile(),
         SliderSettingTile(setting: Settings.textScale, title: '文字大小', min: 0.85, max: 1.3, divisions: 9),
       ],
       SettingsGroup.playback => const [
@@ -403,5 +404,26 @@ class DynamicColorTile extends StatelessWidget {
       );
     }
     return const SizedBox.shrink();
+  }
+}
+
+/// F-SET-03: the density of discover and search cards on this kind of
+/// device (phones and desktops keep their own, as 3.x did).
+class CardPresetTile extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final touch = Platform.isAndroid || Platform.isIOS;
+    // 3.x's 详细 and 自定义 show as the standard two lines.
+    return SettingBuilder<CardPreset>(
+      setting: touch ? Settings.cardPresetMobile : Settings.cardPresetDesktop,
+      builder: (context, value, set) => SwitchListTile(
+        title: Text(touch ? '发现和搜索用紧凑卡片（手机）' : '发现和搜索用紧凑卡片（桌面）'),
+        subtitle: const Text('主播名和标题放在一行'),
+        value: value == CardPreset.compact,
+        onChanged: (compact) => set(compact ? CardPreset.compact : CardPreset.normal),
+      ),
+    );
   }
 }

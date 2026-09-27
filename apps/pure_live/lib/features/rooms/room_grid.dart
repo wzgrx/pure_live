@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -11,6 +12,7 @@ import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/audience.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
+import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/card_marks.dart';
 import 'package:pure_live_app/features/rooms/room_card_menu.dart';
@@ -99,7 +101,7 @@ class RoomGrid extends ConsumerWidget {
     required this.query,
     this.where,
     this.arrange,
-    this.density = CardDensity.standard,
+    this.density,
     this.emptyText,
     this.refreshOn,
     this.originLabel,
@@ -115,8 +117,8 @@ class RoomGrid extends ConsumerWidget {
   /// Optional client-side order of the loaded rooms (search sort, F-SRC-01).
   final List<RoomCard> Function(List<RoomCard> cards)? arrange;
 
-  /// Card density.
-  final CardDensity density;
+  /// Card density; by default this device's preset (F-SET-03).
+  final CardDensity? density;
 
   /// Empty-state title.
   final String? emptyText;
@@ -146,7 +148,7 @@ class RoomGrid extends ConsumerWidget {
           items: items,
           hasMore: state.hasMore,
           moreError: state.moreError,
-          density: density,
+          density: density ?? ref.watch(cardDensityProvider),
           emptyText: emptyText,
           originLabel: originLabel,
           onLoadMore: () => ref.read(provider.notifier).loadMore(),
@@ -379,3 +381,12 @@ class RoomCardTile extends ConsumerWidget {
     );
   }
 }
+
+/// The density of discover and search cards (F-SET-03, principles §4.3):
+/// v4 keeps only the density of 3.x's presets, per device family; 紧凑 is
+/// one line, the others two.
+final Provider<CardDensity> cardDensityProvider = Provider<CardDensity>((ref) {
+  final touch = defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
+  final preset = ref.watch(touch ? cardPresetMobileSetting : cardPresetDesktopSetting);
+  return preset == CardPreset.compact ? CardDensity.compact : CardDensity.standard;
+});

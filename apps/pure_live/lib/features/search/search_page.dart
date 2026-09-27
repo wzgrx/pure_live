@@ -348,6 +348,7 @@ class _CombinedResults extends ConsumerWidget {
         final found = liveOnly ? state.items.where((card) => card.state == LiveState.live).toList() : state.items;
         final failed = state.failed;
         return RoomCardGrid(
+          density: ref.watch(cardDensityProvider),
           items: sortSearch(found, sort, platforms: platforms),
           hasMore: state.hasMore,
           moreError: state.moreError,

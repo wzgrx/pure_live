@@ -91,3 +91,13 @@ final catalogPreferredSetting = NotifierProvider<SettingNotifier<String>, String
 /// Dynamic colour: wallpaper (Android 12+) or system accent (Windows),
 /// off by default (principles §2.2).
 final dynamicColorSetting = NotifierProvider<SettingNotifier<bool>, bool>(() => SettingNotifier(Settings.dynamicColor));
+
+/// Card preset of phones and tablets (F-SET-03).
+final cardPresetMobileSetting = NotifierProvider<SettingNotifier<CardPreset>, CardPreset>(
+  () => SettingNotifier(Settings.cardPresetMobile),
+);
+
+/// Card preset of desktops (F-SET-03).
+final cardPresetDesktopSetting = NotifierProvider<SettingNotifier<CardPreset>, CardPreset>(
+  () => SettingNotifier(Settings.cardPresetDesktop),
+);

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 8–11 launch window: theme background with the centred icon
+     (spec/design/principles.md §3.2). Android 12+ uses the SplashScreen API. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="?android:colorBackground" />
+    <item
+        android:width="160dp"
+        android:height="160dp"
+        android:gravity="center">
+        <layer-list>
+            <item android:drawable="@color/ic_launcher_background" />
+            <item android:drawable="@drawable/ic_launcher_foreground" />
+        </layer-list>
+    </item>
+</layer-list>

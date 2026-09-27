@@ -1,0 +1,140 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:live_core/live_core.dart';
+import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/app/routes.dart';
+import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/features/rooms/room_grid.dart';
+import 'package:pure_live_app/features/rooms/room_list.dart';
+import 'package:pure_live_app/l10n/strings.dart';
+
+/// Discover: platform tabs, each with recommended rooms and areas
+/// (principles §4.1; "热门" and "分区" are one entry).
+class DiscoverPage extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) => DefaultTabController(
+    length: platformOrder.length,
+    child: Scaffold(
+      appBar: AppBar(
+        title: const Text(S.discover),
+        bottom: TabBar(
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          tabs: [
+            for (final id in platformOrder)
+              Tab(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PlatformLogo(platformId: id, size: 18),
+                    const SizedBox(width: Space.s2),
+                    Text(platformNames[id]!),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+      body: TabBarView(children: [for (final id in platformOrder) _PlatformDiscover(platform: id)]),
+    ),
+  );
+}
+
+class _PlatformDiscover extends StatelessWidget {
+  const new({required this.platform});
+
+  final String platform;
+
+  @override
+  Widget build(BuildContext context) => DefaultTabController(
+    length: 2,
+    child: Column(
+      children: [
+        const TabBar(
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          dividerHeight: 0,
+          tabs: [
+            Tab(text: S.recommended, height: 40),
+            Tab(text: S.areas, height: 40),
+          ],
+        ),
+        Expanded(
+          child: TabBarView(
+            children: [
+              RoomGrid(query: RecommendedQuery(platform)),
+              _Categories(platform: platform),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _Categories extends ConsumerWidget {
+  const new({required this.platform});
+
+  final String platform;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(categoriesProvider(platform));
+    final layout = WindowLayout(MediaQuery.sizeOf(context));
+    return async.when(
+      loading: () => const LoadingView(),
+      error: (error, _) {
+        final text = describeError(error);
+        return MessageView.error(
+          title: text.title,
+          message: text.message,
+          onAction: () => ref.invalidate(categoriesProvider(platform)),
+        );
+      },
+      data: (categories) => ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: layout.margin, vertical: Space.s2),
+        itemCount: categories.length,
+        itemBuilder: (context, index) => _CategorySection(platform: platform, category: categories[index]),
+      ),
+    );
+  }
+}
+
+class _CategorySection extends StatelessWidget {
+  const new({required this.platform, required this.category});
+
+  final String platform;
+  final Category category;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Space.s4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: Space.s2),
+            child: Text(category.name, style: theme.textTheme.titleSmall),
+          ),
+          Wrap(
+            spacing: Space.s2,
+            runSpacing: Space.s2,
+            children: [
+              for (final area in category.areas)
+                ActionChip(
+                  label: Text(area.name),
+                  onPressed: () => context.push(areaLocation(platform), extra: area),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

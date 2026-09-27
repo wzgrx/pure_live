@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
-import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live_app/core/engine.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/room/playback.dart';
@@ -110,10 +110,17 @@ int multiviewCapacity() => Platform.isAndroid || Platform.isIOS ? 4 : 9;
 class MultiviewController extends Notifier<MultiviewState> {
   /// Global, never reused: late results for a reassigned cell are dropped (INV-MULTI-03).
   int _epoch = 0;
-  final List<int> _cellEpochs = [];
+
+  /// The epoch each cell was last assigned with, by cell index.
+  final Map<int, int> _cellEpochs = {};
+
+  /// The latest state, for release on dispose: `state` must not be read
+  /// inside a dispose callback.
+  MultiviewState? _latest;
 
   @override
   MultiviewState build() {
+    listenSelf((_, next) => _latest = next);
     ref.onDispose(_releaseAll);
     return const MultiviewState(
       layout: MultiviewLayout.four,
@@ -146,7 +153,7 @@ class MultiviewController extends Notifier<MultiviewState> {
     while (cells.length < count) {
       cells.add(const MultiviewCell());
     }
-    _cellEpochs.length = cells.length;
+    _cellEpochs.removeWhere((index, _) => index >= cells.length);
     int firstPlaying() => cells.indexWhere((c) => c.status == CellStatus.playing).clamp(0, cells.length - 1);
     final focus = state.audioFocus < cells.length ? state.audioFocus : firstPlaying();
     state = state.copyWith(
@@ -164,7 +171,6 @@ class MultiviewController extends Notifier<MultiviewState> {
   void addCell() {
     if (state.cells.length >= multiviewCapacity()) return;
     _grow();
-    _cellEpochs.length = state.cells.length;
   }
 
   /// Picks where the next room goes.
@@ -180,9 +186,8 @@ class MultiviewController extends Notifier<MultiviewState> {
   Future<void> assign(int index, RoomRef room) async {
     if (index >= state.cells.length) return;
     final epoch = ++_epoch;
-    if (_cellEpochs.length < state.cells.length) _cellEpochs.length = state.cells.length;
     _cellEpochs[index] = epoch;
-    bool current() => index < _cellEpochs.length && _cellEpochs[index] == epoch;
+    bool current() => _cellEpochs[index] == epoch;
 
     final old = state.cells[index];
     _setCell(index, MultiviewCell(status: CellStatus.resolving, room: room));
@@ -205,9 +210,7 @@ class MultiviewController extends Notifier<MultiviewState> {
         return;
       }
       final settings = ref.read(storeProvider).settings;
-      final session = PlaybackSession(
-        engine: mpvEngineFactory(MpvEngineConfig(hardwareDecoding: settings.get(Settings.hardwareDecoding))),
-      );
+      final session = PlaybackSession(engine: ref.read(engineFactoryProvider));
       // Start muted; sound comes with the focus (INV-MULTI-06).
       await session.setVolume(0);
       _setCell(index, MultiviewCell(status: CellStatus.playing, room: room, detail: detail, session: session));
@@ -310,7 +313,7 @@ class MultiviewController extends Notifier<MultiviewState> {
   /// Empties a cell at once; native release finishes in the background (CEL-7).
   void close(int index) {
     final cell = state.cells[index];
-    if (index < _cellEpochs.length) _cellEpochs[index] = ++_epoch;
+    _cellEpochs[index] = ++_epoch;
     _setCell(index, const MultiviewCell());
     unawaited(_release(cell));
     if (index == state.audioFocus || index == state.big) {
@@ -335,7 +338,7 @@ class MultiviewController extends Notifier<MultiviewState> {
 
   /// Clears every cell for a safe exit (EXT-2): state first, native release after.
   void _releaseAll() {
-    for (final cell in state.cells) {
+    for (final cell in _latest?.cells ?? const <MultiviewCell>[]) {
       unawaited(_release(cell));
     }
   }

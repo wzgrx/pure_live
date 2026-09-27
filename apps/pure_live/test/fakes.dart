@@ -3,7 +3,16 @@ import 'package:live_record/live_record.dart';
 
 /// An adapter with canned pages, for widget and provider tests.
 final class FakeSite implements LiveSite, CatalogSource, SearchSource, RoomSource, StreamSource, LinkResolver {
-  new(this.id, {List<Page<RoomCard>>? pages, this.failFirst = false}) : pages = pages ?? [];
+  new(this.id, {List<Page<RoomCard>>? pages, this.failFirst = false, this.offline = const {}}) : pages = pages ?? [];
+
+  /// Room ids whose detail reports offline.
+  final Set<String> offline;
+
+  /// Detail requests, in order, so tests can see which rooms were asked for.
+  final details = <String>[];
+
+  /// Stream requests, in order.
+  final streamRequests = <String>[];
 
   @override
   final String id;
@@ -49,11 +58,39 @@ final class FakeSite implements LiveSite, CatalogSource, SearchSource, RoomSourc
   Future<Page<RoomCard>> search(String keyword, {PageCursor? cursor}) => _page(cursor);
 
   @override
-  Future<RoomDetail> detail(RoomRef ref) async =>
-      RoomDetail(card: card(ref.roomId), link: Uri.parse('https://example.com/${ref.roomId}'));
+  Future<RoomDetail> detail(RoomRef ref) async {
+    details.add(ref.roomId);
+    final state = offline.contains(ref.roomId) ? LiveState.offline : LiveState.live;
+    return RoomDetail(
+      card: card(ref.roomId, state: state),
+      link: Uri.parse('https://example.com/${ref.roomId}'),
+    );
+  }
+
+  /// Qualities every room offers, best first.
+  static const qualities = [
+    Quality(id: 'hd', label: '原画', rank: 3),
+    Quality(id: 'sd', label: '高清', rank: 2),
+    Quality(id: 'ld', label: '流畅', rank: 1),
+  ];
 
   @override
-  Future<StreamSet> streams(RoomDetail room, {Quality? quality}) => throw StreamUnavailable(id);
+  Future<StreamSet> streams(RoomDetail room, {Quality? quality}) async {
+    streamRequests.add(room.ref.roomId);
+    final chosen = quality ?? qualities.first;
+    return StreamSet(
+      qualities: qualities,
+      selected: chosen,
+      lines: [
+        StreamLine(
+          url: Uri.parse('https://cdn.example.com/${room.ref.roomId}/${chosen.id}.m3u8'),
+          format: StreamFormat.hls,
+          lineId: 'a',
+          requested: chosen,
+        ),
+      ],
+    );
+  }
 
   @override
   Future<RoomRef?> resolve(String input) async =>

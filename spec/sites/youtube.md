@@ -35,9 +35,10 @@ ADR 0003 的**候选下线**平台，第 7 阶段评估。只写行为和外部�
 
 | 输入 | 处理 | 证据 |
 |---|---|---|
-| 纯视频 id / 频道 id | 直接使用 | L:… |
-| `https://www.youtube.com/watch?v=<id>`、`/live/<id>`、`/embed/<id>`、`https://youtu.be/<id>`（也收 `m.youtube.com`） | 视频 | L |
-| `https://www.youtube.com/channel/<UC…>[/live]` | 频道 | L |
+| 纯视频 id / 频道 id | 直接使用 | L:58-66 |
+| `https://www.youtube.com/watch?v=<id>`、`/live/<id>`、`/embed/<id>`、`/v/<id>`、`https://youtu.be/<id>`（也收 `m.youtube.com`） | 视频 | L:22-42 |
+| `https://www.youtube.com/embed/live_stream?channel=<UC…>` | 频道 | L:31-37 |
+| `https://www.youtube.com/channel/<UC…>[/live]` | 频道 | L:85-101 |
 | `https://www.youtube.com/@<handle>[/…]`、`/c/<名>`、`/user/<名>`、纯 `@<handle>` | `navigation/resolve_url` 换成频道 id（`browseEndpoint.browseId`，S03-resolve-handle） | A:171-189 改写 |
 | 分享文本 | 抽出第一个 URL | — |
 

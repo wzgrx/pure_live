@@ -114,6 +114,7 @@ void main() {
       expect(await site.resolve('https://www.youtube.com/live/$_live'), RoomRef('youtube', _live));
       expect(await site.resolve('https://m.youtube.com/channel/$_lofi/live'), RoomRef('youtube', _lofi));
       expect(await site.resolve('看 https://www.youtube.com/@LofiGirl 吧'), RoomRef('youtube', _lofi));
+      expect(await site.resolve('https://www.youtube.com/embed/live_stream?channel=$_lofi'), RoomRef('youtube', _lofi));
       expect(await site.resolve('https://www.douyu.com/9999'), isNull);
     });
   });

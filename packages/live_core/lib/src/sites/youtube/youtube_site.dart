@@ -159,9 +159,14 @@ final class YouTubeSite implements LiveSite, CatalogSource, SearchSource, RoomSo
       return id != null && YouTubeParse.videoId.hasMatch(id) ? RoomRef(_site, id) : null;
     }
     if (host != 'youtube.com' && host != 'www.youtube.com' && host != 'm.youtube.com') return null;
+    // An embedded channel player names the channel (legacy L:31-37).
+    if (segments case ['embed', 'live_stream']) {
+      final channel = url.queryParameters['channel'];
+      return channel != null && YouTubeParse.channelId.hasMatch(channel) ? RoomRef(_site, channel) : null;
+    }
     final video = switch (segments) {
       ['watch'] => url.queryParameters['v'],
-      ['live', final id] || ['embed', final id] => id,
+      ['live', final id] || ['embed', final id] || ['v', final id] => id,
       _ => null,
     };
     if (video != null) return YouTubeParse.videoId.hasMatch(video) ? RoomRef(_site, video) : null;

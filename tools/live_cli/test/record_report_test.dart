@@ -1,10 +1,23 @@
 import 'dart:io';
 
 import 'package:live_cli/live_cli.dart';
+import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('record url: one live room with one line, its format by the IPTV rule', () async {
+    expect(urlFormat(Uri.parse('http://192.168.1.1:4022/udp/239.3.1.1:8000')), StreamFormat.other);
+    expect(urlFormat(Uri.parse('https://cdn.test/live/index.M3U8?t=1')), StreamFormat.hls);
+    expect(urlFormat(Uri.parse('https://cdn.test/live/a.flv')), StreamFormat.flv);
+    final rooms = UrlRecordRooms(Uri.parse('http://127.0.0.1:8090/udp/239.1.1.1:5000'), headers: {'user-agent': 'x'});
+    final detail = await rooms.detail(rooms.ref);
+    expect(detail.card.state, LiveState.live);
+    final line = (await rooms.streams(detail)).lines.single;
+    expect((line.format, line.url.port), (StreamFormat.other, 8090));
+    expect(line.headers, {'user-agent': 'x'});
+  });
+
   test('stepReport finds the largest step and regressions', () {
     final report = stepReport([0, 0.04, 0.08, 0.2, 0.18, 0.22]);
     expect(report.count, 6);

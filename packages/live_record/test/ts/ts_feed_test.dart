@@ -417,6 +417,21 @@ void main() {
     });
   });
 
+  test('a video PID that goes silent does not hold everything back: the last frame is taken as it is', () {
+    fakeAsync((async) {
+      final live = TsLive(videoUntilMs: 13000);
+      final rig = _Rig(live: live, timings: const TsTimings(maxPending: 100))
+        ..record(async, 8)
+        ..close(async);
+      final check = TsCheck.of(rig.bytes(1));
+      expect(check.problems, isEmpty);
+      expect((check.videoPts.last - live.base) ~/ 90, 12960, reason: 'the last frame is written');
+      final audio = check.audioStarts.length;
+      expect(audio, greaterThan((18000 - 11000) ~/ 64 - 40), reason: 'audio after the video stopped is written');
+      expect(rig.remux(async, 1).audioSamples, audio * 3);
+    });
+  });
+
   test('stop waits for the frame being received, then ends with whole units and no gap', () {
     fakeAsync((async) {
       final rig = _Rig()..connect(async);

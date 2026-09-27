@@ -53,7 +53,7 @@ abstract interface class TsSink {
 /// Limits of a continuous MPEG-TS feed.
 final class TsTimings {
   /// Creates the limits.
-  const new({this.keyframeWait = const Duration(seconds: 30), this.raiFallback = 300});
+  const new({this.keyframeWait = const Duration(seconds: 30), this.raiFallback = 300, this.maxPending = 50000});
 
   /// Longest wait for a keyframe at the start of a connection or after a
   /// cut; then the connection ends (as `unsupportedProtocol` when it wrote
@@ -63,6 +63,11 @@ final class TsTimings {
   /// Video units of a codec the feed cannot parse after which, without any
   /// `random_access_indicator`, every unit counts as a keyframe.
   final int raiFallback;
+
+  /// Packets (50 000: about 9 MB) an unfinished unit may hold back; then
+  /// it is taken as it is (a video PID that went silent never starts the
+  /// next PES).
+  final int maxPending;
 }
 
 enum _Kind { psi, video, es }
@@ -578,7 +583,10 @@ final class TsFeed {
           droppedPackets++;
           continue;
         }
-        if (!unit.complete) break;
+        if (!unit.complete) {
+          if (!_overflow(unit)) break;
+          continue;
+        }
         if (!unit.key) {
           unit.dropped = true;
           _pending.removeFirst();
@@ -589,7 +597,8 @@ final class TsFeed {
         _minSerial = unit.serial;
         resume = true;
       } else if (unit != null && !unit.complete && !unit.dropped) {
-        break;
+        if (!_overflow(unit)) break;
+        continue;
       }
       _pending.removeFirst();
       if (packet.drop || unit != null && (unit.dropped || unit.serial < _minSerial)) {
@@ -599,6 +608,19 @@ final class TsFeed {
       if (unit != null && packet.first && unit.primary) _unitStart(unit, resume: resume);
       _run.add(packet.bytes);
     }
+  }
+
+  /// Whether [unit], unfinished at the front, was taken as it is because it
+  /// held back more than [TsTimings.maxPending] packets: complete when its
+  /// end is the next start, dropped when it declared more than it got.
+  bool _overflow(_Unit unit) {
+    if (_pending.length <= timings.maxPending) return false;
+    if (unit.declared == null) {
+      _complete(unit);
+    } else {
+      _dropUnit(unit);
+    }
+    return true;
   }
 
   void _unitStart(_Unit unit, {required bool resume}) {

@@ -60,6 +60,7 @@ final class TsLive {
     this.audioRateIndexFromMs,
     this.audioPidFromMs,
     this.splitAudio = false,
+    this.videoUntilMs,
   }) {
     _generate();
   }
@@ -90,6 +91,9 @@ final class TsLive {
 
   /// Each audio PES ends inside its last frame; the next PES starts with the rest.
   final bool splitAudio;
+
+  /// The video PID goes silent from this stream time on (still in the PMT).
+  final int? videoUntilMs;
 
   final List<TsLivePacket> packets = [];
 
@@ -143,7 +147,7 @@ final class TsLive {
 
     var serial = 0;
     if (video) {
-      for (var n = 0; n * frameMs < durationMs; n++) {
+      for (var n = 0; n * frameMs < (videoUntilMs ?? durationMs); n++) {
         final ms = n * frameMs;
         final key = n % gop == 0;
         if (videoType == 0x02) {

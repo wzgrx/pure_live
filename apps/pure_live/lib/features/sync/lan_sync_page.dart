@@ -67,6 +67,7 @@ String lanResultText(LanSendResult result) => switch (result) {
 
 const _localNetworkNote =
     'Android 17 起，系统可能要求允许“本地网络 / 附近的设备”权限；连不上时请到系统设置 › 应用 › 纯粹直播 › 权限中允许。\n'
+    'Windows 第一次接收时会弹出防火墙提示，请允许在专用网络上访问。\n'
     '两台设备需要连在同一个 Wi-Fi（或同一局域网）下。';
 
 /// 局域网同步 (F-SYNC-01, store.md §9): the receiver shows its address, a

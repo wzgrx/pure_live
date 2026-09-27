@@ -188,7 +188,10 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
     _offered = null;
     if (!mounted) return;
     if (open ?? false) {
-      await context.push(roomLocation(room));
+      // A single-page site already shows the room's own page, whose player
+      // would keep playing under the app's: step back to the results first.
+      if (link == null) await _page?.goBack();
+      if (mounted) await context.push(roomLocation(room));
       return;
     }
     _dismissed.add(room.key);

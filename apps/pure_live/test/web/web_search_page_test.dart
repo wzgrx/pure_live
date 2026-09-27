@@ -158,6 +158,22 @@ void main() {
     expect(find.text('识别到直播间'), findsNothing);
   });
 
+  testWidgets('F-SRC-02: a single-page site that shows a room steps back before the room opens', (tester) async {
+    await pumpSearch(tester, sites: withWebOnly);
+    await tester.enterText(find.byType(TextField), 'cat');
+    await tester.tap(find.byTooltip('网页搜索'));
+    await settle(tester);
+    final page = engine.pages.single..pushState(Uri.parse('https://picarto.tv/Erin'));
+    // The offer comes after the resolution; then the sheet slides in.
+    await settle(tester);
+    await settle(tester);
+    expect(find.text('picarto · erin'), findsOneWidget);
+    await tester.tap(find.text('打开直播间'));
+    await settle(tester);
+    expect(find.text('ROOM picarto/erin'), findsOneWidget);
+    expect(page.history.last.path, '/search', reason: 'the web room page is left');
+  });
+
   testWidgets('F-SRC-02: 本页的房间 lists the room links on the page', (tester) async {
     await pumpSearch(tester, sites: withWebOnly);
     await tester.enterText(find.byType(TextField), 'cat');

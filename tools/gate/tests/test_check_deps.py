@@ -45,6 +45,19 @@ class CheckDepsTest(unittest.TestCase):
         self.assertIn("Flutter SDK", errors[0])
         self.assertIn("package:flutter_test", errors[1])
 
+    def test_live_record_is_pure_dart(self):
+        root = self.workspace(["packages/live_record"])
+        write(root / "packages/live_record/pubspec.yaml", """\
+            name: live_record
+            dependencies:
+              live_media: any
+              flutter:
+                sdk: flutter
+            """)
+        errors, _ = deps.check(root)
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("Flutter SDK", errors[0])
+
     def test_upward_dependency_is_rejected(self):
         root = self.workspace(["packages/live_core", "packages/live_net"])
         write(root / "packages/live_core/pubspec.yaml", "name: live_core\n")

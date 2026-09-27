@@ -35,8 +35,8 @@ ALLOWED = {
 
 # Must run under plain `dart test` and be callable from live_cli.
 PURE_DART = {
-    'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'packages/live_media', 'packages/live_store',
-    'tools/live_cli', 'tools/check_latest',
+    'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'packages/live_media', 'packages/live_record',
+    'packages/live_store', 'tools/live_cli', 'tools/check_latest',
 }
 
 IMPORT = re.compile(r"""^\s*(?:import|export)\s+['"]package:([a-z0-9_]+)/""", re.M)

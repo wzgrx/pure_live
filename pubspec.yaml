@@ -16,6 +16,7 @@ workspace:
   - packages/live_ui
   - packages/live_media
   - packages/live_player
+  - packages/live_record
   - tools/live_cli
   - tools/check_latest
 

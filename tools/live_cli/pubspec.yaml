@@ -12,6 +12,7 @@ dependencies:
   args: ^2.7.0
   crypto: ^3.0.7
   live_core: any
+  live_danmaku: any
   live_media: any
   live_net: any
 

@@ -3,6 +3,7 @@ import 'package:live_cli/src/fixture/rules/bilibili.dart';
 import 'package:live_cli/src/fixture/rules/douyin.dart';
 import 'package:live_cli/src/fixture/rules/douyu.dart';
 import 'package:live_cli/src/fixture/rules/huya.dart';
+import 'package:live_cli/src/fixture/rules/jdlive.dart';
 import 'package:live_cli/src/fixture/rules/kuaishou.dart';
 import 'package:live_cli/src/fixture/rules/kugoulive.dart';
 import 'package:live_cli/src/fixture/rules/liveme.dart';
@@ -21,6 +22,7 @@ const Map<String, ScrubRules> platformRules = {
   'douyin': douyinRules,
   'douyu': douyuRules,
   'huya': huyaRules,
+  'jdlive': jdliveRules,
   'kuaishou': kuaishouRules,
   'kugoulive': kugouliveRules,
   'liveme': livemeRules,

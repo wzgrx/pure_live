@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0" configId="499354">
+  <specVersion>
+    <major>1</major>
+    <minor>1</minor>
+  </specVersion>
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+    <friendlyName>Kodi (LIBREELEC)</friendlyName>
+    <manufacturer>XBMC Foundation</manufacturer>
+    <manufacturerURL>https://kodi.tv/</manufacturerURL>
+    <modelDescription>Kodi - Media Renderer</modelDescription>
+    <modelName>Kodi</modelName>
+    <modelNumber>21.1 Git:20240811-0000000000-dirty</modelNumber>
+    <modelURL>https://kodi.tv/</modelURL>
+    <UDN>uuid:0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87</UDN>
+    <presentationURL>http://192.168.1.20:8080/</presentationURL>
+    <dlna:X_DLNADOC xmlns:dlna="urn:schemas-dlna-org:device-1-0">DMR-1.50</dlna:X_DLNADOC>
+    <iconList>
+      <icon>
+        <mimetype>image/png</mimetype>
+        <width>256</width>
+        <height>256</height>
+        <depth>8</depth>
+        <url>/icon256x256.png</url>
+      </icon>
+    </iconList>
+    <serviceList>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
+        <SCPDURL>/AVTransport/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/scpd.xml</SCPDURL>
+        <controlURL>/AVTransport/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/control.xml</controlURL>
+        <eventSubURL>/AVTransport/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/event.xml</eventSubURL>
+      </service>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
+        <SCPDURL>/ConnectionManager/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/scpd.xml</SCPDURL>
+        <controlURL>/ConnectionManager/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/control.xml</controlURL>
+        <eventSubURL>/ConnectionManager/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/event.xml</eventSubURL>
+      </service>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
+        <SCPDURL>/RenderingControl/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/scpd.xml</SCPDURL>
+        <controlURL>/RenderingControl/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/control.xml</controlURL>
+        <eventSubURL>/RenderingControl/0e3b1c9a-5b1f-4c6e-9a8e-3f2d1c0b9a87/event.xml</eventSubURL>
+      </service>
+    </serviceList>
+  </device>
+</root>

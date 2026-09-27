@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:dlna="urn:schemas-dlna-org:device-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+    <presentationURL>/</presentationURL>
+    <friendlyName>客厅的小米电视</friendlyName>
+    <manufacturer>Xiaomi</manufacturer>
+    <manufacturerURL>http://www.mi.com/</manufacturerURL>
+    <modelDescription>Xiaomi MediaRenderer</modelDescription>
+    <modelName>Xiaomi MediaRenderer</modelName>
+    <modelNumber>1.0</modelNumber>
+    <modelURL>http://www.mi.com/</modelURL>
+    <serialNumber>0000001</serialNumber>
+    <UDN>uuid:F7CA5454-3F48-4390-8009-4C5EF27F0E07</UDN>
+    <dlna:X_DLNADOC>DMR-1.50</dlna:X_DLNADOC>
+    <serviceList>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
+        <SCPDURL>_urn:schemas-upnp-org:service:ConnectionManager_scpd.xml</SCPDURL>
+        <controlURL>_urn:schemas-upnp-org:service:ConnectionManager_control</controlURL>
+        <eventSubURL>_urn:schemas-upnp-org:service:ConnectionManager_event</eventSubURL>
+      </service>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
+        <SCPDURL>_urn:schemas-upnp-org:service:AVTransport_scpd.xml</SCPDURL>
+        <controlURL>_urn:schemas-upnp-org:service:AVTransport_control</controlURL>
+        <eventSubURL>_urn:schemas-upnp-org:service:AVTransport_event</eventSubURL>
+      </service>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
+        <SCPDURL>_urn:schemas-upnp-org:service:RenderingControl_scpd.xml</SCPDURL>
+        <controlURL>_urn:schemas-upnp-org:service:RenderingControl_control</controlURL>
+        <eventSubURL>_urn:schemas-upnp-org:service:RenderingControl_event</eventSubURL>
+      </service>
+    </serviceList>
+  </device>
+</root>

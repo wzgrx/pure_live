@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 # check, so adding a package forces a decision here.
 ALLOWED = {
     'packages/live_net': set(),
+    # DLNA casting talks to LAN devices only, on dart:io (docs/adr/draft-cast.md).
+    'packages/live_cast': set(),
     'packages/live_core': {'live_net'},
     'packages/live_danmaku': {'live_core', 'live_net'},
     # IPTV is a local data source, not a platform adapter (ADR 0003).
@@ -29,7 +31,7 @@ ALLOWED = {
     'packages/live_platform': set(),
     'apps/pure_live': {
         'live_ui', 'live_media', 'live_player', 'live_record', 'live_danmaku', 'live_iptv', 'live_store', 'live_core',
-        'live_net', 'live_platform',
+        'live_net', 'live_platform', 'live_cast',
     },
     'tools/live_cli': {'live_core', 'live_net', 'live_danmaku', 'live_media', 'live_record'},
     'tools/check_latest': set(),
@@ -38,7 +40,7 @@ ALLOWED = {
 # Must run under plain `dart test` and be callable from live_cli.
 PURE_DART = {
     'packages/live_net', 'packages/live_core', 'packages/live_danmaku', 'packages/live_iptv', 'packages/live_media',
-    'packages/live_record',
+    'packages/live_record', 'packages/live_cast',
     'packages/live_store', 'tools/live_cli', 'tools/check_latest',
 }
 

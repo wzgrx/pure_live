@@ -9,6 +9,7 @@ environment:
 
 workspace:
   - apps/pure_live
+  - packages/live_cast
   - packages/live_core
   - packages/live_danmaku
   - packages/live_iptv

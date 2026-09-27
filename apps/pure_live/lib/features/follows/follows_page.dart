@@ -13,6 +13,7 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
+import 'package:pure_live_app/features/rooms/room_card_menu.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
@@ -239,7 +240,8 @@ class _FollowListState extends ConsumerState<_FollowList> {
                       rowExtent: grid.rowExtent,
                     ),
                     onTap: () => context.push(roomLocation(room.ref), extra: origin),
-                    onMenu: () => _showMenu(context, ref, live[index]),
+                    onMenu: () =>
+                        unawaited(showRoomCardMenu(context, ref, room: room.ref, anchorName: room.anchorName)),
                   );
                 },
               ),
@@ -262,7 +264,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
                   avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
                   subtitle: last == null ? S.offline : '上次开播 ${formatAgo(last, now)}',
                   onTap: () => context.push(roomLocation(room.ref), extra: origin),
-                  onMenu: () => _showMenu(context, ref, offline[index]),
+                  onMenu: () => unawaited(showRoomCardMenu(context, ref, room: room.ref, anchorName: room.anchorName)),
                 );
               },
             ),
@@ -270,66 +272,6 @@ class _FollowListState extends ConsumerState<_FollowList> {
           ],
         );
       },
-    );
-  }
-
-  /// The card menu (principles §4.2); unfollow can be undone.
-  Future<void> _showMenu(BuildContext context, WidgetRef ref, FollowedRoom follow) async {
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(title: Text(follow.room.anchorName), subtitle: Text(platformNames[follow.ref.platform] ?? '')),
-            ListTile(
-              leading: const Icon(Icons.folder_outlined),
-              title: const Text('设置分组'),
-              onTap: () => Navigator.pop(context, 'groups'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.grid_view),
-              title: const Text('加入多画面'),
-              onTap: () => Navigator.pop(context, 'multiview'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.tag),
-              title: const Text('复制房间号'),
-              onTap: () => Navigator.pop(context, 'copy'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.heart_broken_outlined),
-              title: const Text('取消关注'),
-              onTap: () => Navigator.pop(context, 'unfollow'),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (!context.mounted) return;
-    switch (action) {
-      case 'groups':
-        await editRoomGroups(context, ref, follow.ref, follow.room.anchorName);
-        return;
-      case 'multiview':
-        unawaited(context.push('/multiview', extra: [follow.ref]));
-        return;
-      case 'copy':
-        await copyWithToast(context, follow.ref.roomId, '房间号已复制');
-        return;
-      case 'unfollow':
-        break;
-      default:
-        return;
-    }
-    final store = ref.read(storeProvider);
-    final removed = await store.follows.unfollow(follow.ref);
-    if (removed == null || !context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('已取消关注 ${follow.room.anchorName}'),
-        action: SnackBarAction(label: '撤销', onPressed: () => store.follows.restore([removed])),
-      ),
     );
   }
 }

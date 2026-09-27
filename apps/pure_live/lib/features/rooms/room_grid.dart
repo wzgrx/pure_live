@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
+import 'package:pure_live_app/features/rooms/room_card_menu.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
@@ -249,7 +253,7 @@ class _Footer extends StatelessWidget {
 }
 
 /// One card: maps a live_core [RoomCard] onto the design system's view.
-class RoomCardTile extends StatelessWidget {
+class RoomCardTile extends ConsumerWidget {
   const new({
     required this.card,
     required this.coverWidth,
@@ -283,7 +287,7 @@ class RoomCardTile extends StatelessWidget {
   final ValueChanged<bool>? onFocusChange;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final audience = card.audience.online ?? card.audience.popularity ?? card.audience.cumulative;
     final since = card.liveSince;
     return RoomCardView(
@@ -299,6 +303,16 @@ class RoomCardTile extends StatelessWidget {
       onKeyEvent: onKeyEvent,
       onFocusChange: onFocusChange,
       onTap: () => context.push(roomLocation(card.ref), extra: origin?.call()),
+      // principles §4.2: the same menu on every card.
+      onMenu: () => unawaited(
+        showRoomCardMenu(
+          context,
+          ref,
+          room: card.ref,
+          anchorName: card.anchorName,
+          snapshot: RoomSnapshot.fromCard(card),
+        ),
+      ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/rooms/room_card_menu.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 /// Watch history, newest first.
@@ -59,6 +62,21 @@ class HistoryPage extends ConsumerWidget {
                   avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
                   subtitle: [room.title, if (watched != null) formatAgo(watched, now)].join(' · '),
                   onTap: () => context.push(roomLocation(room.ref)),
+                  onMenu: () => unawaited(
+                    showRoomCardMenu(
+                      context,
+                      ref,
+                      room: room.ref,
+                      anchorName: room.anchorName,
+                      snapshot: RoomSnapshot(
+                        ref: room.ref,
+                        anchorName: room.anchorName,
+                        title: room.title,
+                        avatar: room.avatar,
+                        cover: room.cover,
+                      ),
+                    ),
+                  ),
                 );
               },
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pure_live_app/app/appearance.dart';
 import 'package:pure_live_app/app/routes.dart';
+import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/share_intake.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -23,7 +24,10 @@ class PureLiveApp extends ConsumerWidget {
       ..watch(recordManagerProvider)
       ..watch(iptvShareIntakeProvider)
       ..watch(iptvAutoSyncProvider)
-      ..watch(systemIntegrationProvider);
+      ..watch(systemIntegrationProvider)
+      // Known before the first room opens (Q-2); listened, so a network
+      // change does not rebuild the app.
+      ..listen(networkKindProvider, (_, _) {});
     final (light, dark, mode) = themesFor(ref.watch(themeModeSetting), pureBlack: ref.watch(pureBlackSetting));
     return MaterialApp.router(
       title: S.appName,

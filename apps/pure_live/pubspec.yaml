@@ -12,6 +12,7 @@ dependencies:
   audio_service: ^0.18.19
   audio_session: ^0.2.4
   cached_network_image: ^4.0.2
+  connectivity_plus: ^7.3.1
   crypto: ^3.0.7
   ffi: ^2.2.0
   file_picker: ^13.1.0

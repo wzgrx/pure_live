@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/core/engine.dart';
+import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -222,6 +223,7 @@ class MultiviewController extends Notifier<MultiviewState> {
         detail: detail,
         preference: _smallCell(index) ? QualityPreference.smooth : null,
         proxiedHosts: ref.read(proxiedHostsProvider),
+        cellular: ref.read(networkKindProvider).value == NetworkKind.cellular,
       );
       if (!current()) {
         unawaited(session.dispose());
@@ -285,7 +287,8 @@ class MultiviewController extends Notifier<MultiviewState> {
   /// Small cells use the lowest quality, big ones the preference, unless the
   /// user chose one for that cell (RS-2).
   void _applyQualities() {
-    final preference = ref.read(storeProvider).settings.get(Settings.qualityWifi);
+    final cellular = ref.read(networkKindProvider).value == NetworkKind.cellular;
+    final preference = ref.read(storeProvider).settings.get(cellular ? Settings.qualityMobile : Settings.qualityWifi);
     for (final (index, cell) in state.cells.indexed) {
       final session = cell.session;
       if (session == null || cell.manualQuality) continue;

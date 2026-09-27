@@ -13,7 +13,7 @@ void main() {
   const expected = {
     SettingsGroup.general: ['启动页', '播放时屏幕常亮'],
     SettingsGroup.appearance: ['主题', '纯黑'],
-    SettingsGroup.playback: ['默认画质（Wi-Fi）', '硬件解码'],
+    SettingsGroup.playback: ['默认画质（Wi-Fi）', '网络不稳时自动降低画质', '硬件解码'],
     SettingsGroup.danmaku: ['显示弹幕', '字号'],
     SettingsGroup.recording: ['录制中心', '录制保存位置', '开播监控'],
     SettingsGroup.accounts: ['平台账号'],

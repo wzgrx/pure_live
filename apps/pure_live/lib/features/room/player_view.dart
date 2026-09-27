@@ -12,6 +12,7 @@ import 'package:live_store/live_store.dart' as store;
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
+import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -24,6 +25,7 @@ import 'package:pure_live_app/features/room/playback.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/features/room/room_menus.dart';
 import 'package:pure_live_app/features/room/sleep_timer.dart';
+import 'package:pure_live_app/features/room/weak_network.dart';
 import 'package:pure_live_app/features/system/launch_args.dart';
 import 'package:pure_live_app/features/system/pip.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -151,6 +153,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   Timer? _volumeSave;
   double _brightness = 1;
   bool _pipSupported = false;
+  final StallWatch _stallWatch = StallWatch();
   late store.VideoFit _fit;
 
   Size _size = Size.zero;
@@ -206,6 +209,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
       // Switching rooms in place: same session and surface, new source
       // (SES-3); late results of the old room are dropped by the session.
       _openError = null;
+      _stallWatch.reset();
       _initVolume();
       if (_live) {
         unawaited(_open());
@@ -234,6 +238,12 @@ class PlayerViewState extends ConsumerState<PlayerView> {
 
   void _onState(PlaybackState state) {
     if (!mounted) return;
+    final lower = _stallWatch.observe(_state, state);
+    if (lower != null && ref.read(storeProvider).settings.get(store.Settings.autoLowerQuality)) {
+      // F-NEW-10: keeps stalling, one step down.
+      unawaited(_session.selectQuality(lower));
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text('网络不稳，已切到${lower.label}，可以在画质里换回')));
+    }
     final wasPlaying = _state.phase == PlaybackPhase.playing;
     setState(() => _state = state);
     if (state.phase == PlaybackPhase.playing && !wasPlaying) _scheduleHide();
@@ -255,6 +265,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         session: _session,
         detail: detail,
         proxiedHosts: ref.read(proxiedHostsProvider),
+        cellular: ref.read(networkKindProvider).value == NetworkKind.cellular,
       );
     } on Object catch (error) {
       if (mounted && widget.detail.ref == detail.ref) setState(() => _openError = error);
@@ -375,7 +386,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   /// Q / L: the quality and line panel.
   Future<void> chooseQualityLine() async {
     if (_state.qualities.isEmpty && _state.lines.isEmpty) return;
-    await withPanel(() => showQualityLineSheet(context, _session));
+    await withPanel(() => showQualityLineSheet(context, _session, onQualityPicked: (_) => _stallWatch.picked()));
   }
 
   // ------------------------------------------------------------- controls

@@ -35,13 +35,27 @@ final Provider<PlaybackSession> playbackSessionProvider = Provider.autoDispose<P
   return session;
 });
 
-/// Picks the platform quality that matches the user's preference: the
-/// platform's list is best first, the preference names a relative level.
+/// The names of the standard levels (live-room Q-2).
+const Map<QualityPreference, String> qualityPreferenceNames = {
+  QualityPreference.original: '原画',
+  QualityPreference.bluRay8M: '蓝光8M',
+  QualityPreference.bluRay4M: '蓝光4M',
+  QualityPreference.superHigh: '超清',
+  QualityPreference.smooth: '流畅',
+};
+
+/// Picks the platform quality for the user's preference (live-room Q-2): a
+/// quality with the preference's name, else the same relative position in
+/// the platform's list (best first) as the preference has among the standard
+/// levels, rounded. Null only for an empty list.
 Quality? preferredQuality(List<Quality> offered, QualityPreference preference) {
-  if (offered.isEmpty || preference == QualityPreference.original) return null;
-  // "流畅" always means the platform's lowest; the others count down from the best.
-  if (preference == QualityPreference.smooth) return offered.last;
-  return offered[preference.index.clamp(0, offered.length - 1)];
+  if (offered.isEmpty) return null;
+  final name = qualityPreferenceNames[preference];
+  for (final quality in offered) {
+    if (quality.label.replaceAll(' ', '') == name) return quality;
+  }
+  final position = preference.index / (QualityPreference.values.length - 1);
+  return offered[(position * (offered.length - 1)).round()];
 }
 
 /// Opens [detail] in [session] at the stored default quality: resolves once,
@@ -54,10 +68,15 @@ Future<void> openRoom({
   required RoomDetail detail,
   QualityPreference? preference,
   ProxiedHosts? proxiedHosts,
+  bool cellular = false,
 }) async {
   final initial = await site.streams.streams(detail);
   proxiedHosts?.note(settings, detail.ref.platform, initial);
-  final wanted = preferredQuality(initial.qualities, preference ?? settings.get(Settings.qualityWifi));
+  // Q-2: the cellular preference on mobile data, the other one elsewhere.
+  final wanted = preferredQuality(
+    initial.qualities,
+    preference ?? settings.get(cellular ? Settings.qualityMobile : Settings.qualityWifi),
+  );
   await session.open(
     wanted == null || wanted == initial.selected
         ? PlaybackRequest.room(site.streams, detail, initial: initial)

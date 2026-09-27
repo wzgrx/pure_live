@@ -16,18 +16,24 @@ import 'package:pure_live_app/features/me/history_page.dart';
 
 /// Q-12: quality and line in one panel, two columns when there is room. The
 /// panel follows the session, so a switch in progress shows.
-Future<void> showQualityLineSheet(BuildContext context, PlaybackSession session) => showModalBottomSheet<void>(
+/// [onQualityPicked] hears a quality the user picked.
+Future<void> showQualityLineSheet(
+  BuildContext context,
+  PlaybackSession session, {
+  ValueChanged<Quality>? onQualityPicked,
+}) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
   showDragHandle: true,
   constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-  builder: (context) => _QualityLinePanel(session: session),
+  builder: (context) => _QualityLinePanel(session: session, onQualityPicked: onQualityPicked),
 );
 
 class _QualityLinePanel extends StatefulWidget {
-  const new({required this.session});
+  const new({required this.session, this.onQualityPicked});
 
   final PlaybackSession session;
+  final ValueChanged<Quality>? onQualityPicked;
 
   @override
   State<_QualityLinePanel> createState() => _QualityLinePanelState();
@@ -75,6 +81,7 @@ class _QualityLinePanelState extends State<_QualityLinePanel> {
                     : (_) {
                         // Q-8: the last choice wins; choosing the current one cancels a switch.
                         unawaited(widget.session.selectQuality(quality));
+                        widget.onQualityPicked?.call(quality);
                         Navigator.pop(context);
                       },
               ),

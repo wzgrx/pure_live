@@ -111,6 +111,9 @@ abstract final class Settings {
     legacy: [LegacyKey('preferResolutionCellular', convert: _quality)],
   );
 
+  /// Lower the quality by one step when playback keeps stalling (F-NEW-10).
+  static const autoLowerQuality = BoolSetting('player.autoLowerQuality', true);
+
   /// Hardware decoding (device scope: decoders differ per machine).
   static const hardwareDecoding = BoolSetting(
     'player.hardwareDecoding',
@@ -760,6 +763,7 @@ abstract final class Settings {
     preferRealOnlineCounts,
     qualityWifi,
     qualityMobile,
+    autoLowerQuality,
     hardwareDecoding,
     videoFit,
     backgroundPlay,

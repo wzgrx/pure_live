@@ -164,6 +164,11 @@ class SettingsGroupBody extends StatelessWidget {
       SettingsGroup.playback => const [
         ChoiceSettingTile<QualityPreference>(setting: Settings.qualityWifi, title: '默认画质（Wi-Fi）', labels: _quality),
         ChoiceSettingTile<QualityPreference>(setting: Settings.qualityMobile, title: '默认画质（移动网络）', labels: _quality),
+        SwitchSettingTile(
+          setting: Settings.autoLowerQuality,
+          title: '网络不稳时自动降低画质',
+          subtitle: '一分钟内卡顿 3 次就降一档；手动选过画质后不再自动调整',
+        ),
         SwitchSettingTile(setting: Settings.hardwareDecoding, title: '硬件解码', subtitle: '画面异常时关闭试试'),
         ChoiceSettingTile<VideoFit>(
           setting: Settings.videoFit,

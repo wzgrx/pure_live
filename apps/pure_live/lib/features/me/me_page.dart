@@ -33,7 +33,12 @@ class MePage extends StatelessWidget {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/multiview'),
               ),
-              later(Icons.account_circle_outlined, S.accounts),
+              ListTile(
+                leading: const Icon(Icons.account_circle_outlined),
+                title: const Text(S.accounts),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/me/accounts'),
+              ),
               ListTile(
                 leading: const Icon(Icons.cloud_sync_outlined),
                 title: const Text(S.backup),

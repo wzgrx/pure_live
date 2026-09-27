@@ -1,0 +1,457 @@
+{
+  "generator": "KuaishowSite.getSubCategores",
+  "value": {
+    "getSubCategores": [
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "1018",
+        "areaName": "JJ斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1018-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22185",
+        "areaName": "天天象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22185-20220530172821.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "6",
+        "areaName": "斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-6-20220530172807.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "10",
+        "areaName": "象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-10-20220530172809.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "1017",
+        "areaName": "欢乐斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1017-20220530172812.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22427",
+        "areaName": "指尖四川麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22427-20220530172810.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "9",
+        "areaName": "麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-9-20181130184522.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22339",
+        "areaName": "微乐斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22339-20220530172813.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22429",
+        "areaName": "途游斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22429-20220530172805.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "20",
+        "areaName": "三国杀",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-20-20220530172819.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22563",
+        "areaName": "多乐麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22563-20220530172815.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22313",
+        "areaName": "嘻嘻红中麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22313-20220530172825.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22672",
+        "areaName": "途游麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22672-20230606153138.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "11",
+        "areaName": "军棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-11-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22426",
+        "areaName": "微乐四川麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22426-20220530172822.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "1026",
+        "areaName": "欢乐麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1026-20220729112113.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22764",
+        "areaName": "芒果斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22764-20240925152623.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22338",
+        "areaName": "禅游斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22338-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22447",
+        "areaName": "JJ象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22447-20220530172813.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22778",
+        "areaName": "微乐麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22778-20241217183838.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22652",
+        "areaName": "全民口袋麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22652-20230418173020.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22722",
+        "areaName": "约游麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22722-20240223150612.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22435",
+        "areaName": "联众棋牌",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22435-20220530172807.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22478",
+        "areaName": "JJ麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22478-20220530172822.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "1052",
+        "areaName": "四川麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1052-20220530172805.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22813",
+        "areaName": "皇冠斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22813-20251212192614.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "1037",
+        "areaName": "中国象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1037-20220530172820.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22765",
+        "areaName": "开运麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22765-20240925144348.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22354",
+        "areaName": "快手棋牌馆",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22354-20220530172805.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22782",
+        "areaName": "大掼蛋（腾讯）",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22782-20250115164436.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22752",
+        "areaName": "多乐够级",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22752-20240719164040.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22498",
+        "areaName": "友旗麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22498-20220530172814.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22674",
+        "areaName": "斗地主比赛",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22674-20230608154014.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22736",
+        "areaName": "棋者象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22736-20240520165201.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22260",
+        "areaName": "五子棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22260-20220530172809.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22421",
+        "areaName": "微乐象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22421-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22760",
+        "areaName": "指尖天天斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22760-20240809163140.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22428",
+        "areaName": "天天军棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22428-20220530172808.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22311",
+        "areaName": "多乐游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22311-20220530172805.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22727",
+        "areaName": "边锋掼蛋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22727-20240325124244.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22438",
+        "areaName": "好彩麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22438-20220908173419.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22541",
+        "areaName": "芝麻红中麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22541-20220530172822.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22542",
+        "areaName": "赖子斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22542-20220530172821.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22622",
+        "areaName": "喜喜斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22622-20221018175615.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22746",
+        "areaName": "玖玖麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22746-20240702112228.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22773",
+        "areaName": "拼米长沙麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22773-20241114151551.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22280",
+        "areaName": "就要斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22280-20220530172825.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22384",
+        "areaName": "雀姬",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22384-20220530172822.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22403",
+        "areaName": "八牛斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22403-20220530172806.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22422",
+        "areaName": "蜀山四川麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22422-20220530172812.webp",
+        "shortName": null
+      }
+    ]
+  }
+}

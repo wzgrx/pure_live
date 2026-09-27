@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "platform": "kuaishou",
+  "sample": "S01-category-type3-p1",
+  "capturedAt": "2026-09-27T10:18:39.706054Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.kuaishou.com/live_api/category/data?type=3&page=1&size=30",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
+      "connection": "keep-alive",
+      "sec-ch-ua": "Google Chrome;v=107, Chromium;v=107, Not=A?Brand;v=24",
+      "sec-ch-ua-platform": "macOS",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-User": "?1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": [
+        "clientid=3; path=/; expires=Mon, 27 Sep 2027 10:18:40 GMT; domain=kuaishou.com; httponly",
+        "did=gwb_yd56db1635244bc89046e85624p1ba07; path=/; expires=Mon, 27 Sep 2027 10:18:40 GMT; domain=kuaishou.com; httponly"
+      ],
+      "date": "Sun, 27 Sep 2026 10:18:40 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "x-ksclient-ip": "671.803.201.877",
+      "content-type": "application/json; charset=utf-8",
+      "x-kslogid": "790504320156199031"
+    }
+  },
+  "raw": {
+    "sha256": "ddb0b67f6caedcd82b64b3c0a1b6e5c67ac625bf9376d9a4f6d05578380d27b5",
+    "length": 16364
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:did",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-ksclient-ip",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

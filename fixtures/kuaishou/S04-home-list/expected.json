@@ -1,0 +1,2493 @@
+{
+  "generator": "KuaishowSite.getRecommendRooms + parsePlayQualities(room.data)",
+  "value": [
+    {
+      "roomId": "yc551614",
+      "title": "每天挖红薯，攒米给你们直播。 商务合作：lzq52211（闲人勿扰备注来意）",
+      "nick": "亦晨",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2023/04/05/12/BMjAyMzA0MDUxMjM5MTZfMTkyNzk2MzAzN18xX2hkNTU3XzU3_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22088-20220530172823.webp",
+      "area": "经典单机",
+      "watching": "281",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "281",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "每天挖红薯，攒米给你们直播。\n商务合作：lzq52211（闲人勿扰备注来意）",
+      "introduction": "每天挖红薯，攒米给你们直播。 商务合作：lzq52211（闲人勿扰备注来意）",
+      "isCatchUp": false,
+      "link": "Cf33FL4Vly0",
+      "danmakuData": {
+        "liveStreamId": "Cf33FL4Vly0",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Cf33FL4Vly0_GameAvcFhdL3.flv?txSecret=6cb38c754ff822fe590acaae977faad4&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Cf33FL4Vly0_GameAvcFhdL0.flv?txSecret=33e3ea846b9661b539d01012d044085b&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Cf33FL4Vly0_GameAvcHdL0.flv?txSecret=4af9582c6558d87d7c82353cf4fc8867&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Cf33FL4Vly0_GameAvcSdL0.flv?txSecret=f55c7c2a2cc63a5187d9e7bcf8679c91&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "lh225521",
+      "title": "你好",
+      "nick": "海棠.",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/07/28/06/BMjAyNjA3MjgwNjI3NDFfMzc5NjE2OTIwM18xX2hkOTM0XzYwMw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22146-20230202175719.png",
+      "area": "无畏契约",
+      "watching": "8",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "8",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "你好",
+      "introduction": "你好",
+      "isCatchUp": false,
+      "link": "1vDlwsaVPvs",
+      "danmakuData": {
+        "liveStreamId": "1vDlwsaVPvs",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1vDlwsaVPvs_GameAvcHdL0.flv?txSecret=c217dc9377bf72d3caaa8a4a69d32293&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "jj05050042",
+      "title": "",
+      "nick": "辰小白（吃豆电竞）",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2025/06/26/16/BMjAyNTA2MjYxNjUyNDZfNDEyNjExNDA1OF8yX2hkNDQ4XzE5OQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22008-20220530172807.webp",
+      "area": "和平精英",
+      "watching": "1452",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1452",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "RQ5FismD6vw",
+      "danmakuData": {
+        "liveStreamId": "RQ5FismD6vw",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光Plus",
+          "id": "蓝光Plus\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/RQ5FismD6vw_GameAvcFhdL3Lto.flv?wsTime=6aba3f67&wsSecret=ec7c64b560becb52f6b83d2bc260c151&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205816&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光",
+          "id": "蓝光\u000070",
+          "sort": 70,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/RQ5FismD6vw_GameAvcHdL1Lto.flv?wsTime=6aba3f67&wsSecret=7709786b823dc79732d67fe2c14890a8&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205816&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/RQ5FismD6vw_GameAvcHdL0Lto.flv?wsTime=6aba3f67&wsSecret=04e18f83dca9b017910e887c10ac0e7f&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205816&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/RQ5FismD6vw_GameAvcSdL1Lto.flv?wsTime=6aba3f67&wsSecret=c1e8851caaa102769c28f9196bf96f65&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=205816&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xwry39gc3bqvam",
+      "title": "永远太远了  谢谢你的关注",
+      "nick": "荒野行动-无内心",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/11/21/BMjAyNjA5MTEyMTExMjBfNTM2ODUxNDc5MF8yX2hkNTNfMzY0_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22130-20220530172819.webp",
+      "area": "使命召唤手游",
+      "watching": "4",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "4",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "永远太远了 \n谢谢你的关注",
+      "introduction": "永远太远了  谢谢你的关注",
+      "isCatchUp": false,
+      "link": "FnXCNelOwfI",
+      "danmakuData": {
+        "liveStreamId": "FnXCNelOwfI",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/FnXCNelOwfI_GameAvcHdL0.flv?txSecret=57390f5e64389d401dfb264f9f15add6&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "mnxfsj666888",
+      "title": "新来的主播 迷你号：411951539 打卡15天回关！ 马甲：xx.枫 未成年禁止刷礼物❗❗❗ 重要的话说三遍 主播任何游戏都玩 禁止忘本❗❗❗ 打不过含含家的大熊难言初夏 打不过神人家的难言",
+      "nick": "迷你世界🍭小枫",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/08/10/13/BMjAyNjA4MTAxMzI2MjdfNTQ5MjgxMDQwOF8yX2hkNjc4Xzc5MQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22181-20220530172826.webp",
+      "area": "原神",
+      "watching": "14",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "14",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "新来的主播\n迷你号：411951539\n打卡15天回关！\n马甲：xx.枫\n未成年禁止刷礼物❗❗❗\n重要的话说三遍\n主播任何游戏都玩\n禁止忘本❗❗❗\n打不过含含家的大熊难言初夏\n打不过神人家的难言",
+      "introduction": "新来的主播 迷你号：411951539 打卡15天回关！ 马甲：xx.枫 未成年禁止刷礼物❗❗❗ 重要的话说三遍 主播任何游戏都玩 禁止忘本❗❗❗ 打不过含含家的大熊难言初夏 打不过神人家的难言",
+      "isCatchUp": false,
+      "link": "Knx2kxI8WwU",
+      "danmakuData": {
+        "liveStreamId": "Knx2kxI8WwU",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/Knx2kxI8WwU_GameAvcFhdL3.flv?wsTime=6aba3f67&wsSecret=0587c8bf8768ccef2c371abab6181f52&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/Knx2kxI8WwU_GameAvcHdL0.flv?wsTime=6aba3f67&wsSecret=103016b20ec476e85e0abf938e3eab84&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "CrossFire_2008",
+      "title": "蓝V终于回来了的低调CF官方 给玩家整福利不易，希望老铁们多多关注，多点两个小爱心 TAT CF新版本已上线，超多惊喜等你体验，CFer们可千万不要错过！",
+      "nick": "穿越火线官方账号",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/04/07/09/BMjAyNTA0MDcwOTAzNDlfNDA4NjMwMzA5XzJfaGQxNDdfNzc4_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-2-20181130184450.jpg",
+      "area": "穿越火线",
+      "watching": "56",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "56",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "蓝V终于回来了的低调CF官方\n给玩家整福利不易，希望老铁们多多关注，多点两个小爱心 TAT\nCF新版本已上线，超多惊喜等你体验，CFer们可千万不要错过！",
+      "introduction": "蓝V终于回来了的低调CF官方 给玩家整福利不易，希望老铁们多多关注，多点两个小爱心 TAT CF新版本已上线，超多惊喜等你体验，CFer们可千万不要错过！",
+      "isCatchUp": false,
+      "link": "OGB861lI2jk",
+      "danmakuData": {
+        "liveStreamId": "OGB861lI2jk",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260925111035_tug_strL_GameAvcFhdL3.flv?txSecret=9f14f93a4cfa253462b6dc00f9e63bc2&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=OGB861lI2jk&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260925111035_tug_strL_GameAvcFhdL0.flv?txSecret=6df9988dea9b58a3d0d7c0ec415017a7&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=OGB861lI2jk&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260925111035_tug_strL_GameAvcHdL0.flv?txSecret=463efee6fa68414ec3c39bdce62ee3ab&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=OGB861lI2jk&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260925111035_tug_strL_GameAvcSdL0.flv?txSecret=50bee8a8d46708f700b0b7a4ae821186&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=OGB861lI2jk&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "jq-99999999999",
+      "title": "三角洲鲁国人 国庆女装版 商务合作LGDJ9999 破产认准⬇️ 服务号：鲁国电竞",
+      "nick": "17老弟（鲁国电竞）",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/22/04/BMjAyNjA5MjIwNDQyMDFfMjc0MzQwNjU5Nl8xX2hkMjA2XzI3Mw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22723-20240301141234.png",
+      "area": "三角洲行动",
+      "watching": "55",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "55",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "三角洲鲁国人\n国庆女装版\n商务合作LGDJ9999\n破产认准⬇️\n服务号：鲁国电竞",
+      "introduction": "三角洲鲁国人 国庆女装版 商务合作LGDJ9999 破产认准⬇️ 服务号：鲁国电竞",
+      "isCatchUp": false,
+      "link": "Q55sYM-Nn08",
+      "danmakuData": {
+        "liveStreamId": "Q55sYM-Nn08",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ty-origin.pull.yximgs.com/gifshow/Q55sYM-Nn08_GameAvcFhdL3.flv?ty_Time=1790590823&ty_Secret=b348f7ca369fef5560ebdb49841e320a&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://ty-origin.pull.yximgs.com/gifshow/Q55sYM-Nn08_GameAvcFhdL0.flv?ty_Time=1790590823&ty_Secret=3d869c0ee348b288eec48367f5919350&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ty-origin.pull.yximgs.com/gifshow/Q55sYM-Nn08_GameAvcHdL0.flv?ty_Time=1790590823&ty_Secret=2b6843cadb9a5fc055a586fc8a42712f&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://ty-origin.pull.yximgs.com/gifshow/Q55sYM-Nn08_GameAvcSdL0.flv?ty_Time=1790590823&ty_Secret=9d35a6113004079f135df9a219cae17e&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "aimihu888",
+      "title": "单身可撩 等一个爱情♥️ 直播时间：全天不定时",
+      "nick": "米糊不服🍓",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/05/16/BMjAyNjA5MDUxNjA2NTlfMTg4ODUyODIwNF8xX2hkNTYyXzE3NQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22088-20220530172823.webp",
+      "area": "经典单机",
+      "watching": "60",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "60",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "单身可撩 等一个爱情♥️\n直播时间：全天不定时",
+      "introduction": "单身可撩 等一个爱情♥️ 直播时间：全天不定时",
+      "isCatchUp": false,
+      "link": "nJHQU6dYwHc",
+      "danmakuData": {
+        "liveStreamId": "nJHQU6dYwHc",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光Plus",
+          "id": "蓝光Plus\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/nJHQU6dYwHc_GameAvcFhdL3Lto.flv?txSecret=681a3b2f58eb2629e4d015ecaa7c13fb&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光",
+          "id": "蓝光\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/nJHQU6dYwHc_GameAvcHdL1Lto.flv?txSecret=511aa4f2decbca2eb8fec9f4975957c7&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/nJHQU6dYwHc_GameAvcHdL0Lto.flv?txSecret=69ae49edb9d6fa6b1b703e52a1832621&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/nJHQU6dYwHc_GameAvcSdL1Lto.flv?txSecret=7089c7b9f4e271dc4611d824098e8602&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x9nzaisxmiwgcg",
+      "title": "晚上开播哦，谢谢你们的喜欢",
+      "nick": "如花",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/07/24/08/BMjAyNjA3MjQwODI2NTVfMjAzMzQyODM1MV8yX2hkNjU5XzI5MQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-2-20181130184450.jpg",
+      "area": "穿越火线",
+      "watching": "42",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "42",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "晚上开播哦，谢谢你们的喜欢",
+      "introduction": "晚上开播哦，谢谢你们的喜欢",
+      "isCatchUp": false,
+      "link": "zgYzkQSpepQ",
+      "danmakuData": {
+        "liveStreamId": "zgYzkQSpepQ",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光Plus",
+          "id": "蓝光Plus\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/zgYzkQSpepQ_GameAvcFhdL3Lto.flv?txSecret=5fac65e0af33a35d45634be38f7b19d5&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光",
+          "id": "蓝光\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/zgYzkQSpepQ_GameAvcHdL1Lto.flv?txSecret=2f2305929e63b9e85310a518c77190e9&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/zgYzkQSpepQ_GameAvcHdL0Lto.flv?txSecret=0d0313ea28cd0433ae8cbeb87077f4e7&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/zgYzkQSpepQ_GameAvcSdL1Lto.flv?txSecret=70695030e11624cf722bd8cb959ae096&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "s4562580t159357",
+      "title": "粉丝群750332894欢迎大家加入୧(๑•̀⌄•́๑)૭碉堡了",
+      "nick": "学生-白给",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2021/06/11/19/BMjAyMTA2MTExOTA4MTVfMjM4NDc3NDA3Nl8yX2hkODk0XzM=_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22743-20240617191530.jpg",
+      "area": "奥特曼传奇英雄2",
+      "watching": "6",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "6",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "粉丝群750332894欢迎大家加入୧(๑•̀⌄•́๑)૭碉堡了",
+      "introduction": "粉丝群750332894欢迎大家加入୧(๑•̀⌄•́๑)૭碉堡了",
+      "isCatchUp": false,
+      "link": "Bl-i32Wayjc",
+      "danmakuData": {
+        "liveStreamId": "Bl-i32Wayjc",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 8M",
+          "id": "蓝光 8M\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Bl-i32Wayjc_GameAvcFhdL3.flv?txSecret=79fed9303a640e818e1e62d94554991b&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205599&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Bl-i32Wayjc_GameAvcHdL0.flv?txSecret=1ec31418d2f364f70b3416aa90d21297&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205599&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xysjxzepegf94c",
+      "title": "",
+      "nick": "风神",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/08/08/19/BMjAyNjA4MDgxOTUwMTBfMjUzOTQ5MzMzXzFfaGQ2MjhfNTIz_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22658-20230509174949.jpg",
+      "area": "热血传奇",
+      "watching": "94",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "94",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "1dNlKaaUH-U",
+      "danmakuData": {
+        "liveStreamId": "1dNlKaaUH-U",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1dNlKaaUH-U_GameAvcFhdL3.flv?txSecret=cb0abbbdbf8186bdde69da6865b8c57e&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1dNlKaaUH-U_GameAvcFhdL0.flv?txSecret=9e946b54e23d4bedcaec10c487b711e5&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1dNlKaaUH-U_GameAvcHdL0.flv?txSecret=80b5e43cbeaa1667a06c99e5eefa69ce&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1dNlKaaUH-U_GameAvcSdL0.flv?txSecret=4ada159078382fc0a0b2948403607aba&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xpgzxsktg9vegi",
+      "title": "",
+      "nick": "DMA-五哥pubg",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2026/08/17/17/BMjAyNjA4MTcxNzI1MTNfNTQ1MjY3MDcwN18xX2hkNTQ0XzkxNg==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-21-20240924171929.png",
+      "area": "绝地求生",
+      "watching": "2",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "2",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "criCdykPHRE",
+      "danmakuData": {
+        "liveStreamId": "criCdykPHRE",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/criCdykPHRE_GameAvcHdL0.flv?wsTime=6aba3f67&wsSecret=6625294a6d8cb0c04ceb1b94aef8a529&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "cfqijie277",
+      "title": "【时而高手】【时而御姐】【时而萝莉】 【行而不辍，未来可七】  【支持绿色游戏】 【我是七姐一个才华与美貌并存的女子🌞 】 【喜欢我就关注我，每天直播更加精彩🌞 】 【直播时间：下午14点  ，傍晚19点30🌞 】         【感谢快手APP让我们相遇  🌞   】",
+      "nick": "CF七姐🌞游戏主播",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2026/02/10/15/BMjAyNjAyMTAxNTIzNDBfNDQ2MDgyMTEwXzJfaGQ2OTlfMTA5_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-2-20181130184450.jpg",
+      "area": "穿越火线",
+      "watching": "99",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "99",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "【时而高手】【时而御姐】【时而萝莉】\n【行而不辍，未来可七】  【支持绿色游戏】\n【我是七姐一个才华与美貌并存的女子🌞 】\n【喜欢我就关注我，每天直播更加精彩🌞 】\n【直播时间：下午14点  ，傍晚19点30🌞 】\n        【感谢快手APP让我们相遇  🌞   】",
+      "introduction": "【时而高手】【时而御姐】【时而萝莉】 【行而不辍，未来可七】  【支持绿色游戏】 【我是七姐一个才华与美貌并存的女子🌞 】 【喜欢我就关注我，每天直播更加精彩🌞 】 【直播时间：下午14点  ，傍晚19点30🌞 】         【感谢快手APP让我们相遇  🌞   】",
+      "isCatchUp": false,
+      "link": "qMZAo3MTbTI",
+      "danmakuData": {
+        "liveStreamId": "qMZAo3MTbTI",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/qMZAo3MTbTI_GameAvcFhdL3.flv?txSecret=d620a55f02f3c9a47fdbfb692a488dc6&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206077&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/qMZAo3MTbTI_GameAvcFhdL0.flv?txSecret=7f3114f27a71616588a0b53bbae66dfa&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206077&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/qMZAo3MTbTI_GameAvcHdL0.flv?txSecret=d9e6c4bc024c65db14a44b8c089fda78&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206077&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/qMZAo3MTbTI_GameAvcSdL0.flv?txSecret=786e04d0a7e10dd7f585e8f1480d2543&txTime=6aba3f67&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206077&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "wendu333",
+      "title": "周一到周五每天七点准时直播，周六日全天播。 感谢关注我的粉丝。 我以后会不断努力更新最好的作品。 热爱生活，热爱游戏。 勇敢去闯，做一个真实的自己。",
+      "nick": "带头大哥Pubg",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2023/10/22/20/BMjAyMzEwMjIyMDE1MzBfMjAyMjQxNjk1OV8yX2hkMTMxXzg3OQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-21-20240924171929.png",
+      "area": "绝地求生",
+      "watching": "3",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "3",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "周一到周五每天七点准时直播，周六日全天播。\n感谢关注我的粉丝。\n我以后会不断努力更新最好的作品。\n热爱生活，热爱游戏。\n勇敢去闯，做一个真实的自己。",
+      "introduction": "周一到周五每天七点准时直播，周六日全天播。 感谢关注我的粉丝。 我以后会不断努力更新最好的作品。 热爱生活，热爱游戏。 勇敢去闯，做一个真实的自己。",
+      "isCatchUp": false,
+      "link": "88QJALByVc8",
+      "danmakuData": {
+        "liveStreamId": "88QJALByVc8",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/88QJALByVc8_GameAvcHdL0.flv?wsTime=6aba3f67&wsSecret=e618f4bff513a0879112799d6111de43&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2012&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "Dila0611",
+      "title": "怕输才会紧张  想赢只会兴奋",
+      "nick": "迪li",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2026/06/06/01/BMjAyNjA2MDYwMTE1NTJfMjA5MjQ5OTk2NF8xX2hkNzM5XzM4Nw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-21-20240924171929.png",
+      "area": "绝地求生",
+      "watching": "5",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "5",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "怕输才会紧张  想赢只会兴奋",
+      "introduction": "怕输才会紧张  想赢只会兴奋",
+      "isCatchUp": false,
+      "link": "v7xQSuqjj7c",
+      "danmakuData": {
+        "liveStreamId": "v7xQSuqjj7c",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/v7xQSuqjj7c_GameAvcFhdL3.flv?wsTime=6aba3f68&wsSecret=5fbadfaf7816b420229d239878c8036b&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206077&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/v7xQSuqjj7c_GameAvcHdL0.flv?wsTime=6aba3f68&wsSecret=3af64a0acaca91f2e1d4416e7eb66739&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206077&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xbayis56g5drfc",
+      "title": "🌏cqlc178",
+      "nick": "传奇来财",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/07/07/17/BMjAyNjA3MDcxNzIzMDNfNTAyNTUyOTcxN18yX2hkNTk2Xzg4OQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22658-20230509174949.jpg",
+      "area": "热血传奇",
+      "watching": "91",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "91",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "🌏cqlc178",
+      "introduction": "🌏cqlc178",
+      "isCatchUp": false,
+      "link": "XGlKVo3Q5hs",
+      "danmakuData": {
+        "liveStreamId": "XGlKVo3Q5hs",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/XGlKVo3Q5hs_GameAvcFhdL3.flv?txSecret=a43ad666d8e0bb87ea95f26460857d23&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205599&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/XGlKVo3Q5hs_GameAvcFhdL0.flv?txSecret=55874e438c94afa817b901403523a6af&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205599&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/XGlKVo3Q5hs_GameAvcHdL0.flv?txSecret=5b2d6903dcf8279f30fba71f3c02edc0&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205599&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/XGlKVo3Q5hs_GameAvcSdL0.flv?txSecret=73011d0fcfb4a8cf76d7b6502ed17e61&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205599&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xduqtfppp9rhac",
+      "title": "龙岛天才阿乐大王 下午17：00左右    晚上21：00左右开播 我要带领江湖团走向世界第一！ 达人孵🌸：Lin200103090X",
+      "nick": "阿乐（龙岛异兽起源）",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2026/01/27/08/BMjAyNjAxMjcwODM0MzVfNDMzOTUxOTU2NF8yX2hkNzE1XzUxOQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22742-20240606175802.jpg",
+      "area": "龙岛异兽起源",
+      "watching": "10万+",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "10万+",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "龙岛天才阿乐大王\n下午17：00左右    晚上21：00左右开播\n我要带领江湖团走向世界第一！\n达人孵🌸：Lin200103090X",
+      "introduction": "龙岛天才阿乐大王 下午17：00左右    晚上21：00左右开播 我要带领江湖团走向世界第一！ 达人孵🌸：Lin200103090X",
+      "isCatchUp": false,
+      "link": "jW30oIWzDmM",
+      "danmakuData": {
+        "liveStreamId": "jW30oIWzDmM",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/jW30oIWzDmM_GameAvcFhdL3.flv?txSecret=59363435a49e7fdaf8f2f8af6b28ede1&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&highTraffic=1&oidc=watchmen&sidc=2062&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/jW30oIWzDmM_GameAvcFhdL0.flv?txSecret=490d2bd45036ae49413c903ef5c4f48a&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&highTraffic=1&oidc=watchmen&sidc=2062&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/jW30oIWzDmM_GameAvcHdL0.flv?txSecret=5b5da03cbc6e7385ae26b818919613ca&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&highTraffic=1&oidc=watchmen&sidc=2062&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/jW30oIWzDmM_GameAvcSdL0.flv?txSecret=7ee0c237599acc3831cebbcb585e40d0&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&highTraffic=1&oidc=watchmen&sidc=2062&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xrrzzgbbjmjns9",
+      "title": "我只有两岁🥺🥺🥺战雷真好玩😋战雷真好玩😋   😭😭😭被拷打了战雷不好玩😭",
+      "nick": "柔洛（战雷代肝）",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/08/01/22/BMjAyNjA4MDEyMjIzMTRfNTYwMTgxNjUwOF8yX2hkNDg3XzkzMg==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-25-20220530172816.webp",
+      "area": "CS:GO",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "0",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "我只有两岁🥺🥺🥺战雷真好玩😋战雷真好玩😋   😭😭😭被拷打了战雷不好玩😭",
+      "introduction": "我只有两岁🥺🥺🥺战雷真好玩😋战雷真好玩😋   😭😭😭被拷打了战雷不好玩😭",
+      "isCatchUp": false,
+      "link": "vPZ-htZj2b4",
+      "danmakuData": {
+        "liveStreamId": "vPZ-htZj2b4",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/vPZ-htZj2b4_GameAvcFhdL3.flv?wsTime=6aba3f68&wsSecret=51c6d5cf73efaebc21a1523b307a8bc9&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/vPZ-htZj2b4_GameAvcHdL0.flv?wsTime=6aba3f68&wsSecret=548b355ecfac975829d8e591da07bafc&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "Gaochenglong_",
+      "title": "黑龙江省 望奎县人🎗️ 霸穹传奇：bqcq666.com",
+      "nick": "耀龙‼️",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2026/08/28/06/BMjAyNjA4MjgwNjI2NDJfMTgxMTM5ODA5XzFfaGQ1MzFfMTQ4_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22658-20230509174949.jpg",
+      "area": "热血传奇",
+      "watching": "156",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "156",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "黑龙江省 望奎县人🎗️\n霸穹传奇：bqcq666.com",
+      "introduction": "黑龙江省 望奎县人🎗️ 霸穹传奇：bqcq666.com",
+      "isCatchUp": false,
+      "link": "ULTp4tkdmCc",
+      "danmakuData": {
+        "liveStreamId": "ULTp4tkdmCc",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光Plus",
+          "id": "蓝光Plus\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/ULTp4tkdmCc_GameAvcFhdL3Lto.flv?wsTime=6aba3f68&wsSecret=beeb1e0be3087354f4b751cc2eddfa2f&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光",
+          "id": "蓝光\u000070",
+          "sort": 70,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/ULTp4tkdmCc_GameAvcHdL1Lto.flv?wsTime=6aba3f68&wsSecret=e0555b06745680b0fd01d9df28808744&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/ULTp4tkdmCc_GameAvcHdL0Lto.flv?wsTime=6aba3f68&wsSecret=d7cdc87caa5a638e2d66b32409e23194&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/ULTp4tkdmCc_GameAvcSdL1Lto.flv?wsTime=6aba3f68&wsSecret=7e6064d491d22c85bce74833e860dfd6&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "xiaobo52111",
+      "title": "🌟我的世界职（ye）业（yu）主播 每天晚上7点直播，偶尔迟到偶尔不播 🌟视频每天更新关注我不迷路哦～ ❤爱MC爱粉丝，别看了是本人",
+      "nick": "我的世界牧阳",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2022/08/15/11/BMjAyMjA4MTUxMTM5MzBfMTI2NTA0NTNfMl9oZDU4Nl81NjE=_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1009-20220530172805.webp",
+      "area": "我的世界",
+      "watching": "15",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "15",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "🌟我的世界职（ye）业（yu）主播\n每天晚上7点直播，偶尔迟到偶尔不播\n🌟视频每天更新关注我不迷路哦～\n❤爱MC爱粉丝，别看了是本人",
+      "introduction": "🌟我的世界职（ye）业（yu）主播 每天晚上7点直播，偶尔迟到偶尔不播 🌟视频每天更新关注我不迷路哦～ ❤爱MC爱粉丝，别看了是本人",
+      "isCatchUp": false,
+      "link": "bX_IYsbEzYU",
+      "danmakuData": {
+        "liveStreamId": "bX_IYsbEzYU",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bX_IYsbEzYU_GameAvcFhdL3.flv?txSecret=fc6656f4db12a8e8aec80348d2e9621a&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bX_IYsbEzYU_GameAvcFhdL0.flv?txSecret=2eb5df395b45188ec616f0474c3bc533&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bX_IYsbEzYU_GameAvcHdL0.flv?txSecret=da541fce4f04e1316e101a256f1869b7&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bX_IYsbEzYU_GameAvcSdL0.flv?txSecret=a600a8f9997afa3c43578c127a671ffb&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "Lv08n7-_-",
+      "title": "最爱宁宁",
+      "nick": "郭志",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/07/00/BMjAyNjA5MDcwMDM4MzVfMTIxNTgyNzQzOV8xX2hkNjYzXzIwNQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22146-20230202175719.png",
+      "area": "无畏契约",
+      "watching": "8",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "8",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "最爱宁宁",
+      "introduction": "最爱宁宁",
+      "isCatchUp": false,
+      "link": "XLb4d-UCV-I",
+      "danmakuData": {
+        "liveStreamId": "XLb4d-UCV-I",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/XLb4d-UCV-I_GameAvcFhdL3.flv?wsTime=6aba3f68&wsSecret=5a21ae1cbbb1ed577755869710511900&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/XLb4d-UCV-I_GameAvcHdL0.flv?wsTime=6aba3f68&wsSecret=8c619bd2c8ab0d770596a9c9f82edd02&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "mjl1999991",
+      "title": "放下长矛，我名九黎，提起长矛，请唤吾九离老祖",
+      "nick": "墨九黎",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2026/08/25/03/BMjAyNjA4MjUwMzIxMThfMTc3MjgzMDM1MF8yX2hkMjY5XzEwNw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1009-20220530172805.webp",
+      "area": "我的世界",
+      "watching": "29",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "29",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "放下长矛，我名九黎，提起长矛，请唤吾九离老祖",
+      "introduction": "放下长矛，我名九黎，提起长矛，请唤吾九离老祖",
+      "isCatchUp": false,
+      "link": "WBCOZB7nndk",
+      "danmakuData": {
+        "liveStreamId": "WBCOZB7nndk",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/WBCOZB7nndk_GameAvcFhdL3.flv?txSecret=156634bd66f5cad8e7e0536cb2f6ab20&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206577&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/WBCOZB7nndk_GameAvcFhdL0.flv?txSecret=910b1fbc6b68032a6b91a76200223a69&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206577&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/WBCOZB7nndk_GameAvcHdL0.flv?txSecret=26c0819c09627c403ada71af99c20eb9&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206577&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/WBCOZB7nndk_GameAvcSdL0.flv?txSecret=0e35605bd5ea6c0bf0c149883f037adb&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206577&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "lv66998833",
+      "title": "有资源的脏活累活找驴驴V    yelv666999来吧铁子们",
+      "nick": "大话西游2阿木花驴",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2020/04/02/20/BMjAyMDA0MDIyMDQyNDFfMTI4NTg3MjIwN18yX2hkMjczXzQyNA==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-32-20220530172821.webp",
+      "area": "大话西游2",
+      "watching": "263",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "263",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "有资源的脏活累活找驴驴V    yelv666999来吧铁子们",
+      "introduction": "有资源的脏活累活找驴驴V    yelv666999来吧铁子们",
+      "isCatchUp": false,
+      "link": "ZPH-iHzHARo",
+      "danmakuData": {
+        "liveStreamId": "ZPH-iHzHARo",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/ZPH-iHzHARo_GameAvcFhdL3.flv?txSecret=4593bf8b77a322fa6e12e9573d6377f0&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/ZPH-iHzHARo_GameAvcFhdL0.flv?txSecret=788450ac3f664efd2c07aebee79ea43c&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/ZPH-iHzHARo_GameAvcHdL0.flv?txSecret=29d4d61bbc9ba90f067cfa3061e01c18&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/ZPH-iHzHARo_GameAvcSdL0.flv?txSecret=06a4c641a40e1edd4351be5f16e2859a&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "yzxks504",
+      "title": "🔥给大家带来最好的游戏思路和有趣的直播 🕐直播时间：晚上22:00-1:30 🏆无畏契约前职业选手（D7G、AG、情久） 2020/5.27-2022/5.15（职业生涯）",
+      "nick": "2.0（无畏契约）",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/07/08/02/BMjAyNjA3MDgwMjAzNDJfMTM5ODY3OTMxM18xX2hkNTkxXzcxOQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22146-20230202175719.png",
+      "area": "无畏契约",
+      "watching": "1120",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1120",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "🔥给大家带来最好的游戏思路和有趣的直播\n🕐直播时间：晚上22:00-1:30\n🏆无畏契约前职业选手（D7G、AG、情久）\n2020/5.27-2022/5.15（职业生涯）",
+      "introduction": "🔥给大家带来最好的游戏思路和有趣的直播 🕐直播时间：晚上22:00-1:30 🏆无畏契约前职业选手（D7G、AG、情久） 2020/5.27-2022/5.15（职业生涯）",
+      "isCatchUp": false,
+      "link": "Dt_mYwZ28zc",
+      "danmakuData": {
+        "liveStreamId": "Dt_mYwZ28zc",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Dt_mYwZ28zc_GameAvcFhdL3.flv?txSecret=b15bd10186183bb4e3bbca7ecdd9e680&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Dt_mYwZ28zc_GameAvcFhdL0.flv?txSecret=0b7ddca645ac8306979d67432a8ad735&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Dt_mYwZ28zc_GameAvcHdL0.flv?txSecret=f31e224a6058ea8aae4f42fd8f1a394e&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Dt_mYwZ28zc_GameAvcSdL0.flv?txSecret=509b67f5f9d04ae1f11bb78462f0f56d&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xgyi26u2m4rm89",
+      "title": "",
+      "nick": "皓辰（皓）",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/26/21/BMjAyNjA5MjYyMTEzNTFfNTI4NDUyMTgzOF8yX2hkNTUyXzY5OA==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22130-20220530172819.webp",
+      "area": "使命召唤手游",
+      "watching": "9",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "9",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "iPybHzrnk38",
+      "danmakuData": {
+        "liveStreamId": "iPybHzrnk38",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/iPybHzrnk38_GameAvcHdL0.flv?wsTime=6aba3f68&wsSecret=b1023384e7110c14aac586bebc22a9de&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2959&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/iPybHzrnk38_GameAvcSdL0.flv?wsTime=6aba3f68&wsSecret=9722ac41b3f904e78d47aca23e630cce&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2959&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xrkfmpbzj46g2w",
+      "title": "弟子林川，见过诸位祖师 不爱强度，爱整活 没活悄悄偷懒，嘿嘿。。",
+      "nick": "丛林冰川",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/04/26/23/BMjAyNTA0MjYyMzU3MTFfMzk4ODE5OTE4MF8yX2hkODE3XzE3Mg==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22695-20230914153439.jpg",
+      "area": "元气骑士前传",
+      "watching": "14",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "14",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "弟子林川，见过诸位祖师\n不爱强度，爱整活\n没活悄悄偷懒，嘿嘿。。",
+      "introduction": "弟子林川，见过诸位祖师 不爱强度，爱整活 没活悄悄偷懒，嘿嘿。。",
+      "isCatchUp": false,
+      "link": "6O_-QfhquUI",
+      "danmakuData": {
+        "liveStreamId": "6O_-QfhquUI",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/6O_-QfhquUI_GameAvcFhdL3.flv?txSecret=91fe906c4e4c1d1a0c5f242126c9e30d&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/6O_-QfhquUI_GameAvcHdL0.flv?txSecret=9e01a08f5ecfc678c24e2df26da19a2d&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xaexn5jws78asi",
+      "title": "",
+      "nick": "阿斯Cc-",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/08/25/03/BMjAyNjA4MjUwMzMzMjJfMjQyNTMzMTUwMl8xX2hkNTI3XzMwMQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22494-20220530172824.webp",
+      "area": "金铲铲之战",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "0",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "8AobrhzXUU8",
+      "danmakuData": {
+        "liveStreamId": "8AobrhzXUU8",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/8AobrhzXUU8_GameAvcFhdL3.flv?wsTime=6aba3f68&wsSecret=30f0b3a0654515f24785870b3f72b600&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/8AobrhzXUU8_GameAvcHdL0.flv?wsTime=6aba3f68&wsSecret=15c14c20d8de9c4531a09a51199816fe&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "Gouba511",
+      "title": "",
+      "nick": "四季",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2024/05/04/16/BMjAyNDA1MDQxNjE4MzhfNzg4OTA4MTI2XzFfaGQ4ODVfNDY1_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22683-20230808114608.jpg",
+      "area": "新天龙八部手游",
+      "watching": "4",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "4",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "szKjP-pqBhs",
+      "danmakuData": {
+        "liveStreamId": "szKjP-pqBhs",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/szKjP-pqBhs_GameAvcFhdL3.flv?txSecret=a94a08e90a22d5d49ab7747fa1efe31f&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206577&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/szKjP-pqBhs_GameAvcHdL0.flv?txSecret=09d9a0741d14a671964eacc256140eea&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=206577&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "mnxfsj666888",
+      "title": "新来的主播 迷你号：411951539 打卡15天回关！ 马甲：xx.枫 未成年禁止刷礼物❗❗❗ 重要的话说三遍 主播任何游戏都玩 禁止忘本❗❗❗ 打不过含含家的大熊难言初夏 打不过神人家的难言",
+      "nick": "迷你世界🍭小枫",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2026/08/10/13/BMjAyNjA4MTAxMzI2MjdfNTQ5MjgxMDQwOF8yX2hkNjc4Xzc5MQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22181-20220530172826.webp",
+      "area": "原神",
+      "watching": "14",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "14",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "新来的主播\n迷你号：411951539\n打卡15天回关！\n马甲：xx.枫\n未成年禁止刷礼物❗❗❗\n重要的话说三遍\n主播任何游戏都玩\n禁止忘本❗❗❗\n打不过含含家的大熊难言初夏\n打不过神人家的难言",
+      "introduction": "新来的主播 迷你号：411951539 打卡15天回关！ 马甲：xx.枫 未成年禁止刷礼物❗❗❗ 重要的话说三遍 主播任何游戏都玩 禁止忘本❗❗❗ 打不过含含家的大熊难言初夏 打不过神人家的难言",
+      "isCatchUp": false,
+      "link": "Knx2kxI8WwU",
+      "danmakuData": {
+        "liveStreamId": "Knx2kxI8WwU",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/Knx2kxI8WwU_GameAvcFhdL3.flv?wsTime=6aba3f68&wsSecret=6e3c3ca736da57a8e555417116bd82eb&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/Knx2kxI8WwU_GameAvcHdL0.flv?wsTime=6aba3f68&wsSecret=2798695582742f4dc16676b5e78d505c&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xvyx6in99iskes",
+      "title": "全新版本【命运征途】正式开启！",
+      "nick": "使命召唤手游官号",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/12/10/14/BMjAyNTEyMTAxNDAwMDRfMTQ4MzQzMTE4MV8yX2hkNzMyXzEzNA==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22130-20220530172819.webp",
+      "area": "使命召唤手游",
+      "watching": "23",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "23",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "全新版本【命运征途】正式开启！",
+      "introduction": "全新版本【命运征途】正式开启！",
+      "isCatchUp": false,
+      "link": "cnAxhXPdcq0",
+      "danmakuData": {
+        "liveStreamId": "cnAxhXPdcq0",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260920115653_zFG_strL_GameAvcFhdL3.flv?txSecret=7ae43e3f8acdcb80da2b3d02da606640&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=cnAxhXPdcq0&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260920115653_zFG_strL_GameAvcFhdL0.flv?txSecret=c5f7dfe38e6e4119e012ea69e2206938&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=cnAxhXPdcq0&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260920115653_zFG_strL_GameAvcHdL0.flv?txSecret=72b9595b34443bf6e1f2a9670801d5d4&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=cnAxhXPdcq0&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260920115653_zFG_strL_GameAvcSdL0.flv?txSecret=82e735e1a9d35551f490234f703c8336&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=cnAxhXPdcq0&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "Zzc20110804zzc",
+      "title": "🍅尊享团:黑鸡蛋×1 🍅钻粉团:漩     心×1 其他账号: 🍅宠粉的番茄🍅  快手号:Chong-Fen-De-Fan-Qie",
+      "nick": "番茄日常直播号🅥",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/07/13/14/BMjAyNjA3MTMxNDU0MjNfNDc4MTk4MDE2OF8yX2hkNjczXzMzNw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22181-20220530172826.webp",
+      "area": "原神",
+      "watching": "12",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "12",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "🍅尊享团:黑鸡蛋×1\n🍅钻粉团:漩     心×1\n其他账号:\n🍅宠粉的番茄🍅  快手号:Chong-Fen-De-Fan-Qie",
+      "introduction": "🍅尊享团:黑鸡蛋×1 🍅钻粉团:漩     心×1 其他账号: 🍅宠粉的番茄🍅  快手号:Chong-Fen-De-Fan-Qie",
+      "isCatchUp": false,
+      "link": "Og9I5fU1Qgg",
+      "danmakuData": {
+        "liveStreamId": "Og9I5fU1Qgg",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Og9I5fU1Qgg_GameAvcFhdL3.flv?txSecret=91eb11e8733e6a0bc76aad7cfa8fb65b&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=207615&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Og9I5fU1Qgg_GameAvcHdL0.flv?txSecret=bcb38a73113c807e5a0196000ee4621f&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=207615&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xqvdqbxq5fvju2",
+      "title": "《探索专业户》代肝+v🛰：q181801279 性格：社恐，内向，话少 爱好：动漫，游戏，二次元",
+      "nick": "糊涂鬼☝🤓",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/04/12/16/BMjAyNjA0MTIxNjU0MDRfMjgxOTI3OTQ3OV8yX2hkNDA4XzYyNg==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22181-20220530172826.webp",
+      "area": "原神",
+      "watching": "6",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "6",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "《探索专业户》代肝+v🛰：q181801279\n性格：社恐，内向，话少\n爱好：动漫，游戏，二次元",
+      "introduction": "《探索专业户》代肝+v🛰：q181801279 性格：社恐，内向，话少 爱好：动漫，游戏，二次元",
+      "isCatchUp": false,
+      "link": "QFbNj5Keo-A",
+      "danmakuData": {
+        "liveStreamId": "QFbNj5Keo-A",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/QFbNj5Keo-A_GameAvcFhdL3.flv?txSecret=9cbbb657019914e90c87a4b28734d727&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/QFbNj5Keo-A_GameAvcHdL0.flv?txSecret=126f51fd79365931c55205436e939ca7&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xnbq2k74x6ghr9",
+      "title": "心上人： 芋圆🍡芋圆🍡芋圆🍡 最爱吃 芋圆 芋圆 芋圆 芋圆 未成年人🚫打赏❌ ❌ ❌ 马甲：××.芋圆🍡 仅在本平台只有一个账号🍡 其他的私信宝宝千万不要信！！！ 芋圆家的宝宝永远要开心顺遂呀！！！",
+      "nick": "蛋仔小芋圆",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2026/09/21/18/BMjAyNjA5MjExODM2MTNfNTQwMTMzMjY0NF8yX2hkNTEyXzIz_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22046-20220530172824.webp",
+      "area": "我叫MT4",
+      "watching": "60",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "60",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "心上人：\n芋圆🍡芋圆🍡芋圆🍡\n最爱吃 芋圆 芋圆 芋圆 芋圆\n未成年人🚫打赏❌ ❌ ❌\n马甲：××.芋圆🍡\n仅在本平台只有一个账号🍡\n其他的私信宝宝千万不要信！！！\n芋圆家的宝宝永远要开心顺遂呀！！！",
+      "introduction": "心上人： 芋圆🍡芋圆🍡芋圆🍡 最爱吃 芋圆 芋圆 芋圆 芋圆 未成年人🚫打赏❌ ❌ ❌ 马甲：××.芋圆🍡 仅在本平台只有一个账号🍡 其他的私信宝宝千万不要信！！！ 芋圆家的宝宝永远要开心顺遂呀！！！",
+      "isCatchUp": false,
+      "link": "N4FrwtTutRw",
+      "danmakuData": {
+        "liveStreamId": "N4FrwtTutRw",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/N4FrwtTutRw_GameAvcHdL0.flv?txSecret=5efbeeb476d3d479c86f0ef7eea459ea&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/N4FrwtTutRw_GameAvcSdL0.flv?txSecret=0265a6affb806d164efed6ef6537c18f&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xjyxmdi2wa8tyw",
+      "title": "初心：酷二狗 KEG明星女护 哈夫币♻️家人关系背景",
+      "nick": "KEG小诗",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2026/06/06/00/BMjAyNjA2MDYwMDEwMTRfMTgwOTE5NzcxNV8yX2hkMzA1XzI4_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22723-20240301141234.png",
+      "area": "三角洲行动",
+      "watching": "233",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "233",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "初心：酷二狗\nKEG明星女护\n哈夫币♻️家人关系背景",
+      "introduction": "初心：酷二狗 KEG明星女护 哈夫币♻️家人关系背景",
+      "isCatchUp": false,
+      "link": "5xvtnCBGjKY",
+      "danmakuData": {
+        "liveStreamId": "5xvtnCBGjKY",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/5xvtnCBGjKY_GameAvcFhdL3.flv?txSecret=2d01ff861bb929cf418e93f56e95ff4c&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/5xvtnCBGjKY_GameAvcFhdL0.flv?txSecret=109e4ff9353d7189ebc1f1d649441f6f&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/5xvtnCBGjKY_GameAvcHdL0.flv?txSecret=4da06310e5e23c61a3a9dfe31c08d5ed&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/5xvtnCBGjKY_GameAvcSdL0.flv?txSecret=0ccc137547ec000319f73d638dc4def9&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "xieyige520",
+      "title": "",
+      "nick": "第二方协议",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2024/08/15/18/BMjAyNDA4MTUxODA3NTFfMjcwNDgzNjI0OF8xX2hkMjg4XzQwNw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22181-20220530172826.webp",
+      "area": "原神",
+      "watching": "9",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "9",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "YTTd0ficw68",
+      "danmakuData": {
+        "liveStreamId": "YTTd0ficw68",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/YTTd0ficw68_GameAvcFhdL3.flv?txSecret=af71ad0a255ac58d571f40bb18f0eb83&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/YTTd0ficw68_GameAvcFhdL0.flv?txSecret=8c03116f52b55302ac0fd1692fe3c1f2&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/YTTd0ficw68_GameAvcHdL0.flv?txSecret=f32dbafc2848367e1ea7132c1e7d289e&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/YTTd0ficw68_GameAvcSdL0.flv?txSecret=576877b2d635217f244b5d1609c50eb4&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xit4fz56k2ery2",
+      "title": "最全面的暗区官方赛事一手信息，尽在暗区突围赛事 恋人：@暗区突围 家人：@暗区突围无限",
+      "nick": "暗区突围赛事",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2024/03/29/20/BMjAyNDAzMjkyMDU4MjBfMzQzMjAxNDUwMF8yX2hkODE0XzIzNA==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22484-20220530172821.webp",
+      "area": "暗区突围",
+      "watching": "18",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "18",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "最全面的暗区官方赛事一手信息，尽在暗区突围赛事\n恋人：@暗区突围\n家人：@暗区突围无限",
+      "introduction": "最全面的暗区官方赛事一手信息，尽在暗区突围赛事 恋人：@暗区突围 家人：@暗区突围无限",
+      "isCatchUp": false,
+      "link": "UEcBTkI8T98",
+      "danmakuData": {
+        "liveStreamId": "UEcBTkI8T98",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260914115223_Kln_strL_GameAvcFhdL3.flv?txSecret=7153587c28b056f6f4acd56454eeaa67&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=UEcBTkI8T98&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260914115223_Kln_strL_GameAvcFhdL0.flv?txSecret=fcff5247248c5da7453df2979440b40e&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=UEcBTkI8T98&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260914115223_Kln_strL_GameAvcHdL0.flv?txSecret=bbac27d152c0c5733bf65ae78018142d&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=UEcBTkI8T98&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260914115223_Kln_strL_GameAvcSdL0.flv?txSecret=a071de205a56c9f105e55f40bb611fdc&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=2062&no_script=1&srcStrm=UEcBTkI8T98&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "MONT9178",
+      "title": "本人唯一直播号 大号：MONT💪",
+      "nick": "MONT直播号",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/21/21/BMjAyNjA5MjEyMTMxNTZfNDE3ODQ4NTQxOF8yX2hkNTg2XzU3NA==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22743-20240617191530.jpg",
+      "area": "奥特曼传奇英雄2",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "0",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "本人唯一直播号\n大号：MONT💪",
+      "introduction": "本人唯一直播号 大号：MONT💪",
+      "isCatchUp": false,
+      "link": "cJyPojEGLas",
+      "danmakuData": {
+        "liveStreamId": "cJyPojEGLas",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/cJyPojEGLas_GameAvcHdL0.flv?txSecret=c61c29bdc81335e8ac4ffe2a537b804d&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/cJyPojEGLas_GameAvcSdL0.flv?txSecret=25da1dc26735f83b55a4f0ade4c18aaf&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x6rbu7ns7dtgrq",
+      "title": "遇事不决，可问春风。春风不语，即随本心。",
+      "nick": "TA                 .",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/20/08/BMjAyNjA5MjAwODI4MzJfMTk1Mzk5NTQxOF8yX2hkOTgwXzg3Mw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22762-20240813185304.png",
+      "area": "黑神话悟空",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "0",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "遇事不决，可问春风。春风不语，即随本心。",
+      "introduction": "遇事不决，可问春风。春风不语，即随本心。",
+      "isCatchUp": false,
+      "link": "mviVT4AIHhI",
+      "danmakuData": {
+        "liveStreamId": "mviVT4AIHhI",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/mviVT4AIHhI_GameAvcFhdL3.flv?txSecret=969305f422eb291a3e2529dfccf7aa77&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/mviVT4AIHhI_GameAvcHdL0.flv?txSecret=a63bb2150068084c07d3bcea0aaad9d3&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "kn90327520",
+      "title": "带大家领略游戏世界的精彩 商务合作加V:hv910666 每天中午12点开播",
+      "nick": "小威游戏解说",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2022/08/11/13/BMjAyMjA4MTExMzI1NDNfMjI5NDE5NDI1XzJfaGQ3NDdfNTg5_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22088-20220530172823.webp",
+      "area": "经典单机",
+      "watching": "291",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "291",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "带大家领略游戏世界的精彩\n商务合作加V:hv910666\n每天中午12点开播",
+      "introduction": "带大家领略游戏世界的精彩 商务合作加V:hv910666 每天中午12点开播",
+      "isCatchUp": false,
+      "link": "f5W769ZQ-O8",
+      "danmakuData": {
+        "liveStreamId": "f5W769ZQ-O8",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/f5W769ZQ-O8_GameAvcFhdL3.flv?txSecret=27c6ec1288f297d078bc20db4a248d13&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/f5W769ZQ-O8_GameAvcFhdL0.flv?txSecret=238acc229cb6372858ba0ca06871cca8&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/f5W769ZQ-O8_GameAvcHdL0.flv?txSecret=fcad18503cac84ab498c33d23d787b23&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/f5W769ZQ-O8_GameAvcSdL0.flv?txSecret=8dce07e479297322bde090929c8d1e7b&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "zhenbao1007",
+      "title": "早八开播型蛇。 之前生病了所以停播了大学两年， 为了保持开播状态，下播一般不看消息。 私皮已注册版权，请勿侵权！",
+      "nick": "白素真Naga（虚拟歌势）",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/08/19/19/BMjAyNTA4MTkxOTQ2MjZfMzc1MzUyMTI2NF8xX2hkMTA3XzIyMQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22716-20231229112326.png",
+      "area": "燕云十六声",
+      "watching": "2",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "2",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "早八开播型蛇。\n之前生病了所以停播了大学两年，\n为了保持开播状态，下播一般不看消息。\n私皮已注册版权，请勿侵权！",
+      "introduction": "早八开播型蛇。 之前生病了所以停播了大学两年， 为了保持开播状态，下播一般不看消息。 私皮已注册版权，请勿侵权！",
+      "isCatchUp": false,
+      "link": "z9TTXcRhAHU",
+      "danmakuData": {
+        "liveStreamId": "z9TTXcRhAHU",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/z9TTXcRhAHU_GameAvcHdL0.flv?txSecret=596636e8462c92821c0f801ad730f9c3&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xw2jue7vmebt3q",
+      "title": "当你选择放弃他，他也会选择放弃你。",
+      "nick": "情了了。",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2023/09/25/06/BMjAyMzA5MjUwNjU2MDZfNDMxODc4ODYyXzJfaGQzNTVfNTM1_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-15-20181130184459.jpg",
+      "area": "街机游戏",
+      "watching": "24",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "24",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "当你选择放弃他，他也会选择放弃你。",
+      "introduction": "当你选择放弃他，他也会选择放弃你。",
+      "isCatchUp": false,
+      "link": "bSYAu0TkEaI",
+      "danmakuData": {
+        "liveStreamId": "bSYAu0TkEaI",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bSYAu0TkEaI_GameAvcFhdL3.flv?txSecret=697e52b468de7f66867986e295807138&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bSYAu0TkEaI_GameAvcFhdL0.flv?txSecret=5f3d4f62cb2876b66d17739a867d5a45&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bSYAu0TkEaI_GameAvcHdL0.flv?txSecret=640e5a962fb4d563f7613c80bc66465f&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/bSYAu0TkEaI_GameAvcSdL0.flv?txSecret=50c04196f7c586548d0d4dfa4be01187&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "xy200982ln",
+      "title": "喜欢玫瑰🌹",
+      "nick": "小宇",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/03/03/16/BMjAyNjAzMDMxNjE2MTZfMjU5MjcxMDQ1MV8yX2hkOTQ5XzM5Ng==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22020-20220530172810.webp",
+      "area": "战神",
+      "watching": "1",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "喜欢玫瑰🌹",
+      "introduction": "喜欢玫瑰🌹",
+      "isCatchUp": false,
+      "link": "x-z0Fl5iddQ",
+      "danmakuData": {
+        "liveStreamId": "x-z0Fl5iddQ",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光Plus",
+          "id": "蓝光Plus\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/x-z0Fl5iddQ_GameAvcFhdL3Lto.flv?wsTime=6aba3f68&wsSecret=c260b8b826b27703a26bbfbb7adf16b7&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光",
+          "id": "蓝光\u000070",
+          "sort": 70,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/x-z0Fl5iddQ_GameAvcHdL1Lto.flv?wsTime=6aba3f68&wsSecret=f7e5dacc92dc12a7ca2eae580d7958fc&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/x-z0Fl5iddQ_GameAvcHdL0Lto.flv?wsTime=6aba3f68&wsSecret=7a00f6877db27e00bf71d1a28abee79b&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/x-z0Fl5iddQ_GameAvcSdL1Lto.flv?wsTime=6aba3f68&wsSecret=4fa2e284b94d6f6f1a73f227981d0272&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "tuge0129",
+      "title": "感谢官方提供这么好的平台！街机游戏爱好者，欢迎相互交流学习。",
+      "nick": "街机-兔哥",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2022/05/11/02/BMjAyMjA1MTEwMjIyMzRfNDgxNzU2ODYyXzFfaGQ1MV85Ng==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-15-20181130184459.jpg",
+      "area": "街机游戏",
+      "watching": "66",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "66",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "感谢官方提供这么好的平台！街机游戏爱好者，欢迎相互交流学习。",
+      "introduction": "感谢官方提供这么好的平台！街机游戏爱好者，欢迎相互交流学习。",
+      "isCatchUp": false,
+      "link": "CtkbAvA2eTo",
+      "danmakuData": {
+        "liveStreamId": "CtkbAvA2eTo",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/CtkbAvA2eTo_GameAvcFhdL3.flv?txSecret=e44b1c25e55d7dc791146d01d286b643&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/CtkbAvA2eTo_GameAvcFhdL0.flv?txSecret=285cbd653b32084d2362ac2ecad3f47a&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/CtkbAvA2eTo_GameAvcHdL0.flv?txSecret=070cc8f29d3f5fe4bcc67bef56b3908c&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/CtkbAvA2eTo_GameAvcSdL0.flv?txSecret=e7fa5f315f170859e0b936d1ca03ec71&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "qh97anjing",
+      "title": "感谢快手提供平台❤️ 每晚8点直播  买街机游戏摇杆 通过主页店铺  街机摇杆问题 游戏问题 摇杆售后服务 都可以咨询小店客服",
+      "nick": "拳皇97-拳皇安静",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2018/01/03/00/BMjAxODAxMDMwMDQ4MjJfMjY3MzE0OTkyXzFfaGQ3MTJfMTM=_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22139-20200429151033.jpg",
+      "area": "NBA2k系列",
+      "watching": "21",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "21",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "感谢快手提供平台❤️\n每晚8点直播 \n买街机游戏摇杆 通过主页店铺 \n街机摇杆问题 游戏问题\n摇杆售后服务 都可以咨询小店客服",
+      "introduction": "感谢快手提供平台❤️ 每晚8点直播  买街机游戏摇杆 通过主页店铺  街机摇杆问题 游戏问题 摇杆售后服务 都可以咨询小店客服",
+      "isCatchUp": false,
+      "link": "8rlyYzrkpn8",
+      "danmakuData": {
+        "liveStreamId": "8rlyYzrkpn8",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/8rlyYzrkpn8_GameAvcFhdL3.flv?txSecret=338ff6219fceb5407ad9ea7fc0504e88&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/8rlyYzrkpn8_GameAvcFhdL0.flv?txSecret=6f741ce205250bb6d3baf533823340e6&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/8rlyYzrkpn8_GameAvcHdL0.flv?txSecret=3db69047188bb915b40296d92343eade&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/8rlyYzrkpn8_GameAvcSdL0.flv?txSecret=53ee0e0a009dbe01414ae5d284edbb6b&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xid7i59t454d3w",
+      "title": "都是ai生成的图片，有人说是假的，可多少真人网红是真的，真的你又能如何，好看最起码能给人带来愉悦的心情，愿你天天开心。接受粉丝定制图片",
+      "nick": "万维老周",
+      "avatar": "https://p66.a.kwimgs.com/uhead/AB/2026/08/08/03/BMjAyNjA4MDgwMzQxNDZfMjAxMTUxOTk0NV8xX2hkMTA5XzE1OQ==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22190-20220530172810.webp",
+      "area": "生化危机系列",
+      "watching": "2",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "2",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "都是ai生成的图片，有人说是假的，可多少真人网红是真的，真的你又能如何，好看最起码能给人带来愉悦的心情，愿你天天开心。接受粉丝定制图片",
+      "introduction": "都是ai生成的图片，有人说是假的，可多少真人网红是真的，真的你又能如何，好看最起码能给人带来愉悦的心情，愿你天天开心。接受粉丝定制图片",
+      "isCatchUp": false,
+      "link": "r4WbQfAjr1Y",
+      "danmakuData": {
+        "liveStreamId": "r4WbQfAjr1Y",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/r4WbQfAjr1Y_GameAvcFhdL3.flv?wsTime=6aba3f68&wsSecret=e9479527c47b69ce6002b78e91531f61&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/r4WbQfAjr1Y_GameAvcHdL0.flv?wsTime=6aba3f68&wsSecret=b7ccd0591d7dcf9415c0e47499c59983&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x8d4984y8nnprs",
+      "title": "福利码：DWBY666、DWBY888",
+      "nick": "电玩捕鱼-百万倍率",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2025/09/01/14/BMjAyNTA5MDExNDEyMTBfNDAzNjg0MDUxMF8yX2hkOTk3XzE3Mg==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-15-20181130184459.jpg",
+      "area": "街机游戏",
+      "watching": "161",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "161",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "福利码：DWBY666、DWBY888",
+      "introduction": "福利码：DWBY666、DWBY888",
+      "isCatchUp": false,
+      "link": "DZC49nPjoqQ",
+      "danmakuData": {
+        "liveStreamId": "DZC49nPjoqQ",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/DZC49nPjoqQ_GameAvcFhdL3.flv?txSecret=aa786dfc7ceceda40655c520ffbe9cf7&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/DZC49nPjoqQ_GameAvcFhdL0.flv?txSecret=93ace4d28806922ec2ef7f0a1b6148a5&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/DZC49nPjoqQ_GameAvcHdL0.flv?txSecret=e70194daaface6030a423bf8010bfd0f&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/DZC49nPjoqQ_GameAvcSdL0.flv?txSecret=f1d59684fc5b1bc4c188ce3fce5099db&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "SSS-2026",
+      "title": "售 组装机 各类组件 显示器 显卡 鼠键 耳机等！有需要随时联系！拒绝分期付款！",
+      "nick": "枯木—单机游戏",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/07/17/11/BMjAyNjA3MTcxMTUzMDdfMjA1MTgwNzY4OF8yX2hkMTM2XzQ1Mw==_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22088-20220530172823.webp",
+      "area": "经典单机",
+      "watching": "44",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "44",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "售 组装机 各类组件 显示器 显卡 鼠键 耳机等！有需要随时联系！拒绝分期付款！",
+      "introduction": "售 组装机 各类组件 显示器 显卡 鼠键 耳机等！有需要随时联系！拒绝分期付款！",
+      "isCatchUp": false,
+      "link": "96SygwNNGYA",
+      "danmakuData": {
+        "liveStreamId": "96SygwNNGYA",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/96SygwNNGYA_GameAvcFhdL3.flv?txSecret=4b940a8efb0d093a144ad1fa0a054768&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/96SygwNNGYA_GameAvcFhdL0.flv?txSecret=66d88acba5bd2650acfda08d1223703b&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/96SygwNNGYA_GameAvcHdL0.flv?txSecret=5618447c3cea5a35dfe9d9a70190bef9&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/96SygwNNGYA_GameAvcSdL0.flv?txSecret=9450d5fe2e0f841ace1426765553de67&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=203562&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "han6585895",
+      "title": "",
+      "nick": "魔域旧城挖宝",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/09/01/BMjAyNjA5MDkwMTI2MDJfNzgyNzY2MTlfMl9oZDYzOV8yNjk=_s.jpg",
+      "cover": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22830-20260303191054.jpg",
+      "area": "天使魔剑",
+      "watching": "1",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "Wcx1HvMKBfw",
+      "danmakuData": {
+        "liveStreamId": "Wcx1HvMKBfw",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Wcx1HvMKBfw_GameAvcFhdL3.flv?txSecret=00622bf0685b3c5ac992d067a6b2c9f8&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/Wcx1HvMKBfw_GameAvcHdL0.flv?txSecret=e1701ffbbd040eb31c150e490d53b222&txTime=6aba3f68&stat=%2FR5Jn1LR73F5XF8Rhkp9%2BKsjMMIAi0d6XYwfAZthinveNQ8lNJZbu3VtA0MZoZ1%2F&tsc=origin&oidc=edgeWm&sidc=205730&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    }
+  ]
+}

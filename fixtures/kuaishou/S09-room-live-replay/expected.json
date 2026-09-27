@@ -1,0 +1,95 @@
+{
+  "generator": "KuaishowSite.getRoomDetailForRefresh + getRoomDetail + parsePlayQualities(liveroom.playList[0].liveStream.playUrls) (user cookie setting = fixture_cookie=1)",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "roomId": "KPL704668133",
+      "title": "啊～ 原来这是有认证的官方啊！",
+      "nick": "KPL王者荣耀职业联赛",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/07/29/14/BMjAyNTA3MjkxNDIzMzNfNzA0NjY4MTMzXzJfaGQzNzVfNDEx_s.jpg",
+      "cover": "https://live1.static.yximgs.com/live/game/screenshot/P80X87Kx4sk~1790504403717~1.jpg",
+      "area": "王者荣耀",
+      "watching": "1万+",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1万+",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "啊～\n原来这是有认证的官方啊！",
+      "introduction": "啊～\n原来这是有认证的官方啊！",
+      "isCatchUp": false,
+      "link": "P80X87Kx4sk",
+      "danmakuData": {
+        "liveStreamId": "P80X87Kx4sk",
+        "cookie": "fixture_cookie=1"
+      }
+    },
+    "getRoomDetail": {
+      "roomId": "KPL704668133",
+      "title": "啊～ 原来这是有认证的官方啊！",
+      "nick": "KPL王者荣耀职业联赛",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/07/29/14/BMjAyNTA3MjkxNDIzMzNfNzA0NjY4MTMzXzJfaGQzNzVfNDEx_s.jpg",
+      "cover": "https://live1.static.yximgs.com/live/game/screenshot/P80X87Kx4sk~1790504403717~1.jpg",
+      "area": "王者荣耀",
+      "watching": "1万+",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1万+",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "啊～\n原来这是有认证的官方啊！",
+      "introduction": "啊～\n原来这是有认证的官方啊！",
+      "isCatchUp": false,
+      "link": "P80X87Kx4sk",
+      "danmakuData": {
+        "liveStreamId": "P80X87Kx4sk",
+        "cookie": "fixture_cookie=1"
+      }
+    },
+    "requests": {
+      "getRoomDetailForRefresh": 1,
+      "getRoomDetail": 1
+    },
+    "parsePlayQualities": [
+      {
+        "quality": "蓝光 质臻",
+        "id": "蓝光 质臻\u0000130",
+        "sort": 130,
+        "lines": [
+          "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260912230553_3ES_strL_GameAvcFhdL3.flv?txSecret=16be6b9f124ba40302ed8f2dab27d0b7&txTime=6aba3f96&stat=yawg1jchrj6cL8DgFkkWvmwpdTEk1pBjO%2B03TZyD2DGbvutjxhtNwVldJbrL4ZpZ&tsc=origin&highTraffic=2&oidc=watchmen&sidc=2062&no_script=1&srcStrm=P80X87Kx4sk&ss=s20&tfc_buyer=0"
+        ]
+      },
+      {
+        "quality": "蓝光 4M",
+        "id": "蓝光 4M\u000070",
+        "sort": 70,
+        "lines": [
+          "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260912230553_3ES_strL_GameAvcFhdL0.flv?txSecret=270b6581728afd49a051a17518aedacc&txTime=6aba3f96&stat=yawg1jchrj6cL8DgFkkWvmwpdTEk1pBjO%2B03TZyD2DGbvutjxhtNwVldJbrL4ZpZ&tsc=origin&highTraffic=2&oidc=watchmen&sidc=2062&no_script=1&srcStrm=P80X87Kx4sk&ss=s20&tfc_buyer=0"
+        ]
+      },
+      {
+        "quality": "超清",
+        "id": "超清\u000050",
+        "sort": 50,
+        "lines": [
+          "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260912230553_3ES_strL_GameAvcHdL0.flv?txSecret=9ca4745c0de24feb927b2106752d0fa0&txTime=6aba3f96&stat=yawg1jchrj6cL8DgFkkWvmwpdTEk1pBjO%2B03TZyD2DGbvutjxhtNwVldJbrL4ZpZ&tsc=origin&highTraffic=2&oidc=watchmen&sidc=2062&no_script=1&srcStrm=P80X87Kx4sk&ss=s20&tfc_buyer=0"
+        ]
+      },
+      {
+        "quality": "高清",
+        "id": "高清\u000030",
+        "sort": 30,
+        "lines": [
+          "https://tx-origin.pull.yximgs.com/gifshow/kwai_actL_ksle_20260912230553_3ES_strL_GameAvcSdL0.flv?txSecret=dd94312b786c5797332845004a81ce8b&txTime=6aba3f96&stat=yawg1jchrj6cL8DgFkkWvmwpdTEk1pBjO%2B03TZyD2DGbvutjxhtNwVldJbrL4ZpZ&tsc=origin&highTraffic=2&oidc=watchmen&sidc=2062&no_script=1&srcStrm=P80X87Kx4sk&ss=s20&tfc_buyer=0"
+        ]
+      }
+    ]
+  }
+}

@@ -5,4 +5,9 @@ import 'package:live_net/live_net.dart';
 typedef SiteFactory = Object Function(LiveHttp http);
 
 /// Adapters available to the command-line tools; grows as phase 4 lands them.
-final Map<String, SiteFactory> siteFactories = {'douyu': DouyuSite.new};
+final Map<String, SiteFactory> siteFactories = {
+  'bilibili': BilibiliSite.new,
+  'douyin': DouyinSite.new,
+  'douyu': DouyuSite.new,
+  'kuaishou': KuaishouSite.new,
+};

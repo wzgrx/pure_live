@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/app/appearance.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
 import 'package:pure_live_app/features/danmaku/on_video.dart';
 import 'package:pure_live_app/features/multiview/multiview_cell.dart';
@@ -470,12 +471,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
         if (!didPop) _back();
       },
       // Video pages are dark in every theme (principles §3); TV already is.
-      child: theme.brightness == Brightness.light && !tv
-          ? Theme(
-              data: PureTheme.of(Appearance.dark, platform: theme.platform, locale: Localizations.localeOf(context)),
-              child: page,
-            )
-          : page,
+      child: theme.brightness == Brightness.light && !tv ? Theme(data: DarkTheme.of(context), child: page) : page,
     );
   }
 }

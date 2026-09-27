@@ -87,7 +87,10 @@ class PureLiveApp extends ConsumerWidget {
                 data: media.copyWith(textScaler: TextScaler.linear(media.textScaler.scale(1) * textScale)),
                 // The in-app mini window floats above every page (F-PIP-03).
                 // Touches drive the refresh-rate hint (F-SET-08).
-                child: RefreshRateScope(child: MiniPlayerHost(child: child!)),
+                child: DarkTheme(
+                  data: dark,
+                  child: RefreshRateScope(child: MiniPlayerHost(child: child!)),
+                ),
               );
             },
           ),

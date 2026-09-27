@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live_app/app/locale.dart';
+import 'package:pure_live_app/app/appearance.dart';
 import 'package:pure_live_app/features/room/gestures.dart';
 import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
@@ -61,19 +61,11 @@ class RoomLayout extends StatelessWidget {
   /// The "横屏全屏" button of the portrait layout.
   final VoidCallback? onForceLandscape;
 
-  static final Map<Locale, ThemeData> _overlayThemes = {};
-
-  /// The dark panel theme, with the interface language's text (principles §2.3).
-  static ThemeData get _overlayTheme {
-    final locale = flutterLocaleOf(LocaleSettings.currentLocale);
-    return _overlayThemes.putIfAbsent(locale, () => PureTheme.of(Appearance.dark, locale: locale));
-  }
-
   @override
   Widget build(BuildContext context) => WindowLayoutBuilder(
     builder: (context, layout) {
       final wide = layout.width.atLeast(WidthClass.expanded) && !layout.isShortLandscape;
-      if (presentation.isFullscreen || layout.isShortLandscape) return _fullscreen(wide: wide);
+      if (presentation.isFullscreen || layout.isShortLandscape) return _fullscreen(context, wide: wide);
       if (!wide) {
         final tabs = _Tabs(chat: chat, info: info);
         if (portraitPanel) {
@@ -118,17 +110,19 @@ class RoomLayout extends StatelessWidget {
 
   /// Fullscreen: the chat squeezes the video from expanded width, and floats
   /// over the right 40% on landscape phones (70% black, principles §5.2).
-  Widget _fullscreen({required bool wide}) {
+  Widget _fullscreen(BuildContext context, {required bool wide}) {
     final black = ColoredBox(color: Colors.black, child: video);
     if (!chatOpen || presentation == RoomPresentation.portraitFullscreen) return black;
-    final panel = Theme(data: _overlayTheme, child: chat);
+    // The app's dark theme: its colours, interface font and language.
+    final overlay = DarkTheme.of(context);
+    final panel = Theme(data: overlay, child: chat);
     if (wide) {
       return Row(
         children: [
           Expanded(child: black),
           SizedBox(
             width: chatWidth.clamp(minChatWidth, maxChatWidth),
-            child: ColoredBox(color: _overlayTheme.colorScheme.surface, child: panel),
+            child: ColoredBox(color: overlay.colorScheme.surface, child: panel),
           ),
         ],
       );

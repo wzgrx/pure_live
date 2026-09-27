@@ -30,3 +30,20 @@ import 'package:live_ui/live_ui.dart';
     },
   );
 }
+
+/// The app's dark theme — dynamic colour, interface font and language
+/// included — for what is dark in every mode: video pages and the panels
+/// over video (principles §3). `PureLiveApp` provides it; without it (a bare
+/// test) a plain dark theme stands in.
+class DarkTheme extends InheritedWidget {
+  const new({required this.data, required super.child, super.key});
+
+  final ThemeData data;
+
+  static ThemeData of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<DarkTheme>()?.data ??
+      PureTheme.of(Appearance.dark, platform: Theme.of(context).platform, locale: Localizations.maybeLocaleOf(context));
+
+  @override
+  bool updateShouldNotify(DarkTheme oldWidget) => oldWidget.data != data;
+}

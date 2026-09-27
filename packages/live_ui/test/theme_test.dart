@@ -5,6 +5,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_ui/live_ui.dart';
 
 void main() {
+  test('Android names no font family anywhere: the system font, vendor fonts included (principles §2.3)', () {
+    final theme = PureTheme.of(Appearance.light, platform: TargetPlatform.android);
+    final styles = [
+      theme.textTheme.bodyMedium,
+      theme.textTheme.titleLarge,
+      theme.textTheme.labelMedium,
+      theme.primaryTextTheme.bodyMedium,
+      theme.appBarTheme.titleTextStyle,
+      theme.chipTheme.labelStyle,
+      theme.navigationBarTheme.labelTextStyle!.resolve(const {}),
+      theme.navigationRailTheme.selectedLabelTextStyle,
+    ];
+    for (final style in styles) {
+      expect(style!.fontFamily, isNull, reason: '$style');
+    }
+    expect(theme.textTheme.bodyMedium!.fontFamilyFallback, isNotEmpty, reason: 'CJK fallbacks stay');
+  });
+
   test('generated colour tokens match spec/design/tokens.json', () {
     final result = Process.runSync('python3', ['tool/generate_tokens.py', '--check']);
     expect(result.exitCode, 0, reason: 'run python3 packages/live_ui/tool/generate_tokens.py');

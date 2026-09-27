@@ -224,6 +224,11 @@ abstract final class PureTheme {
       colorScheme: scheme,
       brightness: brightness,
       platform: target,
+      // Material's typography names Roboto; merged under [text] it would put
+      // Roboto on theme styles but not on component styles built from [text],
+      // two fonts on one screen. Without it Android uses the system font
+      // (vendor fonts included), as principles §2.3 asks.
+      typography: _familyless(Typography.material2021(platform: target)),
       textTheme: text,
       scaffoldBackgroundColor: scheme.surface,
       visualDensity: desktop ? VisualDensity.compact : VisualDensity.standard,
@@ -377,6 +382,45 @@ abstract final class PureTheme {
     final script = locale.scriptCode;
     if (script != null) return script == 'Hant';
     return const {'TW', 'HK', 'MO'}.contains(locale.countryCode);
+  }
+
+  /// [typography] with every font family removed; colours and baselines stay.
+  static Typography _familyless(Typography typography) {
+    TextStyle? plain(TextStyle? style) => style == null
+        ? null
+        : TextStyle(
+            inherit: style.inherit,
+            color: style.color,
+            decoration: style.decoration,
+            textBaseline: style.textBaseline,
+            leadingDistribution: style.leadingDistribution,
+            debugLabel: style.debugLabel,
+          );
+    TextTheme theme(TextTheme t) => TextTheme(
+      displayLarge: plain(t.displayLarge),
+      displayMedium: plain(t.displayMedium),
+      displaySmall: plain(t.displaySmall),
+      headlineLarge: plain(t.headlineLarge),
+      headlineMedium: plain(t.headlineMedium),
+      headlineSmall: plain(t.headlineSmall),
+      titleLarge: plain(t.titleLarge),
+      titleMedium: plain(t.titleMedium),
+      titleSmall: plain(t.titleSmall),
+      bodyLarge: plain(t.bodyLarge),
+      bodyMedium: plain(t.bodyMedium),
+      bodySmall: plain(t.bodySmall),
+      labelLarge: plain(t.labelLarge),
+      labelMedium: plain(t.labelMedium),
+      labelSmall: plain(t.labelSmall),
+    );
+    return Typography.material2021(
+      platform: null,
+      black: theme(typography.black),
+      white: theme(typography.white),
+      englishLike: typography.englishLike,
+      dense: typography.dense,
+      tall: typography.tall,
+    );
   }
 
   static TextTheme _textTheme(TargetPlatform platform, {bool tv = false, String? fontFamily, Locale? locale}) {

@@ -31,4 +31,4 @@
 ## 影响
 
 - 合并时要合并的共用文件：live_core 导出、探针注册表、弹幕工厂和导出、`transport.dart`（`TextFrame`）、`socket_connector.dart`（可空心跳）、`scrub.dart`（`textPatterns`）、脱敏规则注册表、帧脱敏分发、录制器。
-- live_media 待办：~~codec 12 → enhanced FLV 改写~~（不需要：各平台的 libmpv 都是 FFmpeg ≥ 8，能直接识别，见 docs/rewrite/DIAGNOSIS.md；第 7 条的限制可以放开，另行处理）；Bigo 的 HLS 解扰中继（第 10 条）；niconico 的按路径 Cookie；TwitCasting 的 HLS 分片需要把播放列表响应下发的 `lvhls_ssid_<id>` Cookie 带到分片请求（`StreamLine.headers` 表达不了响应 Cookie，FFmpeg 会自动传，中转和录制也要传）。
+- live_media 待办：~~codec 12 → enhanced FLV 改写~~（不需要：各平台的 libmpv 都是 FFmpeg ≥ 8，能直接识别，见 docs/rewrite/DIAGNOSIS.md；录制写入时改写，ADR 0005）。第 7 条的限制仍然保留，放开的条件改为高通真机验证硬解不丢帧（REG-PLAY-022），通过后映客加“原画”（即构 HEVC）档、17LIVE 默认档改回最高；Bigo 的 HLS 解扰中继（第 10 条）；niconico 的按路径 Cookie；TwitCasting 的 HLS 分片需要把播放列表响应下发的 `lvhls_ssid_<id>` Cookie 带到分片请求（`StreamLine.headers` 表达不了响应 Cookie，FFmpeg 会自动传，中转和录制也要传）。

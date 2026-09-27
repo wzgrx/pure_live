@@ -10,6 +10,11 @@ concurrency:
   group: audit-upstream-${{ github.ref }}
   cancel-in-progress: true
 
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   review:
     name: Inventory upstream diff and current repository
@@ -41,7 +46,7 @@ jobs:
         with:
           name: upstream-and-repository-audit
           path: |
-            local-artifacts/upstream-reviews/latest.json
-            local-artifacts/repository-audits/current.json
+            legacy/local-artifacts/upstream-reviews/latest.json
+            legacy/local-artifacts/repository-audits/current.json
           if-no-files-found: warn
           retention-days: 14

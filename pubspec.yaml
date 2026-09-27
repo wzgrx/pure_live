@@ -1,218 +1,26 @@
-name: pure_live
-description: 纯粹直播,一款开源的第三方多平台直播聚合播放器.
+# Pure Live repository workspace (docs/adr/0013-legacy-folder.md).
+# The legacy 3.x app lives in legacy/; v4 packages and tools are members too.
+# All members share this directory's pubspec.lock.
+name: pure_live_workspace
 publish_to: none
-version: 3.2.11+4134
 
 environment:
   sdk: ^3.13.0
 
-# v4 packages and tools (docs/adr/0007-legacy-at-root.md). The legacy app stays
-# at the root and is the workspace root, so all members share one pubspec.lock.
 workspace:
+  - legacy
   - packages/live_core
   - packages/live_net
   - tools/live_cli
   - tools/check_latest
 
-dependencies:
-  flutter:
-    sdk: flutter
-
-  flutter_localizations:
-    sdk: flutter
-
-  hashlib: ^2.0.0 # 哈希计算工具
-  crypto: ^3.0.7 # 加密解密工具库
-  pointycastle: ^4.0.0 # 克拉克拉官方分享链接 AES-CBC 读取
-  crypto_simple: ^3.0.0 # 简易加密工具
-  uuid: ^4.5.3 # 生成唯一标识符
-  html_unescape: ^2.0.0 # HTML转义字符解码
-  brotli: ^0.6.0 # Brotli压缩解压
-  equatable: ^3.0.0
-  xml: ^7.0.1 # XML parser
-  archive: ^4.3.0
-  string_similarity: ^2.0.0
-  fuzzywuzzy: ^1.1.6
-  scrollview_observer: ^1.27.3
-  flutter_reorderable_grid_view: ^5.6.0
-  pro_mpack: ^3.2.0
-  share_plus: ^13.1.0
-  photo_view: ^0.15.0
-  flutter_json: ^0.2.0
-
-  # Local database (SQLite)
-  drift: ^2.35.0
-  charset_converter: ^2.3.0
-  synchronized: ^3.4.2
-  meta: ^1.18.0 # Flutter 3.47.5 SDK pin
-
-  # v4 platform layer, used for lists, search and links in 3.3.x (ADR 0012).
-  live_core: any
-  live_net: any
-
-  # -------------------------- 网络请求/网络状态 --------------------------
-  http: ^1.1.0 # 基础HTTP请求
-  dio: ^5.9.0 # 强大的Dart HTTP客户端
-  dio_cookie_manager: ^3.3.0 # Dio的Cookie管理插件
-  cookie_jar: ^4.0.8 # Cookie持久化存储
-  web_socket_channel: ^3.0.3 # WebSocket通信
-  stream_channel: ^2.1.4 # YY保留请求头大小写的自定义WebSocket通道
-  connectivity_plus: ^7.3.1 # 网络连接状态监听
-  webdav_client: ^1.2.2 # WebDAV文件存储客户端
-
-  firebase_core: ^4.15.0
-  firebase_auth: ^6.7.0
-  cloud_firestore: ^6.10.0
-
-  win32_registry: ^3.0.3
-  best_form_validator: ^1.4.0
-  flutter_spinkit: ^5.2.2
-  loading_animation_widget: ^1.3.0
-  loading_indicator: ^4.0.2
-  flame_barrage:
-    path: ./plugins/flame_barrage # Local patch keeps per-item speed effective
-
-  # -------------------------- 音视频播放 --------------------------
-  media_kit:
-    # Predidit/media-kit@803c4a27 vendored: Android and Linux libmpv rebuilt with
-    # mpv 0.41.0 + FFmpeg 9.0.2 (hook/native_bundles.json); no Kazumi option.
-    path: ./third_party/media_kit
-  media_kit_video:
-    path: ./third_party/media_kit_video # Local Android Surface and Windows presentation patches
-
-  better_player_plus:
-    path: plugins/built_in_kotlin/better_player_plus # Local AGP 9 Built‑in Kotlin patch
-
-  audio_service: ^0.18.18 # 后台音频服务
-  audio_service_win: ^0.0.3
-  audio_session: ^0.2.3 # 音频会话管理
-  # Keep this exact: 0.6.2 preserves argv through FFmpeg/FFprobe/FFplay.
-  # Platform URL overrides below select our verified FFmpeg 9.0.2 bundles;
-  # prefetch gates pin the Android and Windows archive hashes.
-  ffmpeg_kit_extended_flutter: 0.6.2
-  bonsoir: ^7.1.5 # LAN device discovery for settings sync
-
-  flv_lzc:
-    path: plugins/flv_lzc # Vendored from liuchuancong/flv_lzc@030d611
-  # -------------------------- UI组件/界面样式 --------------------------
-  flutter_svg: ^2.2.1 # SVG图片渲染
-  lottie: ^3.6.1 #动画
-  cached_network_image: ^4.0.2 # 网络图片缓存
-  dynamic_color: ^2.1.0 # 动态主题色
-  material_ui: ^1.4.0 # dynamic_color 2.x 的独立 Material ColorScheme 桥接
-  waterfall_flow: ^3.1.1 # 瀑布流布局
-  easy_refresh: ^3.5.0 # 下拉刷新/上拉加载
-  flutter_smart_dialog: ^5.1.0 # 自定义弹窗
-  flex_color_picker: ^4.0.0 # 颜色选择器
-  bordered_text: ^3.0.2 # 带边框文字
-  flutter_color: ^2.1.1 # 颜色工具
-  syncfusion_flutter_sliders: ^34.2.9 # 滑块组件
-  markdown_widget: ^2.3.2+8 # Markdown渲染
-
-  # -------------------------- 图标/字体 --------------------------
-  font_awesome_flutter: ^11.0.0 # Font Awesome图标
-  remixicon: ^4.9.3 # Remix图标库
-
-  # -------------------------- 窗口/桌面端控制 --------------------------
-  window_manager: ^0.5.1 # 桌面端窗口管理
-  windows_single_instance: ^1.2.0
-  tray_manager: ^0.7.0 # 系统托盘管理
-  flutter_acrylic: ^1.1.4 # 亚克力毛玻璃效果
-  screen_retriever:
-    git:
-      url: https://github.com/liuchuancong/screen_retriever.git
-      path: ./packages/screen_retriever
-      ref: b246b3963738d6cc159c921764c194c73dbdf2ad
-  win32: ^6.3.0 # Windows系统API
-  android_intent_plus: ^6.0.0
-
-  # -------------------------- 设备/系统权限/硬件 --------------------------
-  # Brightness gestures are mobile-only. Depend on the mobile implementations
-  # directly so desktop builds never register a physical-monitor DDC/CI plugin.
-  screen_brightness_platform_interface: ^2.1.2
-  screen_brightness_android: ^2.1.6
-  screen_brightness_ios: ^2.1.4
-  volume_controller: ^3.7.1 # 音量控制
-  wakelock_plus: ^1.4.0 # 保持屏幕常亮
-  battery_plus: ^7.0.0 # 电池状态获取
-  permission_handler: ^13.0.1 # 权限管理
-  device_info_plus: ^13.1.0 # 设备信息
-
-  mobile_scanner:
-    path: plugins/built_in_kotlin/mobile_scanner # Local AGP 9 Built‑in Kotlin patch
-
-  # -------------------------- 数据存储/数据库 --------------------------
-  hive_ce: ^2.20.0 # Hive本地数据库
-  hive_ce_flutter: ^2.3.3 # Hive Flutter集成
-  flutter_cache_manager: ^3.4.5 # 通用缓存管理
-
-  # -------------------------- 文件/路径/存储 --------------------------
-  path_provider: ^2.1.5 # 获取文件路径
-  path_provider_platform_interface: ^2.1.3 # Windows 安装目录内统一数据路径
-  path_provider_windows: ^2.3.0 # Windows 插件数据目录重定向
-  shared_preferences_platform_interface: ^2.4.2 # 本地化配置目录重定向
-  shared_preferences_windows: ^2.4.1 # Windows 本地化配置目录重定向
-  path: ^1.9.1 # 路径处理
-  file: ^7.0.1 # 文件操作
-  file_picker: ^13.1.0 # 文件选择器
-  uri_to_file: ^1.0.0 # URI转文件
-  open_filex: ^4.7.0 # 打开本地文件
-  mime: ^2.0.0 # MIME类型处理
-
-  # -------------------------- 工具/通用库 --------------------------
-  timezone: ^0.11.0 # 时区处理
-  date_format: ^2.0.9 # 日期格式化
-  logger: ^2.8.0 # 日志打印
-  quiver: ^3.2.1 # 实用工具集
-  ffi: ^2.2.0 # 本地代码交互
-  rxdart: ^0.28.0 # 响应式编程
-  pinyindart: ^0.0.1 # 汉字转拼音
-  dart_sm: ^0.1.5 # 工具库
-
-  # -------------------------- 网页/JS解析 --------------------------
-  html: ^0.15.4 # HTML解析
-  flutter_inappwebview:
-    git:
-      url: https://github.com/guide-inc-org/guide-flutter_inappwebview.git
-      path: flutter_inappwebview
-      ref: 3e6c4c4a25340cd363af9d38891d88498b90be26
-
-  # -------------------------- 直播协议/定制SDK --------------------------
-  protobuf: ^6.1.0 # Protocol Buffers
-  fixnum: ^1.1.0 # 固定精度数字
-  dlna_dart: ^0.1.0 # DLNA投屏
-
-  # -------------------------- 功能组件 --------------------------
-  url_launcher: ^6.1.12 # 打开外部链接
-  share_handler: ^0.0.25 # 分享功能
-  animated_splash_plus: ^1.0.3 # 启动动画
-
-  flutter_exit_app:
-    path: plugins/built_in_kotlin/flutter_exit_app # Local AGP 9 Built‑in Kotlin patch
-
-  move_to_desktop: ^0.0.2
-  package_info_plus: ^10.1.0 # 应用包信息
-  stop_watch_timer: ^3.2.2 # 计时器
-
-  floating:
-    path: plugins/built_in_kotlin/floating # Local AGP 9 Built‑in Kotlin patch
-
-  flutter_floating: ^2.0.1 # 悬浮窗
-  qr: ^4.0.0 # Bilibili 登录二维码矩阵；绘制由应用控制
-  easy_localization: ^3.0.8 #多语言
-  app_links: ^7.2.1
-  scroll_animator: 0.3.0
-  fvp:
-    # wang-bin/fvp 0.38.1 vendored with Android/iOS plugin platforms only, so
-    # desktop bundles libmpv alone (no libmdk, no fvp#402 disposal hang).
-    path: ./third_party/fvp
-
-# 依赖覆盖（强制指定版本）
+# Overrides apply to the whole workspace and may only be declared here
+# (docs/adr/0008-dependency-overrides.md).
 dependency_overrides:
   media_kit:
-    path: ./third_party/media_kit
+    path: third_party/media_kit
   fvp:
-    path: ./third_party/fvp
+    path: third_party/fvp
   # Keep the full dependency graph at current stable releases while upstream
   # packages and Flutter SDK pins are migrated and regression-tested here.
   _fe_analyzer_shared: 108.0.0
@@ -225,9 +33,9 @@ dependency_overrides:
   source_gen: 4.3.0
   test_api: 0.7.14
   flutter_inappwebview_android:
-    path: plugins/built_in_kotlin/flutter_inappwebview_android # 上游网页内核Android子包ProGuard兼容补丁
+    path: legacy/plugins/built_in_kotlin/flutter_inappwebview_android # 上游网页内核Android子包ProGuard兼容补丁
   share_handler_android:
-    path: plugins/built_in_kotlin/share_handler_android # share_handler Android本地兼容补丁
+    path: legacy/plugins/built_in_kotlin/share_handler_android # share_handler Android本地兼容补丁
   hooks: ^2.2.0 # Native Assets 构建 hooks 兼容
   code_assets: ^2.1.0 # media_kit Native Assets 2 and FFmpeg hook compatibility
   xml: ^7.0.1 # webdav_client xml7兼容
@@ -237,76 +45,3 @@ dependency_overrides:
       url: https://github.com/liuchuancong/screen_retriever.git
       path: ./packages/screen_retriever
       ref: b246b3963738d6cc159c921764c194c73dbdf2ad
-
-# 开发依赖
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  integration_test: # on-device checks of native channels (integration_test/)
-    sdk: flutter
-  shared_preferences: ^2.5.5 # widget tests mock localization persistence
-  change_app_package_name: ^1.5.0 # 修改应用包名
-  build_runner: ^2.4.15 # 代码生成器
-  flutter_launcher_icons: ^0.14.4 # 应用图标生成
-  msix: ^3.16.12 # Windows安装包打包
-  intl_utils: ^2.8.11 # 国际化工具
-  flutter_lints: ^6.0.0 # 代码规范检查
-  dmg: ^0.1.7 # macOS安装包打包
-  drift_dev: ^2.35.0
-  enven: ^1.3.0
-
-# 应用图标配置
-flutter_icons:
-  android: "ic_launcher"
-  ios: true
-  remove_alpha_ios: true
-  image_path: assets/icons/icon.png
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: assets/icons/icon_foreground.png
-  min_sdk_android: 21
-  windows:
-    generate: true
-    image_path: assets/icons/icon.png
-    icon_size: 48
-  macos:
-    generate: true
-    image_path: assets/icons/icon.png
-
-# Flutter核心配置
-flutter:
-  uses-material-design: true
-  assets:
-    - assets/
-    - assets/images/
-    - assets/images/video/
-    - assets/icons/
-    - assets/webdav/
-    - assets/version.json
-    - assets/releases.json
-    - assets/emo/images/huya/
-    - assets/emo/images/douyu/
-    - assets/emo/images/douyin/
-    - assets/emo/images/bilibili/
-    - assets/emo/json/
-    - assets/translations/
-    - assets/animations/loading.json
-    - assets/animations/empty.json
-    - assets/animations/error.json
-    - assets/fonts/fonts-manifest.json
-    - assets/certificates/
-  # 字体配置
-  fonts:
-    - family: CustomIcons
-      fonts:
-        - asset: assets/icons/CustomIcons.ttf
-
-# FFmpeg配置
-ffmpeg_kit_extended_config:
-  type: base
-  gpl: false
-  small: false
-  android: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-shared-lgpl-release.aar
-  windows: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-windows-x86_64-shared-lgpl.zip
-  linux: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-linux-x86_64-shared-lgpl.zip
-  macos: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-macos-universal-lgpl.xcframework.zip
-  ios: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-ios-universal-lgpl.xcframework.zip

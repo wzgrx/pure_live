@@ -4,14 +4,14 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/tool/hooks/format_dart.sh\"" }
+          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/tools/gate/hooks/format_dart.sh\"" }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/tool/gate.sh\" --hook", "timeout": 1800 }
+          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/tools/gate/gate.sh\" --hook", "timeout": 1800 }
         ]
       }
     ]

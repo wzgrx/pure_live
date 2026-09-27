@@ -25,6 +25,11 @@ concurrency:
 env:
   FLUTTER_VERSION: 3.47.5
 
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   build-ios-unsigned:
     name: Build iOS IPA for TrollStore
@@ -189,7 +194,7 @@ jobs:
         with:
           name: pure-live-ios-trollstore-ipa
           path: |
-            PureLive-*-ios-arm64-trollstore.ipa
+            legacy/PureLive-*-ios-arm64-trollstore.ipa
           if-no-files-found: error
           retention-days: 7
 
@@ -206,4 +211,4 @@ jobs:
           generate_release_notes: false
           fail_on_unmatched_files: false
           files: |
-            PureLive-*-ios-arm64-trollstore.ipa
+            legacy/PureLive-*-ios-arm64-trollstore.ipa

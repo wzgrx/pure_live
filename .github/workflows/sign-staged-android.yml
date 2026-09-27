@@ -27,6 +27,11 @@ concurrency:
   group: sign-staged-android-${{ inputs.tag }}
   cancel-in-progress: false
 
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   sign:
     name: Sign locally-built Android APK

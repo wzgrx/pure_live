@@ -24,6 +24,11 @@ concurrency:
   group: publish-signed-android-${{ inputs.tag }}
   cancel-in-progress: false
 
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   publish:
     name: Verify and publish signed Android APK
@@ -31,6 +36,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Verify source workflow provenance
+        # Runs before checkout, when legacy/ does not exist yet.
+        working-directory: ${{ github.workspace }}
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -57,7 +64,7 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: pure-live-android
-          path: signed
+          path: legacy/signed
           run-id: ${{ inputs.run_id }}
           github-token: ${{ github.token }}
 

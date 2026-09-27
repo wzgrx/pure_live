@@ -44,4 +44,31 @@ packages:
     expect(const Finding('fork', 'media_kit', 'abc', 'def').isBehind, isTrue);
     expect(const Finding('pub', 'args', '2.7.0', '').isBehind, isFalse);
   });
+
+  test('workspace direct dependencies come from member pubspecs, versions from the lock', () {
+    const lock = '''
+packages:
+  args:
+    dependency: transitive
+    source: hosted
+    version: "2.7.0"
+  media_kit:
+    dependency: "direct overridden"
+    source: path
+    version: "1.1.11"
+  crypto:
+    dependency: transitive
+    source: hosted
+    version: "3.0.7"
+''';
+    final result = readWorkspaceDirectDependencies(lock, [
+      'name: a\ndependencies:\n  args: ^2.7.0\n  media_kit:\n    path: x\n',
+      'name: b\ndev_dependencies:\n  crypto: any\n',
+    ]);
+    expect(result, {'args': '2.7.0', 'crypto': '3.0.7'});
+    expect(readWorkspaceMembers('name: w\nworkspace:\n  - legacy\n  - packages/live_core\n'), [
+      'legacy',
+      'packages/live_core',
+    ]);
+  });
 }

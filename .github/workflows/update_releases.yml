@@ -10,6 +10,11 @@ concurrency:
   group: release-index-master
   cancel-in-progress: false
 
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   update-json:
     timeout-minutes: 10
@@ -46,7 +51,9 @@ jobs:
 
         # 检查是否有文件变动
         if ! git diff --quiet -- assets/releases.json; then
-          git add assets/releases.json
+          # Installed 3.x apps read the root copy (docs/adr/0013-legacy-folder.md).
+          cp assets/releases.json ../assets/releases.json
+          git add assets/releases.json ../assets/releases.json
           git commit -m "chore: update releases.json [skip ci]"
 
           # 推送前先拉取远程最新修改，防止与其他任务（如发布 Release）冲突

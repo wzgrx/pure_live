@@ -3,8 +3,9 @@
 ## v4 rewrite
 
 - A full rewrite is in progress on `master`: plan [docs/rewrite/PLAN.md](docs/rewrite/PLAN.md), rules and accepted decisions [spec/constitution.md](spec/constitution.md), decisions [docs/adr/](docs/adr/README.md), progress [docs/rewrite/STATUS.md](docs/rewrite/STATUS.md).
-- The current 3.x app keeps shipping until v4.0.0. New v4 code goes into `packages/` and `apps/pure_live` (pub workspace rooted at the legacy app, ADR 0007); `lib/` only gets fixes and wiring.
-- v4 gate: `tool/gate.sh` (changed members) or `tool/gate.sh --all` (CI: every member plus legacy analyze/tests and `tool/tests`). Dependency direction lives in `tool/check_deps.py`; pinned toolchain in `toolchain.env`; `dart run tools/check_latest/bin/check_latest.dart` compares it with the latest official releases.
+- The current 3.x app lives in `legacy/` (ADR 0013) and keeps shipping until v4.0.0; run its commands from `legacy/`. New v4 code goes into `packages/`, `tools/` and `apps/pure_live`; `legacy/lib/` only gets fixes and wiring. The root `pubspec.yaml` only declares the pub workspace; `pubspec.lock` stays at the root.
+- The installed 3.x apps read `assets/version.json` and `assets/releases.json` from the root of `master`; `legacy/assets/` holds the packaged copies. Update both copies together, only with a published release.
+- v4 gate: `tools/gate/gate.sh` (changed members) or `tools/gate/gate.sh --all` (CI: every member plus legacy analyze/tests and `legacy/tool/tests`). Dependency direction lives in `tools/gate/check_deps.py`; pinned toolchain in `toolchain.env`; `dart run tools/check_latest/bin/check_latest.dart` compares it with the latest official releases.
 
 ## Scope and execution
 
@@ -15,29 +16,30 @@
 
 ## Project map
 
-- `lib/core/`: platform APIs, stream resolution, danmaku protocols.
-- `lib/player/`, `lib/modules/live_play/`: player adapters, lifecycle and playback UI.
-- `lib/common/`, `lib/modules/`: settings, persistence, shared UI and feature pages.
-- `test/`: deterministic Dart/Widget tests; `tool/probes/`: opt-in external/native probes.
-- `tool/`: local quality/build/release entrypoints; `docs/`: feature and acceptance evidence.
-- `android/`, `windows/`: primary targets; other platform directories remain community-verified.
+- `legacy/lib/core/`: platform APIs, stream resolution, danmaku protocols; `legacy/lib/core/site/v4_bridge/` wires lists and search to v4 (ADR 0012).
+- `legacy/lib/player/`, `legacy/lib/modules/live_play/`: player adapters, lifecycle and playback UI.
+- `legacy/lib/common/`, `legacy/lib/modules/`: settings, persistence, shared UI and feature pages.
+- `legacy/test/`: deterministic Dart/Widget tests; `legacy/tool/probes/`: opt-in external/native probes.
+- `legacy/tool/`: local quality/build/release entrypoints; `legacy/docs/`: feature and acceptance evidence.
+- `legacy/android/`, `legacy/windows/`: primary targets; other platform directories remain community-verified.
+- v4: `packages/` (domain model, network), `tools/` (probe, fixture capture, gate), `spec/`, `fixtures/`, `docs/rewrite/`, `docs/adr/`; `third_party/` holds the media_kit fork used by both apps.
 
 ## Maintenance scope and triage
 
-- For bugs and upstream work, use [MAINTENANCE_POLICY.md](MAINTENANCE_POLICY.md). Find the first invalid state and classify provenance; use `not-reproduced` when evidence is insufficient. Broaden review to callers, adjacent modes and resource ownership, not unrelated files by default.
-- Use the rapid Issue lane in [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md): compare the reported tag with `HEAD` and search existing tests/evidence before opening a new investigation. Batch compact triage results in the central ledger. An unchanged `already-fixed` case does not get another bespoke audit, full analysis run, build or device session.
-- Read [UPSTREAM_REVIEW_POLICY.md](UPSTREAM_REVIEW_POLICY.md) only for upstream comparison/integration. Every incoming commit/file needs review before an authorized merge. A local fix does not imply an upstream merge.
+- For bugs and upstream work, use [MAINTENANCE_POLICY.md](legacy/MAINTENANCE_POLICY.md). Find the first invalid state and classify provenance; use `not-reproduced` when evidence is insufficient. Broaden review to callers, adjacent modes and resource ownership, not unrelated files by default.
+- Use the rapid Issue lane in [docs/AGENT_WORKFLOW.md](legacy/docs/AGENT_WORKFLOW.md): compare the reported tag with `HEAD` and search existing tests/evidence before opening a new investigation. Batch compact triage results in the central ledger. An unchanged `already-fixed` case does not get another bespoke audit, full analysis run, build or device session.
+- Read [UPSTREAM_REVIEW_POLICY.md](legacy/UPSTREAM_REVIEW_POLICY.md) only for upstream comparison/integration. Every incoming commit/file needs review before an authorized merge. A local fix does not imply an upstream merge.
 - Android and Windows are maintained first. New feature requests in fork Issues route upstream; explicit user-requested development retains its requested scope.
 - Preserve playback/session ownership, user pause/exit intent, source-generation fences, bounded caches and existing settings migration. Avoid replacing diagnosis with repeated delays, refreshes or retries.
 
 ## Validation and delivery
 
-Read [BUILD_POLICY.md](BUILD_POLICY.md) before heavy commands. Use [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md) to select the smallest sufficient verification and the release route.
+Read [BUILD_POLICY.md](legacy/BUILD_POLICY.md) before heavy commands. Use [docs/AGENT_WORKFLOW.md](legacy/docs/AGENT_WORKFLOW.md) to select the smallest sufficient verification and the release route.
 
 - Documentation/instruction/config-only work: links, syntax and relevant static policy checks. App analyze/tests/packages are not an automatic next step.
 - Behavior changes: meaningful affected tests; analyze once after the current repair train's planned Dart edits settle, not after every source-sync commit. Broaden or repeat checks only for new edits, failures, unresolved risk or a formal delivery gate.
-- Use the SDK pinned in `.fvmrc` through `tool/flutterw.ps1`. Preserve incremental outputs; format changed Dart files only (exclude JS-vendoring `lib/core/scripts/douyin_sign.dart`).
-- Heavy work uses `tool/build_resource_guard.ps1`; one heavy task and one platform/variant at a time. Resource values and cache rules live only in BUILD_POLICY.md.
+- Use the SDK pinned in `legacy/.fvmrc` through `legacy/tool/flutterw.ps1`. Preserve incremental outputs; format changed Dart files only (exclude JS-vendoring `legacy/lib/core/scripts/douyin_sign.dart`).
+- Heavy work uses `legacy/tool/build_resource_guard.ps1`; one heavy task and one platform/variant at a time. Resource values and cache rules live only in BUILD_POLICY.md.
 - Completed bug-fix batches retain `bugfix-android-release-default` under BUILD_POLICY.md: one Android patch/build release per converged repair train, not per independently reversible fix inside it. Analysis-only or explicitly deferred delivery stays within that scope. Ordinary docs work does not trigger a version bump.
 - Secrets and signing keys stay outside Git. APK/source/signature/hash/version checks remain required for publication. No force-push or deletion of unrelated branches/artifacts.
 - Source synchronization is separate from package publication. After each independently verified fix passes its affected tests, commit and push the authorized current branch to `origin`, then verify the remote head; an active repair train may explicitly leave its single repository-wide Analyze/Full gate pending until source convergence. Do not accumulate local-only commits while waiting for 3.2.0 or full native acceptance. Preserve unpublished work on a failed push, inspect divergence, and never force-push to resolve it. A successful source push is not a release or full acceptance claim.
@@ -46,8 +48,8 @@ Read [BUILD_POLICY.md](BUILD_POLICY.md) before heavy commands. Use [docs/AGENT_W
 ## Device and collaboration boundaries
 
 - Default to source/tests/local builds. Phone discovery, ADB, install, logs and device UI require a current explicit device request. Historical phone connections are not continuing consent.
-- Read-only upstream comparison is distinct from merging; merge only within the current requested scope. For requested device work, use `tool/run_android_device_test_turn.ps1` and its shared-device lease; see [docs/ANDROID_DEVICE_TEST_ROTATION.md](docs/ANDROID_DEVICE_TEST_ROTATION.md).
-- The Windows GUI model/cost rule has one owner: [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md#model-and-task-handoff). Link to it when needed; do not restate unchanged model policy or usage boilerplate in active plans, audit documents or routine progress reports.
+- Read-only upstream comparison is distinct from merging; merge only within the current requested scope. For requested device work, use `legacy/tool/run_android_device_test_turn.ps1` and its shared-device lease; see [docs/ANDROID_DEVICE_TEST_ROTATION.md](legacy/docs/ANDROID_DEVICE_TEST_ROTATION.md).
+- The Windows GUI model/cost rule has one owner: [docs/AGENT_WORKFLOW.md](legacy/docs/AGENT_WORKFLOW.md#model-and-task-handoff). Link to it when needed; do not restate unchanged model policy or usage boilerplate in active plans, audit documents or routine progress reports.
 - Use subagents only when explicitly requested by the user or applicable instructions. Keep independent read-only work separate; serialize edits to shared files, builds and device leases. Preserve the configured model/effort unless the user requests a change.
 
 ## Completion

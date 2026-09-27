@@ -16,6 +16,11 @@ concurrency:
   group: local-signed-android-${{ github.event_name }}
   cancel-in-progress: false
 
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   android:
     name: Signed Android arm64-v8a on local runner

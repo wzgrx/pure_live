@@ -1,6 +1,6 @@
 # 0001 v4 重写的 12 项基础决定
 
-- 状态：已接受（“播放内核”一项被 [0006](0006-license-compliance.md) 取代：只用 mpv；“仓库方式”中的目录安排被 [0007](0007-repo-layout-workspace.md) 取代：旧应用留在根目录）
+- 状态：已接受（“播放内核”一项被 [0006](0006-license-compliance.md) 取代：只用 mpv；“仓库方式”中的目录安排先被 [0007](0007-repo-layout-workspace.md) 取代，现由 [0013](0013-legacy-folder.md) 决定：旧应用收进 `legacy/`）
 - 日期：2026-09-27
 
 ## 背景

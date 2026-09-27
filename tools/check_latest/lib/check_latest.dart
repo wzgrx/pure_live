@@ -87,6 +87,28 @@ Map<String, String> readDirectHostedDependencies(String lockText) {
   return result;
 }
 
+/// Hosted packages that any workspace member lists under `dependencies` or
+/// `dev_dependencies`, with the version resolved in the shared lock file.
+/// [pubspecs] are the members' pubspec.yaml texts.
+Map<String, String> readWorkspaceDirectDependencies(String lockText, Iterable<String> pubspecs) {
+  final lock = loadYaml(lockText) as YamlMap;
+  final packages = lock['packages'] as YamlMap? ?? YamlMap();
+  final names = <String>{
+    for (final text in pubspecs)
+      for (final section in const ['dependencies', 'dev_dependencies'])
+        ...(((loadYaml(text) as YamlMap)[section] as YamlMap?)?.keys.map((key) => key.toString()) ?? const <String>[]),
+  };
+  return {
+    for (final name in names.toList()..sort())
+      if (packages[name] case final YamlMap info when info['source'] == 'hosted') name: info['version'].toString(),
+  };
+}
+
+/// Workspace member directories listed in the root pubspec.yaml.
+List<String> readWorkspaceMembers(String rootPubspec) => [
+  for (final member in ((loadYaml(rootPubspec) as YamlMap)['workspace'] as YamlList?) ?? YamlList()) member.toString(),
+];
+
 /// Picks the highest stable version from candidate strings such as `n9.0.2` or `v0.41.0`.
 String highestStable(Iterable<String> candidates, {String prefix = ''}) {
   Version? best;

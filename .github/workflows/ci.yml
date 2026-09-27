@@ -1,8 +1,8 @@
 name: CI
 
 # v4 gate on every push to master and every pull request (docs/rewrite/PLAN.md, phase 3).
-# Runs tool/gate.sh --all: dependency direction, format/analyze/tests for every
-# workspace member, the legacy app's analyze and tests, and tool/tests.
+# Runs tools/gate/gate.sh --all: dependency direction, format/analyze/tests for every
+# v4 workspace member, the legacy app's analyze and tests (legacy/, ADR 0013), and the tool tests.
 on:
   push:
     branches: [master]
@@ -43,6 +43,6 @@ jobs:
         run: flutter pub get --enforce-lockfile
 
       - name: Gate
-        run: bash tool/gate.sh --all
+        run: bash tools/gate/gate.sh --all
         env:
           GATE_TEST_CONCURRENCY: "4"

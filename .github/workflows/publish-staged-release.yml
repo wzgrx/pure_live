@@ -54,6 +54,11 @@ concurrency:
   group: publish-staged-${{ inputs.release_tag }}
   cancel-in-progress: false
 
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   windows:
     name: Build Windows x64 on local runner
@@ -62,9 +67,11 @@ jobs:
     timeout-minutes: 75
     steps:
       - name: Preserve compatible packages from the previous local job
+        # Runs before checkout, when legacy/ does not exist yet.
+        working-directory: ${{ github.workspace }}
         shell: pwsh
         run: |
-          $source = Join-Path $env:GITHUB_WORKSPACE 'local-artifacts'
+          $source = Join-Path $env:GITHUB_WORKSPACE 'legacy\local-artifacts'
           $cache = Join-Path $env:RUNNER_TEMP 'pure-live-prebuilt-windows'
           Remove-Item -LiteralPath $cache -Recurse -Force -ErrorAction SilentlyContinue
           if (Test-Path -LiteralPath $source -PathType Container) {
@@ -89,9 +96,9 @@ jobs:
           if ($metadata.tracked_files_dirty -or -not $metadata.source_commit) { exit 0 }
           git cat-file -e "$($metadata.source_commit)^{commit}"
           if ($LASTEXITCODE -ne 0) { exit 0 }
-          $changed = @(git diff --name-only $metadata.source_commit $env:TARGET_SHA -- .)
+          $changed = @(git diff --name-only $metadata.source_commit $env:TARGET_SHA -- ..)
           if ($LASTEXITCODE -ne 0 -or $changed.Count -ne 0) { exit 0 }
-          $destination = Join-Path $env:GITHUB_WORKSPACE 'local-artifacts'
+          $destination = Join-Path $env:GITHUB_WORKSPACE 'legacy\local-artifacts'
           New-Item -ItemType Directory -Path $destination -Force | Out-Null
           Copy-Item -Path (Join-Path $cache '*') -Destination $destination -Recurse -Force
           "PURELIVE_WINDOWS_REUSED=true" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
@@ -141,10 +148,10 @@ jobs:
         with:
           name: pure-live-windows-release
           path: |
-            local-artifacts/*/PureLive-*-windows-x64-portable.zip
-            local-artifacts/*/PureLive-*-windows-x64-setup.exe
-            local-artifacts/*/WINDOWS_SIGNING.txt
-            local-artifacts/*/WINDOWS_SOURCE_COMMIT.txt
+            legacy/local-artifacts/*/PureLive-*-windows-x64-portable.zip
+            legacy/local-artifacts/*/PureLive-*-windows-x64-setup.exe
+            legacy/local-artifacts/*/WINDOWS_SIGNING.txt
+            legacy/local-artifacts/*/WINDOWS_SOURCE_COMMIT.txt
           if-no-files-found: error
           retention-days: 3
 
@@ -201,7 +208,7 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v7.0.1
         with:
           name: pure-live-windows-release
-          path: downloads/windows
+          path: legacy/downloads/windows
 
       - name: Download pre-uploaded local Windows packages
         if: ${{ inputs.windows_source == 'preuploaded-release' }}
@@ -224,7 +231,7 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v7.0.1
         with:
           name: pure-live-android
-          path: downloads/android
+          path: legacy/downloads/android
           run-id: ${{ inputs.android_run_id }}
           github-token: ${{ github.token }}
 
@@ -244,7 +251,7 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v7.0.1
         with:
           name: pure-live-linux-x64
-          path: downloads/linux
+          path: legacy/downloads/linux
           run-id: ${{ inputs.stage_run_id }}
           github-token: ${{ github.token }}
 
@@ -252,7 +259,7 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v7.0.1
         with:
           name: pure-live-macos
-          path: downloads/macos
+          path: legacy/downloads/macos
           run-id: ${{ inputs.stage_run_id }}
           github-token: ${{ github.token }}
 
@@ -260,7 +267,7 @@ jobs:
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v7.0.1
         with:
           name: pure-live-ios
-          path: downloads/ios
+          path: legacy/downloads/ios
           run-id: ${{ inputs.stage_run_id }}
           github-token: ${{ github.token }}
 
@@ -487,7 +494,9 @@ jobs:
           if git diff --quiet -- assets/releases.json; then
             exit 0
           fi
-          git add assets/releases.json
+          # Installed 3.x apps read the root copy (docs/adr/0013-legacy-folder.md).
+          cp assets/releases.json ../assets/releases.json
+          git add assets/releases.json ../assets/releases.json
           git commit -m "chore: index $RELEASE_TAG release assets [skip ci]"
           git pull --rebase origin master
           git push origin HEAD:master

@@ -30,9 +30,15 @@ Future<void> main(List<String> arguments) async {
   final root = options.option('root')!;
   final env = readEnvFile(File('$root/toolchain.env').readAsStringSync());
   final lock = File('$root/pubspec.lock');
-  final pub = options.flag('skip-pub') || !lock.existsSync()
-      ? const <String, String>{}
-      : readDirectHostedDependencies(lock.readAsStringSync());
+  final Map<String, String> pub;
+  if (options.flag('skip-pub') || !lock.existsSync()) {
+    pub = const {};
+  } else {
+    final members = readWorkspaceMembers(File('$root/pubspec.yaml').readAsStringSync());
+    pub = readWorkspaceDirectDependencies(lock.readAsStringSync(), [
+      for (final member in members) File('$root/$member/pubspec.yaml').readAsStringSync(),
+    ]);
+  }
 
   final findings = await collect(env: env, pub: pub);
   if (options.flag('json')) {

@@ -52,6 +52,11 @@ env:
   FLUTTER_VERSION: 3.47.5
   FLUTTER_LINUX_ARCHIVE: stable/linux/flutter_linux_3.47.5-stable.tar.xz
   FLUTTER_LINUX_SHA256: 2132e990f236f8d22e7c6314b29a191a95b10d7cbcfec9b4e2e303d996652cbb
+# The 3.x app lives in legacy/ (docs/adr/0013-legacy-folder.md).
+defaults:
+  run:
+    working-directory: legacy
+
 jobs:
   quality:
     name: Analyze, test and probe
@@ -203,10 +208,10 @@ jobs:
         with:
           name: pure-live-android
           path: |
-            PureLive-*-android-arm64-v8a-release.apk
-            PureLive-*-android-armeabi-v7a-release.apk
-            PureLive-*-android-x86_64-release.apk
-            ANDROID_SHA256SUM.txt
+            legacy/PureLive-*-android-arm64-v8a-release.apk
+            legacy/PureLive-*-android-armeabi-v7a-release.apk
+            legacy/PureLive-*-android-x86_64-release.apk
+            legacy/ANDROID_SHA256SUM.txt
           if-no-files-found: error
           retention-days: 3
   windows:
@@ -387,9 +392,9 @@ jobs:
         with:
           name: pure-live-windows
           path: |
-            PureLive-*-windows-x64-setup.exe
-            PureLive-*-windows-x64.msix
-            PureLive-*-windows-x64-portable.zip
+            legacy/PureLive-*-windows-x64-setup.exe
+            legacy/PureLive-*-windows-x64.msix
+            legacy/PureLive-*-windows-x64-portable.zip
           if-no-files-found: error
           retention-days: 3
   linux:
@@ -501,7 +506,7 @@ jobs:
         with:
           name: pure-live-linux-x64
           path: |
-            PureLive-*-linux-x64.tar.gz
+            legacy/PureLive-*-linux-x64.tar.gz
           if-no-files-found: error
           retention-days: 3
   apple:
@@ -608,8 +613,8 @@ jobs:
         with:
           name: pure-live-macos
           path: |
-            PureLive-*-macos-universal.zip
-            PureLive-*-macos-universal.dmg
+            legacy/PureLive-*-macos-universal.zip
+            legacy/PureLive-*-macos-universal.dmg
           if-no-files-found: error
           retention-days: 3
       - name: Build iOS device application
@@ -695,7 +700,7 @@ jobs:
           mkdir -p "$WORK_DIR/Payload"
           cp -R "$APP" "$WORK_DIR/Payload/Runner.app"
           cd "$WORK_DIR"
-          zip -r -q "$GITHUB_WORKSPACE/PureLive-${VERSION}-ios-arm64-trollstore.ipa" Payload
+          zip -r -q "$GITHUB_WORKSPACE/legacy/PureLive-${VERSION}-ios-arm64-trollstore.ipa" Payload
       - name: Verify TrollStore IPA
         if: ${{ github.event_name == 'push' || inputs.build_ios }}
         shell: bash
@@ -716,8 +721,8 @@ jobs:
         with:
           name: pure-live-ios
           path: |
-            PureLive-*-ios-arm64-unsigned-app.zip
-            PureLive-*-ios-arm64-trollstore.ipa
+            legacy/PureLive-*-ios-arm64-unsigned-app.zip
+            legacy/PureLive-*-ios-arm64-trollstore.ipa
           if-no-files-found: error
           retention-days: 7
   publish-release:
@@ -744,6 +749,8 @@ jobs:
       contents: write
     steps:
       - name: Validate release tag
+        # Runs before checkout, when legacy/ does not exist yet.
+        working-directory: ${{ github.workspace }}
         shell: bash
         env:
           TAG: ${{ inputs.release_tag }}
@@ -766,7 +773,7 @@ jobs:
       - name: Download all build artifacts
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v7.0.1
         with:
-          path: artifacts
+          path: legacy/artifacts
       - name: Show release artifacts
         shell: bash
         run: |
@@ -786,7 +793,7 @@ jobs:
         id: version
         uses: juliangruber/read-file-action@271ff311a4947af354c6abcd696a306553b9ec18 # v1
         with:
-          path: assets/version.json
+          path: legacy/assets/version.json
       - name: Generate BUILD_METADATA.json
         shell: bash
         env:
@@ -895,8 +902,8 @@ jobs:
           make_latest: true
           fail_on_unmatched_files: false
           files: |
-            artifacts/**/*
-            BUILD_METADATA.json
+            legacy/artifacts/**/*
+            legacy/BUILD_METADATA.json
   update-json:
     timeout-minutes: 15
     name: Update releases.json
@@ -981,7 +988,9 @@ jobs:
             echo "assets/releases.json has no changes."
             exit 0
           fi
-          git add assets/releases.json
+          # Installed 3.x apps read the root copy (docs/adr/0013-legacy-folder.md).
+          cp assets/releases.json ../assets/releases.json
+          git add assets/releases.json ../assets/releases.json
           git commit -m "chore: update releases.json for $RELEASE_TAG [skip ci]"
           git pull --rebase origin master
           git push origin master

@@ -66,3 +66,19 @@ app.*.map.json
 # FVM Version Cache
 .fvm/
 **/.make_config.yaml
+
+# Legacy app build outputs and local artifacts (docs/adr/0013-legacy-folder.md)
+/legacy/build/
+/legacy/android/build/
+/legacy/android/.gradle/
+/legacy/android/.kotlin/
+/legacy/local-artifacts/
+/legacy/local-smoke/
+/legacy/.local-build/
+/legacy/build-audit-*
+/legacy/android/app/debug
+/legacy/android/app/profile
+/legacy/android/app/release
+/legacy/android/key.properties
+/legacy/assets/keystore/
+/legacy/assets/pure_live_web/

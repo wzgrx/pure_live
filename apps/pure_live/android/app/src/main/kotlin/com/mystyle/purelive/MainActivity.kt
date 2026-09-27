@@ -40,6 +40,8 @@ class MainActivity : AudioServiceActivity() {
         val messenger = flutterEngine.dartExecutor.binaryMessenger
         // DLNA search needs the Wi-Fi multicast lock (F-CAST-01).
         CastMulticast(applicationContext).register(messenger)
+        // The system proxy for "跟随系统代理" (F-SET-07).
+        SystemNet(applicationContext).register(messenger)
         pip?.detach()
         pip = PictureInPicture(this, messenger)
         PlaybackLocks.attach(applicationContext, messenger)

@@ -7,6 +7,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/core/system_proxy.dart';
 
 /// Creates playback engines: mpv on devices (ADR 0006), a fake in tests.
 /// Decoding, output and latency follow the settings at creation time (the
@@ -22,7 +23,7 @@ final Provider<EngineFactory> engineFactoryProvider = Provider<EngineFactory>((r
       androidCompatibility: Platform.isAndroid && settings.get(Settings.androidCompatibility),
       lowLatency: settings.get(Settings.lowLatency),
       audioOutput: settings.get(Settings.audioOutput).isEmpty ? null : settings.get(Settings.audioOutput),
-      httpProxy: (uri) => hosts.contains(uri) ? proxyUrl(settings) : null,
+      httpProxy: (uri) => hosts.contains(uri) ? proxyUrl(settings, system: ref.read(systemProxyProvider)) : null,
     ),
   )();
 });

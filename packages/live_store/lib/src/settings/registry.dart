@@ -675,6 +675,10 @@ abstract final class Settings {
     scope: SettingScope.device,
   );
 
+  /// Follow the operating system's proxy while the manual proxy is off
+  /// (F-SET-07, PLAN §12; on by default).
+  static const followSystemProxy = BoolSetting('network.followSystemProxy', true, scope: SettingScope.device);
+
   // Recording (spec/modules/record.md §20); device scope, never synced.
 
   /// Default recording quality.
@@ -979,6 +983,7 @@ abstract final class Settings {
     proxyHost,
     proxyPort,
     proxyPlatforms,
+    followSystemProxy,
     windowPosition,
     windowMaximized,
     closeDontAsk,

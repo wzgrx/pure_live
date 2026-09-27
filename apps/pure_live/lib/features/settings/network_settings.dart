@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
+import 'package:pure_live_app/core/system_proxy.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 
 /// 设置 › 网络 (spec/product.md F-SET-07): one proxy for requests, chat,
@@ -13,7 +18,12 @@ class NetworkSettings extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const SwitchSettingTile(setting: Settings.proxyEnabled, title: '使用代理', subtitle: 'HTTP 代理，例如 Clash 的 7897 端口'),
+      const SystemProxyTile(),
+      const SwitchSettingTile(
+        setting: Settings.proxyEnabled,
+        title: '使用代理',
+        subtitle: 'HTTP 代理，例如 Clash 的 7897 端口；打开后不再跟随系统代理',
+      ),
       SettingBuilder<String>(
         setting: Settings.proxyHost,
         builder: (context, value, set) => ListTile(
@@ -90,5 +100,31 @@ class NetworkSettings extends StatelessWidget {
     );
     controller.dispose();
     return result;
+  }
+}
+
+/// 跟随系统代理 (F-SET-07): shows what the system proxy is now.
+class SystemProxyTile extends ConsumerWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final system = ref.watch(systemProxyProvider);
+    final manual = ref.watch(proxyEnabledSetting);
+    return SwitchListTile(
+      title: const Text('跟随系统代理'),
+      subtitle: Text(
+        manual
+            ? '手动代理打开时不使用系统代理'
+            : system == null
+            ? '系统当前没有设置代理，直接连接'
+            : '系统代理：${system.host}:${system.port}',
+      ),
+      value: ref.watch(followSystemProxySetting),
+      onChanged: (value) {
+        unawaited(ref.read(followSystemProxySetting.notifier).set(value));
+        unawaited(ref.read(systemProxyProvider.notifier).refresh());
+      },
+    );
   }
 }

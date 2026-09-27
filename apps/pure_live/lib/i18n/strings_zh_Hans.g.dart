@@ -1864,6 +1864,9 @@ class Translations$iptv$zh_Hans {
   /// zh-Hans: '分组'
   String get groups => '分组';
 
+  /// zh-Hans: '未分组'
+  String get ungrouped => '未分组';
+
   /// zh-Hans: '管理播放列表'
   String get managePlaylists => '管理播放列表';
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_iptv/live_iptv.dart';
 import 'package:live_net/live_net.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -83,6 +84,11 @@ Map<String, String> get platformNames => t.sites.names;
 /// Names of 3.x platforms this build has no adapter for, so their follows and
 /// history still read well (spec/product.md F-FAV-08).
 Map<String, String> get _otherPlatformNames => t.sites.otherNames;
+
+/// The name shown for [area]: the platform's own, except IPTV's channels
+/// without a group, which read in the interface language.
+String areaName(Area area) =>
+    area.name == IptvSite.ungrouped && area.id == '${area.categoryId}/' ? t.iptv.ungrouped : area.name;
 
 /// The display name of any platform id, supported or not.
 String platformName(String id) => platformNames[id] ?? _otherPlatformNames[id] ?? id;

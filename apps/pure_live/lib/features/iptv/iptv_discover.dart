@@ -5,6 +5,7 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/iptv/iptv_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
@@ -104,7 +105,7 @@ class _Groups extends ConsumerWidget {
                         children: [
                           for (final area in playlist.areas)
                             ActionChip(
-                              label: Text(area.name),
+                              label: Text(areaName(area)),
                               onPressed: () => context.push(areaLocation(IptvSite.platformId), extra: area),
                             ),
                         ],

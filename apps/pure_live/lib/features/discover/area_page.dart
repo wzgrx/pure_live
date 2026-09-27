@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/discover/discover_refresh.dart';
 import 'package:pure_live_app/features/discover/followed_areas.dart';
@@ -28,7 +29,7 @@ class AreaPage extends ConsumerWidget {
     final followed = area != null && isAreaFollowed(ref.watch(followedAreasProvider).value ?? const [], platform, area);
     return Scaffold(
       appBar: AppBar(
-        title: Text(area?.name ?? ''),
+        title: Text(area == null ? '' : areaName(area)),
         actions: [
           if (area != null)
             IconButton(

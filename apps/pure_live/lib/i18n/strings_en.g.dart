@@ -1415,6 +1415,8 @@ class _Translations$iptv$en implements Translations$iptv$zh_Hans {
   @override
   String get groups => 'Groups';
   @override
+  String get ungrouped => 'Ungrouped';
+  @override
   String get managePlaylists => 'Manage playlists';
   @override
   String get noChannels => 'This playlist has no channels yet';

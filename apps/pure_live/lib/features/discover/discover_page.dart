@@ -157,7 +157,7 @@ class _CategorySection extends StatelessWidget {
             children: [
               for (final area in category.areas)
                 ActionChip(
-                  label: Text(area.name),
+                  label: Text(areaName(area)),
                   onPressed: () => context.push(areaLocation(platform), extra: area),
                 ),
             ],

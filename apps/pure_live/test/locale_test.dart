@@ -118,6 +118,19 @@ void main() {
       expect(t.app.tabs.follows, '关注');
       expect(formatCount(12000), '1.2万');
     });
+
+    test("IPTV's ungrouped channels read in the interface language; platform areas stay as given", () {
+      const ungrouped = Area(id: 'p1/', name: '未分组', categoryId: 'p1');
+      const named = Area(id: 'p1/未分组', name: '未分组', categoryId: 'p1');
+      applyAppLocale(AppLocale.en);
+      expect(areaName(ungrouped), 'Ungrouped');
+      expect(areaName(named), '未分组', reason: 'a group the playlist itself calls so');
+      expect(areaName(const Area(id: '1', name: '英雄联盟', categoryId: 'game')), '英雄联盟');
+      applyAppLocale(AppLocale.zhHant);
+      expect(areaName(ungrouped), '未分組');
+      applyAppLocale(AppLocale.zhHans);
+      expect(areaName(ungrouped), '未分组');
+    });
   });
 
   group('F-APP-06: the app follows the setting', () {

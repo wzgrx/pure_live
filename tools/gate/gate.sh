@@ -84,6 +84,22 @@ step() {
 
 in_dir() { (cd "$1" && shift && "$@"); }
 
+# A merge or pull that changed the lock leaves package_config.json stale:
+# analyze would then miss new packages while `flutter test` resolves them.
+config=.dart_tool/package_config.json
+stale=0
+[[ -f $config ]] || stale=1
+for spec in pubspec.lock pubspec.yaml "${members[@]/%//pubspec.yaml}"; do
+  [[ -f $spec && $spec -nt $config ]] && stale=1
+done
+if [[ $stale == 1 ]]; then
+  if command -v flutter >/dev/null 2>&1; then
+    step "dependencies" flutter pub get
+  else
+    step "dependencies" dart pub get
+  fi
+fi
+
 step "dependency direction" python3 tools/gate/check_deps.py
 for member in "${selected[@]}"; do
   step "$member format" dart format --output=none --set-exit-if-changed "$member"

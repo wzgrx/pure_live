@@ -1363,6 +1363,8 @@ class Translations$iptv$zh_Hant implements Translations$iptv$zh_Hans {
   @override
   String get groups => '群組';
   @override
+  String get ungrouped => '未分組';
+  @override
   String get managePlaylists => '管理播放清單';
   @override
   String get noChannels => '播放清單裡還沒有頻道';

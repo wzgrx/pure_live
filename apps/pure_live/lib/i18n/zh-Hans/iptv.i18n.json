@@ -38,6 +38,7 @@
   "importPlaylist": "导入播放列表",
   "allChannels": "全部频道",
   "groups": "分组",
+  "ungrouped": "未分组",
   "managePlaylists": "管理播放列表",
   "noChannels": "播放列表里还没有频道",
   "playlistNotSynced": "这个播放列表还没有同步",

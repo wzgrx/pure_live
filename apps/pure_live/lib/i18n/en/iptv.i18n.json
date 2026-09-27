@@ -41,6 +41,7 @@
   "importPlaylist": "Import playlist",
   "allChannels": "All channels",
   "groups": "Groups",
+  "ungrouped": "Ungrouped",
   "managePlaylists": "Manage playlists",
   "noChannels": "This playlist has no channels yet",
   "playlistNotSynced": "This playlist has not been synced yet",

@@ -27,6 +27,8 @@ void main() {
           onTap: () => taps++,
           onMenu: () => menus++,
         ),
+        // The test font draws every glyph a full em wide: room for both labels.
+        width: 260,
       ),
     );
     expect(find.text('直播 01:24'), findsOneWidget);
@@ -58,6 +60,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
+    expect(find.text('直播'), findsOneWidget, reason: 'the duration goes first, the word stays');
     final badge = tester.getRect(find.byType(LiveBadge));
     final audience = tester.getRect(find.byType(CoverLabel));
     final cover = tester.getRect(find.byType(AspectRatio));

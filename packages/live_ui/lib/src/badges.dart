@@ -90,21 +90,38 @@ class LiveBadge extends StatelessWidget {
   /// Formatted duration shown after the label.
   final String? duration;
 
+  static const _padding = EdgeInsets.symmetric(horizontal: Space.s1 + 2, vertical: 1);
+
   @override
   Widget build(BuildContext context) {
     final live = LiveTheme.of(context);
     final style = live.numeric.copyWith(color: live.onLive);
-    return DecoratedBox(
+    final words = LiveUiText.current;
+    Widget badge(String text) => DecoratedBox(
       decoration: BoxDecoration(color: live.live, borderRadius: BorderRadius.circular(Radii.r1)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Space.s1 + 2, vertical: 1),
-        child: Text(
-          duration == null ? LiveUiText.current.live : LiveUiText.current.liveFor(duration!),
-          style: style,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        padding: _padding,
+        child: Text(text, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
+    );
+    final duration = this.duration;
+    if (duration == null) return badge(words.live);
+    // Where the badge has no room for both (large text on a narrow card), the
+    // duration goes and the word 直播 stays (principles rule 2).
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final full = words.liveFor(duration);
+        if (!constraints.hasBoundedWidth) return badge(full);
+        final painter = TextPainter(
+          text: TextSpan(text: full, style: DefaultTextStyle.of(context).style.merge(style)),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          maxLines: 1,
+        )..layout();
+        final fits = painter.width + _padding.horizontal <= constraints.maxWidth;
+        painter.dispose();
+        return badge(fits ? full : words.live);
+      },
     );
   }
 }

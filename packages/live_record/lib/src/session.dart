@@ -409,7 +409,8 @@ final class RecordSession {
         try {
           detail = await _orStop(_rooms.detail(room).timeout(requestTimeout));
           if (_stopping) break;
-          if (detail.state == LiveState.offline) return (SessionEnd.offline, null);
+          // A replay is not recorded (§4.1): it ends the session like going offline.
+          if (detail.state != LiveState.live) return (SessionEnd.offline, null);
           _detail = detail;
           _onDetail?.call(detail);
           stage = RecordStage.stream;

@@ -915,7 +915,9 @@ final class RecordManager {
         if (_current(runtime, generation)) {
           _update(runtime, runtime.task.copyWith(snapshot: RecordRoomSnapshot.of(detail)));
         }
-        live = detail.state != LiveState.offline;
+        // Replays (reruns, loops) count as offline: recording them only fills the
+        // disk and keeps a monitored task busy (spec/modules/record.md §4.1).
+        live = detail.state == LiveState.live;
       } on Object catch (error) {
         failure = classifyError(error, RecordStage.status);
         if (failure.kind == RecordErrorKind.roomOffline) {
@@ -1037,7 +1039,9 @@ final class RecordManager {
           bool? live;
           try {
             final detail = await _rooms.detail(runtime.task.room).timeout(timings.checkTimeout);
-            live = detail.state != LiveState.offline;
+            // Replays (reruns, loops) count as offline: recording them only fills the
+            // disk and keeps a monitored task busy (spec/modules/record.md §4.1).
+            live = detail.state == LiveState.live;
           } on Object catch (error) {
             live = classifyError(error, RecordStage.status).kind == RecordErrorKind.roomOffline ? false : null;
           }

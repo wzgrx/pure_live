@@ -1,0 +1,122 @@
+{
+  "generator": "DouyinSite.getRoomDetail + DouyinSite.parseStreamQualities + LiveStreamGeometryHintResolver.resolveDouyin",
+  "value": {
+    "requests": [
+      "GET webcast.amemv.com/webcast/room/reflow/info/"
+    ],
+    "room": {
+      "roomId": "547977714661",
+      "title": "央视新闻频道正在直播",
+      "nick": "小央视频",
+      "avatar": "https://p11.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_6eef264efae046cee7fce06d2b392a53.jpeg?from=3067671334",
+      "cover": "https://p11-webcast-sign.douyinpic.com/webcast-cover/7687741789511518991~tplv-qz53dukwul-common-resize:0:0.image?biz_tag=app_6383_webcast&from=webcast.room.pack&l=202609271751330CDD960CC5BEC23CD774&lk3s=39e7556e&s=reflow_room_info&sc=webcast_cover&x-expires=1793094693&x-signature=baEKe79OlqA2ue2HQXyn%2FdRU5tk%3D",
+      "area": "",
+      "watching": "30549820",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "2585",
+      "totalViewers": "30549820",
+      "followers": "0",
+      "platform": "douyin",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "央视国际网络有限公司",
+      "isCatchUp": false,
+      "link": "https://live.douyin.com/547977714661",
+      "danmakuData": {
+        "webRid": "547977714661",
+        "roomId": "7687741736843512602",
+        "userId": "<process visitor id 7[3-9]+17 digits>",
+        "cookie": "<redacted>"
+      },
+      "streamUrlKept": true
+    },
+    "qualities": [
+      {
+        "id": "origin",
+        "quality": "原画",
+        "sort": 6000000,
+        "urls": [
+          "http://pull-flv-f11.douyinliving.com/media/stream-120120965258019666.flv?expire=1791107493&sign=79883855f52a4a7af1755e4c43b40606&rtm_expr_tag=reflow_room_info&major_anchor_level=vip&s_anchor=1&arch_hrchy=s2&unique_id=fzieft-215581437840704554_510_yqt&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign",
+          "http://pull-hls-f11.douyinliving.com/media/stream-120120965258019666.m3u8?expire=1791107493&sign=4eb565e2409de7f20353eb2f39729b2d&s_anchor=1&arch_hrchy=s2&rtm_expr_tag=reflow_room_info&major_anchor_level=vip&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign"
+        ]
+      },
+      {
+        "id": "hd",
+        "quality": "蓝光",
+        "sort": 4000000,
+        "urls": [
+          "http://pull-flv-f11.douyinliving.com/media/stream-120120965258019666_hd.flv?expire=1791107493&sign=1a41a6cb16504833e138bf4baa485e3e&s_anchor=1&arch_hrchy=s2&rtm_expr_tag=reflow_room_info&major_anchor_level=vip&unique_id=kbrgtb-416729138395330480_887_ebu_sx&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign",
+          "http://pull-hls-f11.douyinliving.com/media/stream-120120965258019666_hd.m3u8?expire=1791107493&sign=9978ad42f62a7bd8e8438d3fa7749534&major_anchor_level=vip&s_anchor=1&arch_hrchy=s2&rtm_expr_tag=reflow_room_info&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign"
+        ]
+      },
+      {
+        "id": "sd",
+        "quality": "高清",
+        "sort": 3000000,
+        "urls": [
+          "http://pull-flv-f11.douyinliving.com/media/stream-120120965258019666_sd.flv?expire=1791107493&sign=97807d6c57db5ab04ee754b1159310aa&rtm_expr_tag=reflow_room_info&s_anchor=1&arch_hrchy=s2&major_anchor_level=vip&unique_id=pcucwl-780258122487891124_143_nme_ot&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign",
+          "http://pull-hls-f11.douyinliving.com/media/stream-120120965258019666_sd.m3u8?expire=1791107493&sign=deb30e75eda201513690eccdd8c609d4&rtm_expr_tag=reflow_room_info&s_anchor=1&arch_hrchy=s2&major_anchor_level=vip&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign"
+        ]
+      },
+      {
+        "id": "ld",
+        "quality": "标清",
+        "sort": 2000000,
+        "urls": [
+          "http://pull-flv-f11.douyinliving.com/media/stream-120120965258019666_ld.flv?expire=1791107493&sign=fdcde9ebd0c9fa2d273c163909e2a05e&rtm_expr_tag=reflow_room_info&s_anchor=1&arch_hrchy=s2&major_anchor_level=vip&unique_id=kwldgq-134959639160963974_312_red_ka&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign",
+          "http://pull-hls-f11.douyinliving.com/media/stream-120120965258019666_ld.m3u8?expire=1791107493&sign=954e88b1ffd8f663770f3f5e29c81d9f&rtm_expr_tag=reflow_room_info&s_anchor=1&arch_hrchy=s2&major_anchor_level=vip&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign"
+        ]
+      },
+      {
+        "id": "md",
+        "quality": "流畅",
+        "sort": 1000000,
+        "urls": [
+          "https://pull-flv-f11-admin.douyinliving.com/media/stream-120120965258019666_md.flv?expire=1791107493&sign=1e80e03e09e546139bc0d62b50206891&s_anchor=1&arch_hrchy=s2&major_anchor_level=vip&rtm_expr_tag=reflow_room_info&unique_id=nrlaxi-764450926650128608_588_hpw_bd&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign",
+          "http://pull-hls-f11.douyinliving.com/media/stream-120120965258019666_md.m3u8?expire=1791107493&sign=7d272c38c2ab92bad41b670456a20c5d&rtm_expr_tag=reflow_room_info&s_anchor=1&arch_hrchy=s2&major_anchor_level=vip&t_id=037-202609271751330CDD960CC5BEC23CD774-rfsign"
+        ]
+      }
+    ],
+    "geometry": {
+      "unselected": {
+        "width": 1280,
+        "height": 720,
+        "confidence": 0.97,
+        "source": "douyin.default_quality"
+      },
+      "origin": {
+        "width": 1920,
+        "height": 1080,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "hd": {
+        "width": 1920,
+        "height": 1080,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "sd": {
+        "width": 1280,
+        "height": 720,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "ld": {
+        "width": 853,
+        "height": 480,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "md": {
+        "width": 640,
+        "height": 360,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      }
+    }
+  }
+}

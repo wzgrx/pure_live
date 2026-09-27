@@ -1,0 +1,189 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "seid": "807790733244545782",
+    "page": 2,
+    "pagesize": 20,
+    "numResults": 1000,
+    "numPages": 50,
+    "suggest_keyword": "",
+    "rqt_type": "search",
+    "exp_list": {
+      "100010": true,
+      "161301": true,
+      "161501": true,
+      "5510": true,
+      "6605": true,
+      "81701100": true,
+      "83677106": true,
+      "9902": true,
+      "9920": true,
+      "9931": true,
+      "9944": true,
+      "9961": true
+    },
+    "egg_hit": 0,
+    "pageinfo": {
+      "live_room": {
+        "numResults": 14,
+        "pages": 1,
+        "total": 14,
+        "numPages": 1
+      },
+      "live_user": {
+        "numResults": 1000,
+        "pages": 167,
+        "total": 1000,
+        "numPages": 167
+      }
+    },
+    "result": {
+      "live_room": [],
+      "live_user": [
+        {
+          "uid": 9617619,
+          "uname": "<em class=\"keyword\">哔哩哔哩直播</em>",
+          "roomid": 5440,
+          "id": 5440,
+          "attentions": 20273676,
+          "area": 6,
+          "cny_flag": 0,
+          "tags": "",
+          "is_live": false,
+          "live_status": 2,
+          "cate_name": "颜值",
+          "area_v2_id": 145,
+          "live_time": "0000-00-00 00:00:00",
+          "hit_columns": [
+            "uname"
+          ],
+          "uface": "//i1.hdslb.com/bfs/face/8f6a614a48a3813d90da7a11894ae56a59396fcd.jpg",
+          "type": "live_user",
+          "rank_score": 20303673,
+          "rank_index": 1,
+          "rank_offset": 0
+        },
+        {
+          "uid": 434967398,
+          "uname": "<em class=\"keyword\">哔哩哔哩直播</em>观察员",
+          "roomid": 22462095,
+          "id": 22462095,
+          "attentions": 879502,
+          "area": 6,
+          "cny_flag": 0,
+          "tags": "",
+          "is_live": false,
+          "live_status": 2,
+          "cate_name": "颜值",
+          "area_v2_id": 145,
+          "live_time": "0000-00-00 00:00:00",
+          "hit_columns": [
+            "uname"
+          ],
+          "uface": "//i0.hdslb.com/bfs/face/0badf24e42d23a14255ee3809866791a9080461e.jpg",
+          "type": "live_user",
+          "rank_score": 909503,
+          "rank_index": 2,
+          "rank_offset": 1
+        },
+        {
+          "uid": 10769652,
+          "uname": "<em class=\"keyword\">哔哩哔哩直播</em>基",
+          "roomid": 20006,
+          "id": 20006,
+          "attentions": 109302,
+          "area": 10,
+          "cny_flag": 0,
+          "tags": "BW",
+          "is_live": false,
+          "live_status": 0,
+          "cate_name": "BW",
+          "area_v2_id": 444,
+          "live_time": "0000-00-00 00:00:00",
+          "hit_columns": [
+            "uname"
+          ],
+          "uface": "//i0.hdslb.com/bfs/face/d7a4121301fc5a06d4b53af9251fc3ba91cdfe90.jpg",
+          "type": "live_user",
+          "rank_score": 139302,
+          "rank_index": 3,
+          "rank_offset": 2
+        },
+        {
+          "uid": 410670605,
+          "uname": "<em class=\"keyword\">哔哩哔哩直播</em>运营团队",
+          "roomid": 22647871,
+          "id": 22647871,
+          "attentions": 5698,
+          "area": 6,
+          "cny_flag": 0,
+          "tags": "",
+          "is_live": false,
+          "live_status": 0,
+          "cate_name": "聊天室",
+          "area_v2_id": 740,
+          "live_time": "0000-00-00 00:00:00",
+          "hit_columns": [
+            "uname"
+          ],
+          "uface": "//i2.hdslb.com/bfs/face/5950fdd8adfaba39821cb09b7f04eaed0f32c725.jpg",
+          "type": "live_user",
+          "rank_score": 35698,
+          "rank_index": 4,
+          "rank_offset": 3
+        },
+        {
+          "uid": 227044725,
+          "uname": "<em class=\"keyword\">哔哩哔哩直播</em>小天",
+          "roomid": 6243413,
+          "id": 6243413,
+          "attentions": 140,
+          "area": 3,
+          "cny_flag": 0,
+          "tags": "",
+          "is_live": false,
+          "live_status": 0,
+          "cate_name": "三角洲行动",
+          "area_v2_id": 878,
+          "live_time": "0000-00-00 00:00:00",
+          "hit_columns": [
+            "uname"
+          ],
+          "uface": "//i0.hdslb.com/bfs/face/1a745a02e2663534eb5f7aacc054a0c5dcb8dd27.jpg",
+          "type": "live_user",
+          "rank_score": 30141,
+          "rank_index": 5,
+          "rank_offset": 4
+        },
+        {
+          "uid": 20718633,
+          "uname": "<em class=\"keyword\">哔哩哔哩直播</em>间审查团",
+          "roomid": 7297527,
+          "id": 7297527,
+          "attentions": 13,
+          "area": 0,
+          "cny_flag": 0,
+          "tags": "",
+          "is_live": false,
+          "live_status": 0,
+          "cate_name": "",
+          "area_v2_id": 0,
+          "live_time": "0000-00-00 00:00:00",
+          "hit_columns": [
+            "uname"
+          ],
+          "uface": "//i0.hdslb.com/bfs/face/7b6c4ae47092e4e1bc81bf66ff86a58d8d247066.jpg",
+          "type": "live_user",
+          "rank_score": 30013,
+          "rank_index": 6,
+          "rank_offset": 5
+        }
+      ]
+    },
+    "show_column": 0,
+    "in_black_key": 0,
+    "in_white_key": 0
+  }
+}

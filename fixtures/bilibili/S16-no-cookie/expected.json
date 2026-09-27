@@ -1,0 +1,12 @@
+{
+  "generator": "BiliBiliAccountService.loadUserInfo",
+  "value": {
+    "loaded": false,
+    "logined": false,
+    "storedCookieAfter": "",
+    "browserCookieClears": 1,
+    "notices": [
+      "bilibili_login_expired"
+    ]
+  }
+}

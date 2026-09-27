@@ -1,0 +1,38 @@
+{
+  "generator": "BiliBiliSite.parsePlayQualities (LiveQualityLabel.normalize) + BiliBiliSite.parsePlayUrlResolution",
+  "value": {
+    "requestedQn": 0,
+    "parsePlayQualities": [
+      {
+        "quality": "原画",
+        "id": 10000,
+        "data": 10000,
+        "sort": 10000
+      },
+      {
+        "quality": "蓝光",
+        "id": 400,
+        "data": 400,
+        "sort": 400
+      },
+      {
+        "quality": "超清",
+        "id": 250,
+        "data": 250,
+        "sort": 250
+      }
+    ],
+    "parsePlayUrlResolution": {
+      "urls": [
+        "https://d1--cn-gotcha04.bilivideo.com/live-bvc/396115/live_fnu4_St2csHT_19l5o_2500.flv?expires=1790506404&len=0&oi=7490899929&pt=web&qn=250&trid=58456ec485a8846d61b37d54513f646ae7f4&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha04&sign=d1bd02b7cc6eb79470afd815e3cc909b&site=ce54ac3dce534b284f4c7ee851ff1954&free_type=0&mid=8&sche=ban&trace=16&isp=on&rg=ZvzgdBiet&pv=Lynalzo&sk=5b0aa030e949cfcf5211bb8d33d35e4bb412c8c5740209b0dc2b0637f59caa84&expected_qn=250&strategy_ids=25,122&strategy_type=0&sl=10&deploy_env=prod&media_type=0&info_source=hot_cache&ld=wtbi&suffix=2500&score=58&hot_cdn=909773&p2p_type=1&strategy_id=25&origin_bitrate=868&pp=rtmp&strategy_types=0,1&hdr_type=0&codec=0&source=puv3_onetier&vd=bc&src=puv3&order=1",
+        "https://d1--cn-gotcha04b.bilivideo.com/live-bvc/396115/live_fnu4_St2csHT_19l5o_2500.flv?expires=1790506404&len=0&oi=7490899929&pt=web&qn=250&trid=58456ec485a8846d61b37d54513f646ae7f4&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha04&sign=d1bd02b7cc6eb79470afd815e3cc909b&site=ce54ac3dce534b284f4c7ee851ff1954&free_type=0&mid=8&sche=ban&trace=16&isp=on&rg=ZvzgdBiet&pv=Lynalzo&sk=5b0aa030e949cfcf5211bb8d33d35e4bb412c8c5740209b0dc2b0637f59caa84&expected_qn=250&strategy_ids=25,122&strategy_type=0&sl=10&deploy_env=prod&media_type=0&info_source=hot_cache&ld=wtbi&suffix=2500&score=58&hot_cdn=909773&p2p_type=1&strategy_id=25&origin_bitrate=868&pp=rtmp&strategy_types=0,1&hdr_type=0&codec=0&source=puv3_onetier&vd=bc&src=puv3&order=2",
+        "https://d1--cn-gotcha104.bilivideo.com/live-bvc/892679/live_fnu4_St2csHT_19l5o_2500.m3u8?expires=1790506404&len=0&oi=7490899929&pt=web&qn=250&trid=98708ea736a4249c65b99e46971a320de0a3&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha104&sign=851052095146f1527fe945d70d184c83&site=ce54ac3dce534b284f4c7ee851ff1954&free_type=0&mid=8&sche=ban&trace=16&isp=on&rg=ZvzgdBiet&pv=Lynalzo&strategy_ids=25,122&pp=rtmp&source=puv3_onetier&strategy_types=0,1&ld=wtbi&p2p_type=1&media_type=0&score=58&hot_cdn=909773&strategy_type=0&strategy_id=25&sk=5b0aa030e949cfcf5211bb8d33d35e4bb412c8c5740209b0dc2b0637f59caa84&sl=10&deploy_env=prod&info_source=hot_cache&codec=0&hdr_type=0&suffix=2500&expected_qn=250&origin_bitrate=868&vd=bc&src=puv3&order=1",
+        "https://d1--cn-gotcha104b.bilivideo.com/live-bvc/892679/live_fnu4_St2csHT_19l5o_2500.m3u8?expires=1790506404&len=0&oi=7490899929&pt=web&qn=250&trid=98708ea736a4249c65b99e46971a320de0a3&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha104&sign=851052095146f1527fe945d70d184c83&site=ce54ac3dce534b284f4c7ee851ff1954&free_type=0&mid=8&sche=ban&trace=16&isp=on&rg=ZvzgdBiet&pv=Lynalzo&strategy_ids=25,122&pp=rtmp&source=puv3_onetier&strategy_types=0,1&ld=wtbi&p2p_type=1&media_type=0&score=58&hot_cdn=909773&strategy_type=0&strategy_id=25&sk=5b0aa030e949cfcf5211bb8d33d35e4bb412c8c5740209b0dc2b0637f59caa84&sl=10&deploy_env=prod&info_source=hot_cache&codec=0&hdr_type=0&suffix=2500&expected_qn=250&origin_bitrate=868&vd=bc&src=puv3&order=2",
+        "https://d1--cn-gotcha204.bilivideo.com/live-bvc/388281/live_fnu4_St2csHT_19l5o_2500/index.m3u8?expires=1790506404&len=0&oi=7490899929&pt=web&qn=250&trid=49946cb060a6509d96a10e64009d381ca4a7&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha204&sign=2e6817f9957fe39d24cbab0c5f28abe4&site=ce54ac3dce534b284f4c7ee851ff1954&free_type=0&mid=8&sche=ban&bvchls=1&trace=16&isp=on&rg=ZvzgdBiet&pv=Lynalzo&hot_cdn=909773&ld=wtbi&strategy_id=25&flvsk=5b0aa030e949cfcf5211bb8d33d35e4bb412c8c5740209b0dc2b0637f59caa84&pp=rtmp&source=puv3_onetier&strategy_types=0,1&strategy_ids=25,122&strategy_type=0&origin_bitrate=868&deploy_env=prod&codec=0&p2p_type=1&info_source=hot_cache&sk=37a9f76228b0de555885d434896560c393ebfc809bf4647779640bc8ec03e4f3&sl=10&suffix=2500&score=58&expected_qn=250&hdr_type=0&media_type=0&vd=bc&src=puv3&order=1",
+        "https://d1--cn-gotcha204b.bilivideo.com/live-bvc/388281/live_fnu4_St2csHT_19l5o_2500/index.m3u8?expires=1790506404&len=0&oi=7490899929&pt=web&qn=250&trid=49946cb060a6509d96a10e64009d381ca4a7&bmt=2&sigparams=cdn,expires,len,oi,pt,qn,trid,bmt&cdn=cn-gotcha204&sign=2e6817f9957fe39d24cbab0c5f28abe4&site=ce54ac3dce534b284f4c7ee851ff1954&free_type=0&mid=8&sche=ban&bvchls=1&trace=16&isp=on&rg=ZvzgdBiet&pv=Lynalzo&hot_cdn=909773&ld=wtbi&strategy_id=25&flvsk=5b0aa030e949cfcf5211bb8d33d35e4bb412c8c5740209b0dc2b0637f59caa84&pp=rtmp&source=puv3_onetier&strategy_types=0,1&strategy_ids=25,122&strategy_type=0&origin_bitrate=868&deploy_env=prod&codec=0&p2p_type=1&info_source=hot_cache&sk=37a9f76228b0de555885d434896560c393ebfc809bf4647779640bc8ec03e4f3&sl=10&suffix=2500&score=58&expected_qn=250&hdr_type=0&media_type=0&vd=bc&src=puv3&order=2"
+      ],
+      "appliedQualityData": 250,
+      "qualityUnconfirmed": false
+    }
+  }
+}

@@ -10,19 +10,39 @@ enum ScrubRule {
   /// A viewer's identity: the same original always maps to the same pseudonym
   /// within one scrubber, so "same person" relations survive.
   person,
+
+  /// Public data at a specific JSON path that a key rule would otherwise
+  /// scrub (an anchor's id under the same key name as a viewer's).
+  keep,
 }
 
 /// What a platform declares as sensitive.
 class ScrubRules {
   /// Creates rules.
-  const new({this.jsonKeys = const {}, this.queryParams = const {}});
+  const new({
+    this.jsonKeys = const {},
+    this.jsonPaths = const {},
+    this.queryParams = const {},
+    this.responseHeaders = const {},
+  });
 
   /// JSON object keys (at any depth) whose values are replaced.
   final Map<String, ScrubRule> jsonKeys;
 
+  /// JSON paths that override [jsonKeys]: `$.data.uid`, `$.data.list[*].uid`,
+  /// `$.*.sec_uid`; `[*]` matches any index and `*` one key. Response headers
+  /// holding JSON are scrubbed under `$header.<name>`.
+  final Map<String, ScrubRule> jsonPaths;
+
   /// URL query and form parameters whose values are replaced; `expire` and
   /// other timing fields are deliberately not listed.
   final Map<String, ScrubRule> queryParams;
+
+  /// Response headers (lower case) whose whole value is replaced; a header
+  /// whose value is JSON is scrubbed field by field with [jsonKeys] and
+  /// [jsonPaths] instead. Any header still holding a value replaced elsewhere
+  /// gets the same synthetic value (a signature echoed back, for example).
+  final Map<String, ScrubRule> responseHeaders;
 }
 
 /// One replacement, recorded in meta.json without the original value.
@@ -44,13 +64,21 @@ class ScrubRecord {
 /// checked for leaks.
 class Scrubber {
   /// Creates a scrubber; [seed] only makes tests deterministic.
-  new(this.rules, {int? seed}) : _random = Random(seed ?? Random.secure().nextInt(1 << 32));
+  new(this.rules, {int? seed})
+    : _random = Random(seed ?? Random.secure().nextInt(1 << 32)),
+      _paths = {
+        for (final entry in rules.jsonPaths.entries)
+          RegExp('^${RegExp.escape(entry.key).replaceAll(r'\[\*\]', r'\[\d+\]').replaceAll(r'\*', r'[^.\[\]]+')}\$'):
+              entry.value,
+      };
 
   /// Platform rules.
   final ScrubRules rules;
 
   final Random _random;
+  final Map<RegExp, ScrubRule> _paths;
   final Map<String, String> _synthetic = {};
+  final Map<String, String> _encoded = {};
   final Map<String, String> _people = {};
   final Set<String> _originals = {};
   final List<ScrubRecord> _records = [];
@@ -70,7 +98,8 @@ class Scrubber {
 
   /// Replaces [value] according to [rule], remembering where it was.
   String replace(String value, ScrubRule rule, String where) {
-    if (value.isEmpty) return value;
+    // A single character (uid 0, an empty flag) identifies nobody.
+    if (value.length <= 1 || rule == ScrubRule.keep) return value;
     _records.add(ScrubRecord(where, rule));
     _originals.add(value);
     if (rule == ScrubRule.person && value.runes.any((rune) => rune > 0x7f)) {
@@ -108,7 +137,7 @@ class Scrubber {
     if (node is Map) {
       for (final key in node.keys.toList()) {
         final childPath = '$path.$key';
-        final rule = rules.jsonKeys[key];
+        final rule = _pathRule(childPath) ?? rules.jsonKeys[key];
         final value = node[key];
         node[key] = rule == null ? scrubJson(value, childPath) : _scrubLeaf(value, rule, childPath);
       }
@@ -124,7 +153,15 @@ class Scrubber {
     return node;
   }
 
+  ScrubRule? _pathRule(String path) {
+    for (final entry in _paths.entries) {
+      if (entry.key.hasMatch(path)) return entry.value;
+    }
+    return null;
+  }
+
   Object? _scrubLeaf(Object? value, ScrubRule rule, String path) {
+    if (rule == ScrubRule.keep) return value;
     if (value is String) return replace(value, rule, path);
     if (value is int) return int.parse(replace('$value', rule, path));
     if (value is Map || value is List) {
@@ -154,7 +191,8 @@ class Scrubber {
     return scrubQuery(value, path);
   }
 
-  static final _queryPair = RegExp(r'([?&;]|^)([A-Za-z0-9_.\-]+)=([^&#"\s\\;]*)');
+  // Separators: ? & ; (so &amp; works) and the JSON escape \u0026.
+  static final _queryPair = RegExp(r'([?&;]|\\u0026|^)([A-Za-z0-9_.\-]+)=([^&#"\s\\;]*)');
 
   /// Replaces listed query/form parameter values inside [text] (a URL, a form
   /// body or any text containing URLs).
@@ -172,8 +210,12 @@ class Scrubber {
         // Malformed percent-encoding: treat the raw text as the value.
         decoded = encoded;
       }
-      _originals.add(encoded);
-      return '${match.group(1)}$name=${Uri.encodeQueryComponent(replace(decoded, rule, '$where:$name'))}';
+      final replaced = Uri.encodeQueryComponent(replace(decoded, rule, '$where:$name'));
+      if (encoded.length > 1 && rule != ScrubRule.keep) {
+        _originals.add(encoded);
+        _encoded[encoded] = replaced;
+      }
+      return '${match.group(1)}$name=$replaced';
     });
   }
 
@@ -202,22 +244,53 @@ class Scrubber {
   }
 
   static final _textPair = RegExp(r'(\\?"([A-Za-z0-9_]+)\\?"\s*:\s*)(\\?"([^"\\]*)\\?"|-?\d+)');
+  static final _htmlPair = RegExp(r'(&quot;([A-Za-z0-9_]+)&quot;\s*:\s*)(&quot;((?:(?!&quot;)[^"<>])*)&quot;|-?\d+)');
 
   /// Scrubs a non-JSON text body (HTML or script with embedded JSON): listed
   /// keys in `"key":"value"` or `"key":123` form, then listed URL parameters.
   String scrubText(String text) {
-    final pairs = text.replaceAllMapped(_textPair, (match) {
+    String pairs(String input, RegExp pattern, String quote) => input.replaceAllMapped(pattern, (match) {
       final key = match.group(2)!;
       final rule = rules.jsonKeys[key];
       if (rule == null) return match.group(0)!;
       final quoted = match.group(4);
       if (quoted != null) {
         final replaced = replace(quoted, rule, 'text:$key');
-        return match.group(0)!.replaceFirst('"$quoted', '"$replaced');
+        return match.group(0)!.replaceFirst('$quote$quoted', '$quote$replaced');
       }
       return '${match.group(1)}${replace(match.group(3)!, rule, 'text:$key')}';
     });
-    return scrubQuery(pairs, 'text');
+    return scrubQuery(pairs(pairs(text, _textPair, '"'), _htmlPair, '&quot;'), 'text');
+  }
+
+  /// Replaces every value already replaced elsewhere (length >= 6) wherever it
+  /// appears in [text], with the same synthetic value.
+  String replaceKnown(String text) {
+    final known = <String, String>{
+      ..._synthetic,
+      ..._people,
+      ..._encoded,
+    }.entries.where((entry) => entry.key.length >= 6).toList()..sort((a, b) => b.key.length - a.key.length);
+    var result = text;
+    for (final entry in known) {
+      result = result.replaceAll(entry.key, entry.value);
+    }
+    return result;
+  }
+
+  /// Scrubs one response header value by the rules; see [ScrubRules.responseHeaders].
+  String scrubResponseHeader(String name, String value) {
+    final rule = rules.responseHeaders[name.toLowerCase()];
+    if (rule == null) return scrubQuery(value, 'header:$name');
+    final trimmed = value.trimLeft();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        return jsonEncode(scrubJson(jsonDecode(value), '\$header.${name.toLowerCase()}'));
+      } on FormatException {
+        // Not JSON after all: replace the whole value.
+      }
+    }
+    return replace(value, rule, 'header:$name');
   }
 
   /// Originals (length >= 6) still present in [text]; empty means no leak.

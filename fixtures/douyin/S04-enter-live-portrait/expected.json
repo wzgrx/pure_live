@@ -1,0 +1,122 @@
+{
+  "generator": "DouyinSite.getRoomDetail + DouyinSite.parseStreamQualities + LiveStreamGeometryHintResolver.resolveDouyin",
+  "value": {
+    "requests": [
+      "GET live.douyin.com/webcast/room/web/enter/"
+    ],
+    "room": {
+      "roomId": "153806988623",
+      "title": "人间美味大锅菜",
+      "nick": "小禅",
+      "avatar": "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oQAflBEgDOAFDEgADG9N2wfMAKD9ACAI6AopyC.jpeg?from=3067671334",
+      "cover": "https://p3-webcast-sign.douyinpic.com/webcast-cover/7620813030049565449~tplv-qz53dukwul-common-resize:0:0.image?biz_tag=app_6383_webcast&from=webcast.room.pack&l=2026092717524256ADD9A061D3AEC3A8B3&lk3s=39e7556e&s=enter_room&sc=webcast_cover&x-expires=1793094763&x-signature=q9zzmQ%2B5LDZJ1Zp%2Blrw60H%2FbRB8%3D",
+      "area": "",
+      "watching": "2268",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "2000+",
+      "totalViewers": "2268",
+      "followers": "0",
+      "platform": "douyin",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "https://live.douyin.com/153806988623",
+      "danmakuData": {
+        "webRid": "153806988623",
+        "roomId": "7690129480030980906",
+        "userId": "<process visitor id 7[3-9]+17 digits>",
+        "cookie": "<redacted>"
+      },
+      "streamUrlKept": true
+    },
+    "qualities": [
+      {
+        "id": "origin",
+        "quality": "蓝光",
+        "sort": 6000000,
+        "urls": [
+          "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_or4.flv?expire=1791107563&sign=94ce98c33bf7c52dd0a5d59735f18577&exp_hrchy=w1&major_anchor_level=common&arch_hrchy=w1&unique_id=qowymw-951708096174313729_254_scp_na4&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+          "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_or4.m3u8?expire=1791107563&sign=44ca3b7242c36cf820519cf105748562&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT"
+        ]
+      },
+      {
+        "id": "hd",
+        "quality": "超清",
+        "sort": 4000000,
+        "urls": [
+          "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_Stage0T000hd.flv?expire=1791107563&sign=5191eb56164aff16d36e91550c173a78&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=qclsme-665992578755616306_371_lak_Aobdw8Z254za&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+          "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_Stage0T000hd.m3u8?expire=1791107563&sign=208f54c474b22ea810d1ceac223abbd2&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT"
+        ]
+      },
+      {
+        "id": "sd",
+        "quality": "高清",
+        "sort": 3000000,
+        "urls": [
+          "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_sd.flv?expire=1791107563&sign=2b6267097628106004ba0bb9a2bf54fa&exp_hrchy=w1&arch_hrchy=w1&major_anchor_level=common&unique_id=pkukdm-673827042241937363_168_nhn_fg&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+          "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_sd.m3u8?expire=1791107563&sign=2ef6a68430d616ae4c4ddff9d75e7617&exp_hrchy=w1&arch_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT"
+        ]
+      },
+      {
+        "id": "ld",
+        "quality": "标清",
+        "sort": 2000000,
+        "urls": [
+          "http://pull-flv-l11.douyincdn.com/stage/stream-408388649177841809_ld.flv?expire=1791107563&sign=cfa00aae053a025794ef2ad502f96953&major_anchor_level=common&arch_hrchy=w1&exp_hrchy=w1&unique_id=khljvj-951576424274069208_603_cfx_na&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+          "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_ld.m3u8?expire=1791107563&sign=8f8206c3282be577de5216268cc21bd5&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT"
+        ]
+      },
+      {
+        "id": "md",
+        "quality": "流畅",
+        "sort": 1000000,
+        "urls": [
+          "https://pull-flv-l11-admin.douyincdn.com/stage/stream-408388649177841809_md.flv?expire=1791107563&sign=e2d4d7ee393b3888ad800653af0b32b8&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&unique_id=rnzarz-804502892345983164_233_mog_rs&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT",
+          "http://pull-hls-l11.douyincdn.com/stage/stream-408388649177841809_md.m3u8?expire=1791107563&sign=f7631eda68984d6d34292f3c1147723f&arch_hrchy=w1&exp_hrchy=w1&major_anchor_level=common&t_id=037-2026092717524256ADD9A061D3AEC3A8B3-S0oeIT"
+        ]
+      }
+    ],
+    "geometry": {
+      "unselected": {
+        "width": 1088,
+        "height": 1920,
+        "confidence": 0.975,
+        "source": "douyin.default_quality"
+      },
+      "origin": {
+        "width": 1088,
+        "height": 1920,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "hd": {
+        "width": 720,
+        "height": 1270,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "sd": {
+        "width": 540,
+        "height": 952,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "ld": {
+        "width": 480,
+        "height": 847,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      },
+      "md": {
+        "width": 240,
+        "height": 423,
+        "confidence": 0.995,
+        "source": "douyin.selected_sdk_params"
+      }
+    }
+  }
+}

@@ -135,4 +135,78 @@ void main() {
     expect(all, isNot(contains('zzzzzz999999')));
     expect(all, contains('5526219'));
   });
+
+  test('path rules override key rules; single characters are kept', () {
+    final scrubber = Scrubber(
+      const ScrubRules(
+        jsonKeys: {'uid': ScrubRule.person},
+        jsonPaths: {r'$.data.anchor.uid': ScrubRule.keep, r'$.data.list[*].sec': ScrubRule.secret},
+      ),
+      seed: 7,
+    );
+    final json =
+        scrubber.scrubJson({
+              'data': {
+                'anchor': {'uid': 12345678},
+                'viewer': {'uid': 87654321},
+                'list': [
+                  {'sec': 'abcdef1234', 'uid': 0},
+                ],
+              },
+            })!
+            as Map;
+    final data = json['data'] as Map;
+    expect((data['anchor'] as Map)['uid'], 12345678);
+    expect((data['viewer'] as Map)['uid'], isNot(87654321));
+    final item = (data['list'] as List).single as Map;
+    expect(item['sec'], isNot('abcdef1234'));
+    expect(item['uid'], 0);
+  });
+
+  test('HTML-escaped pairs and escaped-ampersand parameters are scrubbed', () {
+    final scrubber = Scrubber(_rules, seed: 8);
+    // JSON inside HTML writes & as a backslash followed by u0026.
+    final amp = '${String.fromCharCode(92)}u0026';
+    final html =
+        '<div data-value="{&quot;did&quot;:&quot;abcdef123456&quot;}"></div> '
+        '<script>{"url":"https://cdn.example.test/a.flv?expire=1${amp}wsSecret=0123456789abcdef${amp}x=1"}</script>';
+    final text = scrubber.scrubText(html);
+    expect(text, isNot(contains('abcdef123456')));
+    expect(text, isNot(contains('0123456789abcdef')));
+    expect(text, contains('?expire=1${amp}wsSecret='));
+    expect(scrubber.leaks(text), isEmpty);
+  });
+
+  test('response headers echoing a request signature get the same synthetic value', () async {
+    final temp = await Directory.systemTemp.createTemp('fixture-test');
+    addTearDown(() => temp.delete(recursive: true));
+    const rules = ScrubRules(
+      queryParams: {'w_rid': ScrubRule.secret},
+      responseHeaders: {'x-ms-token': ScrubRule.secret, 'bdturing-verify': ScrubRule.secret},
+      jsonPaths: {r'$header.bdturing-verify.detail': ScrubRule.secret},
+    );
+    final exchange = RawExchange(
+      request: CaptureRequest(url: Uri.parse('https://api.example.test/info?room=1&w_rid=feedfacecafe0123')),
+      status: 200,
+      headers: const {
+        'content-type': ['application/json'],
+        'x-client-sign': ['feedfacecafe0123'],
+        'x-ms-token': ['TOKENtoken123456'],
+        'bdturing-verify': ['{"detail":"DETAILvalue999","subtype":"whirl"}'],
+      },
+      body: utf8.encode('{"code":0}'),
+      route: 'direct',
+      capturedAt: DateTime.utc(2026, 9, 27),
+    );
+    await writeSample(exchange, Scrubber(rules, seed: 9), directory: temp, platform: 'x', sample: 'S01-echo');
+    final meta = File('${temp.path}/meta.json').readAsStringSync();
+    final decoded = jsonDecode(meta) as Map<String, Object?>;
+    final headers = (decoded['response']! as Map<String, Object?>)['headers']! as Map<String, Object?>;
+    final url = (decoded['request']! as Map<String, Object?>)['url']! as String;
+    expect(headers['x-client-sign'], Uri.parse(url).queryParameters['w_rid']);
+    expect(meta, isNot(contains('feedfacecafe0123')));
+    expect(meta, isNot(contains('TOKENtoken123456')));
+    expect(meta, isNot(contains('DETAILvalue999')));
+    expect(meta, contains('whirl'));
+  });
 }

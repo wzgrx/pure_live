@@ -150,15 +150,6 @@ Future<WrittenSample> writeSample(
       requestHeaders[name] = value;
     }
   });
-  final responseHeaders = <String, Object>{};
-  exchange.headers.forEach((name, values) {
-    final scrubbed = [
-      for (final value in values)
-        if (name == 'set-cookie') scrubber.scrubSetCookie(value) else scrubber.scrubQuery(value, 'header:$name'),
-    ];
-    responseHeaders[name] = scrubbed.length == 1 ? scrubbed.single : scrubbed;
-  });
-
   final String bodyText;
   List<int>? bodyBytes;
   if (ext == 'bin') {
@@ -170,6 +161,20 @@ Future<WrittenSample> writeSample(
   }
   final url = scrubber.scrubQuery(exchange.request.url.toString(), 'url');
   final requestBody = exchange.request.body == null ? null : scrubber.scrubQuery(exchange.request.body!, 'form');
+
+  // Response headers last: by now every value replaced in the request, the URL
+  // and the body is known, so an echoed signature (bilibili x-client-sign) or
+  // token gets the same synthetic value.
+  final responseHeaders = <String, Object>{};
+  exchange.headers.forEach((name, values) {
+    final scrubbed = [
+      for (final value in values)
+        scrubber.replaceKnown(
+          name == 'set-cookie' ? scrubber.scrubSetCookie(value) : scrubber.scrubResponseHeader(name, value),
+        ),
+    ];
+    responseHeaders[name] = scrubbed.length == 1 ? scrubbed.single : scrubbed;
+  });
 
   final meta = <String, Object?>{
     'schema': fixtureSchema,

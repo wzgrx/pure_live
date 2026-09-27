@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "sample": "S09-user-me-no-cookie",
+  "capturedAt": "2026-09-27T09:54:15.091806Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.douyin.com/webcast/user/me/?aid=6383",
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+      "accept": "application/json, text/plain, */*",
+      "accept-language": "zh-CN,zh;q=0.9,en;q=0.8"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-tt-supplier-id": "0_9",
+      "bd-tt-error-code": "20003",
+      "date": "Sun, 27 Sep 2026 09:54:15 GMT",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "server-timing": [
+        "cdn-cache;desc=MISS, edge;dur=1, origin;dur=40",
+        "inner; dur=15,ugm;dur=7"
+      ],
+      "x-tt-trace-id": "00-260927175415595B1A29962D9E033CD3-0817309A6F8C7EFA-00",
+      "x-tt-logid": "20260927175415595B1A29962D9E033CD3",
+      "content-type": "application/json; charset=utf-8",
+      "x-tt-trace-host": "013bebe0cafb8d31a21521a307737c766254a3bce1826a12f81e69cb42e983952a571771185c93006030760aab1140ea240091d992a6ff24da32cdab932071fda8a459c38bdf1af855f94e46efd11bf15f5df72e1b209c7638fa1db1d835264d06",
+      "server": "TLB",
+      "x-tt-trace-tag": "id=26;cdn-cache=miss;type=dyn",
+      "x-janus-info": "CAM-RkwX8bL7sADHhQHUqGwx1_QgkNaCVu6zEIRdugy2iwZeecfdC1-TYUkN-e4NvAzILn_U53B3HyJEucJEJGhSyXm14PS1_WcYjQ2kpPbPeilTpSM_MHn8qSphybUR3G48plRksCJt9NM2tZQLrrhVkAJM4bcF9_CFHpH4_wn_lOJKNn2Mvz1ugm4VgYVIGOhC12QzEmDarJALJg==",
+      "tt_stable": "1",
+      "webcast-ntp-t3": "1790502855583",
+      "content-length": "131",
+      "x-webcast-gateway-mini": "1",
+      "webcast-ntp-t2": "1790502855578",
+      "via": "CHN-SNxianyang-CT4-CACHE18[41],CHN-SNxianyang-CT4-CACHE18[ovl,40]",
+      "x-ccdn-req-id-46b1": "71c7d50809ecb04f75d9c64c7c536a55"
+    }
+  },
+  "raw": {
+    "sha256": "ff2d73d76003b46511f5c4b1c4aa2b6e307332aa3121ec942f1dd7130c7ac302",
+    "length": 131
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1) + x-ms-token response header scrub"
+}

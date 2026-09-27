@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
@@ -196,7 +198,7 @@ class SettingsGroupBody extends StatelessWidget {
           title: '网络不稳时自动降低画质',
           subtitle: '一分钟内卡顿 3 次就降一档；手动选过画质后不再自动调整',
         ),
-        SwitchSettingTile(setting: Settings.hardwareDecoding, title: '硬件解码', subtitle: '画面异常时关闭试试'),
+        PlaybackOutputTiles(),
         ChoiceSettingTile<VideoFit>(
           setting: Settings.videoFit,
           title: '画面比例',
@@ -343,3 +345,56 @@ String _integer(double value) => value.round().toString();
 String _minutes(double value) => '${value.round()} 分钟';
 String _percent(double value) => '${(value * 100).round()}%';
 String _historyLimit(double value) => value.round() == 0 ? '不限' : '${value.round()} 条';
+
+/// F-SET-05, F-SET-06: volume defaults and the decoding and output options
+/// of this device; each platform lists its own decoders and outputs.
+class PlaybackOutputTiles extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final android = Platform.isAndroid;
+    final windows = Platform.isWindows;
+    final touch = android || Platform.isIOS;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SettingsHeader('音量'),
+        const SwitchSettingTile(setting: Settings.globalMute, title: '进入直播间时静音', subtitle: '所有直播间都从静音开始'),
+        SliderSettingTile(
+          setting: touch ? Settings.defaultMobileVolume : Settings.defaultDesktopVolume,
+          title: touch ? '默认音量' : '默认音量（没有记住音量的直播间）',
+          min: 0,
+          max: 1,
+          divisions: 20,
+          format: (value) => '${(value * 100).round()}%',
+        ),
+        const SettingsHeader('解码与输出'),
+        const SwitchSettingTile(setting: Settings.hardwareDecoding, title: '硬件解码', subtitle: '画面异常时关闭试试'),
+        ChoiceSettingTile<String>(
+          setting: Settings.hardwareDecoder,
+          title: '硬件解码方式',
+          labels: {
+            'auto-safe': '自动',
+            if (android) ...{'mediacodec': 'MediaCodec', 'mediacodec-copy': 'MediaCodec（复制）'},
+            if (windows) ...{'d3d11va': 'D3D11', 'd3d11va-copy': 'D3D11（复制）', 'dxva2': 'DXVA2', 'nvdec': 'NVDEC（英伟达）'},
+            if (!android) 'vulkan': 'Vulkan',
+          },
+        ),
+        if (android)
+          const SwitchSettingTile(setting: Settings.androidCompatibility, title: '兼容模式', subtitle: '部分机型黑屏、花屏或卡住时打开'),
+        const SwitchSettingTile(setting: Settings.lowLatency, title: '低延迟', subtitle: '缓冲更少、延迟更低，网络差时更容易卡'),
+        ChoiceSettingTile<String>(
+          setting: Settings.audioOutput,
+          title: '音频输出',
+          labels: {
+            '': '自动',
+            if (android) ...{'aaudio': 'AAudio', 'opensles': 'OpenSL ES', 'audiotrack': 'AudioTrack'},
+            if (windows) ...{'wasapi': 'WASAPI', 'openal': 'OpenAL'},
+            if (!android && !windows) ...{'pulse': 'PulseAudio', 'pipewire': 'PipeWire', 'alsa': 'ALSA'},
+          },
+        ),
+      ],
+    );
+  }
+}

@@ -120,6 +120,47 @@ abstract final class Settings {
     legacy: [LegacyKey('preferResolutionCellular', convert: _quality)],
   );
 
+  /// mpv's hardware decoder (F-SET-06; device scope: decoders differ per
+  /// machine). 3.x's `auto` becomes the safe list.
+  static const hardwareDecoder = StringSetting(
+    'player.hardwareDecoder',
+    'auto-safe',
+    allowed: {
+      'auto-safe',
+      'auto',
+      'auto-copy',
+      'mediacodec',
+      'mediacodec-copy',
+      'd3d11va',
+      'd3d11va-copy',
+      'dxva2',
+      'nvdec',
+      'vulkan',
+    },
+    scope: SettingScope.device,
+    legacy: [LegacyKey('videoHardwareDecoder', convert: _hardwareDecoder)],
+  );
+
+  /// Android compatibility output (F-SET-06, SURF-6): mediacodec_embed.
+  static const androidCompatibility = BoolSetting(
+    'player.androidCompatibility',
+    false,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('playerCompatMode')],
+  );
+
+  /// Smaller caches and probes for a lower delay (F-SET-06, PERF-4).
+  static const lowLatency = BoolSetting('player.lowLatency', false, scope: SettingScope.device);
+
+  /// mpv audio output; empty is the platform default (F-SET-06).
+  static const audioOutput = StringSetting(
+    'player.audioOutput',
+    '',
+    allowed: {'', 'aaudio', 'opensles', 'audiotrack', 'wasapi', 'openal', 'pulse', 'alsa', 'pipewire'},
+    scope: SettingScope.device,
+    legacy: [LegacyKey('audioOutputDriver', convert: _audioOutput)],
+  );
+
   /// Lower the quality by one step when playback keeps stalling (F-NEW-10).
   static const autoLowerQuality = BoolSetting('player.autoLowerQuality', true);
 
@@ -832,6 +873,10 @@ abstract final class Settings {
     qualityWifi,
     qualityMobile,
     autoLowerQuality,
+    hardwareDecoder,
+    androidCompatibility,
+    lowLatency,
+    audioOutput,
     hardwareDecoding,
     videoFit,
     backgroundPlay,
@@ -948,6 +993,10 @@ Object? _locale(Object? value) {
 }
 
 Object? _portraitFit(Object? value) => value == 'cover' ? 'cover' : 'contain';
+
+Object? _hardwareDecoder(Object? value) => value == 'auto' || value is! String ? 'auto-safe' : value;
+
+Object? _audioOutput(Object? value) => value == 'auto' || value is! String ? '' : value;
 
 Object? _quality(Object? value) => switch (value is String ? value.trim() : null) {
   '蓝光8M' => 'bluRay8M',

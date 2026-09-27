@@ -25,7 +25,7 @@ void main() {
     expect(DanmakuTemplate.exists(settings), isFalse);
     expect(await DanmakuTemplate.restore(settings), isFalse);
 
-    await settings.set(Settings.danmakuFontSize, 22.0);
+    await settings.set(Settings.danmakuFontSize, 22);
     await settings.set(Settings.danmakuArea, 0.5);
     await DanmakuTemplate.save(settings);
     await danmakuPresets.last.apply(settings);

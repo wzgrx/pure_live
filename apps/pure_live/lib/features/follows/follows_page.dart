@@ -12,6 +12,8 @@ import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
+import 'package:pure_live_app/features/room/room_switch.dart';
+import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 /// Which follows to show: live, all, or one group.
@@ -47,7 +49,7 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
               final live = [
                 for (final follow in follows.value ?? const <FollowedRoom>[])
                   if (follow.room.lastState == LiveState.live) follow,
-              ]..sort((a, b) => _audience(b.room).compareTo(_audience(a.room)));
+              ]..sort((a, b) => followAudience(b.room).compareTo(followAudience(a.room)));
               unawaited(context.push('/multiview', extra: [for (final f in live) f.ref]));
             },
           ),
@@ -81,7 +83,7 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
               ? rooms.where((f) => f.tagIds.contains(_groupId)).toList()
               : rooms;
           final live = shown.where((f) => f.room.lastState == LiveState.live).toList()
-            ..sort((a, b) => _audience(b.room).compareTo(_audience(a.room)));
+            ..sort((a, b) => followAudience(b.room).compareTo(followAudience(a.room)));
           final offline = shown.where((f) => f.room.lastState != LiveState.live).toList()
             ..sort((a, b) => (b.room.lastLiveAt ?? DateTime(0)).compareTo(a.room.lastLiveAt ?? DateTime(0)));
           return RefreshIndicator(
@@ -102,12 +104,9 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
       ),
     );
   }
-
-  static int _audience(StoredRoom room) =>
-      room.audience.online ?? room.audience.popularity ?? room.audience.cumulative ?? 0;
 }
 
-class _FollowList extends ConsumerWidget {
+class _FollowList extends ConsumerStatefulWidget {
   const new({
     required this.live,
     required this.offline,
@@ -125,19 +124,40 @@ class _FollowList extends ConsumerWidget {
   final void Function(_Filter filter, {String? groupId}) onFilter;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_FollowList> createState() => _FollowListState();
+}
+
+class _FollowListState extends ConsumerState<_FollowList> {
+  final TvGridFocus _focus = TvGridFocus(debugLabel: 'follows-grid');
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final live = widget.live;
+    final offline = widget.offline;
+    final filter = widget.filter;
+    final groupId = widget.groupId;
+    final failedPlatforms = widget.failedPlatforms;
+    final onFilter = widget.onFilter;
     final layout = WindowLayout(MediaQuery.sizeOf(context));
     final dense = ref.watch(denseFollowsSetting);
     final density = dense ? CardDensity.compact : CardDensity.standard;
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final now = DateTime.now();
+    // Up and down in a room opened here step through the live follows as
+    // shown (F-NEW-04); rooms opened from the offline list use it too.
+    final origin = RoomOrigin([
+      for (final follow in live) RoomEntry(follow.ref, name: follow.room.anchorName, title: follow.room.title),
+    ], label: '开播的关注');
     return LayoutBuilder(
       builder: (context, constraints) {
-        final inner = constraints.maxWidth - 2 * layout.margin;
-        final columns = layout.columnsFor(inner);
-        final cellWidth = (inner - (columns - 1) * layout.gap) / columns;
-        final textScale = MediaQuery.textScalerOf(context).scale(1);
-        final textHeight = (dense ? 24 : 44) * textScale + 12;
+        final grid = CardGridGeometry.of(context, constraints.maxWidth, density: density);
+        final margin = TvScope.of(context).enabled ? grid.padding.left : layout.margin;
         return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -154,7 +174,7 @@ class _FollowList extends ConsumerWidget {
                 ),
               ),
             SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: layout.margin, vertical: Space.s2),
+              padding: EdgeInsets.symmetric(horizontal: margin, vertical: Space.s2),
               sliver: SliverToBoxAdapter(
                 child: Wrap(
                   spacing: Space.s2,
@@ -192,14 +212,9 @@ class _FollowList extends ConsumerWidget {
                 ),
               ),
             SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: layout.margin),
+              padding: EdgeInsets.fromLTRB(grid.padding.left, Space.s1, grid.padding.right, 0),
               sliver: SliverGrid.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: columns,
-                  mainAxisSpacing: layout.gap,
-                  crossAxisSpacing: layout.gap,
-                  mainAxisExtent: cellWidth * 9 / 16 + textHeight,
-                ),
+                gridDelegate: grid.delegate,
                 itemCount: live.length,
                 itemBuilder: (context, index) {
                   final room = live[index].room;
@@ -209,10 +224,21 @@ class _FollowList extends ConsumerWidget {
                     anchorName: room.anchorName,
                     title: room.title,
                     isLive: true,
-                    cover: networkImage(room.cover, logicalWidth: cellWidth, devicePixelRatio: dpr),
+                    cover: networkImage(room.cover, logicalWidth: grid.cellWidth, devicePixelRatio: dpr),
                     audience: audience == null ? null : formatCount(audience),
                     density: density,
-                    onTap: () => context.push(roomLocation(room.ref)),
+                    focusNode: _focus.node(index),
+                    onFocusChange: (focused) {
+                      if (focused) _focus.focused(index);
+                    },
+                    onKeyEvent: (node, event) => _focus.handleKey(
+                      index,
+                      event,
+                      count: live.length,
+                      columns: grid.columns,
+                      rowExtent: grid.rowExtent,
+                    ),
+                    onTap: () => context.push(roomLocation(room.ref), extra: origin),
                     onMenu: () => _showMenu(context, ref, live[index]),
                   );
                 },
@@ -220,7 +246,7 @@ class _FollowList extends ConsumerWidget {
             ),
             if (offline.isNotEmpty)
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(layout.margin, Space.s6, layout.margin, Space.s1),
+                padding: EdgeInsets.fromLTRB(margin, Space.s6, margin, Space.s1),
                 sliver: SliverToBoxAdapter(
                   child: Text('未开播 ${offline.length}', style: Theme.of(context).textTheme.titleSmall),
                 ),
@@ -235,7 +261,7 @@ class _FollowList extends ConsumerWidget {
                   anchorName: room.anchorName,
                   avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
                   subtitle: last == null ? S.offline : '上次开播 ${formatAgo(last, now)}',
-                  onTap: () => context.push(roomLocation(room.ref)),
+                  onTap: () => context.push(roomLocation(room.ref), extra: origin),
                   onMenu: () => _showMenu(context, ref, offline[index]),
                 );
               },

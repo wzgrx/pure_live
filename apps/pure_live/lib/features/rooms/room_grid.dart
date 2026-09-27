@@ -6,8 +6,85 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
+import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/l10n/strings.dart';
+
+/// Geometry of a card grid in a content area of a given width: the window
+/// class's margins, gap and column count (principles §5.2), or on TV four
+/// columns with the 20 dp gutter (§5.3). Card height follows the text
+/// scale, never a constant.
+@immutable
+final class CardGridGeometry {
+  const new({
+    required this.columns,
+    required this.gap,
+    required this.padding,
+    required this.cellWidth,
+    required this.cellHeight,
+  });
+
+  /// The geometry for [context] at [width] with [density].
+  factory of(BuildContext context, double width, {CardDensity density = CardDensity.standard}) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    if (TvScope.of(context).enabled) {
+      // A little side room so a focused card can grow without being clipped;
+      // the rail and the safe area already hold the margins.
+      const padding = EdgeInsets.fromLTRB(Space.s2, Space.s3, Space.s2, TvMetrics.safeY);
+      const gap = TvMetrics.gutter;
+      final text = Theme.of(context).textTheme;
+      double line(TextStyle style) => style.fontSize! * (style.height ?? 1.4);
+      final lines = density == CardDensity.standard
+          ? line(text.titleSmall!) + line(text.bodySmall!)
+          : line(text.titleSmall!);
+      final cellWidth = (width - padding.horizontal - (TvMetrics.columns - 1) * gap) / TvMetrics.columns;
+      return CardGridGeometry(
+        columns: TvMetrics.columns,
+        gap: gap,
+        padding: padding,
+        cellWidth: cellWidth,
+        cellHeight: cellWidth * 9 / 16 + lines * textScale + 16,
+      );
+    }
+    final layout = WindowLayout(MediaQuery.sizeOf(context));
+    final inner = width - 2 * layout.margin;
+    final columns = layout.columnsFor(inner);
+    final cellWidth = (inner - (columns - 1) * layout.gap) / columns;
+    return CardGridGeometry(
+      columns: columns,
+      gap: layout.gap,
+      padding: EdgeInsets.fromLTRB(layout.margin, layout.gap, layout.margin, layout.gap),
+      cellWidth: cellWidth,
+      cellHeight: cellWidth * 9 / 16 + (density == CardDensity.standard ? 44 : 24) * textScale + 12,
+    );
+  }
+
+  /// Cards per row.
+  final int columns;
+
+  /// Gap between cards.
+  final double gap;
+
+  /// Padding around the grid.
+  final EdgeInsets padding;
+
+  /// Width of a card (the cover's decode width).
+  final double cellWidth;
+
+  /// Height of a card.
+  final double cellHeight;
+
+  /// A row with its gap: how far one D-pad step down scrolls.
+  double get rowExtent => cellHeight + gap;
+
+  /// The delegate for these cards.
+  SliverGridDelegate get delegate => SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: columns,
+    mainAxisSpacing: gap,
+    crossAxisSpacing: gap,
+    mainAxisExtent: cellHeight,
+  );
+}
 
 /// A paged, pull-to-refresh grid of room cards for one [RoomListQuery].
 class RoomGrid extends ConsumerWidget {
@@ -61,7 +138,7 @@ class RoomGrid extends ConsumerWidget {
   }
 }
 
-class _Grid extends StatelessWidget {
+class _Grid extends StatefulWidget {
   const new({
     required this.items,
     required this.state,
@@ -77,49 +154,65 @@ class _Grid extends StatelessWidget {
   final Future<void> Function() onRefresh;
 
   @override
+  State<_Grid> createState() => _GridState();
+}
+
+class _GridState extends State<_Grid> {
+  final TvGridFocus _focus = TvGridFocus(debugLabel: 'room-grid');
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Margins and card sizes follow the window class; the column count follows
-    // the content width, which excludes the navigation rail (principles §5.2).
-    final layout = WindowLayout(MediaQuery.sizeOf(context));
+    final items = widget.items;
+    // The column count follows the content width, which excludes the
+    // navigation rail (principles §5.2).
     return LayoutBuilder(
       builder: (context, constraints) {
-        final inner = constraints.maxWidth - 2 * layout.margin;
-        final columns = layout.columnsFor(inner);
-        final cellWidth = (inner - (columns - 1) * layout.gap) / columns;
-        final textScale = MediaQuery.textScalerOf(context).scale(1);
-        final textHeight = (density == CardDensity.standard ? 44 : 24) * textScale + 12;
+        final grid = CardGridGeometry.of(context, constraints.maxWidth, density: widget.density);
         final dpr = MediaQuery.devicePixelRatioOf(context);
         final now = DateTime.now();
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) {
-            if (notification.metrics.extentAfter < 800) onLoadMore();
+            if (notification.metrics.extentAfter < 800) widget.onLoadMore();
             return false;
           },
           child: RefreshIndicator(
-            onRefresh: onRefresh,
+            onRefresh: widget.onRefresh,
             child: CustomScrollView(
               slivers: [
                 SliverPadding(
-                  padding: EdgeInsets.fromLTRB(layout.margin, layout.gap, layout.margin, layout.gap),
+                  padding: grid.padding,
                   sliver: SliverGrid.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      mainAxisSpacing: layout.gap,
-                      crossAxisSpacing: layout.gap,
-                      mainAxisExtent: cellWidth * 9 / 16 + textHeight,
-                    ),
+                    gridDelegate: grid.delegate,
                     itemCount: items.length,
                     itemBuilder: (context, index) => RoomCardTile(
                       card: items[index],
-                      density: density,
-                      coverWidth: cellWidth,
+                      density: widget.density,
+                      coverWidth: grid.cellWidth,
                       devicePixelRatio: dpr,
                       now: now,
+                      origin: () => RoomOrigin.fromCards(items),
+                      focusNode: _focus.node(index),
+                      onFocusChange: (focused) {
+                        if (focused) _focus.focused(index);
+                      },
+                      onKeyEvent: (node, event) => _focus.handleKey(
+                        index,
+                        event,
+                        count: items.length,
+                        columns: grid.columns,
+                        rowExtent: grid.rowExtent,
+                      ),
                     ),
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: _Footer(state: state, onRetry: onLoadMore),
+                  child: _Footer(state: widget.state, onRetry: widget.onLoadMore),
                 ),
               ],
             ),
@@ -163,6 +256,10 @@ class RoomCardTile extends StatelessWidget {
     required this.devicePixelRatio,
     required this.now,
     this.density = CardDensity.standard,
+    this.origin,
+    this.focusNode,
+    this.onKeyEvent,
+    this.onFocusChange,
     super.key,
   });
 
@@ -171,6 +268,19 @@ class RoomCardTile extends StatelessWidget {
   final double devicePixelRatio;
   final DateTime now;
   final CardDensity density;
+
+  /// The list the card belongs to, for switching rooms (F-NEW-04); built on
+  /// open only.
+  final RoomOrigin Function()? origin;
+
+  /// Remote focus of the card in its grid.
+  final FocusNode? focusNode;
+
+  /// Grid moves.
+  final FocusOnKeyEventCallback? onKeyEvent;
+
+  /// Focus changes.
+  final ValueChanged<bool>? onFocusChange;
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +295,10 @@ class RoomCardTile extends StatelessWidget {
       audience: audience == null ? null : formatCount(audience),
       liveFor: since == null || card.state != LiveState.live ? null : formatLiveDuration(now.difference(since)),
       density: density,
-      onTap: () => context.push(roomLocation(card.ref)),
+      focusNode: focusNode,
+      onKeyEvent: onKeyEvent,
+      onFocusChange: onFocusChange,
+      onTap: () => context.push(roomLocation(card.ref), extra: origin?.call()),
     );
   }
 }

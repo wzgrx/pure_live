@@ -42,7 +42,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) => WindowLayoutBuilder(
     builder: (context, layout) {
-      final twoPane = layout.width.atLeast(WidthClass.expanded) && !layout.isShortLandscape;
+      final tv = TvScope.of(context).enabled;
+      // TV: always two panes (principles §5.3); the group under focus opens
+      // on the right, the D-pad goes right into it.
+      final twoPane = tv || (layout.width.atLeast(WidthClass.expanded) && !layout.isShortLandscape);
       final list = ListView(
         children: [
           for (final group in SettingsGroup.values)
@@ -51,6 +54,11 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text(group.label),
               selected: twoPane && group == _selected,
               trailing: twoPane ? null : const Icon(Icons.chevron_right),
+              onFocusChange: tv
+                  ? (focused) {
+                      if (focused && _selected != group) setState(() => _selected = group);
+                    }
+                  : null,
               onTap: () => twoPane ? setState(() => _selected = group) : context.go('/me/settings/${group.name}'),
             ),
         ],
@@ -60,7 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
         body: twoPane
             ? Row(
                 children: [
-                  SizedBox(width: 280, child: list),
+                  SizedBox(width: tv ? 240 : 280, child: list),
                   const VerticalDivider(width: 1),
                   Expanded(
                     child: Align(
@@ -133,6 +141,13 @@ class SettingsGroupBody extends StatelessWidget {
         ),
         SwitchSettingTile(setting: Settings.autoCheckUpdate, title: '自动检查更新'),
         ClipboardRecognitionTile(),
+        SettingsHeader('电视'),
+        ChoiceSettingTile<TvMode>(
+          setting: Settings.tvMode,
+          title: '电视模式',
+          labels: {TvMode.auto: '自动（检测到电视时开启）', TvMode.on: '开启', TvMode.off: '关闭'},
+        ),
+        SwitchSettingTile(setting: Settings.tvPerformanceMode, title: '电视焦点只描边', subtitle: '性能优先：焦点不放大，适合低端电视盒子'),
         SettingsHeader('关注刷新'),
         SwitchSettingTile(setting: Settings.autoRefreshFollows, title: '定时刷新关注的开播状态'),
         SwitchSettingTile(setting: Settings.refreshFollowsOnResume, title: '回到应用时刷新关注'),
@@ -156,6 +171,7 @@ class SettingsGroupBody extends StatelessWidget {
           },
         ),
         SwitchSettingTile(setting: Settings.pureBlack, title: S.themeBlack, subtitle: '深色时用纯黑背景，适合 OLED 屏幕'),
+        _TvThemeNote(),
         SwitchSettingTile(setting: Settings.denseFollows, title: '关注页紧凑卡片', subtitle: '主播名和标题放在一行'),
         SliderSettingTile(setting: Settings.textScale, title: '文字大小', min: 0.85, max: 1.3, divisions: 9),
       ],
@@ -169,6 +185,11 @@ class SettingsGroupBody extends StatelessWidget {
           labels: {VideoFit.contain: '适应', VideoFit.cover: '填充（裁切）', VideoFit.fill: '拉伸'},
         ),
         SwitchSettingTile(setting: Settings.fullScreenDefault, title: '进入直播间自动全屏'),
+        SwitchSettingTile(
+          setting: Settings.switchRoomGesture,
+          title: '竖屏全屏上下滑切换直播间',
+          subtitle: '上滑下一个、下滑上一个；开启后竖屏全屏里不再上下滑调亮度和音量',
+        ),
         SwitchSettingTile(setting: Settings.backgroundPlay, title: '后台播放', subtitle: '离开应用后继续播放声音'),
         SliderSettingTile(
           setting: Settings.defaultMobileVolume,
@@ -247,6 +268,16 @@ class SettingsGroupBody extends StatelessWidget {
       SettingsGroup.network => const [NetworkSettings()],
     },
   );
+}
+
+/// principles §5.3: TV mode has only dark and pure black.
+class _TvThemeNote extends StatelessWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context) => TvScope.of(context).enabled
+      ? const ListTile(leading: Icon(Icons.tv), title: Text('电视模式下只用深色'), subtitle: Text('纯黑背景开关仍然有效'))
+      : const SizedBox.shrink();
 }
 
 String _integer(double value) => value.round().toString();

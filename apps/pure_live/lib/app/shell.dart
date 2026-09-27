@@ -10,19 +10,24 @@ const _destinations = [
   NavDestination(icon: Icons.person_outline, selectedIcon: Icons.person, label: S.me),
 ];
 
-/// The four top-level destinations (principles §4.1) in the adaptive shell.
+/// The four top-level destinations (principles §4.1) in the adaptive shell;
+/// in TV mode the collapsed rail that expands on focus (§5.3).
 class AppShell extends StatelessWidget {
   const new({required this.shell, super.key});
 
   /// go_router's branch navigator.
   final StatefulNavigationShell shell;
 
+  // Choosing the current destination again returns to its first page.
+  void _select(int index) => shell.goBranch(index, initialLocation: index == shell.currentIndex);
+
   @override
-  Widget build(BuildContext context) => AdaptiveNavScaffold(
-    destinations: _destinations,
-    selectedIndex: shell.currentIndex,
-    // Tapping the current destination again returns to its first page.
-    onSelected: (index) => shell.goBranch(index, initialLocation: index == shell.currentIndex),
-    body: shell,
-  );
+  Widget build(BuildContext context) => TvScope.of(context).enabled
+      ? TvNavScaffold(destinations: _destinations, selectedIndex: shell.currentIndex, onSelected: _select, body: shell)
+      : AdaptiveNavScaffold(
+          destinations: _destinations,
+          selectedIndex: shell.currentIndex,
+          onSelected: _select,
+          body: shell,
+        );
 }

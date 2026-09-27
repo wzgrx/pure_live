@@ -12,6 +12,7 @@ import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/secrets.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/diagnostics/app_log.dart';
 import 'package:pure_live_app/features/diagnostics/crash_handler.dart';
 import 'package:pure_live_app/features/onboarding/startup.dart';
@@ -29,6 +30,9 @@ Future<void> main() async {
   final secrets = await openSecretStore(root.path);
   final recordPaths = await RecordPaths.resolve(root.path);
   final prefs = await AppPrefs.load(store.meta);
+  // Known before the first frame, so a TV never flashes the phone layout.
+  final tv = await TvDevice.detect();
+  if (tv.isTv) log.info('app', 'television (ui mode ${tv.television}, leanback ${tv.leanback})');
   await initDesktopWindow(store.settings);
   runApp(
     ProviderScope(
@@ -39,6 +43,7 @@ Future<void> main() async {
         // Adapters read the user's platform cookies from the encrypted store.
         cookieVaultProvider.overrideWithValue(StoreCookieVault(secrets)),
         appPrefsProvider.overrideWith(() => AppPrefsNotifier(prefs)),
+        tvDeviceProvider.overrideWithValue(tv),
       ],
       // First-run wizard, crash prompt, update check and clipboard check.
       child: const StartupTasks(child: PureLiveApp()),

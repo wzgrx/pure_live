@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S02-info-live",
+  "capturedAt": "2026-09-27T17:33:09.698823Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://steamcommunity.com/broadcast/getbroadcastinfo/?steamid=76561199485215572&broadcastid=0&location=5",
+    "headers": {
+      "X-Requested-With": "XMLHttpRequest",
+      "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+      "Accept": "application/json, text/javascript, */*; q=0.8",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "steamCountry=RP%1Av6b74b0089i0zxnp1850b9hi4468x4zy; path=/; secure; HttpOnly; SameSite=None",
+      "cache-control": "public,max-age=60",
+      "last-modified": "Sun, 27 Sep 2026 17:33:00 GMT",
+      "date": "Sun, 27 Sep 2026 17:33:10 GMT",
+      "vary": [
+        "Accept-Encoding, Origin",
+        "Accept-Encoding"
+      ],
+      "content-encoding": "gzip",
+      "content-length": "283",
+      "content-type": "application/json; charset=utf-8",
+      "server": "nginx",
+      "expires": "Sun, 27 Sep 2026 17:34:10 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "1f9f5624cd972ef8fd6c194bcf232f9f2d4de953b7f1b2b06c9c9d3837679152",
+    "length": 382
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:steamCountry",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

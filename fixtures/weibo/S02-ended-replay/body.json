@@ -1,0 +1,41 @@
+{
+  "code": 100000,
+  "msg": "success",
+  "error_code": 0,
+  "data": {
+    "liveId": "1022:2321325269875509035102",
+    "status": 3,
+    "cover": "https://wx4.sinaimg.cn/large/005RxYfQly8h5dmpcrwo5j30hs0hs3za.jpg",
+    "startTime": 1771919713000,
+    "endTime": 1771920532000,
+    "width": 720,
+    "height": 1280,
+    "mid": "5269875591218796",
+    "createType": 2,
+    "createSource": 2,
+    "title": "16点继续最后一波奶茶卡",
+    "watch_limit": 0,
+    "user": {
+      "uid": 5371906414,
+      "screenName": "佩奇线报",
+      "profileImageUrl": "https://tvax4.sinaimg.cn/crop.0.0.639.639.50/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=iaUWhdlQF6",
+      "verified": 1,
+      "verifiedType": 0,
+      "verifiedTypeExt": 1,
+      "userAuthType": 3,
+      "avatar": "https://tvax4.sinaimg.cn/crop.0.0.639.639.1024/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=3YL%2B9d4Ngn",
+      "gender": "m"
+    },
+    "following": 0,
+    "reposts_count": 0,
+    "comments_count": 146,
+    "attitudes_count": 10,
+    "friends_count": 592269,
+    "liked": false,
+    "live_origin_hls_url": "",
+    "live_origin_flv_url": "",
+    "replay_origin_url": "http://live.video.weibocdn.com/5269875505238409_wb1080avc_index.m3u8",
+    "pay_live_status": 1,
+    "play_switch": 1
+  }
+}

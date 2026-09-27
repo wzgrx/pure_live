@@ -25,7 +25,7 @@ final FutureProvider<List<PlatformHealth>> platformHealthProvider = FutureProvid
   ref,
 ) async {
   final sites = ref.watch(sitesProvider);
-  final platforms = ref.watch(enabledPlatformsProvider);
+  final platforms = ref.watch(browsablePlatformsProvider);
   return await Future.wait([
     for (final id in platforms)
       () async {

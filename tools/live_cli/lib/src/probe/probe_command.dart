@@ -80,6 +80,8 @@ class ProbeCommand extends Command<int> {
       step('failed   $error');
       return 2;
     } finally {
+      if (site is Fc2LiveSite) await site.close();
+      if (site is NiconicoSite) await site.close();
       http.close();
     }
   }

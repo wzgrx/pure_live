@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "xiaohongshu",
+  "sample": "S01-room-live",
+  "capturedAt": "2026-09-27T18:29:56.969959Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.xiaohongshu.com/livestream/570459564696889177",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/87.0.4280.141 Mobile Safari/537.36",
+      "Referer": "https://www.xiaohongshu.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": [
+        "acw_tc=4f24a11314708718967532244db93ef4c37812c3b42bfaa549ceb4983041f0;path=/;HttpOnly;Max-Age=1800",
+        "abRequestId=9m6tf951-h97a-4ph1-xz4f-8277p7s43271; path=/; expires=Mon, 27 Sep 2027 18:29:57 GMT; domain=xiaohongshu.com"
+      ],
+      "xhs-real-ip": "203.0.113.7",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 18:29:57 GMT",
+      "access-control-allow-origin": "0",
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=utf-8",
+      "access-control-max-age": "86400",
+      "server": "openresty",
+      "access-control-allow-credentials": "true",
+      "alt-svc": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, h3-27=\":443\"; ma=2592000, h3-Q050=\":443\"; ma=2592000, h3-Q046=\":443\"; ma=2592000, h3-Q043=\":443\"; ma=2592000, h3-Q039=\":443\"; ma=2592000, quic=\":443\"; ma=2592000; v=\"39,43,46\"",
+      "access-control-allow-methods": "GET,OPTIONS",
+      "xhs-request-time": "0.016"
+    }
+  },
+  "raw": {
+    "sha256": "8e16f6eae9873dcd6cf13979f7ba63667900ab5ba5eeec4f70c58a92738cd01c",
+    "length": 22032
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "set-cookie:acw_tc",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:abRequestId",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

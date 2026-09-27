@@ -21,7 +21,7 @@ class DiscoverPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final platforms = ref.watch(enabledPlatformsProvider);
+    final platforms = ref.watch(browsablePlatformsProvider);
     // F-DSC-03: opens on the preferred platform.
     final preferred = platforms.indexOf(ref.watch(catalogPreferredSetting));
     return DefaultTabController(

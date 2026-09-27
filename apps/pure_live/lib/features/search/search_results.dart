@@ -129,7 +129,7 @@ class CombinedSearchNotifier extends AsyncNotifier<CombinedSearchState> {
   @override
   Future<CombinedSearchState> build() async {
     ref.watch(sitesProvider);
-    final platforms = ref.watch(enabledPlatformsProvider);
+    final platforms = ref.watch(searchablePlatformsProvider);
     _stagnant.clear();
     final pages = await Future.wait([for (final id in platforms) _page(id, null)]);
     final items = <RoomCard>[];

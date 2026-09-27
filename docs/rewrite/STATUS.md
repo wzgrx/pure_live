@@ -13,7 +13,7 @@
 | 4 平台与网络层 | **完成**：5 个平台的解析器、适配器、`live_net` 和真实网络探针全部完成；3.x 不再发布（ADR 0014） | `live_net`、`live_core`（5 个主力平台） | 样本测试和探针全过 |
 | 5 播放、弹幕、录制层 | 代码完成，待真机：`live_media`、`live_player`（ADR 0018）、`live_danmaku`（ADR 0019，现 17 个平台有弹幕）、弹幕渲染（ADR 0020）、`live_record`（ADR 0021，纯 Dart FLV→MP4、后台录制 ADR 0029）、`live_cast`（ADR 0027）；HLS 录制在做 | `live_media`、`live_danmaku`、`live_record` | 契约测试、真机播放和录制、体积门禁 |
 | 6 新应用界面 | 代码基本完成，待真机：全部一级页面、直播间（ADR 0023）、多画面、录制中心、IPTV（ADR 0024）、系统集成（ADR 0025）、开播提醒（ADR 0028）、账号与网页组件（ADR 0032）、设置八个分组；多语言在做 | `live_ui`、`apps/pure_live`（预览版 `.next`） | 截图测试、五个宽度等级、性能门禁 |
-| 7 其余平台、TV、桌面 | 进行中：第二批 5 个、第三批前半 9 个平台完成并保留；TV 模式完成（ADR 0026）；Windows 外壳完成；第三批后半在做 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
+| 7 其余平台、TV、桌面 | 进行中：第二批 5 个、第三批 23 个平台完成（Bigo 有条件保留，等 HLS 解扰中继后接入）；TV 模式完成（ADR 0026）；Windows 外壳完成 | 其余平台、TV 焦点体系、Windows 细节 | 每个平台探针通过或明确下线 |
 | 8 对齐验收与切换 | 未开始 | v4.0.0 | 删除 `legacy/` |
 
 ## 第 1 阶段：规格
@@ -105,7 +105,7 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 | Android 画中画、后台播放与通知、应用内小窗；Windows 单实例、新窗口、托盘、关闭行为、开机自启、系统媒体控制 | 完成（ADR 0025），已接入直播间 | 子代理 → 主会话 |
 | 第二批平台：cc、yy、soop、acfun、twitch | 完成，五个都保留并接入应用（CC 暂无弹幕；Twitch 列表只有第一页，翻页要 WebView 完整性令牌） | 子代理 → 主会话 |
 | 第三批平台前半：chzzk、missevan、kilakila、inke、picarto、twitcasting、showroom、pandalive、17live | 完成，九个都保留并接入应用（ADR 0031；映客无匿名弹幕；17LIVE 手机开播的高画质是 codec 12，默认 H.264 档；TwitCasting 分片要带响应 Cookie） | 子代理 → 主会话 |
-| 第三批平台后半：liveme、steambroadcast、sixroom、kugoulive、jdlive、baidulive、looklive、weibo；niconico；候选下线 tiktok、youtube、bigo、fc2live；小红书仅链接 | 进行中 | 子代理 |
+| 第三批平台后半：liveme、steambroadcast、sixroom、kugoulive、jdlive、baidulive、looklive、weibo；niconico；候选下线 tiktok、youtube、bigo、fc2live；小红书仅链接 | 完成，13 个接入应用（ADR 0031 第 10 条）：YouTube、FC2 保留，TikTok、小红书仅链接；Bigo 有条件保留，等 live_media 的 HLS 解扰中继后再注册；发现和搜索按适配器能力筛选；弹幕新增 fc2live、niconico、steambroadcast、youtube；niconico 分片的按路径 Cookie 待真机验证 | 子代理 → 主会话 |
 | 缓存清理、平台健康状态 | 完成 | 主会话 |
 | 深链 `purelive://`、按网络选画质与卡顿自动降一档、断网提示、录制拼音文件夹 | 完成 | 主会话 |
 | DLNA 投屏（`live_cast`，ADR 0027） | 完成，已接入直播间菜单和 Android 顶栏 | 子代理 → 主会话 |

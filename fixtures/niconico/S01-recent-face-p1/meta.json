@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "niconico",
+  "sample": "S01-recent-face-p1",
+  "capturedAt": "2026-09-27T18:39:31.493305Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.nicovideo.jp/front/api/pages/recent/v1/programs?tab=face&offset=0&sortOrder=recentDesc",
+    "headers": {
+      "Accept": "application/json",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-service-version": "v21.6.1",
+      "cache-control": "max-age=0, s-maxage=10, stale-if-error=0, stale-while-revalidate=5, no-cache=\"Set-Cookie\"",
+      "date": "Sun, 27 Sep 2026 18:39:31 GMT",
+      "transfer-encoding": "chunked",
+      "x-amz-cf-pop": "SFO53-P11",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "strict-transport-security": "max-age=5184000",
+      "x-amz-cf-id": "TOixlMGA6ScA5q8_ulXuCEx37M1jcQKddeMq5xY0TgNJJB6C6N9EDA==",
+      "x-permitted-cross-domain-policies": "none",
+      "content-type": "application/json; charset=utf-8",
+      "x-xss-protection": "1; mode=block",
+      "server": "istio-envoy",
+      "x-download-options": "noopen",
+      "via": "1.1 deac93e317fba2fa40a54b72a7760e24.cloudfront.net (CloudFront)",
+      "x-frame-options": "SAMEORIGIN",
+      "x-content-type-options": "nosniff",
+      "x-cache": "Miss from cloudfront"
+    }
+  },
+  "raw": {
+    "sha256": "fc10959ef5dfa92cb8779a7fa133f45356375cc8c5011d5d931ec0184532370b",
+    "length": 36251
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

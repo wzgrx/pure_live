@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "platform": "fc2live",
+  "sample": "S02-member-missing",
+  "capturedAt": "2026-09-27T19:37:22.073034Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://live.fc2.com/api/memberApi.php",
+    "headers": {
+      "Origin": "https://live.fc2.com",
+      "Referer": "https://live.fc2.com/",
+      "X-Requested-With": "XMLHttpRequest",
+      "Accept": "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    },
+    "body": "channel=1&profile=1&user=1&streamid=99999999"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "last-modified": "Sun, 27 Sep 2026 19:37:22 GMT",
+      "set-cookie": "PHPSESSID=b822zo7sabecf7su2fpelbjh2z; path=/; domain=.live.fc2.com; HttpOnly",
+      "cache-control": "no-store, no-cache, must-revalidate",
+      "access-control-allow-origin": "*",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 19:37:24 GMT",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "cross-origin-opener-policy": "same-origin",
+      "content-type": "text/javascript; charset=utf-8",
+      "pragma": "no-cache",
+      "server": "nginx",
+      "x-content-type-options": "nosniff",
+      "expires": "Thu, 19 Nov 1981 08:52:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "a49b3dcfcfcd777778f3865bcc97433cf31d5d6275826d519a8b229623ad3f41",
+    "length": 3731
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:PHPSESSID",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -6,17 +6,21 @@ import 'package:live_danmaku/src/sites/bilibili.dart';
 import 'package:live_danmaku/src/sites/chzzk.dart';
 import 'package:live_danmaku/src/sites/douyin.dart';
 import 'package:live_danmaku/src/sites/douyu.dart';
+import 'package:live_danmaku/src/sites/fc2live.dart';
 import 'package:live_danmaku/src/sites/huya.dart';
 import 'package:live_danmaku/src/sites/kilakila.dart';
 import 'package:live_danmaku/src/sites/kuaishou.dart';
 import 'package:live_danmaku/src/sites/missevan.dart';
+import 'package:live_danmaku/src/sites/niconico.dart';
 import 'package:live_danmaku/src/sites/pandalive.dart';
 import 'package:live_danmaku/src/sites/picarto.dart';
 import 'package:live_danmaku/src/sites/seventeenlive.dart';
 import 'package:live_danmaku/src/sites/showroom.dart';
 import 'package:live_danmaku/src/sites/soop.dart';
+import 'package:live_danmaku/src/sites/steambroadcast.dart';
 import 'package:live_danmaku/src/sites/twitcasting.dart';
 import 'package:live_danmaku/src/sites/twitch.dart';
+import 'package:live_danmaku/src/sites/youtube.dart';
 import 'package:live_danmaku/src/sites/yy.dart';
 import 'package:live_danmaku/src/transport.dart';
 
@@ -28,16 +32,20 @@ const danmakuPlatforms = {
   'chzzk',
   'douyin',
   'douyu',
+  'fc2live',
   'huya',
   'kilakila',
   'kuaishou',
   'missevan',
+  'niconico',
   'pandalive',
   'picarto',
   'showroom',
   'soop',
+  'steambroadcast',
   'twitcasting',
   'twitch',
+  'youtube',
   'yy',
 };
 
@@ -54,6 +62,7 @@ DanmakuConnector? danmakuConnectorFor(
   DanmakuClock? clock,
 }) => switch (room.ref.platform) {
   'douyu' => DouyuConnector(detail: room, transport: transport, session: session, clock: clock),
+  'fc2live' => Fc2LiveConnector(detail: room, transport: transport, session: session, clock: clock),
   'huya' => HuyaConnector(detail: room, transport: transport, session: session, clock: clock),
   'bilibili' => BilibiliConnector(
     detail: room,
@@ -87,12 +96,15 @@ DanmakuConnector? danmakuConnectorFor(
     session: session,
     clock: clock,
   ),
+  'niconico' => NiconicoChatConnector(detail: room, transport: transport, session: session, clock: clock),
   'pandalive' => PandaliveConnector(detail: room, transport: transport, session: session, clock: clock),
   'picarto' => PicartoConnector(detail: room, transport: transport, session: session, clock: clock),
   'showroom' => ShowroomConnector(detail: room, transport: transport, session: session, clock: clock),
   'soop' => SoopConnector(detail: room, transport: transport, session: session, clock: clock),
+  'steambroadcast' => SteamBroadcastConnector(detail: room, transport: transport, session: session, clock: clock),
   'twitcasting' => TwitcastingConnector(detail: room, transport: transport, session: session, clock: clock),
   'twitch' => TwitchConnector(detail: room, transport: transport, session: session, clock: clock),
+  'youtube' => YouTubeChatConnector(detail: room, transport: transport, session: session, clock: clock),
   'yy' => YyConnector(detail: room, transport: transport, session: session, clock: clock),
   _ => null,
 };

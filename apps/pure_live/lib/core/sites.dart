@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
@@ -6,7 +8,8 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 
 /// A platform adapter seen through its capabilities (ADR 0010, rule 7). The
-/// first five platforms and the IPTV source implement all of them.
+/// first five platforms and the IPTV source implement all of them; later
+/// adapters may lack a catalog or a search ([hasCatalog], [hasSearch]).
 final class PlatformSite {
   const new(this._site);
 
@@ -21,6 +24,12 @@ final class PlatformSite {
   RoomSource get rooms => _site as RoomSource;
   StreamSource get streams => _site as StreamSource;
   LinkResolver get links => _site as LinkResolver;
+
+  /// Whether the platform lists rooms and areas (link-only adapters do not).
+  bool get hasCatalog => _site is CatalogSource;
+
+  /// Whether the platform has a native keyword search (F-SRC-01).
+  bool get hasSearch => _site is SearchSource;
 }
 
 /// Platform ids in display order (constitution: first five platforms, then
@@ -47,6 +56,20 @@ const platformOrder = [
   'showroom',
   'pandalive',
   '17live',
+  // Batch 3b (ADR 0031): Bigo waits for its HLS relay.
+  'liveme',
+  'steambroadcast',
+  'sixroom',
+  'kugoulive',
+  'jdlive',
+  'baidulive',
+  'looklive',
+  'weibo',
+  'niconico',
+  'xiaohongshu',
+  'youtube',
+  'tiktok',
+  'fc2live',
   'iptv',
 ];
 
@@ -71,22 +94,25 @@ const platformNames = {
   'showroom': 'SHOWROOM',
   'pandalive': 'PandaTV',
   '17live': '17LIVE',
+  'liveme': 'LiveMe',
+  'steambroadcast': 'Steam 直播',
+  'sixroom': '六间房直播',
+  'kugoulive': '酷狗直播',
+  'jdlive': '京东直播',
+  'baidulive': '百度直播',
+  'looklive': 'LOOK 直播',
+  'weibo': '微博直播',
+  'niconico': 'niconico',
+  'xiaohongshu': '小红书',
+  'youtube': 'YouTube Live',
+  'tiktok': 'TikTok LIVE',
+  'fc2live': 'FC2 Live',
   'iptv': '网络电视',
 };
 
 /// Names of 3.x platforms this build has no adapter for, so their follows and
 /// history still read well (spec/product.md F-FAV-08).
-const _otherPlatformNames = {
-  'huajiao': '花椒',
-  'weibo': '微博直播',
-  'xiaohongshu': '小红书',
-  'youtube': 'YouTube Live',
-  'tiktok': 'TikTok LIVE',
-  'niconico': 'niconico',
-  'bigo': 'Bigo Live',
-  'fc2live': 'FC2 Live',
-  'kick': 'Kick',
-};
+const _otherPlatformNames = {'huajiao': '花椒', 'bigo': 'Bigo Live', 'kick': 'Kick'};
 
 /// The display name of any platform id, supported or not.
 String platformName(String id) => platformNames[id] ?? _otherPlatformNames[id] ?? id;
@@ -138,6 +164,14 @@ final liveHttpProvider = Provider<LiveHttp>((ref) {
 final sitesProvider = Provider<Map<String, PlatformSite>>((ref) {
   final http = ref.watch(liveHttpProvider);
   final cookies = ref.watch(cookieVaultProvider);
+  // Both hold control sockets while a line plays (spec/sites/fc2live.md §6.3,
+  // niconico.md §6.4).
+  final fc2 = Fc2LiveSite(http);
+  final niconico = NiconicoSite(http);
+  ref.onDispose(() {
+    unawaited(fc2.close());
+    unawaited(niconico.close());
+  });
   return {
     'bilibili': PlatformSite(BilibiliSite(http, cookies: cookies)),
     'douyu': PlatformSite(DouyuSite(http, cookies: cookies)),
@@ -158,6 +192,19 @@ final sitesProvider = Provider<Map<String, PlatformSite>>((ref) {
     'showroom': PlatformSite(ShowroomSite(http)),
     'pandalive': PlatformSite(PandaliveSite(http)),
     '17live': PlatformSite(SeventeenliveSite(http)),
+    'liveme': PlatformSite(LiveMeSite(http)),
+    'steambroadcast': PlatformSite(SteamBroadcastSite(http)),
+    'sixroom': PlatformSite(SixRoomSite(http)),
+    'kugoulive': PlatformSite(KugouLiveSite(http)),
+    'jdlive': PlatformSite(JdLiveSite(http)),
+    'baidulive': PlatformSite(BaiduLiveSite(http)),
+    'looklive': PlatformSite(LookLiveSite(http)),
+    'weibo': PlatformSite(WeiboSite(http)),
+    'niconico': PlatformSite(niconico),
+    'xiaohongshu': PlatformSite(XiaohongshuSite(http)),
+    'youtube': PlatformSite(YouTubeSite(http)),
+    'tiktok': PlatformSite(TikTokSite(http)),
+    'fc2live': PlatformSite(fc2),
     'iptv': PlatformSite(ref.watch(iptvSiteProvider)),
   };
 });
@@ -180,4 +227,24 @@ final linkResolverProvider = Provider<Future<RoomRef?> Function(String input)>((
 final enabledPlatformsProvider = Provider<List<String>>((ref) {
   final chosen = ref.watch(catalogPlatformsSetting).where(platformOrder.contains).toList();
   return chosen.isEmpty ? platformOrder : chosen;
+});
+
+/// The enabled platforms that list rooms (discover, platform status); the
+/// link-only ones (TikTok, 小红书) open from links and follows only.
+final browsablePlatformsProvider = Provider<List<String>>((ref) {
+  final sites = ref.watch(sitesProvider);
+  return [
+    for (final id in ref.watch(enabledPlatformsProvider))
+      if (sites[id]?.hasCatalog ?? false) id,
+  ];
+});
+
+/// The enabled platforms with a native search (F-SRC-01); the rest are
+/// reached through the web search (F-SRC-02) or links.
+final searchablePlatformsProvider = Provider<List<String>>((ref) {
+  final sites = ref.watch(sitesProvider);
+  return [
+    for (final id in ref.watch(enabledPlatformsProvider))
+      if (sites[id]?.hasSearch ?? false) id,
+  ];
 });

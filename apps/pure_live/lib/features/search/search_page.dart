@@ -139,7 +139,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   Widget _keywordResults() {
-    final platforms = ref.watch(enabledPlatformsProvider);
+    final platforms = ref.watch(searchablePlatformsProvider);
     if (_keyword.isEmpty) {
       return const MessageView(icon: Icons.search, title: S.searchHint);
     }

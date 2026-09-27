@@ -1,0 +1,48 @@
+{
+  "code": "0",
+  "data": {
+    "liveId": 48378944,
+    "videoUrl": "https://zt-pull-ai.jdcloud.com/live/834C6A62B3177AB5FDD83B3EAC6DC6EA_fhd.flv",
+    "pcVideoUrl": "https://zt-pull-ai.jdcloud.com/live/834C6A62B3177AB5FDD83B3EAC6DC6EA_fhd.flv",
+    "h5VideoUrl": "https://zt-pull-ai.jdcloud.com/live/834C6A62B3177AB5FDD83B3EAC6DC6EA_fhd.m3u8",
+    "status": 1,
+    "blurredImg": "https://m.360buyimg.com/live/jfs/t1/523184/35/9717/8484/6ab08b9bFa75c804e/00292ee53616c658.jpg!q70.jpg",
+    "screen": "0",
+    "slide": {
+      "pre": {
+        "liveId": 47871501,
+        "vedioUrl": "https://zt-pull-ai.jdcloud.com/live/0B5582CB48FC120638649EB8FB99D5A0_fhd.flv",
+        "videoUrl": "https://zt-pull-ai.jdcloud.com/live/0B5582CB48FC120638649EB8FB99D5A0_fhd.flv",
+        "status": 1,
+        "blurredImg": "https://m.360buyimg.com/live/jfs/t1/504808/6/9155/10040/6a8a2254Fcd860154/00292ee53602f741.jpg!q70.jpg",
+        "screen": "0",
+        "playerOption": null,
+        "skuVideoUrl": null,
+        "h5VideoUrl": "https://zt-pull-ai.jdcloud.com/live/0B5582CB48FC120638649EB8FB99D5A0_fhd.m3u8",
+        "secret": 0,
+        "nowTime": 1790533554,
+        "slide": null
+      },
+      "next": {
+        "liveId": 48378908,
+        "vedioUrl": "https://zt-pull-ai.jdcloud.com/live/BA4ED58648DA0D106F92FD6E1D1A8C92_fhd.flv",
+        "videoUrl": "https://zt-pull-ai.jdcloud.com/live/BA4ED58648DA0D106F92FD6E1D1A8C92_fhd.flv",
+        "status": 1,
+        "blurredImg": "https://m.360buyimg.com/live/jfs/t1/528165/9/6130/9343/6ab08b3aFd7929b0a/00292ee5360af8f3.jpg!q70.jpg",
+        "screen": "0",
+        "playerOption": null,
+        "skuVideoUrl": null,
+        "h5VideoUrl": "https://zt-pull-ai.jdcloud.com/live/BA4ED58648DA0D106F92FD6E1D1A8C92_fhd.m3u8",
+        "secret": 0,
+        "nowTime": 1790533554,
+        "slide": null
+      }
+    },
+    "secret": 0,
+    "nowTime": 1790533554,
+    "skuVideoUrl": null,
+    "livingLiveId": null
+  },
+  "subCode": "0",
+  "tranceId": "10386764.53843.17905335540973016"
+}

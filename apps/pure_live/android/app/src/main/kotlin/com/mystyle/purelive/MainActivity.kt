@@ -42,6 +42,8 @@ class MainActivity : AudioServiceActivity() {
         CastMulticast(applicationContext).register(messenger)
         // The system proxy for "跟随系统代理" (F-SET-07).
         SystemNet(applicationContext).register(messenger)
+        // The refresh-rate hint of the 刷新率 setting (F-SET-08).
+        DisplayRate(this).register(messenger)
         pip?.detach()
         pip = PictureInPicture(this, messenger)
         PlaybackLocks.attach(applicationContext, messenger)

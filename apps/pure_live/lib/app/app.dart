@@ -6,6 +6,7 @@ import 'package:pure_live_app/app/appearance.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/recording.dart';
+import 'package:pure_live_app/core/refresh_rate.dart';
 import 'package:pure_live_app/core/share_intake.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/core/tv.dart';
@@ -58,7 +59,8 @@ class PureLiveApp extends ConsumerWidget {
               return MediaQuery(
                 data: media.copyWith(textScaler: TextScaler.linear(media.textScaler.scale(1) * textScale)),
                 // The in-app mini window floats above every page (F-PIP-03).
-                child: MiniPlayerHost(child: child!),
+                // Touches drive the refresh-rate hint (F-SET-08).
+                child: RefreshRateScope(child: MiniPlayerHost(child: child!)),
               );
             },
           ),

@@ -86,15 +86,17 @@ abstract final class PureTheme {
   /// The theme for [appearance] on [platform]. [seed] (wallpaper or system
   /// accent colour, principles §2.2 动态取色) replaces the primary, secondary,
   /// tertiary and neutral roles; semantic colours and pure black stay.
-  static ThemeData of(Appearance appearance, {TargetPlatform? platform, Color? seed}) =>
-      _build(appearance, platform, tv: false, seed: seed);
+  /// [fontFamily] replaces the platform font (a font the user downloaded,
+  /// F-SET-01); the platform fonts stay as the fallback.
+  static ThemeData of(Appearance appearance, {TargetPlatform? platform, Color? seed, String? fontFamily}) =>
+      _build(appearance, platform, tv: false, seed: seed, fontFamily: fontFamily);
 
   /// The TV theme (principles §5.3): dark or pure black only (a light
   /// [appearance] gets dark), type one step larger with body text at least
   /// 14 sp, 32 dp icons, a near-white focus ring and focus that shows on
   /// buttons, chips, tabs, list rows and fields at ten feet.
-  static ThemeData tv(Appearance appearance, {TargetPlatform? platform}) =>
-      _build(appearance == Appearance.light ? Appearance.dark : appearance, platform, tv: true);
+  static ThemeData tv(Appearance appearance, {TargetPlatform? platform, String? fontFamily}) =>
+      _build(appearance == Appearance.light ? Appearance.dark : appearance, platform, tv: true, fontFamily: fontFamily);
 
   /// Dynamic colour: the seed's fidelity scheme for the colour and neutral
   /// roles; error roles from the tokens; pure black keeps its surfaces.
@@ -138,7 +140,13 @@ abstract final class PureTheme {
     );
   }
 
-  static ThemeData _build(Appearance appearance, TargetPlatform? platform, {required bool tv, Color? seed}) {
+  static ThemeData _build(
+    Appearance appearance,
+    TargetPlatform? platform, {
+    required bool tv,
+    Color? seed,
+    String? fontFamily,
+  }) {
     final tokens = switch (appearance) {
       Appearance.light => ColorTokens.light,
       Appearance.dark => ColorTokens.dark,
@@ -183,7 +191,11 @@ abstract final class PureTheme {
     );
     final scheme = seed == null ? base : _seeded(base, seed, black: appearance == Appearance.black);
     final target = platform ?? defaultTargetPlatform;
-    final text = _textTheme(target, tv: tv).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
+    final text = _textTheme(
+      target,
+      tv: tv,
+      fontFamily: fontFamily,
+    ).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
     final numeric = text.labelMedium!.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     final desktop =
         !tv && (target == TargetPlatform.windows || target == TargetPlatform.linux || target == TargetPlatform.macOS);
@@ -343,8 +355,8 @@ abstract final class PureTheme {
   /// fallbacks (principles §2.3). On TV every role is one step larger and
   /// body text is at least 14 sp (principles §5.3), with the same ≥ 1.4
   /// line height rounded up to an even number.
-  static TextTheme _textTheme(TargetPlatform platform, {bool tv = false}) {
-    final family = platform == TargetPlatform.windows ? 'Microsoft YaHei UI' : null;
+  static TextTheme _textTheme(TargetPlatform platform, {bool tv = false, String? fontFamily}) {
+    final family = fontFamily ?? (platform == TargetPlatform.windows ? 'Microsoft YaHei UI' : null);
     const fallback = ['Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Noto Sans CJK SC'];
     TextStyle style(double size, double height, FontWeight weight) => TextStyle(
       fontFamily: family,

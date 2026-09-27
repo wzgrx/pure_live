@@ -16,6 +16,7 @@ import 'package:pure_live_app/features/discover/discover_page.dart';
 import 'package:pure_live_app/features/follows/follow_order_page.dart';
 import 'package:pure_live_app/features/follows/follows_page.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
+import 'package:pure_live_app/features/fonts/fonts_page.dart';
 import 'package:pure_live_app/features/health/platform_status_page.dart';
 import 'package:pure_live_app/features/iptv/guide_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_page.dart';
@@ -138,6 +139,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(path: 'accounts', builder: (context, state) => const AccountsPage()),
                   GoRoute(path: 'platforms', builder: (context, state) => const PlatformsPage()),
                   GoRoute(path: 'audience', builder: (context, state) => const AudiencePage()),
+                  GoRoute(path: 'fonts', builder: (context, state) => const FontsPage()),
                   GoRoute(
                     path: 'settings',
                     builder: (context, state) => const SettingsPage(),

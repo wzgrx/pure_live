@@ -6,6 +6,7 @@ import 'package:live_danmaku/live_danmaku.dart' show DanmakuFilterSettings;
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart' show DanmakuBudget, DanmakuStyle;
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/fonts/fonts.dart';
 
 /// The danmaku settings of `live_store` as one snapshot, so the room applies
 /// a change in one place (FLT-6: filters without reconnecting; principle 3:
@@ -39,6 +40,8 @@ final class DanmakuPrefs {
       stroke: settings.get(Settings.danmakuStroke),
       strokeWidth: settings.get(Settings.danmakuStrokeWidth),
       noEmoji: settings.get(Settings.danmakuNoEmoji),
+      // F-DM-06: registered at start when chosen; unknown families fall back.
+      fontFamily: familyForSetting(settings.get(Settings.danmakuFontFamily)),
     ),
     autoFps: settings.get(Settings.danmakuAutoFps),
     fps: settings.get(Settings.danmakuFps),
@@ -219,6 +222,7 @@ final class PipDanmakuLook {
       opacity: settings.get(Settings.danmakuPipOpacity),
       area: settings.get(Settings.danmakuPipArea),
       noEmoji: settings.get(Settings.danmakuPipNoEmoji),
+      fontFamily: familyForSetting(settings.get(Settings.danmakuFontFamily)),
     ),
     budget: DanmakuBudget.pip(maxVisible: settings.get(Settings.danmakuPipMaxVisibleCount)),
   );

@@ -201,6 +201,7 @@ class SettingsGroupBody extends StatelessWidget {
         _TvThemeNote(),
         SwitchSettingTile(setting: Settings.denseFollows, title: '关注页紧凑卡片', subtitle: '主播名和标题放在一行'),
         CardPresetTile(),
+        FontsTile(),
         SliderSettingTile(setting: Settings.textScale, title: '文字大小', min: 0.85, max: 1.3, divisions: 9),
       ],
       SettingsGroup.playback => const [
@@ -426,4 +427,17 @@ class CardPresetTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 字体 (F-SET-01, F-DM-06).
+class FontsTile extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    title: const Text('字体'),
+    subtitle: const Text('下载开源字体，用作界面或弹幕字体'),
+    trailing: const Icon(Icons.chevron_right),
+    onTap: () => context.go('/me/fonts'),
+  );
 }

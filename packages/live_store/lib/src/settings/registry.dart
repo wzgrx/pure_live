@@ -386,6 +386,26 @@ abstract final class Settings {
   /// its format so 3.x backups restore it as is; empty when none.
   static const danmakuTemplate = StringSetting('danmaku.template', '', legacy: [LegacyKey('savedDanmakuTemplate')]);
 
+  /// The danmaku font (F-DM-06): a downloaded font's id, empty for the
+  /// system font; device scope, the files are on this device.
+  static const danmakuFontFamily = StringSetting(
+    'danmaku.fontFamily',
+    '',
+    maxLength: 64,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('danmakuFontFamilyName', convert: _fontId)],
+  );
+
+  /// The interface font (F-SET-01): a downloaded font's id, empty for the
+  /// platform font (principles §2.3).
+  static const appFontFamily = StringSetting(
+    'app.fontFamily',
+    '',
+    maxLength: 64,
+    scope: SettingScope.device,
+    legacy: [LegacyKey('fontFamilyName', convert: _fontId)],
+  );
+
   /// Tapping a danmaku opens its actions.
   static const danmakuTapInteraction = BoolSetting(
     'danmaku.tapInteraction',
@@ -950,6 +970,8 @@ abstract final class Settings {
     danmakuAutoFps,
     danmakuFps,
     danmakuTemplate,
+    danmakuFontFamily,
+    appFontFamily,
     danmakuTapInteraction,
     danmakuLongPressInteraction,
     danmakuCollapseRepeated,
@@ -1035,6 +1057,13 @@ Object? _locale(Object? value) {
   if (text == '简体中文' || text.toLowerCase().startsWith('zh')) return 'zh-Hans';
   if (text == 'English' || text.toLowerCase().startsWith('en')) return 'en';
   return null;
+}
+
+/// 3.x font ids; `Default` and anything unsafe mean the system font.
+Object? _fontId(Object? value) {
+  if (value is! String) return '';
+  final id = value.trim();
+  return id == 'Default' || !RegExp(r'^[a-zA-Z0-9._-]{1,64}$').hasMatch(id) ? '' : id;
 }
 
 Object? _portraitFit(Object? value) => value == 'cover' ? 'cover' : 'contain';

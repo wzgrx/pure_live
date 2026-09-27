@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/refresh_rate.dart';
 import 'package:pure_live_app/core/share_intake.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/core/tv.dart';
+import 'package:pure_live_app/features/fonts/fonts.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_share.dart';
 import 'package:pure_live_app/features/system/mini_player_host.dart';
@@ -29,6 +30,8 @@ class PureLiveApp extends ConsumerWidget {
       ..watch(iptvShareIntakeProvider)
       ..watch(iptvAutoSyncProvider)
       ..watch(systemIntegrationProvider)
+      // Registers the chosen interface and danmaku fonts (F-SET-01, F-DM-06).
+      ..watch(chosenFontsProvider)
       // Known before the first room opens (Q-2); listened, so a network
       // change does not rebuild the app.
       ..listen(networkKindProvider, (_, _) {});
@@ -38,9 +41,16 @@ class PureLiveApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeSetting);
     final pureBlack = ref.watch(pureBlackSetting);
     final router = ref.watch(routerProvider);
+    final fontFamily = familyForSetting(ref.watch(appFontFamilySetting));
     // Builds outside this build method (in DynamicColorBuilder): no ref here.
     Widget app(Color? seed) {
-      final (light, dark, mode) = themesFor(themeMode, pureBlack: pureBlack, tv: tv.enabled, seed: seed);
+      final (light, dark, mode) = themesFor(
+        themeMode,
+        pureBlack: pureBlack,
+        tv: tv.enabled,
+        seed: seed,
+        fontFamily: fontFamily,
+      );
       return MaterialApp.router(
         title: S.appName,
         debugShowCheckedModeBanner: false,

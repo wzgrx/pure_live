@@ -30,6 +30,7 @@ import 'package:pure_live_app/features/search/search_page.dart';
 import 'package:pure_live_app/features/settings/settings_page.dart';
 import 'package:pure_live_app/features/sync/lan_sync_page.dart';
 import 'package:pure_live_app/features/sync/webdav_page.dart';
+import 'package:pure_live_app/features/system/mini_player.dart';
 
 /// Location of a room page; the room is a full-screen route outside the shell
 /// (principles §4.1).
@@ -45,13 +46,17 @@ String areaLocation(String platform) => '/discover/area/${Uri.encodeComponent(pl
 /// scroll positions; rooms open above them.
 final routerProvider = Provider<GoRouter>((ref) {
   final startPage = ref.read(storeProvider).settings.get(Settings.startPage);
+  // Every navigator reports its popups, which hide the mini window (PIP-4).
+  final popups = ref.read(popupTrackerProvider);
   final router = GoRouter(
     initialLocation: startPage == StartPage.discover ? '/discover' : '/follows',
+    observers: [PopupRouteObserver(popups)],
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(
+            observers: [PopupRouteObserver(popups)],
             routes: [
               GoRoute(
                 path: '/follows',
@@ -61,6 +66,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
+            observers: [PopupRouteObserver(popups)],
             routes: [
               GoRoute(
                 path: '/discover',
@@ -76,6 +82,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
+            observers: [PopupRouteObserver(popups)],
             routes: [
               GoRoute(
                 path: '/search',
@@ -84,6 +91,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
+            observers: [PopupRouteObserver(popups)],
             routes: [
               GoRoute(
                 path: '/me',

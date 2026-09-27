@@ -8,6 +8,7 @@ import 'package:pure_live_app/features/health/cache_tile.dart';
 import 'package:pure_live_app/features/settings/network_settings.dart';
 import 'package:pure_live_app/features/settings/record_directory_tile.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/features/system/system_settings.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 /// Settings groups of principles §4.4. Groups whose features are not in the
@@ -133,6 +134,7 @@ class SettingsGroupBody extends StatelessWidget {
         ),
         SwitchSettingTile(setting: Settings.autoCheckUpdate, title: '自动检查更新'),
         ClipboardRecognitionTile(),
+        SystemSettingTiles(SystemSettingsSection.general),
         SettingsHeader('关注刷新'),
         SwitchSettingTile(setting: Settings.autoRefreshFollows, title: '定时刷新关注的开播状态'),
         SwitchSettingTile(setting: Settings.refreshFollowsOnResume, title: '回到应用时刷新关注'),
@@ -170,6 +172,7 @@ class SettingsGroupBody extends StatelessWidget {
         ),
         SwitchSettingTile(setting: Settings.fullScreenDefault, title: '进入直播间自动全屏'),
         SwitchSettingTile(setting: Settings.backgroundPlay, title: '后台播放', subtitle: '离开应用后继续播放声音'),
+        SystemSettingTiles(SystemSettingsSection.playback),
         SliderSettingTile(
           setting: Settings.defaultMobileVolume,
           title: '手机默认音量',

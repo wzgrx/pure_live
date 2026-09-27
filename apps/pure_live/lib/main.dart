@@ -15,9 +15,17 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/diagnostics/app_log.dart';
 import 'package:pure_live_app/features/diagnostics/crash_handler.dart';
 import 'package:pure_live_app/features/onboarding/startup.dart';
+import 'package:pure_live_app/features/system/launch_args.dart';
+import 'package:pure_live_app/features/system/system_integration.dart';
+import 'package:pure_live_app/features/system/windows_native.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Only the forms the new-window launcher writes are accepted (F-WIN-02).
+  final launch = LaunchArgs.parse(args);
+  // Listening before the first frame; forwarded launches queue in the runner
+  // until the shell says it is ready (F-WIN-01).
+  final windows = Platform.isWindows ? WindowsNative() : null;
   final root = await getApplicationSupportDirectory();
   // The local rolling log first, so start-up failures are recorded (F-BAK-02).
   final log = await AppLog.open(Directory('${root.path}${Platform.pathSeparator}logs'));
@@ -25,11 +33,16 @@ Future<void> main() async {
   installCrashHandlers(log);
   log.info('app', 'start $appVersion ($appBuildNumber) on ${Platform.operatingSystem}');
   // Settings and secrets are in memory before the first frame (REG-STORE-001).
+  // An extra window shares the data root and the encrypted secret store.
   final store = await LiveStore.open(root.path, log: StoreLog((message) => log.warning('store', message)));
   final secrets = await openSecretStore(root.path);
   final recordPaths = await RecordPaths.resolve(root.path);
   final prefs = await AppPrefs.load(store.meta);
-  await initDesktopWindow(store.settings);
+  await initDesktopWindow(
+    store.settings,
+    secondary: launch.secondaryWindow,
+    startMaximized: windows?.setStartMaximized,
+  );
   runApp(
     ProviderScope(
       overrides: [
@@ -39,6 +52,8 @@ Future<void> main() async {
         // Adapters read the user's platform cookies from the encrypted store.
         cookieVaultProvider.overrideWithValue(StoreCookieVault(secrets)),
         appPrefsProvider.overrideWith(() => AppPrefsNotifier(prefs)),
+        launchArgsProvider.overrideWithValue(launch),
+        if (windows != null) windowsNativeProvider.overrideWithValue(windows),
       ],
       // First-run wizard, crash prompt, update check and clipboard check.
       child: const StartupTasks(child: PureLiveApp()),

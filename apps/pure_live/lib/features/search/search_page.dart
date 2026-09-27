@@ -10,6 +10,7 @@ import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
 import 'package:pure_live_app/features/search/search_results.dart';
+import 'package:pure_live_app/features/search/web_search_page.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 /// Looks like a link or share text rather than a keyword.
@@ -131,6 +132,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ],
           onChanged: (_) => setState(() {}),
         ),
+        actions: [WebSearchButton(keyword: _controller)],
       ),
       body: _link != null ? _LinkResult(future: _link!) : _keywordResults(),
     );

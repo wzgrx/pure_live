@@ -78,9 +78,6 @@ const platformNames = {
 /// history still read well (spec/product.md F-FAV-08).
 const _otherPlatformNames = {
   'huajiao': '花椒',
-  'inke': '映客',
-  'missevan': '猫耳 FM',
-  'kilakila': '克拉克拉',
   'weibo': '微博直播',
   'xiaohongshu': '小红书',
   'youtube': 'YouTube Live',
@@ -88,7 +85,6 @@ const _otherPlatformNames = {
   'niconico': 'niconico',
   'bigo': 'Bigo Live',
   'fc2live': 'FC2 Live',
-  'chzzk': 'CHZZK',
   'kick': 'Kick',
 };
 
@@ -116,8 +112,12 @@ extension SiteLookup on Map<String, PlatformSite> {
   PlatformSite of(String platform) => this[platform] ?? (throw PlatformUnsupported(platform));
 }
 
-/// Whether [platform] has accounts to sign in to (IPTV has none).
-bool platformHasAccount(String platform) => platform != 'iptv';
+/// Whether [platform] has accounts to sign in to (F-ACC-01): the platforms
+/// whose adapters read the user's cookie. IPTV has none; CC and AcFun are
+/// anonymous in v4 (spec/sites/cc.md §8, acfun.md §8), and so are the later
+/// batches' adapters.
+bool platformHasAccount(String platform) =>
+    const {'bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'yy', 'soop', 'twitch'}.contains(platform);
 
 /// The user's platform cookies. In memory until live_store's encrypted vault
 /// is wired in.

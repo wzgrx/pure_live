@@ -21,6 +21,7 @@ export 'src/sites/chzzk/chzzk_site.dart';
 export 'src/sites/douyin/douyin_parse.dart';
 export 'src/sites/douyin/douyin_site.dart';
 export 'src/sites/douyu/douyu_parse.dart';
+export 'src/sites/douyu/douyu_session.dart';
 export 'src/sites/douyu/douyu_sign.dart';
 export 'src/sites/douyu/douyu_site.dart';
 export 'src/sites/huya/huya_parse.dart';

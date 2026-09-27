@@ -7,6 +7,8 @@ import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/about/about_page.dart';
 import 'package:pure_live_app/features/about/update_page.dart';
 import 'package:pure_live_app/features/accounts/accounts_page.dart';
+import 'package:pure_live_app/features/accounts/platform_account_page.dart';
+import 'package:pure_live_app/features/accounts/web_login.dart';
 import 'package:pure_live_app/features/backup/backup_page.dart';
 import 'package:pure_live_app/features/danmaku/block_list_page.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_settings.dart';
@@ -30,6 +32,7 @@ import 'package:pure_live_app/features/recording/recording_page.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
+import 'package:pure_live_app/features/search/web_search_page.dart';
 import 'package:pure_live_app/features/settings/audience_page.dart';
 import 'package:pure_live_app/features/settings/platforms_page.dart';
 import 'package:pure_live_app/features/settings/settings_page.dart';
@@ -136,7 +139,16 @@ final routerProvider = Provider<GoRouter>((ref) {
                     ],
                   ),
                   GoRoute(path: 'recordings', builder: (context, state) => const RecordingPage()),
-                  GoRoute(path: 'accounts', builder: (context, state) => const AccountsPage()),
+                  GoRoute(
+                    path: 'accounts',
+                    builder: (context, state) => const AccountsPage(),
+                    routes: [
+                      GoRoute(
+                        path: ':platform',
+                        builder: (context, state) => PlatformAccountPage(platform: state.pathParameters['platform']!),
+                      ),
+                    ],
+                  ),
                   GoRoute(path: 'platforms', builder: (context, state) => const PlatformsPage()),
                   GoRoute(path: 'audience', builder: (context, state) => const AudiencePage()),
                   GoRoute(path: 'fonts', builder: (context, state) => const FontsPage()),
@@ -163,6 +175,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: iptvLocation,
         builder: (context, state) => IptvPage(initialImport: state.extra as IptvImportRequest?),
         routes: [GoRoute(path: 'guide', builder: (context, state) => const IptvGuidePage())],
+      ),
+      // In-app browser pages, full screen (F-ACC-01 web sign-in, F-SRC-02).
+      GoRoute(
+        path: '/web-login/:platform',
+        builder: (context, state) => WebLoginPage(platform: state.pathParameters['platform']!),
+      ),
+      GoRoute(
+        path: '/web-search',
+        builder: (context, state) => WebSearchPage(
+          platform: state.uri.queryParameters['platform'] ?? '',
+          keyword: state.uri.queryParameters['q'] ?? '',
+        ),
       ),
       GoRoute(
         path: '/multiview',

@@ -58,17 +58,13 @@ void main() {
 
   testWidgets('F-FAV-01: a recording room carries 录制中 on its card and its row', (tester) async {
     await tester.pumpWidget(
-      host(
-        const RoomCardView(platformId: 'douyu', anchorName: '主播', title: '标题', isLive: true, recording: true),
-      ),
+      host(const RoomCardView(platformId: 'douyu', anchorName: '主播', title: '标题', isLive: true, recording: true)),
     );
     expect(find.byType(RecordingBadge), findsOneWidget);
     expect(find.text('录制中'), findsOneWidget);
     expect(find.bySemanticsLabel('主播，直播中，录制中，标题'), findsOneWidget);
 
-    await tester.pumpWidget(
-      host(const RoomCardView(platformId: 'douyu', anchorName: '主播', title: '标题', isLive: true)),
-    );
+    await tester.pumpWidget(host(const RoomCardView(platformId: 'douyu', anchorName: '主播', title: '标题', isLive: true)));
     expect(find.text('录制中'), findsNothing);
 
     await tester.pumpWidget(

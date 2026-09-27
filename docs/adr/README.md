@@ -38,6 +38,7 @@
 | [0030](0030-record-backup.md) | 录制任务进备份：数据库外的分区经应用提供的接口读写 | 已接受（部分取代 0017） |
 | [0031](0031-platform-batch3.md) | 第三批平台迁移的共用决定 | 已接受 |
 | [0032](0032-webview.md) | 内置网页组件：接口隔离，Android 用 webview_flutter，Windows 用 webview_all_windows | 已接受 |
+| [0033](0033-hls-relay.md) | HLS 中继：线路带配方，回环中继改写播放列表 | 已接受 |
 
 ## 模板
 

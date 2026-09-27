@@ -14,7 +14,8 @@
   "sort": {
     "smart": "Smart",
     "platform": "By platform",
-    "audience": "By viewers"
+    "audience": "By viewers",
+    "followers": "By followers"
   },
   "web": {
     "title": "Web search",

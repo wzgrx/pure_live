@@ -183,10 +183,22 @@ void main() {
       'hello',
     ]);
     final frames = _clientFrames(server.received.toBytes());
-    expect(frames.map((f) => f.opcode), [2, 1, 10], reason: 'binary, text, pong');
-    expect(frames[0].payload, [9, 8, 7]);
-    expect(utf8.decode(frames[1].payload), 'JOIN #room');
-    expect(frames[2].payload, utf8.encode('p'));
+    // The pong answers the server's ping as soon as it arrives, which may be
+    // before or after the test's own frames; only the data frames keep order.
+    final data = [
+      for (final frame in frames)
+        if (frame.opcode != 10) frame,
+    ];
+    expect(data.map((f) => f.opcode), [2, 1], reason: 'binary, then text');
+    expect(data[0].payload, [9, 8, 7]);
+    expect(utf8.decode(data[1].payload), 'JOIN #room');
+    expect(
+      [
+        for (final frame in frames)
+          if (frame.opcode == 10) frame.payload,
+      ],
+      [utf8.encode('p')],
+    );
     await socket.close();
     await subscription.cancel();
   });

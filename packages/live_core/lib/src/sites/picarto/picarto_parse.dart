@@ -84,6 +84,7 @@ abstract final class PicartoParse {
           : null,
       audience: Audience(online: online && viewers != null && viewers >= 0 ? viewers : null),
       avatar: jsonUrl(row['avatar']),
+      followers: jsonCount(row['follower_count'] ?? row['followers']),
     );
   }
 

@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:live_cli/src/probe/sites.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
 
 /// `live_cli probe <platform> <room or link>`: resolve, detail, streams and
@@ -71,33 +73,87 @@ class ProbeCommand extends Command<int> {
       }
       if (options.flag('media') && set.lines.isNotEmpty) {
         final line = set.lines.first;
-        final media = await _head(route, line);
+        final media = await _head(route, line.url, line.headers);
         step('media    HTTP ${media.status} · ${media.bytes.length} bytes · ${_container(media.bytes)}');
         if (media.status < 200 || media.status >= 300 || _container(media.bytes) == 'unknown') return 3;
+        if (line.hlsRelay != null) {
+          final relayed = await _throughRelay(route, platform, line);
+          step(
+            'relay    ${relayed.what} · HTTP ${relayed.status} · ${relayed.bytes.length} bytes · ${_container(relayed.bytes)}',
+          );
+          if (relayed.status != 200 || !const {'MPEG-TS', 'fMP4'}.contains(_container(relayed.bytes))) return 3;
+        }
       }
       return 0;
     } on SiteError catch (error) {
       step('failed   $error');
       return 2;
     } finally {
+      if (site is Fc2LiveSite) await site.close();
+      if (site is NiconicoSite) await site.close();
       http.close();
     }
   }
 
-  /// Reads the first 64 KiB of a live stream and drops the connection; live
-  /// media never ends, so this streams instead of going through LiveHttp.
-  Future<({int status, List<int> bytes})> _head(ProxyRoute route, StreamLine line) async {
+  /// The first segment (or the fMP4 init map) of a line that needs the HLS
+  /// relay, fetched through the relay as the player would (ADR 0033): the
+  /// relay adds the per-path cookies and restores scrambled segments, so an
+  /// MPEG-TS segment starts with the sync byte again.
+  Future<({String what, int status, List<int> bytes})> _throughRelay(
+    ProxyRoute route,
+    String platform,
+    StreamLine line,
+  ) async {
+    final relay = await LoopbackRelay.start(proxy: FixedProxyPolicy(global: route));
+    try {
+      final input = relay.openHls(line, site: platform);
+      Future<String?> playlist(Uri url) async {
+        final answer = await _head(const DirectRoute(), url, const {}, limit: 1 << 22);
+        return answer.status == 200 ? utf8.decode(answer.bytes, allowMalformed: true) : null;
+      }
+
+      var text = await playlist(input.uri);
+      if (text == null) return (what: 'playlist', status: 0, bytes: const <int>[]);
+      String? firstUri(String text) => const LineSplitter()
+          .convert(text)
+          .map((l) => l.trim())
+          .where((l) => l.isNotEmpty && !l.startsWith('#'))
+          .firstOrNull;
+      if (text.contains('#EXT-X-STREAM-INF')) {
+        final variant = firstUri(text);
+        text = variant == null ? null : await playlist(Uri.parse(variant));
+        if (text == null) return (what: 'variant', status: 0, bytes: const <int>[]);
+      }
+      final map = RegExp('#EXT-X-MAP:.*URI="([^"]+)"').firstMatch(text)?.group(1);
+      final target = map ?? firstUri(text);
+      if (target == null) return (what: 'segment', status: 0, bytes: const <int>[]);
+      final answer = await _head(const DirectRoute(), Uri.parse(target), const {});
+      return (what: map == null ? 'first segment' : 'init map', status: answer.status, bytes: answer.bytes);
+    } finally {
+      await relay.close();
+    }
+  }
+
+  /// Reads the first [limit] bytes of [url] (64 KiB) and drops the
+  /// connection; live media never ends, so this streams instead of going
+  /// through LiveHttp.
+  Future<({int status, List<int> bytes})> _head(
+    ProxyRoute route,
+    Uri url,
+    Map<String, String> headers, {
+    int limit = 65536,
+  }) async {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10)
       ..findProxy = (_) => route.directive;
     try {
-      final request = await client.getUrl(line.url);
-      line.headers.forEach(request.headers.set);
+      final request = await client.getUrl(url);
+      headers.forEach(request.headers.set);
       final response = await request.close().timeout(const Duration(seconds: 10));
       final bytes = <int>[];
       await for (final chunk in response.timeout(const Duration(seconds: 10))) {
         bytes.addAll(chunk);
-        if (bytes.length >= 65536) break;
+        if (bytes.length >= limit) break;
       }
       return (status: response.statusCode, bytes: bytes);
     } on Object catch (error) {
@@ -112,6 +168,7 @@ class ProbeCommand extends Command<int> {
     if (bytes.length >= 3 && bytes[0] == 0x46 && bytes[1] == 0x4C && bytes[2] == 0x56) return 'FLV';
     if (bytes.length >= 7 && String.fromCharCodes(bytes.take(7)) == '#EXTM3U') return 'HLS playlist';
     if (bytes.isNotEmpty && bytes[0] == 0x47) return 'MPEG-TS';
+    if (bytes.length >= 8 && String.fromCharCodes(bytes.sublist(4, 8)) == 'ftyp') return 'fMP4';
     return 'unknown';
   }
 }

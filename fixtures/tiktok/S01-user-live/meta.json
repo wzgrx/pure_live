@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "platform": "tiktok",
+  "sample": "S01-user-live",
+  "capturedAt": "2026-09-27T20:15:47.310644Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Origin": "https://www.tiktok.com",
+      "Referer": "https://www.tiktok.com/@qvc/live",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "set-cookie": "csrfToken=9N8YdqTI-JiOCH-A4INzdPjKNFd6Bp4-0kTc; path=/; domain=.tiktok.com; samesite=lax",
+      "date": "Sun, 27 Sep 2026 20:15:47 GMT",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "x-origin-response-time": "239,23.56.100.59",
+      "x-parent-response-time": "308,23.209.85.77",
+      "access-control-expose-headers": "x-tt-traceflag,x-tt-logid",
+      "pragma": "no-cache",
+      "x-tt-trace-host": "01561751557052203fc0aff4f22ef683cc008d18a1bd3b60580dd2307fd9505d305006102c39e19571b4fc7c58ac64fbd4ff96281a49fbf34174edd63b5a42237df9640f96daaf88fffd78b4df3173a74761e0167b527fc105e1ae5417a03e717d37a6363f9e554f34656a9e8a7f80c1bf",
+      "server": "nginx",
+      "x-tt-trace-tag": "id=16;cdn-cache=miss;type=dyn",
+      "x-akamai-request-id": "746aa1.1a570843",
+      "content-length": "3070",
+      "x-frame-options": "SAMEORIGIN",
+      "connection": "keep-alive",
+      "cache-control": "max-age=0, no-cache, no-store",
+      "access-control-allow-origin": "https://www.tiktok.com",
+      "strict-transport-security": "max-age=31536000; includeSubdomains",
+      "tt-gateway-flag": "v2",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "server-timing": [
+        "cdn-cache; desc=MISS, edge; dur=69, origin; dur=239",
+        "inner; dur=219"
+      ],
+      "x-tt-trace-id": "00-260927201547B3BDB20F2C1378F4EDDE-40C8AD1A7AA9548B-00",
+      "x-bytefaas-request-id": "20260927201547B3BDB20F2C1378F4EDDE",
+      "content-type": "application/json; charset=utf-8",
+      "x-tt-logid": "20260927201547B3BDB20F2C1378F4EDDE",
+      "x-xss-protection": "1; mode=block",
+      "x-bytefaas-execution-duration": "204.22",
+      "access-control-allow-credentials": "true",
+      "x-powered-by": "Goofy Node",
+      "x-gw-dst-psm": "serverless.live.api",
+      "x-download-options": "noopen",
+      "x-cache-remote": "TCP_MISS from a23-56-100-59.deploy.akamaitechnologies.com (AkamaiGHost/22.6.4-f482a3e3664c9c221e0e3f27d57156e9) (-)",
+      "x-content-type-options": "nosniff",
+      "x-cache": "TCP_MISS from a23-209-85-77.deploy.akamaitechnologies.com (AkamaiGHost/22.6.3-3e6da3dfbe26c674604cf393ddf1b015) (-)",
+      "expires": "Sun, 27 Sep 2026 20:15:47 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "6736229b027bc2389a3e2b5c7c822808e3b83b2805f30ad12ca76552caae7259",
+    "length": 13919
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.user.avatarLarger:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.user.avatarMedium:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.user.avatarThumb:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.coverUrl:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.streamData.pull_data.stream_data.data.hd.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.streamData.pull_data.stream_data.data.hd.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.streamData.pull_data.stream_data.data.hd.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.streamData.pull_data.stream_data.data.hd.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.streamData.pull_data.stream_data.data.ao.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.streamData.pull_data.stream_data.data.ao.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.origin.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.origin.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.origin.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.origin.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.sd.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.sd.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.sd.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.sd.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.ld.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.ld.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.ld.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.ld.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.uhd_60.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.uhd_60.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.uhd_60.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.uhd_60.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd_60.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd_60.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd_60.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.hd_60.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.ao.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.liveRoom.hevcStreamData.pull_data.stream_data.data.ao.main.cmaf:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:csrfToken",
+      "rule": "secret"
+    },
+    {
+      "where": "stream_data:sign",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -2864,19 +2864,23 @@ class Translations$sites$zh_Hans {
     'showroom': 'SHOWROOM',
     'pandalive': 'PandaTV',
     '17live': '17LIVE',
-    'iptv': '网络电视',
-  };
-  Map<String, String> get otherNames => {
-    'huajiao': '花椒',
+    'liveme': 'LiveMe',
+    'steambroadcast': 'Steam 直播',
+    'sixroom': '六间房直播',
+    'kugoulive': '酷狗直播',
+    'jdlive': '京东直播',
+    'baidulive': '百度直播',
+    'looklive': 'LOOK 直播',
     'weibo': '微博直播',
+    'niconico': 'niconico',
     'xiaohongshu': '小红书',
     'youtube': 'YouTube Live',
     'tiktok': 'TikTok LIVE',
-    'niconico': 'niconico',
-    'bigo': 'Bigo Live',
     'fc2live': 'FC2 Live',
-    'kick': 'Kick',
+    'bigo': 'Bigo Live',
+    'iptv': '网络电视',
   };
+  Map<String, String> get otherNames => {'huajiao': '花椒', 'kick': 'Kick'};
 }
 
 // Path: sync
@@ -3760,6 +3764,9 @@ class Translations$search$sort$zh_Hans {
 
   /// zh-Hans: '按人数'
   String get audience => '按人数';
+
+  /// zh-Hans: '按粉丝'
+  String get followers => '按粉丝';
 }
 
 // Path: search.web

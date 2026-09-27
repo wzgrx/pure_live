@@ -24,6 +24,20 @@ const _logos = {
   'showroom',
   'pandalive',
   '17live',
+  'liveme',
+  'steambroadcast',
+  'sixroom',
+  'kugoulive',
+  'jdlive',
+  'baidulive',
+  'looklive',
+  'weibo',
+  'niconico',
+  'xiaohongshu',
+  'youtube',
+  'tiktok',
+  'fc2live',
+  'bigo',
 };
 
 /// A platform's logo, used as is (principles §3.4).

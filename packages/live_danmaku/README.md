@@ -81,6 +81,10 @@ await session.close();                      // 5 s 内返回
 | SHOWROOM | 通过（匿名） | `fixtures/showroom/danmaku/S06-live`（25 帧，18 条评论） | 评论、礼物（只有 id） |
 | PandaTV | 通过（游客令牌） | `fixtures/pandalive/danmaku/S07-live`（36 帧：`live/play`、连接、订阅、18 条聊天、心跳） | 聊天（含表情名）、送心/签名心/特别心（按实测结构构造，未录到） |
 | 17LIVE | 通过（匿名 Ably 令牌） | `fixtures/17live/danmaku/S05-live`（37 帧：令牌、ATTACH、8 条评论、服务端心跳；负载解压精简后重新压缩） | 评论、礼物（只有 id，按实测结构构造）、在线人数（按实测结构构造） |
+| FC2 ライブ | 通过（匿名，控制连接 WebSocket，JSON 命令走二进制帧） | `fixtures/fc2live/danmaku/S06-live`（53 帧：30 条历史评论不发出，20 条新评论，4 次心跳） | 评论、在线人数、累计人数 |
+| niconico | 通过（匿名；自己的座位 WebSocket + NDGR 评论服务器 HTTP） | `fixtures/niconico/danmaku/S07-live`（7 帧：3 次 view、4 个窗口，15 条评论；座位用 live_core 的 S04-seat 回放） | 评论、在线人数（按原节奏晚一个窗口发出） |
+| Steam 直播 | 通过（匿名，HTTP 轮询聊天日志） | `fixtures/steambroadcast/danmaku/S07-live`（146 帧：历史 50 条 + 约 140 个时间窗，录制期间无新消息） | 聊天（历史只用于对时，不发出） |
+| YouTube | 通过（匿名，经代理，InnerTube 聊天轮询） | `fixtures/youtube/danmaku/S06-live`（9 帧：`next` + 8 次轮询；历史 73 条不发出，21 条新消息） | 聊天、付费留言（按聊天行，带金额） |
 
 ## 录制样本
 

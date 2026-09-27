@@ -17,7 +17,8 @@ final class RoomCard {
     this.audience = Audience.none,
     this.liveSince,
     this.avatar,
-  });
+    this.followers,
+  }) : assert(followers == null || followers >= 0, 'followers must not be negative');
 
   /// Normalised room identity.
   final RoomRef ref;
@@ -46,6 +47,10 @@ final class RoomCard {
   /// Streamer's avatar when the list provides one (search results, the 3.3.x
   /// bridge); v4 room cards do not show it.
   final Uri? avatar;
+
+  /// The streamer's follower count when the list reports one (search results
+  /// of some platforms); a sort key (F-SRC-01), not an audience measure.
+  final int? followers;
 }
 
 /// A room's detail page data: the card plus what the room page needs.

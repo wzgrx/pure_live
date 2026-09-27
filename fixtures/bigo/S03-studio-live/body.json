@@ -1,0 +1,30 @@
+{
+  "code": 0,
+  "data": {
+    "sid": 2472221860,
+    "siteId": "qashia305",
+    "uid": 409742853,
+    "avatar": "http://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+    "nick_name": "qashia",
+    "country_code": "",
+    "gameTitle": "",
+    "gameId": 0,
+    "roomTopic": "",
+    "snapshot": "http://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_2.jpg?type=20&auth-token=WlT2PgnB_JQ4JvTFqoHDhkAUiClVu6FplctWOFQavPL%3AekJlXqe1QEpuPjM5TqPxiP3dETRkQBJiMnekQLY7XRa5GSspImD2AmehxpN5DtOmeH",
+    "alive": 1,
+    "roomId": "6812312308570332324",
+    "roomStatus": 6,
+    "covers": null,
+    "client_ip": "",
+    "hls_src": "https://47A788A9.cubetecn.com:1451/list_3453520891_2472221860_0.m3u8",
+    "cdn_src": [],
+    "needLogin": false,
+    "passRoom": false,
+    "reserver": 4108,
+    "clientBigoId": "qashia305",
+    "roomType": "0",
+    "isPaidShow": ""
+  },
+  "msg": "success",
+  "flag": null
+}

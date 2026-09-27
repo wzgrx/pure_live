@@ -16,6 +16,10 @@ enum SearchSort {
 
   /// Audience, then platform order.
   audience,
+
+  /// The streamer's followers where the platform reports them, then
+  /// audience, then platform order.
+  followers,
 }
 
 /// Menu labels of [SearchSort].
@@ -23,6 +27,7 @@ Map<SearchSort, String> get searchSortLabels => {
   SearchSort.smart: t.search.sort.smart,
   SearchSort.platform: t.search.sort.platform,
   SearchSort.audience: t.search.sort.audience,
+  SearchSort.followers: t.search.sort.followers,
 };
 
 int _audience(RoomCard card) => card.audience.online ?? card.audience.popularity ?? card.audience.cumulative ?? 0;
@@ -50,11 +55,13 @@ List<RoomCard> sortSearch(List<RoomCard> cards, SearchSort sort, {required List<
     if (live != 0) return live;
     final byPlatform = platformRank(a).compareTo(platformRank(b));
     final byAudience = _audience(b).compareTo(_audience(a));
+    final byFollowers = (b.followers ?? 0).compareTo(a.followers ?? 0);
     final byRelevance = rank[a.ref.key]!.compareTo(rank[b.ref.key]!);
     for (final order in switch (sort) {
       SearchSort.smart => [byRelevance, byPlatform],
       SearchSort.platform => [byPlatform, byAudience],
       SearchSort.audience => [byAudience, byPlatform],
+      SearchSort.followers => [byFollowers, byAudience, byPlatform],
     }) {
       if (order != 0) return order;
     }
@@ -130,7 +137,7 @@ class CombinedSearchNotifier extends AsyncNotifier<CombinedSearchState> {
   @override
   Future<CombinedSearchState> build() async {
     ref.watch(sitesProvider);
-    final platforms = ref.watch(enabledPlatformsProvider);
+    final platforms = ref.watch(searchablePlatformsProvider);
     _stagnant.clear();
     final pages = await Future.wait([for (final id in platforms) _page(id, null)]);
     final items = <RoomCard>[];

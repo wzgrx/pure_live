@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S02-search-p2",
+  "capturedAt": "2026-09-27T18:58:34.659015Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://www.youtube.com/youtubei/v1/search?prettyPrint=false",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Content-Type": "application/json",
+      "Origin": "https://www.youtube.com",
+      "Cookie": "SOCS=POX"
+    },
+    "body": "{\"context\":{\"client\":{\"clientName\":\"WEB\",\"clientVersion\":\"2.20260925.01.00\",\"hl\":\"en\",\"gl\":\"US\"}},\"continuation\":\"EpkDEgRsb2ZpGpADRWdKQUFVZ1VnZ0VMY2taYVNFOUliQzFNT0VHQ0FRdEJPV1J0YW1oa2JFRkxaNElCQzBVeWRrOU9abnB2ZVZKSmdnRUxjbEJxWlhvNGVqWXhja21DQVF0R09IVktOa3B1ZWtsaFJZSUJDekpCY1UxdVNqZ3pRa3BaZ2dFTE1WUnNNa1owVmpBMmNXLUNBUXN6VUVaS09WTkZWRk0wVFlJQkMwbDRVRUZPYldwUVlXVnJnZ0VMTUcxMVNFWkNVMmw1WW5lQ0FRdDJXVWxaU1ZadFQyOHpVWUlCQ3pkdlNIaHdkWE50VW1aVmdnRUxaR2d6WTJGck0yTnViVW1DQVF0NVpqVk9UM2w1TVZOWVZZSUJDMjVKTnpJMWFWWnplVzlSZ2dFTFEzZFFRM2t4UjB4VE16aUNBUXQ0WW1WSU1IZGpRbmRxZDRJQkMwRjJkV2RuU1V0VFJFUkZnZ0VMVHpkWU9FTk5jbVpzVTAyQ0FRczFlWGcyUWxkc1JWWmpXYklCQmdvRUNCUVFBZyUzRCUzRBiB4OgYIgtzZWFyY2gtZmVlZA%3D%3D\"}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 18:58:35 GMT",
+      "vary": [
+        "Origin",
+        "X-Origin",
+        "Referer"
+      ],
+      "content-encoding": "gzip",
+      "content-type": "application/json; charset=UTF-8",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "0",
+      "x-content-type-options": "nosniff",
+      "server": "scaffolding on HTTPServer2"
+    }
+  },
+  "raw": {
+    "sha256": "7b7e7ad6bdfe07b717d1eb94700765d87baf73b2b44effe959586f881b3693b9",
+    "length": 241597
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "cookie:SOCS",
+      "rule": "secret"
+    },
+    {
+      "where": "$.responseContext.visitorData",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[0].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[0].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[0].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[1].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[1].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[1].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[2].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[2].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[2].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[3].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[3].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[3].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[4].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[4].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[4].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[5].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[5].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[5].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[6].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[6].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[6].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[7].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[7].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[7].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[8].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[8].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[8].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[9].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[9].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[9].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[10].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[10].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[10].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[11].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[11].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[11].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[12].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[12].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[12].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[13].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[13].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[13].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[14].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[14].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[14].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[15].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[15].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[15].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[16].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[16].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[16].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[17].videoRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[17].videoRenderer.menu.menuRenderer.items[0].menuServiceItemRenderer.serviceEndpoint.signalServiceEndpoint.actions[0].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems[0].itemSectionRenderer.contents[17].videoRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

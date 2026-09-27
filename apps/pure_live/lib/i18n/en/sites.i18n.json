@@ -19,17 +19,24 @@
     "showroom": "SHOWROOM",
     "pandalive": "PandaTV",
     "17live": "17LIVE",
+    "liveme": "LiveMe",
+    "steambroadcast": "Steam Broadcasting",
+    "sixroom": "6.cn",
+    "kugoulive": "Kugou Live",
+    "jdlive": "JD Live",
+    "baidulive": "Baidu Live",
+    "looklive": "LOOK Live",
+    "weibo": "Weibo Live",
+    "niconico": "niconico",
+    "xiaohongshu": "REDnote",
+    "youtube": "YouTube Live",
+    "tiktok": "TikTok LIVE",
+    "fc2live": "FC2 Live",
+    "bigo": "Bigo Live",
     "iptv": "IPTV"
   },
   "otherNames(map)": {
     "huajiao": "Huajiao",
-    "weibo": "Weibo Live",
-    "xiaohongshu": "REDnote",
-    "youtube": "YouTube Live",
-    "tiktok": "TikTok LIVE",
-    "niconico": "niconico",
-    "bigo": "Bigo Live",
-    "fc2live": "FC2 Live",
     "kick": "Kick"
   }
 }

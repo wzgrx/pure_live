@@ -1,0 +1,450 @@
+{
+  "schema": 1,
+  "platform": "bigo",
+  "sample": "S01-list",
+  "capturedAt": "2026-09-27T19:04:26.520829Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://ta.bigo.tv/official_website/OInterfaceWeb/vedioList/72?tabType=00&fetchNum=10&lang=en&countryCode=US",
+    "headers": {
+      "Origin": "https://www.bigo.tv",
+      "Referer": "https://www.bigo.tv/",
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-origin": "https://www.bigo.tv",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 19:04:27 GMT",
+      "content-encoding": "gzip",
+      "vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Origin"
+      ],
+      "x-kong-proxy-latency": "0",
+      "strict-transport-security": "max-age=15768001",
+      "otel-x-biz-code": "0",
+      "access-control-expose-headers": "*",
+      "content-type": "application/json;charset=UTF-8",
+      "x-kong-upstream-latency": "27",
+      "server": "nginx",
+      "access-control-allow-credentials": "true",
+      "via": "kong/2.2.2"
+    }
+  },
+  "raw": {
+    "sha256": "2e4ed86c82e002848e2cb928b15645f0a9d088cf6878e50d147311a22e1001f0",
+    "length": 28789
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.data[0].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[1].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[1].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[1].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[1].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[1].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[2].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[2].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[2].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[2].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[2].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[3].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[3].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[3].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[3].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[3].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[4].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[4].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[4].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[4].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[4].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[5].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[5].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[5].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[5].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[5].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[6].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[6].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[6].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[6].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[6].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[7].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[7].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[7].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[7].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[7].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[8].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[8].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[8].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[8].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[8].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[9].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[9].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[9].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[9].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[9].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[10].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[10].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[10].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[10].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[10].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[11].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[11].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[11].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[11].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[11].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[12].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[12].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[12].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[12].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[12].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[13].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[13].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[13].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[13].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[13].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[14].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[14].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[14].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[14].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[14].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[15].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[15].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[15].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[15].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[15].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[16].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[16].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[16].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[16].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[16].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[17].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[17].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[17].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[17].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[17].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[18].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[18].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[18].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[18].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[18].data5:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[19].cover_l:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[19].cover_m:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[19].data1:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[19].data2.bigUrl:auth-token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[19].data5:auth-token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

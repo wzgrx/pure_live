@@ -1,0 +1,374 @@
+{
+  "flag": "001",
+  "content": {
+    "u0": [],
+    "recid": "T1790532035038-0",
+    "pagename": "index_z",
+    "tagInfo": [
+      {
+        "id": 9000001,
+        "name": "金牌",
+        "viewPicNormal": {
+          "img2x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/golden/golden@2x.png",
+          "img3x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/golden/golden@3x.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2019/11/05/11/1013v1572922952578890199.png",
+          "img3x": "https://vi1.xiu123.cn/live/2019/11/05/11/1013v1572922952777678128.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 57
+      },
+      {
+        "id": "1000009",
+        "name": "唱将",
+        "viewPicNormal": {
+          "img2x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/singer/singer@2x.png",
+          "img3x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/singer/singer@3x.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817178666297536.png",
+          "img3x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817178864949727.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000000",
+        "name": "舞秀",
+        "viewPicNormal": {
+          "img2x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/dancing/dancing@2x.png",
+          "img3x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/dancing/dancing@3x.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536817150267635940.png",
+          "img3x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817150460315359.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000054",
+        "name": "户外",
+        "viewPicNormal": {
+          "img2x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/outside/outside@2x.png",
+          "img3x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/outside/outside@3x.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817288768953074.png",
+          "img3x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817288971915230.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000018",
+        "name": "聊咖",
+        "viewPicNormal": {
+          "img2x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/talkshow/talkshow@2x.png",
+          "img3x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/talkshow/talkshow@3x.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817209971397295.png",
+          "img3x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817210161622216.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 2
+      },
+      {
+        "id": "1000090",
+        "name": "乐器",
+        "viewPicNormal": {
+          "img2x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/piano/piano@2x.png",
+          "img3x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/piano/piano@3x.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817344719587761.png",
+          "img3x": "https://vi2.xiu123.cn/live/2018/09/13/13/1013v1536817344834557947.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000182",
+        "name": "组合",
+        "viewPicNormal": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536816037345284393.png",
+          "img3x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536816037537792777.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817120177244636.png",
+          "img3x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817120309711732.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000225",
+        "name": "女神经",
+        "viewPicNormal": {
+          "img2x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/dancing/dancing@2x.png",
+          "img3x": "https://vr0.xiu123.cn/images/app/icon/2021/0528/dancing/dancing@3x.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536817150267635940.png",
+          "img3x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817150460315359.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000198",
+        "name": "二次元",
+        "viewPicNormal": {
+          "img2x": "https://vi0.xiu123.cn/live/2021/09/06/10/1013v1630896822862034146.png",
+          "img3x": "https://vi0.xiu123.cn/live/2021/09/06/10/1013v1630896822862034146.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2021/09/06/10/1013v1630896822862034146.png",
+          "img3x": "https://vi1.xiu123.cn/live/2021/09/06/10/1013v1630896822935411686.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000196",
+        "name": "组合",
+        "viewPicNormal": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536816037345284393.png",
+          "img3x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536816037537792777.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817120177244636.png",
+          "img3x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817120309711732.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000189",
+        "name": "组合",
+        "viewPicNormal": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536816037345284393.png",
+          "img3x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536816037537792777.png"
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817120177244636.png",
+          "img3x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817120309711732.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000135",
+        "name": "娇萌",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536817459270379321.png",
+          "img3x": "https://vi2.xiu123.cn/live/2018/09/13/13/1013v1536817459414060099.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000161",
+        "name": "甜美",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi1.xiu123.cn/live/2018/09/25/16/1013v1537863633958020011.png",
+          "img3x": "https://vi3.xiu123.cn/live/2018/09/25/16/1013v1537863637748381137.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000144",
+        "name": "女王",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817477902482372.png",
+          "img3x": "https://vi2.xiu123.cn/live/2018/09/13/13/1013v1536817478097824259.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000117",
+        "name": "戏精",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536817411226138917.png",
+          "img3x": "https://vi3.xiu123.cn/live/2018/09/13/13/1013v1536817411445430827.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000099",
+        "name": "曼妙",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817367051452291.png",
+          "img3x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817367175523996.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000063",
+        "name": "女神",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817318636586865.png",
+          "img3x": "https://vi2.xiu123.cn/live/2018/09/13/13/1013v1536817318675939614.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000236",
+        "name": "清纯",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vi0.xiu123.cn/live/2018/09/13/13/1013v1536817367051452291.png",
+          "img3x": "https://vi1.xiu123.cn/live/2018/09/13/13/1013v1536817367175523996.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000900",
+        "name": "相亲",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vr0.xiu123.cn/tao/i/y4/8f80fa961146fe3368c53bc4806aa7a4.png",
+          "img3x": "https://vr0.xiu123.cn/tao/i/y2/40450aded896f4cae068da3d07b44374.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      },
+      {
+        "id": "1000902",
+        "name": "相亲交友",
+        "viewPicNormal": {
+          "img2x": "",
+          "img3x": ""
+        },
+        "viewPicSmall": {
+          "img2x": "https://vr0.xiu123.cn/tao/i/u3/3dcfefaf2c93c0c633d49848fe86d791.png",
+          "img3x": "https://vr0.xiu123.cn/tao/i/t7/95db5819a626e1afb7d93306a8a10950.png",
+          "img2xw": 79,
+          "img2xh": 36,
+          "img3xw": 119,
+          "img3xh": 54
+        },
+        "count": 0
+      }
+    ],
+    "roomListRec": [],
+    "roomListCount": {
+      "u0": 59,
+      "u1": 32,
+      "u2": 5,
+      "u3": 0,
+      "u7": 0,
+      "u10": 12,
+      "r10": 20,
+      "r5": 11,
+      "r4": 7,
+      "r2": 0,
+      "r1": 21,
+      "video": 0,
+      "mlive": 5,
+      "lianmai": 0,
+      "male": 3,
+      "special": 64,
+      "new": 16,
+      "cnew": 30,
+      "allCount": 128,
+      "u8": 19,
+      "u11": 1
+    }
+  }
+}

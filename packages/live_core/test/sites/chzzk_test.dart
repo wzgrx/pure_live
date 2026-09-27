@@ -126,6 +126,7 @@ void main() {
       );
       expect(page.items.where((c) => c.state == LiveState.live), isNotEmpty);
       expect(page.items.first.title, page.items.first.anchorName);
+      expect(page.items.map((c) => c.followers), raw.map((item) => (item['channel'] as Map)['followerCount']));
       expect(page.next, const PageCursor('20'));
     });
 

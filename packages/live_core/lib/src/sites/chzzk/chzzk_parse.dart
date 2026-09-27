@@ -228,6 +228,7 @@ abstract final class ChzzkParse {
       state: channel['openLive'] == true ? LiveState.live : LiveState.offline,
       cover: avatar,
       avatar: avatar,
+      followers: jsonCount(channel['followerCount']),
     );
   }
 

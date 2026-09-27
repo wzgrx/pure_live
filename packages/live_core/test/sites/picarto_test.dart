@@ -56,6 +56,7 @@ void main() {
     expect(page.items.where((c) => c.state == LiveState.offline), isNotEmpty);
     expect(page.items.where((c) => c.state == LiveState.live), isNotEmpty);
     expect(page.items.first.title, page.items.first.anchorName);
+    expect(page.items.first.followers, 1156);
     expect(page.next, const PageCursor('2'));
     expect(PicartoParse.searchPage(Fixture.load('picarto', 'S03-search-empty').body, page: 1, size: 20).isLast, isTrue);
   });

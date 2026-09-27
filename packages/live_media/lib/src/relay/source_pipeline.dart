@@ -9,17 +9,19 @@ enum PipelineMode {
   /// FLV whose lease cuts the connection: the loopback relay splices renewals in (SRC-5).
   splice,
 
+  /// HLS with a relay recipe (per-path cookies, restored segments): the
+  /// loopback relay rewrites and forwards it.
+  hls,
+
   /// Everything else: the engine connects to the CDN itself.
   direct;
 
-  /// The mode for [line]. Splicing needs a way to renew the line.
-  ///
-  /// Not implemented, pending the spec's open questions: codec-12 HEVC tag
-  /// rewriting (all v4 libmpv builds ship FFmpeg >= 8 except the unverified
-  /// Windows one) and the HLS relay (no v4 platform produces a query policy).
+  /// The mode for [line]. Splicing needs a way to renew the line. Codec-12
+  /// HEVC needs no rewriting: every v4 libmpv ships FFmpeg >= 8.
   static PipelineMode of(StreamLine line, {required bool canRenew}) {
     final lease = line.lease;
     if (canRenew && line.format == StreamFormat.flv && lease != null && lease.cutsConnection) return splice;
+    if (line.format == StreamFormat.hls && line.hlsRelay != null) return hls;
     return direct;
   }
 }
@@ -71,12 +73,12 @@ final class _DirectInput implements PlaybackInput {
 }
 
 final class _RelayedInput implements PlaybackInput {
-  new(this.input);
+  new(this.input, this.mode);
 
   final RelayInput input;
 
   @override
-  PipelineMode get mode => PipelineMode.splice;
+  final PipelineMode mode;
 
   @override
   Uri get uri => input.uri;
@@ -87,8 +89,10 @@ final class _RelayedInput implements PlaybackInput {
   @override
   bool get local => true;
 
+  /// Only the splice renews; an HLS relay keeps the session's prefetch, which
+  /// also keeps a niconico seat open (spec/sites/niconico.md §6.4).
   @override
-  bool get renewsLease => true;
+  bool get renewsLease => mode == PipelineMode.splice;
 
   @override
   Future<void> close() => input.close();
@@ -122,7 +126,13 @@ final class SourcePipeline {
         return _DirectInput(line);
       case PipelineMode.splice:
         final relay = await (_relay ??= _startRelay());
-        return _RelayedInput(relay.openSplice(line, site: site, renew: renew!, onRenewed: onRenewed, onEvent: onEvent));
+        return _RelayedInput(
+          relay.openSplice(line, site: site, renew: renew!, onRenewed: onRenewed, onEvent: onEvent),
+          PipelineMode.splice,
+        );
+      case PipelineMode.hls:
+        final relay = await (_relay ??= _startRelay());
+        return _RelayedInput(relay.openHls(line, site: site), PipelineMode.hls);
     }
   }
 

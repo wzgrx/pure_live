@@ -107,6 +107,7 @@ void main() {
           // DIAGNOSIS: legacy used the keyframe `cover`; the room cover is `user_cover`.
           expect(legacy[index]['cover'], 'https:${item['cover']}@400w.jpg');
           expect(room.cover.toString(), 'https:${item['user_cover']}@400w.jpg');
+          expect(room.followers, item['attentions']);
           expect(room.liveSince, DateTime.parse('${(item['live_time'] as String).replaceFirst(' ', 'T')}+08:00'));
         }
         // DIAGNOSIS: legacy ignored `live_user`; v4 appends the streamers not

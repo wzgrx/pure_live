@@ -2102,20 +2102,24 @@ class Translations$sites$zh_Hant implements Translations$sites$zh_Hans {
     'showroom': 'SHOWROOM',
     'pandalive': 'PandaTV',
     '17live': '17LIVE',
-    'iptv': '網路電視',
-  };
-  @override
-  Map<String, String> get otherNames => {
-    'huajiao': '花椒',
+    'liveme': 'LiveMe',
+    'steambroadcast': 'Steam 直播',
+    'sixroom': '六間房直播',
+    'kugoulive': '酷狗直播',
+    'jdlive': '京東直播',
+    'baidulive': '百度直播',
+    'looklive': 'LOOK 直播',
     'weibo': '微博直播',
+    'niconico': 'niconico',
     'xiaohongshu': '小紅書',
     'youtube': 'YouTube Live',
     'tiktok': 'TikTok LIVE',
-    'niconico': 'niconico',
-    'bigo': 'Bigo Live',
     'fc2live': 'FC2 Live',
-    'kick': 'Kick',
+    'bigo': 'Bigo Live',
+    'iptv': '網路電視',
   };
+  @override
+  Map<String, String> get otherNames => {'huajiao': '花椒', 'kick': 'Kick'};
 }
 
 // Path: sync
@@ -2799,6 +2803,8 @@ class Translations$search$sort$zh_Hant implements Translations$search$sort$zh_Ha
   String get platform => '按平台';
   @override
   String get audience => '按人數';
+  @override
+  String get followers => '按粉絲';
 }
 
 // Path: search.web

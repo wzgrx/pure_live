@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "bigo",
+  "sample": "S02-time-live",
+  "capturedAt": "2026-09-27T19:04:56.396695Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://sec.bigo.sg/v1/webjs/t?callback=jsonp_purelive_t",
+    "headers": {
+      "Origin": "https://www.bigo.tv",
+      "Referer": "https://www.bigo.tv/",
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "content-type": "application/javascript; charset=utf-8",
+      "date": "Sun, 27 Sep 2026 19:04:56 GMT",
+      "strict-transport-security": "max-age=15768001",
+      "content-length": "49",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "fc7d2cef182c52fad6511976bdf4908e13e2e970a25f2708b32bc385acd95bd6",
+    "length": 49
+  },
+  "body": "body.txt",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

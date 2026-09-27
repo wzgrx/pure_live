@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "sample": "S03-area-7024-p1",
+  "capturedAt": "2026-09-27T17:51:13.212270Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://fx1.service.kugou.com/mfanxing-home/h5/cdn/room/index/list_v4?pid=0&kugouId=0&doubleLiveFirst=1&sysVersion=0&platform=7&device=PureLive-Web&channel=0&version=99999&longitude=0&latitude=0&appid=1010&liveTypeFilter=0&isNew=0&entranceType=0&uiMode=0&page=1&cid=7024",
+    "headers": {
+      "Origin": "https://fanxing.kugou.com",
+      "Referer": "https://fanxing.kugou.com/",
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "access-control-allow-credentials": "true",
+      "cache-control": "no-cache",
+      "x-envoy-upstream-service-time": "8",
+      "date": "Sun, 27 Sep 2026 17:51:13 GMT",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://fanxing.kugou.com",
+      "content-encoding": "gzip",
+      "x-via": "1.1 PS-ZHY-01BNR40:14 (Cdn Cache Server V2.0)",
+      "content-type": "application/json;charset=utf-8",
+      "x-ws-request-id": "6ab95791_PS-ZHY-01BNR40_27986-53637",
+      "server": "openresty"
+    }
+  },
+  "raw": {
+    "sha256": "e1f3e707e789919a38e29e03d11160e5128977b34dfa6c41b9be0ee7de9bdf15",
+    "length": 12091
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

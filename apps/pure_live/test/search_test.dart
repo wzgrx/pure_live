@@ -12,13 +12,15 @@ import 'package:pure_live_app/features/search/search_results.dart';
 
 import 'fakes.dart';
 
-RoomCard _card(String platform, String id, {int online = 0, LiveState state = LiveState.live}) => RoomCard(
-  ref: RoomRef(platform, id),
-  title: '标题$id',
-  anchorName: '主播$id',
-  state: state,
-  audience: Audience(online: online),
-);
+RoomCard _card(String platform, String id, {int online = 0, LiveState state = LiveState.live, int? followers}) =>
+    RoomCard(
+      ref: RoomRef(platform, id),
+      title: '标题$id',
+      anchorName: '主播$id',
+      state: state,
+      audience: Audience(online: online),
+      followers: followers,
+    );
 
 List<String> _ids(List<RoomCard> cards) => [for (final card in cards) card.ref.roomId];
 
@@ -44,6 +46,25 @@ void main() {
 
     test('audience, then platform', () {
       expect(_ids(sortSearch(cards, SearchSort.audience, platforms: platforms)), ['d2', 'h1', 'd1', 'h2', 'd3']);
+    });
+
+    test('followers where reported, then audience, then platform; live first', () {
+      final withFollowers = [
+        _card('bilibili', 'b1', online: 1, followers: 5000),
+        _card('bilibili', 'b2', online: 1, followers: 20),
+        _card('bilibili', 'b3', followers: 90000, state: LiveState.offline),
+        ...cards,
+      ];
+      expect(_ids(sortSearch(withFollowers, SearchSort.followers, platforms: ['bilibili', ...platforms])), [
+        'b1',
+        'b2',
+        'd2',
+        'h1',
+        'd1',
+        'h2',
+        'b3',
+        'd3',
+      ]);
     });
   });
 

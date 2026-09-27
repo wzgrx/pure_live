@@ -14,7 +14,8 @@
   "sort": {
     "smart": "智能",
     "platform": "按平台",
-    "audience": "按人数"
+    "audience": "按人数",
+    "followers": "按粉丝"
   },
   "web": {
     "title": "网页搜索",

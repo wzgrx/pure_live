@@ -3,10 +3,14 @@ import 'dart:math';
 
 import 'package:live_cli/src/danmaku/recorder.dart';
 import 'package:live_cli/src/danmaku/scrub_acfun.dart';
+import 'package:live_cli/src/danmaku/scrub_fc2live.dart';
 import 'package:live_cli/src/danmaku/scrub_json_sites.dart';
+import 'package:live_cli/src/danmaku/scrub_niconico.dart';
 import 'package:live_cli/src/danmaku/scrub_sites.dart';
 import 'package:live_cli/src/danmaku/scrub_soop.dart';
+import 'package:live_cli/src/danmaku/scrub_steambroadcast.dart';
 import 'package:live_cli/src/danmaku/scrub_twitch.dart';
+import 'package:live_cli/src/danmaku/scrub_youtube.dart';
 import 'package:live_cli/src/danmaku/scrub_yy.dart';
 import 'package:live_core/live_core.dart';
 
@@ -133,6 +137,7 @@ abstract class FrameScrubber {
   factory forPlatform(String platform, RoomDetail detail, {int? seed}) => switch (platform) {
     'acfun' => AcfunFrameScrubber(detail, seed: seed),
     'douyu' => DouyuFrameScrubber(detail, seed: seed),
+    'fc2live' => Fc2LiveFrameScrubber(detail, seed: seed),
     'huya' => HuyaFrameScrubber(detail, seed: seed),
     'kilakila' => KilakilaFrameScrubber(detail, seed: seed),
     'bilibili' => BilibiliFrameScrubber(detail, seed: seed),
@@ -141,12 +146,15 @@ abstract class FrameScrubber {
     'kuaishou' => KuaishouFrameScrubber(detail, seed: seed),
     '17live' => SeventeenliveFrameScrubber(detail, seed: seed),
     'missevan' => MissevanFrameScrubber(detail, seed: seed),
+    'niconico' => NiconicoFrameScrubber(detail, seed: seed),
     'pandalive' => PandaliveFrameScrubber(detail, seed: seed),
     'picarto' => PicartoFrameScrubber(detail, seed: seed),
     'showroom' => ShowroomFrameScrubber(detail, seed: seed),
     'soop' => SoopFrameScrubber(detail, seed: seed),
+    'steambroadcast' => SteamBroadcastFrameScrubber(detail, seed: seed),
     'twitcasting' => TwitcastingFrameScrubber(detail, seed: seed),
     'twitch' => TwitchFrameScrubber(detail, seed: seed),
+    'youtube' => YouTubeFrameScrubber(detail, seed: seed),
     'yy' => YyFrameScrubber(detail, seed: seed),
     _ => throw ArgumentError.value(platform, 'platform', 'no frame scrubber'),
   };

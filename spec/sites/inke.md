@@ -79,7 +79,7 @@
 - `now_publish.live` 两个地址：
   - `stream_addr`：`https://live-pull-ws.ikstatic.cn/live/<liveid>_t.flv?stream_id=<liveid>_t&wsSecret=<md5>&wsABStime=<hex 秒>`（网宿，转码后的 **H.264**，720×1280，15 fps）；
   - `stream_multi_addr`：`http://live-pull-zego.ikstatic.cn/inkemain/<liveid>_0_en.flv?…&codecInfo=8192&…`（即构，原始推流，**FLV codec id 12 = HEVC**，432×786）。S02 的 12 个直播全是这样。
-- v4 只给网宿线路（线路身份 `ws`），画质“原画”一个。旧版只认网宿地址（A:164-179）。即构线路要等 live_media 实现旧版中继的 codec 12 → 增强 FLV 改写后才能用（§6.4）。
+- v4 只给网宿线路（线路身份 `ws`），画质“原画”一个。旧版只认网宿地址（A:164-179）。即构线路是 codec 12 的 HEVC 原始流，等高通真机验证后再提供（§6.4）。
 - 网宿地址不带签名直接请求会失败；必须用接口给的 `wsSecret`。
 
 ---
@@ -102,7 +102,7 @@
 ### 6.4 媒体实况与 HEVC 缺口（2026-09-27）
 
 - 网宿 `_t.flv`：`videocodecid 7`（AVC）、AAC，v4 直接播放。
-- 即构 `_0_en.flv`：视频 tag 的 codec id 是 **12**（国内 CDN 的非标准 FLV HEVC），`codecInfo=8192` 标记。3.x 的本地中继会把它改写成增强 FLV（`hvc1`），live_media 还没有实现这一步，mpv/FFmpeg 读不了 codec 12。**缺口**：要提供映客原画 HEVC 线路，需要 live_media 实现 codec 12 改写；在此之前 v4 只用 H.264 转码线路。
+- 即构 `_0_en.flv`：视频 tag 的 codec id 是 **12**（国内 CDN 的非标准 FLV HEVC），`codecInfo=8192` 标记。3.x 的本地中继会把它改写成增强 FLV（`hvc1`）；v4 各平台的 libmpv 都是 FFmpeg ≥ 8，能直接读 codec 12，不需要改写（spec/modules/playback.md），录制写入时改写（ADR 0005）。**剩下的条件**：高通硬解对这类流是否静默丢帧（REG-PLAY-022）要真机验证；通过后加“原画”（即构 HEVC）档，默认仍是 H.264 转码档；在此之前 v4 只用 H.264 转码线路。
 - `live_cli probe inke <网页房间链接>`：解析 → 详情（在线 13）→ 取流（网宿 FLV）→ 读到 FLV 文件头，通过（2026-09-27，直连）。
 
 ---
@@ -173,6 +173,6 @@
 | # | 问题 | 怎么查 |
 |---|---|---|
 | 1 | 网宿地址到期（约 2 小时）后已建立的 FLV 连接是否断开 | 连续播放超过 2 小时 |
-| 2 | 即构线路是否全部是 codec 12；live_media 实现改写后能否作为原画线路 | 实现中继改写后对照 |
+| 2 | 即构线路是否全部是 codec 12；能否作为原画线路 | 高通真机验证（REG-PLAY-022）时对照 |
 | 3 | 登录后 `live_share_pc` 是否给 `sio_url`、`live_addr` | 有账号后对照 |
 | 4 | `simpleall` 的 `offset`/`count` 语义 | 多次请求对比 |

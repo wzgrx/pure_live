@@ -412,6 +412,7 @@ abstract final class BilibiliParse {
       area: jsonString(item['cate_name']),
       audience: _audience(item['online'], item['watched_show'], state),
       liveSince: state == LiveState.live ? _beijingTime(item['live_time']) : null,
+      followers: jsonCount(item['attentions']),
     );
   }
 
@@ -424,6 +425,7 @@ abstract final class BilibiliParse {
       anchorName: _highlighted(item['uname']),
       state: _searchState(item['live_status']),
       area: jsonString(item['cate_name']),
+      followers: jsonCount(item['attentions']),
     );
   }
 

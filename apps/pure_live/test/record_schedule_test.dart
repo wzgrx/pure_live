@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
@@ -47,14 +49,25 @@ void main() {
     );
   }
 
+  // Waits for [done] on the real clock the schedule's timers run on; a
+  // loaded machine (the gate runs suites side by side) is slower than any
+  // fixed delay.
+  Future<void> until(FutureOr<bool> Function() done) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    while (!await done() && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+  }
+
   test('F-IPTV-10: a booking starts and stops the recorder, then leaves the list', () async {
     final schedule = container.read(recordScheduleProvider.notifier);
-    expect(await schedule.add(booking(100, 400)), isTrue);
+    expect(await schedule.add(booking(100, 1500)), isTrue);
     expect(container.read(recordScheduleProvider), hasLength(1));
     expect(await store.meta.get(RecordScheduleNotifier.metaKey), contains('新闻联播'));
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    expect(recorder.events, ['start iptv:CCTV-1']);
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+    await until(() => recorder.events.isNotEmpty);
+    expect(recorder.events, ['start iptv:CCTV-1'], reason: 'started, the window is still open');
+    // The end stops the recorder, then saves the shorter list.
+    await until(() async => recorder.events.length > 1 && await store.meta.get(RecordScheduleNotifier.metaKey) == null);
     expect(recorder.events, ['start iptv:CCTV-1', 'stop iptv:CCTV-1']);
     expect(container.read(recordScheduleProvider), isEmpty);
     expect(await store.meta.get(RecordScheduleNotifier.metaKey), isNull);
@@ -65,7 +78,7 @@ void main() {
     final schedule = container.read(recordScheduleProvider.notifier);
     expect(await schedule.add(booking(-1000, -10)), isFalse);
     expect(await schedule.add(booking(0, 200)), isTrue);
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await until(() => recorder.events.isNotEmpty && container.read(recordScheduleProvider).isEmpty);
     expect(recorder.events, ['start iptv:CCTV-1'], reason: 'not stopped: the schedule did not start it');
   });
 
@@ -74,7 +87,7 @@ void main() {
     final running = booking(0, 60000);
     await schedule.add(running);
     await schedule.add(booking(60000, 120000, id: 'CCTV-2'));
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await until(() => recorder.events.isNotEmpty);
     await schedule.remove(running);
     expect(recorder.events, ['start iptv:CCTV-1', 'stop iptv:CCTV-1']);
 

@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart' show DanmakuController;
+import 'package:pure_live_app/core/clock.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/room/player_view.dart';
@@ -38,6 +40,7 @@ void main() {
     WidgetTester tester, {
     RoomPresentation presentation = RoomPresentation.inline,
     Size size = const Size(400, 300),
+    List<Override> overrides = const [],
   }) async {
     tester.view.physicalSize = const Size(900, 600);
     tester.view.devicePixelRatio = 1;
@@ -57,6 +60,7 @@ void main() {
         overrides: [
           storeProvider.overrideWithValue(store),
           sitesProvider.overrideWithValue({'douyu': PlatformSite(_QuietSite())}),
+          ...overrides,
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -100,6 +104,16 @@ void main() {
     expect(player.volume, 0.5);
     expect(player.brightness, 1);
     expect(player.fit, VideoFit.contain);
+  });
+
+  testWidgets('F-ROOM-17: fullscreen shows the time of the app clock', (tester) async {
+    await pumpPlayer(
+      tester,
+      presentation: RoomPresentation.fullscreen,
+      overrides: [clockProvider.overrideWithValue(() => DateTime(2026, 9, 28, 21, 7))],
+    );
+    expect(find.text('21:07'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('T-03: the right half sets the volume, the left half the brightness', (tester) async {

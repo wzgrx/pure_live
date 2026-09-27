@@ -32,6 +32,7 @@
 | [0024](0024-iptv.md) | IPTV：独立模块 live_iptv，数据进主库，旧库只读导入 | 已接受 |
 | [0025](0025-system-integration.md) | 系统集成：后台播放、画中画与小窗、Windows 外壳 | 已接受 |
 | [0026](0026-tv-mode.md) | Android TV 模式：同一安装包内的检测、画布、焦点体系与换台 | 已接受 |
+| [0027](0027-dlna-cast.md) | DLNA 投屏：自写 live_cast 包，投上游原始地址 | 已接受 |
 
 ## 模板
 

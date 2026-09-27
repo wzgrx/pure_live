@@ -323,6 +323,9 @@ enum RoomMenuAction {
   /// 快捷键 (D-16).
   keys,
 
+  /// 投屏 (F-CAST-01).
+  cast,
+
   /// 新窗口打开 (F-WIN-02, Windows).
   newWindow,
 }
@@ -341,6 +344,7 @@ List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({
     item(RoomMenuAction.switchRoom, Icons.swap_horiz, '切换直播间'),
     item(RoomMenuAction.openSite, Icons.open_in_new, '打开原站'),
     item(RoomMenuAction.share, Icons.share_outlined, '分享'),
+    item(RoomMenuAction.cast, Icons.cast, '投屏'),
     item(RoomMenuAction.copyStreamUrl, Icons.link, '复制直链'),
     item(RoomMenuAction.sleepTimer, Icons.bedtime_outlined, '定时关闭'),
     item(RoomMenuAction.volume, Icons.volume_up_outlined, '房间音量'),

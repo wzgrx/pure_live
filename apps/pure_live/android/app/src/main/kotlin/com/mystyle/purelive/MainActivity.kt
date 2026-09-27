@@ -38,6 +38,8 @@ class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         val messenger = flutterEngine.dartExecutor.binaryMessenger
+        // DLNA search needs the Wi-Fi multicast lock (F-CAST-01).
+        CastMulticast(applicationContext).register(messenger)
         pip?.detach()
         pip = PictureInPicture(this, messenger)
         PlaybackLocks.attach(applicationContext, messenger)

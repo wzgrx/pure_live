@@ -108,7 +108,8 @@ CI：`ci.yml` 在 ab38717c 首次全绿（旧应用 analyze 与全量测试、v4
 | 第三批平台后半：liveme、steambroadcast、sixroom、kugoulive、jdlive、baidulive、looklive、weibo；niconico；候选下线 tiktok、youtube、bigo、fc2live；小红书仅链接 | 进行中 | 子代理 |
 | 缓存清理、平台健康状态 | 完成 | 主会话 |
 | 深链 `purelive://`、按网络选画质与卡顿自动降一档、断网提示、录制拼音文件夹 | 完成 | 主会话 |
-| 开播提醒（含 IPTV 节目提醒）、DLNA 投屏 | 进行中 | 子代理 |
+| DLNA 投屏（`live_cast`，ADR 0027） | 完成，已接入直播间菜单和 Android 顶栏 | 子代理 → 主会话 |
+| 开播提醒（含 IPTV 节目提醒） | 进行中 | 子代理 |
 | TV 模式（遥控器焦点、10 英尺界面、换台） | 完成（ADR 0026），Kotlin 和 TV 真机待统一构建时验证 | 子代理 |
 | 多语言（简体、繁体、英文） | 界面稳定后统一做 | 主会话 |
 | 统一构建：Android（WSL）、Windows（本机），真机检查 | 全部功能完成后 | 主会话 |

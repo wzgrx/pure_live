@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/cast/cast_sheet.dart';
 import 'package:pure_live_app/features/danmaku/chat_actions.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_preferences.dart';
 import 'package:pure_live_app/features/danmaku/on_video.dart';
@@ -757,6 +759,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
         await context.push('/multiview', extra: [widget.detail.ref]);
       case RoomMenuAction.keys:
         await withPanel(() => showKeyHelp(context));
+      case RoomMenuAction.cast:
+        await withPanel(() => showCastSheet(context, ref, detail: widget.detail, state: _state));
       case RoomMenuAction.newWindow:
         await _openNewWindow();
     }
@@ -1009,6 +1013,14 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                         icon: const Icon(Icons.headphones_outlined),
                         selectedIcon: const Icon(Icons.headphones),
                         onPressed: toggleAudioOnly,
+                      ),
+                    // LAY-4: casting in the top bar on Android (the menu has it everywhere).
+                    if (_live && Platform.isAndroid)
+                      IconButton(
+                        tooltip: '投屏',
+                        color: ink,
+                        icon: const Icon(Icons.cast),
+                        onPressed: () => unawaited(_onMenu(RoomMenuAction.cast)),
                       ),
                     PopupMenuButton<RoomMenuAction>(
                       tooltip: '更多',

@@ -193,7 +193,8 @@ abstract final class Settings {
     legacy: [LegacyKey('danmakuOpacity')],
   );
 
-  /// Scroll speed; larger is slower (seconds-per-screen scale of 3.x).
+  /// Scroll speed in logical pixels per second; larger is faster (as 3.2.x
+  /// used it, ADR 0020).
   static const danmakuSpeed = DoubleSetting(
     'danmaku.speed',
     120,

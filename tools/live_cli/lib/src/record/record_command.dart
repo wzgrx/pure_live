@@ -65,8 +65,8 @@ Future<List<double>?> ffprobeVideoDts(String path) async {
 }
 
 /// A [Remuxer] over the `ffmpeg` executable, for comparison with the
-/// pure-Dart [FlvToMp4Remuxer] the app uses (ADR 0021). Any error output
-/// fails the job.
+/// pure-Dart [Mp4Remuxer] the app uses (ADR 0021). Any error output fails
+/// the job.
 final class FfmpegProcessRemuxer implements Remuxer {
   /// Creates the remuxer; [executable] defaults to `ffmpeg` on PATH.
   const new({this.executable = 'ffmpeg'});
@@ -115,10 +115,20 @@ final class FfmpegProcessRemuxer implements Remuxer {
 }
 
 final class _LoggingRooms implements RecordRooms {
-  new(this._inner, this._log);
+  new(this._inner, this._log, {this.format, this.lineId, this.renewAfter});
 
   final RecordRooms _inner;
   final void Function(String) _log;
+
+  /// Only lines of this format are offered to the recorder (`--format`).
+  final StreamFormat? format;
+
+  /// Only lines whose id contains this are offered (`--line`).
+  final String? lineId;
+
+  /// Every line gets a lease that asks for renewal this long after the
+  /// resolve (`--renew-after`): exercises lease renewals on real streams.
+  final Duration? renewAfter;
   int resolves = 0;
 
   @override
@@ -131,10 +141,37 @@ final class _LoggingRooms implements RecordRooms {
   @override
   Future<StreamSet> streams(RoomDetail room, {Quality? quality}) async {
     resolves++;
-    final set = await _inner.streams(room, quality: quality);
+    var set = await _inner.streams(room, quality: quality);
+    final only = format;
+    final id = lineId;
+    final renew = renewAfter;
+    if (only != null || id != null || renew != null) {
+      set = StreamSet(
+        qualities: set.qualities,
+        selected: set.selected,
+        lines: [
+          for (final line in set.lines)
+            if ((only == null || line.format == only) && (id == null || line.lineId.contains(id)))
+              if (renew == null)
+                line
+              else
+                StreamLine(
+                  url: line.url,
+                  format: line.format,
+                  lineId: line.lineId,
+                  requested: line.requested,
+                  confirmed: line.confirmed,
+                  headers: line.headers,
+                  codec: line.codec,
+                  lease: Lease(refreshAt: DateTime.now().add(renew), cutsConnection: false),
+                ),
+        ],
+      );
+    }
     final lease = set.lines.firstOrNull?.lease;
     _log(
-      'resolve  #$resolves ${set.selected.label} · ${set.lines.map((line) => line.lineId).join(', ')}'
+      'resolve  #$resolves ${set.selected.label} · '
+      '${set.lines.map((line) => '${line.lineId} ${line.format.name}').join(', ')}'
       '${lease == null ? '' : ' · refresh ${lease.refreshAt.toLocal()} · cuts=${lease.cutsConnection}'}',
     );
     return set;
@@ -143,8 +180,9 @@ final class _LoggingRooms implements RecordRooms {
 
 /// `live_cli record <platform> <room>`: records a live room with the v4
 /// recorder (`live_record`) for a while, then checks the files: timestamp
-/// steps and gaps of each FLV segment (as `lease` does for the relay), the
-/// session's `gaps.json`, and with ffprobe the video DTS of the FLV and MP4.
+/// steps and gaps of each FLV segment (as `lease` does for the relay),
+/// packets and a full decode of HLS segments (`.ts`, `.m4s`), the
+/// session's `gaps.json`, and with ffprobe the video DTS of the segments and MP4.
 class RecordCommand extends Command<int> {
   /// Creates the command.
   new() {
@@ -153,13 +191,16 @@ class RecordCommand extends Command<int> {
       ..addOption('out', help: 'Recording root; a temporary folder by default.')
       ..addOption('proxy', help: 'host:port of an HTTP proxy for this platform; direct by default.')
       ..addOption('quality', allowed: [for (final q in RecordQuality.values) q.name], help: 'Quality preference.')
+      ..addOption('format', allowed: ['flv', 'hls'], help: 'Offer only lines of this format to the recorder.')
+      ..addOption('line', help: 'Offer only lines whose id contains this text (Bilibili: fmp4).')
+      ..addOption('renew-after', help: 'Seconds after each resolve at which the recorder renews the line (lease test).')
       ..addOption('split-minutes', defaultsTo: '0', help: 'Split segments every N minutes (0: never).')
       ..addFlag('remux', help: 'Remux to MP4 afterwards (sources kept for the check).')
       ..addOption(
         'remuxer',
         allowed: ['dart', 'ffmpeg'],
         defaultsTo: 'dart',
-        help: 'With --remux: the pure-Dart remuxer the app uses, or the ffmpeg executable.',
+        help: 'With --remux: the pure-Dart remuxer the app uses (FLV, MPEG-TS, fMP4), or the ffmpeg executable.',
       )
       ..addOption('gap-ms', defaultsTo: '500', help: 'A timestamp step above this counts as a gap.');
   }
@@ -209,7 +250,16 @@ class RecordCommand extends Command<int> {
         return 2;
       }
       final quality = options.option('quality');
-      final rooms = _LoggingRooms(SiteRecordRooms((id) => id == platform ? site : null), log);
+      final format = options.option('format');
+      final rooms = _LoggingRooms(
+        SiteRecordRooms((id) => id == platform ? site : null),
+        log,
+        format: format == null ? null : StreamFormat.values.byName(format),
+        lineId: options.option('line'),
+        renewAfter: options.option('renew-after') == null
+            ? null
+            : Duration(seconds: int.parse(options.option('renew-after')!)),
+      );
       manager = RecordManager(
         rooms: rooms,
         store: JsonFileRecordTaskStore(p.join(out, 'record_tasks.json')),
@@ -225,7 +275,7 @@ class RecordCommand extends Command<int> {
             ? null
             : options.option('remuxer') == 'ffmpeg'
             ? const FfmpegProcessRemuxer()
-            : const FlvToMp4Remuxer(),
+            : const Mp4Remuxer(),
       );
       await manager.init();
       RecordState? lastState;
@@ -272,6 +322,10 @@ class RecordCommand extends Command<int> {
         ..writeln('  connections     ${session.connections} outer, ${session.splices} spliced renewals');
       var clean = task.failure == null;
       for (final path in session.segments) {
+        if (!path.endsWith('.flv')) {
+          clean = await _checkHlsSegment(path) && clean;
+          continue;
+        }
         final report = await checkFlvFile(path, gapMs: gapMs);
         stdout
           ..writeln(
@@ -313,6 +367,14 @@ class RecordCommand extends Command<int> {
         );
         clean = clean && faststart && (steps == null || steps.backwards == 0);
       }
+      for (final path in session.outputs) {
+        final media = await checkMedia(path);
+        if (media == null) continue;
+        stdout.writeln(
+          '    decode        ${media.decodeErrors.isEmpty ? 'clean' : media.decodeErrors.split('\n').take(3).join(' | ')}',
+        );
+        clean = clean && media.decodeErrors.isEmpty;
+      }
       final gapsFile = File(session.layout.gaps);
       if (gapsFile.existsSync()) {
         final gaps = (jsonDecode(gapsFile.readAsStringSync()) as Map<String, Object?>)['gaps']! as List<Object?>;
@@ -332,4 +394,30 @@ class RecordCommand extends Command<int> {
       http.close();
     }
   }
+}
+
+/// Checks one HLS segment file (`.ts` or `.m4s`) with ffprobe and a full
+/// decode; prints the result and returns whether it is clean.
+Future<bool> _checkHlsSegment(String path) async {
+  stdout.writeln(
+    '  segment         ${p.basename(path)} · ${(File(path).lengthSync() / 1048576).toStringAsFixed(1)} MiB',
+  );
+  final media = await checkMedia(path);
+  if (media == null) {
+    stdout.writeln('    check         skipped (ffprobe/ffmpeg not installed)');
+    return true;
+  }
+  for (final type in const ['video', 'audio']) {
+    final packets = media.packets[type];
+    if (packets == null) continue;
+    final label = '    $type'.padRight(18);
+    stdout.writeln(
+      '$label${media.codecs[type]} $packets packets, ${media.durations[type]?.toStringAsFixed(3)} s, '
+      'DTS backwards ${media.backwards[type] ?? 0}',
+    );
+  }
+  stdout.writeln(
+    '    decode        ${media.decodeErrors.isEmpty ? 'clean' : media.decodeErrors.split('\n').take(3).join(' | ')}',
+  );
+  return media.decodeErrors.isEmpty;
 }

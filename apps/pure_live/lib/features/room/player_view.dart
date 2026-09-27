@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,11 +10,13 @@ import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart' as player;
 import 'package:live_store/live_store.dart' as store;
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/room/playback.dart';
+import 'package:window_manager/window_manager.dart';
 
 /// What the user reads when playback fails, by failure kind (principles rule 3:
 /// say what happened in place and offer the next step).
@@ -57,6 +60,8 @@ class _PlayerViewState extends ConsumerState<PlayerView> {
   Object? _openError;
   bool _controls = true;
   Timer? _hide;
+  double _volume = 1;
+  bool _muted = false;
 
   @override
   void initState() {
@@ -91,6 +96,47 @@ class _PlayerViewState extends ConsumerState<PlayerView> {
       if (mounted && _state.phase == PlaybackPhase.playing) setState(() => _controls = false);
     });
   }
+
+  void _setVolume(double volume) {
+    _volume = volume.clamp(0, 1);
+    _muted = _volume == 0;
+    unawaited(_session.setVolume(_volume));
+    _showControlsBriefly();
+  }
+
+  void _toggleMute() {
+    _muted = !_muted;
+    unawaited(_session.setVolume(_muted ? 0 : (_volume == 0 ? 1 : _volume)));
+    _showControlsBriefly();
+  }
+
+  void _togglePlay() {
+    unawaited(_state.phase == PlaybackPhase.paused ? _session.play() : _session.pause());
+  }
+
+  void _showControlsBriefly() {
+    if (!_controls) setState(() => _controls = true);
+    _hide?.cancel();
+    // Desktop: controls hide after 2 s without pointer movement (principles §6.2).
+    _hide = Timer(const Duration(seconds: 2), () {
+      if (mounted && _state.phase == PlaybackPhase.playing) setState(() => _controls = false);
+    });
+  }
+
+  /// Desktop keys (principles §6.2).
+  Map<ShortcutActivator, VoidCallback> get _shortcuts => {
+    const SingleActivator(LogicalKeyboardKey.space): _togglePlay,
+    const SingleActivator(LogicalKeyboardKey.keyF): () => widget.onFullscreen(!widget.fullscreen),
+    const SingleActivator(LogicalKeyboardKey.escape): () {
+      if (widget.fullscreen) widget.onFullscreen(false);
+    },
+    const SingleActivator(LogicalKeyboardKey.keyM): _toggleMute,
+    const SingleActivator(LogicalKeyboardKey.arrowUp): () => _setVolume(_volume + 0.1),
+    const SingleActivator(LogicalKeyboardKey.arrowDown): () => _setVolume(_volume - 0.1),
+    const SingleActivator(LogicalKeyboardKey.keyQ): () => unawaited(_chooseQuality()),
+    const SingleActivator(LogicalKeyboardKey.keyL): () => unawaited(_chooseLine()),
+    const SingleActivator(LogicalKeyboardKey.keyR, control: true): () => unawaited(_session.retry()),
+  };
 
   void _toggleControls() {
     setState(() => _controls = !_controls);
@@ -146,6 +192,25 @@ class _PlayerViewState extends ConsumerState<PlayerView> {
     };
     final live = widget.detail.state == LiveState.live;
     final keepOn = ref.watch(screenKeepOnSetting);
+    return CallbackShortcuts(
+      bindings: _shortcuts,
+      child: Focus(
+        autofocus: true,
+        child: MouseRegion(
+          onHover: isDesktop ? (_) => _showControlsBriefly() : null,
+          child: Listener(
+            // The wheel on the picture changes the volume (principles §6.2).
+            onPointerSignal: (signal) {
+              if (signal is PointerScrollEvent) _setVolume(_volume - signal.scrollDelta.dy / 1000);
+            },
+            child: _player(context, fit, live, keepOn),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _player(BuildContext context, player.VideoFit fit, bool live, bool keepOn) {
     return ColoredBox(
       color: Colors.black,
       child: GestureDetector(
@@ -332,8 +397,13 @@ class _OfflineCover extends StatelessWidget {
   }
 }
 
-/// Immersive, landscape fullscreen on phones; the system bars come back on exit.
+/// Fullscreen: the window on desktops; immersive and landscape on phones,
+/// with the system bars back on exit.
 Future<void> applyFullscreen({required bool on, required bool portraitVideo}) async {
+  if (isDesktop) {
+    await windowManager.setFullScreen(on);
+    return;
+  }
   if (on) {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     if (!portraitVideo) {

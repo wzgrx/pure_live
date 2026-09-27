@@ -207,6 +207,11 @@ class _RoomInfo extends ConsumerWidget {
                   onPressed: () => ref.read(storeProvider).follows.follow(RoomSnapshot.fromDetail(detail)),
                 ),
               OutlinedButton.icon(
+                icon: const Icon(Icons.grid_view, size: 18),
+                label: const Text('加入多画面'),
+                onPressed: () => context.push('/multiview', extra: [card.ref]),
+              ),
+              OutlinedButton.icon(
                 icon: const Icon(Icons.open_in_new, size: 18),
                 label: const Text(S.openSite),
                 onPressed: () => launchUrl(detail.link, mode: LaunchMode.externalApplication),

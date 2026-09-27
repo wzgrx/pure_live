@@ -77,7 +77,7 @@
 | 编号 | 功能与旧版行为 | 优先级 | v4 处置 | 旧代码入口 |
 |---|---|---|---|---|
 | F-SRC-01 | 跨平台搜索：关键词；平台筛选（全部/单个）；排序（智能、平台、人数、粉丝）；“包含未开播”开关；加载更多 | P0 | 保留；布局按窗口等级（单列 → 列表+详情+平台筛选侧栏） | `lib/modules/search/search_page.dart:26-256`；`search_controller.dart:175-370` |
-| F-SRC-02 | 网页搜索兜底：没有原生搜索的平台，在内置网页打开平台搜索页并识别房间链接；Windows 需要 WebView2，缺失时提示 | P0 | 保留：网页组件封装在接口后面（PLAN §04 对 inappwebview 的评估） | `lib/modules/search/web_search_controller.dart`；`web_search_room_parser.dart`；`search_controller.dart:147,523-559` |
+| F-SRC-02 | 网页搜索兜底：没有原生搜索的平台，在内置网页打开平台搜索页并识别房间链接；Windows 需要 WebView2，缺失时提示 | P0 | 保留：网页组件封装在接口后面（PLAN §04 对 inappwebview 的评估；docs/adr/draft-webview.md）。只对适配器没有实现 SearchSource、又有已知搜索页的平台显示入口；前两批十个平台都有原生搜索，入口要等第三批才会出现。网页里点开的房间链接和“本页的房间”都用链接识别（F-SRC-03 同一套）判断 | `lib/modules/search/web_search_controller.dart`；`web_search_room_parser.dart`；`search_controller.dart:147,523-559` |
 | F-SRC-03 | 链接跳转：粘贴直播间链接或“平台+房间号”打开直播间；页面列出支持的链接格式 | P0 | **合并**到搜索框：输入识别为链接时直接给出“打开直播间” | `lib/modules/toolbox/toolbox_page.dart:23-41,140-147`；`toolbox_controller.dart:120` |
 | F-SRC-04 | 获取直链：解析链接 → 选画质、线路 → 复制播放地址（工具箱和直播间菜单两处入口） | P2 | 保留：入口为直播间菜单、搜索结果的更多菜单 | `lib/modules/toolbox/toolbox_controller.dart:129`；`lib/modules/live_play/dialogs/known_room_link_dialog.dart`；`lib/common/utils/live_url_tool.dart:388` |
 | F-SRC-05 | 工具箱打开时自动读剪贴板识别链接 | P2 | **重新设计**：并入搜索页，读剪贴板可在设置关闭（PLAN §05 建议） | `lib/modules/toolbox/toolbox_controller.dart:250` |

@@ -11,6 +11,7 @@ import 'package:pure_live_app/core/tv.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
 import 'package:pure_live_app/features/rooms/room_list.dart';
+import 'package:pure_live_app/features/search/web_search_page.dart';
 import 'package:pure_live_app/l10n/strings.dart';
 
 /// First page of every enabled platform for the keyword, merged: live rooms
@@ -127,6 +128,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ],
           onChanged: (_) => setState(() {}),
         ),
+        actions: [WebSearchButton(keyword: _controller)],
       ),
       body: _link != null ? _LinkResult(future: _link!) : _keywordResults(),
     );

@@ -30,6 +30,7 @@ import 'package:pure_live_app/features/recording/recording_page.dart';
 import 'package:pure_live_app/features/room/room_page.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/search/search_page.dart';
+import 'package:pure_live_app/features/search/web_search_page.dart';
 import 'package:pure_live_app/features/settings/platforms_page.dart';
 import 'package:pure_live_app/features/settings/settings_page.dart';
 import 'package:pure_live_app/features/sync/lan_sync_page.dart';
@@ -167,10 +168,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => IptvPage(initialImport: state.extra as IptvImportRequest?),
         routes: [GoRoute(path: 'guide', builder: (context, state) => const IptvGuidePage())],
       ),
-      // In-app browser pages, full screen (F-ACC-01 web sign-in).
+      // In-app browser pages, full screen (F-ACC-01 web sign-in, F-SRC-02).
       GoRoute(
         path: '/web-login/:platform',
         builder: (context, state) => WebLoginPage(platform: state.pathParameters['platform']!),
+      ),
+      GoRoute(
+        path: '/web-search',
+        builder: (context, state) => WebSearchPage(
+          platform: state.uri.queryParameters['platform'] ?? '',
+          keyword: state.uri.queryParameters['q'] ?? '',
+        ),
       ),
       GoRoute(
         path: '/multiview',

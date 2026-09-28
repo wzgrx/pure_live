@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "platform": "steambroadcast",
+  "sample": "S09-mpd-live",
+  "capturedAt": "2026-09-28T20:00:35.749836Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561198843011284&viewertoken=0&sessionid=",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/javascript, */*; q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Referer": "https://steamcommunity.com/broadcast/watch/76561198843011284",
+      "X-Requested-With": "XMLHttpRequest"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "content-type": "application/json; charset=utf-8",
+      "expires": "Mon, 26 Jul 1997 05:00:00 GMT",
+      "cache-control": "no-cache",
+      "vary": [
+        "origin",
+        "Accept-Encoding"
+      ],
+      "date": "Mon, 28 Sep 2026 20:00:37 GMT",
+      "content-length": "707",
+      "connection": "keep-alive",
+      "set-cookie": [
+        "sessionid=08233890407db51030753049; Path=/; Secure; SameSite=None",
+        "steamCountry=US%7C20f5221348f5128d4620c4f25700f601; path=/; secure; HttpOnly; SameSite=None"
+      ]
+    }
+  },
+  "raw": {
+    "sha256": "24fdaa2c32db241af95053c93b6ad9c0d7c117456ade93053238e74f91378b7c",
+    "length": 707
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:sessionid",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:steamCountry",
+      "rule": "secret"
+    },
+    {
+      "where": "$.viewertoken",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.U.27 recorder (schema 1): http.client, the adapter's headers, redirects not followed; Set-Cookie sessionid/steamCountry and viewertoken replaced by random same-shape values"
+}

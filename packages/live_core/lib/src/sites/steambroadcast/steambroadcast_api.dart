@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:live_core/src/audience.dart';
+import 'package:live_core/src/hls_master.dart';
 import 'package:live_core/src/html.dart';
+import 'package:live_core/src/json.dart';
 import 'package:live_core/src/live_area.dart';
 import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/play_line.dart';
@@ -10,63 +12,153 @@ import 'package:meta/meta.dart';
 
 const _site = 'steambroadcast';
 
-/// A broadcast's state as 3.x read `getbroadcastmpd`'s `success`.
+/// A broadcast's state, from `getbroadcastmpd`'s `success` (room entry,
+/// recording, recovery) or `getbroadcastinfo` (refresh, 27-2).
 enum SteamBroadcastState {
-  /// `ready`: live, with an HLS master.
+  /// `ready`, or `missing_subscription` (a broadcast for subscribers only,
+  /// [SteamBroadcast.restriction]); `getbroadcastinfo` online.
   live,
 
-  /// `unavailable`, `offline`, `not_live`, `no_broadcast`.
+  /// A replay (`is_replay`, which Steam's player plays as one): `ready`
+  /// with its master, or `getbroadcastinfo` online. Played like a live.
+  replay,
+
+  /// `unavailable`, `offline`, `not_live`, `no_broadcast`;
+  /// `getbroadcastinfo`'s `success: 42` or not online.
   offline,
 
-  /// `user_restricted`: the broadcaster limits who may watch. 3.x shows the
-  /// room as unknown with its own notice, never as offline.
-  restricted,
+  /// `user_restricted`. Steam's watch page says "`%s`'s account is
+  /// currently restricted from broadcasting on Steam" (its
+  /// `broadcast_watch.js`): there is no broadcast to watch, whoever asks.
+  /// 3.x read it as a viewer restriction and showed the room as unknown;
+  /// it is shown as banned.
+  accountRestricted,
 
-  /// `waiting`, `waiting_to_start`, `waiting_for_start` and any value 3.x did
-  /// not know.
+  /// `waiting`, `waiting_to_start`, `waiting_for_start` and any other value
+  /// (3.x).
   unknown,
 }
 
-/// One broadcast as 3.x's `SteamBroadcastRoom` held it: a directory card, or
-/// a room read from its watch page and `getbroadcastmpd` (and, on room entry,
-/// its checked HLS master).
+/// One variant of a broadcast's HLS master, as Steam's own player lists it
+/// (`<height>p`, the frame rate added above 30 fps: `1080p60`, 27-7). The
+/// quality of a variant is played from the master restricted to this
+/// variant and its audio (Steam's variants carry no audio of their own), so
+/// the variant is a selector that holds across fresh copies of the master
+/// (the CDN host and paths change between answers): see [selectIn].
+@immutable
+final class SteamBroadcastVariant {
+  /// Creates the variant.
+  const new({
+    required this.id,
+    required this.width,
+    required this.height,
+    required this.bandwidth,
+    this.frameRate = 0,
+    this.codec,
+  });
+
+  /// The quality id and name: `720p`, `1080p60`.
+  final String id;
+
+  /// The width in pixels.
+  final int width;
+
+  /// The height in pixels.
+  final int height;
+
+  /// The `FRAME-RATE`; 0 when not given.
+  final double frameRate;
+
+  /// The `BANDWIDTH` in bits per second.
+  final int bandwidth;
+
+  /// The video codec (`avc`, `hevc`), when named.
+  final String? codec;
+
+  /// This variant (and its audio) in [text], a copy of the master at
+  /// [source]: the variant of the same [id] whose bandwidth is closest to
+  /// [bandwidth]. Throws [FormatException] when the master cannot be read
+  /// or has no such variant.
+  HlsMasterSelection selectIn(String text, {required Uri source}) {
+    final playlist = HlsMasterPlaylist.parse(source, text);
+    HlsMasterVariant? best;
+    var distance = 0;
+    for (final variant in playlist.variants) {
+      final size = _resolution(variant);
+      if (size == null || SteamBroadcastApi.variantId(size.height, _frameRate(variant)) != id) continue;
+      final gap = (int.parse(variant.attributes['BANDWIDTH']!) - bandwidth).abs();
+      if (best == null || gap < distance) {
+        best = variant;
+        distance = gap;
+      }
+    }
+    if (best == null) throw FormatException('Steam variant $id is not in the master');
+    return playlist.select(video: best.uri);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SteamBroadcastVariant &&
+      other.id == id &&
+      other.width == width &&
+      other.height == height &&
+      other.frameRate == frameRate &&
+      other.bandwidth == bandwidth &&
+      other.codec == codec;
+
+  @override
+  int get hashCode => Object.hash(id, width, height, frameRate, bandwidth, codec);
+
+  @override
+  String toString() => 'SteamBroadcastVariant($id, ${width}x$height, $bandwidth)';
+}
+
+/// One broadcast: a directory card, or a room read from its answers (the
+/// mini profile or watch page, `getbroadcastinfo` and `getbroadcastmpd`,
+/// and on room entry its checked HLS master).
 @immutable
 final class SteamBroadcast {
   /// Creates the broadcast.
-  const new({
+  new({
     required this.steamId,
-    required this.broadcaster,
-    required this.title,
     required this.state,
+    this.broadcaster = '',
+    this.title = '',
     this.game = '',
     this.cover = '',
     this.avatar = '',
     this.viewers,
+    this.restriction,
+    this.broadcastId,
     this.master,
     this.masterChecked = false,
     this.codec,
+    Iterable<SteamBroadcastVariant> variants = const [],
     this.mediaError,
-  });
+  }) : variants = List.unmodifiable(variants);
 
   /// The broadcaster's 64-bit Steam id: the room's identity.
   final String steamId;
 
-  /// The broadcaster's name: the card's author, or the watch page's title
-  /// (`Steam broadcaster` when it has none, 3.x).
+  /// The broadcaster's name: the card's author, the mini profile's
+  /// `persona_name` or the watch page's title; '' when none is known (a
+  /// name that is only the id is none: Steam writes the id for an account
+  /// that does not exist, X-2).
   final String broadcaster;
 
-  /// The card's game (its `: Broadcast` type stripped), or `getbroadcastmpd`'s
-  /// `title` (`Steam Broadcast` when empty, 3.x; Steam leaves it empty).
+  /// The broadcast's title, else its game (the card's content type, or
+  /// `getbroadcastinfo`'s `title`, else `app_title`); '' when unknown
+  /// (3.x wrote `Steam Broadcast`, X-2).
   final String title;
 
-  /// The card's game; '' for a room (the room answers have none).
+  /// The game; '' when unknown (3.x showed `Steam Community`, X-2).
   final String game;
 
-  /// The card's thumbnail (3.x's host and path rule); '' when there is none.
+  /// The live thumbnail (3.x's host and path rule); '' when there is none.
   final String cover;
 
-  /// The card's avatar, any https host (3.x kept only
-  /// `avatars.akamai.steamstatic.com`; see [SteamBroadcastApi.room]).
+  /// The broadcaster's avatar (any https host, 184 px), '' when there is
+  /// none or it is Steam's default avatar (27-1).
   final String avatar;
 
   /// Concurrent viewers, when given.
@@ -75,8 +167,18 @@ final class SteamBroadcast {
   /// The broadcast's state.
   final SteamBroadcastState state;
 
-  /// The HLS master of a live broadcast (3.x's host and path rule, CDN
-  /// parameters appended), when `getbroadcastmpd` gave a usable one.
+  /// Who may watch, when the answer says: [LiveRestriction.none] for
+  /// `ready`, [LiveRestriction.subscribersOnly] for `missing_subscription`;
+  /// null otherwise (a refresh, a card, not live).
+  final LiveRestriction? restriction;
+
+  /// `getbroadcastmpd`'s `broadcastid` of the current broadcast, when one
+  /// (the chat's key besides the Steam id, 27-6).
+  final String? broadcastId;
+
+  /// The HLS master of a live broadcast or replay (3.x's host and path
+  /// rule, CDN parameters appended), when `getbroadcastmpd` gave a usable
+  /// one.
   final Uri? master;
 
   /// Whether [master] was fetched and passed 3.x's check (room entry).
@@ -85,51 +187,82 @@ final class SteamBroadcast {
   /// The video codec the checked master names (`avc`, `hevc`), when one.
   final String? codec;
 
-  /// Why the live broadcast's media cannot be played, when known: an
-  /// unusable `hls_url`, or a master that failed to load or 3.x's check. It
-  /// never fails the room itself (3.x failed the whole detail, refresh
-  /// included).
+  /// The checked master's variants, best first, when it has more than one
+  /// (27-7); empty otherwise.
+  final List<SteamBroadcastVariant> variants;
+
+  /// Why the broadcast's media cannot be played, when known: an unusable
+  /// `hls_url`, or a master that failed to load or 3.x's check. It never
+  /// fails the room itself (3.x failed the whole detail, refresh included).
   final SiteError? mediaError;
+
+  /// This broadcast with its fields replaced where given.
+  SteamBroadcast _copy({
+    String? broadcaster,
+    String? title,
+    String? game,
+    String? cover,
+    String? avatar,
+    int? viewers,
+    bool? masterChecked,
+    String? codec,
+    Iterable<SteamBroadcastVariant>? variants,
+    SiteError? mediaError,
+  }) => SteamBroadcast(
+    steamId: steamId,
+    state: state,
+    broadcaster: broadcaster ?? this.broadcaster,
+    title: title ?? this.title,
+    game: game ?? this.game,
+    cover: cover ?? this.cover,
+    avatar: avatar ?? this.avatar,
+    viewers: viewers ?? this.viewers,
+    restriction: restriction,
+    broadcastId: broadcastId,
+    master: master,
+    masterChecked: masterChecked ?? this.masterChecked,
+    codec: codec ?? this.codec,
+    variants: variants ?? this.variants,
+    mediaError: mediaError ?? this.mediaError,
+  );
 
   /// This room with the fields its answers lack taken from [known], an
   /// earlier card or room of the same broadcaster (3.x's `enrich`): the
-  /// name when it is the id or the placeholder, the title when it is the
-  /// placeholder, the game, cover and avatar when empty, the viewers when
-  /// not given. State and media stay this room's.
-  SteamBroadcast enrich(SteamBroadcast known) => SteamBroadcast(
-    steamId: steamId,
-    broadcaster: broadcaster == steamId || broadcaster == SteamBroadcastApi.defaultBroadcaster
-        ? known.broadcaster
-        : broadcaster,
-    title: title == SteamBroadcastApi.defaultTitle ? known.title : title,
+  /// name, title, game, cover and avatar when empty; the viewers only while
+  /// this broadcast is live and has none of its own (27-5: 3.x kept the
+  /// last card's count after the broadcast ended). State, restriction and
+  /// media stay this room's.
+  SteamBroadcast enrich(SteamBroadcast known) => _copy(
+    broadcaster: broadcaster.isEmpty ? known.broadcaster : broadcaster,
+    title: title.isEmpty ? known.title : title,
     game: game.isEmpty ? known.game : game,
     cover: cover.isEmpty ? known.cover : cover,
     avatar: avatar.isEmpty ? known.avatar : avatar,
-    viewers: viewers ?? known.viewers,
-    state: state,
-    master: master,
-    masterChecked: masterChecked,
-    codec: codec,
-    mediaError: mediaError,
+    viewers: viewers ?? (state == SteamBroadcastState.live ? known.viewers : null),
   );
 
-  /// This broadcast with its master checked ([codec] as it names it), or
-  /// with [mediaError] when loading or checking it failed.
-  SteamBroadcast withMaster({String? codec, SiteError? mediaError}) => SteamBroadcast(
-    steamId: steamId,
-    broadcaster: broadcaster,
-    title: title,
-    game: game,
-    cover: cover,
-    avatar: avatar,
-    viewers: viewers,
-    state: state,
-    master: master,
-    masterChecked: mediaError == null,
-    codec: codec,
-    mediaError: mediaError,
+  /// This `getbroadcastmpd` room with `getbroadcastinfo`'s title, game and
+  /// cover (27-2) where [info] has them; its viewers only when this room
+  /// has none.
+  SteamBroadcast withInfo(SteamBroadcast info) => _copy(
+    title: info.title.isEmpty ? null : info.title,
+    game: info.game.isEmpty ? null : info.game,
+    cover: info.cover.isEmpty ? null : info.cover,
+    viewers: viewers ?? info.viewers,
   );
+
+  /// This broadcast with its master checked ([codec] and [variants] as it
+  /// names them), or with [mediaError] when loading or checking it failed.
+  SteamBroadcast withMaster({
+    String? codec,
+    Iterable<SteamBroadcastVariant> variants = const [],
+    SiteError? mediaError,
+  }) => _copy(masterChecked: mediaError == null, codec: codec, variants: variants, mediaError: mediaError);
 }
+
+/// The broadcaster's name and avatar (the mini profile, or the watch page's
+/// name when it fails; 27-2).
+typedef SteamBroadcastProfile = ({String name, String avatar});
 
 /// One page of the trending broadcasts.
 @immutable
@@ -146,18 +279,29 @@ final class SteamBroadcastPage {
 }
 
 /// What a room detail carries besides 3.x's fields: the broadcast's state
-/// and, after room entry, its checked master. The interface shows the notice
-/// of [state] in its own language (M13).
+/// and restriction and, after room entry, its checked master and variants.
+/// The interface shows the notice of [state] in its own language (M13).
 @immutable
 final class SteamBroadcastRoomData {
   /// Creates the data.
-  const new({required this.steamId, required this.state, this.master, this.codec, this.mediaError});
+  new({
+    required this.steamId,
+    required this.state,
+    this.restriction,
+    this.master,
+    this.codec,
+    Iterable<SteamBroadcastVariant> variants = const [],
+    this.mediaError,
+  }) : variants = List.unmodifiable(variants);
 
   /// The room's Steam id.
   final String steamId;
 
   /// The broadcast's state.
   final SteamBroadcastState state;
+
+  /// Who may watch, when the answer said (see [SteamBroadcast.restriction]).
+  final LiveRestriction? restriction;
 
   /// The HLS master, checked on room entry (3.x fetched it then); null for a
   /// refresh, which does not load it (3.x left refreshed rooms without data).
@@ -166,47 +310,72 @@ final class SteamBroadcastRoomData {
   /// The video codec the master names, when one.
   final String? codec;
 
-  /// Why the live broadcast's media cannot be played, when known.
+  /// The master's variants, best first, when it has more than one (27-7).
+  final List<SteamBroadcastVariant> variants;
+
+  /// Why the broadcast's media cannot be played, when known.
   final SiteError? mediaError;
 
-  /// Why this room cannot be played, or null: not live (offline, restricted,
-  /// waiting or unknown) is `StreamUnavailable`; a live one with a media
-  /// problem says what; a live one without a checked master (a refresh) is
+  /// The qualities: 3.x's adaptive master first (the player chooses), then
+  /// one per variant (27-7), each with its [SteamBroadcastVariant] as data.
+  List<LivePlayQuality> get qualities => [
+    SteamBroadcastApi.quality,
+    for (final variant in variants) LivePlayQuality(quality: variant.id, id: variant.id, data: variant),
+  ];
+
+  /// Why this room cannot be played, or null: not live (offline, restricted
+  /// account, waiting or unknown) is `StreamUnavailable`, and so is a
+  /// broadcast for subscribers only; a live one with a media problem says
+  /// what; a live one without a checked master (a refresh) is
   /// `StreamUnavailable` until the room is entered.
   SiteError? get streamError => switch (state) {
     SteamBroadcastState.offline => StreamUnavailable(_site, '$steamId is offline'),
-    SteamBroadcastState.restricted => StreamUnavailable(_site, '$steamId: user_restricted'),
-    SteamBroadcastState.unknown => StreamUnavailable(_site, '$steamId: broadcast state unknown'),
-    SteamBroadcastState.live when mediaError != null => mediaError,
-    SteamBroadcastState.live when master == null => StreamUnavailable(
+    SteamBroadcastState.accountRestricted => StreamUnavailable(
       _site,
-      '$steamId: no checked master; enter the room',
+      "$steamId: the broadcaster's account is restricted from broadcasting (user_restricted)",
     ),
-    SteamBroadcastState.live => null,
+    SteamBroadcastState.unknown => StreamUnavailable(_site, '$steamId: broadcast state unknown'),
+    _ when restriction == LiveRestriction.subscribersOnly => StreamUnavailable(
+      _site,
+      "$steamId: a broadcast for the broadcaster's subscribers only (missing_subscription)",
+    ),
+    _ when mediaError != null => mediaError,
+    _ when master == null => StreamUnavailable(_site, '$steamId: no checked master; enter the room'),
+    _ => null,
   };
 }
 
-/// What the danmaku module needs for a room (M5): the broadcaster's Steam
-/// id. 3.x had no Steam chat (`EmptyDanmaku`); the archived v4 read the
-/// chat log with this key alone (it asks `getbroadcastmpd` for the current
-/// broadcast itself, so a new broadcast does not stale it). Whether the app
-/// shows Steam chat is the danmaku module's decision; room entry only hands
-/// it over, without a request.
+/// What the danmaku module needs for a room (M5, 27-6): the broadcaster's
+/// Steam id and, when the room is live, the current `broadcastid` (the
+/// chat's `getchatinfo` needs it; the archived v4 asked `getbroadcastmpd`
+/// for it first, which room entry already did). A new broadcast gets a new
+/// id: the chat asks `getbroadcastmpd` again when it changes or is absent.
 @immutable
 final class SteamBroadcastDanmakuArgs {
   /// Creates the arguments.
-  const new(this.steamId);
+  const new(this.steamId, {this.broadcastId});
 
   /// The broadcaster's Steam id.
   final String steamId;
+
+  /// The current broadcast's id, when known.
+  final String? broadcastId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SteamBroadcastDanmakuArgs && other.steamId == steamId && other.broadcastId == broadcastId;
+
+  @override
+  int get hashCode => Object.hash(steamId, broadcastId);
 
   @override
   String toString() => steamId;
 }
 
 /// Pure parsing of Steam broadcast answers (3.x's `SteamBroadcastApi`,
-/// `SteamBroadcastLink` and the models of its `SteamBroadcastSite`). Each
-/// function takes the answer and its status and returns 3.x's models or
+/// `SteamBroadcastLink` and the models of its `SteamBroadcastSite`, and the
+/// answers M4.U added: the mini profile, `getbroadcastinfo`, profile XML).
+/// Each function takes the answer and its status and returns the models or
 /// throws a `SiteError`.
 abstract final class SteamBroadcastApi {
   /// Steam Community.
@@ -235,26 +404,34 @@ abstract final class SteamBroadcastApi {
   /// the interface translates it by id, M13).
   static const String areaName = '热门社区直播';
 
-  /// The area of a room whose game is not known (3.x).
-  static const String defaultArea = 'Steam Community';
+  /// 3.x's area of a room whose game was not known. No longer written (X-2);
+  /// M9 may treat a stored area equal to it as empty.
+  static const String legacyArea = 'Steam Community';
 
-  /// The title of a room whose broadcast has none (3.x).
-  static const String defaultTitle = 'Steam Broadcast';
+  /// 3.x's title of a room whose broadcast had none. No longer written
+  /// (X-2); M9 may treat a stored title equal to it as empty.
+  static const String legacyTitle = 'Steam Broadcast';
 
-  /// The name of a broadcaster the watch page does not name (3.x).
-  static const String defaultBroadcaster = 'Steam broadcaster';
+  /// 3.x's name of a broadcaster the watch page did not name. No longer
+  /// written (X-2); M9 may treat a stored name equal to it as empty.
+  static const String legacyBroadcaster = 'Steam broadcaster';
 
-  /// The notice of a room (3.x's zh.json `steambroadcast_chat_notice`).
-  static const String chatNotice = 'Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。';
+  /// The notice of a room (3.x's zh.json key `steambroadcast_chat_notice`,
+  /// rewritten for viewers; M13 translates it). Drop its first sentence
+  /// once the chat is shown (M5).
+  static const String chatNotice = 'Steam 直播的聊天暂时不能在这里显示。人数是正在观看的人数。';
 
-  /// The notice of a restricted broadcast (`steambroadcast_restricted_notice`).
-  static const String restrictedNotice = '该 Steam 直播受账号访问范围限制，界面保持未知状态，不将其显示成未开播。';
+  /// The notice of a broadcaster whose account may not broadcast (key
+  /// `steambroadcast_restricted_notice`, rewritten: 3.x said the broadcast
+  /// was limited to some viewers and kept its state unknown).
+  static const String restrictedNotice = '这位主播的 Steam 账号目前被限制直播，暂时不能观看。';
 
-  /// Id of the one quality.
+  /// Id of the adaptive quality.
   static const String qualityId = 'auto';
 
-  /// The one quality: the HLS master, variants left to the player (3.x:
-  /// `auto`, zh.json `steambroadcast_quality_auto`).
+  /// The adaptive quality: the HLS master, variants left to the player
+  /// (3.x: `auto`, zh.json `steambroadcast_quality_auto`). First, and the
+  /// default, as in 3.x; the variants follow it (27-7).
   static const LivePlayQuality quality = LivePlayQuality(quality: '自适应 HLS', id: qualityId);
 
   /// The one line's id: the CDN host changes between answers
@@ -272,6 +449,10 @@ abstract final class SteamBroadcastApi {
 
   /// The largest page size of 3.x's search; a larger one gives nothing.
   static const int maxSearchSize = 100;
+
+  /// The first 64-bit Steam id of an individual account; a Steam id minus
+  /// it is the account id of the mini profile.
+  static final BigInt _accountBase = BigInt.parse('76561197960265728');
 
   /// The one area.
   static const LiveArea area = LiveArea(
@@ -292,13 +473,20 @@ abstract final class SteamBroadcastApi {
   };
 
   /// The headers of the watch page, or with [json] of `getbroadcastmpd`
-  /// (3.x's `roomHeaders`).
+  /// (3.x's `roomHeaders`), `getbroadcastinfo` and the mini profile.
   static Map<String, String> roomHeaders(String steamId, {bool json = false}) => {
     'user-agent': userAgent,
     'accept': json ? 'application/json, text/javascript, */*; q=0.8' : 'text/html,application/xhtml+xml,*/*;q=0.8',
     'accept-language': 'en-US,en;q=0.9',
     'referer': link(steamId),
     if (json) 'x-requested-with': 'XMLHttpRequest',
+  };
+
+  /// The headers of a profile's XML (a custom address's Steam id, 27-4).
+  static const Map<String, String> xmlHeaders = {
+    'user-agent': userAgent,
+    'accept': 'text/xml, application/xml, */*; q=0.8',
+    'accept-language': 'en-US,en;q=0.9',
   };
 
   /// 3.x's `mediaHeaders`: what it sent for the master it checked on room
@@ -319,15 +507,12 @@ abstract final class SteamBroadcastApi {
   /// The watch page of [steamId] (3.x's `watchUrl`), also the room's link.
   static String link(String steamId) => '$origin/broadcast/watch/$steamId';
 
-  /// The Steam id of [raw] (3.x's `SteamBroadcastLink.parseSteamId`): a bare
-  /// id, or an http(s) watch link `steamcommunity.com/broadcast/watch/<id>`
-  /// (exactly that host and path, a query allowed; no user info, no
-  /// fragment, the default ports); null for anything else, a profile link
-  /// included.
-  static String? steamIdOf(String raw) {
-    final value = raw.trim();
-    if (isSteamId(value)) return value;
-    final uri = Uri.tryParse(value);
+  /// The path segments of [raw] when it is an http(s) link of
+  /// `steamcommunity.com` (exactly that host, no user info, no fragment,
+  /// the default ports; a query allowed), empty segments left out; null for
+  /// anything else.
+  static List<String>? _communityPath(String raw) {
+    final uri = Uri.tryParse(raw.trim());
     if (uri == null ||
         !const {'http', 'https'}.contains(uri.scheme.toLowerCase()) ||
         uri.userInfo.isNotEmpty ||
@@ -336,17 +521,36 @@ abstract final class SteamBroadcastApi {
         (uri.hasPort && uri.port != 80 && uri.port != 443)) {
       return null;
     }
-    final List<String> segments;
     try {
-      segments = uri.pathSegments.where((segment) => segment.isNotEmpty).toList(growable: false);
+      return uri.pathSegments.where((segment) => segment.isNotEmpty).toList(growable: false);
     } on FormatException {
       return null;
     }
-    return switch (segments) {
-      ['broadcast', 'watch', final id] when isSteamId(id) => id,
+  }
+
+  /// The Steam id of [raw]: a bare id, a watch link
+  /// `steamcommunity.com/broadcast/watch/<id>` (3.x's
+  /// `SteamBroadcastLink.parseSteamId`) or a profile link
+  /// `steamcommunity.com/profiles/<id>` (27-4), without a request; null for
+  /// anything else (a custom address `/id/<name>` needs one, see
+  /// [vanityOf]).
+  static String? steamIdOf(String raw) {
+    final value = raw.trim();
+    if (isSteamId(value)) return value;
+    return switch (_communityPath(value)) {
+      ['broadcast', 'watch', final id] || ['profiles', final id] when isSteamId(id) => id,
       _ => null,
     };
   }
+
+  static final RegExp _vanity = RegExp(r'^[A-Za-z0-9_-]{1,64}$');
+
+  /// The custom address of a profile link `steamcommunity.com/id/<name>`
+  /// (27-4; letters, digits, `_` and `-`), or null.
+  static String? vanityOf(String raw) => switch (_communityPath(raw)) {
+    ['id', final name] when _vanity.hasMatch(name) => name,
+    _ => null,
+  };
 
   // Requests ------------------------------------------------------------------
 
@@ -372,6 +576,21 @@ abstract final class SteamBroadcastApi {
     'sessionid': '',
   });
 
+  /// `getbroadcastinfo` of [steamId]'s current broadcast (27-2; the watch
+  /// page asks it for the title, game and viewers).
+  static Uri infoUrl(String steamId) => Uri.https('steamcommunity.com', '/broadcast/getbroadcastinfo/', {
+    'steamid': steamId,
+    'broadcastid': '0',
+    'location': '5',
+  });
+
+  /// The mini profile of [steamId] (27-2): its name and avatar.
+  static Uri profileUrl(String steamId) =>
+      Uri.https('steamcommunity.com', '/miniprofile/${BigInt.parse(steamId) - _accountBase}/json');
+
+  /// The XML of the profile at the custom address [vanity] (27-4).
+  static Uri vanityUrl(String vanity) => Uri.https('steamcommunity.com', '/id/$vanity/', {'xml': '1'});
+
   // Catalog -------------------------------------------------------------------
 
   /// 3.x's one category `Steam Broadcasts` with the one area.
@@ -387,11 +606,12 @@ abstract final class SteamBroadcastApi {
 
   /// `allcontenthome` (an HTML fragment): one `Broadcast_Card` per broadcast,
   /// read as 3.x did (`parseDirectoryHtml`): the watch link's id (a card
-  /// without one, or a repeated broadcaster, is skipped), the content type
-  /// without `: Broadcast` as title (else the game), the game, the author's
-  /// name (else the id), 3.x's thumbnail rule, the avatar, `N viewers`, all
-  /// live. The hidden form says whether page [page] has a next one:
-  /// `p == page + 1` and `broadcastsoffset == page × 10`, with cards.
+  /// without one, a repeated broadcaster, or one that cannot be read is
+  /// skipped), the content type without `: Broadcast` as title (else the
+  /// game), the game, the author's name (else none, X-2), 3.x's thumbnail
+  /// rule, the avatar at 184 px (27-1), `N viewers`, all live. The hidden
+  /// form says whether page [page] has a next one: `p == page + 1` and
+  /// `broadcastsoffset == page × 10`, with cards.
   static SteamBroadcastPage directory(String body, {required int page, int status = 200}) {
     _checkStatus(body, status: status, what: 'allcontenthome');
     final root = HtmlElement.parseFragment(body);
@@ -401,42 +621,18 @@ abstract final class SteamBroadcastApi {
       final watch = card.query(
         (element) => element.tag == 'a' && (element.attributes['href'] ?? '').contains('/broadcast/watch/'),
       );
-      final steamId = steamIdOf(watch?.attributes['href'] ?? '');
-      if (steamId == null || !seen.add(steamId)) continue;
-      HtmlElement? classed(String name) => card.query((element) => element.hasClass(name));
-      final contentType = _elementText(classed('apphub_CardContentType'));
-      final game = _elementText(classed('apphub_CardContentTitle'));
-      final authorLink = card.query(
-        (element) =>
-            element.tag == 'a' &&
-            element.ancestors
-                .takeWhile((ancestor) => !identical(ancestor, card))
-                .any((ancestor) => ancestor.hasClass('apphub_CardContentAuthorName')),
-      );
-      final broadcaster = [
-        _clean(authorLink?.text ?? ''),
-        _elementText(classed('apphub_CardContentAuthorName')),
-        steamId,
-      ].firstWhere((name) => name.isNotEmpty);
-      final avatarImage = card.query(
-        (element) =>
-            element.tag == 'img' &&
-            element.ancestors
-                .takeWhile((ancestor) => !identical(ancestor, card))
-                .any((ancestor) => ancestor.hasClass('appHubIconHolder')),
-      );
-      broadcasts.add(
-        SteamBroadcast(
-          steamId: steamId,
-          broadcaster: broadcaster,
-          title: _stripBroadcastSuffix(contentType.isEmpty ? game : contentType),
-          game: game,
-          cover: _thumbnail(classed('apphub_CardContentPreviewImage')?.attributes['src'], steamId),
-          avatar: _avatar(avatarImage?.attributes['src']),
-          viewers: viewerCount(_elementText(classed('apphub_CardContentViewers'))),
-          state: SteamBroadcastState.live,
-        ),
-      );
+      final href = watch?.attributes['href'] ?? '';
+      final steamId = switch (_communityPath(href)) {
+        ['broadcast', 'watch', final id] when isSteamId(id) => id,
+        _ => null,
+      };
+      if (steamId == null || seen.contains(steamId)) continue;
+      try {
+        broadcasts.add(_card(card, steamId));
+        seen.add(steamId);
+      } on SiteError {
+        // One card that cannot be read only loses itself.
+      }
     }
     String? hidden(String name) =>
         root.query((element) => element.tag == 'input' && element.attributes['name'] == name)?.attributes['value'];
@@ -445,6 +641,40 @@ abstract final class SteamBroadcastApi {
     return SteamBroadcastPage(
       broadcasts: broadcasts,
       hasMore: broadcasts.isNotEmpty && nextPage == page + 1 && nextOffset == page * pageSize,
+    );
+  }
+
+  static SteamBroadcast _card(HtmlElement card, String steamId) {
+    HtmlElement? classed(String name) => card.query((element) => element.hasClass(name));
+    final contentType = _elementText(classed('apphub_CardContentType'));
+    final game = _elementText(classed('apphub_CardContentTitle'));
+    final authorLink = card.query(
+      (element) =>
+          element.tag == 'a' &&
+          element.ancestors
+              .takeWhile((ancestor) => !identical(ancestor, card))
+              .any((ancestor) => ancestor.hasClass('apphub_CardContentAuthorName')),
+    );
+    final broadcaster = [
+      _clean(authorLink?.text ?? ''),
+      _elementText(classed('apphub_CardContentAuthorName')),
+    ].firstWhere((name) => name.isNotEmpty, orElse: () => '');
+    final avatarImage = card.query(
+      (element) =>
+          element.tag == 'img' &&
+          element.ancestors
+              .takeWhile((ancestor) => !identical(ancestor, card))
+              .any((ancestor) => ancestor.hasClass('appHubIconHolder')),
+    );
+    return SteamBroadcast(
+      steamId: steamId,
+      broadcaster: broadcaster == steamId ? '' : broadcaster,
+      title: _stripBroadcastSuffix(contentType.isEmpty ? game : contentType),
+      game: game,
+      cover: _thumbnail(classed('apphub_CardContentPreviewImage')?.attributes['src'], steamId),
+      avatar: _avatar(avatarImage?.attributes['src']),
+      viewers: viewerCount(_elementText(classed('apphub_CardContentViewers'))),
+      state: SteamBroadcastState.live,
     );
   }
 
@@ -474,13 +704,14 @@ abstract final class SteamBroadcastApi {
 
   static final RegExp _pageTitle = RegExp(r'^Steam Community\s*::\s*(.+?)\s*::\s*Broadcast$', caseSensitive: false);
 
-  /// The watch page of [steamId] (3.x's `parseWatchHtml`): its application
-  /// config must name the same account (`data-broadcastsinfo`, JSON), the
-  /// broadcaster's name is in `og:title` (else `<title>`),
-  /// `Steam Community :: <name> :: Broadcast`, or [defaultBroadcaster]. A
-  /// page without the config is `NotFound`, another account or a broken
-  /// config `ApiChanged`. An account that does not exist still has a page;
-  /// its title names the id.
+  /// The watch page of [steamId] (3.x's `parseWatchHtml`, now the fallback
+  /// when the mini profile fails, 27-2): its application config must name
+  /// the same account (`data-broadcastsinfo`, JSON), the broadcaster's name
+  /// is in `og:title` (else `<title>`), `Steam Community :: <name> :: Broadcast`;
+  /// '' when it names nobody or only the id (3.x:
+  /// [legacyBroadcaster] or the id, X-2). A page without the config is
+  /// `NotFound`, another account or a broken config `ApiChanged`. An
+  /// account that does not exist still has a page; its title names the id.
   static String broadcaster(String body, {required String steamId, int status = 200}) {
     const what = 'watch page';
     _checkStatus(body, status: status, what: what);
@@ -505,20 +736,80 @@ abstract final class SteamBroadcastApi {
         root.query((element) => element.tag == 'title')?.text ??
         '';
     final name = _pageTitle.firstMatch(title)?.group(1)?.trim() ?? '';
-    return name.isEmpty ? defaultBroadcaster : name;
+    return name == steamId ? '' : name;
+  }
+
+  /// The mini profile of [steamId] (27-2): `persona_name` (HTML characters
+  /// decoded; '' when it is only the id, which Steam writes for an account
+  /// that does not exist) and `avatar_url` (see [directory]'s avatar rule;
+  /// Steam's default avatar is none). Not an object, or a `persona_name`
+  /// that is not text, is `ApiChanged`.
+  static SteamBroadcastProfile profile(String body, {required String steamId, int status = 200}) {
+    const what = 'miniprofile';
+    final decoded = _object(body, status: status, what: what);
+    final name = decoded['persona_name'];
+    if (name is! String) throw ApiChanged(_site, '$what: persona_name is $name');
+    final cleaned = _clean(decodeHtmlEntities(name));
+    final avatar = decoded['avatar_url'];
+    return (name: cleaned == steamId ? '' : cleaned, avatar: _avatar(avatar is String ? avatar : null));
+  }
+
+  /// `getbroadcastinfo` of [steamId] (27-2; the state of a refresh):
+  /// `success: 42` is offline; `success: 1` is live, or a replay with
+  /// `is_replay`, when `is_online`, else offline; any other `success` is
+  /// `ApiChanged`. While online: the title (`title`, else `app_title`), the
+  /// game (`app_title`, HTML characters decoded), the cover
+  /// (`thumbnail_url`, 3.x's thumbnail rule) and `viewer_count`. Fields
+  /// that only fill the card are left empty when malformed. The name and
+  /// avatar are [profile]'s.
+  static SteamBroadcast info(
+    String body, {
+    required String steamId,
+    SteamBroadcastProfile profile = (name: '', avatar: ''),
+    int status = 200,
+  }) {
+    const what = 'getbroadcastinfo';
+    final decoded = _object(body, status: status, what: what);
+    final success = jsonInt(decoded['success']);
+    if (success != 1 && success != 42) throw ApiChanged(_site, '$what: success ${decoded['success']}');
+    final online = success == 1 && _flag(decoded['is_online']);
+    if (!online) {
+      return SteamBroadcast(
+        steamId: steamId,
+        state: SteamBroadcastState.offline,
+        broadcaster: profile.name,
+        avatar: profile.avatar,
+      );
+    }
+    final game = _lenientText(decoded['app_title']);
+    final title = _lenientText(decoded['title']);
+    final thumbnail = decoded['thumbnail_url'];
+    return SteamBroadcast(
+      steamId: steamId,
+      state: _flag(decoded['is_replay']) ? SteamBroadcastState.replay : SteamBroadcastState.live,
+      broadcaster: profile.name,
+      avatar: profile.avatar,
+      title: title.isEmpty ? game : title,
+      game: game,
+      cover: _thumbnail(thumbnail is String ? thumbnail : null, steamId),
+      viewers: _viewers(decoded['viewer_count']),
+    );
   }
 
   /// `getbroadcastmpd` of [steamId] (3.x's `parseBroadcastJson`): the state
-  /// of `success`, the title (else [defaultTitle]) and `num_viewers` (a
-  /// count, or null); for a live one the HLS master of `hls_url` with
-  /// `cdn_auth_url_parameters` appended. A missing or non-text `success` or
-  /// `title` is `ApiChanged`. A live one whose `hls_url` or CDN parameters
-  /// break 3.x's rules keeps its state and carries the reason as
-  /// [SteamBroadcast.mediaError] (3.x failed the room, refresh included).
+  /// of `success` (see [SteamBroadcastState]; `ready` with `is_replay` is a
+  /// replay), its restriction (`none` for `ready`, subscribers only for
+  /// `missing_subscription`), the title ('' when empty), `num_viewers` (a
+  /// count, or null) and `broadcastid`; for `ready` the HLS master of
+  /// `hls_url` with `cdn_auth_url_parameters` appended. A missing or
+  /// non-text `success` or `title` is `ApiChanged`. A `ready` answer whose
+  /// `hls_url` or CDN parameters break 3.x's rules keeps its state and
+  /// carries the reason as [SteamBroadcast.mediaError] (3.x failed the
+  /// room, refresh included). The name and avatar are [profile]'s.
   static SteamBroadcast broadcast(
     String body, {
     required String steamId,
-    required String broadcaster,
+    SteamBroadcastProfile profile = (name: '', avatar: ''),
     int status = 200,
   }) {
     const what = 'getbroadcastmpd';
@@ -531,31 +822,54 @@ abstract final class SteamBroadcastApi {
     }
     if (decoded is! Map) throw const ApiChanged(_site, '$what: not an object');
     final success = _requiredText(decoded['success'], '$what success').toLowerCase();
-    final state = switch (success) {
-      'ready' => SteamBroadcastState.live,
-      'unavailable' || 'offline' || 'not_live' || 'no_broadcast' => SteamBroadcastState.offline,
-      'user_restricted' => SteamBroadcastState.restricted,
-      _ => SteamBroadcastState.unknown,
+    final (state, restriction) = switch (success) {
+      'ready' => (
+        _flag(decoded['is_replay']) ? SteamBroadcastState.replay : SteamBroadcastState.live,
+        LiveRestriction.none,
+      ),
+      'missing_subscription' => (SteamBroadcastState.live, LiveRestriction.subscribersOnly),
+      'unavailable' || 'offline' || 'not_live' || 'no_broadcast' => (SteamBroadcastState.offline, null),
+      'user_restricted' => (SteamBroadcastState.accountRestricted, null),
+      _ => (SteamBroadcastState.unknown, null),
     };
     Uri? master;
     SiteError? mediaError;
-    if (state == SteamBroadcastState.live) {
+    if (success == 'ready') {
       try {
         master = _withCdnAuth(_master(decoded['hls_url'], steamId), decoded['cdn_auth_url_parameters']);
       } on ApiChanged catch (error) {
         mediaError = error;
       }
     }
-    final title = _optionalText(decoded['title'], '$what title');
+    final broadcastId = switch (decoded['broadcastid']) {
+      final String id when RegExp(r'^[1-9][0-9]{0,19}$').hasMatch(id) => id,
+      final int id when id > 0 => '$id',
+      _ => null,
+    };
     return SteamBroadcast(
       steamId: steamId,
-      broadcaster: broadcaster,
-      title: title.isEmpty ? defaultTitle : title,
+      broadcaster: profile.name,
+      avatar: profile.avatar,
+      title: _optionalText(decoded['title'], '$what title'),
       viewers: _viewers(decoded['num_viewers']),
       state: state,
+      restriction: restriction,
+      broadcastId: broadcastId,
       master: master,
       mediaError: mediaError,
     );
+  }
+
+  /// The Steam id in the XML of a profile's custom address (27-4):
+  /// `<steamID64>`; null when Steam says the profile does not exist
+  /// (`<error>`); anything else is `ApiChanged`.
+  static String? steamIdOfProfileXml(String body, {int status = 200}) {
+    const what = 'profile XML';
+    _checkStatus(body, status: status, what: what);
+    final id = RegExp(r'<steamID64>\s*(\d+)\s*</steamID64>').firstMatch(body)?.group(1);
+    if (id != null && isSteamId(id)) return id;
+    if (RegExp(r'<response>\s*<error>').hasMatch(body)) return null;
+    throw ApiChanged(_site, '$what: no steamID64 (${_snippet(body)})');
   }
 
   /// 3.x's `validateMaster` of the HLS master at [master]: `#EXTM3U`, at most
@@ -598,14 +912,68 @@ abstract final class SteamBroadcastApi {
     return codecs.length == 1 ? codecs.single : null;
   }
 
+  /// The id and name of a variant [height] pixels high at [frameRate], as
+  /// Steam's player writes it: `<height>p`, with the rounded frame rate
+  /// above 30 fps (`1080p60`).
+  static String variantId(int height, double frameRate) => '${height}p${frameRate > 30 ? frameRate.round() : ''}';
+
+  static final RegExp _variantId = RegExp(r'^[1-9][0-9]{0,4}p(?:[1-9][0-9]{0,3})?$');
+
+  /// Whether [id] has the shape of a variant id ([variantId]).
+  static bool isVariantId(String id) => _variantId.hasMatch(id);
+
+  /// The variants of [text], the master at [master] that passed
+  /// [checkMaster], best first (height, frame rate, then bandwidth), one per
+  /// [variantId] (the highest bandwidth), when there are at least two
+  /// (27-7; Steam's player too offers a choice only then). A variant
+  /// without a resolution, or whose audio cannot be selected with it, is
+  /// left out; a master the shared parser refuses gives none, which leaves
+  /// the adaptive quality alone.
+  static List<SteamBroadcastVariant> variants(String text, {required Uri master}) {
+    final HlsMasterPlaylist playlist;
+    try {
+      playlist = HlsMasterPlaylist.parse(master, text);
+    } on FormatException {
+      return const [];
+    }
+    final byId = <String, SteamBroadcastVariant>{};
+    for (final variant in playlist.variants) {
+      final size = _resolution(variant);
+      if (size == null) continue;
+      try {
+        playlist.select(video: variant.uri);
+      } on FormatException {
+        continue;
+      }
+      final frameRate = _frameRate(variant);
+      final choice = SteamBroadcastVariant(
+        id: variantId(size.height, frameRate),
+        width: size.width,
+        height: size.height,
+        frameRate: frameRate,
+        bandwidth: int.parse(variant.attributes['BANDWIDTH']!),
+        codec: _videoCodec(variant.line),
+      );
+      final current = byId[choice.id];
+      if (current == null || choice.bandwidth > current.bandwidth) byId[choice.id] = choice;
+    }
+    if (byId.length < 2) return const [];
+    return List.unmodifiable(
+      byId.values.toList()..sort((a, b) {
+        final byHeight = b.height.compareTo(a.height);
+        if (byHeight != 0) return byHeight;
+        final byRate = b.frameRate.compareTo(a.frameRate);
+        return byRate != 0 ? byRate : b.bandwidth.compareTo(a.bandwidth);
+      }),
+    );
+  }
+
   /// The card or room of [broadcast] (3.x's `_room`): the Steam id as room
-  /// and user id; the title, name, game (else [defaultArea]); the cover, and
-  /// as avatar what 3.x showed, the cover (3.x kept only avatars on
-  /// `avatars.akamai.steamstatic.com`, and Steam now serves them from
-  /// `avatars.fastly.steamstatic.com`), the avatar only when there is no
-  /// cover; the viewers as concurrent audience; the state (restricted and
-  /// unknown are unknown, never offline); 3.x's notice and headers; [data]
-  /// and [danmaku] as given.
+  /// and user id; the title, name, avatar (27-1: the broadcaster's own, no
+  /// longer the cover), cover and game ('' when unknown, X-2); the viewers
+  /// as concurrent audience; the state (a restricted account is banned,
+  /// waiting and unknown are unknown, never offline) and restriction;
+  /// the notice; 3.x's headers; [data] and [danmaku] as given.
   static LiveRoom room(SteamBroadcast broadcast, {SteamBroadcastRoomData? data, SteamBroadcastDanmakuArgs? danmaku}) {
     final viewers = broadcast.viewers?.toString() ?? '';
     return LiveRoom(
@@ -615,41 +983,44 @@ abstract final class SteamBroadcastApi {
       link: link(broadcast.steamId),
       title: broadcast.title,
       nick: broadcast.broadcaster,
-      avatar: _legacyAvatar(broadcast.avatar)
-          ? broadcast.avatar
-          : broadcast.cover.isNotEmpty
-          ? broadcast.cover
-          : broadcast.avatar,
+      avatar: broadcast.avatar,
       cover: broadcast.cover,
-      area: broadcast.game.isEmpty ? defaultArea : broadcast.game,
+      area: broadcast.game,
       watching: viewers,
       onlineViewers: viewers,
       audienceMetricType: viewers.isEmpty ? AudienceMetricType.unknown : AudienceMetricType.onlineViewers,
       liveStatus: switch (broadcast.state) {
         SteamBroadcastState.live => LiveStatus.live,
+        SteamBroadcastState.replay => LiveStatus.replay,
         SteamBroadcastState.offline => LiveStatus.offline,
-        SteamBroadcastState.restricted || SteamBroadcastState.unknown => LiveStatus.unknown,
+        SteamBroadcastState.accountRestricted => LiveStatus.banned,
+        SteamBroadcastState.unknown => LiveStatus.unknown,
       },
-      notice: broadcast.state == SteamBroadcastState.restricted ? restrictedNotice : chatNotice,
+      restriction: broadcast.restriction,
+      notice: broadcast.state == SteamBroadcastState.accountRestricted ? restrictedNotice : chatNotice,
       httpHeaders: mediaHeaders(broadcast.steamId),
       data: data,
       danmakuData: danmaku,
     );
   }
 
-  /// The room data of [broadcast]: the master only when it was checked.
+  /// The room data of [broadcast]: the master and its variants only when it
+  /// was checked.
   static SteamBroadcastRoomData roomData(SteamBroadcast broadcast) => SteamBroadcastRoomData(
     steamId: broadcast.steamId,
     state: broadcast.state,
+    restriction: broadcast.restriction,
     master: broadcast.masterChecked ? broadcast.master : null,
     codec: broadcast.codec,
+    variants: broadcast.masterChecked ? broadcast.variants : const [],
     mediaError: broadcast.mediaError,
   );
 
   /// The one line of a checked master: HLS, the codec it names, no headers
   /// (3.x's player and recorder sent none; the CDN answers without them,
   /// 2026-09-28) and no lease (no expiry in the address; Steam needs no
-  /// heartbeat, archive spec §6).
+  /// heartbeat, archive spec §6). A variant's quality plays the same line
+  /// restricted to its variant ([SteamBroadcastVariant.selectIn], M7).
   static LivePlayLine line(Uri master, {String? codec}) =>
       LivePlayLine('$master', format: StreamFormat.hls, codec: codec, lineId: lineId);
 }
@@ -745,6 +1116,15 @@ String? _videoCodec(String line) {
   return null;
 }
 
+/// A variant's `RESOLUTION`, or null.
+({int width, int height})? _resolution(HlsMasterVariant variant) {
+  final size = RegExp(r'^(\d+)x(\d+)$').firstMatch(variant.attributes['RESOLUTION'] ?? '');
+  return size == null ? null : (width: int.parse(size[1]!), height: int.parse(size[2]!));
+}
+
+/// A variant's `FRAME-RATE`; 0 when not given.
+double _frameRate(HlsMasterVariant variant) => double.tryParse(variant.attributes['FRAME-RATE'] ?? '') ?? 0;
+
 /// 3.x's `_image`: an https thumbnail on `steambroadcast.akamaized.net`
 /// under `/broadcast/<steamId>/`, no user info or fragment; '' otherwise.
 String _thumbnail(String? value, String steamId) {
@@ -760,19 +1140,30 @@ String _thumbnail(String? value, String steamId) {
   return '$uri';
 }
 
-/// 3.x's `_avatar` without its host rule: an https URL with a host, no user
-/// info or fragment; '' otherwise.
+/// Steam's default avatar (the question mark), which is no avatar.
+const _defaultAvatar = 'fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb';
+
+final RegExp _avatarPath = RegExp(r'^/([0-9a-f]{40})(?:_medium|_full)?\.jpg$');
+
+/// An avatar: an https URL with a host, no user info or fragment (3.x kept
+/// only `avatars.akamai.steamstatic.com`; Steam serves them from
+/// `avatars.fastly.steamstatic.com` now). A Steam avatar
+/// (`avatars.*.steamstatic.com/<hash>.jpg`, 32 px on the cards) is taken at
+/// its 184 px size `<hash>_full.jpg`, which the mini profile names (27-1);
+/// Steam's default avatar is ''. '' otherwise.
 String _avatar(String? value) {
   final uri = Uri.tryParse(_clean(value ?? ''));
   if (uri == null || uri.scheme != 'https' || uri.host.isEmpty || uri.userInfo.isNotEmpty || uri.hasFragment) {
     return '';
   }
-  return '$uri';
+  final host = uri.host.toLowerCase();
+  final hash = host.startsWith('avatars.') && host.endsWith('.steamstatic.com')
+      ? _avatarPath.firstMatch(uri.path)?.group(1)
+      : null;
+  if (hash == null) return '$uri';
+  if (hash == _defaultAvatar) return '';
+  return '${Uri.https(uri.authority, '/${hash}_full.jpg')}';
 }
-
-/// Whether 3.x kept [avatar]: on `avatars.akamai.steamstatic.com`.
-bool _legacyAvatar(String avatar) =>
-    avatar.isNotEmpty && Uri.tryParse(avatar)?.host.toLowerCase() == 'avatars.akamai.steamstatic.com';
 
 /// 3.x's `_nonNegativeInt`: an integer, a finite number (truncated) or an
 /// integer text, when zero or more; null otherwise.
@@ -786,6 +1177,9 @@ int? _viewers(Object? value) {
   return parsed != null && parsed >= 0 ? parsed : null;
 }
 
+/// A JSON flag: `true`, or a non-zero number.
+bool _flag(Object? value) => value == true || (value is num && value != 0);
+
 String _stripBroadcastSuffix(String value) =>
     value.replaceFirst(RegExp(r':\s*Broadcast\s*$', caseSensitive: false), '').trim();
 
@@ -795,6 +1189,10 @@ String _clean(String text) {
   if (text.length > 65536) throw const ApiChanged(_site, 'text over 65536 characters');
   return text.trim().replaceAll(RegExp(r'\s+'), ' ');
 }
+
+/// A JSON text that only fills the card: cleaned, HTML characters decoded;
+/// '' when it is not text or too long.
+String _lenientText(Object? value) => value is String && value.length <= 65536 ? _clean(decodeHtmlEntities(value)) : '';
 
 String _elementText(HtmlElement? element) => element == null ? '' : _clean(element.text);
 
@@ -811,6 +1209,19 @@ String _requiredText(Object? value, String what) {
   final text = _optionalText(value, what);
   if (text.isEmpty) throw ApiChanged(_site, '$what is empty');
   return text;
+}
+
+/// The JSON object of an answer; anything else is `ApiChanged`.
+Map<Object?, Object?> _object(String body, {required int status, required String what}) {
+  _checkStatus(body, status: status, what: what);
+  final Object? decoded;
+  try {
+    decoded = jsonDecode(body);
+  } on FormatException {
+    throw ApiChanged(_site, '$what: not JSON (${_snippet(body)})');
+  }
+  if (decoded is! Map) throw ApiChanged(_site, '$what: not an object');
+  return decoded;
 }
 
 String _snippet(String body) {

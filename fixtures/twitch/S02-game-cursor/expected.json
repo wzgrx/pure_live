@@ -1,0 +1,9 @@
+{
+  "generator": "TwitchSite.getCategoryRooms (twitch_site.dart:817-871)",
+  "value": {
+    "throws": {
+      "type": "StateError",
+      "message": "Bad state: Twitch GraphQL error: failed integrity check"
+    }
+  }
+}

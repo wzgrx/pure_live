@@ -1,0 +1,19 @@
+{
+  "data": {
+    "streamPlaybackAccessToken": {
+      "value": "{\"adblock\":false,\"authorization\":{\"forbidden\":false,\"reason\":\"\"},\"blackout_enabled\":false,\"channel\":\"minecraft\",\"channel_id\":112568845,\"chansub\":{\"restricted_bitrates\":[],\"view_until\":1924905600},\"ci_gb\":false,\"geoblock_reason\":\"\",\"device_id\":\"f489ab0806800b09956ba80ad722088c\",\"expires\":1790535835,\"extended_history_allowed\":false,\"game\":\"\",\"hide_ads\":false,\"https_required\":true,\"mature\":false,\"notification_id\":null,\"partner\":false,\"platform\":\"site\",\"player_type\":\"site\",\"private\":{\"allowed_to_view\":true},\"privileged\":false,\"role\":\"\",\"server_ads\":true,\"show_ads\":true,\"subscriber\":false,\"turbo\":false,\"user_id\":null,\"user_ip\":\"581.821.231.734\",\"version\":3,\"maximum_resolution\":\"FULL_HD\",\"maximum_video_bitrate_kbps\":12500,\"maximum_resolution_reasons\":{\"QUAD_HD\":[\"AUTHZ_NOT_LOGGED_IN\"],\"ULTRA_HD\":[\"AUTHZ_NOT_LOGGED_IN\"]},\"maximum_video_bitrate_kbps_reasons\":[\"AUTHZ_DISALLOWED_BITRATE\"]}",
+      "signature": "d4400393d8d236442221a742d1e1481871bcb5aa",
+      "authorization": {
+        "isForbidden": false,
+        "forbiddenReasonCode": "NONE",
+        "__typename": "PlaybackAccessTokenAuthorization"
+      },
+      "__typename": "PlaybackAccessToken"
+    }
+  },
+  "extensions": {
+    "durationMilliseconds": 29,
+    "requestID": "01M3J2WKQHZ1WAKQJP04H4HF7R",
+    "operationName": "PlaybackAccessToken"
+  }
+}

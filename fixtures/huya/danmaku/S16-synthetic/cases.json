@@ -1,0 +1,469 @@
+{
+  "note": "Synthetic server frames for what the recording (S11-live) lacks: batched chat with event ids, colours, headline notices, missing fields, other groups, unknown uris and commands, malformed bodies and frames. Each case is one WebSocket frame: tag 0 the command, tag 1 the payload. Command 7's payload is tag 0 pushType 5, tag 1 uri, tag 2 body, tag 3 protocolType 2; command 22's is tag 0 group, tag 1 the items (tag 0 uri, tag 1 body, tag 2 id, 0 when absent); other commands carry an empty payload. A body is \"chat\" (a MessageNotice: tag 0 sender {0 uid, 1 0, 2 nick, 3 0} when uid or nick is given, tags 1 and 2 the channel tid, tag 3 content when given, tag 6 bullet format {0 color, 1 4, 2 0, 3 1} when color is given), \"count\" (tag 0), \"body\" (raw Base64) or empty. \"cutBody\" and \"cut\" drop that many bytes from the end of the body or the frame; \"base64\" is the raw frame. Names and ids are made up.",
+  "cases": [
+    {
+      "name": "batched chat carries the item's event id",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 2018964510849866753,
+            "chat": {
+              "uid": 1001001,
+              "nick": "观众A",
+              "content": "你好",
+              "color": 16740462,
+              "tid": 1001
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "single push chat has no event id",
+      "frame": {
+        "command": 7,
+        "uri": 1400,
+        "chat": {
+          "uid": 1001002,
+          "nick": "viewerB",
+          "content": "hello",
+          "color": -1,
+          "tid": 1001
+        }
+      }
+    },
+    {
+      "name": "colour -1 (the default), 0 and a missing bullet format are white",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 11,
+            "chat": {
+              "uid": 1001003,
+              "nick": "观众C",
+              "content": "默认色",
+              "color": -1,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 12,
+            "chat": {
+              "uid": 1001003,
+              "nick": "观众C",
+              "content": "零",
+              "color": 0,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 13,
+            "chat": {
+              "uid": 1001003,
+              "nick": "观众C",
+              "content": "没有格式",
+              "tid": 1001
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "colours with four and six hexadecimal digits",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 21,
+            "chat": {
+              "uid": 1001004,
+              "nick": "观众D",
+              "content": "金色",
+              "color": 16763904,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 22,
+            "chat": {
+              "uid": 1001004,
+              "nick": "观众D",
+              "content": "绿色",
+              "color": 65280,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 23,
+            "chat": {
+              "uid": 1001004,
+              "nick": "观众D",
+              "content": "深蓝",
+              "color": 4660,
+              "tid": 1001
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "colours 3.x's hexadecimal parse turned white",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 31,
+            "chat": {
+              "uid": 1001005,
+              "nick": "观众E",
+              "content": "蓝色",
+              "color": 255,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 32,
+            "chat": {
+              "uid": 1001005,
+              "nick": "观众E",
+              "content": "深灰",
+              "color": 657930,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 33,
+            "chat": {
+              "uid": 1001005,
+              "nick": "观众E",
+              "content": "七位",
+              "color": 33488896,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 34,
+            "chat": {
+              "uid": 1001005,
+              "nick": "观众E",
+              "content": "两位",
+              "color": 100,
+              "tid": 1001
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "popularity in a batch (3.x test)",
+      "frame": {
+        "command": 22,
+        "group": "live:2272316519",
+        "items": [
+          {
+            "uri": 8006,
+            "id": 2018964510849866752,
+            "count": 3212923
+          }
+        ]
+      }
+    },
+    {
+      "name": "popularity in a single push",
+      "frame": {
+        "command": 7,
+        "uri": 8006,
+        "count": 5413644
+      }
+    },
+    {
+      "name": "popularity without a count is 0",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 8006,
+            "id": 41
+          }
+        ]
+      }
+    },
+    {
+      "name": "headline notice in a batch (3.x test)",
+      "frame": {
+        "command": 22,
+        "group": "live:2272316519",
+        "items": [
+          {
+            "uri": 2001314,
+            "id": 2018964510849866753
+          }
+        ]
+      }
+    },
+    {
+      "name": "two headline notices around a chat",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 2001314,
+            "id": 51
+          },
+          {
+            "uri": 1400,
+            "id": 52,
+            "chat": {
+              "uid": 1001006,
+              "nick": "观众F",
+              "content": "上头条了",
+              "color": 16738047,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 2001314,
+            "id": 53
+          }
+        ]
+      }
+    },
+    {
+      "name": "headline notice in a single push",
+      "frame": {
+        "command": 7,
+        "uri": 2001314
+      }
+    },
+    {
+      "name": "chat without a sender or a format",
+      "frame": {
+        "command": 7,
+        "uri": 1400,
+        "chat": {
+          "content": "只有文字",
+          "tid": 1001
+        }
+      }
+    },
+    {
+      "name": "empty text and a chat without text are still reported",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 61,
+            "chat": {
+              "uid": 1001007,
+              "nick": "观众G",
+              "content": "",
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 62,
+            "chat": {
+              "uid": 1001007,
+              "nick": "观众G",
+              "tid": 1001
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "long text (string4)",
+      "frame": {
+        "command": 7,
+        "uri": 1400,
+        "chat": {
+          "uid": 1001008,
+          "nick": "观众H",
+          "content": "弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕",
+          "color": 13434726,
+          "tid": 1001
+        }
+      }
+    },
+    {
+      "name": "another group and another channel are kept (3.x checks neither)",
+      "frame": {
+        "command": 22,
+        "group": "live:999",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 71,
+            "chat": {
+              "uid": 1001009,
+              "nick": "观众I",
+              "content": "别的房间",
+              "color": 8766719,
+              "tid": 999
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown uris in a batch are skipped",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 6501,
+            "id": 81,
+            "body": "AA=="
+          },
+          {
+            "uri": 1400,
+            "id": 82,
+            "chat": {
+              "uid": 1001010,
+              "nick": "观众J",
+              "content": "礼物之后",
+              "color": 2281166,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 6111,
+            "id": 83
+          }
+        ]
+      }
+    },
+    {
+      "name": "other commands are ignored",
+      "frame": {
+        "command": 21
+      }
+    },
+    {
+      "name": "a malformed chat body in a batch",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 91,
+            "chat": {
+              "uid": 1001011,
+              "nick": "观众K",
+              "content": "第一条",
+              "color": 16740462,
+              "tid": 1001
+            }
+          },
+          {
+            "uri": 1400,
+            "id": 92,
+            "chat": {
+              "uid": 1001011,
+              "nick": "观众K",
+              "content": "被截断",
+              "color": 16740462,
+              "tid": 1001
+            },
+            "cutBody": 4
+          },
+          {
+            "uri": 1400,
+            "id": 93,
+            "chat": {
+              "uid": 1001011,
+              "nick": "观众K",
+              "content": "第三条",
+              "color": 16740462,
+              "tid": 1001
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "text that is not UTF-8",
+      "frame": {
+        "command": 22,
+        "group": "live:1001",
+        "items": [
+          {
+            "uri": 1400,
+            "id": 101,
+            "body": "NgLkvQ=="
+          },
+          {
+            "uri": 1400,
+            "id": 102,
+            "chat": {
+              "uid": 1001012,
+              "nick": "观众L",
+              "content": "之后",
+              "color": -1,
+              "tid": 1001
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "sender uid -1 is a signed byte",
+      "frame": {
+        "command": 7,
+        "uri": 1400,
+        "chat": {
+          "uid": -1,
+          "nick": "系统",
+          "content": "系统消息",
+          "color": -1,
+          "tid": 1001
+        }
+      }
+    },
+    {
+      "name": "truncated frame",
+      "frame": {
+        "command": 7,
+        "uri": 1400,
+        "chat": {
+          "uid": 1001013,
+          "nick": "观众M",
+          "content": "截断",
+          "color": -1,
+          "tid": 1001
+        },
+        "cut": 5
+      }
+    },
+    {
+      "name": "not a Tars frame",
+      "frame": {
+        "base64": "/w=="
+      }
+    }
+  ]
+}

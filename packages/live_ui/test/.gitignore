@@ -1,0 +1,2 @@
+# Golden comparison output (flutter test writes it on a mismatch).
+failures/

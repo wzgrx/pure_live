@@ -123,6 +123,32 @@ void main() {
       expect(find.byWidgetPredicate((widget) => widget is LiveIcon && widget.icon == LiveIcons.back), findsOneWidget);
     });
 
+    testWidgets('a checked menu item shows the Symbols check on the chosen entry only', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: PureTheme.of(Appearance.light),
+          home: Scaffold(
+            body: PopupMenuButton<int>(
+              icon: const LiveIcon(LiveIcons.more),
+              itemBuilder: (context) => [
+                const CheckedMenuItem(value: 1, checked: true, child: Text('one')),
+                const CheckedMenuItem(value: 2, checked: false, child: Text('two')),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(PopupMenuButton<int>));
+      await tester.pumpAndSettle();
+      final check = find.byWidgetPredicate((widget) => widget is LiveIcon && widget.icon == LiveIcons.check);
+      expect(check, findsOneWidget);
+      expect(find.ancestor(of: check, matching: find.widgetWithText(CheckedMenuItem<int>, 'one')), findsOneWidget);
+      expect(find.byType(Icon), findsNWidgets(2), reason: 'the menu button and the check, both Symbols');
+      for (final icon in tester.widgetList<Icon>(find.byType(Icon))) {
+        expect(icon.icon!.fontFamily, 'MaterialSymbolsRounded');
+      }
+    });
+
     test('the stroke model matches the font within 0.01 grid units', () {
       // (weight, grade, optical size, stroke on the 24 dp grid), measured
       // from MaterialSymbolsRounded 2.960 (drawn_glyphs.dart).

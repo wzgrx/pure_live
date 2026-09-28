@@ -381,6 +381,9 @@ enum LiveIcons {
   /// Record; filled while recording or booked. Symbols `fiber_manual_record`.
   record.symbol(Symbols.fiber_manual_record_rounded),
 
+  /// 录制, the settings group. Symbols `radio_button_checked`.
+  recording.symbol(Symbols.radio_button_checked_rounded),
+
   /// Waits for the room to go live; a time. Symbols `schedule`.
   schedule.symbol(Symbols.schedule_rounded),
 
@@ -436,11 +439,11 @@ enum LiveIcons {
   /// Back up. Symbols `save`.
   backup.symbol(Symbols.save_rounded),
 
-  /// WebDAV. Symbols `cloud`.
-  webdav.symbol(Symbols.cloud_rounded),
+  /// WebDAV, a playlist from the network. Symbols `cloud`.
+  cloud.symbol(Symbols.cloud_rounded),
 
   /// No WebDAV account. Symbols `cloud_off`.
-  noWebdav.symbol(Symbols.cloud_off_rounded),
+  cloudOff.symbol(Symbols.cloud_off_rounded),
 
   /// Test a connection. Symbols `wifi_tethering`.
   testConnection.symbol(Symbols.wifi_tethering_rounded),

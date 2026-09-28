@@ -4,6 +4,7 @@ library;
 export 'src/adaptive_scaffold.dart';
 export 'src/avatar.dart';
 export 'src/badges.dart';
+export 'src/checked_menu_item.dart';
 export 'src/color_tokens.dart';
 export 'src/danmaku/danmaku_lanes.dart';
 export 'src/danmaku/danmaku_models.dart';

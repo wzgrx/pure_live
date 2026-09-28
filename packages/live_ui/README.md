@@ -47,7 +47,11 @@ VideoControlIcons(size: VideoControlIcons.sizeFor(context, fullscreen: full), ch
   glyph sits in a row of font glyphs at the same weight.
 - **Framework icons**: the theme's `ActionIconThemeData` makes Material's own
   back, close and drawer buttons show `LiveIcon`s, and the segmented button's
-  check is `LiveIcons.check`. The app screenshot tests fail when any Material
+  check is `LiveIcons.check`. `CheckedMenuItem` replaces
+  `CheckedPopupMenuItem` (its check is fixed to Material Icons). Popup menu
+  buttons get `LiveIcons.more`, expansion tiles a `LiveIcon` arrow and
+  reorderable lists their own handles, since Material's defaults are
+  Material Icons glyphs. The app screenshot tests fail when any Material
   Icons glyph is drawn.
 - **Release size**: `flutter build` shrinks icon fonts to the glyphs the
   code names (icon tree shaking). The package references its Outlined and
@@ -194,6 +198,7 @@ Material Symbols names; the Rounded style is used throughout.
 | `noPicture` | `tv_off` | A screen that shows nothing (the room is offline, no device found). |
 | `offline` | `wifi_off` | No network. |
 | `record` | `fiber_manual_record` | Record; filled while recording or booked. |
+| `recording` | `radio_button_checked` | 录制, the settings group. |
 | `schedule` | `schedule` | Waits for the room to go live; a time. |
 | `stopTask` | `stop_circle` | Stop a task. |
 | `recordingCenter` | `video_library` | The recording center. |
@@ -211,8 +216,8 @@ Material Symbols names; the Rounded style is used throughout.
 | `tvMode` | `tv` | TV mode. |
 | `alerts` | `notifications` | Live alerts; filled when on. |
 | `backup` | `save` | Back up. |
-| `webdav` | `cloud` | WebDAV. |
-| `noWebdav` | `cloud_off` | No WebDAV account. |
+| `cloud` | `cloud` | WebDAV, a playlist from the network. |
+| `cloudOff` | `cloud_off` | No WebDAV account. |
 | `testConnection` | `wifi_tethering` | Test a connection. |
 | `lanSync` | `devices_other` | LAN sync, other devices. |
 | `diagnostics` | `medical_information` | Diagnostics. |

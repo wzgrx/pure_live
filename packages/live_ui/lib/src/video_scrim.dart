@@ -25,8 +25,9 @@ class VideoControlIcons extends StatelessWidget {
   /// Icon size.
   final double size;
 
-  /// Icon colour.
-  final Color color;
+  /// Icon colour; null keeps the surrounding one (a tonal button on the
+  /// picture has its own).
+  final Color? color;
 
   /// The controls.
   final Widget child;

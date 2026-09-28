@@ -364,23 +364,46 @@ void main() {
       expect(setup.http.requests, isEmpty);
     });
 
-    test("the requested spelling stays the identity, so a follow merges (3.x took the answer's)", () async {
-      final live = ReplaySample.load('$_root/S04-detail-live');
+    test("a room asked for in another spelling is the platform's, the followed one (3.x)", () async {
+      final offline = ReplaySample.load('$_root/S04-detail-offline');
       final setup = _setup(
+        [],
+        extra: [
+          ReplaySample(method: 'GET', url: Uri.parse('$_api$_detailPath/kaiyote'), status: 200, bytes: offline.bytes),
+        ],
+      );
+      // 3.x stored the follow under the platform's spelling.
+      final followed = LiveRoom.fromJson(
+        _legacy('S04-detail-offline')['getRoomDetailForRefresh'] as Map<String, Object?>,
+      );
+      expect(followed.roomId, 'Kaiyote');
+      for (final call in [
+        setup.site.getRoomDetail,
+        setup.site.getRoomDetailForRefresh,
+        setup.site.getRoomDetailForRecording,
+      ]) {
+        final room = await call(roomId: 'kaiyote');
+        expect(room.roomId, 'Kaiyote');
+        expect(room.hasSameIdentity(followed), isTrue, reason: 'the page shows it followed; no second follow');
+      }
+      final merged = followed
+          .copyWith(title: 'old')
+          .mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: 'kaiyote'));
+      expect(merged.title, 'My Channel Title', reason: 'the refresh merges into the follow');
+      expect(setup.http.requests.map((request) => request.url.path).toSet(), {'$_detailPath/kaiyote'});
+
+      final live = ReplaySample.load('$_root/S04-detail-live');
+      final entry = _setup(
         ['S05-master'],
         extra: [
           ReplaySample(method: 'GET', url: Uri.parse('$_api$_detailPath/ALLATIR'), status: 200, bytes: live.bytes),
         ],
       );
-      final room = await setup.site.getRoomDetail(roomId: 'ALLATIR');
-      expect(room.roomId, 'ALLATIR');
-      expect(room.nick, 'allatir');
-      expect((room.data! as PicartoRoomData).name, 'allatir');
-      final follow = LiveRoom(platform: 'picarto', roomId: 'ALLATIR', nick: 'old', followers: '1');
-      final merged = follow.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: 'ALLATIR'));
-      expect(merged.nick, 'allatir');
-      expect(merged.isLiveNow, isTrue);
-      expect(merged.followers, '653');
+      final room = await entry.site.getRoomDetail(roomId: 'ALLATIR');
+      expect(room.roomId, 'allatir');
+      final data = room.data! as PicartoRoomData;
+      expect((data.name, data.requestedId), ('allatir', 'ALLATIR'));
+      expect((room.danmakuData! as PicartoDanmakuArgs).channelName, 'allatir');
     });
 
     test('overlapping room reads share nothing (3.x)', () async {

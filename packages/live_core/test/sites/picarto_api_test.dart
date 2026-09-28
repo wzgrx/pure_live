@@ -427,12 +427,29 @@ void main() {
       expect(legacy['roomEntryRequests'], hasLength(1), reason: 'no master for an offline channel');
     });
 
-    test("the requested spelling stays the identity (3.x took the answer's)", () {
-      final channel = PicartoApi.roomDetail(_sample('S04-detail-offline').body, requestedId: 'kaiyote');
-      expect(channel.room.roomId, 'kaiyote');
-      expect(channel.room.nick, 'Kaiyote');
-      expect(channel.room.link, 'https://picarto.tv/Kaiyote');
-      expect(channel.name, 'Kaiyote');
+    test("the platform's spelling is the room id whatever the spelling asked for, as in 3.x", () {
+      // 3.x's follows were stored under the platform's spelling: a room
+      // opened from a lower-case link must be the followed one.
+      for (final (name, requested) in [
+        ('S04-detail-offline', 'kaiyote'),
+        ('S04-detail-offline', 'KAIYOTE'),
+        ('S04-detail-live', 'ALLATIR'),
+      ]) {
+        final channel = PicartoApi.roomDetail(_sample(name).body, requestedId: requested);
+        final legacy = _legacy(name);
+        for (final depth in ['getRoomDetailForRefresh', 'getRoomDetail', 'getRoomDetailForRecording']) {
+          _expectParity(
+            channel.room.toJson(),
+            legacy[depth] as Map<String, dynamic>,
+            changed: {'followers'},
+            reason: '$requested $depth',
+          );
+        }
+        expect(channel.room.roomId, (legacy['getRoomDetail'] as Map)['roomId'], reason: requested);
+        expect(channel.room.roomId, isNot(requested));
+        expect(channel.name, channel.room.roomId);
+        expect(channel.requestedId, requested);
+      }
       expect(() => _roomDetail(_detail(name: 'Other')), throwsA(isA<ApiChanged>()), reason: 'another channel');
     });
 
@@ -452,7 +469,7 @@ void main() {
       final channel = _roomDetail(_detail(), requestedId: 'artist');
       expect(channel.master, _masterUri);
       expect(channel.room.cover, 'https://thumb.picarto.tv/Artist.jpg');
-      expect(channel.room.roomId, 'artist');
+      expect(channel.room.roomId, 'Artist');
       final noThumbnail = _roomDetail({
         ..._detail(),
         'channel': {..._channel(), 'image_thumbnail': 'https://thumb.picarto.tv/channel.jpg'},

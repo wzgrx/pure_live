@@ -17,7 +17,9 @@ const _site = 'picarto';
 /// of 30, search from channel profiles (offline ones too). Room entry reads
 /// the detail and, when live, the HLS master playlist on the edge the load
 /// balancer chose (3.x's two requests); follow refreshes read the detail
-/// only. Failures are `SiteError`s; nothing is disguised as an offline room.
+/// only. Room ids are the platform's spelling of the channel name, as 3.x
+/// stored follows (a room asked for as `thebaker` is `TheBaker`). Failures
+/// are `SiteError`s; nothing is disguised as an offline room.
 final class PicartoSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -184,6 +186,7 @@ final class PicartoSite extends LiveSite
         channelId: channel.channelId,
         master: master,
         qualities: PicartoApi.qualities(response.text, master: master, status: response.status),
+        requestedId: channel.requestedId,
       );
     }
     return channel.room.copyWith(data: data, danmakuData: withDanmaku ? PicartoApi.danmakuArgs(channel) : null);
@@ -261,7 +264,8 @@ final class PicartoSite extends LiveSite
   // Links ---------------------------------------------------------------------
 
   /// A channel page on `picarto.tv` (3.x's rule, see
-  /// [PicartoApi.channelFromUrl]), spelled as in the link.
+  /// [PicartoApi.channelFromUrl]), spelled as in the link; the detail
+  /// answers with the platform's spelling, the room id (3.x).
   @override
   String? roomIdFromUrl(String url) {
     final uri = Uri.tryParse(url.trim());

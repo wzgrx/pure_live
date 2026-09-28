@@ -34,18 +34,27 @@ final class PicartoDanmakuArgs {
   String toString() => 'PicartoDanmakuArgs($channelName, $channelId)';
 }
 
-/// The stream behind a live room, apart from its identity (the channel name
-/// as asked for): 3.x parsed the master playlist on room entry and kept its
-/// qualities in `data`.
+/// The stream behind a live room: 3.x parsed the master playlist on room
+/// entry and kept its qualities in `data`.
 @immutable
 final class PicartoRoomData {
   /// Creates the data.
-  new({required this.name, required this.channelId, required this.master, required List<LivePlayQuality> qualities})
-    : qualities = List.unmodifiable(qualities);
+  new({
+    required this.name,
+    required this.channelId,
+    required this.master,
+    required List<LivePlayQuality> qualities,
+    String? requestedId,
+  }) : qualities = List.unmodifiable(qualities),
+       requestedId = requestedId ?? name;
 
-  /// The channel name as the platform writes it (`TheBaker` for a room asked
-  /// for as `thebaker`).
+  /// The channel name as the platform writes it (`TheBaker`), which is also
+  /// the room id.
   final String name;
+
+  /// The name as it was asked for (`thebaker` from a lower-case link); kept
+  /// for reference only.
+  final String requestedId;
 
   /// The channel's numeric id, which picks its own stream in a multistream
   /// group.
@@ -59,18 +68,21 @@ final class PicartoRoomData {
   final List<LivePlayQuality> qualities;
 }
 
-/// A `channel/detail` answer: the room as asked for, and what streams and
-/// danmaku need.
+/// A `channel/detail` answer: the room under the platform's spelling of its
+/// name, and what streams and danmaku need.
 @immutable
 final class PicartoChannel {
   /// Creates the answer.
-  const new({required this.room, required this.name, required this.channelId, this.master});
+  const new({required this.room, required this.name, required this.channelId, required this.requestedId, this.master});
 
   /// The room, without stream data or danmaku arguments.
   final LiveRoom room;
 
-  /// The channel name as the platform writes it.
+  /// The channel name as the platform writes it, the room id.
   final String name;
+
+  /// The name as it was asked for.
+  final String requestedId;
 
   /// The channel's numeric id.
   final int channelId;
@@ -300,9 +312,12 @@ abstract final class PicartoApi {
 
   // Rooms ---------------------------------------------------------------------
 
-  /// `api/channel/detail/<name>` for the room asked for as [requestedId]
-  /// (its identity: the platform matches names ignoring case and answers in
-  /// its own spelling, kept in [PicartoChannel.name]).
+  /// `api/channel/detail/<name>` for the channel asked for as
+  /// [requestedId]. The platform matches names ignoring case and answers in
+  /// its own spelling (`thebaker` → `TheBaker`), which is the room id, as in
+  /// 3.x: 3.x's follows were stored under it, so a room opened from a
+  /// lower-case link is the followed one. [requestedId] is kept in
+  /// [PicartoChannel.requestedId].
   ///
   /// - `channel: null`: `NotFound`; a private channel: `NeedsLogin`.
   /// - A channel of another name, or without id, state or `private` flag:
@@ -355,8 +370,9 @@ abstract final class PicartoApi {
         followers: followers == null ? null : '$followers',
         introduction: _introduction(channel['descriptions']),
       ),
-      name: card.nick,
+      name: card.roomId,
       channelId: channelId,
+      requestedId: id,
       master: master,
     );
   }
@@ -543,10 +559,10 @@ abstract final class PicartoApi {
   // Helpers -------------------------------------------------------------------
 
   /// A channel of an explore row, or of a detail asked for as [requestedId]
-  /// (3.x's `parseChannel`). The name (a valid channel name), id and state
-  /// are required; a detail must answer the name asked for (case ignored)
-  /// and say whether it is private, and keeps [requestedId] as the room id.
-  /// A private channel is `NeedsLogin`. The audience is `viewers`
+  /// (3.x's `parseChannel`), under the platform's spelling of its name. The
+  /// name (a valid channel name), id and state are required; a detail must
+  /// answer the name asked for (case ignored) and say whether it is
+  /// private. A private channel is `NeedsLogin`. The audience is `viewers`
   /// (concurrent) and `total_views` (cumulative, details only).
   static LiveRoom _card(Map<String, dynamic> channel, {String? requestedId}) {
     final name = jsonString(channel['name']) ?? '';
@@ -568,7 +584,7 @@ abstract final class PicartoApi {
     final total = jsonCount(channel['total_views']);
     final categories = channel['categories'];
     return LiveRoom(
-      roomId: requestedId ?? name,
+      roomId: name,
       platform: _site,
       userId: '$id',
       nick: name,

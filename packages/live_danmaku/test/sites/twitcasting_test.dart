@@ -661,7 +661,13 @@ void main() {
       final posts = <String>[];
       final handshake = <String, String?>{};
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      addTearDown(() => server.close(force: true));
+      // An upgraded WebSocket is detached from the server, so force-closing
+      // the server leaves it open; close each one or the VM never exits.
+      final sockets = <WebSocket>[];
+      addTearDown(() async {
+        await Future.wait([for (final socket in sockets) socket.close()]);
+        await server.close(force: true);
+      });
       server.listen((request) async {
         if (request.uri.path == '/eventpubsuburl.php') {
           posts.add(
@@ -678,6 +684,7 @@ void main() {
         handshake['origin'] = request.headers.value('origin');
         handshake['user-agent'] = request.headers.value('user-agent');
         final socket = await WebSocketTransformer.upgrade(request);
+        sockets.add(socket);
         socket
           ..add('[]')
           ..add(jsonEncode([_comment(message: '弾き語り')]));

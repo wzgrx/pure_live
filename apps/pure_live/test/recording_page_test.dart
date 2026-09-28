@@ -136,6 +136,39 @@ void main() {
       expect(actions, [RecordTaskAction.forceStart, RecordTaskAction.remove]);
     });
 
+    testWidgets('principles §3.4: the avatar leads, the logo sits in the subtitle, figures keep its weight', (
+      tester,
+    ) async {
+      await pumpTile(tester, _task(RecordState.completed, session: true));
+      final avatar = tester.widget<InitialAvatar>(find.byType(InitialAvatar));
+      expect((avatar.name, avatar.seed), ('主播甲', 'douyu:9999'));
+      final logo = tester.widget<PlatformLogo>(find.byType(PlatformLogo));
+      expect(logo.size, Sizes.logoSmall);
+      final tile = find.byType(ListTile);
+      expect(
+        tester.getTopLeft(find.byType(PlatformLogo)).dy,
+        greaterThan(tester.getBottomLeft(find.text('主播甲')).dy - 1),
+        reason: 'below the name, in the subtitle',
+      );
+      expect(tester.getSize(find.byType(InitialAvatar)), const Size.square(40));
+      expect(find.descendant(of: tile, matching: find.byType(PlatformLogo)), findsOneWidget);
+      // The details line inherits the subtitle's regular weight.
+      final details = tester.widget<Text>(find.textContaining('已完成'));
+      expect(details.style!.fontWeight, isNull);
+      expect(details.style!.fontFeatures, [const FontFeature.tabularFigures()]);
+    });
+
+    testWidgets('principles §2.2: 开始录制 is an outlined circle with words, never the recording dot', (tester) async {
+      await pumpTile(tester, _task(RecordState.stopped));
+      final start = find.widgetWithText(TextButton, '开始录制');
+      expect(start, findsOneWidget);
+      expect(find.descendant(of: start, matching: find.byIcon(Icons.fiber_manual_record_outlined)), findsOneWidget);
+      expect(find.byIcon(Icons.fiber_manual_record), findsNothing);
+      await tester.tap(start);
+      await settle(tester);
+      expect(actions, [RecordTaskAction.start]);
+    });
+
     testWidgets('deleting a finished task asks first', (tester) async {
       await pumpTile(tester, _task(RecordState.completed, session: true));
       await tester.tap(find.byTooltip('更多'));

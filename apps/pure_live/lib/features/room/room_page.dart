@@ -838,11 +838,8 @@ class _RoomInfo extends ConsumerWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 24,
-                foregroundImage: avatar,
-                child: Text(card.anchorName.characters.firstOrNull ?? '?'),
-              ),
+              // The same toned initial as in follows (principles §3.4).
+              InitialAvatar(name: card.anchorName, seed: card.ref.key, image: avatar, size: 48),
               const SizedBox(width: Space.s3),
               Expanded(
                 child: Column(

@@ -93,7 +93,7 @@ class _PlatformsPageState extends ConsumerState<PlatformsPage> {
             ),
             title: Row(
               children: [
-                PlatformLogo(platformId: id, size: 20),
+                PlatformLogo(platformId: id, size: Sizes.logoMedium),
                 const SizedBox(width: Space.s2),
                 Text(platformNames[id] ?? id),
               ],

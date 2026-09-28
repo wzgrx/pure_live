@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/error_view.dart';
+import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/me/history_page.dart';
@@ -30,6 +32,7 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
   Widget build(BuildContext context) {
     final follows = ref.watch(followsProvider);
     final history = ref.watch(historyProvider);
+    final dpr = MediaQuery.devicePixelRatioOf(context);
     bool matches(StoredRoom room) =>
         _filter.isEmpty ||
         room.anchorName.toLowerCase().contains(_filter) ||
@@ -38,8 +41,17 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
       final all = rooms.value;
       if (all == null) {
         return rooms.hasError
-            ? MessageView(title: t.common.loadFailed)
-            : const Center(child: CircularProgressIndicator());
+            ? ErrorView(
+                rooms.error!,
+                title: t.common.loadFailed,
+                compact: true,
+                onRetry: () {
+                  ref
+                    ..invalidate(followsProvider)
+                    ..invalidate(historyProvider);
+                },
+              )
+            : const SkeletonList();
       }
       final shown = all.where(matches).toList()
         ..sort((a, b) => (b.lastState == LiveState.live ? 1 : 0).compareTo(a.lastState == LiveState.live ? 1 : 0));
@@ -48,10 +60,22 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
         itemCount: shown.length,
         itemBuilder: (context, i) {
           final room = shown[i];
+          // principles §3.4: the streamer's avatar leads; the logo only
+          // names the source, beside the title.
           return ListTile(
-            leading: PlatformLogo(platformId: room.ref.platform, size: Sizes.iconMd),
+            leading: InitialAvatar(
+              name: room.anchorName,
+              seed: room.ref.key,
+              image: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
+            ),
             title: Text(room.anchorName, maxLines: 1, overflow: TextOverflow.ellipsis),
-            subtitle: Text(room.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: Row(
+              children: [
+                PlatformLogo(platformId: room.ref.platform),
+                const SizedBox(width: Space.s1),
+                Expanded(child: Text(room.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
+              ],
+            ),
             trailing: room.lastState == LiveState.live
                 ? const LiveBadge()
                 : Text(platformNames[room.ref.platform] ?? ''),

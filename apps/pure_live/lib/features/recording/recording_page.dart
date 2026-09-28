@@ -9,6 +9,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -200,9 +201,23 @@ class RecordingPage extends ConsumerWidget {
                   ListTile(title: Text(t.recording.pickFromFollows)),
                   for (final follow in follows)
                     ListTile(
-                      leading: PlatformLogo(platformId: follow.ref.platform, size: Sizes.iconMd),
+                      leading: InitialAvatar(
+                        name: follow.room.anchorName,
+                        seed: follow.ref.key,
+                        image: networkImage(
+                          follow.room.avatar,
+                          logicalWidth: 40,
+                          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                        ),
+                      ),
                       title: Text(follow.room.anchorName),
-                      subtitle: Text(follow.room.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Row(
+                        children: [
+                          PlatformLogo(platformId: follow.ref.platform),
+                          const SizedBox(width: Space.s1),
+                          Expanded(child: Text(follow.room.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        ],
+                      ),
                       trailing: follow.room.lastState == LiveState.live ? const LiveBadge() : null,
                       onTap: () => Navigator.pop(context, follow.ref),
                     ),
@@ -246,9 +261,11 @@ class RecordingPage extends ConsumerWidget {
         initialData: manager.tasks,
         builder: (context, snapshot) {
           final tasks = snapshot.data ?? const <RecordTask>[];
+          // Until the stored tasks are read, empty is not "none".
+          if (tasks.isEmpty && !manager.loaded) return const SkeletonList();
           if (tasks.isEmpty && schedule.isEmpty) {
             return MessageView(
-              icon: Icons.fiber_manual_record_outlined,
+              illustration: Illustration.noRecordings,
               title: t.recording.noTasks,
               message: t.recording.noTasksHint,
             );
@@ -355,14 +372,30 @@ class RecordTaskTile extends StatelessWidget {
     final problem = task.failure ?? task.retrying;
     final next = task.nextCheckAt;
     final button = recordTaskButton(task);
+    // principles §3.4: the streamer's avatar leads the row; the logo only
+    // names the source, in the subtitle.
     return ListTile(
-      leading: PlatformLogo(platformId: task.room.platform, size: Sizes.iconLg),
+      leading: InitialAvatar(
+        name: recordTaskName(task),
+        seed: task.room.key,
+        image: networkImage(
+          task.snapshot.avatar,
+          logicalWidth: 40,
+          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+        ),
+      ),
       title: Text(recordTaskName(task)),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // The subtitle's own size and weight, never heavier than the name.
-          Text(details.join(' · '), style: LiveTheme.tabularFigures),
+          Row(
+            children: [
+              PlatformLogo(platformId: task.room.platform),
+              const SizedBox(width: Space.s1),
+              // The subtitle's own size and weight, never heavier than the name.
+              Flexible(child: Text(details.join(' · '), style: LiveTheme.tabularFigures)),
+            ],
+          ),
           if (problem != null)
             Text(
               t.recording.problemWithStage(problem: recordFailureText(problem), stage: recordStageText(problem.stage)),
@@ -391,12 +424,18 @@ class RecordTaskTile extends StatelessWidget {
               icon: const Icon(Icons.stop_circle_outlined),
               onPressed: () => unawaited(_dispatch(context, RecordTaskAction.stop)),
             )
+          // Starting is an outlined circle with words: the solid red dot
+          // means "recording now" (principles §2.2).
+          else if (button == RecordTaskAction.start && session == null)
+            TextButton.icon(
+              icon: const Icon(Icons.fiber_manual_record_outlined, size: 18),
+              label: Text(t.recording.start),
+              onPressed: () => unawaited(_dispatch(context, RecordTaskAction.start)),
+            )
           else if (button == RecordTaskAction.start)
             IconButton(
-              tooltip: session == null ? t.recording.start : t.recording.restart,
-              icon: session == null
-                  ? const Icon(Icons.fiber_manual_record, color: Color(0xFFD92D20))
-                  : const Icon(Icons.replay),
+              tooltip: t.recording.restart,
+              icon: const Icon(Icons.replay),
               onPressed: () => unawaited(_dispatch(context, RecordTaskAction.start)),
             ),
           PopupMenuButton<RecordTaskAction>(
@@ -446,7 +485,8 @@ class _ScheduledTile extends ConsumerWidget {
     return ListTile(
       leading: Icon(
         running ? Icons.fiber_manual_record : Icons.schedule,
-        color: running ? Theme.of(context).colorScheme.error : null,
+        // "录制中" follows in the subtitle: dot plus words, the live red.
+        color: running ? FixedColors.live : null,
       ),
       title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(

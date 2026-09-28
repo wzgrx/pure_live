@@ -272,6 +272,12 @@ final class RecordManager {
   /// Tasks in the order they were added (stable; REG-RECORD-039).
   List<RecordTask> get tasks => [for (final key in _order) _runtimes[key]!.task];
 
+  /// Whether [init] has read the stored tasks: until then an empty [tasks]
+  /// means "not read yet", not "none" (the recording center shows a
+  /// skeleton, not its empty state). [listChanges] emits once they are in.
+  bool get loaded => _loaded;
+  var _loaded = false;
+
   /// The task of [key], if any.
   RecordTask? task(String key) => _runtimes[key]?.task;
 
@@ -311,6 +317,7 @@ final class RecordManager {
       _runtimes[task.key] = _Runtime(task);
       _order.add(task.key);
     }
+    _loaded = true;
     _list.add(tasks);
     _scheduleStorage();
     // Tasks that were active or waiting when the app last ended: crashed

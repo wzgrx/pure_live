@@ -1,0 +1,102 @@
+{
+  "generator": "fixtures/yy/danmaku/legacy_expected.dart: 3.x YyProtocolSession (channel from meta.json danmakuKeys, UUID from its handshake URL) over every incoming frame, chats turned into LiveMessages as YyDanmaku did; only frames with a non-empty batch are listed",
+  "value": {
+    "topSid": 54880976,
+    "subSid": 54880976,
+    "uuid": "4444hm3v-5e72-u22v-y32v-xx60o46d1i76",
+    "incomingFrames": 563,
+    "handshake": "TgAAAATgCwDIAAAAbk0AADoAAAAAAAAAAAARAEI4LTk3LTVBLTE3LUFELTREEQBCOC05Ny01QS0xNy1BRC00RAAAAAAIAHl5bXdlYmg1",
+    "frames": [
+      {
+        "frame": 1,
+        "outbound": [
+          "bQEAAATWCwDIALEAAAARADgzNjc5NDY2MjVfa3ZmdmhjKABiOXpmMjI5NXExMzFyMWc2c3pmMDExM2YzdXkzODVheGVxaHFyM3YwAgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAA0NDQ0aG0zdi01ZTcyLXUyMnYteTMydi14eDYwbzQ2ZDFpNzYDAQAA85yAigEAAAAAAABwAJE0hCJSWDJyIoKCKSjTPUKEJCRC6EYDAIk0aEdleFF5OYnAG+QlBuBJiQucA5cnG3RkZ5lElIVHloyAtFtDmJvxsHeF5JIxJXXlgRRg5EEojhIhlpYhZhgHY3l5lkOJAjQZqDCJsY41AghrRQSQh3IFADI1OTowAAAAAAAAAAAAAAAAAAAA/////wAAAQAAAAcAQkNJRlZlcgIAVjI="
+        ],
+        "ready": false,
+        "messages": [],
+        "failure": null,
+        "warnings": [],
+        "phase": "waitingAp",
+        "heartbeat": "DgAAAAQeDADIAAAAAAA="
+      },
+      {
+        "frame": 3,
+        "outbound": [
+          "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAPOcgIrQakUD0GpFAwIAAAACAAAAAQAwAwAAAAEAMfOcgIoBAAAAjQAAAAgAAAECQR8AEAAAAgMBAADznICKAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEANBqRQNnAAAAHABGNjYxODY1MTg5MV95eW13ZWJoNV84MDY0OF8wBgAACAAAeHh4/w==",
+          "KgAAAFg3CADIAPOcgIoBAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+        ],
+        "ready": false,
+        "messages": [],
+        "failure": null,
+        "warnings": [],
+        "phase": "waitingJoin",
+        "heartbeat": "DgAAAAQeDADIAAAAAAA="
+      },
+      {
+        "frame": 6,
+        "outbound": [
+          "eAAAAFg1CADIAPOcgIoBAAAABgAAAAEAAAAAAAAA0GpFAwAAAAACAAAAAAAAANBqRQMAAAAAAAQAAAMBAADQakUD0GpFAwADAAADAQAAAAAAANBqRQMAAQAAAwEAAAAAAADQakUDAAEAAAMBAADQakUD0GpFAwAA",
+          "OAAAAFg1CADIAPOcgIoBAAAAAgAAAAEAAAAAAAAA0GpFAwAAAAACAAAAAAAAANBqRQMAAAAAAAA="
+        ],
+        "ready": true,
+        "messages": [],
+        "failure": null,
+        "warnings": [],
+        "phase": "joined",
+        "heartbeat": "DgAAAAQeDADIAAAAAAA="
+      },
+      {
+        "frame": 189,
+        "outbound": [],
+        "ready": false,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众1",
+            "userId": "",
+            "message": "<?xml version=\"1.0\"?><msg><txt data=\"发起了欢乐投票，铁铁们快点击左上角图标支持吧！参与还有机会获奖励哦~\" /></msg>",
+            "color": "#ffffff",
+            "messageId": "",
+            "sentAt": null,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ],
+        "failure": null,
+        "warnings": [],
+        "phase": "joined",
+        "heartbeat": "DgAAAAQeDADIAAAAAAA="
+      },
+      {
+        "frame": 488,
+        "outbound": [],
+        "ready": false,
+        "messages": [
+          {
+            "type": "chat",
+            "userName": "观众1",
+            "userId": "",
+            "message": "<?xml version=\"1.0\"?><msg><txt data=\"发起了欢乐投票，铁铁们快点击左上角图标支持吧！参与还有机会获奖励哦~\" /></msg>",
+            "color": "#ffffff",
+            "messageId": "",
+            "sentAt": null,
+            "userLevel": "",
+            "fansLevel": "",
+            "fansName": "",
+            "isLocal": false,
+            "data": null
+          }
+        ],
+        "failure": null,
+        "warnings": [],
+        "phase": "joined",
+        "heartbeat": "DgAAAAQeDADIAAAAAAA="
+      }
+    ],
+    "phase": "joined",
+    "heartbeat": "DgAAAAQeDADIAAAAAAA="
+  }
+}

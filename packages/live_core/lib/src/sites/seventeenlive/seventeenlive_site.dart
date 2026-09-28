@@ -16,11 +16,12 @@ const _site = '17live';
 /// A room is the broadcaster's `liveStreamID`, kept as asked for (3.x's
 /// identity). Anonymous, like 3.x: no cookie, no account; every request
 /// carries 3.x's headers and follows no redirect. Requests are 3.x's:
-/// - there is no catalog (3.x's LiveSite defaults: no category, no area
-///   rooms);
-/// - the directory is the website's Japanese recommendation sections, one
-///   request a page by cursor ([getDirectoryPageAtCursor]); by page number
-///   ([getDirectoryPage], recommendations) it replays from page 1;
+/// - the catalog is one category of three regions, Japan, Taiwan and Hong
+///   Kong, without a request (33-1; 3.x had none);
+/// - the directory is the website's recommendation sections of a region
+///   (Japan for the recommendations, as 3.x), one request a page by cursor
+///   ([getDirectoryPageAtCursor]); by page number ([getDirectoryPage],
+///   recommendations, area rooms) it replays from page 1;
 /// - search is one `lives/<id>` for a room id or link, else one
 ///   `liveStreams/search` (current broadcasts only, one page);
 /// - follow refreshes, the live state, room entry, recordings and recovery
@@ -37,11 +38,18 @@ final class SeventeenLiveSite extends LiveSite
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
         LivePlayRecoveryResolver {
-  /// Creates the adapter.
-  new(this.http);
+  /// Creates the adapter. [preferH264] reads "优先 H.264" (on by default,
+  /// 33-2 as 22-3) each time the qualities are listed: on, the H.264
+  /// transcode comes first and is the default; off, 原画 does
+  /// ([SeventeenLiveApi.playQualities]).
+  new(this.http, {bool Function()? preferH264}) : _preferH264 = preferH264 ?? _on;
 
   /// Transport.
   final LiveHttp http;
+
+  final bool Function() _preferH264;
+
+  static bool _on() => true;
 
   @override
   String get id => _site;
@@ -80,14 +88,23 @@ final class SeventeenLiveSite extends LiveSite
 
   static Uri _api(String path, [Map<String, String>? query]) => Uri.https(SeventeenLiveApi.apiHost, path, query);
 
+  // Catalog -------------------------------------------------------------------
+
+  /// The one category of three regions ([SeventeenLiveApi.category], 33-1)
+  /// on page 1, none after; no request.
+  @override
+  Future<List<LiveCategory>> getCategories(int page, int pageSize) async =>
+      page == 1 ? [SeventeenLiveApi.category] : const [];
+
   // Directory -----------------------------------------------------------------
 
-  /// The sections page after [cursor] (null on page 1): one request (see
+  /// The sections page after [cursor] (null on page 1) of [category]'s
+  /// region (Japan for null, the recommendations): one request (see
   /// [SeventeenLiveApi.sectionsQuery] and [SeventeenLiveApi.sectionsPage]).
   /// [page] is the caller's sequence: page 1 takes no cursor and later pages
-  /// need one. There is no category (3.x had none), so [category] must be
-  /// null. Anything else, or a cursor 3.x would not send, is a caller error
-  /// (`ArgumentError`), refused before any request as in 3.x.
+  /// need one. Anything else, a cursor 3.x would not send, or an area that
+  /// is not one of the regions ([SeventeenLiveApi.regionOf]) is a caller
+  /// error (`ArgumentError`), refused before any request as in 3.x.
   @override
   Future<LiveDirectoryPage> getDirectoryPageAtCursor({
     required int page,
@@ -99,10 +116,10 @@ final class SeventeenLiveSite extends LiveSite
     if ((page == 1) != (cursor == null)) {
       throw ArgumentError.value(cursor, 'cursor', page == 1 ? 'page 1 takes no cursor' : 'page $page needs a cursor');
     }
-    _checkCategory(category);
+    final region = SeventeenLiveApi.regionOf(category);
     SeventeenLiveApi.checkCursor(cursor);
     final response = await _get(
-      _api('/api/v1/sections', SeventeenLiveApi.sectionsQuery(cursor)),
+      _api('/api/v1/sections', SeventeenLiveApi.sectionsQuery(cursor, regionCode: region)),
       SeventeenLiveApi.catalogHeaders,
       cancel: cancel,
     );
@@ -110,22 +127,18 @@ final class SeventeenLiveSite extends LiveSite
     return LiveDirectoryPage(rooms: result.rooms, page: page, hasMore: result.hasMore, nextCursor: result.nextCursor);
   }
 
-  static void _checkCategory(LiveArea? category) {
-    if (category != null) throw ArgumentError.value(category, 'category', '17LIVE has no categories');
-  }
-
-  /// Page [page] (1–20) of the directory, replayed from page 1 by cursor
-  /// (3.x: [page] requests); a directory that ends first gives an empty last
-  /// page.
+  /// Page [page] (1–20) of [category]'s region (Japan for null), replayed
+  /// from page 1 by cursor (3.x: [page] requests); a directory that ends
+  /// first gives an empty last page.
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
     if (page < 1 || page > SeventeenLiveApi.maxDirectoryPage) {
       throw RangeError.range(page, 1, SeventeenLiveApi.maxDirectoryPage, 'page');
     }
-    _checkCategory(category);
+    SeventeenLiveApi.regionOf(category);
     String? cursor;
     for (var current = 1; ; current++) {
-      final result = await getDirectoryPageAtCursor(page: current, cursor: cursor, cancel: cancel);
+      final result = await getDirectoryPageAtCursor(page: current, cursor: cursor, category: category, cancel: cancel);
       if (current == page) return result;
       if (!result.hasMore) return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
       cursor = result.nextCursor;
@@ -141,6 +154,13 @@ final class SeventeenLiveSite extends LiveSite
     return List.unmodifiable((await getDirectoryPage(page: page)).rooms.take(pageSize));
   }
 
+  /// As [getRecommendRooms], for [category]'s region (33-1).
+  @override
+  Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
+    if (pageSize < 1) throw RangeError.range(pageSize, 1, null, 'pageSize');
+    return List.unmodifiable((await getDirectoryPage(page: page, category: category)).rooms.take(pageSize));
+  }
+
   // Search --------------------------------------------------------------------
 
   @override
@@ -149,12 +169,15 @@ final class SeventeenLiveSite extends LiveSite
 
   /// 3.x's search, one page only:
   /// - a page other than 1 or a [pageSize] below 1 finds nothing;
-  /// - a room link (see [roomIdFromUrl]) or a room id finds that room, live
-  ///   or not (one `lives/<id>`; nothing when there is no such room);
-  /// - another URL (anything with a scheme), a blank keyword or one over
-  ///   100 characters finds nothing;
-  /// - anything else is one `liveStreams/search`: current broadcasts, the
-  ///   first [pageSize].
+  /// - a room link (see [roomIdFromUrl]; `www.17.live` too, 33-6) or a room
+  ///   id finds that room, live or not (one `lives/<id>`; nothing when there
+  ///   is no such room);
+  /// - another web address (`<scheme>://…`, [SeventeenLiveApi.isUrl]) or a
+  ///   blank keyword finds nothing;
+  /// - anything else is one `liveStreams/search` of the keyword cut to 100
+  ///   characters ([SeventeenLiveApi.searchKeyword]): current broadcasts,
+  ///   the first [pageSize]. Unlike 3.x, a keyword with a colon (`Re:Zero`)
+  ///   or over 100 characters is searched (33-5).
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
     String keyword, {
@@ -172,11 +195,10 @@ final class SeventeenLiveSite extends LiveSite
         return const [];
       }
     }
-    if (text.isEmpty || text.length > SeventeenLiveApi.maxKeywordLength || (Uri.tryParse(text)?.hasScheme ?? false)) {
-      return const [];
-    }
+    final query = SeventeenLiveApi.searchKeyword(text);
+    if (query.isEmpty || SeventeenLiveApi.isUrl(text)) return const [];
     final response = await _get(
-      _api('/api/v1/liveStreams/search', {'query': text}),
+      _api('/api/v1/liveStreams/search', {'query': query}),
       SeventeenLiveApi.catalogHeaders,
       cancel: cancel,
     );
@@ -201,8 +223,9 @@ final class SeventeenLiveSite extends LiveSite
   }
 
   /// Room entry: one `lives/<id>`, whose pull URLs become the qualities
-  /// ([SeventeenLiveRoomData]). A room that cannot be played (offline, no
-  /// pull URL, a state 3.x did not know) is entered; its stream says why.
+  /// ([SeventeenLiveRoomData]), with the danmaku channel. A room that cannot
+  /// be played (offline, locked, no pull URL, a state 3.x did not know) is
+  /// entered; its stream says why.
   Future<LiveRoom> _entered(String roomId) async {
     final id = _checkedId(roomId);
     final response = await _lives(id);
@@ -232,21 +255,23 @@ final class SeventeenLiveSite extends LiveSite
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities (see [SeventeenLiveApi.qualities]) from the data room
-  /// entry brought: no request. A room without it (a list card, a refreshed
-  /// follow) is entered first; one the platform called offline has no
-  /// stream (`StreamUnavailable`, without a request). A room that cannot be
-  /// played says why.
+  /// The qualities (see [SeventeenLiveApi.qualities]) from the data room
+  /// entry brought, in the order "优先 H.264" asks for
+  /// ([SeventeenLiveApi.playQualities], read now): no request. A room
+  /// without it (a list card, a refreshed follow) is entered first; one the
+  /// platform called offline has no stream (`StreamUnavailable`, without a
+  /// request). A room that cannot be played says why (a locked live names
+  /// its lock).
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
-      SeventeenLiveApi.playQualities(await _stream(detail, fresh: false));
+      SeventeenLiveApi.playQualities(await _stream(detail, fresh: false), preferH264: _preferH264());
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The lines of [quality]: one per CDN in the answer's order, with the
-  /// media headers.
+  /// The lines of [quality] (3.x's `standard` id is 原画): one per CDN in
+  /// the answer's order, https, with the media headers.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
     required LiveRoom detail,

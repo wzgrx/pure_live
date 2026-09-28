@@ -1,9 +1,11 @@
 // SeventeenLiveSite over the recorded 17LIVE responses (ReplayHttp) and a few
 // synthetic ones: the requests (URL, headers, redirects) and their number,
 // compared with the requests 3.x made (expected.json), the cursor directory
-// and its page-number replay, search by room and by keyword, room details
-// for entry, refresh and recording, streams with their lines and recovery,
-// cancellation, links through the link parser and the error mapping.
+// and its page-number replay, the regions (33-1), search by room and by
+// keyword, room details for entry, refresh and recording, streams with their
+// lines, "优先 H.264" and recovery, locked lives, cancellation, links through
+// the link parser and the error mapping. Differences from 3.x name their
+// docs/UPGRADES.md row (33-x).
 import 'dart:async';
 import 'dart:convert';
 
@@ -18,6 +20,15 @@ const _root = '../../fixtures/17live';
 const _live = '27484154';
 const _offline = '28371376';
 const _missing = '999999999';
+const _army = '376827';
+
+/// 3.x's quality ids → the current ones (33-2).
+const _qualityIds = {'enhanced': 'enhanced', 'hd': 'hd', 'h264': 'h264', 'standard': 'source'};
+
+/// A 3.x pull URL as the current code gives it: always https (33-3).
+String _https(Object? url) => '$url'.replaceFirst(RegExp('^http://'), 'https://');
+
+LiveArea _area(String id) => SeventeenLiveApi.areas.singleWhere((area) => area.areaId == id);
 
 /// Answers every request with [answer].
 final class _Scripted implements LiveHttp {
@@ -99,7 +110,7 @@ String _lives({int status = 2, Object? providers, Map<String, Object?> changes =
 });
 
 void main() {
-  test('the adapter: id, name, capabilities, directory notice, no catalog, no danmaku', () async {
+  test('the adapter: id, name, capabilities, directory notice, a catalog without a request, no danmaku', () async {
     final http = ReplayHttp(const []);
     final site = SeventeenLiveSite(http);
     expect(site.id, '17live');
@@ -118,13 +129,12 @@ void main() {
     expect(site, isA<LivePlayRecoveryResolver>());
     expect(site, isNot(isA<LiveSearchPaginationPolicy>()));
     expect(site, isNot(isA<LivePlayLeaseMetadata>()));
-    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no 17LIVE danmaku');
-    expect(await site.getCategories(1, 30), isEmpty, reason: "3.x's LiveSite default");
-    expect(
-      await site.getCategoryRooms(const LiveArea(platform: '17live', areaId: 'JP')),
-      isEmpty,
-      reason: "3.x's LiveSite default",
-    );
+    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the chat is the danmaku module (M5, 33-4)');
+    // changed: 3.x had no catalog (its LiveSite default); 33-1.
+    final categories = await site.getCategories(1, 30);
+    expect(categories.single.id, 'region');
+    expect(categories.single.children.map((area) => area.areaId), ['JP', 'TW', 'HK']);
+    expect(await site.getCategories(2, 30), isEmpty);
     expect(await site.searchAnchors('a'), isEmpty);
     expect(http.requests, isEmpty);
   });
@@ -204,12 +214,21 @@ void main() {
       await expectLater(site.getDirectoryPageAtCursor(page: 2, cursor: ''), throwsArgumentError);
       await expectLater(site.getDirectoryPageAtCursor(page: 2, cursor: 'x' * 513), throwsArgumentError);
       await expectLater(site.getDirectoryPageAtCursor(page: 2, cursor: 'a\tb'), throwsArgumentError);
-      const area = LiveArea(platform: '17live', areaId: 'JP');
-      await expectLater(site.getDirectoryPageAtCursor(page: 1, category: area), throwsArgumentError);
-      await expectLater(site.getDirectoryPage(category: area), throwsArgumentError);
+      // 3.x refused every area (it had none); now only one that is not a
+      // region (33-1).
+      for (final area in [
+        const LiveArea(platform: '17live', areaId: 'US'),
+        const LiveArea(platform: 'showroom', areaId: 'JP'),
+      ]) {
+        await expectLater(site.getDirectoryPageAtCursor(page: 1, category: area), throwsArgumentError);
+        await expectLater(site.getDirectoryPage(category: area), throwsArgumentError);
+        await expectLater(site.getCategoryRooms(area), throwsArgumentError);
+      }
       await expectLater(site.getDirectoryPage(page: 0), throwsA(isA<RangeError>()));
       await expectLater(site.getDirectoryPage(page: 21), throwsA(isA<RangeError>()));
+      await expectLater(site.getDirectoryPage(page: 21, category: _area('TW')), throwsA(isA<RangeError>()));
       await expectLater(site.getRecommendRooms(pageSize: 0), throwsA(isA<RangeError>()));
+      await expectLater(site.getCategoryRooms(_area('HK'), pageSize: 0), throwsA(isA<RangeError>()));
       expect(setup.http.requests, isEmpty);
       for (final key in [
         'getDirectoryPageAtCursor(0)',
@@ -223,6 +242,56 @@ void main() {
       ]) {
         expect(_legacyRequests('S01-sections-jp', key), isEmpty, reason: key);
       }
+    });
+
+    test('33-1: a region is its sections page, one request by cursor, with the headers of the directory', () async {
+      final setup = _setup(['S02-sections-tw', 'S02-sections-hk']);
+      for (final (id, sample, count) in [('TW', 'S02-sections-tw', 20), ('HK', 'S02-sections-hk', 32)]) {
+        setup.http.requests.clear();
+        final page = await setup.site.getDirectoryPageAtCursor(page: 1, category: _area(id));
+        final request = setup.http.requests.single;
+        expect(
+          request.url.toString(),
+          'https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=$id&cursor',
+          reason: sample,
+        );
+        expect(request.headers, SeventeenLiveApi.catalogHeaders);
+        expect(request.followRedirects, isFalse);
+        expect(page.rooms, hasLength(count));
+        expect(page.hasMore, isTrue);
+        setup.http.requests.clear();
+        final rooms = await setup.site.getCategoryRooms(_area(id), pageSize: 5);
+        expect(rooms.map((room) => room.roomId), page.rooms.take(5).map((room) => room.roomId));
+        expect(setup.http.requests, hasLength(1));
+      }
+      final tw = _legacyValue('S02-sections-tw', 'getDirectoryPageAtCursor(1)')! as Map<String, dynamic>;
+      setup.http.requests.clear();
+      final page = await setup.site.getDirectoryPage(category: _area('TW'));
+      expect(_ids(page.rooms), _legacyIds(tw['rooms']), reason: "the same rooms 3.x's parser read");
+      expect(page.nextCursor, tw['nextCursor']);
+      expect(setup.http.requests, hasLength(1));
+    });
+
+    test('33-1: Japan by area is the recommendations; page N of a region replays that region', () async {
+      final setup = _setup(['S01-sections-jp', 'S01-sections-jp-p2']);
+      final byArea = await setup.site.getDirectoryPage(page: 2, category: _area('JP'));
+      expect(_urls(setup.http.requests), _legacyRequests('S01-sections-jp-p2', 'getDirectoryPage(2)'));
+      expect(_ids(byArea.rooms), ['28571668']);
+      setup.http.requests.clear();
+      expect(
+        _ids(await setup.site.getCategoryRooms(_area('JP'))),
+        _legacyIds(_legacyValue('S01-sections-jp', 'getRecommendRooms(1)')),
+      );
+      expect(_urls(setup.http.requests), _legacyRequests('S01-sections-jp', 'getRecommendRooms(1)'));
+      final stored = LiveArea.fromJson(_area('HK').toJson());
+      final http = _Scripted((request) {
+        final cursor = request.url.queryParameters['cursor']!;
+        return _response(request, jsonEncode({'cursor': cursor.isEmpty ? 'hk-2' : '', 'sections': <Object?>[]}));
+      });
+      final hk = await SeventeenLiveSite(http).getDirectoryPage(page: 3, category: stored);
+      expect(hk.rooms, isEmpty);
+      expect(http.requests.map((request) => request.url.queryParameters['region']), ['HK', 'HK']);
+      expect(http.requests.map((request) => request.url.queryParameters['cursor']), ['', 'hk-2']);
     });
 
     test('cancellation: before the request, and while it runs', () async {
@@ -286,20 +355,37 @@ void main() {
       expect(_ids(await SeventeenLiveSite(many).searchRooms('n', pageSize: 3)), ['1', '2', '3']);
     });
 
-    test('nothing to search, no request: blank, over 100 characters, any URL or scheme (3.x)', () async {
+    test('nothing to search, no request: blank, or a web address that is not a room (3.x)', () async {
       final setup = _setup(const []);
       for (final keyword in [
         '',
         '   ',
-        'x' * 101,
         'https://other.test/live/123',
-        'https://www.17.live/ja/live/$_live',
+        'https://m.17.live/ja/live/$_live',
         'https://17.live/ja/live/%FF',
-        'Re:Zero',
+        'https://17.live/ja/profile/$_live',
       ]) {
         expect(await setup.site.searchRooms(keyword), isEmpty, reason: keyword);
       }
       expect(setup.http.requests, isEmpty);
+    });
+
+    test('33-5: a keyword with a colon is searched; one over 100 characters is cut (3.x: no request)', () async {
+      final http = _Scripted((request) => _response(request, '[]'));
+      final site = SeventeenLiveSite(http);
+      final long = '${'x' * 99}😀 tail';
+      for (final (keyword, sent) in [
+        (' Re:Zero ', 'Re:Zero'),
+        ('mailto:someone', 'mailto:someone'),
+        ('x' * 101, 'x' * 100),
+        (long, 'x' * 99),
+      ]) {
+        http.requests.clear();
+        expect(await site.searchRooms(keyword), isEmpty, reason: keyword);
+        expect(http.requests.single.url.path, '/api/v1/liveStreams/search');
+        expect(http.requests.single.url.queryParameters, {'query': sent}, reason: keyword);
+      }
+      expect(Uri.tryParse('Re:Zero')?.hasScheme, isTrue, reason: 'why 3.x refused it');
     });
 
     test('a room id or link: one lives request, live or not, as 3.x', () async {
@@ -320,6 +406,14 @@ void main() {
         expect(await setup.site.searchRooms(id, page: 2), isEmpty);
         expect(setup.http.requests, isEmpty);
       }
+    });
+
+    test('33-6: a www.17.live link finds its room with one lives request (3.x: nothing)', () async {
+      final setup = _setup(['S04-live-live']);
+      final rooms = await setup.site.searchRooms('https://www.17.live/ja/live/$_live');
+      expect(_urls(setup.http.requests), ['https://api-dsa.17app.co/api/v1/lives/$_live']);
+      expect(_ids(rooms), [_live]);
+      expect(rooms.single.startedAt, DateTime.utc(2026, 9, 27, 17, 54, 44), reason: '33-7');
     });
 
     test('a room that does not exist finds nothing (3.x failed on HTTP 520); other failures stay', () async {
@@ -408,12 +502,54 @@ void main() {
       await expectLater(site.getPlayQualities(detail: room), throwsA(isA<ApiChanged>()));
     });
 
-    test('pull data 3.x could not read fails the entry, as in 3.x; the refresh is not affected', () async {
+    test('pull data that cannot be read: entered (3.x failed the entry), playing it is ApiChanged', () async {
       final http = _Scripted((request) => _response(request, _lives(providers: 'x')));
       final site = SeventeenLiveSite(http);
-      await expectLater(site.getRoomDetail(roomId: '123'), throwsA(isA<ApiChanged>()));
-      await expectLater(site.getRoomDetailForRecording(roomId: '123'), throwsA(isA<ApiChanged>()));
+      final room = await site.getRoomDetail(roomId: '123');
+      expect(room.isLiveNow, isTrue);
+      await expectLater(site.getPlayQualities(detail: room), throwsA(isA<ApiChanged>()));
+      expect((await site.getRoomDetailForRecording(roomId: '123')).isLiveNow, isTrue);
       expect((await site.getRoomDetailForRefresh(roomId: '123')).isLiveNow, isTrue);
+      expect(http.requests, hasLength(3), reason: 'the stream is not asked again');
+    });
+
+    test('an army-only live (S04-live-army): live and marked everywhere, not played, one request each', () async {
+      final setup = _setup(['S04-live-army']);
+      final site = setup.site;
+      final entered = await site.getRoomDetail(roomId: _army);
+      final refreshed = await site.getRoomDetailForRefresh(roomId: _army);
+      final recording = await site.getRoomDetailForRecording(roomId: _army);
+      final found = (await site.searchRooms(_army)).single;
+      for (final room in [entered, refreshed, recording, found]) {
+        expect(room.isLiveNow, isTrue);
+        expect(room.restriction, LiveRestriction.subscribersOnly);
+        expect(room.startedAt, DateTime.utc(2026, 9, 28, 20, 46, 5));
+      }
+      expect(await site.getLiveStatus(roomId: _army), isTrue);
+      expect(setup.http.requests, hasLength(5));
+      setup.http.requests.clear();
+      await expectLater(site.getPlayQualities(detail: entered), throwsA(isA<StreamUnavailable>()));
+      const quality = LivePlayQuality(quality: 'H.264 · FLV', id: 'h264');
+      await expectLater(site.resolvePlayUrls(detail: entered, quality: quality), throwsA(isA<StreamUnavailable>()));
+      await expectLater(
+        site.resolvePlayUrlsForRecovery(detail: entered, quality: quality),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      expect(setup.http.requests, isEmpty, reason: 'room entry already knows');
+      await expectLater(site.getPlayQualities(detail: refreshed), throwsA(isA<StreamUnavailable>()));
+      expect(setup.http.requests, hasLength(1), reason: 'a card is entered first');
+    });
+
+    test('33-4: room entry and recording carry the chat channel; refreshes and cards do not', () async {
+      final setup = _setup(['S04-live-live', 'S01-sections-jp']);
+      final site = setup.site;
+      const args = SeventeenLiveDanmakuArgs(roomId: _live);
+      expect((await site.getRoomDetail(roomId: _live)).danmakuData, args);
+      expect((await site.getRoomDetailForRecording(roomId: _live)).danmakuData, args);
+      expect((await site.getRoomDetailForRefresh(roomId: _live)).danmakuData, isNull);
+      expect((await site.getRecommendRooms()).map((room) => room.danmakuData).toSet(), {null});
+      expect(args.toString(), 'SeventeenLiveDanmakuArgs($_live)');
+      expect(args.hashCode, const SeventeenLiveDanmakuArgs(roomId: _live).hashCode);
     });
 
     test('a refresh merges into the room 3.x stored: the identity is the room id', () async {
@@ -434,34 +570,58 @@ void main() {
   });
 
   group('streams', () {
-    test('an entered room: qualities and URLs without a request, as 3.x', () async {
+    test('an entered room: qualities and URLs without a request, as 3.x (33-2 order and names, 33-3 https)', () async {
       final setup = _setup(['S04-live-live']);
       final room = await setup.site.getRoomDetail(roomId: _live);
       setup.http.requests.clear();
       final qualities = await setup.site.getPlayQualities(detail: room);
-      expect(qualities.map((q) => q.id), ['enhanced', 'hd', 'h264', 'standard']);
+      // changed: 3.x's order was enhanced, hd, h264, standard (33-2).
+      expect(qualities.map((q) => q.id), ['h264', 'source', 'enhanced', 'hd']);
+      expect(qualities.first.quality, 'H.264 · FLV', reason: 'the default with 优先 H.264 on');
       final urls = _legacy('S04-live-live')['getPlayUrls'] as Map<String, dynamic>;
-      for (final quality in qualities) {
+      for (final MapEntry(key: old, value: id) in _qualityIds.entries) {
+        final quality = qualities.singleWhere((q) => q.id == id);
         final resolution = await setup.site.resolvePlayUrls(detail: room, quality: quality);
-        expect(resolution.urls, (urls['${quality.id}'] as Map)['value']);
-        expect(resolution.appliedQualityData, quality.id);
+        expect(resolution.urls, [for (final url in (urls[old] as Map)['value'] as List) _https(url)], reason: old);
+        expect(resolution.appliedQualityData, id);
         expect(resolution.lines.first.headers, SeventeenLiveApi.mediaHeaders(_live));
         expect(await setup.site.getPlayUrls(detail: room, quality: quality), resolution.urls);
+        final byOldId = await setup.site.resolvePlayUrls(
+          detail: room,
+          quality: LivePlayQuality(quality: 'x', id: old),
+        );
+        expect(byOldId.urls, resolution.urls, reason: "3.x's stored id still plays");
       }
       expect(setup.http.requests, isEmpty);
     });
 
-    test('recovery: room entry again, one request, same URLs as 3.x', () async {
+    test('33-2: "优先 H.264" is read each time the qualities are listed; on by default', () async {
+      var prefer = false;
+      final setup = _setup(['S04-live-live']);
+      final site = SeventeenLiveSite(setup.http, preferH264: () => prefer);
+      final room = await site.getRoomDetail(roomId: _live);
+      expect((await site.getPlayQualities(detail: room)).map((q) => q.id), ['source', 'enhanced', 'hd', 'h264']);
+      expect((await site.getPlayQualities(detail: room)).first.quality, '原画 · FLV');
+      prefer = true;
+      expect((await site.getPlayQualities(detail: room)).map((q) => q.id), ['h264', 'source', 'enhanced', 'hd']);
+      expect(setup.http.requests, hasLength(1));
+      final byDefault = SeventeenLiveSite(setup.http);
+      expect((await byDefault.getPlayQualities(detail: room)).first.id, 'h264');
+    });
+
+    test('recovery: room entry again, one request, same URLs as 3.x (over https, 33-3)', () async {
       final setup = _setup(['S04-live-live']);
       final room = await setup.site.getRoomDetail(roomId: _live);
       final recovered = _legacy('S04-live-live')['resolvePlayUrlsForRecoveryRaw'] as Map<String, dynamic>;
-      for (final quality in await setup.site.getPlayQualities(detail: room)) {
+      for (final MapEntry(key: old, value: id) in _qualityIds.entries) {
+        final quality = (await setup.site.getPlayQualities(detail: room)).singleWhere((q) => q.id == id);
         setup.http.requests.clear();
         final resolution = await setup.site.resolvePlayUrlsForRecovery(detail: room, quality: quality);
-        final legacy = recovered['${quality.id}'] as Map<String, dynamic>;
+        final legacy = recovered[old] as Map<String, dynamic>;
         expect(_urls(setup.http.requests), legacy['requests']);
-        expect(resolution.urls, (legacy['value'] as Map)['urls']);
-        expect(resolution.appliedQualityData, (legacy['value'] as Map)['appliedQualityData']);
+        expect(resolution.urls, [for (final url in (legacy['value'] as Map)['urls'] as List) _https(url)]);
+        expect((legacy['value'] as Map)['appliedQualityData'], old);
+        expect(resolution.appliedQualityData, id, reason: '33-2: the current id');
       }
     });
 
@@ -583,9 +743,17 @@ void main() {
       expect(http.requests, isEmpty);
     });
 
+    test('33-6: a www.17.live page is a room too (3.x: not a link), without a request', () async {
+      final http = ReplayHttp(const []);
+      expect(await parser(http).parse('見て https://www.17.live/ja/live/$_live'), const RoomLink('17live', _live));
+      expect(await parser(http).parse('https://WWW.17.live/profile/r/$_live'), const RoomLink('17live', _live));
+      expect(parser(http).containsSupportedLink('https://www.17.live/live/$_live'), isTrue);
+      expect(http.requests, isEmpty);
+    });
+
     test('other hosts and pages are not rooms (3.x); no short links', () async {
       final http = ReplayHttp(const []);
-      expect(await parser(http).parse('https://www.17.live/ja/live/$_live'), isNull);
+      expect(await parser(http).parse('https://m.17.live/ja/live/$_live'), isNull);
       expect(await parser(http).parse('https://17.live/ja/profile/$_live'), isNull);
       expect(parser(http).containsSupportedLink('https://17.live/'), isFalse);
       final site = SeventeenLiveSite(http);

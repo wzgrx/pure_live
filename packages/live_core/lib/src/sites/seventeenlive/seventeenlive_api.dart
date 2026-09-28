@@ -26,13 +26,38 @@ final class SeventeenLiveRoomData {
   /// `userID`: the broadcaster's UUID (the name of the pull streams).
   final String userId;
 
-  /// In 3.x's order (enhanced, HD, H.264, standard); each quality's `data`
-  /// is its `List<LivePlayLine>`.
+  /// Best first (原画, enhanced, HD, H.264: [SeventeenLiveApi.qualityFields]);
+  /// the order shown is [SeventeenLiveApi.playQualities]'s. Each quality's
+  /// `data` is its `List<LivePlayLine>`.
   final List<LivePlayQuality> qualities;
 
-  /// Why there is nothing to play: offline, a state 3.x did not know, or a
-  /// live without a pull URL.
+  /// Why there is nothing to play: offline, a state 3.x did not know, a
+  /// locked (restricted) live, or a live without a readable pull URL.
   final SiteError? unavailable;
+}
+
+/// What the danmaku module needs for a room (M5, 33-4): the room id, which
+/// is also the name of its Ably chat channel (the website subscribes to
+/// `subscribeChatRoom(roomID)`). The token is anonymous
+/// (`POST api-dsa.17app.co/api/v1/messenger/auth`) and asked by the chat
+/// itself, so room entry hands the channel over without a request. The
+/// channel is the broadcaster's and does not change between broadcasts.
+@immutable
+final class SeventeenLiveDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.roomId});
+
+  /// `liveStreamID`, the Ably channel name.
+  final String roomId;
+
+  @override
+  bool operator ==(Object other) => other is SeventeenLiveDanmakuArgs && other.roomId == roomId;
+
+  @override
+  int get hashCode => roomId.hashCode;
+
+  @override
+  String toString() => 'SeventeenLiveDanmakuArgs($roomId)';
 }
 
 /// One page of the recommendation sections (`/api/v1/sections`).
@@ -67,6 +92,8 @@ final class _Stream {
     required this.total,
     required this.audioOnly,
     required this.status,
+    required this.startedAt,
+    required this.restriction,
   });
 
   final String roomId;
@@ -81,6 +108,12 @@ final class _Stream {
   final int? total;
   final bool audioOnly;
   final LiveStatus status;
+
+  /// `beginTime` while live (33-7).
+  final DateTime? startedAt;
+
+  /// From `premiumContent` while live; null otherwise or unreadable.
+  final LiveRestriction? restriction;
 }
 
 /// A stream object 3.x refused (its `schema` and `identity` failures).
@@ -99,6 +132,13 @@ final class _Refused implements Exception {
 /// broadcaster's fixed `liveStreamID` (the owner's `userInfo.roomID`), kept
 /// as asked for; the broadcaster's `userID` is a UUID and names the pull
 /// streams. The pull URLs carry no signature and do not expire.
+///
+/// M4.U (docs/UPGRADES.md 33-1 to 33-7): the Japan, Taiwan and Hong Kong
+/// recommendations are the areas of one category; 3.x's 标准 is 原画 and
+/// comes first, and "优先 H.264" puts the H.264 transcode before it; pull
+/// URLs are https; keywords with a colon are searched and long ones cut;
+/// `www.17.live` links are rooms; a live room has its `beginTime` and its
+/// `premiumContent` lock (a locked live is live, marked and not played).
 abstract final class SeventeenLiveApi {
   /// The API host.
   static const String apiHost = 'api-dsa.17app.co';
@@ -123,27 +163,90 @@ abstract final class SeventeenLiveApi {
   /// `seventeen_audio_room`).
   static const String audioRoom = '音频直播';
 
-  /// 3.x's zh.json `seventeen_directory_scope`, the directory notice's text.
-  static const String directoryScope = '官网日本区公开推荐按原生游标加载，不代表全站目录；搜索覆盖官网当前直播窗口，精确房间号与官方直播间/主播主页链接继续支持，未开播昵称不在搜索结果中。';
+  /// The directory notice's text (key `seventeen_directory_scope`), in words
+  /// a viewer understands (unified rule "说明文字"; 3.x's zh.json text was a
+  /// developer note), covering the regions of 33-1. The interface's
+  /// translations are M13's.
+  static const String directoryScope =
+      '推荐和分区里是 17LIVE 官网日本、台湾、香港区首页推荐的直播，不是全部直播。搜索只能找到正在直播的主播；也可以输入房间号，或粘贴 17LIVE 的直播间或主页链接。';
 
-  /// The quality names (3.x's zh.json `seventeen_quality_*`), in 3.x's
-  /// order.
-  static const Map<String, String> qualityNames = {'enhanced': '增强高清', 'hd': '高清', 'h264': 'H.264', 'standard': '标准'};
+  /// The id of 原画 (33-2): the broadcaster's own stream, 3.x's `standard`.
+  static const String sourceQualityId = 'source';
 
-  /// The sort value of each quality (3.x's `_qualitySort`).
-  static const Map<String, int> qualitySorts = {'enhanced': 400, 'hd': 300, 'h264': 200, 'standard': 100};
+  /// The id of the H.264 transcode, the one quality that is always AVC.
+  static const String h264QualityId = 'h264';
 
-  /// The pull URL fields of each quality, in 3.x's order: every field of
-  /// every provider is a line.
+  /// The quality names (3.x's zh.json `seventeen_quality_*`; 33-2: 3.x's
+  /// 标准 is 原画), best first. Each is shown as `<name> · FLV`, as 3.x did.
+  static const Map<String, String> qualityNames = {
+    sourceQualityId: '原画',
+    'enhanced': '增强高清',
+    'hd': '高清',
+    h264QualityId: 'H.264',
+  };
+
+  /// The sort value of each quality: 3.x's `_qualitySort`, 原画 now the
+  /// highest (33-2; 3.x's 标准 was 100, the lowest).
+  static const Map<String, int> qualitySorts = {sourceQualityId: 500, 'enhanced': 400, 'hd': 300, h264QualityId: 200};
+
+  /// The pull URL fields of each quality, best first (33-2; 3.x's order was
+  /// enhanced, HD, H.264, standard): every field of every provider is a
+  /// line. The source fields are the broadcaster's stream as pushed (no
+  /// suffix; archived spec §5).
   static const Map<String, List<String>> qualityFields = {
+    sourceQualityId: ['urlLowQuality', 'webUrlLowQuality', 'urlHighQuality'],
     'enhanced': ['urlQualityEnhancedHD'],
     'hd': ['urlLowBitrateHD', 'webUrl', 'url'],
-    'h264': ['url264'],
-    'standard': ['urlLowQuality', 'webUrlLowQuality', 'urlHighQuality'],
+    h264QualityId: ['url264'],
   };
+
+  /// 3.x's quality ids whose quality has a new id (33-2), for M9 to migrate
+  /// a stored quality once: `standard` (标准 · FLV) is `source` (原画 ·
+  /// FLV). The other ids are unchanged.
+  static const Map<String, String> legacyQualityIds = {'standard': sourceQualityId};
+
+  /// The quality id for [id] as 3.x stored it ([legacyQualityIds], any
+  /// case); any other id is kept, trimmed.
+  static String qualityIdFromLegacy(String id) => legacyQualityIds[id.trim().toLowerCase()] ?? id.trim();
 
   /// The region of the recommendations (3.x asked for Japan only).
   static const String region = 'JP';
+
+  /// `id` of the one category (33-1).
+  static const String categoryId = 'region';
+
+  /// Name of the one category (33-1); the interface's translations are
+  /// M13's.
+  static const String categoryName = '地区';
+
+  /// The regions of the website's recommendation sections (33-1; the
+  /// archived v4 measured these three: `US` only mixes Japan and Hong
+  /// Kong), by `region` code, in order. The names are the interface's
+  /// defaults (M13 translates them).
+  static const Map<String, String> regions = {'JP': '日本', 'TW': '台湾', 'HK': '香港'};
+
+  /// The areas of [category], one per region ([regions]): `areaId` is the
+  /// `region` code sent.
+  static const List<LiveArea> areas = [
+    LiveArea(platform: _site, areaType: categoryId, typeName: categoryName, areaId: 'JP', areaName: '日本'),
+    LiveArea(platform: _site, areaType: categoryId, typeName: categoryName, areaId: 'TW', areaName: '台湾'),
+    LiveArea(platform: _site, areaType: categoryId, typeName: categoryName, areaId: 'HK', areaName: '香港'),
+  ];
+
+  /// The one category: the regions (33-1; 3.x had no catalog).
+  static final LiveCategory category = LiveCategory(id: categoryId, name: categoryName, children: areas);
+
+  /// The `region` code of [area]: [region] for null (the recommendations),
+  /// else the area's id (any case) when it is one of [regions]. An area of
+  /// another platform, or another id, is a caller error (`ArgumentError`).
+  static String regionOf(LiveArea? area) {
+    if (area == null) return region;
+    final code = area.areaId.trim().toUpperCase();
+    if (area.platform.trim().toLowerCase() != _site || !regions.containsKey(code)) {
+      throw ArgumentError.value(area, 'category', 'not a 17LIVE region');
+    }
+    return code;
+  }
 
   /// Rows the website asks each section for (`count`).
   static const int sectionCount = 20;
@@ -154,7 +257,8 @@ abstract final class SeventeenLiveApi {
   /// The longest cursor 3.x sent or accepted.
   static const int maxCursorLength = 512;
 
-  /// The longest keyword searched (3.x).
+  /// The longest keyword sent, in UTF-16 code units (3.x refused a longer
+  /// one; 33-5 cuts it, as the archived v4 did).
   static const int maxKeywordLength = 100;
 
   /// Sections without current broadcasts (3.x skipped these three).
@@ -352,8 +456,54 @@ abstract final class SeventeenLiveApi {
       total: live ? _count(data['viewerCount'], invalid: noCount) : null,
       audioOnly: _integer(data['audioOnly']) == 1,
       status: status,
+      // 3.x read neither: one that cannot be read is left out, never a
+      // reason to drop the row (33-7, unified rule on restrictions).
+      startedAt: live ? startTime(data['beginTime']) : null,
+      restriction: live ? restrictionOf(data['premiumContent']) : null,
     );
   }
+
+  /// `beginTime` (Unix seconds; the room answer and search rows have it,
+  /// section rows do not) as a UTC time (33-7); null when missing, not an
+  /// integer, or outside 2000–2100 (an offline room's is the last
+  /// broadcast's and is not read).
+  static DateTime? startTime(Object? value) {
+    final seconds = value is int ? value : null;
+    if (seconds == null || seconds < 946684800 || seconds > 4102444800) return null;
+    return DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true);
+  }
+
+  /// A live's restriction from its `premiumContent`, by the website's rule
+  /// (`isLocked`: a `premiumType` other than 0 that `paymentInfo.paid` does
+  /// not unlock; the anonymous viewer never paid): `premiumType` 1 (PAID, a
+  /// premium live) is [LiveRestriction.paid], 2 (ARMY, for the
+  /// broadcaster's army members) [LiveRestriction.subscribersOnly], any
+  /// other (3, NEW_USER, and later ones) [LiveRestriction.unplayable]. No
+  /// `premiumContent` (the room answer leaves it out, search rows write
+  /// null) or type 0 is [LiveRestriction.none]; one that is not an object
+  /// cannot be read (null).
+  static LiveRestriction? restrictionOf(Object? premium) {
+    if (premium == null) return LiveRestriction.none;
+    final content = _map(premium);
+    if (content == null) return null;
+    final type = _integer(content['premiumType']) ?? 0;
+    if (type == 0 || _map(content['paymentInfo'])?['paid'] == true) return LiveRestriction.none;
+    return switch (type) {
+      1 => LiveRestriction.paid,
+      2 => LiveRestriction.subscribersOnly,
+      _ => LiveRestriction.unplayable,
+    };
+  }
+
+  /// Why a live with [restriction] is not played: the website locks it for
+  /// this (anonymous) viewer even when the answer carries pull URLs (it did
+  /// on 2026-09-28, sample S04-live-army); 3.x played it.
+  static StreamUnavailable lockedLive(String roomId, LiveRestriction restriction) =>
+      StreamUnavailable(_site, switch (restriction) {
+        LiveRestriction.paid => '$roomId: a premium live, for viewers who paid',
+        LiveRestriction.subscribersOnly => "$roomId: a live for the broadcaster's army members only",
+        _ => '$roomId: a locked live (${restriction.name})',
+      });
 
   /// A list row (a section grid's `stream`, a search result) as 3.x kept
   /// it: a live object that passes 3.x's rules, else null.
@@ -371,7 +521,8 @@ abstract final class SeventeenLiveApi {
   }
 
   /// 3.x's card (`_card`): the age notice on every room, the audio area,
-  /// the current and this broadcast's viewers while live.
+  /// the current and this broadcast's viewers while live; and, while live,
+  /// the start time (33-7) and the restriction (a locked live stays live).
   static LiveRoom _card(_Stream stream) => LiveRoom(
     platform: _site,
     roomId: stream.roomId,
@@ -385,6 +536,8 @@ abstract final class SeventeenLiveApi {
     introduction: stream.bio,
     link: roomUrl(stream.roomId),
     liveStatus: stream.status,
+    startedAt: stream.startedAt,
+    restriction: stream.restriction,
     watching: '',
     onlineViewers: stream.online?.toString() ?? '',
     totalViewers: stream.total?.toString() ?? '',
@@ -404,12 +557,13 @@ abstract final class SeventeenLiveApi {
     }
   }
 
-  /// The query of the sections page after [cursor] (3.x: Japan, the
-  /// website's hot tab, 20 a section; an empty cursor on page 1).
-  static Map<String, String> sectionsQuery(String? cursor) => {
+  /// The query of the sections page after [cursor] (3.x: the website's hot
+  /// tab, 20 a section; an empty cursor on page 1) of [regionCode]: Japan
+  /// for the recommendations, as 3.x, or one of [regions] (33-1).
+  static Map<String, String> sectionsQuery(String? cursor, {String regionCode = region}) => {
     'count': '$sectionCount',
     'typeTab': '2',
-    'region': region,
+    'region': regionCode,
     'cursor': cursor ?? '',
   };
 
@@ -454,6 +608,28 @@ abstract final class SeventeenLiveApi {
 
   // Search --------------------------------------------------------------------
 
+  static final RegExp _url = RegExp('^[a-z][a-z0-9+.-]*://', caseSensitive: false);
+
+  /// Whether [text] is a web address (`<scheme>://…`), which the search
+  /// does not send as a keyword. Unlike 3.x (anything with a URI scheme),
+  /// `Re:Zero` and other keywords with a colon are keywords (33-5).
+  static bool isUrl(String text) => _url.hasMatch(text.trim());
+
+  /// The keyword sent for [keyword]: trimmed and cut to [maxKeywordLength]
+  /// UTF-16 code units (3.x's measure), never inside a surrogate pair, then
+  /// trimmed again (33-5; 3.x found nothing for a longer one). Empty when
+  /// there is nothing to search for.
+  static String searchKeyword(String keyword) {
+    var text = keyword.trim();
+    if (text.length > maxKeywordLength) {
+      var end = maxKeywordLength;
+      final last = text.codeUnitAt(end - 1);
+      if (last >= 0xD800 && last <= 0xDBFF) end--;
+      text = text.substring(0, end).trim();
+    }
+    return text;
+  }
+
   /// `liveStreams/search` results as cards: current broadcasts only, a room
   /// once; as 3.x, a row must name its owner's `roomID` and pass 3.x's
   /// rules, else it is skipped. The answer is a list (else `ApiChanged`).
@@ -493,62 +669,88 @@ abstract final class SeventeenLiveApi {
       _card(_checked(_room(body, roomId: roomId, status: status), roomId));
 
   /// The room [roomId] from `lives/<id>` as room entry reads it: the card
-  /// of [refreshRoom] with its playback ([SeventeenLiveRoomData]). A live
-  /// room without a pull URL is entered (3.x failed the entry); its stream
-  /// says why. Pull data 3.x could not read fails the entry, as in 3.x.
+  /// of [refreshRoom] with its playback ([SeventeenLiveRoomData]) and the
+  /// danmaku channel ([SeventeenLiveDanmakuArgs], 33-4). A room that cannot
+  /// be played is entered; its stream says why: offline, a state 3.x did
+  /// not know, a locked live ([lockedLive]; its pull URLs are not read), a
+  /// live without a pull URL (3.x failed the entry), or pull data that
+  /// cannot be read at all (`ApiChanged`; 3.x failed the entry).
   static LiveRoom enteredRoom(String body, {required String roomId, int status = 200}) {
     final data = _room(body, roomId: roomId, status: status);
     final stream = _checked(data, roomId);
-    final List<LivePlayQuality> offered;
+    final what = 'lives/$roomId';
+    var offered = const <LivePlayQuality>[];
     final SiteError? unavailable;
     switch (stream.status) {
+      case LiveStatus.live when (stream.restriction ?? LiveRestriction.none) != LiveRestriction.none:
+        unavailable = lockedLive(what, stream.restriction!);
       case LiveStatus.live:
-        offered = qualities(data, roomId: roomId);
-        unavailable = offered.isEmpty ? StreamUnavailable(_site, 'lives/$roomId: no pull URL') : null;
+        final skipped = <String>[];
+        offered = qualities(data, roomId: roomId, skipped: skipped);
+        unavailable = offered.isNotEmpty
+            ? null
+            : skipped.isEmpty
+            ? StreamUnavailable(_site, '$what: no pull URL')
+            : ApiChanged(_site, '$what: no readable pull URL (${skipped.join('; ')})');
       case LiveStatus.offline:
-        offered = const [];
-        unavailable = StreamUnavailable(_site, 'lives/$roomId: offline');
+        unavailable = StreamUnavailable(_site, '$what: offline');
       case _:
-        offered = const [];
-        unavailable = ApiChanged(_site, 'lives/$roomId: status ${data['status']}');
+        unavailable = ApiChanged(_site, '$what: status ${data['status']}');
     }
     return _card(stream).copyWith(
       data: SeventeenLiveRoomData(roomId: roomId, userId: stream.userId, qualities: offered, unavailable: unavailable),
+      danmakuData: SeventeenLiveDanmakuArgs(roomId: roomId),
     );
   }
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities of a live `lives/<id>` answer (`_streams`): the
+  /// The largest number of providers read (3.x refused more).
+  static const int maxProviders = 16;
+
+  /// The qualities of a live `lives/<id>` answer (3.x's `_streams`): the
   /// providers of `pullURLsInfo.rtmpURLs` (else `rtmpUrls`), in their order
   /// (only the first one serves at a time: REG-17LIVE-002); for each quality
-  /// of [qualityFields], every field of every provider that is a pull URL
-  /// ([pullUrl]) is a line, each URL once. Named `<name> · FLV`, sorted as
-  /// 3.x ([qualitySorts]). Each line carries [mediaHeaders], the FLV format,
-  /// its CDN (`tencent`, `wansu`) and, for the H.264 transcode, the `avc`
-  /// codec (the other qualities follow the broadcaster's encoder and may be
-  /// FLV codec 12, HEVC: REG-17LIVE-001). No lease: the URLs are unsigned.
+  /// of [qualityFields], best first, every field of every provider that is
+  /// a pull URL ([pullUrl], https) is a line, each URL once. Named
+  /// `<name> · FLV` (33-2: 原画 for 3.x's 标准), sorted by [qualitySorts].
+  /// Each line carries [mediaHeaders], the FLV format, its CDN (`tencent`,
+  /// `wansu`) and, for the H.264 transcode, the `avc` codec (the other
+  /// qualities follow the broadcaster's encoder and may be FLV codec 12,
+  /// HEVC: REG-17LIVE-001). No lease: the URLs are unsigned.
   ///
-  /// As 3.x, providers that are not a list of at most 16 objects, or a URL
-  /// field that is not text, are `ApiChanged`. Empty when nothing is
-  /// offered.
-  static List<LivePlayQuality> qualities(Map<String, dynamic> data, {required String roomId}) {
-    final what = 'lives/$roomId';
+  /// Unlike 3.x (unified rule "容错"), a provider that is not an object, a
+  /// URL field that is not text, providers beyond [maxProviders] and
+  /// providers that are not a list only lose themselves; each is noted in
+  /// [skipped]. Empty when nothing is offered.
+  static List<LivePlayQuality> qualities(Map<String, dynamic> data, {required String roomId, List<String>? skipped}) {
+    void skip(String reason) => skipped?.add(reason);
     Object? providers;
     final pull = data['pullURLsInfo'];
     if (pull is Map) providers = pull['rtmpURLs'];
     providers ??= data['rtmpUrls'];
     if (providers == null) return const [];
-    if (providers is! List || providers.length > 16) throw ApiChanged(_site, '$what: rtmpURLs is not a list of 16');
+    if (providers is! List) {
+      skip('rtmpURLs is not a list');
+      return const [];
+    }
+    if (providers.length > maxProviders) skip('${providers.length - maxProviders} providers over $maxProviders');
     final lines = <String, List<LivePlayLine>>{};
     final headers = mediaHeaders(roomId);
-    for (final item in providers) {
-      final provider = _map(item) ?? (throw ApiChanged(_site, '$what: provider $item'));
+    for (final (index, item) in providers.take(maxProviders).indexed) {
+      final provider = _map(item);
+      if (provider == null) {
+        skip('provider $index is not an object');
+        continue;
+      }
       for (final MapEntry(key: id, value: fields) in qualityFields.entries) {
         for (final field in fields) {
           final value = provider[field];
           if (value == null || value == '') continue;
-          if (value is! String) throw ApiChanged(_site, '$what: $field is not text');
+          if (value is! String) {
+            skip('provider $index: $field is not text');
+            continue;
+          }
           final url = pullUrl(value);
           if (url == null) continue;
           final list = lines.putIfAbsent(id, () => []);
@@ -559,7 +761,7 @@ abstract final class SeventeenLiveApi {
               text,
               headers: headers,
               format: StreamFormat.flv,
-              codec: id == 'h264' ? 'avc' : null,
+              codec: id == h264QualityId ? 'avc' : null,
               lineId: url.host.toLowerCase().split('-').first,
             ),
           );
@@ -580,8 +782,10 @@ abstract final class SeventeenLiveApi {
 
   /// A pull URL as 3.x accepted it (`_mediaUri`): http(s) on a
   /// `*.17app.co` host containing `pull-rtmp`, an `.flv` path, without
-  /// whitespace, user info or fragment; kept as given (3.x played the
-  /// Tencent CDN over http). Null otherwise.
+  /// whitespace, user info or fragment. Always https (33-3; 3.x played the
+  /// Tencent CDN over http, which serves https too): an http URL is
+  /// upgraded, except one with an explicit port other than 80, kept as
+  /// given since its https port is unknown. Null otherwise.
   static Uri? pullUrl(String raw) {
     if (raw.isEmpty || raw.length > 65536 || raw.contains(RegExp(r'[\s\x00-\x1f]'))) return null;
     final uri = Uri.tryParse(raw);
@@ -595,41 +799,56 @@ abstract final class SeventeenLiveApi {
         !uri.path.toLowerCase().endsWith('.flv')) {
       return null;
     }
-    return uri;
+    if (uri.scheme == 'https' || (uri.hasPort && uri.port != 80)) return uri;
+    return Uri(scheme: 'https', host: uri.host, path: uri.path, query: uri.hasQuery ? uri.query : null);
   }
 
-  /// The lines of [quality] (by its id) among [data]'s qualities, applied as
-  /// asked; a quality the room does not offer is `StreamUnavailable`, and a
-  /// room with nothing to play reports why.
+  /// The lines of [quality] (by its id; 3.x's `standard` is read through
+  /// [qualityIdFromLegacy]) among [data]'s qualities, applied as the
+  /// current id; a quality the room does not offer is `StreamUnavailable`,
+  /// and a room with nothing to play reports why.
   static LivePlayUrlResolution resolution(SeventeenLiveRoomData data, LivePlayQuality quality) {
     final offered = playQualities(data);
-    final wanted = '${quality.selectionId}';
+    final wanted = qualityIdFromLegacy('${quality.selectionId}');
     final match = offered.where((option) => '${option.selectionId}' == wanted).firstOrNull;
-    if (match == null) throw StreamUnavailable(_site, 'quality $wanted is not offered');
+    if (match == null) throw StreamUnavailable(_site, 'quality ${quality.selectionId} is not offered');
     return LivePlayUrlResolution.lines(match.data! as List<LivePlayLine>, appliedQualityData: match.selectionId);
   }
 
-  /// [data]'s qualities, or why there are none.
-  static List<LivePlayQuality> playQualities(SeventeenLiveRoomData data) {
-    if (data.qualities.isNotEmpty) return data.qualities;
-    throw data.unavailable ?? const StreamUnavailable(_site, 'no quality');
+  /// [data]'s qualities in the order shown, or why there are none. With
+  /// [preferH264] ("优先 H.264", on by default; 33-2 as 22-3) the H.264
+  /// transcode comes first, so it is the default (the others may be HEVC:
+  /// REG-17LIVE-001), then 原画 and the rest best first; off, best first
+  /// (原画, enhanced, HD, H.264).
+  static List<LivePlayQuality> playQualities(SeventeenLiveRoomData data, {bool preferH264 = true}) {
+    final offered = data.qualities;
+    if (offered.isEmpty) throw data.unavailable ?? const StreamUnavailable(_site, 'no quality');
+    if (!preferH264) return offered;
+    return List.unmodifiable([
+      ...offered.where((quality) => quality.id == h264QualityId),
+      ...offered.where((quality) => quality.id != h264QualityId),
+    ]);
   }
 
   // Links ---------------------------------------------------------------------
 
+  /// The hosts of the website: `www.17.live` redirects to `17.live` (33-6;
+  /// 3.x knew only `17.live`).
+  static const Set<String> webHosts = {'17.live', 'www.17.live'};
+
   /// The room of a 17LIVE page (3.x's `SeventeenLiveLink.parse`): http(s) on
-  /// `17.live` exactly (any case, any port), without user info; the path
-  /// (empty segments ignored, words in any case) `/live/<id>`,
+  /// one of [webHosts] exactly (any case, any port), without user info; the
+  /// path (empty segments ignored, words in any case) `/live/<id>`,
   /// `/<locale>/live/<id>`, `/profile/r/<id>` or `/<locale>/profile/r/<id>`,
   /// the locale two letters with an optional `-` suffix (`ja`,
   /// `zh-Hant`), the id a room id. A path that cannot be decoded is no link
-  /// (3.x threw). Other hosts (`www.17.live`) are not rooms, as in 3.x.
+  /// (3.x threw). Other hosts are not rooms.
   static String? roomIdFromUrl(String url) {
     final uri = Uri.tryParse(url.trim());
     if (uri == null ||
         (uri.scheme != 'http' && uri.scheme != 'https') ||
         uri.userInfo.isNotEmpty ||
-        uri.host.toLowerCase() != '17.live') {
+        !webHosts.contains(uri.host.toLowerCase())) {
       return null;
     }
     final List<String> segments;

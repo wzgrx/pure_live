@@ -1,0 +1,163 @@
+{
+  "prev_league_id": 30,
+  "room_grade_meter_position": 4,
+  "remaining_seconds": 593107,
+  "push_send_status": {},
+  "live_id": 23483509,
+  "is_collaboration_battle_enabled": true,
+  "aggregation_status": 1,
+  "league_id": 30,
+  "is_official": false,
+  "is_follow": false,
+  "room_grade_name": "",
+  "voice_list": [],
+  "description": "初めまして！KINGです！初心者配信者ではありますが、皆さん宜しくお願い致します🤲\r\nインスタ　tosi.0927此方も宜しくです",
+  "is_birthday": true,
+  "stella_list": [],
+  "liver_badge": 0,
+  "genre_id": 112,
+  "live_tags": [],
+  "exist_last_week_room_grade": 1,
+  "visit_count": 0,
+  "room_grade_after_aggregation": "Silver3",
+  "current_live_started_at": 1790516942,
+  "sns_list": null,
+  "badge_list": [
+    {
+      "image_url": "https://static.showroom-live.com/image/glitter/badge/4096dbb06f4422debbbbf27d1e98e5fa.png?v=1790449203",
+      "id": 1
+    }
+  ],
+  "room_url_key": "0c1c310117354",
+  "is_live_tag_campaign_opened": true,
+  "prev_show_rank_subdivided": "B-3",
+  "room_grade_border_list": [
+    {
+      "lower_limit_score": 1316,
+      "border_num": 0
+    },
+    {
+      "lower_limit_score": 2346,
+      "border_num": 1
+    }
+  ],
+  "recommend_comment_post_url": "https://www.showroom-live.com/room/recommend_comments?room_id=577362#post",
+  "genre_name": "music",
+  "room_name": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+  "birthday": 86367600,
+  "party": {},
+  "image": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_m.jpeg?v=1790516941",
+  "is_party_enabled": false,
+  "room_id": 577362,
+  "frame_image_url": "https://static.showroom-live.com/image/room_grade/1_f.png?v=1750057344",
+  "image_list": [
+    {
+      "m_original": "https://static.showroom-live.com/resize/large/image/fan_talk/b9ab60f13a732d0894fb816540e40b54ae834feb0770a7563dfc261b37e45f23.jpeg?v=1",
+      "ts": 1787395553,
+      "id": 88730957,
+      "m": "https://static.showroom-live.com/resize/small/image/fan_talk/b9ab60f13a732d0894fb816540e40b54ae834feb0770a7563dfc261b37e45f23.jpeg?v=1"
+    }
+  ],
+  "last_week_starting_room_grade_name": "Silver2",
+  "banner_list": null,
+  "is_talk_online": false,
+  "is_opponent_collaboration_battle_enabled": false,
+  "award_list": null,
+  "performer_name": "",
+  "follower_num": 91,
+  "next_league_id": 30,
+  "live_continuous_days": 39,
+  "starting_room_grade_frame_image_url": "https://static.showroom-live.com/image/room_grade/2_f.png?v=1743404893",
+  "room_grade_list": [
+    {
+      "color": "#B4B2BC",
+      "room_grade_name": "Silver2",
+      "room_grade_id": 1298,
+      "room_grade_diff_label": "-1"
+    },
+    {
+      "color": "#B4B2BC",
+      "room_grade_name": "Silver3",
+      "room_grade_id": 1297,
+      "room_grade_diff_label": "±0"
+    },
+    {
+      "color": "#DCC303",
+      "room_grade_name": "Gold",
+      "room_grade_id": 1199,
+      "room_grade_diff_label": "+1"
+    }
+  ],
+  "starting_room_grade_id": 1297,
+  "room_grade_archive_border_list": [
+    {
+      "grade_name": "Silver3",
+      "lower_limit_score": 1316
+    },
+    {
+      "grade_name": "Gold",
+      "lower_limit_score": 2346
+    }
+  ],
+  "event": null,
+  "show_rank_subdivided": "B-4",
+  "room_group_config_type": "Individual",
+  "collaboration_broadcast": {
+    "collaboration_room_id": 0,
+    "collaboration_broadcast_session_id": 0,
+    "is_collaboration_room_muted": false,
+    "is_collaboration_broadcast_now": false,
+    "age_restriction_type": 0
+  },
+  "broadcast_style": 1,
+  "youtube_id": "",
+  "prev_score": 0,
+  "displayed_medals": [
+    {
+      "medal_id": 2097,
+      "event_name": "weekday_start_048",
+      "medal_name": "週の始まり3days 〜今週も楽しもう！〜Vol.48(Blue1位)",
+      "displayed": 1,
+      "image_url": "https://static.showroom-live.com/image/medal/2097.png?v=15",
+      "description": "Blue1位記念"
+    }
+  ],
+  "recommend_comment_list": null,
+  "next_show_rank_subdivided": "B-5",
+  "share_text_live": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍 Broadcasting!\nhttps://www.showroom-live.com/r/0c1c310117354?t=1790532892",
+  "recommend_comments_url": "https://www.showroom-live.com/room/recommend_comments?room_id=577362",
+  "share_url": "https://www.showroom-live.com/room/profile?room_id=577362",
+  "starting_room_grade_image_url": "https://static.showroom-live.com/image/room_grade/2.png?v=1743404893",
+  "avatar": {
+    "description": "Send gifts to this performer, and you will receive an original avatar!",
+    "list": [
+      "https://static.showroom-live.com/image/avatar/1146447.png?v=110"
+    ]
+  },
+  "league_label": "B",
+  "opponent_broadcast_style": 0,
+  "current_room_grade_id": 1199,
+  "share_url_live": "https://www.showroom-live.com/r/0c1c310117354?t=1790532892",
+  "last_week_score": 482925,
+  "room_grade_before_aggregation": "Silver2",
+  "is_talk_opened": true,
+  "image_square": "https://static.showroom-live.com/image/room/cover/66f8009da7c097e6842523b9019455e30f5532129e4499904d5f1443afc5faf8_square_m.png?v=1790074830",
+  "room_level": 7,
+  "is_displayed": true,
+  "party_live_status": 0,
+  "score": 10342,
+  "ec_config": {
+    "sales_available": 0,
+    "is_external_ec": 0,
+    "links": []
+  },
+  "recommend_comment_open_status": 0,
+  "main_name": "KING生誕祭！27日！皆に出会えて感謝🙏ズバッと👍",
+  "view_num": 3941,
+  "has_more_recommend_comment": false,
+  "image_url": "https://static.showroom-live.com/image/room_grade/1.png?v=1750057344",
+  "is_onlive": true,
+  "next_score": 178522,
+  "premium_room_type": 0,
+  "is_collaboration_broadcast_enabled": true
+}

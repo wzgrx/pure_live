@@ -1,0 +1,122 @@
+{
+  "generator": "ShowroomSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw (with S03-profile-offline, S04-live-info-offline, S05-streaming-offline)",
+  "value": {
+    "61576": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "61576",
+          "title": "福岡 聖菜（AKB48）",
+          "nick": "福岡 聖菜（AKB48）",
+          "avatar": "https://static.showroom-live.com/image/room/cover/cf6b8f12524a44ad3ee8684de42e39a379b389d55bba86c397b74a28e8649652_square_m.png?v=1765529937",
+          "cover": "https://static.showroom-live.com/image/room/cover/cf6b8f12524a44ad3ee8684de42e39a379b389d55bba86c397b74a28e8649652_square_m.png?v=1765529937",
+          "area": "idol",
+          "watching": "0",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "0",
+          "followers": "24809",
+          "platform": "showroom",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "introduction": "おしゃべり好きなのでぜひ気軽にみていってください☺️\r\n\r\n福岡聖菜　Seina Fukuoka\r\n \r\n【ﾆｯｸﾈｰﾑ】せいちゃん\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n【AKB48プライベートメールサービス】\r\nAKB48の推しメンバーから直接メールが届きます！\r\nhttps://www.akb48.co.jp/mailmagazine\r\n\r\n .*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜プロフィール＞\r\n【生年月日】\r\n 2000年8月1日\r\n\r\n【出身地】\r\n神奈川県\r\n \r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜SNS＞\r\n【X(Twitter)】\r\nhttps://twitter.com/seina_fuku48\r\n\r\n【Instagram】\r\nhttps://www.instagram.com/seina___ff/\r\n\r\n .*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜自己紹介＞\r\nAKB48せいちゃんこと福岡聖菜です\r\nおしゃべりが大好きなので楽しい時間を一緒に作りたいです〜！！\r\n\r\n【将来の夢】\r\n私らしく生きること\r\n\r\n【趣味】\r\n読書\r\n\r\n【好きなこと】\r\n夢中になれること！お菓子作りや調べ物などなど\r\n\r\n【特技】\r\n想像すること…？\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜AKB48オフィシャルサービス＞\r\n\r\n【AKB48 公式サイト】\r\nhttps://www.akb48.co.jp/\r\n\r\n【AKB48 Official Fan Club】\r\nhttps://www.akb48.co.jp/hashiranokai\r\n\r\n【AKB48 Official Shop】\r\nhttps://shop.akb48.co.jp/\r\n\r\n【AKB48 公式YouTube】\r\nhttps://www.youtube.com/c/akb48\r\n\r\n【AKB48/ official LIVE ch】\r\nhttps://www.youtube.com/channel/UCfmrcEdes7yDtEISGPM1T-A\r\n\r\n\r\n＜各情報サービス＞\r\n\r\n【AKB48 オフィシャルブログ】\r\nhttps://ameblo.jp/akihabara48/\r\n\r\n【AKB48 公式X(Twitter)】\r\nhttps://twitter.com/AKB48_staff\r\n\r\n【AKB48 公式Instagram】\r\nhttps://www.instagram.com/akb48/?hl=ja\r\n\r\n\r\n＜各映像配信サービス＞\r\n\r\n【映像倉庫】\r\nhttps://akb48group-eizo.jp/\r\n\r\n【DMM.com「AKB48 LIVE!! ON DEMAND」】\r\nhttps://www.dmm.com/lod/akb48/\r\n\r\n【VR SQUARE「AKB48＋チャンネル」】\r\nhttps://livr.jp/monthly-member-add/H372648599\r\n\r\n\r\n＜各イベント申し込みサービス＞\r\n【AKB48チケットセンター】\r\nhttps://ticket.akb48-group.com/home/top.php\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n【お願い】\r\n・複数アカウントによる応援はポイントが反映されないだけでなく、減点対象となってしまいますのでおやめ下さい。\r\n・SMS認証がまだの方は無料ポイントを投げていただいてもポイントに加算されないのでご登録よろしくお願い致します。\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/48_Seina_Fukuoka"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=61576",
+          "https://www.showroom-live.com/api/live/live_info?room_id=61576"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "61576",
+          "title": "福岡 聖菜（AKB48）",
+          "nick": "福岡 聖菜（AKB48）",
+          "avatar": "https://static.showroom-live.com/image/room/cover/cf6b8f12524a44ad3ee8684de42e39a379b389d55bba86c397b74a28e8649652_square_m.png?v=1765529937",
+          "cover": "https://static.showroom-live.com/image/room/cover/cf6b8f12524a44ad3ee8684de42e39a379b389d55bba86c397b74a28e8649652_square_m.png?v=1765529937",
+          "area": "idol",
+          "watching": "0",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "0",
+          "followers": "24809",
+          "platform": "showroom",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "introduction": "おしゃべり好きなのでぜひ気軽にみていってください☺️\r\n\r\n福岡聖菜　Seina Fukuoka\r\n \r\n【ﾆｯｸﾈｰﾑ】せいちゃん\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n【AKB48プライベートメールサービス】\r\nAKB48の推しメンバーから直接メールが届きます！\r\nhttps://www.akb48.co.jp/mailmagazine\r\n\r\n .*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜プロフィール＞\r\n【生年月日】\r\n 2000年8月1日\r\n\r\n【出身地】\r\n神奈川県\r\n \r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜SNS＞\r\n【X(Twitter)】\r\nhttps://twitter.com/seina_fuku48\r\n\r\n【Instagram】\r\nhttps://www.instagram.com/seina___ff/\r\n\r\n .*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜自己紹介＞\r\nAKB48せいちゃんこと福岡聖菜です\r\nおしゃべりが大好きなので楽しい時間を一緒に作りたいです〜！！\r\n\r\n【将来の夢】\r\n私らしく生きること\r\n\r\n【趣味】\r\n読書\r\n\r\n【好きなこと】\r\n夢中になれること！お菓子作りや調べ物などなど\r\n\r\n【特技】\r\n想像すること…？\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜AKB48オフィシャルサービス＞\r\n\r\n【AKB48 公式サイト】\r\nhttps://www.akb48.co.jp/\r\n\r\n【AKB48 Official Fan Club】\r\nhttps://www.akb48.co.jp/hashiranokai\r\n\r\n【AKB48 Official Shop】\r\nhttps://shop.akb48.co.jp/\r\n\r\n【AKB48 公式YouTube】\r\nhttps://www.youtube.com/c/akb48\r\n\r\n【AKB48/ official LIVE ch】\r\nhttps://www.youtube.com/channel/UCfmrcEdes7yDtEISGPM1T-A\r\n\r\n\r\n＜各情報サービス＞\r\n\r\n【AKB48 オフィシャルブログ】\r\nhttps://ameblo.jp/akihabara48/\r\n\r\n【AKB48 公式X(Twitter)】\r\nhttps://twitter.com/AKB48_staff\r\n\r\n【AKB48 公式Instagram】\r\nhttps://www.instagram.com/akb48/?hl=ja\r\n\r\n\r\n＜各映像配信サービス＞\r\n\r\n【映像倉庫】\r\nhttps://akb48group-eizo.jp/\r\n\r\n【DMM.com「AKB48 LIVE!! ON DEMAND」】\r\nhttps://www.dmm.com/lod/akb48/\r\n\r\n【VR SQUARE「AKB48＋チャンネル」】\r\nhttps://livr.jp/monthly-member-add/H372648599\r\n\r\n\r\n＜各イベント申し込みサービス＞\r\n【AKB48チケットセンター】\r\nhttps://ticket.akb48-group.com/home/top.php\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n【お願い】\r\n・複数アカウントによる応援はポイントが反映されないだけでなく、減点対象となってしまいますのでおやめ下さい。\r\n・SMS認証がまだの方は無料ポイントを投げていただいてもポイントに加算されないのでご登録よろしくお願い致します。\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/48_Seina_Fukuoka"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=61576",
+          "https://www.showroom-live.com/api/live/live_info?room_id=61576"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "61576",
+          "title": "福岡 聖菜（AKB48）",
+          "nick": "福岡 聖菜（AKB48）",
+          "avatar": "https://static.showroom-live.com/image/room/cover/cf6b8f12524a44ad3ee8684de42e39a379b389d55bba86c397b74a28e8649652_square_m.png?v=1765529937",
+          "cover": "https://static.showroom-live.com/image/room/cover/cf6b8f12524a44ad3ee8684de42e39a379b389d55bba86c397b74a28e8649652_square_m.png?v=1765529937",
+          "area": "idol",
+          "watching": "0",
+          "audienceMetricType": "totalViewers",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "0",
+          "followers": "24809",
+          "platform": "showroom",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "introduction": "おしゃべり好きなのでぜひ気軽にみていってください☺️\r\n\r\n福岡聖菜　Seina Fukuoka\r\n \r\n【ﾆｯｸﾈｰﾑ】せいちゃん\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n【AKB48プライベートメールサービス】\r\nAKB48の推しメンバーから直接メールが届きます！\r\nhttps://www.akb48.co.jp/mailmagazine\r\n\r\n .*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜プロフィール＞\r\n【生年月日】\r\n 2000年8月1日\r\n\r\n【出身地】\r\n神奈川県\r\n \r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜SNS＞\r\n【X(Twitter)】\r\nhttps://twitter.com/seina_fuku48\r\n\r\n【Instagram】\r\nhttps://www.instagram.com/seina___ff/\r\n\r\n .*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜自己紹介＞\r\nAKB48せいちゃんこと福岡聖菜です\r\nおしゃべりが大好きなので楽しい時間を一緒に作りたいです〜！！\r\n\r\n【将来の夢】\r\n私らしく生きること\r\n\r\n【趣味】\r\n読書\r\n\r\n【好きなこと】\r\n夢中になれること！お菓子作りや調べ物などなど\r\n\r\n【特技】\r\n想像すること…？\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n＜AKB48オフィシャルサービス＞\r\n\r\n【AKB48 公式サイト】\r\nhttps://www.akb48.co.jp/\r\n\r\n【AKB48 Official Fan Club】\r\nhttps://www.akb48.co.jp/hashiranokai\r\n\r\n【AKB48 Official Shop】\r\nhttps://shop.akb48.co.jp/\r\n\r\n【AKB48 公式YouTube】\r\nhttps://www.youtube.com/c/akb48\r\n\r\n【AKB48/ official LIVE ch】\r\nhttps://www.youtube.com/channel/UCfmrcEdes7yDtEISGPM1T-A\r\n\r\n\r\n＜各情報サービス＞\r\n\r\n【AKB48 オフィシャルブログ】\r\nhttps://ameblo.jp/akihabara48/\r\n\r\n【AKB48 公式X(Twitter)】\r\nhttps://twitter.com/AKB48_staff\r\n\r\n【AKB48 公式Instagram】\r\nhttps://www.instagram.com/akb48/?hl=ja\r\n\r\n\r\n＜各映像配信サービス＞\r\n\r\n【映像倉庫】\r\nhttps://akb48group-eizo.jp/\r\n\r\n【DMM.com「AKB48 LIVE!! ON DEMAND」】\r\nhttps://www.dmm.com/lod/akb48/\r\n\r\n【VR SQUARE「AKB48＋チャンネル」】\r\nhttps://livr.jp/monthly-member-add/H372648599\r\n\r\n\r\n＜各イベント申し込みサービス＞\r\n【AKB48チケットセンター】\r\nhttps://ticket.akb48-group.com/home/top.php\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ\r\n\r\n【お願い】\r\n・複数アカウントによる応援はポイントが反映されないだけでなく、減点対象となってしまいますのでおやめ下さい。\r\n・SMS認証がまだの方は無料ポイントを投げていただいてもポイントに加算されないのでご登録よろしくお願い致します。\r\n\r\n.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ　.ﾟ･*.*･ﾟ",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "referer": "https://www.showroom-live.com/",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.showroom-live.com/r/48_Seina_Fukuoka"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=61576",
+          "https://www.showroom-live.com/api/live/live_info?room_id=61576"
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=61576",
+          "https://www.showroom-live.com/api/live/live_info?room_id=61576"
+        ]
+      },
+      "getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getPlayUrls": {},
+      "resolvePlayUrlsForRecoveryRaw(hls:2:1000)": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom mediaUnavailable"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=61576",
+          "https://www.showroom-live.com/api/live/live_info?room_id=61576"
+        ]
+      }
+    }
+  }
+}

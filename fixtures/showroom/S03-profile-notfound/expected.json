@@ -1,0 +1,48 @@
+{
+  "generator": "ShowroomSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw (with S03-profile-notfound)",
+  "value": {
+    "synthetic": "live/live_info?room_id=1 answered 404 (not recorded; spec §1)",
+    "1": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=1",
+          "https://www.showroom-live.com/api/live/live_info?room_id=1"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=1",
+          "https://www.showroom-live.com/api/live/live_info?room_id=1"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=1",
+          "https://www.showroom-live.com/api/live/live_info?room_id=1"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "ShowroomException",
+          "message": "Showroom missing"
+        },
+        "requests": [
+          "https://www.showroom-live.com/api/room/profile?room_id=1",
+          "https://www.showroom-live.com/api/live/live_info?room_id=1"
+        ]
+      }
+    }
+  }
+}

@@ -47,6 +47,8 @@ export 'src/sites/niconico/niconico_seat.dart';
 export 'src/sites/niconico/niconico_site.dart';
 export 'src/sites/picarto/picarto_api.dart';
 export 'src/sites/picarto/picarto_site.dart';
+export 'src/sites/showroom/showroom_api.dart';
+export 'src/sites/showroom/showroom_site.dart';
 export 'src/sites/soop/soop_api.dart';
 export 'src/sites/soop/soop_site.dart';
 export 'src/sites/twitcasting/twitcasting_api.dart';

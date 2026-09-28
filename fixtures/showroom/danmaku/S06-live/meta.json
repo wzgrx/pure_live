@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "showroom",
+  "case": "S06-live",
+  "room": "showroom:577362",
+  "danmakuKeys": {
+    "bcsvrKey": "6e6c686835796846:23483509",
+    "bcsvrHost": "online.showroom-live.com"
+  },
+  "capturedAt": "2026-09-27T18:19:06.432576Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://online.showroom-live.com/",
+      "headers": {
+        "origin": "https://www.showroom-live.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 25,
+  "raw": {
+    "sha256": "3befc6e491e7cd28eab7b8e541e6969aae79d4cc4fab54c04adebcd0250b667f",
+    "length": 6438
+  },
+  "scrubbed": [
+    {
+      "where": "$[t=1,2].u/ac",
+      "rule": "person"
+    },
+    {
+      "where": "$[other t]",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

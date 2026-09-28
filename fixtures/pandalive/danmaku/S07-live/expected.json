@@ -1,0 +1,358 @@
+{
+  "generator": "archived v4 PandaliveProtocol (archive/v4 6ba709135: endpoint, headers, heartbeatInterval, playForm, session, connect, subscribe, ping, decode) over the recording's danmakuKeys, its live/play answer and every received socket frame (fixtures/pandalive/danmaku/v4_expected.dart)",
+  "value": {
+    "endpoint": "wss://chat-ws.neolive.kr/connection/websocket",
+    "headers": {
+      "origin": "https://www.pandalive.co.kr",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    },
+    "heartbeatSeconds": 25,
+    "play": "https://api.pandalive.co.kr/v1/live/play",
+    "playForm": {
+      "action": "watch",
+      "userId": "daisy00",
+      "password": "",
+      "shareLinkType": ""
+    },
+    "session": {
+      "channel": "24133575",
+      "token": "gkG2nHHkHtHGP7GvZGTosLawJeXAYaE6FtX5.mdTwuDGwMmW1VcOsFuNxKQJ4UVDrTTSkxCLuYyL8VAU6IvwzFhyzVeqpUd7sXhetK3dwxs4haRK6QhV7MARiQTh1TwnfzCcsNBT3RkAtLMquzgZxAtI0Yzajq7ZzLktavJHrGaS0OTXbZPIeSOHyLqV1XEH5AkG7PztgNqnuGwbqu0veNK1PQknnRVRTDAFXMfhkLVSxse35PvqmcTBzUlH9OrHsskEbKYZaA8rcJmQratH2NZUivTJyYpryvLLqHbBgPFQrZgI1OJ1sNTK7QXgyKNEkIQU0TGZ6TJbzQiLqTVUilD0.XJearW7qfvCmVp4wWiH2hgM-k3Z9sF-tBx58UFYH-2f"
+    },
+    "connect": "{\"params\":{\"token\":\"gkG2nHHkHtHGP7GvZGTosLawJeXAYaE6FtX5.mdTwuDGwMmW1VcOsFuNxKQJ4UVDrTTSkxCLuYyL8VAU6IvwzFhyzVeqpUd7sXhetK3dwxs4haRK6QhV7MARiQTh1TwnfzCcsNBT3RkAtLMquzgZxAtI0Yzajq7ZzLktavJHrGaS0OTXbZPIeSOHyLqV1XEH5AkG7PztgNqnuGwbqu0veNK1PQknnRVRTDAFXMfhkLVSxse35PvqmcTBzUlH9OrHsskEbKYZaA8rcJmQratH2NZUivTJyYpryvLLqHbBgPFQrZgI1OJ1sNTK7QXgyKNEkIQU0TGZ6TJbzQiLqTVUilD0.XJearW7qfvCmVp4wWiH2hgM-k3Z9sF-tBx58UFYH-2f\",\"name\":\"js\"},\"id\":1}",
+    "subscribe": "{\"method\":1,\"params\":{\"channel\":\"24133575\"},\"id\":2}",
+    "pings": [
+      "{\"method\":7,\"id\":3}",
+      "{\"method\":7,\"id\":4}",
+      "{\"method\":7,\"id\":5}",
+      "{\"method\":7,\"id\":6}",
+      "{\"method\":7,\"id\":7}",
+      "{\"method\":7,\"id\":8}"
+    ],
+    "frames": [
+      {
+        "line": 4,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 5,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 6,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2095",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "뭐지 귀신들렸나",
+            "sentAt": 1790536489000
+          }
+        ]
+      },
+      {
+        "line": 8,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 9,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2096",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "?",
+            "sentAt": 1790536505000
+          }
+        ]
+      },
+      {
+        "line": 10,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2097",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "그걸 왜 우리한테 짜증내긤?",
+            "sentAt": 1790536510000
+          }
+        ]
+      },
+      {
+        "line": 11,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2098",
+            "userId": "lixyu253",
+            "userName": "观众2",
+            "text": "아",
+            "sentAt": 1790536513000
+          }
+        ]
+      },
+      {
+        "line": 12,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2099",
+            "userId": "lixyu253",
+            "userName": "观众2",
+            "text": "이제 데이지같다",
+            "sentAt": 1790536516000
+          }
+        ]
+      },
+      {
+        "line": 13,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2100",
+            "userId": "lixyu253",
+            "userName": "观众2",
+            "text": "짜증내네",
+            "sentAt": 1790536525000
+          }
+        ]
+      },
+      {
+        "line": 14,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2101",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "ㅋㅋㅋㅋㅋㅋ",
+            "sentAt": 1790536528000
+          }
+        ]
+      },
+      {
+        "line": 16,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 17,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2102",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "개쳐귀여운련",
+            "sentAt": 1790536533000
+          }
+        ]
+      },
+      {
+        "line": 18,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2103",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "사랑스럽다",
+            "sentAt": 1790536537000
+          }
+        ]
+      },
+      {
+        "line": 19,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2104",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "[pandaS하트다발png]",
+            "sentAt": 1790536540000
+          }
+        ]
+      },
+      {
+        "line": 21,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 23,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 24,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2105",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "그래비리~",
+            "sentAt": 1790536579000
+          }
+        ]
+      },
+      {
+        "line": 25,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2106",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "그래븨리~",
+            "sentAt": 1790536583000
+          }
+        ]
+      },
+      {
+        "line": 26,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 27,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 28,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2109",
+            "userId": "iexpq486",
+            "userName": "观众3",
+            "text": "조동아리❤️fine⭐님 추천 감사합니다:)",
+            "sentAt": 1790536599000
+          }
+        ]
+      },
+      {
+        "line": 30,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "line": 31,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2110",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "파인형아~ ㅡㅡㄱ",
+            "sentAt": 1790536604000
+          }
+        ]
+      },
+      {
+        "line": 32,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2111",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "야 이디야",
+            "sentAt": 1790536614000
+          }
+        ]
+      },
+      {
+        "line": 33,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2112",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "안되겠다",
+            "sentAt": 1790536617000
+          }
+        ]
+      },
+      {
+        "line": 34,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2113",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "자는형아들",
+            "sentAt": 1790536618000
+          }
+        ]
+      },
+      {
+        "line": 35,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "type": "chat",
+            "id": "pandalive:24133575:2114",
+            "userId": "0173670687",
+            "userName": "观众1",
+            "text": "다 깨우자",
+            "sentAt": 1790536620000
+          }
+        ]
+      }
+    ]
+  }
+}

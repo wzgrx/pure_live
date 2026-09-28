@@ -28,6 +28,7 @@ export 'src/sites/kilakila.dart';
 export 'src/sites/kuaishou.dart';
 export 'src/sites/missevan.dart';
 export 'src/sites/niconico.dart';
+export 'src/sites/pandalive.dart';
 export 'src/sites/picarto.dart';
 export 'src/sites/showroom.dart';
 export 'src/sites/soop.dart';

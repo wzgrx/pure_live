@@ -15,6 +15,9 @@ dependencies:
   cached_network_image: ^4.0.2
   connectivity_plus: ^7.3.1
   crypto: ^3.0.7
+  # Material's adaptive widgets (cupertino_ui) name CupertinoIcons glyphs;
+  # without the font a release build warns and any such glyph is a box.
+  cupertino_icons: ^1.0.9
   dynamic_color: ^2.1.0
   ffi: ^2.2.0
   file_picker: ^13.1.0

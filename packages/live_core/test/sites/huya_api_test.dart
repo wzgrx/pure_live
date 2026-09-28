@@ -101,10 +101,37 @@ void main() {
           _expectParity(room.toJson(), legacy[index], reason: '$name[$index]');
           expect(room.onlineViewers, isEmpty, reason: 'totalCount is heat, never a head count (REG-HUYA-014)');
           expect(room.audienceMetricType, AudienceMetricType.popularity);
+          // M2.1 fields, outside the keys 3.x wrote: every recorded card has
+          // isRoomPay "0"; lists carry no start time.
+          expect((room.restriction, room.startedAt), (LiveRestriction.none, null), reason: '$name[$index]');
         }
         expect(result.hasMore, more, reason: 'totalPage, or an empty page past the end');
       });
     }
+
+    test('isRoomPay marks a paid card, still live; a card without the flag leaves it unknown (M2.1)', () {
+      final body = jsonEncode({
+        'status': 200,
+        'data': {
+          'totalPage': 1,
+          'datas': [
+            {'profileRoom': '1', 'isRoomPay': '1', 'roomPayTag': '付费'},
+            {'profileRoom': '2', 'isRoomPay': true},
+            {'profileRoom': '3', 'isRoomPay': '0'},
+            {'profileRoom': '4'},
+          ],
+        },
+      });
+      final rooms = HuyaApi.roomList(body, page: 1).rooms;
+      expect(rooms.map((room) => room.restriction), [
+        LiveRestriction.paid,
+        LiveRestriction.paid,
+        LiveRestriction.none,
+        null,
+      ]);
+      expect(rooms.every((room) => room.isLiveNow && room.followGroup == FollowGroup.live), isTrue);
+      expect(rooms.first.isRestricted, isTrue);
+    });
 
     test('a cover without a query gets the thumbnail style; a missing one stays empty', () {
       final body = jsonEncode({
@@ -139,6 +166,8 @@ void main() {
         expect(rooms.map((room) => room.roomId), legacy.map((room) => room['roomId']));
         for (final (index, room) in rooms.indexed) {
           _expectParity(room.toJson(), legacy[index], reason: '$name[$index]');
+          // The search docs tell neither (M2.1): unknown, not "none".
+          expect((room.restriction, room.startedAt), (null, null), reason: '$name[$index]');
         }
       });
     }
@@ -205,7 +234,11 @@ void main() {
   });
 
   group('S05/S06 room detail', () {
-    for (final name in ['S05-multicdn', 'S05-xingxiu', 'S05-ratearray']) {
+    for (final (name, startedAt) in [
+      ('S05-multicdn', DateTime.utc(2025, 12, 29, 20, 22, 10)),
+      ('S05-xingxiu', DateTime.utc(2026, 9, 26, 16, 2, 1)),
+      ('S05-ratearray', DateTime.utc(2026, 9, 27, 9, 35, 10)),
+    ]) {
       test('$name: room, qualities and lines match 3.x', () {
         final fixture = _sample(name);
         final requested = fixture.url.queryParameters['roomid']!;
@@ -216,6 +249,12 @@ void main() {
         expect(profile.room.roomId, requested);
         expect(profile.room.isLiveNow, isTrue);
         expect(profile.hasStream, isTrue);
+        // M2.1 fields, outside the keys 3.x wrote: liveData.startTime (Unix
+        // seconds) and the pay / secret flags (all clear here).
+        expect(profile.room.startedAt, startedAt);
+        expect(profile.room.restriction, LiveRestriction.none);
+        expect(profile.room.toJson(), containsPair('startedAt', startedAt.toIso8601String()));
+        expect(profile.replay, isNull);
 
         expect(
           [
@@ -280,9 +319,12 @@ void main() {
       expect(profile.lines, isEmpty);
       expect(profile.qualities, isEmpty);
       expect(profile.topSid, isPositive, reason: 'chTopId: offline rooms have no baseSteamInfoList');
+      // liveData.startTime is the last broadcast's; an offline room has no
+      // start time and no restriction (M2.1).
+      expect((profile.room.startedAt, profile.room.restriction, profile.replay), (null, null, null));
     });
 
-    test('S06-replay is a replay as 3.x refreshed it, on every entry point, without lines', () {
+    test('S06-replay is a replay as 3.x refreshed it, on every entry point, and plays its recording (3-1)', () {
       final fixture = _sample('S06-replay');
       final legacy = fixture.legacy as Map<String, dynamic>;
       final profile = HuyaApi.profile(fixture.body, requestedId: '102411', status: fixture.status);
@@ -301,7 +343,99 @@ void main() {
       expect(profile.room.isLiveNow, isFalse);
       expect(profile.hasStream, isFalse);
       expect(profile.lines, isEmpty);
-      expect(profile.qualities, isEmpty);
+      // 3-1: liveData.hls is the recording (3.x never played it). The room
+      // stays in the replay group, playable, without a start time.
+      const recording =
+          'https://videotx-platform.cdn.huya.com/vhuya/danmu/liverecord/679257140/'
+          '7bcaab29-46d5-4127-945f-4110189e671f.m3u8?bitrate=0&client=81&definition=350&pid=679257140'
+          '&scene=livereplay&vid=1126494362&hyvid=1126494362&hyauid=679257140&hyroomid=0&hyratio=0'
+          '&hyscence=livereplay&appid=66&domainid=41&srckey=YfEmSCSkFIYrUpW8CZY5Ig%3D%3D&';
+      expect(profile.replay!.url, recording);
+      expect(profile.replay!.videoId, 1126494362);
+      expect(profile.replay.toString(), 'HuyaReplay(1126494362)', reason: 'no srckey in diagnostics');
+      expect(profile.room.restriction, LiveRestriction.none);
+      expect(profile.room.followGroup, FollowGroup.replay);
+      expect(profile.room.startedAt, isNull);
+      expect(profile.qualities.map((quality) => (quality.quality, quality.id, quality.data)), [
+        ('360P', '350', recording),
+      ], reason: 'the definition profileRoom names, until getMomentContent lists the others');
+    });
+
+    test('a replay without a recording is unplayable and grouped with offline rooms (3-1, M2.1)', () {
+      final data = (jsonDecode(_sample('S06-replay').body) as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+      final live = data['liveData'] as Map<String, dynamic>;
+      String wrapped() => jsonEncode({'status': 200, 'message': '', 'data': data});
+
+      live['hls'] = null;
+      final fromHlsUrl = HuyaApi.profile(wrapped(), requestedId: '102411');
+      expect(fromHlsUrl.replay!.videoId, 1126494362, reason: 'hlsUrl when hls is missing');
+
+      for (final (hlsUrl, why) in [
+        (null, 'no recording'),
+        ('', 'blank'),
+        ('https://videotx-platform.cdn.huya.com/vhuya/x.mp4', 'not a playlist'),
+        ('rtmp://videotx-platform.cdn.huya.com/x.m3u8', 'not http'),
+      ]) {
+        live['hlsUrl'] = hlsUrl;
+        final profile = HuyaApi.profile(wrapped(), requestedId: '102411');
+        expect(profile.room.effectiveLiveStatus, LiveStatus.replay, reason: why);
+        expect(profile.room.restriction, LiveRestriction.unplayable, reason: why);
+        expect(profile.room.followGroup, FollowGroup.offline, reason: why);
+        expect(profile.room.isPlayableNow, isTrue, reason: 'entry explains why it cannot play (M2.1)');
+        expect(profile.replay, isNull, reason: why);
+        expect(profile.qualities, isEmpty, reason: why);
+      }
+    });
+
+    test('a live room: isRoomPay is paid, isSecret a password, both paid; no flag is unknown (M2.1)', () {
+      Map<String, dynamic> liveData() =>
+          (jsonDecode(_sample('S05-ratearray').body) as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+      String wrapped(Map<String, dynamic> data) => jsonEncode({'status': 200, 'message': '', 'data': data});
+      LiveRestriction? restriction(void Function(Map<String, dynamic> data, Map<String, dynamic> live) edit) {
+        final data = liveData();
+        edit(data, data['liveData'] as Map<String, dynamic>);
+        return HuyaApi.profile(wrapped(data), requestedId: '30925595').room.restriction;
+      }
+
+      expect(restriction((data, live) => data['isRoomPay'] = true), LiveRestriction.paid);
+      expect(restriction((data, live) => live['isRoomPay'] = '1'), LiveRestriction.paid);
+      expect(restriction((data, live) => data['isPayRoom'] = 1), LiveRestriction.paid);
+      expect(restriction((data, live) => live['isSecret'] = 1), LiveRestriction.password);
+      expect(
+        restriction((data, live) {
+          live['isSecret'] = 1;
+          data['isRoomPay'] = true;
+        }),
+        LiveRestriction.paid,
+        reason: 'the web player: isSecret && !isPayRoom',
+      );
+      expect(
+        restriction((data, live) {
+          data.remove('isRoomPay');
+          live.remove('isSecret');
+        }),
+        isNull,
+      );
+      final paid = liveData()..['isRoomPay'] = true;
+      final room = HuyaApi.profile(wrapped(paid), requestedId: '30925595').room;
+      expect((room.isLiveNow, room.followGroup, room.isRestricted), (true, FollowGroup.live, true));
+    });
+
+    test('startedAt: liveData.startTime seconds, a numeric string too; 0 or missing is none (M2.1)', () {
+      DateTime? startedAt(Object? value) {
+        final data =
+            (jsonDecode(_sample('S05-ratearray').body) as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+        (data['liveData'] as Map<String, dynamic>)['startTime'] = value;
+        return HuyaApi.profile(
+          jsonEncode({'status': 200, 'message': '', 'data': data}),
+          requestedId: '30925595',
+        ).room.startedAt;
+      }
+
+      expect(startedAt('1790501710'), DateTime.utc(2026, 9, 27, 9, 35, 10));
+      expect(startedAt(0), isNull);
+      expect(startedAt(null), isNull);
+      expect(startedAt('soon'), isNull);
     });
 
     test('S06-notfound and S06-alias (status 422) are NotFound (3.x: an error room or FormatException)', () {
@@ -411,6 +545,75 @@ void main() {
     test('no rate list gives one source quality, never an invented transcode (REG-HUYA-013)', () {
       final qualities = HuyaApi.qualities(data());
       expect(qualities.map((quality) => (quality.quality, quality.selectionId)), [('原画', 0)]);
+    });
+  });
+
+  group('replay recordings (3-1)', () {
+    test('S15-vod: the source as 原画, then 720P and 360P; ids are the definitions, data the https playlists', () {
+      final fixture = _sample('S15-vod');
+      final qualities = HuyaApi.replayQualities(fixture.body, status: fixture.status);
+      expect(qualities.map((quality) => (quality.quality, quality.id)), [
+        ('原画', 'yuanhua'),
+        ('720P', '1300'),
+        ('360P', '350'),
+      ]);
+      expect(qualities.map((quality) => quality.sort), [HuyaApi.sourceRank, 720, 360]);
+      for (final quality in qualities) {
+        final url = Uri.parse(quality.data! as String);
+        expect((url.scheme, url.host), ('https', 'videotx-platform.cdn.huya.com'));
+        expect(url.path, endsWith('.m3u8'));
+        expect(url.queryParameters['vid'], '1126494362');
+      }
+      // The 360P definition is the recording profileRoom names (S06-replay):
+      // same file and id, so the fallback quality and the full list agree.
+      final replay = HuyaApi.profile(_sample('S06-replay').body, requestedId: '102411').replay!;
+      expect(Uri.parse(qualities.last.data! as String).path, Uri.parse(replay.url).path);
+      expect(HuyaApi.replayQuality(replay.url).selectionId, qualities.last.selectionId);
+    });
+
+    test('S15-vod-missing: an unknown video lists nothing; a status other than 200 is ApiChanged', () {
+      final fixture = _sample('S15-vod-missing');
+      expect(HuyaApi.replayQualities(fixture.body, status: fixture.status), isEmpty);
+      expect(() => HuyaApi.replayQualities('{"status":404,"msg":"x"}'), throwsA(isA<ApiChanged>()));
+      expect(() => HuyaApi.replayQualities('', status: 502), throwsA(isA<NetworkFailure>()));
+    });
+
+    test('definitions: blank or duplicated ones dropped; a definition without defName takes the known name', () {
+      String entry(String definition, {String? name, int height = 0}) => jsonEncode({
+        'defName': ?name,
+        'height': '$height',
+        'm3u8': 'http://videotx-platform.cdn.huya.com/r/$definition.m3u8?definition=$definition&vid=7',
+      });
+      final body =
+          '{"status":200,"data":{"moment":{"videoInfo":{"definitions":['
+          '${entry('350', height: 360)},${entry('1300', name: '720P', height: 720)},'
+          '${entry('350', name: 'again', height: 360)},{"m3u8":""},{"url":"https://x.test/a.flv"},'
+          '${entry('9000', name: '2K', height: 1440)}]}}}}';
+      final qualities = HuyaApi.replayQualities(body);
+      expect(qualities.map((quality) => (quality.quality, quality.id)), [
+        ('2K', '9000'),
+        ('720P', '1300'),
+        ('360P', '350'),
+      ]);
+    });
+
+    test('recording URLs: http(s) .m3u8 only; http on huya.com becomes https; other hosts are kept', () {
+      expect(
+        HuyaApi.replayUrl(' http://videoal-platform.cdn.huya.com/a/b.m3u8?definition=350&srckey=k%3D& '),
+        'https://videoal-platform.cdn.huya.com/a/b.m3u8?definition=350&srckey=k%3D&',
+      );
+      expect(HuyaApi.replayUrl('http://vod.example/b.M3U8'), 'http://vod.example/b.M3U8');
+      for (final value in [null, 350, '', 'https://x.huya.com/a.flv', 'ftp://x.huya.com/a.m3u8', '/a.m3u8']) {
+        expect(HuyaApi.replayUrl(value), isNull, reason: '$value');
+      }
+    });
+
+    test('the one quality of a recording: named by its definition, else 默认 with the label as its identity', () {
+      final source = HuyaApi.replayQuality('https://v.huya.com/a.m3u8?definition=yuanhua');
+      expect((source.quality, source.id, source.sort), ('原画', 'yuanhua', HuyaApi.sourceRank));
+      final unknown = HuyaApi.replayQuality('https://v.huya.com/a.m3u8');
+      expect((unknown.quality, unknown.id, unknown.selectionId), ('默认', null, '默认'));
+      expect(HuyaApi.replayQuality('https://v.huya.com/a.m3u8?definition=1300').quality, '720P');
     });
   });
 

@@ -1,0 +1,99 @@
+{
+  "status": 200,
+  "msg": "",
+  "data": {
+    "moment": {
+      "momentAttachment": [],
+      "momId": "7687500276440986265",
+      "type": 1,
+      "uid": 679257140,
+      "nickName": "神超",
+      "iconUrl": "https://huyaimg.msstatic.com/avatar/1072/bd/8c8dc2071fca5f917cc84372eed4cb_180_135.jpg?1585727771",
+      "title": "TPC跨区对抗赛决赛OB一整天",
+      "content": "",
+      "favorCount": 21,
+      "commentCount": 0,
+      "shareCount": 5,
+      "comment": [],
+      "cTime": 1789885637,
+      "status": 0,
+      "opt": 0,
+      "videoInfo": {
+        "uid": 679257140,
+        "avatarUrl": "https://huyaimg.msstatic.com/avatar/1072/bd/8c8dc2071fca5f917cc84372eed4cb_180_135.jpg?1585727771",
+        "nickName": "神超",
+        "vid": 1126494362,
+        "videoTitle": "TPC跨区对抗赛决赛OB一整天",
+        "videoCover": "https://v-huya-img2.msstatic.com/liveReplayClip/2638/40bacd1e-b3a1-478c-8567-fb310641fe27.jpg?x-oss-process=style/640x360",
+        "videoPlayNum": 2059,
+        "videoCommentNum": 0,
+        "videoDuration": "08:41:26",
+        "videoUrl": "",
+        "videoUploadTime": "2026-09-20 14:06:26",
+        "videoChannel": "vhuyalol",
+        "category": "英雄联盟",
+        "definitions": [
+          {
+            "size": "20",
+            "width": "1920",
+            "height": "1080",
+            "definition": "4000",
+            "url": "http://videotx-platform.cdn.huya.com/vhuya/danmu/liverecord/679257140/7f8b3538-07fd-46d6-90d8-0223cdfe9096.m3u8?bitrate=0&client=81&definition=yuanhua&pid=679257140&scene=vod&vid=1126494362&hyvid=1126494362&hyauid=679257140&hyroomid=0&hyratio=0&hyscence=vod&appid=66&domainid=41&srckey=YfEmSCSkFIYrUpW8CZY5Ig%3D%3D&",
+            "m3u8": "http://videotx-platform.cdn.huya.com/vhuya/danmu/liverecord/679257140/7f8b3538-07fd-46d6-90d8-0223cdfe9096.m3u8?bitrate=0&client=81&definition=yuanhua&pid=679257140&scene=vod&vid=1126494362&hyvid=1126494362&hyauid=679257140&hyroomid=0&hyratio=0&hyscence=vod&appid=66&domainid=41&srckey=YfEmSCSkFIYrUpW8CZY5Ig%3D%3D&",
+            "defName": "1080P"
+          },
+          {
+            "size": "20",
+            "width": "1280",
+            "height": "720",
+            "definition": "1300",
+            "url": "http://videotx-platform.cdn.huya.com/vhuya/danmu/liverecord/679257140/ab8e83af-e694-414b-a803-e71632d07607.m3u8?bitrate=0&client=81&definition=1300&pid=679257140&scene=vod&vid=1126494362&hyvid=1126494362&hyauid=679257140&hyroomid=0&hyratio=0&hyscence=vod&appid=66&domainid=41&srckey=YfEmSCSkFIYrUpW8CZY5Ig%3D%3D&",
+            "m3u8": "http://videotx-platform.cdn.huya.com/vhuya/danmu/liverecord/679257140/ab8e83af-e694-414b-a803-e71632d07607.m3u8?bitrate=0&client=81&definition=1300&pid=679257140&scene=vod&vid=1126494362&hyvid=1126494362&hyauid=679257140&hyroomid=0&hyratio=0&hyscence=vod&appid=66&domainid=41&srckey=YfEmSCSkFIYrUpW8CZY5Ig%3D%3D&",
+            "defName": "720P"
+          },
+          {
+            "size": "20",
+            "width": "640",
+            "height": "360",
+            "definition": "350",
+            "url": "http://videotx-platform.cdn.huya.com/vhuya/danmu/liverecord/679257140/7bcaab29-46d5-4127-945f-4110189e671f.m3u8?bitrate=0&client=81&definition=350&pid=679257140&scene=vod&vid=1126494362&hyvid=1126494362&hyauid=679257140&hyroomid=0&hyratio=0&hyscence=vod&appid=66&domainid=41&srckey=YfEmSCSkFIYrUpW8CZY5Ig%3D%3D&",
+            "m3u8": "http://videotx-platform.cdn.huya.com/vhuya/danmu/liverecord/679257140/7bcaab29-46d5-4127-945f-4110189e671f.m3u8?bitrate=0&client=81&definition=350&pid=679257140&scene=vod&vid=1126494362&hyvid=1126494362&hyauid=679257140&hyroomid=0&hyratio=0&hyscence=vod&appid=66&domainid=41&srckey=YfEmSCSkFIYrUpW8CZY5Ig%3D%3D&",
+            "defName": "360P"
+          }
+        ],
+        "videoRecommend": 0,
+        "videoDot": true,
+        "videoRank": 0,
+        "videoHasRanked": true,
+        "traceId": "",
+        "actorUid": 679257140,
+        "actorNick": "神超",
+        "actorAvatarUrl": "https://huyaimg.msstatic.com/avatar/1072/bd/8c8dc2071fca5f917cc84372eed4cb_180_135.jpg?1585727771",
+        "extPlayTimes": 0,
+        "videoBigCover": "https://v-huya-img2.msstatic.com/liveReplayClip/2638/40bacd1e-b3a1-478c-8567-fb310641fe27.jpg?x-oss-process=style/640x360",
+        "commentCount": 0,
+        "tags": [],
+        "videoDirection": 0,
+        "briefIntroduction": "",
+        "videoType": 4,
+        "favorCount": 0,
+        "momId": "0"
+      },
+      "keyWord": [],
+      "hasDraw": 0,
+      "coverUrl": [],
+      "htmlDoc": "",
+      "tags": [],
+      "belongPlate": [],
+      "browseCount": 0,
+      "cardType": 0,
+      "iStepOnCount": 0,
+      "iUserOpt": 0
+    },
+    "vote": {
+      "voteId": "",
+      "voteTitle": "",
+      "voteOption": []
+    }
+  }
+}

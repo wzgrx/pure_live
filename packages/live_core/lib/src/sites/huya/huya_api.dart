@@ -186,9 +186,30 @@ final class HuyaUserId {
   String toString() => 'HuyaUserId($huyaUa)';
 }
 
+/// The recording a replay room plays (`liveData.hls`, upgrade 3-1): a VOD
+/// playlist that needs no signature and does not expire, and the video id
+/// whose other definitions `moment/getMomentContent` lists.
+@immutable
+final class HuyaReplay {
+  /// Creates the recording.
+  const new({required this.url, this.videoId});
+
+  /// The https playlist `profileRoom` names (the 360P definition when
+  /// recorded).
+  final String url;
+
+  /// The recording's `vid`; null when the playlist does not carry one.
+  final int? videoId;
+
+  /// Diagnostics without the playlist's `srckey`.
+  @override
+  String toString() => 'HuyaReplay(${videoId ?? Uri.tryParse(url)?.host ?? 'unknown'})';
+}
+
 /// A `profileRoom` answer: the room as the user asked for it, the ids
 /// streams and danmaku need, and, for a live room, its qualities and (with
-/// a `stream`) its lines.
+/// a `stream`) its lines. A replay with a recording has `replay` and that
+/// recording's one quality.
 typedef HuyaProfile = ({
   LiveRoom room,
   int presenterUid,
@@ -197,6 +218,7 @@ typedef HuyaProfile = ({
   bool hasStream,
   List<HuyaLine> lines,
   List<LivePlayQuality> qualities,
+  HuyaReplay? replay,
 });
 
 /// Pure parsing, signing and Tars payloads of Huya (3.x's `HuyaSite`,
@@ -239,6 +261,17 @@ abstract final class HuyaApi {
   /// Rank of the source quality (bit rate 0), above every transcode.
   static const int sourceRank = 1 << 30;
 
+  /// The `definition` of a replay's source recording.
+  static const String replaySourceDefinition = 'yuanhua';
+
+  /// Names of the replay definitions seen in `getMomentContent` (S15-vod),
+  /// for the one quality `profileRoom` names when that list is not read.
+  static const Map<String, String> replayDefinitionNames = {
+    replaySourceDefinition: '原画',
+    '1300': '720P',
+    '350': '360P',
+  };
+
   // Catalog -------------------------------------------------------------------
 
   /// `bussLive?bussType=` → the areas of one top-level category in server
@@ -267,7 +300,8 @@ abstract final class HuyaApi {
   /// `getLiveListByPage` (recommendations without `gameId`, an area with
   /// it): every listed room is live; the audience is popularity. More
   /// pages follow until `totalPage` or an empty `datas` (past the last page
-  /// `totalPage` reads 1).
+  /// `totalPage` reads 1). `isRoomPay` marks a paid room (M2.1); the list
+  /// has no start time.
   static ({List<LiveRoom> rooms, bool hasMore}) roomList(String body, {required int page, int status = 200}) {
     final root = _envelope(body, status: status, what: 'getLiveListByPage');
     final data = _object(root['data']);
@@ -288,6 +322,11 @@ abstract final class HuyaApi {
             popularity: _count(room['totalCount']),
             audienceMetricType: AudienceMetricType.popularity,
             liveStatus: LiveStatus.live,
+            restriction: switch (_flag(room['isRoomPay'])) {
+              true => LiveRestriction.paid,
+              false => LiveRestriction.none,
+              null => null,
+            },
           ),
     ];
     final totalPage = jsonInt(data?['totalPage']) ?? 0;
@@ -303,7 +342,8 @@ abstract final class HuyaApi {
   /// A later page repeats every earlier result first (`start=20&rows=20`
   /// answers 40 docs): when there are more docs than [rows], the first
   /// [start] are skipped, and a room already seen in the response is not
-  /// repeated. 3.x showed all of them.
+  /// repeated. 3.x showed all of them. The docs tell neither the start time
+  /// nor restrictions, so both stay unknown (null).
   static List<LiveRoom> searchRooms(String body, {required int start, required int rows, int status = 200}) {
     final response = _object(_json(body, status: status, what: 'getSearchContent')['response']);
     if (response == null) throw ApiChanged(_site, 'getSearchContent: no response (${_snippet(body)})');
@@ -375,14 +415,21 @@ abstract final class HuyaApi {
   /// - `status` 422 (a missing room, or a letter alias) is `NotFound`; any
   ///   other non-200 status or a `data` that is not an object is
   ///   `ApiChanged`.
-  /// - `liveStatus` `ON` is live; `REPLAY` is a replay, shown as 3.x did,
-  ///   but without a stream this app can play (`liveData.hls` is a recorded
-  ///   VOD 3.x never played); `OFF`, `OFFLINE` and `CLOSED` are offline;
-  ///   anything else is `ApiChanged`, never offline.
+  /// - `liveStatus` `ON` is live; `REPLAY` is a replay, shown as 3.x did;
+  ///   `OFF`, `OFFLINE` and `CLOSED` are offline; anything else is
+  ///   `ApiChanged`, never offline.
+  /// - A replay plays its recording (`liveData.hls`, else `hlsUrl`: an
+  ///   `.m3u8` VOD 3.x never played, upgrade 3-1) with restriction `none`;
+  ///   one without a recording is `unplayable` (grouped with offline rooms).
+  /// - A live room's restriction as the web player reads it: `isRoomPay`
+  ///   (the page's `isPayRoom`) is `paid`; else `liveData.isSecret` 1 is
+  ///   `password` (a secret room); else `none`. Its `startedAt` is
+  ///   `liveData.startTime` (Unix seconds). An offline room has neither.
   /// - Every count is popularity: `totalCount`, else `userCount`.
   /// - topSid / subSid: the first positive `lChannelId` / `lSubChannelId`
   ///   of `baseSteamInfoList`, else `chTopId` / `subChId`.
-  /// - Qualities only for a live room; lines only when it has a `stream`.
+  /// - Qualities for a live room, or the recording's one quality; lines
+  ///   only when a live room has a `stream`.
   static HuyaProfile profile(String body, {required String requestedId, int status = 200}) {
     final root = _json(body, status: status, what: 'profileRoom');
     final code = jsonInt(root['status']);
@@ -406,7 +453,10 @@ abstract final class HuyaApi {
     final presenterUid = jsonInt(info['uid']) ?? jsonInt(live['uid']) ?? 0;
     final popularity = _count(live['totalCount']).ifEmpty(() => _count(live['userCount']));
     final id = requestedId.trim();
-    final hasStream = state == LiveStatus.live && stream != null;
+    final isLive = state == LiveStatus.live;
+    final hasStream = isLive && stream != null;
+    final replay = state == LiveStatus.replay ? _replayOf(live) : null;
+    final startTime = isLive ? _positive(live['startTime']) : null;
     return (
       room: LiveRoom(
         roomId: id,
@@ -423,14 +473,106 @@ abstract final class HuyaApi {
         introduction: _text(live['introduction']),
         notice: _text(data['welcomeText']),
         link: '$_web/$id',
+        startedAt: startTime == null ? null : DateTime.fromMillisecondsSinceEpoch(startTime * 1000, isUtc: true),
+        restriction: switch (state) {
+          LiveStatus.live => _liveRestriction(data, live),
+          LiveStatus.replay => replay == null ? LiveRestriction.unplayable : LiveRestriction.none,
+          _ => null,
+        },
       ),
       presenterUid: presenterUid,
       topSid: channel('lChannelId', 'chTopId'),
       subSid: channel('lSubChannelId', 'subChId'),
       hasStream: hasStream,
       lines: hasStream ? _lines(stream, bases, jsonInt(info['uid'])) : const [],
-      qualities: state == LiveStatus.live ? qualities(data) : const [],
+      qualities: isLive
+          ? qualities(data)
+          : replay != null
+          ? [replayQuality(replay.url)]
+          : const [],
+      replay: replay,
     );
+  }
+
+  /// A live room's restriction, read as the web player does: a paid room
+  /// (`isRoomPay` of `data` or `liveData`, the page's `isPayRoom`) plays
+  /// only for buyers; a secret room (`isSecret` 1 and not paid) asks for its
+  /// password and the player does not open its stream. Null when the answer
+  /// has none of the flags.
+  static LiveRestriction? _liveRestriction(Map<String, dynamic> data, Map<String, dynamic> live) {
+    final paid = [data['isRoomPay'], live['isRoomPay'], data['isPayRoom']].map(_flag).nonNulls;
+    final secret = [live['isSecret'], data['isSecret']].map(_flag).nonNulls;
+    if (paid.isEmpty && secret.isEmpty) return null;
+    if (paid.contains(true)) return LiveRestriction.paid;
+    return secret.contains(true) ? LiveRestriction.password : LiveRestriction.none;
+  }
+
+  /// The recording of a replay: `liveData.hls`, else `hlsUrl`, when it is
+  /// an http(s) `.m3u8`; its `vid` names the video.
+  static HuyaReplay? _replayOf(Map<String, dynamic> live) {
+    for (final key in const ['hls', 'hlsUrl']) {
+      final url = replayUrl(live[key]);
+      if (url == null) continue;
+      return HuyaReplay(url: url, videoId: _positive(_parseMap(Uri.parse(url).query)['vid']));
+    }
+    return null;
+  }
+
+  /// A recording playlist: an http(s) `.m3u8` URL, `http://` on huya.com
+  /// upgraded to https (the VOD CDN serves both); null for anything else,
+  /// so a live quality's bit rate is never taken for a recording.
+  static String? replayUrl(Object? value) {
+    if (value is! String) return null;
+    final uri = jsonUrl(value);
+    if (uri == null || !uri.path.toLowerCase().endsWith('.m3u8')) return null;
+    return secureBase(value.trim());
+  }
+
+  /// The one quality of the recording at [url], named by its `definition`
+  /// ([replayDefinitionNames]; `默认` when unknown). Its id is the
+  /// definition, its data the URL.
+  static LivePlayQuality replayQuality(String url) {
+    final definition = jsonString(_parseMap(Uri.tryParse(url)?.query ?? '')['definition']);
+    return LivePlayQuality(
+      quality: replayDefinitionNames[definition] ?? '默认',
+      id: definition,
+      data: url,
+      sort: definition == replaySourceDefinition ? sourceRank : 0,
+    );
+  }
+
+  /// `moment/getMomentContent?videoId=`: every definition of a replay's
+  /// recording (S15-vod: 1080P source, 720P, 360P, all H.264 HLS), the
+  /// source first, then by height. The source (`definition=yuanhua` in its
+  /// URL) is named `原画` (the unified quality naming); the others keep the
+  /// platform's `defName`. Ids are the URL's `definition` (`yuanhua`,
+  /// `1300`, `350`), the same as [replayQuality]'s; data is the https
+  /// playlist. A missing video answers an empty list (S15-vod-missing).
+  static List<LivePlayQuality> replayQualities(String body, {int status = 200}) {
+    final root = _envelope(body, status: status, what: 'getMomentContent');
+    final info = _object(_object(_object(root['data'])?['moment'])?['videoInfo']);
+    final seen = <String>{};
+    final qualities = <LivePlayQuality>[];
+    for (final raw in _list(info?['definitions'])) {
+      final item = _object(raw);
+      final url = replayUrl(item?['m3u8']) ?? replayUrl(item?['url']);
+      if (item == null || url == null) continue;
+      final fallback = replayQuality(url);
+      if (!seen.add('${fallback.selectionId}')) continue;
+      final source = fallback.sort == sourceRank;
+      final name = jsonString(item['defName']);
+      qualities.add(
+        LivePlayQuality(
+          quality: source || name == null
+              ? fallback.quality
+              : LiveQualityLabel.normalize(platform: _site, rawLabel: name, id: fallback.id),
+          id: fallback.id,
+          data: url,
+          sort: source ? sourceRank : max(jsonInt(item['height']) ?? 0, 0),
+        ),
+      );
+    }
+    return qualities..sort((a, b) => b.sort.compareTo(a.sort));
   }
 
   /// Lines: `stream.flv.multiLine` then `stream.hls.multiLine`, server order,
@@ -1053,6 +1195,19 @@ String? _roomId(Object? value) {
 int? _positive(Object? value) => switch (jsonInt(value)) {
   final int number when number > 0 => number,
   _ => null,
+};
+
+/// A 0/1 or boolean flag (`isRoomPay` is `false` in `profileRoom` and `"0"`
+/// in lists); null when absent or anything else.
+bool? _flag(Object? value) => switch (value) {
+  final bool flag => flag,
+  'true' => true,
+  'false' => false,
+  _ => switch (jsonInt(value)) {
+    1 => true,
+    0 => false,
+    _ => null,
+  },
 };
 
 /// Text as 3.x wrote it (not trimmed), HTML entities decoded; '' for null.

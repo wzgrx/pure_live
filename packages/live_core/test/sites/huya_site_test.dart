@@ -98,6 +98,31 @@ ReplaySample _patched(
   );
 }
 
+/// [sample] with its `data` object changed by [edit].
+ReplaySample _edited(ReplaySample sample, void Function(Map<String, dynamic> data) edit) {
+  final body = jsonDecode(utf8.decode(sample.bytes)) as Map<String, dynamic>;
+  edit(body['data'] as Map<String, dynamic>);
+  return ReplaySample(
+    method: sample.method,
+    url: sample.url,
+    status: sample.status,
+    headers: sample.headers,
+    bytes: utf8.encode(jsonEncode(body)),
+  );
+}
+
+/// A replay sample whose recording names video [videoId] (`vid`, not
+/// `hyvid`).
+ReplaySample _withReplayVideo(ReplaySample sample, String videoId) => _edited(sample, (data) {
+  final live = data['liveData'] as Map<String, dynamic>;
+  for (final key in ['hls', 'hlsUrl']) {
+    live[key] = (live[key] as String).replaceFirstMapped(
+      RegExp(r'([?&])vid=\d+'),
+      (match) => '${match[1]}vid=$videoId',
+    );
+  }
+});
+
 /// Replaces the scrubbed `fm` with the synthetic web template.
 String _withTemplate(String antiCode) => antiCode.replaceFirst(RegExp('fm=[^&]*'), 'fm=${_fm(_webTemplate)}');
 
@@ -368,35 +393,109 @@ void main() {
       final refreshed = await site.getRoomDetailForRefresh(roomId: '660000');
       expect((refreshed.data, refreshed.danmakuData), (null, null));
       expect(refreshed.isLiveNow, isTrue);
+      // M2.1: the follow refresh carries the start time and the restriction.
+      expect(refreshed.startedAt, DateTime.utc(2025, 12, 29, 20, 22, 10));
+      expect(refreshed.restriction, LiveRestriction.none);
       final recording = await site.getRoomDetailForRecording(roomId: '660000');
       expect(recording.data, isA<HuyaRoomData>());
       expect(await site.getLiveStatus(roomId: '660000'), isTrue);
     });
 
     test(
-      'offline and replay rooms keep their state on every entry point, without stream data (REG-HUYA-015)',
+      'offline and replay rooms keep their state on every entry point; only a replay carries its recording',
       () async {
         final site = _site(_Http([_sample('S06-off'), _sample('S06-replay')]));
         for (final (id, status) in [('441195', LiveStatus.offline), ('102411', LiveStatus.replay)]) {
-          for (final room in [
-            await site.getRoomDetail(roomId: id),
-            await site.getRoomDetailForRefresh(roomId: id),
-            // 3.x's recording detail threw FormatException for a replay.
-            await site.getRoomDetailForRecording(roomId: id),
-          ]) {
+          final entry = await site.getRoomDetail(roomId: id);
+          final refresh = await site.getRoomDetailForRefresh(roomId: id);
+          // 3.x's recording detail threw FormatException for a replay.
+          final recording = await site.getRoomDetailForRecording(roomId: id);
+          for (final room in [entry, refresh, recording]) {
             expect(room.effectiveLiveStatus, status, reason: id);
-            expect((room.data, room.danmakuData), (null, null));
+            expect(room.danmakuData, isNull);
           }
-          expect(await site.getLiveStatus(roomId: id), isFalse);
+          expect(refresh.data, isNull);
+          if (status == LiveStatus.offline) {
+            expect((entry.data, recording.data), (null, null), reason: 'REG-HUYA-015');
+          } else {
+            // 3-1: the replay's recording, so opening it needs no second profileRoom.
+            for (final room in [entry, recording]) {
+              expect((room.data! as HuyaRoomData).replay!.videoId, 1126494362);
+              expect((room.data! as HuyaRoomData).lines, isEmpty);
+            }
+          }
+          expect(await site.getLiveStatus(roomId: id), isFalse, reason: 'a replay is not live (not recorded)');
         }
       },
     );
 
-    test('a replay room has no stream: qualities and lines are StreamUnavailable', () async {
-      final http = _Http([_sample('S06-replay')]);
+    test('a replay plays its recording: getMomentContent definitions, one unsigned HLS line (3-1)', () async {
+      final http = _Http([_sample('S06-replay'), _sample('S15-vod')]);
       final site = _site(http);
       final room = await site.getRoomDetail(roomId: '102411');
-      expect(room.isRecord, isTrue);
+      expect((room.isRecord, room.restriction, room.followGroup), (true, LiveRestriction.none, FollowGroup.replay));
+      final qualities = await site.getPlayQualities(detail: room);
+      expect(qualities.map((quality) => quality.quality), ['原画', '720P', '360P']);
+      final vod = http.on('liveapi.huya.com').single;
+      expect(vod.url.path, '/moment/getMomentContent');
+      expect(vod.url.queryParameters, {'videoId': '1126494362'});
+      expect(vod.headers, {
+        'user-agent': HuyaApi.userAgent,
+        'origin': 'https://www.huya.com',
+        'referer': 'https://www.huya.com/',
+      });
+
+      final resolution = await site.resolvePlayUrls(detail: room, quality: qualities.first);
+      final line = resolution.lines.single;
+      expect(line.url, qualities.first.data);
+      expect(Uri.parse(line.url).queryParameters['definition'], 'yuanhua');
+      expect((line.format, line.lineId, line.lease, line.codec), (StreamFormat.hls, 'replay|hls', null, null));
+      expect(line.headers, HuyaApi.mediaHeaders('102411'), reason: 'no login cookie to the VOD CDN');
+      expect(resolution.appliedQualityData, 'yuanhua');
+      expect(site.getPlayUrlInvalidAt(line.url), isNull, reason: 'the recording does not expire');
+      expect(site.getPlayUrlRefreshAt(line.url), isNull);
+
+      final before = http.requests.length;
+      final recovered = await site.resolvePlayUrlsForRecovery(detail: room, quality: qualities[1]);
+      expect(recovered.lines.single.url, qualities[1].data);
+      expect(recovered.appliedQualityData, '1300');
+      expect(http.requests, hasLength(before), reason: 'a static recording is reopened without a request');
+      expect((await site.resolvePlayUrlAtRaw(detail: room, quality: qualities.last, lineIndex: 0)).urls, [
+        qualities.last.data,
+      ]);
+      expect((await site.resolvePlayUrlAtRaw(detail: room, quality: qualities.last, lineIndex: 1)).urls, isEmpty);
+      expect(http.on('wup.huya.com'), isEmpty, reason: 'nothing to sign');
+      expect(http.on('mp.huya.com'), hasLength(1));
+    });
+
+    test('the recording profileRoom names when getMomentContent fails or lists nothing (3-1)', () async {
+      for (final vod in [
+        _sample('S15-vod-missing'),
+        _synthetic('https://liveapi.huya.com/moment/getMomentContent?videoId=1126494362', '', status: 502),
+      ]) {
+        final missing = vod.url.queryParameters['videoId']!;
+        final http = _Http([vod], profiles: [_withReplayVideo(_sample('S06-replay'), missing)]);
+        final site = _site(http);
+        final room = await site.getRoomDetail(roomId: '102411');
+        final quality = (await site.getPlayQualities(detail: room)).single;
+        expect((quality.quality, quality.id), ('360P', '350'));
+        final line = (await site.resolvePlayUrls(detail: room, quality: quality)).lines.single;
+        expect(line.url, (room.data! as HuyaRoomData).replay!.url);
+        expect(http.on('liveapi.huya.com'), hasLength(1));
+      }
+    });
+
+    test('a replay without a recording is StreamUnavailable everywhere; no request beyond profileRoom', () async {
+      final bare = _edited(
+        _sample('S06-replay'),
+        (data) => (data['liveData'] as Map<String, dynamic>)
+          ..remove('hls')
+          ..remove('hlsUrl'),
+      );
+      final http = _Http(const [], profiles: [bare, bare, bare, bare]);
+      final site = _site(http);
+      final room = await site.getRoomDetail(roomId: '102411');
+      expect((room.restriction, room.followGroup, room.data), (LiveRestriction.unplayable, FollowGroup.offline, null));
       await expectLater(site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
       const quality = LivePlayQuality(quality: '原画', id: 0, data: 0);
       await expectLater(site.resolvePlayUrls(detail: room, quality: quality), throwsA(isA<StreamUnavailable>()));
@@ -404,11 +503,48 @@ void main() {
         site.resolvePlayUrlsForRecovery(detail: room, quality: quality),
         throwsA(isA<StreamUnavailable>()),
       );
+      expect(http.on('mp.huya.com'), hasLength(4));
+      expect(http.on('wup.huya.com'), isEmpty);
+    });
+
+    test('a paid or secret live room shows as live but its streams are StreamUnavailable (M2.1)', () async {
+      for (final (edit, kind) in [
+        ((Map<String, dynamic> data) => data['isRoomPay'] = true, LiveRestriction.paid),
+        (
+          (Map<String, dynamic> data) => (data['liveData'] as Map<String, dynamic>)['isSecret'] = 1,
+          LiveRestriction.password,
+        ),
+      ]) {
+        final http = _Http(const [], profiles: [_edited(_sample('S05-multicdn'), edit)]);
+        final site = _site(http);
+        final room = await site.getRoomDetail(roomId: '660000');
+        expect((room.isLiveNow, room.restriction, room.followGroup), (true, kind, FollowGroup.live));
+        expect(room.danmakuData, isA<HuyaDanmakuArgs>(), reason: 'chat still works');
+        await expectLater(
+          site.getPlayQualities(detail: room),
+          throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains(kind.name))),
+        );
+        await expectLater(
+          site.resolvePlayUrls(
+            detail: room,
+            quality: const LivePlayQuality(quality: '原画', id: 0, data: 0),
+          ),
+          throwsA(isA<StreamUnavailable>()),
+        );
+        expect(http.on('wup.huya.com'), isEmpty, reason: 'nothing is signed for a restricted room');
+      }
+    });
+
+    test('recovering a live quality after the broadcast ended in a replay is StreamUnavailable', () async {
+      final http = _Http(const [], profiles: [_sample('S06-replay')]);
       await expectLater(
-        site.resolvePlayUrlAtRaw(detail: room, quality: quality, lineIndex: 0),
+        _site(http).resolvePlayUrlsForRecovery(
+          detail: LiveRoom(platform: 'huya', roomId: '102411'),
+          quality: const LivePlayQuality(quality: '蓝光4M', id: 4000, data: 4000),
+        ),
         throwsA(isA<StreamUnavailable>()),
       );
-      expect(http.on('wup.huya.com'), isEmpty);
+      expect(http.on('liveapi.huya.com'), isEmpty);
     });
 
     test('a missing room is NotFound; a letter alias is NotFound without a request', () async {

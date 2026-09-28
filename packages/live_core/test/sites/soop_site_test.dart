@@ -1,7 +1,8 @@
 // SoopSite over the recorded responses (ReplayHttp): the requests 3.x made
 // (queries, forms, headers, the user's cookie on every one), the catalog
-// walk, room depths, streams from the room's broadcast and recovery, links
-// and error mapping.
+// walk, room depths (room entry with the station, M4.U 7-5), restricted
+// broadcasts, streams from the room's broadcast and recovery, links and app
+// links, and error mapping.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -16,6 +17,9 @@ final DateTime _now = DateTime.utc(2026, 9, 27, 17, 30, 45);
 
 const _player = '/afreeca/player_live_api.php';
 const _assign = '/broad_stream_assign.html';
+
+/// The station path of streamer [id] (7-5).
+String _station(String id) => '/api/$id/station';
 const _catalog = ['S01-category-p1', 'S01-category-p2', 'S01-category-p3', 'S01-category-p4', 'S01-category-p5'];
 
 ReplaySample _synthetic(String url, Object body, {int status = 200, String method = 'GET'}) => ReplaySample(
@@ -200,9 +204,10 @@ void main() {
 
   group('rooms', () {
     test("room entry: 3.x's form and headers, the requested id, the broadcast and danmaku arguments", () async {
-      final setup = _setup(['S05-live-live']);
+      final setup = _setup(['S05-live-live', 'S05-station-live']);
       final room = await setup.site.getRoomDetail(roomId: ' khm11903 ');
-      final request = setup.http.requests.single;
+      expect(_trace(setup.http), ['POST $_player live', 'GET ${_station('khm11903')}']);
+      final request = setup.http.requests.first;
       final legacy = _legacyRequest('S05-live-live');
       expect(request.method, 'POST');
       expect(request.url, Uri.parse(legacy['url'] as String));
@@ -212,9 +217,46 @@ void main() {
       expect(room.isLiveNow, isTrue);
       expect(room.data, isA<SoopRoomData>());
       expect((room.danmakuData! as SoopDanmakuArgs).chatNo, '4172');
+      expect(room.startedAt, DateTime.utc(2026, 9, 22, 10, 59, 31));
+      expect(room.restriction, LiveRestriction.none);
     });
 
-    test('refresh and recording: the same answer without danmaku arguments', () async {
+    test("room entry also reads the station (7-5): 3.x's API headers, the profile and viewers", () async {
+      final setup = _setup(['S05-live-live', 'S05-station-live']);
+      final room = await setup.site.getRoomDetail(roomId: 'khm11903');
+      final station = setup.http.requests.last;
+      expect(station.method, 'GET');
+      expect(station.url, Uri.parse('https://chapi.sooplive.co.kr/api/khm11903/station'));
+      expect(station.headers, SoopApi.apiHeaders());
+      expect(station.site, 'soop');
+      expect(room.avatar, 'https://profile.img.sooplive.co.kr/LOGO/kh/khm11903/khm11903.jpg');
+      expect(room.introduction, '스타1 전프로게이머 김봉준 입니다.');
+      expect(room.onlineViewers, '35465');
+    });
+
+    test('a failing station leaves the room as the player API says (one request more, at room entry)', () async {
+      for (final failure in <Object>[
+        TransportReason.timeout,
+        TransportReason.cancelled,
+        _synthetic('https://chapi.sooplive.co.kr/api/nsh100427/station', 'bad gateway', status: 502),
+        _synthetic('https://chapi.sooplive.co.kr/api/nsh100427/station', '<html></html>'),
+      ]) {
+        final setup = _setup(
+          ['S05-live-password'],
+          script: {
+            _station('nsh100427'): [failure],
+          },
+        );
+        final room = await setup.site.getRoomDetail(roomId: 'nsh100427');
+        expect(room.isLiveNow, isTrue, reason: '$failure');
+        expect(room.restriction, LiveRestriction.password, reason: '7-8');
+        expect(room.avatar, 'https://stimg.sooplive.co.kr/LOGO/ns/nsh100427/nsh100427.jpg', reason: 'the built one');
+        expect(room.introduction, '');
+        expect(setup.http.requests, hasLength(2));
+      }
+    });
+
+    test('refresh and recording: the player API alone, without danmaku arguments (one request, as in 3.x)', () async {
       final setup = _setup(['S05-live-live']);
       final refresh = await setup.site.getRoomDetailForRefresh(roomId: 'khm11903');
       final recording = await setup.site.getRoomDetailForRecording(roomId: 'khm11903');
@@ -222,27 +264,103 @@ void main() {
       expect(recording.danmakuData, isNull);
       expect(recording.data, isA<SoopRoomData>(), reason: "the recorder's streams need the broadcast");
       expect(_trace(setup.http), ['POST $_player live', 'POST $_player live']);
+      expect(refresh.startedAt, DateTime.utc(2026, 9, 22, 10, 59, 31));
+      expect(refresh.restriction, LiveRestriction.none);
       expect(await setup.site.getLiveStatus(roomId: 'khm11903'), isTrue);
     });
 
-    test('offline and unknown streamers: offline on refresh, a failed load at room entry, one request each', () async {
-      final setup = _setup(['S05-live-offline', 'S05-live-missing']);
-      for (final id in ['phonics1', 'zzzqqqxxxnotexist1']) {
-        // REG-SOOP-005 kept as 3.x: an unknown id is offline too.
-        expect((await setup.site.getRoomDetailForRefresh(roomId: id)).effectiveLiveStatus, LiveStatus.offline);
-        expect((await setup.site.getRoomDetailForRecording(roomId: id)).effectiveLiveStatus, LiveStatus.offline);
-        await expectLater(setup.site.getRoomDetail(roomId: id), throwsA(isA<StreamUnavailable>()));
-      }
-      expect(setup.http.requests, hasLength(6));
-      expect(setup.http.requests.every((request) => request.url.path == _player), isTrue);
+    test('offline (7-4): offline at room entry too, with the profile; refresh and recording as in 3.x', () async {
+      final setup = _setup(['S05-live-offline', 'S05-station-offline']);
+      expect((await setup.site.getRoomDetailForRefresh(roomId: 'phonics1')).effectiveLiveStatus, LiveStatus.offline);
+      expect((await setup.site.getRoomDetailForRecording(roomId: 'phonics1')).effectiveLiveStatus, LiveStatus.offline);
+      expect(setup.http.requests, hasLength(2), reason: 'one request each, as in 3.x');
+      final room = await setup.site.getRoomDetail(roomId: 'phonics1');
+      expect(room.effectiveLiveStatus, LiveStatus.offline);
+      expect(room.nick, '김민교.');
+      expect(room.introduction, '실력과 재미와 감동을 겸비한 방송');
+      expect(_trace(setup.http).sublist(2), ['POST $_player live', 'GET ${_station('phonics1')}']);
       expect(await setup.site.getLiveStatus(roomId: 'phonics1'), isFalse);
     });
 
-    test("an age-restricted broadcast is NeedsLogin at every depth (REG-SOOP-006: 3.x's unknown state)", () async {
-      final setup = _setup(['S05-live-adult']);
-      await expectLater(setup.site.getRoomDetail(roomId: 'bumzi98'), throwsA(isA<NeedsLogin>()));
-      await expectLater(setup.site.getRoomDetailForRefresh(roomId: 'bumzi98'), throwsA(isA<NeedsLogin>()));
-      await expectLater(setup.site.getRoomDetailForRecording(roomId: 'bumzi98'), throwsA(isA<NeedsLogin>()));
+    test('an unknown streamer is NotFound at room entry (7-5, REG-SOOP-005); offline on refresh', () async {
+      final setup = _setup(['S05-live-missing', 'S05-station-missing']);
+      const id = 'zzzqqqxxxnotexist1';
+      await expectLater(setup.site.getRoomDetail(roomId: id), throwsA(isA<NotFound>()));
+      expect(setup.http.requests, hasLength(2));
+      // The refresh reads the player API only, which answers an unknown
+      // streamer like an offline one (as 3.x did).
+      expect((await setup.site.getRoomDetailForRefresh(roomId: id)).effectiveLiveStatus, LiveStatus.offline);
+      expect(setup.http.requests, hasLength(3));
+      // Without the station's word it stays offline.
+      final failing = _setup(
+        ['S05-live-missing'],
+        script: {
+          _station(id): [TransportReason.timeout],
+        },
+      );
+      expect((await failing.site.getRoomDetail(roomId: id)).effectiveLiveStatus, LiveStatus.offline);
+    });
+
+    test('banned at room entry (7-4; 3.x: a failed load)', () async {
+      final setup = _setup(
+        ['S05-station-offline'],
+        extra: [
+          _synthetic('https://live.sooplive.co.kr$_player?bjid=phonics1', {
+            'CHANNEL': {'RESULT': -2},
+          }, method: 'POST'),
+        ],
+      );
+      final room = await setup.site.getRoomDetail(roomId: 'phonics1');
+      expect(room.effectiveLiveStatus, LiveStatus.banned);
+      expect(room.nick, '김민교.');
+      await expectLater(
+        setup.site.getPlayQualities(
+          detail: LiveRoom(platform: 'soop', roomId: 'phonics1'),
+        ),
+        throwsA(isA<StreamUnavailable>()),
+      );
+    });
+
+    test(
+      'an age-restricted broadcast is live at every depth, and NeedsLogin for its stream (7-5, REG-SOOP-006)',
+      () async {
+        final setup = _setup(['S05-live-adult', 'S05-station-adult']);
+        final entry = await setup.site.getRoomDetail(roomId: 'bumzi98');
+        expect(entry.isLiveNow, isTrue);
+        expect(entry.restriction, LiveRestriction.adult);
+        expect((entry.nick, entry.onlineViewers), ('하니니', '3209'));
+        expect(entry.danmakuData, isNull);
+        for (final room in [
+          await setup.site.getRoomDetailForRefresh(roomId: 'bumzi98'),
+          await setup.site.getRoomDetailForRecording(roomId: 'bumzi98'),
+        ]) {
+          expect(room.isLiveNow, isTrue);
+          expect(room.restriction, LiveRestriction.adult);
+          expect(room.title, '다시보기 X 추석 토끼 떡 찧다가 술마시는중');
+        }
+        expect(await setup.site.getLiveStatus(roomId: 'bumzi98'), isTrue);
+        await expectLater(setup.site.getPlayQualities(detail: entry), throwsA(isA<NeedsLogin>()));
+      },
+    );
+
+    test('password and subscribers-only broadcasts: live, restricted, StreamUnavailable with the reason', () async {
+      final setup = _setup(['S05-live-adult-password', 'S05-live-subscribers', 'S05-station-subscribers']);
+      final locked = await setup.site.getRoomDetailForRefresh(roomId: 'qazeee');
+      expect((locked.isLiveNow, locked.restriction), (true, LiveRestriction.password));
+      await expectLater(
+        setup.site.getPlayQualities(detail: locked),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('password'))),
+      );
+      final members = await setup.site.getRoomDetail(roomId: 'kirababy2');
+      expect((members.isLiveNow, members.restriction), (true, LiveRestriction.subscribersOnly));
+      expect(members.title, '햇비랑 프클하려고 왔음');
+      await expectLater(
+        setup.site.resolvePlayUrls(
+          detail: members,
+          quality: const LivePlayQuality(quality: '原画', id: 'original'),
+        ),
+        throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('subscribers'))),
+      );
     });
 
     test('a room id that is no streamer id is NotFound without a request', () async {
@@ -255,10 +373,20 @@ void main() {
 
   group('streams', () {
     test("from room entry: no new room request, 3.x's assignment then key, 3.x's URL", () async {
-      final setup = _setup(['S05-live-live', 'S06-assign-original', 'S06-aid-original', 'S06-assign-hd', 'S06-aid-hd']);
+      final setup = _setup([
+        'S05-live-live',
+        'S05-station-live',
+        'S06-assign-original',
+        'S06-aid-original',
+        'S06-assign-hd',
+        'S06-aid-hd',
+      ]);
       final room = await setup.site.getRoomDetail(roomId: 'khm11903');
       final qualities = await setup.site.getPlayQualities(detail: room);
-      expect(qualities.map((quality) => quality.id), ['original', 'hd', 'sd', 'hd4k']);
+      expect(setup.http.requests, hasLength(2), reason: 'the qualities need no request');
+      // 7-1: 720p (hd4k) is “超清” after the source; ids unchanged.
+      expect(qualities.map((quality) => quality.id), ['original', 'hd4k', 'hd', 'sd']);
+      expect(qualities.map((quality) => quality.quality), ['原画', '超清', '高清', '标清']);
       for (final name in ['original', 'hd']) {
         final before = setup.http.requests.length;
         final resolution = await setup.site.resolvePlayUrls(
@@ -347,13 +475,45 @@ void main() {
         throwsA(isA<NeedsLogin>()),
       );
     });
+
+    test('a password broadcast (7-8): 3.x asked for the key anyway; its refusal names the password', () async {
+      final setup = _setup(
+        ['S05-live-password', 'S06-aid-password'],
+        extra: [
+          _synthetic(
+            'https://livestream-manager.sooplive.com$_assign?return_type=gcp_cdn&broad_key=297451835-common-original-hls',
+            {'result': '1', 'view_url': 'https://live-global-cdn-v02.sooplive.com/x/auth_playlist.m3u8'},
+          ),
+        ],
+        script: {
+          _station('nsh100427'): [TransportReason.timeout],
+        },
+      );
+      final room = await setup.site.getRoomDetail(roomId: 'nsh100427');
+      expect(room.restriction, LiveRestriction.password);
+      final qualities = await setup.site.getPlayQualities(detail: room);
+      expect(qualities.map((quality) => quality.quality), ['原画', '超清', '高清', '标清']);
+      await expectLater(
+        setup.site.resolvePlayUrls(detail: room, quality: qualities.first),
+        throwsA(
+          isA<StreamUnavailable>().having((error) => error.detail, 'detail', 'aid: RESULT 0, password-protected'),
+        ),
+      );
+      expect(_trace(setup.http).sublist(2), ['GET $_assign', 'POST $_player aid']);
+    });
   });
 
   group("the user's cookie", () {
     test('goes with every request, the media lines and the danmaku handshake, as in 3.x', () async {
       final vault = MemoryCookieVault()..set('soop', ' PdboxTicket=t;\n AuthTicket=a ');
       addTearDown(vault.dispose);
-      final setup = _setup(['S03-main-p1', 'S05-live-live', 'S06-assign-original', 'S06-aid-original'], cookies: vault);
+      final setup = _setup([
+        'S03-main-p1',
+        'S05-live-live',
+        'S05-station-live',
+        'S06-assign-original',
+        'S06-aid-original',
+      ], cookies: vault);
       const cookie = 'PdboxTicket=t; AuthTicket=a';
       await setup.site.getRecommendRooms();
       final room = await setup.site.getRoomDetail(roomId: 'khm11903');
@@ -362,12 +522,13 @@ void main() {
         quality: const LivePlayQuality(quality: '原画', id: 'original'),
       );
       expect(setup.http.requests.map((request) => request.headers['cookie']).toSet(), {cookie});
+      expect(setup.http.requests.where((request) => request.url.host == 'chapi.sooplive.co.kr'), hasLength(1));
       expect(resolution.lines.single.headers['cookie'], cookie);
       expect((room.danmakuData! as SoopDanmakuArgs).headers['cookie'], cookie);
     });
 
     test('without one no request carries a cookie header', () async {
-      final setup = _setup(['S03-main-p1', 'S05-live-live']);
+      final setup = _setup(['S03-main-p1', 'S05-live-live', 'S05-station-live']);
       await setup.site.getRecommendRooms();
       final room = await setup.site.getRoomDetail(roomId: 'khm11903');
       expect(setup.http.requests.every((request) => !request.headers.containsKey('cookie')), isTrue);
@@ -403,9 +564,9 @@ void main() {
         'https://vod.sooplive.co.kr/player/123',
         'https://www.sooplive.co.kr/live/all',
         'https://sch.sooplive.co.kr/api.php',
-        // The former domain, which SOOP's search answers still link to: 3.x
-        // did not recognise it (a later upgrade).
-        'http://afreecatv.com/ecvhao',
+        'https://vod.afreecatv.com/player/123',
+        'https://www.afreecatv.com/',
+        'https://afreecatv.com.example.com/khm11903',
         'https://example.com/khm11903',
         'https://sooplive.co.kr.example.com/khm11903',
         'ftp://play.sooplive.co.kr/khm11903',
@@ -413,6 +574,38 @@ void main() {
         expect(site.roomIdFromUrl(url), isNull, reason: url);
       }
       expect(site.needsResolving('https://play.sooplive.co.kr/khm11903'), isFalse);
+    });
+
+    test('the former afreecatv.com links, as SOOP search answers still give them (7-7)', () {
+      final site = _setup([]).site;
+      final search = SoopApi.searchRooms(Fixture.load('soop', 'S04-search-p1').body);
+      final urls = [
+        for (final entry in (jsonDecode(Fixture.load('soop', 'S04-search-p1').body) as Map)['REAL_BROAD'] as List)
+          '${(entry as Map)['url']}',
+      ];
+      expect(urls.first, 'http://afreecatv.com/ecvhao');
+      expect([for (final url in urls) site.roomIdFromUrl(url)], [for (final room in search) room.roomId]);
+      expect(site.roomIdFromUrl('https://play.afreecatv.com/khm11903/297314125'), 'khm11903');
+      expect(site.roomIdFromUrl('https://bj.afreecatv.com/KHM11903'), 'khm11903');
+      expect(site.roomIdFromUrl('https://www.afreecatv.com/station/khm11903'), 'khm11903');
+    });
+
+    test('SOOP app links in a share text (7-9), before web links, without a request', () async {
+      final site = _setup([]).site;
+      expect(site.roomIdsInShareText('보러 와 sooplive://player/live?broad_no=297314125&user_id=khm11903&channel='), [
+        'khm11903',
+      ]);
+      expect(site.roomIdsInShareText('(sooplive://player/live?user_id=KHM11903)'), ['khm11903']);
+      expect(site.roomIdsInShareText('sooplive://player/vod?user_id=a1 https://play.sooplive.co.kr/b2'), isEmpty);
+      final http = ReplayHttp([]);
+      final registry = SiteRegistry({'soop': () => SoopSite(http)});
+      final parser = LinkParser(registry, http);
+      expect(
+        await parser.parse('봉준 sooplive://player/live?broad_no=1&user_id=khm11903，https://play.sooplive.co.kr/other1'),
+        const RoomLink('soop', 'khm11903'),
+      );
+      expect(parser.containsSupportedLink('sooplive://player/live?user_id=khm11903'), isTrue);
+      expect(http.requests, isEmpty);
     });
 
     test('a share text is parsed without a request', () async {
@@ -429,14 +622,14 @@ void main() {
 
   test('transport failures are NetworkFailure; cancellation passes through', () async {
     final failing = _setup(
-      [],
+      ['S05-station-live'],
       script: {
         _player: [TransportReason.timeout],
       },
     );
     await expectLater(failing.site.getRoomDetail(roomId: 'khm11903'), throwsA(isA<NetworkFailure>()));
     final cancelled = _setup(
-      [],
+      ['S05-station-live'],
       script: {
         _player: [TransportReason.cancelled],
       },
@@ -446,7 +639,7 @@ void main() {
       throwsA(isA<TransportFailure>().having((failure) => failure.reason, 'reason', TransportReason.cancelled)),
     );
     final server = _setup(
-      [],
+      ['S05-station-live'],
       script: {
         _player: [_synthetic('https://live.sooplive.co.kr$_player', 'bad gateway', status: 502, method: 'POST')],
       },

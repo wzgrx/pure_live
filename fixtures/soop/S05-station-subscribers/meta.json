@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "sample": "S05-station-subscribers",
+  "capturedAt": "2026-09-28T16:43:31.302327Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://chapi.sooplive.co.kr/api/kirababy2/station",
+    "headers": {
+      "Accept": "*/*",
+      "Origin": "https://www.sooplive.co.kr",
+      "Referer": "https://www.sooplive.co.kr/",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-site",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "date": "Mon, 28 Sep 2026 16:43:31 GMT",
+      "set-cookie": "bjStationHistory=%4179883044; expires=Sun, 12-Jun-5431 12:14:31 GMT; Max-Age=107442012660; path=/; domain=.sooplive.co.kr; httponly",
+      "vary": "Accept-Encoding",
+      "server": "nginx",
+      "cache-control": "no-cache, private",
+      "access-control-allow-origin": "https://www.sooplive.co.kr",
+      "access-control-allow-credentials": "true",
+      "x-cache": "Miss from cloudfront",
+      "via": "1.1 35d82a79c83e6f5c8884f1f61b240f38.cloudfront.net (CloudFront)",
+      "x-amz-cf-pop": "SFO53-P12",
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "x-amz-cf-id": "Xy7opRs3CORGSVrEwXNAUrnNgfISrgNLdvbrQ76APpDqwzvP1w8n1A=="
+    }
+  },
+  "raw": {
+    "sha256": "4e1f9c360bf5e8e0e31d6b3551634a8e64736d647049a16481ef4029e11a45cd",
+    "length": 12221
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.starballoon_top[*].user_id",
+      "rule": "person"
+    },
+    {
+      "where": "$.starballoon_top[*].user_nick",
+      "rule": "person"
+    },
+    {
+      "where": "$.starballoon_top[*].profile_image",
+      "rule": "person"
+    },
+    {
+      "where": "$.sticker_top[*].user_id",
+      "rule": "person"
+    },
+    {
+      "where": "$.sticker_top[*].user_nick",
+      "rule": "person"
+    },
+    {
+      "where": "$.sticker_top[*].profile_image",
+      "rule": "person"
+    },
+    {
+      "where": "set-cookie:bjStationHistory",
+      "rule": "secret"
+    }
+  ],
+  "tool": "manual capture (M4.U.7): urllib, scrubbed by hand as fixtures/README.md asks"
+}

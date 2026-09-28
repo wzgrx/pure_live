@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S01-tags-en",
+  "capturedAt": "2026-09-28T16:52:01.151559Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Accept": "application/vnd.twitchtv.v5+json",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Device-Id": "5f0c3e9a7b2d4e6f8a1c3e5f7a9b1d3f",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "{\"operationName\":\"SearchCategoryTags\",\"extensions\":{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"b4cb189d8d17aadf29c61e9d7c7e7dcfc932e93b77b3209af5661bffb484195f\"}},\"variables\":{\"userQuery\":\"\",\"limit\":100}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "close",
+      "content-length": "8456",
+      "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*",
+      "x-amzn-trace-id": "Self=1-6aba9b33-7073e9962ac159301fc30dae;Root=1-6aba9b33-3b789f79e065dac99b3428bc",
+      "x-gateway-trace": "3e785a2ec8e6b8a608434580a6991522",
+      "x-router-config-version": "b3f449cc-3f52-474b-a722-53905cc8f367",
+      "date": "Mon, 28 Sep 2026 16:52:03 GMT",
+      "timing-allow-origin": "*",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "x-served-by": "gateway"
+    }
+  },
+  "raw": {
+    "sha256": "8e1b774e79b63a0c56ad5b7f489f0439fa55bacb0fa042c3d352c443d1b811f6",
+    "length": 8456
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:Device-Id",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.8); random Device-Id replaced by a synthetic one"
+}

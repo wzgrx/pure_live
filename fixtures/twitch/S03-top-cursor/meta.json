@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S03-top-cursor",
+  "capturedAt": "2026-09-28T16:52:03.667402Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Accept": "application/vnd.twitchtv.v5+json",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Device-Id": "5f0c3e9a7b2d4e6f8a1c3e5f7a9b1d3f",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "{\"query\":\"query($first: Int!, $after: Cursor, $languages: [String!]) { streams(first: $first, after: $after, options: {broadcasterLanguages: $languages}) { edges { cursor node { id title type viewersCount createdAt previewImageURL(width: 440, height: 248) restriction { type } broadcaster { id login displayName profileImageURL(width: 70) } game { id name displayName slug } } } pageInfo { hasNextPage } } }\",\"variables\":{\"first\":30,\"after\":\"eyJzIjo3NTQ3LjQ3NjY5MjE0OTI5NCwiZCI6ZmFsc2UsInQiOnRydWV9\"}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "close",
+      "content-length": "251",
+      "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store, no-cache, must-revalidate",
+      "x-amzn-trace-id": "Self=1-6aba9b35-1f4f81d60338f24b0eacc753;Root=1-6aba9b35-d893ac4d6dfa169e44ec40ad",
+      "x-gateway-trace": "ec18593d921067d089805c2a765745ec",
+      "x-router-config-version": "b3f449cc-3f52-474b-a722-53905cc8f367",
+      "date": "Mon, 28 Sep 2026 16:52:05 GMT",
+      "timing-allow-origin": "*",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "x-served-by": "gateway"
+    }
+  },
+  "raw": {
+    "sha256": "5d5a12a8268ad1b4a21355af76e111a9213ff1e0f6f3ed261974fd35cb33167c",
+    "length": 251
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:Device-Id",
+      "rule": "secret"
+    }
+  ],
+  "tool": "scratch capture script (urllib, schema 1, M4.U.8); random Device-Id replaced by a synthetic one"
+}

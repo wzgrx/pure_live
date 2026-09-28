@@ -1,0 +1,37 @@
+{
+  "data": {
+    "user": {
+      "id": "403594122",
+      "login": "zarbex",
+      "displayName": "zarbex",
+      "description": "GEIL GEMACHT 🗣️",
+      "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/436a50ca-f8e9-4cc0-aae8-def977448ac7-profile_image-300x300.png",
+      "stream": {
+        "id": "318612472423",
+        "title": "🤏 MR. GEIL STREAMT 🤏 GEILE REACTIONS 🤏 UNTIL DAWN HORROR ABEND 🤏 BIN KRANK 🤏  !socials !merch !esn !pmm",
+        "type": "live",
+        "viewersCount": 18561,
+        "createdAt": "2026-09-28T14:02:26Z",
+        "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_zarbex-640x360.jpg",
+        "restriction": null,
+        "game": {
+          "id": "509658",
+          "name": "Just Chatting",
+          "displayName": "谈天说地",
+          "slug": "just-chatting"
+        }
+      },
+      "lastBroadcast": {
+        "title": "🤏 MR. GEIL STREAMT 🤏 GEILE REACTIONS 🤏 UNTIL DAWN HORROR ABEND 🤏 BIN KRANK 🤏  !socials !merch !esn !pmm",
+        "game": {
+          "name": "Just Chatting",
+          "displayName": "谈天说地"
+        }
+      }
+    }
+  },
+  "extensions": {
+    "durationMilliseconds": 61,
+    "requestID": "01M3MEWKX08Y4REC5HA0G1SYFZ"
+  }
+}

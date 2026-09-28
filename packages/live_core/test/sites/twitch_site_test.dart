@@ -1,14 +1,13 @@
 // TwitchSite over the recorded responses (ReplayHttp): the GraphQL transports
 // and their fallbacks, the session on the access token, the catalog's page
-// rounds, directory and search cursors, detail, the token-then-usher stream,
-// recovery, links and error mapping.
+// rounds, the list snapshots and the search cursor, detail, the
+// token-then-usher stream, recovery, links and error mapping.
 //
 // GraphQL samples are matched by their JSON body. Some samples were recorded
-// by the archived v4, whose requests differ from 3.x's (no language filter,
-// other page sizes, a "top" directory list, usher without 3.x's player
-// parameters); the adapter sends 3.x's requests, so those responses are
-// replayed as answers to 3.x's request (see _answer). The response bodies are
-// the recorded ones; a few error answers are synthetic.
+// by the archived v4 or with an older query (S05-user-*), whose requests
+// differ from the adapter's; those responses are replayed as answers to the
+// adapter's request (see _answer). The response bodies are the recorded
+// ones; a few error answers are synthetic.
 import 'dart:convert';
 import 'dart:math';
 
@@ -39,13 +38,13 @@ ReplaySample _answer(Object? json, {String? name, Object? body, int status = 200
   );
 }
 
-/// The usher playlist of [login] (3.x's parameters) answered with sample
-/// [name]'s response.
-ReplaySample _usher(String login, String name) {
+/// The usher playlist of [login] (3.x's parameters, the codecs of
+/// [preferH264]) answered with sample [name]'s response.
+ReplaySample _usher(String login, String name, {bool preferH264 = true}) {
   final recorded = _recorded(name);
   return ReplaySample(
     method: 'GET',
-    url: TwitchApi.usherUrl(login, (value: '', signature: ''), Random(0)),
+    url: TwitchApi.usherUrl(login, (value: '', signature: ''), Random(0), preferH264: preferH264),
     status: recorded.status,
     headers: recorded.headers,
     bytes: recorded.bytes,
@@ -103,13 +102,40 @@ final class _Script implements LiveHttp {
   void close() {}
 }
 
+/// Answers the requests that ask for English with sample [name] (ReplayHttp
+/// matches bodies, not headers, and the tags request is the same in both
+/// languages); everything else goes to [inner].
+final class _English implements LiveHttp {
+  new(this.inner, this.name);
+
+  final LiveHttp inner;
+  final String name;
+  final List<LiveRequest> requests = [];
+
+  @override
+  Future<LiveResponse> send(LiveRequest request) async {
+    requests.add(request);
+    if (!(request.headers['accept-language'] ?? '').startsWith('en')) return await inner.send(request);
+    final recorded = _recorded(name);
+    return LiveResponse(status: recorded.status, bytes: recorded.bytes, url: request.url);
+  }
+
+  @override
+  Future<LiveStreamedResponse> open(LiveRequest request) => throw UnsupportedError('open');
+
+  @override
+  void close() {}
+}
+
 typedef _Setup = ({TwitchSite site, ReplayHttp http});
 
 _Setup _setup(
   List<ReplaySample> samples, {
   CookieVault? cookies,
   List<LiveHttp> fallbacks = const [],
-  bool searchPaging = false,
+  List<String> Function()? languages,
+  bool Function()? preferH264,
+  DateTime Function()? now,
 }) {
   final http = ReplayHttp(samples, ignoredQuery: _ignored);
   return (
@@ -117,22 +143,36 @@ _Setup _setup(
       http,
       cookies: cookies,
       gqlFallbacks: fallbacks,
-      searchPaging: searchPaging,
+      languages: languages,
+      preferH264: preferH264,
       random: Random(1),
-      now: () => _now,
+      now: now ?? () => _now,
     ),
     http: http,
   );
 }
 
-LiveRoom _live(String roomId) => LiveRoom(platform: 'twitch', roomId: roomId, liveStatus: LiveStatus.live);
+LiveRoom _live(String roomId, {LiveStatus status = LiveStatus.live, LiveRestriction? restriction}) =>
+    LiveRoom(platform: 'twitch', roomId: roomId, liveStatus: status, restriction: restriction);
+
+/// A forbidden playback token (the viewer may not watch).
+Map<String, Object?> _forbidden(String reason) => {
+  'data': {
+    'streamPlaybackAccessToken': {
+      'value': jsonEncode({
+        'authorization': {'forbidden': true, 'reason': reason},
+      }),
+      'signature': 's',
+    },
+  },
+};
 
 void main() {
   group('GraphQL transports', () {
     const failure = TransportFailure('twitch', TransportReason.connect, 'reset after CONNECT');
 
-    test("every request is POST gql with 3.x's identity, site twitch, one Device-Id per adapter", () async {
-      final setup = _setup([_recorded('S04-search-p1'), _recorded('S05-user-live')]);
+    test("every request is POST gql with 3.x's identity in Chinese, site twitch, one Device-Id per adapter", () async {
+      final setup = _setup([_recorded('S04-search-p1'), _recorded('S05-detail-live')]);
       await setup.site.searchRooms('minecraft');
       await setup.site.getRoomDetail(roomId: 'zarbex');
       final requests = setup.http.requests;
@@ -143,18 +183,19 @@ void main() {
       expect(devices, hasLength(1));
       expect(devices.single, matches(RegExp(r'^[0-9a-f]{32}$')));
       expect(requests.first.headers['client-id'], 'kimne78kx3ncx6brgo4mv6wki5h1ko');
+      expect(requests.map((request) => request.headers['accept-language']).toSet(), {'zh-CN,zh;q=0.9,en;q=0.8'});
     });
 
     test('the first transport answers: no fallback is used', () async {
       final fallback = _Script([]);
-      final setup = _setup([_recorded('S05-user-live')], fallbacks: [fallback]);
+      final setup = _setup([_recorded('S05-detail-live')], fallbacks: [fallback]);
       await setup.site.getRoomDetail(roomId: 'zarbex');
       expect(fallback.requests, isEmpty);
     });
 
     test('a transport failure sends the same request through the next transport (3.x: Android system TLS)', () async {
       final first = _Script([failure]);
-      final second = ReplayHttp([_recorded('S05-user-live')]);
+      final second = ReplayHttp([_recorded('S05-detail-live')]);
       final site = TwitchSite(first, gqlFallbacks: [second], random: Random(1), now: () => _now);
       final room = await site.getRoomDetail(roomId: 'zarbex');
       expect(room.isLiveNow, isTrue);
@@ -184,7 +225,7 @@ void main() {
       final answered = TwitchSite(
         _Script([challenge]),
         gqlFallbacks: [
-          ReplayHttp([_recorded('S05-user-live')]),
+          ReplayHttp([_recorded('S05-detail-live')]),
         ],
         random: Random(1),
       );
@@ -192,8 +233,8 @@ void main() {
     });
 
     test('HTTP 5xx goes to the next transport; 4xx does not', () async {
-      final recovered = _Script([(503, '')], ReplayHttp([_recorded('S05-user-live')]));
-      final fallback = ReplayHttp([_recorded('S05-user-live')]);
+      final recovered = _Script([(503, '')], ReplayHttp([_recorded('S05-detail-live')]));
+      final fallback = ReplayHttp([_recorded('S05-detail-live')]);
       final site = TwitchSite(recovered, gqlFallbacks: [fallback], random: Random(1));
       expect((await site.getRoomDetail(roomId: 'zarbex')).roomId, 'zarbex');
       expect(fallback.requests, hasLength(1));
@@ -279,20 +320,28 @@ void main() {
       ];
     }
 
-    test('tags, then their directories in batches of at most 35 (REG-TWITCH-010); areas as 3.x', () async {
+    List<ReplaySample> challengedSecondRound() {
       final second = continued();
-      final setup = _setup([
-        _recorded('S01-tags'),
-        ...firstRound(),
+      return [
         for (var start = 0; start < second.length; start += TwitchApi.batchLimit)
           if (second.sublist(start, min(start + TwitchApi.batchLimit, second.length)) case final chunk)
             _answer([
               for (final page in chunk) TwitchApi.directoriesOperation(page.id, cursor: page.cursor),
             ], body: _challenge(chunk.length)),
-      ]);
-      final categories = await setup.site.getCategories(1, 20);
+      ];
+    }
+
+    test('tags, then their directories in batches of at most 35 (REG-TWITCH-010); areas as 3.x', () async {
+      final second = continued();
+      final replay = ReplayHttp([
+        _recorded('S01-tags'),
+        ...firstRound(),
+        ...challengedSecondRound(),
+      ], ignoredQuery: _ignored);
+      final http = _English(replay, 'S01-tags-en');
+      final site = TwitchSite(http, random: Random(1), now: () => _now);
+      final categories = await site.getCategories(1, 20);
       expect(categories.map((category) => category.id), tags.map((tag) => tag.id));
-      expect(categories.map((category) => category.name), tags.map((tag) => tag.name));
       final pages = recordedPages();
       for (final category in categories) {
         final recorded = pages[category.id];
@@ -302,26 +351,54 @@ void main() {
         expect(category.children, hasLength(expected), reason: category.name);
       }
       final batches = [
-        for (final request in setup.http.requests)
+        for (final request in http.requests)
           if (jsonDecode(utf8.decode(request.body!)) case final List<Object?> batch) batch.length,
       ];
       expect(batches.every((size) => size <= TwitchApi.batchLimit), isTrue);
       expect(batches.take(2), [35, 6], reason: '41 tags in the first round');
-      expect(setup.http.requests, hasLength(1 + 2 + (second.length / TwitchApi.batchLimit).ceil()));
+      expect(
+        http.requests,
+        hasLength(2 + 2 + (second.length / TwitchApi.batchLimit).ceil()),
+        reason: 'the tags twice (Chinese, then English for the nameless one), then the rounds',
+      );
+    });
+
+    test('8-2: tag names are Chinese; the one Twitch has no Chinese name for takes its English name', () async {
+      final http = _English(
+        ReplayHttp([_recorded('S01-tags'), ...firstRound(), ...challengedSecondRound()], ignoredQuery: _ignored),
+        'S01-tags-en',
+      );
+      final categories = await TwitchSite(http, random: Random(1), now: () => _now).getCategories(1, 20);
+      expect(categories.first.name, '冒险游戏');
+      expect(categories.where((category) => category.name.isEmpty), isEmpty);
+      final gambling = categories.singleWhere((category) => category.id == '2cf37ad2-6700-4312-a114-27bb91800254');
+      expect(gambling.name, 'Gambling');
+      final english = http.requests.where((request) => request.headers['accept-language'] == 'en-US,en;q=0.9');
+      expect(english, hasLength(1), reason: 'one more request, only for the names');
+      final named = categories.firstWhere((category) => category.children.isNotEmpty);
+      expect(named.children.first.typeName, named.name, reason: "areas carry their tag's name");
+      expect(named.children.first.areaPic, startsWith('https://static-cdn.jtvnw.net/'), reason: '8-7');
+    });
+
+    test('when the English names cannot be had, the tag stays nameless and the catalog still loads', () async {
+      final replay = ReplayHttp([
+        _recorded('S01-tags'),
+        ...firstRound(),
+        ...challengedSecondRound(),
+      ], ignoredQuery: _ignored);
+      final categories = await TwitchSite(
+        _EnglishFailure(replay),
+        random: Random(1),
+        now: () => _now,
+      ).getCategories(1, 20);
+      expect(categories, hasLength(tags.length));
+      expect(categories.where((category) => category.name.isEmpty), hasLength(1));
     });
 
     test('a later page answered with an integrity challenge ends those tags quietly (REG-TWITCH-001)', () async {
       final second = continued();
       expect(second, isNotEmpty, reason: 'most tags have a full first page');
-      final setup = _setup([
-        _recorded('S01-tags'),
-        ...firstRound(),
-        for (var start = 0; start < second.length; start += TwitchApi.batchLimit)
-          if (second.sublist(start, min(start + TwitchApi.batchLimit, second.length)) case final chunk)
-            _answer([
-              for (final page in chunk) TwitchApi.directoriesOperation(page.id, cursor: page.cursor),
-            ], body: _challenge(chunk.length)),
-      ]);
+      final setup = _setup([_recorded('S01-tags'), ...firstRound(), ...challengedSecondRound()]);
       final categories = await setup.site.getCategories(1, 20);
       final full = categories.firstWhere((category) => category.id == second.first.id);
       expect(full.children, hasLength(TwitchApi.tagDirectoryLimit));
@@ -362,12 +439,21 @@ void main() {
       final categories = await setup.site.getCategories(1, 20);
       expect(categories.single.children, hasLength(TwitchApi.tagDirectoryLimit + 1));
       expect(categories.single.children.last.areaId, '1');
-      expect(setup.http.requests, hasLength(3), reason: 'a page with fewer than 30 ends the tag');
+      expect(setup.http.requests, hasLength(3), reason: 'every tag named: no English request; <30 ends the tag');
     });
 
     test('a failed first round fails the catalog (3.x showed empty tabs)', () async {
       final setup = _setup([
-        _recorded('S01-tags'),
+        _answer(
+          TwitchApi.tagsOperation(),
+          body: {
+            'data': {
+              'searchCategoryTags': [
+                for (final tag in tags) {'id': tag.id, 'tagName': 'T'},
+              ],
+            },
+          },
+        ),
         for (var start = 0; start < tags.length; start += TwitchApi.batchLimit)
           if (tags.sublist(start, min(start + TwitchApi.batchLimit, tags.length)) case final chunk)
             _answer([for (final tag in chunk) TwitchApi.directoriesOperation(tag.id)], body: 'x', status: 502),
@@ -376,107 +462,200 @@ void main() {
     });
   });
 
-  group('directories', () {
-    ReplaySample page(String slug, int limit, {String? cursor, String name = 'S02-game'}) =>
-        _answer([TwitchApi.gameOperation(slug, limit: limit, cursor: cursor)], name: name);
-
+  group('areas (8-3 no language filter by default, 8-10 100 at a time, 8-6 unknown areas)', () {
+    const area = LiveArea(platform: 'twitch', areaId: '509658', shortName: 'just-chatting');
     final lastCursor = TwitchApi.gameStreams(
       TwitchApi.decode(Fixture.load('twitch', 'S02-game').body, status: 200, what: 'game'),
       now: _now,
     ).cursor!;
+    ReplaySample page(String slug, {String? cursor, List<String> languages = const [], String name = 'S02-game'}) =>
+        _answer([TwitchApi.gameOperation(slug, limit: 100, cursor: cursor, languages: languages)], name: name);
 
-    test("recommend: Just Chatting in Chinese and Korean, the page size asked (3.x's popular page: 100)", () async {
-      final setup = _setup([page('just-chatting', 100)]);
-      final rooms = await setup.site.getRecommendRooms(pageSize: 100);
-      expect(rooms, hasLength(87));
-      final variables = _variables(setup.http.requests.single);
-      expect(variables['slug'], 'just-chatting');
-      expect(variables['limit'], 100);
-      expect((variables['options']! as Map)['broadcasterLanguages'], ['ZH', 'KO']);
-      expect(setup.http.requests.single.headers.keys, isNot(contains('cookie')));
-    });
+    test(
+      "one request of 100 in every language (S02-game, the recorded request); the cards' 8-2 and 8-7 fields",
+      () async {
+        final setup = _setup([_recorded('S02-game')]);
+        final rooms = await setup.site.getCategoryRooms(area);
+        expect(rooms, hasLength(30), reason: 'the page size asked');
+        final variables = _variables(setup.http.requests.single);
+        expect(variables['slug'], 'just-chatting');
+        expect(variables['limit'], 100);
+        expect((variables['options']! as Map)['broadcasterLanguages'], isEmpty);
+        expect(setup.http.requests.single.headers.keys, isNot(contains('cookie')));
+        expect(rooms.first.area, '谈天说地');
+        expect(rooms.first.avatar, startsWith('https://static-cdn.jtvnw.net/'));
+      },
+    );
 
-    test('area pages: the slug, 30 by default; page 2 follows the cursor; its challenge ends the list '
+    test('pages are cut from the snapshot; the page past it follows the cursor, whose challenge ends the list '
         '(REG-TWITCH-001)', () async {
-      const area = LiveArea(platform: 'twitch', areaId: '509658', shortName: 'just-chatting');
-      final setup = _setup([
-        page('just-chatting', 30),
-        page('just-chatting', 30, cursor: lastCursor, name: 'S02-game-cursor'),
-      ]);
-      expect(await setup.site.getCategoryRooms(area), hasLength(87));
-      expect(await setup.site.getCategoryRooms(area, page: 2), isEmpty);
+      final setup = _setup([_recorded('S02-game'), page('just-chatting', cursor: lastCursor, name: 'S02-game-cursor')]);
+      final pages = [for (var number = 1; number <= 5; number++) await setup.site.getCategoryRooms(area, page: number)];
+      expect(pages.map((rooms) => rooms.length), [30, 30, 27, 0, 0], reason: '87 streams in the first 100');
+      final ids = [for (final rooms in pages) ...rooms.map((room) => room.roomId)];
+      expect(ids.toSet(), hasLength(87), reason: 'no card twice, none skipped');
+      expect(setup.http.requests, hasLength(2), reason: 'pages 2 and 3 from the snapshot; page 4 tried the cursor');
       expect(_variables(setup.http.requests.last)['cursor'], lastCursor);
-      expect(await setup.site.getCategoryRooms(area, page: 3), isEmpty);
-      expect(setup.http.requests, hasLength(2), reason: 'no cursor, no request');
+      expect(_variables(setup.http.requests.last)['limit'], 100);
     });
 
-    test('a first page answered with a challenge is RiskControl', () async {
-      final setup = _setup([page('just-chatting', 30, name: 'S02-game-cursor')]);
-      await expectLater(setup.site.getRecommendRooms(), throwsA(isA<RiskControl>()));
-    });
-
-    test('recommend and the Just Chatting area keep their own cursors (3.x shared them)', () async {
-      const area = LiveArea(platform: 'twitch', shortName: 'just-chatting');
+    test("3.x's 100-card pages work too; a chunk that answers is added, without the cards already there", () async {
+      final first = TwitchApi.gameStreams(
+        TwitchApi.decode(Fixture.load('twitch', 'S02-game').body, status: 200, what: 'game'),
+        now: _now,
+      ).rooms;
+      Map<String, Object?> edge(String login) => {
+        'cursor': 'c-$login',
+        'node': {
+          'type': 'live',
+          'broadcaster': {'login': login},
+        },
+      };
       final setup = _setup([
-        page('just-chatting', 100),
+        _recorded('S02-game'),
         _answer(
-          [TwitchApi.gameOperation('just-chatting', limit: 30)],
+          [TwitchApi.gameOperation('just-chatting', limit: 100, cursor: lastCursor)],
           body: [
             {
               'data': {
                 'game': {
                   'streams': {
-                    'edges': [
-                      {
-                        'cursor': 'area-cursor',
-                        'node': {
-                          'broadcaster': {'login': 'a'},
-                        },
-                      },
-                    ],
-                    'pageInfo': {'hasNextPage': true},
+                    'edges': [edge(first.last.roomId), edge('newcomer_a'), edge('newcomer_b')],
+                    'pageInfo': {'hasNextPage': false},
                   },
                 },
               },
             },
           ],
         ),
-        page('just-chatting', 100, cursor: lastCursor),
-        _answer([TwitchApi.gameOperation('just-chatting', limit: 30, cursor: 'area-cursor')], name: 'S02-game-missing'),
       ]);
-      await setup.site.getRecommendRooms(pageSize: 100);
-      await setup.site.getCategoryRooms(area);
-      await setup.site.getRecommendRooms(page: 2, pageSize: 100);
-      expect(_variables(setup.http.requests.last)['cursor'], lastCursor);
-      await setup.site.getCategoryRooms(area, page: 2);
-      expect(_variables(setup.http.requests.last)['cursor'], 'area-cursor');
+      expect(await setup.site.getCategoryRooms(area, pageSize: 100), hasLength(87));
+      final second = await setup.site.getCategoryRooms(area, page: 2, pageSize: 100);
+      expect(second.map((room) => room.roomId), ['newcomer_a', 'newcomer_b'], reason: 'a browser transport (M12)');
+      expect(await setup.site.getCategoryRooms(area, page: 3, pageSize: 100), isEmpty);
+      expect(setup.http.requests, hasLength(2), reason: 'no next page');
     });
 
-    test('an unknown directory has no streams (3.x); an area without a slug sends nothing', () async {
-      final setup = _setup([page('zzz-not-a-directory', 30, name: 'S02-game-missing')]);
-      expect(await setup.site.getCategoryRooms(const LiveArea(shortName: 'zzz-not-a-directory')), isEmpty);
+    test('page 1 fetches anew; a later page after 30 s fetches a new snapshot', () async {
+      var clock = _now;
+      final setup = _setup([_recorded('S02-game')], now: () => clock);
+      await setup.site.getCategoryRooms(area);
+      await setup.site.getCategoryRooms(area);
+      expect(setup.http.requests, hasLength(2), reason: 'a first page is a refresh');
+      clock = clock.add(const Duration(seconds: 29));
+      expect(await setup.site.getCategoryRooms(area, page: 2), hasLength(30));
+      expect(setup.http.requests, hasLength(2));
+      clock = clock.add(const Duration(seconds: 2));
+      expect(await setup.site.getCategoryRooms(area, page: 3), hasLength(27));
+      expect(setup.http.requests, hasLength(3), reason: 'the snapshot was 31 s old');
+    });
+
+    test('8-3: the language setting filters the list, read at each request; 3.x preset ZH + KO', () async {
+      var languages = <String>['zh', 'ko'];
+      final setup = _setup([
+        page('just-chatting', languages: ['ZH', 'KO']),
+        _recorded('S02-game'),
+      ], languages: () => languages);
+      await setup.site.getCategoryRooms(area);
+      expect((_variables(setup.http.requests.last)['options']! as Map)['broadcasterLanguages'], ['ZH', 'KO']);
+      expect(TwitchApi.legacyLanguages, ['ZH', 'KO']);
+      languages = [];
+      await setup.site.getCategoryRooms(area, page: 2);
+      expect(setup.http.requests, hasLength(2), reason: 'another setting is another list');
+      expect((_variables(setup.http.requests.last)['options']! as Map)['broadcasterLanguages'], isEmpty);
+    });
+
+    test('a first page answered with a challenge is RiskControl', () async {
+      final setup = _setup([page('just-chatting', name: 'S02-game-cursor')]);
+      await expectLater(setup.site.getCategoryRooms(area), throwsA(isA<RiskControl>()));
+    });
+
+    test('8-6: an unknown directory is NotFound; an area without a slug sends nothing', () async {
+      final setup = _setup([page('zzz-not-a-directory', name: 'S02-game-missing')]);
+      await expectLater(
+        setup.site.getCategoryRooms(const LiveArea(shortName: 'zzz-not-a-directory')),
+        throwsA(isA<NotFound>()),
+      );
       expect(await setup.site.getCategoryRooms(const LiveArea(areaId: '1')), isEmpty);
       expect(setup.http.requests, hasLength(1));
     });
+
+    test('other failures of a later chunk fail the page and keep the cursor', () async {
+      final script = _Script([
+        (200, jsonDecode(Fixture.load('twitch', 'S02-game').body) as Object),
+        const TransportFailure('twitch', TransportReason.timeout),
+        (200, jsonDecode(Fixture.load('twitch', 'S02-game-cursor').body) as Object),
+      ]);
+      final site = TwitchSite(script, random: Random(1), now: () => _now);
+      await site.getCategoryRooms(area, pageSize: 100);
+      await expectLater(site.getCategoryRooms(area, page: 2, pageSize: 100), throwsA(isA<NetworkFailure>()));
+      expect(await site.getCategoryRooms(area, page: 2, pageSize: 100), isEmpty);
+      expect(_variables(script.requests.last)['cursor'], lastCursor, reason: 'the retry used the same cursor');
+    });
   });
 
-  group('search', () {
-    test("the first page; later pages are empty without a request, as users saw 3.x's", () async {
-      final setup = _setup([_recorded('S04-search-p1')]);
-      expect(await setup.site.searchRooms('minecraft', pageSize: 20), hasLength(10));
-      expect(await setup.site.searchRooms('minecraft', page: 2), isEmpty);
-      expect(setup.http.requests, hasLength(1));
-      expect(await setup.site.searchRooms('  '), isEmpty);
-      expect(setup.http.requests, hasLength(1), reason: 'a blank keyword sends nothing');
+  group('recommendations (8-3: the whole site)', () {
+    test("the site's busiest streams, 30 asked (S03-top), with start times and restrictions; the next chunk's "
+        'challenge ends the list', () async {
+      final setup = _setup([_recorded('S03-top'), _recorded('S03-top-cursor')]);
+      final first = await setup.site.getRecommendRooms();
+      expect(first, hasLength(29));
+      expect(first.every((room) => room.startedAt != null && room.restriction == LiveRestriction.none), isTrue);
+      expect(_gqlBody(setup.http.requests.single)['query'], TwitchApi.streamsQuery);
+      expect(_variables(setup.http.requests.single), {'first': 30}, reason: 'no language filter by default');
+      expect(await setup.site.getRecommendRooms(page: 2), isEmpty);
+      expect(setup.http.requests, hasLength(2), reason: 'page 2 tried the cursor once');
+      expect(await setup.site.getRecommendRooms(page: 3), isEmpty);
+      expect(setup.http.requests, hasLength(2));
     });
 
-    test('with searchPaging, page 2 names the channel cursor in options.targets (REG-TWITCH-002)', () async {
+    test("3.x's popular page asks for 100: it gets the 29, in one request", () async {
+      final setup = _setup([_recorded('S03-top'), _recorded('S03-top-cursor')]);
+      expect(await setup.site.getRecommendRooms(pageSize: 100), hasLength(29));
+      expect(setup.http.requests, hasLength(1));
+    });
+
+    test('small pages continue where the last one ended', () async {
+      final setup = _setup([_recorded('S03-top'), _recorded('S03-top-cursor')]);
+      final pages = [
+        for (var number = 1; number <= 4; number++) await setup.site.getRecommendRooms(page: number, pageSize: 10),
+      ];
+      expect(pages.map((rooms) => rooms.length), [10, 10, 9, 0]);
+      expect([for (final rooms in pages) ...rooms].map((room) => room.roomId).toSet(), hasLength(29));
+    });
+
+    test('the language setting (S03-top-zh-ko); recommendations and areas keep their own snapshots', () async {
+      final setup = _setup([
+        _recorded('S03-top-zh-ko'),
+        _answer([
+          TwitchApi.gameOperation('just-chatting', limit: 100, languages: ['ZH', 'KO']),
+        ], name: 'S02-game'),
+      ], languages: () => [' zh', 'KO', 'bad value']);
+      final recommended = await setup.site.getRecommendRooms(pageSize: 10);
+      expect(recommended, hasLength(10));
+      expect(_variables(setup.http.requests.single)['languages'], ['ZH', 'KO']);
+      await setup.site.getCategoryRooms(const LiveArea(shortName: 'just-chatting'));
+      final again = await setup.site.getRecommendRooms(page: 2, pageSize: 10);
+      expect(again, hasLength(10), reason: "the recommendations' own snapshot");
+      expect(again.first.roomId, isNot(recommended.first.roomId));
+      expect(setup.http.requests, hasLength(2));
+    });
+
+    test('a first page answered with a challenge is RiskControl', () async {
+      final setup = _setup([_answer(TwitchApi.streamsOperation(limit: 30), name: 'S03-top-cursor')]);
+      await expectLater(setup.site.getRecommendRooms(), throwsA(isA<RiskControl>()));
+    });
+  });
+
+  group('search (8-1: paged)', () {
+    test('page 2 names the channel cursor in options.targets (REG-TWITCH-002); an empty page ends it', () async {
       final setup = _setup([
         _recorded('S04-search-p1'),
         _recorded('S04-search-p2'),
         _answer(TwitchApi.searchOperation('minecraft', cursor: 'MjU='), name: 'S04-search-empty'),
-      ], searchPaging: true);
+      ]);
       final first = await setup.site.searchRooms(' minecraft ');
+      expect(first, hasLength(10));
       final second = await setup.site.searchRooms('minecraft', page: 2);
       expect(second, hasLength(15));
       expect(second.map((room) => room.roomId).toSet().intersection(first.map((room) => room.roomId).toSet()), isEmpty);
@@ -488,31 +667,68 @@ void main() {
       expect(await setup.site.searchRooms('minecraft', page: 3), isEmpty);
       expect(await setup.site.searchRooms('minecraft', page: 4), isEmpty);
       expect(setup.http.requests, hasLength(3), reason: 'an empty page has no cursor');
+      expect(first.first.startedAt, isNotNull);
+      expect(first.first.avatar, startsWith('https://static-cdn.jtvnw.net/'), reason: '8-7');
+    });
+
+    test('a blank keyword sends nothing; a page without its cursor sends nothing', () async {
+      final setup = _setup([]);
+      expect(await setup.site.searchRooms('  '), isEmpty);
+      expect(await setup.site.searchRooms('minecraft', page: 2), isEmpty);
+      expect(setup.http.requests, isEmpty);
+    });
+
+    test("a later page answered with a challenge ends the search; the first page's is RiskControl", () async {
+      final setup = _setup([
+        _recorded('S04-search-p1'),
+        _answer(TwitchApi.searchOperation('minecraft', cursor: 'MTA='), body: _challenge(1).single),
+      ]);
+      await setup.site.searchRooms('minecraft');
+      expect(await setup.site.searchRooms('minecraft', page: 2), isEmpty);
+      final challenged = _setup([_answer(TwitchApi.searchOperation('x'), body: _challenge(1).single)]);
+      await expectLater(challenged.site.searchRooms('x'), throwsA(isA<RiskControl>()));
     });
   });
 
   group('detail', () {
     test('one user query; the id stays as asked, the request names the login in lower case', () async {
-      final setup = _setup([_recorded('S05-user-live')]);
+      final setup = _setup([_recorded('S05-detail-live')]);
       final room = await setup.site.getRoomDetail(roomId: 'Zarbex');
       expect(room.roomId, 'Zarbex');
       expect(room.isLiveNow, isTrue);
-      expect(room.onlineViewers, '23169');
+      expect(room.onlineViewers, '18561');
       expect(_variables(setup.http.requests.single)['login'], 'zarbex');
+      expect(_gqlBody(setup.http.requests.single)['query'], TwitchApi.userQuery);
+    });
+
+    test('the upgrades: description (8-4), live screenshot (8-5), Chinese area (8-2), start time, no restriction', () async {
+      final setup = _setup([_recorded('S05-detail-live')]);
+      final room = await setup.site.getRoomDetail(roomId: 'zarbex');
+      expect(room.introduction, 'GEIL GEMACHT 🗣️');
+      expect(
+        room.cover,
+        'https://static-cdn.jtvnw.net/previews-ttv/live_user_zarbex-640x360.jpg?&t=${_now.millisecondsSinceEpoch ~/ 1000}',
+      );
+      expect(room.avatar, isNot(room.cover));
+      expect(room.area, '谈天说地');
+      expect(room.startedAt, DateTime.utc(2026, 9, 28, 14, 2, 26));
+      expect(room.restriction, LiveRestriction.none);
     });
 
     test('refresh and recording send the same single request', () async {
-      final setup = _setup([_recorded('S05-user-offline')]);
+      final setup = _setup([_recorded('S05-detail-offline')]);
       final refreshed = await setup.site.getRoomDetailForRefresh(roomId: 'minecraft');
       final recorded = await setup.site.getRoomDetailForRecording(roomId: 'minecraft');
       expect(refreshed.isExplicitlyOfflineNow, isTrue);
+      expect(refreshed.introduction, isNotEmpty);
+      expect(refreshed.startedAt, isNull);
       expect(recorded.title, refreshed.title);
       expect(setup.http.requests, hasLength(2));
       expect(await setup.site.getLiveStatus(roomId: 'minecraft'), isFalse);
     });
 
     test('an unknown channel is NotFound; not a login is NotFound without a request', () async {
-      final setup = _setup([_recorded('S05-user-missing')]);
+      final setup = _setup([_answer(TwitchApi.userOperation('zzzznotachannelzzzz'), name: 'S05-user-missing')]);
       await expectLater(setup.site.getRoomDetail(roomId: 'zzzznotachannelzzzz'), throwsA(isA<NotFound>()));
       await expectLater(setup.site.getRoomDetail(roomId: 'not a login!'), throwsA(isA<NotFound>()));
       expect(setup.http.requests, hasLength(1));
@@ -527,7 +743,7 @@ void main() {
         '(REG-TWITCH-006)', () async {
       final vault = MemoryCookieVault()..set('twitch', 'auth-token=abc; login=Me; persistent=1');
       addTearDown(vault.dispose);
-      final setup = _setup([_recorded('S05-user-live')], cookies: vault);
+      final setup = _setup([_recorded('S05-detail-live')], cookies: vault);
       final room = await setup.site.getRoomDetail(roomId: 'zarbex');
       final args = room.danmakuData! as TwitchDanmakuArgs;
       expect(args.channel, 'zarbex');
@@ -538,38 +754,95 @@ void main() {
   });
 
   group('streams', () {
-    test("the access token, then usher: 3.x's qualities; lines from the quality with media headers", () async {
-      final setup = _setup([_recorded('S06-pat-live'), _usher('zarbex', 'S06-usher-live')]);
-      final qualities = await setup.site.getPlayQualities(detail: _live('zarbex'));
-      expect(qualities.map((quality) => quality.quality), ['1080P50（原画）', '720P60', '480P', '360P', '160P']);
-      final token = TwitchApi.accessToken(
-        TwitchApi.decode(Fixture.load('twitch', 'S06-pat-live').body, status: 200, what: 'token'),
-        login: 'zarbex',
-      );
-      final usher = setup.http.requests.last;
-      expect(usher.url.queryParameters['sig'], token.signature);
-      expect(usher.url.queryParameters['token'], token.value);
-      expect(usher.url.queryParameters['player_version'], '1.28.0-rc.1');
-      expect(usher.headers['client-id'], TwitchApi.clientId);
-      expect(usher.site, 'twitch');
-      final resolution = await setup.site.resolvePlayUrls(detail: _live('zarbex'), quality: qualities[1]);
-      expect(resolution.urls, qualities[1].data);
-      expect(resolution.lines.single.headers['referer'], 'https://www.twitch.tv/zarbex');
-      expect(resolution.appliedQualityData, qualities[1].id);
-      expect(setup.http.requests, hasLength(2), reason: 'the quality already holds its URLs');
-      expect(await setup.site.getPlayUrls(detail: _live('zarbex'), quality: qualities[1]), qualities[1].data);
+    test(
+      "the access token, then usher (H.264 only): 3.x's qualities; lines with the codec, without the cookie",
+      () async {
+        final setup = _setup([_recorded('S06-pat-live'), _usher('zarbex', 'S06-usher-live')]);
+        final qualities = await setup.site.getPlayQualities(detail: _live('zarbex'));
+        expect(qualities.map((quality) => quality.quality), ['1080P50（原画）', '720P60', '480P', '360P', '160P']);
+        final token = TwitchApi.accessToken(
+          TwitchApi.decode(Fixture.load('twitch', 'S06-pat-live').body, status: 200, what: 'token'),
+          login: 'zarbex',
+        );
+        final usher = setup.http.requests.last;
+        expect(usher.url.queryParameters['sig'], token.signature);
+        expect(usher.url.queryParameters['token'], token.value);
+        expect(usher.url.queryParameters['player_version'], '1.28.0-rc.1');
+        expect(usher.url.queryParameters['supported_codecs'], 'h264', reason: '8-8, "优先 H.264" on by default');
+        expect(usher.headers['client-id'], TwitchApi.clientId);
+        expect(usher.site, 'twitch');
+        final resolution = await setup.site.resolvePlayUrls(detail: _live('zarbex'), quality: qualities[1]);
+        expect(resolution.urls, qualities[1].data);
+        expect(resolution.lines.single.headers['referer'], 'https://www.twitch.tv/zarbex');
+        expect(resolution.lines.single.codec, 'avc');
+        expect(resolution.appliedQualityData, qualities[1].id);
+        expect(setup.http.requests, hasLength(2), reason: 'the quality already holds its URLs');
+        expect(await setup.site.getPlayUrls(detail: _live('zarbex'), quality: qualities[1]), qualities[1].data);
+      },
+    );
+
+    test('8-8: with "优先 H.264" off, usher is asked for HEVC and AV1 as well; the setting is read each time', () async {
+      var h264 = false;
+      final setup = _setup([
+        _recorded('S06-pat-live'),
+        _usher('zarbex', 'S06-usher-live', preferH264: false),
+        _usher('zarbex', 'S06-usher-live'),
+      ], preferH264: () => h264);
+      await setup.site.getPlayQualities(detail: _live('zarbex'));
+      expect(setup.http.requests.last.url.queryParameters['supported_codecs'], 'av1,h265,h264');
+      h264 = true;
+      await setup.site.getPlayQualities(detail: _live('zarbex'));
+      expect(setup.http.requests.last.url.queryParameters['supported_codecs'], 'h264');
     });
 
-    test('a room the detail did not call live has no stream: StreamUnavailable without a request', () async {
+    test('8-9: a rerun (replay) plays like a live stream', () async {
+      final setup = _setup([_recorded('S06-pat-live'), _usher('zarbex', 'S06-usher-live')]);
+      final qualities = await setup.site.getPlayQualities(detail: _live('zarbex', status: LiveStatus.replay));
+      expect(qualities, hasLength(5));
+    });
+
+    test('a room the detail called offline has no stream: StreamUnavailable without a request', () async {
       final setup = _setup([]);
       await expectLater(
-        setup.site.getPlayQualities(
-          detail: LiveRoom(platform: 'twitch', roomId: 'minecraft', liveStatus: LiveStatus.offline),
-        ),
+        setup.site.getPlayQualities(detail: _live('minecraft', status: LiveStatus.offline)),
         throwsA(isA<StreamUnavailable>()),
       );
       expect(setup.http.requests, isEmpty);
     });
+
+    test(
+      'a subscriber-only stream Twitch refuses is StreamUnavailable naming it; an unmarked one NeedsLogin',
+      () async {
+        final token = (200, _forbidden('UNAUTHORIZED_ENTITLEMENTS') as Object);
+        final restricted = TwitchSite(_Script([token]), random: Random(1));
+        await expectLater(
+          restricted.getPlayQualities(detail: _live('zarbex', restriction: LiveRestriction.subscribersOnly)),
+          throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('subscribersOnly'))),
+        );
+        final forbidden = TwitchSite(_Script([token]), random: Random(1));
+        await expectLater(
+          forbidden.getPlayQualities(detail: _live('zarbex', restriction: LiveRestriction.none)),
+          throwsA(isA<NeedsLogin>()),
+        );
+        final usher403 = TwitchSite(
+          _Script([
+            (200, jsonDecode(Fixture.load('twitch', 'S06-pat-live').body) as Object),
+            (403, '[{"error_code":"unauthorized_entitlements"}]'),
+          ]),
+          random: Random(1),
+        );
+        await expectLater(
+          usher403.getPlayQualities(detail: _live('zarbex', restriction: LiveRestriction.subscribersOnly)),
+          throwsA(isA<StreamUnavailable>()),
+        );
+        final geo = TwitchSite(_Script([(200, _forbidden('GEOBLOCKED') as Object)]), random: Random(1));
+        await expectLater(
+          geo.getPlayQualities(detail: _live('zarbex', restriction: LiveRestriction.subscribersOnly)),
+          throwsA(isA<RegionBlocked>()),
+          reason: 'the region is about this viewer, not the stream',
+        );
+      },
+    );
 
     test('a channel that went offline: usher 404 is StreamUnavailable', () async {
       final setup = _setup([_recorded('S06-pat-offline'), _usher('minecraft', 'S06-usher-offline')]);
@@ -591,6 +864,7 @@ void main() {
       final resolution = await setup.site.resolvePlayUrlsForRecovery(detail: _live('zarbex'), quality: old);
       expect(resolution.urls.single, startsWith('https://use22.playlist.ttvnw.net/v1/playlist/'));
       expect(resolution.appliedQualityData, old.id);
+      expect(resolution.lines.single.codec, 'avc');
       expect(setup.http.requests, hasLength(2));
     });
 
@@ -661,7 +935,7 @@ void main() {
       expect(await site.getPlayQualities(detail: _live('zarbex')), hasLength(5));
     });
 
-    test("media lines carry the stored cookie, as 3.x's PlaybackHeaderResolver did", () async {
+    test('8-7: media lines never carry the login cookie (3.x sent it to the CDN)', () async {
       final vault = MemoryCookieVault()..set('twitch', 'auth-token=t');
       addTearDown(vault.dispose);
       final setup = _setup([], cookies: vault);
@@ -669,7 +943,8 @@ void main() {
         detail: _live('zarbex'),
         quality: const LivePlayQuality(quality: '720P', id: 'q', data: ['https://a.test/1.m3u8']),
       );
-      expect(resolution.lines.single.headers['cookie'], 'auth-token=t');
+      expect(resolution.lines.single.headers.keys, isNot(contains('cookie')));
+      expect(resolution.lines.single.codec, isNull, reason: 'a plain list says no codec');
     });
 
     test('usher transport failures are NetworkFailure; cancellation passes through', () async {
@@ -743,4 +1018,26 @@ void main() {
       expect(http.requests, isEmpty);
     });
   });
+}
+
+/// Fails every request that asks for English (the tag names), passing the
+/// rest to [inner].
+final class _EnglishFailure implements LiveHttp {
+  new(this.inner);
+
+  final LiveHttp inner;
+
+  @override
+  Future<LiveResponse> send(LiveRequest request) async {
+    if ((request.headers['accept-language'] ?? '').startsWith('en')) {
+      return LiveResponse(status: 500, bytes: const [], url: request.url);
+    }
+    return await inner.send(request);
+  }
+
+  @override
+  Future<LiveStreamedResponse> open(LiveRequest request) => throw UnsupportedError('open');
+
+  @override
+  void close() {}
 }

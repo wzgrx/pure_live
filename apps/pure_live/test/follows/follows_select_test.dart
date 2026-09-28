@@ -69,7 +69,18 @@ void main() {
     final router = GoRouter(
       initialLocation: '/follows',
       routes: [
-        GoRoute(path: '/follows', builder: (context, state) => const FollowsPage()),
+        // As in the app: the follows page is the root of a shell branch.
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, shell) => shell,
+          branches: [
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/follows', builder: (context, state) => const FollowsPage())],
+            ),
+            StatefulShellBranch(
+              routes: [GoRoute(path: '/discover', builder: (context, state) => const Text('发现页'))],
+            ),
+          ],
+        ),
         GoRoute(
           path: '/multiview',
           builder: (context, state) {

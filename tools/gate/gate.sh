@@ -101,6 +101,7 @@ if [[ $stale == 1 ]]; then
 fi
 
 step "dependency direction" python3 tools/gate/check_deps.py
+step "fixture privacy" python3 tools/gate/check_fixtures.py
 for member in "${selected[@]}"; do
   step "$member format" dart format --output=none --set-exit-if-changed "$member"
   step "$member analyze" in_dir "$member" dart analyze --fatal-infos

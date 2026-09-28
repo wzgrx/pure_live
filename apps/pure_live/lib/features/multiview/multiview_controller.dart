@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart' show WidthClass;
 import 'package:pure_live_app/core/engine.dart';
 import 'package:pure_live_app/core/network.dart';
 import 'package:pure_live_app/core/proxy.dart';
@@ -150,6 +152,51 @@ final class MultiviewState {
 
 /// Decoders a device may run at once (LYT-1): phones and TVs 4, desktops 9.
 int multiviewCapacity() => Platform.isAndroid || Platform.isIOS ? 4 : 9;
+
+/// The layouts a window of [width] offers (spec/modules/multiview.md §2,
+/// principles §5.2): 1×1, 1×2 and 2×2 everywhere, 1+N from the expanded
+/// class, 3×3 from the large class on devices that run 9.
+List<MultiviewLayout> multiviewLayoutsFor(WidthClass width, {required int capacity}) => [
+  MultiviewLayout.one,
+  MultiviewLayout.two,
+  MultiviewLayout.four,
+  if (width.atLeast(WidthClass.expanded)) MultiviewLayout.onePlusN,
+  if (capacity >= 9 && width.atLeast(WidthClass.large)) MultiviewLayout.nine,
+];
+
+/// How many rooms [layout] shows at once: 1+N grows to the capacity.
+int multiviewHolds(MultiviewLayout layout, {required int capacity}) =>
+    layout == MultiviewLayout.onePlusN ? capacity : math.min(layout.cells, capacity);
+
+/// The most rooms one entry can fill with the [layouts] a window offers
+/// (ENT-1): more are left out, and the follows page says so.
+int multiviewRoomLimit(List<MultiviewLayout> layouts, {required int capacity}) =>
+    layouts.map((layout) => multiviewHolds(layout, capacity: capacity)).reduce(math.max);
+
+/// ENT-3: the layout to start with [rooms] rooms: [preferred] (the window's
+/// default) when they fit, else the smallest of [layouts] that shows them
+/// all (2×2, then 3×3, then 1+N), else the one that shows the most. Rooms
+/// must never land in cells a grid does not show.
+MultiviewLayout multiviewStartLayout(
+  int rooms, {
+  required MultiviewLayout preferred,
+  required List<MultiviewLayout> layouts,
+  required int capacity,
+}) {
+  if (rooms <= multiviewHolds(preferred, capacity: capacity)) return preferred;
+  final larger = [
+    for (final layout in [MultiviewLayout.four, MultiviewLayout.nine, MultiviewLayout.onePlusN])
+      if (layouts.contains(layout)) layout,
+  ];
+  for (final layout in larger) {
+    if (rooms <= multiviewHolds(layout, capacity: capacity)) return layout;
+  }
+  return larger.fold(
+    preferred,
+    (best, layout) =>
+        multiviewHolds(layout, capacity: capacity) > multiviewHolds(best, capacity: capacity) ? layout : best,
+  );
+}
 
 /// Per-room volumes shared with the single room (CEL-9); tests replace it.
 abstract interface class RoomVolumes {

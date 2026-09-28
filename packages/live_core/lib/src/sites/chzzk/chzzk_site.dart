@@ -10,22 +10,28 @@ import 'package:live_net/live_net.dart';
 
 const _site = 'chzzk';
 
+/// The qualities read for a room's playback data, until their lines are due
+/// for renewal (held weakly: they go with the room).
+final Expando<List<LivePlayQuality>> _fetched = Expando('chzzk qualities');
+
 /// The CHZZK (치지직) adapter (3.x's `ChzzkSite`; parsing in [ChzzkApi]).
 ///
 /// A room is a channel, its id the 32-hex `channelId`, as 3.x stored it.
 /// Anonymous, like 3.x: no cookie, no account; every request carries
-/// [ChzzkApi.headers] and follows no redirect. Requests are 3.x's:
-/// - the catalog is one fixed area, the popular directory, without a
-///   request;
-/// - the directory is `/service/v1/lives`, one request a page by cursor
-///   ([getDirectoryPageAtCursor]); by page number ([getDirectoryPage],
-///   recommendations and the area) it replays from page 1, within 20
-///   seconds;
+/// [ChzzkApi.headers] and follows no redirect. Requests:
+/// - the catalog is the platform's areas (20-1), up to four
+///   `categories/live` pages one after another;
+/// - a directory page is one request by cursor ([getDirectoryPageAtCursor]):
+///   `/service/v1/lives` for recommendations and 3.x's popular area, an
+///   area's `/service/v2/categories/<type>/<id>/lives` otherwise; by page
+///   number ([getDirectoryPage], recommendations and areas) it replays from
+///   page 1, within 20 seconds;
 /// - search is `/service/v1/search/channels`, one request a page;
-/// - follow refreshes and the live state read the channel and its
-///   `v3.1 live-detail` (two requests);
-/// - room entry, recordings and recovery read both, then each HLS master
-///   of the live (four requests for a playable live).
+/// - follow refreshes, the live state, room entry and recordings read the
+///   channel and its `v3.1 live-detail` (two requests; 20-9: 3.x also read
+///   both masters on entry);
+/// - the qualities read the live's HLS masters (two requests, together),
+///   which also serve its URLs; recovery reads all four again.
 ///
 /// Failures are `SiteError`s; nothing is disguised as an offline room.
 final class ChzzkSite extends LiveSite
@@ -36,11 +42,12 @@ final class ChzzkSite extends LiveSite
         LiveSiteCursorDirectoryPager,
         LiveDirectoryNotice,
         LiveCancellableSearch,
+        LiveQualityDiscovery,
         LivePlayUrlResolver,
         LivePlayRecoveryResolver {
-  /// Creates the adapter. [now] (when masters were issued) and
-  /// `directoryDeadline` (3.x's 20 seconds for a page-number replay) are
-  /// injectable for tests.
+  /// Creates the adapter. [now] (when masters were issued, and whether
+  /// their lines are due) and `directoryDeadline` (3.x's 20 seconds for a
+  /// page-number replay) are injectable for tests.
   new(this.http, {DateTime Function()? now, this._directoryDeadline = const Duration(seconds: 20)})
     : _now = now ?? DateTime.now;
 
@@ -56,8 +63,8 @@ final class ChzzkSite extends LiveSite
   @override
   String get name => ChzzkApi.categoryName;
 
-  /// 3.x's lasting note on what the directory covers (the site-wide popular
-  /// lives; search also finds offline channels).
+  /// The lasting note on what the directory covers (3.x's key; its text is
+  /// [ChzzkApi.directoryScope], 20-6).
   @override
   String get directoryNoticeKey => 'chzzk_directory_scope';
 
@@ -90,18 +97,37 @@ final class ChzzkSite extends LiveSite
 
   // Catalog and directory -----------------------------------------------------
 
-  /// 3.x's catalog (see [ChzzkApi.categories]) on page 1; later pages are
-  /// empty. No request.
+  /// The platform's areas by `categoryType` (20-1, see
+  /// [ChzzkApi.categories]) on page 1; later pages are empty without a
+  /// request. Up to [ChzzkApi.maxCategoryPages] `categories/live` pages,
+  /// each after the previous one's `next`; the first failing fails the
+  /// catalog, a later one ends it with the areas read so far.
   @override
-  Future<List<LiveCategory>> getCategories(int page, int pageSize) async =>
-      page == 1 ? ChzzkApi.categories() : const [];
+  Future<List<LiveCategory>> getCategories(int page, int pageSize) async {
+    if (page != 1) return const [];
+    final pages = <List<LiveArea>>[];
+    Map<String, String>? next = const {};
+    for (var index = 0; index < ChzzkApi.maxCategoryPages && next != null; index++) {
+      final ChzzkCategoryPage result;
+      try {
+        final response = await _get(_api('/service/v1/categories/live', ChzzkApi.categoriesQuery(next)));
+        result = ChzzkApi.categoryPage(response.text, status: response.status);
+      } on SiteError {
+        if (index == 0) rethrow;
+        break;
+      }
+      pages.add(result.areas);
+      next = result.next;
+    }
+    return ChzzkApi.categories(pages);
+  }
 
-  /// The directory page after [cursor] (null on page 1): one request (see
-  /// [ChzzkApi.livesQuery] and [ChzzkApi.lives]). [page] is the caller's
-  /// sequence: page 1 takes no cursor and later pages need one; [category]
-  /// is null or the popular area. Anything else, or a cursor this adapter
-  /// did not make, is a caller error (`ArgumentError`), refused before any
-  /// request as in 3.x.
+  /// The page after [cursor] (null on page 1) of [category]'s lives: one
+  /// request (see [ChzzkApi.livesUrl] and [ChzzkApi.lives]). Null or 3.x's
+  /// popular area is the site-wide list. [page] is the caller's sequence:
+  /// page 1 takes no cursor and later pages need one. Anything else, or a
+  /// cursor this adapter did not make, is a caller error (`ArgumentError`),
+  /// refused before any request as in 3.x.
   @override
   Future<LiveDirectoryPage> getDirectoryPageAtCursor({
     required int page,
@@ -113,15 +139,16 @@ final class ChzzkSite extends LiveSite
     if ((page == 1) != (cursor == null)) {
       throw ArgumentError.value(cursor, 'cursor', page == 1 ? 'page 1 takes no cursor' : 'page $page needs a cursor');
     }
-    ChzzkApi.checkArea(category);
-    final response = await _get(_api('/service/v1/lives', ChzzkApi.livesQuery(cursor)), cancel: cancel);
+    final response = await _get(ChzzkApi.livesUrl(category, cursor), cancel: cancel);
     final result = ChzzkApi.lives(response.text, cursor: cursor, status: response.status);
     return LiveDirectoryPage(rooms: result.rooms, page: page, hasMore: result.hasMore, nextCursor: result.nextCursor);
   }
 
-  /// Page [page] (1–20) of the directory, replayed from page 1 by cursor (3.x:
-  /// [page] requests); a directory that ends first gives an empty last page.
-  /// The replay has [ChzzkSite.new]'s deadline (20 seconds), after which its
+  /// Page [page] (1–20) of [category]'s lives (null: the site-wide list),
+  /// replayed from page 1 by cursor (3.x: [page] requests); a list that ends
+  /// first gives an empty last page. A channel already on an earlier page of
+  /// the replay is left out (viewer counts move rows between requests). The
+  /// replay has [ChzzkSite.new]'s deadline (20 seconds), after which its
   /// requests are cancelled and it is a `NetworkFailure`.
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
@@ -136,10 +163,19 @@ final class ChzzkSite extends LiveSite
     }
     Future<LiveDirectoryPage> replay() async {
       String? cursor;
+      final shown = <String>{};
       for (var current = 1; ; current++) {
         final result = await getDirectoryPageAtCursor(page: current, cursor: cursor, category: category, cancel: owned);
-        if (current == page) return result;
+        if (current == page) {
+          return LiveDirectoryPage(
+            rooms: result.rooms.where((room) => !shown.contains(room.roomId)),
+            page: page,
+            hasMore: result.hasMore,
+            nextCursor: result.nextCursor,
+          );
+        }
         if (!result.hasMore) return LiveDirectoryPage(rooms: const [], page: page, hasMore: false);
+        shown.addAll(result.rooms.map((room) => room.roomId));
         cursor = result.nextCursor;
       }
     }
@@ -154,13 +190,14 @@ final class ChzzkSite extends LiveSite
     }
   }
 
-  /// Page [page] of the popular directory ([getDirectoryPage]); [pageSize]
-  /// is not sent (3.x).
+  /// Page [page] of the site-wide popular lives ([getDirectoryPage]);
+  /// [pageSize] is not sent (3.x).
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async =>
       (await getDirectoryPage(page: page)).rooms;
 
-  /// As [getRecommendRooms], for the popular area.
+  /// As [getRecommendRooms], for [category] (an area of the catalog, or
+  /// 3.x's popular area).
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async =>
       (await getDirectoryPage(page: page, category: category)).rooms;
@@ -172,12 +209,13 @@ final class ChzzkSite extends LiveSite
       searchRoomsCancellable(keyword, page: page, pageSize: pageSize);
 
   /// Channels matching [keyword], live and offline (see
-  /// [ChzzkApi.searchRooms]), [pageSize] a page from offset
-  /// `(page - 1) * pageSize`. As 3.x, a page below 1 or a [pageSize] out of
-  /// 1–30 finds nothing, without a request. A blank keyword finds nothing
-  /// too (3.x refused it); a keyword over 100 characters or an offset over
-  /// 1000000 is a caller error (`ArgumentError`, no request), as 3.x
-  /// refused them.
+  /// [ChzzkApi.searchRooms]), [ChzzkApi.searchPageSize] a page from offset
+  /// `(page - 1) * 20` whatever [pageSize] says (20-5; 3.x's search page
+  /// asked 20 too). The keyword is cut to 100 characters
+  /// ([ChzzkApi.searchKeyword]; 20-5, 3.x refused a longer one). A page
+  /// below 1 or a blank keyword finds nothing, without a request (3.x); an
+  /// offset over 1000000 is a caller error (`RangeError`, no request), as
+  /// 3.x refused it.
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
     String keyword, {
@@ -185,16 +223,13 @@ final class ChzzkSite extends LiveSite
     int pageSize = 30,
     CancelToken? cancel,
   }) async {
-    if (page < 1 || pageSize < 1 || pageSize > ChzzkApi.maxSearchPageSize) return const [];
-    final text = keyword.trim();
+    if (page < 1) return const [];
+    final text = ChzzkApi.searchKeyword(keyword);
     if (text.isEmpty) return const [];
-    if (text.length > ChzzkApi.maxKeywordLength) {
-      throw ArgumentError.value(keyword, 'keyword', 'over ${ChzzkApi.maxKeywordLength} characters');
-    }
-    final offset = (page - 1) * pageSize;
+    final offset = (page - 1) * ChzzkApi.searchPageSize;
     if (offset > ChzzkApi.maxSearchOffset) throw RangeError.range(offset, 0, ChzzkApi.maxSearchOffset, 'offset');
     final response = await _get(
-      _api('/service/v1/search/channels', {'keyword': text, 'offset': '$offset', 'size': '$pageSize'}),
+      _api('/service/v1/search/channels', {'keyword': text, 'offset': '$offset', 'size': '${ChzzkApi.searchPageSize}'}),
       cancel: cancel,
     );
     return ChzzkApi.searchRooms(response.text, status: response.status);
@@ -205,118 +240,153 @@ final class ChzzkSite extends LiveSite
   /// The channel and its latest live (two requests); an id that is not a
   /// channel id (32 lower-case hex digits, as 3.x checked) is `NotFound`
   /// without a request.
-  Future<({ChzzkChannel owner, ChzzkLive? live})> _read(String roomId) async {
+  Future<({ChzzkChannel owner, ChzzkLive? live})> _read(String roomId, {CancelToken? cancel}) async {
     final id = roomId.trim();
     if (!ChzzkApi.isChannelId(id)) throw NotFound(_site, 'not a channel id: $id');
-    final channel = await _get(_api('/service/v1/channels/$id'));
+    final channel = await _get(_api('/service/v1/channels/$id'), cancel: cancel);
     final owner = ChzzkApi.channel(channel.text, channelId: id, status: channel.status);
-    final live = await _get(_api('/service/v3.1/channels/$id/live-detail'));
+    final live = await _get(_api('/service/v3.1/channels/$id/live-detail'), cancel: cancel);
     return (owner: owner, live: ChzzkApi.liveDetail(live.text, owner: owner, status: live.status));
   }
 
-  /// Room entry (3.x's `_detail` with playback): the channel, its live, and
-  /// for an open live with playback data each HLS master in order, which
-  /// give the qualities ([ChzzkRoomData]). A master that fails, or cannot be
-  /// read, fails the entry as in 3.x. A live without playback data (region,
-  /// adult) is entered; its stream says why it cannot play.
-  Future<LiveRoom> _entered(String roomId, {bool withDanmaku = false}) async {
-    final (:owner, :live) = await _read(roomId);
+  /// Room entry: the channel and its live (two requests), with the live's
+  /// masters or why it cannot play ([ChzzkRoomData]); the masters are read
+  /// with the qualities (20-9: entry is quicker, and a failing master no
+  /// longer hides the room). [strict] (recordings) throws unreadable
+  /// playback data at once.
+  Future<LiveRoom> _entered(String roomId, {bool withDanmaku = false, bool strict = false, CancelToken? cancel}) async {
+    final (:owner, :live) = await _read(roomId, cancel: cancel);
+    if (strict) {
+      if (live?.mediaError case final error?) throw error;
+    }
     final room = ChzzkApi.room(owner, live);
     final chat = live != null && live.isLive ? live.chatChannelId : null;
     return room.copyWith(
-      data: await _playback(owner.id, live),
-      danmakuData: withDanmaku && chat != null ? ChzzkDanmakuArgs(chatChannelId: chat) : null,
+      data: ChzzkApi.roomData(owner.id, live),
+      danmakuData: withDanmaku && chat != null ? ChzzkDanmakuArgs(channelId: owner.id, chatChannelId: chat) : null,
     );
   }
 
-  Future<ChzzkRoomData> _playback(String channelId, ChzzkLive? live) async {
-    if (live?.mediaError case final error?) throw error;
-    if (live == null || !live.isLive || live.media.isEmpty) {
-      return ChzzkRoomData(channelId: channelId, unavailable: ChzzkApi.unavailable(live));
-    }
-    final masters = <({ChzzkMedia media, String body})>[];
-    for (final media in live.media) {
-      final response = await _get(media.url);
-      masters.add((
-        media: media,
-        body: ChzzkApi.master(response.text, what: '${media.id} master', status: response.status),
-      ));
-    }
-    return ChzzkRoomData(
-      channelId: channelId,
-      qualities: ChzzkApi.qualities(masters, issuedAt: _now()),
-    );
-  }
-
-  /// The room with its qualities and the live's chat channel.
+  /// The room with its playback data and the live's chat.
   @override
   Future<LiveRoom> getRoomDetail({required String roomId}) => _entered(roomId, withDanmaku: true);
 
-  /// Follow-card refresh: the channel and its live, two requests as in 3.x;
-  /// no masters.
+  /// Follow-card refresh: the channel and its live, two requests as in 3.x.
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async {
     final (:owner, :live) = await _read(roomId);
     return ChzzkApi.room(owner, live);
   }
 
-  /// Room entry's answer (the qualities included), as 3.x's recorder asked.
+  /// Room entry's answer, the masters to read included, as 3.x's recorder
+  /// asked; unreadable playback data is `ApiChanged` here already.
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId, strict: true);
 
-  /// Whether the refresh detail says live; a failed request is an error,
-  /// never "offline".
+  /// Whether the refresh detail says live (the live, not the channel:
+  /// 20-7); a failed request is an error, never "offline".
   @override
   Future<bool> getLiveStatus({required String roomId}) async =>
       (await getRoomDetailForRefresh(roomId: roomId)).isLiveNow;
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities (see [ChzzkApi.qualities]) from the data room entry
-  /// brought: no request. A room without it (a list card, a refreshed
-  /// follow) is entered first; one the platform called offline has no
-  /// stream (`StreamUnavailable`, without a request). A live that cannot be
-  /// played says why (see [ChzzkApi.unavailable]).
   @override
-  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
-      ChzzkApi.playQualities(await _stream(detail, fresh: false));
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) =>
+      discoverPlayQualitiesRaw(detail: detail);
+
+  /// 3.x's qualities (see [ChzzkApi.qualities]) of the masters room entry
+  /// kept: both read together (20-9; 3.x read them on entry), each quality
+  /// holding its lines. A master that fails only loses its lines; when both
+  /// fail, the first failure is thrown. The answer serves [getPlayUrls] and
+  /// [resolvePlayUrlsRaw] of the same room until a line is due for renewal.
+  /// A room without playback data (a list card, a refreshed follow) is
+  /// entered first; one the platform called offline has no stream
+  /// (`StreamUnavailable`, without a request). A live that cannot be played
+  /// says why without a request (see [ChzzkApi.unavailable]). [cancel]
+  /// reaches the requests.
+  @override
+  Future<List<LivePlayQuality>> discoverPlayQualitiesRaw({required LiveRoom detail, CancelToken? cancel}) =>
+      _qualities(detail, fresh: false, cancel: cancel);
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
   /// The lines of [quality]: `HLS` then `LLHLS`, with the media headers and
-  /// their leases.
+  /// their leases; from the qualities just read, else as they are read.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
     required LiveRoom detail,
     required LivePlayQuality quality,
-  }) async => ChzzkApi.resolution(await _stream(detail, fresh: false), quality);
+  }) async => ChzzkApi.resolution(await _qualities(detail, fresh: false), quality);
 
-  /// Room entry again (3.x): the masters carry tokens. A quality the live no
-  /// longer offers is `StreamUnavailable`; the old lines are never reused.
+  /// Room entry and the masters again (3.x's four requests): the masters
+  /// carry tokens. A quality the live no longer offers is
+  /// `StreamUnavailable`; the old lines are never reused, and the new ones
+  /// serve the room's later requests.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
     required LiveRoom detail,
     required LivePlayQuality quality,
-  }) async => ChzzkApi.resolution(await _stream(detail, fresh: true), quality);
+  }) async => ChzzkApi.resolution(await _qualities(detail, fresh: true), quality);
 
-  Future<ChzzkRoomData> _stream(LiveRoom detail, {required bool fresh}) async {
+  /// The qualities of [detail]: those read for its playback data while no
+  /// line is due; else its masters, while their tokens hold; else (and
+  /// always when [fresh]) room entry and its masters.
+  Future<List<LivePlayQuality>> _qualities(LiveRoom detail, {required bool fresh, CancelToken? cancel}) async {
     if (detail.platform != _site) throw ArgumentError.value(detail, 'detail', 'not a CHZZK room');
+    _checkCancelled(cancel);
+    final held = switch (detail.data) {
+      final ChzzkRoomData data when data.channelId == detail.roomId => data,
+      _ => null,
+    };
     if (!fresh) {
-      if (detail.data case final ChzzkRoomData data when data.channelId == detail.roomId) return data;
-      if (detail.isExplicitlyOfflineNow) {
+      if (held != null) {
+        final now = _now();
+        if (_fetched[held] case final qualities? when ChzzkApi.linesFresh(qualities, now)) return qualities;
+        if (ChzzkApi.mastersFresh(held.media, now)) return await _fetchQualities(held, cancel);
+      } else if (detail.isExplicitlyOfflineNow) {
         throw StreamUnavailable(_site, '${detail.roomId} is ${detail.effectiveLiveStatus.name}');
       }
     }
-    return (await _entered(detail.roomId)).data! as ChzzkRoomData;
+    final entered = (await _entered(detail.roomId, cancel: cancel)).data! as ChzzkRoomData;
+    final qualities = await _fetchQualities(entered, cancel);
+    if (held != null) _fetched[held] = qualities;
+    return qualities;
+  }
+
+  /// The qualities of [data]'s masters, read together; kept with [data].
+  Future<List<LivePlayQuality>> _fetchQualities(ChzzkRoomData data, CancelToken? cancel) async {
+    if (data.media.isEmpty) throw data.unavailable ?? const StreamUnavailable(_site, 'no playback');
+    final issuedAt = _now();
+    final answers = await Future.wait([for (final media in data.media) _master(media, cancel)]);
+    final bodies = [
+      for (final answer in answers)
+        if (answer.body case final body?) (media: answer.media, body: body),
+    ];
+    if (bodies.isEmpty) throw answers.first.error!;
+    final qualities = ChzzkApi.qualities(bodies, issuedAt: issuedAt);
+    _fetched[data] = qualities;
+    return qualities;
+  }
+
+  /// One master's text, or why it failed (a cancellation is thrown).
+  Future<({ChzzkMedia media, String? body, SiteError? error})> _master(ChzzkMedia media, CancelToken? cancel) async {
+    try {
+      final response = await _get(media.url, cancel: cancel);
+      final body = ChzzkApi.master(response.text, what: '${media.id} master', status: response.status);
+      return (media: media, body: body, error: null);
+    } on SiteError catch (error) {
+      return (media: media, body: null, error: error);
+    }
   }
 
   // Links ---------------------------------------------------------------------
 
-  /// A live page `https://chzzk.naver.com/live/<id>` (see
-  /// [ChzzkApi.roomIdFromUrl]), without a request. CHZZK has no short
-  /// links.
+  /// A live page `https://chzzk.naver.com/live/<id>` or a channel page
+  /// `https://chzzk.naver.com/<id>` (20-4; see [ChzzkApi.roomIdFromUrl]),
+  /// without a request. CHZZK has no short links.
   @override
   String? roomIdFromUrl(String url) => ChzzkApi.roomIdFromUrl(url);
 }

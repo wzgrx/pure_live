@@ -13,6 +13,9 @@ import 'package:meta/meta.dart';
 
 const _site = 'chzzk';
 
+/// Korea Standard Time, the zone of every `openDate` (no daylight saving).
+const _kst = Duration(hours: 9);
+
 /// A CHZZK channel: the room identity (3.x's `ChzzkChannel`), from
 /// `/service/v1/channels/<id>` or a channel search result.
 @immutable
@@ -74,9 +77,11 @@ final class ChzzkLive {
     required this.area,
     required List<ChzzkMedia> media,
     this.online,
+    this.startedAt,
     this.adult = false,
     this.krOnly = false,
     this.abroadBlind = false,
+    this.paid = false,
     this.timeMachine = false,
     this.chatChannelId,
     this.mediaError,
@@ -103,6 +108,9 @@ final class ChzzkLive {
   /// `concurrentUserCount` when `cvExposure` allows showing it.
   final int? online;
 
+  /// `openDate` of an open live, in UTC (see [ChzzkApi.seoulTime]).
+  final DateTime? startedAt;
+
   /// `adult`: anonymous viewers get no playback.
   final bool adult;
 
@@ -111,6 +119,11 @@ final class ChzzkLive {
 
   /// `blindType == ABROAD`: hidden abroad.
   final bool abroadBlind;
+
+  /// A paid product is attached (`paidProduct`, `paidProductId` or
+  /// `watchPartyPaidProductId`); only used to name why a live without
+  /// playback cannot play.
+  final bool paid;
 
   /// `timeMachineActive`: the live can be rewound on the website.
   final bool timeMachine;
@@ -122,48 +135,53 @@ final class ChzzkLive {
   /// none, or is not usable: see [mediaError]).
   final List<ChzzkMedia> media;
 
-  /// Why `livePlaybackJson` could not be read; room entry reports it, the
+  /// Why `livePlaybackJson` could not be read; the stream reports it, the
   /// room's other fields still stand.
   final SiteError? mediaError;
 }
 
-/// What room entry keeps for playback (3.x's `_ChzzkPlayback`): the
-/// qualities with their lines, or why the live cannot be played.
+/// What room entry keeps for playback: the live's HLS masters, or why the
+/// live cannot be played. The masters are read when the qualities are
+/// asked for (20-9; 3.x read them on entry).
 @immutable
 final class ChzzkRoomData {
-  /// Creates the data; [unavailable] is required when [qualities] is empty.
-  new({required this.channelId, List<LivePlayQuality> qualities = const [], this.unavailable})
-    : qualities = List.unmodifiable(qualities),
-      assert(qualities.isNotEmpty || unavailable != null, 'an empty playback needs its reason');
+  /// Creates the data; [unavailable] is required when [media] is empty.
+  new({required this.channelId, List<ChzzkMedia> media = const [], this.unavailable})
+    : media = List.unmodifiable(media),
+      assert(media.isNotEmpty || unavailable != null, 'an empty playback needs its reason');
 
   /// The channel the playback belongs to.
   final String channelId;
 
-  /// Best first; each quality's `data` is its `List<LivePlayLine>`.
-  final List<LivePlayQuality> qualities;
+  /// The live's HLS masters in `livePlaybackJson` order (`HLS`, `LLHLS`).
+  final List<ChzzkMedia> media;
 
-  /// Why there is nothing to play (offline, region-locked, adult, no
-  /// playback data).
+  /// Why there is nothing to play (offline, region-locked, adult, paid, no
+  /// or unreadable playback data).
   final SiteError? unavailable;
 }
 
-/// The chat channel of a live. 3.x had no CHZZK danmaku (`EmptyDanmaku`);
+/// The chat of a live, for M5. 3.x had no CHZZK danmaku (`EmptyDanmaku`);
 /// room entry keeps the live's `chatChannelId` (the website's chat room,
-/// joined with an access token from `comm-api.game.naver.com`) for M5 to
-/// decide on.
+/// joined with an access token from `comm-api.game.naver.com`) and the
+/// channel it belongs to.
 @immutable
 final class ChzzkDanmakuArgs {
   /// Creates the arguments.
-  const new({required this.chatChannelId});
+  const new({required this.channelId, required this.chatChannelId});
+
+  /// The room's channel: its `live-detail` names the chat of a later live
+  /// (a restarted broadcast may get another chat channel).
+  final String channelId;
 
   /// `chatChannelId` of `live-detail`.
   final String chatChannelId;
 
   @override
-  String toString() => 'ChzzkDanmakuArgs($chatChannelId)';
+  String toString() => 'ChzzkDanmakuArgs($channelId, $chatChannelId)';
 }
 
-/// One page of the popular directory (`/service/v1/lives`).
+/// One page of a lives list (`/service/v1/lives` or an area's lives).
 @immutable
 final class ChzzkLivesPage {
   /// Creates the page.
@@ -179,9 +197,14 @@ final class ChzzkLivesPage {
   bool get hasMore => nextCursor != null && rooms.isNotEmpty;
 }
 
+/// One page of `categories/live`: its areas and the query of the next page
+/// (null on the last).
+typedef ChzzkCategoryPage = ({List<LiveArea> areas, Map<String, String>? next});
+
 /// Pure parsing of CHZZK (치지직, NAVER) responses (3.x's `ChzzkApi` and the
-/// card rules of `ChzzkSite`). Each function takes the response text and
-/// status and returns 3.x's models or throws a `SiteError`.
+/// card rules of `ChzzkSite`, with the upgrades of docs/UPGRADES.md 20-x).
+/// Each function takes the response text and status and returns 3.x's
+/// models or throws a `SiteError`.
 ///
 /// Anonymous and public: no cookie, no signature. A room is a channel, its
 /// id the 32-hex `channelId` (a live's `liveId` changes every broadcast).
@@ -215,35 +238,68 @@ abstract final class ChzzkApi {
   /// Display name (3.x's `ChzzkSite.name`).
   static const String categoryName = 'CHZZK';
 
-  /// The one area of 3.x's catalog: the site-wide popular lives (3.x's
-  /// zh.json `chzzk_public_directory`).
+  /// The one area of 3.x's catalog, the site-wide popular lives (3.x's
+  /// zh.json `chzzk_public_directory`); see [popularArea].
   static const String directoryAreaName = '公开热门直播';
 
-  /// 3.x's zh.json `chzzk_directory_scope`, the directory notice's text.
-  static const String directoryScope =
-      '官方公开热门直播目录，使用包含边界项的游标分页；原生频道搜索同时返回开播和未开播频道。仅在 cvExposure 允许时展示 concurrentUserCount。';
+  /// The default text of the directory notice `chzzk_directory_scope`
+  /// (20-6: 3.x's text spoke of an inclusive cursor, which the recordings
+  /// disprove, and of API field names; M13 translates it).
+  static const String directoryScope = '推荐是 CHZZK 全站正在直播的频道，按在线人数排序；分类是平台自己的分区。搜索按频道名查找，未开播的频道也会列出。主播关闭人数显示时不显示在线人数。';
 
-  /// The notice of an adult live (3.x's zh.json `chzzk_adult_notice`).
-  static const String adultNotice = '成人分级房间未返回公开匿名媒体源。';
+  /// The notice of an adult live (3.x's zh.json `chzzk_adult_notice` said
+  /// no public anonymous media source was returned; rewritten for users).
+  static const String adultNotice = '成人直播需要登录 CHZZK 并通过年龄验证，本应用暂时无法播放。';
 
   /// The notice of a region-locked live (3.x's zh.json
   /// `chzzk_region_notice`).
   static const String regionNotice = '当前地区受到播放限制。';
 
-  /// The notice of a live the website can rewind (3.x's zh.json
-  /// `chzzk_time_machine_notice`).
-  static const String timeMachineNotice = '实时 HLS 已启用；独立时光机回看会话纳入下一协议批次。';
+  /// The notice of a live the website can rewind (20-10; 3.x's zh.json
+  /// `chzzk_time_machine_notice` was a development note).
+  static const String timeMachineNotice = '这场直播在 CHZZK 网页上可以回看，本应用只播放实时画面。';
 
-  /// Rows of a directory page (3.x's `directory` size).
+  /// Rows of a lives page, also after a cursor (20-6; 3.x asked 31 after a
+  /// cursor).
   static const int pageSize = 30;
 
   /// The last page `getDirectoryPage` replays to (3.x).
   static const int maxDirectoryPage = 20;
 
-  /// Rows of a search page at most (3.x).
-  static const int maxSearchPageSize = 30;
+  /// Areas asked per `categories/live` page.
+  static const int categoryPageSize = 50;
 
-  /// The longest keyword searched (3.x).
+  /// `categories/live` pages read for the catalog (20-1): sorted by viewers,
+  /// four pages hold every area with a real audience (2026-09-29: 200 of
+  /// 228 areas, 1269 of 1298 lives).
+  static const int maxCategoryPages = 4;
+
+  /// Names of the platform's `categoryType`s, in catalog order; M13
+  /// translates them. Another type is listed after these under its own
+  /// name.
+  static const Map<String, String> categoryTypeNames = {
+    'GAME': '游戏',
+    'ENTERTAINMENT': '娱乐',
+    'SPORTS': '体育',
+    'ETC': '其他',
+  };
+
+  /// 3.x's stored popular area: still listed (the site-wide popular lives,
+  /// what recommendations show) though the catalog no longer has it.
+  static const LiveArea popularArea = LiveArea(
+    platform: _site,
+    areaType: 'directory',
+    typeName: categoryName,
+    areaId: 'popular',
+    areaName: directoryAreaName,
+  );
+
+  /// Rows of a search page, whatever the caller asks (20-5: the website's
+  /// size; 3.x's search page asked 20 too).
+  static const int searchPageSize = 20;
+
+  /// The longest keyword searched; a longer one is cut (20-5; 3.x refused
+  /// it).
   static const int maxKeywordLength = 100;
 
   /// The largest search offset (3.x).
@@ -254,6 +310,8 @@ abstract final class ChzzkApi {
   static const Duration leaseLead = Duration(minutes: 10);
 
   static final RegExp _channelId = RegExp(r'^[a-f0-9]{32}$');
+  static final RegExp _categoryType = RegExp(r'^[A-Za-z_]{1,32}$');
+  static final RegExp _unsafeAreaId = RegExp(r'[\s/\\?#\x00-\x1f\x7f]');
 
   /// Whether [text] is a channel id as 3.x checked it (lower-case only).
   static bool isChannelId(String text) => _channelId.hasMatch(text);
@@ -345,34 +403,149 @@ abstract final class ChzzkApi {
   /// value stays empty).
   static String _area(Map<String, dynamic> data) => _text(data['liveCategoryValue'] ?? data['liveCategory']);
 
+  static final RegExp _seoulTime = RegExp(r'^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$');
+
+  /// An `openDate` (`2026-09-27 17:52:04`) in UTC: CHZZK writes Korean time
+  /// (UTC+9; the newest start of the site-wide list was four minutes before
+  /// the request only when read as Korean time, 2026-09-29). Null when
+  /// missing, malformed or before 2000.
+  static DateTime? seoulTime(Object? value) {
+    final match = _seoulTime.firstMatch(jsonString(value) ?? '');
+    if (match == null) return null;
+    final parts = [for (var i = 1; i <= 6; i++) int.parse(match.group(i)!)];
+    final local = DateTime.utc(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+    if (local.month != parts[1] || local.day != parts[2] || local.hour != parts[3] || local.minute != parts[4]) {
+      return null;
+    }
+    final utc = local.subtract(_kst);
+    return utc.year >= 2000 ? utc : null;
+  }
+
+  /// Whether a live is hidden outside Korea (20-8): `krOnlyViewing`, or
+  /// `blindType == ABROAD` (lists carry only the latter; every such live
+  /// had both in its detail, 2026-09-29).
+  static bool _regionLocked(Map<String, dynamic> data) =>
+      data['krOnlyViewing'] == true || data['blindType'] == 'ABROAD';
+
+  /// Whether a paid product is attached to a live.
+  static bool _paid(Map<String, dynamic> data) =>
+      data['paidProduct'] != null || data['paidProductId'] != null || data['watchPartyPaidProductId'] != null;
+
   // Catalog and directory -----------------------------------------------------
 
-  /// 3.x's catalog: one category, CHZZK, with one area, the site-wide
-  /// popular lives (the platform's own categories are not used,
-  /// REG-CHZZK-004 is an upgrade candidate).
-  static List<LiveCategory> categories() => [
-    LiveCategory(
-      id: _site,
-      name: categoryName,
-      children: const [
-        LiveArea(
-          platform: _site,
-          areaType: 'directory',
-          typeName: categoryName,
-          areaId: 'popular',
-          areaName: directoryAreaName,
-        ),
-      ],
-    ),
-  ];
+  /// The query of the `categories/live` page after [after] (the previous
+  /// page's `next`, empty for the first).
+  static Map<String, String> categoriesQuery(Map<String, String> after) => {'size': '$categoryPageSize', ...after};
 
-  /// Checks that [area] is null or 3.x's popular area; anything else is a
-  /// caller error (3.x refused it before any request).
-  static void checkArea(LiveArea? area) {
-    if (area == null) return;
-    if (area.platform != _site || area.areaType != 'directory' || area.areaId != 'popular') {
-      throw ArgumentError.value(area, 'category', 'not the CHZZK popular directory');
+  /// One `categories/live` page (20-1): an area per entry (`categoryType`
+  /// the parent, `categoryId` the id, `categoryValue` the name,
+  /// `posterImageUrl` the picture) and the next page's query from
+  /// `page.next`, sent back as it came. A malformed entry is skipped; a
+  /// page of malformed entries only is `ApiChanged`. An empty page ends
+  /// the list.
+  static ChzzkCategoryPage categoryPage(String body, {int status = 200}) {
+    const what = 'categories/live';
+    final data = _object(content(body, what: what, status: status), what);
+    final rows = _list(data['data'], '$what.data');
+    final areas = <LiveArea>[];
+    for (final row in rows) {
+      if (row is Map) {
+        if (_categoryArea(_object(row, '$what row')) case final area?) areas.add(area);
+      }
     }
+    if (areas.isEmpty && rows.isNotEmpty) throw ApiChanged(_site, '$what: no readable entry of ${rows.length}');
+    return (areas: areas, next: rows.isEmpty ? null : _nextQuery(data['page']));
+  }
+
+  static LiveArea? _categoryArea(Map<String, dynamic> row) {
+    final type = _text(row['categoryType']);
+    final id = _text(row['categoryId']);
+    if (!_categoryType.hasMatch(type) || !isAreaId(id)) return null;
+    final name = _text(row['categoryValue']);
+    return LiveArea(
+      platform: _site,
+      areaType: type,
+      typeName: categoryTypeName(type),
+      areaId: id,
+      areaName: name.isEmpty ? id : name,
+      areaPic: image(row['posterImageUrl']),
+    );
+  }
+
+  /// `page.next` as a query: its scalar fields as text; null when absent.
+  static Map<String, String>? _nextQuery(Object? page) {
+    final next = page is Map ? page['next'] : null;
+    if (next is! Map) return null;
+    final query = {
+      for (final MapEntry(:key, :value) in next.entries)
+        if (value is num || (value is String && value.isNotEmpty)) '$key': '$value',
+    };
+    return query.isEmpty ? null : query;
+  }
+
+  /// The name shown for a `categoryType` ([categoryTypeNames], else the
+  /// type itself).
+  static String categoryTypeName(String type) => categoryTypeNames[type] ?? type;
+
+  /// The catalog from the `categories/live` pages (20-1): a category per
+  /// `categoryType` ([categoryTypeNames] first, in that order, then others
+  /// as they appear), its areas in the platform's order (by viewers), an
+  /// area once (counts move between page requests, so a later page may
+  /// repeat one). A type without areas is left out.
+  static List<LiveCategory> categories(Iterable<List<LiveArea>> pages) {
+    final byType = <String, List<LiveArea>>{};
+    final seen = <String>{};
+    for (final page in pages) {
+      for (final area in page) {
+        if (seen.add(area.areaId)) byType.putIfAbsent(area.areaType, () => []).add(area);
+      }
+    }
+    final order = [
+      ...categoryTypeNames.keys.where(byType.containsKey),
+      ...byType.keys.where((type) => !categoryTypeNames.containsKey(type)),
+    ];
+    return [for (final type in order) LiveCategory(id: type, name: categoryTypeName(type), children: byType[type]!)];
+  }
+
+  /// Whether [id] can be an area id in a request path: not blank, at most
+  /// 128 characters, no whitespace, control characters, `/`, `\`, `?` or
+  /// `#`, not `.` or `..` (ids are sent path-encoded; one has `&`:
+  /// `Mount_&_Blade2_Bannerlord`).
+  static bool isAreaId(String id) =>
+      id.isNotEmpty && id.length <= 128 && id != '.' && id != '..' && !_unsafeAreaId.hasMatch(id);
+
+  /// Whether [area] is 3.x's popular area ([popularArea]).
+  static bool isPopular(LiveArea area) =>
+      area.platform == _site && area.areaType == popularArea.areaType && area.areaId == popularArea.areaId;
+
+  /// Checks that [area] is null or the popular area (the site-wide lives),
+  /// or an area of the catalog: a CHZZK area with a `categoryType` and an
+  /// [isAreaId] id. Anything else is a caller error, refused before any
+  /// request.
+  static void checkArea(LiveArea? area) {
+    if (area == null || isPopular(area)) return;
+    if (area.platform != _site ||
+        area.areaType == popularArea.areaType ||
+        !_categoryType.hasMatch(area.areaType) ||
+        !isAreaId(area.areaId)) {
+      throw ArgumentError.value(area, 'category', 'not a CHZZK area');
+    }
+  }
+
+  /// The lives page of [area] after [cursor] ([livesQuery]): the site-wide
+  /// `/service/v1/lives` for null or the popular area (3.x), else
+  /// `/service/v2/categories/<type>/<id>/lives` (20-1). Checks both first
+  /// ([checkArea], [decodeCursor]).
+  static Uri livesUrl(LiveArea? area, String? cursor) {
+    checkArea(area);
+    final query = livesQuery(cursor);
+    if (area == null || isPopular(area)) return Uri.https(apiHost, '/service/v1/lives', query);
+    return Uri(
+      scheme: 'https',
+      host: apiHost,
+      pathSegments: ['service', 'v2', 'categories', area.areaType, area.areaId, 'lives'],
+      queryParameters: query,
+    );
   }
 
   /// The cursor after the row of [viewers] and [liveId]: 3.x's opaque JSON.
@@ -397,25 +570,28 @@ abstract final class ChzzkApi {
     throw ArgumentError.value(cursor, 'cursor', 'not a CHZZK directory cursor');
   }
 
-  /// The query of the directory page after [cursor] (3.x): [pageSize] rows
-  /// on the first page; after a cursor one more, because 3.x took the
-  /// cursor for inclusive and drops the repeated row.
+  /// The query of the lives page after [cursor]: [pageSize] rows, after a
+  /// cursor with its two fields (20-6: the cursor is exclusive, the page
+  /// after it starts at the next row, `S03-lives-p1`/`p2`; 3.x asked one
+  /// more row and dropped the repeated first).
   static Map<String, String> livesQuery(String? cursor) {
     if (cursor == null) return {'size': '$pageSize'};
     final after = decodeCursor(cursor);
-    return {'size': '${pageSize + 1}', 'concurrentUserCount': '${after.viewers}', 'liveId': '${after.liveId}'};
+    return {'size': '$pageSize', 'concurrentUserCount': '${after.viewers}', 'liveId': '${after.liveId}'};
   }
 
-  /// A directory page fetched with [livesQuery] of [cursor].
+  /// A lives page fetched with [livesQuery] of [cursor] (the site-wide list
+  /// or an area's, which have the same rows).
   ///
-  /// As 3.x: a first row that is the cursor's own live is dropped, the rest
-  /// is cut to [pageSize], a channel appears once, every card is live, and
-  /// the next cursor is `page.next` unless it repeats [cursor].
+  /// As 3.x: a first row that is the cursor's own live is dropped (kept as
+  /// a guard; the platform starts after it), the rest is cut to [pageSize],
+  /// a channel appears once, every card is live, and the next cursor is
+  /// `page.next` unless it repeats [cursor].
   ///
   /// Unlike 3.x, a row that cannot be a card (no channel id or `liveId`) is
   /// skipped instead of failing the page, an empty title is the channel
   /// name, and when rows were cut the next cursor points after the last row
-  /// kept: `page.next` names the last row sent, so 3.x skipped the cut row.
+  /// kept. Cards carry their start and restriction (see [_liveCard]).
   static ChzzkLivesPage lives(String body, {String? cursor, int status = 200}) {
     const what = 'lives';
     final data = _object(content(body, what: what, status: status), what);
@@ -461,10 +637,23 @@ abstract final class ChzzkApi {
     );
   }
 
-  /// A live card of the directory (3.x's `_liveCard`).
+  /// A live card of a lives list (3.x's `_liveCard`), with the start
+  /// (`openDate`) and what keeps it from playing: region-locked (20-8: with
+  /// 3.x's region notice), else adult (3.x's adult notice), else nothing
+  /// when no paid product is attached (unknown when one is: none of 600
+  /// lives had one, 2026-09-29).
   static LiveRoom _liveCard(Map<String, dynamic> row, Map<String, dynamic> channel, String id) {
     final name = _text(channel['channelName']);
     final title = _text(row['liveTitle']);
+    final LiveRestriction? restriction;
+    final String? notice;
+    if (_regionLocked(row)) {
+      (restriction, notice) = (LiveRestriction.regionBlocked, regionNotice);
+    } else if (row['adult'] == true) {
+      (restriction, notice) = (LiveRestriction.adult, adultNotice);
+    } else {
+      (restriction, notice) = (_paid(row) ? null : LiveRestriction.none, null);
+    }
     return LiveRoom(
       platform: _site,
       roomId: id,
@@ -476,13 +665,30 @@ abstract final class ChzzkApi {
       area: _area(row),
       link: roomUrl(id),
       liveStatus: LiveStatus.live,
+      startedAt: seoulTime(row['openDate']),
+      restriction: restriction,
       onlineViewers: _online(row)?.toString() ?? '',
       audienceMetricType: AudienceMetricType.onlineViewers,
-      notice: row['adult'] == true ? adultNotice : null,
+      notice: notice,
     );
   }
 
   // Search --------------------------------------------------------------------
+
+  /// The keyword sent for [keyword]: trimmed and cut to [maxKeywordLength]
+  /// UTF-16 code units (3.x's measure), never inside a surrogate pair, then
+  /// trimmed again (20-5; 3.x refused a longer one). Empty when there is
+  /// nothing to search for.
+  static String searchKeyword(String keyword) {
+    var text = keyword.trim();
+    if (text.length > maxKeywordLength) {
+      var end = maxKeywordLength;
+      final last = text.codeUnitAt(end - 1);
+      if (last >= 0xD800 && last <= 0xDBFF) end--;
+      text = text.substring(0, end).trim();
+    }
+    return text;
+  }
 
   /// Channel search results as cards (3.x's `_channelCard`): the title is
   /// the channel name, the cover its avatar, live by `openLive`. A result
@@ -511,8 +717,8 @@ abstract final class ChzzkApi {
   }
 
   /// A channel as a card (3.x's `_channelCard`, also the room of a channel
-  /// that is not live).
-  static LiveRoom channelCard(ChzzkChannel channel) => LiveRoom(
+  /// that is not live): live by `openLive` unless [status] says otherwise.
+  static LiveRoom channelCard(ChzzkChannel channel, {LiveStatus? status}) => LiveRoom(
     platform: _site,
     roomId: channel.id,
     userId: channel.id,
@@ -523,7 +729,7 @@ abstract final class ChzzkApi {
     followers: channel.followers?.toString() ?? '',
     introduction: channel.description,
     link: roomUrl(channel.id),
-    liveStatus: channel.isLive ? LiveStatus.live : LiveStatus.offline,
+    liveStatus: status ?? (channel.isLive ? LiveStatus.live : LiveStatus.offline),
   );
 
   // Rooms ---------------------------------------------------------------------
@@ -584,9 +790,11 @@ abstract final class ChzzkApi {
       cover: cover(map['liveImageUrl'], map['defaultThumbnailImageUrl']),
       area: _area(map),
       online: _online(map),
+      startedAt: isLive ? seoulTime(map['openDate']) : null,
       adult: map['adult'] == true,
       krOnly: map['krOnlyViewing'] == true,
       abroadBlind: map['blindType'] == 'ABROAD',
+      paid: _paid(map),
       timeMachine: map['timeMachineActive'] == true,
       chatChannelId: jsonString(map['chatChannelId']),
       media: playback.media,
@@ -596,9 +804,11 @@ abstract final class ChzzkApi {
 
   /// The HLS masters of `livePlaybackJson` (3.x's `_playbackMedia`): the
   /// `HLS` and `LLHLS` items of protocol `HLS`, in its order, each master
-  /// once. Absent is none; anything 3.x refused is `ApiChanged`: not a JSON
-  /// string, no `media` list, an item without protocol or id, or a master
-  /// that is not a plain https URL on `akamaized.net`.
+  /// once. Absent is none. Not a JSON string, no `media` list or more than
+  /// 16 items is `ApiChanged`, as in 3.x. An item without protocol or id,
+  /// or whose master is not a plain https URL on `akamaized.net`, is
+  /// skipped (3.x refused the whole live); only when no usable master is
+  /// left is it `ApiChanged`.
   static List<ChzzkMedia> media(Object? raw) {
     const what = 'livePlaybackJson';
     if (raw == null || raw == '') return const [];
@@ -613,16 +823,27 @@ abstract final class ChzzkApi {
     if (items.length > 16) throw ApiChanged(_site, '$what: ${items.length} media');
     final result = <ChzzkMedia>[];
     final seen = <Uri>{};
+    var broken = 0;
     for (final item in items) {
-      final media = _object(item, '$what item');
-      final protocol = _text(media['protocol']);
-      final id = _text(media['mediaId']);
-      if (protocol.isEmpty || id.isEmpty) throw const ApiChanged(_site, '$what: item without protocol or mediaId');
+      if (item is! Map) {
+        broken++;
+        continue;
+      }
+      final protocol = _text(item['protocol']);
+      final id = _text(item['mediaId']);
+      if (protocol.isEmpty || id.isEmpty) {
+        broken++;
+        continue;
+      }
       if (protocol != 'HLS' || (id != 'HLS' && id != 'LLHLS')) continue;
-      final url = _mediaUrl(media['path']);
-      if (url == null) throw ApiChanged(_site, '$what: $id path is not an Akamai URL');
+      final url = _mediaUrl(item['path']);
+      if (url == null) {
+        broken++;
+        continue;
+      }
       if (seen.add(url)) result.add(ChzzkMedia(id, url));
     }
+    if (result.isEmpty && broken > 0) throw ApiChanged(_site, '$what: $broken unusable media, no usable master');
     return List.unmodifiable(result);
   }
 
@@ -643,14 +864,16 @@ abstract final class ChzzkApi {
   }
 
   /// The room of [owner] and its latest [live] (3.x's `_detail` without the
-  /// stream): a live that is not open (or none) is the channel card, live by
-  /// the channel's `openLive`; an open live is its card with the channel's
-  /// followers and introduction and 3.x's notice (region, else adult
-  /// without playback, else rewindable, else adult).
+  /// stream): a live that is not open (or none) is the channel card, offline
+  /// whatever the channel's `openLive` says (20-7: the channel may still say
+  /// live after the live closed); an open live is its card with the
+  /// channel's followers and introduction, its start, its [restriction]
+  /// and 3.x's notice (region, else adult without playback, else rewindable,
+  /// else adult), region now also by `blindType` (20-8).
   static LiveRoom room(ChzzkChannel owner, ChzzkLive? live) {
-    if (live == null || !live.isLive) return channelCard(owner);
+    if (live == null || !live.isLive) return channelCard(owner, status: LiveStatus.offline);
     final String? notice;
-    if (live.krOnly) {
+    if (live.krOnly || live.abroadBlind) {
       notice = regionNotice;
     } else if (live.adult && live.media.isEmpty) {
       notice = adultNotice;
@@ -670,6 +893,8 @@ abstract final class ChzzkApi {
       area: live.area,
       link: roomUrl(owner.id),
       liveStatus: LiveStatus.live,
+      startedAt: live.startedAt,
+      restriction: restriction(live),
       onlineViewers: live.online?.toString() ?? '',
       audienceMetricType: AudienceMetricType.onlineViewers,
       followers: owner.followers?.toString() ?? '',
@@ -678,15 +903,39 @@ abstract final class ChzzkApi {
     );
   }
 
+  /// What keeps an open [live] from playing here: nothing when it has
+  /// playback data; else region-locked, adult, paid, or unplayable, in the
+  /// order of [unavailable]. Null when it is not open, or when its playback
+  /// data could not be read.
+  static LiveRestriction? restriction(ChzzkLive? live) {
+    if (live == null || !live.isLive) return null;
+    if (live.media.isNotEmpty) return LiveRestriction.none;
+    if (live.mediaError != null) return null;
+    if (live.krOnly || live.abroadBlind) return LiveRestriction.regionBlocked;
+    if (live.adult) return LiveRestriction.adult;
+    if (live.paid) return LiveRestriction.paid;
+    return LiveRestriction.unplayable;
+  }
+
   /// Why [live] has nothing to play: not live `StreamUnavailable`,
-  /// region-locked (`krOnlyViewing`, or hidden abroad) `RegionBlocked`,
-  /// adult `NeedsLogin`, anything else (a paid live...) `StreamUnavailable`.
+  /// unreadable playback data its `ApiChanged`, region-locked
+  /// (`krOnlyViewing`, or hidden abroad) `RegionBlocked`, adult
+  /// `NeedsLogin`, paid or anything else `StreamUnavailable` naming it.
   static SiteError unavailable(ChzzkLive? live) {
     if (live == null || !live.isLive) return const StreamUnavailable(_site, 'not live');
     if (live.mediaError case final error?) return error;
     if (live.krOnly || live.abroadBlind) return const RegionBlocked(_site, 'krOnlyViewing');
     if (live.adult) return const NeedsLogin(_site, 'adult live');
+    if (live.paid) return const StreamUnavailable(_site, 'paid live');
     return const StreamUnavailable(_site, 'live without playback');
+  }
+
+  /// What room entry keeps of [live] for playback ([ChzzkRoomData]).
+  static ChzzkRoomData roomData(String channelId, ChzzkLive? live) {
+    final playable = live != null && live.isLive && live.media.isNotEmpty;
+    return playable
+        ? ChzzkRoomData(channelId: channelId, media: live.media)
+        : ChzzkRoomData(channelId: channelId, unavailable: unavailable(live));
   }
 
   // Streams -------------------------------------------------------------------
@@ -706,20 +955,23 @@ abstract final class ChzzkApi {
   /// variant, best first. Each quality holds its lines (`data`), one per
   /// variant URL in master order: the line id is the media id, the headers
   /// are [mediaHeaders], the codec is the variant's and the lease that of
-  /// its token. A master the shared parser refuses is `ApiChanged` (as in
-  /// 3.x); a variant without a resolution (audio only, which failed 3.x's
-  /// room) is left out; no video variant at all is `StreamUnavailable`.
+  /// its token. A variant without a resolution (audio only, which failed
+  /// 3.x's room) is left out. A master the shared parser refuses only loses
+  /// its lines (3.x failed the room); when none is readable it is
+  /// `ApiChanged`, and no video variant at all is `StreamUnavailable`.
   static List<LivePlayQuality> qualities(
     List<({ChzzkMedia media, String body})> masters, {
     required DateTime issuedAt,
   }) {
     final builders = <String, ({int rank, List<LivePlayLine> lines})>{};
+    SiteError? unreadable;
     for (final master in masters) {
       final HlsMasterPlaylist playlist;
       try {
         playlist = HlsMasterPlaylist.parse(master.media.url, master.body);
       } on FormatException catch (error) {
-        throw ApiChanged(_site, '${master.media.id} master: ${error.message}');
+        unreadable ??= ApiChanged(_site, '${master.media.id} master: ${error.message}');
+        continue;
       }
       for (final variant in playlist.variants) {
         final height = int.tryParse((variant.attributes['RESOLUTION'] ?? '').split('x').last) ?? 0;
@@ -751,7 +1003,7 @@ abstract final class ChzzkApi {
           data: List<LivePlayLine>.unmodifiable(builder.lines),
         ),
     ]..sort((a, b) => b.sort.compareTo(a.sort));
-    if (qualities.isEmpty) throw const StreamUnavailable(_site, 'no video variant');
+    if (qualities.isEmpty) throw unreadable ?? const StreamUnavailable(_site, 'no video variant');
     return List.unmodifiable(qualities);
   }
 
@@ -768,6 +1020,17 @@ abstract final class ChzzkApi {
   static final RegExp _variantExpiry = RegExp(r'hdntl=exp=(\d{9,12})');
   static final RegExp _masterExpiry = RegExp(r'(?:^|~)exp=(\d{9,12})');
 
+  /// When the token of [master] (`hdnts`'s `exp`) expires; null without one.
+  static DateTime? masterExpiry(Uri master) {
+    String? exp;
+    try {
+      exp = _masterExpiry.firstMatch(master.queryParameters['hdnts'] ?? '')?.group(1);
+    } on FormatException {
+      exp = null;
+    }
+    return exp == null ? null : DateTime.fromMillisecondsSinceEpoch(int.parse(exp) * 1000, isUtc: true);
+  }
+
   /// The lease of a variant issued at [issuedAt]: its Akamai token expires
   /// at the `exp` of the variant path's `hdntl`, else of the master's
   /// `hdnts` (about 17 hours after issue); it is renewed [leaseLead] (at
@@ -775,46 +1038,55 @@ abstract final class ChzzkApi {
   /// request, so expiry ends playback. Null without a future expiry. (3.x
   /// had no lease: it fetched the room again after a failure.)
   static PlayLease? lease(Uri variant, {required Uri master, required DateTime issuedAt}) {
-    var exp = _variantExpiry.firstMatch(variant.path)?.group(1);
-    if (exp == null) {
-      try {
-        exp = _masterExpiry.firstMatch(master.queryParameters['hdnts'] ?? '')?.group(1);
-      } on FormatException {
-        exp = null;
-      }
-    }
-    if (exp == null) return null;
-    final expiresAt = DateTime.fromMillisecondsSinceEpoch(int.parse(exp) * 1000, isUtc: true);
+    final exp = _variantExpiry.firstMatch(variant.path)?.group(1);
+    final expiresAt = exp == null
+        ? masterExpiry(master)
+        : DateTime.fromMillisecondsSinceEpoch(int.parse(exp) * 1000, isUtc: true);
+    if (expiresAt == null) return null;
     final lifetime = expiresAt.difference(issuedAt);
     if (lifetime <= Duration.zero) return null;
     final lead = Duration(microseconds: math.min(leaseLead.inMicroseconds, lifetime.inMicroseconds ~/ 4));
     return PlayLease(refreshAt: expiresAt.subtract(lead), expiresAt: expiresAt, cutsConnection: true);
   }
 
-  /// The lines of [quality] (by its id) among [data]'s qualities, applied as
-  /// asked; a quality the live does not offer is `StreamUnavailable`, and a
-  /// live with nothing to play reports why.
-  static LivePlayUrlResolution resolution(ChzzkRoomData data, LivePlayQuality quality) {
-    final offered = playQualities(data);
+  /// Whether [qualities]' lines can still be handed out at [now]: no line's
+  /// lease is due.
+  static bool linesFresh(List<LivePlayQuality> qualities, DateTime now) {
+    for (final quality in qualities) {
+      for (final line in quality.data! as List<LivePlayLine>) {
+        if (line.lease case final lease? when !now.isBefore(lease.refreshAt)) return false;
+      }
+    }
+    return true;
+  }
+
+  /// Whether [media]'s masters can still be requested at [now]: none of
+  /// their tokens expires within [leaseLead].
+  static bool mastersFresh(List<ChzzkMedia> media, DateTime now) => media.every(
+    (item) => switch (masterExpiry(item.url)) {
+      final expiry? => now.add(leaseLead).isBefore(expiry),
+      null => true,
+    },
+  );
+
+  /// The lines of [quality] (by its id) among the [offered] qualities,
+  /// applied as asked; a quality the live does not offer is
+  /// `StreamUnavailable`.
+  static LivePlayUrlResolution resolution(List<LivePlayQuality> offered, LivePlayQuality quality) {
     final wanted = '${quality.selectionId}';
     final match = offered.where((option) => '${option.selectionId}' == wanted).firstOrNull;
     if (match == null) throw StreamUnavailable(_site, 'quality $wanted is not offered');
     return LivePlayUrlResolution.lines(match.data! as List<LivePlayLine>, appliedQualityData: match.selectionId);
   }
 
-  /// [data]'s qualities, or why there are none.
-  static List<LivePlayQuality> playQualities(ChzzkRoomData data) {
-    if (data.qualities.isNotEmpty) return data.qualities;
-    throw data.unavailable ?? const StreamUnavailable(_site, 'no quality');
-  }
-
   // Links ---------------------------------------------------------------------
 
-  /// The channel of a live page (3.x's `ChzzkLink.parse`): http(s) on
-  /// `chzzk.naver.com` exactly, without user info, the path `/live/<id>`
-  /// (empty segments ignored), the id in any case; returned in lower case.
-  /// Other pages (the channel page `/<id>`, `m.chzzk.naver.com`) are not
-  /// rooms, as in 3.x.
+  /// The channel of a CHZZK page: http(s) on `chzzk.naver.com` exactly,
+  /// without user info, empty path segments ignored, the id in any case,
+  /// returned in lower case. The live page `/live/<id>` (3.x's
+  /// `ChzzkLink.parse`), and the channel page `/<id>` with at most one tab
+  /// (`/<id>/videos`...) (20-4; 3.x did not take it). Other pages
+  /// (`/video/<no>`, `m.chzzk.naver.com`) are not rooms.
   static String? roomIdFromUrl(String url) {
     final uri = Uri.tryParse(url.trim());
     if (uri == null ||
@@ -829,8 +1101,12 @@ abstract final class ChzzkApi {
     } on FormatException {
       return null;
     }
-    if (segments.length != 2 || segments.first != 'live') return null;
-    final id = segments[1].trim().toLowerCase();
-    return isChannelId(id) ? id : null;
+    final candidate = switch (segments) {
+      ['live', final id] => id,
+      [final id] || [final id, _] => id,
+      _ => null,
+    };
+    final id = candidate?.trim().toLowerCase();
+    return id != null && isChannelId(id) ? id : null;
   }
 }

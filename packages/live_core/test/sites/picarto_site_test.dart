@@ -38,16 +38,22 @@ _Setup _setup(List<String> samples, {List<ReplaySample> extra = const []}) {
 
 /// Answers each request with the next of [answers] (a [TransportReason]
 /// throws, a function is called with the request), recording the requests.
+/// The public API, which room entry asks for the start of a live broadcast
+/// beside the master playlist, is answered with [publicApi] (by default
+/// "Channel does not exist") and takes nothing from [answers].
 final class _Scripted implements LiveHttp {
-  new(this.answers);
+  new(this.answers, {this.publicApi});
 
   final List<Object> answers;
+  final Object? publicApi;
   final List<LiveRequest> requests = [];
 
   @override
   Future<LiveResponse> send(LiveRequest request) async {
     requests.add(request);
-    var next = answers.removeAt(0);
+    var next = request.url.host == PicartoApi.publicApiHost
+        ? publicApi ?? _answer('"Channel does not exist"', status: 404)
+        : answers.removeAt(0);
     if (next is Future<Object> Function(LiveRequest)) next = await next(request);
     if (next is TransportReason) throw TransportFailure('picarto', next, 'scripted');
     final sample = next as ReplaySample;
@@ -66,6 +72,9 @@ final class _Scripted implements LiveHttp {
 const _masterText =
     '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=3661056,RESOLUTION=1280x720,FRAME-RATE=60,CODECS="avc1.640020,mp4a.40.2"\n'
     'variant.m3u8\n';
+
+/// The master playlist of [_detail].
+final Uri _masterUri = Uri.parse('https://edge1-eu-west.picarto.tv/stream/hls/golive+Artist/index.m3u8');
 
 Map<String, dynamic> _channel({String name = 'Artist', bool online = true}) => {
   'id': 15237,
@@ -302,15 +311,18 @@ void main() {
       expect(room.data, isNull);
       expect(room.danmakuData, isNull);
       expect(room.onlineViewers, (legacy['getRoomDetailForRefresh'] as Map)['onlineViewers']);
+      expect(room.restriction, LiveRestriction.none, reason: 'the detail says it is not private');
+      expect(room.startedAt, isNull, reason: 'no start time without another request');
       expect(await setup.site.getLiveStatus(roomId: 'allatir'), isTrue);
     });
 
-    test("room entry: 3.x's two requests, the stream in PicartoRoomData, danmaku arguments", () async {
-      final setup = _setup(['S04-detail-live', 'S05-master']);
+    test("room entry: 3.x's two requests and the start of the broadcast, the stream, danmaku arguments", () async {
+      final setup = _setup(['S04-detail-live', 'S05-master', 'S08-channel-live']);
       final room = await setup.site.getRoomDetail(roomId: 'allatir');
-      expect([
-        for (final request in setup.http.requests) request.url.toString(),
-      ], _legacy('S04-detail-live')['roomEntryRequests']);
+      final urls = [for (final request in setup.http.requests) request.url.toString()];
+      final legacy = (_legacy('S04-detail-live')['roomEntryRequests'] as List).cast<String>();
+      expect(urls.first, legacy.first, reason: 'the detail first');
+      expect(urls.skip(1).toSet(), {legacy.last, 'https://api.picarto.tv/api/v1/channel/name/allatir'});
       expect(setup.http.requests.every((request) => request.headers['referer'] == 'https://picarto.tv/'), isTrue);
       final data = room.data! as PicartoRoomData;
       expect((data.name, data.channelId), ('allatir', 942670));
@@ -318,14 +330,81 @@ void main() {
       expect(data.qualities.map((quality) => quality.quality), ['720p 60fps']);
       final args = room.danmakuData! as PicartoDanmakuArgs;
       expect((args.channelName, args.channelId), ('allatir', 942670));
+      expect(room.startedAt, DateTime.utc(2026, 9, 28, 16, 12, 10));
+      expect(room.restriction, LiveRestriction.none);
     });
 
-    test('recording: the stream too (3.x used room entry), without danmaku arguments', () async {
+    test('room entry stands without the start of the broadcast when the public API fails', () async {
+      for (final failure in <Object>[
+        TransportReason.timeout,
+        TransportReason.cancelled,
+        _answer('bad gateway', status: 502),
+        _answer('<html>'),
+        _answer({'name': 'Artist', 'online': false, 'last_live': '2026-09-28 16:12:10'}),
+      ]) {
+        final http = _Scripted([_answer(_detail()), _answer(_masterText)], publicApi: failure);
+        final room = await PicartoSite(http).getRoomDetail(roomId: 'Artist');
+        expect(room.startedAt, isNull, reason: '$failure');
+        expect(room.data, isA<PicartoRoomData>(), reason: '$failure');
+        expect(http.requests.map((request) => request.url.host), contains(PicartoApi.publicApiHost));
+      }
+    });
+
+    test('recording: the stream too (3.x used room entry), without danmaku arguments or start', () async {
       final setup = _setup(['S04-detail-live', 'S05-master']);
       final room = await setup.site.getRoomDetailForRecording(roomId: 'allatir');
       expect(room.data, isA<PicartoRoomData>());
       expect(room.danmakuData, isNull);
+      expect(room.startedAt, isNull);
       expect(setup.http.requests, hasLength(2));
+    });
+
+    test('the follow refresh of a live channel without its stream fields succeeds (11-2)', () async {
+      final http = _Scripted([
+        _answer({..._detail(), 'getLoadBalancerUrl': null}),
+        _answer({..._detail(), 'getLoadBalancerUrl': null}),
+      ]);
+      final site = PicartoSite(http);
+      final room = await site.getRoomDetailForRefresh(roomId: 'Artist');
+      expect((room.isLiveNow, room.title, room.onlineViewers), (true, 'Drawing', '15'));
+      expect(await site.getLiveStatus(roomId: 'Artist'), isTrue);
+      expect(http.requests, hasLength(2), reason: 'one request each');
+      // Room entry needs the stream: 3.x's error there.
+      final entry = _Scripted([
+        _answer({..._detail(), 'getLoadBalancerUrl': null}),
+      ]);
+      await expectLater(PicartoSite(entry).getRoomDetail(roomId: 'Artist'), throwsA(isA<ApiChanged>()));
+    });
+
+    test('a private channel: shown live and marked, no stream requested, playing names the reason (11-9)', () async {
+      final private = {
+        ..._detail(),
+        'channel': {..._channel(), 'private': true},
+      };
+      final http = _Scripted([_answer(private), _answer(private), _answer(private), _answer(private)]);
+      final site = PicartoSite(http);
+      final refreshed = await site.getRoomDetailForRefresh(roomId: 'Artist');
+      expect((refreshed.isLiveNow, refreshed.restriction), (true, LiveRestriction.private));
+      final entered = await site.getRoomDetail(roomId: 'Artist');
+      expect((entered.isLiveNow, entered.restriction, entered.data), (true, LiveRestriction.private, null));
+      expect(entered.danmakuData, isA<PicartoDanmakuArgs>());
+      expect(http.requests.map((request) => request.url.host), [
+        'ptvintern.picarto.tv',
+        'ptvintern.picarto.tv',
+        PicartoApi.publicApiHost,
+      ], reason: 'no master playlist');
+      await expectLater(
+        site.getPlayQualities(detail: entered),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('private'))),
+      );
+      await expectLater(
+        site.resolvePlayUrlsForRecovery(
+          detail: entered,
+          quality: const LivePlayQuality(quality: '720p 60fps', id: 'x'),
+        ),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('private'))),
+      );
+      expect(http.requests.where((request) => request.url.host != 'ptvintern.picarto.tv'), hasLength(1));
     });
 
     test('offline: one request at every depth, no stream, no qualities without a request', () async {
@@ -386,15 +465,18 @@ void main() {
         expect(room.roomId, 'Kaiyote');
         expect(room.hasSameIdentity(followed), isTrue, reason: 'the page shows it followed; no second follow');
       }
-      final merged = followed
-          .copyWith(title: 'old')
-          .mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: 'kaiyote'));
-      expect(merged.title, 'My Channel Title', reason: 'the refresh merges into the follow');
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: 'kaiyote');
+      final merged = followed.copyWith(title: 'old').mergeFrom(refreshed);
+      expect(merged.cover, refreshed.cover, reason: 'the refresh merges into the follow');
+      expect(merged.cover, isNotEmpty);
+      // X-2: Picarto's default title is a placeholder; it no longer replaces
+      // the stored one (3.x: "My Channel Title").
+      expect(merged.title, 'old');
       expect(setup.http.requests.map((request) => request.url.path).toSet(), {'$_detailPath/kaiyote'});
 
       final live = ReplaySample.load('$_root/S04-detail-live');
       final entry = _setup(
-        ['S05-master'],
+        ['S05-master', 'S08-channel-live'],
         extra: [
           ReplaySample(method: 'GET', url: Uri.parse('$_api$_detailPath/ALLATIR'), status: 200, bytes: live.bytes),
         ],
@@ -404,6 +486,27 @@ void main() {
       final data = room.data! as PicartoRoomData;
       expect((data.name, data.requestedId), ('allatir', 'ALLATIR'));
       expect((room.danmakuData! as PicartoDanmakuArgs).channelName, 'allatir');
+      expect(room.startedAt, isNotNull, reason: "the public API is asked with the platform's spelling");
+    });
+
+    test('rooms compare ignoring case, before the detail answers too (11-8, M2.1)', () {
+      expect(SiteIds.ignoresRoomIdCase(SiteIds.picarto), isTrue);
+      final followed = LiveRoom.fromJson(
+        _legacy('S04-detail-offline')['getRoomDetailForRefresh'] as Map<String, Object?>,
+      );
+      // A lower-case link, a history entry: the platform has not answered yet.
+      final fromLink = LiveRoom(
+        platform: 'picarto',
+        roomId: _setup([]).site.roomIdFromUrl('https://picarto.tv/kaiyote'),
+      );
+      expect(fromLink.roomId, 'kaiyote', reason: 'the link keeps its spelling');
+      expect(fromLink.hasSameIdentity(followed), isTrue);
+      expect(fromLink, followed);
+      expect(fromLink.identityKey, followed.identityKey);
+      // A streamer who changed the case of their name still merges.
+      final renamed = LiveRoom(platform: 'picarto', roomId: 'KAIYOTE', title: 'new');
+      expect(followed.mergeFrom(renamed).title, 'new');
+      expect(followed.mergeFrom(renamed).roomId, 'Kaiyote', reason: 'the stored spelling stays');
     });
 
     test('overlapping room reads share nothing (3.x)', () async {
@@ -423,7 +526,7 @@ void main() {
 
   group('streams', () {
     test('from room entry: no new request, one line with the media headers', () async {
-      final setup = _setup(['S04-detail-live', 'S05-master']);
+      final setup = _setup(['S04-detail-live', 'S05-master', 'S08-channel-live']);
       final room = await setup.site.getRoomDetail(roomId: 'allatir');
       final qualities = await setup.site.getPlayQualities(detail: room);
       final legacy = _legacy('S04-detail-live');
@@ -435,7 +538,7 @@ void main() {
       expect(resolution.lines.single.headers, PicartoApi.headers);
       expect(resolution.appliedQualityData, qualities.single.selectionId);
       expect(await setup.site.getPlayUrls(detail: room, quality: qualities.single), resolution.urls);
-      expect(setup.http.requests, hasLength(2), reason: 'the two of room entry');
+      expect(setup.http.requests, hasLength(3), reason: 'the three of room entry');
     });
 
     test('a room without its stream (a list card) is entered first', () async {
@@ -476,10 +579,55 @@ void main() {
       expect(recorded.urls.single, contains('edge3.picarto.tv'));
       expect(recorded.appliedQualityData, quality.selectionId, reason: 'the profile id survives the edge');
       expect((details, playlists), (3, 3));
+      expect(
+        http.requests.where((request) => request.url.host == PicartoApi.publicApiHost),
+        hasLength(1),
+        reason: 'only room entry asks for the start; recovery and recording do not',
+      );
+    });
+
+    test('recovery after a profile change plays the best quality and reports it (11-1; 3.x failed)', () async {
+      const hd =
+          '#EXTM3U\n'
+          '#EXT-X-STREAM-INF:BANDWIDTH=6000000,RESOLUTION=1920x1080,FRAME-RATE=60,CODECS="avc1.64002a,mp4a.40.2"\n'
+          'hd.m3u8\n'
+          '#EXT-X-STREAM-INF:BANDWIDTH=2000000,RESOLUTION=1280x720,FRAME-RATE=30,CODECS="avc1.64001f,mp4a.40.2"\n'
+          'sd.m3u8\n';
+      final http = _Scripted([_answer(_detail()), _answer(_masterText), _answer(_detail()), _answer(hd)]);
+      final site = PicartoSite(http);
+      final room = await site.getRoomDetail(roomId: 'Artist');
+      final old = (await site.getPlayQualities(detail: room)).single;
+      expect(old.quality, '720p 60fps');
+      final recovered = await site.resolvePlayUrlsForRecovery(detail: room, quality: old);
+      expect(recovered.urls.single, endsWith('/hd.m3u8'), reason: 'the best of the new playlist');
+      expect(recovered.appliedQualityData, isNot(old.selectionId));
+      final renewed = PicartoApi.qualities(hd, master: _masterUri);
+      expect(recovered.appliedQualityData, renewed.first.selectionId, reason: 'the quality played, for M7 to show');
+      expect(renewed.first.quality, '1080p 60fps');
+      // With the room's own playlist a quality it lacks is still the caller's
+      // mistake (3.x: quality unavailable).
+      await expectLater(
+        site.getPlayUrls(
+          detail: room,
+          quality: const LivePlayQuality(id: 'missing', quality: 'fake'),
+        ),
+        throwsA(isA<StreamUnavailable>()),
+      );
+    });
+
+    test('a list card whose quality is gone by the time it plays gets the best one too (11-1)', () async {
+      final http = _Scripted([_answer(_detail()), _answer(_masterText)]);
+      final card = LiveRoom(platform: 'picarto', roomId: 'Artist', liveStatus: LiveStatus.live);
+      final resolution = await PicartoSite(http).resolvePlayUrls(
+        detail: card,
+        quality: const LivePlayQuality(id: 'gone', quality: '1080p 60fps'),
+      );
+      expect(resolution.urls.single, endsWith('/variant.m3u8'));
+      expect(resolution.appliedQualityData, PicartoApi.qualities(_masterText, master: _masterUri).single.selectionId);
     });
 
     test('a quality the playlist no longer has is StreamUnavailable (3.x: quality unavailable)', () async {
-      final setup = _setup(['S04-detail-live', 'S05-master']);
+      final setup = _setup(['S04-detail-live', 'S05-master', 'S08-channel-live']);
       final room = await setup.site.getRoomDetail(roomId: 'allatir');
       await expectLater(
         setup.site.getPlayUrls(

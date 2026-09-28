@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "sample": "S08-channel-live",
+  "capturedAt": "2026-09-28T17:22:29.689401Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.picarto.tv/api/v1/channel/name/allatir",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://picarto.tv/",
+      "Origin": "https://picarto.tv"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 17:22:32 GMT",
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "server": "cloudflare",
+      "vary": "Accept-Encoding",
+      "cache-control": "public, s-maxage=60",
+      "x-cacheable": "1",
+      "access-control-allow-origin": "*",
+      "x-cache": "EXPIRED",
+      "content-encoding": "gzip",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4246e46383c2fe9-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    }
+  },
+  "raw": {
+    "sha256": "b7d61e5339127ae315017a729d4fcae1a8d13d625e39121974c3a8acadc2a090",
+    "length": 2027
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "manual capture (M4.U.11): urllib, checked by hand as fixtures/README.md asks"
+}

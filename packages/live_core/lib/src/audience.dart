@@ -169,7 +169,9 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     onlineAvailability: AudienceOnlineAvailability.roomRealtime,
   ),
   // The watch page exposes a dedicated concurrent-view renderer while a
-  // broadcast is live. Historical viewCount is deliberately not reused.
+  // broadcast is live. Historical viewCount is deliberately not reused. The
+  // live chat's `next` answer carries the same renderer; the danmaku
+  // connection reports it once as it joins (M5.19).
   'youtube': AudiencePlatformCapability(
     hasPopularity: false,
     hasTotalViewers: false,

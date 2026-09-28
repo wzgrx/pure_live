@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "case": "S08-ended",
+  "room": "youtube:UCSF_aFGIIIoWY30GVV19TKA",
+  "danmakuKeys": {
+    "videoId": "xd_fJRWZuVI",
+    "channelId": "UCSF_aFGIIIoWY30GVV19TKA"
+  },
+  "capturedAt": "2026-09-28T22:22:11.072337Z",
+  "route": "proxy",
+  "handshakes": [],
+  "frames": 5,
+  "raw": {
+    "sha256": "934a09aeca7dc122ab65dc23d3cf61e3f9786f36cf7250e87e1aa34e67bb0c4a",
+    "length": 770275
+  },
+  "scrubbed": [
+    {
+      "where": "$..clickTrackingParams",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..trackingParams",
+      "rule": "dropped"
+    },
+    {
+      "where": "$..loggingDirectives",
+      "rule": "dropped"
+    },
+    {
+      "where": "next: all but $.contents.twoColumnWatchNextResults.conversationBar and .results.results.contents[*].videoPrimaryInfoRenderer.viewCount",
+      "rule": "dropped"
+    },
+    {
+      "where": "get_live_chat: all but $.continuationContents.liveChatContinuation.continuations and .actions (an answer without continuationContents: all but $.contents)",
+      "rule": "dropped"
+    }
+  ],
+  "note": "After the broadcasts ended: `next` of the S06 broadcast xd_fJRWZuVI (a chat replay, isReplay), get_live_chat with that replay continuation (400 INVALID_ARGUMENT), `next` of the ended broadcast 9njefMDxzqw (fixtures/youtube S09; no replay: conversationBarRenderer), then get_live_chat with the last continuation S06-live recorded (a reloadContinuationData and no actions) and with that reload continuation (no continuationContents: \"Chat is disabled for this live stream.\"). The continuations are the real ones: they hold the broadcaster and the video only. Each frame names its request.",
+  "tool": "scratch Python scripts (not in the repository): read-only anonymous InnerTube requests (WEB context of YouTubeApi.webContext, YouTubeApi.apiHeaders, prettyPrint=false) through the local proxy 127.0.0.1:7897; no login, nothing posted. Scrubbing refuses to write while an original author name, channel id or photo path can be found plainly, percent-encoded or in (nested) Base64"
+}

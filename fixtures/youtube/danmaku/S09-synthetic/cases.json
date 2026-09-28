@@ -1,0 +1,3358 @@
+{
+ "note": "Synthetic YouTube live chat answers (docs/modules/M5.19-youtube.md). answers: get_live_chat answers parsed on their own; nexts: next answers; sessions: what a connection to videoId is answered, in order ({\"answer\"}: 200 with that JSON, {\"raw\"}: 200 with that text, {\"status\"}: that status, {\"error\"}: no response). Written by fixtures/youtube/danmaku/synthetic_cases.py; names, ids, tokens and times are made up.",
+ "videoId": "Synth3tic_0",
+ "answers": [
+  {
+   "name": "a text line with every field",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "hello chat"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer1"
+           },
+           "id": "ChwKGkN00000000000000000001",
+           "timestampUsec": "1790633001000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000001"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "runs: text, a link, standard emoji with and without shortcuts, custom emoji with and without shortcuts",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "gg "
+             },
+             {
+              "text": "example.com",
+              "navigationEndpoint": {
+               "urlEndpoint": {
+                "url": "https://example.com/"
+               }
+              }
+             },
+             {
+              "text": " "
+             },
+             {
+              "emoji": {
+               "emojiId": "😂",
+               "image": {
+                "thumbnails": [
+                 {
+                  "url": "https://fonts.gstatic.com/s/e/notoemoji/15.1/1f602/72.png"
+                 }
+                ],
+                "accessibility": {
+                 "accessibilityData": {
+                  "label": "😂"
+                 }
+                }
+               },
+               "shortcuts": [
+                ":face_with_tears_of_joy:",
+                ":joy:"
+               ],
+               "searchTerms": [
+                "face_with_tears_of_joy"
+               ]
+              }
+             },
+             {
+              "emoji": {
+               "emojiId": "🇹🇷",
+               "image": {
+                "thumbnails": [
+                 {
+                  "url": "https://fonts.gstatic.com/s/e/notoemoji/15.1/1f602/72.png"
+                 }
+                ],
+                "accessibility": {
+                 "accessibilityData": {
+                  "label": "🇹🇷"
+                 }
+                }
+               }
+              }
+             },
+             {
+              "emoji": {
+               "emojiId": "UCsyntheticChannel00000001/face-purple-crying",
+               "image": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.ggpht.com/synthetic=w24-h24-c-k-nd",
+                  "width": 24,
+                  "height": 24
+                 }
+                ],
+                "accessibility": {
+                 "accessibilityData": {
+                  "label": "face-purple-crying"
+                 }
+                }
+               },
+               "isCustomEmoji": true,
+               "shortcuts": [
+                ":face-purple-crying:"
+               ],
+               "searchTerms": [
+                "face-purple-crying"
+               ]
+              }
+             },
+             {
+              "emoji": {
+               "emojiId": "UCsyntheticChannel00000001/channel-badge",
+               "image": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.ggpht.com/synthetic=w24-h24-c-k-nd",
+                  "width": 24,
+                  "height": 24
+                 }
+                ],
+                "accessibility": {
+                 "accessibilityData": {
+                  "label": "channel-badge"
+                 }
+                }
+               },
+               "isCustomEmoji": true
+              }
+             },
+             {
+              "text": " !"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer2"
+           },
+           "id": "ChwKGkN00000000000000000002",
+           "timestampUsec": "1790633002000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000002"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a Super Chat with a message",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatPaidMessageRenderer": {
+           "id": "ChwKGkP00000000000000000001",
+           "timestampUsec": "1790633001000000",
+           "authorName": {
+            "simpleText": "@supporter1"
+           },
+           "authorExternalChannelId": "UCsyntheticViewer0001001",
+           "headerBackgroundColor": 4291821568,
+           "headerTextColor": 4294967295,
+           "bodyBackgroundColor": 4293271831,
+           "bodyTextColor": 4294967295,
+           "authorNameTextColor": 3019898879,
+           "timestampColor": 2164260863,
+           "isV2Style": true,
+           "purchaseAmountText": {
+            "simpleText": "TRY 55.00"
+           },
+           "message": {
+            "runs": [
+             {
+              "text": "great show "
+             },
+             {
+              "emoji": {
+               "emojiId": "👏",
+               "image": {
+                "thumbnails": [
+                 {
+                  "url": "https://fonts.gstatic.com/s/e/notoemoji/15.1/1f602/72.png"
+                 }
+                ],
+                "accessibility": {
+                 "accessibilityData": {
+                  "label": "👏"
+                 }
+                }
+               },
+               "shortcuts": [
+                ":clapping_hands:"
+               ],
+               "searchTerms": [
+                "clapping_hands"
+               ]
+              }
+             }
+            ]
+           }
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a Super Chat without a message",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatPaidMessageRenderer": {
+           "id": "ChwKGkP00000000000000000002",
+           "timestampUsec": "1790633002000000",
+           "authorName": {
+            "simpleText": "@supporter2"
+           },
+           "authorExternalChannelId": "UCsyntheticViewer0001002",
+           "headerBackgroundColor": 4291821568,
+           "headerTextColor": 4294967295,
+           "bodyBackgroundColor": 4293271831,
+           "bodyTextColor": 4294967295,
+           "authorNameTextColor": 3019898879,
+           "timestampColor": 2164260863,
+           "isV2Style": true,
+           "purchaseAmountText": {
+            "simpleText": "$5.00"
+           }
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a Super Chat with neither amount nor message",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatPaidMessageRenderer": {
+           "id": "ChwKGkP00000000000000000003",
+           "timestampUsec": "1790633003000000",
+           "authorName": {
+            "simpleText": "@supporter3"
+           },
+           "authorExternalChannelId": "UCsyntheticViewer0001003",
+           "headerBackgroundColor": 4291821568,
+           "headerTextColor": 4294967295,
+           "bodyBackgroundColor": 4293271831,
+           "bodyTextColor": 4294967295,
+           "authorNameTextColor": 3019898879,
+           "timestampColor": 2164260863,
+           "isV2Style": true
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a Super Chat with only spaces for its message",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatPaidMessageRenderer": {
+           "id": "ChwKGkP00000000000000000004",
+           "timestampUsec": "1790633004000000",
+           "authorName": {
+            "simpleText": "@supporter4"
+           },
+           "authorExternalChannelId": "UCsyntheticViewer0001004",
+           "headerBackgroundColor": 4291821568,
+           "headerTextColor": 4294967295,
+           "bodyBackgroundColor": 4293271831,
+           "bodyTextColor": 4294967295,
+           "authorNameTextColor": 3019898879,
+           "timestampColor": 2164260863,
+           "isV2Style": true,
+           "purchaseAmountText": {
+            "simpleText": "₫1,000,000"
+           },
+           "message": {
+            "runs": [
+             {
+              "text": "   "
+             }
+            ]
+           }
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "Super Stickers, memberships, gifted memberships, engagement messages and placeholders are not read",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatPaidStickerRenderer": {
+           "id": "ChwKGkO00000000000000000010",
+           "timestampUsec": "1790633010000000",
+           "purchaseAmountText": {
+            "simpleText": "€2.00"
+           },
+           "authorName": {
+            "simpleText": "@sticker10"
+           },
+           "authorExternalChannelId": "UCsyntheticViewer0000010"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatMembershipItemRenderer": {
+           "id": "ChwKGkO00000000000000000011",
+           "timestampUsec": "1790633011000000",
+           "headerSubtext": {
+            "runs": [
+             {
+              "text": "Welcome to Members!"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@member11"
+           },
+           "authorExternalChannelId": "UCsyntheticViewer0000011"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatSponsorshipsGiftPurchaseAnnouncementRenderer": {
+           "id": "ChwKGkO00000000000000000012",
+           "timestampUsec": "1790633012000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000012"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatViewerEngagementMessageRenderer": {
+           "id": "ChwKGkO00000000000000000013",
+           "timestampUsec": "1790633013000000",
+           "message": {
+            "runs": [
+             {
+              "text": "Welcome to live chat! Remember to guard your privacy."
+             }
+            ]
+           }
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatPlaceholderItemRenderer": {
+           "id": "ChwKGkO00000000000000000014",
+           "timestampUsec": "1790633014000000"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "after the others"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer15"
+           },
+           "id": "ChwKGkN00000000000000000015",
+           "timestampUsec": "1790633015000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000015"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "removals, a replacement and other actions are not read",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "removeChatItemAction": {
+         "targetItemId": "ChwKGkN00000000000000000001"
+        }
+       },
+       {
+        "removeChatItemByAuthorAction": {
+         "externalChannelId": "UCsyntheticViewer0000016"
+        }
+       },
+       {
+        "replaceChatItemAction": {
+         "targetItemId": "ChwKGkO00000000000000000014",
+         "replacementItem": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "held, then shown"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer14"
+           },
+           "id": "ChwKGkN00000000000000000014",
+           "timestampUsec": "1790633014000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000014"
+          }
+         }
+        }
+       },
+       {
+        "markChatItemAsDeletedAction": {
+         "targetItemId": "ChwKGkN00000000000000000002"
+        }
+       },
+       {
+        "addLiveChatTickerItemAction": {}
+       },
+       {
+        "updateLiveChatPollAction": {}
+       },
+       {
+        "addBannerToLiveChatCommand": {}
+       },
+       {
+        "liveChatReportModerationStateCommand": {}
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "still read"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer17"
+           },
+           "id": "ChwKGkN00000000000000000017",
+           "timestampUsec": "1790633017000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000017"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "text that is only spaces, empty runs, runs that are not a list",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "  "
+             },
+             {
+              "text": "\t"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer20"
+           },
+           "id": "ChwKGkN00000000000000000020",
+           "timestampUsec": "1790633020000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000020"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": []
+           },
+           "authorName": {
+            "simpleText": "@viewer21"
+           },
+           "id": "ChwKGkN00000000000000000021",
+           "timestampUsec": "1790633021000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000021"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": null
+           },
+           "authorName": {
+            "simpleText": "@viewer22"
+           },
+           "id": "ChwKGkN00000000000000000022",
+           "timestampUsec": "1790633022000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000022"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "simpleText": "simple text, not runs"
+           },
+           "id": "ChwKGkN00000000000000000023"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "  padded  "
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer24"
+           },
+           "id": "ChwKGkN00000000000000000024",
+           "timestampUsec": "1790633024000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000024"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "author, id and time missing",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "anonymous"
+             }
+            ]
+           }
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "fields of other types",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "numeric id"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer30"
+           },
+           "id": 12345,
+           "timestampUsec": 1790633030000000,
+           "authorExternalChannelId": 67890
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "author in runs"
+             }
+            ]
+           },
+           "authorName": {
+            "runs": [
+             {
+              "text": "@viewer"
+             },
+             {
+              "text": "31"
+             }
+            ]
+           },
+           "id": "ChwKGkN00000000000000000031",
+           "timestampUsec": "1790633031000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000031"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "author is text"
+             }
+            ]
+           },
+           "authorName": "@viewer32",
+           "id": "ChwKGkN00000000000000000032",
+           "timestampUsec": "1790633032000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000032"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": 7
+             },
+             {
+              "text": "run text is a number"
+             },
+             "not a run",
+             {
+              "emoji": "not a map"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer33"
+           },
+           "id": "ChwKGkN00000000000000000033",
+           "timestampUsec": "1790633033000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000033"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": "not a map",
+           "id": "x34"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatPaidMessageRenderer": {
+           "id": "ChwKGkP00000000000000000035",
+           "timestampUsec": "1790633035000000",
+           "authorName": {
+            "simpleText": "@supporter35"
+           },
+           "authorExternalChannelId": "UCsyntheticViewer0001035",
+           "headerBackgroundColor": 4291821568,
+           "headerTextColor": 4294967295,
+           "bodyBackgroundColor": 4293271831,
+           "bodyTextColor": 4294967295,
+           "authorNameTextColor": 3019898879,
+           "timestampColor": 2164260863,
+           "isV2Style": true,
+           "purchaseAmountText": {
+            "runs": [
+             {
+              "text": "$1.00"
+             }
+            ]
+           }
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "times: zero, negative, not a number, spaces, past int64",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "zero"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer40"
+           },
+           "id": "ChwKGkN00000000000000000040",
+           "timestampUsec": "0",
+           "authorExternalChannelId": "UCsyntheticViewer0000040"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "negative"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer41"
+           },
+           "id": "ChwKGkN00000000000000000041",
+           "timestampUsec": "-1000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000041"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "not a number"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer42"
+           },
+           "id": "ChwKGkN00000000000000000042",
+           "timestampUsec": "soon",
+           "authorExternalChannelId": "UCsyntheticViewer0000042"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "spaces"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer43"
+           },
+           "id": "ChwKGkN00000000000000000043",
+           "timestampUsec": " 1790633043000000 ",
+           "authorExternalChannelId": "UCsyntheticViewer0000043"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "past int64"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer44"
+           },
+           "id": "ChwKGkN00000000000000000044",
+           "timestampUsec": "99999999999999999999",
+           "authorExternalChannelId": "UCsyntheticViewer0000044"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "a fraction"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer45"
+           },
+           "id": "ChwKGkN00000000000000000045",
+           "timestampUsec": 1790633045000000.5,
+           "authorExternalChannelId": "UCsyntheticViewer0000045"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a time past what DateTime holds",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "before"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer46"
+           },
+           "id": "ChwKGkN00000000000000000046",
+           "timestampUsec": "1790633046000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000046"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "far future"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer47"
+           },
+           "id": "ChwKGkN00000000000000000047",
+           "timestampUsec": "8640000000000000001",
+           "authorExternalChannelId": "UCsyntheticViewer0000047"
+          }
+         }
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "after"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer48"
+           },
+           "id": "ChwKGkN00000000000000000048",
+           "timestampUsec": "1790633048000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000048"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "emoji: shortcuts that are not text, no emojiId, custom without shortcuts or id",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "emoji": {
+               "emojiId": "🔥",
+               "shortcuts": [
+                7
+               ]
+              }
+             },
+             {
+              "emoji": {
+               "shortcuts": [
+                ":fire:"
+               ]
+              }
+             },
+             {
+              "emoji": {
+               "isCustomEmoji": true,
+               "searchTerms": [
+                "nothing"
+               ]
+              }
+             },
+             {
+              "emoji": {
+               "emojiId": "",
+               "shortcuts": []
+              }
+             },
+             {
+              "emoji": {
+               "isCustomEmoji": "true",
+               "emojiId": "⭐",
+               "shortcuts": [
+                ":star:"
+               ]
+              }
+             },
+             {
+              "text": "end"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer50"
+           },
+           "id": "ChwKGkN00000000000000000050",
+           "timestampUsec": "1790633050000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000050"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a timed continuation, 3 s",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "continuation": "SYNTH-next",
+         "timeoutMs": 3000
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "an invalidation continuation, 10 s",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "timeoutMs 200",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "continuation": "SYNTH-next",
+         "timeoutMs": 200
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "timeoutMs 0",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "continuation": "SYNTH-next",
+         "timeoutMs": 0
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "timeoutMs missing",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next"
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "timeoutMs as text",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "continuation": "SYNTH-next",
+         "timeoutMs": "3000"
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "timeoutMs negative",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "continuation": "SYNTH-next",
+         "timeoutMs": -5
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "timeoutMs a fraction",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "continuation": "SYNTH-next",
+         "timeoutMs": 2500.0
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "a reload continuation",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "reloadContinuationData": {
+         "continuation": "SYNTH-reload"
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "a continuation kind not seen yet",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "liveChatReplayContinuationData": {
+         "continuation": "SYNTH-next",
+         "timeoutMs": 4000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "kept"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer60"
+           },
+           "id": "ChwKGkN00000000000000000060",
+           "timestampUsec": "1790633060000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000060"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "two continuation kinds in one entry",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "timeoutMs": 2000,
+         "continuation": "SYNTH-first"
+        },
+        "reloadContinuationData": {
+         "continuation": "SYNTH-second"
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "a continuation that is not text",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "timedContinuationData": {
+         "timeoutMs": 2000,
+         "continuation": 7
+        }
+       }
+      ],
+      "actions": []
+     }
+    }
+   }
+  },
+  {
+   "name": "no continuations: the chat is over, its actions are still read",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "actions": [
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "last words"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer61"
+           },
+           "id": "ChwKGkN00000000000000000061",
+           "timestampUsec": "1790633061000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000061"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "no continuationContents, a message: the chat is over",
+   "body": {
+    "contents": {
+     "messageRenderer": {
+      "text": {
+       "runs": [
+        {
+         "text": "Chat is disabled for this live stream."
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "an empty object",
+   "body": {}
+  },
+  {
+   "name": "liveChatContinuation that is not an object",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": []
+    }
+   }
+  },
+  {
+   "name": "actions that are not a list",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": {
+       "0": {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "in a map"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer70"
+           },
+           "id": "ChwKGkN00000000000000000070",
+           "timestampUsec": "1790633070000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000070"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "actions and items that are not objects",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       "text",
+       7,
+       null,
+       {
+        "addChatItemAction": "x"
+       },
+       {
+        "addChatItemAction": {
+         "item": []
+        }
+       },
+       {
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "the only line"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer71"
+           },
+           "id": "ChwKGkN00000000000000000071",
+           "timestampUsec": "1790633071000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000071"
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "an action with its tracking before the item",
+   "body": {
+    "continuationContents": {
+     "liveChatContinuation": {
+      "continuations": [
+       {
+        "invalidationContinuationData": {
+         "invalidationId": {
+          "objectSource": 1056,
+          "topic": "chat~Synth3tic_0",
+          "subscribeToGcmTopics": true
+         },
+         "continuation": "SYNTH-next",
+         "timeoutMs": 10000
+        }
+       }
+      ],
+      "actions": [
+       {
+        "clickTrackingParams": "CAEQ",
+        "addChatItemAction": {
+         "item": {
+          "liveChatTextMessageRenderer": {
+           "message": {
+            "runs": [
+             {
+              "text": "tracked"
+             }
+            ]
+           },
+           "authorName": {
+            "simpleText": "@viewer72"
+           },
+           "id": "ChwKGkN00000000000000000072",
+           "timestampUsec": "1790633072000000",
+           "authorExternalChannelId": "UCsyntheticViewer0000072"
+          }
+         },
+         "clientId": "client-72"
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "not JSON",
+   "raw": "<!DOCTYPE html><html><body>Sorry</body></html>"
+  },
+  {
+   "name": "a JSON array",
+   "raw": "[{\"continuationContents\": {}}]"
+  },
+  {
+   "name": "a JSON string",
+   "raw": "\"continuationContents\""
+  }
+ ],
+ "nexts": [
+  {
+   "name": "live, with the viewers in runs",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "conversationBar": {
+       "liveChatRenderer": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-reload-0"
+          }
+         }
+        ]
+       }
+      },
+      "results": {
+       "results": {
+        "contents": [
+         {
+          "videoPrimaryInfoRenderer": {
+           "viewCount": {
+            "videoViewCountRenderer": {
+             "viewCount": {
+              "runs": [
+               {
+                "text": "1,234"
+               },
+               {
+                "text": " watching now"
+               }
+              ]
+             },
+             "isLive": true,
+             "originalViewCount": "1234"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "live, with the viewers in simpleText",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "results": {
+       "results": {
+        "contents": [
+         {
+          "videoPrimaryInfoRenderer": {
+           "viewCount": {
+            "videoViewCountRenderer": {
+             "viewCount": {
+              "simpleText": "1,331 watching now"
+             },
+             "isLive": true
+            }
+           }
+          }
+         }
+        ]
+       }
+      },
+      "conversationBar": {
+       "liveChatRenderer": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-reload-1"
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "live, without a view count",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "conversationBar": {
+       "liveChatRenderer": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-reload-0"
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "no live chat: a conversation bar message",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "conversationBar": {
+       "conversationBarRenderer": {
+        "availabilityMessage": {
+         "messageRenderer": {
+          "text": {
+           "runs": [
+            {
+             "text": "Live chat replay is not available for this video."
+            }
+           ]
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "a chat replay",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "conversationBar": {
+       "liveChatRenderer": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-reload-0"
+          }
+         }
+        ],
+        "isReplay": true
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "isReplay false",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "conversationBar": {
+       "liveChatRenderer": {
+        "isReplay": false,
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-reload-2"
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "continuations empty",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "conversationBar": {
+       "liveChatRenderer": {
+        "continuations": []
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "a continuation that is not text",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "conversationBar": {
+       "liveChatRenderer": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": 12
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "liveChatRenderer elsewhere in the answer",
+   "body": {
+    "engagementPanels": [
+     {
+      "panel": {
+       "liveChatRenderer": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-elsewhere"
+          }
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "a liveChatRenderer that is not an object, then one that is",
+   "body": {
+    "a": {
+     "liveChatRenderer": "x"
+    },
+    "b": {
+     "liveChatRenderer": {
+      "continuations": [
+       {
+        "reloadContinuationData": {
+         "continuation": "SYNTH-second"
+        }
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a view count that is not live",
+   "body": {
+    "contents": {
+     "twoColumnWatchNextResults": {
+      "results": {
+       "results": {
+        "contents": [
+         {
+          "videoPrimaryInfoRenderer": {
+           "viewCount": {
+            "videoViewCountRenderer": {
+             "viewCount": {
+              "simpleText": "402,519 views"
+             }
+            }
+           }
+          }
+         }
+        ]
+       }
+      },
+      "conversationBar": {
+       "liveChatRenderer": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-reload-3"
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "an empty object",
+   "body": {}
+  },
+  {
+   "name": "not JSON",
+   "raw": "<html>"
+  },
+  {
+   "name": "a JSON array holding the chat",
+   "raw": "[{\"liveChatRenderer\": {\"continuations\": [{\"reloadContinuationData\": {\"continuation\": \"SYNTH-in-array\"}}]}}]"
+  }
+ ],
+ "sessions": [
+  {
+   "name": "a chat: history, two answers, the end",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        },
+        "results": {
+         "results": {
+          "contents": [
+           {
+            "videoPrimaryInfoRenderer": {
+             "viewCount": {
+              "videoViewCountRenderer": {
+               "viewCount": {
+                "runs": [
+                 {
+                  "text": "1,234"
+                 },
+                 {
+                  "text": " watching now"
+                 }
+                ]
+               },
+               "isLive": true,
+               "originalViewCount": "1234"
+              }
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-1",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "history, not shown"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer100"
+             },
+             "id": "ChwKGkN00000000000000000100",
+             "timestampUsec": "1790633100000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000100"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "timedContinuationData": {
+           "continuation": "SYNTH-2",
+           "timeoutMs": 3000
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "first"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer101"
+             },
+             "id": "ChwKGkN00000000000000000101",
+             "timestampUsec": "1790633101000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000101"
+            }
+           }
+          }
+         },
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatPaidMessageRenderer": {
+             "id": "ChwKGkP00000000000000000102",
+             "timestampUsec": "1790633102000000",
+             "authorName": {
+              "simpleText": "@supporter102"
+             },
+             "authorExternalChannelId": "UCsyntheticViewer0001102",
+             "headerBackgroundColor": 4291821568,
+             "headerTextColor": 4294967295,
+             "bodyBackgroundColor": 4293271831,
+             "bodyTextColor": 4294967295,
+             "authorNameTextColor": 3019898879,
+             "timestampColor": 2164260863,
+             "isV2Style": true,
+             "purchaseAmountText": {
+              "simpleText": "$2.00"
+             },
+             "message": {
+              "runs": [
+               {
+                "text": "thanks"
+               }
+              ]
+             }
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-3",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "second"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer103"
+             },
+             "id": "ChwKGkN00000000000000000103",
+             "timestampUsec": "1790633103000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000103"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "contents": {
+       "messageRenderer": {
+        "text": {
+         "runs": [
+          {
+           "text": "Chat is disabled for this live stream."
+          }
+         ]
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "next fails once",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "status": 503
+    },
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        },
+        "results": {
+         "results": {
+          "contents": [
+           {
+            "videoPrimaryInfoRenderer": {
+             "viewCount": {
+              "videoViewCountRenderer": {
+               "viewCount": {
+                "runs": [
+                 {
+                  "text": "1,234"
+                 },
+                 {
+                  "text": " watching now"
+                 }
+                ]
+               },
+               "isLive": true,
+               "originalViewCount": "1234"
+              }
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-1",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "after a retry"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer110"
+             },
+             "id": "ChwKGkN00000000000000000110",
+             "timestampUsec": "1790633110000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000110"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "next fails three times",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "error": "timeout"
+    },
+    {
+     "status": 500
+    },
+    {
+     "error": "connect"
+    }
+   ]
+  },
+  {
+   "name": "the first poll fails twice, then answers",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        },
+        "results": {
+         "results": {
+          "contents": [
+           {
+            "videoPrimaryInfoRenderer": {
+             "viewCount": {
+              "videoViewCountRenderer": {
+               "viewCount": {
+                "runs": [
+                 {
+                  "text": "1,234"
+                 },
+                 {
+                  "text": " watching now"
+                 }
+                ]
+               },
+               "isLive": true,
+               "originalViewCount": "1234"
+              }
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "status": 500
+    },
+    {
+     "error": "timeout"
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-1",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "history"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer120"
+             },
+             "id": "ChwKGkN00000000000000000120",
+             "timestampUsec": "1790633120000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000120"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "shown"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer121"
+             },
+             "id": "ChwKGkN00000000000000000121",
+             "timestampUsec": "1790633121000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000121"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "the first poll fails three times",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        },
+        "results": {
+         "results": {
+          "contents": [
+           {
+            "videoPrimaryInfoRenderer": {
+             "viewCount": {
+              "videoViewCountRenderer": {
+               "viewCount": {
+                "runs": [
+                 {
+                  "text": "1,234"
+                 },
+                 {
+                  "text": " watching now"
+                 }
+                ]
+               },
+               "isLive": true,
+               "originalViewCount": "1234"
+              }
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 403
+    }
+   ]
+  },
+  {
+   "name": "failures after joining, then recovery",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "timedContinuationData": {
+           "continuation": "SYNTH-1",
+           "timeoutMs": 1500
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "error": "timeout"
+    },
+    {
+     "status": 503
+    },
+    {
+     "raw": "<html>not json</html>"
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-2",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "back"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer130"
+             },
+             "id": "ChwKGkN00000000000000000130",
+             "timestampUsec": "1790633130000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000130"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "status": 503
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "back again"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer131"
+             },
+             "id": "ChwKGkN00000000000000000131",
+             "timestampUsec": "1790633131000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000131"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "eight failures in a row",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-1",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "status": 500
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-2",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "too late"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer140"
+             },
+             "id": "ChwKGkN00000000000000000140",
+             "timestampUsec": "1790633140000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000140"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "no live chat",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "conversationBarRenderer": {
+          "availabilityMessage": {
+           "messageRenderer": {
+            "text": {
+             "runs": [
+              {
+               "text": "Live chat replay is not available for this video."
+              }
+             ]
+            }
+           }
+          }
+         }
+        },
+        "results": {
+         "results": {
+          "contents": [
+           {
+            "videoPrimaryInfoRenderer": {
+             "viewCount": {
+              "videoViewCountRenderer": {
+               "viewCount": {
+                "runs": [
+                 {
+                  "text": "1,234"
+                 },
+                 {
+                  "text": " watching now"
+                 }
+                ]
+               },
+               "isLive": true,
+               "originalViewCount": "1234"
+              }
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "a chat replay",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ],
+          "isReplay": true
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "status": 400
+    },
+    {
+     "status": 400
+    },
+    {
+     "status": 400
+    }
+   ]
+  },
+  {
+   "name": "the history answer has no continuation",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        },
+        "results": {
+         "results": {
+          "contents": [
+           {
+            "videoPrimaryInfoRenderer": {
+             "viewCount": {
+              "videoViewCountRenderer": {
+               "viewCount": {
+                "runs": [
+                 {
+                  "text": "1,234"
+                 },
+                 {
+                  "text": " watching now"
+                 }
+                ]
+               },
+               "isLive": true,
+               "originalViewCount": "1234"
+              }
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "contents": {
+       "messageRenderer": {
+        "text": {
+         "runs": [
+          {
+           "text": "Chat is disabled for this live stream."
+          }
+         ]
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "a reload in the middle",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-1",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "reloadContinuationData": {
+           "continuation": "SYNTH-reload"
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "before the reload"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer150"
+             },
+             "id": "ChwKGkN00000000000000000150",
+             "timestampUsec": "1790633150000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000150"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-2",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "recent, again"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer151"
+             },
+             "id": "ChwKGkN00000000000000000151",
+             "timestampUsec": "1790633151000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000151"
+            }
+           }
+          }
+         },
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "before the reload"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer150"
+             },
+             "id": "ChwKGkN00000000000000000150",
+             "timestampUsec": "1790633150000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000150"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "actions": [
+         {
+          "addChatItemAction": {
+           "item": {
+            "liveChatTextMessageRenderer": {
+             "message": {
+              "runs": [
+               {
+                "text": "after the reload"
+               }
+              ]
+             },
+             "authorName": {
+              "simpleText": "@viewer152"
+             },
+             "id": "ChwKGkN00000000000000000152",
+             "timestampUsec": "1790633152000000",
+             "authorExternalChannelId": "UCsyntheticViewer0000152"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "server delays: 3 s, 10 s, 200 ms, none, 0",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "timedContinuationData": {
+           "continuation": "SYNTH-1",
+           "timeoutMs": 3000
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-2",
+           "timeoutMs": 10000
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "timedContinuationData": {
+           "continuation": "SYNTH-3",
+           "timeoutMs": 200
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "invalidationContinuationData": {
+           "invalidationId": {
+            "objectSource": 1056,
+            "topic": "chat~Synth3tic_0",
+            "subscribeToGcmTopics": true
+           },
+           "continuation": "SYNTH-4"
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "continuations": [
+         {
+          "timedContinuationData": {
+           "continuation": "SYNTH-5",
+           "timeoutMs": 0
+          }
+         }
+        ],
+        "actions": []
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "actions": []
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "the next answer has no chat renderer at all",
+   "videoId": "Synth3tic_0",
+   "steps": [
+    {
+     "answer": {
+      "responseContext": {}
+     }
+    }
+   ]
+  },
+  {
+   "name": "no video id",
+   "videoId": "",
+   "steps": []
+  },
+  {
+   "name": "not a video id",
+   "videoId": "not-a-video-id",
+   "steps": [
+    {
+     "answer": {
+      "contents": {
+       "twoColumnWatchNextResults": {
+        "conversationBar": {
+         "liveChatRenderer": {
+          "continuations": [
+           {
+            "reloadContinuationData": {
+             "continuation": "SYNTH-reload-0"
+            }
+           }
+          ]
+         }
+        },
+        "results": {
+         "results": {
+          "contents": [
+           {
+            "videoPrimaryInfoRenderer": {
+             "viewCount": {
+              "videoViewCountRenderer": {
+               "viewCount": {
+                "runs": [
+                 {
+                  "text": "1,234"
+                 },
+                 {
+                  "text": " watching now"
+                 }
+                ]
+               },
+               "isLive": true,
+               "originalViewCount": "1234"
+              }
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     }
+    },
+    {
+     "answer": {
+      "continuationContents": {
+       "liveChatContinuation": {
+        "actions": []
+       }
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

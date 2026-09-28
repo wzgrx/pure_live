@@ -1,0 +1,216 @@
+{
+  "generator": "WeiboSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + searchRooms + getLiveStatus + WeiboLink.parse + WeiboLink.url + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw (with S03-recommend)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "1022:2321325347923495092258",
+        "userId": "3978030571",
+        "title": "男大学生助眠",
+        "nick": "陈屿学长",
+        "avatar": "https://tvax4.sinaimg.cn/crop.0.0.1080.1080.50/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg?KID=imgbed,tva&Expires=1790540358&ssig=wqT71eDavo",
+        "cover": "https://wx4.sinaimg.cn/large/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "1022:2321325347923495092258",
+        "userId": "3978030571",
+        "title": "男大学生助眠",
+        "nick": "陈屿学长",
+        "avatar": "https://tvax4.sinaimg.cn/crop.0.0.1080.1080.50/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg?KID=imgbed,tva&Expires=1790540358&ssig=wqT71eDavo",
+        "cover": "https://wx4.sinaimg.cn/large/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "1022:2321325347923495092258",
+        "userId": "3978030571",
+        "title": "男大学生助眠",
+        "nick": "陈屿学长",
+        "avatar": "https://tvax4.sinaimg.cn/crop.0.0.1080.1080.50/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg?KID=imgbed,tva&Expires=1790540358&ssig=wqT71eDavo",
+        "cover": "https://wx4.sinaimg.cn/large/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "1022:2321325347923495092258",
+          "userId": "3978030571",
+          "title": "男大学生助眠",
+          "nick": "陈屿学长",
+          "avatar": "https://tvax4.sinaimg.cn/crop.0.0.1080.1080.50/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg?KID=imgbed,tva&Expires=1790540358&ssig=wqT71eDavo",
+          "cover": "https://wx4.sinaimg.cn/large/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "searchRooms(link)": {
+      "result": [
+        {
+          "roomId": "1022:2321325347923495092258",
+          "userId": "3978030571",
+          "title": "男大学生助眠",
+          "nick": "陈屿学长",
+          "avatar": "https://tvax4.sinaimg.cn/crop.0.0.1080.1080.50/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg?KID=imgbed,tva&Expires=1790540358&ssig=wqT71eDavo",
+          "cover": "https://wx4.sinaimg.cn/large/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "searchRooms(mobile link)": {
+      "result": [
+        {
+          "roomId": "1022:2321325347923495092258",
+          "userId": "3978030571",
+          "title": "男大学生助眠",
+          "nick": "陈屿学长",
+          "avatar": "https://tvax4.sinaimg.cn/crop.0.0.1080.1080.50/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg?KID=imgbed,tva&Expires=1790540358&ssig=wqT71eDavo",
+          "cover": "https://wx4.sinaimg.cn/large/ed1bedebly8igpm7f6tmpj20u00u0gn6.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "getLiveStatus": {
+      "result": true,
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "WeiboLink.parse": {
+      "1022:2321325347923495092258": "1022:2321325347923495092258",
+      "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258": "1022:2321325347923495092258",
+      "https://weibo.com/l/wblive/m/show/1022%3A2321325347923495092258": "1022:2321325347923495092258"
+    },
+    "WeiboLink.url": "https://weibo.com/l/wblive/p/show/1022:2321325347923495092258",
+    "getPlayQualites": [
+      {
+        "quality": "原始流",
+        "id": "original",
+        "sort": 0
+      }
+    ],
+    "getPlayUrls": {
+      "result": [
+        "https://plwb01.live.weibo.com/alicdn/5347923496010310_wb720avc.flv"
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "resolvePlayUrlsRaw": {
+      "result": {
+        "urls": [
+          "https://plwb01.live.weibo.com/alicdn/5347923496010310_wb720avc.flv"
+        ],
+        "appliedQualityData": "original"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "result": {
+        "urls": [
+          "https://plwb01.live.weibo.com/alicdn/5347923496010310_wb720avc.flv"
+        ],
+        "appliedQualityData": "original"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325347923495092258"
+      ]
+    }
+  }
+}

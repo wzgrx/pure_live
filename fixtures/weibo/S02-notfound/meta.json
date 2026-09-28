@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "platform": "weibo",
+  "sample": "S02-notfound",
+  "capturedAt": "2026-09-27T17:19:27.667311Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321320000000000000001",
+    "headers": {
+      "Referer": "https://weibo.com/l/wblive/",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-powered-by": "PHP/7.2.1",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:19:28 GMT",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "content-type": "application/json; charset=utf-8",
+      "proc_node": "wblive-open-web-95859458f-zbh7k",
+      "server": "SHANHAI-SERVER",
+      "ssl_node": "msre-10-185-10-115.yf.intra.weibo.cn",
+      "lb": "49.7.37.75"
+    }
+  },
+  "raw": {
+    "sha256": "078b829ebd2a41431207533ea7bad6247211dfbb1de6ac6b225469931535251c",
+    "length": 109
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

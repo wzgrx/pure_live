@@ -383,6 +383,29 @@ void main() {
     });
   });
 
+  test('ENT-3: the default layout grows to show every entered room, never past the capacity', () {
+    MultiviewLayout fit(MultiviewLayout layout, int rooms, int capacity) =>
+        MultiviewController.fittingLayout(layout, rooms: rooms, capacity: capacity);
+    expect(fit(MultiviewLayout.two, 2, 4), MultiviewLayout.two);
+    expect(fit(MultiviewLayout.two, 3, 4), MultiviewLayout.four, reason: 'a phone prefilled with 3');
+    expect(fit(MultiviewLayout.two, 4, 4), MultiviewLayout.four);
+    expect(fit(MultiviewLayout.four, 6, 9), MultiviewLayout.nine);
+    expect(fit(MultiviewLayout.four, 3, 9), MultiviewLayout.four);
+    expect(fit(MultiviewLayout.onePlusN, 5, 9), MultiviewLayout.onePlusN, reason: '1+N grows by itself');
+  });
+
+  test('ENT-3: prefilled rooms on a phone layout leave no cell off screen', () async {
+    await controller().start(
+      layout: MultiviewLayout.two,
+      rooms: [
+        for (final id in ['1', '2', '3', '4']) RoomRef('douyu', id),
+      ],
+    );
+    await settle();
+    expect(state().cells, hasLength(MultiviewLayout.four.cells));
+    expect(state().layout, MultiviewLayout.four, reason: 'all four shown, none decoding unseen');
+  });
+
   test('entering pauses the room page player (ENT-2, INV-MULTI-02)', () async {
     final room = PlaybackSession(engine: FakeEngine.new);
     addTearDown(room.dispose);

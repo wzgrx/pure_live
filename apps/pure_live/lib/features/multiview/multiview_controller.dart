@@ -237,12 +237,24 @@ class MultiviewController extends Notifier<MultiviewState> {
   /// Starts with [layout] and optionally [rooms] filled in order.
   Future<void> start({required MultiviewLayout layout, List<RoomRef> rooms = const []}) async {
     _silenceSingleRoom();
-    setLayout(layout);
     final capacity = multiviewCapacity();
-    for (final (index, room) in rooms.take(capacity).indexed) {
+    final entered = rooms.take(capacity).toList();
+    setLayout(fittingLayout(layout, rooms: entered.length, capacity: capacity));
+    for (final (index, room) in entered.indexed) {
       if (index >= state.cells.length) _grow();
       unawaited(assign(index, room));
     }
+  }
+
+  /// ENT-3: [layout] (the window's default), or the first larger grid that
+  /// shows all [rooms] within [capacity]. A cell the layout does not show
+  /// would still decode and could hold the sound focus unseen.
+  static MultiviewLayout fittingLayout(MultiviewLayout layout, {required int rooms, required int capacity}) {
+    if (layout == MultiviewLayout.onePlusN || rooms <= layout.cells) return layout;
+    for (final grid in const [MultiviewLayout.two, MultiviewLayout.four, MultiviewLayout.nine]) {
+      if (grid.cells >= rooms && grid.cells <= capacity) return grid;
+    }
+    return layout;
   }
 
   /// ENT-2, INV-MULTI-02: the mini window closes (a paused one would stay as

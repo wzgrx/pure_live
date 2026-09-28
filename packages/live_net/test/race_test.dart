@@ -96,4 +96,19 @@ void main() {
       expect(ranges, everyElement('bytes=0-0'));
     });
   });
+
+  test("GitHub mirrors: the raw URL, 3.x's proxy prefixes in order, kkgithub, jsDelivr and Fastly", () {
+    final mirrors = const GitHubMirror(owner: 'o', repo: 'r').mirrors('assets/a.json');
+    const raw = 'https://raw.githubusercontent.com/o/r/master/assets/a.json';
+    expect(mirrors.map((url) => url.toString()), [
+      raw,
+      for (final prefix in GitHubMirror.rawPrefixes) '$prefix$raw',
+      'https://raw.kkgithub.com/o/r/master/assets/a.json',
+      'https://cdn.jsdelivr.net/gh/o/r@master/assets/a.json',
+      'https://fastly.jsdelivr.net/gh/o/r@master/assets/a.json',
+    ]);
+    expect(mirrors, hasLength(18));
+    expect(mirrors.toSet(), hasLength(mirrors.length));
+    expect(GitHubMirror.rawPrefixes.first, 'https://cdn.gh-proxy.org/');
+  });
 }

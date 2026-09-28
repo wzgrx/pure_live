@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S01-buss2",
+  "capturedAt": "2026-09-27T09:39:28.587558Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.cdn.huya.com/liveconfig/game/bussLive?bussType=2",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "max-age=30",
+      "access-control-allow-origin": "*",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "ali-swift-global-savetime": "1790501969",
+      "access-control-expose-headers": "**",
+      "access-control-max-age": "5",
+      "content-type": "application/json",
+      "x-swift-cachetime": "30",
+      "server": "Tengine",
+      "timing-allow-origin": "*",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-methods": "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,CONNECT,TRACE",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:39:29 GMT",
+      "via": "cache33.l2cn9466[122,121,200-0,M], cache13.l2cn9466[123,0], ens-cache11.cn9055[154,154,200-0,M], ens-cache3.cn9055[156,0]",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "eagleid": "76b4281717905019689452340e"
+    }
+  },
+  "raw": {
+    "sha256": "8903eeb902735b38be6b9aaf287348c9fd653fba868ea57e2cdeea0ee1beee4c",
+    "length": 20109
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

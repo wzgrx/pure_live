@@ -1,0 +1,266 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S05-multicdn",
+  "capturedAt": "2026-09-27T09:44:32.850388Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://mp.huya.com/cache.php?m=Live&do=profileRoom&roomid=660000&showSecret=1&_=1790502271759",
+    "headers": {
+      "Accept": "*/*",
+      "Origin": "https://www.huya.com",
+      "Referer": "https://www.huya.com/",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-site",
+      "user-agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 09:44:33 GMT",
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=utf-8",
+      "server": "HUYA/2.15.3",
+      "x-request-id": "4792954979d616ea011f39e78d83f7c8"
+    }
+  },
+  "raw": {
+    "sha256": "dc2cf16d11f5f08b46fb926983a907dc92a5627744a74d43407a312d193a6114",
+    "length": 17680
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[0].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[1].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[2].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[3].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[3].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[3].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[3].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[3].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[3].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[4].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[4].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[4].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[4].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[4].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[4].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[5].sFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[5].sFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[5].sHlsAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[5].sHlsAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[5].newCFlvAntiCode:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.baseSteamInfoList[5].newCFlvAntiCode:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[0].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[0].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[1].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[1].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[2].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[2].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[3].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[3].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[4].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.hls.multiLine[4].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[0].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[0].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[1].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[1].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[2].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[2].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[3].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[3].url:fm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[4].url:wsSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.stream.flv.multiLine[4].url:fm",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

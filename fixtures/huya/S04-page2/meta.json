@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S04-page2",
+  "capturedAt": "2026-09-27T09:50:45.255725Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://search.cdn.huya.com/?m=Search&do=getSearchContent&q=%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F&uid=4&v=4&typ=-5&livestate=0&rows=20&start=20",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "content-encoding": "gzip",
+      "content-length": "14784",
+      "ali-swift-global-savetime": "1790502645",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:50:45 GMT",
+      "content-type": "text/html; charset=utf8",
+      "via": "cache33.l2cn7478[645,645,200-0,M], cache18.l2cn7478[646,0], ens-cache12.cn8000[761,761,200-0,M], ens-cache20.cn8000[763,0]",
+      "x-swift-cachetime": "0",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "server": "Tengine",
+      "eagleid": "dcb5a52817905026449651397e"
+    }
+  },
+  "raw": {
+    "sha256": "f9a0e83c0cd608dd87d658147bc3f7cd919fdf97c9f669430db9c51ee8ddb4fa",
+    "length": 76246
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.response.3.docs[7].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[14].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[17].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[25].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[30].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[33].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "url:uid",
+      "rule": "person"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S04-fallback",
+  "capturedAt": "2026-09-27T09:50:48.820976Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://search.cdn.huya.com/?m=Search&do=getSearchContent&q=%E6%96%AF%E8%AF%BA%E5%85%8B&uid=5&v=4&typ=-5&livestate=0&rows=20&start=0",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "content-encoding": "gzip",
+      "content-length": "8236",
+      "ali-swift-global-savetime": "1790502649",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:50:49 GMT",
+      "content-type": "text/html; charset=utf8",
+      "via": "cache21.l2cn7478[676,675,200-0,M], cache19.l2cn7478[678,0], ens-cache27.cn8000[758,758,200-0,M], ens-cache28.cn8000[762,0]",
+      "x-swift-cachetime": "0",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "server": "Tengine",
+      "eagleid": "dcb5a53017905026485472936e"
+    }
+  },
+  "raw": {
+    "sha256": "6838e042865b7fcbfdc1c0df015a2e18b6b5651570c0d836d7fb1baf34d268f0",
+    "length": 41876
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.response.3.docs[3].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[8].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[11].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.response.3.docs[13].game_screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "url:uid",
+      "rule": "person"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

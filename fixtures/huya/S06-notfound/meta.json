@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S06-notfound",
+  "capturedAt": "2026-09-27T09:44:49.055698Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://mp.huya.com/cache.php?m=Live&do=profileRoom&roomid=999999999&showSecret=1&_=1790502288148",
+    "headers": {
+      "Accept": "*/*",
+      "Origin": "https://www.huya.com",
+      "Referer": "https://www.huya.com/",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-site",
+      "user-agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 09:44:49 GMT",
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=utf-8",
+      "server": "HUYA/2.15.3",
+      "x-request-id": "618d821139e8360e0121204934269d18"
+    }
+  },
+  "raw": {
+    "sha256": "45cabd5f3be3a0ba1eb44894d5cdd2bace738872909b75648a379cc385b6c2ef",
+    "length": 79
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

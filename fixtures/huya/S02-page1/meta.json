@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S02-page1",
+  "capturedAt": "2026-09-27T09:49:57.730707Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.huya.com/cache.php?m=LiveList&do=getLiveListByPage&tagAll=0&page=1",
+    "headers": {
+      "user-agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0",
+      "Origin": "https://www.huya.com",
+      "Referer": "https://www.huya.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "no-cache",
+      "date": "Sun, 27 Sep 2026 09:49:58 GMT",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://www.huya.com",
+      "vary": "Origin",
+      "content-encoding": "gzip",
+      "ali-swift-global-savetime": "1790502598",
+      "content-type": "text/html; charset=utf-8",
+      "access-control-max-age": "1728000",
+      "x-swift-cachetime": "30",
+      "server": "Tengine",
+      "x-request-id": "ed9ec448f5926f200117f0f1e9732b8a",
+      "timing-allow-origin": "*",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-methods": "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,CONNECT,TRACE",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:49:58 GMT",
+      "via": "ens-cache56.l2su121-10[110,110,200-0,M], ens-cache38.l2su121-10[112,0], cache15.cn2530[146,146,200-0,M], cache16.cn2530[147,0]",
+      "x-cache": "MISS TCP_REFRESH_MISS dirn:-2:-2",
+      "eagleid": "775436a417905025980576280e"
+    }
+  },
+  "raw": {
+    "sha256": "3bda4620a7e4d34a0c93fbdf51c43829908fcf5d92ccaefd187de87539433dc4",
+    "length": 118746
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.datas[20].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[26].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[31].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[35].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[41].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[53].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[59].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[68].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[72].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[97].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[99].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[104].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[108].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[116].screenshot:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.datas[119].screenshot:sign",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

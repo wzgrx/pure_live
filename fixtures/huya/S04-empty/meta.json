@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "huya",
+  "sample": "S04-empty",
+  "capturedAt": "2026-09-27T09:42:06.159626Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://search.cdn.huya.com/?m=Search&do=getSearchContent&q=qzxjvkwpqhuya&uid=4&v=4&typ=-5&livestate=0&rows=20&start=0",
+    "headers": {}
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "timing-allow-origin": "*",
+      "connection": "keep-alive",
+      "content-length": "396",
+      "ali-swift-global-savetime": "1790502126",
+      "x-swift-savetime": "Sun, 27 Sep 2026 09:42:06 GMT",
+      "content-type": "text/html; charset=utf8",
+      "via": "cache11.l2cn7478[444,443,200-0,M], cache48.l2cn7478[446,0], ens-cache23.cn8000[521,521,200-0,M], ens-cache27.cn8000[524,0]",
+      "x-swift-cachetime": "0",
+      "server": "Tengine",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "eagleid": "dcb5a52f17905021261342431e"
+    }
+  },
+  "raw": {
+    "sha256": "232eddf67c68cba1c83a7cbedbb6635a43f177e135f535407ff96d9629ea3470",
+    "length": 396
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "url:uid",
+      "rule": "person"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -25,5 +25,8 @@ export 'src/sites/douyin/douyin_sign.dart';
 export 'src/sites/douyin/douyin_site.dart';
 export 'src/sites/douyu/douyu_api.dart';
 export 'src/sites/douyu/douyu_site.dart';
+export 'src/sites/huya/huya_api.dart';
+export 'src/sites/huya/huya_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/tars.dart';

@@ -1281,7 +1281,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                               tooltip: _volume == 0 ? t.room.unmuteKey : t.room.muteKey,
                               color: ink,
                               isSelected: _volume == 0,
-                              icon: const LiveIcon(LiveIcons.mute),
+                              // Sound on shows the speaker; a crossed one reads as muted.
+                              icon: const LiveIcon(LiveIcons.volume),
                               selectedIcon: const LiveIcon(LiveIcons.mute, filled: true),
                               onPressed: toggleMute,
                             ),

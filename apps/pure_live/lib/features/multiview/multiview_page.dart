@@ -563,7 +563,8 @@ class _Toolbar extends ConsumerWidget {
             IconButton(
               tooltip: state.muteAll ? t.multiview.unmuteAll : t.multiview.muteAll,
               isSelected: state.muteAll,
-              icon: const LiveIcon(LiveIcons.mute),
+              // Sound on shows the speaker; a crossed one reads as muted.
+              icon: const LiveIcon(LiveIcons.volume),
               selectedIcon: const LiveIcon(LiveIcons.mute, filled: true),
               onPressed: controller.toggleMuteAll,
             ),

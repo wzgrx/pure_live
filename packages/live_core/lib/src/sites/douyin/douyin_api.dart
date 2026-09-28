@@ -333,7 +333,8 @@ abstract final class DouyinApi {
 
   /// `room/web/enter/` for [webRid] (the identity, as requested): the room is
   /// `data.data[0]`, the streamer `data.user` when the room is offline.
-  /// `status` 2 is live (`data.room_status` 0 when there is no status).
+  /// `status` 2 is live, anything else (a missing status too) offline, as in
+  /// 3.x.
   /// 4001038 or an empty list is `NotFound`; an empty 200 (no ttwid, or a
   /// rejected signature) is `RiskControl`.
   static DouyinRoom enter(
@@ -348,12 +349,7 @@ abstract final class DouyinApi {
     if (list.isEmpty) throw NotFound(_site, 'enter: no room for $webRid');
     final room = _map(list.first);
     if (room == null) throw const ApiChanged(_site, 'enter: data.data[0] is not an object');
-    return _room(
-      webRid: webRid.trim(),
-      room: room,
-      person: _map(data['user']),
-      live: _isLive(room, roomStatus: data['room_status']),
-    );
+    return _room(webRid: webRid.trim(), room: room, person: _map(data['user']), live: _isLive(room));
   }
 
   /// `room/reflow/info/` for a room_id: the identity is `room.owner.web_rid`;
@@ -457,13 +453,9 @@ abstract final class DouyinApi {
     );
   }
 
-  /// `status` 2 (number or string) is live, anything else offline; enter's
-  /// `data.room_status` (0 live) decides only when there is no status.
-  static bool _isLive(Map<String, dynamic> room, {Object? roomStatus}) {
-    final status = jsonInt(room['status']);
-    if (status != null) return status == 2;
-    return jsonInt(roomStatus) == 0;
-  }
+  /// `status` 2 (number or string) is live, anything else offline, a missing
+  /// status included (3.x's rule; enter's `data.room_status` is not read).
+  static bool _isLive(Map<String, dynamic> room) => jsonInt(room['status']) == 2;
 
   /// `webcast/user/me/`: the signed-in account's nickname. 20003 ("User
   /// doesn't login", also the answer without a cookie) is `NeedsLogin`

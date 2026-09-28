@@ -893,6 +893,17 @@ void main() {
       reason: 'an empty room list',
     );
     expect(() => DouyinApi.reflow('{"status_code":0,"data":{"room":{"status":2}}}'), throwsA(isA<ApiChanged>()));
+    // A missing status is offline as in 3.x, whatever data.room_status says.
+    final noStatus = DouyinApi.enter(
+      '{"status_code":0,"data":{"room_status":0,"data":[{"id_str":"7000000000000000001","title":"t"}]}}',
+      webRid: '1',
+    );
+    expect(noStatus.room.isExplicitlyOfflineNow, isTrue);
+    expect(
+      DouyinApi.enter('{"status_code":0,"data":{"data":[{"status":"2","title":"t"}]}}', webRid: '1').room.isLiveNow,
+      isTrue,
+      reason: 'a string "2" is live',
+    );
     expect(() => DouyinApi.roomPage('<html></html>', webRid: '1'), throwsA(isA<ApiChanged>()));
     expect(() => DouyinApi.categories('<html></html>'), throwsA(isA<ApiChanged>()));
     for (final body in [

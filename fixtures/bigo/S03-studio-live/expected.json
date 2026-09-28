@@ -1,0 +1,331 @@
+{
+  "generator": "BigoSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + BigoApi.studioRoom (with S02-time-live, S02-status-live; avatarHttps: the avatar made https)",
+  "value": {
+    "recorded": {
+      "414439909": {
+        "getRoomDetail": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo schema"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "getRoomDetailForRefresh": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo schema"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "getRoomDetailForRecording": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo schema"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "getLiveStatus": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo schema"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "studioRoom": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo schema"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        }
+      },
+      "notASiteId": {
+        "result": {
+          "throws": "BigoException",
+          "message": "Bigo identity"
+        },
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "BigoException",
+          "message": "Bigo identity"
+        },
+        "requests": []
+      }
+    },
+    "avatarHttps": {
+      "414439909": {
+        "getRoomDetail": {
+          "result": {
+            "roomId": "qashia305",
+            "userId": "409742853",
+            "title": "qashia",
+            "nick": "qashia",
+            "avatar": "https://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+            "cover": "https://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+            "area": "Bigo Live",
+            "watching": "0",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "followers": "0",
+            "platform": "bigo",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Bigo Live 远端聊天尚待接入；目录 user_count 仅作为当前直播在线人数，房间详情缺值时保持未知。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.bigo.tv",
+              "referer": "https://www.bigo.tv/",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://www.bigo.tv/qashia305"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "getRoomDetailForRefresh": {
+          "result": {
+            "roomId": "qashia305",
+            "userId": "409742853",
+            "title": "qashia",
+            "nick": "qashia",
+            "avatar": "https://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+            "cover": "https://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+            "area": "Bigo Live",
+            "watching": "0",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "followers": "0",
+            "platform": "bigo",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Bigo Live 远端聊天尚待接入；目录 user_count 仅作为当前直播在线人数，房间详情缺值时保持未知。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.bigo.tv",
+              "referer": "https://www.bigo.tv/",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://www.bigo.tv/qashia305"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "getRoomDetailForRecording": {
+          "result": {
+            "roomId": "qashia305",
+            "userId": "409742853",
+            "title": "qashia",
+            "nick": "qashia",
+            "avatar": "https://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+            "cover": "https://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+            "area": "Bigo Live",
+            "watching": "0",
+            "audienceMetricType": "unknown",
+            "popularity": "",
+            "followers": "0",
+            "platform": "bigo",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "Bigo Live 远端聊天尚待接入；目录 user_count 仅作为当前直播在线人数，房间详情缺值时保持未知。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.bigo.tv",
+              "referer": "https://www.bigo.tv/",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://www.bigo.tv/qashia305"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "getLiveStatus": {
+          "result": true,
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "studioRoom": {
+          "result": {
+            "requestedSiteId": "414439909",
+            "canonicalSiteId": "qashia305",
+            "ownerId": 409742853,
+            "access": "public",
+            "reportedAlive": true,
+            "roomStatus": 6,
+            "roomType": "0",
+            "roomId": "6812312308570332324",
+            "nickname": "qashia",
+            "title": "",
+            "category": "",
+            "avatar": "https://esx.bigo.sg/na/live_pic/luy/1wgYlS00y4dZTiM2B5Tdq_4.jpg?type=20&auth-token=wM-iwQMG9uOK9CD8AZvRNphYT0pwOMMcVf3rXq0q1ms%3ArqIwJil4BGzyWfG8HtKuN98esn3dvR1nizHvCXKaBtyzQTH5HJy0KXwxBZK8ADgikrZ4PaWmgL",
+            "hls": "https://47a788a9.cubetecn.com:1451/list_3453520891_2472221860_0.m3u8"
+          },
+          "requests": [
+            "GET https://sec.bigo.sg/v1/webjs/t",
+            "GET https://sec.bigo.sg/v1/webjs/status",
+            "POST https://ta.bigo.tv/official_website/studio/getInternalStudioInfo?siteId=414439909&verify="
+          ]
+        },
+        "getRoomDetail → getPlayQualites": {
+          "result": [
+            {
+              "quality": "直播自动",
+              "id": "live",
+              "sort": 0,
+              "data": null
+            }
+          ],
+          "requests": []
+        },
+        "getRoomDetail → resolvePlayUrlsRaw": {
+          "result": {
+            "urls": [],
+            "appliedQualityData": "live",
+            "inputRecipe": {
+              "siteId": "qashia305",
+              "identity": "bigo:qashia305:live"
+            }
+          },
+          "requests": []
+        },
+        "getRoomDetail → resolvePlayUrlsForRecoveryRaw": {
+          "result": {
+            "urls": [],
+            "appliedQualityData": "live",
+            "inputRecipe": {
+              "siteId": "qashia305",
+              "identity": "bigo:qashia305:live"
+            }
+          },
+          "requests": []
+        },
+        "getRoomDetail → getPlayUrls": {
+          "result": [],
+          "requests": []
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(auto)": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo mediaUnavailable"
+          },
+          "requests": []
+        },
+        "getRoomDetailForRefresh → getPlayQualites": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo mediaUnavailable"
+          },
+          "requests": []
+        },
+        "getRoomDetailForRefresh → resolvePlayUrlsRaw": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo mediaUnavailable"
+          },
+          "requests": []
+        },
+        "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo mediaUnavailable"
+          },
+          "requests": []
+        },
+        "getRoomDetailForRefresh → getPlayUrls": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo mediaUnavailable"
+          },
+          "requests": []
+        },
+        "getRoomDetailForRefresh → resolvePlayUrlsRaw(auto)": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo mediaUnavailable"
+          },
+          "requests": []
+        },
+        "getRoomDetailForRecording → getPlayQualites": {
+          "result": [
+            {
+              "quality": "直播自动",
+              "id": "live",
+              "sort": 0,
+              "data": null
+            }
+          ],
+          "requests": []
+        },
+        "getRoomDetailForRecording → resolvePlayUrlsRaw": {
+          "result": {
+            "urls": [],
+            "appliedQualityData": "live",
+            "inputRecipe": {
+              "siteId": "qashia305",
+              "identity": "bigo:qashia305:live"
+            }
+          },
+          "requests": []
+        },
+        "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw": {
+          "result": {
+            "urls": [],
+            "appliedQualityData": "live",
+            "inputRecipe": {
+              "siteId": "qashia305",
+              "identity": "bigo:qashia305:live"
+            }
+          },
+          "requests": []
+        },
+        "getRoomDetailForRecording → getPlayUrls": {
+          "result": [],
+          "requests": []
+        },
+        "getRoomDetailForRecording → resolvePlayUrlsRaw(auto)": {
+          "result": {
+            "throws": "BigoException",
+            "message": "Bigo mediaUnavailable"
+          },
+          "requests": []
+        }
+      }
+    }
+  }
+}

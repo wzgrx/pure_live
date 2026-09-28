@@ -1,0 +1,23 @@
+{
+  "generator": "NiconicoStream.parse (the stream frame, now = capturedAt) + cookieHeaderFor",
+  "value": {
+    "uri": "https://livedelivery.dlive.nicovideo.jp/hls/playlists/6ab953b4d954bb7b1d847c01/4766dc3f43803356/multivariant/variant.m3u8",
+    "quality": "abr",
+    "availableQualities": [
+      "abr",
+      "super_high",
+      "1.5Mbps480p30fps",
+      "480kbps288p30fps",
+      "audio_high",
+      "audio_only"
+    ],
+    "retainedCookieCount": 13,
+    "cookieHeaderFor": {
+      "master": "CloudFront-Policy=iwGWfLS2CZ1komKyToc7ZaDww676kmMwRwshnRF1oXL7Ec5tuSBjMBMqrYMuwowoRLjmgpGyvoani2RiJAPtTvhvQ2sunk8feUQ5uBhdeVBbGfHtYLRmOfQdIPV9EuR3ThZnMBD1OuUsNhJ3MdNmJrQpDGS0OCXwAAEeQiDiLeWlzsVorOtsifX8lyTTTJDnOTZmx5AaGO8cYjhqBTcGHpUfc8PmYDvjJKJ0IRj0JAZmPBr0EQ63jE87; CloudFront-Signature=EAWYTM3QR2c3MFtkf-pJiSkq5dPto4tF543V-5Mgg9EIUD90GzUR4HgSrIBZms3e8Vfrk4g-0ElVrkVDUOZWh60HaKwEVI__; CloudFront-Key-Pair-Id=J91FOCAC0KOKGA",
+      "video": "CloudFront-Policy=kgNKmFO5SY4zdpKoIdy4KcRzl216deWzOsirdDC2qLP4Rg0dbWGiZODzhQGadlvpHRpixvUhrbnlt0VxHRUzEslaU3qwja5aVJxhDX73ii45HOP3LPTcENC9KUNkDzoaXDB0CXioXFPoounsDC9dLLuoIYYLd47ajVNnj64gTkweJJV8OMqnn9BUjNZoHpd0QlKNQvyRyV5joPKpsAJwGwX4RZQ3OgV6XeZ5fK2ipA__; CloudFront-Signature=AMLZQZM4WIFDfn0HQjci9DsLiDJdZFY5Unmg5CVZOFIDItiuvDFvLRFWz02wYbwrzsIR8J4OCEqg0qCUI0kKnOaynRI39Oa_; CloudFront-Key-Pair-Id=J91FOCAC0KOKGA",
+      "audio": "CloudFront-Policy=obRSoKH6LT9mzkXlXuq9NcLnc362nrOiWcfkuJT4cHO9Ad1jkVKhSJAxlSWrpwfwXUjtogKethdoh4VzPUCsHrzjT5ulgx2jAGgpZG17yg50MIE1JJCxYON4TUEbSbqnYID4NIahDQOiBOGizJ5zVGxpSLZJw03crLGsh35tBrkcZRQ5LHajq2TJbCNeAlt7BgHPWboRzM0ciHVscNDuZrJ7WDR9IwJ2XjW9sB4djZ__; CloudFront-Signature=RPSOUUX-84UKExb8AOTHkjOhSkYvpFHfpSeNpfd1aBi2xMftaHCdUPoz7z1Lc6A9HzlhcJifg1WMwLNCBgpDXTH5PomhBIRm; CloudFront-Key-Pair-Id=J91FOCAC0KOKGA",
+      "key": "CloudFront-Policy=quIBnTB1OK9tcnTrIvt0NmMur483wqMsDcgjyRI3jDD7Vq4ytXNzFBRjiJCuexfzOUzebbNlnnybw1GaTUDxOwgeD6ilfm2eDWxnLnTtFui3U2V5GLi8LQLrQ1TtUAh0P8JdIY60McF9AUQuEaAcZYTcOfC8DvrrCPAWk72yzRLyi77xQvllHVG8URawk6OVrYKzOnl3KgLGUwvPoL1ygUHolANoRfH0QII8CuW4XdE9zV2epE__; CloudFront-Signature=SNNOUFKn9uEqxDU2853OhHLHjdUEgOeq2UJLhWHwwu0ZksWNikSqOEpm1tLlUZDaQ1LZBwQtACkLaoV8APPWyaZeYvfVzcCI; CloudFront-Key-Pair-Id=J91FOCAC0KOKGA; session=375d1176514127ji02l89g0qe81j39616109bw6b24950272922130029qcbt7co0uj137981a8y33p7",
+      "sessionKey": "session=375d1176514127ji02l89g0qe81j39616109bw6b24950272922130029qcbt7co0uj137981a8y33p7"
+    }
+  }
+}

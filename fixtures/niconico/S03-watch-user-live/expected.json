@@ -1,0 +1,72 @@
+{
+  "generator": "NiconicoSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + NiconicoApi.room (lv351482868)",
+  "value": {
+    "getRoomDetail": {
+      "roomId": "lv351482868",
+      "title": "【カリスマ】ひま",
+      "nick": "まいきち",
+      "avatar": "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/14484/144846457.jpg?1787139576",
+      "cover": "https://asset2.dlive.nicovideo.jp/de6b/6ab953b4102d8e0e349b282a/screenshot/12/thumbnail-640x360/screenshot.jpg",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "2292",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351482868"
+    },
+    "getRoomDetailForRefresh": {
+      "roomId": "lv351482868",
+      "title": "【カリスマ】ひま",
+      "nick": "まいきち",
+      "avatar": "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/14484/144846457.jpg?1787139576",
+      "cover": "https://asset2.dlive.nicovideo.jp/de6b/6ab953b4102d8e0e349b282a/screenshot/12/thumbnail-640x360/screenshot.jpg",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "2292",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351482868"
+    },
+    "getRoomDetailForRecording": {
+      "roomId": "lv351482868",
+      "title": "【カリスマ】ひま",
+      "nick": "まいきち",
+      "avatar": "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/14484/144846457.jpg?1787139576",
+      "cover": "https://asset2.dlive.nicovideo.jp/de6b/6ab953b4102d8e0e349b282a/screenshot/12/thumbnail-640x360/screenshot.jpg",
+      "watching": "0",
+      "audienceMetricType": "totalViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "2292",
+      "followers": "0",
+      "platform": "niconico",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。",
+      "isCatchUp": false,
+      "link": "https://live.nicovideo.jp/watch/lv351482868"
+    },
+    "getLiveStatus": true,
+    "watch": {
+      "status": "onAir",
+      "access": "allowed",
+      "reportedWatchCount": 2292,
+      "webSocketUri": "wss://a.live2.nicovideo.jp/unama/wsapi/v2/watch/24876040585822?audience_token=56988856188548_brqnjiekb-ksvm-3xpiw353-19r5-1xoe-dy48-15u138228438_7925498691_04w6411004h9z1y1d88j90eqsd6rg132tog49t18&frontend_id=9"
+    }
+  }
+}

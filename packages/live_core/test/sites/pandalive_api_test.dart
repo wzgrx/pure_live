@@ -74,6 +74,16 @@ const Set<String> _liveChanged = {..._roomChanged, 'area'};
 /// userId, the broadcaster's number (25-10; 3.x wrote the login id).
 const Set<String> _cardChanged = {..._liveChanged, 'userId'};
 
+/// What a rerun's room changes besides the rest: its state, a replay (the
+/// unified rule on replays and reruns, as Twitch's 8-9; 3.x: live).
+const _rerunChanged = {'liveStatus', 'isRecord', 'status'};
+
+/// [_cardChanged] for the card of [row], with [_rerunChanged] for a rerun.
+Set<String> _cardChangedFor(Map<String, dynamic> row) => {
+  ..._cardChanged,
+  if (row['onAirType'] == 'rec') ..._rerunChanged,
+};
+
 /// The new keys of a live broadcast [media] (a `live/index` row or
 /// `media`): its start (25-12), cumulative viewers (25-3) and restriction
 /// (the recorded ones are all free: none).
@@ -89,6 +99,10 @@ void _expectCardChanges(LiveRoom room, Map<String, dynamic> row, {String? reason
   expect(room.area, PandaLiveApi.areaNames[row['category']], reason: '$reason area (25-8)');
   expect(room.link, 'https://www.pandalive.co.kr/play/${row['userId']}', reason: '$reason link (25-4)');
   expect(room.notice, PandaLiveApi.chatNotice, reason: '$reason notice (25-7)');
+  final rerun = row['onAirType'] == 'rec';
+  expect(room.liveStatus, rerun ? LiveStatus.replay : LiveStatus.live, reason: '$reason rerun');
+  expect(room.followGroup, rerun ? FollowGroup.replay : FollowGroup.live, reason: '$reason rerun');
+  expect(room.isPlayableNow, isTrue, reason: '$reason rerun');
 }
 
 PandaLiveMember _member(String sample, String userId) {
@@ -301,7 +315,7 @@ void main() {
         _expectParity(
           _projection(room),
           rooms[index],
-          changed: _cardChanged,
+          changed: _cardChangedFor(rows[index]),
           added: _liveAdded(rows[index]),
           reason: 'p1[$index]',
         );
@@ -326,7 +340,7 @@ void main() {
         _expectParity(
           _projection(room),
           rooms[index],
-          changed: _cardChanged,
+          changed: _cardChangedFor(rows[index]),
           added: _liveAdded(rows[index]),
           reason: 'p5[$index]',
         );
@@ -481,6 +495,106 @@ void main() {
     });
   });
 
+  group('reruns (the unified rule on replays and reruns)', () {
+    test('the recorded reruns: rec on both fields, a [녹] title; replays, playable, in the replay group', () {
+      for (final (sample, count, total) in [('S01-index-hot', 5, 30), ('S02-index-newbj', 2, 7)]) {
+        final rows = _rows(sample);
+        final reruns = rows.where(PandaLiveApi.isRerun).toList();
+        expect([reruns.length, rows.length], [count, total], reason: sample);
+        for (final row in reruns) {
+          expect([row['onAirType'], row['liveType']], ['rec', 'rec'], reason: '${row['userId']}');
+          expect(row['title'], startsWith('[녹]'), reason: '${row['userId']}');
+        }
+        final fixture = _sample(sample);
+        final page = PandaLiveApi.livePage(fixture.body, page: 1, status: fixture.status);
+        final replays = page.rooms.where((room) => room.liveStatus == LiveStatus.replay);
+        expect(replays.map((room) => room.roomId), reruns.map((row) => row['userId']), reason: sample);
+        for (final room in replays) {
+          expect(room.isRecord, isTrue);
+          expect(room.isLiveNow, isFalse);
+          expect(room.isPlayableNow, isTrue);
+          expect(room.followGroup, FollowGroup.replay);
+          expect(room.toJson(), containsPair('liveStatus', LiveStatus.replay.index));
+        }
+      }
+    });
+
+    test('either field says it; a rerun keeps its audience, start, restriction and notice', () {
+      for (final changes in [
+        {'onAirType': 'rec', 'liveType': 'rec'},
+        {'onAirType': 'rec'},
+        {'liveType': 'rec'},
+      ]) {
+        final card = PandaLiveApi.liveCard(
+          _media(changes: {...changes, 'startTime': '2026-09-28 20:00:00', 'type': 'free', 'isPw': true}),
+        )!;
+        expect(card.liveStatus, LiveStatus.replay, reason: '$changes');
+        expect([card.onlineViewers, card.totalViewers], ['127', '900'], reason: '$changes');
+        expect(card.startedAt, DateTime.utc(2026, 9, 28, 11), reason: '$changes');
+        expect(card.restriction, LiveRestriction.password, reason: '$changes');
+        expect(card.notice, PandaLiveApi.passwordNotice, reason: '$changes');
+      }
+      for (final changes in [
+        {'onAirType': 'live', 'liveType': 'live'},
+        {'onAirType': 'REC'},
+        const <String, Object?>{},
+      ]) {
+        expect(PandaLiveApi.liveCard(_media(changes: changes))!.liveStatus, LiveStatus.live, reason: '$changes');
+      }
+      expect(
+        PandaLiveApi.liveCard(_media(changes: {'onAirType': 'rec', 'isLive': false})),
+        isNull,
+        reason: 'only on-air rows are cards',
+      );
+    });
+
+    test('the BJ search, the refresh and room entry (accepted or refused) say replay too', () {
+      const rec = {'onAirType': 'rec', 'liveType': 'rec'};
+      final row = PandaLiveApi.profileCard(
+        _broadcaster(
+          id: 'fixture_101',
+          index: 101,
+          media: _media(changes: rec),
+        ),
+      )!;
+      expect(row.liveStatus, LiveStatus.replay);
+      expect(row.totalViewers, '900');
+      final ended = PandaLiveApi.profileCard(
+        _broadcaster(
+          id: 'fixture_101',
+          index: 101,
+          media: _media(changes: {...rec, 'isLive': false}),
+        ),
+      )!;
+      expect(ended.liveStatus, LiveStatus.offline);
+      final member = PandaLiveApi.member(
+        _memberAnswer(media: _media(changes: rec)),
+        userId: 'fixture_101',
+      );
+      expect(PandaLiveApi.listedLive(member), isTrue);
+      expect(PandaLiveApi.refreshRoom(member).liveStatus, LiveStatus.replay);
+      final accepted = PandaLiveApi.playRoom(
+        member,
+        PandaLiveApi.play(
+          _playAnswer(media: _media(changes: rec)),
+          member: member,
+        ),
+      );
+      expect(accepted.room.liveStatus, LiveStatus.replay);
+      expect(accepted.room.restriction, LiveRestriction.none);
+      expect(accepted.unavailable, isNull, reason: 'it plays like a live broadcast');
+      final refused = PandaLiveApi.playRoom(
+        member,
+        PandaLiveApi.play(_refusal('needAdult'), member: member, status: 400),
+      );
+      expect(refused.room.liveStatus, LiveStatus.replay);
+      expect(refused.room.restriction, LiveRestriction.adult);
+      expect(refused.unavailable, isA<NeedsLogin>());
+      final live = PandaLiveApi.member(_memberAnswer(media: _media()), userId: 'fixture_101');
+      expect(PandaLiveApi.refreshRoom(live).liveStatus, LiveStatus.live);
+    });
+  });
+
   group('upgrades of the cards', () {
     test('startTime is Korean time (25-12, REG-PANDALIVE-004)', () {
       expect(PandaLiveApi.koreanTime('2026-09-28 02:00:35'), DateTime.utc(2026, 9, 27, 17, 0, 35));
@@ -562,7 +676,7 @@ void main() {
         _expectParity(
           _projection(room),
           rooms[index],
-          changed: _cardChanged,
+          changed: _cardChangedFor(rows[index]),
           added: _liveAdded(rows[index]),
           reason: 'live[$index]',
         );

@@ -406,6 +406,18 @@ abstract final class PandaLiveApi {
       normalizeUserId(media['userId'])?.toLowerCase() == userId.toLowerCase() &&
       (index == null || _positive(media['userIdx']) == index);
 
+  /// Whether an on-air broadcast is a recording played again (`onAirType`
+  /// or `liveType` `rec`; its title starts with `[녹]`, 녹화): a replay, as
+  /// Twitch's reruns (the unified rule on replays and reruns; 9 of 132
+  /// broadcasts of the directory on 2026-09-28; 3.x showed them live). It
+  /// plays like a live broadcast.
+  static bool isRerun(Map<String, Object?> media) =>
+      _text(media['onAirType']) == 'rec' || _text(media['liveType']) == 'rec';
+
+  /// The state of an on-air broadcast: a replay for a rerun ([isRerun]),
+  /// else live.
+  static LiveStatus _onAir(Map<String, Object?> media) => isRerun(media) ? LiveStatus.replay : LiveStatus.live;
+
   // Restrictions --------------------------------------------------------------
 
   /// The restriction a broadcast's flags show (the unified rules): adult
@@ -574,8 +586,9 @@ abstract final class PandaLiveApi {
   /// snapshot as cover, the category's name as area (25-8), concurrent
   /// viewers, this broadcast's entries as cumulative viewers (`playCnt`,
   /// 25-3), fans, the start (25-12) and the restriction its flags show,
-  /// with that restriction's notice. Null for a row without a broadcaster
-  /// id or that is not live.
+  /// with that restriction's notice; live, or a replay for a rerun
+  /// ([isRerun]). Null for a row without a broadcaster id or that is not
+  /// on air.
   ///
   /// The card's `userId` is the broadcaster's number, as in room details
   /// and the BJ search (25-10; 3.x wrote the login id here); empty without
@@ -596,7 +609,7 @@ abstract final class PandaLiveApi {
       cover: image(row['thumbUrl'] ?? row['ivsThumbnail']),
       area: areaNameOf(row['category']),
       link: roomUrl(id),
-      liveStatus: LiveStatus.live,
+      liveStatus: _onAir(row),
       startedAt: koreanTime(row['startTime']),
       restriction: restriction,
       onlineViewers: _count(row['user']),
@@ -653,7 +666,8 @@ abstract final class PandaLiveApi {
   /// nick, the avatar `thumbUrl`, 3.x's `userId` the broadcaster's number.
   /// Without `media` it is offline, titled by the nick; with it, the
   /// broadcast's title, cover, category name (25-8) and fans, live by
-  /// `isLive` (unknown when it says neither). Only while live: viewers,
+  /// `isLive` (a replay for a rerun, [isRerun]; unknown when it says
+  /// neither). Only while on air: viewers,
   /// cumulative viewers (25-3), the start (25-12) and the restriction the
   /// flags show; the notice is the restriction's (3.x: adult, else
   /// password). An empty nick stays empty (the unified rule on
@@ -699,7 +713,7 @@ abstract final class PandaLiveApi {
       area: areaNameOf(media['category']),
       link: roomUrl(id),
       liveStatus: switch (live) {
-        true => LiveStatus.live,
+        true => _onAir(media),
         false => LiveStatus.offline,
         null => LiveStatus.unknown,
       },
@@ -856,8 +870,9 @@ abstract final class PandaLiveApi {
   /// avatar, cover (the snapshot, for a playable broadcast also
   /// `ivsThumbnail`, else the banner), category name (25-8), fans, viewers
   /// and cumulative viewers (25-3), its start (25-12), with the channel
-  /// description; live, with [notice] and [restriction]. An empty nick
-  /// stays empty (the unified rule on placeholders).
+  /// description; live (a replay for a rerun, [isRerun]), with [notice]
+  /// and [restriction]. An empty nick stays empty (the unified rule on
+  /// placeholders).
   static LiveRoom mediaRoom(
     PandaLiveMember member,
     Map<String, Object?> media, {
@@ -880,7 +895,7 @@ abstract final class PandaLiveApi {
       cover: image(cover),
       area: areaNameOf(media['category']),
       link: roomUrl(member.userId),
-      liveStatus: LiveStatus.live,
+      liveStatus: _onAir(media),
       startedAt: koreanTime(media['startTime']),
       restriction: restriction,
       onlineViewers: _count(media['user']),

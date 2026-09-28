@@ -741,6 +741,36 @@ void main() {
       expect(http.requests, hasLength(4));
     });
 
+    test('a rerun (rec): a replay in refresh, entry and recording, played like a live broadcast (the unified '
+        'rule on reruns; 3.x: live)', () async {
+      const rec = {'onAirType': 'rec', 'liveType': 'rec'};
+      final http = _world(
+        member: (request) => _response(request, _memberAnswer(media: _media(changes: rec))),
+        play: (request) => _response(request, _playAnswer(media: _media(changes: rec))),
+        search: (request) => _response(request, _pageFor(request, [_media(changes: rec)])),
+      );
+      final site = PandaLiveSite(http);
+      final card = (await site.getRecommendRooms()).single;
+      expect(card.liveStatus, LiveStatus.replay);
+      final refreshed = await site.getRoomDetailForRefresh(roomId: 'fixture_101');
+      expect(refreshed.liveStatus, LiveStatus.replay);
+      expect(refreshed.followGroup, FollowGroup.replay);
+      expect(await site.getLiveStatus(roomId: 'fixture_101'), isFalse, reason: 'a replay is not live (M2.1)');
+      final before = http.requests.length;
+      expect(await site.getPlayQualities(detail: card), hasLength(2), reason: 'a replay card is entered first');
+      expect(_paths(http.requests.sublist(before)).take(2), ['/v1/member/bj', '/v1/live/play']);
+      for (final room in [
+        await site.getRoomDetail(roomId: 'fixture_101'),
+        await site.getRoomDetailForRecording(roomId: 'fixture_101'),
+      ]) {
+        expect(room.liveStatus, LiveStatus.replay);
+        expect(room.restriction, LiveRestriction.none);
+        expect(room.danmakuData, isA<PandaLiveDanmakuArgs>());
+        final quality = (await site.getPlayQualities(detail: room)).first;
+        expect((await site.resolvePlayUrls(detail: room, quality: quality)).urls, isNotEmpty);
+      }
+    });
+
     test('an offline broadcaster: member/bj alone; its channel, offline; no stream, without a request', () async {
       final setup = _setup(['S04-member-offline']);
       for (final key in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {

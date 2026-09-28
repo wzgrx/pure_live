@@ -1,0 +1,63 @@
+{
+  "code": 100000,
+  "msg": "success",
+  "error_code": 0,
+  "data": {
+    "data": [
+      {
+        "nickname": "惑星VORTEX",
+        "cover": "https://wx1.sinaimg.cn/large/007coN0rly8ibvxq2uvhuj30dc0dcdgy.jpg",
+        "liveid": "1022:2321325348206094712906",
+        "uid": 6596154111
+      },
+      {
+        "nickname": "江苏卫视",
+        "cover": "https://wx1.sinaimg.cn/large/001ICKA4ly8ihjlo1vo7nj60zk0k00x602.jpg",
+        "liveid": "1022:2321325348202143940855",
+        "uid": 1575527140
+      },
+      {
+        "nickname": "官方魅力石屏",
+        "cover": "https://wx2.sinaimg.cn/large/4bb202f3ly8ihjinudmdyj20zk0k0tda.jpg",
+        "liveid": "1022:2321325348175996649537",
+        "uid": 1269957363
+      },
+      {
+        "nickname": "长江云新闻",
+        "cover": "https://wx1.sinaimg.cn/large/001Q55EZly8ihjiswgf11j612f0lmai602.jpg",
+        "liveid": "1022:2321325348176613212220",
+        "uid": 1685715705
+      },
+      {
+        "nickname": "微博罗江",
+        "cover": "https://wx1.sinaimg.cn/large/bb03b9dfly8ihjkvn94m2j20u00gwq5r.jpg",
+        "liveid": "1022:2321325348193285308499",
+        "uid": 3137583583
+      },
+      {
+        "nickname": "尾巴大叔",
+        "cover": "https://wx1.sinaimg.cn/large/b5845917ly8ihjm63oxx1j21hc0u0dkr.jpg",
+        "liveid": "1022:2321325348206422130791",
+        "uid": 3045349655
+      },
+      {
+        "nickname": "安庆发布",
+        "cover": "https://wx3.sinaimg.cn/large/ab5cb03cly8ihjip7rd2vj21hc0u0472.jpg",
+        "liveid": "1022:2321325348174910324857",
+        "uid": 2874978364
+      },
+      {
+        "nickname": "会泽融媒",
+        "cover": "https://wx3.sinaimg.cn/large/721ac822ly8ihjidtncqpj20u00gw41h.jpg",
+        "liveid": "1022:2321325348173438124219",
+        "uid": 1914357794
+      },
+      {
+        "nickname": "美丽开远",
+        "cover": "https://wx3.sinaimg.cn/large/6b1fac16ly8ihjhzee341j20u00gw0vp.jpg",
+        "liveid": "1022:2321325348169659056266",
+        "uid": 1797237782
+      }
+    ]
+  }
+}

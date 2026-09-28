@@ -1,0 +1,64 @@
+{
+  "generator": "WeiboSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + searchRooms + getLiveStatus + WeiboLink.parse + WeiboLink.url + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw (with S03-recommend)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo identity"
+      },
+      "requests": []
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo identity"
+      },
+      "requests": []
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo identity"
+      },
+      "requests": []
+    },
+    "searchRooms": {
+      "result": [],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/pc_recommend/list.json?count=10&uid="
+      ]
+    },
+    "searchRooms(link)": {
+      "result": [],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/pc_recommend/list.json?count=10&uid="
+      ]
+    },
+    "searchRooms(mobile link)": {
+      "result": [],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/pc_recommend/list.json?count=10&uid="
+      ]
+    },
+    "getLiveStatus": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo identity"
+      },
+      "requests": []
+    },
+    "WeiboLink.parse": {
+      "1022:2320508a306db1bc389510651e77d5feb4f90d": null,
+      "https://weibo.com/l/wblive/p/show/1022:2320508a306db1bc389510651e77d5feb4f90d": null,
+      "https://weibo.com/l/wblive/m/show/1022%3A2320508a306db1bc389510651e77d5feb4f90d": null
+    },
+    "WeiboLink.url": {
+      "throws": "WeiboException",
+      "message": "Weibo identity"
+    },
+    "getPlayQualites": {
+      "throws": "WeiboException",
+      "message": "Weibo identity"
+    }
+  }
+}

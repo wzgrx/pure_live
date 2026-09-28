@@ -1,0 +1,201 @@
+{
+  "generator": "WeiboSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + searchRooms + getLiveStatus + WeiboLink.parse + WeiboLink.url + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw (with S03-recommend)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "1022:2321325269875509035102",
+        "userId": "5371906414",
+        "title": "16点继续最后一波奶茶卡",
+        "nick": "佩奇线报",
+        "avatar": "https://tvax4.sinaimg.cn/crop.0.0.639.639.50/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=iaUWhdlQF6",
+        "cover": "https://wx4.sinaimg.cn/large/005RxYfQly8h5dmpcrwo5j30hs0hs3za.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 2,
+        "isRecord": false,
+        "status": false,
+        "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325269875509035102"
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "1022:2321325269875509035102",
+        "userId": "5371906414",
+        "title": "16点继续最后一波奶茶卡",
+        "nick": "佩奇线报",
+        "avatar": "https://tvax4.sinaimg.cn/crop.0.0.639.639.50/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=iaUWhdlQF6",
+        "cover": "https://wx4.sinaimg.cn/large/005RxYfQly8h5dmpcrwo5j30hs0hs3za.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 2,
+        "isRecord": false,
+        "status": false,
+        "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325269875509035102"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "1022:2321325269875509035102",
+        "userId": "5371906414",
+        "title": "16点继续最后一波奶茶卡",
+        "nick": "佩奇线报",
+        "avatar": "https://tvax4.sinaimg.cn/crop.0.0.639.639.50/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=iaUWhdlQF6",
+        "cover": "https://wx4.sinaimg.cn/large/005RxYfQly8h5dmpcrwo5j30hs0hs3za.jpg",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "weibo",
+        "liveStatus": 2,
+        "isRecord": false,
+        "status": false,
+        "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+        "isCatchUp": false,
+        "link": "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102"
+      },
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325269875509035102"
+      ]
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "1022:2321325269875509035102",
+          "userId": "5371906414",
+          "title": "16点继续最后一波奶茶卡",
+          "nick": "佩奇线报",
+          "avatar": "https://tvax4.sinaimg.cn/crop.0.0.639.639.50/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=iaUWhdlQF6",
+          "cover": "https://wx4.sinaimg.cn/large/005RxYfQly8h5dmpcrwo5j30hs0hs3za.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 2,
+          "isRecord": false,
+          "status": false,
+          "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325269875509035102"
+      ]
+    },
+    "searchRooms(link)": {
+      "result": [
+        {
+          "roomId": "1022:2321325269875509035102",
+          "userId": "5371906414",
+          "title": "16点继续最后一波奶茶卡",
+          "nick": "佩奇线报",
+          "avatar": "https://tvax4.sinaimg.cn/crop.0.0.639.639.50/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=iaUWhdlQF6",
+          "cover": "https://wx4.sinaimg.cn/large/005RxYfQly8h5dmpcrwo5j30hs0hs3za.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 2,
+          "isRecord": false,
+          "status": false,
+          "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325269875509035102"
+      ]
+    },
+    "searchRooms(mobile link)": {
+      "result": [
+        {
+          "roomId": "1022:2321325269875509035102",
+          "userId": "5371906414",
+          "title": "16点继续最后一波奶茶卡",
+          "nick": "佩奇线报",
+          "avatar": "https://tvax4.sinaimg.cn/crop.0.0.639.639.50/005RxYfQly8ifj0u4f9mrj30hr0hr3z6.jpg?KID=imgbed,tva&Expires=1790540363&ssig=iaUWhdlQF6",
+          "cover": "https://wx4.sinaimg.cn/large/005RxYfQly8h5dmpcrwo5j30hs0hs3za.jpg",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "weibo",
+          "liveStatus": 2,
+          "isRecord": false,
+          "status": false,
+          "notice": "收藏跟踪当前直播场次，不是主播账号；新场次需重新导入直播链接。",
+          "isCatchUp": false,
+          "link": "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102"
+        }
+      ],
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325269875509035102"
+      ]
+    },
+    "getLiveStatus": {
+      "result": false,
+      "requests": [
+        "https://weibo.com/l/!/2/wblive/room/show_pc_live.json?live_id=1022%3A2321325269875509035102"
+      ]
+    },
+    "WeiboLink.parse": {
+      "1022:2321325269875509035102": "1022:2321325269875509035102",
+      "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102": "1022:2321325269875509035102",
+      "https://weibo.com/l/wblive/m/show/1022%3A2321325269875509035102": "1022:2321325269875509035102"
+    },
+    "WeiboLink.url": "https://weibo.com/l/wblive/p/show/1022:2321325269875509035102",
+    "getPlayQualites": [],
+    "getPlayUrls": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo notLive"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsRaw": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo notLive"
+      },
+      "requests": []
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "result": {
+        "throws": "WeiboException",
+        "message": "Weibo notLive"
+      },
+      "requests": []
+    }
+  }
+}

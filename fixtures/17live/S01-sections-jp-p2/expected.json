@@ -1,0 +1,95 @@
+{
+  "generator": "SeventeenLiveSite.getDirectoryPageAtCursor(2, cursor of page 1) + getDirectoryPage(2) + getDirectoryPage(3)",
+  "value": {
+    "cursor": "1790538478401563328:32:20:10-HSvb1ip49VilQh7pGZZSKqhtQrU=",
+    "getDirectoryPageAtCursor(2)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=JP&cursor=1790538478401563328%3A32%3A20%3A10-HSvb1ip49VilQh7pGZZSKqhtQrU%3D"
+      ],
+      "value": {
+        "page": 2,
+        "hasMore": false,
+        "nextCursor": null,
+        "rooms": [
+          {
+            "roomId": "28571668",
+            "userId": "3eb93265-66d4-4148-8fe8-c393478ec062",
+            "title": "✨'雪狐ユキがあなたを配信に招待中👀✨\n今すぐタップして👆配信を楽しみましょう💄🎉",
+            "nick": "雪狐ユキ",
+            "avatar": "https://cdn.17app.co/C2D4A976-4948-4232-ADAD-8EA47A05B48F.jpg",
+            "cover": "https://cdn.17app.co/snapshot/3eb93265-66d4-4148-8fe8-c393478ec062?t=1790538551",
+            "area": "",
+            "watching": "",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "0",
+            "platform": "17live",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "17LIVE 要求观看者年满 18 周岁。",
+            "introduction": "さつまいも🍠大好きお芋、お野菜、大好き(*^ω^*)不思議な🦊です！  ラジオ、自分でイラスト書いたイラストVまたは、AIで配信！\nX\n\nhttps://x.com/kiTSUne301103\n\nインスタ\n\nhttps://www.instagram.com/yulitsuneyuki?igsh=Nm96Mm8zdjJqNGF3&utm_source=qr\n\n会いに来てくれると嬉しいです(*^^*)\nアーミー様、ガー様、募集しています･:*+.(( °ω° ))/.:+\n単推し、一途も募集中です",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://17.live",
+              "referer": "https://17.live/en/live/28571668",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://17.live/en/live/28571668"
+          }
+        ]
+      }
+    },
+    "getDirectoryPage(2)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=JP&cursor",
+        "https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=JP&cursor=1790538478401563328%3A32%3A20%3A10-HSvb1ip49VilQh7pGZZSKqhtQrU%3D"
+      ],
+      "value": {
+        "page": 2,
+        "hasMore": false,
+        "nextCursor": null,
+        "rooms": [
+          {
+            "roomId": "28571668",
+            "userId": "3eb93265-66d4-4148-8fe8-c393478ec062",
+            "title": "✨'雪狐ユキがあなたを配信に招待中👀✨\n今すぐタップして👆配信を楽しみましょう💄🎉",
+            "nick": "雪狐ユキ",
+            "avatar": "https://cdn.17app.co/C2D4A976-4948-4232-ADAD-8EA47A05B48F.jpg",
+            "cover": "https://cdn.17app.co/snapshot/3eb93265-66d4-4148-8fe8-c393478ec062?t=1790538551",
+            "area": "",
+            "watching": "",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "0",
+            "platform": "17live",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "17LIVE 要求观看者年满 18 周岁。",
+            "introduction": "さつまいも🍠大好きお芋、お野菜、大好き(*^ω^*)不思議な🦊です！  ラジオ、自分でイラスト書いたイラストVまたは、AIで配信！\nX\n\nhttps://x.com/kiTSUne301103\n\nインスタ\n\nhttps://www.instagram.com/yulitsuneyuki?igsh=Nm96Mm8zdjJqNGF3&utm_source=qr\n\n会いに来てくれると嬉しいです(*^^*)\nアーミー様、ガー様、募集しています･:*+.(( °ω° ))/.:+\n単推し、一途も募集中です",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://17.live",
+              "referer": "https://17.live/en/live/28571668",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://17.live/en/live/28571668"
+          }
+        ]
+      }
+    },
+    "getDirectoryPage(3)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=JP&cursor",
+        "https://api-dsa.17app.co/api/v1/sections?count=20&typeTab=2&region=JP&cursor=1790538478401563328%3A32%3A20%3A10-HSvb1ip49VilQh7pGZZSKqhtQrU%3D"
+      ],
+      "value": {
+        "page": 3,
+        "hasMore": false,
+        "nextCursor": null,
+        "rooms": []
+      }
+    }
+  }
+}

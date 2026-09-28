@@ -1,0 +1,252 @@
+{
+  "generator": "SeventeenLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + searchRooms + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/28371376"
+      ],
+      "value": {
+        "roomId": "28371376",
+        "userId": "c9b7d664-f935-420c-9f7c-62b0c01ea075",
+        "title": "えぃるとやぎのvol.17ワードウルフ大会🐺⭐️",
+        "nick": "八ツ橋えぃる📣🧡",
+        "avatar": "https://cdn.17app.co/A0995805-6A03-4B3E-A6AD-E7FB31CD1892.jpg",
+        "cover": "https://cdn.17app.co/snapshot/c9b7d664-f935-420c-9f7c-62b0c01ea075",
+        "area": "",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "1710",
+        "platform": "17live",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "17LIVE 要求观看者年满 18 周岁。",
+        "introduction": "⭐️毎週TLにてスケジュール更新してます🗓\n歌と笑いで世界を応援📣\n\n新規アーミー💎リーグメンバー条件なしで募集中🫶\n\n・和菓子の国の精霊\n・夢は声優アイドル\nアニソン多めな歌枠🎤\nたまにゲームもあり🎮\n\n誕生日🎂6月16日和菓子の日🍡\n2024年7月20日デビュー🎀\n\n－－－推しマ－－－\n\n📣🧡\n\n    －－－Dream－－－                                                                                                 ・声優さんになる                                                                          ・アニメーションに関わるお仕事をする                                                    ・リアルライブをする                                                               ・あなたのいちばんになる                                                                                 ーーーーーーーーーー \n🛍公式BOOTHオリジナルグッズ\nhttps://8284yell.booth.pm/                                                               ·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙ \n🎀えぃるの大切なアーミーさま🎀\nすこしでも楽しいなっ応援したいなっ\nで入場して頂けるように頑張ります💕\n伍長(天空席)/軍曹(スタンド席)\n少佐(アリーナ席)/中佐(アリーナ最前)\n⭐️週に１回はアミ限配信あります❕\n·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙\n\nみんなで夢を叶えぃる🪄︎︎◝✩\n\n🏆17LIVE入賞🏅\nなぎむぎ⭐️みちる役\nゾンちゅう⭐️本人役\nカラオケ館⭐️コラボ決定\n声優グランプリ⭐️Web掲載\n\n⚠️過剰な下ネタ・見下す発言だけお控え🥺",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://17.live",
+          "referer": "https://17.live/en/live/28371376",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://17.live/en/live/28371376"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/28371376"
+      ],
+      "value": {
+        "roomId": "28371376",
+        "userId": "c9b7d664-f935-420c-9f7c-62b0c01ea075",
+        "title": "えぃるとやぎのvol.17ワードウルフ大会🐺⭐️",
+        "nick": "八ツ橋えぃる📣🧡",
+        "avatar": "https://cdn.17app.co/A0995805-6A03-4B3E-A6AD-E7FB31CD1892.jpg",
+        "cover": "https://cdn.17app.co/snapshot/c9b7d664-f935-420c-9f7c-62b0c01ea075",
+        "area": "",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "1710",
+        "platform": "17live",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "17LIVE 要求观看者年满 18 周岁。",
+        "introduction": "⭐️毎週TLにてスケジュール更新してます🗓\n歌と笑いで世界を応援📣\n\n新規アーミー💎リーグメンバー条件なしで募集中🫶\n\n・和菓子の国の精霊\n・夢は声優アイドル\nアニソン多めな歌枠🎤\nたまにゲームもあり🎮\n\n誕生日🎂6月16日和菓子の日🍡\n2024年7月20日デビュー🎀\n\n－－－推しマ－－－\n\n📣🧡\n\n    －－－Dream－－－                                                                                                 ・声優さんになる                                                                          ・アニメーションに関わるお仕事をする                                                    ・リアルライブをする                                                               ・あなたのいちばんになる                                                                                 ーーーーーーーーーー \n🛍公式BOOTHオリジナルグッズ\nhttps://8284yell.booth.pm/                                                               ·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙ \n🎀えぃるの大切なアーミーさま🎀\nすこしでも楽しいなっ応援したいなっ\nで入場して頂けるように頑張ります💕\n伍長(天空席)/軍曹(スタンド席)\n少佐(アリーナ席)/中佐(アリーナ最前)\n⭐️週に１回はアミ限配信あります❕\n·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙\n\nみんなで夢を叶えぃる🪄︎︎◝✩\n\n🏆17LIVE入賞🏅\nなぎむぎ⭐️みちる役\nゾンちゅう⭐️本人役\nカラオケ館⭐️コラボ決定\n声優グランプリ⭐️Web掲載\n\n⚠️過剰な下ネタ・見下す発言だけお控え🥺",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://17.live",
+          "referer": "https://17.live/en/live/28371376",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://17.live/en/live/28371376"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/28371376"
+      ],
+      "value": {
+        "roomId": "28371376",
+        "userId": "c9b7d664-f935-420c-9f7c-62b0c01ea075",
+        "title": "えぃるとやぎのvol.17ワードウルフ大会🐺⭐️",
+        "nick": "八ツ橋えぃる📣🧡",
+        "avatar": "https://cdn.17app.co/A0995805-6A03-4B3E-A6AD-E7FB31CD1892.jpg",
+        "cover": "https://cdn.17app.co/snapshot/c9b7d664-f935-420c-9f7c-62b0c01ea075",
+        "area": "",
+        "watching": "",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "followers": "1710",
+        "platform": "17live",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "17LIVE 要求观看者年满 18 周岁。",
+        "introduction": "⭐️毎週TLにてスケジュール更新してます🗓\n歌と笑いで世界を応援📣\n\n新規アーミー💎リーグメンバー条件なしで募集中🫶\n\n・和菓子の国の精霊\n・夢は声優アイドル\nアニソン多めな歌枠🎤\nたまにゲームもあり🎮\n\n誕生日🎂6月16日和菓子の日🍡\n2024年7月20日デビュー🎀\n\n－－－推しマ－－－\n\n📣🧡\n\n    －－－Dream－－－                                                                                                 ・声優さんになる                                                                          ・アニメーションに関わるお仕事をする                                                    ・リアルライブをする                                                               ・あなたのいちばんになる                                                                                 ーーーーーーーーーー \n🛍公式BOOTHオリジナルグッズ\nhttps://8284yell.booth.pm/                                                               ·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙ \n🎀えぃるの大切なアーミーさま🎀\nすこしでも楽しいなっ応援したいなっ\nで入場して頂けるように頑張ります💕\n伍長(天空席)/軍曹(スタンド席)\n少佐(アリーナ席)/中佐(アリーナ最前)\n⭐️週に１回はアミ限配信あります❕\n·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙\n\nみんなで夢を叶えぃる🪄︎︎◝✩\n\n🏆17LIVE入賞🏅\nなぎむぎ⭐️みちる役\nゾンちゅう⭐️本人役\nカラオケ館⭐️コラボ決定\n声優グランプリ⭐️Web掲載\n\n⚠️過剰な下ネタ・見下す発言だけお控え🥺",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://17.live",
+          "referer": "https://17.live/en/live/28371376",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://17.live/en/live/28371376"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/28371376"
+      ],
+      "value": false
+    },
+    "getRoomDetail(other platform)": {
+      "requests": [],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE identity"
+      }
+    },
+    "searchRooms(id)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/28371376"
+      ],
+      "value": [
+        {
+          "roomId": "28371376",
+          "userId": "c9b7d664-f935-420c-9f7c-62b0c01ea075",
+          "title": "えぃるとやぎのvol.17ワードウルフ大会🐺⭐️",
+          "nick": "八ツ橋えぃる📣🧡",
+          "avatar": "https://cdn.17app.co/A0995805-6A03-4B3E-A6AD-E7FB31CD1892.jpg",
+          "cover": "https://cdn.17app.co/snapshot/c9b7d664-f935-420c-9f7c-62b0c01ea075",
+          "area": "",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "1710",
+          "platform": "17live",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "17LIVE 要求观看者年满 18 周岁。",
+          "introduction": "⭐️毎週TLにてスケジュール更新してます🗓\n歌と笑いで世界を応援📣\n\n新規アーミー💎リーグメンバー条件なしで募集中🫶\n\n・和菓子の国の精霊\n・夢は声優アイドル\nアニソン多めな歌枠🎤\nたまにゲームもあり🎮\n\n誕生日🎂6月16日和菓子の日🍡\n2024年7月20日デビュー🎀\n\n－－－推しマ－－－\n\n📣🧡\n\n    －－－Dream－－－                                                                                                 ・声優さんになる                                                                          ・アニメーションに関わるお仕事をする                                                    ・リアルライブをする                                                               ・あなたのいちばんになる                                                                                 ーーーーーーーーーー \n🛍公式BOOTHオリジナルグッズ\nhttps://8284yell.booth.pm/                                                               ·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙ \n🎀えぃるの大切なアーミーさま🎀\nすこしでも楽しいなっ応援したいなっ\nで入場して頂けるように頑張ります💕\n伍長(天空席)/軍曹(スタンド席)\n少佐(アリーナ席)/中佐(アリーナ最前)\n⭐️週に１回はアミ限配信あります❕\n·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙\n\nみんなで夢を叶えぃる🪄︎︎◝✩\n\n🏆17LIVE入賞🏅\nなぎむぎ⭐️みちる役\nゾンちゅう⭐️本人役\nカラオケ館⭐️コラボ決定\n声優グランプリ⭐️Web掲載\n\n⚠️過剰な下ネタ・見下す発言だけお控え🥺",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://17.live",
+            "referer": "https://17.live/en/live/28371376",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://17.live/en/live/28371376"
+        }
+      ]
+    },
+    "searchRooms(live link)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/28371376"
+      ],
+      "value": [
+        {
+          "roomId": "28371376",
+          "userId": "c9b7d664-f935-420c-9f7c-62b0c01ea075",
+          "title": "えぃるとやぎのvol.17ワードウルフ大会🐺⭐️",
+          "nick": "八ツ橋えぃる📣🧡",
+          "avatar": "https://cdn.17app.co/A0995805-6A03-4B3E-A6AD-E7FB31CD1892.jpg",
+          "cover": "https://cdn.17app.co/snapshot/c9b7d664-f935-420c-9f7c-62b0c01ea075",
+          "area": "",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "1710",
+          "platform": "17live",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "17LIVE 要求观看者年满 18 周岁。",
+          "introduction": "⭐️毎週TLにてスケジュール更新してます🗓\n歌と笑いで世界を応援📣\n\n新規アーミー💎リーグメンバー条件なしで募集中🫶\n\n・和菓子の国の精霊\n・夢は声優アイドル\nアニソン多めな歌枠🎤\nたまにゲームもあり🎮\n\n誕生日🎂6月16日和菓子の日🍡\n2024年7月20日デビュー🎀\n\n－－－推しマ－－－\n\n📣🧡\n\n    －－－Dream－－－                                                                                                 ・声優さんになる                                                                          ・アニメーションに関わるお仕事をする                                                    ・リアルライブをする                                                               ・あなたのいちばんになる                                                                                 ーーーーーーーーーー \n🛍公式BOOTHオリジナルグッズ\nhttps://8284yell.booth.pm/                                                               ·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙ \n🎀えぃるの大切なアーミーさま🎀\nすこしでも楽しいなっ応援したいなっ\nで入場して頂けるように頑張ります💕\n伍長(天空席)/軍曹(スタンド席)\n少佐(アリーナ席)/中佐(アリーナ最前)\n⭐️週に１回はアミ限配信あります❕\n·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙\n\nみんなで夢を叶えぃる🪄︎︎◝✩\n\n🏆17LIVE入賞🏅\nなぎむぎ⭐️みちる役\nゾンちゅう⭐️本人役\nカラオケ館⭐️コラボ決定\n声優グランプリ⭐️Web掲載\n\n⚠️過剰な下ネタ・見下す発言だけお控え🥺",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://17.live",
+            "referer": "https://17.live/en/live/28371376",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://17.live/en/live/28371376"
+        }
+      ]
+    },
+    "searchRooms(profile link)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/28371376"
+      ],
+      "value": [
+        {
+          "roomId": "28371376",
+          "userId": "c9b7d664-f935-420c-9f7c-62b0c01ea075",
+          "title": "えぃるとやぎのvol.17ワードウルフ大会🐺⭐️",
+          "nick": "八ツ橋えぃる📣🧡",
+          "avatar": "https://cdn.17app.co/A0995805-6A03-4B3E-A6AD-E7FB31CD1892.jpg",
+          "cover": "https://cdn.17app.co/snapshot/c9b7d664-f935-420c-9f7c-62b0c01ea075",
+          "area": "",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "followers": "1710",
+          "platform": "17live",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "17LIVE 要求观看者年满 18 周岁。",
+          "introduction": "⭐️毎週TLにてスケジュール更新してます🗓\n歌と笑いで世界を応援📣\n\n新規アーミー💎リーグメンバー条件なしで募集中🫶\n\n・和菓子の国の精霊\n・夢は声優アイドル\nアニソン多めな歌枠🎤\nたまにゲームもあり🎮\n\n誕生日🎂6月16日和菓子の日🍡\n2024年7月20日デビュー🎀\n\n－－－推しマ－－－\n\n📣🧡\n\n    －－－Dream－－－                                                                                                 ・声優さんになる                                                                          ・アニメーションに関わるお仕事をする                                                    ・リアルライブをする                                                               ・あなたのいちばんになる                                                                                 ーーーーーーーーーー \n🛍公式BOOTHオリジナルグッズ\nhttps://8284yell.booth.pm/                                                               ·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙ \n🎀えぃるの大切なアーミーさま🎀\nすこしでも楽しいなっ応援したいなっ\nで入場して頂けるように頑張ります💕\n伍長(天空席)/軍曹(スタンド席)\n少佐(アリーナ席)/中佐(アリーナ最前)\n⭐️週に１回はアミ限配信あります❕\n·̩͙꒰ঌ┈┈┈┈┈┈┈┈┈┈┈┈໒꒱·̩͙\n\nみんなで夢を叶えぃる🪄︎︎◝✩\n\n🏆17LIVE入賞🏅\nなぎむぎ⭐️みちる役\nゾンちゅう⭐️本人役\nカラオケ館⭐️コラボ決定\n声優グランプリ⭐️Web掲載\n\n⚠️過剰な下ネタ・見下す発言だけお控え🥺",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://17.live",
+            "referer": "https://17.live/en/live/28371376",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://17.live/en/live/28371376"
+        }
+      ]
+    },
+    "searchRooms(id, page 2)": {
+      "requests": [],
+      "value": []
+    },
+    "getPlayQualites": {
+      "requests": [],
+      "value": []
+    },
+    "getPlayUrls": {
+      "hd": {
+        "requests": [],
+        "value": {
+          "throws": "SeventeenLiveException",
+          "message": "17LIVE mediaUnavailable"
+        }
+      }
+    },
+    "resolvePlayUrlsRaw": {
+      "hd": {
+        "requests": [],
+        "value": {
+          "throws": "SeventeenLiveException",
+          "message": "17LIVE mediaUnavailable"
+        }
+      }
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "hd": {
+        "requests": [],
+        "value": {
+          "throws": "SeventeenLiveException",
+          "message": "17LIVE mediaUnavailable"
+        }
+      }
+    },
+    "getPlayUrls(unknown quality)": {
+      "requests": [],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE mediaUnavailable"
+      }
+    }
+  }
+}

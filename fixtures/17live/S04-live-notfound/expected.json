@@ -1,0 +1,79 @@
+{
+  "generator": "SeventeenLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + searchRooms + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/999999999"
+      ],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE service"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/999999999"
+      ],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE service"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/999999999"
+      ],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE service"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/999999999"
+      ],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE service"
+      }
+    },
+    "getRoomDetail(other platform)": {
+      "requests": [],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE identity"
+      }
+    },
+    "searchRooms(id)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/999999999"
+      ],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE service"
+      }
+    },
+    "searchRooms(live link)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/999999999"
+      ],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE service"
+      }
+    },
+    "searchRooms(profile link)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/lives/999999999"
+      ],
+      "value": {
+        "throws": "SeventeenLiveException",
+        "message": "17LIVE service"
+      }
+    },
+    "searchRooms(id, page 2)": {
+      "requests": [],
+      "value": []
+    }
+  }
+}

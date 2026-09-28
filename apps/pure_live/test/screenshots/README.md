@@ -59,7 +59,7 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 - 已过首次启动：一次性提示不出现。阴影按真实方式绘制（测试框架默认把阴影画成黑边，这里关掉了）。
 - “出错”截图用应用的重试策略 `networkRetry`（网络错误重试两次，1 s、2 s），推进 4 秒假时间后截：错误必须在 4 秒内出现。
 
-## 页面清单（73 张）
+## 页面清单（78 张）
 
 | 文件 | 页面 | 尺寸 | 主题 | 语言 |
 |---|---|---|---|---|
@@ -79,6 +79,9 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | `discover_xlarge_light_zh-Hans.png` | 发现 | 超大（Windows） | 浅色 | 简体 |
 | `follows-banner_medium_light_zh-Hans.png` | 关注（平台异常横幅） | 中等 | 浅色 | 简体 |
 | `follows-banner_phone_dark_zh-Hans.png` | 关注（平台异常横幅） | 手机竖屏 | 深色 | 简体 |
+| `follows-scrolled_phoneland_light_zh-Hans.png` | 关注（向下滚动后顶栏收起） | 手机横屏 | 浅色 | 简体 |
+| `follows-select_large_dark_zh-Hans.png` | 关注（Ctrl 点选再 Shift 点选的多选） | 大（Windows） | 深色 | 简体 |
+| `follows-select_phone_light_zh-Hans.png` | 关注（从卡片菜单进入多选，选了三张卡） | 手机竖屏 | 浅色 | 简体 |
 | `follows-empty_phone_light_zh-Hans.png` | 关注（空） | 手机竖屏 | 浅色 | 简体 |
 | `follows_expanded_dark_zh-Hans.png` | 关注 | 展开 | 深色 | 简体 |
 | `follows_large_light_zh-Hans.png` | 关注 | 大（Windows） | 浅色 | 简体 |
@@ -110,6 +113,8 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | `room_xlarge_dark_zh-Hans.png` | 直播间 | 超大（Windows） | 深色 | 简体 |
 | `search-empty_large_dark_zh-Hans.png` | 搜索（无结果） | 大（Windows） | 深色 | 简体 |
 | `search-empty_phone_light_zh-Hans.png` | 搜索（无结果） | 手机竖屏 | 浅色 | 简体 |
+| `search-history_large_dark_en.png` | 搜索（搜索框为空并聚焦：最近搜索） | 大（Windows） | 深色 | 英文 |
+| `search-history_phone_light_zh-Hans.png` | 搜索（搜索框为空并聚焦：最近搜索） | 手机竖屏 | 浅色 | 简体 |
 | `search-link_phone_light_zh-Hans.png` | 搜索（识别到链接：打开直播间） | 手机竖屏 | 浅色 | 简体 |
 | `search_expanded_light_zh-Hans.png` | 搜索（有结果） | 展开 | 浅色 | 简体 |
 | `search_large_dark_zh-Hans.png` | 搜索（有结果） | 大（Windows） | 深色 | 简体 |
@@ -142,4 +147,4 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 1. 在对应的 `*_screens_test.dart` 里写 `screenshot('<页面>', ShotScreen.<尺寸>, (app) => app.go('<路由>'), theme: …, locale: …)`；全屏路由用 `app.push`，需要等待的状态用 `app.frames()`。
 2. 页面要的数据放进 `ShotWorld`；需要的 provider 替换放进 `ShotApp.pump`。
 3. `flutter test --update-goldens test/screenshots --plain-name <文件名>` 生成，看过再提交，并把它加进上表。
-4. 总量控制在 8 MB 以内（现在约 6.6 MB）。
+4. 总量控制在 8 MB 以内（现在约 7.1 MB）。

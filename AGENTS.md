@@ -11,7 +11,7 @@
 
 ## 工作规则
 
-- **界面、布局、操作逻辑以 v3 为准。** v3 源码在归档分支 `archive/v4` 的 `legacy/` 下，本机只读副本在 `~/ref/pure_live_archive/legacy`。改变外观或操作习惯的改动，先征得用户同意。
+- **界面、布局、操作逻辑以 v3 为准。** v3 源码在归档分支 `archive/v4` 的 `legacy/` 下，本机只读副本在 `~/ref/pure_live_archive/legacy`。改变外观或操作习惯的改动，先征得用户同意。用户已批准的升级（2026-09-28 全部采用）记录在 [docs/UPGRADES.md](docs/UPGRADES.md)，照表执行，不必再问；表外的新改动仍要先问。
 - **一个模块一次上传**：走完 docs/PLAN.md 第 7 节的流程（读、审查、重构、测试、门禁）后推送。只用 `master`，不强推。
 - **工具链和依赖用最新稳定版**，固定在 `toolchain.env` 和根目录的 `pubspec.lock`。检查命令：`GITHUB_TOKEN=$(gh auth token) dart run tools/check_latest/bin/check_latest.dart`。
 - **代码规范**：very_good_analysis，行宽 120，公开接口写文档注释，Dart 主构造函数写 `const new(...)`。纯 Dart 包不引用 Flutter；依赖方向由 `tools/gate/check_deps.py` 强制。

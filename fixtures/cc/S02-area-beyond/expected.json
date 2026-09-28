@@ -1,0 +1,7 @@
+{
+  "generator": "CCSite.getCategoryRooms + _CCCategoryDirectory.hasMore",
+  "value": {
+    "rooms": [],
+    "hasMore": false
+  }
+}

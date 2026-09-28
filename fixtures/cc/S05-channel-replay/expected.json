@@ -1,0 +1,93 @@
+{
+  "generator": "CCSite.getRoomDetailForRefresh + getRoomDetail + getPlayQualites + getPlayUrls",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "roomId": "732923115",
+      "userId": "7532306",
+      "title": "【重播】天下第一武道大会",
+      "nick": "永劫故事直播君",
+      "avatar": "http://cc.res.netease.com/webcc/portrait/nsep/28_v1",
+      "cover": "http://cc.fp.ps.netease.com/file/6ab93a05d8d1b745e56590cdIiO78E2V07",
+      "area": "永劫无间",
+      "watching": "271039",
+      "audienceMetricType": "popularity",
+      "popularity": "271039",
+      "onlineViewers": "342",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "cc",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "http://cgi.v.cc.163.com/redirect/video/732923115.m3u8?secret=7919c93bc6"
+    },
+    "getRoomDetail": {
+      "roomId": "732923115",
+      "userId": "7532306",
+      "title": "【重播】天下第一武道大会",
+      "nick": "永劫故事直播君",
+      "avatar": "http://cc.res.netease.com/webcc/portrait/nsep/28_v1",
+      "cover": "http://cc.fp.ps.netease.com/file/6ab93a05d8d1b745e56590cdIiO78E2V07",
+      "area": "永劫无间",
+      "watching": "271039",
+      "audienceMetricType": "popularity",
+      "popularity": "271039",
+      "onlineViewers": "342",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "cc",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "http://cgi.v.cc.163.com/redirect/video/732923115.m3u8?secret=7919c93bc6"
+    },
+    "getPlayQualites": [
+      {
+        "quality": "原画",
+        "id": "original",
+        "sort": 6003000,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/732923115.m3u8?secret=7919c93bc6&wsSecret=a72b12543206ea37e9fa00c4c0af6ede&wsTime=6ab93a8d"
+        ]
+      },
+      {
+        "quality": "高清",
+        "id": "high",
+        "sort": 4002000,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/732923115.m3u8?secret=7919c93bc6&wsSecret=0a96f8574cdfd0a99770c26b5c3a96ba&wsTime=6ab93a8d"
+        ]
+      },
+      {
+        "quality": "标准",
+        "id": "medium",
+        "sort": 3001000,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/732923115.m3u8?secret=7919c93bc6&wsSecret=1db0d9ca47225c84aa6c5c7964d96e6f&wsTime=6ab93a8d"
+        ]
+      },
+      {
+        "quality": "低清",
+        "id": "low",
+        "sort": 2000600,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/732923115.m3u8?secret=7919c93bc6&wsSecret=c034662f29fe852ccb298018f6d136e0&wsTime=6ab93a8d"
+        ]
+      },
+      {
+        "quality": "blueray_20M",
+        "id": "blueray_20M",
+        "sort": 5000,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/732923115.m3u8?secret=7919c93bc6&wsSecret=e09a6a679d509d1264e6fb796e087ce1&wsTime=6ab93a8d"
+        ]
+      }
+    ]
+  }
+}

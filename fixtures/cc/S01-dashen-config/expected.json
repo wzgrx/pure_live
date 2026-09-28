@@ -1,0 +1,233 @@
+{
+  "generator": "CCSite.getCategores (with S01-dashen-games)",
+  "value": [
+    {
+      "id": "1",
+      "name": "直播分类",
+      "children": [
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "3",
+          "areaName": "梦幻西游互通版",
+          "areaPic": "https://ok.166.net/reunionpub/2019-08-12/ntesgod_cms/1565619425951_klblof.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "90013",
+          "areaName": "率土之滨",
+          "areaPic": "https://ok.166.net/reunionpub/2025-11-14/ntesgod_cms/1763116387272_70cziy.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "1005",
+          "areaName": "炉石传说",
+          "areaPic": "https://ok.166.net/reunionpub/2024-09-25/ntesgod_cms/1727257834509_fhozxy.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "6",
+          "areaName": "大话西游2",
+          "areaPic": "https://ok.166.net/reunionpub/2025-01-20/ntesgod_cms/1737376971153_mkp6io.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "28",
+          "areaName": "大话西游手游",
+          "areaPic": "https://ok.166.net/reunionpub/2026-09-16/ntesgod_cms/1789527553578_yda2q7.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "1001",
+          "areaName": "魔兽世界",
+          "areaPic": "https://ok.166.net/reunionpub/2026-08-19/ntesgod_cms/1787133717390_gssfcl.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9050",
+          "areaName": "明日之后",
+          "areaPic": "https://ok.166.net/reunionpub/2026-07-23/ntesgod_cms/1784774084073_rryiql.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "25",
+          "areaName": "梦幻西游手游",
+          "areaPic": "https://ok.166.net/reunionpub/2026-09-23/ntesgod_cms/1790165468247_jrrzpp.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9161",
+          "areaName": "永劫无间手游",
+          "areaPic": "https://ok.166.net/reunionpub/2026-07-01/ntesgod_cms/1782907126012_ffpqsq.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "20",
+          "areaName": "大话西游2免费版",
+          "areaPic": "https://ok.166.net/reunionpub/2022-08-11/ntesgod_cms/1660183627383_chezkw.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9051",
+          "areaName": "逆水寒端游",
+          "areaPic": "https://ok.166.net/reunionpub/2026-06-24/ntesgod_cms/1782286923937_autkcn.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "4",
+          "areaName": "新倩女幽魂",
+          "areaPic": "https://ok.166.net/reunionpub/2018-07-24/ntesgod_cms/1532404188661_icnjbz.jpg",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "30",
+          "areaName": "倩女幽魂手游",
+          "areaPic": "https://ok.166.net/reunionpub/2019-08-20/ntesgod_cms/1566305139844_tj3pgn.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9141",
+          "areaName": "蛋仔派对",
+          "areaPic": "https://ok.166.net/reunionpub/2026-07-24/ntesgod_cms/1784888002941_fjqecx.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9148",
+          "areaName": "逆水寒手游",
+          "areaPic": "https://ok.166.net/reunionpub/2026-06-25/ntesgod_cms/1782392035388_5rnzzx.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9063",
+          "areaName": "光·遇",
+          "areaPic": "https://ok.166.net/reunionpub/2026-03-19/ntesgod_cms/1773886231490_rhlfsa.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9010",
+          "areaName": "阴阳师",
+          "areaPic": "https://ok.166.net/reunionpub/2026-09-08/ntesgod_cms/1788856548715_m5rwu8.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9144",
+          "areaName": "暗黑破坏神：不朽",
+          "areaPic": "https://ok.166.net/reunionpub/2026-06-24/ntesgod_cms/1782288658055_zgrajm.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "9149",
+          "areaName": "燕云十六声",
+          "areaPic": "https://ok.166.net/reunionpub/2025-01-16/ntesgod_cms/1737000206174_cttjab.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "1",
+          "typeName": "直播分类",
+          "areaId": "2",
+          "areaName": "天下贰",
+          "areaPic": "https://ok.166.net/reunionpub/2023-06-02/ntesgod_cms/1685693860675_cplufg.png",
+          "shortName": null
+        }
+      ]
+    },
+    {
+      "id": "official",
+      "name": "官方房间/专题",
+      "children": [
+        {
+          "platform": "cc",
+          "areaType": "official",
+          "typeName": "官方房间/专题",
+          "areaId": "official:249133",
+          "areaName": "永劫无间",
+          "areaPic": "https://ok.166.net/reunionpub/2026-06-24/ntesgod_cms/1782286149721_ycl64j.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "official",
+          "typeName": "官方房间/专题",
+          "areaId": "official:341427600",
+          "areaName": "漫威争锋",
+          "areaPic": "https://ok.166.net/reunionpub/2024-08-22/ntesgod_cms/1724319565772_61tzc7.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "official",
+          "typeName": "官方房间/专题",
+          "areaId": "official:341436398",
+          "areaName": "全明星街球派对",
+          "areaPic": "https://ok.166.net/reunionpub/2026-08-19/ntesgod_cms/1787104657809_pbm7lg.png",
+          "shortName": null
+        },
+        {
+          "platform": "cc",
+          "areaType": "official",
+          "typeName": "官方房间/专题",
+          "areaId": "official:586568",
+          "areaName": "第五人格",
+          "areaPic": "https://ok.166.net/reunionpub/2026-04-02/ntesgod_cms/1775096683912_sxqfao.png",
+          "shortName": null
+        }
+      ]
+    }
+  ]
+}

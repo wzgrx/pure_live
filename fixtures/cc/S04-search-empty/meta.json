@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S04-search-empty",
+  "capturedAt": "2026-09-27T16:28:50.022988Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://cc.163.com/search/anchor/?query=zzqqxxkkyyww&size=20&page=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://cc.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "VISITOR=8314z891-f53r-65bt-c72i-500lz44982g7; Domain=.cc.163.com; expires=Wed, 24-Sep-2036 16:28:50 GMT; Max-Age=315360000; Path=/",
+      "date": "Sun, 27 Sep 2026 16:28:50 GMT",
+      "vary": "Cookie",
+      "x-apisix-upstream-node": "cclive",
+      "x-apisix-traceid": "abdbf77166c6697a",
+      "content-type": "application/json",
+      "server": "APISIX",
+      "x-b3-traceid": "abdbf77166c6697a",
+      "content-length": "44",
+      "x-b3-version": "1.1.55",
+      "x-frame-options": "ALLOWALL",
+      "x-apisix-response-start": "1790526530564",
+      "x-apisix-routename": "CC main site to webdd"
+    }
+  },
+  "raw": {
+    "sha256": "5a32e3967f28921bea19a4bb500ee6b38c8b9c34570a228cbc1e47256b2943d0",
+    "length": 44
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:VISITOR",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

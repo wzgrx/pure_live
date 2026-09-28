@@ -1,0 +1,189 @@
+{
+  "result": {
+    "id": "67b32cdd1801fc391a6c2657",
+    "configType": "WEB_COMMON_PAGE",
+    "hidden": false,
+    "module": "大神web官网通用配置",
+    "createTime": 1739795677669,
+    "updateTime": 1789612473400,
+    "deleteTime": 0,
+    "itemList": [
+      {
+        "weight": 50,
+        "hidden": false,
+        "name": "圈子页重定向列表",
+        "itemList": [
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "射雕",
+            "content": "6284e8066776790001843126",
+            "ext": "{\n  \"redirectUrl\": \"/g/wuxia/\",\n  \"ifRedirect\": true\n}\n"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "燕云十六声",
+            "content": "63058976010e2e0001e72a49",
+            "ext": "{\n  \"redirectUrl\": \"/g/yysls/\",\n  \"ifRedirect\": false,\n   \"mobileRedirectUrl\":\"https://act.ds.163.com/1cdb31103f28411b/66739b7f28167361de3cbf69?wvFullScreen=true&wvStatusBarStyle=black&utm_source=dspc&utm_medium=redirect\"\n}"
+          }
+        ]
+      },
+      {
+        "weight": 50,
+        "hidden": false,
+        "name": "直播入口列表",
+        "itemList": [
+          {
+            "weight": 100,
+            "hidden": false,
+            "name": "d90",
+            "content": "https://cc.163.com/249133/?open=blizzardtv&from=8382&platform=ds",
+            "itemList": []
+          },
+          {
+            "weight": 99,
+            "hidden": false,
+            "name": "xyq",
+            "content": "https://cc.163.com/n/ds_category/3/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 99,
+            "hidden": false,
+            "name": "g10",
+            "content": "https://cc.163.com/n/ds_category/90013/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 93,
+            "hidden": false,
+            "name": "ld2",
+            "content": "https://cc.163.com/n/ds_category/1005/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 90,
+            "hidden": false,
+            "name": "x20",
+            "content": "https://cc.163.com/341427600/?open=blizzardtv&from=8382&platform=ds",
+            "itemList": []
+          },
+          {
+            "weight": 85,
+            "hidden": false,
+            "name": "xy2",
+            "content": "https://cc.163.com/n/ds_category/6/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 80,
+            "hidden": false,
+            "name": "g17",
+            "content": "https://cc.163.com/n/ds_category/28/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 80,
+            "hidden": false,
+            "name": "wow",
+            "content": "https://cc.163.com/n/ds_category/1001/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 70,
+            "hidden": false,
+            "name": "g66",
+            "content": "https://cc.163.com/n/ds_category/9050/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 66,
+            "hidden": false,
+            "name": "g18",
+            "content": "https://cc.163.com/n/ds_category/25/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 60,
+            "hidden": false,
+            "name": "l22",
+            "content": "https://cc.163.com/n/ds_category/9161/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "dh2free",
+            "content": "https://cc.163.com/n/ds_category/20/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "nsh",
+            "content": "https://cc.163.com/n/ds_category/9051/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "qn",
+            "content": "https://cc.163.com/n/ds_category/4/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "l10",
+            "content": "https://cc.163.com/n/ds_category/30/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "l33",
+            "content": "https://cc.163.com/341436398/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "h55",
+            "content": "https://cc.163.com/586568/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "u5",
+            "content": "https://cc.163.com/n/ds_category/9141/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "l36",
+            "content": "https://cc.163.com/n/ds_category/9148/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "ma75",
+            "content": "https://cc.163.com/n/ds_category/9063/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 50,
+            "hidden": false,
+            "name": "g37",
+            "content": "https://cc.163.com/n/ds_category/9010/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 20,
+            "hidden": false,
+            "name": "g67",
+            "content": "https://cc.163.com/n/ds_category/9144/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 5,
+            "hidden": false,
+            "name": "h72",
+            "content": "https://cc.163.com/n/ds_category/9149/?open=blizzardtv&from=8382&platform=ds"
+          },
+          {
+            "weight": 0,
+            "hidden": false,
+            "name": "tx2",
+            "content": "https://cc.163.com/n/ds_category/2/?open=blizzardtv&from=8382&platform=ds"
+          }
+        ]
+      }
+    ]
+  },
+  "code": 200,
+  "errmsg": "OK"
+}

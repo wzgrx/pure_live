@@ -1,0 +1,86 @@
+{
+  "generator": "CCSite.getRoomDetailForRefresh + getRoomDetail + getPlayQualites + getPlayUrls",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "roomId": "341438909",
+      "userId": "5728999",
+      "title": "《蛋仔派对》抖音巅峰杯",
+      "nick": "巅峰杯",
+      "avatar": "http://cc.fp.ps.netease.com/file/6aab6128abfc40028d7ee08aUCIYCrbq07",
+      "cover": "http://cc.fp.ps.netease.com/file/6ab9436767a2f9b676f80ff1ebgmOUUT07",
+      "area": "蛋仔派对",
+      "watching": "293325",
+      "audienceMetricType": "popularity",
+      "popularity": "293325",
+      "onlineViewers": "654",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "cc",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "http://cgi.v.cc.163.com/redirect/video/341438909.m3u8?secret=bac6536f08"
+    },
+    "getRoomDetail": {
+      "roomId": "341438909",
+      "userId": "5728999",
+      "title": "《蛋仔派对》抖音巅峰杯",
+      "nick": "巅峰杯",
+      "avatar": "http://cc.fp.ps.netease.com/file/6aab6128abfc40028d7ee08aUCIYCrbq07",
+      "cover": "http://cc.fp.ps.netease.com/file/6ab9436767a2f9b676f80ff1ebgmOUUT07",
+      "area": "蛋仔派对",
+      "watching": "293325",
+      "audienceMetricType": "popularity",
+      "popularity": "293325",
+      "onlineViewers": "654",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "cc",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "http://cgi.v.cc.163.com/redirect/video/341438909.m3u8?secret=bac6536f08"
+    },
+    "getPlayQualites": [
+      {
+        "quality": "原画",
+        "id": "original",
+        "sort": 6007999,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/341438909.m3u8?secret=bac6536f08&auth_key=1790612944-i2t7l7o22j213th1fozwba4v07316i9s-0-9u0314myo995d74n56160k8932304592",
+          "http://cgi.v.cc.163.com/redirect/video/341438909.m3u8?secret=bac6536f08&wsSecret=7c76c698a60122dfdd54dc46b4accff9&wsTime=6ab94450"
+        ]
+      },
+      {
+        "quality": "高清",
+        "id": "high",
+        "sort": 4002000,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/341438909.m3u8?secret=bac6536f08&wsSecret=6810b284e0cea11a3e4acdaeeae8d478&wsTime=6ab94450"
+        ]
+      },
+      {
+        "quality": "标准",
+        "id": "medium",
+        "sort": 3001000,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/341438909.m3u8?secret=bac6536f08&wsSecret=76f2c3a59de3c6256d59bc53282e6ae4&wsTime=6ab94450"
+        ]
+      },
+      {
+        "quality": "低清",
+        "id": "low",
+        "sort": 2000600,
+        "getPlayUrls": [
+          "http://cgi.v.cc.163.com/redirect/video/341438909.m3u8?secret=bac6536f08&wsSecret=c606d5f846c843e56764e4d228a778ee&wsTime=6ab94450"
+        ]
+      }
+    ]
+  }
+}

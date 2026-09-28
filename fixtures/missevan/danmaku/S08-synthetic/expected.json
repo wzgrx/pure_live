@@ -1,0 +1,882 @@
+{
+  "generator": "fixtures/missevan/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) MissevanProtocol (session, headers, join, heartbeat, endpoint, text, decode) over the recorded guest session and every incoming frame (copied as it was; the event classes cut down to their fields, package:brotli replaced by live_net's brotliDecode)",
+  "value": {
+    "cases": {
+      "a chat line with every field": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000001",
+              "sentAt": 1790612400123,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "你好",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ],
+      "the same line compressed at quality 0, 5 and 11, windows 10 and 24, and stored": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000001",
+              "sentAt": 1790612400123,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "你好",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000001",
+              "sentAt": 1790612400123,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "你好",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000001",
+              "sentAt": 1790612400123,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "你好",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000001",
+              "sentAt": 1790612400123,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "你好",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ],
+      "a paid danmaku (message/danmaku) is chat": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000002",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "付费弹幕来啦",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ],
+      "an array: two chat lines, a gift, a cross-room gift and the statistics": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000003",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "第一条",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            },
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000004",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "第二条",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            },
+            {
+              "kind": "gift",
+              "sentAt": null,
+              "userId": "7300002",
+              "userName": "观众乙",
+              "giftId": "92264",
+              "giftName": "花语笺",
+              "count": 2,
+              "icon": "https://static.maoercdn.com/live/gifts/icons/92264.png"
+            },
+            {
+              "kind": "online",
+              "audience": "popularity",
+              "value": 105019
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 22
+            }
+          ]
+        }
+      ],
+      "statistics: numbers, numbers as text, negative, missing, zero, not an object": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "online",
+              "audience": "popularity",
+              "value": 5164
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "online",
+              "audience": "popularity",
+              "value": 12
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 7
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "online",
+              "audience": "popularity",
+              "value": 0
+            },
+            {
+              "kind": "online",
+              "audience": "online",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "another room's chat and statistics are skipped; no room_id and room_id as text are this room": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000006",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "没有房间号",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000007",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "房间号是文字",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "the answer to the join: accepted, refused, another uuid, no uuid, no code": [
+        {
+          "text": true,
+          "joined": true,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": true,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": true,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": true,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000009",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "加入后",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ],
+      "connects, entries, ranks, global notices and gifts show nothing": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "gift",
+              "sentAt": null,
+              "userId": "7300002",
+              "userName": "观众乙",
+              "giftId": "92264",
+              "giftName": "花语笺",
+              "count": 2,
+              "icon": "https://static.maoercdn.com/live/gifts/icons/92264.png"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "text frames: the heartbeat, JSON as text, not JSON": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000010",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "文字帧",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "binary frames that are dropped": [
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": false,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "good frames whose JSON shows nothing": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000011",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "混在里面",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ],
+      "chat fields of other types": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000013",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "123",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000014",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "[x]",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000015",
+              "sentAt": null,
+              "userId": "",
+              "userName": "",
+              "text": "没有用户",
+              "userLevel": null,
+              "medalLevel": null,
+              "medalName": null
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000016",
+              "sentAt": null,
+              "userId": "7300003",
+              "userName": "8866",
+              "text": "数字名字",
+              "userLevel": null,
+              "medalLevel": null,
+              "medalName": null
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000017",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "文字等级",
+              "userLevel": 16,
+              "medalLevel": 9,
+              "medalName": "粉丝牌"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000018",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "没有粉丝牌名",
+              "userLevel": 16,
+              "medalLevel": 3,
+              "medalName": null
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": null,
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "没有消息号",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:12345",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "前后空白",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ],
+      "times: milliseconds, zero, negative, beyond DateTime, text, create_time": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000020",
+              "sentAt": 1790612400123,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "毫秒",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000021",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "零",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000022",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "负数",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000024",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "文字",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000025",
+              "sentAt": 1790612400123,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "create_time",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ],
+      "malformed UTF-8 is replaced, not fatal": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000026",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "x",
+              "text": "bad �� utf-8",
+              "userLevel": null,
+              "medalLevel": null,
+              "medalName": null
+            }
+          ]
+        }
+      ],
+      "a sticker and a line of many lines": [
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000027",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "[打call]",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        },
+        {
+          "text": true,
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "missevan:bbbbbbbb-0000-4000-8000-000000000028",
+              "sentAt": null,
+              "userId": "7300001",
+              "userName": "观众甲",
+              "text": "第一行\n第二行",
+              "userLevel": 16,
+              "medalLevel": 8,
+              "medalName": "在花间"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

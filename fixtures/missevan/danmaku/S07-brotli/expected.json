@@ -1,0 +1,274 @@
+{
+  "generator": "fixtures/missevan/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) MissevanProtocol (session, headers, join, heartbeat, endpoint, text, decode) over the recorded guest session and every incoming frame (copied as it was; the event classes cut down to their fields, package:brotli replaced by live_net's brotliDecode)",
+  "value": {
+    "roomId": "180370487",
+    "uuid": "00000000-0000-4000-8000-000000000001",
+    "guestSession": null,
+    "connector": {
+      "sessionUrl": "https://fm.missevan.com/api/user/info",
+      "sessionHeaders": {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "referer": "https://fm.missevan.com/"
+      },
+      "endpoint": "wss://im.missevan.com/ws?room_id=180370487",
+      "handshakeHeaders": {
+        "cookie": "FM_SESS=<session>",
+        "origin": "https://fm.missevan.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "join": "{\"action\":\"join\",\"uuid\":\"00000000-0000-4000-8000-000000000001\",\"type\":\"room\",\"room_id\":180370487}",
+      "heartbeat": "❤️",
+      "heartbeatSeconds": 30
+    },
+    "frames": [
+      {
+        "frame": 2,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 3,
+        "text": true,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 4,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 5,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:1ff11c2c-0eed-4f2a-b02e-dfcb07df4436",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "？我以为你要唱一唱",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      },
+      {
+        "frame": 6,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:14e0f54a-a21f-41f2-8b4a-71682fadbb45",
+            "sentAt": null,
+            "userId": "48924325",
+            "userName": "观众3",
+            "text": "不好听差评",
+            "userLevel": 52,
+            "medalLevel": null,
+            "medalName": null
+          }
+        ]
+      },
+      {
+        "frame": 7,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:1dd5d2ac-fc14-4b0d-809b-47bd523d5f14",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "怎么是放一放",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      },
+      {
+        "frame": 9,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 10,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:195786e2-40e9-4210-89f1-544db8bbc3c4",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "嗯嗯 不好听就差评",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      },
+      {
+        "frame": 11,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 12,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 13,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "popularity",
+            "value": 6374
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 9
+          }
+        ]
+      },
+      {
+        "frame": 15,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 16,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:1b7f9e69-0087-43e0-a1f7-6f638a9145be",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "嘶 那不是裁缝歌吗 我记错了？",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      },
+      {
+        "frame": 18,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 19,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:168a33ab-792c-47ef-8ced-3aba80396435",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "啊那是我记错了",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      },
+      {
+        "frame": 20,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:1a9911a1-b277-4886-a652-b99a9877feaf",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "嘘～",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      },
+      {
+        "frame": 21,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:1cafc5fe-b944-454f-9bf0-5a5e4c117f67",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "先听一下",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      },
+      {
+        "frame": 23,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 24,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:1b304065-742d-4602-90b6-1ad19877feaf",
+            "sentAt": null,
+            "userId": "4224688",
+            "userName": "观众2",
+            "text": "嘘～",
+            "userLevel": 55,
+            "medalLevel": 12,
+            "medalName": "懒星星"
+          }
+        ]
+      }
+    ]
+  }
+}

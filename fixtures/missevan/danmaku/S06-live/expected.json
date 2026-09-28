@@ -1,0 +1,149 @@
+{
+  "generator": "fixtures/missevan/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) MissevanProtocol (session, headers, join, heartbeat, endpoint, text, decode) over the recorded guest session and every incoming frame (copied as it was; the event classes cut down to their fields, package:brotli replaced by live_net's brotliDecode)",
+  "value": {
+    "roomId": "246709466",
+    "uuid": "s57v0i88-7h2n-2y5g-81t2-r589qbl1b5e6",
+    "guestSession": "15347729|1vdfplkra6mijr86dtmov1ydy",
+    "connector": {
+      "sessionUrl": "https://fm.missevan.com/api/user/info",
+      "sessionHeaders": {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "referer": "https://fm.missevan.com/"
+      },
+      "endpoint": "wss://im.missevan.com/ws?room_id=246709466",
+      "handshakeHeaders": {
+        "cookie": "FM_SESS=15347729|1vdfplkra6mijr86dtmov1ydy",
+        "origin": "https://fm.missevan.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "join": "{\"action\":\"join\",\"uuid\":\"s57v0i88-7h2n-2y5g-81t2-r589qbl1b5e6\",\"type\":\"room\",\"room_id\":246709466}",
+      "heartbeat": "❤️",
+      "heartbeatSeconds": 30
+    },
+    "frames": [
+      {
+        "frame": 2,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 3,
+        "text": true,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 4,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:354cf329-f325-412d-b50e-1e49f3b375c5",
+            "sentAt": null,
+            "userId": "29829269",
+            "userName": "观众1",
+            "text": "｛\\＿/｝\n（ •－•）✏️敲​黑​板​（咚​咚​咚​）\n/ づ ❤️ ┈┈┈┈┈┈┈┈┈┈\n┊欢​迎​来​到​五​音​的​直​播​间​🎉\n┊只​要​6​0​💎就​可​以​戴​上​\n┊✨小​音​符​✨粉​丝​牌​🏵️\n┊📕首​次​卡​牌​送​好​歌​一​首​\n┊📙100💎礼​物​开​启​点​歌​\n┊📒2980💎开​通​超​粉​即​享​\n┊╰双​倍​亲​密​度​＋免​费​点​歌​哦​\n┊📗感​谢​小​可​爱​们​的​喜​欢​与​支​持​\n┗┈┈┈┈┈┈┈┈┈┈┈┈☁️",
+            "userLevel": 45,
+            "medalLevel": 18,
+            "medalName": "个音符"
+          }
+        ]
+      },
+      {
+        "frame": 5,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 7,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 8,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 9,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 10,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:3ed211d8-cee5-4f2e-a742-c89f318ee9f8",
+            "sentAt": null,
+            "userId": "88772874",
+            "userName": "观众3",
+            "text": "欢迎暖​暧​暖​暧​(ﾉ･ω･)ﾉﾞ",
+            "userLevel": 68,
+            "medalLevel": 29,
+            "medalName": "个音符"
+          }
+        ]
+      },
+      {
+        "frame": 11,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "online",
+            "audience": "popularity",
+            "value": 105019
+          },
+          {
+            "kind": "online",
+            "audience": "online",
+            "value": 22
+          }
+        ]
+      },
+      {
+        "frame": 12,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 13,
+        "text": true,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "missevan:3753808c-ae3a-49ea-aeee-5f910b106223",
+            "sentAt": null,
+            "userId": "29829269",
+            "userName": "观众1",
+            "text": "@苏​小​小​小​小​小​木​ 来​咯​~ |｡˃̶͈̀▽˂̶͈́)っ♡ 笔​芯​～\n\n✐[拼​音​]  [s​ū x​i​ǎo​ x​i​ǎo​ x​i​ǎo​ x​i​ǎo​ x​i​ǎo​ m​ù]",
+            "userLevel": 45,
+            "medalLevel": 18,
+            "medalName": "个音符"
+          }
+        ]
+      }
+    ]
+  }
+}

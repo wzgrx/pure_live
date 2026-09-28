@@ -1,0 +1,366 @@
+{
+  "note": "Synthetic frames of a Missevan chat socket (docs/modules/M5.12-missevan.md), read for room roomId with the join uuid. Each case is one or more frames in order: {\"text\": ...} is a text frame, {\"b64\": ...} a binary frame; \"plain\" shows what a Brotli frame holds, \"note\" what a broken one is. Written by fixtures/missevan/danmaku/synthetic_cases.py (google/brotli 1.2.0); names, ids and times are made up.",
+  "roomId": "246709466",
+  "uuid": "aaaaaaaa-0000-4000-8000-000000000001",
+  "cases": [
+    {
+      "name": "a chat line with every field",
+      "frames": [
+        {
+          "b64": "AXQBABtzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wC",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000001\",\"message\":\"你好\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":1790612400123,\"bubble\":{\"type\":\"message\",\"text_color\":\"#FFE7E8\"}}"
+        }
+      ]
+    },
+    {
+      "name": "the same line compressed at quality 0, 5 and 11, windows 10 and 24, and stored",
+      "frames": [
+        {
+          "b64": "AXQBAIu5AACAqqqq6v9057iquYu5G5i56939cgkIMFB1E7BQAFUzBVM1CzcwsEsc4xwAfolDXAIirhEQx4jbzR3C4/+u+vfcW90zqsvbGO6KFwsLCxsbq3qZUR18+PBjMBiM40xW1WAwGAwGgznUGZGK0igcFtpJ9p7g+58QR8+QcByCqhkCPHATIdHwAwS6tnWlqSBXWV7QNstzARfq0lSQ0Fpv4bOEiCjJiCjZENElkE1OIeIfvyBx/n29vP1CoA/cQU7HQElMizURUXoXf0iNcgyJ6/vj+ef09/wFAXNom76zkLiP0Qe5XIaoojks+Kict7xUg4qqW/imhkA00XKAvJ3KeJhUykIg+vTVy8vH9enz//QNAcsDW8jNLKYQA1+2299Nms93s0A0jiHTYkt5usqI0tVaQPdaW4acwg8NNL8a+RjLQ2vbDhI3+/2u2G0wzwM=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000001\",\"message\":\"你好\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":1790612400123,\"bubble\":{\"type\":\"message\",\"text_color\":\"#FFE7E8\"}}"
+        },
+        {
+          "b64": "AXQBAKGYCwAgPvw1yd/0X6XfiawicNyphTuz5dTNe320d12zuXyfZ1GCEX9gpdvE+jtEceDSPimrY9ZlgA5rB4LwM3SkgmUQDKf8cUcD0HlRVlhNlGWCZD5sLuA7mmrglBIVqN5YmTgQ/DcdL2vzPlogGHvooNd1gpcpQgT1tilvUoK/c+/1HH8HNxBwNRRziUcGdzGlzdFlaZnSxTwC+gXCMw/dnmMT8CYWg0ffi8uvf/2PH4SZA7raJJuahXvm5KaziYzjv3GKxsocL7IsxwsEvqLPlwjmc83mUghWCu5LCkOHzTQNxVDRbAI=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000001\",\"message\":\"你好\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":1790612400123,\"bubble\":{\"type\":\"message\",\"text_color\":\"#FFE7E8\"}}"
+        },
+        {
+          "b64": "AXQBAB9zAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wC",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000001\",\"message\":\"你好\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":1790612400123,\"bubble\":{\"type\":\"message\",\"text_color\":\"#FFE7E8\"}}"
+        },
+        {
+          "b64": "AXQBADAXEHsidHlwZSI6Im1lc3NhZ2UiLCJldmVudCI6Im5ldyIsInJvb21faWQiOjI0NjcwOTQ2NiwibXNnX2lkIjoiYmJiYmJiYmItMDAwMC00MDAwLTgwMDAtMDAwMDAwMDAwMDAxIiwibWVzc2FnZSI6IuS9oOWlvSIsInVzZXIiOnsidXNlcl9pZCI6NzMwMDAwMSwidXNlcm5hbWUiOiLop4LkvJfnlLIiLCJpY29udXJsIjoiaHR0cHM6Ly9zdGF0aWMuZXhhbXBsZS9hdmF0YXIucG5nIiwidGl0bGVzIjpbeyJ0eXBlIjoibWVkYWwiLCJuYW1lIjoi5Zyo6Iqx6Ze0IiwibGV2ZWwiOjh9LHsidHlwZSI6ImxldmVsIiwibGV2ZWwiOjE2fV19LCJ0aW1lIjoxNzkwNjEyNDAwMTIzLCJidWJibGUiOnsidHlwZSI6Im1lc3NhZ2UiLCJ0ZXh0X2NvbG9yIjoiI0ZGRTdFOCJ9fQM=",
+          "note": "one uncompressed meta-block, as S06-live"
+        }
+      ]
+    },
+    {
+      "name": "a paid danmaku (message/danmaku) is chat",
+      "frames": [
+        {
+          "b64": "AYUBABuEAQCcCfH2LiNudnmawoYgiHPkz6skjgraDcyyy83P09vlQu6izBGIttXtlL9JHZa+0dNqsYTFOr5Hb+eDXdHFJzqwZYCzcy2/5tMaIwf/4gn2EUh7wpxK8TwZh6Q7GJS3qMmhGZatuHyyBIat4kJ6IFGJokHQ4SJJs0Zv/MX9/W8YgJZFF4EI+PPOfUdbtw6qluGk6/PfdI9NHpG7h2PtwS9S5ZjINg1yK/MJzNGud3iY2zzpSbonnzg/31vzTK1wLsFCiLV6Ua0r2J4qgElXhIQdo/RI075Aw+tyPQrTpxHGBw==",
+          "plain": "{\"type\":\"message\",\"event\":\"danmaku\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000002\",\"message\":\"付费弹幕来啦\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"price\":30,\"danmaku_bubble\":{\"image_url\":\"https://static.example/b.png\"}}"
+        }
+      ]
+    },
+    {
+      "name": "an array: two chat lines, a gift, a cross-room gift and the statistics",
+      "frames": [
+        {
+          "b64": "ASsEABsqBCAsCmwbnXbQ6eCPLZda0XEGAV4jP1+Yf1QByur35nH/s2NmZ0zUEVFUsvQ06dxSf8aNX0TImZEsXX3FouPDn2s8m+H30ab23qIo6qJAqigbLQXoiM625QwaewZhUzvXyX+laMBeJbRlwHyWWJsPgPEsG2oq8nv3vjSWq9MmKIcidHiiybXnUr/gPg6+FC6XGyDKnCk9hv/aBFwENAcRQwPz1YeDdFWfc64zILLJDPNkBur0knQxnNAHoizqYm6md9GmHth+vUxOm7UMqJ1b/d/M7aVMO36+ywXuzj8g1Oq+HlQ9DZgXmfvoTGnUbilj72JgC3v56SSO9EVlrM9CZep01meWYmvOql7/oJGvirCnjKJLxWH+1oXK6nVmBphqiL0c08cesdkfYYiGrcju9xmZHuZlrt6omH8HIViHEX3gOduoPZOUjHfY563cAw==",
+          "plain": "[{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000003\",\"message\":\"第一条\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}},{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000004\",\"message\":\"第二条\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}},{\"type\":\"gift\",\"event\":\"send\",\"room_id\":246709466,\"user\":{\"user_id\":7300002,\"username\":\"观众乙\"},\"gift\":{\"gift_id\":92264,\"name\":\"花语笺\",\"price\":28,\"num\":2,\"icon_url\":\"https://static.maoercdn.com/live/gifts/icons/92264.png\"}},{\"type\":\"gift\",\"event\":\"cross_send\",\"room_id\":246709466,\"room\":{\"room_id\":100000001},\"gift\":{\"name\":\"别处\",\"num\":1}},{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":{\"score\":105019,\"online\":22,\"vip\":6}}]"
+        }
+      ]
+    },
+    {
+      "name": "statistics: numbers, numbers as text, negative, missing, zero, not an object",
+      "frames": [
+        {
+          "b64": "AV8AABteACCM1GLNGe4EVbfUN3+Ac0ZLiiLkny8WHQ+46BXNUatC5AKP4XNBTZhMN6ENqA7hFezn/sch73ZkRyaTH4urWwE5BM8q",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":{\"score\":5164,\"online\":3}}"
+        },
+        {
+          "b64": "AWEAABtgACCM0xXzooR1j8B25M9B7XbbZZQkAZc6LH1ucMAcaFlZwhEMqIPH8LmgJvymG7SR6gGvZH/Ou0RWz51VIxPfj4MVQg6h7QE=",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":{\"score\":\"12\",\"online\":\"7\"}}"
+        },
+        {
+          "b64": "AV0AABtcAGAcBW6ssW8P0TeVC3MbW99tUCFGe0ct8kWWtlh0POCiVzTHrAuRCzyGzyfUhGe4BWtAcQStMJ8+W55c2UzkebGMImoI6x8=",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":{\"score\":-1,\"online\":4}}"
+        },
+        {
+          "b64": "AU8AABtOAOAsCuzG4hzv0WtGRqNpQj9CktkW2YOTmWlkdjA2No+jEUYWTV+JfMEGnIC3vdBmA+qBaI4nJEKmLZ0BaaRUAE9pvPlVaJWdAQ==",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":{\"vip\":2}}"
+        },
+        {
+          "b64": "AVwAABtbAOAsCuw24hytqUPIWLSbfi2yJwOzyNJah4WmL2yMzeNohFGJfHnARbdYjlgZIhdsjI3OlcCIGW14RkoDUwk843N5FRp5sCzCCH8=",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":{\"score\":0,\"online\":0}}"
+        },
+        {
+          "b64": "AUsAABtKAECM0xX3SNusIj1ZLA9sdvPUNUXIpkVktr56wEWvaI45VyITbIydqYHxPDeJDVgOyRXQ9ztUMK2ChAJQc9QP",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":[1,2]}"
+        },
+        {
+          "b64": "AWEAABtgAICcB3YbR47WLBjKy64mt7H13RIVZrR3RZZWLDop8tUHG3AC3vaiGwyoI9vwuVVYxLvbghqwG4EV2VO2vHmyWcj3xLZiSI0MHg==",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":246709466,\"statistics\":{\"score\":1.5,\"online\":true}}"
+        }
+      ]
+    },
+    {
+      "name": "another room's chat and statistics are skipped; no room_id and room_id as text are this room",
+      "frames": [
+        {
+          "b64": "ATIBABsxAQAcCdlZzJWdPJM7QQDzSv3ypNQBvBBaG7+xsb8M2UrJpywylWLRsdxxGKD+9UuiXw/t1wJsq6eIEk005yZ1RPcwZjncn3zR3glqIP0kQ/4EMnxYZ1SVvakC/bWElWREURHRCIIDiOcwwf/PSrUbbvSnLtBh/MZgVVu/hlBS9yNHwHK6y4CKPe6XjvwdlZuDzVlkA6PvKkx601XasrhbTO9Wz4P7PajPpPMXMhKcjxfV+vv/Pw==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":100000001,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000005\",\"message\":\"别的房间\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "AVwAABtbAECcBe72eX0wujXroutQi+x9xSyytNSJYck+GBY3OGAOtKISjWQb3IaPt59YsIi5PICtbD7gSu0+ts+NVN4IOdQIBA==",
+          "plain": "{\"type\":\"room\",\"event\":\"statistics\",\"room_id\":100000001,\"statistics\":{\"score\":1,\"online\":1}}"
+        },
+        {
+          "b64": "ASEBABsgASAcCdlZzJWdPJM7QQDzSv3ypNQBvBBaG/VkIXfJFMX2olOZTbEpFh3LHX+WYa59t+Tp99J+LcC2jBINNMxzm9IX7ByFMsP+6RfpnRQdoH/IkD9Bfy3DOiNJRlFR0TjBIQUxLFBZbH7d+E/Mqgte7fxemVdtHSlqM2t5kSNoOezWYD6H+6UjP0XFKsCKItuVt8xgyZ2urpbFXYA9XT0PqRPD05h0/gKgVGt3Ua2///8D",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000006\",\"message\":\"没有房间号\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "AToBABs5AQAcCdlZzJWdPJM7QQDnIj9eJXHnV4LZUjcXcjeJxSLMYNcmHuHl8GLRWW+ZpkU932e2K59ymBCZKCWlClWm28Ts64lwaEy0O/7CvRFrAe47GYsnoCFRk+ukGZatuCtYSB2u1YzpZkSFRUO1oxSUbuOGT1b+B3bRu3o/rxnwKfyeITbbujepaB6TQZ570vyw2QGZu9wvPflDKjYJFinJhQz9l1CsJz3Gkif9wPD2ErXLHFjI06DzFzyc2cOLav2D/x8=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":\"246709466\",\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000007\",\"message\":\"房间号是文字\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "AS0BABssAQAcCdlZzJWdPJM7QQDzSv3ypNQBvBBaG3VzIXeTWCzCBO2+nR/5y+HFomN5yzQt6vndlE8/Aj8Tok2UklKFSmjcprh3sCMKA8P+yRftjWQV0Fcy5E8g4xXWGRWB/loikzwnKiIagXWMAnQHfb+y8T/Rq97N5xkHSFB+Y7pi61RWq3WIe1yPouVhtw2GdbhfOvJtVOwFfMmyd2nlEvy50xVZsrg7aO+vOQ5ZJ5pGM+j8BUZIx/KkWn///wc=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":0,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000008\",\"message\":\"房间号是零\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        }
+      ]
+    },
+    {
+      "name": "the answer to the join: accepted, refused, another uuid, no uuid, no code",
+      "frames": [
+        {
+          "b64": "AY8AABuOAAAdCXZMhxuXHDCHoOaW+mXYHsdQW7JYDNlRYXXFogPf3uMwQKv/RsPwDiwayNzGyNOr41as+fwscqaBRySt8f0uMekaT8YCIOSA/x7xM7KmNlVGxFLGt+YXsCeZ5paqje5u",
+          "plain": "{\"type\":\"room\",\"event\":\"join\",\"uuid\":\"aaaaaaaa-0000-4000-8000-000000000001\",\"room_id\":246709466,\"code\":0,\"info\":{\"room\":{\"status\":{\"open\":1}}}}"
+        },
+        {
+          "b64": "AZMAABuSAICsineEyJGKx64JtWStMGeEJLMtgr73NQNJX1Ox1BVEN1S+eksKjOc8hqwL6ysWHZsd15LMcm2LwvCKAgpePwTeYONZHnL86nqDnNqggyT6x38SNK0s4kOK3eCRE5xea3uxQozhVIeo0HzIuMRQPl38V7dn",
+          "plain": "{\"type\":\"room\",\"event\":\"join\",\"uuid\":\"aaaaaaaa-0000-4000-8000-000000000001\",\"room_id\":246709466,\"code\":500030004,\"info\":\"无法找到该聊天室\"}"
+        },
+        {
+          "b64": "AY8AABuOAACN1GJNme4EMrfUn2FDx1BaMmhx3eQoFh349h6HAVr9NxqGd2DRQOY2Rp5eHbdizednkTMNPCJpje+9e8ieVBt1xgQgzAn/XeKnewxLKoSIpQnfml/AnmSaW6q2VVUB",
+          "plain": "{\"type\":\"room\",\"event\":\"join\",\"uuid\":\"cccccccc-0000-4000-8000-000000000009\",\"room_id\":246709466,\"code\":0,\"info\":{\"room\":{\"status\":{\"open\":1}}}}"
+        },
+        {
+          "b64": "AWEAABtgAGAsCuw25LyKmUFH1OwPk9vY+m6HRRjtLWXfW1qx6LTIV5nbIoNzyqnm3ALqVmAB4R1j7CyRdhyP2FpgjKg86LfY49WNTc4pOlGjIlAgGN9XDw==",
+          "plain": "{\"type\":\"room\",\"event\":\"join\",\"room_id\":246709466,\"code\":0,\"info\":{\"room\":{\"status\":{\"open\":1}}}}"
+        },
+        {
+          "b64": "AYYAABuFAACMxDgm8YIbUQKZW+rPsIFjqLRisRiyo8LqbHZLswCtblEYloVRIO/vNoaeXkEQYuYne1G82whaI1zp+V0KLWqpsfD6DOMIkeOIzoictlkphG3q3zFujMIrivXubg==",
+          "plain": "{\"type\":\"room\",\"event\":\"join\",\"uuid\":\"aaaaaaaa-0000-4000-8000-000000000001\",\"room_id\":246709466,\"info\":{\"room\":{\"status\":{\"open\":1}}}}"
+        },
+        {
+          "b64": "AcEBABvAAQAcibGNij1s8pvChSCAa5IffyVxVGwNZq0nC7k/Pphge9GpTNQ6LF19p87p39sbvmPFMmg62s2jBFJkts3AoWipkEo9i/v5G+9O8g3A2xLGDQhLZHIcTQ6SjkQlEQ0FOlSEtCr5sZHRQDMsW3GVxhKI1UMRSLvF/SAdHAKtFFQH9TmFYRIw1+3LWJzjtMNWLeek01mswFX+M1C5frsVeqst7jpzmdp6cny3GZPBCP8VXq9vLH2/n2PtwZ+sCqoKqngyndhXIAvKXOGlWedJL8I9/s7+cf469loXOJciltX2WLWewT8=",
+          "plain": "[{\"type\":\"room\",\"event\":\"join\",\"uuid\":\"aaaaaaaa-0000-4000-8000-000000000001\",\"room_id\":246709466,\"code\":0,\"info\":{\"room\":{\"status\":{\"open\":1}}}},{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000009\",\"message\":\"加入后\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}]"
+        }
+      ]
+    },
+    {
+      "name": "connects, entries, ranks, global notices and gifts show nothing",
+      "frames": [
+        {
+          "b64": "ATYAABs1AIAcBW6ssW8Pp08uG9Qie18wsy+NrFh0wENWQkewG/CQhYcsGEP5jeqG3LU9GJ72BwM=",
+          "plain": "{\"type\":\"user\",\"event\":\"connect\",\"user\":{\"user_id\":0}}"
+        },
+        {
+          "b64": "AVwAABtbAGCM0xX3IwQzjwhyR34cfMG3iFt7SQKudVho+jrlwCHMylp0oO968Bgen5uSxV80KGH9p6Kxv55X7xLBc+k/2QZjjeWMpWTDsIAoBw==",
+          "plain": "{\"event\":\"join_queue\",\"queue\":[{\"user_id\":0,\"count\":1}],\"room_id\":246709466,\"type\":\"member\"}"
+        },
+        {
+          "b64": "AWAAABtfAAiM1GLNGe6MUOkQ7Zz2mw3oe9mmTzFISUoGKRYdxzhwv2m9bRoIzxFGlRVOSg8/ZLtBcchs13aZAzjXemUUTT6LqqPQEgrLEDA7i2fxAQ==",
+          "plain": "{\"type\":\"creator\",\"event\":\"new_rank\",\"room_id\":246709466,\"rank_type\":4,\"rank\":11,\"rank_up\":1984}"
+        },
+        {
+          "b64": "AXMAABtyAIiM0xX3I7xMMp+4+aTdA6m8i3SNCdgFFGh/GO7UiWHRyfEFD4SVJEnaEotybXnKmkKQ7VGTnhW2P4DrxYZaIAV3uwbE1pNkpLiybk3OkIGm3IdmAR58sr9zfD3313UwJDfx74f3dkcD",
+          "plain": "{\"type\":\"notify\",\"notify_type\":\"gift\",\"event\":\"send\",\"room_id\":100000001,\"message\":\"<font>观众丙</font> 送出\"}"
+        },
+        {
+          "b64": "AecAABvmAIAch7HzJCy9URTpPHiezpE/Xv5bGkUEHZiudHLAfjzId6Ck1sJaqcPSp3Mj5AqMAqTbpEQ3g7UZqjanbgzR0A1/wroIDe4O9lpEHquAJQfAM+lKiBeETuwFgUHjgrbqQ6i4m+KRcX7gD9yve83VbrTVjDkWCTyD2Bvn7/ryCFB0lMhgviaIwYZ2ybWP4FhUY8MyZUu1F+X83aCwCeK2jIcdiwQe+/A=",
+          "plain": "{\"type\":\"gift\",\"event\":\"send\",\"room_id\":246709466,\"user\":{\"user_id\":7300002,\"username\":\"观众乙\"},\"gift\":{\"gift_id\":92264,\"name\":\"花语笺\",\"price\":28,\"num\":2,\"icon_url\":\"https://static.maoercdn.com/live/gifts/icons/92264.png\"}}"
+        },
+        {
+          "b64": "AWAAABtfAGCtCuw29OdVDAZtttkN+rXI3ozM7EsLKxYd2Bibx9EIoyKbS5GvNaecgIfVksCDA/hhY2ztxIKQwVFAgK46yr/N1eVVQDX68YHDujgB",
+          "plain": "{\"type\":\"question\",\"event\":\"ask\",\"room_id\":246709466,\"content\":{\"price\":30,\"question\":\"问题\"}}"
+        }
+      ]
+    },
+    {
+      "name": "text frames: the heartbeat, JSON as text, not JSON",
+      "frames": [
+        {
+          "text": "❤️"
+        },
+        {
+          "text": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000010\",\"message\":\"文字帧\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "text": "not json"
+        },
+        {
+          "text": ""
+        }
+      ]
+    },
+    {
+      "name": "binary frames that are dropped",
+      "frames": [
+        {
+          "b64": "AHQBABtzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wC",
+          "note": "flag 0"
+        },
+        {
+          "b64": "AnQBABtzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wC",
+          "note": "flag 2"
+        },
+        {
+          "b64": "AXQBAA==",
+          "note": "the header only"
+        },
+        {
+          "b64": "AXQB",
+          "note": "three bytes"
+        },
+        {
+          "b64": "",
+          "note": "empty"
+        },
+        {
+          "b64": "AXUBABtzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wC",
+          "note": "declares one byte more"
+        },
+        {
+          "b64": "AXMBABtzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wC",
+          "note": "declares one byte less"
+        },
+        {
+          "b64": "AXQBABtzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ",
+          "note": "the stream truncated"
+        },
+        {
+          "b64": "AXQBABtzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wCAA==",
+          "note": "a byte after the stream"
+        },
+        {
+          "b64": "AXQBAORzAQAcCdlZzJWVejG4EwS1rdT364kD06GUF/XQmuvJQu6ibHsRFKMy0YtF5/L0gonFMG5rleYAm1aiihas9wBa3SZaHV1FKApb9pffwT4R6wDC72Q1PAMYX+3pgC6kzBTjkgTL/dhc0duoNLkMSnJsjCwWkR/Ki/FOAgQD72e1isxHaK/EJQT8lbweX1vA1ctxtyC/RjXPwpRlpktX8oh0eT5Zx9gNugs16dm390/nj1PMbMyfommzc682PZuTdzpd/s1mhUnWBWOs84LesddbDMmmZDy1L0m4gFpVlVmZ83wC",
+          "note": "the first byte of the stream flipped"
+        },
+        {
+          "b64": "AQoAAFunhoHfSC3WnOFOLRKGt7d0+kqS2wKBs/wCLow=",
+          "note": "declares 10 bytes; the stream holds 100 kB"
+        }
+      ]
+    },
+    {
+      "name": "good frames whose JSON shows nothing",
+      "frames": [
+        {
+          "b64": "AQgAAIsDgG5vdCBqc29uAw==",
+          "plain": "not json"
+        },
+        {
+          "b64": "AQoAAIsEgCJhIHN0cmluZyID",
+          "plain": "\"a string\""
+        },
+        {
+          "b64": "AQIAAIsAgDQyAw==",
+          "plain": "42"
+        },
+        {
+          "b64": "AQIAAIsAgFtdAw==",
+          "plain": "[]"
+        },
+        {
+          "b64": "AQQAAIsBgG51bGwD",
+          "plain": "null"
+        },
+        {
+          "b64": "AQAAADs=",
+          "plain": ""
+        },
+        {
+          "b64": "AT8BABs+AQAcCdlZzJWdPJM7QQDXJD/+SuKo2BrM2m1s7N9sBx5/3iLwVCw6661rmlT1fJ9isx3BP1mnmVCEpkWj2yShpytCa7Cl9DZ7JFCF66Q7OjSyQwDUSsbiDCi9oianZli24vbJEhi2yl1IJy0qJBqmnKi0rqrA3/Kx39Q7xYCT8L4G1GTrB12Ux2QY31/H6/GtBeqZY+0P/pGKhYKJGuRkhhrMSNibHtOaJ70hvP2mfjl/HGjV6Tx1QbcPj6r1DJ7PAA==",
+          "plain": "[\"a\",1,null,{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000011\",\"message\":\"混在里面\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}]"
+        }
+      ]
+    },
+    {
+      "name": "chat fields of other types",
+      "frames": [
+        {
+          "b64": "ASkBABsoAQAcienGB9ko/ZQ7QRDrSvVm84kpA3wwtGadHLAfz98u99JaWLHorLeuaVHP/6fYbMfGTRZtNCkpVWhGt4kDn66ImZKif3wn90bYCtx3MpVnkMYrbgvqpu2oni62yLjXdCLbtKSyZEK5XpWu6YifI4iA51fez4DgGPfRKlM6ru+v8Hp/taBQl+M2kC+j0kxQTzqlb2HcInrzpJ9gKdIBFN58p3+cvw/KMug+RQ+krXnS7Gf4fAI=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000012\",\"message\":\"   \",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "AScBABsmAQAcCdlZzJWdPJM7QQDXJD/+SuKo2BrMWicH7Mfzt8u9tBZWLDrrrWta1Kv/U2y2I9gni7ZrUlKq0GS6TQz6OiJmSpP5x3e4d4IKCN/JWJwBjVfU5NQMy1bcuVgCw1bBlXSzosKiMYyTFBuqjvyqqukCjxfez7Cyrd9Gr6f0I7/C6/3VgjJdjrUnH0aljiBFRlm10GwFyjzp0Wt50huld9/pH+fvg6JMOk8hAuHgVqr1DJ5P",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000013\",\"message\":123,\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "ASkBABsoAQAch7HzJOzM0xTpPAjgmuTHX0kcFVuDWevkgP14/na5l9bCWoelq+9665oW9er/FJvtCPbJoo32lJQqNJlukwn9ETOlif7xHe0dsEKEazAWZ0LGK2pyaIZlK+7aLIFhq+hKullRYdEw4yQFQzUov+JxYfF8wf0MyLZ+H71e1A/8Cq/3V0sU6nKsPfgyKs0E9WSU+xbGrURvnvAEtjzpQendd/rH+fugLBPOswikg3tRred+",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000014\",\"message\":[\"x\"],\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "AX0AABt8ACAcibEtij1mvrlT7fVBtHPab6ae3mOblEgGFoNi0QGZnGcBet72ra2tAgwkAE13aHbtm4hkFIg+pFlg+pI7P0iRbQ8+US1LVTPHeUtBt3rBa5Xigg0JLGxy+vYGEA==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000015\",\"message\":\"没有用户\"}"
+        },
+        {
+          "b64": "AboAABu5ACCM0xXzgBLWPfhvbqm/vMGfO25nS4IoYvAMBsNSh6VPN4fVZohV1oXhQS4vLw/p5SHU6w2TyycitBKcQF8g2ET1C/L8CRS13Qd/FvOh1dwLz3fJYFerYjWrEaLTnNonbh1+wSRgNKaLpvfoktTTDm8jYi4WTirfjPMB",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000016\",\"message\":\"数字名字\",\"user\":{\"user_id\":\"7300003\",\"username\":8866,\"titles\":\"none\"}}"
+        },
+        {
+          "b64": "ATYBABs1ASAcCdlZzJWdPJM7gQDXIh9fJXFUfYNZOuWAPWsL0ziPDk8Wnb7Bmz6bDXCgc7x2X/HTLEoDyzDdJgl2dAUxUZiod+EB9ZUAJ/C+E2NxASz+oiYnzbBsxdWLJTBsFZpJLxSVIBoCHKusTbURPsU8FSNlABqTHk8eNNq6nzCOMRkO/hfvPz2QMHSs/Yuvo8rekLWp5PrlbZdQo1/yiPY86UVGJ3/j+/KjeHro3lwWXDj+tDvV0hG8Xg==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000017\",\"message\":\"文字等级\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"粉丝牌\",\"level\":\"9\"},{\"type\":\"level\",\"level\":\"16\"}]}}"
+        },
+        {
+          "b64": "ATEBABswAQAcCdlZzJWdPJM7gQDXIh9fJXFUfYNZuo2N/X2CQSNotfuuRsWis966JsT8fwKb7S5gsmijSUmpQjORbhOFnq6ImcJk/vED7pWgBaSvZCwugMYtanJqhmUr7posgWGr4Eh6aFFh0XDleMWa6qC+RPu/n/m++VGfDMCm8HGH2sHW0zGax2TYz//i/f0rg74djrUnP0ilESGJOlnGMH0Cqe70+KY86R3Lg5Qt7enUX8JThE14UK1X8HoB",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000018\",\"message\":\"没有粉丝牌名\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":null,\"level\":3},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "ATIBABsxAQAcCdlZzJWdPJM7QQDzSv3yxJQBvBBam/RkIXftG5tgo8ii7UlQLDrrrWtCzP+n2GxHcJME0UaTklKFZjLdJgk9XhGzBhPtjr9oLwTN4PpKxuIJZNyiJqdmWLbizskSGK4VHEkXLSosGqYcp4ymuuD/5yDW6wO6ue21b58AQZnfPbi3dQaMypgM/jxH1s8jCFJ3uF968olU6hKqUitXMjRgQLXu9CSnPOkN6auhCeSnU/8LBxE24UG1/sH/Dw==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000019\",\"message\":\"粉丝牌名是数字\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":42,\"level\":3},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "ARMBABsSASAcCdlZzJWlF4M7IySZhQCuSX78lcRRsTWYtZ4s5P74othedCqzKYpFx2ynPNd+u8mom+x2AXe3LKJEA4vLQAECuulzSKViJfvX70QfREzg3slYnEGKV9Tk1AzLVtwWS2DYKhUMqNkDNpNf3nZgz+S9hCtsXdnUZtv+R36J1+vrAy5yOdae/A1V4Bf4TAYU78oB4UkvSeRJT6bTd9SP/dci/6TzFAysareo1jN4PgE=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":null,\"message\":\"没有消息号\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        },
+        {
+          "b64": "ARUBABsUAQAcCeXGyyyl3wh3gqC/9qRvlq+SOPNngtnl2zb29ykoDkEEvzqLVlSx6FjulN+165Y8teT3C7itoC2iRAOLw9ymdPRHGI4Z7l/+or0S1AF9JYfqCWTckq6kYTmu5ufgSOyvDTzphmnZEv0vQkzIk8oyd4kvBLiq89uDaK6pFdWnQcCLrAXj88U2WMrhftmR76HS//Sfqh7F0yrw4c5AjJXZLni8nLJXWpsfrKDR+0uMCKdxpzv/6P8H",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":12345,\"message\":\"  前后空白  \",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        }
+      ]
+    },
+    {
+      "name": "times: milliseconds, zero, negative, beyond DateTime, text, create_time",
+      "frames": [
+        {
+          "b64": "AUEBABtAAQCcBXYzdXAzD+0bRyc2QgkCft6nfnl4YMqbP+DQGluE7DydnizkLopme9FvE4yJUoela7117S3qzdynfLN9BDObJgqalJQqNBPpNlHq6CpkojDRP3nAvQK0EOErWI8uBI1bMxPKOC/inlzC6jCBE/0DqZDUqApBSFeC8r/w7YpGMCh42HjF6xCWXsvrB/6U9yNfolaH034Jfo1KY0FtyXnr4sTFaM8dBcc87JZC6fVP5F9nHFZmILyKcLB3N+leH7NgtrpIH4WTyghhiH4B",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000020\",\"message\":\"毫秒\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":1790612400123}"
+        },
+        {
+          "b64": "ATIBABsxAQAcCdlZzJWdPJM7QQDXJD/+SuKo2BrMWk8Wcn98tj3QqcwkxaKz3rr2FvVm7lO+2T7CZzZNFDQpKVVoMt0mszr6IhSlif7JHe6NaCtw38lYnAGNV9Tk1AzLVty1WALDVqkL6QGiIqIhxkkKhqYi/pa/H3h+5f2OUFtXBqtWT+pHfonX62sDEnU51p58GZV6gmqS5brFdsuozZMeQc2THhTefkf92H8tpmXSeQoeQR3NXbWewXYTmkGUJw==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000021\",\"message\":\"零\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":0}"
+        },
+        {
+          "b64": "ATYBABs1AQAcibGNij1M4mnuBAFck/z4K4mjYmswaz1ZyF2U2YtNJGKPikVnvXXtLerNfp9is30EzKaJgiYlpQrN6DbR6ugqYqIw0T+5w70RtAL3nYzFGdB4RU1OzbBsxV2LJTBsFZxILxAVEQ1VTlBkaBri//JjfnwAg8r7m47YuotXrcgLPX4lr8fXDuTqcqw9+TUqtwWXpZdLlzouojxPehxznvTK4fV39E/3D1JmJp2nMCzszF21nsE2E5qhiOYT",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000022\",\"message\":\"负数\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":-5}"
+        },
+        {
+          "b64": "AUQBABtDASAcCdlZzJWdPJM7QQDXJD/+SuKo2BrMWk8Wcn+UbS+i7aYxUbHoDN702Qzntt+5165FlGhgcbpNjDo6AiEmShP98+9QrwhYAO87GYszYPEVNTk1w7IVd10sgWGr0IhUoaj4ojGA4yiyaDrCr3lnn16AQMH7lYXzbd3DVI2U1h/5Ca/n1xek6uVYe/JpVNEVoipNuXJZw4Wozic9ilme9CKio++on82fxxKz0XkKDhxVrK1qPYONJ2yG2bEMRemr9Sc=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000023\",\"message\":\"太大\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":8640000000000001}"
+        },
+        {
+          "b64": "AUMBABtCAQAcCdlZzJWdvBjcCQK6FvnwVh3xfWSCWevkgP14/na5l9bCikVn8KbPNrO5vdO/Fl6LKNHAxuk2MeroKmSiMNHu8jvcJ4IOwP1JVsMzoOFrTwd0IWVTrVsSLPdjuKJ3QWlyGQYoiZHNBUT8Mg9qDxgMvOv85Nm7hNbKeP2RX+H1/mpBrj6OuwX5NapsC1mWoS5d3nElyvPNmmM36C5Ehsff6R/n7+OZ2VmewkPA2rza9GxuMtF06bG5Msm6YIzSe54=",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000024\",\"message\":\"文字\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"time\":\"1790612400123\"}"
+        },
+        {
+          "b64": "AU0BABtMAQAch7HbJJbyNM1wHghwLfLxVRJH1TeYpU4O2I/ntkteWgszb6UOS9fkrZvOZjjX7+v9LXwtSyzRwMbpNlHo6AuZaE30L3vAfQRoT4TfwVhcCBqhqMmhGZatuOtiCQxbBZekBxKVTDQUOrEiq2ZS/gIvNNHVgNDo8bBp0szW45zqJeT+wD/wXp01UbCPY+3B11H5bPDedHL/0rErokff8Ii2edILT49/PP+s19DybHBeRTBYuhfVer2fNEJU21UsVTMUxcj0Fw==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000025\",\"message\":\"create_time\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"create_time\":1790612400123}"
+        }
+      ]
+    },
+    {
+      "name": "malformed UTF-8 is replaced, not fatal",
+      "frames": [
+        {
+          "b64": "AacAABumACAch+nGTlaT6C9DnY9QySFoc6lynyfAvCUxLf//ZNHp+3RdE2LEus1ms5miCEUSQvzdxhCXTxCjKgnHfupFlAm2LzGVN1hE3Bb8aNcPZOT6vsG413IyoynNdIVQJUb7OP+OLC1E4jwqMwSNpD/Knx04Ukqphpwj9MMD",
+          "note": "two bytes that are not UTF-8 in the text"
+        }
+      ]
+    },
+    {
+      "name": "a sticker and a line of many lines",
+      "frames": [
+        {
+          "b64": "AWoBABtpAQAcCdmpzIWd/KYYB4IArkl+/JXEUbE1mLWeLOT+dpXtRacyUeuwdPW1tlnFZov26nlNeHg0+CLYjMLWltJKXWjTbZLQ4RcxUZqsu/QO9wnQQaQ/wVicCRp/UZNDMyxbcefNEhi2Cm6kSxAVFQ3zjihjazbVv8D70F8yMARIDNz3KKm2nlXUqI3JkBT/Cq/XNza16+NYe/BxVN4MKrPI6sWlq6HQNzyaPU96Y/n4nf2z+evQnAPnWQZgIbxU6zlXNjXns1NdcFGjgJxGDuRs/A==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000027\",\"message\":\"[打call]\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]},\"sticker\":{\"package_id\":1,\"sticker_id\":2,\"name\":\"打call\"}}"
+        },
+        {
+          "b64": "AT8BABs+AQAcibGNij0s8mnuBAGsM/XLL6YMeFBoadaThVw/0USbokhUJpli0VlvXTMt6dV9yjfbd8FMtik2mpSUKjSZbhOFoDNo4mKif3xDeyVoAek7GYsTkPGKmpyaYdmKuxZLYNgqOJEeWlRYNFw5UbGmOeCXzEv/hfjj1ZxMTwCIKrxteIJtnYXUqJP6I7+k19tXB5Tvclh78pFUnBTsVJK7GYZQ0LEnPdk5T3pDevvt9eP+20KxBp2HkOHhEJ5U6xE8Hg==",
+          "plain": "{\"type\":\"message\",\"event\":\"new\",\"room_id\":246709466,\"msg_id\":\"bbbbbbbb-0000-4000-8000-000000000028\",\"message\":\"第一行\\n第二行\\n　\",\"user\":{\"user_id\":7300001,\"username\":\"观众甲\",\"iconurl\":\"https://static.example/avatar.png\",\"titles\":[{\"type\":\"medal\",\"name\":\"在花间\",\"level\":8},{\"type\":\"level\",\"level\":16}]}}"
+        }
+      ]
+    }
+  ]
+}

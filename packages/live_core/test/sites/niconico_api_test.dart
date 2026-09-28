@@ -131,6 +131,10 @@ Map<String, dynamic> _stream() => _mutable({
   ],
 });
 
+/// 3.x's zh.json `niconico_program_scope`, which its frozen details end
+/// with; M5.14 dropped its closing "；弹幕暂未接入" (comments not connected).
+const _v3ProgramScope = '收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。';
+
 /// Observed official-program master attributes with synthetic media paths
 /// (3.x's `officialMaster`).
 const _officialMaster = '''
@@ -318,7 +322,7 @@ void main() {
             reason: depth,
           );
           expect(expected['roomId'], program);
-          expect(expected['notice'], endsWith(NiconicoApi.noticeText['niconico_program_scope']!));
+          expect(expected['notice'], endsWith(_v3ProgramScope));
           if (channel) expect(expected['avatar'], '');
         }
         expect(watch.programId, program);
@@ -767,8 +771,11 @@ void main() {
       expect(jsonEncode(room.toJson()), isNot(contains('webSocket')));
     });
 
-    test("the notice is 3.x's zh.json text for the state and the access", () {
-      const scope = '收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。';
+    test("the notice is 3.x's zh.json text for the state and the access, comments connected (M5.14)", () {
+      const scope = '收藏对应本次节目，主播的新节目需重新添加。';
+      expect(NiconicoApi.noticeText['niconico_program_scope'], scope);
+      expect(_v3ProgramScope, startsWith(scope.substring(0, scope.length - 1)), reason: '3.x also said so');
+      expect(NiconicoApi.noticeText.values.join(), isNot(contains('弹幕')), reason: 'no "comments not connected" left');
       expect(NiconicoApi.notice(NiconicoProgramStatus.onAir, NiconicoAccess.allowed), scope);
       expect(NiconicoApi.notice(NiconicoProgramStatus.scheduled, NiconicoAccess.regionRestricted), '节目尚未开始。 $scope');
       expect(NiconicoApi.notice(NiconicoProgramStatus.onAir, NiconicoAccess.regionRestricted), '此节目设有地区访问限制。 $scope');

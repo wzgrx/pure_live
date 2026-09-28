@@ -417,13 +417,15 @@ abstract final class NiconicoApi {
   /// The area type of the tabs.
   static const String areaType = 'recent';
 
-  /// 3.x's zh.json text of the notice parts, by key.
+  /// 3.x's zh.json text of the notice parts, by key. Since the comments
+  /// are connected (M5.14), `niconico_program_scope` leaves out 3.x's
+  /// closing "；弹幕暂未接入" (comments not connected yet).
   static const Map<String, String> noticeText = {
     'niconico_scheduled': '节目尚未开始。',
     'niconico_login_required': '此节目要求登录官方站点。',
     'niconico_region_restricted': '此节目设有地区访问限制。',
     'niconico_access_restricted': '此节目的当前观看权限受限。',
-    'niconico_program_scope': '收藏对应本次节目，主播的新节目需重新添加；弹幕暂未接入。',
+    'niconico_program_scope': '收藏对应本次节目，主播的新节目需重新添加。',
   };
 
   static final RegExp _programId = RegExp(r'^lv[1-9][0-9]{0,17}$');

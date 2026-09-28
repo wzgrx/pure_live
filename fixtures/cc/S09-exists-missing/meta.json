@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S09-exists-missing",
+  "capturedAt": "2026-09-28T17:03:42.937266Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.cc.163.com/v1/wapcc/recommendbyccid?ccid=88888888888",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://cc.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "81",
+      "connection": "close",
+      "x-b3-traceid": "16c166dee3a50eaf",
+      "x-b3-sampled": "0",
+      "x-b3-version": "1.1.68",
+      "x-ms-service": "wapcc",
+      "x-app-server-addr": "7.51.60.36:10000",
+      "date": "Mon, 28 Sep 2026 17:03:44 GMT",
+      "server": "APISIX",
+      "x-apisix-response-start": "1790615024233",
+      "vary": "Origin",
+      "x-apisix-ms-service": "wapcc",
+      "x-apisix-routename": "webccms consul.api.wapcc",
+      "x-apisix-traceid": "16c166dee3a50eaf"
+    }
+  },
+  "raw": {
+    "sha256": "5b6d38e5e47b7fb982a844a9e3f4b42376a26eb4329cde1cf087c371a7e59bf8",
+    "length": 81
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "M4.U.9 recorder (schema 1)"
+}

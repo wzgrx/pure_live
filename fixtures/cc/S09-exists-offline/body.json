@@ -1,0 +1,99 @@
+{
+  "msg": "",
+  "code": 0,
+  "data": {
+    "live_list": [
+      {
+        "roomtype": -1,
+        "hot_score": 172950,
+        "uid": 288460561,
+        "title": "【重播】2026暴雪嘉年华魔兽世界舞台DAY2",
+        "visitor": 172950,
+        "channelid": 7499784,
+        "cover": "http://cc.fp.ps.netease.com/file/6aba9d17bc2c6a85acec49803uCga8oq07",
+        "gametype": 1001,
+        "label": "",
+        "roomid": 20,
+        "gamename": "魔兽世界",
+        "nickname": "魔兽世界",
+        "ccid": 367005413
+      },
+      {
+        "roomtype": -1,
+        "hot_score": 248434,
+        "uid": 285581113,
+        "title": "【重播】2026IVL夏季赛总决赛Day4",
+        "visitor": 248434,
+        "channelid": 5515810,
+        "cover": "http://cc.fp.ps.netease.com/file/6a2b87ffbb9e1108968035d6TMTUI0el07",
+        "gametype": 9045,
+        "label": "",
+        "roomid": 15,
+        "gamename": "第五人格",
+        "nickname": "第五人格赛事",
+        "ccid": 586568
+      },
+      {
+        "roomtype": -1,
+        "hot_score": 311647,
+        "uid": 38495237,
+        "title": "【重播】群雄逐鹿超级联赛S6-常规赛",
+        "visitor": 311647,
+        "channelid": 4941662,
+        "cover": "http://cc.fp.ps.netease.com/file/6aba9d1774355749a91729d1R5429Uiy07",
+        "gametype": 3,
+        "label": "",
+        "roomid": 520,
+        "gamename": "《梦幻西游》电脑版",
+        "nickname": "梦端群雄逐鹿赛事",
+        "ccid": 5200
+      },
+      {
+        "roomtype": -1,
+        "hot_score": 206825,
+        "uid": 289164163,
+        "title": "实况足球超级联赛26-27夏季赛",
+        "visitor": 206825,
+        "channelid": 6519303,
+        "cover": "http://cc.fp.ps.netease.com/file/6aba9d166f2366048a46a2fdQMRjKAGB07",
+        "gametype": 9055,
+        "label": "",
+        "roomid": 2323,
+        "gamename": "实况足球",
+        "nickname": "实况足球官方",
+        "ccid": 367592480
+      },
+      {
+        "roomtype": -1,
+        "hot_score": 201976,
+        "uid": 260267129,
+        "title": "《蛋仔派对》抖音巅峰杯",
+        "visitor": 201976,
+        "channelid": 5728999,
+        "cover": "http://cc.fp.ps.netease.com/file/6aba9d1bda207a1e32083742xHd12xyX07",
+        "gametype": 9141,
+        "label": "",
+        "roomid": 2231474,
+        "gamename": "蛋仔派对",
+        "nickname": "巅峰杯",
+        "ccid": 341438909
+      },
+      {
+        "roomtype": -1,
+        "hot_score": 186364,
+        "uid": 565185940,
+        "title": "执子之魂热聊巅峰联赛S13揭幕战",
+        "visitor": 186364,
+        "channelid": 7548576,
+        "cover": "http://cc.fp.ps.netease.com/file/6aba9d176f2366048a46a30diveBNrTk07",
+        "gametype": 25,
+        "label": "",
+        "roomid": 520,
+        "gamename": "《梦幻西游》手游",
+        "nickname": "梦幻赛事小记者",
+        "ccid": 745335384
+      }
+    ]
+  },
+  "time": 1790615023
+}

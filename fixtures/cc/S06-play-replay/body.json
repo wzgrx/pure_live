@@ -1,0 +1,55 @@
+{
+  "show_vbr": 1,
+  "vbrname_sel": "original",
+  "capture_type": 9,
+  "videourl": "https://hsrelayhdl.cc.netease.com/pushstation/f6f7dd8540bcfd8dbb8c555885292.flv?volcSecret=8cb3bcc84079b26473c27f582a4ab4a5&src=webcc_h5&relaySecret=1790615024-hj-owyysm-fquan180ox852u40i1d722c6i4m59278&auth_key=1790615324-vl1k2dn5c3ww03u003j5cv37c331z37r-3-s3352g9o357y0i2s613o830400p6g23o&_t=3c32003271debc79&volcTime=1793207024",
+  "live_device": "pc",
+  "bakcdnfree": 0,
+  "gametype": 9133,
+  "anchor_uid": 555885292,
+  "subId": 7532306,
+  "ptscopy_enable": {
+    "blueray_5M_avc": 0,
+    "blueray_3M_avc_lowfps": 0,
+    "standard": 0,
+    "high": 0,
+    "ultra": 0,
+    "original": 0
+  },
+  "vbrname_list": [
+    "original",
+    "blueray_5M_avc",
+    "blueray_3M_avc_lowfps",
+    "ultra",
+    "high",
+    "standard"
+  ],
+  "is_horizontal": 1,
+  "record_room_audio": 1,
+  "cdn_list": [
+    "hs",
+    "ali"
+  ],
+  "cdnfree": 0,
+  "vbr_choose_by_user": 0,
+  "cdn_sel": "hs",
+  "bakcdn_sel": "ali",
+  "transformer_id": 1,
+  "play_cfg": {
+    "url": "http://vlogger.cc.163.com/player/PLAYER_STAT_SEC",
+    "frequency": 1
+  },
+  "roomId": 78649098,
+  "bakvideourl": "https://alirtspull.cc.netease.com/pushstationsave/f6f7dd8540bcfd8dbb8c555885292.flv?src=webcc_h5&_t=3c32003271debc79&auth_key=1790615324-t04mh23tqn1a2c75c5c59dam39e65765-9-mm4o9q78wg41668pkd3q8c1nw87f8p73&quic_versions=46%2C43%2C39",
+  "vbrname_mapping": {
+    "blueray_5M_avc": "蓝光5M",
+    "blueray_3M_avc_lowfps": "蓝光3M",
+    "standard": "标清",
+    "high": "高清",
+    "ultra": "超清",
+    "original": "原画"
+  },
+  "multiplyIpReq": 0,
+  "stream_features": {},
+  "vbr_sel": 7999
+}

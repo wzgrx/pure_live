@@ -11,22 +11,25 @@ const _site = 'fc2live';
 /// whose session authorises a channel's HLS playlists. The media server
 /// refuses variant playlists once the socket is gone, so whoever opens the
 /// control (playback, recording) keeps it open for exactly as long as its
-/// consumer reads the master, and closes it afterwards (M7, M8).
+/// consumer reads the [playlist], and closes it afterwards (M7, M8).
 ///
 /// Protocol (3.x): the handshake carries the site's origin and UA and the
 /// grant's `l_ortkn` cookie; after `connect_complete` the control sends
-/// `get_hls_information` once and is open when the answer names the
-/// channel's master playlist ([Fc2LiveApi.hlsMaster]); the socket pings
-/// every 15 s ([pingInterval]). Only text frames of at most 2 MiB are
-/// understood; anything else, `control_disconnection` (the grant expired),
-/// an error or the socket closing ends the control, which never reconnects
-/// with a used grant: [done] says why and the owner takes a new grant.
+/// `get_hls_information` once and is open when the answer names a playlist
+/// of its quality ([Fc2LiveApi.hlsPlaylists], [Fc2LiveApi.playlistFor]:
+/// 3.x's low-latency master for `auto`, a single variant for a tier,
+/// 26-2); the socket pings every 15 s ([pingInterval]). Only text frames of
+/// at most 2 MiB are understood; anything else, `control_disconnection`
+/// (the grant expired), an error or the socket closing ends the control,
+/// which never reconnects with a used grant: [done] says why and the owner
+/// takes a new grant.
 final class Fc2LiveControl {
-  new _(this.grant, this._startupTimeout, this._closeTimeout, this._timer);
+  new _(this.grant, this.requestedQuality, this._startupTimeout, this._closeTimeout, this._timer);
 
   /// Opens the control socket of [grant] through [route] with [connector]
-  /// and waits, at most [startupTimeout] for the handshake and the master
-  /// together, for the HLS answer.
+  /// and waits, at most [startupTimeout] for the handshake and the answer
+  /// together, for the HLS answer; the control plays [quality], one of
+  /// [Fc2LiveApi.qualityIds] (3.x: always `auto`).
   ///
   /// A cancelled [cancel] opens nothing; cancelling while it opens ends the
   /// control (the open throws a cancelled `TransportFailure`). Once open,
@@ -38,12 +41,14 @@ final class Fc2LiveControl {
     required SocketConnector connector,
     ProxyRoute route = const DirectRoute(),
     CancelToken? cancel,
+    String quality = Fc2LiveApi.autoQualityId,
     Duration startupTimeout = const Duration(seconds: 20),
     Duration closeTimeout = const Duration(seconds: 2),
     Timer Function(Duration duration, void Function() callback)? timer,
   }) async {
+    if (!Fc2LiveApi.qualityIds.contains(quality)) throw ArgumentError.value(quality, 'quality', 'not an FC2 quality');
     if (cancel?.isCancelled ?? false) throw const TransportFailure(_site, TransportReason.cancelled);
-    final control = Fc2LiveControl._(grant, startupTimeout, closeTimeout, timer ?? Timer.new);
+    final control = Fc2LiveControl._(grant, quality, startupTimeout, closeTimeout, timer ?? Timer.new);
     if (cancel != null) {
       unawaited(
         cancel.whenCancelled.then((_) {
@@ -93,6 +98,9 @@ final class Fc2LiveControl {
   /// The grant the control was opened with (used once).
   final Fc2LiveGrant grant;
 
+  /// The quality asked for ([Fc2LiveApi.qualityIds]).
+  final String requestedQuality;
+
   final Duration _startupTimeout;
   final Duration _closeTimeout;
   final Timer Function(Duration, void Function()) _timer;
@@ -102,7 +110,8 @@ final class Fc2LiveControl {
   SocketChannel? _channel;
   StreamSubscription<Object?>? _subscription;
   Timer? _startup;
-  Uri? _master;
+  Map<int, Uri>? _playlists;
+  Fc2LivePlaylist? _playlist;
   Exception? _failure;
   Future<void>? _closing;
   bool _closed = false;
@@ -111,9 +120,19 @@ final class Fc2LiveControl {
   /// The channel.
   String get channelId => grant.channelId;
 
-  /// The channel's low-latency master playlist (3.x's `master`), known
-  /// once the control opened; worth opening only while [isClosed] is false.
-  Uri get master => _master ?? (throw StateError('the FC2 control never opened'));
+  /// The playlist to play (3.x's `master` for `auto`; a single variant for
+  /// a tier, 26-2), known once the control opened; worth opening only while
+  /// [isClosed] is false. The relay (M7, M8) reads it with [mediaHeaders].
+  Uri get playlist => (_playlist ?? (throw StateError('the FC2 control never opened'))).url;
+
+  /// The quality [playlist] is: [requestedQuality], or the tier it fell
+  /// back to when the channel does not offer that one
+  /// ([Fc2LiveApi.playlistFor]); the player shows it (M7).
+  String get quality => (_playlist ?? (throw StateError('the FC2 control never opened'))).quality;
+
+  /// Every playlist the HLS answer named, by mode ([Fc2LiveApi.hlsPlaylists]),
+  /// known once the control opened.
+  Map<int, Uri> get playlists => _playlists ?? (throw StateError('the FC2 control never opened'));
 
   /// The headers of every media request (3.x's `Fc2Api.mediaHeaders`).
   Map<String, String> get mediaHeaders => Fc2LiveApi.mediaHeaders(channelId);
@@ -122,8 +141,8 @@ final class Fc2LiveControl {
   /// `SiteError`, or a cancelled `TransportFailure`).
   Future<Exception?> get done => _done.future;
 
-  /// Whether the control has ended (3.x's `isClosed`): its master must not
-  /// be opened any more.
+  /// Whether the control has ended (3.x's `isClosed`): its playlist must
+  /// not be opened any more.
   bool get isClosed => _closed;
 
   Future<void> _handshake(SocketConnector connector, ProxyRoute route) async {
@@ -176,8 +195,12 @@ final class Fc2LiveControl {
             _requested = true;
             _send(hlsRequest);
           }
-        case '_response_' when message['id'] == 1 && _requested && _master == null:
-          _master = Fc2LiveApi.hlsMaster(message, channelId: channelId);
+        case '_response_' when message['id'] == 1 && _requested && _playlist == null:
+          final playlists = Fc2LiveApi.hlsPlaylists(message, channelId: channelId);
+          _playlist =
+              Fc2LiveApi.playlistFor(playlists, requestedQuality) ??
+              (throw ApiChanged(_site, 'control: no playlist for $requestedQuality'));
+          _playlists = playlists;
           _startup?.cancel();
           if (!_ready.isCompleted) _ready.complete();
         case 'control_disconnection':

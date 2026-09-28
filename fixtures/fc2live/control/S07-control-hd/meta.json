@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "platform": "fc2live",
+  "case": "S07-control-hd",
+  "room": "fc2live:10200498",
+  "capturedAt": "2026-09-28T20:47:52Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://us-west-1-media-worker1078.live.fc2.com/control/channels/10200498?control_token=kes2geMcbRBIb4FuPOJUzbghnCptojM8yzN5.SfGPeUj0bjzpuem4uBE3QFp0HTggbnnWg2J2cNRUI2YkHddyFIhAVVnvkodJatqAmRH7LUF5qWXYrPsLEYdqzdXdM4lMsooKqGTASMb9TuWnDsg0W8gad9WLZZeiy1W5hEzFWPm6qMqWgOZ7PexDorj1tWJ3UQKwiFdLXND1CEtoS7VCEnkfreMoKVQZmX0grX3KDhlYwKACBGm4nRg9XiJztFP1CHGctjNPOxPFGxK5PTKQbRvVWAT0Vax2VwxpLiGdVLG5AJf2VaoHTN7FkYj9IgZWyzqdStALsF9zLndCrkW3jYjxKbwIF9gkxw56F4s6uAWFstOOIryrEFwSsRLdwz9qZQlQpMnERm11M5jmE5dTSFqWpGtBVkIQcy30IdUTvv3xyANsdf1QuwKYeDGarb8OqhqXDxtCtC5tqPktrF9aNwgeZxdfTcTWypFTdKAeA3WLGIQoF47gYsLkfbP1bsj9RjM5YtbnK2dHtRQCJomHmJsleQG1RQhAKa0UBwlqLYsazLs2BNwIawduEBCtinXhPqXEL95pPa22dMRNGex9BHPHiiPLjR9rVN4NXfRjvGQzmvm2viYyEUGGxeRzrGYedaysG3IYYH0MugC4oudYc924mFwbLv6rT7hCtHLXyotvAVoYfHSaYQ9QiFS5PEKOTpserROgmbnVdwy7JUJ0AE.OEHvWEn4sCSiiDIiR9P2EIdmYo_g1ioFAIF5Z86p_88",
+      "headers": {
+        "Origin": "https://live.fc2.com",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "Cookie": "l_ortkn=0nxf8ug0c03ecwgpfirw1w74yccja7h4clcb1ds1"
+      }
+    }
+  ],
+  "frames": 9,
+  "raw": {
+    "sha256": "11a426bad07c316e5a47b31f49fd3da99fe28a7cfc9b73fe937359a9bca1c972",
+    "length": 76715
+  },
+  "scrubbed": [
+    {
+      "where": "_response_.playlists[*].url:c,d",
+      "rule": "secret"
+    },
+    {
+      "where": "_response_.playlists_high_latency[*].url:c,d",
+      "rule": "secret"
+    },
+    {
+      "where": "_response_.playlists_middle_latency[*].url:c,d",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake.control_token",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake.cookie:l_ortkn",
+      "rule": "secret"
+    }
+  ],
+  "notes": [
+    "1 comment frame(s) dropped (history comments, not used here)",
+    "1 ng_comment frame(s) dropped (admin NG keyword list, not used)",
+    "a channel whose HLS answer offers modes 40 and 50 (2 Mbps, 3 Mbps beta) besides 10, 20, 30 and 90",
+    "handshake headers are the adapter's (Fc2LiveGrant.handshakeHeaders); the recorder did not keep the l_ortkn value, the one here is synthetic"
+  ],
+  "tool": "control socket recorder of the M4.U.26 session (Fc2LiveSite.openControl with a recording connector), frames as live_cli danmaku --record writes them"
+}

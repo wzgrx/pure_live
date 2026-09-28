@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 
 const _site = 'fc2live';
 
-/// A channel's state as 3.x read it.
+/// A channel's state as the platform answers it.
 enum Fc2LiveState {
   /// `is_publish` 1 and open to anonymous viewers.
   live,
@@ -19,13 +19,14 @@ enum Fc2LiveState {
   /// Not broadcasting (`is_publish` other than 1).
   offline,
 
-  /// Broadcasting, but paid, login-only, ticketed or limited: 3.x kept the
-  /// room visible with an unknown state and a notice, never "offline".
+  /// Broadcasting, but paid, ticketed, for signed-in viewers only or
+  /// restricted by FC2 ([Fc2LiveChannel.restriction] says which). The room
+  /// is live and marked with the restriction (26-9; 3.x showed it with an
+  /// unknown state); playback refuses it with the reason.
   restricted,
 }
 
-/// One channel of the directory or of a member answer (3.x's `Fc2Room`,
-/// without the start time 3.x parsed but never showed).
+/// One channel of the directory or of a member answer (3.x's `Fc2Room`).
 @immutable
 final class Fc2LiveChannel {
   /// Creates the channel.
@@ -38,33 +39,43 @@ final class Fc2LiveChannel {
     required this.categoryName,
     required this.state,
     this.description = '',
+    this.avatar = '',
     this.currentViewers,
     this.totalViewers,
+    this.startedAt,
+    this.restriction,
     this.isAdult = false,
   });
 
   /// The channel number, the room id.
   final String channelId;
 
-  /// The owner's name (`name`; `profile_data.name`, else `tname`), else the
-  /// channel number.
+  /// The owner's name (`name`; `profile_data.name`, else `tname`), HTML
+  /// entities decoded (26-4); empty when the platform has none (3.x wrote
+  /// the channel number, a placeholder).
   final String userName;
 
-  /// `title`, else the owner's name, else the channel number.
+  /// `title`, else [userName], HTML entities decoded (26-4); empty when
+  /// both are.
   final String title;
 
-  /// `channel_data.info` (member answers only), whitespace collapsed.
+  /// `channel_data.info` (member answers only), HTML entities decoded and
+  /// whitespace collapsed.
   final String description;
 
   /// `image` when it is an https image on `fc2.com` or a subdomain, else
   /// empty.
   final String cover;
 
+  /// The owner's picture (member answers only, 26-5): `profile_data.icon`,
+  /// else `profile_data.image`, checked as [cover]; else empty.
+  final String avatar;
+
   /// `category` (0–99).
   final int categoryId;
 
-  /// The directory's English name of [categoryId]; a member answer's own
-  /// `category_name` (Japanese) when it has one.
+  /// The area name of [categoryId] ([Fc2LiveApi.areaName]), the same for
+  /// cards and details (26-6).
   final String categoryName;
 
   /// `count`: viewers now.
@@ -72,6 +83,13 @@ final class Fc2LiveChannel {
 
   /// `total`: viewers of this broadcast so far.
   final int? totalViewers;
+
+  /// When the broadcast started (`start_time`, `start`), when on air.
+  final DateTime? startedAt;
+
+  /// What keeps viewers out of a broadcast on air: [LiveRestriction.none]
+  /// when nothing does; null when offline.
+  final LiveRestriction? restriction;
 
   /// Broadcast state.
   final Fc2LiveState state;
@@ -94,7 +112,13 @@ typedef Fc2LiveMember = ({Fc2LiveChannel channel, String? version});
 @immutable
 final class Fc2LiveRoomData {
   /// Creates the data.
-  const new({required this.channelId, required this.state, required this.categoryId, this.isAdult = false});
+  const new({
+    required this.channelId,
+    required this.state,
+    required this.categoryId,
+    this.restriction,
+    this.isAdult = false,
+  });
 
   /// The channel the data belongs to.
   final String channelId;
@@ -102,12 +126,42 @@ final class Fc2LiveRoomData {
   /// Broadcast state.
   final Fc2LiveState state;
 
-  /// `category`.
+  /// `category`: the interface names the area by it (26-6, M13).
   final int categoryId;
+
+  /// The broadcast's restriction ([Fc2LiveChannel.restriction]).
+  final LiveRestriction? restriction;
 
   /// Marked adult by the platform.
   final bool isAdult;
 }
+
+/// What the comment connection needs (26-3, M5): the channel. Comments
+/// travel on a control socket of their own: the connection takes a grant
+/// with `Fc2LiveSite.controlGrant` (again after every
+/// `control_disconnection`), connects [Fc2LiveGrant.endpoint] with
+/// [Fc2LiveGrant.handshakeHeaders] and reads `comment` and `user_count`
+/// messages (archive spec §7).
+@immutable
+final class Fc2LiveDanmakuArgs {
+  /// Creates the arguments.
+  const new(this.channelId);
+
+  /// The channel number.
+  final String channelId;
+
+  @override
+  bool operator ==(Object other) => other is Fc2LiveDanmakuArgs && other.channelId == channelId;
+
+  @override
+  int get hashCode => channelId.hashCode;
+
+  @override
+  String toString() => 'Fc2LiveDanmakuArgs($channelId)';
+}
+
+/// The playlist a control plays and the quality it is (26-2).
+typedef Fc2LivePlaylist = ({String quality, Uri url});
 
 /// An anonymous control grant (`getControlServer.php`, 3.x's
 /// `Fc2ControlGrant`): the control socket of one channel and its session.
@@ -144,24 +198,32 @@ final class Fc2LiveGrant {
 }
 
 /// The public recipe of an FC2 input (3.x's `Fc2InputRecipe`): the channel
-/// only. There is no URL to export: playback and recording each take a
-/// grant, hold its control socket while they play and read the master it
-/// announces (M7, M8).
+/// and the quality. There is no URL to export: playback and recording each
+/// take a grant, hold its control socket while they play and read the
+/// playlist it announces for the quality (`Fc2LiveSite.openControl`; M7,
+/// M8).
 @immutable
 final class Fc2LiveInputRecipe implements LiveInputRecipe {
-  /// Creates the recipe of [channelId], a channel number.
-  new(this.channelId) {
+  /// Creates the recipe of [channelId], a channel number, in [quality], one
+  /// of [Fc2LiveApi.qualityIds] (3.x's recipes were all `auto`).
+  new(this.channelId, {this.quality = Fc2LiveApi.autoQualityId}) {
     if (!Fc2LiveApi.isChannelId(channelId)) throw ArgumentError.value(channelId, 'channelId', 'not an FC2 channel');
+    if (!Fc2LiveApi.qualityIds.contains(quality)) throw ArgumentError.value(quality, 'quality', 'not an FC2 quality');
   }
 
   /// The channel number.
   final String channelId;
 
+  /// The quality id: a tier (`50`, `40`, `30`, `20`, `10`, 26-2) or
+  /// `auto`.
+  final String quality;
+
+  /// `fc2live:<channel>:<quality>` (3.x's `fc2live:<channel>:auto`).
   @override
-  String get identity => 'fc2live:$channelId:auto';
+  String get identity => 'fc2live:$channelId:$quality';
 
   @override
-  bool operator ==(Object other) => other is Fc2LiveInputRecipe && other.channelId == channelId;
+  bool operator ==(Object other) => other is Fc2LiveInputRecipe && other.identity == identity;
 
   @override
   int get hashCode => identity.hashCode;
@@ -238,9 +300,41 @@ abstract final class Fc2LiveApi {
     'fc2live_adult_notice': '该房间由平台标记为成人内容，不进入普通公开目录。',
   };
 
+  /// Id of [autoQuality].
+  static const String autoQualityId = 'auto';
+
   /// 3.x's one quality: the site's adaptive HLS master (label from its
-  /// zh.json `fc2live_quality_auto`).
-  static const LivePlayQuality autoQuality = LivePlayQuality(id: 'auto', quality: '自适应 HLS');
+  /// zh.json `fc2live_quality_auto`). Kept, after the tiers (26-2): id and
+  /// label are 3.x's.
+  static const LivePlayQuality autoQuality = LivePlayQuality(id: autoQualityId, quality: '自适应 HLS');
+
+  /// The tiers of 26-2, best first. The id is the tier's playlist mode in
+  /// the control's HLS answer; the site transcodes every tier, none is the
+  /// source. The labels follow the site's player (`mode10`…`mode50`):
+  /// - `50` 3 Mbps (β) and `40` 2 Mbps, offered only for some channels
+  ///   (a 1080p broadcast in control/S07-control-hd): 超清 with the rate;
+  /// - `30` 1.2 Mbps, `20` 400 Kbps and `10` 150 Kbps, offered for every
+  ///   channel recorded: the shared names of high, standard and low
+  ///   (`LiveQualityLabel`).
+  static const List<LivePlayQuality> tierQualities = [
+    LivePlayQuality(id: '50', quality: '超清 3M（β）', sort: 50),
+    LivePlayQuality(id: '40', quality: '超清 2M', sort: 40),
+    LivePlayQuality(id: '30', quality: '高清', sort: 30),
+    LivePlayQuality(id: '20', quality: '标清', sort: 20),
+    LivePlayQuality(id: '10', quality: '流畅', sort: 10),
+  ];
+
+  /// The playlist modes of [tierQualities], best first.
+  static const List<int> tierModes = [50, 40, 30, 20, 10];
+
+  /// Every quality a live room can have, in menu order (26-2): the tiers,
+  /// best first, then [autoQuality]. A room lists those its channel offers
+  /// ([qualitiesOf]).
+  static const List<LivePlayQuality> qualities = [...tierQualities, autoQuality];
+
+  /// The ids of [qualities]. 3.x's one id, `auto`, is unchanged, so stored
+  /// quality ids need no mapping (M9).
+  static const Set<String> qualityIds = {'50', '40', '30', '20', '10', autoQualityId};
 
   static final RegExp _channelId = RegExp(r'^[1-9]\d{0,11}$');
 
@@ -324,8 +418,21 @@ abstract final class Fc2LiveApi {
   static bool inArea(Fc2LiveChannel channel, int? category) =>
       category == null || channel.categoryId == category || (category == 2 && channel.categoryId == 3);
 
-  /// The English area name 3.x gave directory cards.
-  static String directoryAreaName(int category) => switch (category) {
+  /// The area name of a room in [category] (26-6): the name of the catalog
+  /// area that holds it ([areaNames], 3.x's zh.json), for cards and details
+  /// alike; the interface shows its own translation by
+  /// [Fc2LiveRoomData.categoryId] (M13). 3.x named cards in English and
+  /// details in the site's Japanese (`雑談`). Categories outside the catalog
+  /// (0 and 8 are the site's "unknown", 6 premium, 7 official) have no name.
+  static String areaName(int category) => switch (category) {
+    1 || 4 || 5 || 9 => areaNames['$category']!,
+    2 || 3 => areaNames['2']!,
+    _ => '',
+  };
+
+  /// The English area name 3.x gave directory cards; the keyword search
+  /// still matches it, so 3.x's searches find the same rooms.
+  static String legacyAreaName(int category) => switch (category) {
     1 => 'Idle Chat',
     2 || 3 => 'Game / Work',
     4 => 'Video',
@@ -338,12 +445,16 @@ abstract final class Fc2LiveApi {
 
   /// `allchannellist.php`: every channel on air, in the site's order. Rows
   /// other than public rooms (`type` 1: open chats, private two-shots) are
-  /// skipped; restricted rooms (`pay`, `login` or `tid` not 0) stay, as
-  /// 3.x kept them; a channel listed twice is kept once. 3.x's checks, all
-  /// `ApiChanged`: `time` a positive integer, at most 1000 rows, each an
-  /// object with an integer `type`; a public row needs a channel number,
-  /// integer `pay`, `login`, `tid`, a `category` 0–99, and a name, a title
-  /// or its number.
+  /// skipped; restricted rooms (`pay`, `login` or `tid` not 0) stay, live
+  /// and marked ([directoryRestriction], 26-9); a channel listed twice is
+  /// kept once. The list must be there: `time` a positive integer and at
+  /// most 1000 rows (3.x's checks, `ApiChanged`). A row that cannot be read
+  /// (not an object, no integer `type`; a public row without a channel
+  /// number, integer `pay`, `login`, `tid` or a `category` 0–99, or with a
+  /// name, title or count of the wrong type) is skipped alone (26-7; 3.x
+  /// failed the whole list); unreadable rows without a single readable
+  /// public one are `ApiChanged`, so a changed API never looks like an
+  /// empty directory.
   static List<Fc2LiveChannel> directory(String body, {int status = 200}) {
     final root = _json(body, status, 'allchannellist');
     if (_int(root['time'], 'allchannellist time') < 1) throw const ApiChanged(_site, 'allchannellist: time');
@@ -351,31 +462,101 @@ abstract final class Fc2LiveApi {
     if (rows is! List || rows.length > 1000) throw const ApiChanged(_site, 'allchannellist: no channel list');
     final seen = <String>{};
     final channels = <Fc2LiveChannel>[];
+    var unreadable = 0;
     for (final row in rows) {
-      final data = _object(row, 'allchannellist row');
-      // Open chat and private two-shot entries are not public media rooms.
-      if (_int(data['type'], 'allchannellist type') != 1) continue;
-      final channel = _directoryChannel(data);
+      final Fc2LiveChannel channel;
+      try {
+        final data = _object(row, 'allchannellist row');
+        // Open chat and private two-shot entries are not public media rooms.
+        if (_int(data['type'], 'allchannellist type') != 1) continue;
+        channel = _directoryChannel(data);
+      } on ApiChanged {
+        unreadable++;
+        continue;
+      }
       if (seen.add(channel.channelId)) channels.add(channel);
+    }
+    if (channels.isEmpty && unreadable > 0) {
+      throw ApiChanged(_site, 'allchannellist: none of $unreadable rows can be read');
     }
     return List.unmodifiable(channels);
   }
 
   static Fc2LiveChannel _directoryChannel(Map<String, dynamic> data) {
     final id = _channelNumber(data['id'], 'allchannellist id');
-    final restricted = ['pay', 'login', 'tid'].any((key) => _int(data[key], 'allchannellist $key') != 0);
+    final restriction = directoryRestriction(
+      pay: _int(data['pay'], 'allchannellist pay'),
+      ticket: _int(data['tid'], 'allchannellist tid'),
+      login: _int(data['login'], 'allchannellist login'),
+    );
     final category = _category(data['category'], 'allchannellist');
+    final name = _displayText(data['name'], 'allchannellist name');
     return Fc2LiveChannel(
       channelId: id,
-      userName: _firstText([data['name'], id], 'allchannellist name'),
-      title: _firstText([data['title'], data['name'], id], 'allchannellist title'),
+      userName: name,
+      title: _firstOptional([_displayText(data['title'], 'allchannellist title'), name], 'allchannellist title'),
       cover: _image(data['image']),
       categoryId: category,
-      categoryName: directoryAreaName(category),
+      categoryName: areaName(category),
       currentViewers: _count(data['count'], 'allchannellist count'),
       totalViewers: _count(data['total'], 'allchannellist total'),
-      state: restricted ? Fc2LiveState.restricted : Fc2LiveState.live,
+      startedAt: startTime(data['start_time']),
+      restriction: restriction,
+      state: restriction == LiveRestriction.none ? Fc2LiveState.live : Fc2LiveState.restricted,
     );
+  }
+
+  /// The restriction of a directory row (26-9), by the site's card marks
+  /// in their order: `pay` 1 (pay per minute in points) and `tid` (a
+  /// ticket or premium broadcast) are [LiveRestriction.paid]; `login` 1
+  /// (for signed-in viewers) and 2 (for signed-in viewers holding points,
+  /// free to watch) are [LiveRestriction.needsLogin]; all 0 is
+  /// [LiveRestriction.none].
+  static LiveRestriction directoryRestriction({required int pay, required int ticket, required int login}) {
+    if (pay != 0 || ticket != 0) return LiveRestriction.paid;
+    if (login != 0) return LiveRestriction.needsLogin;
+    return LiveRestriction.none;
+  }
+
+  /// The restriction of a live member answer (26-9): `is_limited`
+  /// (the site shows "配信規制中", its broadcast is restricted by FC2, and
+  /// sends every viewer out) is [LiveRestriction.unplayable]; `fee` (pay
+  /// per minute), `ticketid` and `ticket_only` are [LiveRestriction.paid];
+  /// `login_only` (1 signed-in viewers, 2 those holding points, as the
+  /// directory's `login`) is [LiveRestriction.needsLogin]; all 0 is
+  /// [LiveRestriction.none].
+  static LiveRestriction memberRestriction({
+    required int limited,
+    required int fee,
+    required int ticketId,
+    required int ticketOnly,
+    required int loginOnly,
+  }) {
+    if (limited != 0) return LiveRestriction.unplayable;
+    if (fee != 0 || ticketId != 0 || ticketOnly != 0) return LiveRestriction.paid;
+    if (loginOnly != 0) return LiveRestriction.needsLogin;
+    return LiveRestriction.none;
+  }
+
+  /// The error that refuses to play a broadcast with [restriction]
+  /// (M2.1's table), or null when nothing does: [LiveRestriction.needsLogin]
+  /// is `NeedsLogin` (this app has no FC2 account), the others are
+  /// `StreamUnavailable` with the reason.
+  static SiteError? refusal(LiveRestriction? restriction, String channelId) => switch (restriction) {
+    null || LiveRestriction.none => null,
+    LiveRestriction.needsLogin => NeedsLogin(_site, 'channel $channelId is for signed-in viewers only'),
+    LiveRestriction.paid => StreamUnavailable(_site, 'channel $channelId is a paid or ticketed broadcast'),
+    LiveRestriction.unplayable => StreamUnavailable(_site, 'channel $channelId is restricted by FC2 (配信規制中)'),
+    final LiveRestriction other => StreamUnavailable(_site, 'channel $channelId is restricted (${other.name})'),
+  };
+
+  /// A start time in Unix milliseconds (`start_time`, `start`) as UTC; null
+  /// for 0, anything before 2000 or after 2100, and anything that is not
+  /// an integer.
+  static DateTime? startTime(Object? value) {
+    final milliseconds = jsonInt(value);
+    if (milliseconds == null || milliseconds < 946684800000 || milliseconds > 4102444800000) return null;
+    return DateTime.fromMillisecondsSinceEpoch(milliseconds, isUtc: true);
   }
 
   /// Whether 3.x served a slice of [page] × [pageSize]: page 1 and up, 1–100
@@ -400,9 +581,11 @@ abstract final class Fc2LiveApi {
     hasMore: page * directoryPageSize < channels.length,
   );
 
-  /// The channels whose number, name, title or area name contains
-  /// [keyword] (trimmed, case ignored), in the directory's order (3.x's
-  /// local search; the site has no search API).
+  /// The channels whose number, name, title or area name (the room's, or
+  /// 3.x's English one, [legacyAreaName]) contains [keyword] (trimmed, case
+  /// ignored), in the directory's order (3.x's local search; the site has
+  /// no search API). Names and titles are matched as shown, with HTML
+  /// entities decoded (26-4).
   static List<Fc2LiveChannel> search(List<Fc2LiveChannel> channels, String keyword) {
     final query = keyword.trim().toLowerCase();
     if (query.isEmpty) return const [];
@@ -411,7 +594,9 @@ abstract final class Fc2LiveApi {
         if (channel.channelId.contains(query) ||
             channel.userName.toLowerCase().contains(query) ||
             channel.title.toLowerCase().contains(query) ||
-            channel.categoryName.toLowerCase().contains(query))
+            (channel.categoryName.isNotEmpty &&
+                (channel.categoryName.toLowerCase().contains(query) ||
+                    legacyAreaName(channel.categoryId).toLowerCase().contains(query))))
           channel,
     ];
   }
@@ -429,10 +614,13 @@ abstract final class Fc2LiveApi {
   /// fields that are strings.
   ///
   /// `is_publish` 1 is live, anything else offline; a live channel with any
-  /// of the five restriction flags is restricted. `version` is kept for the
-  /// control grant: 3.x required it, but the site answers `''` for every
-  /// channel that is not on air (S02-member-offline), so 3.x failed on
-  /// every offline channel.
+  /// of the five restriction flags is restricted ([memberRestriction]),
+  /// still live (26-9). `version` is kept for the control grant: 3.x
+  /// required it, but the site answers `''` for every channel that is not
+  /// on air (S02-member-offline), so 3.x failed on every offline channel.
+  /// A live channel carries its start time (`start`) and restriction; the
+  /// owner's picture ([Fc2LiveChannel.avatar]) is read leniently, a field
+  /// 3.x did not read never fails the answer.
   static Fc2LiveMember member(String body, {required String channelId, int status = 200}) {
     final root = _json(body, status, 'memberApi');
     if (_int(root['status'], 'memberApi status') != 1) throw NotFound(_site, 'memberApi: no channel $channelId');
@@ -446,33 +634,38 @@ abstract final class Fc2LiveApi {
       throw NotFound(_site, 'memberApi: channel $channelId has no owner');
     }
     final published = _int(channel['is_publish'], 'memberApi is_publish') == 1;
-    final restricted = [
-      'fee',
-      'login_only',
-      'ticketid',
-      'ticket_only',
-      'is_limited',
-    ].any((key) => _int(channel[key], 'memberApi $key') != 0);
+    int flag(String key) => _int(channel[key], 'memberApi $key');
+    final restriction = memberRestriction(
+      limited: flag('is_limited'),
+      fee: flag('fee'),
+      ticketId: flag('ticketid'),
+      ticketOnly: flag('ticket_only'),
+      loginOnly: flag('login_only'),
+    );
     final category = _category(channel['category'], 'memberApi');
     final version = _optionalText(channel['version'], 'memberApi version');
     if (version.length > 256) throw const ApiChanged(_site, 'memberApi: version over 256 characters');
+    final name = _firstOptional([
+      _displayText(profile?['name'], 'memberApi name'),
+      _displayText(channel['tname'], 'memberApi tname'),
+    ], 'memberApi name');
     return (
       channel: Fc2LiveChannel(
         channelId: id,
-        userName: _firstText([profile?['name'], channel['tname'], id], 'memberApi name'),
-        title: _firstText([channel['title'], profile?['name'], id], 'memberApi title'),
-        description: _optionalText(channel['info'], 'memberApi info'),
+        userName: name,
+        title: _firstOptional([_displayText(channel['title'], 'memberApi title'), name], 'memberApi title'),
+        description: _displayText(channel['info'], 'memberApi info'),
         cover: _image(channel['image']),
+        avatar: _firstOptional([_lenientImage(profile?['icon']), _lenientImage(profile?['image'])], 'avatar'),
         categoryId: category,
-        categoryName: _firstOptional([
-          channel['category_name'],
-          directoryAreaName(category),
-        ], 'memberApi category_name'),
+        categoryName: areaName(category),
         currentViewers: _count(channel['count'], 'memberApi count'),
         totalViewers: _count(channel['total'], 'memberApi total'),
+        startedAt: published ? startTime(channel['start']) : null,
+        restriction: published ? restriction : null,
         state: !published
             ? Fc2LiveState.offline
-            : restricted
+            : restriction != LiveRestriction.none
             ? Fc2LiveState.restricted
             : Fc2LiveState.live,
         isAdult: _int(channel['adult'], 'memberApi adult') == 1,
@@ -483,41 +676,47 @@ abstract final class Fc2LiveApi {
 
   // Rooms ---------------------------------------------------------------------
 
-  /// The room of [channel] (3.x's `Fc2Site._room`): live, offline, or
-  /// unknown when restricted (3.x kept those apart from offline); viewers
-  /// now as the audience, the broadcast's total as `totalViewers`; the
-  /// cover also as the avatar (3.x); the link is the channel page; 3.x's
-  /// notice ([notice]); the introduction from a member answer's `info`
-  /// (3.x parsed it but left it out); [Fc2LiveRoomData] for the interface
-  /// and the streams. No `httpHeaders`: that field is IPTV's, the media
-  /// headers travel with the control session.
-  static LiveRoom room(Fc2LiveChannel channel) {
-    final viewers = channel.currentViewers?.toString();
+  /// The room of [channel] (3.x's `Fc2Site._room`): live (restricted ones
+  /// too, marked with their restriction, 26-9; 3.x showed them unknown) or
+  /// offline; viewers now as the audience and the broadcast's total as
+  /// `totalViewers`, both only while on air (26-8; 3.x wrote an offline
+  /// channel's 0); the start time while on air; the owner's picture as the
+  /// avatar, else the cover (26-5; 3.x always the cover); the link is the
+  /// channel page; 3.x's notice ([notice]); the introduction from a member
+  /// answer's `info` (3.x parsed it but left it out); [Fc2LiveRoomData]
+  /// for the interface and the streams; with [danmaku] (room entry and
+  /// recording) the comment arguments (26-3, M5). No `httpHeaders`: that
+  /// field is IPTV's, the media headers travel with the control session.
+  static LiveRoom room(Fc2LiveChannel channel, {bool danmaku = false}) {
+    final live = channel.state != Fc2LiveState.offline;
+    final viewers = live ? channel.currentViewers?.toString() : null;
     return LiveRoom(
       platform: _site,
       roomId: channel.channelId,
       userId: channel.channelId,
       title: channel.title,
       nick: channel.userName,
-      avatar: channel.cover,
+      avatar: channel.avatar.isEmpty ? channel.cover : channel.avatar,
       cover: channel.cover,
       area: channel.categoryName,
       link: channelUrl(channel.channelId),
-      liveStatus: switch (channel.state) {
-        Fc2LiveState.live => LiveStatus.live,
-        Fc2LiveState.offline => LiveStatus.offline,
-        Fc2LiveState.restricted => LiveStatus.unknown,
-      },
+      liveStatus: live ? LiveStatus.live : LiveStatus.offline,
       watching: viewers ?? '',
       onlineViewers: viewers ?? '',
-      totalViewers: channel.totalViewers?.toString() ?? '',
-      audienceMetricType: viewers == null ? AudienceMetricType.unknown : AudienceMetricType.onlineViewers,
+      totalViewers: (live ? channel.totalViewers?.toString() : null) ?? '',
+      audienceMetricType: channel.currentViewers == null
+          ? AudienceMetricType.unknown
+          : AudienceMetricType.onlineViewers,
       notice: notice(channel),
       introduction: channel.description.isEmpty ? null : channel.description,
+      startedAt: live ? channel.startedAt : null,
+      restriction: live ? channel.restriction : null,
+      danmakuData: danmaku ? Fc2LiveDanmakuArgs(channel.channelId) : null,
       data: Fc2LiveRoomData(
         channelId: channel.channelId,
         state: channel.state,
         categoryId: channel.categoryId,
+        restriction: live ? channel.restriction : null,
         isAdult: channel.isAdult,
       ),
     );
@@ -561,49 +760,125 @@ abstract final class Fc2LiveApi {
     return Fc2LiveGrant(channelId: channelId, socket: socket, controlToken: token, orz: orz);
   }
 
+  /// The playlist families of the control's HLS answer: low latency (the
+  /// one 3.x read, modes 0, 10, 20, 30, 90), high latency (mode + 1) and
+  /// middle latency (mode + 2).
+  static const List<String> playlistFamilies = ['playlists', 'playlists_high_latency', 'playlists_middle_latency'];
+
   /// The control socket's `get_hls_information` answer (3.x's
-  /// `Fc2ControlSession.parseHlsResponse`): the low-latency master (mode 0)
-  /// of `playlists`, the one 3.x played.
+  /// `Fc2ControlSession.parseHlsResponse`): every playlist of
+  /// [playlistFamilies] by mode (26-2). A mode below 10 is a family's
+  /// master (0 is the low-latency master 3.x played), the others are single
+  /// variants (`<tier>` + the family's offset; 90 is sound only).
   ///
   /// `arguments.status` other than 0 is `StreamUnavailable`; rows whose
-  /// `status` is not 0 are skipped. The master must be https on
+  /// `status` is not 0 are skipped. A playlist must be https on
   /// `live.fc2.com` or a subdomain, without user info or fragment, at
-  /// `/a/stream/<channelId>/0/master_playlist`, with exactly the query
-  /// parameters `c`, `d` (1–1024 characters) and `targets` (up to 16
-  /// numbers of 1–3 digits). A wrong message, a malformed row or no master
-  /// is `ApiChanged`.
-  static Uri hlsMaster(Map<String, dynamic> response, {required String channelId}) {
+  /// `/a/stream/<channelId>/<mode>/master_playlist` (a master) or
+  /// `/a/stream/<channelId>/<mode>/playlist` (a variant), with exactly the
+  /// query parameters `c`, `d` (1–1024 characters) and, for a master only,
+  /// `targets` (up to 16 numbers of 1–3 digits). A row or a family that
+  /// breaks these rules is skipped alone (3.x's checks, which failed the
+  /// whole answer, now only make that playlist unavailable); a wrong
+  /// message or an answer without a usable playlist is `ApiChanged`.
+  static Map<int, Uri> hlsPlaylists(Map<String, dynamic> response, {required String channelId}) {
     if (response['name'] != '_response_' || response['id'] != 1) {
       throw const ApiChanged(_site, 'control: not the answer to get_hls_information');
     }
     final arguments = _object(response['arguments'], 'control arguments');
     final result = _integer(arguments['status'], 'control status');
     if (result != 0) throw StreamUnavailable(_site, 'get_hls_information: status $result');
-    final playlists = arguments['playlists'];
-    if (playlists is! List || playlists.length > 32) throw const ApiChanged(_site, 'control: no playlists');
-    for (final value in playlists) {
-      final item = _object(value, 'control playlist');
-      if (_integer(item['mode'], 'control mode') != 0 || _integer(item['status'], 'control playlist status') != 0) {
-        continue;
+    final found = <int, Uri>{};
+    for (final family in playlistFamilies) {
+      final rows = arguments[family];
+      if (rows is! List || rows.length > 32) continue;
+      for (final row in rows) {
+        if (row is! Map) continue;
+        final mode = jsonInt(row['mode']);
+        if (mode == null || mode < 0 || mode > 999 || jsonInt(row['status']) != 0) continue;
+        final uri = _playlist(row['url'], channelId: channelId, mode: mode);
+        if (uri != null) found.putIfAbsent(mode, () => uri);
       }
-      final url = item['url'];
-      if (url is! String || url.isEmpty || url.length > 65536) throw const ApiChanged(_site, 'control: master url');
-      final uri = Uri.tryParse(url);
-      if (uri == null ||
-          uri.scheme != 'https' ||
-          uri.userInfo.isNotEmpty ||
-          !_isFc2Live(uri.host) ||
-          uri.path != '/a/stream/$channelId/0/master_playlist' ||
-          uri.hasFragment ||
-          !_mediaToken(uri.queryParameters['c']) ||
-          !_mediaToken(uri.queryParameters['d']) ||
-          !_targets(uri.queryParameters['targets']) ||
-          uri.queryParameters.keys.any((key) => !const {'targets', 'c', 'd'}.contains(key))) {
-        throw const ApiChanged(_site, 'control: not a master playlist of the channel');
-      }
-      return uri;
     }
-    throw const ApiChanged(_site, 'control: no master playlist');
+    if (found.isEmpty) throw const ApiChanged(_site, 'control: no playlist');
+    return Map.unmodifiable(found);
+  }
+
+  static Uri? _playlist(Object? url, {required String channelId, required int mode}) {
+    if (url is! String || url.isEmpty || url.length > 65536) return null;
+    final uri = Uri.tryParse(url);
+    final master = mode < 10;
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        uri.userInfo.isNotEmpty ||
+        !_isFc2Live(uri.host) ||
+        uri.path != '/a/stream/$channelId/$mode/${master ? 'master_playlist' : 'playlist'}' ||
+        uri.hasFragment) {
+      return null;
+    }
+    final Map<String, String> query;
+    try {
+      query = uri.queryParameters;
+    } on FormatException {
+      return null;
+    }
+    final keys = master ? const {'targets', 'c', 'd'} : const {'c', 'd'};
+    if (!_mediaToken(query['c']) ||
+        !_mediaToken(query['d']) ||
+        (master && !_targets(query['targets'])) ||
+        query.keys.any((key) => !keys.contains(key))) {
+      return null;
+    }
+    return uri;
+  }
+
+  /// The qualities a channel offers by its HLS answer's [playlists]
+  /// ([hlsPlaylists]), in menu order (26-2): each tier with a variant in
+  /// any family (so `50` and `40` only for the channels that have them),
+  /// then [autoQuality] when a master is there. Empty when the answer has
+  /// neither (sound only).
+  static List<LivePlayQuality> qualitiesOf(Map<int, Uri> playlists) => [
+    for (final quality in tierQualities)
+      if ([0, 1, 2].any((offset) => playlists.containsKey(int.parse('${quality.id}') + offset))) quality,
+    if ([0, 1, 2].any(playlists.containsKey)) autoQuality,
+  ];
+
+  /// The low-latency master (mode 0) of the HLS answer, the one 3.x played
+  /// (see [hlsPlaylists]); an answer without it is `ApiChanged`.
+  static Uri hlsMaster(Map<String, dynamic> response, {required String channelId}) =>
+      hlsPlaylists(response, channelId: channelId)[0] ?? (throw const ApiChanged(_site, 'control: no master playlist'));
+
+  /// The playlist to play for [quality] among [playlists] (26-2), or null
+  /// when there is none:
+  /// - a tier plays a single variant: its high-latency one (mode + 1; the
+  ///   archived v4 found that ffmpeg reading a master fetches every variant
+  ///   and stalls, and long segments suit the relay), else its low-latency
+  ///   one, else its middle-latency one. A tier the channel does not offer
+  ///   falls back to the next lower tier, then the next higher, then to a
+  ///   master; the result names the quality that plays;
+  /// - `auto` plays the low-latency master (3.x), else the high- or
+  ///   middle-latency master, else the best tier.
+  static Fc2LivePlaylist? playlistFor(Map<int, Uri> playlists, String quality) {
+    Fc2LivePlaylist? tier(int mode) {
+      for (final offset in const [1, 0, 2]) {
+        if (playlists[mode + offset] case final url?) return (quality: '$mode', url: url);
+      }
+      return null;
+    }
+
+    Fc2LivePlaylist? master() {
+      for (final mode in const [0, 1, 2]) {
+        if (playlists[mode] case final url?) return (quality: autoQualityId, url: url);
+      }
+      return null;
+    }
+
+    if (quality == autoQualityId) return master() ?? tierModes.map(tier).nonNulls.firstOrNull;
+    final requested = int.tryParse(quality);
+    if (requested == null || !tierModes.contains(requested) || '$requested' != quality) return null;
+    final lower = tierModes.where((mode) => mode < requested);
+    final higher = tierModes.reversed.where((mode) => mode > requested);
+    return [requested, ...lower, ...higher].map(tier).nonNulls.firstOrNull ?? master();
   }
 
   static bool _isFc2Live(String host) {
@@ -716,10 +991,22 @@ abstract final class Fc2LiveApi {
     return '';
   }
 
-  static String _firstText(Iterable<Object?> values, String what) {
-    final result = _firstOptional(values, what);
-    if (result.isEmpty) throw ApiChanged(_site, '$what: missing');
-    return result;
+  /// A name, title or introduction as shown: [_optionalText] with HTML
+  /// entities decoded (26-4; the site's own pages decode them), whitespace
+  /// collapsed again afterwards.
+  static String _displayText(Object? value, String what) {
+    final text = _optionalText(value, what);
+    return text.contains('&') ? _optionalText(decodeHtmlEntities(text), what) : text;
+  }
+
+  /// [_image] of a field 3.x never read: anything it would refuse is no
+  /// image, never a failure.
+  static String _lenientImage(Object? value) {
+    try {
+      return _image(value);
+    } on ApiChanged {
+      return '';
+    }
   }
 
   static String _bounded(Object? value, int max, String what) {

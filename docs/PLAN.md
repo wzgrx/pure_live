@@ -85,8 +85,8 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 | M0 | 工程底座 | 工具链、门禁、代码规范 | 根目录、`tools/` | 完成（2026-09-28，[记录](modules/M0-foundation.md)） |
 | M1 | 网络 | `core/common` 中的 HTTP 客户端、拦截器、请求头策略、代理路由、请求作用域和 WebSocket，`plugins/race_http`、`fake_useragent` | live_net | 完成（2026-09-28，[记录](modules/M1-network.md)） |
 | M2 | 基础模型与接口 | `core/interface`、`common/models`（直播间、分区、弹幕消息）、`model/`、画质标签、HLS 查询策略 | live_core | 完成（2026-09-28，[记录](modules/M2-core.md)） |
-| M3 | 平台框架与链接解析 | `core/sites.dart`，站点注册，`common/utils` 中的链接工具和短链 | live_core | 进行中 |
-| M4.x | 各直播平台，一个平台一次上传 | `core/site/<平台>` | live_core | 未开始 |
+| M3 | 平台框架与链接解析 | `core/sites.dart`，站点注册，`common/utils` 中的链接工具和短链 | live_core | 完成（2026-09-28，[记录](modules/M3-sites-links.md)） |
+| M4.x | 各直播平台，一个平台一次上传（含该平台的链接规则） | `core/site/<平台>` | live_core | 进行中 |
 | M5.x | 弹幕：先框架和过滤，再一个平台一次 | `core/danmaku`、`core/emoji`、`plugins/emoji_manager` | live_danmaku | 未开始 |
 | M6 | IPTV 内核 | `core/iptv`、`core/site/iptv` | live_iptv | 未开始 |
 | M7 | 播放：media_kit 分支和原生包 → 播放核心（拆分 PlayerManager） → Flutter 绑定 | `player/` | live_media、live_player | 未开始 |

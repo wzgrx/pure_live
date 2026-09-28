@@ -167,7 +167,7 @@ abstract final class SoopApi {
             areaType: category.id,
             typeName: category.name,
             areaId: jsonString(item['category_no'])!,
-            areaName: decodeHtmlEntities(_text(item['category_name'])),
+            areaName: _text(item['category_name']),
             areaPic: normalizeImageUrl(item['cate_img']),
           ),
     ];
@@ -202,9 +202,10 @@ abstract final class SoopApi {
 
   /// `api.php?m=liveSearch`: live rooms matching the keyword (`REAL_BROAD`).
   /// The results end with an empty page: `HAS_MORE_LIST` stays true and
-  /// `TOTAL_CNT` non-zero on empty pages (REG-SOOP-007). The area is
-  /// `standard_broad_cate_name`, which the answers no longer carry, else
-  /// `broad_cate_name` (3.x left search cards without an area).
+  /// `TOTAL_CNT` non-zero on empty pages (REG-SOOP-007). The area is 3.x's
+  /// `standard_broad_cate_name`, which the answers no longer carry, so
+  /// search cards have none, as in 3.x (`broad_cate_name` has it; a later
+  /// upgrade).
   static List<LiveRoom> searchRooms(String body, {int status = 200}) {
     final root = _root(body, status: status, what: 'liveSearch');
     final result = root['RESULT'];
@@ -214,11 +215,7 @@ abstract final class SoopApi {
     return [
       for (final raw in _listField(root['REAL_BROAD'], body, 'liveSearch'))
         if (_object(raw) case final item?)
-          ?_card(
-            item,
-            cover: item['broad_img'],
-            area: jsonString(item['standard_broad_cate_name']) ?? jsonString(item['broad_cate_name']) ?? '',
-          ),
+          ?_card(item, cover: item['broad_img'], area: _text(item['standard_broad_cate_name'])),
     ];
   }
 
@@ -282,8 +279,11 @@ abstract final class SoopApi {
   /// - `RESULT` 1: live when `VIEWPRESET` is present, else offline (3.x's
   ///   rule); a live broadcast goes into [SoopRoomData], and with
   ///   [withDanmaku] the danmaku arguments carry [cookie].
-  /// - 0: offline (an unknown streamer too, as in 3.x's refresh); -2:
-  ///   banned; -6: `NeedsLogin`; anything else `ApiChanged`.
+  /// - 0: offline (an unknown streamer too), -2: banned, as 3.x's refresh
+  ///   and recording said. At room entry ([roomEntry]) 3.x reported both as
+  ///   a failed load (its page said "获取房间信息失败"), so they are
+  ///   `StreamUnavailable` there.
+  /// - -6: `NeedsLogin`; anything else `ApiChanged`.
   ///
   /// The cover is the live thumbnail with 3.x's cache buster [now]; the
   /// answer has no audience figure, so the audience is empty.
@@ -293,6 +293,7 @@ abstract final class SoopApi {
     required DateTime now,
     String cookie = '',
     bool withDanmaku = false,
+    bool roomEntry = false,
     int status = 200,
   }) {
     final answer = channel(body, status: status);
@@ -300,6 +301,8 @@ abstract final class SoopApi {
     switch (answer.result) {
       case 1:
         break;
+      case 0 || -2 when roomEntry:
+        throw StreamUnavailable(_site, 'player_live_api: RESULT ${answer.result} (not broadcasting or blocked)');
       case 0:
         return LiveRoom(roomId: id, platform: _site, liveStatus: LiveStatus.offline, link: roomPageUrl(id));
       case -2:
@@ -318,8 +321,8 @@ abstract final class SoopApi {
     return LiveRoom(
       roomId: id,
       platform: _site,
-      title: decodeHtmlEntities(_text(fields['TITLE'])),
-      nick: decodeHtmlEntities(_text(fields['BJNICK'])),
+      title: _text(fields['TITLE']),
+      nick: _text(fields['BJNICK']),
       avatar: bj.length < 2 ? '' : 'https://stimg.sooplive.co.kr/LOGO/${bj.substring(0, 2)}/$bj/$bj.jpg',
       cover: bno.isEmpty ? '' : 'https://liveimg.sooplive.co.kr/m/$bno?_t=${now.millisecondsSinceEpoch}',
       area: tags is List && tags.isNotEmpty ? _text(tags.first) : '',
@@ -360,7 +363,7 @@ abstract final class SoopApi {
 
   /// The danmaku arguments of a `CHANNEL` for streamer [roomId]
   /// (3.x's `buildDanmakuWebSocketUrl`): the chat host is `CHDOMAIN`, else
-  /// `chat-<CHIP as hex>.sooplive.com`, and the TLS port is `CHPT + 1`.
+  /// `chat-<CHIP as hex>.sooplive.co.kr`, and the TLS port is `CHPT + 1`.
   /// Null without `CHATNO`, a host or a plain port below 65535 (3.x
   /// connected nothing then).
   static SoopDanmakuArgs? danmakuArgs(Map<String, dynamic> channel, {required String roomId, String cookie = ''}) {
@@ -380,13 +383,13 @@ abstract final class SoopApi {
     );
   }
 
-  /// `chat-<IPv4 as eight hex digits>.sooplive.com`, or null. 3.x wrote
-  /// `.sooplive.co.kr`; the chat hosts the API names (`CHDOMAIN`) are on
-  /// `sooplive.com`.
+  /// `chat-<IPv4 as eight hex digits>.sooplive.co.kr` (3.x), or null. The
+  /// chat hosts the API names (`CHDOMAIN`) are on `sooplive.com`; the
+  /// archived v4 used that domain here, a later upgrade.
   static String? _chatHost(String ip) {
     final parts = ip.split('.').map(int.tryParse).toList();
     if (parts.length != 4 || parts.any((part) => part == null || part < 0 || part > 255)) return null;
-    return 'chat-${parts.map((part) => part!.toRadixString(16).padLeft(2, '0')).join().toUpperCase()}.sooplive.com';
+    return 'chat-${parts.map((part) => part!.toRadixString(16).padLeft(2, '0')).join().toUpperCase()}.sooplive.co.kr';
   }
 
   // Streams -------------------------------------------------------------------
@@ -425,21 +428,21 @@ abstract final class SoopApi {
   /// The order of a preset (3.x's `_qualitySort`): the name's tier first,
   /// the bitrate within it, so a source without a bitrate never falls
   /// below a transcode (REG-SOOP-004). Tiers: `original` > `master` >
-  /// `fullhd` > `hd4k` > `hd` > `sd` > `low`; unknown names rank by bitrate
-  /// alone, below every tier. 3.x had no `hd4k` tier and put the 720p
-  /// preset last.
+  /// `fullhd` > `hd` > `sd` > `low`; other names rank by bitrate alone,
+  /// below every tier. That includes the 720p preset `hd4k`, which 3.x
+  /// listed last under its request name; giving it a tier (and the name
+  /// “超清”) is a later upgrade.
   static int qualitySort(String name, int bps) {
     final rank = switch (name.toLowerCase().replaceAll(RegExp('[^a-z0-9]+'), '')) {
-      'original' || 'origin' || 'source' => 600,
-      'master' || 'uhd' => 500,
-      'fullhd' || 'fhd' => 400,
-      'hd4k' => 350,
-      'hd' => 300,
-      'sd' || 'normal' => 200,
-      'low' || 'ld' => 100,
+      'original' || 'origin' || 'source' => 6,
+      'master' || 'uhd' => 5,
+      'fullhd' || 'fhd' => 4,
+      'hd' => 3,
+      'sd' || 'normal' => 2,
+      'low' || 'ld' => 1,
       _ => 0,
     };
-    return rank == 0 ? bps : rank * 1000000 + bps.clamp(0, 49999999);
+    return rank == 0 ? bps : rank * 100000000 + bps.clamp(0, 99999999);
   }
 
   /// The `return_type` of the stream assignment for CDN code [cdn].
@@ -522,8 +525,8 @@ abstract final class SoopApi {
     return LiveRoom(
       roomId: id,
       platform: _site,
-      title: decodeHtmlEntities(_text(item['broad_title'])),
-      nick: decodeHtmlEntities(_text(item['user_nick'])),
+      title: _text(item['broad_title']),
+      nick: _text(item['user_nick']),
       avatar: avatar.isEmpty ? SoopApi.avatar(id) : avatar,
       cover: normalizeImageUrl(cover),
       area: area,

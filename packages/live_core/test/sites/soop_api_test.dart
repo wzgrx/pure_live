@@ -32,14 +32,12 @@ void _expectParity(
 }
 
 /// List cards against 3.x's: same rooms in the same order, every field
-/// equal except [changed]. Titles: 3.x showed HTML entities as written
-/// (`&amp;`, `&gt;&lt;`); they are decoded now.
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {required String reason, Set<String> changed = const {}}) {
+/// equal.
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {required String reason}) {
   final expected = (legacy! as List).cast<Map<String, dynamic>>();
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(room.toJson(), expected[index], changed: {'title', ...changed}, reason: '$reason[$index]');
-    expect(room.title, decodeHtmlEntities('${expected[index]['title']}'), reason: '$reason[$index] title');
+    _expectParity(room.toJson(), expected[index], reason: '$reason[$index]');
   }
 }
 
@@ -93,16 +91,12 @@ void main() {
       });
     }
 
-    test('titles with HTML entities are decoded (3.x showed `&amp;`)', () {
-      final fixture = _sample('S02-area-p1');
-      final legacy = (_legacy('S02-area-p1')['rooms'] as List).cast<Map<String, dynamic>>();
-      final rooms = SoopApi.areaRooms(fixture.body, areaName: '');
-      final decoded = [
-        for (final (index, room) in rooms.indexed)
-          if (room.title != legacy[index]['title']) room.title,
-      ];
-      expect(decoded, isNotEmpty);
-      expect(decoded.every((title) => !title.contains('&amp;') && !title.contains('&gt;')), isTrue);
+    test('titles keep their HTML entities as 3.x showed them (decoding is a later upgrade)', () {
+      final rooms = SoopApi.areaRooms(_sample('S02-area-p1').body, areaName: '');
+      expect(rooms.where((room) => room.title.contains('&amp;')), isNotEmpty);
+      expect(SoopApi.recommendRooms(_sample('S03-main-p1').body).where((room) => room.title.contains('&gt;&lt;')), [
+        isA<LiveRoom>(),
+      ]);
     });
 
     for (final page in [1, 36, 37]) {
@@ -133,17 +127,14 @@ void main() {
       expect(split, greaterThan(0));
     });
 
-    test('S04 search: the rooms 3.x found, with the area 3.x left empty', () {
+    test('S04 search: the rooms 3.x found, without an area as in 3.x', () {
       final fixture = _sample('S04-search-p1');
-      final raw = ((jsonDecode(fixture.body) as Map)['REAL_BROAD'] as List).cast<Map<String, dynamic>>();
       final rooms = SoopApi.searchRooms(fixture.body, status: fixture.status);
-      // area: 3.x read `standard_broad_cate_name`, which the answers no longer
-      // carry, so search cards had none; `broad_cate_name` is the area.
-      _expectRooms(rooms, _legacy('S04-search-p1')['rooms'], reason: 'S04', changed: {'area'});
-      expect((_legacy('S04-search-p1')['rooms'] as List).every((room) => (room as Map)['area'] == ''), isTrue);
-      for (final (index, room) in rooms.indexed) {
-        expect(room.area, raw[index]['broad_cate_name'], reason: room.roomId);
-      }
+      _expectRooms(rooms, _legacy('S04-search-p1')['rooms'], reason: 'S04');
+      // 3.x read `standard_broad_cate_name`, which the answers no longer
+      // carry; `broad_cate_name` has the area (a later upgrade).
+      expect(rooms.every((room) => room.area == ''), isTrue);
+      expect(fixture.body, contains('"broad_cate_name"'));
     });
 
     test('an empty search page is empty although HAS_MORE_LIST says more (REG-SOOP-007)', () {
@@ -258,18 +249,21 @@ void main() {
     });
 
     for (final (name, id) in [('S05-live-offline', 'phonics1'), ('S05-live-missing', 'zzzqqqxxxnotexist1')]) {
-      test("$name: RESULT 0 is offline at every depth, as 3.x's refresh said (REG-SOOP-005 kept)", () {
+      test('$name: RESULT 0 is offline on refresh and recording, a failed load at room entry, as in 3.x', () {
         final fixture = _sample(name);
         final legacy = _legacy(name);
-        final room = SoopApi.roomDetail(fixture.body, requestedId: id, now: _now, withDanmaku: true);
+        final room = SoopApi.roomDetail(fixture.body, requestedId: id, now: _now);
         _expectParity(room.toJson(), legacy['getRoomDetailForRefresh'] as Map<String, dynamic>, reason: name);
         _expectParity(room.toJson(), legacy['getRoomDetailForRecording'] as Map<String, dynamic>, reason: name);
-        expect(room.effectiveLiveStatus, LiveStatus.offline);
-        expect(room.danmakuData, isNull);
+        expect(room.effectiveLiveStatus, LiveStatus.offline, reason: 'REG-SOOP-005 kept: an unknown id too');
         expect(room.data, isNull);
         // 3.x's room entry lumped RESULT 0 with failures: an error room,
-        // state unknown.
+        // state unknown, "获取房间信息失败".
         expect((legacy['getRoomDetail'] as Map)['liveStatus'], LiveStatus.unknown.index);
+        expect(
+          () => SoopApi.roomDetail(fixture.body, requestedId: id, now: _now, withDanmaku: true, roomEntry: true),
+          throwsA(isA<StreamUnavailable>()),
+        );
         expect(legacy['getPlayQualites'], isEmpty);
       });
     }
@@ -283,13 +277,20 @@ void main() {
       expect(((legacy['getRoomDetailForRecording'] as Map)['throws'] as Map)['type'], 'StateError');
     });
 
-    test("RESULT -2 is banned (3.x's refresh); RESULT 1 without VIEWPRESET is offline (3.x's rule)", () {
+    test("RESULT -2 is banned (3.x's refresh), a failed load at room entry; no VIEWPRESET is offline", () {
       final banned = SoopApi.roomDetail(_channel({'RESULT': -2}), requestedId: 'ab12', now: _now);
       expect(banned.effectiveLiveStatus, LiveStatus.banned);
+      expect(
+        () => SoopApi.roomDetail(_channel({'RESULT': -2}), requestedId: 'ab12', now: _now, roomEntry: true),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      // 3.x's rule at every depth, room entry included: RESULT 1 without
+      // presets is an offline room.
       final idle = SoopApi.roomDetail(
         _channel({'RESULT': 1, 'BJID': 'ab12', 'BNO': '9', 'TITLE': 'x'}),
         requestedId: 'ab12',
         now: _now,
+        roomEntry: true,
       );
       expect(idle.effectiveLiveStatus, LiveStatus.offline);
       expect(idle.data, isNull, reason: 'no broadcast to stream');
@@ -336,23 +337,17 @@ void main() {
   });
 
   group('qualities', () {
-    test("S05: 3.x's qualities, with the 720p preset (hd4k) in its place and named", () {
+    test("S05: 3.x's qualities, names, order and order values", () {
       final fixture = _sample('S05-live-live');
       final data = SoopApi.roomDetail(fixture.body, requestedId: 'khm11903', now: _now).data! as SoopRoomData;
       final qualities = SoopApi.qualities(data.presets);
-      final legacy = (_legacy('S05-live-live')['getPlayQualites'] as List).cast<Map<String, dynamic>>();
-      // 3.x: [original, hd, sd, hd4k]: hd4k had no tier, so the 720p preset
-      // sorted by bitrate alone, below 360p, and showed its request name.
-      expect(legacy.map((quality) => quality['id']), ['original', 'hd', 'sd', 'hd4k']);
-      expect(legacy.last['quality'], 'hd4k');
-      expect(qualities.map((quality) => quality.id), ['original', 'hd4k', 'hd', 'sd']);
-      expect(qualities.map((quality) => quality.quality), ['原画', '超清', '高清', '标清']);
-      for (final quality in qualities.where((quality) => quality.id != 'hd4k')) {
-        final before = legacy.firstWhere((entry) => entry['id'] == quality.id);
-        expect(quality.quality, before['quality']);
-        expect(quality.sort, before['sort'], reason: 'the tiers 3.x knew keep their order values');
-        expect(quality.data, before['data']);
-      }
+      expect([
+        for (final quality in qualities)
+          {'quality': quality.quality, 'id': quality.id, 'data': quality.data, 'sort': quality.sort},
+      ], _legacy('S05-live-live')['getPlayQualites']);
+      // The 720p preset (hd4k) has no tier: it sorts by bitrate alone, after
+      // 360p, under its request name, as 3.x showed it (a later upgrade).
+      expect(qualities.map((quality) => quality.quality), ['原画', '高清', '标清', 'hd4k']);
     });
 
     test("3.x's case: auto and repeats dropped, a source without bitrate first (REG-SOOP-004)", () {
@@ -371,7 +366,7 @@ void main() {
       expect(qualities.first.sort, greaterThan(qualities.last.sort));
     });
 
-    test('tiers: original > master > fullhd > hd4k > hd > sd > low > unknown names by bitrate', () {
+    test('tiers: original > master > fullhd > hd > sd > low > other names by bitrate (3.x)', () {
       final names = ['low', 'x2', 'sd', 'hd', 'hd4k', 'fullhd', 'master', 'original', 'x1'];
       final qualities = SoopApi.qualities([
         for (final name in names) SoopPreset(name: name, bps: name == 'x1' ? 90000 : 10),
@@ -380,14 +375,15 @@ void main() {
         'original',
         'master',
         'fullhd',
-        'hd4k',
         'hd',
         'sd',
         'low',
         'x1',
         'x2',
+        'hd4k',
       ]);
-      expect(SoopApi.qualitySort('hd', 49999999), lessThan(SoopApi.qualitySort('hd4k', 0)));
+      expect(SoopApi.qualitySort('original', 0), 600000000);
+      expect(SoopApi.qualitySort('hd4k', 4000), 4000);
     });
   });
 
@@ -420,10 +416,10 @@ void main() {
         'CHATNO': '1',
       }, roomId: 'khm11903')!;
       expect(domain.url.toString(), 'wss://chat-dee9364c.sooplive.com:9001/Websocket/khm11903');
-      // 3.x built `chat-….sooplive.co.kr` from CHIP; the hosts the API names
-      // are on sooplive.com.
+      // From CHIP, 3.x's `.sooplive.co.kr` (the hosts the API names are on
+      // sooplive.com; switching is a later upgrade).
       final ip = SoopApi.danmakuArgs({'CHIP': '222.233.54.76', 'CHPT': 9000, 'CHATNO': '1'}, roomId: 'room id')!;
-      expect(ip.url.toString(), 'wss://chat-dee9364c.sooplive.com:9001/Websocket/room%20id');
+      expect(ip.url.toString(), 'wss://chat-dee9364c.sooplive.co.kr:9001/Websocket/room%20id');
       expect(SoopApi.danmakuArgs({'CHDOMAIN': 'chat.example', 'CHPT': 65535, 'CHATNO': '1'}, roomId: 'room'), isNull);
       expect(SoopApi.danmakuArgs({'CHIP': '999.1.1.1', 'CHPT': 9000, 'CHATNO': '1'}, roomId: 'room'), isNull);
       expect(SoopApi.danmakuArgs({'CHDOMAIN': 'chat.example', 'CHPT': 9000}, roomId: 'room'), isNull);

@@ -112,7 +112,7 @@ void main() {
       }
     });
 
-    test('a failing page fails the catalog (3.x returned what it had)', () async {
+    test('a failing later page ends the catalog with the areas so far, as in 3.x', () async {
       final setup = _setup(
         _catalog,
         script: {
@@ -123,7 +123,29 @@ void main() {
           ],
         },
       );
+      expect((await setup.site.getCategories(1, 20)).single.children, hasLength(240));
+      expect(setup.http.requests, hasLength(3), reason: 'no more requests than 3.x');
+    });
+
+    test('a failing first page fails the catalog (3.x showed an empty one)', () async {
+      final setup = _setup(
+        [],
+        script: {
+          '/api.php': <Object>[TransportReason.timeout],
+        },
+      );
       await expectLater(setup.site.getCategories(1, 20), throwsA(isA<NetworkFailure>()));
+      final cancelled = _setup(
+        _catalog,
+        script: {
+          '/api.php': [ReplaySample.load('$_root/S01-category-p1'), TransportReason.cancelled],
+        },
+      );
+      await expectLater(
+        cancelled.site.getCategories(1, 20),
+        throwsA(isA<TransportFailure>()),
+        reason: 'a cancelled walk is not a partial catalog',
+      );
     });
 
     test('a server that repeats a page cannot loop the catalog', () async {
@@ -203,12 +225,15 @@ void main() {
       expect(await setup.site.getLiveStatus(roomId: 'khm11903'), isTrue);
     });
 
-    test('offline and unknown streamers are offline from one request (REG-SOOP-005 kept as 3.x)', () async {
+    test('offline and unknown streamers: offline on refresh, a failed load at room entry, one request each', () async {
       final setup = _setup(['S05-live-offline', 'S05-live-missing']);
       for (final id in ['phonics1', 'zzzqqqxxxnotexist1']) {
-        expect((await setup.site.getRoomDetail(roomId: id)).effectiveLiveStatus, LiveStatus.offline);
+        // REG-SOOP-005 kept as 3.x: an unknown id is offline too.
         expect((await setup.site.getRoomDetailForRefresh(roomId: id)).effectiveLiveStatus, LiveStatus.offline);
+        expect((await setup.site.getRoomDetailForRecording(roomId: id)).effectiveLiveStatus, LiveStatus.offline);
+        await expectLater(setup.site.getRoomDetail(roomId: id), throwsA(isA<StreamUnavailable>()));
       }
+      expect(setup.http.requests, hasLength(6));
       expect(setup.http.requests.every((request) => request.url.path == _player), isTrue);
       expect(await setup.site.getLiveStatus(roomId: 'phonics1'), isFalse);
     });
@@ -233,7 +258,7 @@ void main() {
       final setup = _setup(['S05-live-live', 'S06-assign-original', 'S06-aid-original', 'S06-assign-hd', 'S06-aid-hd']);
       final room = await setup.site.getRoomDetail(roomId: 'khm11903');
       final qualities = await setup.site.getPlayQualities(detail: room);
-      expect(qualities.map((quality) => quality.id), ['original', 'hd4k', 'hd', 'sd']);
+      expect(qualities.map((quality) => quality.id), ['original', 'hd', 'sd', 'hd4k']);
       for (final name in ['original', 'hd']) {
         final before = setup.http.requests.length;
         final resolution = await setup.site.resolvePlayUrls(
@@ -362,11 +387,9 @@ void main() {
       expect(site.roomIdFromUrl('https://ch.sooplive.co.kr/khm11903'), 'khm11903');
     });
 
-    test('station pages, the former afreecatv.com and upper case (3.x read "station", ignored the rest)', () {
+    test('station pages and upper case (3.x opened the streamer "station", and the id as typed)', () {
       final site = _setup([]).site;
       expect(site.roomIdFromUrl('https://www.sooplive.co.kr/station/khm11903'), 'khm11903');
-      expect(site.roomIdFromUrl('http://afreecatv.com/ecvhao'), 'ecvhao');
-      expect(site.roomIdFromUrl('https://play.afreecatv.com/ecvhao/297429193'), 'ecvhao');
       expect(site.roomIdFromUrl('https://play.sooplive.co.kr/KHM11903'), 'khm11903');
     });
 
@@ -380,6 +403,9 @@ void main() {
         'https://vod.sooplive.co.kr/player/123',
         'https://www.sooplive.co.kr/live/all',
         'https://sch.sooplive.co.kr/api.php',
+        // The former domain, which SOOP's search answers still link to: 3.x
+        // did not recognise it (a later upgrade).
+        'http://afreecatv.com/ecvhao',
         'https://example.com/khm11903',
         'https://sooplive.co.kr.example.com/khm11903',
         'ftp://play.sooplive.co.kr/khm11903',

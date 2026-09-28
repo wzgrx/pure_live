@@ -23,9 +23,9 @@ final RegExp _controlCharacters = RegExp(r'[\u0000-\u001F\u007F]');
 /// Streamer ids (3.x's link rule): letters, digits, `_` and `-`.
 final RegExp _roomIdPattern = RegExp(r'^[a-zA-Z0-9_-]+$');
 
-/// Hosts of SOOP pages: 3.x's `sooplive.co.kr` and `sooplive.com`, and the
-/// former `afreecatv.com`, which SOOP's own search answers still link to.
-const _hosts = ['sooplive.co.kr', 'sooplive.com', 'afreecatv.com'];
+/// Hosts of SOOP pages 3.x recognised. The former `afreecatv.com`, which
+/// SOOP's own search answers still link to, is a later upgrade.
+const _hosts = ['sooplive.co.kr', 'sooplive.com'];
 
 /// First path segments that are pages there, not streamers (besides
 /// [RoomPaths.reservedSegments]).
@@ -107,24 +107,30 @@ final class SoopSite extends LiveSite
   // Catalog and search --------------------------------------------------------
 
   /// One category (3.x's "热门", id 1) with every area: pages of 120 while
-  /// `is_more` says so. Any failing page fails the catalog (3.x returned
-  /// what it had so far, an empty catalog when page 1 failed).
+  /// `is_more` says so. A failing first page fails the catalog (3.x showed
+  /// an empty one); a later one ends it with the areas so far, as in 3.x.
   @override
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async {
     final areas = <String, LiveArea>{};
     for (var number = 1; number <= _maxCategoryPages; number++) {
-      final response = await _get(
-        Uri.https(_search, '/api.php', {
-          'm': 'categoryList',
-          'szKeyword': '',
-          'szOrder': 'view_cnt',
-          'nPageNo': '$number',
-          'nListCnt': '${SoopApi.categoryPageSize}',
-          'nOffset': '0',
-          'szPlatform': 'pc',
-        }),
-      );
-      final result = SoopApi.categoryPage(response.text, status: response.status);
+      final ({List<LiveArea> areas, bool hasMore}) result;
+      try {
+        final response = await _get(
+          Uri.https(_search, '/api.php', {
+            'm': 'categoryList',
+            'szKeyword': '',
+            'szOrder': 'view_cnt',
+            'nPageNo': '$number',
+            'nListCnt': '${SoopApi.categoryPageSize}',
+            'nOffset': '0',
+            'szPlatform': 'pc',
+          }),
+        );
+        result = SoopApi.categoryPage(response.text, status: response.status);
+      } on SiteError {
+        if (number == 1) rethrow;
+        break;
+      }
       var added = false;
       for (final area in result.areas) {
         if (areas.containsKey(area.areaId)) continue;
@@ -201,7 +207,7 @@ final class SoopSite extends LiveSite
 
   // Rooms ---------------------------------------------------------------------
 
-  Future<LiveRoom> _detail(String roomId, {required bool withDanmaku}) async {
+  Future<LiveRoom> _detail(String roomId, {bool roomEntry = false}) async {
     final id = roomId.trim();
     if (!_roomIdPattern.hasMatch(id)) throw NotFound(_site, 'room id "$id" is not a SOOP streamer id');
     final response = await _player(id, type: 'live');
@@ -210,24 +216,28 @@ final class SoopSite extends LiveSite
       requestedId: id,
       now: _now(),
       cookie: _cookie(),
-      withDanmaku: withDanmaku,
+      withDanmaku: roomEntry,
+      roomEntry: roomEntry,
       status: response.status,
     );
   }
 
-  /// The room with its broadcast and danmaku arguments. An age-restricted
-  /// broadcast without an adult-verified cookie is `NeedsLogin`.
+  /// The room with its broadcast and danmaku arguments. A streamer who is
+  /// not broadcasting (or blocked) is `StreamUnavailable` here: 3.x's page
+  /// reported a failed load for them, while its refresh said offline. An
+  /// age-restricted broadcast without an adult-verified cookie is
+  /// `NeedsLogin`.
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, withDanmaku: true);
+  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, roomEntry: true);
 
   /// Follow-card refresh: the same answer without danmaku arguments.
   @override
-  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId, withDanmaku: false);
+  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
   /// The same answer as the refresh; it holds everything the recorder's
   /// streams need.
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withDanmaku: false);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
 
   @override
   Future<bool> getLiveStatus({required String roomId}) async =>
@@ -268,7 +278,7 @@ final class SoopSite extends LiveSite
   /// (`StreamUnavailable`), an age-restricted one needs a login.
   Future<SoopRoomData> _broadcast(LiveRoom detail, {required bool fresh}) async {
     if (detail.data case final SoopRoomData data when !fresh) return data;
-    final room = await _detail(detail.roomId, withDanmaku: false);
+    final room = await _detail(detail.roomId);
     final data = room.data;
     if (!room.isLiveNow || data is! SoopRoomData) {
       throw StreamUnavailable(_site, 'player_live_api: ${detail.roomId} is ${room.effectiveLiveStatus.name}');

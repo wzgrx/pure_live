@@ -63,8 +63,7 @@ abstract final class LiveQualityLabel {
   static String? _soop(String token) => switch (token) {
     'original' || 'origin' || 'source' => '原画',
     'master' || 'uhd' => '蓝光',
-    // hd4k is SOOP's 720p preset, between hd (540p) and original (1080p).
-    'fullhd' || 'fhd' || 'hd4k' => '超清',
+    'fullhd' || 'fhd' => '超清',
     'hd' => '高清',
     'sd' || 'normal' => '标清',
     'low' || 'ld' => '流畅',

@@ -244,7 +244,8 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
   Widget build(BuildContext context) {
     final current = _current;
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
+        maxContentWidth: Sizes.readingWidth,
         title: const Text('WebDAV'),
         actions: [
           IconButton(
@@ -255,22 +256,19 @@ class _WebDavPageState extends ConsumerState<WebDavPage> {
           IconButton(tooltip: t.sync.webdav.addAccount, icon: const Icon(Icons.add), onPressed: _edit),
         ],
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-          child: _loading
-              ? const LoadingView()
-              : current == null
-              ? MessageView(
-                  icon: Icons.cloud_off_outlined,
-                  title: t.sync.webdav.noAccounts,
-                  message: t.sync.webdav.noAccountsHint,
-                  actionLabel: t.sync.webdav.addAccount,
-                  onAction: _edit,
-                )
-              : AbsorbPointer(absorbing: _busy != null, child: _body(current)),
-        ),
+      body: PageBody(
+        maxContentWidth: Sizes.readingWidth,
+        child: _loading
+            ? const LoadingView()
+            : current == null
+            ? MessageView(
+                icon: Icons.cloud_off_outlined,
+                title: t.sync.webdav.noAccounts,
+                message: t.sync.webdav.noAccountsHint,
+                actionLabel: t.sync.webdav.addAccount,
+                onAction: _edit,
+              )
+            : AbsorbPointer(absorbing: _busy != null, child: _body(current)),
       ),
     );
   }

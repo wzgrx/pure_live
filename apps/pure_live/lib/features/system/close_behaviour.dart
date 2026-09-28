@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// What closing the window does now (F-WIN-04).
@@ -87,7 +88,9 @@ class CloseBehaviourTile extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) => SettingBuilder<bool>(
+  Widget build(BuildContext context) => SettingAnchor(id: Settings.closeAction.id, child: _tile());
+
+  Widget _tile() => SettingBuilder<bool>(
     setting: Settings.closeDontAsk,
     builder: (context, dontAsk, setDontAsk) => SettingBuilder<CloseAction>(
       setting: Settings.closeAction,

@@ -2,7 +2,9 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:live_core/live_core.dart';
 import 'package:pure_live_app/app/routes.dart';
+import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 import 'shot_harness.dart';
@@ -23,6 +25,14 @@ void main() {
     screenshot('follows', ShotScreen.large, follows);
     screenshot('follows', ShotScreen.extraLarge, follows, theme: ShotTheme.dark);
     screenshot('follows-empty', ShotScreen.phone, follows, world: () => ShotWorld(follows: false));
+    // principles §3.3: the banner wraps its actions under the text on a phone.
+    screenshot(
+      'follows-banner',
+      ShotScreen.phone,
+      follows,
+      world: () => ShotWorld(failedPlatforms: {'huya'}),
+      theme: ShotTheme.dark,
+    );
   });
 
   group('discover', () {
@@ -68,5 +78,13 @@ void main() {
     screenshot('search', ShotScreen.extraLarge, search);
     screenshot('search-empty', ShotScreen.phone, search, world: nothing);
     screenshot('search-empty', ShotScreen.large, search, world: nothing, theme: ShotTheme.dark);
+    // principles §4.1: a pasted room link offers 打开直播间 at the top.
+    screenshot(
+      'search-link',
+      ShotScreen.phone,
+      (app) => app.go(searchLocation('https://www.douyu.com/288016')),
+      overrides: (world) => [linkResolverProvider.overrideWithValue((input) async => RoomRef('douyu', '288016'))],
+    );
+    screenshot('search', ShotScreen.medium, search, locale: AppLocale.zhHant);
   });
 }

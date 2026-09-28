@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// 清理缓存 (spec/product.md F-SET-09): covers and avatars cached on disk and
@@ -50,13 +51,18 @@ class _CacheTileState extends State<CacheTile> {
   @override
   Widget build(BuildContext context) {
     final bytes = _bytes;
-    return ListTile(
-      leading: const Icon(Icons.cleaning_services_outlined),
-      title: Text(t.health.clearImageCache),
-      subtitle: Text(
-        bytes == null ? t.health.calculating : t.health.imageCacheSize(size: (bytes / 1024 / 1024).toStringAsFixed(1)),
+    return SettingAnchor(
+      id: cacheAnchor,
+      child: ListTile(
+        leading: const Icon(Icons.cleaning_services_outlined),
+        title: Text(t.health.clearImageCache),
+        subtitle: Text(
+          bytes == null
+              ? t.health.calculating
+              : t.health.imageCacheSize(size: (bytes / 1024 / 1024).toStringAsFixed(1)),
+        ),
+        onTap: bytes == null ? null : _clear,
       ),
-      onTap: bytes == null ? null : _clear,
     );
   }
 }

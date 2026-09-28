@@ -7,6 +7,8 @@
     "search": "Search",
     "me": "Me"
   },
+  "expandNavigation": "Expand navigation",
+  "collapseNavigation": "Collapse navigation",
   "history": "Watch history",
   "recordings": "Recordings",
   "multiview": "Multi-view",

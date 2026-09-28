@@ -108,78 +108,72 @@ class _IptvGuidePageState extends ConsumerState<IptvGuidePage> {
     };
     final selected = (sources.value ?? const []).where((source) => source.selected).firstOrNull?.id ?? _none;
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
+        maxContentWidth: Sizes.readingWidth,
         title: Text(t.iptv.guide),
         bottom: _busy.isEmpty
             ? null
             : const PreferredSize(preferredSize: Size.fromHeight(2), child: LinearProgressIndicator(minHeight: 2)),
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
-                child: Text(t.iptv.guideHint),
+      body: PageBody(
+        maxContentWidth: Sizes.readingWidth,
+        child: ListView(
+          children: [
+            Padding(padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0), child: Text(t.iptv.guideHint)),
+            SettingsHeader(t.iptv.guideSources),
+            RadioGroup<int>(
+              groupValue: selected,
+              onChanged: (id) {
+                final all = sources.value ?? const <IptvGuideSourceRecord>[];
+                unawaited(_sync.selectGuide(all.where((source) => source.id == id).firstOrNull));
+              },
+              child: Column(
+                children: [
+                  for (final source in sources.value ?? const <IptvGuideSourceRecord>[])
+                    _GuideTile(
+                      source: source,
+                      busy: _busy.contains('g${source.id}'),
+                      onAction: (action) => _menu(source, action),
+                    ),
+                  if (sources.value?.isNotEmpty ?? false) RadioListTile<int>(value: _none, title: Text(t.iptv.noGuide)),
+                ],
               ),
-              SettingsHeader(t.iptv.guideSources),
-              RadioGroup<int>(
-                groupValue: selected,
-                onChanged: (id) {
-                  final all = sources.value ?? const <IptvGuideSourceRecord>[];
-                  unawaited(_sync.selectGuide(all.where((source) => source.id == id).firstOrNull));
-                },
-                child: Column(
-                  children: [
-                    for (final source in sources.value ?? const <IptvGuideSourceRecord>[])
-                      _GuideTile(
-                        source: source,
-                        busy: _busy.contains('g${source.id}'),
-                        onAction: (action) => _menu(source, action),
-                      ),
-                    if (sources.value?.isNotEmpty ?? false)
-                      RadioListTile<int>(value: _none, title: Text(t.iptv.noGuide)),
-                  ],
-                ),
+            ),
+            if (sources.value?.isEmpty ?? false)
+              ListTile(
+                leading: const Icon(Icons.event_note_outlined),
+                title: Text(t.iptv.noGuides),
+                subtitle: Text(t.iptv.guideFormats),
               ),
-              if (sources.value?.isEmpty ?? false)
+            if (offered.isNotEmpty) ...[
+              SettingsHeader(t.iptv.playlistGuide),
+              for (final url in offered)
                 ListTile(
-                  leading: const Icon(Icons.event_note_outlined),
-                  title: Text(t.iptv.noGuides),
-                  subtitle: Text(t.iptv.guideFormats),
+                  leading: const Icon(Icons.add_circle_outline),
+                  title: Text(url, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  onTap: _busy.contains('add') ? null : () => _addUrl(url: url),
                 ),
-              if (offered.isNotEmpty) ...[
-                SettingsHeader(t.iptv.playlistGuide),
-                for (final url in offered)
-                  ListTile(
-                    leading: const Icon(Icons.add_circle_outline),
-                    title: Text(url, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    onTap: _busy.contains('add') ? null : () => _addUrl(url: url),
-                  ),
-              ],
-              Padding(
-                padding: const EdgeInsets.all(Space.s4),
-                child: Wrap(
-                  spacing: Space.s2,
-                  runSpacing: Space.s2,
-                  children: [
-                    FilledButton.tonalIcon(
-                      icon: const Icon(Icons.link, size: 18),
-                      label: Text(t.iptv.addFromUrl),
-                      onPressed: _busy.contains('add') ? null : _addUrl,
-                    ),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.folder_open, size: 18),
-                      label: Text(t.iptv.addFromFile),
-                      onPressed: _busy.contains('add') ? null : _addFile,
-                    ),
-                  ],
-                ),
-              ),
             ],
-          ),
+            Padding(
+              padding: const EdgeInsets.all(Space.s4),
+              child: Wrap(
+                spacing: Space.s2,
+                runSpacing: Space.s2,
+                children: [
+                  FilledButton.tonalIcon(
+                    icon: const Icon(Icons.link, size: 18),
+                    label: Text(t.iptv.addFromUrl),
+                    onPressed: _busy.contains('add') ? null : _addUrl,
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.folder_open, size: 18),
+                    label: Text(t.iptv.addFromFile),
+                    onPressed: _busy.contains('add') ? null : _addFile,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

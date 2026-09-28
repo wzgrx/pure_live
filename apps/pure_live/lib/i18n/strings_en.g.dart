@@ -460,6 +460,10 @@ class _Translations$app$en implements Translations$app$zh_Hans {
   @override
   late final _Translations$app$tabs$en tabs = _Translations$app$tabs$en._(_root);
   @override
+  String get expandNavigation => 'Expand navigation';
+  @override
+  String get collapseNavigation => 'Collapse navigation';
+  @override
   String get history => 'Watch history';
   @override
   String get recordings => 'Recordings';
@@ -1195,6 +1199,8 @@ class _Translations$follows$en implements Translations$follows$zh_Hans {
   @override
   String refreshFailed({required Object platforms}) =>
       'Refreshing ${platforms} failed; those streamers\' status is unknown for now';
+  @override
+  String get viewStatus => 'View status';
   @override
   late final _Translations$follows$filter$en filter = _Translations$follows$filter$en._(_root);
   @override
@@ -2060,6 +2066,8 @@ class _Translations$search$en implements Translations$search$zh_Hans {
   @override
   String get failedTag => 'Failed';
   @override
+  String otherPlatforms({required Object n}) => 'Other platforms ${n}';
+  @override
   String get allFailed => 'Search failed. Check your network and pull down to retry.';
   @override
   String someFailed({required Object platforms}) => 'Search failed on ${platforms}. Pull down to retry.';
@@ -2125,6 +2133,8 @@ class _Translations$settings$en implements Translations$settings$zh_Hans {
   String get setDiscoverDefault => 'Make it Discover\'s default';
   @override
   Map<String, String> get languageNames => {'zh-Hans': '简体中文', 'zh-Hant': '繁體中文', 'en': 'English'};
+  @override
+  late final _Translations$settings$search$en search = _Translations$settings$search$en._(_root);
 }
 
 // Path: share
@@ -3314,6 +3324,98 @@ class _Translations$settings$network$en implements Translations$settings$network
   String get systemProxyNone => 'The system has no proxy; connecting directly';
   @override
   String systemProxyIs({required Object host, required Object port}) => 'System proxy: ${host}:${port}';
+}
+
+// Path: settings.search
+class _Translations$settings$search$en implements Translations$settings$search$zh_Hans {
+  _Translations$settings$search$en._(this._root);
+
+  final TranslationsEn _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get hint => 'Search settings';
+  @override
+  String get noResults => 'No matching settings';
+  @override
+  String legacyName({required Object name}) => '3.x: ${name}';
+  @override
+  Map<String, String> get legacy => {
+    'theme_locale': 'Change language|Language & Region',
+    'app_refreshRateMode': 'Interface refresh rate',
+    'exit_choice': 'Exit Without Prompt|No Exit Confirm',
+    'startup_enabled': 'Start on Boot',
+    'refresh_autoRefreshFavorite': 'Auto refresh follow list',
+    'refresh_refreshFavoriteOnResume': 'Refresh favorites on resume',
+    'refresh_autoRefreshInterval': 'Refresh Interval',
+    'refresh_maxConcurrentRefresh': 'Concurrent home refresh tasks',
+    'refresh_autoRefreshThumbnails': 'Auto refresh live thumbnails',
+    'refresh_thumbnailRefreshInterval': 'Thumbnail Refresh Interval',
+    'theme_mode': 'Theme Mode',
+    'theme_dynamicColor': 'Dynamic Color',
+    'app_denseFavorites': 'Dense Mode',
+    'roomCard': 'Room Card Settings|Card layout',
+    'fonts': 'Change System Font|Font Family Settings',
+    'theme_textScale': 'Global Font Scaling|Font Size Settings',
+    'player_preferResolution': 'Resolution Preference',
+    'player_preferResolutionCellular': 'Mobile Network Quality',
+    'volume_globalVolumeMute': 'Global Mute',
+    'volume_defaultMobileVolume': 'Mobile Default Volume',
+    'volume_defaultDesktopVolume': 'Desktop Default Volume',
+    'player_hardwareDecoding': 'Enable hardcodec',
+    'player_hardwareDecoder': 'Hardware Decoder|hwdec',
+    'player_audioOutput': 'Audio Output Driver',
+    'player_fit': 'Aspect ratio',
+    'app_fullScreenDefault': 'Auto Full Screen',
+    'player_portraitAdaptation': 'Detect portrait live sources',
+    'player_portraitFullscreenPolicy': 'Fullscreen orientation',
+    'player_portraitFit': 'Portrait fullscreen display',
+    'player_portraitDanmakuArea': 'Portrait danmaku layout',
+    'player_rememberPortraitOverride': 'Remember room orientation',
+    'player_asmrSleepMode': 'Auto-start sleep audio for new rooms',
+    'player_asmrSleepMinutes': 'Auto sleep playback duration',
+    'player_miniPlayerOnLeave': 'Exit Floating Window|Play by float window',
+    'player_pipAlwaysOnTop': 'Keep Windows mini player on top',
+    'danmaku_area': 'Top-screen height used',
+    'danmaku_topArea': 'Top inset',
+    'danmaku_bottomArea': 'Bottom inset in area',
+    'danmaku_speed': 'Scroll speed',
+    'danmaku_fontSize': 'Font Size',
+    'danmaku_fontWeight': 'Font Weight',
+    'danmaku_stroke': 'Danmaku Stroke',
+    'danmaku_strokeWidth': 'Stroke width',
+    'danmaku_noEmoji': 'Pure text mode',
+    'danmaku_autoFps': 'Follow interface refresh policy|Danmaku FPS',
+    'danmaku_tapInteraction': 'Tap an on-screen danmaku for actions',
+    'danmaku_longPressInteraction': 'Long-press an on-screen danmaku for block actions',
+    'danmaku_blockList': 'Block List|Danmaku Keyword Block|Danmaku Filter',
+    'danmaku_collapseRepeated': 'Collapse identical danmaku bursts|Repeated danmaku filter',
+    'danmaku_similarityFilter': 'Similar Danmaku Filter',
+    'danmaku_filterDouyuAutomated': 'Filter Suspected Automated Douyu Chat',
+    'danmaku_pipEnabled': 'Show Danmaku in PiP|PiP Danmaku',
+    'record_defaultQuality': 'Default Recording Quality',
+    'record_polling': 'Enable Live Detection|Polling Detection',
+    'record_liveCheckInterval': 'Check Interval',
+    'record_autoReconnect': 'Auto Reconnect',
+    'record_maxRetries': 'Maximum Retry Count',
+    'record_retryDelay': 'Reconnect Delay',
+    'record_maxCheckInterval': 'Maximum Check Interval',
+    'record_readTimeout': 'Read/Write Timeout',
+    'record_maxConcurrent': 'Maximum Concurrent Recording Tasks',
+    'record_danmaku': 'Record chat',
+    'record_pinyinFolders': 'Use Pinyin Folder Name',
+    'record_resumeOnLaunch': 'Resume unfinished tasks on app launch',
+    'record_cacheLimitEnabled': 'Enable Cache Limit',
+    'record_cacheLimitMB': 'Cache Limit',
+    'accounts_platforms': 'Platform Display|Platform Preference',
+    'accounts_audience': 'Audience data and ranking',
+    'accounts_accounts': 'Third-party Authentication',
+    'network_proxyEnabled': 'Enable App Proxy|Enable Player Proxy|Proxy Settings',
+    'network_proxyHost': 'Proxy Host',
+    'history_limit': 'Watch History Retention',
+    'data_cache': 'Clear Local Cache|Storage & Cache',
+    'data_diagnostics': 'Local Config Preview',
+  };
 }
 
 // Path: sync.device

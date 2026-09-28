@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show Sizes, Space;
+import 'package:live_ui/live_ui.dart' show PageMargin, Sizes, Space;
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/danmaku/danmaku_presets.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Location of the block-list page.
@@ -127,11 +128,14 @@ class DanmakuSettingsTiles extends StatelessWidget {
         subtitle: t.danmaku.opensActions,
       ),
       SettingsHeader(t.danmaku.filters),
-      ListTile(
-        leading: const Icon(Icons.block),
-        title: Text(t.danmaku.blockListTitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.push(blockListLocation),
+      SettingAnchor(
+        id: blockListAnchor,
+        child: ListTile(
+          leading: const Icon(Icons.block),
+          title: Text(t.danmaku.blockListTitle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push(blockListLocation),
+        ),
       ),
       SwitchSettingTile(setting: Settings.danmakuCollapseRepeated, title: t.danmaku.collapseRepeated),
       SettingBuilder<bool>(
@@ -258,7 +262,9 @@ class _DanmakuSliderTileState extends State<DanmakuSliderTile> {
   }
 
   @override
-  Widget build(BuildContext context) => SettingBuilder<num>(
+  Widget build(BuildContext context) => SettingAnchor(id: widget.setting.id, child: _tile(context));
+
+  Widget _tile(BuildContext context) => SettingBuilder<num>(
     setting: widget.setting,
     builder: (context, value, set) {
       _store = set;
@@ -349,7 +355,7 @@ class _DanmakuPresetRowState extends ConsumerState<DanmakuPresetRow> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     void say(String text) => messenger?.showSnackBar(SnackBar(content: Text(text)));
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
+      padding: PageMargin.rowInsets(context).copyWith(top: Space.s2, bottom: Space.s2),
       child: Wrap(
         spacing: Space.s2,
         runSpacing: Space.s2,

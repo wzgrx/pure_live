@@ -17,6 +17,7 @@ final class AppPrefs {
     this.firstRunDone = false,
     this.switchGestureHinted = false,
     this.tips = const {},
+    this.navRailExtended,
   });
 
   /// Look for share codes and room links in the clipboard when the app
@@ -38,6 +39,11 @@ final class AppPrefs {
   /// One-time tips already shown (principles §6.5), by [Tip] name.
   final Set<String> tips;
 
+  /// The navigation rail expanded (true) or collapsed (false) by the user
+  /// (principles §5.2); null until they choose, so the window class decides.
+  /// A property of this device's windows, not a setting to sync.
+  final bool? navRailExtended;
+
   /// Whether [tip] was shown.
   bool shown(Tip tip) => tips.contains(tip.name);
 
@@ -56,6 +62,9 @@ final class AppPrefs {
   /// Meta key of [switchGestureHinted].
   static const switchGestureHintKey = 'app.switchGestureHinted';
 
+  /// Meta key of [navRailExtended].
+  static const navRailKey = 'app.navRailExtended';
+
   /// Reads the stored preferences.
   static Future<AppPrefs> load(MetaStore meta) async {
     bool? flag(String? value) => value == null ? null : value == '1';
@@ -65,6 +74,7 @@ final class AppPrefs {
       crashReports: flag(await meta.get(crashReportsKey)) ?? defaults.crashReports,
       firstRunDone: flag(await meta.get(firstRunKey)) ?? defaults.firstRunDone,
       switchGestureHinted: flag(await meta.get(switchGestureHintKey)) ?? defaults.switchGestureHinted,
+      navRailExtended: flag(await meta.get(navRailKey)),
       tips: {
         for (final name in (await meta.get(tipsKey) ?? '').split(','))
           if (name.isNotEmpty) name,
@@ -79,12 +89,14 @@ final class AppPrefs {
     bool? firstRunDone,
     bool? switchGestureHinted,
     Set<String>? tips,
+    bool? navRailExtended,
   }) => AppPrefs(
     clipboardRecognition: clipboardRecognition ?? this.clipboardRecognition,
     crashReports: crashReports ?? this.crashReports,
     firstRunDone: firstRunDone ?? this.firstRunDone,
     switchGestureHinted: switchGestureHinted ?? this.switchGestureHinted,
     tips: tips ?? this.tips,
+    navRailExtended: navRailExtended ?? this.navRailExtended,
   );
 }
 
@@ -111,6 +123,10 @@ class AppPrefsNotifier extends Notifier<AppPrefs> {
   /// Records that the room-switch swipe tip was shown.
   Future<void> markSwitchGestureHinted() =>
       _save(state.copyWith(switchGestureHinted: true), AppPrefs.switchGestureHintKey, value: true);
+
+  /// Remembers that the user expanded or collapsed the navigation rail.
+  Future<void> setNavRailExtended({required bool extended}) =>
+      _save(state.copyWith(navRailExtended: extended), AppPrefs.navRailKey, value: extended);
 
   /// Takes [tip] if it was not shown yet: true once per installation.
   bool takeTip(Tip tip) {

@@ -66,53 +66,55 @@ class _PlatformsPageState extends ConsumerState<PlatformsPage> {
     final preferred = ref.watch(catalogPreferredSetting);
     final shown = _rows.where((row) => row.$2).length;
     return Scaffold(
-      appBar: AppBar(title: Text(t.settings.accounts.platforms)),
-      body: ReorderableListView.builder(
-        header: Padding(
-          padding: const EdgeInsets.fromLTRB(Space.s4, Space.s3, Space.s4, Space.s2),
-          child: Text(t.settings.platformsHint),
+      appBar: PageAppBar(title: Text(t.settings.accounts.platforms)),
+      body: PageBody(
+        child: ReorderableListView.builder(
+          header: Padding(
+            padding: const EdgeInsets.fromLTRB(Space.s4, Space.s3, Space.s4, Space.s2),
+            child: Text(t.settings.platformsHint),
+          ),
+          itemCount: _rows.length,
+          onReorderItem: (from, to) {
+            setState(() => _rows.insert(to, _rows.removeAt(from)));
+            _save();
+          },
+          itemBuilder: (context, index) {
+            final (id, on) = _rows[index];
+            return ListTile(
+              key: ValueKey(id),
+              leading: Checkbox(
+                value: on,
+                // At least one platform stays.
+                onChanged: on && shown == 1
+                    ? null
+                    : (value) {
+                        setState(() => _rows[index] = (id, value ?? false));
+                        _save();
+                      },
+              ),
+              title: Row(
+                children: [
+                  PlatformLogo(platformId: id, size: 20),
+                  const SizedBox(width: Space.s2),
+                  Text(platformNames[id] ?? id),
+                ],
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: preferred == id ? t.settings.discoverDefault : t.settings.setDiscoverDefault,
+                    isSelected: preferred == id,
+                    icon: const Icon(Icons.star_border),
+                    selectedIcon: const Icon(Icons.star),
+                    onPressed: on ? () => unawaited(ref.read(catalogPreferredSetting.notifier).set(id)) : null,
+                  ),
+                  ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
+                ],
+              ),
+            );
+          },
         ),
-        itemCount: _rows.length,
-        onReorderItem: (from, to) {
-          setState(() => _rows.insert(to, _rows.removeAt(from)));
-          _save();
-        },
-        itemBuilder: (context, index) {
-          final (id, on) = _rows[index];
-          return ListTile(
-            key: ValueKey(id),
-            leading: Checkbox(
-              value: on,
-              // At least one platform stays.
-              onChanged: on && shown == 1
-                  ? null
-                  : (value) {
-                      setState(() => _rows[index] = (id, value ?? false));
-                      _save();
-                    },
-            ),
-            title: Row(
-              children: [
-                PlatformLogo(platformId: id, size: 20),
-                const SizedBox(width: Space.s2),
-                Text(platformNames[id] ?? id),
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  tooltip: preferred == id ? t.settings.discoverDefault : t.settings.setDiscoverDefault,
-                  isSelected: preferred == id,
-                  icon: const Icon(Icons.star_border),
-                  selectedIcon: const Icon(Icons.star),
-                  onPressed: on ? () => unawaited(ref.read(catalogPreferredSetting.notifier).set(id)) : null,
-                ),
-                ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
-              ],
-            ),
-          );
-        },
       ),
     );
   }

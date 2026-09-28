@@ -248,7 +248,8 @@ class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
+    appBar: PageAppBar(
+      maxContentWidth: Sizes.readingWidth,
       title: Text(t.backup.lanSync),
       bottom: TabBar(
         controller: _tabs,
@@ -267,12 +268,9 @@ class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProv
     ),
   );
 
-  Widget _page(List<Widget> children) => Align(
-    alignment: Alignment.topCenter,
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-      child: ListView(padding: const EdgeInsets.all(Space.s4), children: children),
-    ),
+  Widget _page(List<Widget> children) => PageBody(
+    maxContentWidth: Sizes.readingWidth,
+    child: ListView(padding: const EdgeInsets.all(Space.s4), children: children),
   );
 
   Iterable<Widget> _receiveTiles(BuildContext context) sync* {

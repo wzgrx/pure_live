@@ -31,8 +31,17 @@ class _Done extends FollowRefreshNotifier {
 
   final FollowRefreshResult? value;
 
+  /// Refreshes asked for after the first.
+  int again = 0;
+
   @override
   Future<FollowRefreshResult?> build() async => value;
+
+  @override
+  Future<FollowRefreshResult> refresh() async {
+    again++;
+    return value!;
+  }
 }
 
 final DateTime _now = DateTime.now().toUtc();
@@ -85,6 +94,7 @@ void main() {
           path: '/room/:platform/:roomId',
           builder: (context, state) => Text('直播间 ${state.pathParameters['roomId']}'),
         ),
+        GoRoute(path: platformStatusLocation, builder: (context, state) => const Text('平台状态页')),
       ],
     );
     addTearDown(router.dispose);
@@ -150,7 +160,48 @@ void main() {
     await tester.pump();
     expect(cardNames(tester), ['主播a']);
     expect(find.text('状态未知'), findsOneWidget);
-    expect(find.textContaining('虎牙 刷新失败'), findsOneWidget);
+    expect(find.textContaining('虎牙刷新失败'), findsOneWidget, reason: 'no space between the name and the text');
+  });
+
+  group('principles §3.3: the platform alert banner', () {
+    FollowRefreshResult failedOn(Set<String> platforms) =>
+        FollowRefreshResult(checked: 1, failedPlatforms: platforms, failed: const {'huya:b'}, at: _now);
+
+    testWidgets('知道了 closes it (it is part of the list, not a ScaffoldMessenger banner)', (tester) async {
+      await pumpPage(
+        tester,
+        follows: [_follow('douyu', 'a'), _follow('huya', 'b')],
+        refresh: () => _Done(failedOn(const {'huya'})),
+      );
+      await tester.pump();
+      expect(find.byType(PlatformAlertBanner), findsOneWidget);
+      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget, reason: 'an icon, not colour alone');
+      await tester.tap(find.text('知道了'));
+      await tester.pump();
+      expect(find.byType(PlatformAlertBanner), findsNothing);
+      expect(find.text('状态未知'), findsOneWidget, reason: 'the rows keep saying what is unknown');
+    });
+
+    testWidgets('重试 refreshes the follows again', (tester) async {
+      final refresh = _Done(failedOn(const {'huya'}));
+      await pumpPage(tester, follows: [_follow('douyu', 'a'), _follow('huya', 'b')], refresh: () => refresh);
+      await tester.pump();
+      await tester.tap(find.text('重试'));
+      await tester.pump();
+      expect(refresh.again, 1);
+    });
+
+    testWidgets('查看状态 opens the platform status page', (tester) async {
+      await pumpPage(
+        tester,
+        follows: [_follow('douyu', 'a'), _follow('huya', 'b')],
+        refresh: () => _Done(failedOn(const {'huya'})),
+      );
+      await tester.pump();
+      await tester.tap(find.text('查看状态'));
+      await tester.pumpAndSettle();
+      expect(find.text('平台状态页'), findsOneWidget);
+    });
   });
 
   testWidgets('F-FAV-08: an unsupported platform says so instead of opening the room', (tester) async {

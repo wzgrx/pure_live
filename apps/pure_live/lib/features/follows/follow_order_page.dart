@@ -48,30 +48,27 @@ class _FollowOrderPageState extends ConsumerState<FollowOrderPage> {
         : [for (final ref in pending) ...follows.where((follow) => follow.ref == ref)];
     final dpr = MediaQuery.devicePixelRatioOf(context);
     return Scaffold(
-      appBar: AppBar(title: Text(t.follows.reorder)),
+      appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.follows.reorder)),
       body: shown.isEmpty
           ? MessageView(icon: Icons.favorite_border, title: t.follows.emptyTitle)
-          : Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-                child: ReorderableListView.builder(
-                  itemCount: shown.length,
-                  onReorderItem: (from, to) => unawaited(_move(shown, from, to)),
-                  itemBuilder: (context, index) {
-                    final room = shown[index].room;
-                    return ListTile(
-                      key: ValueKey(room.ref.key),
-                      leading: CircleAvatar(
-                        foregroundImage: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
-                        child: Text(room.anchorName.characters.firstOrNull ?? '?'),
-                      ),
-                      title: Text(room.anchorName.isEmpty ? room.ref.roomId : room.anchorName),
-                      subtitle: Text(platformName(room.ref.platform)),
-                      trailing: const Icon(Icons.drag_handle),
-                    );
-                  },
-                ),
+          : PageBody(
+              maxContentWidth: Sizes.readingWidth,
+              child: ReorderableListView.builder(
+                itemCount: shown.length,
+                onReorderItem: (from, to) => unawaited(_move(shown, from, to)),
+                itemBuilder: (context, index) {
+                  final room = shown[index].room;
+                  return ListTile(
+                    key: ValueKey(room.ref.key),
+                    leading: CircleAvatar(
+                      foregroundImage: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
+                      child: Text(room.anchorName.characters.firstOrNull ?? '?'),
+                    ),
+                    title: Text(room.anchorName.isEmpty ? room.ref.roomId : room.anchorName),
+                    subtitle: Text(platformName(room.ref.platform)),
+                    trailing: const Icon(Icons.drag_handle),
+                  );
+                },
               ),
             ),
     );

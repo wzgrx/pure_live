@@ -189,4 +189,57 @@ void main() {
     await pumpAt(const Size(1440, 900));
     expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).extended, isTrue);
   });
+
+  testWidgets('principles §5.2: the rail expands and collapses by hand from the expanded class on', (tester) async {
+    const destinations = [
+      NavDestination(icon: Icons.favorite_border, selectedIcon: Icons.favorite, label: '关注'),
+      NavDestination(icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: '发现'),
+    ];
+    bool? chosen;
+    final changes = <bool>[];
+    Future<void> pumpAt(Size size) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: PureTheme.of(Appearance.light, platform: TargetPlatform.windows),
+          home: AdaptiveNavScaffold(
+            destinations: destinations,
+            selectedIndex: 0,
+            onSelected: (_) {},
+            body: const SizedBox.expand(),
+            railExtended: chosen,
+            onRailExtendedChanged: (value) {
+              changes.add(value);
+              chosen = value;
+            },
+            expandRailLabel: 'expand',
+            collapseRailLabel: 'collapse',
+          ),
+        ),
+      );
+    }
+
+    bool extended() => tester.widget<NavigationRail>(find.byType(NavigationRail)).extended;
+
+    addTearDown(tester.view.reset);
+    await pumpAt(const Size(700, 900));
+    expect(find.byTooltip('expand'), findsNothing, reason: 'medium keeps the collapsed rail');
+    await pumpAt(const Size(1440, 900));
+    expect(extended(), isTrue, reason: 'large starts expanded');
+    await tester.tap(find.byTooltip('collapse'));
+    await pumpAt(const Size(1440, 900));
+    expect(changes, [false]);
+    expect(extended(), isFalse, reason: 'the choice wins over the class');
+    await pumpAt(const Size(1920, 1080));
+    expect(extended(), isFalse, reason: 'and is kept on other windows');
+    await pumpAt(const Size(1024, 768));
+    await tester.tap(find.byTooltip('expand'));
+    await pumpAt(const Size(1024, 768));
+    expect(changes, [false, true]);
+    expect(extended(), isTrue, reason: 'expanded windows can expand the rail');
+    await pumpAt(const Size(852, 393));
+    expect(find.byTooltip('collapse'), findsNothing, reason: 'landscape phones keep the collapsed rail');
+    expect(extended(), isFalse);
+  });
 }

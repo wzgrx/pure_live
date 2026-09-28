@@ -45,24 +45,21 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
     final platforms = ref.watch(enabledPlatformsProvider).where(platformHasAccount);
     final now = DateTime.now();
     return Scaffold(
-      appBar: AppBar(title: Text(t.app.accounts)),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-          child: ListView(
-            children: [
-              Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.accounts.storageNote)),
-              for (final platform in platforms)
-                ListTile(
-                  leading: PlatformLogo(platformId: platform, size: Sizes.iconLg),
-                  title: Text(platformNames[platform] ?? platform),
-                  subtitle: Text(accountSummary(platform, store, ref.watch(accountCheckProvider(platform)), now: now)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(accountLocation(platform)),
-                ),
-            ],
-          ),
+      appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.app.accounts)),
+      body: PageBody(
+        maxContentWidth: Sizes.readingWidth,
+        child: ListView(
+          children: [
+            Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.accounts.storageNote)),
+            for (final platform in platforms)
+              ListTile(
+                leading: PlatformLogo(platformId: platform, size: Sizes.iconLg),
+                title: Text(platformNames[platform] ?? platform),
+                subtitle: Text(accountSummary(platform, store, ref.watch(accountCheckProvider(platform)), now: now)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(accountLocation(platform)),
+              ),
+          ],
         ),
       ),
     );

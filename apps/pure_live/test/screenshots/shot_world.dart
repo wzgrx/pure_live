@@ -306,10 +306,15 @@ final class ShotWorld {
             ),
         ];
 
-  /// The first refresh of this launch, finished a minute ago.
+  /// The first refresh of this launch, finished a minute ago; the rooms of
+  /// [failedPlatforms] could not be checked (状态未知).
   FollowRefreshResult get refresh => FollowRefreshResult(
     checked: followed.length,
     failedPlatforms: failedPlatforms,
+    failed: {
+      for (final follow in followed)
+        if (failedPlatforms.contains(follow.ref.platform)) follow.ref.key,
+    },
     liveSince: {for (final room in shotRooms.take(8)) RoomRef(room.platform, room.id).key: now.subtract(room.liveFor)},
     at: now.subtract(const Duration(minutes: 1)),
   );

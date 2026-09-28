@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -84,7 +85,7 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
       liveSince: session.liveSince,
     );
     return Scaffold(
-      appBar: AppBar(
+      appBar: PageAppBar(
         title: Text(t.app.tabs.follows),
         actions: [
           PopupMenuButton<Object>(
@@ -139,14 +140,16 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
               onAction: () => context.go('/discover'),
             );
           }
-          return RefreshIndicator(
-            onRefresh: () => ref.read(followRefreshProvider.notifier).refresh(),
-            child: _FollowList(
-              live: live,
-              rows: sortRows(entries.where((entry) => entry.status != FollowStatus.live), sort, platforms: platforms),
-              session: session,
-              filter: _filter,
-              onFilter: (filter) => setState(() => _filter = filter),
+          return PageBody(
+            child: RefreshIndicator(
+              onRefresh: () => ref.read(followRefreshProvider.notifier).refresh(),
+              child: _FollowList(
+                live: live,
+                rows: sortRows(entries.where((entry) => entry.status != FollowStatus.live), sort, platforms: platforms),
+                session: session,
+                filter: _filter,
+                onFilter: (filter) => setState(() => _filter = filter),
+              ),
             ),
           );
         },
@@ -180,6 +183,10 @@ class _FollowList extends ConsumerStatefulWidget {
 class _FollowListState extends ConsumerState<_FollowList> {
   final TvGridFocus _focus = TvGridFocus(debugLabel: 'follows-grid');
   final Map<String, TvGridFocus> _groupFocus = {};
+
+  /// The failed platforms whose banner was dismissed; a refresh that fails
+  /// on other platforms shows it again.
+  Set<String> _dismissed = const {};
 
   @override
   void dispose() {
@@ -216,6 +223,9 @@ class _FollowListState extends ConsumerState<_FollowList> {
       builder: (context, constraints) {
         final grid = CardGridGeometry.of(context, constraints.maxWidth, density: density);
         final margin = TvScope.of(context).enabled ? grid.padding.left : layout.margin;
+        // Offline rows are as wide as a reading column on the grid's left
+        // line, so the logo stays near the name (principles §4.3).
+        final rowWidth = Sizes.readingWidth + 2 * margin;
 
         void open(FollowEntry entry) {
           final room = entry.follow.ref;
@@ -269,35 +279,38 @@ class _FollowListState extends ConsumerState<_FollowList> {
           ),
         );
 
-        Widget rowList(List<FollowEntry> rows) => SliverList.builder(
-          itemCount: rows.length,
-          itemBuilder: (context, index) {
-            final entry = rows[index];
-            final room = entry.follow.room;
-            final last = room.lastLiveAt;
-            final lastText = last == null ? null : t.follows.lastLive(ago: formatAgo(last, now));
-            final (String? tag, String subtitle) = switch (entry.status) {
-              FollowStatus.unsupported => (
-                t.follows.tag.unsupported,
-                t.follows.unsupportedPlatform(name: platformName(room.ref.platform)),
-              ),
-              FollowStatus.unknown => (t.follows.tag.unknown, lastText ?? t.follows.unknownDetail),
-              FollowStatus.missing => (t.follows.tag.missing, lastText ?? t.follows.missingDetail),
-              FollowStatus.replay => (t.follows.tag.replay, lastText ?? t.follows.replayDetail),
-              FollowStatus.checking => (null, lastText ?? t.follows.checking),
-              FollowStatus.offline || FollowStatus.live => (null, lastText ?? t.common.offline),
-            };
-            return OfflineRoomRow(
-              platformId: room.ref.platform,
-              anchorName: room.anchorName.isEmpty ? room.ref.roomId : room.anchorName,
-              avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
-              subtitle: subtitle,
-              tag: tag,
-              recording: recording.contains(room.ref.key),
-              onTap: () => open(entry),
-              onMenu: () => menu(entry),
-            );
-          },
+        Widget rowList(List<FollowEntry> rows) => SliverConstrainedCrossAxis(
+          maxExtent: rowWidth,
+          sliver: SliverList.builder(
+            itemCount: rows.length,
+            itemBuilder: (context, index) {
+              final entry = rows[index];
+              final room = entry.follow.room;
+              final last = room.lastLiveAt;
+              final lastText = last == null ? null : t.follows.lastLive(ago: formatAgo(last, now));
+              final (String? tag, String subtitle) = switch (entry.status) {
+                FollowStatus.unsupported => (
+                  t.follows.tag.unsupported,
+                  t.follows.unsupportedPlatform(name: platformName(room.ref.platform)),
+                ),
+                FollowStatus.unknown => (t.follows.tag.unknown, lastText ?? t.follows.unknownDetail),
+                FollowStatus.missing => (t.follows.tag.missing, lastText ?? t.follows.missingDetail),
+                FollowStatus.replay => (t.follows.tag.replay, lastText ?? t.follows.replayDetail),
+                FollowStatus.checking => (null, lastText ?? t.follows.checking),
+                FollowStatus.offline || FollowStatus.live => (null, lastText ?? t.common.offline),
+              };
+              return OfflineRoomRow(
+                platformId: room.ref.platform,
+                anchorName: room.anchorName.isEmpty ? room.ref.roomId : room.anchorName,
+                avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
+                subtitle: subtitle,
+                tag: tag,
+                recording: recording.contains(room.ref.key),
+                onTap: () => open(entry),
+                onMenu: () => menu(entry),
+              );
+            },
+          ),
         );
 
         Widget heading(String text, {String? detail, double top = Space.s6}) => SliverPadding(
@@ -315,18 +328,16 @@ class _FollowListState extends ConsumerState<_FollowList> {
         );
 
         final slivers = <Widget>[
-          if (failedPlatforms.isNotEmpty)
-            SliverToBoxAdapter(
-              child: MaterialBanner(
-                content: Text(
-                  t.follows.refreshFailed(platforms: failedPlatforms.map(platformName).join(t.common.listSeparator)),
+          if (failedPlatforms.isNotEmpty && !setEquals(failedPlatforms, _dismissed))
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(margin, Space.s2, margin, 0),
+              sliver: SliverToBoxAdapter(
+                child: PlatformAlertBanner(
+                  platforms: failedPlatforms,
+                  onRetry: () => ref.read(followRefreshProvider.notifier).refresh(),
+                  onStatus: () => context.go(platformStatusLocation),
+                  onDismiss: () => setState(() => _dismissed = failedPlatforms),
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                    child: Text(t.common.gotIt),
-                  ),
-                ],
               ),
             ),
           SliverPadding(
@@ -438,7 +449,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
             if (cards.isEmpty && rows.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
+                  padding: EdgeInsets.symmetric(horizontal: PageMargin.rowInsets(context).left, vertical: Space.s2),
                   child: Text(t.follows.groupEmpty),
                 ),
               ),
@@ -447,5 +458,79 @@ class _FollowListState extends ConsumerState<_FollowList> {
           ];
         }(),
     ];
+  }
+}
+
+/// Location of 关于 › 平台状态.
+const platformStatusLocation = '/me/about/status';
+
+/// principles §3.3 "平台异常": the platforms the last follow refresh could not
+/// reach, what that means for the list, and the next steps: retry, look at
+/// the platforms' status, or dismiss it until other platforms fail.
+class PlatformAlertBanner extends StatelessWidget {
+  const new({
+    required this.platforms,
+    required this.onRetry,
+    required this.onStatus,
+    required this.onDismiss,
+    super.key,
+  });
+
+  /// Platform ids.
+  final Set<String> platforms;
+
+  /// Refreshes the follows again.
+  final VoidCallback onRetry;
+
+  /// Opens the platform status page.
+  final VoidCallback onStatus;
+
+  /// Hides the banner.
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final warning = LiveTheme.of(context).warning;
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color.alphaBlend(warning.withValues(alpha: 0.12), theme.colorScheme.surface),
+          border: Border.all(color: warning.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(Radii.r3),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(Space.s4, Space.s3, Space.s2, Space.s1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: warning, size: Sizes.iconMd),
+                  const SizedBox(width: Space.s3),
+                  Expanded(
+                    child: Text(
+                      t.follows.refreshFailed(platforms: platforms.map(platformName).join(t.common.listSeparator)),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+              OverflowBar(
+                alignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(onPressed: onRetry, child: Text(t.common.retry)),
+                  TextButton(onPressed: onStatus, child: Text(t.follows.viewStatus)),
+                  TextButton(onPressed: onDismiss, child: Text(t.common.gotIt)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

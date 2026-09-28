@@ -450,6 +450,10 @@ class Translations$app$zh_Hant implements Translations$app$zh_Hans {
   @override
   late final Translations$app$tabs$zh_Hant tabs = Translations$app$tabs$zh_Hant.internal(_root);
   @override
+  String get expandNavigation => '展開導覽列';
+  @override
+  String get collapseNavigation => '收合導覽列';
+  @override
   String get history => '觀看紀錄';
   @override
   String get recordings => '錄製中心';
@@ -1159,7 +1163,9 @@ class Translations$follows$zh_Hant implements Translations$follows$zh_Hans {
   @override
   String get checking => '正在檢查開播狀態';
   @override
-  String refreshFailed({required Object platforms}) => '${platforms} 重新整理失敗，這些主播的狀態暫時未知';
+  String refreshFailed({required Object platforms}) => '${platforms}重新整理失敗，這些主播的狀態暫時未知';
+  @override
+  String get viewStatus => '查看狀態';
   @override
   late final Translations$follows$filter$zh_Hant filter = Translations$follows$filter$zh_Hant.internal(_root);
   @override
@@ -1987,9 +1993,11 @@ class Translations$search$zh_Hant implements Translations$search$zh_Hans {
   @override
   String get failedTag => '失敗';
   @override
+  String otherPlatforms({required Object n}) => '其他平台 ${n}';
+  @override
   String get allFailed => '搜尋失敗，檢查網路後下拉重試';
   @override
-  String someFailed({required Object platforms}) => '${platforms} 搜尋失敗，下拉可以重試';
+  String someFailed({required Object platforms}) => '${platforms}搜尋失敗，下拉可以重試';
   @override
   String get hint => '搜尋主播、直播間，或貼上直播間連結';
   @override
@@ -2053,6 +2061,8 @@ class Translations$settings$zh_Hant implements Translations$settings$zh_Hans {
   String get setDiscoverDefault => '設為探索頁預設開啟';
   @override
   Map<String, String> get languageNames => {'zh-Hans': '简体中文', 'zh-Hant': '繁體中文', 'en': 'English'};
+  @override
+  late final Translations$settings$search$zh_Hant search = Translations$settings$search$zh_Hant.internal(_root);
 }
 
 // Path: share
@@ -3218,6 +3228,98 @@ class Translations$settings$network$zh_Hant implements Translations$settings$net
   String get systemProxyNone => '系統目前沒有設定 Proxy，直接連線';
   @override
   String systemProxyIs({required Object host, required Object port}) => '系統 Proxy：${host}:${port}';
+}
+
+// Path: settings.search
+class Translations$settings$search$zh_Hant implements Translations$settings$search$zh_Hans {
+  Translations$settings$search$zh_Hant.internal(this._root);
+
+  final TranslationsZhHant _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get hint => '搜尋設定';
+  @override
+  String get noResults => '找不到相關設定';
+  @override
+  String legacyName({required Object name}) => '3.x：${name}';
+  @override
+  Map<String, String> get legacy => {
+    'theme_locale': '切換語言|區域與語言',
+    'app_refreshRateMode': '介面刷新率',
+    'exit_choice': '退出不再詢問',
+    'startup_enabled': '開機啟動',
+    'refresh_autoRefreshFavorite': '開啟關注自動刷新|定時刷新時間',
+    'refresh_refreshFavoriteOnResume': '返回應用時刷新收藏',
+    'refresh_autoRefreshInterval': '刷新間隔時間',
+    'refresh_maxConcurrentRefresh': '首頁並發刷新任務',
+    'refresh_autoRefreshThumbnails': '自動刷新直播縮略圖',
+    'refresh_thumbnailRefreshInterval': '縮略圖刷新間隔',
+    'theme_mode': '主題模式',
+    'theme_dynamicColor': '動態取色',
+    'app_denseFavorites': '緊湊模式',
+    'roomCard': '房間卡片設定|卡片佈局',
+    'fonts': '更換系統預設字體|字體樣式設定',
+    'theme_textScale': '全局字體縮放比例|介面字號調節',
+    'player_preferResolution': '首選清晰度',
+    'player_preferResolutionCellular': '移動網路清晰度',
+    'volume_globalVolumeMute': '全局靜音',
+    'volume_defaultMobileVolume': '手機端預設音量',
+    'volume_defaultDesktopVolume': '電腦端預設音量',
+    'player_hardwareDecoding': '開啟硬解碼',
+    'player_hardwareDecoder': '硬體解碼器|hwdec',
+    'player_audioOutput': '音訊輸出驅動',
+    'player_fit': '螢幕比例',
+    'app_fullScreenDefault': '自動全螢幕',
+    'player_portraitAdaptation': '智慧識別豎屏直播源',
+    'player_portraitFullscreenPolicy': '進入全螢幕時的方向',
+    'player_portraitFit': '豎屏全螢幕畫面模式',
+    'player_portraitDanmakuArea': '豎屏彈幕佈局',
+    'player_rememberPortraitOverride': '記住單個直播間方向',
+    'player_asmrSleepMode': '新直播間自動助眠',
+    'player_asmrSleepMinutes': '自動助眠播放時長',
+    'player_miniPlayerOnLeave': '退出小窗播放|小窗播放',
+    'player_pipAlwaysOnTop': 'Windows 小窗始終置頂',
+    'danmaku_area': '畫面頂部佔用高度',
+    'danmaku_topArea': '頂部留白',
+    'danmaku_bottomArea': '區域底部留白',
+    'danmaku_speed': '滾動速度',
+    'danmaku_fontSize': '字體大小',
+    'danmaku_fontWeight': '字體粗細',
+    'danmaku_stroke': '彈幕描邊',
+    'danmaku_strokeWidth': '描邊寬度',
+    'danmaku_noEmoji': '純文字模式',
+    'danmaku_autoFps': '跟隨介面刷新率策略|彈幕幀率',
+    'danmaku_tapInteraction': '點擊畫面彈幕查看操作',
+    'danmaku_longPressInteraction': '長按畫面彈幕開啟屏蔽操作',
+    'danmaku_blockList': '屏蔽管理|彈幕關鍵詞屏蔽|彈幕關鍵詞過濾',
+    'danmaku_collapseRepeated': '合併短時間內的相同彈幕|重複彈幕過濾',
+    'danmaku_similarityFilter': '相似彈幕過濾',
+    'danmaku_filterDouyuAutomated': '過濾斗魚疑似自動彈幕',
+    'danmaku_pipEnabled': '小窗顯示彈幕|小窗彈幕',
+    'record_defaultQuality': '預設錄製清晰度',
+    'record_polling': '啟用開播檢測|掛機輪詢檢測',
+    'record_liveCheckInterval': '檢測間隔時間',
+    'record_autoReconnect': '自動斷線重連',
+    'record_maxRetries': '最大重試次數',
+    'record_retryDelay': '重連間隔時間',
+    'record_maxCheckInterval': '最大檢測間隔',
+    'record_readTimeout': '錄製讀寫逾時',
+    'record_maxConcurrent': '最大同時錄製任務數',
+    'record_danmaku': '同時錄製彈幕',
+    'record_pinyinFolders': '使用拼音資料夾名',
+    'record_resumeOnLaunch': '應用啟動時恢復待錄任務',
+    'record_cacheLimitEnabled': '啟用快取限制',
+    'record_cacheLimitMB': '快取限制',
+    'accounts_platforms': '平台顯示|首選直播平台',
+    'accounts_audience': '觀看數據與排行口徑',
+    'accounts_accounts': '三方認證',
+    'network_proxyEnabled': '啟用應用層代理|啟用播放代理|網路代理設定',
+    'network_proxyHost': '代理主機',
+    'history_limit': '觀看紀錄保留數量',
+    'data_cache': '清空本機快取|快取與資料管理',
+    'data_diagnostics': '本機配置預覽',
+  };
 }
 
 // Path: sync.device

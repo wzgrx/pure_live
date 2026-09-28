@@ -10,6 +10,7 @@ import 'package:pure_live_app/features/alerts/alert_notifier.dart';
 import 'package:pure_live_app/features/alerts/live_alerts.dart';
 import 'package:pure_live_app/features/alerts/programme_reminders.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Text shown when the system refuses notifications.
@@ -46,6 +47,10 @@ class _LiveAlertsTileState extends ConsumerState<LiveAlertsTile> {
   @override
   Widget build(BuildContext context) {
     final supported = ref.watch(alertNotifierProvider).supported;
+    return SettingAnchor(id: Settings.liveAlerts.id, child: _tile(supported));
+  }
+
+  Widget _tile(bool supported) {
     return SettingBuilder<bool>(
       setting: Settings.liveAlerts,
       builder: (context, value, set) => SwitchListTile(

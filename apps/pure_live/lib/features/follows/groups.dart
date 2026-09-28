@@ -197,7 +197,7 @@ class GroupsPage extends ConsumerWidget {
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
     final store = ref.read(storeProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(t.follows.manageGroups)),
+      appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.follows.manageGroups)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => createGroup(context, ref),
         icon: const Icon(Icons.add),
@@ -205,62 +205,59 @@ class GroupsPage extends ConsumerWidget {
       ),
       body: tags.isEmpty
           ? MessageView(icon: Icons.folder_outlined, title: t.follows.noGroups, message: t.follows.groupsHint)
-          : Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-                child: ReorderableListView.builder(
-                  itemCount: tags.length,
-                  onReorderItem: (from, to) {
-                    final ids = [for (final tag in tags) tag.id];
-                    final moved = ids.removeAt(from);
-                    ids.insert(to, moved);
-                    unawaited(store.tags.reorder(ids));
-                  },
-                  itemBuilder: (context, index) {
-                    final tag = tags[index];
-                    return ListTile(
-                      key: ValueKey(tag.id),
-                      leading: const Icon(Icons.drag_handle),
-                      title: Text(tag.name),
-                      subtitle: tag.description.isEmpty ? null : Text(tag.description, maxLines: 2),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: t.follows.renameAndDescribe,
-                            icon: const Icon(Icons.edit_outlined),
-                            onPressed: () => editGroup(context, ref, tag),
-                          ),
-                          IconButton(
-                            tooltip: t.common.delete,
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () async {
-                              final members = [
-                                for (final follow in await store.follows.all())
-                                  if (follow.tagIds.contains(tag.id)) follow.ref,
-                              ];
-                              await store.tags.delete(tag.id);
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(t.follows.groupDeleted(name: tag.name)),
-                                  action: SnackBarAction(
-                                    label: t.common.undo,
-                                    onPressed: () async {
-                                      final restored = await store.tags.create(tag.name, description: tag.description);
-                                      await store.tags.addRooms(restored.id, members);
-                                    },
-                                  ),
+          : PageBody(
+              maxContentWidth: Sizes.readingWidth,
+              child: ReorderableListView.builder(
+                itemCount: tags.length,
+                onReorderItem: (from, to) {
+                  final ids = [for (final tag in tags) tag.id];
+                  final moved = ids.removeAt(from);
+                  ids.insert(to, moved);
+                  unawaited(store.tags.reorder(ids));
+                },
+                itemBuilder: (context, index) {
+                  final tag = tags[index];
+                  return ListTile(
+                    key: ValueKey(tag.id),
+                    leading: const Icon(Icons.drag_handle),
+                    title: Text(tag.name),
+                    subtitle: tag.description.isEmpty ? null : Text(tag.description, maxLines: 2),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: t.follows.renameAndDescribe,
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () => editGroup(context, ref, tag),
+                        ),
+                        IconButton(
+                          tooltip: t.common.delete,
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () async {
+                            final members = [
+                              for (final follow in await store.follows.all())
+                                if (follow.tagIds.contains(tag.id)) follow.ref,
+                            ];
+                            await store.tags.delete(tag.id);
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(t.follows.groupDeleted(name: tag.name)),
+                                action: SnackBarAction(
+                                  label: t.common.undo,
+                                  onPressed: () async {
+                                    final restored = await store.tags.create(tag.name, description: tag.description);
+                                    await store.tags.addRooms(restored.id, members);
+                                  },
                                 ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
     );

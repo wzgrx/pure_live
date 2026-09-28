@@ -4,6 +4,7 @@
   "results": "Search results",
   "all": "All",
   "failedTag": "Failed",
+  "otherPlatforms": "Other platforms {n}",
   "allFailed": "Search failed. Check your network and pull down to retry.",
   "someFailed": "Search failed on {platforms}. Pull down to retry.",
   "hint": "Search streamers and rooms, or paste a room link",

@@ -1,6 +1,7 @@
 @Tags(['screenshots'])
 library;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
@@ -36,6 +37,26 @@ void main() {
       await app.tester.tap(find.text(SettingsGroup.playback.label));
       await app.frames();
     });
+    // principles §4.4: 3.x names find today's settings and say so.
+    screenshot('settings-search', ShotScreen.phone, (app) async {
+      await settings(app);
+      await app.tester.enterText(find.byType(TextField), '清晰度');
+      await app.frames(3);
+    });
+    // Two panes: the result opens beside the list, scrolled to and lit.
+    screenshot(
+      'settings-search',
+      ShotScreen.large,
+      (app) async {
+        await settings(app);
+        await app.tester.enterText(find.byType(TextField), 'latency');
+        await app.frames(3);
+        await app.tester.tap(find.widgetWithText(ListTile, 'Low latency').first);
+        await app.frames(5);
+      },
+      theme: ShotTheme.dark,
+      locale: AppLocale.en,
+    );
   });
 
   group('settings group', () {

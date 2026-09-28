@@ -33,7 +33,8 @@
   "missingDetail": "平台找不到这个房间",
   "replayDetail": "正在轮播",
   "checking": "正在检查开播状态",
-  "refreshFailed": "{platforms} 刷新失败，这些主播的状态暂时未知",
+  "refreshFailed": "{platforms}刷新失败，这些主播的状态暂时未知",
+  "viewStatus": "查看状态",
   "filter": {
     "live": "开播",
     "liveCount": "开播 {n}",

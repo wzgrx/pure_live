@@ -73,44 +73,41 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
     final lines = ref.watch(appLogProvider).recent.reversed.take(200).toList();
     final mono = Theme.of(context).textTheme.bodySmall?.copyWith(fontFamily: 'monospace');
     return Scaffold(
-      appBar: AppBar(title: Text(t.backup.diagnostics)),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-          child: ListView(
-            children: [
-              if (_busy) const LinearProgressIndicator(),
-              ListTile(
-                leading: const Icon(Icons.medical_information_outlined),
-                title: Text(t.diagnostics.exportBundle),
-                subtitle: Text(t.diagnostics.exportBundleSubtitle),
-                enabled: !_busy,
-                onTap: _export,
-              ),
-              SwitchListTile(
-                secondary: const Icon(Icons.bug_report_outlined),
-                title: Text(t.backup.crashReports),
-                subtitle: Text(t.diagnostics.crashReportsSubtitle),
-                value: prefs.crashReports,
-                onChanged: (value) => ref.read(appPrefsProvider.notifier).setCrashReports(enabled: value),
-              ),
-              const Divider(),
-              ListTile(
-                title: Text(t.diagnostics.recentLogs),
-                subtitle: Text(t.diagnostics.recentLogsSubtitle),
-                trailing: TextButton(onPressed: lines.isEmpty ? null : _clear, child: Text(t.common.clear)),
-              ),
-              if (lines.isEmpty)
-                Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.diagnostics.noLogs))
-              else
-                for (final line in lines)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: 2),
-                    child: SelectableText(line, style: mono),
-                  ),
-            ],
-          ),
+      appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.backup.diagnostics)),
+      body: PageBody(
+        maxContentWidth: Sizes.readingWidth,
+        child: ListView(
+          children: [
+            if (_busy) const LinearProgressIndicator(),
+            ListTile(
+              leading: const Icon(Icons.medical_information_outlined),
+              title: Text(t.diagnostics.exportBundle),
+              subtitle: Text(t.diagnostics.exportBundleSubtitle),
+              enabled: !_busy,
+              onTap: _export,
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.bug_report_outlined),
+              title: Text(t.backup.crashReports),
+              subtitle: Text(t.diagnostics.crashReportsSubtitle),
+              value: prefs.crashReports,
+              onChanged: (value) => ref.read(appPrefsProvider.notifier).setCrashReports(enabled: value),
+            ),
+            const Divider(),
+            ListTile(
+              title: Text(t.diagnostics.recentLogs),
+              subtitle: Text(t.diagnostics.recentLogsSubtitle),
+              trailing: TextButton(onPressed: lines.isEmpty ? null : _clear, child: Text(t.common.clear)),
+            ),
+            if (lines.isEmpty)
+              Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.diagnostics.noLogs))
+            else
+              for (final line in lines)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: 2),
+                  child: SelectableText(line, style: mono),
+                ),
+          ],
         ),
       ),
     );

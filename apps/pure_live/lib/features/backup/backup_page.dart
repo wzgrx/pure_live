@@ -52,53 +52,50 @@ class _BackupPageState extends ConsumerState<BackupPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(t.app.backup)),
-    body: Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
-        child: AbsorbPointer(
-          absorbing: _busy,
-          child: ListView(
-            children: [
-              if (_busy) const LinearProgressIndicator(),
-              SettingsHeader(t.backup.localFiles),
-              ListTile(
-                leading: const Icon(Icons.upload_file),
-                title: Text(t.backup.exportTitle),
-                subtitle: Text(t.backup.exportSubtitle),
-                onTap: _export,
-              ),
-              ListTile(
-                leading: const Icon(Icons.download),
-                title: Text(t.backup.restoreFollows),
-                subtitle: Text(t.backup.restoreFollowsSubtitle),
-                onTap: () => _import(RestoreMode.follows),
-              ),
-              ListTile(
-                leading: const Icon(Icons.restore),
-                title: Text(t.backup.restoreFull),
-                subtitle: Text(t.backup.restoreFullSubtitle),
-                onTap: () => _import(RestoreMode.full),
-              ),
-              const Divider(),
-              SettingsHeader(t.common.sync),
-              ListTile(
-                leading: const Icon(Icons.cloud_outlined),
-                title: const Text('WebDAV'),
-                subtitle: Text(t.backup.webdavSubtitle),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.go('/me/backup/webdav'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.devices_other_outlined),
-                title: Text(t.backup.lanSync),
-                subtitle: Text(t.backup.lanSyncSubtitle),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.go('/me/backup/lan'),
-              ),
-            ],
-          ),
+    appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.app.backup)),
+    body: PageBody(
+      maxContentWidth: Sizes.readingWidth,
+      child: AbsorbPointer(
+        absorbing: _busy,
+        child: ListView(
+          children: [
+            if (_busy) const LinearProgressIndicator(),
+            SettingsHeader(t.backup.localFiles),
+            ListTile(
+              leading: const Icon(Icons.upload_file),
+              title: Text(t.backup.exportTitle),
+              subtitle: Text(t.backup.exportSubtitle),
+              onTap: _export,
+            ),
+            ListTile(
+              leading: const Icon(Icons.download),
+              title: Text(t.backup.restoreFollows),
+              subtitle: Text(t.backup.restoreFollowsSubtitle),
+              onTap: () => _import(RestoreMode.follows),
+            ),
+            ListTile(
+              leading: const Icon(Icons.restore),
+              title: Text(t.backup.restoreFull),
+              subtitle: Text(t.backup.restoreFullSubtitle),
+              onTap: () => _import(RestoreMode.full),
+            ),
+            const Divider(),
+            SettingsHeader(t.common.sync),
+            ListTile(
+              leading: const Icon(Icons.cloud_outlined),
+              title: const Text('WebDAV'),
+              subtitle: Text(t.backup.webdavSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.go('/me/backup/webdav'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.devices_other_outlined),
+              title: Text(t.backup.lanSync),
+              subtitle: Text(t.backup.lanSyncSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.go('/me/backup/lan'),
+            ),
+          ],
         ),
       ),
     ),

@@ -1,0 +1,498 @@
+{
+  "generator": "fixtures/huya/danmaku/legacy_expected.dart: each case of cases.json built into one server frame with 3.x TarsOutputStream, then 3.x HuyaDanmaku.decodeMessage over it",
+  "value": [
+    {
+      "name": "batched chat carries the item's event id",
+      "frame": "ABYdAABMBglsaXZlOjEwMDEZAAEKAQV4HQAALAoCAA9GKRwmB+inguS8l0E8CxED6SED6TYG5L2g5aW9agIA/3BuEAQsMAELIxwEzYaTU5wBCw==",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众A",
+          "userId": "1001001",
+          "message": "你好",
+          "color": "#ff706e",
+          "messageId": "huya:2018964510849866753",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "single push chat has no event id",
+      "frame": "AAcdAAAzAAURBXgtAAAoCgIAD0YqHCYHdmlld2VyQjwLEQPpIQPpNgVoZWxsb2oA/xAELDABCzAC",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "viewerB",
+          "userId": "1001002",
+          "message": "hello",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "colour -1 (the default), 0 and a missing bullet format are white",
+      "frame": "ABYdAAEApgYJbGl2ZToxMDAxGQADCgEFeB0AACwKAgAPRiscJgfop4LkvJdDPAsRA+khA+k2Cem7mOiupOiJsmoA/xAELDABCyALCwoBBXgdAAAlCgIAD0YrHCYH6KeC5LyXQzwLEQPpIQPpNgPpm7ZqDBAELDABCyAMCwoBBXgdAAAmCgIAD0YrHCYH6KeC5LyXQzwLEQPpIQPpNgzmsqHmnInmoLzlvI8gDQs=",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众C",
+          "userId": "1001003",
+          "message": "默认色",
+          "color": "#ffffff",
+          "messageId": "huya:11",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众C",
+          "userId": "1001003",
+          "message": "零",
+          "color": "#ffffff",
+          "messageId": "huya:12",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众C",
+          "userId": "1001003",
+          "message": "没有格式",
+          "color": "#ffffff",
+          "messageId": "huya:13",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "colours with four and six hexadecimal digits",
+      "frame": "ABYdAAEAsQYJbGl2ZToxMDAxGQADCgEFeB0AACwKAgAPRiwcJgfop4LkvJdEPAsRA+khA+k2BumHkeiJsmoCAP/MABAELDABCyAVCwoBBXgdAAAsCgIAD0YsHCYH6KeC5LyXRDwLEQPpIQPpNgbnu7/oibJqAgAA/wAQBCwwAQsgFgsKAQV4HQAAKgoCAA9GLBwmB+inguS8l0Q8CxED6SED6TYG5rex6JOdagESNBAELDABCyAXCw==",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众D",
+          "userId": "1001004",
+          "message": "金色",
+          "color": "#ffcc00",
+          "messageId": "huya:21",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众D",
+          "userId": "1001004",
+          "message": "绿色",
+          "color": "#00ff00",
+          "messageId": "huya:22",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众D",
+          "userId": "1001004",
+          "message": "深蓝",
+          "color": "#001234",
+          "messageId": "huya:23",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "colours 3.x's hexadecimal parse turned white",
+      "frame": "ABYdAAEA5QYJbGl2ZToxMDAxGQAECgEFeB0AACoKAgAPRi0cJgfop4LkvJdFPAsRA+khA+k2BuiTneiJsmoBAP8QBCwwAQsgHwsKAQV4HQAALAoCAA9GLRwmB+inguS8l0U8CxED6SED6TYG5rex54GwagIACgoKEAQsMAELICALCgEFeB0AACwKAgAPRi0cJgfop4LkvJdFPAsRA+khA+k2BuS4g+S9jWoCAf8AABAELDABCyAhCwoBBXgdAAApCgIAD0YtHCYH6KeC5LyXRTwLEQPpIQPpNgbkuKTkvY1qAGQQBCwwAQsgIgs=",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众E",
+          "userId": "1001005",
+          "message": "蓝色",
+          "color": "#ffffff",
+          "messageId": "huya:31",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众E",
+          "userId": "1001005",
+          "message": "深灰",
+          "color": "#ffffff",
+          "messageId": "huya:32",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众E",
+          "userId": "1001005",
+          "message": "七位",
+          "color": "#ffffff",
+          "messageId": "huya:33",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众E",
+          "userId": "1001005",
+          "message": "两位",
+          "color": "#ffffff",
+          "messageId": "huya:34",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "popularity in a batch (3.x test)",
+      "frame": "ABYdAAArBg9saXZlOjIyNzIzMTY1MTkZAAEKAR9GHQAABQIAMQZ7IxwEzYaTU5wACw==",
+      "messages": [
+        {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "huya:2018964510849866752",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "popularity",
+            "value": 3212923
+          }
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "popularity in a single push",
+      "frame": "AAcdAAAQAAURH0YtAAAFAgBSmwwwAg==",
+      "messages": [
+        {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "popularity",
+            "value": 5413644
+          }
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "popularity without a count is 0",
+      "frame": "ABYdAAAYBglsaXZlOjEwMDEZAAEKAR9GHQAMICkL",
+      "messages": [
+        {
+          "type": "online",
+          "userName": "",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "huya:41",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": {
+            "kind": "popularity",
+            "value": 0
+          }
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "headline notice in a batch (3.x test)",
+      "frame": "ABYdAAAnBg9saXZlOjIyNzIzMTY1MTkZAAEKAgAeiaIdAAwjHATNhpNTnAEL",
+      "messages": [],
+      "superChatNotices": 1
+    },
+    {
+      "name": "two headline notices around a chat",
+      "frame": "ABYdAABjBglsaXZlOjEwMDEZAAMKAgAeiaIdAAwgMwsKAQV4HQAAMgoCAA9GLhwmB+inguS8l0Y8CxED6SED6TYM5LiK5aS05p2h5LqGagIA/2b/EAQsMAELIDQLCgIAHomiHQAMIDUL",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众F",
+          "userId": "1001006",
+          "message": "上头条了",
+          "color": "#ff66ff",
+          "messageId": "huya:52",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 2
+    },
+    {
+      "name": "headline notice in a single push",
+      "frame": "AAcdAAAMAAUSAB6Joi0ADDAC",
+      "messages": [],
+      "superChatNotices": 1
+    },
+    {
+      "name": "chat without a sender or a format",
+      "frame": "AAcdAAAfAAURBXgtAAAUEQPpIQPpNgzlj6rmnInmloflrZcwAg==",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "",
+          "userId": "0",
+          "message": "只有文字",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "empty text and a chat without text are still reported",
+      "frame": "ABYdAABWBglsaXZlOjEwMDEZAAIKAQV4HQAAGgoCAA9GLxwmB+inguS8l0c8CxED6SED6TYAID0LCgEFeB0AABgKAgAPRi8cJgfop4LkvJdHPAsRA+khA+kgPgs=",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众G",
+          "userId": "1001007",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "huya:61",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "观众G",
+          "userId": "1001007",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "huya:62",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "long text (string4)",
+      "frame": "AAcdAAEBYQAFEQV4LQABAVUKAgAPRjAcJgfop4LkvJdIPAsRA+khA+k3AAABLOW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5leW8ueW5lWoCAMz/ZhAELDABCzAC",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众H",
+          "userId": "1001008",
+          "message": "弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕",
+          "color": "#ccff66",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "another group and another channel are kept (3.x checks neither)",
+      "frame": "ABYdAABKBghsaXZlOjk5ORkAAQoBBXgdAAAyCgIAD0YxHCYH6KeC5LyXSTwLEQPnIQPnNgzliKvnmoTmiL/pl7RqAgCFxP8QBCwwAQsgRws=",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众I",
+          "userId": "1001009",
+          "message": "别的房间",
+          "color": "#85c4ff",
+          "messageId": "huya:71",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "unknown uris in a batch are skipped",
+      "frame": "ABYdAABhBglsaXZlOjEwMDEZAAMKARllHQAAAQAgUQsKAQV4HQAAMgoCAA9GMhwmB+inguS8l0o8CxED6SED6TYM56S854mp5LmL5ZCOagIAIs7OEAQsMAELIFILCgEX3x0ADCBTCw==",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众J",
+          "userId": "1001010",
+          "message": "礼物之后",
+          "color": "#22cece",
+          "messageId": "huya:82",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "other commands are ignored",
+      "frame": "ABUdAAw=",
+      "messages": [],
+      "superChatNotices": 0
+    },
+    {
+      "name": "a malformed chat body in a batch",
+      "frame": "ABYdAAEAuAYJbGl2ZToxMDAxGQADCgEFeB0AAC8KAgAPRjMcJgfop4LkvJdLPAsRA+khA+k2CeesrOS4gOadoWoCAP9wbhAELDABCyBbCwoBBXgdAAArCgIAD0YzHCYH6KeC5LyXSzwLEQPpIQPpNgnooqvmiKrmlq1qAgD/cG4QBCBcCwoBBXgdAAAvCgIAD0YzHCYH6KeC5LyXSzwLEQPpIQPpNgnnrKzkuInmnaFqAgD/cG4QBCwwAQsgXQs=",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "观众K",
+          "userId": "1001011",
+          "message": "第一条",
+          "color": "#ff706e",
+          "messageId": "huya:91",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "text that is not UTF-8",
+      "frame": "ABYdAABRBglsaXZlOjEwMDEZAAIKAQV4HQAABDYC5L0gZQsKAQV4HQAAKQoCAA9GNBwmB+inguS8l0w8CxED6SED6TYG5LmL5ZCOagD/EAQsMAELIGYL",
+      "messages": [],
+      "superChatNotices": 0
+    },
+    {
+      "name": "sender uid -1 is a signed byte",
+      "frame": "AAcdAAA2AAURBXgtAAArCgD/HCYG57O757ufPAsRA+khA+k2DOezu+e7n+a2iOaBr2oA/xAELDABCzAC",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "系统",
+          "userId": "255",
+          "message": "系统消息",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "superChatNotices": 0
+    },
+    {
+      "name": "truncated frame",
+      "frame": "AAcdAAA0AAURBXgtAAApCgIAD0Y1HCYH6KeC5LyXTTwLEQPpIQPpNgbmiKrmlq1qAP8QBCw=",
+      "messages": [],
+      "superChatNotices": 0
+    },
+    {
+      "name": "not a Tars frame",
+      "frame": "/w==",
+      "messages": [],
+      "superChatNotices": 0
+    }
+  ]
+}

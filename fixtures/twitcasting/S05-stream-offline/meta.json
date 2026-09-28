@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "twitcasting",
+  "sample": "S05-stream-offline",
+  "capturedAt": "2026-09-27T18:02:49.532358Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://twitcasting.tv/streamserver.php?target=twitcasting_jp&mode=client&player=pc_web",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://twitcasting.tv/",
+      "Accept-Language": "en"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "set-cookie": "hl=uo; expires=Mon, 27-Sep-2027 18:02:50 GMT; Max-Age=31536000; path=/; domain=.twitcasting.tv",
+      "last-modified": "Sun, 27 Sep 2026 18:02:50 GMT",
+      "cache-control": [
+        "no-cache, must-revalidate",
+        "post-check=0, pre-check=0"
+      ],
+      "date": "Sun, 27 Sep 2026 18:02:50 GMT",
+      "content-length": "431",
+      "strict-transport-security": "max-age=0",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "server": "Apache",
+      "expires": "Thu, 01 Dec 1994 16:00:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "bc4ad2c5c71fb8d38160272652092ae9ec44679db3679d689b39b5d48c335bbc",
+    "length": 431
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:hl",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -1,0 +1,21 @@
+{
+  "generator": "TwitcastingSite.getRoomDetail + getRoomDetailForRefresh + searchRooms(link) + getPlayQualites + getPlayUrls (with S05-stream-notfound)",
+  "value": {
+    "getRoomDetail": {
+      "throws": "TwitcastingException",
+      "message": "TwitCasting schema"
+    },
+    "getRoomDetailForRefresh": {
+      "throws": "TwitcastingException",
+      "message": "TwitCasting schema"
+    },
+    "searchRooms(link)": {
+      "throws": "TwitcastingException",
+      "message": "TwitCasting schema"
+    },
+    "getPlayQualites": {
+      "throws": "TwitcastingException",
+      "message": "TwitCasting schema"
+    }
+  }
+}

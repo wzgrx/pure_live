@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "twitcasting",
+  "sample": "S03-search",
+  "capturedAt": "2026-09-27T18:02:09.844816Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://search.twitcasting.tv/search/text/game?hl=en",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://twitcasting.tv/",
+      "Accept-Language": "en"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "close",
+      "set-cookie": [
+        "hl=qr; expires=Mon, 27-Sep-2027 18:02:09 GMT; Max-Age=31536000; path=/; domain=.twitcasting.tv",
+        "did=10f733eb3947294bb3a6bd292d0cb6ac; expires=Wed, 24-Sep-2036 18:02:09 GMT; Max-Age=315360000; path=/; domain=.twitcasting.tv"
+      ],
+      "cache-control": "no-cache, must-revalidate",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 18:02:09 GMT",
+      "strict-transport-security": "max-age=0",
+      "content-type": "text/html; charset=utf-8",
+      "pragma": "no-cache",
+      "server": "Apache",
+      "expires": "Thu, 01 Dec 1994 16:00:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "3477f6914fb96d491b371dccb939333b9b3254c483bc8e5115451852ba8db310",
+    "length": 292133
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "set-cookie:hl",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:did",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Recorded platform samples keep their exact bytes.
+fixtures/**/body.* -text

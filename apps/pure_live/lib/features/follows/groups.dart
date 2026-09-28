@@ -218,7 +218,7 @@ class _GroupPickerState extends ConsumerState<_GroupPicker> {
                 onChanged: (value) => setState(() => _changed[tag.id] = value),
               ),
             ListTile(
-              leading: const Icon(Icons.add),
+              leading: const LiveIcon(LiveIcons.add),
               title: Text(t.follows.newGroup),
               onTap: () async {
                 final tag = await createGroup(context, ref);
@@ -252,14 +252,17 @@ class GroupsPage extends ConsumerWidget {
       appBar: PageAppBar(maxContentWidth: Sizes.readingWidth, title: Text(t.follows.manageGroups)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => createGroup(context, ref),
-        icon: const Icon(Icons.add),
+        icon: const LiveIcon(LiveIcons.add),
         label: Text(t.follows.newGroup),
       ),
       body: tags.isEmpty
-          ? MessageView(icon: Icons.folder_outlined, title: t.follows.noGroups, message: t.follows.groupsHint)
+          ? MessageView(icon: LiveIcons.folder, title: t.follows.noGroups, message: t.follows.groupsHint)
           : PageBody(
               maxContentWidth: Sizes.readingWidth,
               child: ReorderableListView.builder(
+                // Own handles: Material's desktop handle is a Material Icons
+                // glyph (principles §2.6). A long press drags on touch.
+                buildDefaultDragHandles: false,
                 itemCount: tags.length,
                 onReorderItem: (from, to) {
                   final ids = [for (final tag in tags) tag.id];
@@ -269,44 +272,47 @@ class GroupsPage extends ConsumerWidget {
                 },
                 itemBuilder: (context, index) {
                   final tag = tags[index];
-                  return ListTile(
+                  return ReorderableDelayedDragStartListener(
                     key: ValueKey(tag.id),
-                    leading: const Icon(Icons.drag_handle),
-                    title: Text(tag.name),
-                    subtitle: tag.description.isEmpty ? null : Text(tag.description, maxLines: 2),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          tooltip: t.follows.renameAndDescribe,
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => editGroup(context, ref, tag),
-                        ),
-                        IconButton(
-                          tooltip: t.common.delete,
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () async {
-                            final members = [
-                              for (final follow in await store.follows.all())
-                                if (follow.tagIds.contains(tag.id)) follow.ref,
-                            ];
-                            await store.tags.delete(tag.id);
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(t.follows.groupDeleted(name: tag.name)),
-                                action: SnackBarAction(
-                                  label: t.common.undo,
-                                  onPressed: () async {
-                                    final restored = await store.tags.create(tag.name, description: tag.description);
-                                    await store.tags.addRooms(restored.id, members);
-                                  },
+                    index: index,
+                    child: ListTile(
+                      leading: ReorderableDragStartListener(index: index, child: const LiveIcon(LiveIcons.reorder)),
+                      title: Text(tag.name),
+                      subtitle: tag.description.isEmpty ? null : Text(tag.description, maxLines: 2),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: t.follows.renameAndDescribe,
+                            icon: const LiveIcon(LiveIcons.edit),
+                            onPressed: () => editGroup(context, ref, tag),
+                          ),
+                          IconButton(
+                            tooltip: t.common.delete,
+                            icon: const LiveIcon(LiveIcons.delete),
+                            onPressed: () async {
+                              final members = [
+                                for (final follow in await store.follows.all())
+                                  if (follow.tagIds.contains(tag.id)) follow.ref,
+                              ];
+                              await store.tags.delete(tag.id);
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(t.follows.groupDeleted(name: tag.name)),
+                                  action: SnackBarAction(
+                                    label: t.common.undo,
+                                    onPressed: () async {
+                                      final restored = await store.tags.create(tag.name, description: tag.description);
+                                      await store.tags.addRooms(restored.id, members);
+                                    },
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },

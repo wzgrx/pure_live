@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_iptv/live_iptv.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -261,8 +262,8 @@ class ProgrammeRecordButton extends ConsumerWidget {
     return IconButton(
       tooltip: on ? t.recording.cancelSchedule : t.recording.schedule,
       isSelected: on,
-      icon: const Icon(Icons.radio_button_unchecked),
-      selectedIcon: const Icon(Icons.radio_button_checked),
+      icon: const LiveIcon(LiveIcons.record),
+      selectedIcon: const LiveIcon(LiveIcons.record, filled: true),
       onPressed: () {
         final schedule = ref.read(recordScheduleProvider.notifier);
         unawaited(on ? schedule.remove(item) : schedule.add(item));

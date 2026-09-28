@@ -18,7 +18,9 @@ import 'package:pure_live_app/features/fonts/fonts.dart';
 ///   Simplified fallback (`Microsoft YaHei UI`, also the explicit Windows
 ///   family) and the Traditional face for `Microsoft JhengHei UI`, so every
 ///   glyph Roboto lacks resolves to it instead of the test font.
-/// - Icons are Material Icons from the Flutter SDK.
+/// - Icons are Material Symbols Rounded from the `material_symbols_icons`
+///   package (principles §2.6), as the app bundles it. Material Icons are not
+///   loaded: the harness fails on any Material Icons glyph.
 abstract final class ShotFonts {
   /// Noto Sans CJK, regular.
   static const cjkRegular = '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc';
@@ -31,6 +33,12 @@ abstract final class ShotFonts {
 
   /// The danmaku font id every screenshot chooses.
   static const danmakuFontId = 'screenshot-noto';
+
+  /// The icon font's family, as `Symbols.*_rounded` glyphs name it.
+  static const symbolsFamily = 'packages/material_symbols_icons/MaterialSymbolsRounded';
+
+  /// The icon font in the test asset bundle.
+  static const symbolsAsset = 'packages/material_symbols_icons/lib/fonts/MaterialSymbolsRounded.ttf';
 
   /// Faces of the CJK collections (`fc-scan --format "%{index} %{family[0]}\n"`).
   static const _simplified = 2;
@@ -52,7 +60,6 @@ abstract final class ShotFonts {
   static List<String> get _files => [
     cjkRegular,
     cjkBold,
-    _material('MaterialIcons-Regular.otf'),
     _material('Roboto-Regular.ttf'),
     _material('Roboto-Medium.ttf'),
     _material('Roboto-Bold.ttf'),
@@ -93,7 +100,7 @@ abstract final class ShotFonts {
     await family('Roboto', roboto);
     await family(fontFamilyOf(appFontId), roboto);
     await family(fontFamilyOf(danmakuFontId), simplified);
-    await family('MaterialIcons', [file(_material('MaterialIcons-Regular.otf'))]);
+    await family(symbolsFamily, [await rootBundle.load(symbolsAsset)]);
     // Windows' default family for text outside the theme.
     await family('Segoe UI', simplified);
     await family('Microsoft YaHei UI', simplified);

@@ -80,14 +80,14 @@ class _DiagnosticsPageState extends ConsumerState<DiagnosticsPage> {
           children: [
             if (_busy) const LinearProgressIndicator(),
             ListTile(
-              leading: const Icon(Icons.medical_information_outlined),
+              leading: const LiveIcon(LiveIcons.diagnostics),
               title: Text(t.diagnostics.exportBundle),
               subtitle: Text(t.diagnostics.exportBundleSubtitle),
               enabled: !_busy,
               onTap: _export,
             ),
             SwitchListTile(
-              secondary: const Icon(Icons.bug_report_outlined),
+              secondary: const LiveIcon(LiveIcons.debugLog),
               title: Text(t.backup.crashReports),
               subtitle: Text(t.diagnostics.crashReportsSubtitle),
               value: prefs.crashReports,

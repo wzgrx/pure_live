@@ -97,7 +97,10 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
           Padding(
             padding: const EdgeInsets.all(Space.s3),
             child: TextField(
-              decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: t.multiview.filterHint),
+              decoration: InputDecoration(
+                prefixIcon: const LiveIcon(LiveIcons.search),
+                hintText: t.multiview.filterHint,
+              ),
               onChanged: (value) => setState(() => _filter = value.trim().toLowerCase()),
             ),
           ),
@@ -152,26 +155,26 @@ Future<void> showMultiviewCellMenu(BuildContext context, WidgetRef ref, int inde
   final action = await showModalBottomSheet<MultiviewCellAction>(
     context: context,
     builder: (context) {
-      Widget item(MultiviewCellAction action, IconData icon, String label) =>
-          ListTile(leading: Icon(icon), title: Text(label), onTap: () => Navigator.pop(context, action));
+      Widget item(MultiviewCellAction action, LiveIcons icon, String label) =>
+          ListTile(leading: LiveIcon(icon), title: Text(label), onTap: () => Navigator.pop(context, action));
       return SafeArea(
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(title: Text(cell.detail?.card.anchorName ?? t.multiview.cell(n: index + 1))),
-              item(MultiviewCellAction.swap, Icons.swap_horiz, t.multiview.switchRoom),
+              item(MultiviewCellAction.swap, LiveIcons.switchRoom, t.multiview.switchRoom),
               if (cell.paused)
-                item(MultiviewCellAction.resume, Icons.play_arrow, t.common.resume)
+                item(MultiviewCellAction.resume, LiveIcons.play, t.common.resume)
               else
-                item(MultiviewCellAction.pause, Icons.pause, t.common.pause),
+                item(MultiviewCellAction.pause, LiveIcons.pause, t.common.pause),
               if ((session?.state.qualities.length ?? 0) > 1)
-                item(MultiviewCellAction.quality, Icons.hd_outlined, t.multiview.quality),
+                item(MultiviewCellAction.quality, LiveIcons.quality, t.multiview.quality),
               if ((session?.state.lines.length ?? 0) > 1)
-                item(MultiviewCellAction.line, Icons.alt_route, t.multiview.line),
-              item(MultiviewCellAction.volume, Icons.volume_up_outlined, t.multiview.volume),
-              item(MultiviewCellAction.refresh, Icons.refresh, t.common.refresh),
-              item(MultiviewCellAction.close, Icons.close, t.common.close),
+                item(MultiviewCellAction.line, LiveIcons.line, t.multiview.line),
+              item(MultiviewCellAction.volume, LiveIcons.volume, t.multiview.volume),
+              item(MultiviewCellAction.refresh, LiveIcons.refresh, t.common.refresh),
+              item(MultiviewCellAction.close, LiveIcons.close, t.common.close),
             ],
           ),
         ),
@@ -215,7 +218,7 @@ Future<void> showMultiviewQualitySheet(BuildContext context, WidgetRef ref, int 
           for (final q in qualities)
             ListTile(
               title: Text(q.label),
-              trailing: q == session.state.quality ? const Icon(Icons.check) : null,
+              trailing: q == session.state.quality ? const LiveIcon(LiveIcons.check) : null,
               onTap: () => Navigator.pop(context, q),
             ),
         ],
@@ -240,7 +243,7 @@ Future<void> showMultiviewLineSheet(BuildContext context, WidgetRef ref, int ind
           for (final (i, line) in lines.indexed)
             ListTile(
               title: Text(t.multiview.lineN(n: i + 1)),
-              trailing: line.lineId == session.state.line?.lineId ? const Icon(Icons.check) : null,
+              trailing: line.lineId == session.state.line?.lineId ? const LiveIcon(LiveIcons.check) : null,
               onTap: () => Navigator.pop(context, line.lineId),
             ),
         ],
@@ -294,7 +297,7 @@ class MultiviewVolumePanel extends ConsumerWidget {
           ),
           Row(
             children: [
-              const Icon(Icons.volume_down),
+              const LiveIcon(LiveIcons.volumeDown),
               Expanded(
                 child: Slider(
                   value: cell.volume,
@@ -303,7 +306,7 @@ class MultiviewVolumePanel extends ConsumerWidget {
                   onChangeEnd: (value) => controller.setVolume(index, value),
                 ),
               ),
-              const Icon(Icons.volume_up),
+              const LiveIcon(LiveIcons.volume),
             ],
           ),
           Text(

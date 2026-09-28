@@ -34,7 +34,7 @@ class AreaPage extends ConsumerWidget {
           if (area != null)
             IconButton(
               tooltip: followed ? t.discover.unfollowArea : t.discover.followArea,
-              icon: Icon(followed ? Icons.star : Icons.star_border),
+              icon: LiveIcon(LiveIcons.star, filled: followed),
               onPressed: () {
                 final store = ref.read(storeProvider).followAreas;
                 final entry = followedAreaOf(platform, area);

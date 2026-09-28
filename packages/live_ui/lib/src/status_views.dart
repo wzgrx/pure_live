@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/live_icon.dart';
+import 'package:live_ui/src/icons/live_icons.dart';
 import 'package:live_ui/src/illustration.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/room_card_view.dart';
@@ -246,7 +248,7 @@ class MessageView extends StatelessWidget {
     required this.title,
     this.message,
     this.illustration,
-    this.icon = Icons.inbox_outlined,
+    this.icon = LiveIcons.inbox,
     this.actionLabel,
     this.onAction,
     this.secondaryLabel,
@@ -267,7 +269,7 @@ class MessageView extends StatelessWidget {
     this.onSecondary,
     this.actions = const [],
     super.key,
-  }) : icon = Icons.error_outline,
+  }) : icon = LiveIcons.error,
        _error = true;
 
   /// Headline.
@@ -281,7 +283,7 @@ class MessageView extends StatelessWidget {
 
   /// A 48 dp icon for places too small for an [illustration] (sheets,
   /// panels).
-  final IconData icon;
+  final LiveIcons icon;
 
   /// Primary action label.
   final String? actionLabel;
@@ -323,7 +325,7 @@ class MessageView extends StatelessWidget {
               if (illustration != null)
                 IllustrationView(illustration)
               else
-                Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),
+                LiveIcon(icon, size: Sizes.iconXxl, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(height: Space.s4),
               Text(
                 title,

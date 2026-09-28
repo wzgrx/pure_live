@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_ui/src/adaptive_scaffold.dart';
+import 'package:live_ui/src/icons/live_icon.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/tv/tv_scope.dart';
 
@@ -341,14 +342,16 @@ class _RailItemState extends State<_RailItem> {
             child: Container(
               height: Sizes.targetTouch,
               margin: const EdgeInsets.symmetric(vertical: Space.s1),
-              padding: const EdgeInsets.symmetric(horizontal: Space.s4),
+              // The 32 dp icon (principles §2.6) centred in the collapsed rail's
+              // pill: 72 less the rail's right padding, less the icon, halved.
+              padding: const EdgeInsets.symmetric(horizontal: (TvMetrics.railItems - Space.s3 - Sizes.iconLg) / 2),
               decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(Radii.full)),
               // The label joins once the expanding rail has room for it.
               child: LayoutBuilder(
                 builder: (context, constraints) => Row(
                   children: [
-                    Icon(widget.selected ? d.selectedIcon : d.icon, color: foreground, size: Sizes.iconMd),
-                    if (widget.expanded && constraints.maxWidth >= Sizes.iconMd + Space.s3 + Sizes.iconLg) ...[
+                    LiveIcon(d.icon, filled: widget.selected, color: foreground, size: Sizes.iconLg),
+                    if (widget.expanded && constraints.maxWidth >= Sizes.iconLg + Space.s3 + Sizes.iconLg) ...[
                       const SizedBox(width: Space.s3),
                       Expanded(
                         child: Text(

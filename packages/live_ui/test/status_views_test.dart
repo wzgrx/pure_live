@@ -123,7 +123,7 @@ void main() {
       var retried = false;
       await tester.pumpWidget(host(MessageView.error(title: '出错', onAction: () => retried = true)));
       expect(find.byType(IllustrationView), findsNothing);
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(_icon(LiveIcons.error), findsOneWidget);
       await tester.tap(find.text('重试'));
       expect(retried, isTrue);
     });
@@ -158,3 +158,6 @@ void main() {
     });
   });
 }
+
+/// The [LiveIcon] showing [icon].
+Finder _icon(LiveIcons icon) => find.byWidgetPredicate((widget) => widget is LiveIcon && widget.icon == icon);

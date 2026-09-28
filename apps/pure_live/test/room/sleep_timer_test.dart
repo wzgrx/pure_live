@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live_app/features/room/sleep_timer.dart';
 
+import '../icon_finder.dart';
+
 void main() {
   testWidgets('F-TMR-01: ends after the chosen time; cancel stops it; a restart replaces it', (tester) async {
     final container = ProviderContainer();
@@ -118,15 +120,15 @@ void main() {
         child: const MaterialApp(home: Scaffold(body: SleepTimerChip())),
       ),
     );
-    expect(find.byIcon(Icons.bedtime_outlined), findsNothing);
+    expect(findIcon(LiveIcons.sleepTimer), findsNothing);
     container.read(sleepTimerProvider.notifier).start(const Duration(minutes: 2));
     await tester.pump();
     expect(find.text('02:00'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1));
-    expect(find.byIcon(Icons.bedtime_outlined), findsOneWidget);
+    expect(findIcon(LiveIcons.sleepTimer), findsOneWidget);
     container.read(sleepTimerProvider.notifier).cancel();
     await tester.pump();
-    expect(find.byIcon(Icons.bedtime_outlined), findsNothing);
+    expect(findIcon(LiveIcons.sleepTimer), findsNothing);
   });
 
   test('F-ROOM-10: restoring the picture ends a 助眠模式 timer, not one the user set', () {

@@ -180,7 +180,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
         actions: [
           IconButton(
             tooltip: t.iptv.syncAll,
-            icon: const Icon(Icons.sync),
+            icon: const LiveIcon(LiveIcons.sync),
             onPressed: _busy.contains('all') || (playlists.value?.isEmpty ?? true) ? null : _syncAll,
           ),
         ],
@@ -196,7 +196,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
             ...switch (playlists) {
               AsyncData(:final value) when value.isEmpty => [
                 ListTile(
-                  leading: const Icon(Icons.live_tv_outlined),
+                  leading: const LiveIcon(LiveIcons.liveTv),
                   title: Text(t.iptv.noPlaylists),
                   subtitle: Text(t.iptv.playlistsHint),
                 ),
@@ -223,17 +223,17 @@ class _IptvPageState extends ConsumerState<IptvPage> {
                 runSpacing: Space.s2,
                 children: [
                   FilledButton.tonalIcon(
-                    icon: const Icon(Icons.link, size: 18),
+                    icon: const LiveIcon(LiveIcons.link),
                     label: Text(t.iptv.importFromUrl),
                     onPressed: _busy.contains('import') ? null : _importUrl,
                   ),
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.folder_open, size: 18),
+                    icon: const LiveIcon(LiveIcons.folderOpen),
                     label: Text(t.iptv.importFromFile),
                     onPressed: _busy.contains('import') ? null : _importFile,
                   ),
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.vpn_key_outlined, size: 18),
+                    icon: const LiveIcon(LiveIcons.key),
                     label: Text(t.iptv.xtreamAccount),
                     onPressed: _busy.contains('import') ? null : _importXtream,
                   ),
@@ -242,14 +242,14 @@ class _IptvPageState extends ConsumerState<IptvPage> {
             ),
             SettingsHeader(t.iptv.guide),
             ListTile(
-              leading: const Icon(Icons.event_note_outlined),
+              leading: const LiveIcon(LiveIcons.guide),
               title: Text(t.iptv.guideSources),
               subtitle: Text(
                 selectedGuide == null
                     ? (guides.isEmpty ? t.iptv.noGuideAdded : t.iptv.noGuideSelected)
                     : t.iptv.currentGuide(name: selectedGuide.name),
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const LiveIcon(LiveIcons.subpage),
               onTap: () => context.push(iptvGuideLocation),
             ),
             SettingsHeader(t.common.sync),
@@ -271,7 +271,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
               builder: (context, value, set) => ListTile(
                 title: Text(t.iptv.customUserAgent),
                 subtitle: Text(value.isEmpty ? t.iptv.userAgentUnset : value, maxLines: 2),
-                trailing: const Icon(Icons.edit_outlined),
+                trailing: const LiveIcon(LiveIcons.edit),
                 onTap: () async {
                   final agent = await askText(
                     context,
@@ -310,7 +310,7 @@ class _PlaylistTile extends StatelessWidget {
         ? t.iptv.notSyncedHint
         : t.iptv.channelsAndSynced(n: playlist.channelCount, synced: syncedText(playlist.lastSyncAt));
     return ListTile(
-      leading: Icon(playlist.isRemote ? Icons.cloud_outlined : Icons.description_outlined),
+      leading: LiveIcon(playlist.isRemote ? LiveIcons.cloud : LiveIcons.file),
       title: Text(playlist.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,6 +328,7 @@ class _PlaylistTile extends StatelessWidget {
       trailing: busy
           ? const SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2))
           : PopupMenuButton<_PlaylistAction>(
+              icon: const LiveIcon(LiveIcons.more),
               tooltip: t.common.more,
               onSelected: onAction,
               itemBuilder: (context) => [
@@ -335,7 +336,7 @@ class _PlaylistTile extends StatelessWidget {
                 PopupMenuItem(value: _PlaylistAction.rename, child: Text(t.common.rename)),
                 const PopupMenuItem(value: _PlaylistAction.userAgent, child: Text('User-Agent')),
                 if (playlist.isRemote) ...[
-                  CheckedPopupMenuItem(
+                  CheckedMenuItem(
                     value: _PlaylistAction.autoSync,
                     checked: playlist.autoSync,
                     child: Text(t.iptv.autoSync),
@@ -425,7 +426,7 @@ class _XtreamDialogState extends State<_XtreamDialog> {
               labelText: t.common.password,
               suffixIcon: IconButton(
                 tooltip: _hidden ? t.iptv.showPassword : t.iptv.hidePassword,
-                icon: Icon(_hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                icon: LiveIcon(LiveIcons.showPassword, filled: !_hidden),
                 onPressed: () => setState(() => _hidden = !_hidden),
               ),
             ),

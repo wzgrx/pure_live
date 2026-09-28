@@ -4,7 +4,7 @@ import 'dart:ui' show AppExitType;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:live_ui/live_ui.dart' show Sizes, Space;
+import 'package:live_ui/live_ui.dart' show LiveIcon, LiveIcons, Sizes, Space;
 import 'package:pure_live_app/features/room/presentation.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
@@ -240,7 +240,7 @@ class _SleepTimerPanelState extends ConsumerState<SleepTimerPanel> {
                     onPressed: () => _start(minutes),
                   ),
                 ActionChip(
-                  avatar: const Icon(Icons.edit_outlined, size: 18),
+                  avatar: const LiveIcon(LiveIcons.edit),
                   label: Text(t.room.sleep.custom),
                   onPressed: _custom,
                 ),
@@ -249,11 +249,15 @@ class _SleepTimerPanelState extends ConsumerState<SleepTimerPanel> {
             const SizedBox(height: Space.s3),
             SegmentedButton<SleepAction>(
               segments: [
-                ButtonSegment(value: SleepAction.pause, label: Text(t.room.sleep.pause), icon: const Icon(Icons.pause)),
+                ButtonSegment(
+                  value: SleepAction.pause,
+                  label: Text(t.room.sleep.pause),
+                  icon: const LiveIcon(LiveIcons.pause),
+                ),
                 ButtonSegment(
                   value: SleepAction.exit,
                   label: Text(t.room.sleep.exit),
-                  icon: const Icon(Icons.exit_to_app),
+                  icon: const LiveIcon(LiveIcons.quit),
                 ),
               ],
               selected: {state.action},
@@ -353,7 +357,7 @@ class _SleepTimerChipState extends ConsumerState<SleepTimerChip> {
     return TextButton.icon(
       style: TextButton.styleFrom(foregroundColor: color),
       onPressed: widget.onTap,
-      icon: const Icon(Icons.bedtime_outlined, size: 18),
+      icon: const LiveIcon(LiveIcons.sleepTimer),
       label: Text(
         formatRemaining(state.remaining(DateTime.now())),
         style: const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),

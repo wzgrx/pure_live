@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/alerts/alert_notifier.dart';
 import 'package:pure_live_app/features/alerts/live_alerts.dart';
@@ -87,7 +88,7 @@ class RoomAlertSwitch extends ConsumerWidget {
     final global = ref.watch(liveAlertsSetting);
     final off = ref.watch(liveAlertsOffProvider).value?.contains(room) ?? false;
     return SwitchListTile(
-      secondary: Icon(global && !off ? Icons.notifications_active_outlined : Icons.notifications_off_outlined),
+      secondary: LiveIcon(LiveIcons.alerts, filled: global && !off),
       title: Text(t.alerts.liveAlerts),
       subtitle: Text(
         !global
@@ -119,7 +120,7 @@ class ProgrammeReminderButton extends ConsumerWidget {
     final reminder = ProgrammeReminder.of(room, programme);
     final on = ref.watch(programmeRemindersProvider).any((item) => item.key == reminder.key);
     return TextButton.icon(
-      icon: Icon(on ? Icons.notifications_active : Icons.notifications_none, size: 18),
+      icon: LiveIcon(LiveIcons.alerts, filled: on),
       label: Text(on ? t.alerts.reminderSet : t.alerts.remindMe),
       onPressed: () => unawaited(toggleProgrammeReminder(context, ref, reminder)),
     );

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
-import 'package:live_ui/live_ui.dart' show OnVideoTextScale;
+import 'package:live_ui/live_ui.dart' show LiveIcon, LiveIcons, OnVideoTextScale, Sizes, VideoControlIcons;
 import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/system/mini_player.dart';
@@ -182,52 +182,54 @@ class _MiniWindowState extends ConsumerState<_MiniWindow> {
     const ink = Colors.white;
     final paused = !_state.wantsPlay;
     // No tooltips: the window sits above the navigator, outside any Overlay.
-    return ColoredBox(
-      color: const Color(0x66000000),
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Semantics(
-              label: t.system.backToRoom,
-              button: true,
-              child: IconButton(
-                color: ink,
-                iconSize: 20,
-                icon: const Icon(Icons.open_in_full),
-                onPressed: () => ref.read(miniPlayerProvider.notifier).openRoom(),
+    // The controls on a picture (principles §2.6): a small window, 24 dp,
+    // the play button 32.
+    return VideoControlIcons(
+      child: ColoredBox(
+        color: const Color(0x66000000),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Semantics(
+                label: t.system.backToRoom,
+                button: true,
+                child: IconButton(
+                  color: ink,
+                  icon: const LiveIcon(LiveIcons.expandView),
+                  onPressed: () => ref.read(miniPlayerProvider.notifier).openRoom(),
+                ),
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: Semantics(
-              label: t.system.closeMini,
-              button: true,
-              child: IconButton(
-                color: ink,
-                iconSize: 20,
-                icon: const Icon(Icons.close),
-                onPressed: () => unawaited(ref.read(miniPlayerProvider.notifier).close()),
+            Align(
+              alignment: Alignment.topRight,
+              child: Semantics(
+                label: t.system.closeMini,
+                button: true,
+                child: IconButton(
+                  color: ink,
+                  icon: const LiveIcon(LiveIcons.close),
+                  onPressed: () => unawaited(ref.read(miniPlayerProvider.notifier).close()),
+                ),
               ),
             ),
-          ),
-          Center(
-            child: Semantics(
-              label: paused ? t.common.play : t.common.pause,
-              button: true,
-              child: IconButton(
-                color: ink,
-                iconSize: 32,
-                icon: Icon(paused ? Icons.play_arrow : Icons.pause),
-                onPressed: () {
-                  runSessionCommand(paused ? _session.play : _session.pause);
-                  if (!isDesktop) _showControls();
-                },
+            Center(
+              child: Semantics(
+                label: paused ? t.common.play : t.common.pause,
+                button: true,
+                child: IconButton(
+                  color: ink,
+                  iconSize: Sizes.iconLg,
+                  icon: LiveIcon(paused ? LiveIcons.play : LiveIcons.pause),
+                  onPressed: () {
+                    runSessionCommand(paused ? _session.play : _session.pause);
+                    if (!isDesktop) _showControls();
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -94,7 +94,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
           children: [
             if (checking) const LinearProgressIndicator(),
             ListTile(
-              leading: const Icon(Icons.info_outline),
+              leading: const LiveIcon(LiveIcons.info),
               title: Text(t.about.currentVersion(version: appVersion)),
               subtitle: Text(currentVersion.isPreRelease ? t.about.channelPreview : t.about.channelStable),
               trailing: TextButton(
@@ -104,7 +104,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
             ),
             if (status?.error case final error?)
               ListTile(
-                leading: Icon(Icons.error_outline, color: theme.colorScheme.error),
+                leading: LiveIcon(LiveIcons.error, color: theme.colorScheme.error),
                 title: Text(updateErrorText(error)),
                 trailing: TextButton(
                   onPressed: () => _open(ref.read(updateCheckerProvider).releasesUrl),
@@ -112,13 +112,13 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
                 ),
               )
             else if (status != null && !status.checking && latest == null)
-              ListTile(leading: const Icon(Icons.check_circle_outline), title: Text(t.about.upToDate)),
+              ListTile(leading: const LiveIcon(LiveIcons.success), title: Text(t.about.upToDate)),
             if (latest != null) ..._latestSection(context, latest),
             if (status != null && status.releases.isNotEmpty) ...[
               const Divider(),
               ListTile(dense: true, title: Text(t.about.olderReleases)),
               for (final release in status.releases.where((release) => release != latest))
-                ExpansionTile(
+                _Expandable(
                   title: Text(release.tag),
                   subtitle: Text(_describe(release)),
                   childrenPadding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s3),
@@ -152,7 +152,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
     return [
       const Divider(),
       ListTile(
-        leading: Icon(Icons.new_releases_outlined, color: theme.colorScheme.primary),
+        leading: LiveIcon(LiveIcons.newRelease, color: theme.colorScheme.primary),
         title: Text(t.about.newRelease(version: release.version), style: theme.textTheme.titleMedium),
         subtitle: Text(_describe(release)),
         trailing: TextButton(onPressed: () => _open(release.pageUrl), child: Text(t.about.releasePage)),
@@ -162,7 +162,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
         for (final asset in recommended) _assetTile(asset, highlight: asset == recommended.first),
       ],
       if (others.isNotEmpty)
-        ExpansionTile(title: Text(t.about.otherDownloads), children: [for (final asset in others) _assetTile(asset)]),
+        _Expandable(title: Text(t.about.otherDownloads), children: [for (final asset in others) _assetTile(asset)]),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s2),
         child: Column(
@@ -170,7 +170,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
           children: [
             OutlinedButton.icon(
               onPressed: _verifying ? null : () => _verify(release),
-              icon: const Icon(Icons.verified_outlined),
+              icon: const LiveIcon(LiveIcons.verified),
               label: Text(_verifying ? t.about.calculating : t.about.verifyDownload),
             ),
             if (_verifyResult case final result?)
@@ -203,7 +203,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
     };
     final sha = asset.sha256;
     return ListTile(
-      leading: Icon(highlight ? Icons.download_for_offline : Icons.download_outlined),
+      leading: LiveIcon(LiveIcons.download, filled: highlight),
       title: Text(asset.name, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         [
@@ -214,6 +214,7 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
       ),
       onTap: () => _open(asset.url),
       trailing: PopupMenuButton<String>(
+        icon: const LiveIcon(LiveIcons.more),
         tooltip: t.common.more,
         onSelected: (value) => switch (value) {
           'link' => _copy(asset.url.toString(), t.about.downloadLinkCopied),
@@ -226,4 +227,40 @@ class _UpdatePageState extends ConsumerState<UpdatePage> {
       ),
     );
   }
+}
+
+/// An [ExpansionTile] whose arrow is a [LiveIcon]: Material's own is a
+/// Material Icons glyph (principles §2.6).
+class _Expandable extends StatefulWidget {
+  const new({
+    required this.title,
+    required this.children,
+    this.subtitle,
+    this.childrenPadding,
+    this.expandedCrossAxisAlignment,
+  });
+
+  final Widget title;
+  final Widget? subtitle;
+  final List<Widget> children;
+  final EdgeInsetsGeometry? childrenPadding;
+  final CrossAxisAlignment? expandedCrossAxisAlignment;
+
+  @override
+  State<_Expandable> createState() => _ExpandableState();
+}
+
+class _ExpandableState extends State<_Expandable> {
+  var _open = false;
+
+  @override
+  Widget build(BuildContext context) => ExpansionTile(
+    title: widget.title,
+    subtitle: widget.subtitle,
+    childrenPadding: widget.childrenPadding,
+    expandedCrossAxisAlignment: widget.expandedCrossAxisAlignment,
+    trailing: LiveIcon(_open ? LiveIcons.collapse : LiveIcons.expand),
+    onExpansionChanged: (open) => setState(() => _open = open),
+    children: widget.children,
+  );
 }

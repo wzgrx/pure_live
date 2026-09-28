@@ -317,7 +317,7 @@ class PortraitPanelLayoutState extends State<PortraitPanelLayout> {
               bottom: height + Space.s3,
               child: FilledButton.tonalIcon(
                 onPressed: widget.onForceLandscape,
-                icon: const Icon(Icons.screen_rotation, size: 18),
+                icon: const LiveIcon(LiveIcons.rotate),
                 label: Text(t.room.forceLandscape),
               ),
             ),

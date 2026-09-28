@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_media/live_media.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/desktop_window.dart';
 import 'package:pure_live_app/features/system/now_playing.dart';
 import 'package:pure_live_app/features/system/pip.dart';
@@ -92,29 +93,33 @@ class _PipVideoFrameState extends ConsumerState<PipVideoFrame> {
           children: [
             video,
             if (_hover)
-              ColoredBox(
-                color: const Color(0x55000000),
-                child: Stack(
-                  children: [
-                    Center(
-                      child: IconButton(
-                        tooltip: paused ? t.common.play : t.common.pause,
-                        color: Colors.white,
-                        iconSize: 36,
-                        icon: Icon(paused ? Icons.play_arrow : Icons.pause),
-                        onPressed: () => runSessionCommand(paused ? widget.session.play : widget.session.pause),
+              // The controls on a picture (principles §2.6): a small window,
+              // 24 dp, the play button 32.
+              VideoControlIcons(
+                child: ColoredBox(
+                  color: const Color(0x55000000),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: IconButton(
+                          tooltip: paused ? t.common.play : t.common.pause,
+                          color: Colors.white,
+                          iconSize: Sizes.iconLg,
+                          icon: LiveIcon(paused ? LiveIcons.play : LiveIcons.pause),
+                          onPressed: () => runSessionCommand(paused ? widget.session.play : widget.session.pause),
+                        ),
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                        tooltip: t.system.exitPip,
-                        color: Colors.white,
-                        icon: const Icon(Icons.close_fullscreen),
-                        onPressed: () => unawaited(_exit()),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          tooltip: t.system.exitPip,
+                          color: Colors.white,
+                          icon: const LiveIcon(LiveIcons.collapseView),
+                          onPressed: () => unawaited(_exit()),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
           ],

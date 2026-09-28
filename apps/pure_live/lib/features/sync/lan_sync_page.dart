@@ -282,7 +282,7 @@ class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProv
       yield const SizedBox(height: Space.s4);
       yield FilledButton.icon(
         onPressed: _starting ? null : _start,
-        icon: const Icon(Icons.download_for_offline_outlined),
+        icon: const LiveIcon(LiveIcons.receive),
         label: Text(_starting ? t.sync.lan.starting : t.sync.lan.startReceiving),
       );
       if (_receiveError case final error?) {
@@ -320,7 +320,7 @@ class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProv
       yield const SizedBox(height: Space.s4);
       yield OutlinedButton.icon(
         onPressed: _stop,
-        icon: const Icon(Icons.stop_circle_outlined),
+        icon: const LiveIcon(LiveIcons.stopTask),
         label: Text(t.sync.lan.stopReceiving),
       );
     }
@@ -341,7 +341,7 @@ class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProv
         hintText: '192.168.1.5:${LanSyncProtocol.port}',
         suffixIcon: IconButton(
           tooltip: t.common.paste,
-          icon: const Icon(Icons.content_paste),
+          icon: const LiveIcon(LiveIcons.paste),
           onPressed: () async {
             final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
             if (text == null) return;
@@ -360,7 +360,7 @@ class _LanSyncPageState extends ConsumerState<LanSyncPage> with SingleTickerProv
     yield const SizedBox(height: Space.s4);
     yield FilledButton.icon(
       onPressed: _sending ? null : _send,
-      icon: const Icon(Icons.send_outlined),
+      icon: const LiveIcon(LiveIcons.send),
       label: Text(_sending ? t.sync.lan.awaiting : t.common.send),
     );
     if (_sending) {

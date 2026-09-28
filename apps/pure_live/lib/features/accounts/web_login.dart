@@ -243,7 +243,7 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage> {
           title: Text(t.accounts.webTitle(name: name)),
           actions: [
             if (page != null)
-              IconButton(tooltip: t.common.refresh, icon: const Icon(Icons.refresh), onPressed: page.reload),
+              IconButton(tooltip: t.common.refresh, icon: const LiveIcon(LiveIcons.refresh), onPressed: page.reload),
           ],
           bottom: _progress < 100
               ? PreferredSize(
@@ -254,7 +254,7 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage> {
         ),
         body: flow == null || page == null
             ? MessageView(
-                icon: Icons.public_off,
+                icon: LiveIcons.webUnavailable,
                 title: t.accounts.webUnavailable,
                 message: t.accounts.webUnavailableHint,
               )

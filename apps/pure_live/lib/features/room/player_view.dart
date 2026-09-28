@@ -180,7 +180,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   bool _locked = false;
   bool _lockButton = false;
   Timer? _lockButtonTimer;
-  (IconData, String)? _hint;
+  (LiveIcons, String, bool)? _hint;
   Timer? _hintTimer;
   String? _tip;
   Timer? _tipTimer;
@@ -374,7 +374,11 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     });
     unawaited(_session.setVolume(next));
     if (hint) {
-      showHint(next == 0 ? Icons.volume_off : Icons.volume_up, t.room.volumeHint(percent: (next * 100).round()));
+      showHint(
+        next == 0 ? LiveIcons.mute : LiveIcons.volume,
+        t.room.volumeHint(percent: (next * 100).round()),
+        filled: next == 0,
+      );
     }
     if (!touched) return;
     _volumeTouched = true;
@@ -421,10 +425,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     final prefs = ref.read(danmakuPrefsProvider);
     if (!prefs.enabled) return;
     ref.read(danmakuPrefsProvider.notifier).setHidden(hidden: !prefs.hidden);
-    showHint(
-      prefs.hidden ? Icons.subtitles : Icons.subtitles_off_outlined,
-      prefs.hidden ? t.room.danmakuShown : t.room.danmakuHidden,
-    );
+    showHint(LiveIcons.danmaku, prefs.hidden ? t.room.danmakuShown : t.room.danmakuHidden, filled: prefs.hidden);
   }
 
   /// P and the picture-in-picture button (F-PIP-01, F-PIP-02): only the
@@ -477,7 +478,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
     if (_systemBrightness) {
       unawaited(ScreenBrightness.instance.setApplicationScreenBrightness(next).catchError((Object _) {}));
     }
-    showHint(Icons.brightness_medium, t.room.brightnessHint(percent: (next * 100).round()));
+    showHint(LiveIcons.brightness, t.room.brightnessHint(percent: (next * 100).round()));
   }
 
   /// Audio only on or off, in place (F-ROOM-9, AUD-1). Restoring the picture
@@ -554,10 +555,11 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   }
 
   /// A short message in the middle of the picture (volume, fit, room
-  /// switches), gone after [duration].
-  void showHint(IconData icon, String text, {Duration duration = const Duration(seconds: 1)}) {
+  /// switches), gone after [duration]; [filled] for a state that is now on
+  /// (principles §2.6).
+  void showHint(LiveIcons icon, String text, {Duration duration = const Duration(seconds: 1), bool filled = false}) {
     if (!mounted) return;
-    setState(() => _hint = (icon, text));
+    setState(() => _hint = (icon, text, filled));
     _hintTimer?.cancel();
     _hintTimer = Timer(duration, () {
       if (mounted) setState(() => _hint = null);
@@ -599,7 +601,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
   /// Sets and remembers the picture fit.
   void setFit(store.VideoFit fit) {
     setState(() => _fit = fit);
-    showHint(Icons.aspect_ratio, switch (fit) {
+    showHint(LiveIcons.aspect, switch (fit) {
       store.VideoFit.cover => t.room.fit.cover,
       store.VideoFit.fill => t.room.fit.fill,
       _ => t.room.fit.contain,
@@ -939,82 +941,88 @@ class PlayerViewState extends ConsumerState<PlayerView> {
               // The gesture layer sits under the buttons, not around them: a
               // double-tap recognizer around a button would hold every button
               // tap for the double-tap window.
-              return ColoredBox(
-                color: Colors.black,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    RepaintBoundary(child: video),
-                    Positioned.fill(
-                      child: DanmakuOverlay(controller: widget.overlay, visible: danmakuShown),
-                    ),
-                    if (!_systemBrightness && _brightness < 1)
-                      IgnorePointer(child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 1 - _brightness))),
-                    if (_live && _state.showsBuffering && _openError == null)
-                      const IgnorePointer(
-                        child: Center(child: CircularProgressIndicator(color: Colors.white)),
+              // Principles §2.6: icons on the picture have the controls'
+              // weight, 32 dp in fullscreen and from the expanded width
+              // class on, 24 dp below.
+              return VideoControlIcons(
+                size: VideoControlIcons.sizeFor(context, fullscreen: _fullscreen),
+                child: ColoredBox(
+                  color: Colors.black,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      RepaintBoundary(child: video),
+                      Positioned.fill(
+                        child: DanmakuOverlay(controller: widget.overlay, visible: danmakuShown),
                       ),
-                    if (_hint case (final icon, final text))
-                      Center(
-                        child: _Hint(icon: icon, text: text),
-                      ),
-                    Positioned.fill(
-                      child: GestureDetector(
-                        key: const ValueKey('room-gestures'),
-                        behavior: HitTestBehavior.opaque,
-                        onTapUp: _onTapUp,
-                        onDoubleTap: _onDoubleTap,
-                        onLongPressStart: _onLongPress,
-                        onSecondaryTapUp: _touch ? null : (_) => unawaited(openQuickPanel()),
-                        onScaleStart: _touch ? _onScaleStart : null,
-                        onScaleUpdate: _touch ? _onScaleUpdate : null,
-                        onScaleEnd: _touch ? _onScaleEnd : null,
-                      ),
-                    ),
-                    if (_live && _state.audioOnly) _AudioOnlyCover(onRestore: toggleAudioOnly),
-                    if (_openError != null || _state.failure != null) _failureOverlay(),
-                    if (_state.showsPaused && _openError == null)
-                      Center(
-                        child: IconButton(
-                          style: IconButton.styleFrom(
-                            backgroundColor: VideoBarScrim.color,
-                            foregroundColor: Colors.white,
-                          ),
-                          tooltip: t.room.resumePlayback,
-                          iconSize: 40,
-                          onPressed: _session.play,
-                          icon: const Icon(Icons.play_arrow),
+                      if (!_systemBrightness && _brightness < 1)
+                        IgnorePointer(child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 1 - _brightness))),
+                      if (_live && _state.showsBuffering && _openError == null)
+                        const IgnorePointer(
+                          child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                        ),
+                      if (_hint case (final icon, final text, final filled))
+                        Center(
+                          child: _Hint(icon: icon, text: text, filled: filled),
+                        ),
+                      Positioned.fill(
+                        child: GestureDetector(
+                          key: const ValueKey('room-gestures'),
+                          behavior: HitTestBehavior.opaque,
+                          onTapUp: _onTapUp,
+                          onDoubleTap: _onDoubleTap,
+                          onLongPressStart: _onLongPress,
+                          onSecondaryTapUp: _touch ? null : (_) => unawaited(openQuickPanel()),
+                          onScaleStart: _touch ? _onScaleStart : null,
+                          onScaleUpdate: _touch ? _onScaleUpdate : null,
+                          onScaleEnd: _touch ? _onScaleEnd : null,
                         ),
                       ),
-                    // On TV the room page draws the remote's controls (§3.5).
-                    if (!widget.tv) RepaintBoundary(child: _controlsLayer(prefs)),
-                    if (_tip case final tip?)
-                      SafeArea(
-                        top: _fullscreen,
-                        bottom: false,
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Padding(
-                            // Below the top bar; TV has none.
-                            padding: EdgeInsets.fromLTRB(
-                              Space.s3,
-                              widget.tv ? Space.s3 : Sizes.targetTouch + Space.s2,
-                              Space.s3,
-                              0,
+                      if (_live && _state.audioOnly) _AudioOnlyCover(onRestore: toggleAudioOnly),
+                      if (_openError != null || _state.failure != null) _failureOverlay(),
+                      if (_state.showsPaused && _openError == null)
+                        Center(
+                          child: IconButton(
+                            style: IconButton.styleFrom(
+                              backgroundColor: VideoBarScrim.color,
+                              foregroundColor: Colors.white,
                             ),
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 360),
-                              child: _Hint(
-                                key: const ValueKey('room-tip'),
-                                icon: Icons.lightbulb_outline,
-                                text: tip,
-                                onTap: _dismissTip,
+                            tooltip: t.room.resumePlayback,
+                            iconSize: Sizes.iconXl,
+                            onPressed: _session.play,
+                            icon: const LiveIcon(LiveIcons.play),
+                          ),
+                        ),
+                      // On TV the room page draws the remote's controls (§3.5).
+                      if (!widget.tv) RepaintBoundary(child: _controlsLayer(prefs)),
+                      if (_tip case final tip?)
+                        SafeArea(
+                          top: _fullscreen,
+                          bottom: false,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Padding(
+                              // Below the top bar; TV has none.
+                              padding: EdgeInsets.fromLTRB(
+                                Space.s3,
+                                widget.tv ? Space.s3 : Sizes.targetTouch + Space.s2,
+                                Space.s3,
+                                0,
+                              ),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 360),
+                                child: _Hint(
+                                  key: const ValueKey('room-tip'),
+                                  icon: LiveIcons.tip,
+                                  text: tip,
+                                  onTap: _dismissTip,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
@@ -1101,7 +1109,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                   key: const ValueKey('room-lock'),
                   style: IconButton.styleFrom(backgroundColor: VideoBarScrim.color, foregroundColor: Colors.white),
                   tooltip: _locked ? t.room.unlock : t.room.lock,
-                  icon: Icon(_locked ? Icons.lock : Icons.lock_open),
+                  icon: LiveIcon(LiveIcons.lock, filled: _locked),
                   onPressed: () => _setLocked(locked: !_locked),
                 ),
               ),
@@ -1135,7 +1143,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                   IconButton(
                     tooltip: t.common.back,
                     color: ink,
-                    icon: const Icon(Icons.arrow_back),
+                    icon: const LiveIcon(LiveIcons.back),
                     onPressed: widget.onBack,
                   ),
                   Expanded(
@@ -1158,7 +1166,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     IconButton(
                       tooltip: t.room.switchRoom,
                       color: ink,
-                      icon: const Icon(Icons.swap_horiz),
+                      icon: const LiveIcon(LiveIcons.switchRoom),
                       onPressed: widget.onSwitchRoom,
                     ),
                   if (_fullscreen && widget.onToggleChat != null)
@@ -1166,8 +1174,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                       tooltip: widget.chatOpen ? t.room.hideChat : t.room.chat,
                       color: ink,
                       isSelected: widget.chatOpen,
-                      icon: const Icon(Icons.chat_bubble_outline),
-                      selectedIcon: const Icon(Icons.chat_bubble),
+                      icon: const LiveIcon(LiveIcons.chat),
+                      selectedIcon: const LiveIcon(LiveIcons.chat, filled: true),
                       onPressed: widget.onToggleChat,
                     ),
                   if (_live)
@@ -1175,8 +1183,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                       tooltip: _state.audioOnly ? t.room.restoreVideo : t.room.audioOnly,
                       color: ink,
                       isSelected: _state.audioOnly,
-                      icon: const Icon(Icons.headphones_outlined),
-                      selectedIcon: const Icon(Icons.headphones),
+                      icon: const LiveIcon(LiveIcons.audioOnly),
+                      selectedIcon: const LiveIcon(LiveIcons.audioOnly, filled: true),
                       onPressed: toggleAudioOnly,
                     ),
                   // LAY-4: casting in the top bar on Android (the menu has it everywhere).
@@ -1184,12 +1192,12 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     IconButton(
                       tooltip: t.room.cast,
                       color: ink,
-                      icon: const Icon(Icons.cast),
+                      icon: const LiveIcon(LiveIcons.cast),
                       onPressed: () => unawaited(_onMenu(RoomMenuAction.cast)),
                     ),
                   PopupMenuButton<RoomMenuAction>(
                     tooltip: t.common.more,
-                    icon: const Icon(Icons.more_vert, color: ink),
+                    icon: const LiveIcon(LiveIcons.more, color: ink),
                     onOpened: () {
                       _panels++;
                       _hideTimer?.cancel();
@@ -1233,20 +1241,20 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                               IconButton(
                                 tooltip: t.common.play,
                                 color: ink,
-                                icon: const Icon(Icons.play_arrow),
+                                icon: const LiveIcon(LiveIcons.play),
                                 onPressed: _session.play,
                               )
                             else
                               IconButton(
                                 tooltip: t.common.pause,
                                 color: ink,
-                                icon: const Icon(Icons.pause),
+                                icon: const LiveIcon(LiveIcons.pause),
                                 onPressed: _session.pause,
                               ),
                             IconButton(
                               tooltip: t.common.refresh,
                               color: ink,
-                              icon: const Icon(Icons.refresh),
+                              icon: const LiveIcon(LiveIcons.refresh),
                               onPressed: refresh,
                             ),
                           ],
@@ -1256,15 +1264,15 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                               tooltip: prefs.hidden ? t.room.danmakuOnKey : t.room.danmakuOffKey,
                               color: ink,
                               isSelected: !prefs.hidden,
-                              icon: const Icon(Icons.subtitles_off_outlined),
-                              selectedIcon: const Icon(Icons.subtitles),
+                              icon: const LiveIcon(LiveIcons.danmaku),
+                              selectedIcon: const LiveIcon(LiveIcons.danmaku, filled: true),
                               onPressed: toggleDanmaku,
                             ),
                             if (widget.onOpenDanmakuSettings != null)
                               IconButton(
                                 tooltip: t.danmaku.settings,
                                 color: ink,
-                                icon: const Icon(Icons.tune),
+                                icon: const LiveIcon(LiveIcons.tune),
                                 onPressed: widget.onOpenDanmakuSettings,
                               ),
                           ],
@@ -1272,7 +1280,9 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                             IconButton(
                               tooltip: _volume == 0 ? t.room.unmuteKey : t.room.muteKey,
                               color: ink,
-                              icon: Icon(_volume == 0 ? Icons.volume_off : Icons.volume_up),
+                              isSelected: _volume == 0,
+                              icon: const LiveIcon(LiveIcons.mute),
+                              selectedIcon: const LiveIcon(LiveIcons.mute, filled: true),
                               onPressed: toggleMute,
                             ),
                             SizedBox(
@@ -1298,8 +1308,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                                   ? t.room.showWholePicture
                                   : t.room.fillScreen,
                               color: ink,
-                              icon: Icon(
-                                _portraitFit == store.PortraitFit.cover ? Icons.fit_screen : Icons.crop_portrait,
+                              icon: LiveIcon(
+                                _portraitFit == store.PortraitFit.cover ? LiveIcons.fitPicture : LiveIcons.fillScreen,
                               ),
                               onPressed: () {
                                 final notifier = ref.read(portraitFitSetting.notifier);
@@ -1316,7 +1326,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                             PopupMenuButton<store.PortraitOverride>(
                               key: const ValueKey('room-orientation'),
                               tooltip: t.room.orientation,
-                              icon: const Icon(Icons.screen_rotation_alt, color: ink),
+                              icon: const LiveIcon(LiveIcons.orientation, color: ink),
                               initialValue: widget.portraitOverride,
                               onSelected: onOverride,
                               itemBuilder: (context) => [
@@ -1337,7 +1347,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                           if (wide)
                             PopupMenuButton<store.VideoFit>(
                               tooltip: t.room.aspect,
-                              icon: const Icon(Icons.aspect_ratio, color: ink),
+                              icon: const LiveIcon(LiveIcons.aspect, color: ink),
                               initialValue: _fit,
                               onSelected: setFit,
                               itemBuilder: (context) => [
@@ -1353,7 +1363,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                                   : t.room.theaterKey,
                               color: ink,
                               isSelected: widget.presentation == RoomPresentation.theater,
-                              icon: const Icon(Icons.crop_7_5),
+                              icon: const LiveIcon(LiveIcons.theater),
+                              selectedIcon: const LiveIcon(LiveIcons.theater, filled: true),
                               onPressed: widget.onToggleTheater,
                             ),
                           if (!_fullscreen && widget.onToggleChat != null)
@@ -1361,8 +1372,8 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                               tooltip: widget.chatOpen ? t.room.hideChatKey : t.room.showChatKey,
                               color: ink,
                               isSelected: widget.chatOpen,
-                              icon: const Icon(Icons.view_sidebar_outlined),
-                              selectedIcon: const Icon(Icons.view_sidebar),
+                              icon: const LiveIcon(LiveIcons.chatPanel),
+                              selectedIcon: const LiveIcon(LiveIcons.chatPanel, filled: true),
                               onPressed: widget.onToggleChat,
                             ),
                         ],
@@ -1374,7 +1385,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                       key: const ValueKey('room-pip'),
                       tooltip: t.room.pipKey,
                       color: ink,
-                      icon: const Icon(Icons.picture_in_picture_alt_outlined),
+                      icon: const LiveIcon(LiveIcons.pip),
                       onPressed: () => unawaited(enterPip()),
                     ),
                   // REG-ROOM-017: fullscreen stays outside the scrolling row.
@@ -1382,7 +1393,7 @@ class PlayerViewState extends ConsumerState<PlayerView> {
                     key: const ValueKey('room-fullscreen'),
                     tooltip: _fullscreen ? t.room.exitFullscreenKey : t.room.fullscreenKey,
                     color: ink,
-                    icon: Icon(_fullscreen ? Icons.fullscreen_exit : Icons.fullscreen),
+                    icon: LiveIcon(_fullscreen ? LiveIcons.fullscreenExit : LiveIcons.fullscreen),
                     onPressed: widget.onToggleFullscreen,
                   ),
                 ],
@@ -1398,30 +1409,33 @@ class PlayerViewState extends ConsumerState<PlayerView> {
 /// A short message on the picture: white on 60% black. Without [onTap] it
 /// takes no pointers.
 class _Hint extends StatelessWidget {
-  const new({required this.icon, required this.text, this.onTap, super.key});
+  const new({required this.icon, required this.text, this.filled = false, this.onTap, super.key});
 
-  final IconData icon;
+  final LiveIcons icon;
   final String text;
+  final bool filled;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final box = DecoratedBox(
-      decoration: BoxDecoration(color: VideoBarScrim.color, borderRadius: BorderRadius.circular(Radii.r3)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s3),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(width: Space.s2),
-            Flexible(
-              child: Text(
-                text,
-                style: const TextStyle(color: Colors.white, fontFeatures: [FontFeature.tabularFigures()]),
+    final box = VideoControlIcons(
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: VideoBarScrim.color, borderRadius: BorderRadius.circular(Radii.r3)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              LiveIcon(icon, filled: filled),
+              const SizedBox(width: Space.s2),
+              Flexible(
+                child: Text(
+                  text,
+                  style: const TextStyle(color: Colors.white, fontFeatures: [FontFeature.tabularFigures()]),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1444,7 +1458,7 @@ class _AudioOnlyCover extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.headphones, color: Colors.white, size: 48),
+            const VideoControlIcons(size: Sizes.iconXxl, child: LiveIcon(LiveIcons.audioOnly, filled: true)),
             const SizedBox(height: Space.s2),
             Text(t.room.audioOnlyPlaying, style: const TextStyle(color: Colors.white)),
             TextButton(
@@ -1563,18 +1577,18 @@ class _BatteryTextState extends State<_BatteryText> {
     if (level == null || level < 0) return const SizedBox.shrink();
     final charging = _state == BatteryState.charging || _state == BatteryState.full;
     final icon = charging
-        ? Icons.battery_charging_full
+        ? LiveIcons.batteryCharging
         : switch (level) {
-            >= 90 => Icons.battery_full,
-            >= 60 => Icons.battery_5_bar,
-            >= 35 => Icons.battery_3_bar,
-            >= 15 => Icons.battery_2_bar,
-            _ => Icons.battery_alert,
+            >= 90 => LiveIcons.batteryFull,
+            >= 60 => LiveIcons.batteryHigh,
+            >= 35 => LiveIcons.batteryHalf,
+            >= 15 => LiveIcons.batteryLow,
+            _ => LiveIcons.batteryAlert,
           };
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: widget.color),
+        LiveIcon(icon, size: 16, color: widget.color),
         Text(
           '$level%',
           style: TextStyle(color: widget.color, fontFeatures: const [FontFeature.tabularFigures()]),
@@ -1606,7 +1620,7 @@ class _OfflineCover extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.tv_off_outlined, color: Colors.white, size: 48),
+              const VideoControlIcons(size: Sizes.iconXxl, child: LiveIcon(LiveIcons.noPicture)),
               const SizedBox(height: Space.s2),
               Text(
                 detail.state == LiveState.replay ? t.common.replay : t.common.offline,

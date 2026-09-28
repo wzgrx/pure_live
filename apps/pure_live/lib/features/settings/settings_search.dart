@@ -486,12 +486,12 @@ class SettingsSearchField extends StatelessWidget {
       hintText: t.settings.search.hint,
       elevation: const WidgetStatePropertyAll(0),
       constraints: const BoxConstraints(minHeight: 48, maxHeight: 48),
-      leading: const Icon(Icons.search),
+      leading: const LiveIcon(LiveIcons.search),
       trailing: [
         if (controller.text.isNotEmpty)
           IconButton(
             tooltip: t.search.clear,
-            icon: const Icon(Icons.close),
+            icon: const LiveIcon(LiveIcons.close),
             onPressed: () {
               controller.clear();
               onChanged('');
@@ -517,14 +517,14 @@ class SettingsSearchResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final matches = searchSettings(query, settingsIndex());
     if (matches.isEmpty) {
-      return ListTile(leading: const Icon(Icons.search_off), title: Text(t.settings.search.noResults));
+      return ListTile(leading: const LiveIcon(LiveIcons.noResults), title: Text(t.settings.search.noResults));
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final (:entry, :legacyName) in matches)
           ListTile(
-            leading: Icon(entry.group.icon),
+            leading: LiveIcon(entry.group.icon),
             title: Text(entry.title, maxLines: 2, overflow: TextOverflow.ellipsis),
             subtitle: Text(
               [

@@ -47,14 +47,14 @@ void main() {
         page: (context) => Scaffold(
           appBar: PageAppBar(
             title: const Text('Title'),
-            actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.refresh))],
+            actions: [IconButton(onPressed: () {}, icon: const LiveIcon(LiveIcons.refresh))],
           ),
           body: content(),
         ),
       );
       expect(tester.getTopLeft(find.text('Title')).dx, margin);
       expect(tester.getTopLeft(find.text('row')).dx, margin);
-      expect(size.width - tester.getTopRight(find.byIcon(Icons.refresh)).dx, margin);
+      expect(size.width - tester.getTopRight(_icon(LiveIcons.refresh)).dx, margin);
     });
   }
 
@@ -81,7 +81,7 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    final back = tester.getRect(find.byIcon(Icons.arrow_back));
+    final back = tester.getRect(_icon(LiveIcons.back));
     expect(back.left, 32);
     expect(tester.getTopLeft(find.text('Sub')).dx, back.right + 32);
     expect(tester.getTopLeft(find.text('row')).dx, 32);
@@ -141,7 +141,7 @@ void main() {
         child: Scaffold(
           appBar: PageAppBar(
             title: const Text('Follows'),
-            actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.refresh))],
+            actions: [IconButton(onPressed: () {}, icon: const LiveIcon(LiveIcons.refresh))],
             bottom: const PageTabBar(
               tabs: [
                 Tab(text: 'One'),
@@ -157,6 +157,9 @@ void main() {
     expect(tester.getTopLeft(find.text('One')).dx, Space.s2);
     // A 48 dp touch button centres its 24 dp glyph 12 dp from its edge: 4 dp
     // inside the line, since the button cannot reach into the overscan margin.
-    expect(792 - tester.getTopRight(find.byIcon(Icons.refresh)).dx, 12);
+    expect(792 - tester.getTopRight(_icon(LiveIcons.refresh)).dx, 12);
   });
 }
+
+/// The [LiveIcon] showing [icon].
+Finder _icon(LiveIcons icon) => find.byWidgetPredicate((widget) => widget is LiveIcon && widget.icon == icon);

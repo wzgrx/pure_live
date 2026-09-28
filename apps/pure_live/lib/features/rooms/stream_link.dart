@@ -194,7 +194,7 @@ class _StreamLinkDialogState extends ConsumerState<StreamLinkDialog> {
             for (final (index, line) in streams.lines.indexed)
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.content_copy),
+                leading: const LiveIcon(LiveIcons.copy),
                 title: Text('${t.multiview.lineN(n: index + 1)} · ${_formatLabel(line.format)}'),
                 subtitle: Text(line.url.host, maxLines: 1, overflow: TextOverflow.ellipsis),
                 onTap: () => _copy(line),

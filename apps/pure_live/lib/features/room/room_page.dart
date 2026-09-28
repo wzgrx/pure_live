@@ -532,12 +532,12 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     final player = _videoKey.currentState;
     if (target == null) {
       final text = entries.isEmpty ? t.room.noRoomsToSwitch : (step < 0 ? t.room.firstRoom : t.room.lastRoom);
-      player?.showHint(step < 0 ? Icons.vertical_align_top : Icons.vertical_align_bottom, text);
+      player?.showHint(step < 0 ? LiveIcons.firstRoom : LiveIcons.lastRoom, text);
       return;
     }
     final position = entries.indexOf(target) + 1;
     player?.showHint(
-      Icons.swap_vert,
+      LiveIcons.roomStep,
       '${target.label}  $position/${entries.length}',
       duration: const Duration(seconds: 2),
     );
@@ -550,7 +550,7 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     if (!_touch || ref.read(switchRoomGestureSetting) || ref.read(appPrefsProvider).switchGestureHinted) return;
     unawaited(ref.read(appPrefsProvider.notifier).markSwitchGestureHinted().catchError((Object _) {}));
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _videoKey.currentState?.showHint(Icons.swipe_vertical, t.room.swipeHint, duration: const Duration(seconds: 3));
+      _videoKey.currentState?.showHint(LiveIcons.swipeRooms, t.room.swipeHint, duration: const Duration(seconds: 3));
     });
   }
 
@@ -803,7 +803,7 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Align(
     alignment: Alignment.centerLeft,
-    child: IconButton(tooltip: t.common.back, icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+    child: IconButton(tooltip: t.common.back, icon: const LiveIcon(LiveIcons.back), onPressed: () => context.pop()),
   );
 }
 
@@ -884,31 +884,31 @@ class _RoomInfo extends ConsumerWidget {
             children: [
               if (followed)
                 FilledButton.tonalIcon(
-                  icon: const Icon(Icons.favorite, size: 18),
+                  icon: const LiveIcon(LiveIcons.follow, filled: true),
                   label: Text(t.common.followed),
                   // F-FAV-02: the write is awaited; a failure is said.
                   onPressed: () => unfollowWithNotice(context, ref, card.ref),
                 )
               else
                 FilledButton.icon(
-                  icon: const Icon(Icons.favorite_border, size: 18),
+                  icon: const LiveIcon(LiveIcons.follow),
                   label: Text(t.common.follow),
                   onPressed: () => followWithNotice(context, ref, RoomSnapshot.fromDetail(detail)),
                 ),
               // F-ROOM-14; IPTV channels record from the recording center.
               if (card.ref.platform != 'iptv') RoomRecordButton(detail: detail),
               OutlinedButton.icon(
-                icon: const Icon(Icons.grid_view, size: 18),
+                icon: const LiveIcon(LiveIcons.multiview),
                 label: Text(t.room.addToMultiview),
                 onPressed: () => context.push('/multiview', extra: [card.ref]),
               ),
               OutlinedButton.icon(
-                icon: const Icon(Icons.open_in_new, size: 18),
+                icon: const LiveIcon(LiveIcons.openSite),
                 label: Text(t.common.openSite),
                 onPressed: () => launchUrl(detail.link, mode: LaunchMode.externalApplication),
               ),
               OutlinedButton.icon(
-                icon: const Icon(Icons.link, size: 18),
+                icon: const LiveIcon(LiveIcons.link),
                 label: Text(t.common.copyLink),
                 onPressed: () async {
                   await Clipboard.setData(ClipboardData(text: detail.link.toString()));
@@ -918,7 +918,7 @@ class _RoomInfo extends ConsumerWidget {
                 },
               ),
               OutlinedButton.icon(
-                icon: const Icon(Icons.share_outlined, size: 18),
+                icon: const LiveIcon(LiveIcons.share),
                 label: Text(t.room.share),
                 onPressed: () => shareRoom(context, detail),
               ),

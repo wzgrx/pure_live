@@ -42,7 +42,7 @@ class WebSearchButton extends ConsumerWidget {
     if (platforms.isEmpty || availability == WebAvailability.unsupported) return const SizedBox.shrink();
     return IconButton(
       tooltip: t.search.web.title,
-      icon: const Icon(Icons.travel_explore),
+      icon: const LiveIcon(LiveIcons.webSearch),
       onPressed: () => _open(context, ref, platforms),
     );
   }
@@ -240,10 +240,10 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
             if (page != null) ...[
               IconButton(
                 tooltip: t.search.web.pageRooms,
-                icon: const Icon(Icons.format_list_bulleted),
+                icon: const LiveIcon(LiveIcons.roomList),
                 onPressed: _listRooms,
               ),
-              IconButton(tooltip: t.common.refresh, icon: const Icon(Icons.refresh), onPressed: page.reload),
+              IconButton(tooltip: t.common.refresh, icon: const LiveIcon(LiveIcons.refresh), onPressed: page.reload),
             ],
           ],
           bottom: page != null && _progress < 100
@@ -254,7 +254,7 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
               : null,
         ),
         body: page == null
-            ? MessageView(icon: Icons.public_off, title: t.search.web.unavailable)
+            ? MessageView(icon: LiveIcons.webUnavailable, title: t.search.web.unavailable)
             : _failed
             ? MessageView.error(
                 title: t.search.web.notOpened,

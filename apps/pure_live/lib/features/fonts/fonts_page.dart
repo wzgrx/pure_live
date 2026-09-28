@@ -191,10 +191,11 @@ class _FontTile extends StatelessWidget {
         final value? => SizedBox.square(dimension: 24, child: CircularProgressIndicator(value: value, strokeWidth: 3)),
         null when !installed => IconButton(
           tooltip: t.fonts.download,
-          icon: const Icon(Icons.download),
+          icon: const LiveIcon(LiveIcons.download),
           onPressed: onDownload,
         ),
         null => PopupMenuButton<String>(
+          icon: const LiveIcon(LiveIcons.more),
           tooltip: t.fonts.use,
           onSelected: (action) => switch (action) {
             'app' => onUseForApp(),

@@ -59,7 +59,7 @@ class PlatformStatusPage extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: t.health.checkAgain,
-            icon: const Icon(Icons.refresh),
+            icon: const LiveIcon(LiveIcons.refresh),
             onPressed: () => ref.invalidate(platformHealthProvider),
           ),
         ],
@@ -78,8 +78,9 @@ class PlatformStatusPage extends ConsumerWidget {
                   subtitle: Text(
                     result.ok ? t.health.ok(ms: result.elapsed.inMilliseconds) : result.problem ?? t.health.failed,
                   ),
-                  trailing: Icon(
-                    result.ok ? Icons.check_circle : Icons.error,
+                  trailing: LiveIcon(
+                    result.ok ? LiveIcons.success : LiveIcons.error,
+                    filled: true,
                     color: result.ok ? live.success : Theme.of(context).colorScheme.error,
                   ),
                 ),

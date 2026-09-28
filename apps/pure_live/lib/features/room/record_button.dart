@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show FixedColors;
+import 'package:live_ui/live_ui.dart' show FixedColors, LiveIcon, LiveIcons;
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -130,14 +130,14 @@ class RoomRecordButton extends ConsumerWidget {
       menuChildren: [
         for (final action in roomRecordActions(task, live: live))
           MenuItemButton(
-            leadingIcon: Icon(switch (action) {
+            leadingIcon: LiveIcon(switch (action) {
               // An outlined circle: the solid dot means "recording now".
-              RoomRecordAction.recordNow => Icons.fiber_manual_record_outlined,
-              RoomRecordAction.watch => Icons.schedule,
-              RoomRecordAction.stop => Icons.stop,
-              RoomRecordAction.checkNow => Icons.refresh,
-              RoomRecordAction.remove => Icons.delete_outline,
-              RoomRecordAction.openCenter => Icons.video_library_outlined,
+              RoomRecordAction.recordNow => LiveIcons.record,
+              RoomRecordAction.watch => LiveIcons.schedule,
+              RoomRecordAction.stop => LiveIcons.stop,
+              RoomRecordAction.checkNow => LiveIcons.refresh,
+              RoomRecordAction.remove => LiveIcons.delete,
+              RoomRecordAction.openCenter => LiveIcons.recordingCenter,
             }),
             onPressed: () => unawaited(_run(context, ref, action, task)),
             child: Text(switch (action) {
@@ -152,11 +152,9 @@ class RoomRecordButton extends ConsumerWidget {
       ],
       builder: (context, controller, _) {
         void toggle() => controller.isOpen ? controller.close() : controller.open();
-        final icon = Icon(
-          running && state != RecordState.waitingLive ? Icons.fiber_manual_record : Icons.fiber_manual_record_outlined,
-          size: 18,
-          color: running && state != RecordState.waitingLive ? FixedColors.live : null,
-        );
+        // The solid dot means "recording now" (principles §2.2, §2.6).
+        final recording = running && state != RecordState.waitingLive;
+        final icon = LiveIcon(LiveIcons.record, filled: recording, color: recording ? FixedColors.live : null);
         return running
             ? FilledButton.tonalIcon(
                 key: const ValueKey('room-record'),

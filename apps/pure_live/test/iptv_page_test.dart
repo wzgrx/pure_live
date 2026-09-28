@@ -10,6 +10,8 @@ import 'package:pure_live_app/features/iptv/iptv_page.dart';
 import 'package:pure_live_app/features/iptv/iptv_providers.dart';
 import 'package:pure_live_app/features/iptv/iptv_room.dart';
 
+import 'icon_finder.dart';
+
 /// The site only needs its clock for the sheet (availability).
 final class _NoRepository implements IptvRepository {
   @override
@@ -154,7 +156,7 @@ void main() {
     expect(find.textContaining('今天'), findsWidgets);
     expect(find.text('正在播出的节目'), findsOneWidget);
     expect(find.text('直播'), findsOneWidget, reason: 'the live badge');
-    expect(find.byIcon(Icons.replay), findsOneWidget, reason: 'playseek rule: the past programme can be replayed');
+    expect(findIcon(LiveIcons.replay), findsOneWidget, reason: 'playseek rule: the past programme can be replayed');
 
     await show(IptvCatchup.disabled);
     expect(find.text('不可回看'), findsOneWidget);

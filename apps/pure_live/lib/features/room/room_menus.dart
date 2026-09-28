@@ -210,7 +210,7 @@ Future<QuickAction?> showQuickPanel(
     constraints: const BoxConstraints(maxWidth: Sizes.readingWidth),
     builder: (context) {
       final theme = Theme.of(context);
-      Widget action(QuickAction value, IconData icon, String label, {bool enabled = true, bool selected = false}) =>
+      Widget action(QuickAction value, LiveIcons icon, String label, {bool enabled = true, bool selected = false}) =>
           SizedBox(
             width: 88,
             child: InkWell(
@@ -220,7 +220,11 @@ Future<QuickAction?> showQuickPanel(
                 padding: const EdgeInsets.symmetric(vertical: Space.s2),
                 child: Column(
                   children: [
-                    Icon(icon, color: enabled ? (selected ? theme.colorScheme.primary : null) : theme.disabledColor),
+                    LiveIcon(
+                      icon,
+                      filled: selected,
+                      color: enabled ? (selected ? theme.colorScheme.primary : null) : theme.disabledColor,
+                    ),
                     const SizedBox(height: Space.s1),
                     Text(
                       label,
@@ -247,24 +251,19 @@ Future<QuickAction?> showQuickPanel(
               Wrap(
                 alignment: WrapAlignment.spaceAround,
                 children: [
-                  action(QuickAction.qualityLine, Icons.high_quality_outlined, qualityLabel),
+                  action(QuickAction.qualityLine, LiveIcons.quality, qualityLabel),
                   if (danmakuAvailable)
                     action(
                       QuickAction.toggleDanmaku,
-                      danmakuShown ? Icons.subtitles : Icons.subtitles_off_outlined,
+                      LiveIcons.danmaku,
                       danmakuShown ? t.multiview.danmakuOff : t.danmaku.turnOn,
                       selected: danmakuShown,
                     ),
-                  action(
-                    QuickAction.screenshot,
-                    Icons.photo_camera_outlined,
-                    t.room.screenshot,
-                    enabled: canScreenshot,
-                  ),
-                  action(QuickAction.sleepTimer, Icons.bedtime_outlined, t.room.sleepTimer),
+                  action(QuickAction.screenshot, LiveIcons.screenshot, t.room.screenshot, enabled: canScreenshot),
+                  action(QuickAction.sleepTimer, LiveIcons.sleepTimer, t.room.sleepTimer),
                   action(
                     QuickAction.audioOnly,
-                    Icons.headphones_outlined,
+                    LiveIcons.audioOnly,
                     audioOnly ? t.room.restoreVideo : t.room.audioOnly,
                     selected: audioOnly,
                   ),
@@ -350,24 +349,24 @@ List<PopupMenuEntry<RoomMenuAction>> roomMenuEntries({
   bool newWindow = false,
   bool openApp = false,
 }) {
-  PopupMenuItem<RoomMenuAction> item(RoomMenuAction value, IconData icon, String label) => PopupMenuItem(
+  PopupMenuItem<RoomMenuAction> item(RoomMenuAction value, LiveIcons icon, String label) => PopupMenuItem(
     value: value,
-    child: ListTile(leading: Icon(icon), title: Text(label), contentPadding: EdgeInsets.zero),
+    child: ListTile(leading: LiveIcon(icon), title: Text(label), contentPadding: EdgeInsets.zero),
   );
   return [
-    item(RoomMenuAction.switchRoom, Icons.swap_horiz, t.room.switchRoom),
-    item(RoomMenuAction.openSite, Icons.open_in_new, t.common.openSite),
-    if (openApp) item(RoomMenuAction.openApp, Icons.launch, t.room.openInApp),
-    item(RoomMenuAction.share, Icons.share_outlined, t.room.share),
-    item(RoomMenuAction.cast, Icons.cast, t.room.cast),
-    item(RoomMenuAction.copyStreamUrl, Icons.link, t.room.copyStreamUrl),
-    item(RoomMenuAction.sleepTimer, Icons.bedtime_outlined, t.room.sleepTimer),
-    item(RoomMenuAction.volume, Icons.volume_up_outlined, t.room.roomVolume),
-    if (danmakuAvailable) item(RoomMenuAction.danmakuSettings, Icons.tune, t.danmaku.settings),
-    item(RoomMenuAction.multiview, Icons.grid_view, t.room.addToMultiview),
-    if (desktop) item(RoomMenuAction.keys, Icons.keyboard_outlined, t.room.shortcuts),
+    item(RoomMenuAction.switchRoom, LiveIcons.switchRoom, t.room.switchRoom),
+    item(RoomMenuAction.openSite, LiveIcons.openSite, t.common.openSite),
+    if (openApp) item(RoomMenuAction.openApp, LiveIcons.openInApp, t.room.openInApp),
+    item(RoomMenuAction.share, LiveIcons.share, t.room.share),
+    item(RoomMenuAction.cast, LiveIcons.cast, t.room.cast),
+    item(RoomMenuAction.copyStreamUrl, LiveIcons.link, t.room.copyStreamUrl),
+    item(RoomMenuAction.sleepTimer, LiveIcons.sleepTimer, t.room.sleepTimer),
+    item(RoomMenuAction.volume, LiveIcons.volume, t.room.roomVolume),
+    if (danmakuAvailable) item(RoomMenuAction.danmakuSettings, LiveIcons.tune, t.danmaku.settings),
+    item(RoomMenuAction.multiview, LiveIcons.multiview, t.room.addToMultiview),
+    if (desktop) item(RoomMenuAction.keys, LiveIcons.shortcuts, t.room.shortcuts),
     // F-WIN-02: Windows only.
-    if (newWindow) item(RoomMenuAction.newWindow, Icons.open_in_browser, t.room.openInNewWindow),
+    if (newWindow) item(RoomMenuAction.newWindow, LiveIcons.newWindow, t.room.openInNewWindow),
   ];
 }
 
@@ -588,7 +587,7 @@ Future<void> showRoomVolumeDialog(
           children: [
             Row(
               children: [
-                Icon(value == 0 ? Icons.volume_off : Icons.volume_up),
+                LiveIcon(value == 0 ? LiveIcons.mute : LiveIcons.volume, filled: value == 0),
                 Expanded(
                   child: Slider(
                     value: value,

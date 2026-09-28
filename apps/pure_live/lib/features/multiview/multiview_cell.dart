@@ -196,8 +196,11 @@ class _CellOverlay extends StatelessWidget {
   final bool label;
   final VoidCallback onRetry;
 
+  // Icons on the picture have the controls' weight (principles §2.6).
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => VideoControlIcons(child: Builder(builder: _build));
+
+  Widget _build(BuildContext context) {
     const ink = Colors.white;
     final name = cell.detail?.card.anchorName;
     switch (cell.status) {
@@ -208,7 +211,7 @@ class _CellOverlay extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.add_circle_outline, color: tone, size: 36),
+              LiveIcon(LiveIcons.addEntry, color: tone, size: Sizes.iconXl),
               const SizedBox(height: Space.s1),
               Text(t.multiview.addRoom, style: TextStyle(color: tone)),
             ],
@@ -240,7 +243,9 @@ class _CellOverlay extends StatelessWidget {
                 if (playback?.phase == PlaybackPhase.error)
                   _Failure(title: t.multiview.interrupted, onRetry: onRetry)
                 else if (cell.paused || (playback?.showsPaused ?? false))
-                  const Center(child: Icon(Icons.pause_circle_outline, color: Colors.white70, size: 40))
+                  const Center(
+                    child: LiveIcon(LiveIcons.paused, color: Colors.white70, size: Sizes.iconXl),
+                  )
                 else if (playback?.showsBuffering ?? false)
                   const Center(
                     child: SizedBox.square(dimension: 28, child: CircularProgressIndicator(color: ink, strokeWidth: 2)),
@@ -262,7 +267,13 @@ class _CellOverlay extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (focused) Icon(muteAll ? Icons.volume_off : Icons.volume_up, size: 14, color: ink),
+                              if (focused)
+                                LiveIcon(
+                                  muteAll ? LiveIcons.mute : LiveIcons.volume,
+                                  filled: muteAll,
+                                  size: 14,
+                                  color: ink,
+                                ),
                               if (focused) const SizedBox(width: 2),
                               Flexible(
                                 child: Text(
@@ -332,61 +343,68 @@ class MultiviewControlBar extends ConsumerWidget {
     final controller = ref.read(multiviewProvider.notifier);
     final danmakuOn = ref.watch(danmakuPrefsProvider.select((prefs) => prefs.enabled));
     const ink = Color(0xEBFFFFFF);
-    Widget button(IconData icon, String tooltip, VoidCallback onPressed, {Color? color}) => IconButton(
-      tooltip: tooltip,
-      icon: Icon(icon, size: Sizes.iconDense, color: color ?? ink),
-      onPressed: onPressed,
-    );
+    Widget button(LiveIcons icon, String tooltip, VoidCallback onPressed, {Color? color, bool filled = false}) =>
+        IconButton(
+          tooltip: tooltip,
+          icon: LiveIcon(icon, filled: filled, color: color ?? ink),
+          onPressed: onPressed,
+        );
     return StreamBuilder<PlaybackState>(
       stream: session.states,
       initialData: session.state,
       builder: (context, snapshot) {
         final playback = snapshot.data ?? session.state;
-        return DecoratedBox(
-          decoration: BoxDecoration(color: const Color(0x8C000000), borderRadius: BorderRadius.circular(Radii.r2)),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (cell.paused)
-                  button(Icons.play_arrow, t.common.resume, () => controller.setPaused(index, paused: false))
-                else
-                  button(Icons.pause, t.common.pause, () => controller.setPaused(index, paused: true)),
-                button(Icons.refresh, t.common.refresh, () => unawaited(controller.refresh(index))),
-                if (danmakuOn) ...[
+        // Principles §2.6: the controls on a picture, 24 or 32 dp.
+        return VideoControlIcons(
+          size: VideoControlIcons.sizeFor(context, fullscreen: fullscreen),
+          color: ink,
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: const Color(0x8C000000), borderRadius: BorderRadius.circular(Radii.r2)),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (cell.paused)
+                    button(LiveIcons.play, t.common.resume, () => controller.setPaused(index, paused: false))
+                  else
+                    button(LiveIcons.pause, t.common.pause, () => controller.setPaused(index, paused: true)),
+                  button(LiveIcons.refresh, t.common.refresh, () => unawaited(controller.refresh(index))),
+                  if (danmakuOn) ...[
+                    button(
+                      LiveIcons.danmaku,
+                      state.danmaku ? t.multiview.danmakuOff : t.multiview.danmakuOn,
+                      controller.toggleDanmaku,
+                      color: state.danmaku ? Theme.of(context).colorScheme.primary : null,
+                      filled: state.danmaku,
+                    ),
+                    button(LiveIcons.tune, t.danmaku.settings, () => unawaited(showDanmakuSettingsSheet(context))),
+                  ],
+                  if (playback.qualities.length > 1)
+                    button(
+                      LiveIcons.quality,
+                      t.multiview.quality,
+                      () => unawaited(showMultiviewQualitySheet(context, ref, index)),
+                    ),
+                  if (playback.lines.length > 1)
+                    button(
+                      LiveIcons.line,
+                      t.multiview.line,
+                      () => unawaited(showMultiviewLineSheet(context, ref, index)),
+                    ),
                   button(
-                    state.danmaku ? Icons.subtitles : Icons.subtitles_off_outlined,
-                    state.danmaku ? t.multiview.danmakuOff : t.multiview.danmakuOn,
-                    controller.toggleDanmaku,
-                    color: state.danmaku ? Theme.of(context).colorScheme.primary : null,
+                    LiveIcons.volume,
+                    t.multiview.volume,
+                    () => unawaited(showMultiviewVolumeSheet(context, index)),
                   ),
-                  button(Icons.tune, t.danmaku.settings, () => unawaited(showDanmakuSettingsSheet(context))),
+                  if (onFullscreen case final toggle?)
+                    button(
+                      fullscreen ? LiveIcons.fullscreenExit : LiveIcons.fullscreen,
+                      fullscreen ? t.multiview.exitFullscreen : t.multiview.fullscreen,
+                      toggle,
+                    ),
                 ],
-                if (playback.qualities.length > 1)
-                  button(
-                    Icons.hd_outlined,
-                    t.multiview.quality,
-                    () => unawaited(showMultiviewQualitySheet(context, ref, index)),
-                  ),
-                if (playback.lines.length > 1)
-                  button(
-                    Icons.alt_route,
-                    t.multiview.line,
-                    () => unawaited(showMultiviewLineSheet(context, ref, index)),
-                  ),
-                button(
-                  Icons.volume_up_outlined,
-                  t.multiview.volume,
-                  () => unawaited(showMultiviewVolumeSheet(context, index)),
-                ),
-                if (onFullscreen case final toggle?)
-                  button(
-                    fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                    fullscreen ? t.multiview.exitFullscreen : t.multiview.fullscreen,
-                    toggle,
-                  ),
-              ],
+              ),
             ),
           ),
         );

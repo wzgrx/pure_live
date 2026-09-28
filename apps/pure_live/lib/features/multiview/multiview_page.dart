@@ -385,18 +385,18 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       MultiviewDisplay.normal => Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          leading: IconButton(tooltip: t.common.back, icon: const Icon(Icons.arrow_back), onPressed: _back),
+          leading: IconButton(tooltip: t.common.back, icon: const LiveIcon(LiveIcons.back), onPressed: _back),
           title: Text(t.app.multiview),
           actions: [
             if (!tv) ...[
               IconButton(
                 tooltip: t.multiview.immersive,
-                icon: const Icon(Icons.open_in_full),
+                icon: const LiveIcon(LiveIcons.expandView),
                 onPressed: () => unawaited(_setDisplay(MultiviewDisplay.immersive)),
               ),
               IconButton(
                 tooltip: t.multiview.fullscreen,
-                icon: const Icon(Icons.fullscreen),
+                icon: const LiveIcon(LiveIcons.fullscreen),
                 onPressed: _toggleFullscreen,
               ),
             ],
@@ -434,10 +434,15 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
               Positioned(
                 right: Space.s4,
                 bottom: Space.s4,
-                child: IconButton.filledTonal(
-                  tooltip: t.multiview.exitImmersive,
-                  icon: const Icon(Icons.close_fullscreen),
-                  onPressed: () => unawaited(_setDisplay(MultiviewDisplay.normal)),
+                // A control on the picture (principles §2.6), the button's colours.
+                child: VideoControlIcons(
+                  size: Sizes.iconLg,
+                  color: null,
+                  child: IconButton.filledTonal(
+                    tooltip: t.multiview.exitImmersive,
+                    icon: const LiveIcon(LiveIcons.collapseView),
+                    onPressed: () => unawaited(_setDisplay(MultiviewDisplay.normal)),
+                  ),
                 ),
               ),
             ],
@@ -457,10 +462,14 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(Space.s2),
-                  child: IconButton.filledTonal(
-                    tooltip: t.multiview.exitFullscreen,
-                    icon: const Icon(Icons.fullscreen_exit),
-                    onPressed: () => unawaited(_setDisplay(MultiviewDisplay.normal)),
+                  child: VideoControlIcons(
+                    size: Sizes.iconLg,
+                    color: null,
+                    child: IconButton.filledTonal(
+                      tooltip: t.multiview.exitFullscreen,
+                      icon: const LiveIcon(LiveIcons.fullscreenExit),
+                      onPressed: () => unawaited(_setDisplay(MultiviewDisplay.normal)),
+                    ),
                   ),
                 ),
               ),
@@ -514,14 +523,14 @@ class _Toolbar extends ConsumerWidget {
                 onSelected: onLayout,
                 itemBuilder: (context) => [
                   for (final layout in layouts)
-                    CheckedPopupMenuItem(value: layout, checked: layout == state.layout, child: Text(layout.label)),
+                    CheckedMenuItem(value: layout, checked: layout == state.layout, child: Text(layout.label)),
                 ],
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: Space.s2, vertical: Space.s3),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.grid_view),
+                      const LiveIcon(LiveIcons.multiview),
                       const SizedBox(width: Space.s1),
                       Text(state.layout.label),
                     ],
@@ -532,7 +541,7 @@ class _Toolbar extends ConsumerWidget {
               // LYT-1: full means the decoders, and the reason is shown.
               IconButton(
                 tooltip: canAdd ? t.multiview.addCell : t.multiview.capacityReached(n: capacity),
-                icon: Icon(Icons.add, color: canAdd ? null : scheme.onSurface.withValues(alpha: 0.38)),
+                icon: LiveIcon(LiveIcons.add, color: canAdd ? null : scheme.onSurface.withValues(alpha: 0.38)),
                 onPressed: () {
                   if (canAdd) {
                     controller.addCell();
@@ -547,20 +556,20 @@ class _Toolbar extends ConsumerWidget {
               IconButton(
                 tooltip: state.danmaku ? t.multiview.danmakuOff : t.multiview.danmakuOn,
                 isSelected: state.danmaku,
-                icon: const Icon(Icons.subtitles_off_outlined),
-                selectedIcon: const Icon(Icons.subtitles),
+                icon: const LiveIcon(LiveIcons.danmaku),
+                selectedIcon: const LiveIcon(LiveIcons.danmaku, filled: true),
                 onPressed: controller.toggleDanmaku,
               ),
             IconButton(
               tooltip: state.muteAll ? t.multiview.unmuteAll : t.multiview.muteAll,
               isSelected: state.muteAll,
-              icon: const Icon(Icons.volume_up),
-              selectedIcon: const Icon(Icons.volume_off),
+              icon: const LiveIcon(LiveIcons.mute),
+              selectedIcon: const LiveIcon(LiveIcons.mute, filled: true),
               onPressed: controller.toggleMuteAll,
             ),
             IconButton(
               tooltip: t.multiview.selectedVolume,
-              icon: const Icon(Icons.tune),
+              icon: const LiveIcon(LiveIcons.volume),
               onPressed: selected?.status == CellStatus.playing
                   ? () => unawaited(showMultiviewVolumeSheet(context, state.selected))
                   : null,

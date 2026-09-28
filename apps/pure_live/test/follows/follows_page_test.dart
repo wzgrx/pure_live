@@ -17,6 +17,7 @@ import 'package:pure_live_app/features/follows/groups.dart';
 import 'package:pure_live_app/features/rooms/card_marks.dart';
 
 import '../fakes.dart';
+import '../icon_finder.dart';
 
 /// A first refresh the test finishes by hand.
 class _Pending extends FollowRefreshNotifier {
@@ -180,7 +181,7 @@ void main() {
       );
       await tester.pump();
       expect(find.byType(PlatformAlertBanner), findsOneWidget);
-      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget, reason: 'an icon, not colour alone');
+      expect(findIcon(LiveIcons.warning), findsOneWidget, reason: 'an icon, not colour alone');
       await tester.tap(find.text('知道了'));
       await tester.pump();
       expect(find.byType(PlatformAlertBanner), findsNothing);

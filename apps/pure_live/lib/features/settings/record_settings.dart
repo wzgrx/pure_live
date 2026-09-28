@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/features/settings/record_directory_tile.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
 import 'package:pure_live_app/features/settings/settings_search.dart';
@@ -28,7 +29,7 @@ class RecordSettingsTiles extends StatelessWidget {
         child: ListTile(
           title: Text(t.app.recordings),
           subtitle: Text(t.settings.record.centerSubtitle),
-          trailing: const Icon(Icons.chevron_right),
+          trailing: const LiveIcon(LiveIcons.subpage),
           onTap: () => context.go('/me/recordings'),
         ),
       ),

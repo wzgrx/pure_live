@@ -131,21 +131,21 @@ class _CastPanelState extends ConsumerState<CastPanel> {
                 if (source.media != null)
                   IconButton(
                     tooltip: t.cast.searchAgain,
-                    icon: const Icon(Icons.refresh),
+                    icon: const LiveIcon(LiveIcons.refresh),
                     onPressed: _searching || connecting ? null : _restart,
                   ),
               ],
             ),
             if (cast.casting) _CastingCard(cast: cast, room: widget.room, onStop: _stop),
-            if (_notice case final notice?) _Hint(icon: Icons.info_outline, text: notice),
+            if (_notice case final notice?) _Hint(icon: LiveIcons.info, text: notice),
             if (source.media == null)
-              MessageView(icon: Icons.link_off, title: t.cast.cannotCast, message: source.problem)
+              MessageView(icon: LiveIcons.linkOff, title: t.cast.cannotCast, message: source.problem)
             else ...[
-              if (source.needsHeaders) _Hint(icon: Icons.warning_amber_rounded, text: t.cast.headersHint),
-              if (source.expires) _Hint(icon: Icons.schedule, text: t.cast.expiresHint),
+              if (source.needsHeaders) _Hint(icon: LiveIcons.warning, text: t.cast.headersHint),
+              if (source.expires) _Hint(icon: LiveIcons.schedule, text: t.cast.expiresHint),
               if (_attempted && cast.phase == CastPhase.failed && cast.failure != null)
                 _Hint(
-                  icon: Icons.error_outline,
+                  icon: LiveIcons.error,
                   text: t.cast.failedWith(reason: castFailureText(cast.failure!)),
                   color: theme.colorScheme.error,
                 ),
@@ -156,7 +156,7 @@ class _CastPanelState extends ConsumerState<CastPanel> {
                 Text(t.cast.searching, style: theme.textTheme.bodySmall),
               ],
               if (_devices.isNotEmpty) ...[
-                if (_searchError != null) _Hint(icon: Icons.info_outline, text: t.cast.searchInterrupted),
+                if (_searchError != null) _Hint(icon: LiveIcons.info, text: t.cast.searchInterrupted),
                 Flexible(
                   child: ListView(
                     shrinkWrap: true,
@@ -176,7 +176,7 @@ class _CastPanelState extends ConsumerState<CastPanel> {
                 MessageView.error(title: t.cast.searchFailed, message: t.cast.searchFailedHint, onAction: _restart)
               else if (!_searching)
                 MessageView(
-                  icon: Icons.tv_off_outlined,
+                  icon: LiveIcons.noPicture,
                   title: t.cast.noDevices,
                   message: t.cast.noDevicesHint,
                   actionLabel: t.cast.searchAgain,
@@ -208,7 +208,7 @@ class _CastingCard extends StatelessWidget {
         padding: const EdgeInsets.all(Space.s3),
         child: Row(
           children: [
-            Icon(Icons.cast_connected, color: theme.colorScheme.primary),
+            LiveIcon(LiveIcons.casting, color: theme.colorScheme.primary),
             const SizedBox(width: Space.s3),
             Expanded(
               child: Column(
@@ -249,13 +249,13 @@ class _DeviceTile extends StatelessWidget {
     return ListTile(
       key: ValueKey('cast-device-${device.id}'),
       contentPadding: EdgeInsets.zero,
-      leading: Icon(active ? Icons.cast_connected : Icons.cast),
+      leading: LiveIcon(active ? LiveIcons.casting : LiveIcons.cast),
       title: Text(device.name, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(maker == null ? device.host : '$maker · ${device.host}', maxLines: 1),
       trailing: connecting
           ? const SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2))
           : active
-          ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+          ? LiveIcon(LiveIcons.success, filled: true, color: Theme.of(context).colorScheme.primary)
           : null,
       enabled: enabled,
       onTap: onTap,
@@ -266,7 +266,7 @@ class _DeviceTile extends StatelessWidget {
 class _Hint extends StatelessWidget {
   const new({required this.icon, required this.text, this.color});
 
-  final IconData icon;
+  final LiveIcons icon;
   final String text;
   final Color? color;
 
@@ -279,7 +279,7 @@ class _Hint extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: Sizes.iconDense, color: shade),
+          LiveIcon(icon, size: Sizes.iconDense, color: shade),
           const SizedBox(width: Space.s2),
           Expanded(
             child: Text(text, style: theme.textTheme.bodySmall!.copyWith(color: shade)),

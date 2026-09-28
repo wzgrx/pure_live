@@ -9,6 +9,7 @@ import 'package:pure_live_app/core/proxy.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/system_proxy.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// 设置 › 网络 (spec/product.md F-SET-07): one proxy for requests, chat,
@@ -20,36 +21,42 @@ class NetworkSettings extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const SystemProxyTile(),
+      SettingAnchor(id: Settings.followSystemProxy.id, child: const SystemProxyTile()),
       SwitchSettingTile(
         setting: Settings.proxyEnabled,
         title: t.settings.network.useProxy,
         subtitle: t.settings.network.useProxySubtitle,
       ),
-      SettingBuilder<String>(
-        setting: Settings.proxyHost,
-        builder: (context, value, set) => ListTile(
-          title: Text(t.settings.network.proxyHost),
-          subtitle: Text(value.isEmpty ? t.settings.network.proxyHostUnset : value),
-          onTap: () async {
-            final text = await _editText(context, t.settings.network.proxyHost, value, TextInputType.url);
-            if (text != null) set(text.trim());
-          },
+      SettingAnchor(
+        id: Settings.proxyHost.id,
+        child: SettingBuilder<String>(
+          setting: Settings.proxyHost,
+          builder: (context, value, set) => ListTile(
+            title: Text(t.settings.network.proxyHost),
+            subtitle: Text(value.isEmpty ? t.settings.network.proxyHostUnset : value),
+            onTap: () async {
+              final text = await _editText(context, t.settings.network.proxyHost, value, TextInputType.url);
+              if (text != null) set(text.trim());
+            },
+          ),
         ),
       ),
-      SettingBuilder<int>(
-        setting: Settings.proxyPort,
-        builder: (context, value, set) => ListTile(
-          title: Text(t.settings.network.proxyPort),
-          subtitle: Text('$value'),
-          onTap: () async {
-            final text = await _editText(context, t.settings.network.proxyPort, '$value', TextInputType.number);
-            final port = int.tryParse(text ?? '');
-            if (port != null && port > 0 && port < 65536) set(port);
-          },
+      SettingAnchor(
+        id: Settings.proxyPort.id,
+        child: SettingBuilder<int>(
+          setting: Settings.proxyPort,
+          builder: (context, value, set) => ListTile(
+            title: Text(t.settings.network.proxyPort),
+            subtitle: Text('$value'),
+            onTap: () async {
+              final text = await _editText(context, t.settings.network.proxyPort, '$value', TextInputType.number);
+              final port = int.tryParse(text ?? '');
+              if (port != null && port > 0 && port < 65536) set(port);
+            },
+          ),
         ),
       ),
-      SettingsHeader(t.settings.network.proxyPlatforms),
+      SettingAnchor(id: Settings.proxyPlatforms.id, child: SettingsHeader(t.settings.network.proxyPlatforms)),
       SettingBuilder<List<String>>(
         setting: Settings.proxyPlatforms,
         builder: (context, chosen, set) => Padding(

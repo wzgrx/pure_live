@@ -2823,6 +2823,7 @@ class Translations$settings$zh_Hans {
   String get setDiscoverDefault => '设为发现页默认打开';
 
   Map<String, String> get languageNames => {'zh-Hans': '简体中文', 'zh-Hant': '繁體中文', 'en': 'English'};
+  late final Translations$settings$search$zh_Hans search = Translations$settings$search$zh_Hans.internal(_root);
 }
 
 // Path: share
@@ -4349,6 +4350,101 @@ class Translations$settings$network$zh_Hans {
 
   /// zh-Hans: '系统代理：{host}:{port}'
   String systemProxyIs({required Object host, required Object port}) => '系统代理：${host}:${port}';
+}
+
+// Path: settings.search
+class Translations$settings$search$zh_Hans {
+  Translations$settings$search$zh_Hans.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// zh-Hans: '搜索设置'
+  String get hint => '搜索设置';
+
+  /// zh-Hans: '没有找到相关设置'
+  String get noResults => '没有找到相关设置';
+
+  /// zh-Hans: '3.x：{name}'
+  String legacyName({required Object name}) => '3.x：${name}';
+
+  Map<String, String> get legacy => {
+    'theme_locale': '切换语言|区域与语言',
+    'app_refreshRateMode': '界面刷新率',
+    'exit_choice': '退出不再询问',
+    'startup_enabled': '开机启动',
+    'refresh_autoRefreshFavorite': '开启关注自动刷新|定时刷新时间',
+    'refresh_refreshFavoriteOnResume': '返回应用时刷新收藏',
+    'refresh_autoRefreshInterval': '刷新间隔时间',
+    'refresh_maxConcurrentRefresh': '首页并发刷新任务',
+    'refresh_autoRefreshThumbnails': '自动刷新直播缩略图',
+    'refresh_thumbnailRefreshInterval': '缩略图刷新间隔',
+    'theme_mode': '主题模式',
+    'theme_dynamicColor': '动态取色',
+    'app_denseFavorites': '紧凑模式',
+    'roomCard': '房间卡片设置|卡片布局',
+    'fonts': '更换系统默认字体|字体样式设置',
+    'theme_textScale': '全局字体缩放比例|界面字号调节',
+    'player_preferResolution': '首选清晰度',
+    'player_preferResolutionCellular': '移动网络清晰度',
+    'volume_globalVolumeMute': '全局静音',
+    'volume_defaultMobileVolume': '手机端默认音量',
+    'volume_defaultDesktopVolume': '电脑端默认音量',
+    'player_hardwareDecoding': '开启硬解码',
+    'player_hardwareDecoder': '硬件解码器|hwdec',
+    'player_audioOutput': '音频输出驱动',
+    'player_fit': '屏幕比例',
+    'app_fullScreenDefault': '自动全屏',
+    'player_portraitAdaptation': '智能识别竖屏直播源',
+    'player_portraitFullscreenPolicy': '进入全屏时的方向',
+    'player_portraitFit': '竖屏全屏画面模式',
+    'player_portraitDanmakuArea': '竖屏弹幕布局',
+    'player_rememberPortraitOverride': '记住单个直播间方向',
+    'player_asmrSleepMode': '新直播间自动助眠',
+    'player_asmrSleepMinutes': '自动助眠播放时长',
+    'player_miniPlayerOnLeave': '退出小窗播放|小窗播放',
+    'player_pipAlwaysOnTop': 'Windows 小窗始终置顶',
+    'danmaku_area': '画面顶部占用高度',
+    'danmaku_topArea': '顶部留白',
+    'danmaku_bottomArea': '区域底部留白',
+    'danmaku_speed': '滚动速度',
+    'danmaku_fontSize': '字体大小',
+    'danmaku_fontWeight': '字体粗细',
+    'danmaku_stroke': '弹幕描边',
+    'danmaku_strokeWidth': '描边宽度',
+    'danmaku_noEmoji': '纯文字模式',
+    'danmaku_autoFps': '跟随界面刷新率策略|弹幕帧率',
+    'danmaku_tapInteraction': '点击画面弹幕查看操作',
+    'danmaku_longPressInteraction': '长按画面弹幕打开屏蔽操作',
+    'danmaku_blockList': '屏蔽管理|弹幕关键词屏蔽|弹幕关键词过滤',
+    'danmaku_collapseRepeated': '合并短时间内的相同弹幕|重复弹幕过滤',
+    'danmaku_similarityFilter': '相似弹幕过滤',
+    'danmaku_filterDouyuAutomated': '过滤斗鱼疑似自动弹幕',
+    'danmaku_pipEnabled': '小窗显示弹幕|小窗弹幕',
+    'record_defaultQuality': '默认录制清晰度',
+    'record_polling': '启用开播检测|挂机轮询检测',
+    'record_liveCheckInterval': '检测间隔时间',
+    'record_autoReconnect': '自动断线重连',
+    'record_maxRetries': '最大重试次数',
+    'record_retryDelay': '重连间隔时间',
+    'record_maxCheckInterval': '最大检测间隔',
+    'record_readTimeout': '录制读写超时',
+    'record_maxConcurrent': '最大同时录制任务数',
+    'record_danmaku': '同时录制弹幕',
+    'record_pinyinFolders': '使用拼音文件夹名',
+    'record_resumeOnLaunch': '应用启动时恢复待录任务',
+    'record_cacheLimitEnabled': '启用缓存限制',
+    'record_cacheLimitMB': '缓存限制',
+    'accounts_platforms': '平台显示|首选直播平台',
+    'accounts_audience': '观看数据与排行口径',
+    'accounts_accounts': '三方认证',
+    'network_proxyEnabled': '启用应用层代理|启用播放代理|网络代理设置',
+    'network_proxyHost': '代理主机',
+    'history_limit': '观看记录保留数量',
+    'data_cache': '清空本地缓存|缓存与数据管理',
+    'data_diagnostics': '本地配置预览',
+  };
 }
 
 // Path: sync.device

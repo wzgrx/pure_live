@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live_app/features/settings/record_directory_tile.dart';
 import 'package:pure_live_app/features/settings/setting_tiles.dart';
+import 'package:pure_live_app/features/settings/settings_search.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 Map<QualityPreference, String> get _quality => {
@@ -22,11 +23,14 @@ class RecordSettingsTiles extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      ListTile(
-        title: Text(t.app.recordings),
-        subtitle: Text(t.settings.record.centerSubtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.go('/me/recordings'),
+      SettingAnchor(
+        id: recordCenterAnchor,
+        child: ListTile(
+          title: Text(t.app.recordings),
+          subtitle: Text(t.settings.record.centerSubtitle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.go('/me/recordings'),
+        ),
       ),
       const RecordDirectoryTile(),
       ChoiceSettingTile<QualityPreference>(

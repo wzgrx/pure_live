@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart' show PageMargin;
 import 'package:pure_live_app/core/store.dart';
+import 'package:pure_live_app/features/settings/settings_search.dart';
 
 /// Rebuilds with a setting's current value; the value is read synchronously
 /// first, so the tile never flashes a default.
@@ -54,13 +55,16 @@ class SwitchSettingTile extends StatelessWidget {
   final String? subtitle;
 
   @override
-  Widget build(BuildContext context) => SettingBuilder<bool>(
-    setting: setting,
-    builder: (context, value, set) => SwitchListTile(
-      title: Text(title),
-      subtitle: subtitle == null ? null : Text(subtitle!),
-      value: value,
-      onChanged: set,
+  Widget build(BuildContext context) => SettingAnchor(
+    id: setting.id,
+    child: SettingBuilder<bool>(
+      setting: setting,
+      builder: (context, value, set) => SwitchListTile(
+        title: Text(title),
+        subtitle: subtitle == null ? null : Text(subtitle!),
+        value: value,
+        onChanged: set,
+      ),
     ),
   );
 }
@@ -76,7 +80,9 @@ class ChoiceSettingTile<T extends Object> extends StatelessWidget {
   final Map<T, String> labels;
 
   @override
-  Widget build(BuildContext context) => SettingBuilder<T>(
+  Widget build(BuildContext context) => SettingAnchor(id: setting.id, child: _tile(context));
+
+  Widget _tile(BuildContext context) => SettingBuilder<T>(
     setting: setting,
     builder: (context, value, set) => ListTile(
       title: Text(title),
@@ -137,7 +143,9 @@ class _SliderSettingTileState extends State<SliderSettingTile> {
   double? _dragging;
 
   @override
-  Widget build(BuildContext context) => SettingBuilder<num>(
+  Widget build(BuildContext context) => SettingAnchor(id: widget.setting.id, child: _tile(context));
+
+  Widget _tile(BuildContext context) => SettingBuilder<num>(
     setting: widget.setting,
     builder: (context, value, set) {
       final shown = (_dragging ?? value.toDouble()).clamp(widget.min, widget.max);

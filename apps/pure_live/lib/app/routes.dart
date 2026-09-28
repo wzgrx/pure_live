@@ -158,8 +158,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                     routes: [
                       GoRoute(
                         path: ':group',
-                        builder: (context, state) =>
-                            SettingsGroupPage(group: SettingsGroup.values.byName(state.pathParameters['group']!)),
+                        builder: (context, state) => SettingsGroupPage(
+                          group: SettingsGroup.values.byName(state.pathParameters['group']!),
+                          focus: state.uri.queryParameters['focus'],
+                        ),
                       ),
                     ],
                   ),

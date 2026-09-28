@@ -35,9 +35,7 @@ class IptvDiscover extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: TabBar(
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
+                child: PageTabBar(
                   dividerHeight: 0,
                   tabs: [
                     Tab(text: t.iptv.allChannels, height: 40),

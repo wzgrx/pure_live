@@ -20,10 +20,11 @@ final RegExp _channelPattern = RegExp(r'^[1-9]\d{0,15}$');
 /// The YY adapter (3.x's `YYSite`; parsing in [YyApi]).
 ///
 /// API requests carry 3.x's browser headers and the user's cookie when one
-/// is stored; there is no anonymous session. Streams come from
-/// stream-manager (FLV), and from the anonymous mobile HLS route when
-/// stream-manager has no stream, as in 3.x. Failures are `SiteError`s;
-/// nothing is disguised as an offline room.
+/// is stored; there is no anonymous session. Streams come from the
+/// anonymous mobile HLS route, what 3.x users got (3.x meant stream-manager
+/// to come first, but its request never worked); stream-manager (FLV) stands
+/// in when mobile HLS has nothing. Failures are `SiteError`s; nothing is
+/// disguised as an offline room.
 final class YySite extends LiveSite
     with LiveSiteLinks
     implements LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LivePlayUrlResolver {
@@ -227,17 +228,21 @@ final class YySite extends LiveSite
 
   // Rooms ---------------------------------------------------------------------
 
-  /// `liveInfoDetail` of the channel; when it is not live (`data: null`,
-  /// also the answer for unknown channels and short numbers) the room page
-  /// tells them apart: the 404 page is `NotFound`, a short number is looked
-  /// up again under its canonical channel, anything else is offline with
-  /// the page's streamer and title. The room keeps [roomId] as its identity.
-  Future<LiveRoom> _detail(String roomId) async {
+  /// `liveInfoDetail` of the channel (under its canonical number when a
+  /// short number was resolved before). When it is not live (`data: null`,
+  /// also the answer for unknown channels and short numbers) and [withPage]
+  /// (room entry), the room page tells them apart: the 404 page is
+  /// `NotFound`, a short number is looked up again under its canonical
+  /// channel, anything else is offline with the page's streamer and title.
+  /// Without it (follow refresh, recording) the room is offline, as in 3.x,
+  /// with 3.x's one request. The room keeps [roomId] as its identity.
+  Future<LiveRoom> _detail(String roomId, {required bool withPage}) async {
     final id = roomId.trim();
     if (!_channelPattern.hasMatch(id)) throw NotFound(_site, 'room id $id is not a channel number');
     final known = _shortIds[id];
     final live = await _liveDetail(known?.sid ?? id, requestedId: id);
     if (live != null) return live;
+    if (!withPage) return YyApi.offlineRoom(requestedId: id, channel: known);
     final response = await _get(Uri.https(_host, '/$id'));
     final page = YyApi.roomPage(response.text, status: response.status);
     if (page.sid != id) {
@@ -247,7 +252,7 @@ final class YySite extends LiveSite
         if (canonical != null) return canonical;
       }
     }
-    return YyApi.offlineRoom(page, requestedId: id);
+    return YyApi.offlineRoom(requestedId: id, page: page);
   }
 
   Future<LiveRoom?> _liveDetail(String sid, {required String requestedId}) async {
@@ -261,21 +266,23 @@ final class YySite extends LiveSite
     if (_shortIds.length > 512) _shortIds.remove(_shortIds.keys.first);
   }
 
-  /// The room with its danmaku arguments (live rooms only, as in 3.x).
+  /// The room with its danmaku arguments (live rooms only, as in 3.x); an
+  /// offline one also reads the room page (see [_detail]).
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, withPage: true);
 
-  /// The same detail: it costs no extra request.
+  /// `liveInfoDetail` only, 3.x's one request per follow: an offline card
+  /// keeps its stored name and avatar when merged (`LiveRoom.mergeFrom`).
   @override
-  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId, withPage: false);
 
-  /// The same detail; streams are requested by channel, so it holds all a
+  /// Like the refresh; streams are requested by channel, so it holds all a
   /// recording needs.
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withPage: false);
 
   @override
-  Future<bool> getLiveStatus({required String roomId}) async => (await _detail(roomId)).isLiveNow;
+  Future<bool> getLiveStatus({required String roomId}) async => (await _detail(roomId, withPage: false)).isLiveNow;
 
   // Streams -------------------------------------------------------------------
 
@@ -330,20 +337,31 @@ final class YySite extends LiveSite
     return YyApi.mobileHls(response.text, status: response.status);
   }
 
-  /// The qualities of stream-manager asked at gear 1 (3.x's request); when
-  /// it fails or lists none (some channels refuse the anonymous route with
-  /// `ErrAuthNotPass`), the mobile HLS qualities. A channel with neither is
-  /// `StreamUnavailable`.
+  /// The mobile HLS qualities, 3.x users' (`流畅 · 360p`, `高清 · 720p`).
+  /// When mobile HLS has none, stream-manager's at gear 1 (FLV). A channel
+  /// with neither is `StreamUnavailable` when a route said it has no
+  /// stream, else the first failure is thrown.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
     final channel = _channel(detail);
+    SiteError? failure;
+    var noStream = false;
+    try {
+      return await _mobileQualities(channel);
+    } on StreamUnavailable {
+      noStream = true;
+    } on SiteError catch (error) {
+      failure = error;
+    }
     try {
       final qualities = YyApi.qualities((await _streamManager(channel, 1)).streams);
       if (qualities.isNotEmpty) return qualities;
-    } on SiteError {
-      // Mobile HLS below, as in 3.x.
+      noStream = true;
+    } on SiteError catch (error) {
+      failure ??= error;
     }
-    return await _mobileQualities(channel);
+    if (noStream || failure == null) throw const StreamUnavailable(_site, 'no stream on mobile HLS or stream-manager');
+    throw failure;
   }
 
   /// Both mobile rates at once (3.x's `_getMobileHlsQualities`). A rate that
@@ -354,7 +372,7 @@ final class YySite extends LiveSite
     final qualities = YyApi.mobileQualities([for (final answer in answers) (rate: answer.rate, hls: answer.hls)]);
     if (qualities.isNotEmpty) return qualities;
     if (answers.every((answer) => answer.error != null)) throw answers.first.error!;
-    throw const StreamUnavailable(_site, 'no stream on stream-manager or mobile HLS');
+    throw const StreamUnavailable(_site, 'mobile HLS: no stream');
   }
 
   Future<({String rate, YyMobileHls? hls, SiteError? error})> _mobileAnswer(
@@ -372,11 +390,15 @@ final class YySite extends LiveSite
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The lines of [quality]. A mobile quality asks the mobile route at its
-  /// rate. A stream-manager quality asks stream-manager at its gear and
-  /// reports the gear it was served; when that fails or has no URL, the
-  /// mobile route at 4000 (quality rate 2000 or more) or 1200 plays
-  /// instead, as in 3.x.
+  /// The lines of [quality].
+  ///
+  /// A mobile quality asks the mobile route at its rate (3.x); when that
+  /// has no stream or fails, stream-manager plays the same tier as FLV
+  /// (4000 is gear 2 高清, 1200 gear 1 流畅, as measured), with its lease but
+  /// without confirming a quality. A stream-manager quality (listed when
+  /// mobile HLS had none) asks stream-manager at its gear and reports the
+  /// gear it was served; when that fails or has no URL, the mobile route at
+  /// 4000 (quality rate 2000 or more) or 1200 plays instead, as in 3.x.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final channel = _channel(detail);
@@ -384,9 +406,25 @@ final class YySite extends LiveSite
     if (data.isEmpty) throw const StreamUnavailable(_site, 'quality without data');
     if (data.startsWith(YyApi.mobileHlsPrefix)) {
       final rate = data.substring(YyApi.mobileHlsPrefix.length);
-      final hls = await _mobile(channel, rate);
-      if (hls == null) throw StreamUnavailable(_site, 'mobile HLS $rate: no stream');
-      return YyApi.mobileResolution(hls, rate: rate, cookie: _login());
+      SiteError? failure;
+      var noStream = false;
+      try {
+        final hls = await _mobile(channel, rate);
+        if (hls != null) return YyApi.mobileResolution(hls, rate: rate, cookie: _login());
+        noStream = true;
+      } on SiteError catch (error) {
+        failure = error;
+      }
+      try {
+        final answer = await _streamManager(channel, (int.tryParse(rate) ?? 0) >= 2000 ? 2 : 1);
+        final resolution = YyApi.resolution(answer.streams, issuedAt: answer.issuedAt, cookie: _login());
+        if (resolution.hasSources) return LivePlayUrlResolution.lines(resolution.lines);
+        noStream = true;
+      } on SiteError catch (error) {
+        failure ??= error;
+      }
+      if (noStream || failure == null) throw StreamUnavailable(_site, 'mobile HLS $rate and stream-manager: no stream');
+      throw failure;
     }
     if (int.tryParse(data) case final gear?) {
       try {

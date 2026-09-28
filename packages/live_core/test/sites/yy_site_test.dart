@@ -1,7 +1,8 @@
 // YySite over the recorded responses (ReplayHttp): the catalog and its area
 // pages, area modules (stored, read, module-less), recommendations, search,
-// room detail (live, offline, unknown, short numbers), stream-manager and its
-// mobile HLS fallback, cookies, links and error mapping. The stream-manager
+// room detail (entry and refresh: live, offline, unknown, short numbers),
+// mobile HLS first and stream-manager standing in, cookies, links and error
+// mapping. The stream-manager
 // body carries clock values (seq, send_time, the URL's sequence) and the
 // recording's browser (osversion, width, height), left out of matching.
 import 'dart:convert';
@@ -59,6 +60,16 @@ final ReplaySample _serverTimeout = _synthetic(
   status: 500,
   method: 'POST',
 );
+
+/// Both mobile HLS rates of [sid] failing.
+Map<String, List<Object>> _mobileDown(String sid) => {
+  '/hls/new/get/$sid/$sid/1200': [TransportReason.timeout],
+  '/hls/new/get/$sid/$sid/4000': [TransportReason.timeout],
+};
+
+/// The 4000 answer of a channel without a stream (the recording has 1200).
+ReplaySample _noStream4000(String sid) =>
+    _synthetic(_mobileUrl(sid, '4000'), '({"code":0,"width":0,"audio":"","video":"","height":0})');
 
 /// Answers scripted responses for a path in order (a [TransportReason]
 /// throws), then replays [inner].
@@ -303,9 +314,9 @@ void main() {
       expect(await setup.site.getLiveStatus(roomId: _live), isTrue);
     });
 
-    test('offline: the room page names the streamer; the state stays offline as in 3.x (REG-YY-007)', () async {
+    test('offline on entry: the room page names the streamer; the state stays offline as in 3.x', () async {
       final setup = _setup(['S05-detail-offline', 'S05-page-offline']);
-      final room = await setup.site.getRoomDetailForRefresh(roomId: _offline);
+      final room = await setup.site.getRoomDetail(roomId: _offline);
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.roomId, _offline);
       expect(room.nick, '小洲- 00000o0000');
@@ -313,12 +324,38 @@ void main() {
       expect(_paths(setup.http), ['/api/liveInfoDetail/$_offline/$_offline/0', '/$_offline']);
     });
 
-    test('an unknown channel is NotFound, not offline (REG-YY-007); a non-number asks nothing', () async {
+    test('follow refresh, recording and live status: 3.x’s one request, no room page', () async {
+      final setup = _setup(['S05-detail-offline', 'S05-detail-missing']);
+      final legacy = (Fixture.load('yy', 'S05-detail-offline').legacy as Map)['room'] as Map<String, dynamic>;
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: _offline);
+      for (final MapEntry(:key, :value) in legacy.entries) {
+        expect(refreshed.toJson()[key] ?? '', value ?? '', reason: key);
+      }
+      expect((await setup.site.getRoomDetailForRecording(roomId: _offline)).effectiveLiveStatus, LiveStatus.offline);
+      expect(await setup.site.getLiveStatus(roomId: _offline), isFalse);
+      expect(
+        (await setup.site.getRoomDetailForRefresh(roomId: _missing)).effectiveLiveStatus,
+        LiveStatus.offline,
+        reason: 'an unknown channel is told apart on room entry only, as 3.x never could',
+      );
+      expect(_paths(setup.http).where((path) => !path.startsWith('/api/')), isEmpty);
+      expect(setup.http.requests, hasLength(4));
+      final merged = LiveRoom(
+        platform: 'yy',
+        roomId: _offline,
+        nick: '小洲',
+        avatar: 'https://a/b.png',
+      ).mergeFrom(refreshed);
+      expect((merged.nick, merged.avatar), ('小洲', 'https://a/b.png'), reason: 'the follow keeps its name');
+      expect(merged.effectiveLiveStatus, LiveStatus.offline);
+    });
+
+    test('an unknown channel is NotFound on entry, not offline (REG-YY-007); a non-number asks nothing', () async {
       final setup = _setup(['S05-detail-missing', 'S05-page-missing']);
-      await expectLater(setup.site.getRoomDetailForRecording(roomId: _missing), throwsA(isA<NotFound>()));
+      await expectLater(setup.site.getRoomDetail(roomId: _missing), throwsA(isA<NotFound>()));
       final before = setup.http.requests.length;
       await expectLater(setup.site.getRoomDetail(roomId: 'music'), throwsA(isA<NotFound>()));
-      await expectLater(setup.site.getRoomDetail(roomId: '0123'), throwsA(isA<NotFound>()));
+      await expectLater(setup.site.getRoomDetailForRefresh(roomId: '0123'), throwsA(isA<NotFound>()));
       expect(setup.http.requests, hasLength(before));
     });
 
@@ -370,11 +407,30 @@ void main() {
   });
 
   group('streams', () {
-    test('qualities: stream-manager at gear 1, a JSON body sent as text/plain (REG-YY-003)', () async {
-      final setup = _setup(['S06-streams-g1']);
+    test('qualities: mobile HLS first, with the names 3.x users saw; stream-manager is not asked', () async {
+      final setup = _setup(['S07-mobile-hls'], extra: [_mobile4000(_live)]);
+      final qualities = await setup.site.getPlayQualities(detail: _room(_live));
+      expect(qualities.map((quality) => (quality.quality, quality.data)), [
+        ('高清 · 720p', 'mobile-hls:4000'),
+        ('流畅 · 360p', 'mobile-hls:1200'),
+      ]);
+      expect(setup.http.requests.every((request) => request.url.host == 'interface.yy.com'), isTrue);
+      final mobile = setup.http.requests.first;
+      expect(mobile.headers['user-agent'], YyApi.mobileUserAgent);
+      expect(mobile.headers['referer'], 'https://wap.yy.com/mobileweb/$_live/$_live');
+      final resolution = await setup.site.resolvePlayUrls(detail: _room(_live), quality: qualities.last);
+      expect(resolution.lines.single.format, StreamFormat.hls);
+      expect(resolution.lines.single.headers, YyApi.mediaHeaders());
+      expect(resolution.lines.single.lease, isNull, reason: 'the HLS t is the issue time');
+      expect(resolution.appliedQualityData, 'mobile-hls:1200');
+      expect(setup.http.requests.where((request) => request.url.host == 'stream-manager.yy.com'), isEmpty);
+    });
+
+    test('mobile HLS has nothing: stream-manager at gear 1, a JSON body sent as text/plain (REG-YY-003)', () async {
+      final setup = _setup(['S06-streams-g1'], script: _mobileDown(_live));
       final qualities = await setup.site.getPlayQualities(detail: _room(_live));
       expect(qualities.map((quality) => (quality.id, quality.quality)), [('2', '高清'), ('1', '流畅')]);
-      final request = setup.http.requests.single;
+      final request = setup.http.requests.last;
       expect(request.method, 'POST');
       expect(request.headers['content-type'], 'text/plain;charset=UTF-8');
       expect(request.headers['referer'], 'https://www.yy.com/$_live/$_live');
@@ -409,7 +465,7 @@ void main() {
     });
 
     test('gear 3 has no web stream: served gear 2, and the lines say so (REG-YY-004)', () async {
-      final setup = _setup(['S06-streams-g1', 'S06-streams-g3']);
+      final setup = _setup(['S06-streams-g1', 'S06-streams-g3'], script: _mobileDown(_live));
       final qualities = await setup.site.getPlayQualities(detail: _room(_live));
       expect(qualities.map((quality) => quality.id), isNot(contains('3')), reason: '3.x listed 超清');
       const requested = LivePlayQuality(quality: '超清', id: '3', data: '3', sort: 2100);
@@ -421,26 +477,40 @@ void main() {
       );
     });
 
-    test('stream-manager refused: 3.x’s mobile HLS qualities (流畅 · 360p, 高清 · 720p)', () async {
+    test('a mobile quality whose HLS fails plays the same tier as FLV, with its lease', () async {
       final setup = _setup(
-        ['S07-mobile-hls'],
-        extra: [_mobile4000(_live)],
+        ['S06-streams-g2'],
         script: {
-          _streams: [_serverTimeout],
+          '/hls/new/get/$_live/$_live/4000': [TransportReason.timeout],
         },
       );
-      final qualities = await setup.site.getPlayQualities(detail: _room(_live));
-      expect(qualities.map((quality) => (quality.quality, quality.data)), [
-        ('高清 · 720p', 'mobile-hls:4000'),
-        ('流畅 · 360p', 'mobile-hls:1200'),
-      ]);
-      final mobile = setup.http.requests.where((request) => request.url.host == 'interface.yy.com').first;
-      expect(mobile.headers['user-agent'], YyApi.mobileUserAgent);
-      expect(mobile.headers['referer'], 'https://wap.yy.com/mobileweb/$_live/$_live');
-      final resolution = await setup.site.resolvePlayUrls(detail: _room(_live), quality: qualities.last);
-      expect(resolution.lines.single.format, StreamFormat.hls);
-      expect(resolution.lines.single.lease, isNull);
-      expect(resolution.appliedQualityData, 'mobile-hls:1200');
+      const quality = LivePlayQuality(quality: '高清 · 720p', id: 'mobile-hls:4000', data: 'mobile-hls:4000', sort: 4000);
+      final resolution = await setup.site.resolvePlayUrls(detail: _room(_live), quality: quality);
+      final line = resolution.lines.single;
+      expect(line.format, StreamFormat.flv);
+      expect(line.headers, YyApi.mediaHeaders());
+      final lease = line.lease!;
+      expect(lease.expiresAt!.difference(_now).inSeconds, inInclusiveRange(599, 601));
+      expect(lease.expiresAt!.difference(lease.refreshAt), YyApi.leaseLead);
+      expect(lease.cutsConnection, isFalse);
+      expect(resolution.appliedQualityData, isNull, reason: 'standing in confirms no quality');
+      final body = jsonDecode(utf8.decode(setup.http.requests.last.body!)) as Map<String, dynamic>;
+      expect((body['avp_parameter'] as Map)['gear'], 2, reason: '4000 is the 高清 tier (gear 2)');
+      expect(
+        resolveAppliedPlayQuality(qualities: const [quality], requested: quality, resolution: resolution).quality,
+        '高清 · 720p',
+      );
+    });
+
+    test('a mobile quality with no stream anywhere is StreamUnavailable', () async {
+      final setup = _setup(['S07-mobile-hls-offline', 'S06-streams-offline']);
+      await expectLater(
+        setup.site.resolvePlayUrls(
+          detail: _room(_offline),
+          quality: const LivePlayQuality(quality: '流畅 · 360p', id: 'mobile-hls:1200', data: 'mobile-hls:1200'),
+        ),
+        throwsA(isA<StreamUnavailable>()),
+      );
     });
 
     test('a stream-manager quality that fails plays mobile HLS at 4000 (rate ≥ 2000) or 1200', () async {
@@ -464,55 +534,58 @@ void main() {
       expect(low.urls.single, contains('_0_1_0'));
     });
 
-    test('an offline channel: no gear, no mobile stream → StreamUnavailable', () async {
-      final setup = _setup(
-        ['S06-streams-offline', 'S07-mobile-hls-offline'],
-        extra: [_synthetic(_mobileUrl(_offline, '4000'), '({"code":0,"width":0,"audio":"","video":"","height":0})')],
-      );
+    test('an offline channel: no mobile stream, no gear → StreamUnavailable', () async {
+      final setup = _setup(['S06-streams-offline', 'S07-mobile-hls-offline'], extra: [_noStream4000(_offline)]);
       await expectLater(setup.site.getPlayQualities(detail: _room(_offline)), throwsA(isA<StreamUnavailable>()));
-      expect(_paths(setup.http).where((path) => path.startsWith('/hls/new/get/')), hasLength(2));
+      expect(_paths(setup.http), [
+        '/hls/new/get/$_offline/$_offline/1200',
+        '/hls/new/get/$_offline/$_offline/4000',
+        _streams,
+      ]);
     });
 
-    test('when every route fails, the failure is reported', () async {
+    test('when every route fails, the first failure is reported', () async {
       final setup = _setup(
         [],
         script: {
+          ..._mobileDown(_live),
           _streams: [_serverTimeout],
-          '/hls/new/get/$_live/$_live/1200': [TransportReason.timeout],
-          '/hls/new/get/$_live/$_live/4000': [TransportReason.timeout],
         },
       );
       await expectLater(setup.site.getPlayQualities(detail: _room(_live)), throwsA(isA<NetworkFailure>()));
+      expect(setup.http.requests.last.url.path, _streams);
     });
 
     test('a room read by its short number plays its canonical channel', () async {
-      final g1 = ReplaySample.load('$_root/S06-streams-g1');
       final setup = _setup(
-        [],
+        ['S07-mobile-hls-offline'],
+        extra: [_noStream4000(_offline)],
         script: {
-          _streams: [g1],
+          _streams: [_serverTimeout],
         },
       );
       final room = LiveRoom(
         platform: 'yy',
         roomId: '2149',
-        data: const YyRoomData(sid: '35340121', ssid: '35340121'),
+        data: const YyRoomData(sid: _offline, ssid: _offline),
       );
-      await setup.site.getPlayQualities(detail: room);
-      expect(setup.http.requests.single.url.queryParameters['cid'], '35340121');
+      await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
+      expect(setup.http.requests.first.url.path, '/hls/new/get/$_offline/$_offline/1200');
+      expect(setup.http.requests.last.url.queryParameters['cid'], _offline);
       final legacy = LiveRoom(
         platform: 'yy',
         roomId: '2149',
-        danmakuData: const YyDanmakuArgs(topSid: 35340121, subSid: 35340121),
+        danmakuData: const YyDanmakuArgs(topSid: 85520900, subSid: 85520900),
       );
       final again = _setup(
-        [],
+        ['S07-mobile-hls-offline'],
+        extra: [_noStream4000(_offline)],
         script: {
-          _streams: [g1],
+          _streams: [_serverTimeout],
         },
       );
-      await again.site.getPlayQualities(detail: legacy);
-      expect(again.http.requests.single.url.queryParameters['sid'], '35340121', reason: "3.x's danmaku arguments");
+      await expectLater(again.site.getPlayQualities(detail: legacy), throwsA(isA<StreamUnavailable>()));
+      expect(again.http.requests.first.url.path, '/hls/new/get/$_offline/$_offline/1200', reason: "3.x's arguments");
     });
 
     test('the user cookie goes with API requests and media lines', () async {
@@ -571,7 +644,7 @@ void main() {
     await expectLater(
       YySite(_Failing(TransportReason.cancelled)).getPlayQualities(detail: _room(_live)),
       throwsA(isA<TransportFailure>()),
-      reason: 'a cancelled stream-manager request does not fall back to mobile HLS',
+      reason: 'a cancelled request does not go on to the other route',
     );
   });
 }

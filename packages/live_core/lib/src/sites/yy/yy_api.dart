@@ -59,6 +59,10 @@ typedef YyModule = ({int moduleId, String biz, String subBiz});
 /// One answer of the anonymous mobile HLS route.
 typedef YyMobileHls = ({Uri url, int width, int height, String video});
 
+/// What a room page says: the canonical channel, the streamer, the channel
+/// title and the area name.
+typedef YyRoomPage = ({String sid, String ssid, String uid, String nick, String avatar, String title, String area});
+
 /// Pure parsing of YY responses (3.x's `YYSite`). Each function takes the
 /// response text and status and returns 3.x's models or throws a
 /// `SiteError`.
@@ -362,10 +366,7 @@ abstract final class YyApi {
   /// (`pageInfo.sid`, `ssid`), the streamer (`nick`, `logo`), the channel
   /// title (`roomName`) and the area name (`owInfo.stringBiz`). The 404 page
   /// (it loads `yycom_404`, with status 200) is `NotFound`.
-  static ({String sid, String ssid, String uid, String nick, String avatar, String title, String area}) roomPage(
-    String html, {
-    int status = 200,
-  }) {
+  static YyRoomPage roomPage(String html, {int status = 200}) {
     if (status == 404 || html.contains('yycom_404')) throw const NotFound(_site, 'room page is the 404 page');
     if (status >= 500) throw NetworkFailure(_site, 'room page: HTTP $status');
     if (status < 200 || status >= 300) throw ApiChanged(_site, 'room page: HTTP $status');
@@ -391,14 +392,14 @@ abstract final class YyApi {
     );
   }
 
-  /// The room of a channel that is not broadcasting, from its [roomPage]:
-  /// offline, the streamer, the channel title and area, without cover or
-  /// audience (3.x had only the id and the state).
-  static LiveRoom offlineRoom(
-    ({String sid, String ssid, String uid, String nick, String avatar, String title, String area}) page, {
-    required String requestedId,
-  }) {
+  /// The room of a channel that is not broadcasting. Without its [page]
+  /// (follow refresh, recording) it is 3.x's room: the id and the state,
+  /// and the canonical [channel] when a short number was resolved before.
+  /// With the page (room entry) it also names the streamer, the channel
+  /// title and area; never a cover or an audience.
+  static LiveRoom offlineRoom({required String requestedId, YyRoomPage? page, YyRoomData? channel}) {
     final id = requestedId.trim();
+    if (page == null) return LiveRoom(roomId: id, platform: _site, liveStatus: LiveStatus.offline, data: channel);
     return LiveRoom(
       roomId: id,
       platform: _site,
@@ -471,8 +472,7 @@ abstract final class YyApi {
   };
 
   /// A stream-manager answer. HTTP 5xx is `NetworkFailure`, any other
-  /// non-2xx status or a body that is not a JSON object `ApiChanged`; the
-  /// adapter then falls back to mobile HLS, as 3.x did.
+  /// non-2xx status or a body that is not a JSON object `ApiChanged`.
   static Map<String, dynamic> streams(String body, {int status = 200}) {
     if (status >= 500) throw NetworkFailure(_site, 'stream-manager: HTTP $status (${_snippet(body)})');
     if (status < 200 || status >= 300) throw ApiChanged(_site, 'stream-manager: HTTP $status (${_snippet(body)})');
@@ -634,7 +634,7 @@ abstract final class YyApi {
   }
 
   /// The one HLS line of a mobile answer, with the media headers. [rate] is
-  /// the confirmed quality when a mobile quality was asked for; a fallback
+  /// the confirmed quality when a mobile quality was asked for; standing in
   /// for a stream-manager quality confirms nothing.
   static LivePlayUrlResolution mobileResolution(YyMobileHls hls, {String? rate, String cookie = ''}) =>
       LivePlayUrlResolution.lines([

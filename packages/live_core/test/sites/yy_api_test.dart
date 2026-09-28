@@ -256,13 +256,28 @@ void main() {
       }
     });
 
-    test('S05 an offline room keeps 3.x’s state and adds the streamer and title of its page', () {
-      final page = YyApi.roomPage(_sample('S05-page-offline').body);
-      final room = YyApi.offlineRoom(page, requestedId: '85520900');
+    test('S05 an offline room without its page (refresh, recording) is 3.x’s', () {
       final legacy = _legacy(_sample('S05-detail-offline'))['room'] as Map<String, dynamic>;
-      // 3.x had only the id and the state (its follow refresh then blanked
-      // the card's name); the page names the streamer, the channel title,
-      // its area and the room page.
+      final room = YyApi.offlineRoom(requestedId: '85520900');
+      _expectParity(room.toJson(), legacy);
+      expect(room.toJson().keys, containsAll(legacy.keys.where((key) => key != 'danmakuData')));
+      expect(
+        (YyApi.offlineRoom(
+                  requestedId: '2149',
+                  channel: const YyRoomData(sid: '35340121', ssid: '35340121'),
+                ).data!
+                as YyRoomData)
+            .sid,
+        '35340121',
+      );
+    });
+
+    test('S05 an offline room on entry keeps 3.x’s state and adds the streamer and title of its page', () {
+      final page = YyApi.roomPage(_sample('S05-page-offline').body);
+      final room = YyApi.offlineRoom(requestedId: '85520900', page: page);
+      final legacy = _legacy(_sample('S05-detail-offline'))['room'] as Map<String, dynamic>;
+      // 3.x had only the id and the state; the page names the streamer, the
+      // channel title, its area and the room page.
       _expectParity(room.toJson(), legacy, changed: {'title', 'nick', 'avatar'});
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.nick, '小洲- 00000o0000');

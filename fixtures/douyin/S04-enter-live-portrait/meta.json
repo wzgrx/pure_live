@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "sample": "S04-enter-live-portrait",
+  "capturedAt": "2026-09-27T09:52:42.688884Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.douyin.com/webcast/room/web/enter/?app_name=douyin_web&enter_from=web_live&live_id=1&web_rid=153806988623&is_need_double_stream=false&aid=6383&compress=gzip&device_platform=web&browser_language=zh-CN&browser_platform=Win32&browser_name=Edge&browser_version=125.0.0.0&msToken=5Obwt547HoN3dPUYC1Rs1h79OnQBKckZYRth93nOufdlvabLF%3DPh4IpGAZQGoeUKVgKWW8CH3gNlqrYk6Z%3DnfOYoJygS4xzhaSyMXVLo%3D8dTsTC4G1D5SoBx1isD7iX6zVH1uj2fBaPLrFu9giF6phJc30elcur1ifdDsza7BCD8mRRslE%3DUUDEq&a_bogus=GqUiUNzXbAdG4uJF5E3SqB9q8-F9Jaiv3ICmUP2gkl8h9x23DMWB6fiaJpVzjlCjLzwqGAGcp4fnGbK5oXN76Hng83pp%2F6JLz9k3v-Ad1sGNc4sukPDdeLPI2CJ8JIMx-pDTunhxaaNkLQFjiDar-lYnFitep1q74oCI",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+      "Referer": "https://live.douyin.com",
+      "Authority": "live.douyin.com",
+      "Cookie": "ttwid=5%2VDVRBRDPhf8pQnZiHIXZrHx5gPyVFWU3ma2-CminQJwh%8M0435043489%7Fmrapegj93t8awrp030a52d0p9d87yc8e6m9949p8361eh15z3jkh6r88em23y784; UIFID_TEMP=3de7b449f8ac6528790e7f08bc93e67282b84c72f1054fe6de7d17eb78a9151004b08e935b59509761acd4c4562ab8ae989c794cf82f01c40eaa1521f0a1d153ae14f8c72f95f5d2e6a64747c05fbc89"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "bd-ticket-guard-key-sign-result": "2",
+      "x-tt-supplier-id": "0_9",
+      "date": "Sun, 27 Sep 2026 09:52:43 GMT",
+      "transfer-encoding": "chunked",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "x-tt-trace-host": "013bebe0cafb8d31a21521a307737c7662e6601d84b712e47a6fddecd91dd995c2c897cc7020e954a54dc100e96d28f7948b1ef7622c858afb7c2db465480389f160072d0a1c9ce76c64af5535eea53745b532b69f2da1c1946d46254ba041556d",
+      "server": "TLB",
+      "x-tt-trace-tag": "id=26;cdn-cache=miss;type=dyn",
+      "tt_stable": "1",
+      "webcast-ntp-t3": "1790502763170",
+      "bd-ticket-guard-sign-res-static-sign": "1102",
+      "x-ccdn-req-id-46b1": "6bebe82936fd45c61c513f914ced02c5",
+      "connection": "keep-alive",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "bd-ticket-guard-sign-res-static-ts-sign": "1102",
+      "server-timing": [
+        "cdn-cache;desc=MISS, edge;dur=2, origin;dur=196",
+        "inner; dur=174,ugm;dur=170"
+      ],
+      "x-tt-trace-id": "00-26092717524256ADD9A061D3AEC3A8B3-44EA6AD015C05C74-00",
+      "content-type": "application/json; charset=utf-8",
+      "x-tt-logid": "2026092717524256ADD9A061D3AEC3A8B3",
+      "x-janus-info": "wVajgmDTswaYyUHfAZEMvrRllDPcH3AbmxgQZ_NUnmY-dQgANrXzTWdRK9kT9bLcjYEvlOfgmn9H6VGMf6GKvV1me_DHDvnWLr-XjatxUXN8iKlVmfhdMImrtKtzYqJDm5x2LzO8IDQp_7WAFRp2IDNNTXZjMlImC1XCZnI0y595deOtVSOb7DMmViNEgwgDFvmqcDcnmWkbDFsNe5Neg34=",
+      "x-ms-token": "h1pppCZHzK7TdwzBzquOxwu5Q2NdEp8KN7cxB-CiCQ7_w8e0-FLZyWL6I6gLnaBmMcoQygB1HzZbzjAKUElX3ulM6YKqkbpgKrjxtJS-NZ8HvI==",
+      "x-webcast-gateway-mini": "1",
+      "webcast-ntp-t2": "1790502763015",
+      "via": "CHN-SNxianyang-CT4-CACHE27[198],CHN-SNxianyang-CT4-CACHE27[ovl,196]"
+    }
+  },
+  "raw": {
+    "sha256": "f6281cd06bbedb2fdd9e6b8572947c468fc1ea74a36895fe64212d4fea1cb93c",
+    "length": 36961
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:x-ms-token",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:ttwid",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:UIFID_TEMP",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].cover.url_list[0]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].cover.url_list[1]:x-signature",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.FULL_HD1:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.FULL_HD1:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.HD1:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.HD1:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.SD1:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.SD1:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.SD2:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.flv_pull_url.SD2:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.hls_pull_url_map.FULL_HD1:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.hls_pull_url_map.HD1:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.hls_pull_url_map.SD1:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.hls_pull_url_map.SD2:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.hls_pull_url:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.common.secret_key",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.origin.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.origin.main.flv:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.origin.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.origin.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.origin.main.lls:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.ld.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.ld.main.flv:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.ld.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.ld.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.ld.main.lls:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.sd.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.sd.main.flv:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.sd.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.sd.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.sd.main.lls:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.md.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.md.main.flv:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.md.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.md.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.md.main.lls:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.ao.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.ao.main.flv:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.flv:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.flv:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.hls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.lls:sign",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].stream_url.live_core_sdk_data.pull_data.stream_data.data.hd.main.lls:unique_id",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.data[0].owner.sec_uid",
+      "rule": "person"
+    },
+    {
+      "where": "$.data.user.sec_uid",
+      "rule": "person"
+    },
+    {
+      "where": "url:msToken",
+      "rule": "secret"
+    },
+    {
+      "where": "url:a_bogus",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1) + x-ms-token response header scrub"
+}

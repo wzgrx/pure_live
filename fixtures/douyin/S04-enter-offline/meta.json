@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "sample": "S04-enter-offline",
+  "capturedAt": "2026-09-27T09:52:45.511608Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.douyin.com/webcast/room/web/enter/?app_name=douyin_web&enter_from=web_live&live_id=1&web_rid=745964462470&is_need_double_stream=false&aid=6383&compress=gzip&device_platform=web&browser_language=zh-CN&browser_platform=Win32&browser_name=Edge&browser_version=125.0.0.0&msToken=fWekmUupIO4T8iNw2kQjVV5ffhm%3D2HgTwsoDQCD1mbyNF4WagyVTDP%3DihYLGrTjWvoH4txefu8pACtkakyuTeqb1Xh1gvIRZtTQANPOyfm8aBrHPeiu7nxcXPRYWweiTEsKHiUhdc4qLktY0RdJ%3DUt57A6UPvJVfyWa6NKGqgvQvflMFuyPDy8ug&a_bogus=CyfUSXacx8nqovXc5F5HbG4r78Q9Jfzr6XAkBF3pvS5r5e41GOLe1waaBcMygtAdMwhsGQOsm1zbLv%2FbqD9Z2Xak93rp%2F39MfnWwVd6C7oSYc2OjtkXmZ2cAgxq2wnu67l2hzDs4movRSRueaGTI4hTjP21-lw5%2F0JG%3D",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+      "Referer": "https://live.douyin.com",
+      "Authority": "live.douyin.com",
+      "Cookie": "ttwid=0%6FIMZPZTEpe0tRsKtRBMQiYz4mDvMSFR0ev9-AaioJTfy%6M3751081356%1Jaczpifh50k7xfme720y34u4f1n13oh6i2b6751z9083gv65p1vsw7j92ed62q594; UIFID_TEMP=4bb7e151c6df8303161c2e49ed08d75318a42b13d5778ef7ba1a39bb82d8574573c26a463f41351199add0a7741cd2fa424c963ad06d89c14eed2281e6c2c461ae71d6c17a23b2b2e0d92591b57ddb02"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "bd-ticket-guard-key-sign-result": "2",
+      "x-tt-supplier-id": "0_9",
+      "date": "Sun, 27 Sep 2026 09:52:46 GMT",
+      "transfer-encoding": "chunked",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "x-tt-trace-host": "013bebe0cafb8d31a21521a307737c7662060d9c5259ad08c856c217565f3f900828a212482420e5580d8ecd7e4f7072844c6f89b2184cd63df6ffbe2e2da3d0841c09ea0a9ab66fc0a22fec89c79fa921ed475206a901c350b521b05eeef1353d",
+      "server": "TLB",
+      "x-tt-trace-tag": "id=26;cdn-cache=miss;type=dyn",
+      "tt_stable": "1",
+      "webcast-ntp-t3": "1790502765999",
+      "bd-ticket-guard-sign-res-static-sign": "1102",
+      "x-ccdn-req-id-46b1": "3f854da539619a566bfd445c2d187c14",
+      "connection": "keep-alive",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "bd-ticket-guard-sign-res-static-ts-sign": "1102",
+      "server-timing": [
+        "cdn-cache;desc=MISS, edge;dur=1, origin;dur=185",
+        "inner; dur=164,ugm;dur=160"
+      ],
+      "x-tt-trace-id": "00-260927175245D054CF0EDFC929D2EFB6-41864C124F03F205-00",
+      "content-type": "application/json; charset=utf-8",
+      "x-tt-logid": "20260927175245D054CF0EDFC929D2EFB6",
+      "x-janus-info": "WxHSs3GHt2Dy6fMEpznH_BD4P2FKQL9XD71XOmb_CYbQwXjhrOJw0LJddr_sm7p4_3quB3Zuls9Rk7IqTUsfSgG8lm2EtiVTaOUGAAUwmk6PLYgHeiPDIqXiGM-cIIcsmk_KGZeIOnlsnrcTYq8zoxP8D8-QTHjlhC3oEX5_06BRtzojyBbcXoGuVbqRvDzLoNYsX62o6VtNQSucuQk6XPg=",
+      "x-ms-token": "P6k57h0NmbLNyJbkE1cM6KH2ZN3fNvDWd47iU2jm2NNZO0tdLF2ze_ZNlUA78ykkmzxXDKh0MHitDql_5-ZNC5jhZIHdzhgph5w2hCEiSSGbLE==",
+      "x-webcast-gateway-mini": "1",
+      "webcast-ntp-t2": "1790502765851",
+      "via": "CHN-SNxianyang-CT4-CACHE19[186],CHN-SNxianyang-CT4-CACHE19[ovl,185]"
+    }
+  },
+  "raw": {
+    "sha256": "251219ce037b37b4b5f2022f067a2ccead69110d7fff6de787ae1e79718ee21f",
+    "length": 1414
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:x-ms-token",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:ttwid",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:UIFID_TEMP",
+      "rule": "secret"
+    },
+    {
+      "where": "$.data.user.sec_uid",
+      "rule": "person"
+    },
+    {
+      "where": "url:msToken",
+      "rule": "secret"
+    },
+    {
+      "where": "url:a_bogus",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1) + x-ms-token response header scrub"
+}

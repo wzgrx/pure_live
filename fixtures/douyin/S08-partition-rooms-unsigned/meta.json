@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "sample": "S08-partition-rooms-unsigned",
+  "capturedAt": "2026-09-27T09:59:22.335030Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.douyin.com/webcast/web/partition/detail/room/v2/?aid=6383&app_name=douyin_web&live_id=1&device_platform=web&language=zh-CN&browser_language=zh-CN&browser_platform=Win32&browser_name=Chrome&browser_version=120.0.0.0&partition=1010032&partition_type=1&count=30&offset=0&cookie_enabled=true&screen_width=1920&screen_height=1080",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9",
+      "Origin": "https://www.douyin.com",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-origin",
+      "Referer": "https://www.douyin.com/search/?source=switch_tab&type=live",
+      "Cookie": "ttwid=3%6JZTTOFJMge5eQbMzAKLTfYn1uFxWZZS2bu4-XpqvGUxv%0C8084224799%5Wvmyuyrq08q9otjh199v78h5u1f10en8c8e1062g4542om91z2zha2l81di56h478; UIFID_TEMP=2dd0a876a9fb3878494a9d60fc60e47267f28d39c4735ed5ba4c41ee44d4797554f43b665e88017410edd8d3565cb3ec535e859ba99b07c97bfa0582c4a5e923bc07c7a90c87a3e1e4e22059f20efe08"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-tt-supplier-id": "0_9",
+      "date": "Sun, 27 Sep 2026 09:59:22 GMT",
+      "access-control-allow-origin": "https://www.douyin.com",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "access-control-expose-headers": "Bdturing-Verify, x-vc-bdturing-parameters",
+      "server-timing": [
+        "cdn-cache;desc=MISS, edge;dur=1, origin;dur=72",
+        "inner; dur=46"
+      ],
+      "x-tt-trace-id": "00-260927175922E3A33E16135FF424421C-7E110FB45787E3C0-00",
+      "x-tt-logid": "20260927175922E3A33E16135FF424421C",
+      "content-type": "application/json",
+      "x-tt-trace-host": "013bebe0cafb8d31a21521a307737c7662f8111d0cd2cacc3da5f3b463896f4291d6075d1e838ab28991fa94a7aeb041c544bc241309832024cac3701c6797dff5edc57e27b051ddcf9d518d56fa1ac66fbc89a33fd4a5acf895ac5349db32ea3d",
+      "server": "TLB",
+      "x-tt-trace-tag": "id=26;cdn-cache=miss;type=dyn",
+      "tt_stable": "1",
+      "access-control-allow-credentials": "true",
+      "x-ms-token": "-mQs_qfwV6LB2xG70u1tyZS2foh6YOP-uu27gXPmSgs3ci_5zExW8VCzko634H1raXRSS7dL54vEa8GrXFayT0k_KyzGI_7XlAxOaaU7",
+      "x-vc-bdturing-parameters": "{\"code\":\"10000\",\"from\":\"\",\"type\":\"verify\",\"version\":\"\",\"region\":\"cn\",\"subtype\":\"whirl\",\"ui_type\":\"\",\"detail\":\"72EHCUPQ2a4eTLS4Tzn-Ux4qBkHTvGcfulilKJPjXBDTS55VqoYq*bazxD8cIeE*--5Pq1KkYzfhILMql1gelQZRk9sT9thRsNqZvWFcdO8RFrny-J82ldvINY7510EWPE-HLdIjqF7PY*l7QcKRPLmWkzY3sUr0zknCzmcvMLxuqWm5t56qRFtkAAwe2rQ*aE1OmNSZlB5qFtazhD3hfop*M4gfswSZAvP5gAnCvmjrFiOe93FlV-LEZ0pTxw5e1Us*1uiiYNdC2Ozyx*3QGfjEmQmtvLAd4lENIyCK5LjQxuXQKWZJFLYZ-1AHFiucBFvDOxNWF1IjWdm03tgttCE17LpA2baWypQ87f6LNI..\",\"verify_event\":\"\",\"fp\":\"verify_mujncqec_ad90eae7_160d_53f3_4416_a712a1ea0981\",\"server_sdk_env\":\"{\\\"idc\\\":\\\"lq\\\",\\\"region\\\":\\\"CN\\\",\\\"server_type\\\":\\\"whale\\\"}\",\"log_id\":\"20260927175922E3A33E16135FF424421C\",\"is_assist_mobile\":false,\"is_complex_sms\":false,\"identity_action\":\"\",\"identity_scene\":\"\",\"login_status\":0,\"aid\":0}",
+      "content-length": "0",
+      "bdturing-verify": "{\"code\":\"10000\",\"from\":\"\",\"type\":\"verify\",\"version\":\"\",\"region\":\"cn\",\"subtype\":\"whirl\",\"ui_type\":\"\",\"detail\":\"72EHCUPQ2a4eTLS4Tzn-Ux4qBkHTvGcfulilKJPjXBDTS55VqoYq*bazxD8cIeE*--5Pq1KkYzfhILMql1gelQZRk9sT9thRsNqZvWFcdO8RFrny-J82ldvINY7510EWPE-HLdIjqF7PY*l7QcKRPLmWkzY3sUr0zknCzmcvMLxuqWm5t56qRFtkAAwe2rQ*aE1OmNSZlB5qFtazhD3hfop*M4gfswSZAvP5gAnCvmjrFiOe93FlV-LEZ0pTxw5e1Us*1uiiYNdC2Ozyx*3QGfjEmQmtvLAd4lENIyCK5LjQxuXQKWZJFLYZ-1AHFiucBFvDOxNWF1IjWdm03tgttCE17LpA2baWypQ87f6LNI..\",\"verify_event\":\"\",\"fp\":\"verify_mujncqec_ad90eae7_160d_53f3_4416_a712a1ea0981\",\"server_sdk_env\":\"{\\\"idc\\\":\\\"lq\\\",\\\"region\\\":\\\"CN\\\",\\\"server_type\\\":\\\"whale\\\"}\",\"log_id\":\"20260927175922E3A33E16135FF424421C\",\"is_assist_mobile\":false,\"is_complex_sms\":false,\"identity_action\":\"\",\"identity_scene\":\"\",\"login_status\":0,\"aid\":0}",
+      "via": "CHN-SNxianyang-CT4-CACHE1[73],CHN-SNxianyang-CT4-CACHE1[ovl,72]",
+      "x-ccdn-req-id-46b1": "65f23b9e6e8309905e0f21833820ff5c"
+    }
+  },
+  "raw": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:x-ms-token",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-vc-bdturing-parameters.detail",
+      "rule": "secret"
+    },
+    {
+      "where": "header:bdturing-verify.detail",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:ttwid",
+      "rule": "secret"
+    },
+    {
+      "where": "cookie:UIFID_TEMP",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1) + douyin response-header scrub wrapper"
+}

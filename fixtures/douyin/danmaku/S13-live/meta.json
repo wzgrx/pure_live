@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "platform": "douyin",
+  "case": "S13-live",
+  "room": "douyin:148108118778",
+  "danmakuKeys": {
+    "webRid": "148108118778",
+    "roomId": "7690183442860198697",
+    "userUniqueId": "2824504236962640624"
+  },
+  "capturedAt": "2026-09-27T14:39:30.266076Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://webcast100-ws-web-lq.douyin.com/webcast/im/push/v2/?app_name=douyin_web&version_code=180800&webcast_sdk_version=1.0.15&update_version_code=1.0.15&compress=gzip&cursor=h-1_t-1790519970273_r-1_d-1_u-1&host=https%3A%2F%2Flive.douyin.com&aid=6383&live_id=1&did_rule=3&debug=false&maxCacheMessageNumber=20&endpoint=live_pc&support_wrds=1&im_path=%2Fwebcast%2Fim%2Ffetch%2F&user_unique_id=2824504236962640624&device_platform=web&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_language=zh-CN&browser_platform=Win32&browser_name=Mozilla&browser_version=5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F134.0.0.0+Safari%2F537.36&browser_online=true&tz_name=Asia%2FShanghai&identity=audience&room_id=7690183442860198697&need_persist_msg_count=15&heartbeatDuration=0&signature=6l%2BErMiddwgL2Tah",
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+        "Origin": "https://live.douyin.com",
+        "Referer": "https://live.douyin.com/148108118778",
+        "Cookie": "<redacted>"
+      }
+    }
+  ],
+  "frames": 163,
+  "raw": {
+    "sha256": "b12e2a564bd8005d1f48161419f71b48014457008cd9d49dc80ec30123170baf",
+    "length": 411391
+  },
+  "scrubbed": [
+    {
+      "where": "WebcastResidentGuestMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastLowPcuGuideMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastRoomDataSyncMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastInRoomBannerMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastRoomRankMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastChatLikeMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastRoomStreamAdaptationMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastRoomStatsMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastMemberMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastRanklistHourEntranceMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastGiftSortMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastEmojiChatMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "ChatMessage.user",
+      "rule": "person"
+    },
+    {
+      "where": "ChatMessage.9",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastFansclubMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "ChatMessage.20",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastLikeMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastRoomUserSeqMessage.ranks",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastSocialMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastLuckyBoxTempStatusMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastHotChatMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "WebcastHotRoomMessage.payload",
+      "rule": "dropped"
+    },
+    {
+      "where": "ChatMessage.19",
+      "rule": "dropped"
+    },
+    {
+      "where": "handshake.signature",
+      "rule": "secret"
+    },
+    {
+      "where": "handshake.user_unique_id",
+      "rule": "person"
+    },
+    {
+      "where": "handshake.cookie",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

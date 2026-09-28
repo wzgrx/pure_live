@@ -1,0 +1,42 @@
+{
+  "generator": "DouyinSite.getRoomDetail + DouyinSite.parseStreamQualities + LiveStreamGeometryHintResolver.resolveDouyin",
+  "value": {
+    "requests": [
+      "GET webcast.amemv.com/webcast/room/reflow/info/",
+      "GET live.douyin.com/webcast/room/web/enter/"
+    ],
+    "room": {
+      "roomId": "745964462470",
+      "title": "女性励志剧《俺娘田小草》直播中~快进来看啊！",
+      "nick": "喜剧电影笑不停",
+      "avatar": "https://p3.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_ab98d1f70e4fe0fca9c456250ad277cd.jpeg?from=3067671334",
+      "cover": "",
+      "area": "",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "douyin",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "notice": "",
+      "introduction": "",
+      "isCatchUp": false,
+      "link": "https://live.douyin.com/745964462470",
+      "danmakuData": {
+        "webRid": "745964462470",
+        "roomId": "7376083140344859455",
+        "userId": "<process visitor id 7[3-9]+17 digits>",
+        "cookie": "<redacted>"
+      },
+      "streamUrlKept": false
+    },
+    "qualities": [],
+    "geometry": {
+      "unselected": null
+    }
+  }
+}

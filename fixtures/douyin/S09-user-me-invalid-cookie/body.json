@@ -1,0 +1,10 @@
+{
+  "data": {
+    "message": "User doesn't login",
+    "prompts": "请登录后进入直播间"
+  },
+  "extra": {
+    "now": 1790502858247
+  },
+  "status_code": 20003
+}

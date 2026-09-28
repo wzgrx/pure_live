@@ -193,8 +193,8 @@ abstract final class PandaLiveApi {
   /// The notice of a public room, key `pandalive_chat_notice` (25-7: 3.x's
   /// "remote chat pending; the user field is shown as ... playCnt is not
   /// concurrency" was a development note; the audience now shows `user`
-  /// and `playCnt`, 25-3).
-  static const String chatNotice = '这里暂时看不到 PandaTV 直播间的聊天。人数分别是正在观看和本场累计观看。';
+  /// and `playCnt`, 25-3). Chat is shown since M5.21.
+  static const String chatNotice = '人数分别是正在观看和本场累计观看。';
 
   /// The notice of an adult room, key `pandalive_adult_notice` (25-7).
   static const String adultNotice = '成人直播需要登录 PandaTV 并通过本人认证，本应用暂时无法播放。';

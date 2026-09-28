@@ -114,13 +114,18 @@ void _expectRoom(LiveRoom room, Object? legacy, {Map<String, String> changed = c
   }
 }
 
-const _identity = {'roomId': '23-1 the channel id', 'avatar': "23-4 the channel's avatar"};
+const _identity = {
+  'roomId': '23-1 the channel id',
+  'avatar': "23-4 the channel's avatar",
+  'notice': 'M5.19 live chat is shown, so the notice drops "chat pending"',
+};
 const _refreshed = {
   'roomId': '23-1 the channel id',
   'avatar': '23-6 no watch page: no avatar, the follow keeps its own',
   'area': '23-6 no watch page: no category',
   'watching': '23-6 updated_metadata (recorded 7 hours later)',
   'onlineViewers': '23-6 updated_metadata (recorded 7 hours later)',
+  'notice': 'M5.19 live chat is shown, so the notice drops "chat pending"',
 };
 
 final Matcher _cancelled = throwsA(
@@ -399,6 +404,7 @@ void main() {
           'link': "23-1 the channel's /live page",
           'avatar': '23-6 no watch page',
           'area': '23-6 no watch page',
+          'notice': 'M5.19 live chat is shown, so the notice drops "chat pending"',
         },
       );
     });

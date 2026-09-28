@@ -390,8 +390,12 @@ abstract final class YouTubeApi {
   /// The public InnerTube key 3.x used when a page had none.
   static const String fallbackApiKey = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
 
-  /// 3.x's room notice (`youtube_chat_notice`, zh.json).
-  static const String chatNotice = 'YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。';
+  /// The room notice (`youtube_chat_notice`). 3.x's text began with
+  /// "YouTube Live 远端聊天尚待接入；"; live chat is shown since M5.19.
+  static const String chatNotice = '仅在直播页给出同时观看人数时显示在线人数，不把累计播放量当作在线人数。';
+
+  /// 3.x's room notice, kept for the parity tests and the 3.x migration.
+  static const String legacyChatNotice = 'YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。';
 
   /// The "Live" destination channel, whose page is the recommendations
   /// (23-2).

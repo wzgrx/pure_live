@@ -147,7 +147,11 @@ void main() {
         _expectParity(
           _projection(room),
           _result(legacy[depth])! as Map<String, dynamic>,
-          changed: const {'roomId': '23-1 the channel id', 'avatar': "23-4 the channel's avatar"},
+          changed: const {
+            'roomId': '23-1 the channel id',
+            'avatar': "23-4 the channel's avatar",
+            'notice': 'M5.19 live chat is shown, so the notice drops "chat pending"',
+          },
           reason: depth,
         );
       }
@@ -276,6 +280,7 @@ void main() {
               'roomId': '23-1 the channel id',
               'link': "23-1 the channel's /live page while it is not live",
               'avatar': "23-4 the channel's avatar",
+              'notice': 'M5.19 live chat is shown, so the notice drops "chat pending"',
             },
             reason: depth,
           );

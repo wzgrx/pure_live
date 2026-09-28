@@ -44,6 +44,8 @@ export 'src/sites/twitcasting/twitcasting_api.dart';
 export 'src/sites/twitcasting/twitcasting_site.dart';
 export 'src/sites/twitch/twitch_api.dart';
 export 'src/sites/twitch/twitch_site.dart';
+export 'src/sites/xiaohongshu/xiaohongshu_api.dart';
+export 'src/sites/xiaohongshu/xiaohongshu_site.dart';
 export 'src/sites/yy/yy_api.dart';
 export 'src/sites/yy/yy_site.dart';
 export 'src/tars.dart';

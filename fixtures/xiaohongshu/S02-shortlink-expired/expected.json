@@ -1,0 +1,17 @@
+{
+  "generator": "XiaohongshuLink.resolve + XiaohongshuSite.searchRooms (short link)",
+  "value": {
+    "XiaohongshuLink.resolve": {
+      "requests": 1,
+      "value": null
+    },
+    "searchRooms(shortLink)": {
+      "requests": 0,
+      "value": []
+    },
+    "searchRooms(shortLink only)": {
+      "requests": 1,
+      "value": []
+    }
+  }
+}

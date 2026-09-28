@@ -1,0 +1,140 @@
+{
+  "generator": "XiaohongshuSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + searchRooms(id, link) + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": 1,
+      "value": {
+        "roomId": "570305058583373361",
+        "title": "听说今天有礼物",
+        "nick": "單來杯可乐",
+        "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo321r9pmcuna005puf8c23jq4akksl7so?imageView2/2/w/80/format/jpg",
+        "cover": "https://sns-na-i4.xhscdn.com/alpha_image/1040g05031voff8rl2gf05puf8c23jq4ae1p7usg?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=6&sc=LVE_PRV",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "xiaohongshu",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。",
+        "isCatchUp": false,
+        "link": "https://www.xiaohongshu.com/livestream/570305058583373361"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": 1,
+      "value": {
+        "roomId": "570305058583373361",
+        "title": "听说今天有礼物",
+        "nick": "單來杯可乐",
+        "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo321r9pmcuna005puf8c23jq4akksl7so?imageView2/2/w/80/format/jpg",
+        "cover": "https://sns-na-i4.xhscdn.com/alpha_image/1040g05031voff8rl2gf05puf8c23jq4ae1p7usg?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=6&sc=LVE_PRV",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "xiaohongshu",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。",
+        "isCatchUp": false,
+        "link": "https://www.xiaohongshu.com/livestream/570305058583373361"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": 1,
+      "value": {
+        "roomId": "570305058583373361",
+        "title": "听说今天有礼物",
+        "nick": "單來杯可乐",
+        "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo321r9pmcuna005puf8c23jq4akksl7so?imageView2/2/w/80/format/jpg",
+        "cover": "https://sns-na-i4.xhscdn.com/alpha_image/1040g05031voff8rl2gf05puf8c23jq4ae1p7usg?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=6&sc=LVE_PRV",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "xiaohongshu",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。",
+        "isCatchUp": false,
+        "link": "https://www.xiaohongshu.com/livestream/570305058583373361"
+      }
+    },
+    "getLiveStatus": {
+      "requests": 1,
+      "value": false
+    },
+    "searchRooms(roomId)": {
+      "requests": 1,
+      "value": [
+        {
+          "roomId": "570305058583373361",
+          "title": "听说今天有礼物",
+          "nick": "單來杯可乐",
+          "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo321r9pmcuna005puf8c23jq4akksl7so?imageView2/2/w/80/format/jpg",
+          "cover": "https://sns-na-i4.xhscdn.com/alpha_image/1040g05031voff8rl2gf05puf8c23jq4ae1p7usg?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=6&sc=LVE_PRV",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "xiaohongshu",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。",
+          "isCatchUp": false,
+          "link": "https://www.xiaohongshu.com/livestream/570305058583373361"
+        }
+      ]
+    },
+    "searchRooms(link)": {
+      "requests": 1,
+      "value": [
+        {
+          "roomId": "570305058583373361",
+          "title": "听说今天有礼物",
+          "nick": "單來杯可乐",
+          "avatar": "https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo321r9pmcuna005puf8c23jq4akksl7so?imageView2/2/w/80/format/jpg",
+          "cover": "https://sns-na-i4.xhscdn.com/alpha_image/1040g05031voff8rl2gf05puf8c23jq4ae1p7usg?imageView2/2/w/640/format/webp/q/85|imageMogr2/strip/sharpen/1/auto-orient&redImage/frame/0&ap=6&sc=LVE_PRV",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "xiaohongshu",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "当前以直播房间号跟踪；主播重新开播使用新房间号时，请重新导入分享链接。",
+          "isCatchUp": false,
+          "link": "https://www.xiaohongshu.com/livestream/570305058583373361"
+        }
+      ]
+    },
+    "searchRooms(link, page 2)": {
+      "requests": 0,
+      "value": []
+    },
+    "getPlayQualites": [],
+    "getPlayUrls(h264:HD)": {
+      "requests": 0,
+      "value": {
+        "throws": "XiaohongshuException",
+        "message": "Xiaohongshu notLive"
+      }
+    }
+  }
+}

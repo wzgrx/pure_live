@@ -13,13 +13,22 @@ lib="${TMPDIR:-/tmp}/pure_live-timeshift.so"
 cc -shared -fPIC -O2 -o "$lib" tools/timeshift/shift.c -ldl || exit 1
 days=("$@"); [[ ${#days[@]} -eq 0 ]] && days=(30 365 1825)
 status=0
+# The `dart test` runner hangs at start-up once the clock is a year or more
+# ahead, so each test file runs as a plain Dart program instead.
 for day in "${days[@]}"; do
   for package in packages/live_net packages/live_core packages/live_danmaku; do
     [[ -d $package/test ]] || continue
-    if (cd "$package" && SHIFT_SECONDS=$((day * 86400)) LD_PRELOAD="$lib" dart test >/dev/null 2>&1); then
+    failed=()
+    while IFS= read -r file; do
+      if ! (cd "$package" && SHIFT_SECONDS=$((day * 86400)) LD_PRELOAD="$lib" timeout 600 dart "$file" >/dev/null 2>&1); then
+        failed+=("$file")
+      fi
+    done < <(cd "$package" && find test -name '*_test.dart' | sort)
+    if [[ ${#failed[@]} -eq 0 ]]; then
       echo "timeshift: ok   +${day}d $package"
     else
-      echo "timeshift: FAIL +${day}d $package (rerun: cd $package && SHIFT_SECONDS=$((day * 86400)) LD_PRELOAD=$lib dart test)"
+      echo "timeshift: FAIL +${day}d $package: ${failed[*]}"
+      echo "  rerun: cd $package && SHIFT_SECONDS=$((day * 86400)) LD_PRELOAD=$lib dart <file>"
       status=1
     fi
   done

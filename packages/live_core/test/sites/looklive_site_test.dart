@@ -3,7 +3,9 @@
 // search's look-ups and filter, rooms at every depth completed from the
 // lists, the streams and their recovery, cancellation, the deadline, links
 // and the error mapping. Requests are compared with the ones 3.x sent
-// (expected.json records each as `POST <url> <plaintext payload>`).
+// (expected.json records each as `POST <url> <plaintext payload>`); rooms
+// with 3.x's projection but for the keys listed as `changed:` with the
+// upgrade item (docs/UPGRADES.md 32-x).
 import 'dart:async';
 import 'dart:convert';
 
@@ -128,9 +130,17 @@ final Matcher _cancelled = throwsA(
   isA<TransportFailure>().having((failure) => failure.reason, 'reason', TransportReason.cancelled),
 );
 
+/// Changed on every room: the notices are in words for users (M4.U, the
+/// unified rule on notices).
+const _notice = {'notice'};
+
+/// Changed for an ended room after a list card of the same broadcast: the
+/// card's heat and viewers are no longer taken (32-5).
+const _audience = {'watching', 'audienceMetricType', 'popularity', 'onlineViewers'};
+
 /// Asserts [room] equals 3.x's [legacy] projection on every key 3.x wrote,
 /// except [changed]. 3.x wrote null where the immutable model writes ''.
-void _expectParity(LiveRoom room, Object? legacy, {Set<String> changed = const {}, String reason = ''}) {
+void _expectParity(LiveRoom room, Object? legacy, {Set<String> changed = _notice, String reason = ''}) {
   final actual = {...room.toJson(), 'link': room.link};
   for (final MapEntry(:key, :value) in (legacy! as Map<String, dynamic>).entries) {
     if (changed.contains(key)) continue;
@@ -209,8 +219,9 @@ List<(Object?, Object?, Object?)> _legacyQualities(Object? legacy) => [
 
 LivePlayQuality _quality(String id) => LivePlayQuality(id: id, quality: id);
 
-/// A list page of [ids] (live video cards with heat and viewers).
-String _listBody(Iterable<String> ids, {bool hasMore = false}) => jsonEncode({
+/// A list page of [ids] (live cards of [liveType], video by default, with
+/// heat and viewers).
+String _listBody(Iterable<String> ids, {bool hasMore = false, int liveType = 1}) => jsonEncode({
   'code': 200,
   'data': {
     'hasMore': hasMore,
@@ -219,7 +230,7 @@ String _listBody(Iterable<String> ids, {bool hasMore = false}) => jsonEncode({
         {
           'type': '1',
           'liveData': {
-            'liveType': 1,
+            'liveType': liveType,
             'liveId': int.parse(id) + 1,
             'liveTitle': 'title $id',
             'popularity': 7,
@@ -442,6 +453,68 @@ void main() {
       expect(_failure(_result(legacy['video page 2'])), 'schema');
     });
 
+    test('32-1: the merged pages no longer ask the ended video list; page 1 asks both again', () async {
+      final setup = _setup();
+      final legacy = _legacy('S01-video-p1')['getDirectoryPage'] as Map<String, dynamic>;
+      await _expectTraced(setup.http, setup.site.getDirectoryPage, legacy['page 1'], check: _expectPage);
+      // S01: the video list answered hasMore false on page 1.
+      const audio2 =
+          'POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list '
+          '{"offset":20,"limit":20}';
+      await _expectTraced(
+        setup.http,
+        () => setup.site.getDirectoryPage(page: 2),
+        legacy['page 2 with an empty video page'],
+        check: _expectPage,
+        requests: const [audio2],
+      );
+      expect(_legacyRequests(legacy['page 2']), hasLength(2), reason: '3.x asked both lists on every page');
+      var sent = setup.http.requests.length;
+      final recommended = await setup.site.getRecommendRooms(page: 2, pageSize: 5);
+      expect(recommended, hasLength(5));
+      expect(_sent(setup.http.requests.skip(sent)), [audio2], reason: 'the recommendations are the merged pages');
+      sent = setup.http.requests.length;
+      await setup.site.getDirectoryPage(page: 2, category: LookLiveApi.videoArea);
+      expect(setup.http.requests, hasLength(sent + 1), reason: 'an area asks its own list, as in 3.x');
+      sent = setup.http.requests.length;
+      await setup.site.getDirectoryPage();
+      expect(setup.http.requests, hasLength(sent + 2), reason: 'page 1 (pulling to refresh) asks both again');
+    });
+
+    test('32-1: both lists ended is an empty last page without a request; a list that grows again is asked', () async {
+      final ended = <String, int>{'video': 1, 'audio': 2};
+      final http = _Scripted((request) {
+        final payload = jsonDecode(_payload(request)) as Map<String, dynamic>;
+        final page = (payload['offset'] as int) ~/ LookLiveApi.pageSize + 1;
+        final list = request.url.path == LookLiveApi.audioListPath ? 'audio' : 'video';
+        final base = list == 'audio' ? 30000000 : 20000000;
+        return _response(
+          request,
+          _listBody(['${base + page}'], hasMore: page < ended[list]!, liveType: list == 'audio' ? 2 : 1),
+        );
+      });
+      final site = LookLiveSite(http);
+      String sentList(LiveRequest request) => request.url.path == LookLiveApi.audioListPath ? 'audio' : 'video';
+      final page1 = await site.getDirectoryPage();
+      expect(page1.rooms.map((room) => room.roomId), ['20000001', '30000001']);
+      expect(page1.hasMore, isTrue);
+      final page2 = await site.getDirectoryPage(page: 2);
+      expect(http.requests.skip(2).map(sentList), ['audio']);
+      expect(page2.rooms.map((room) => room.roomId), ['30000002']);
+      expect(page2.hasMore, isFalse);
+      final page3 = await site.getDirectoryPage(page: 3);
+      expect((page3.rooms.length, page3.hasMore), (0, false));
+      expect(http.requests, hasLength(3), reason: 'both lists have ended');
+      // The video list grows to two pages; pulling to refresh sees it.
+      ended['video'] = 2;
+      final again = await site.getDirectoryPage();
+      expect(again.hasMore, isTrue);
+      await site.getDirectoryPage(page: 2);
+      expect(http.requests.skip(3).map(sentList), ['video', 'audio', 'video', 'audio']);
+      await site.getDirectoryPage(page: 3);
+      expect(http.requests, hasLength(7), reason: 'both ended on page 2');
+    });
+
     test("the areas: 3.x's pages and requests; other areas, page 0 and a page past 10000 send nothing", () async {
       final setup = _setup();
       final legacy = _legacy('S01-video-p1')['getDirectoryPage'] as Map<String, dynamic>;
@@ -641,7 +714,8 @@ void main() {
                 final map = expected! as Map<String, dynamic>;
                 expect(resolution.urls, map['urls']);
                 expect(resolution.appliedQualityData, map['appliedQualityData']);
-                expect(resolution.lines.single.headers, isEmpty);
+                // Changed (32-3): the web's media headers (3.x sent none).
+                expect(resolution.lines.single.headers, LookLiveApi.mediaHeaders(roomId));
               },
               failed: !playable ? unavailable : (id == 'auto' ? throwsArgumentError : null),
               reason: '$depth $id',
@@ -674,7 +748,7 @@ void main() {
       });
     }
 
-    test('the video room: lines with format and host, no headers or lease; one request per recovery', () async {
+    test('the video room: lines with format, host and media headers, no lease; one request per recovery', () async {
       final setup = _setup();
       final detail = await setup.site.getRoomDetail(roomId: _video);
       expect(detail.data, isA<LookLiveRoom>());
@@ -685,7 +759,8 @@ void main() {
         (line.format, line.lineId, line.lease, line.codec),
         (StreamFormat.hls, 'pull0583d674.live.126.net', null, null),
       );
-      expect(line.headers, isEmpty, reason: "3.x's player had no LOOK branch (upgrade candidate 3)");
+      // Changed (32-3): 3.x's player had no LOOK branch and sent none.
+      expect(line.headers, LookLiveApi.mediaHeaders(_video));
       expect(detail.httpHeaders, LookLiveApi.mediaHeaders(_video), reason: "kept in the room's JSON as in 3.x");
       final flv = await setup.site.resolvePlayUrls(detail: detail, quality: LookLiveApi.flvQuality);
       expect(flv.lines.single.format, StreamFormat.flv);
@@ -709,25 +784,56 @@ void main() {
       }
     });
 
-    test('the live status: restricted is NeedsLogin, an unknown state ApiChanged (3.x: access), never false', () async {
+    test('the live status: banned is false (32-2), an unknown state ApiChanged (3.x: access)', () async {
       String edited(Object? status) => _body('S03-room-video').replaceFirst('"liveStatus": 1', '"liveStatus": $status');
-      for (final (status, matcher) in [
-        (-10, throwsA(isA<NeedsLogin>())),
-        (2, throwsA(isA<ApiChanged>())),
-        ('null', throwsA(isA<ApiChanged>())),
+      for (final (status, live, liveStatus) in <(Object?, bool?, LiveStatus)>[
+        (-10, false, LiveStatus.banned),
+        (-4, false, LiveStatus.banned),
+        (-2, false, LiveStatus.offline),
+        (2, null, LiveStatus.unknown),
+        ('null', null, LiveStatus.unknown),
       ]) {
         final setup = _setup(extra: [_room(_video, edited(status))]);
-        await expectLater(setup.site.getLiveStatus(roomId: _video), matcher, reason: '$status');
+        if (live == null) {
+          await expectLater(setup.site.getLiveStatus(roomId: _video), throwsA(isA<ApiChanged>()), reason: '$status');
+        } else {
+          expect(await setup.site.getLiveStatus(roomId: _video), live, reason: '$status');
+        }
         final room = await setup.site.getRoomDetail(roomId: _video);
-        expect(room.liveStatus, LiveStatus.unknown, reason: '3.x shows it as unknown');
-        await expectLater(
-          setup.site.getPlayQualities(detail: room),
-          status == -10 ? throwsA(isA<NeedsLogin>()) : throwsA(isA<StreamUnavailable>()),
-        );
+        expect(room.liveStatus, liveStatus, reason: '$status');
+        await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
+        expect(setup.http.requests, hasLength(2), reason: 'playing asks nothing');
       }
       final ended = _setup();
       expect(await ended.site.getLiveStatus(roomId: _offline), isFalse);
       expect(await ended.site.getLiveStatus(roomId: _appOnly), isTrue, reason: 'live, only not on the web');
+    });
+
+    test('the room says its start and restriction at every depth (M2.1); app-only is live, grouped live', () async {
+      final setup = _setup();
+      for (final call in [
+        () => setup.site.getRoomDetail(roomId: _appOnly),
+        () => setup.site.getRoomDetailForRefresh(roomId: _appOnly),
+        () => setup.site.getRoomDetailForRecording(roomId: _appOnly),
+      ]) {
+        final room = await call();
+        expect(
+          (room.liveStatus, room.restriction, room.followGroup),
+          (LiveStatus.live, LiveRestriction.appOnly, FollowGroup.live),
+        );
+        expect(room.startedAt, DateTime.utc(2026, 8, 18, 18, 4, 34, 614));
+      }
+      final entry = await setup.site.getRoomDetail(roomId: _appOnly);
+      await expectLater(
+        setup.site.getPlayQualities(detail: entry),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('LOOK app only'))),
+      );
+      final video = await setup.site.getRoomDetailForRefresh(roomId: _video);
+      expect((video.restriction, video.startedAt), (LiveRestriction.none, DateTime.utc(2026, 8, 26, 8, 33, 20, 612)));
+      final ended = await setup.site.getRoomDetailForRefresh(roomId: _offline);
+      expect((ended.restriction, ended.startedAt), (LiveRestriction.none, null));
+      final card = (await setup.site.getCategoryRooms(LookLiveApi.audioArea, page: 2)).first;
+      expect((card.restriction, card.startedAt), (null, null), reason: 'a card does not tell tickets or the start');
     });
 
     test('the lists complete rooms of the same broadcast: heat and viewers (3.x)', () async {
@@ -787,7 +893,7 @@ void main() {
       await _expectTraced(setup.http, () => setup.site.getLiveStatus(roomId: _video), room['getLiveStatus']);
     });
 
-    test('voice page 2 completes the voice room, and the ended room keeps its last heat (3.x)', () async {
+    test('voice page 2 completes the voice room; the ended room no longer shows its last heat (32-5)', () async {
       for (final (sample, roomId, names) in [
         ('S03-room-audio', _audio, ['getRoomDetail', 'getRoomDetailForRefresh']),
         ('S04-room-offline', _offline, ['getRoomDetailForRefresh', 'getRoomDetail', 'getLiveStatus']),
@@ -795,6 +901,9 @@ void main() {
         final legacy = _legacy(sample)['after audio page 2'] as Map<String, dynamic>;
         final setup = _setup();
         await setup.site.getCategoryRooms(LookLiveApi.audioArea, page: 2);
+        // Changed (32-5): the ended room no longer takes the card's heat
+        // and viewers.
+        final changed = {..._notice, if (sample == 'S04-room-offline') ..._audience};
         for (final name in names) {
           await _expectTraced<Object?>(
             setup.http,
@@ -804,18 +913,25 @@ void main() {
               _ => setup.site.getLiveStatus(roomId: roomId),
             },
             legacy[name],
-            check: (value, expected) => value is LiveRoom ? _expectParity(value, expected) : expect(value, expected),
+            check: (value, expected) =>
+                value is LiveRoom ? _expectParity(value, expected, changed: changed) : expect(value, expected),
             reason: '$sample $name',
           );
         }
       }
+      final legacy = _legacy('S04-room-offline')['after audio page 2'] as Map<String, dynamic>;
+      final v3 = _result(legacy['getRoomDetailForRefresh'])! as Map<String, dynamic>;
+      expect((v3['popularity'], v3['onlineViewers']), ('824', '8'), reason: "3.x showed the last broadcast's heat");
       final setup = _setup();
       await setup.site.getCategoryRooms(LookLiveApi.audioArea, page: 2);
       final ended = await setup.site.getRoomDetailForRefresh(roomId: _offline);
       expect(
-        (ended.liveStatus, ended.effectivePopularity, ended.effectiveOnlineViewers),
-        (LiveStatus.offline, '824', '8'),
+        (ended.liveStatus, ended.effectivePopularity, ended.effectiveOnlineViewers, ended.watching),
+        (LiveStatus.offline, '', '', ''),
       );
+      final live = await setup.site.getRoomDetailForRefresh(roomId: _audio);
+      expect(live.liveStatus, LiveStatus.live);
+      expect(live.effectiveOnlineViewers, isNotEmpty, reason: 'the live room still takes its card');
     });
 
     test('a live answer without streams plays the list card of the same broadcast (3.x); type 50 does not', () async {

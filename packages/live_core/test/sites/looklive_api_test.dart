@@ -1,9 +1,10 @@
 // LOOK Live parsing against the recorded samples, compared field by field
 // with 3.x's frozen output (expected.json, written by
 // fixtures/looklive/legacy_expected.dart from 3.x's LookLiveApi, LookLiveLink
-// and LookLiveSite). Every intended difference is listed with its reason;
-// everything else must match. The synthetic cases are the edited copies the
-// generator ran through 3.x (`variants`) and 3.x's look_live_site_test.dart.
+// and LookLiveSite). Every intended difference is listed with its reason
+// (`changed:` and the upgrade item, docs/UPGRADES.md 32-x); everything else
+// must match. The synthetic cases are the edited copies the generator ran
+// through 3.x (`variants`) and 3.x's look_live_site_test.dart.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -19,6 +20,19 @@ Map<String, dynamic> _legacy(String name) => _sample(name).legacy as Map<String,
 Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 
 List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<String, dynamic>>();
+
+/// Changed on every room: the notices are in words for users (M4.U, the
+/// unified rule on notices); asserted by their own tests.
+const _notice = {'notice'};
+
+/// Changed for an ended or banned room after a list card of the same
+/// broadcast: the card's heat and viewers are no longer taken (32-5).
+const _audience = {'watching', 'audienceMetricType', 'popularity', 'onlineViewers'};
+
+/// Changed on 3.x's projection of a list card: the stream type is the
+/// card's `type` (32-4; 3.x read `liveStreamType`, which the lists lack),
+/// so a type 50 card without streams is app-only.
+const _card = {'streamType', 'isAppOnly'};
 
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
 /// 3.x wrote, except [changed] (intended differences). 3.x wrote null where
@@ -39,13 +53,18 @@ void _expectParity(
 /// 3.x's room projection: toJson plus `link`.
 Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
 
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {Set<String> changed = _notice, String reason = ''}) {
   final expected = _maps(legacy);
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(_projection(room), expected[index], reason: '$reason[$index]');
+    _expectParity(_projection(room), expected[index], changed: changed, reason: '$reason[$index]');
   }
 }
+
+Map<String, Object?> _without(Map<String, Object?> map, Set<String> keys) => {
+  for (final MapEntry(:key, :value) in map.entries)
+    if (!keys.contains(key)) key: value,
+};
 
 /// 3.x's projection of a `LookLiveRoom`.
 Map<String, Object?> _lookRoom(LookLiveRoom room) => {
@@ -71,6 +90,19 @@ Map<String, Object?> _lookPage(LookLivePage page, {int? take}) => {
   'rooms': [for (final room in take == null ? page.rooms : page.rooms.take(take)) _lookRoom(room)],
   'hasMore': page.hasMore,
 };
+
+/// Asserts that [page] is 3.x's [legacy] `directory` page (its first
+/// [take] rooms) but for the list cards' [_card] keys (32-4).
+void _expectLookPage(LookLivePage page, Object? legacy, {int? take, String reason = ''}) {
+  final expected = legacy! as Map<String, dynamic>;
+  final actual = _lookPage(page, take: take);
+  expect(actual['hasMore'], expected['hasMore'], reason: reason);
+  expect(
+    [for (final room in actual['rooms']! as List) _without(room as Map<String, Object?>, _card)],
+    [for (final room in _maps(expected['rooms'])) _without(room, _card)],
+    reason: reason,
+  );
+}
 
 /// 3.x's failure kind of a legacy error projection (`LOOK Live <kind>`),
 /// or null when it did not fail.
@@ -245,6 +277,41 @@ Map<String, String> _listVariants() {
   };
 }
 
+/// List variants 3.x failed on (or, for the room numbers, failed to make
+/// rooms of) whose entry is now skipped (32-6).
+const _skippedEntries = {
+  'liveData text',
+  'item not an object',
+  'liveType 3',
+  'liveType missing',
+  'userInfo missing',
+  'liveRoomNo 0',
+  'liveRoomNo one digit',
+  'liveRoomNo 19 digits',
+  'liveRoomNo missing',
+  'userId missing',
+  'liveId missing',
+  'popularity negative',
+  'popularity fraction',
+  'onlineNumber negative',
+};
+
+/// List variants with a bad address 3.x failed on, and the streams the
+/// first card keeps now (32-6).
+const _badAddresses = {
+  'liveUrl text': <String>[],
+  'hlsPullUrl other host': ['flv:source'],
+  'hlsPullUrl lookalike host': ['flv:source'],
+  'hlsPullUrl with port': ['flv:source'],
+  'hlsPullUrl user info': ['flv:source'],
+  'hlsPullUrl fragment': ['flv:source'],
+  'hlsPullUrl upper-case key': ['flv:source'],
+  'hlsPullUrl as FLV': ['flv:source'],
+  'hlsPullUrl rtmp': ['flv:source'],
+  'hlsPullUrl long query': ['flv:source'],
+  'httpPullUrl as HLS': ['hls:source'],
+};
+
 typedef _RoomEdit = void Function(Map<String, dynamic> data, Map<String, dynamic> info, Map<String, dynamic> anchor);
 
 /// The edited copies of S03-room-video the generator ran through 3.x's room
@@ -323,39 +390,55 @@ List<(Object?, Object?, Object?)> _qualities(List<LivePlayQuality> qualities) =>
 ];
 
 /// 3.x's room calls at room entry for [body] (the room of [roomId]), before
-/// or after a list that saw [known]: the room, its qualities and both
-/// lines, compared with [legacy] (a `_variantCalls` entry, or a
-/// `_roomCalls` entry without the traces).
-void _expectRoomEntry(String body, String roomId, Map<String, dynamic> legacy, {LookLiveRoom? known}) {
+/// or after a list that saw [known]: the room (but for [changed]), its
+/// qualities and both lines, compared with [legacy] (a `_variantCalls`
+/// entry, or a `_roomCalls` entry without the traces).
+void _expectRoomEntry(
+  String body,
+  String roomId,
+  Map<String, dynamic> legacy, {
+  LookLiveRoom? known,
+  Set<String> changed = _notice,
+  String reason = '',
+}) {
   final expected = legacy['getRoomDetail'];
   final kind = _failure(expected);
   if (kind != null) {
-    expect(() => LookLiveApi.room(body, roomId: roomId), _typed(kind), reason: kind);
+    expect(() => LookLiveApi.room(body, roomId: roomId), _typed(kind), reason: '$reason $kind');
     return;
   }
   var room = LookLiveApi.room(body, roomId: roomId);
   if (known != null) room = room.enrich(known);
-  _expectParity(_projection(LookLiveApi.liveRoom(room, withData: true)), expected! as Map<String, dynamic>);
+  _expectParity(
+    _projection(LookLiveApi.liveRoom(room, withData: true)),
+    expected! as Map<String, dynamic>,
+    changed: changed,
+    reason: reason,
+  );
   final legacyQualities = legacy['getRoomDetail → getPlayQualites'];
   final error = room.streamError;
   if (error == null) {
-    expect(_qualities(LookLiveApi.qualities(room)), _legacyQualities(legacyQualities));
+    expect(_qualities(LookLiveApi.qualities(room)), _legacyQualities(legacyQualities), reason: reason);
   } else if (room.state == LookLiveState.offline) {
     expect(legacyQualities, isEmpty, reason: '3.x: no qualities; now StreamUnavailable (difference 3)');
     expect(error, isA<StreamUnavailable>());
   } else {
-    expect(_failure(legacyQualities), 'mediaUnavailable');
-    expect(error, room.state == LookLiveState.restricted ? isA<NeedsLogin>() : isA<StreamUnavailable>());
+    // 3.x: mediaUnavailable; a banned room (3.x: restricted, NeedsLogin in
+    // M4.32) says so with StreamUnavailable too (32-2).
+    expect(_failure(legacyQualities), 'mediaUnavailable', reason: reason);
+    expect(error, isA<StreamUnavailable>(), reason: reason);
   }
   for (final id in [LookLiveApi.hlsId, LookLiveApi.flvId]) {
     final value = legacy['getRoomDetail → resolvePlayUrlsRaw($id)'];
     if (_failure(value) != null) {
-      expect(error != null || room.variants.every((variant) => variant.id != id), isTrue, reason: id);
+      expect(error != null || room.variants.every((variant) => variant.id != id), isTrue, reason: '$reason $id');
       continue;
     }
     final line = LookLiveApi.line(room, id);
-    expect([line.url], (value! as Map)['urls'], reason: id);
+    expect([line.url], (value! as Map)['urls'], reason: '$reason $id');
     expect((value as Map<String, dynamic>)['appliedQualityData'], id);
+    // Changed (32-3): the line carries the web's media headers.
+    expect(line.headers, LookLiveApi.mediaHeaders(roomId), reason: '$reason $id');
   }
 }
 
@@ -418,13 +501,17 @@ void main() {
 
     test("page 1: 3.x's three video cards with heat, viewers and streams; the end of the list", () {
       final page = LookLiveApi.directory(_body('S01-video-p1'), kind: LookLiveKind.video);
-      expect(_lookPage(page), _result(_legacy('S01-video-p1')['directory(video, 1)']));
+      _expectLookPage(page, _result(_legacy('S01-video-p1')['directory(video, 1)']));
       expect(page.rooms, hasLength(3));
       expect(page.hasMore, isFalse);
       final card = page.rooms.first;
       expect((card.roomId, card.popularity, card.currentViewers), (_video, 440, 1));
-      expect(card.streamType, isNull, reason: 'the lists carry no liveStreamType');
       expect(card.variants.map((variant) => variant.uri.scheme), everyElement('https'));
+      // Changed (32-4): the stream type is the card's `type` (3.x: null,
+      // the lists carry no liveStreamType); 51 is a type LOOK's web client
+      // does not name, with streams.
+      expect(page.rooms.map((room) => room.streamType), [1, 1, 51]);
+      expect(page.rooms.map((room) => room.isAppOnly), everyElement(isFalse));
     });
 
     test("the merged first page as rooms: every field of 3.x's directory (video, then voice)", () {
@@ -433,9 +520,10 @@ void main() {
       final legacy =
           _result((_legacy('S01-video-p1')['getDirectoryPage'] as Map<String, dynamic>)['page 1'])!
               as Map<String, dynamic>;
-      _expectRooms([
+      final rooms = [
         for (final room in [...video.rooms, ...audio.rooms]) LookLiveApi.liveRoom(room),
-      ], legacy['rooms']);
+      ];
+      _expectRooms(rooms, legacy['rooms']);
       final card = LookLiveApi.liveRoom(video.rooms.first);
       expect(card.effectiveOnlineViewers, '1', reason: 'onlineNumber is current viewers (REG-COMMON-004)');
       expect(card.effectivePopularity, '440', reason: 'popularity is heat, kept apart');
@@ -443,6 +531,11 @@ void main() {
       expect(card.httpHeaders, LookLiveApi.mediaHeaders(_video), reason: "3.x's room headers (in the 3.x JSON)");
       expect(card.data, isNull, reason: 'a card cannot be played');
       expect(card.notice, LookLiveApi.chatNotice);
+      // New keys (M2.1): cards that can be played do not tell tickets, so no
+      // restriction; the lists have no start.
+      expect(rooms.map((room) => room.restriction), everyElement(isNull));
+      expect(rooms.map((room) => room.startedAt), everyElement(isNull));
+      expect(rooms.map((room) => room.liveStatus), everyElement(LiveStatus.live));
     });
 
     test("3.x's list checks on edited copies", () {
@@ -452,6 +545,8 @@ void main() {
         bodies.keys.toSet(),
         containsAll(legacy.keys.where((key) => !key.contains(':') && !key.contains(' answered '))),
       );
+      final recorded = LookLiveApi.directory(_body('S01-video-p1'), kind: LookLiveKind.video);
+      final recordedIds = [for (final room in recorded.rooms) room.roomId];
       for (final MapEntry(key: name, value: body) in bodies.entries) {
         final expected = legacy[name];
         final kind = _failure(expected);
@@ -465,11 +560,41 @@ void main() {
           expect(page.hasMore, isFalse);
           continue;
         }
+        if (_skippedEntries.contains(name)) {
+          // Changed (32-6): an entry that cannot be read is skipped; 3.x
+          // failed the page (or, for 1 and 19 digit room numbers, the rooms
+          // it made from the page).
+          expect(kind ?? 'kept', isIn(['schema', 'kept']), reason: name);
+          final page = LookLiveApi.directory(body, kind: LookLiveKind.video);
+          expect(
+            page.rooms.map((room) => room.roomId),
+            name == 'item not an object' ? recordedIds : recordedIds.skip(1),
+            reason: name,
+          );
+          expect(page.hasMore, isFalse, reason: name);
+          continue;
+        }
+        if (_badAddresses[name] case final left?) {
+          // Changed (32-6): a bad address costs only that stream of the
+          // card; 3.x failed the page.
+          expect(kind, 'schema', reason: name);
+          final page = LookLiveApi.directory(body, kind: LookLiveKind.video);
+          expect(page.rooms.map((room) => room.roomId), recordedIds, reason: name);
+          final card = page.rooms.first;
+          expect(card.variants.map((variant) => variant.id), left, reason: name);
+          expect(
+            _without(_lookRoom(card), {'variants'}),
+            _without(_lookRoom(recorded.rooms.first), {'variants'}),
+            reason: name,
+          );
+          expect(card.restriction, left.isEmpty ? LiveRestriction.unplayable : isNull, reason: name);
+          continue;
+        }
         if (kind != null) {
           expect(() => LookLiveApi.directory(body, kind: LookLiveKind.video), _typed(kind), reason: name);
           continue;
         }
-        expect(_lookPage(LookLiveApi.directory(body, kind: LookLiveKind.video), take: 2), expected, reason: name);
+        _expectLookPage(LookLiveApi.directory(body, kind: LookLiveKind.video), expected, take: 2, reason: name);
       }
       expect(
         _lookPage(LookLiveApi.directory(_body('S01-video-p1'), kind: LookLiveKind.audio)),
@@ -509,16 +634,35 @@ void main() {
         _expectParity(
           _projection(room),
           legacy['getDirectoryPage(video): $name'] as Map<String, dynamic>,
+          changed: _notice,
+          reason: name,
+        );
+        final appOnly = name == 'liveStreamType 50 without liveUrl';
+        expect(room.restriction, appOnly ? LiveRestriction.appOnly : isNull, reason: name);
+        expect(
+          room.notice,
+          appOnly ? '${LookLiveApi.appOnlyNotice}\n${LookLiveApi.chatNotice}' : LookLiveApi.chatNotice,
           reason: name,
         );
       }
       // 3.x's link threw a FormatException on a number that is not 2 to 18
-      // digits, failing the page; now that is ApiChanged.
+      // digits, failing the page; now the card is skipped (32-6), and such a
+      // room is still ApiChanged.
       for (final name in ['liveRoomNo one digit', 'liveRoomNo 19 digits']) {
         expect((legacy['getDirectoryPage(video): $name'] as Map)['throws'], 'FormatException');
-        final card = LookLiveApi.directory(bodies[name]!, kind: LookLiveKind.video).rooms.first;
-        expect(() => LookLiveApi.liveRoom(card), throwsA(isA<ApiChanged>()), reason: name);
+        expect(LookLiveApi.directory(bodies[name]!, kind: LookLiveKind.video).rooms.map((room) => room.roomId), [
+          '217327486',
+          '95878198',
+        ], reason: name);
       }
+      final short = LookLiveRoom(
+        roomId: '7',
+        userId: '1',
+        sessionId: '1',
+        kind: LookLiveKind.video,
+        state: LookLiveState.live,
+      );
+      expect(() => LookLiveApi.liveRoom(short), throwsA(isA<ApiChanged>()));
     });
 
     test("room numbers and links: 3.x's parseRoomId and watchUrl", () {
@@ -545,26 +689,35 @@ void main() {
   group('S02 voice list', () {
     test('page 1: 19 voice cards; the injected video card is skipped; more pages', () {
       final page = LookLiveApi.directory(_body('S02-audio-p1'), kind: LookLiveKind.audio);
-      expect(_lookPage(page), _result(_legacy('S02-audio-p1')['directory(audio, 1)']));
+      _expectLookPage(page, _result(_legacy('S02-audio-p1')['directory(audio, 1)']));
       expect(page.rooms, hasLength(19));
       expect(page.hasMore, isTrue);
       expect(page.rooms.map((room) => room.kind), everyElement(LookLiveKind.audio));
+      expect(page.rooms.map((room) => room.streamType), everyElement(6), reason: "voice cards' type (32-4)");
     });
 
-    test("the video list's rule keeps the injected card: a type 50 room without streams (3.x)", () {
+    test('the injected card is a type 50 room without streams: app-only on the card (32-4)', () {
       final legacy = _legacy('S02-audio-p1');
       final page = LookLiveApi.directory(_body('S02-audio-p1'), kind: LookLiveKind.video);
-      expect(_lookPage(page), _result(legacy['directory(video, 1) answered with this list']));
+      _expectLookPage(page, _result(legacy['directory(video, 1) answered with this list']));
       final card = page.rooms.single;
       expect(card.variants, isEmpty);
-      expect(card.isAppOnly, isFalse, reason: 'the lists carry no liveStreamType (3.x, problem 4)');
-      _expectRooms([LookLiveApi.liveRoom(card)], _result(legacy['getCategoryRooms(video) answered with this list']));
+      // Changed (32-4): 3.x read `liveStreamType`, which the lists lack, and
+      // showed this card as an ordinary live room until the room was opened.
+      final v3Card = _maps((_result(legacy['directory(video, 1) answered with this list'])! as Map)['rooms']).single;
+      expect((v3Card['streamType'], v3Card['isAppOnly']), (null, false));
+      expect((card.streamType, card.isAppOnly), (50, true));
+      final room = LookLiveApi.liveRoom(card);
+      _expectRooms([room], _result(legacy['getCategoryRooms(video) answered with this list']));
+      expect((room.liveStatus, room.restriction), (LiveStatus.live, LiveRestriction.appOnly));
+      expect(room.notice, '${LookLiveApi.appOnlyNotice}\n${LookLiveApi.chatNotice}');
+      expect((room.isLiveNow, room.isRestricted, room.followGroup), (true, true, FollowGroup.live));
     });
 
     test('page 2: 20 voice cards, more pages; the rooms match 3.x', () {
       final legacy = _legacy('S02-audio-p2');
       final page = LookLiveApi.directory(_body('S02-audio-p2'), kind: LookLiveKind.audio);
-      expect(_lookPage(page), _result(legacy['directory(audio, 2)']));
+      _expectLookPage(page, _result(legacy['directory(audio, 2)']));
       _expectRooms([
         for (final room in page.rooms) LookLiveApi.liveRoom(room),
       ], _result(legacy['getCategoryRooms(audio, 2)']));
@@ -584,11 +737,11 @@ void main() {
   });
 
   group('rooms', () {
-    for (final (sample, roomId) in [
-      ('S03-room-video', _video),
-      ('S03-room-audio', _audio),
-      ('S04-room-offline', _offline),
-      ('S04-room-apponly', _appOnly),
+    for (final (sample, roomId, startedAt, restriction) in [
+      ('S03-room-video', _video, DateTime.utc(2026, 8, 26, 8, 33, 20, 612), LiveRestriction.none),
+      ('S03-room-audio', _audio, DateTime.utc(2026, 9, 27, 17, 12, 0, 883), LiveRestriction.none),
+      ('S04-room-offline', _offline, null, LiveRestriction.none),
+      ('S04-room-apponly', _appOnly, DateTime.utc(2026, 8, 18, 18, 4, 34, 614), LiveRestriction.appOnly),
     ]) {
       test('$sample: the room answer, with and without streams, and the room at every depth match 3.x', () {
         final legacy = _legacy(sample)['recorded'] as Map<String, dynamic>;
@@ -597,13 +750,25 @@ void main() {
         final refresh = LookLiveApi.room(body, roomId: roomId, withMedia: false);
         expect(_lookRoom(refresh), _result(legacy['api.room(includeMedia: false)']));
         final entry = LookLiveApi.liveRoom(LookLiveApi.room(body, roomId: roomId), withData: true);
-        _expectParity(_projection(entry), _result(legacy['getRoomDetail'])! as Map<String, dynamic>);
-        _expectParity(_projection(entry), _result(legacy['getRoomDetailForRecording'])! as Map<String, dynamic>);
+        _expectParity(_projection(entry), _result(legacy['getRoomDetail'])! as Map<String, dynamic>, changed: _notice);
         _expectParity(
-          _projection(LookLiveApi.liveRoom(refresh)),
+          _projection(entry),
+          _result(legacy['getRoomDetailForRecording'])! as Map<String, dynamic>,
+          changed: _notice,
+        );
+        final refreshed = LookLiveApi.liveRoom(refresh);
+        _expectParity(
+          _projection(refreshed),
           _result(legacy['getRoomDetailForRefresh'])! as Map<String, dynamic>,
+          changed: _notice,
         );
         _expectRoomEntry(body, roomId, {for (final MapEntry(:key, :value) in legacy.entries) key: _result(value)});
+        // New keys (M2.1): the start of a live broadcast (`startTime`), and
+        // the restriction, at every depth.
+        for (final room in [entry, refreshed]) {
+          expect((room.startedAt, room.restriction), (startedAt, restriction), reason: sample);
+          expect(room.toJson()['startedAt'], startedAt?.toIso8601String(), reason: sample);
+        }
       });
     }
 
@@ -618,7 +783,13 @@ void main() {
       final hls = LookLiveApi.line(room, LookLiveApi.hlsId);
       expect(hls.url, 'https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8');
       expect((hls.format, hls.lineId), (StreamFormat.hls, 'pull0583d674.live.126.net'));
-      expect(hls.headers, isEmpty, reason: "3.x's player sent no LOOK headers");
+      // Changed (32-3): the web's media headers (3.x's player sent none).
+      expect(hls.headers, {
+        'origin': 'https://look.163.com',
+        'referer': 'https://look.163.com/live?id=$_video',
+        'user-agent': 'Mozilla/5.0',
+      });
+      expect(LookLiveApi.line(room, LookLiveApi.flvId).headers, LookLiveApi.mediaHeaders(_video));
       expect((hls.lease, hls.codec), (null, null));
       expect(LookLiveApi.line(room, LookLiveApi.flvId).format, StreamFormat.flv);
       expect(
@@ -636,14 +807,20 @@ void main() {
       expect(ended.variants, isEmpty, reason: 'the answer still lists the old addresses; 3.x read them only when live');
       expect(ended.streamError, isA<StreamUnavailable>());
       expect(LookLiveApi.liveRoom(ended).liveStatus, LiveStatus.offline);
+      expect(ended.startedAt, isNull, reason: 'its startTime is the ended broadcast');
     });
 
     test('the app-only room: live, stream type 50, no streams; its notice; StreamUnavailable', () {
       final room = LookLiveApi.room(_body('S04-room-apponly'), roomId: _appOnly);
       expect((room.state, room.streamType, room.isAppOnly), (LookLiveState.live, 50, true));
       expect(room.variants, isEmpty);
-      expect(LookLiveApi.liveRoom(room).notice, '${LookLiveApi.appOnlyNotice}\n${LookLiveApi.chatNotice}');
-      expect(room.streamError, isA<StreamUnavailable>());
+      final detail = LookLiveApi.liveRoom(room);
+      expect(detail.notice, '${LookLiveApi.appOnlyNotice}\n${LookLiveApi.chatNotice}');
+      expect(
+        (detail.liveStatus, detail.restriction, detail.followGroup),
+        (LiveStatus.live, LiveRestriction.appOnly, FollowGroup.live),
+      );
+      expect(room.streamError, isA<StreamUnavailable>().having((error) => '$error', 'text', contains('LOOK app only')));
     });
 
     test("3.x's room checks on edited copies, before and after the video list", () {
@@ -652,7 +829,42 @@ void main() {
       expect(bodies.keys.toSet(), legacy.keys.toSet());
       for (final MapEntry(key: name, value: body) in bodies.entries) {
         final expected = legacy[name] as Map<String, dynamic>;
-        _expectRoomEntry(body, _video, expected);
+        switch (name) {
+          case 'liveUrl text' || 'hlsPullUrl other host':
+            // Changed (32-6): 3.x failed the room entry on a bad address;
+            // now only that stream is left out. The room is the refresh's.
+            expect(_failure(expected['getRoomDetail']), 'schema', reason: name);
+            final room = LookLiveApi.room(body, roomId: _video);
+            final text = name == 'liveUrl text';
+            expect(room.variants.map((variant) => variant.id), text ? isEmpty : [LookLiveApi.flvId], reason: name);
+            final detail = LookLiveApi.liveRoom(room, withData: true);
+            _expectParity(
+              _projection(detail),
+              expected['getRoomDetailForRefresh'] as Map<String, dynamic>,
+              changed: _notice,
+              reason: name,
+            );
+            expect(detail.restriction, text ? LiveRestriction.unplayable : LiveRestriction.none, reason: name);
+            expect(room.streamError, text ? isA<StreamUnavailable>() : isNull, reason: name);
+            if (!text) expect(_qualities(LookLiveApi.qualities(room)), [('FLV 原始线路', 'flv:source', 1)]);
+            continue;
+          case 'code 424' || 'code 555':
+            // Changed: the room answer's 424 (app only) and 555 (a private
+            // room with a password) say why the room cannot be watched
+            // (LOOK's web client); 3.x: access, M4.32 RiskControl.
+            expect(_failure(expected['getRoomDetail']), 'access', reason: name);
+            for (final withMedia in [true, false]) {
+              expect(
+                () => LookLiveApi.room(body, roomId: _video, withMedia: withMedia),
+                throwsA(isA<StreamUnavailable>()),
+                reason: name,
+              );
+            }
+            continue;
+        }
+        // Changed (32-2): -10 is banned (LOOK's `FORBID`), 3.x unknown.
+        final changed = {..._notice, if (name == 'liveStatus -10') 'liveStatus'};
+        _expectRoomEntry(body, _video, expected, changed: changed, reason: name);
         final refresh = expected['getRoomDetailForRefresh'];
         final kind = _failure(refresh);
         if (kind != null) {
@@ -661,21 +873,38 @@ void main() {
           _expectParity(
             _projection(LookLiveApi.liveRoom(LookLiveApi.room(body, roomId: _video, withMedia: false))),
             refresh! as Map<String, dynamic>,
+            changed: changed,
             reason: name,
           );
         }
         if (expected['after the list'] case final Map<String, dynamic> after) {
-          _expectRoomEntry(body, _video, after, known: _videoCard());
+          // Changed (32-5): an ended or banned room no longer takes the
+          // card's heat and viewers.
+          final ended = name == 'liveStatus -1' || name == 'liveStatus -10';
+          _expectRoomEntry(
+            body,
+            _video,
+            after,
+            known: _videoCard(),
+            changed: {...changed, if (ended) ..._audience},
+            reason: '$name after the list',
+          );
+          if (ended) {
+            final v3 = after['getRoomDetail'] as Map<String, dynamic>;
+            expect((v3['popularity'], v3['onlineViewers']), ('440', '1'), reason: '3.x kept the ended card');
+            final room = LookLiveApi.liveRoom(LookLiveApi.room(body, roomId: _video).enrich(_videoCard()));
+            expect((room.effectivePopularity, room.effectiveOnlineViewers), ('', ''), reason: name);
+          }
         }
       }
     });
 
-    test('the live status by state: live, offline; restricted and unknown are errors (3.x: access)', () {
+    test('the state by liveStatus and the live status: -10 and -4 banned, -2 offline (32-2)', () {
       final legacy = _legacy('S03-room-video')['variants'] as Map<String, dynamic>;
       for (final (name, state) in [
         ('liveStatus 0', LookLiveState.offline),
         ('liveStatus -1', LookLiveState.offline),
-        ('liveStatus -10', LookLiveState.restricted),
+        ('liveStatus -10', LookLiveState.banned),
         ('liveStatus 2', LookLiveState.unknown),
         ('liveStatus missing', LookLiveState.unknown),
         ('liveStatus text', LookLiveState.live),
@@ -689,19 +918,51 @@ void main() {
           _ => {'throws': 'LookLiveException', 'message': 'LOOK Live access'},
         });
       }
-      final restricted = LookLiveApi.liveRoom(LookLiveApi.room(_roomVariants()['liveStatus -10']!, roomId: _video));
-      expect(restricted.liveStatus, LiveStatus.unknown, reason: '3.x shows restricted rooms as unknown');
-      expect(restricted.notice, '${LookLiveApi.restrictedNotice}\n${LookLiveApi.chatNotice}');
+      // Changed (32-2): 3.x took -10 for a private or account-restricted
+      // room and showed it as unknown with a notice; LOOK's web client names
+      // it FORBID. It is banned: not live, grouped with offline, and says
+      // so when played.
+      final v3 = (legacy['liveStatus -10'] as Map<String, dynamic>)['getRoomDetail'] as Map<String, dynamic>;
+      expect((v3['liveStatus'], v3['status']), (LiveStatus.unknown.index, false));
+      for (final status in [-10, -4]) {
+        final body = _body('S03-room-video').replaceFirst('"liveStatus": 1', '"liveStatus": $status');
+        final room = LookLiveApi.room(body, roomId: _video);
+        expect((room.state, room.variants.length, room.startedAt), (LookLiveState.banned, 0, null), reason: '$status');
+        final detail = LookLiveApi.liveRoom(room, withData: true);
+        expect(
+          (detail.liveStatus, detail.isLiveNow, detail.isExplicitlyOfflineNow, detail.followGroup),
+          (LiveStatus.banned, false, true, FollowGroup.offline),
+          reason: '$status',
+        );
+        expect(detail.toJson()['liveStatus'], LiveStatus.banned.index);
+        expect(detail.restriction, LiveRestriction.none);
+        expect(detail.notice, '${LookLiveApi.bannedNotice}\n${LookLiveApi.chatNotice}');
+        expect(room.streamError, isA<StreamUnavailable>());
+      }
+      final closed = LookLiveApi.room(
+        _body('S03-room-video').replaceFirst('"liveStatus": 1', '"liveStatus": -2'),
+        roomId: _video,
+      );
+      expect(closed.state, LookLiveState.offline, reason: "the web shows '- 直播间已关闭 -' for -1, 0 and -2");
+      expect(LookLiveApi.liveRoom(closed).notice, LookLiveApi.chatNotice);
     });
 
-    test('a refreshed stream type 50 room says app-only even with addresses (3.x reads no streams then)', () {
+    test('a refreshed stream type 50 room with addresses is not app-only (3.x said it was, problem 3)', () {
       final legacy = _legacy('S03-room-video')['variants'] as Map<String, dynamic>;
       final body = _roomVariants()['liveStreamType 50']!;
       final refresh = LookLiveApi.liveRoom(LookLiveApi.room(body, roomId: _video, withMedia: false));
       final entry = LookLiveApi.liveRoom(LookLiveApi.room(body, roomId: _video), withData: true);
-      expect(refresh.notice, ((legacy['liveStreamType 50'] as Map)['getRoomDetailForRefresh'] as Map)['notice']);
-      expect(refresh.notice, contains(LookLiveApi.appOnlyNotice));
-      expect(entry.notice, LookLiveApi.chatNotice);
+      // Changed (32-4): the refresh sees the addresses without reading them.
+      expect(
+        ((legacy['liveStreamType 50'] as Map)['getRoomDetailForRefresh'] as Map)['notice'],
+        contains('请在 LOOK 客户端中观看'),
+      );
+      expect((refresh.notice, refresh.restriction), (LookLiveApi.chatNotice, LiveRestriction.none));
+      expect((entry.notice, entry.restriction), (LookLiveApi.chatNotice, LiveRestriction.none));
+      final appOnly = LookLiveApi.liveRoom(
+        LookLiveApi.room(_roomVariants()['liveStreamType 50 without liveUrl']!, roomId: _video, withMedia: false),
+      );
+      expect(appOnly.restriction, LiveRestriction.appOnly, reason: 'without addresses, a refresh tells it');
     });
 
     test("stream addresses: 3.x's host, path and query rules, made https", () {
@@ -781,11 +1042,211 @@ void main() {
       _expectParity(
         _projection(LookLiveApi.liveRoom(LookLiveApi.room(exact, roomId: _video, withMedia: false))),
         _result(legacy['room at 2 MiB'])! as Map<String, dynamic>,
+        changed: _notice,
       );
       expect(() => LookLiveApi.room('$exact ', roomId: _video), throwsA(isA<ApiChanged>()));
       final wide = '{"code":200,"data":{"x":"${'中' * (LookLiveApi.responseLimit ~/ 3)}"}}';
       expect(wide.length, lessThan(LookLiveApi.responseLimit));
       expect(() => LookLiveApi.room(wide, roomId: _video), throwsA(isA<ApiChanged>()), reason: 'counted in bytes');
+    });
+  });
+
+  group('upgrades (M4.U)', () {
+    /// S03-room-video's answer with [edit] applied to its `data`.
+    String room(void Function(Map<String, dynamic> data, Map<String, dynamic> info) edit) =>
+        _editedRoom('S03-room-video', (data, info, anchor) => edit(data, info));
+
+    test('startedAt: the start of a live broadcast only; zero, missing or not a number is none', () {
+      for (final (value, expected) in [
+        (1790529120883, DateTime.utc(2026, 9, 27, 17, 12, 0, 883)),
+        ('1790529120883', DateTime.utc(2026, 9, 27, 17, 12, 0, 883)),
+        (0, null),
+        (-5, null),
+        (null, null),
+        ('soon', null),
+        (1.5, null),
+      ]) {
+        final body = room((data, info) => info['startTime'] = value);
+        expect(LookLiveApi.room(body, roomId: _video).startedAt, expected, reason: '$value');
+        expect(LookLiveApi.room(body, roomId: _video, withMedia: false).startedAt, expected, reason: '$value');
+      }
+      for (final status in [0, -1, -2, -4, -10, 2]) {
+        final body = room((data, info) => data['liveStatus'] = status);
+        expect(LookLiveApi.room(body, roomId: _video).startedAt, isNull, reason: 'liveStatus $status');
+      }
+      final card = _videoCard();
+      expect(card.startedAt, isNull, reason: 'the lists do not say');
+      final detail = LookLiveApi.liveRoom(LookLiveApi.room(_body('S03-room-video'), roomId: _video).enrich(card));
+      expect(detail.startedAt, DateTime.utc(2026, 8, 26, 8, 33, 20, 612), reason: "the answer's, not the card's");
+      expect(detail.startedAt!.isUtc, isTrue);
+    });
+
+    test('restriction: app-only, ticket and unplayable live rooms stay live; none otherwise (M2.1)', () {
+      LiveRoom at(String body, {bool withMedia = true}) => LookLiveApi.liveRoom(
+        LookLiveApi.room(body, roomId: _video, withMedia: withMedia),
+        withData: withMedia,
+      );
+      for (final (name, body, entry, refresh) in [
+        ('recorded', _body('S03-room-video'), LiveRestriction.none, LiveRestriction.none),
+        (
+          'type 50 without addresses',
+          room((data, info) {
+            info['liveStreamType'] = 50;
+            info['liveUrl'] = null;
+          }),
+          LiveRestriction.appOnly,
+          LiveRestriction.appOnly,
+        ),
+        (
+          'a ticket',
+          room((data, info) => data['feeInfo'] = {'fee': true, 'sessionKey': ''}),
+          LiveRestriction.paid,
+          LiveRestriction.paid,
+        ),
+        (
+          'a ticket without a session key',
+          room((data, info) => data['feeInfo'] = {'fee': 1}),
+          LiveRestriction.paid,
+          LiveRestriction.paid,
+        ),
+        (
+          'a bought ticket',
+          room((data, info) => data['feeInfo'] = {'fee': true, 'sessionKey': 'k'}),
+          LiveRestriction.none,
+          LiveRestriction.none,
+        ),
+        ('no fee', room((data, info) => data['feeInfo'] = {'fee': false}), LiveRestriction.none, LiveRestriction.none),
+        (
+          'no address',
+          room((data, info) => info['liveUrl'] = null),
+          LiveRestriction.unplayable,
+          LiveRestriction.unplayable,
+        ),
+        (
+          'only bad addresses',
+          room((data, info) => info['liveUrl'] = {'hlsPullUrl': 'http://x.cn/a.m3u8', 'httpPullUrl': 'x'}),
+          LiveRestriction.unplayable,
+          LiveRestriction.none,
+        ),
+        ('offline', room((data, info) => data['liveStatus'] = -1), LiveRestriction.none, LiveRestriction.none),
+        ('banned', room((data, info) => data['liveStatus'] = -10), LiveRestriction.none, LiveRestriction.none),
+        ('unknown', room((data, info) => data['liveStatus'] = 2), null, null),
+      ]) {
+        final entered = at(body);
+        final refreshed = at(body, withMedia: false);
+        expect((entered.restriction, refreshed.restriction), (entry, refresh), reason: name);
+        if (entry != null && entry != LiveRestriction.none) {
+          expect(
+            (entered.liveStatus, entered.isLiveNow, entered.followGroup),
+            (LiveStatus.live, true, FollowGroup.live),
+            reason: name,
+          );
+          expect(entered.toJson()['restriction'], entry.name, reason: name);
+          expect((entered.data! as LookLiveRoom).streamError, isA<StreamUnavailable>(), reason: name);
+        }
+      }
+      final paid = at(room((data, info) => data['feeInfo'] = {'fee': true}));
+      expect(paid.notice, '${LookLiveApi.paidNotice}\n${LookLiveApi.chatNotice}');
+      expect(
+        (paid.data! as LookLiveRoom).streamError,
+        isA<StreamUnavailable>().having((error) => '$error', 'text', contains('ticket')),
+      );
+      expect(at(_body('S03-room-video')).toJson()['restriction'], 'none');
+      final unknown = at(room((data, info) => data['liveStatus'] = 2)).toJson();
+      expect(unknown.containsKey('restriction'), isFalse, reason: 'an unknown state does not tell');
+    });
+
+    test('a refresh that saw the card of the same broadcast plays its streams: not unplayable (3.x enrich)', () {
+      final body = room((data, info) => info['liveUrl'] = null);
+      final refreshed = LookLiveApi.room(body, roomId: _video, withMedia: false);
+      expect(LookLiveApi.liveRoom(refreshed).restriction, LiveRestriction.unplayable);
+      final completed = refreshed.enrich(_videoCard());
+      expect(completed.variants, hasLength(2));
+      expect(LookLiveApi.liveRoom(completed).restriction, LiveRestriction.none);
+    });
+
+    test('32-5: the audience of the same broadcast only while this answer is live', () {
+      final card = _videoCard();
+      for (final (status, kept) in [
+        (1, true),
+        (0, false),
+        (-1, false),
+        (-2, false),
+        (-4, false),
+        (-10, false),
+        (2, false),
+      ]) {
+        final answer = LookLiveApi.room(room((data, info) => data['liveStatus'] = status), roomId: _video);
+        final completed = answer.enrich(card);
+        expect(
+          (completed.popularity, completed.currentViewers),
+          kept ? (440, 1) : (null, null),
+          reason: 'liveStatus $status',
+        );
+        expect((completed.nick, completed.userId), (answer.nick, answer.userId), reason: 'names are kept');
+      }
+      final other = LookLiveApi.room(room((data, info) => info['id'] = 5), roomId: _video).enrich(card);
+      expect((other.popularity, other.currentViewers), (null, null), reason: 'another broadcast');
+    });
+
+    test('32-6: a page of only unreadable entries is still ApiChanged; the others are skipped', () {
+      final all = _editedRoot('S01-video-p1', (json) {
+        final items = (json['data'] as Map<String, dynamic>)['itemList'] as List;
+        for (final item in items) {
+          (((item as Map<String, dynamic>)['liveData'] as Map<String, dynamic>)['userInfo'] as Map).remove('userId');
+        }
+      });
+      expect(() => LookLiveApi.directory(all, kind: LookLiveKind.video), throwsA(isA<ApiChanged>()));
+      final one = _editedLive('S01-video-p1', (live) => live['popularity'] = -1, index: 1);
+      expect(LookLiveApi.directory(one, kind: LookLiveKind.video).rooms.map((room) => room.roomId), [
+        _video,
+        '95878198',
+      ]);
+      final twoBad = _editedLive('S01-video-p1', (live) {
+        (live['liveUrl'] as Map<String, dynamic>)
+          ..['hlsPullUrl'] = 'http://example.com/live/x/playlist.m3u8'
+          ..['httpPullUrl'] = 'rtmp://pull0583d674.live.126.net/live/x';
+      });
+      final card = LookLiveApi.directory(twoBad, kind: LookLiveKind.video).rooms.first;
+      expect((card.roomId, card.variants.length, card.hasAddress), (_video, 0, true));
+      expect(LookLiveApi.liveRoom(card).restriction, LiveRestriction.unplayable);
+    });
+
+    test("the room answer's 424 and 555 say why; on the lists they stay RiskControl, 520 and 522 too", () {
+      String code(String sample, int value) => _editedRoot(sample, (json) => json['code'] = value);
+      expect(
+        () => LookLiveApi.room(code('S03-room-video', 424), roomId: _video),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('LOOK app only'))),
+      );
+      expect(
+        () => LookLiveApi.room(code('S03-room-video', 555), roomId: _video),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'text', contains('password'))),
+      );
+      for (final value in [520, 522]) {
+        expect(() => LookLiveApi.room(code('S03-room-video', value), roomId: _video), throwsA(isA<RiskControl>()));
+      }
+      for (final value in [424, 520, 522, 555]) {
+        expect(
+          () => LookLiveApi.directory(code('S01-video-p1', value), kind: LookLiveKind.video),
+          throwsA(isA<RiskControl>()),
+          reason: '$value',
+        );
+      }
+    });
+
+    test('notices in words for users (M4.U); the text keys stay', () {
+      expect(LookLiveApi.chatNotice, '这里暂时看不到 LOOK 直播的聊天。人数是正在观看的人数，热度另外显示。');
+      expect(LookLiveApi.appOnlyNotice, '这场 LOOK 直播只能在 LOOK App 里观看。');
+      expect(LookLiveApi.bannedNotice, '这个 LOOK 直播间被平台禁播或正在违规整改，现在不能观看。');
+      expect(LookLiveApi.paidNotice, '这场 LOOK 直播要购票才能观看。');
+      for (final notice in [
+        LookLiveApi.chatNotice,
+        LookLiveApi.appOnlyNotice,
+        LookLiveApi.bannedNotice,
+        LookLiveApi.paidNotice,
+      ]) {
+        expect(notice, isNot(matches(RegExp('popularity|onlineNumber|尚待接入|未知状态|官网|房型'))));
+      }
     });
   });
 }

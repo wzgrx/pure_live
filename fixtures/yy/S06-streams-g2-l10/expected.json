@@ -1,0 +1,30 @@
+{
+  "generator": "YYSite.parsePlayQualities + parsePlayUrls (the 3.x request was form-encoded; see M4.06); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "requestedGear": 2,
+    "requestedLine": 10,
+    "parsePlayQualities": [
+      {
+        "quality": "高清",
+        "id": "2",
+        "sort": 2300,
+        "data": "2"
+      },
+      {
+        "quality": "超清",
+        "id": "3",
+        "sort": 2100,
+        "data": "3"
+      },
+      {
+        "quality": "流畅",
+        "id": "1",
+        "sort": 600,
+        "data": "1"
+      }
+    ],
+    "parsePlayUrls": [
+      "https://tx-flv-web.yy.com/live/15013_xv_22490906_22490906_0_0_0-15013_xa_22490906_22490906_0_0_0-0-0-0-0-0-1790527819379770.flv?codec=orig&appid=15013&rts_tk=4c13dce1d66a9048855b4ce5dce4d120&secret=bbd9402c2e55a35bc1e5ae898510c7a4&t=1790528819&stream_key=15013_xv_22490906_22490906_0_0_0&r_stream_key=15013_xa_22490906_22490906_0_0_0&channelid=22490906&mtk=1&line_seq=10&cp_id=9&rts=1&ctx=eyJydHNfYXV0aCI6MiwiZGVmX3Bhc3MiOjF9&r=enter"
+    ]
+  }
+}

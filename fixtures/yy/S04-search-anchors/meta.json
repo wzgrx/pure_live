@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "yy",
+  "sample": "S04-search-anchors",
+  "capturedAt": "2026-09-27T16:56:30.264399Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://www.yy.com/apiSearch/doSearch.json?q=%E8%88%9E%E8%B9%88&t=1&n=1",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.yy.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "connection": "keep-alive",
+      "access-control-allow-headers": "X-Requested-With",
+      "date": "Sun, 27 Sep 2026 16:56:30 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "access-control-allow-methods": "GET,POST",
+      "p3p": "CP=CAO PSA OUR",
+      "content-type": "application/json;charset=UTF-8",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "6a2c333fea7bdd673a0cb87741a50f14acbb450ae135567cc560ff27eeec4dc8",
+    "length": 6643
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

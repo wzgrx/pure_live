@@ -1,0 +1,71 @@
+{
+  "generator": "YYSite.getSubCategores (area pages served from S02-area-page-*; an unrecorded area page is treated as one without pageInfo, so its shortName stays null); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "areas": [
+      {
+        "platform": "yy",
+        "areaType": "2",
+        "typeName": "游戏",
+        "areaId": "15",
+        "areaName": "王者荣耀",
+        "areaPic": "http://image.yy.com/contimage/546L6ICFMTY0NDg5NjAxNDY5MQ.png",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "2",
+        "typeName": "游戏",
+        "areaId": "6",
+        "areaName": "和平精英",
+        "areaPic": "http://image.yy.com/contimage/5ZKM5bmzMTY0NDg5NjAzNzQ2MQ.png",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "2",
+        "typeName": "游戏",
+        "areaId": "5",
+        "areaName": "天天吃鸡",
+        "areaPic": "http://image.yy.com/contimage/5ZCD6bihMTY0NDg5NjA2NDQ3NA.png",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "2",
+        "typeName": "游戏",
+        "areaId": "23",
+        "areaName": "英雄联盟",
+        "areaPic": "http://image.yy.com/contimage/bG9sMTY0NDg5NjA4OTM1MQ.png",
+        "shortName": "{\"moduleId\":0,\"biz\":\"null\",\"subBiz\":\"null\"}"
+      },
+      {
+        "platform": "yy",
+        "areaType": "2",
+        "typeName": "游戏",
+        "areaId": "45",
+        "areaName": "综合游戏",
+        "areaPic": "http://image.yy.com/contimage/5Y2V5py6MTY0NDg5NjEzODU2OA.png",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "2",
+        "typeName": "游戏",
+        "areaId": "49",
+        "areaName": "无畏契约",
+        "areaPic": "http://contimage.bs2cdn.yy.com/cont/6482c72c7f1c843b1ceeff53.jpg",
+        "shortName": null
+      }
+    ],
+    "bizAreaNameMap": {
+      "null": "英雄联盟"
+    },
+    "unrecordedAreaPages": [
+      "https://www.yy.com/game/",
+      "https://www.yy.com/chicken/cjzc",
+      "https://www.yy.com/chicken/jdqs",
+      "https://www.yy.com/djry",
+      "https://www.yy.com/chicken/wwqy"
+    ]
+  }
+}

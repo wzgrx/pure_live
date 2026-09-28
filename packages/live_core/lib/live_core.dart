@@ -31,4 +31,6 @@ export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
 export 'src/sites/soop/soop_api.dart';
 export 'src/sites/soop/soop_site.dart';
+export 'src/sites/yy/yy_api.dart';
+export 'src/sites/yy/yy_site.dart';
 export 'src/tars.dart';

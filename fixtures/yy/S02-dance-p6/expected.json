@@ -1,0 +1,13 @@
+{
+  "generator": "YYSite.getCategoryRooms (area 舞蹈 with the shortName of S02-area-page-dance); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "query": {
+      "page": "6",
+      "pageSize": "30",
+      "moduleId": "313",
+      "biz": "dance",
+      "subBiz": "idx"
+    },
+    "rooms": []
+  }
+}

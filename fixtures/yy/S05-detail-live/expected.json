@@ -1,0 +1,28 @@
+{
+  "generator": "YYSite._fetchRoomDetail (getRoomDetail, getRoomDetailForRefresh, getRoomDetailForRecording); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "roomId": "22490906",
+    "room": {
+      "roomId": "22490906",
+      "userId": "107923068",
+      "title": "星耀营 S6・曼妙一夏特别返场",
+      "nick": "燃舞蹈-福星",
+      "avatar": "https://downhdlogo.yy.com/hdlogo/6060/60/60/92/0107923068/u107923068hIP7XGLq.png",
+      "cover": "https://mobilelivephoto.bs2dl.yy.com/group16/M00/48f2ddc92a5b4ff8aced1b84d587498f.jpg?imageview/4/0/w/404/h/404/q/80",
+      "area": "other",
+      "watching": "1459252",
+      "audienceMetricType": "popularity",
+      "popularity": "1459252",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "yy",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "https://www.yy.com/22490906",
+      "danmakuData": "{\"topSid\":22490906,\"subSid\":22490906}"
+    }
+  }
+}

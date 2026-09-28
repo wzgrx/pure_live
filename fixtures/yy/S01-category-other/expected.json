@@ -1,0 +1,50 @@
+{
+  "generator": "YYSite.getSubCategores (area pages served from S02-area-page-*; an unrecorded area page is treated as one without pageInfo, so its shortName stays null); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "areas": [
+      {
+        "platform": "yy",
+        "areaType": "3",
+        "typeName": "其他",
+        "areaId": "42",
+        "areaName": "综合",
+        "areaPic": "http://image.yy.com/contimage/57u85ZCIMTM3eDIwMDE1Mzc5NDQyODk4OTg.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "3",
+        "typeName": "其他",
+        "areaId": "27",
+        "areaName": "手机直播",
+        "areaPic": "http://image.yy.com/contimage/5omL5py655u05pKtMTUyMDI0MTIzMzA0Ng.png",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "3",
+        "typeName": "其他",
+        "areaId": "36",
+        "areaName": "猜你喜欢",
+        "areaPic": "http://image.yy.com/contimage/5b6u5L-h5Zu-54mHXzIwMTgwNTAzMTE0ODA1MTUyNTMxOTM0MTQ4Ng.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "yy",
+        "areaType": "3",
+        "typeName": "其他",
+        "areaId": "34",
+        "areaName": "小视频",
+        "areaPic": "http://image.yy.com/contimage/5bCP6KeG6aKRMTUyMDM5MDc3Nzc1OQ.png",
+        "shortName": null
+      }
+    ],
+    "bizAreaNameMap": {},
+    "unrecordedAreaPages": [
+      "https://www.yy.com/others/zonghe",
+      "https://www.yy.com/others/mobilelive/",
+      "https://www.yy.com/others/nice",
+      "https://www.yy.com/sv/"
+    ]
+  }
+}

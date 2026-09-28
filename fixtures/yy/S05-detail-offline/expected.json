@@ -1,0 +1,24 @@
+{
+  "generator": "YYSite._fetchRoomDetail (getRoomDetail, getRoomDetailForRefresh, getRoomDetailForRecording); transcribed 3.x parser (fixtures/yy/legacy_expected.dart)",
+  "value": {
+    "roomId": "85520900",
+    "room": {
+      "roomId": "85520900",
+      "title": "",
+      "nick": "",
+      "avatar": "",
+      "cover": "",
+      "watching": "0",
+      "audienceMetricType": "popularity",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "yy",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false
+    }
+  }
+}

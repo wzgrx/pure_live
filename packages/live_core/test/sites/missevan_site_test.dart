@@ -2,7 +2,7 @@
 // synthetic ones: the request headers, the catalog, native directory pages
 // per namespace, keyword and exact search, room details for entry, refresh
 // and recording, streams with their leases and recovery, cancellation,
-// links and the error mapping.
+// links and the error mapping; and the M4.U upgrades (13-1 to 13-4).
 import 'dart:async';
 import 'dart:convert';
 
@@ -134,14 +134,31 @@ void main() {
   });
 
   group('catalog', () {
-    test('one category with the tabs as areas; later pages ask nothing (3.x)', () async {
+    test('the tabs grouped by namespace (13-3); one request, later pages ask nothing (3.x)', () async {
       final setup = _setup(['S01-meta']);
       final categories = await setup.site.getCategories(1, 30);
-      expect(categories.single.id, 'missevan');
-      expect(categories.single.name, '猫耳 FM');
-      expect(categories.single.children, hasLength(7));
+      expect(categories.map((category) => (category.id, category.name, category.children.length)), [
+        ('catalog', '分区', 5),
+        ('list', '团播', 1),
+        ('tag', '标签', 1),
+      ]);
       expect(await setup.site.getCategories(2, 30), isEmpty);
       expect(_paths(setup.http.requests), ['/api/v2/meta/data']);
+    });
+
+    test('an area 3.x stored (typeName 猫耳 FM) lists the same rooms (13-3)', () async {
+      final setup = _setup(['S02-list-tag']);
+      final stored = LiveArea.fromJson(const {
+        'platform': 'missevan',
+        'areaType': 'tag',
+        'typeName': '猫耳 FM',
+        'areaId': '1',
+        'areaName': '新星',
+      });
+      expect(await setup.site.getCategoryRooms(stored), hasLength(20));
+      expect(_queries(setup.http.requests), [
+        {'p': '1', 'tag_id': '1'},
+      ]);
     });
   });
 
@@ -166,8 +183,8 @@ void main() {
     test('each namespace is asked with its own parameter (REG-MISSEVAN-003, -005)', () async {
       final setup = _setup(['S01-meta', 'S02-list-catalog', 'S02-list-tag', 'S02-list-team']);
       final areas = {
-        for (final area in (await setup.site.getCategories(1, 30)).single.children)
-          '${area.areaType}:${area.areaId}': area,
+        for (final category in await setup.site.getCategories(1, 30))
+          for (final area in category.children) '${area.areaType}:${area.areaId}': area,
       };
       final music = await setup.site.getDirectoryPage(category: areas['catalog:104']);
       final stars = await setup.site.getCategoryRooms(areas['tag:1']!);
@@ -301,9 +318,32 @@ void main() {
       expect(setup.site.supportsSearchPaginationFor('Re:Zero'), isTrue);
     });
 
+    test('a keyword over 100 characters is cut to its first 100 and searched (13-4; 3.x refused it)', () async {
+      final keyword = '配音' * 60;
+      final setup = _setup(
+        [],
+        extra: [
+          _synthetic(
+            Uri.https('fm.missevan.com', '/api/v2/chatroom/search', {
+              's': '配音' * 50,
+              'p': '2',
+              'page_size': '20',
+            }).toString(),
+            _ok({
+              'data': [(_detail()['room'] as Map<String, dynamic>)],
+              'pagination': {'p': 2, 'pagesize': 20, 'maxpage': 2, 'count': 21},
+            }),
+          ),
+        ],
+      );
+      expect((await setup.site.searchRooms(' $keyword ', page: 2, pageSize: 20)).single.roomId, '100');
+      expect(setup.http.requests.single.url.queryParameters['s'], hasLength(100));
+      expect(setup.site.supportsSearchPaginationFor(keyword), isTrue);
+    });
+
     test('keywords, pages and sizes the site does not take are refused without a request (3.x)', () async {
       final setup = _setup([]);
-      for (final keyword in ['x' * 101, 'a\nb', 'a\u0000b']) {
+      for (final keyword in ['a\nb', 'a\u0000b', '${'x' * 101}\u0007']) {
         await expectLater(setup.site.searchRooms(keyword), throwsArgumentError, reason: keyword);
       }
       await expectLater(setup.site.searchRooms('配音', page: 0), throwsArgumentError);
@@ -343,16 +383,34 @@ void main() {
         expect(room.roomId, _live);
         expect(room.isLiveNow, isTrue);
         expect(room.data, isA<MissevanRoomData>());
+        expect(room.startedAt, DateTime.utc(2026, 9, 27, 3, 52, 30, 876), reason: 'unified principle');
+        expect(room.restriction, LiveRestriction.none, reason: 'unified principle');
       }
       expect(await setup.site.getLiveStatus(roomId: _live), isTrue);
       expect(_paths(setup.http.requests), everyElement('/api/v2/live/$_live'));
       expect(setup.http.requests, hasLength(4));
     });
 
+    test('room entry hands over the danmaku arguments, live or not, without a request (13-2)', () async {
+      final setup = _setup(['S04-live', 'S04-offline']);
+      final live = await setup.site.getRoomDetail(roomId: _live);
+      final offline = await setup.site.getRoomDetail(roomId: _offline);
+      for (final (room, id) in [(live, _live), (offline, _offline)]) {
+        final args = room.danmakuData! as MissevanDanmakuArgs;
+        expect(args.roomId, id);
+        expect(args.url, Uri.parse('wss://im.missevan.com/ws?room_id=$id'));
+      }
+      expect(setup.http.requests, hasLength(2));
+      expect((await setup.site.getRoomDetailForRefresh(roomId: _live)).danmakuData, isNull);
+      expect((await setup.site.getRoomDetailForRecording(roomId: _live)).danmakuData, isNull);
+      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the connection is M5');
+    });
+
     test('an offline refresh keeps what the card knew (mergeFrom)', () async {
       final setup = _setup(['S04-offline']);
       final refreshed = await setup.site.getRoomDetailForRefresh(roomId: _offline);
       expect(refreshed.isExplicitlyOfflineNow, isTrue);
+      expect((refreshed.startedAt, refreshed.restriction), (null, null));
       expect(await setup.site.getLiveStatus(roomId: _offline), isFalse);
       final stored = LiveRoom(roomId: _offline, platform: 'missevan', area: '配音', title: 'old');
       final merged = stored.mergeFrom(refreshed);
@@ -373,20 +431,21 @@ void main() {
   });
 
   group('streams', () {
-    test('qualities and lines from the room detail: no request', () async {
+    test('one quality 原画, FLV and HLS lines from the room detail: no request (13-1)', () async {
       final setup = _setup(['S04-live']);
       final room = await setup.site.getRoomDetail(roomId: _live);
       final qualities = await setup.site.getPlayQualities(detail: room);
-      expect(qualities.map((quality) => quality.quality), ['HLS', 'FLV']);
-      final resolution = await setup.site.resolvePlayUrls(detail: room, quality: qualities.last);
-      final line = resolution.lines.single;
-      expect(line.format, StreamFormat.flv);
-      expect(line.lineId, 'flv');
+      expect(qualities.map((quality) => (quality.quality, quality.id)), [('原画', '10000')]);
+      final resolution = await setup.site.resolvePlayUrls(detail: room, quality: qualities.single);
+      final [line, backup] = resolution.lines;
+      expect((line.format, line.lineId), (StreamFormat.flv, 'flv'));
+      expect((backup.format, backup.lineId), (StreamFormat.hls, 'hls'));
       expect(line.url, startsWith('https://d1-missevan04.bilivideo.com/'));
       expect(line.headers['referer'], 'https://fm.missevan.com/');
       expect(line.lease!.expiresAt, DateTime.fromMillisecondsSinceEpoch(1790534410 * 1000, isUtc: true));
-      expect(resolution.appliedQualityData, 'flv');
-      expect(await setup.site.getPlayUrls(detail: room, quality: qualities.first), [
+      expect(resolution.appliedQualityData, '10000');
+      expect(await setup.site.getPlayUrls(detail: room, quality: qualities.single), [
+        startsWith('https://d1-missevan04.bilivideo.com/'),
         startsWith('https://d1-missevan104.bilivideo.com/'),
       ]);
       expect(setup.http.requests, hasLength(1));
@@ -413,7 +472,7 @@ void main() {
     test('a room without pull URLs (a card, a pending state) reads its detail first', () async {
       final setup = _setup(['S04-live', 'S04-offline']);
       final pending = LiveRoom(roomId: _live, platform: 'missevan', liveStatus: LiveStatus.unknown);
-      expect(await setup.site.getPlayQualities(detail: pending), hasLength(2));
+      expect(await setup.site.getPlayQualities(detail: pending), hasLength(1));
       final card = LiveRoom(roomId: _offline, platform: 'missevan', liveStatus: LiveStatus.live);
       await expectLater(setup.site.getPlayQualities(detail: card), throwsA(isA<StreamUnavailable>()));
       expect(_paths(setup.http.requests), ['/api/v2/live/$_live', '/api/v2/live/$_offline']);
@@ -429,6 +488,24 @@ void main() {
         ),
         throwsA(isA<StreamUnavailable>()),
       );
+      await expectLater(
+        setup.site.getPlayQualities(detail: room.copyWith(data: const MissevanRoomData())),
+        throwsA(isA<StreamUnavailable>()),
+      );
+    });
+
+    test("3.x's HLS and FLV qualities resolve to the one quality's lines (13-1)", () async {
+      final setup = _setup(['S04-live']);
+      final room = await setup.site.getRoomDetail(roomId: _live);
+      for (final legacy in const [
+        LivePlayQuality(quality: 'HLS', id: 'hls', sort: 2),
+        LivePlayQuality(quality: 'FLV', id: 'flv', sort: 1),
+      ]) {
+        final resolution = await setup.site.resolvePlayUrlsRaw(detail: room, quality: legacy);
+        expect(resolution.lines.map((line) => line.lineId), ['flv', 'hls']);
+        expect(resolution.appliedQualityData, '10000');
+      }
+      expect(setup.http.requests, hasLength(1));
     });
 
     test('recovery reads the room again for fresh signed URLs (3.x)', () async {
@@ -439,12 +516,13 @@ void main() {
       });
       final site = MissevanSite(http);
       final room = await site.getRoomDetailForRecording(roomId: '100');
-      final quality = (await site.getPlayQualities(detail: room)).first;
+      final quality = (await site.getPlayQualities(detail: room)).single;
       final recovered = await site.resolvePlayUrlsForRecovery(detail: room, quality: quality);
-      expect(recovered.appliedQualityData, 'hls');
-      expect(recovered.urls.single, endsWith('generation=2'));
-      expect((quality.data! as List).single, endsWith('generation=1'));
-      expect(recovered.lines.single.lease!.cutsConnection, isTrue);
+      expect(recovered.appliedQualityData, '10000');
+      expect(recovered.urls.last, endsWith('generation=2'));
+      expect((quality.data! as List).last, endsWith('generation=1'));
+      expect(recovered.lines.last.lease!.cutsConnection, isTrue);
+      expect(recovered.lines.first.lease!.cutsConnection, isFalse);
       expect(http.requests, hasLength(2));
     });
 

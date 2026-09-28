@@ -61,3 +61,39 @@ Future<void> unfollowWithUndo(BuildContext context, WidgetRef ref, RoomRef room,
     ),
   );
 }
+
+/// Unfollows [rooms] at once (multi-select 取消关注, spec/product.md F-FAV-09)
+/// with "已取消关注 N 个主播" and an undo action; no confirmation first
+/// (PLAN §07 一致性规则: removals can be undone). The write is one
+/// transaction: a failure keeps every follow and is said, as is a failed
+/// undo.
+Future<void> unfollowManyWithUndo(BuildContext context, WidgetRef ref, List<RoomRef> rooms) async {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final store = ref.read(storeProvider);
+  final log = ref.read(appLogProvider);
+  final List<FollowedRoom> removed;
+  try {
+    removed = await store.follows.unfollowAll(rooms);
+  } on Object catch (error, stack) {
+    log.error('follows', 'unfollowing ${rooms.length} rooms failed', error, stack);
+    messenger?.showSnackBar(SnackBar(content: Text(t.follows.unfollowFailed)));
+    return;
+  }
+  if (removed.isEmpty) return;
+  messenger?.showSnackBar(
+    SnackBar(
+      content: Text(t.follows.unfollowedMany(n: removed.length)),
+      action: SnackBarAction(
+        label: t.common.undo,
+        onPressed: () async {
+          try {
+            await store.follows.restore(removed);
+          } on Object catch (error, stack) {
+            log.error('follows', 'undo unfollowing ${removed.length} rooms failed', error, stack);
+            messenger.showSnackBar(SnackBar(content: Text(t.follows.undoFailed)));
+          }
+        },
+      ),
+    ),
+  );
+}

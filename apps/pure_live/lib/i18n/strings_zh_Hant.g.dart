@@ -1208,6 +1208,24 @@ class Translations$follows$zh_Hant implements Translations$follows$zh_Hans {
   String get renameAndDescribe => '重新命名和描述';
   @override
   String groupDeleted({required Object name}) => '已刪除群組「${name}」';
+  @override
+  String get select => '多選';
+  @override
+  String selectedCount({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已選 ${n}');
+  @override
+  String get selectAll => '全選';
+  @override
+  String get cancelSelection => '結束多選';
+  @override
+  String selectedStreamers({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已選的 ${n} 位主播');
+  @override
+  String unfollowedMany({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已取消追蹤 ${n} 位主播');
+  @override
+  String multiviewLimit({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '多畫面在這裡最多放 ${n} 路，已依選取順序放入前 ${n} 個');
 }
 
 // Path: fonts

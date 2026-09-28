@@ -1647,6 +1647,31 @@ class Translations$follows$zh_Hans {
 
   /// zh-Hans: '已删除分组“{name}”'
   String groupDeleted({required Object name}) => '已删除分组“${name}”';
+
+  /// zh-Hans: '多选'
+  String get select => '多选';
+
+  /// zh-Hans: '(other) {已选 {n}}'
+  String selectedCount({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已选 ${n}');
+
+  /// zh-Hans: '全选'
+  String get selectAll => '全选';
+
+  /// zh-Hans: '取消多选'
+  String get cancelSelection => '取消多选';
+
+  /// zh-Hans: '(other) {已选的 {n} 个主播}'
+  String selectedStreamers({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已选的 ${n} 个主播');
+
+  /// zh-Hans: '(other) {已取消关注 {n} 个主播}'
+  String unfollowedMany({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '已取消关注 ${n} 个主播');
+
+  /// zh-Hans: '(other) {多画面在这里最多放 {n} 路，已按选择顺序放入前 {n} 个}'
+  String multiviewLimit({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '多画面在这里最多放 ${n} 路，已按选择顺序放入前 ${n} 个');
 }
 
 // Path: fonts

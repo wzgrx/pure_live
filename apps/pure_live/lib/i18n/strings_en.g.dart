@@ -1243,6 +1243,33 @@ class _Translations$follows$en implements Translations$follows$zh_Hans {
   String get renameAndDescribe => 'Rename and describe';
   @override
   String groupDeleted({required Object name}) => 'Deleted the group "${name}"';
+  @override
+  String get select => 'Select';
+  @override
+  String selectedCount({required num n}) =>
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, other: '${n} selected');
+  @override
+  String get selectAll => 'Select all';
+  @override
+  String get cancelSelection => 'Cancel selection';
+  @override
+  String selectedStreamers({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
+    n,
+    one: '${n} selected streamer',
+    other: '${n} selected streamers',
+  );
+  @override
+  String unfollowedMany({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
+    n,
+    one: 'Unfollowed ${n} streamer',
+    other: 'Unfollowed ${n} streamers',
+  );
+  @override
+  String multiviewLimit({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
+    n,
+    one: 'Multiview holds ${n} stream here; the first you picked was added',
+    other: 'Multiview holds ${n} streams here; the first ${n} you picked were added',
+  );
 }
 
 // Path: fonts

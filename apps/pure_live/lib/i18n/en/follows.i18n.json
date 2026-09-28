@@ -59,5 +59,23 @@
   "setGroupsFor": "Groups · {title}",
   "groupsHint": "Groups sort the streamers you follow; view them by group on the Following page.",
   "renameAndDescribe": "Rename and describe",
-  "groupDeleted": "Deleted the group \"{name}\""
+  "groupDeleted": "Deleted the group \"{name}\"",
+  "select": "Select",
+  "selectedCount(param=n)": {
+    "other": "{n} selected"
+  },
+  "selectAll": "Select all",
+  "cancelSelection": "Cancel selection",
+  "selectedStreamers(param=n)": {
+    "one": "{n} selected streamer",
+    "other": "{n} selected streamers"
+  },
+  "unfollowedMany(param=n)": {
+    "one": "Unfollowed {n} streamer",
+    "other": "Unfollowed {n} streamers"
+  },
+  "multiviewLimit(param=n)": {
+    "one": "Multiview holds {n} stream here; the first you picked was added",
+    "other": "Multiview holds {n} streams here; the first {n} you picked were added"
+  }
 }

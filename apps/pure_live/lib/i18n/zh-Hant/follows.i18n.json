@@ -59,5 +59,20 @@
   "setGroupsFor": "設定群組 · {title}",
   "groupsHint": "群組可以把追蹤的主播分類，在追蹤頁按群組查看。",
   "renameAndDescribe": "重新命名和描述",
-  "groupDeleted": "已刪除群組「{name}」"
+  "groupDeleted": "已刪除群組「{name}」",
+  "select": "多選",
+  "selectedCount(param=n)": {
+    "other": "已選 {n}"
+  },
+  "selectAll": "全選",
+  "cancelSelection": "結束多選",
+  "selectedStreamers(param=n)": {
+    "other": "已選的 {n} 位主播"
+  },
+  "unfollowedMany(param=n)": {
+    "other": "已取消追蹤 {n} 位主播"
+  },
+  "multiviewLimit(param=n)": {
+    "other": "多畫面在這裡最多放 {n} 路，已依選取順序放入前 {n} 個"
+  }
 }

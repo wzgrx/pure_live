@@ -1,0 +1,426 @@
+{
+  "generator": "YouTubeSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + searchRoomsCancellable (with S10-watch-upcoming, S10-player-upcoming)",
+  "value": {
+    "32myp8UqPOE": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "32myp8UqPOE",
+          "userId": "UCvxWyn4rfcI2H9APhfUIB1Q",
+          "title": "Lakewood Water Baptism | October 3, 2026",
+          "nick": "Joel Osteen",
+          "avatar": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "cover": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "area": "Entertainment",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "At this Lakewood Water Baptism from October 3, 2026, Joel baptizes hundreds of believers, and we celebrate all of those who have answered the call to follow Jesus and make their faith known. We invite you to witness this transformative celebration, hear some of their stories, and rejoice in God's invitation to walk in newness of life! \n\n \n\"We [are] buried with him through baptism into death in order that, just as Christ was raised from the dead through the glory of the Father, we too may live a new life.\" —Romans 6:4, NIV\n\n\nSubscribe to receive weekly messages of hope, encouragement, and inspiration from Joel! https://www.youtube.com/channel/UCvxWyn4rfcI2H9APhfUIB1Q?sub_confirmation=1\n\nFollow #JoelOsteen on social\nX: https://twitter.com/joelosteen\nInstagram: https://instagram.com/joelosteen\nFacebook: https://facebook.com/joelosteen\nTikTok: https://www.tiktok.com/@joelosteen\n\n#LakewoodChurch\n\n\nThank you for your generosity! To give, visit https://www.joelosteen.com/donate\n\n\nYou can also watch here: https://www.joelosteen.com/how-to-watch/live",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=32myp8UqPOE"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "32myp8UqPOE",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "32myp8UqPOE",
+          "userId": "UCvxWyn4rfcI2H9APhfUIB1Q",
+          "title": "Lakewood Water Baptism | October 3, 2026",
+          "nick": "Joel Osteen",
+          "avatar": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "cover": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "area": "Entertainment",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "At this Lakewood Water Baptism from October 3, 2026, Joel baptizes hundreds of believers, and we celebrate all of those who have answered the call to follow Jesus and make their faith known. We invite you to witness this transformative celebration, hear some of their stories, and rejoice in God's invitation to walk in newness of life! \n\n \n\"We [are] buried with him through baptism into death in order that, just as Christ was raised from the dead through the glory of the Father, we too may live a new life.\" —Romans 6:4, NIV\n\n\nSubscribe to receive weekly messages of hope, encouragement, and inspiration from Joel! https://www.youtube.com/channel/UCvxWyn4rfcI2H9APhfUIB1Q?sub_confirmation=1\n\nFollow #JoelOsteen on social\nX: https://twitter.com/joelosteen\nInstagram: https://instagram.com/joelosteen\nFacebook: https://facebook.com/joelosteen\nTikTok: https://www.tiktok.com/@joelosteen\n\n#LakewoodChurch\n\n\nThank you for your generosity! To give, visit https://www.joelosteen.com/donate\n\n\nYou can also watch here: https://www.joelosteen.com/how-to-watch/live",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=32myp8UqPOE"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "32myp8UqPOE",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "32myp8UqPOE",
+          "userId": "UCvxWyn4rfcI2H9APhfUIB1Q",
+          "title": "Lakewood Water Baptism | October 3, 2026",
+          "nick": "Joel Osteen",
+          "avatar": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "cover": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "area": "Entertainment",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "At this Lakewood Water Baptism from October 3, 2026, Joel baptizes hundreds of believers, and we celebrate all of those who have answered the call to follow Jesus and make their faith known. We invite you to witness this transformative celebration, hear some of their stories, and rejoice in God's invitation to walk in newness of life! \n\n \n\"We [are] buried with him through baptism into death in order that, just as Christ was raised from the dead through the glory of the Father, we too may live a new life.\" —Romans 6:4, NIV\n\n\nSubscribe to receive weekly messages of hope, encouragement, and inspiration from Joel! https://www.youtube.com/channel/UCvxWyn4rfcI2H9APhfUIB1Q?sub_confirmation=1\n\nFollow #JoelOsteen on social\nX: https://twitter.com/joelosteen\nInstagram: https://instagram.com/joelosteen\nFacebook: https://facebook.com/joelosteen\nTikTok: https://www.tiktok.com/@joelosteen\n\n#LakewoodChurch\n\n\nThank you for your generosity! To give, visit https://www.joelosteen.com/donate\n\n\nYou can also watch here: https://www.joelosteen.com/how-to-watch/live",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=32myp8UqPOE"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "32myp8UqPOE",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "32myp8UqPOE",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "streams": [],
+      "getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "resolvePlayUrlsRaw": {},
+      "resolvePlayUrlsForRecoveryRaw(hls:auto)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getPlayQualites (refreshed room)": {
+        "result": [],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "32myp8UqPOE",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "32myp8UqPOE",
+          "userId": "UCvxWyn4rfcI2H9APhfUIB1Q",
+          "title": "Lakewood Water Baptism | October 3, 2026",
+          "nick": "Joel Osteen",
+          "avatar": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "cover": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "area": "Entertainment",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "At this Lakewood Water Baptism from October 3, 2026, Joel baptizes hundreds of believers, and we celebrate all of those who have answered the call to follow Jesus and make their faith known. We invite you to witness this transformative celebration, hear some of their stories, and rejoice in God's invitation to walk in newness of life! \n\n \n\"We [are] buried with him through baptism into death in order that, just as Christ was raised from the dead through the glory of the Father, we too may live a new life.\" —Romans 6:4, NIV\n\n\nSubscribe to receive weekly messages of hope, encouragement, and inspiration from Joel! https://www.youtube.com/channel/UCvxWyn4rfcI2H9APhfUIB1Q?sub_confirmation=1\n\nFollow #JoelOsteen on social\nX: https://twitter.com/joelosteen\nInstagram: https://instagram.com/joelosteen\nFacebook: https://facebook.com/joelosteen\nTikTok: https://www.tiktok.com/@joelosteen\n\n#LakewoodChurch\n\n\nThank you for your generosity! To give, visit https://www.joelosteen.com/donate\n\n\nYou can also watch here: https://www.joelosteen.com/how-to-watch/live",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=32myp8UqPOE"
+        }
+      ],
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://www.youtube.com/watch?v=32myp8UqPOE",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cookie": "SOCS=CAI",
+            "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cookie": "SOCS=CAI",
+            "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE",
+            "Content-Type": "application/json; charset=utf-8",
+            "Origin": "https://www.youtube.com"
+          },
+          "body": {
+            "videoId": "32myp8UqPOE",
+            "contentCheckOk": true,
+            "racyCheckOk": true,
+            "context": {
+              "client": {
+                "clientName": "ANDROID",
+                "clientVersion": "21.08.266",
+                "platform": "DESKTOP",
+                "clientScreen": "EMBED",
+                "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                "browserName": "Chrome"
+              },
+              "user": {
+                "lockedSafetyMode": false
+              },
+              "request": {
+                "useSsl": true
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

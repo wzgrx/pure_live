@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S07-player-live",
+  "capturedAt": "2026-09-28T12:23:09.365851Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Cookie": "SOCS=CAI",
+      "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+      "Content-Type": "application/json; charset=utf-8",
+      "Origin": "https://www.youtube.com"
+    },
+    "body": "{\"videoId\":\"nI725iVsyoQ\",\"contentCheckOk\":true,\"racyCheckOk\":true,\"context\":{\"client\":{\"clientName\":\"ANDROID\",\"clientVersion\":\"21.08.266\",\"platform\":\"DESKTOP\",\"clientScreen\":\"EMBED\",\"clientFormFactor\":\"UNKNOWN_FORM_FACTOR\",\"browserName\":\"Chrome\"},\"user\":{\"lockedSafetyMode\":false},\"request\":{\"useSsl\":true}}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=UTF-8",
+      "vary": [
+        "X-Origin",
+        "Referer",
+        "Origin,Accept-Encoding"
+      ],
+      "date": "Mon, 28 Sep 2026 12:23:08 GMT",
+      "server": "scaffolding on HTTPServer2",
+      "x-frame-options": "SAMEORIGIN",
+      "x-content-type-options": "nosniff",
+      "transfer-encoding": "chunked"
+    }
+  },
+  "raw": {
+    "sha256": "b0d96f7ede014389eec55b96a9813f49bc8dcef6ddb9845b85d6e65fc386124a",
+    "length": 164618
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.attestation.playerAttestationRenderer.challenge",
+      "rule": "secret"
+    },
+    {
+      "where": "$.heartbeatParams.heartbeatServerData",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.atrUrl.baseUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.atrUrl.baseUrl:plid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.atrUrl.baseUrl:vm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.engageUrl.baseUrl:cpn",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.engageUrl.baseUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.engageUrl.baseUrl:of",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.engageUrl.baseUrl:plid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.engageUrl.baseUrl:vm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.ptrackingUrl.baseUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.ptrackingUrl.baseUrl:plid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.qoeUrl.baseUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.qoeUrl.baseUrl:plid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsDelayplayUrl.baseUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsDelayplayUrl.baseUrl:of",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsDelayplayUrl.baseUrl:plid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsDelayplayUrl.baseUrl:vm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsPlaybackUrl.baseUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsPlaybackUrl.baseUrl:of",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsPlaybackUrl.baseUrl:plid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsPlaybackUrl.baseUrl:vm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsWatchtimeUrl.baseUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsWatchtimeUrl.baseUrl:of",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsWatchtimeUrl.baseUrl:plid",
+      "rule": "secret"
+    },
+    {
+      "where": "$.playbackTracking.videostatsWatchtimeUrl.baseUrl:vm",
+      "rule": "secret"
+    },
+    {
+      "where": "$.responseContext.serviceTrackingParams[*].params[*].value",
+      "rule": "secret"
+    },
+    {
+      "where": "$.responseContext.visitorData",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.dashManifestUrl path /ei/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.dashManifestUrl path /ip/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.dashManifestUrl path /sig/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.hlsManifestUrl path /ei/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.hlsManifestUrl path /ip/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.hlsManifestUrl path /sig/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.serverAbrStreamingUrl:ei",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.serverAbrStreamingUrl:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.serverAbrStreamingUrl:lsig",
+      "rule": "secret"
+    },
+    {
+      "where": "$.streamingData.serverAbrStreamingUrl:sig",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.23 recorder (schema 1)"
+}

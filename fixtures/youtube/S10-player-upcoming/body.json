@@ -1,0 +1,251 @@
+{
+  "responseContext": {
+    "visitorData": "HdvQTaKTfPUcDP2rdjrRgPeHFcAOJjGZNqYHLfDpFtpMKUBw9hOG0DGmRn6TDM2LJVmauPnTN7kzODd4h9dZpiH7QDpxnDEZKH6EA14qY2rKO9ksG2HadaZzvfnBPPe0nREbrKw8Z5NpWxEwExGZT5c8BCSYqqamgLTuF2jQZIoHimMGSgpQsNLjV2q3FRZREAGJLINUFed9RQaFHnaSz4vfSTYfh1WaDLwmkRz9MYh6uobTfodJlJO7NVF9L3S9L4o5ZwGcO3s9XBQVIdRnX1pNhhIyyXDQYIZBGpD7fCr5T579m1FhOoOXFCiwUnetH6TcZ80oMWTWnPe7eGpkhZY7EQA2DtQpVIE6XHp4L32SgIAicRZ9h1BAHQmLh7v4WF5bRAbatgnbiHrpCTY3CXGPfDQoNl4KJqq5JWm4GOKdD9ETKoyFBUE0OyTKQmIQATmJxzaiPXU2S3b4xqWKwMdKm1jxXXqZNMSZKg4wUyVZdSHLOYLGhpalHMfHJhPeKe5hTMO%3D",
+    "serviceTrackingParams": [
+      {
+        "service": "GFEEDBACK",
+        "params": [
+          {
+            "key": "is_viewed_live",
+            "value": "False"
+          },
+          {
+            "key": "is_alc_surface",
+            "value": "false"
+          },
+          {
+            "key": "ipcc",
+            "value": "0"
+          },
+          {
+            "key": "logged_in",
+            "value": "0"
+          },
+          {
+            "key": "visitor_data",
+            "value": "OmdIWyHCgAIwYK3wqpwPqNoJYtSIPqBMUoWJOcTnIayYLYB%3D"
+          }
+        ]
+      },
+      {
+        "service": "CSI",
+        "params": [
+          {
+            "key": "c",
+            "value": "ANDROID"
+          },
+          {
+            "key": "cver",
+            "value": "21.08.266"
+          },
+          {
+            "key": "yt_li",
+            "value": "0"
+          },
+          {
+            "key": "GetPlayer_rid",
+            "value": "0x47d74ac12f8b4efd"
+          }
+        ]
+      },
+      {
+        "service": "GUIDED_HELP",
+        "params": [
+          {
+            "key": "logged_in",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "service": "ECATCHER",
+        "params": [
+          {
+            "key": "client.version",
+            "value": "21.08"
+          },
+          {
+            "key": "client.name",
+            "value": "ANDROID"
+          }
+        ]
+      },
+      {
+        "service": "LISTNR",
+        "params": [
+          {
+            "key": "e",
+            "value": "52159509,52168099,52221246,52137112,52116788,52227284,52233811,52170019,51648336,51672213,52040391,52095408,52059654,52237881,51530495,51820847,52115377,51920399,51581530,39328822,52005694,52016136,51071073,52093098,51539513,52112912,51607161,52182931,51982297,52183676,52186339,51544402,52186343,52189362,52184125,52203549,51770821,51982291,51565115,52209320,52211482,52034091,52170237,52214850,52226597,52233608,51778339,51863287,51766994,24556101,51671622,51683502,52107081,51883417,52225514,24250570,51366423,52108891,52114817,51453239,51589585,51637510,51842422,52042675,52126796,52155173,51129105,52229302,51095478,51997172,52176331,51737134,51746987,51992967,51295372,52168207,52184212,51831871,52147014,51962116,24290153,52149916,52219399,52227638,52230331,51443707,51869564,24143331,51940941,52012523,52190207,51710872,51535423,51507238,52248847,52208451,51175149,51534669,51593027,52198880,51982300,24232551,51461795,51953630,52176286,52194648,51673124,52213573,52229206,51141472,51179435,51607676,52017300,51681662,51987266,52214167,52229845,51432294,51605329,51883460,52130289,51313109,51372971,52134509,52156349,51349914,52100942,52029147,52166153,52231322,52237669,52245111,51945056,52224996,51773952,52236632,51471138,52245207,100670348,51314496,52166740,51866507,52206032,51577777,51803127,52031813,52153424,51717814,51272458,51752816,52127167,51754406,52178456,52225516,24230811,52026689,52161693,52161752,52170281,52180306,52203341,51010008,52232721,52233680,24033252,24024517,52217697,51731408,24254870,51192010,51248777,51835239,51547388,51902977,51256074,51270362,51978500,52023647,51566065,52096754,51795483,51798928,51982288,51530538,51708804,51985583,51663860,52124819,52169790,51849937,51875250,52126405,52173716,24166867,51834531,51982294,52184866,24195012,52154817,51784229,52193929,51660654,52198261,52212352,24397985,52220701,51774498,51868228,52222432,51086511,52056767,52223002,52159992,52231144,52112858,52155329,51989550,52009309,52239112,52150183"
+          }
+        ]
+      }
+    ],
+    "maxAgeSeconds": 0,
+    "rolloutToken": "CJKi4rW_vdiviQEQ27PNkqKRlwMY27PNkqKRlwM%3D",
+    "responseId": "IhMI0bDNkqKRlwMVBE5MCB02wgGF"
+  },
+  "playabilityStatus": {
+    "status": "LIVE_STREAM_OFFLINE",
+    "reason": "This live event will begin in 5 days.",
+    "playableInEmbed": true,
+    "liveStreamability": {
+      "liveStreamabilityRenderer": {
+        "videoId": "32myp8UqPOE",
+        "offlineSlate": {
+          "liveStreamOfflineSlateRenderer": {
+            "scheduledStartTime": "1791043200",
+            "mainText": {
+              "runs": [
+                {
+                  "text": "Live in "
+                },
+                {
+                  "text": "5 days"
+                }
+              ]
+            },
+            "subtitleText": {
+              "runs": [
+                {
+                  "text": "October 3 at 9:00 AM PDT"
+                }
+              ]
+            },
+            "thumbnail": {
+              "thumbnails": [
+                {
+                  "url": "https://i.ytimg.com/vi/32myp8UqPOE/default.jpg?v=6ab7ec1e",
+                  "width": 120,
+                  "height": 90
+                },
+                {
+                  "url": "https://i.ytimg.com/vi/32myp8UqPOE/mqdefault.jpg?v=6ab7ec1e",
+                  "width": 320,
+                  "height": 180
+                },
+                {
+                  "url": "https://i.ytimg.com/vi/32myp8UqPOE/hqdefault.jpg?v=6ab7ec1e",
+                  "width": 480,
+                  "height": 360
+                },
+                {
+                  "url": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+                  "width": 640,
+                  "height": 480
+                }
+              ]
+            },
+            "offlineSlateStyle": "OFFLINE_SLATE_STYLE_ABSTRACT"
+          }
+        },
+        "pollDelayMs": "30000"
+      }
+    },
+    "pictureInPicture": {
+      "pictureInPictureRenderer": {
+        "pictureInPictureStyleConfig": {
+          "enableScrubbing": true,
+          "enableNavigationControls": true
+        },
+        "pictureInPicturePlayability": "PICTURE_IN_PICTURE_PLAYABILITY_SHOPPING"
+      }
+    },
+    "miniplayer": {
+      "miniplayerRenderer": {
+        "playbackMode": "PLAYBACK_MODE_ALLOW",
+        "enableStashedPlayback": false
+      }
+    },
+    "contextParams": "Q0FFU0FnZ0M="
+  },
+  "heartbeatParams": {
+    "softFailOnError": true,
+    "heartbeatServerData": "KBXeSNZG1DwHQ9uvYvfWP2yLssgyWe2yDXx2epYgjGJCpW2HDBjfdFr4t6AEP0eNDONVTMJTEeIrz0IXFR7eO6Q7XTu4HEsDJ5O2GsK8IZ6QAANsgVmvE2QGhIN9nU0LsQEVEJ6vVVTVUXCzJFK3LNH2MZUDpCx0SpBNc2AFx0MrTjSFEmK6GVplgMIyzA1BJiSfNUXwoLjMX0rbLKpgT2H7Z3lkbGnYZ2bBwEjdlJS1ASb6PHrvVm2GiVhudwRnNSTtSZRMJLvpV8QcXjCEJwjzZnXdFOY1HqGNvduLEvLxLZvYaQZDPx1lgZJXSit0kMRWXUTTPvXijuoPOpOwA8VKDQniPoG5OrZwLKGNWnmzRY3IPWKpT52VENrcUi85IMATrCbBCZsabJjCdFyLWQX5W2ZncRqkgj48h1eoSrYrLVcYJLYembFoZ38HI7Z8CC8dr1SXWjtsT0vFBCTzcIF5aP4pHPBvlzHnsMoeg4CjlI4oHIuUPwkLIIzOZ88ffhh7eQScONdJyMkYfBICensqGN8zyrnaDVKhzGAXTQ5wOtCuNlbwP199GRrCYiVlWTlFZkHqfDCCb1wKH9E9uUH1EIXXRkM9oZseU7d6DWU6mPIti6vMF6YNhiFkAQUPzWVsjTUbL00vHH6hD9RvDaXlLdkxhZPcVQW8GC2ryPvZI9jbgz2wGKoyZL3PC1MqX8ZMX0htAF5sFWZ5nJSTZB1giwFIGkCHLVH5zLAmv6daIei1unYxYZ1gGYNLHDncqhAmMbQzYaWyTfTyGAwSFCcWV45AVXkmPQGUGxA4VLw7Pqv4lMJ4GXLcIsChX3SnhBARHDf0jDL3PYAvHPtmVVO5xcGTePwkjpeXf8fCBIF2oAM7UN8IbLHwApZ1EioODgADojY3qLSoJ79bV4K5b7JMNHE2tm7iBGfottvqxRminfuDDbv4lUM5A0nwyC1JSOF0N4oUGfHUhhvCIZ6pW0mpCS1sRFyvHVJFUWP8tDS9V5m6DF3HZrfyDBiklrB3pAUUE7sCBB8PISTIhNf1il8MW8C9GX3NWWPNXAHxWCTgaTVfRIElHVknRT5MRHU2ago3rdF6P8HTXYIDEM32PLp0OMa8T6cfXXMiT0IMeCYTGEGAOJlkk3uoPiogb6YJJX5itjRYIGSGgIVuLWiGUH8nkGlTxRKYLPcOp5YpOKsiDSP7x7OWwTUjQUBEQPWbaSpqWLfjYn7FZxq2cMZLocXxfWJGUnicH0rXLMJ9VV0UavX0MXYyJ2HhNXm0O4OGvnf5ltPfS0EROPS3bdJdyjwZolAifx5NtsC7KiCkfHdDmhrDADJZnVZ6RXepDTTnK8SLXJ0aFfWCHjPpH8QydCMCP3EXUVASh6MkQ4GWVlufR7Y6w2TOHXNRNSzxAE5RDBYoVqKjJuWvFlZSQWP4bxTkrPWBqHjWZdx1HSizN88JV6RELSyGs7Y3GmNxaRnpXZvmaW6eYejMweuCM90JF4MnOQLaQ34RHXWPO4u9WSNfvxvrQQzBQ5ihwW2kEogcHD9AwQF3W7K5Q0vbAsnrTpt4TC9uTmZnlFjFI8Kax6LXdgIfIcafWNE8BNj9ECPzA1kcNAuSOIWGHTuvWuSRB3Uoz6xtb5Keoh1icfpUNYpiTGK4E3K7OQ2uIkEBJoHvDkAhZHsUAJJoRoecXNnbFb8FGtiUSpMMbUc5Ql6SQRGhAbJbNGuaFgHhswN0nx82W3rakFNzTmAEVPtPGdX3IrFvb3gMIYari0wcnrIPXkAHLNQ0K84BZaxWGK0ExCPxHUyBc4x0YPXPJAvtAuLZLAYBaaUqnbTrDVyLDNTeXXZGCZHfZ6AMKgNZCZGLarwK",
+    "heartbeatAttestationConfig": {
+      "requiresAttestation": true
+    },
+    "heartbeatOnPause": true
+  },
+  "videoDetails": {
+    "videoId": "32myp8UqPOE",
+    "title": "Lakewood Water Baptism | October 3, 2026",
+    "lengthSeconds": "0",
+    "channelId": "UCvxWyn4rfcI2H9APhfUIB1Q",
+    "isOwnerViewing": false,
+    "shortDescription": "At this Lakewood Water Baptism from October 3, 2026, Joel baptizes hundreds of believers, and we celebrate all of those who have answered the call to follow Jesus and make their faith known. We invite you to witness this transformative celebration, hear some of their stories, and rejoice in God's invitation to walk in newness of life! \n\n \n\"We [are] buried with him through baptism into death in order that, just as Christ was raised from the dead through the glory of the Father, we too may live a new life.\" —Romans 6:4, NIV\n\n\nSubscribe to receive weekly messages of hope, encouragement, and inspiration from Joel! https://www.youtube.com/channel/UCvxWyn4rfcI2H9APhfUIB1Q?sub_confirmation=1\n\nFollow #JoelOsteen on social\nX: https://twitter.com/joelosteen\nInstagram: https://instagram.com/joelosteen\nFacebook: https://facebook.com/joelosteen\nTikTok: https://www.tiktok.com/@joelosteen\n\n#LakewoodChurch\n\n\nThank you for your generosity! To give, visit https://www.joelosteen.com/donate\n\n\nYou can also watch here: https://www.joelosteen.com/how-to-watch/live",
+    "isCrawlable": true,
+    "thumbnail": {
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/32myp8UqPOE/default.jpg?v=6ab7ec1e",
+          "width": 120,
+          "height": 90
+        },
+        {
+          "url": "https://i.ytimg.com/vi/32myp8UqPOE/mqdefault.jpg?v=6ab7ec1e",
+          "width": 320,
+          "height": 180
+        },
+        {
+          "url": "https://i.ytimg.com/vi/32myp8UqPOE/hqdefault.jpg?v=6ab7ec1e",
+          "width": 480,
+          "height": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/32myp8UqPOE/sddefault.jpg?v=6ab7ec1e",
+          "width": 640,
+          "height": 480
+        }
+      ]
+    },
+    "isUpcoming": true,
+    "allowRatings": true,
+    "viewCount": "0",
+    "author": "Joel Osteen",
+    "isLowLatencyLiveStream": false,
+    "isPrivate": false,
+    "isUnpluggedCorpus": false,
+    "latencyClass": "MDE_STREAM_OPTIMIZATIONS_RENDERER_LATENCY_NORMAL",
+    "isLiveContent": true,
+    "isTvfilmVideo": false
+  },
+  "trackingParams": "CAAQu2kiEwjRsM2SopGXAxUETkwIHTbCAYXKAQTx8aup",
+  "attestation": {
+    "playerAttestationRenderer": {
+      "challenge": "c=7&x6=4&u=pRzv0rOCNHBEIO0j46U8IvLpG2B&o=7246118041&k=2&k=88vqz3XvTAY&j5j=8&z0c=gk_fszynd_rid&tk=4u_PrUQBfWIuo5QjW_T1KAAlacuitQTL87aXuC5zFSR"
+    }
+  },
+  "playerSettingsMenuData": {
+    "loggingDirectives": {
+      "trackingParams": "CAEQtc4GIhMI0bDNkqKRlwMVBE5MCB02wgGF",
+      "visibility": {
+        "types": "12"
+      }
+    }
+  },
+  "adBreakHeartbeatParams": "Q0FBJTNE",
+  "frameworkUpdates": {
+    "entityBatchUpdate": {
+      "mutations": [
+        {
+          "entityKey": "Eihjb21wb3NpdGUtbGl2ZS1zdHJlYW0tb2ZmbGluZS1lbnRpdHkta2V5IIUEKAE%3D",
+          "type": "ENTITY_MUTATION_TYPE_DELETE"
+        },
+        {
+          "entityKey": "Eg0KCzMybXlwOFVxUE9FIPYBKAE%3D",
+          "type": "ENTITY_MUTATION_TYPE_REPLACE",
+          "payload": {
+            "offlineabilityEntity": {
+              "key": "Eg0KCzMybXlwOFVxUE9FIPYBKAE%3D",
+              "addToOfflineButtonState": "ADD_TO_OFFLINE_BUTTON_STATE_UNKNOWN"
+            }
+          }
+        }
+      ],
+      "timestamp": {
+        "seconds": "1790598211",
+        "nanos": 466987469
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S10-watch-upcoming",
+  "capturedAt": "2026-09-28T12:23:28.628431Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://www.youtube.com/watch?v=32myp8UqPOE",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Cookie": "SOCS=CAI",
+      "Referer": "https://www.youtube.com/watch?v=32myp8UqPOE"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "x-content-type-options": "nosniff",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "expires": "Mon, 01 Jan 1990 00:00:00 GMT",
+      "date": "Mon, 28 Sep 2026 12:23:25 GMT",
+      "x-frame-options": "SAMEORIGIN",
+      "server": "ESF",
+      "vary": "Sec-CH-UA-Arch, Sec-CH-UA-Bitness, Sec-CH-UA-Full-Version, Sec-CH-UA-Full-Version-List, Sec-CH-UA-Model, Sec-CH-UA-WoW64, Sec-CH-UA-Form-Factors, Sec-CH-UA-Platform, Sec-CH-UA-Platform-Version, Sec-CH-Viewport-Width, Sec-CH-DPR, Device-Memory,Accept-Encoding",
+      "transfer-encoding": "chunked"
+    }
+  },
+  "raw": {
+    "sha256": "bbfa5a9c09bd153a3fb13ae14058439f821c54169f94c95eddeb029f3d7d98a2",
+    "length": 1174367
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "$ytInitialData.contents.twoColumnWatchNextResults.results.results.contents[*].videoPrimaryInfoRenderer.videoActions.menuRenderer.flexibleItems[*].menuFlexibleItemRenderer.menuItem.menuServiceItemRenderer.serviceEndpoint.modalEndpoint.modal.modalWithTitleAndButtonRenderer.button.buttonRenderer.navigationEndpoint.signInEndpoint.nextEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnWatchNextResults.results.results.contents[*].videoPrimaryInfoRenderer.videoActions.menuRenderer.flexibleItems[*].menuFlexibleItemRenderer.topLevelButton.buttonViewModel.onTap.serialCommand.commands[*].innertubeCommand.modalEndpoint.modal.modalWithTitleAndButtonRenderer.button.buttonRenderer.navigationEndpoint.signInEndpoint.nextEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnWatchNextResults.results.results.contents[*].videoSecondaryInfoRenderer.subscribeButton.subscribeButtonRenderer.signInEndpoint.modalEndpoint.modal.modalWithTitleAndButtonRenderer.button.buttonRenderer.navigationEndpoint.signInEndpoint.nextEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.currentVideoEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialPlayerResponse.heartbeatParams.heartbeatServerData",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialPlayerResponse.responseContext.serviceTrackingParams[*].params[*].value",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.23 recorder (schema 1)",
+  "trimmed": "kept what 3.x reads: the canonical link, INNERTUBE_API_KEY, ytInitialPlayerResponse and ytInitialData (a watch page keeps contents.twoColumnWatchNextResults.results and currentVideoEndpoint)"
+}

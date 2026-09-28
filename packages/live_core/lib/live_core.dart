@@ -65,6 +65,8 @@ export 'src/sites/weibo/weibo_api.dart';
 export 'src/sites/weibo/weibo_site.dart';
 export 'src/sites/xiaohongshu/xiaohongshu_api.dart';
 export 'src/sites/xiaohongshu/xiaohongshu_site.dart';
+export 'src/sites/youtube/youtube_api.dart';
+export 'src/sites/youtube/youtube_site.dart';
 export 'src/sites/yy/yy_api.dart';
 export 'src/sites/yy/yy_site.dart';
 export 'src/tars.dart';

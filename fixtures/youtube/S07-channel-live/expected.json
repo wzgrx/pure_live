@@ -1,0 +1,668 @@
+{
+  "generator": "YouTubeApi.resolveReference + YouTubeSite.searchRoomsCancellable + YouTubeLink (with S07-channel-live, S07-watch-live, S07-player-live, S07-hls-live)",
+  "value": {
+    "resolveReference": {
+      "@LofiGirl": {
+        "result": "nI725iVsyoQ",
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          }
+        ]
+      },
+      "LofiGirl": {
+        "result": "nI725iVsyoQ",
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          }
+        ]
+      },
+      "https://www.youtube.com/@LofiGirl": {
+        "result": "nI725iVsyoQ",
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          }
+        ]
+      },
+      "https://www.youtube.com/@LofiGirl/live": {
+        "result": "nI725iVsyoQ",
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          }
+        ]
+      }
+    },
+    "searchRooms": {
+      "@LofiGirl": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          },
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "LofiGirl": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          },
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "https://www.youtube.com/@LofiGirl": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          },
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "https://www.youtube.com/@LofiGirl/live": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/@LofiGirl/live",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/"
+            }
+          },
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "YouTubeLink.parse": {
+      "https://www.youtube.com/watch?v=nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://www.youtube.com/watch?v=nI725iVsyoQ&t=42s&si=abc": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "http://youtube.com/watch?v=nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://m.youtube.com/watch?v=nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://music.youtube.com/watch?v=nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://www.youtube.com/watch?v=nI725iVsyoQ#t=1": null,
+      "https://www.youtube.com/watch?v=short": null,
+      "https://www.youtube.com/watch": null,
+      "https://youtu.be/nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://youtu.be/nI725iVsyoQ?si=x": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://youtu.be/nI725iVsyoQ/extra": null,
+      "https://www.youtube.com/live/nI725iVsyoQ?feature=share": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://www.youtube.com/LIVE/nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://www.youtube.com/embed/nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://www.youtube-nocookie.com/embed/nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://www.youtube.com/v/nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://www.youtube.com/shorts/nI725iVsyoQ": null,
+      "https://www.youtube.com/embed/live_stream?channel=UCSJ4gkVC6NrvII8umztf0Ow": {
+        "kind": "channel",
+        "id": "channel/UCSJ4gkVC6NrvII8umztf0Ow",
+        "url": "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow/live"
+      },
+      "https://www.youtube.com/embed/live_stream?channel=nope": null,
+      "https://www.youtube.com/@LofiGirl": {
+        "kind": "channel",
+        "id": "@LofiGirl",
+        "url": "https://www.youtube.com/@LofiGirl/live"
+      },
+      "https://www.youtube.com/@LofiGirl/live": {
+        "kind": "channel",
+        "id": "@LofiGirl",
+        "url": "https://www.youtube.com/@LofiGirl/live"
+      },
+      "https://www.youtube.com/@LofiGirl/videos": null,
+      "https://www.youtube.com/@lo": null,
+      "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow": {
+        "kind": "channel",
+        "id": "channel/UCSJ4gkVC6NrvII8umztf0Ow",
+        "url": "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow/live"
+      },
+      "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow/live": {
+        "kind": "channel",
+        "id": "channel/UCSJ4gkVC6NrvII8umztf0Ow",
+        "url": "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow/live"
+      },
+      "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow/videos": null,
+      "https://www.youtube.com/channel/notachannel": null,
+      "https://www.youtube.com/c/LofiGirl": {
+        "kind": "channel",
+        "id": "c/LofiGirl",
+        "url": "https://www.youtube.com/c/LofiGirl/live"
+      },
+      "https://www.youtube.com/c/LofiGirl/live": {
+        "kind": "channel",
+        "id": "c/LofiGirl",
+        "url": "https://www.youtube.com/c/LofiGirl/live"
+      },
+      "https://www.youtube.com/user/ChilledCow": {
+        "kind": "channel",
+        "id": "user/ChilledCow",
+        "url": "https://www.youtube.com/user/ChilledCow/live"
+      },
+      "https://www.youtube.com/results?search_query=lofi": null,
+      "https://www.youtube.com/": null,
+      "https://www.youtube.com/./watch?v=nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "https://user@www.youtube.com/watch?v=nI725iVsyoQ": null,
+      "https://evilyoutube.com/watch?v=nI725iVsyoQ": null,
+      "https://youtube.com.evil.com/watch?v=nI725iVsyoQ": null,
+      "ftp://www.youtube.com/watch?v=nI725iVsyoQ": null,
+      "undefined": null
+    },
+    "YouTubeLink.parseDurableVideoId": {
+      "https://www.youtube.com/watch?v=nI725iVsyoQ": "nI725iVsyoQ",
+      "https://www.youtube.com/watch?v=nI725iVsyoQ&t=42s&si=abc": "nI725iVsyoQ",
+      "http://youtube.com/watch?v=nI725iVsyoQ": "nI725iVsyoQ",
+      "https://m.youtube.com/watch?v=nI725iVsyoQ": "nI725iVsyoQ",
+      "https://music.youtube.com/watch?v=nI725iVsyoQ": "nI725iVsyoQ",
+      "https://www.youtube.com/watch?v=nI725iVsyoQ#t=1": null,
+      "https://www.youtube.com/watch?v=short": null,
+      "https://www.youtube.com/watch": null,
+      "https://youtu.be/nI725iVsyoQ": "nI725iVsyoQ",
+      "https://youtu.be/nI725iVsyoQ?si=x": "nI725iVsyoQ",
+      "https://youtu.be/nI725iVsyoQ/extra": null,
+      "https://www.youtube.com/live/nI725iVsyoQ?feature=share": "nI725iVsyoQ",
+      "https://www.youtube.com/LIVE/nI725iVsyoQ": "nI725iVsyoQ",
+      "https://www.youtube.com/embed/nI725iVsyoQ": "nI725iVsyoQ",
+      "https://www.youtube-nocookie.com/embed/nI725iVsyoQ": "nI725iVsyoQ",
+      "https://www.youtube.com/v/nI725iVsyoQ": "nI725iVsyoQ",
+      "https://www.youtube.com/shorts/nI725iVsyoQ": null,
+      "https://www.youtube.com/embed/live_stream?channel=UCSJ4gkVC6NrvII8umztf0Ow": null,
+      "https://www.youtube.com/embed/live_stream?channel=nope": null,
+      "https://www.youtube.com/@LofiGirl": null,
+      "https://www.youtube.com/@LofiGirl/live": null,
+      "https://www.youtube.com/@LofiGirl/videos": null,
+      "https://www.youtube.com/@lo": null,
+      "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow": null,
+      "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow/live": null,
+      "https://www.youtube.com/channel/UCSJ4gkVC6NrvII8umztf0Ow/videos": null,
+      "https://www.youtube.com/channel/notachannel": null,
+      "https://www.youtube.com/c/LofiGirl": null,
+      "https://www.youtube.com/c/LofiGirl/live": null,
+      "https://www.youtube.com/user/ChilledCow": null,
+      "https://www.youtube.com/results?search_query=lofi": null,
+      "https://www.youtube.com/": null,
+      "https://www.youtube.com/./watch?v=nI725iVsyoQ": "nI725iVsyoQ",
+      "https://user@www.youtube.com/watch?v=nI725iVsyoQ": null,
+      "https://evilyoutube.com/watch?v=nI725iVsyoQ": null,
+      "https://youtube.com.evil.com/watch?v=nI725iVsyoQ": null,
+      "ftp://www.youtube.com/watch?v=nI725iVsyoQ": null,
+      "undefined": null
+    },
+    "YouTubeLink.parseOrReference": {
+      "nI725iVsyoQ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      " nI725iVsyoQ ": {
+        "kind": "video",
+        "id": "nI725iVsyoQ",
+        "url": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+      },
+      "@LofiGirl": {
+        "kind": "channel",
+        "id": "@LofiGirl",
+        "url": "https://www.youtube.com/@LofiGirl/live"
+      },
+      "LofiGirl": {
+        "kind": "channel",
+        "id": "@LofiGirl",
+        "url": "https://www.youtube.com/@LofiGirl/live"
+      },
+      "lofi": {
+        "kind": "channel",
+        "id": "@lofi",
+        "url": "https://www.youtube.com/@lofi/live"
+      },
+      "lo": null,
+      "lofi girl": null,
+      "hello_world": {
+        "kind": "video",
+        "id": "hello_world",
+        "url": "https://www.youtube.com/watch?v=hello_world"
+      },
+      "https://www.youtube.com/@LofiGirl": {
+        "kind": "channel",
+        "id": "@LofiGirl",
+        "url": "https://www.youtube.com/@LofiGirl/live"
+      },
+      "看 https://www.youtube.com/watch?v=nI725iVsyoQ 吧": null,
+      "": null
+    },
+    "YouTubeLink.videoUrl": {
+      "nI725iVsyoQ": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+      "short": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid YouTube video ID"
+      },
+      " nI725iVsyoQ ": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+    },
+    "getPlayUrlInvalidAt": {
+      "https://rr1---sn-x.googlevideo.com/videoplayback?expire=1790619788&ei=x": {
+        "invalidAt": "2026-09-28T18:23:08.000Z",
+        "refreshAt": "2026-09-28T18:13:08.000Z"
+      },
+      "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/x/file/index.m3u8": {
+        "invalidAt": "2026-09-28T18:23:08.000Z",
+        "refreshAt": "2026-09-28T18:13:08.000Z"
+      },
+      "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/0/file/index.m3u8": {
+        "invalidAt": null,
+        "refreshAt": null
+      },
+      "https://manifest.googlevideo.com/api/manifest/hls_playlist/file/index.m3u8": {
+        "invalidAt": null,
+        "refreshAt": null
+      },
+      "not a url %": {
+        "invalidAt": null,
+        "refreshAt": null
+      }
+    }
+  }
+}

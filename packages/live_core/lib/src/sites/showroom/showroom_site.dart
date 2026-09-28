@@ -11,23 +11,22 @@ const _site = 'showroom';
 /// Where the API answers.
 const _host = 'www.showroom-live.com';
 
-/// How long a snapshot fetched without a cancel token is reused (3.x).
-const _snapshotLifetime = Duration(seconds: 30);
-
 /// The SHOWROOM adapter (3.x's `ShowroomSite`; parsing in [ShowroomApi]).
 ///
-/// Anonymous, like 3.x: no cookie, no account and no comments (3.x's
-/// SHOWROOM had `EmptyDanmaku`). Every request carries 3.x's headers, does
-/// not follow redirects and goes as `showroom`, so the app routes the
-/// platform through its proxy setting. The requests are 3.x's:
+/// Anonymous, like 3.x: no cookie and no account. Every request carries
+/// 3.x's headers, does not follow redirects and goes as `showroom`, so the
+/// app routes the platform through its proxy setting. The requests are
+/// 3.x's:
 /// - the catalog, the directory, the recommendations and the search are all
-///   the `live/onlives` snapshot of every live room, paged locally. A
-///   snapshot asked for without a cancel token is shared for 30 s (and while
-///   it is being fetched); one asked for with a token (the directory and
-///   search pages always pass one) is fetched anew, as in 3.x;
+///   the `live/onlives` snapshot of every live room, paged locally. Page 1
+///   of the directory and of the search (the pull to refresh) always asks
+///   anew; every other call reuses a snapshot younger than
+///   [snapshotLifetime], so the pages after the first come from the same
+///   snapshot as the first (19-1; see [getDirectoryPage]);
 /// - a room is `room/profile` and `live/live_info` (asked together), after
 ///   `room/status` when it is named by its key; room entry and recordings
-///   also ask `live/streaming_url` for a live room;
+///   also ask `live/streaming_url` for a live room, and hand the comment
+///   arguments ([ShowroomDanmakuArgs]) over in `danmakuData`;
 /// - recovery asks `live/streaming_url` alone.
 ///
 /// Rooms are identified by their numeric room id, which is what 3.x's
@@ -46,6 +45,9 @@ final class ShowroomSite extends LiveSite
   /// Creates the adapter; [now] (the snapshot's age) is injectable for
   /// tests.
   new(this.http, {DateTime Function()? now}) : _now = now ?? DateTime.now;
+
+  /// How long a snapshot is reused after it arrived (3.x's 30 s).
+  static const Duration snapshotLifetime = Duration(seconds: 30);
 
   /// Transport.
   final LiveHttp http;
@@ -104,16 +106,44 @@ final class ShowroomSite extends LiveSite
     return ShowroomApi.snapshot(response.text, status: response.status);
   }
 
-  /// The `onlives` snapshot. With [cancel] it is always fetched anew (3.x:
-  /// a cancellable caller never shares a request). Without, the last one is
-  /// reused for 30 s after it arrived, and a fetch under way is shared (3.x
-  /// fetched again for every caller that came before the first answer); a
-  /// failed fetch is forgotten.
-  Future<ShowroomSnapshot> _snapshotFor(CancelToken? cancel) {
-    if (cancel != null) return _fetchSnapshot(cancel: cancel);
-    final cached = _snapshot;
-    final at = _snapshotAt;
-    if (cached != null && (at == null || _now().difference(at) < _snapshotLifetime)) return cached;
+  /// The `onlives` snapshot.
+  ///
+  /// [fresh] (page 1 of the directory or the search: the pull to refresh)
+  /// always asks anew. Otherwise the last snapshot is reused while it is
+  /// younger than [snapshotLifetime] after it arrived, whoever fetched it
+  /// (19-1: 3.x fetched anew for every call with a cancel token, so each
+  /// page of the directory and the search came from another snapshot). A
+  /// call without [cancel] also shares a fetch under way (3.x fetched again
+  /// for every caller that came before the first answer); one with [cancel]
+  /// only reuses a snapshot that has arrived, and fetches its own with the
+  /// token otherwise, so cancelling it never fails another caller. The
+  /// latest successful fetch becomes the shared snapshot; a failed one is
+  /// forgotten.
+  Future<ShowroomSnapshot> _snapshotFor({CancelToken? cancel, bool fresh = false}) async {
+    if (!fresh) {
+      final cached = _snapshot;
+      final at = _snapshotAt;
+      if (cached != null && (at == null ? cancel == null : _young(at))) {
+        final snapshot = await cached;
+        _checkCancelled(cancel);
+        return snapshot;
+      }
+    }
+    if (cancel == null) return await _share();
+    final snapshot = await _fetchSnapshot(cancel: cancel);
+    _snapshot = Future.value(snapshot);
+    _snapshotAt = _now();
+    return snapshot;
+  }
+
+  bool _young(DateTime at) {
+    final age = _now().difference(at);
+    return age >= Duration.zero && age < snapshotLifetime;
+  }
+
+  /// A new fetch, shared with every caller without a cancel token until it
+  /// arrives, and then for [snapshotLifetime]; a failed one is forgotten.
+  Future<ShowroomSnapshot> _share() {
     late final Future<ShowroomSnapshot> fetch;
     fetch = _fetchSnapshot().then(
       (snapshot) {
@@ -155,28 +185,31 @@ final class ShowroomSite extends LiveSite
   @override
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async {
     if (page != 1 || pageSize <= 0) return const [];
-    return ShowroomApi.categories(await _snapshotFor(null));
+    return ShowroomApi.categories(await _snapshotFor());
   }
 
   /// Page [page] (30 rooms) of [category], or of the recommendations when
-  /// it is null (3.x). A page below 1 or an area that is not a SHOWROOM
-  /// genre is a caller error, without a request.
+  /// it is null (3.x). Page 1 (the pull to refresh) asks for a new snapshot;
+  /// later pages come from the last one while it is younger than
+  /// [snapshotLifetime], so they neither repeat nor skip rooms of page 1
+  /// (19-1). A page below 1 or an area that is not a SHOWROOM genre is a
+  /// caller error, without a request.
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
     if (page < 1) throw RangeError.range(page, 1, null, 'page');
     final genre = category == null ? null : _genreId(category);
     _checkCancelled(cancel);
-    final snapshot = await _snapshotFor(cancel);
+    final snapshot = await _snapshotFor(cancel: cancel, fresh: page == 1);
     return ShowroomApi.directoryPage(genre == null ? snapshot.popular : _genre(snapshot, genre), page: page);
   }
 
   /// Slice [page] of [pageSize] of the Popularity genre (3.x's `_page`: a
   /// page or size below 1, or a size over 100, gives nothing, now without a
-  /// request).
+  /// request), from the shared snapshot (3.x).
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
     if (!ShowroomApi.validSlice(page: page, pageSize: pageSize)) return const [];
-    final snapshot = await _snapshotFor(null);
+    final snapshot = await _snapshotFor();
     return [
       for (final live in ShowroomApi.slice(snapshot.popular, page: page, pageSize: pageSize)) ShowroomApi.card(live),
     ];
@@ -187,7 +220,7 @@ final class ShowroomSite extends LiveSite
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
     final genre = _genreId(category);
     if (!ShowroomApi.validSlice(page: page, pageSize: pageSize)) return const [];
-    final snapshot = await _snapshotFor(null);
+    final snapshot = await _snapshotFor();
     return [
       for (final live in ShowroomApi.slice(_genre(snapshot, genre), page: page, pageSize: pageSize))
         ShowroomApi.card(live),
@@ -196,13 +229,17 @@ final class ShowroomSite extends LiveSite
 
   // Search --------------------------------------------------------------------
 
+  /// As [searchRoomsCancellable], every page from the shared snapshot (3.x
+  /// shared it with every call without a cancel token).
   @override
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) =>
-      searchRoomsCancellable(keyword, page: page, pageSize: pageSize);
+      _search(keyword, page: page, pageSize: pageSize, fresh: false);
 
   /// The snapshot's lives matching [keyword] (see [ShowroomApi.search]),
   /// page [page] of [pageSize]. SHOWROOM has no search API: only live rooms
-  /// are found, and a link is a keyword like any other (3.x). A blank
+  /// are found, and a link is a keyword like any other (3.x). Page 1 asks
+  /// for a new snapshot; later pages come from the last one while it is
+  /// younger than [snapshotLifetime] (19-1, as [getDirectoryPage]). A blank
   /// keyword or a page 3.x served nothing for gives nothing, without a
   /// request.
   @override
@@ -211,11 +248,19 @@ final class ShowroomSite extends LiveSite
     int page = 1,
     int pageSize = 30,
     CancelToken? cancel,
+  }) => _search(keyword, page: page, pageSize: pageSize, cancel: cancel, fresh: page == 1);
+
+  Future<List<LiveRoom>> _search(
+    String keyword, {
+    required int page,
+    required int pageSize,
+    required bool fresh,
+    CancelToken? cancel,
   }) async {
     final query = keyword.trim();
     if (query.isEmpty || !ShowroomApi.validSlice(page: page, pageSize: pageSize)) return const [];
     _checkCancelled(cancel);
-    final snapshot = await _snapshotFor(cancel);
+    final snapshot = await _snapshotFor(cancel: cancel, fresh: fresh);
     return [
       for (final live in ShowroomApi.slice(ShowroomApi.search(snapshot, query), page: page, pageSize: pageSize))
         ShowroomApi.card(live),
@@ -240,7 +285,8 @@ final class ShowroomSite extends LiveSite
   /// together (3.x). On [entry] a live room also asks `live/streaming_url`
   /// and keeps its rows in [ShowroomRoomData]; when that request fails the
   /// room still opens (3.x failed the whole room) and the qualities ask
-  /// again.
+  /// again. Its comment arguments go in `danmakuData` (19-3), without a
+  /// request; a refreshed room has neither.
   Future<LiveRoom> _detail(String reference, {required bool entry}) async {
     final roomId = await _roomNumber(reference);
     final query = {'room_id': '$roomId'};
@@ -250,7 +296,7 @@ final class ShowroomSite extends LiveSite
     ]);
     final room = ShowroomApi.profile(profile.text, roomId: roomId, status: profile.status);
     final state = ShowroomApi.liveInfo(info.text, roomId: roomId, status: info.status);
-    final detail = ShowroomApi.room(room, live: state.live);
+    final detail = ShowroomApi.room(room, state);
     if (!entry || !state.live) return detail;
     List<Object?>? streams;
     try {
@@ -259,7 +305,8 @@ final class ShowroomSite extends LiveSite
       streams = null;
     }
     return detail.copyWith(
-      data: ShowroomRoomData(roomId: '$roomId', streams: streams, bcsvrHost: state.bcsvrHost, bcsvrKey: state.bcsvrKey),
+      data: ShowroomRoomData(roomId: '$roomId', streams: streams),
+      danmakuData: state.danmaku,
     );
   }
 

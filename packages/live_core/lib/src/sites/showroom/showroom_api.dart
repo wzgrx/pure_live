@@ -12,11 +12,11 @@ const _site = 'showroom';
 
 /// What room entry learned about a live room (3.x kept the qualities made of
 /// it in `data`): the `streaming_url_list` rows as answered, checked only
-/// when played, and the comment server of the broadcast.
+/// when played.
 @immutable
 final class ShowroomRoomData {
   /// Creates the data.
-  const new({required this.roomId, this.streams, this.bcsvrHost, this.bcsvrKey});
+  const new({required this.roomId, this.streams});
 
   /// The numeric room id the data belongs to.
   final String roomId;
@@ -25,14 +25,45 @@ final class ShowroomRoomData {
   /// checked; null when it was not asked for or the request failed (the
   /// qualities then ask again).
   final List<Object?>? streams;
-
-  /// `live_info.bcsvr_host`: the comment WebSocket host of the broadcast
-  /// (3.x had no SHOWROOM comments; kept for M5).
-  final String? bcsvrHost;
-
-  /// `live_info.bcsvr_key`: the broadcast's comment key.
-  final String? bcsvrKey;
 }
+
+/// What a comment connection needs to join one SHOWROOM broadcast (19-3):
+/// the comment server and the broadcast's key, both from `live/live_info`.
+///
+/// 3.x had no SHOWROOM comments (`EmptyDanmaku`). The archived v4 (its spec
+/// §7) connected `wss://<host>/` (port 443; `bcsvr_port` 8080 is the old
+/// plain port) with `Origin: https://www.showroom-live.com` and the UA, sent
+/// the text frame `SUB\t<key>`, pinged `PING\tshowroom` every 60 s and read
+/// `MSG\t<key>\t<json>` frames (sample `danmaku/S06-live`). The key is the
+/// same for every viewer and changes with each broadcast, so a room that
+/// went live again needs a fresh detail. Room entry and recording details
+/// of a live room hand these over in `danmakuData`, without a request; the
+/// connection itself is the danmaku module's (M5).
+@immutable
+final class ShowroomDanmakuArgs {
+  /// Creates the arguments.
+  const new({required this.roomId, required this.host, required this.key});
+
+  /// The numeric room id.
+  final String roomId;
+
+  /// `bcsvr_host`: the comment server, a host name on `showroom-live.com`
+  /// (`online.showroom-live.com`), lower case.
+  final String host;
+
+  /// `bcsvr_key`: the broadcast's comment key (`6e6c686835796846:23483509`),
+  /// without white space or control characters (the frames are
+  /// tab-separated).
+  final String key;
+
+  @override
+  String toString() => 'ShowroomDanmakuArgs($roomId, $host)';
+}
+
+/// What `live/live_info` says about a room: whether it is live and, when it
+/// is, its restriction (see [ShowroomApi.restrictionOf]) and comment
+/// arguments (null when the answer has no usable comment server).
+typedef ShowroomLiveInfo = ({bool live, LiveRestriction? restriction, ShowroomDanmakuArgs? danmaku});
 
 /// One live room of the `onlives` snapshot (3.x's `ShowroomLive`, without
 /// the streams 3.x parsed there but never used).
@@ -48,6 +79,8 @@ final class ShowroomLive {
     this.followers,
     this.views,
     this.telop = '',
+    this.startedAt,
+    this.restriction,
   });
 
   /// `room_id`.
@@ -73,6 +106,12 @@ final class ShowroomLive {
 
   /// `telop`: the caption the streamer sets, often empty.
   final String telop;
+
+  /// `started_at` (Unix seconds): when the broadcast started.
+  final DateTime? startedAt;
+
+  /// The restriction `premium_room_type` shows ([ShowroomApi.restrictionOf]).
+  final LiveRestriction? restriction;
 }
 
 /// One genre of the snapshot and its live rooms in the site's order.
@@ -118,7 +157,10 @@ final class ShowroomSnapshot {
   List<ShowroomLive>? genre(int id) => genres.where((genre) => genre.id == id).firstOrNull?.lives;
 }
 
-/// `room/profile` of one room, as 3.x read it.
+/// `room/profile` of one room, as 3.x read it, and
+/// `current_live_started_at`, the start of the room's broadcast: only
+/// meaningful while it is live (an offline room gives its next scheduled or
+/// its last start).
 typedef ShowroomProfile = ({
   int roomId,
   String roomUrlKey,
@@ -128,6 +170,7 @@ typedef ShowroomProfile = ({
   int? followers,
   int? views,
   String description,
+  DateTime? liveStartedAt,
 });
 
 /// Pure parsing of SHOWROOM responses (3.x's `ShowroomApi`, the models of
@@ -192,38 +235,58 @@ abstract final class ShowroomApi {
     'lottery',
   };
 
+  /// `sort` of 自动, the adaptive master: below every `hls` tier, so it is
+  /// listed last (19-2; 3.x listed it first with 2000).
+  static const int autoSort = -1;
+
   // Snapshot ------------------------------------------------------------------
 
   /// `live/onlives`: every genre (a repeated `genre_id` is skipped) with its
   /// live rooms. A genre with nobody live holds a message cell (`cell_type`
-  /// 7, no `room_id`), which is skipped (REG-SHOWROOM-001). Any other
-  /// irregular row fails the whole snapshot (`ApiChanged`), as 3.x's test
-  /// fixed: a row without a name is not shown half-read. The rows' own
-  /// `streaming_url_list` is not read: 3.x checked it strictly but never
-  /// used it (a room's streams come from `live/streaming_url`).
+  /// 7, no `room_id`), which is skipped (REG-SHOWROOM-001).
+  ///
+  /// An irregular row (no name, a bad room id or key, a bad count…) drops
+  /// only itself, and a genre without a valid id, name or row list only
+  /// itself (the unified rule on malformed rows; 3.x and M4.19 failed the
+  /// whole snapshot). A snapshot with live rows none of which can be read,
+  /// or without a genre, is still `ApiChanged`: a changed API never looks
+  /// like an empty directory. The rows' own `streaming_url_list` is not
+  /// read: 3.x checked it strictly but never used it (a room's streams come
+  /// from `live/streaming_url`).
   static ShowroomSnapshot snapshot(String body, {int status = 200}) {
     final root = _checked(body, status: status, what: 'onlives');
     final genres = <ShowroomGenre>[];
     final seen = <int>{};
+    var rows = 0;
+    var read = 0;
     for (final raw in _list(root['onlives'], 'onlives', max: 128)) {
-      final group = _object(raw, 'onlives genre');
-      final id = _count(group['genre_id'], 'genre_id');
-      if (!seen.add(id)) continue;
-      final name = _text(group['genre_name'], 'genre_name');
-      genres.add(
-        ShowroomGenre(
-          id: id,
-          name: name,
-          lives: [
-            for (final cell in _list(group['lives'], 'lives of genre $id', max: 5000))
-              if (_object(cell, 'live of genre $id') case final row
-                  when row['room_id'] != null || row['cell_type'] == null)
-                _live(row),
-          ],
-        ),
-      );
+      final ({int id, String name, List<Object?> cells}) group;
+      try {
+        final object = _object(raw, 'onlives genre');
+        group = (
+          id: _count(object['genre_id'], 'genre_id'),
+          name: _text(object['genre_name'], 'genre_name'),
+          cells: _list(object['lives'], 'lives', max: 5000),
+        );
+      } on ApiChanged {
+        continue;
+      }
+      if (!seen.add(group.id)) continue;
+      final lives = <ShowroomLive>[];
+      for (final cell in group.cells) {
+        if (cell is Map && cell['room_id'] == null && cell['cell_type'] != null) continue;
+        rows++;
+        try {
+          lives.add(_live(_object(cell, 'live of genre ${group.id}')));
+          read++;
+        } on ApiChanged {
+          continue;
+        }
+      }
+      genres.add(ShowroomGenre(id: group.id, name: group.name, lives: lives));
     }
     if (genres.isEmpty) throw const ApiChanged(_site, 'onlives: no genre');
+    if (rows > 0 && read == 0) throw ApiChanged(_site, 'onlives: none of the $rows live rows can be read');
     return ShowroomSnapshot(genres);
   }
 
@@ -239,8 +302,29 @@ abstract final class ShowroomApi {
       followers: _optionalCount(row['follower_num'], 'follower_num of $roomId'),
       views: _optionalCount(row['view_num'], 'view_num of $roomId'),
       telop: _optionalText(row['telop'], 'telop of $roomId'),
+      startedAt: startTime(row['started_at']),
+      restriction: restrictionOf(row['premium_room_type']),
     );
   }
+
+  /// A time in Unix seconds (`started_at`, `current_live_started_at`) as
+  /// UTC; null for 0, anything before 2000 or after 2100, and anything that
+  /// is not an integer.
+  static DateTime? startTime(Object? value) {
+    final seconds = _integer(value);
+    if (seconds == null || seconds < 946684800 || seconds > 4102444800) return null;
+    return DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true);
+  }
+
+  /// The restriction of a live room from its `premium_room_type` (in the
+  /// snapshot rows and `live/live_info`): 0, an ordinary broadcast anyone
+  /// can watch, is [LiveRestriction.none]; anything else is null (not
+  /// known). Paid broadcasts (19-5) are not marked: no recorded answer shows
+  /// what a paid broadcast writes there. Every row of the samples and of the
+  /// checks of 2026-09-28/29 is 0, including the rooms that have a paid
+  /// broadcast scheduled (see the M4.19 upgrade notes).
+  static LiveRestriction? restrictionOf(Object? premiumRoomType) =>
+      _integer(premiumRoomType) == 0 ? LiveRestriction.none : null;
 
   /// The one category `SHOWROOM` whose areas are the snapshot's genres, in
   /// its order, empty ones included (3.x).
@@ -263,7 +347,8 @@ abstract final class ShowroomApi {
 
   /// A live room card (3.x's `_card`): the telop as title when there is one,
   /// else the name; `view_num` as total viewers (REG-SHOWROOM-002); the
-  /// cover as avatar too; 3.x's media headers.
+  /// cover as avatar too; 3.x's media headers; the start time and the
+  /// restriction of the row.
   static LiveRoom card(ShowroomLive live) {
     final audience = live.views == null ? '' : '${live.views}';
     return LiveRoom(
@@ -280,6 +365,8 @@ abstract final class ShowroomApi {
       totalViewers: audience,
       audienceMetricType: AudienceMetricType.totalViewers,
       liveStatus: LiveStatus.live,
+      startedAt: live.startedAt,
+      restriction: live.restriction,
       httpHeaders: mediaHeaders,
     );
   }
@@ -341,7 +428,8 @@ abstract final class ShowroomApi {
       _positive(_checked(body, status: status, what: 'room/status')['room_id'], 'room/status room_id');
 
   /// `room/profile` of [roomId] (3.x's checks: the answer is for that room,
-  /// a valid key and name, `genre_id`, `is_onlive`). An unknown room is HTTP
+  /// a valid key and name, `genre_id`, `is_onlive`), with
+  /// `current_live_started_at` (see [startTime]). An unknown room is HTTP
   /// 404 (`NotFound`, sample S03-profile-notfound).
   static ShowroomProfile profile(String body, {required int roomId, int status = 200}) {
     final data = _checked(body, status: status, what: 'room/profile');
@@ -356,6 +444,7 @@ abstract final class ShowroomApi {
       followers: _optionalCount(data['follower_num'], 'room/profile follower_num'),
       views: _optionalCount(data['view_num'], 'room/profile view_num'),
       description: _optionalText(data['description'], 'room/profile description'),
+      liveStartedAt: startTime(data['current_live_started_at']),
     );
     _count(data['genre_id'], 'room/profile genre_id');
     if (data['is_onlive'] is! bool) throw ApiChanged(_site, 'room/profile: is_onlive is ${data['is_onlive']}');
@@ -364,31 +453,46 @@ abstract final class ShowroomApi {
 
   /// `live/live_info` of [roomId]: live when `live_status` is 2; 0 and 1 are
   /// offline; anything else, or an answer for another room, is `ApiChanged`
-  /// (3.x). The comment server is kept for a live room.
-  static ({bool live, String? bcsvrHost, String? bcsvrKey}) liveInfo(
-    String body, {
-    required int roomId,
-    int status = 200,
-  }) {
+  /// (3.x). A live room also gets its restriction ([restrictionOf]) and its
+  /// comment arguments ([danmakuArgs]); an offline one has neither.
+  static ShowroomLiveInfo liveInfo(String body, {required int roomId, int status = 200}) {
     final data = _checked(body, status: status, what: 'live_info');
     final actual = _positive(data['room_id'], 'live_info room_id');
     if (actual != roomId) throw ApiChanged(_site, 'live_info: answer for room $actual, asked $roomId');
     final state = _count(data['live_status'], 'live_status');
     if (state > 2) throw ApiChanged(_site, 'live_info: live_status $state');
-    final live = state == 2;
+    if (state != 2) return (live: false, restriction: null, danmaku: null);
     return (
-      live: live,
-      bcsvrHost: live ? _optionalString(data['bcsvr_host']) : null,
-      bcsvrKey: live ? _optionalString(data['bcsvr_key']) : null,
+      live: true,
+      restriction: restrictionOf(data['premium_room_type']),
+      danmaku: danmakuArgs(roomId: roomId, host: data['bcsvr_host'], key: data['bcsvr_key']),
     );
   }
 
-  /// The room of [profile] (3.x's `_detailCard`): the name as title and
-  /// streamer, `view_num` as total viewers even when offline (3.x), the
-  /// square picture as cover and avatar, the description, 3.x's media
-  /// headers.
-  static LiveRoom room(ShowroomProfile profile, {required bool live}) {
-    final audience = profile.views == null ? '' : '${profile.views}';
+  /// A host name: dot-separated labels of letters, digits and inner hyphens.
+  static final RegExp _hostName = RegExp(r'^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$');
+
+  /// The comment arguments of live room [roomId] (19-3), or null unless
+  /// [host] is a host name on `showroom-live.com` (the archived spec §7.1:
+  /// no other server is connected) and [key] is at most 256 characters
+  /// without white space or control characters.
+  static ShowroomDanmakuArgs? danmakuArgs({required int roomId, required Object? host, required Object? key}) {
+    final server = _optionalString(host)?.toLowerCase();
+    final broadcast = _optionalString(key);
+    if (server == null || server.length > 253 || !_hostName.hasMatch(server) || !_isHost(server)) return null;
+    if (broadcast == null || broadcast.length > 256 || broadcast.contains(RegExp(r'[\s\x00-\x1f\x7f]'))) return null;
+    return ShowroomDanmakuArgs(roomId: '$roomId', host: server, key: broadcast);
+  }
+
+  /// The room of [profile] and [info] (3.x's `_detailCard`): the name as
+  /// title and streamer, the square picture as cover and avatar, the
+  /// description, 3.x's media headers. A live room has `view_num` as total
+  /// viewers, the start time and the restriction; an offline one has no
+  /// audience (19-4; 3.x showed the `view_num` of 0), start time or
+  /// restriction.
+  static LiveRoom room(ShowroomProfile profile, ShowroomLiveInfo info) {
+    final live = info.live;
+    final audience = !live || profile.views == null ? '' : '${profile.views}';
     return LiveRoom(
       roomId: '${profile.roomId}',
       platform: _site,
@@ -404,6 +508,8 @@ abstract final class ShowroomApi {
       audienceMetricType: AudienceMetricType.totalViewers,
       introduction: profile.description,
       liveStatus: live ? LiveStatus.live : LiveStatus.offline,
+      startedAt: live ? profile.liveStartedAt : null,
+      restriction: live ? info.restriction : null,
       httpHeaders: mediaHeaders,
     );
   }
@@ -424,47 +530,70 @@ abstract final class ShowroomApi {
     _list(_checked(body, status: status, what: 'streaming_url')['streaming_url_list'], 'streaming_url_list', max: 64),
   );
 
-  /// 3.x's qualities of [rows], best first: the adaptive `hls_all` master as
-  /// 自动 (sort 2000), then each `hls` tier by `quality` (1000 原画, 200
-  /// 中画质, lower 低画质); WebRTC and other types are skipped, a repeated URL
-  /// too. The id is `{type}:{id}:{quality}` (`hls:2:1000`), the data the
-  /// one URL. Any other irregular row fails them all (`ApiChanged`), as in
-  /// 3.x: a URL that is not https on a SHOWROOM host, a missing label, id or
-  /// `is_default`. None is `StreamUnavailable`.
+  /// The qualities of [rows], best first: each `hls` tier by `quality` (1000
+  /// 原画, 200 中画质, lower 低画质), then the adaptive `hls_all` master as
+  /// 自动 ([autoSort]), so 原画 is the default (19-2; 3.x listed 自动 first).
+  /// Names and ids are 3.x's: the id is `{type}:{id}:{quality}`
+  /// (`hls:2:1000`, `hls_all:100:0`), the data the one URL. WebRTC and
+  /// other types are skipped, a repeated URL too.
+  ///
+  /// An irregular HLS row (a URL that is not https on a SHOWROOM host, a
+  /// missing label, id, `quality` or `is_default`, a row that is not an
+  /// object) drops only its own tier (the unified rule on bad addresses;
+  /// 3.x failed them all). HLS rows none of which can be read are
+  /// `ApiChanged`; no HLS row at all is `StreamUnavailable`.
   static List<LivePlayQuality> qualities(List<Object?> rows) {
     if (rows.length > 64) throw ApiChanged(_site, 'streaming_url: ${rows.length} rows');
     final qualities = <LivePlayQuality>[];
     final seen = <String>{};
+    var broken = 0;
     for (final raw in rows) {
-      final row = _object(raw, 'streaming_url row');
-      final type = _optionalText(row['type'], 'streaming_url type');
-      if (type != 'hls' && type != 'hls_all') continue;
-      final url = _mediaUrl(row['url']);
-      if (!seen.add(url)) continue;
-      final id = _count(row['id'], 'streaming_url id');
-      _text(row['label'], 'streaming_url label');
-      final level = _count(row['quality'], 'streaming_url quality');
-      if (row['is_default'] is! bool) throw ApiChanged(_site, 'streaming_url: is_default is ${row['is_default']}');
-      qualities.add(
-        LivePlayQuality(
-          quality: switch ((type, level)) {
-            ('hls_all', _) => '自动',
-            (_, >= 1000) => '原画',
-            (_, >= 200) => '中画质',
-            _ => '低画质',
-          },
-          id: '$type:$id:$level',
-          data: List<String>.unmodifiable([url]),
-          sort: type == 'hls_all' ? 2000 : level,
-        ),
-      );
+      final ({String url, LivePlayQuality quality})? tier;
+      try {
+        tier = _tier(raw);
+      } on ApiChanged {
+        broken++;
+        continue;
+      }
+      if (tier != null && seen.add(tier.url)) qualities.add(tier.quality);
     }
-    if (qualities.isEmpty) throw const StreamUnavailable(_site, 'no HLS stream');
+    if (qualities.isEmpty) {
+      if (broken > 0) throw ApiChanged(_site, 'streaming_url: none of the $broken HLS rows can be read');
+      throw const StreamUnavailable(_site, 'no HLS stream');
+    }
     qualities.sort((left, right) {
       final rank = right.sort.compareTo(left.sort);
       return rank != 0 ? rank : '${left.selectionId}'.compareTo('${right.selectionId}');
     });
     return List.unmodifiable(qualities);
+  }
+
+  /// The URL and quality of one `streaming_url_list` row; null for a type
+  /// other than `hls` and `hls_all`; `ApiChanged` for an irregular row
+  /// (3.x's checks).
+  static ({String url, LivePlayQuality quality})? _tier(Object? raw) {
+    final row = _object(raw, 'streaming_url row');
+    final type = _optionalText(row['type'], 'streaming_url type');
+    if (type != 'hls' && type != 'hls_all') return null;
+    final url = _mediaUrl(row['url']);
+    final id = _count(row['id'], 'streaming_url id');
+    _text(row['label'], 'streaming_url label');
+    final level = _count(row['quality'], 'streaming_url quality');
+    if (row['is_default'] is! bool) throw ApiChanged(_site, 'streaming_url: is_default is ${row['is_default']}');
+    return (
+      url: url,
+      quality: LivePlayQuality(
+        quality: switch ((type, level)) {
+          ('hls_all', _) => '自动',
+          (_, >= 1000) => '原画',
+          (_, >= 200) => '中画质',
+          _ => '低画质',
+        },
+        id: '$type:$id:$level',
+        data: List<String>.unmodifiable([url]),
+        sort: type == 'hls_all' ? autoSort : level,
+      ),
+    );
   }
 
   /// The line of [quality] (one of [qualities]' results): its HLS URL with

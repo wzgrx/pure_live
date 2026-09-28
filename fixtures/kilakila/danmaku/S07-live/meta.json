@@ -34,7 +34,16 @@
     {
       "where": "$.content[t=200,220]",
       "rule": "person"
+    },
+    {
+      "where": "engine.io open (0{…}).sid",
+      "rule": "session"
+    },
+    {
+      "where": "$.body.response.user_agent (uxid=)",
+      "rule": "device"
     }
   ],
-  "tool": "live_cli danmaku --record (schema 1)"
+  "tool": "live_cli danmaku --record (schema 1)",
+  "note": "The archive's scrub left the Engine.IO session id (frame 1) and one viewer's device id uxid in the sender's client string (frames 44 and 54); M5.13 (2026-09-29) replaced them with synthetic values of the same form and length, each frame level re-encoded as the server writes it. raw still describes the archive's original recording."
 }

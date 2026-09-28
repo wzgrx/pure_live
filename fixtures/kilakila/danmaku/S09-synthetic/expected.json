@@ -1,0 +1,821 @@
+{
+  "generator": "fixtures/kilakila/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) KilakilaProtocol.endpoint, .headers, .join, .ping and .decode over every incoming frame (copied as they were; the event classes cut down to their fields), with the socket settings of KilakilaConnector",
+  "value": {
+    "roomId": "2260000000000000001",
+    "cases": {
+      "the join: the connect_error event with code 0, then the namespace's 40 (the shape of S07 and S08)": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": true,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": true,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "the namespace's 40 with a comma is the join too; other namespaces and the default one are not": [
+        {
+          "joined": true,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "a refusal: connect_error with another code, with none, or with the code as text": [
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": true,
+          "events": []
+        }
+      ],
+      "a Socket.IO error packet on the namespace is a refusal": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "the server leaves the namespace or closes the transport": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "Engine.IO packets that hold nothing: open, pong, noop, ping, upgrade, empty": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "a chat line with every field (the shape of S08-live-full)": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000001",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "心存善良，万物晴朗☀",
+              "userLevel": 161
+            }
+          ]
+        }
+      ],
+      "a chat line of S07's shape: the user id a number": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000002",
+              "sentAt": 1790629525534,
+              "userId": "7300000000002",
+              "userName": "Viewer Two",
+              "text": "@Viewer Two 感谢小可爱赠送的1个克拉应援棒鸭ヾ(≧▽≦*)o",
+              "userLevel": 38
+            }
+          ]
+        }
+      ],
+      "chat text: trimmed and kept with its line breaks; blank, missing or not text is no line": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000003",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "spaced out",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000004",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "┏⚝┓\n┊营┊\n┗ᰔᩚ┛",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000007",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "123",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000008",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "true",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "names and user ids: text or numbers; other types are empty": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000010",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "",
+              "text": "name is a number",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000011",
+              "sentAt": 1790629525534,
+              "userId": "{x: 1}",
+              "userName": "Viewer One",
+              "text": "id is an object",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000012",
+              "sentAt": 1790629525534,
+              "userId": "",
+              "userName": "Viewer One",
+              "text": "no id",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000013",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "",
+              "text": "no name",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000014",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "  Viewer  ",
+              "text": "name kept as written",
+              "userLevel": 38
+            }
+          ]
+        }
+      ],
+      "levels: whole numbers and numeric text; anything else is none": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000015",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "level 38",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000016",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "level text",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000017",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "level junk",
+              "userLevel": null
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000018",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "no level",
+              "userLevel": null
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000019",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "level fraction",
+              "userLevel": null
+            }
+          ]
+        }
+      ],
+      "message ids and times": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000999",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "id as text",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": null,
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "no id",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000021",
+              "sentAt": null,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "time zero",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000022",
+              "sentAt": null,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "time negative",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000023",
+              "sentAt": null,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "time as text",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000024",
+              "sentAt": null,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "no time",
+              "userLevel": 38
+            }
+          ]
+        }
+      ],
+      "a time out of range": [
+        {
+          "throws": "RangeError"
+        }
+      ],
+      "another broadcast's message is skipped; a missing room_id or one written as a number is this room's": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000027",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "no room",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000028",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "room as number",
+              "userLevel": 38
+            }
+          ]
+        }
+      ],
+      "content: an object instead of a JSON string, bad JSON, missing, not an object": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "chat",
+              "id": "kilakila:1047000000000000029",
+              "sentAt": 1790629525534,
+              "userId": "7300000000001",
+              "userName": "Viewer One",
+              "text": "content object",
+              "userLevel": 38
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "the payload must be a JSON string with a body": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "gifts are not shown: 220 and the gift line 10004": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": [
+            {
+              "kind": "gift",
+              "id": "kilakila:1047000000000000034",
+              "sentAt": 1790629525534,
+              "userId": "7300000000003",
+              "userName": "Viewer Three",
+              "giftId": "60486",
+              "giftName": "克拉应援棒",
+              "count": 3,
+              "icon": "https://img.example.invalid/gift.png"
+            }
+          ]
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "the room state 637: watchNumber is the listeners now": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "room state boundaries: zero, negative, text, missing, bad escapes, bad UTF-8, plain JSON, an object": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "other kinds hold nothing: entries, leaves, likes, ranks, activities, the end": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "the kind written as text is not a kind": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "other events and other namespaces": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        },
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "a binary frame is not read": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ],
+      "an event with an acknowledgement id is not read": [
+        {
+          "joined": false,
+          "rejected": false,
+          "events": []
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,460 @@
+{
+  "generator": "fixtures/kilakila/danmaku/v4_expected.dart: the archived v4 (archive/v4 6ba709135) KilakilaProtocol.endpoint, .headers, .join, .ping and .decode over every incoming frame (copied as they were; the event classes cut down to their fields), with the socket settings of KilakilaConnector",
+  "value": {
+    "roomId": "2268450556051718173",
+    "connector": {
+      "endpoints": [
+        "wss://wim.hongrenshuo.com.cn/socket.io/?roomId=2268450556051718173&appId=111&clientType=1&EIO=3&transport=websocket"
+      ],
+      "headers": {
+        "origin": "https://live.kilakila.cn",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "openFrames": [
+        "40/live_chat_room_guest?roomId=2268450556051718173&appId=111&clientType=1,"
+      ],
+      "joinedOnOpen": false,
+      "heartbeatSeconds": 25,
+      "heartbeatOnJoin": false,
+      "heartbeat": "2",
+      "authTimeoutSeconds": 8,
+      "silenceTimeoutSeconds": 90,
+      "maxRejections": 3,
+      "connectTimeoutSeconds": 10,
+      "withoutRoom": {
+        "terminal": "credentials",
+        "detail": "no current broadcast"
+      }
+    },
+    "frames": [
+      {
+        "frame": 1,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 2,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 3,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 4,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 5,
+        "joined": true,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 6,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 7,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 8,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 9,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 10,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 11,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 12,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 13,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 14,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 15,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "kilakila:1046608556667377664",
+            "sentAt": 1790529378956,
+            "userId": "5568549397678",
+            "userName": "观众1",
+            "giftId": "60486",
+            "giftName": "克拉应援棒",
+            "count": 1,
+            "icon": "https://img.kilamanbo.com/1cca5997-ebee-47f3-a8e3-cf02db15a8fb.png"
+          }
+        ]
+      },
+      {
+        "frame": 16,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1046608557871142912",
+            "sentAt": 1790529379243,
+            "userId": "5381110932479",
+            "userName": "观众2",
+            "text": "@观众1 感谢小可爱赠送的1个心有灵犀鸭ヾ(≧▽≦*)o",
+            "userLevel": 38
+          }
+        ]
+      },
+      {
+        "frame": 17,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 18,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 19,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 20,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 21,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 22,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 23,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 24,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1046608581099199488",
+            "sentAt": 1790529384781,
+            "userId": "5381110932479",
+            "userName": "观众2",
+            "text": "@观众1 感谢小可爱赠送的1个克拉应援棒鸭ヾ(≧▽≦*)o",
+            "userLevel": 38
+          }
+        ]
+      },
+      {
+        "frame": 25,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 26,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 27,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 28,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 29,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 30,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 31,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 32,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 33,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 34,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 35,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 36,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 37,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 38,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1046608632634612736",
+            "sentAt": 1790529397068,
+            "userId": "7332096143180",
+            "userName": ".Kzatp.",
+            "text": "宝藏主播！",
+            "userLevel": 66
+          }
+        ]
+      },
+      {
+        "frame": 39,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 41,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 42,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 43,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 44,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "kilakila:1046608642285706240",
+            "sentAt": 1790529399369,
+            "userId": "8961392455748",
+            "userName": "观众3",
+            "giftId": "415490",
+            "giftName": "凝霜雪梨",
+            "count": 1,
+            "icon": "https://img.hongrenshuo.com.cn/eb9f26cc-8a2c-495b-91fa-aae8e29882e6.jpg?t=1789545129000"
+          }
+        ]
+      },
+      {
+        "frame": 45,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 46,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 47,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1046608658098231296",
+            "sentAt": 1790529403139,
+            "userId": "5381110932479",
+            "userName": "观众2",
+            "text": "┏⚝┓✧～𝑊𝑒𝑙𝑐𝑜𝑚𝑒～✧\n┊营┊❀ℂℍ𝔼ℕ𝔾𝕐𝔼直播间⚝\n┊业┊✎唠嗑主播&唱见主播\n┊中┊♬感谢遇见&感恩相遇\n┗ᰔᩚ┛☈ 愿你在这里玩的开心\n┊喜欢点关注➕守护➕礼物\n╰❥✰ॱ॰⋆⚝┈˵^•𖥦•^˵┈⚝╯",
+            "userLevel": 38
+          }
+        ]
+      },
+      {
+        "frame": 48,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 49,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 50,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "chat",
+            "id": "kilakila:1046608663571799040",
+            "sentAt": 1790529404444,
+            "userId": "5381110932479",
+            "userName": "观众2",
+            "text": "感谢 @观众3 小可爱赠送的凝霜雪梨 x1 o(=•ェ•=)m",
+            "userLevel": 38
+          }
+        ]
+      },
+      {
+        "frame": 51,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 52,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 53,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 54,
+        "joined": false,
+        "rejected": false,
+        "events": [
+          {
+            "kind": "gift",
+            "id": "kilakila:1046608679233329152",
+            "sentAt": 1790529408178,
+            "userId": "8961392455748",
+            "userName": "观众3",
+            "giftId": "415487",
+            "giftName": "荔意知心",
+            "count": 1,
+            "icon": "https://img.hongrenshuo.com.cn/ab06c2dc-17ce-4b1d-b232-02429e244d37.jpg?t=1789544721000"
+          }
+        ]
+      },
+      {
+        "frame": 55,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 56,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 57,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      },
+      {
+        "frame": 58,
+        "joined": false,
+        "rejected": false,
+        "events": []
+      }
+    ]
+  }
+}

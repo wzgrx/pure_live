@@ -1,11 +1,12 @@
 // YouTube parsing against the recorded samples, compared field by field with
 // 3.x's frozen output (expected.json, written by
 // fixtures/youtube/legacy_expected.dart from 3.x's YouTubeApi, YouTubeSite
-// and YouTubeLink). Every intended difference is listed with its reason;
-// everything else must match. The archived samples (S01–S05, InnerTube
-// requests 3.x never sent) have no expected values; S04's ANDROID player
-// answers are read here as the recovery reads them. The synthetic cases pin
-// 3.x's rules the samples do not reach.
+// and YouTubeLink). Every intended difference is listed with its reason
+// (the M4.U upgrade row, docs/UPGRADES.md); everything else must match. The
+// archived samples (S01–S05, InnerTube requests 3.x never sent) and the
+// M4.U.23 ones (S03-resolve-*-live/-upcoming/-custom/-missing, S13) have no
+// expected values; they are read as the adapter reads them now. The
+// synthetic cases pin the rules the samples do not reach.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -16,16 +17,19 @@ import 'fixture.dart';
 Fixture _sample(String name) => Fixture.load('youtube', name);
 
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
-/// 3.x wrote, except [changed] (intended differences). 3.x wrote null where
-/// the immutable model writes ''.
+/// 3.x wrote, except [changed] (intended differences, by upgrade row). 3.x
+/// wrote null where the immutable model writes ''.
 void _expectParity(
   Map<String, Object?> actual,
   Map<String, dynamic> legacy, {
-  Set<String> changed = const {},
+  Map<String, String> changed = const {},
   String? reason,
 }) {
   for (final MapEntry(:key, :value) in legacy.entries) {
-    if (changed.contains(key)) continue;
+    if (changed.containsKey(key)) {
+      expect(actual[key] ?? '', isNot(value ?? ''), reason: '${reason ?? ''} $key changed: ${changed[key]}');
+      continue;
+    }
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
 }
@@ -40,6 +44,8 @@ Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 
 const _live = 'nI725iVsyoQ';
 const _lofi = 'UCSJ4gkVC6NrvII8umztf0Ow';
+const _lofiAvatar =
+    'https://yt3.ggpht.com/GyVPysrx-cVIWIQDfi2MkaYr7oRIxuOgGeZihnw-hgTv6E5LBQ67v5yXTFvqP2Bl7BB_S-0L-A=s176-c-k-c0x00ffffff-no-rj';
 
 const _mediaHeaders = {
   'origin': 'https://www.youtube.com',
@@ -83,24 +89,90 @@ String _master(List<String> lines) => ['#EXTM3U', ...lines].join('\n');
 
 final Uri _masterUrl = Uri.parse('https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1790619788/x');
 
+/// A page embedding [data] as `ytInitialData` (and [player] as
+/// `ytInitialPlayerResponse`).
+String _page(Object data, {Object? player}) =>
+    '<html><script>${player == null ? '' : 'var ytInitialPlayerResponse = ${jsonEncode(player)};'}'
+    'var ytInitialData = ${jsonEncode(data)};</script></html>';
+
+/// A video row of a browse or search answer.
+Map<String, Object?> _row(
+  String videoId, {
+  String? channel = _lofi,
+  String title = 'a title',
+  String owner = 'Lofi Girl',
+  String viewers = '12 watching',
+  List<String> badges = const ['BADGE_STYLE_TYPE_LIVE_NOW'],
+}) => {
+  'videoRenderer': {
+    'videoId': videoId,
+    'title': {
+      'runs': [
+        {'text': title},
+      ],
+    },
+    'ownerText': {
+      'runs': [
+        {
+          'text': owner,
+          if (channel != null)
+            'navigationEndpoint': {
+              'browseEndpoint': {'browseId': channel},
+            },
+        },
+      ],
+    },
+    'viewCountText': {
+      'runs': [
+        {'text': viewers},
+      ],
+    },
+    'badges': [
+      for (final style in badges)
+        {
+          'metadataBadgeRenderer': {'style': style},
+        },
+    ],
+  },
+};
+
 void main() {
-  group('S07 live broadcast', () {
+  group('S07 live broadcast: the channel is the room (23-1)', () {
     final legacy = _legacy('S07-watch-live')[_live] as Map<String, dynamic>;
 
-    test('the room matches 3.x at every depth: names, thumbnail, area, viewers, notice, headers', () {
-      final room = _video('S07-watch-live', 'S07-player-live', _live).room;
+    test("the room matches 3.x's at every depth but for its id and avatar", () {
+      final video = _video('S07-watch-live', 'S07-player-live', _live);
+      final room = video.room;
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
-        _expectParity(_projection(room), _result(legacy[depth])! as Map<String, dynamic>, reason: depth);
+        _expectParity(
+          _projection(room),
+          _result(legacy[depth])! as Map<String, dynamic>,
+          changed: const {'roomId': '23-1 the channel id', 'avatar': "23-4 the channel's avatar"},
+          reason: depth,
+        );
       }
-      expect(room.isLiveNow, isTrue);
+      expect(room.roomId, _lofi);
       expect(room.userId, _lofi);
+      expect((video.videoId, video.channelId), (_live, _lofi));
+      expect(room.link, 'https://www.youtube.com/watch?v=$_live', reason: 'the broadcast while live (3.x too)');
+      expect(room.isLiveNow, isTrue);
       expect(room.onlineViewers, '1256', reason: 'the live videoViewCountRenderer of the watch page');
       expect(room.effectiveAudienceMetricType, AudienceMetricType.onlineViewers);
-      expect(room.avatar, room.cover, reason: '3.x shows the video thumbnail as the avatar too');
+      expect(room.avatar, _lofiAvatar, reason: "23-4: videoOwnerRenderer's largest image (3.x: the thumbnail)");
+      expect(room.cover, 'https://i.ytimg.com/vi/$_live/sddefault.jpg?v=6ab3f71c');
       expect(room.area, 'Music');
       expect(room.notice, YouTubeApi.chatNotice);
       expect(room.httpHeaders, _mediaHeaders);
       expect(room.data, isNull, reason: 'playback data is added by room entry');
+    });
+
+    test('M2.1 fields: the start of the broadcast, no restriction; the chat arguments (23-3)', () {
+      final room = _video('S07-watch-live', 'S07-player-live', _live).room;
+      expect(room.startedAt, DateTime.utc(2026, 9, 23, 16, 47, 51), reason: 'liveBroadcastDetails.startTimestamp');
+      expect(room.restriction, LiveRestriction.none);
+      expect(room.danmakuData, const YouTubeDanmakuArgs(roomId: _lofi, videoId: _live));
+      expect(_projection(room), containsPair('startedAt', '2026-09-23T16:47:51.000Z'));
+      expect(_projection(room), containsPair('restriction', 'none'));
     });
 
     test("the watch page gives 3.x's key and canonical link", () {
@@ -109,6 +181,11 @@ void main() {
       expect(page.canonical, 'https://www.youtube.com/watch?v=$_live');
       expect(page.player['videoDetails'], isA<Map<String, dynamic>>());
       expect(page.data['contents'], isA<Map<String, dynamic>>());
+      expect(identical(page.forVideo(_live), page), isTrue);
+      final other = page.forVideo('aaaaaaaaaaa');
+      expect(other.player, isEmpty);
+      expect(other.data, isEmpty);
+      expect(other.apiKey, page.apiKey);
     });
 
     test("the sources match 3.x's: the master's six variants and the DASH manifest, best first", () {
@@ -138,7 +215,7 @@ void main() {
       ]);
     });
 
-    test("qualities: 3.x's labels, ids and order", () {
+    test("qualities: 3.x's labels, ids and order (no rename row, so nothing to migrate)", () {
       final qualities = YouTubeApi.qualities(_liveStreams());
       expect([
         for (final quality in qualities)
@@ -170,40 +247,59 @@ void main() {
       }
     });
 
-    test('the player answer alone (the recovery) is the same live room without viewers', () {
+    test('the player answer alone (the refresh, the recovery) has no viewers, avatar, area or start (23-6)', () {
       final room = _synthetic(_playerBody()).room;
       expect(room.isLiveNow, isTrue);
+      expect(room.roomId, _lofi);
       expect(room.title, '24/7 deep sleep music 🌌 calm ambient to sleep & dream to');
-      expect(room.onlineViewers, isEmpty, reason: 'viewers come from the watch page');
-      expect(room.area, 'YouTube Live', reason: 'the ANDROID answer has no microformat');
+      expect(room.onlineViewers, isEmpty, reason: 'updated_metadata gives them (23-6)');
+      expect(room.avatar, isEmpty, reason: 'the follow keeps its stored avatar');
+      expect(room.area, isNull, reason: "3.x wrote 'YouTube Live', which would overwrite a stored category");
+      expect(room.startedAt, isNull);
+      expect(room.restriction, LiveRestriction.none);
     });
   });
 
-  group('S09/S10 broadcasts that are not live', () {
-    for (final (watch, player, videoId, status) in [
-      ('S09-watch-ended', 'S09-player-ended', '9njefMDxzqw', 'OK'),
-      ('S10-watch-upcoming', 'S10-player-upcoming', '32myp8UqPOE', 'LIVE_STREAM_OFFLINE'),
+  group('S09/S10 broadcasts that are not live: the channel is offline', () {
+    for (final (watch, player, videoId, channel, status) in [
+      ('S09-watch-ended', 'S09-player-ended', '9njefMDxzqw', 'UC1sELGmy5jp5fQUugmuYlXQ', 'OK'),
+      ('S10-watch-upcoming', 'S10-player-upcoming', '32myp8UqPOE', 'UCvxWyn4rfcI2H9APhfUIB1Q', 'LIVE_STREAM_OFFLINE'),
     ]) {
-      test('$watch: offline as in 3.x, every field matches', () {
+      test("$watch: offline as in 3.x; the id, link and avatar are the channel's", () {
         final legacy = _legacy(watch)[videoId] as Map<String, dynamic>;
         final video = _video(watch, player, videoId);
         for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
-          _expectParity(_projection(video.room), _result(legacy[depth])! as Map<String, dynamic>, reason: depth);
+          _expectParity(
+            _projection(video.room),
+            _result(legacy[depth])! as Map<String, dynamic>,
+            changed: const {
+              'roomId': '23-1 the channel id',
+              'link': "23-1 the channel's /live page while it is not live",
+              'avatar': "23-4 the channel's avatar",
+            },
+            reason: depth,
+          );
         }
+        expect(video.room.roomId, channel);
+        expect(video.room.link, 'https://www.youtube.com/channel/$channel/live');
         expect(video.room.effectiveLiveStatus, LiveStatus.offline);
         expect(video.room.onlineViewers, isEmpty, reason: 'viewers only while live');
+        expect(video.room.startedAt, isNull, reason: 'the page has a start (or schedule), but nothing is on');
+        expect(video.room.restriction, isNull);
+        expect(video.room.danmakuData, isNull);
         expect(video.playability, status);
         expect(_result(legacy['getPlayQualites']), isEmpty, reason: '3.x offered nothing; now StreamUnavailable');
       });
     }
   });
 
-  group('videos that are no live room', () {
-    test('S11 an ordinary video is NotFound (3.x: notLive at every depth, no search result)', () {
+  group('videos that are no broadcast', () {
+    test('S11 an ordinary video is its channel, offline (3.x: notLive, 23-1)', () {
       final legacy = _legacy('S11-watch-video')['dQw4w9WgXcQ'] as Map<String, dynamic>;
       expect(_result(legacy['getRoomDetail']), {'throws': 'YouTubeException', 'message': 'YouTube notLive'});
-      expect(_result(_legacy('S11-watch-video')['searchRooms']), isEmpty);
-      expect(() => _video('S11-watch-video', 'S11-player-video', 'dQw4w9WgXcQ'), throwsA(isA<NotFound>()));
+      final room = _video('S11-watch-video', 'S11-player-video', 'dQw4w9WgXcQ').room;
+      expect((room.roomId, room.effectiveLiveStatus), ('UCuAXFkgsw1L7xaCfnd5JJOw', LiveStatus.offline));
+      expect(room.nick, 'Rick Astley');
     });
 
     test('S12 a missing video is NotFound (3.x: an identity error, which also broke its search)', () {
@@ -232,25 +328,67 @@ void main() {
         expect(_result(traced), _live);
       }
       expect(YouTubeApi.liveVideoOfPage(_sample('S07-channel-live').body), _live);
+      final live = YouTubeApi.channelLive(_sample('S07-channel-live').body);
+      expect(live.videoId, _live);
+      expect(YouTubeApi.channel(live.page), isNull, reason: 'a watch page names no channel metadata');
+      final room = YouTubeApi.video(page: live.page.forVideo(_live), player: _playerBody(), videoId: _live).room;
+      expect((room.roomId, room.avatar, room.onlineViewers), (_lofi, _lofiAvatar, '1257'));
     });
 
-    test("S08 an offline channel's /live page names none (3.x: notLive)", () {
+    test("S08 an offline channel's /live page names none (3.x: notLive) but the channel (23-1)", () {
       expect(_result(_legacy('S08-channel-offline')['resolveReference']), {
         'throws': 'YouTubeException',
         'message': 'YouTube notLive',
       });
       expect(YouTubeApi.liveVideoOfPage(_sample('S08-channel-offline').body), isNull);
+      final channel = YouTubeApi.channel(YouTubeApi.watchPage(_sample('S08-channel-offline').body))!;
+      expect((channel.channelId, channel.name), ('UCX6OQ3DkcsbYNE6H8uQQuVA', 'MrBeast'));
+      expect(channel.avatar, startsWith('https://yt3.googleusercontent.com/'), reason: 'avatars may live there');
+      expect(channel.description, startsWith('SUBSCRIBE FOR A COOKIE!'));
+      final room = YouTubeApi.offlineRoom(channel);
+      expect(room.roomId, 'UCX6OQ3DkcsbYNE6H8uQQuVA');
+      expect((room.nick, room.title), ('MrBeast', ''), reason: '23-1: an offline channel shows its name');
+      expect(room.avatar, channel.avatar);
+      expect(room.introduction, channel.description);
+      expect(room.link, 'https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA/live');
+      expect(room.effectiveLiveStatus, LiveStatus.offline);
+      expect((room.startedAt, room.restriction), (null, null));
+    });
+
+    test("YouTube's page for an unknown channel names no channel", () {
+      final page = YouTubeApi.watchPage(
+        _page({
+          'alerts': [
+            {
+              'alertRenderer': {
+                'type': 'ERROR',
+                'text': {'simpleText': 'This channel does not exist.'},
+              },
+            },
+          ],
+        }),
+      );
+      expect(YouTubeApi.channel(page), isNull);
+      expect(
+        YouTubeApi.channel(
+          YouTubeApi.watchPage(
+            _page({
+              'metadata': {
+                'channelMetadataRenderer': {'externalId': 'UCshort', 'title': 'x'},
+              },
+            }),
+          ),
+        ),
+        isNull,
+      );
     });
 
     test("3.x's order: a redirect to a video, the canonical link, a live player, a live renderer", () {
       final offline = _sample('S08-channel-offline').body;
       expect(YouTubeApi.liveVideoOfPage(offline, finalUrl: Uri.parse('https://www.youtube.com/watch?v=$_live')), _live);
-      String page(Object data, {Object? player}) =>
-          '<html><script>${player == null ? '' : 'var ytInitialPlayerResponse = ${jsonEncode(player)};'}'
-          'var ytInitialData = ${jsonEncode(data)};</script></html>';
       expect(
         YouTubeApi.liveVideoOfPage(
-          page(
+          _page(
             {},
             player: {
               'videoDetails': {'videoId': _live, 'isLive': true},
@@ -261,7 +399,7 @@ void main() {
       );
       expect(
         YouTubeApi.liveVideoOfPage(
-          page(
+          _page(
             {},
             player: {
               'videoDetails': {'videoId': _live, 'isLive': false},
@@ -283,10 +421,10 @@ void main() {
           },
         ],
       };
-      expect(YouTubeApi.liveVideoOfPage(page(renderers)), 'bbbbbbbbbbb');
+      expect(YouTubeApi.liveVideoOfPage(_page(renderers)), 'bbbbbbbbbbb');
       expect(
         YouTubeApi.liveVideoOfPage(
-          page({
+          _page({
             'items': [
               {'videoId': 'ccccccccccc', 'isLiveNow': true},
             ],
@@ -297,10 +435,175 @@ void main() {
     });
   });
 
-  group('links', () {
+  group('navigation/resolve_url, the feed and updated_metadata (23-1, 23-6)', () {
+    test('a live channel names its broadcast, an offline one itself, a handle its channel', () {
+      expect(YouTubeApi.resolved(_sample('S03-resolve-channel-live').body), (videoId: _live, channelId: null));
+      expect(YouTubeApi.resolved(_sample('S03-resolve-handle-live').body), (videoId: _live, channelId: null));
+      expect(YouTubeApi.resolved(_sample('S03-resolve-channel-offline').body), (
+        videoId: null,
+        channelId: 'UCX6OQ3DkcsbYNE6H8uQQuVA',
+      ));
+      expect(YouTubeApi.resolved(_sample('S03-resolve-handle').body), (videoId: null, channelId: _lofi));
+      expect(YouTubeApi.resolved(_sample('S03-resolve-custom').body), (videoId: null, channelId: _lofi));
+      expect(YouTubeApi.resolved(_sample('S03-resolve-channel-upcoming').body), (
+        videoId: '32myp8UqPOE',
+        channelId: null,
+      ), reason: "a channel with only a scheduled broadcast names it (S10's upcoming video)");
+    });
+
+    test('an unknown handle is 404 (NotFound); an answer naming neither is NotFound too', () {
+      final missing = _sample('S03-resolve-handle-missing');
+      expect(missing.status, 404);
+      expect(() => YouTubeApi.resolved(missing.body, status: missing.status), throwsA(isA<NotFound>()));
+      expect(
+        () => YouTubeApi.resolved(
+          jsonEncode({
+            'endpoint': {
+              'urlEndpoint': {'url': 'https://example.com'},
+            },
+          }),
+        ),
+        throwsA(isA<NotFound>()),
+      );
+      expect(() => YouTubeApi.resolved('<html>'), throwsA(isA<ApiChanged>()));
+    });
+
+    test("S05 the feed's own title is the channel's name; 404 is NotFound", () {
+      expect(YouTubeApi.feedName(_sample('S05-feed-offline').body), 'MrBeast');
+      expect(
+        YouTubeApi.feedName('<feed><title>Tom &amp; Jerry</title><entry><title>video</title></entry></feed>'),
+        'Tom & Jerry',
+      );
+      expect(() => YouTubeApi.feedName('<feed><entry><title>v</title></entry></feed>'), throwsA(isA<ApiChanged>()));
+      expect(() => YouTubeApi.feedName('x', status: 404), throwsA(isA<NotFound>()));
+    });
+
+    test('S13 updated_metadata gives the live viewer count (23-6)', () {
+      expect(YouTubeApi.viewers(_sample('S13-metadata-live').body), 1331);
+      expect(YouTubeApi.viewers('{"actions":[]}'), isNull);
+      expect(() => YouTubeApi.viewers('x', status: 429), throwsA(isA<RateLimited>()));
+    });
+
+    test('the web client requests: endpoint, context and bodies (the archived samples replay)', () {
+      expect(YouTubeApi.apiUrl('browse'), _sample('S01-browse-live').url);
+      for (final (name, body) in [
+        ('S01-browse-live', YouTubeApi.browseBody()),
+        ('S02-search-p1', YouTubeApi.searchBody('lofi')),
+        ('S03-resolve-channel-live', YouTubeApi.resolveBody(YouTubeApi.liveUrl(_lofi))),
+        ('S03-resolve-handle', YouTubeApi.resolveBody('https://www.youtube.com/@LofiGirl')),
+        ('S13-metadata-live', YouTubeApi.metadataBody(_live)),
+      ]) {
+        final recorded = (_sample(name).meta['request'] as Map<String, dynamic>)['body'] as String;
+        expect(body, jsonDecode(recorded), reason: name);
+      }
+      expect(YouTubeApi.apiHeaders, containsPair('cookie', 'SOCS=CAI'));
+      expect(YouTubeApi.apiHeaders, containsPair('referer', 'https://www.youtube.com/'));
+      expect(YouTubeApi.feedUrl('UCX6OQ3DkcsbYNE6H8uQQuVA'), _sample('S05-feed-offline').url);
+    });
+  });
+
+  group('listings (23-2)', () {
+    test('S01 the "Live" destination: its live rows, one card per channel', () {
+      final listing = YouTubeApi.listing(_sample('S01-browse-live').body, search: false);
+      expect(listing.liveRows, 28, reason: '49 rows: 12 ended, 9 upcoming, 28 live');
+      expect(listing.rooms, hasLength(26), reason: 'LiveNOW from FOX and a row listed twice are one card each');
+      expect(listing.next, isNull, reason: 'the destination has one page');
+      expect(listing.rooms.map((room) => room.roomId).toSet(), hasLength(listing.rooms.length));
+      final first = listing.rooms.first;
+      expect(first.roomId, 'UC4u6RxRxwNv4vWiW0_rkdEw');
+      expect(listing.videoIds.first, 'NUgUOMY2sm8');
+      expect(first.link, 'https://www.youtube.com/watch?v=NUgUOMY2sm8');
+      expect((first.nick, first.onlineViewers, first.effectiveLiveStatus), ('FlowVoyager', '10862', LiveStatus.live));
+      expect(first.title, startsWith('👺 Custom Celebrity Mask'));
+      expect(first.avatar, startsWith('https://yt3.ggpht.com/'), reason: "23-4: the channel's avatar");
+      expect(first.cover, startsWith('https://i.ytimg.com/vi/NUgUOMY2sm8/'));
+      expect(first.restriction, isNull, reason: 'a card cannot tell age or region checks');
+      expect(first.httpHeaders['referer'], 'https://www.youtube.com/watch?v=NUgUOMY2sm8');
+      final fox = listing.rooms.where((room) => room.roomId == 'UCJg9wBPyKMNA5sRDnvzmkdg').toList();
+      expect(fox.single.link, 'https://www.youtube.com/watch?v=jRDug_owloQ', reason: 'the first of its two rows');
+      expect(listing.videoIds, isNot(contains('9njefMDxzqw')), reason: 'ended');
+      expect(listing.videoIds, isNot(contains('gwjEUsW6eIU')), reason: 'upcoming');
+    });
+
+    test('S02 a live search page: cards, and the continuation the next page was asked with', () {
+      final first = YouTubeApi.listing(_sample('S02-search-p1').body, search: true);
+      expect((first.liveRows, first.rooms.length), (20, 11), reason: 'Lofi Girl 8 rows, two channels 2 each');
+      final request = jsonDecode((_sample('S02-search-p2').meta['request'] as Map<String, dynamic>)['body'] as String);
+      expect(first.next, (request as Map<String, dynamic>)['continuation']);
+      expect(first.rooms.first.roomId, _lofi);
+      expect(first.videoIds.first, 'rFZHOHl-L8A', reason: "Lofi Girl's first row; its seven others are left out");
+      final second = YouTubeApi.listing(_sample('S02-search-p2').body, search: true);
+      expect(second.liveRows, 18);
+      expect(second.next, isNotNull);
+      expect(second.rooms.map((room) => room.roomId), contains(_lofi), reason: "cross-page is the adapter's");
+    });
+
+    test('a malformed live row is skipped; all malformed is ApiChanged; ended and upcoming rows are no cards', () {
+      String answer(List<Object?> rows) => jsonEncode({
+        'contents': rows,
+        'continuationItemRenderer': {
+          'continuationEndpoint': {
+            'continuationCommand': {'token': 'NEXT'},
+          },
+        },
+      });
+      final listing = YouTubeApi.listing(
+        answer([
+          _row('aaaaaaaaaa1', channel: null),
+          _row('aaaaaaaaaa2', title: ''),
+          _row('aaaaaaaaaa3', owner: ''),
+          _row('bad'),
+          _row('aaaaaaaaaa4', channel: 'UCshort'),
+          _row('aaaaaaaaaa5', badges: const [], viewers: '3 waiting'),
+          _row('aaaaaaaaaa6', badges: const [], viewers: '1,234 views'),
+          _row('aaaaaaaaaa7', badges: const [], viewers: '1,234 watching'),
+          _row('aaaaaaaaaa8', badges: const ['BADGE_STYLE_TYPE_LIVE_NOW', 'BADGE_STYLE_TYPE_MEMBERS_ONLY']),
+        ]),
+        search: true,
+      );
+      expect(listing.videoIds, ['aaaaaaaaaa7']);
+      expect(listing.rooms.single.onlineViewers, '1234');
+      expect(listing.liveRows, 7);
+      expect(listing.next, 'NEXT');
+      final members = YouTubeApi.listing(
+        answer([
+          _row('aaaaaaaaaa8', badges: const ['BADGE_STYLE_TYPE_LIVE_NOW', 'BADGE_STYLE_TYPE_MEMBERS_ONLY']),
+        ]),
+        search: true,
+      );
+      expect(members.rooms.single.restriction, LiveRestriction.subscribersOnly);
+      expect(
+        () => YouTubeApi.listing(answer([_row('aaaaaaaaaa1', channel: null)]), search: true),
+        throwsA(isA<ApiChanged>()),
+      );
+      final none = YouTubeApi.listing(
+        answer([_row('aaaaaaaaaa5', badges: const [], viewers: '3 waiting')]),
+        search: true,
+      );
+      expect(none.rooms, isEmpty);
+      expect(none.next, isNull, reason: 'no live row: no next page');
+      expect(YouTubeApi.listing('{"contents":[]}', search: true).rooms, isEmpty, reason: 'no results');
+      expect(() => YouTubeApi.listing('{"contents":[]}', search: false), throwsA(isA<ApiChanged>()));
+      expect(() => YouTubeApi.listing('[]', search: true), throwsA(isA<ApiChanged>()));
+      expect(() => YouTubeApi.listing('x', search: true, status: 403), throwsA(isA<RiskControl>()));
+    });
+  });
+
+  group('room ids and links (23-1)', () {
     final legacy = _legacy('S07-channel-live');
 
-    test("every link parses as 3.x's YouTubeLink.parse did", () {
+    test('a channel id is UC and 22 characters; a video id 11', () {
+      expect(YouTubeApi.isChannelId(_lofi), isTrue);
+      expect(YouTubeApi.isChannelId('UCshort'), isFalse);
+      expect(YouTubeApi.isChannelId('${_lofi}x'), isFalse);
+      expect(YouTubeApi.isChannelId(_live), isFalse);
+      expect(YouTubeApi.isVideoId(_live), isTrue);
+      expect(YouTubeApi.isVideoId(_lofi), isFalse);
+      expect(YouTubeApi.roomLink(_lofi), 'https://www.youtube.com/channel/$_lofi/live');
+      expect(YouTubeApi.roomLink(_lofi, liveVideoId: _live), 'https://www.youtube.com/watch?v=$_live');
+    });
+
+    test("every link parses as 3.x's YouTubeLink.parse did; channel/UC… links name their channel", () {
       final expected = legacy['YouTubeLink.parse'] as Map<String, dynamic>;
       expect(expected, hasLength(greaterThan(30)));
       for (final MapEntry(:key, :value) in expected.entries) {
@@ -312,14 +615,33 @@ void main() {
         final link = YouTubeLink.parse(key);
         expect(link?.kind == YouTubeLinkKind.video ? link!.id : null, value, reason: key);
       }
+      expect(YouTubeLink.parse('https://www.youtube.com/channel/$_lofi/live')!.channelId, _lofi);
+      expect(YouTubeLink.parse('https://www.youtube.com/embed/live_stream?channel=$_lofi')!.channelId, _lofi);
+      expect(YouTubeLink.parse('https://www.youtube.com/channel/UCaaaaaaaaaaaaaaaaaaaa')!.channelId, isNull);
+      expect(YouTubeLink.parse('https://www.youtube.com/@LofiGirl')!.channelId, isNull);
+      expect(YouTubeLink.parse('https://youtu.be/$_live')!.channelId, isNull);
     });
 
-    test("search keywords read as 3.x's parseOrReference did (a bare name is a handle)", () {
+    test("search keywords: 3.x's references, but a bare name is a keyword now (23-2)", () {
       final expected = legacy['YouTubeLink.parseOrReference'] as Map<String, dynamic>;
+      // 23-2: keyword search replaces 3.x's reading of a bare 3–30 character
+      // name as a handle (M4.23 problem 15).
+      const changed = {'LofiGirl', 'lofi'};
       for (final MapEntry(:key, :value) in expected.entries) {
         final link = YouTubeLink.parseOrReference(key);
-        expect(link == null ? null : {'kind': link.kind.name, 'id': link.id, 'url': link.url}, value, reason: key);
+        final actual = link == null ? null : {'kind': link.kind.name, 'id': link.id, 'url': link.url};
+        if (changed.contains(key)) {
+          expect(value, isNotNull, reason: key);
+          expect(actual, isNull, reason: '$key changed: 23-2 a keyword');
+        } else {
+          expect(actual, value, reason: key);
+        }
       }
+      expect(YouTubeLink.parseOrReference(_lofi)!.id, 'channel/$_lofi');
+      expect(YouTubeLink.parseOrReference(_lofi)!.channelId, _lofi);
+      expect(YouTubeLink.parseOrReference('programming'), isNull, reason: 'an 11-letter word');
+      expect(YouTubeLink.parseOrReference('Programming')?.kind, YouTubeLinkKind.video, reason: 'may be an id');
+      expect(YouTubeLink.parseOrReference('@lo'), isNull);
     });
 
     test("the watch page URL, and 3.x's FormatException for a non-id", () {
@@ -342,50 +664,98 @@ void main() {
         expect(lease?.refreshAt.toIso8601String(), want['refreshAt'], reason: key);
       }
     });
+
+    test("the channel of any video, broadcast or not (the M9 migration's rule)", () {
+      expect(YouTubeApi.channelOf(_playerBody(), _live), _lofi);
+      expect(
+        YouTubeApi.channelOf(YouTubeApi.player(_sample('S09-player-ended').body), '9njefMDxzqw'),
+        startsWith('UC1s'),
+      );
+      expect(
+        YouTubeApi.channelOf(YouTubeApi.player(_sample('S11-player-video').body), 'dQw4w9WgXcQ'),
+        'UCuAXFkgsw1L7xaCfnd5JJOw',
+      );
+      expect(
+        () => YouTubeApi.channelOf(YouTubeApi.player(_sample('S12-player-missing').body), 'aaaaaaaaaaa'),
+        throwsA(isA<NotFound>()),
+      );
+      expect(() => YouTubeApi.channelOf(_playerBody(), 'aaaaaaaaaaa'), throwsA(isA<ApiChanged>()));
+      expect(
+        () => YouTubeApi.channelOf(_with(_playerBody(), details: {'channelId': null}), _live),
+        throwsA(isA<ApiChanged>()),
+      );
+      final bare = Map<String, dynamic>.of(_playerBody())
+        ..remove('videoDetails')
+        ..['playabilityStatus'] = {'status': 'LOGIN_REQUIRED'};
+      expect(() => YouTubeApi.channelOf(bare, _live), throwsA(isA<NeedsLogin>()));
+    });
   });
 
-  group("3.x's states", () {
+  group('states (3.x, and 23-5 for live broadcasts this client may not play)', () {
     final body = _playerBody();
 
-    test('sign-in, age and content checks, private videos and their reasons are banned', () {
-      for (final status in ['LOGIN_REQUIRED', 'AGE_CHECK_REQUIRED', 'CONTENT_CHECK_REQUIRED']) {
-        expect(
-          _synthetic(_with(body, status: {'status': status})).room.effectiveLiveStatus,
-          LiveStatus.banned,
-          reason: status,
-        );
+    test('a restricted live broadcast stays live with its restriction and the error playback reports', () {
+      for (final (status, reason, restriction, error) in [
+        (
+          'UNPLAYABLE',
+          'The uploader has not made this video available in your country',
+          LiveRestriction.regionBlocked,
+          isA<RegionBlocked>(),
+        ),
+        ('UNPLAYABLE', 'This live event is not available.', LiveRestriction.unplayable, isA<StreamUnavailable>()),
+        (
+          'LOGIN_REQUIRED',
+          'Join this channel to get access to members-only content like this video, and other exclusive perks.',
+          LiveRestriction.subscribersOnly,
+          isA<StreamUnavailable>(),
+        ),
+        ('LOGIN_REQUIRED', 'Sign in to confirm your age', LiveRestriction.adult, isA<NeedsLogin>()),
+        ('AGE_CHECK_REQUIRED', '', LiveRestriction.adult, isA<NeedsLogin>()),
+        ('LOGIN_REQUIRED', 'Sign in to confirm you’re not a bot', LiveRestriction.needsLogin, isA<NeedsLogin>()),
+        ('CONTENT_CHECK_REQUIRED', '', LiveRestriction.needsLogin, isA<NeedsLogin>()),
+        ('LOGIN_REQUIRED', 'This video is private', LiveRestriction.private, isA<StreamUnavailable>()),
+        ('UNPLAYABLE', 'This video requires payment to watch.', LiveRestriction.paid, isA<StreamUnavailable>()),
+        ('ERROR', 'Something went wrong', LiveRestriction.unplayable, isA<StreamUnavailable>()),
+      ]) {
+        final video = _synthetic(_with(body, status: {'status': status, 'reason': reason}));
+        expect(video.room.effectiveLiveStatus, LiveStatus.live, reason: '$status $reason: 3.x showed banned/offline');
+        expect(video.room.restriction, restriction, reason: reason);
+        expect(video.streamError, error, reason: reason);
+        expect(video.streamError.toString(), contains(restriction.name), reason: reason);
+        expect(video.room.followGroup, FollowGroup.live);
       }
-      expect(_synthetic(_with(body, details: {'isPrivate': true})).room.effectiveLiveStatus, LiveStatus.banned);
-      expect(
-        _synthetic(_with(body, status: {'status': 'UNPLAYABLE', 'reason': 'Sign in to confirm your age'}))
-            .room
-            .effectiveLiveStatus,
-        LiveStatus.banned,
-      );
+      final private = _synthetic(_with(body, details: {'isPrivate': true}));
+      expect((private.room.effectiveLiveStatus, private.room.restriction), (LiveStatus.live, LiveRestriction.private));
+      expect(_synthetic(body).streamError, isNull);
     });
 
-    test('a live broadcast the client cannot play stays offline, as 3.x showed it', () {
-      final video = _synthetic(_with(body, status: {'status': 'UNPLAYABLE', 'reason': 'Not available'}));
-      expect(video.room.effectiveLiveStatus, LiveStatus.offline);
-      expect(video.playability, 'UNPLAYABLE');
+    test('restricted videos that are no broadcast stay banned (3.x), with their restriction', () {
+      final plain = _with(body, details: {'isLive': false, 'isLiveContent': false});
+      for (final status in ['LOGIN_REQUIRED', 'AGE_CHECK_REQUIRED', 'CONTENT_CHECK_REQUIRED']) {
+        final video = _synthetic(_with(plain, status: {'status': status}));
+        expect(video.room.effectiveLiveStatus, LiveStatus.banned, reason: status);
+        expect(video.room.restriction, isNotNull, reason: status);
+        expect(video.streamError, isNull, reason: 'nothing is on');
+      }
+      final ended = _synthetic(_with(_with(body, details: {'isLive': false}), status: {'status': 'LOGIN_REQUIRED'}));
+      expect((ended.room.effectiveLiveStatus, ended.room.restriction), (LiveStatus.offline, null));
     });
 
     test('an ended broadcast is offline; without a status a broadcast is offline, anything else unknown', () {
       expect(_synthetic(_with(body, details: {'isLive': false})).room.effectiveLiveStatus, LiveStatus.offline);
       final noStatus = Map<String, dynamic>.of(body)..remove('playabilityStatus');
-      expect(_synthetic(noStatus).room.effectiveLiveStatus, LiveStatus.offline, reason: 'live needs status OK');
+      expect(_synthetic(noStatus).room.effectiveLiveStatus, LiveStatus.live, reason: 'isLive says so (23-5)');
       final plain = _with(noStatus, details: {'isLive': false, 'isLiveContent': false});
       expect(_synthetic(plain).room.effectiveLiveStatus, LiveStatus.unknown);
+      final waiting = _with(body, status: {'status': 'LIVE_STREAM_OFFLINE'});
+      expect(_synthetic(waiting).room.effectiveLiveStatus, LiveStatus.offline, reason: 'not started yet');
     });
 
-    test('an ordinary video is NotFound; an answer for another video or without names is ApiChanged', () {
-      expect(
-        () => _synthetic(_with(body, details: {'isLive': false, 'isLiveContent': false})),
-        throwsA(isA<NotFound>()),
-      );
+    test('an answer for another video, without names or without a channel is ApiChanged', () {
       expect(() => _synthetic(body, videoId: 'aaaaaaaaaaa'), throwsA(isA<ApiChanged>()));
       expect(() => _synthetic(_with(body, details: {'title': ''})), throwsA(isA<ApiChanged>()));
       expect(() => _synthetic(_with(body, details: {'author': null})), throwsA(isA<ApiChanged>()));
+      expect(() => _synthetic(_with(body, details: {'channelId': 'UCshort'})), throwsA(isA<ApiChanged>()));
     });
 
     test('an answer naming no video: sign-in is NeedsLogin, unplayable StreamUnavailable, else ApiChanged', () {
@@ -424,6 +794,22 @@ void main() {
       expect(video.room.area, 'Music', reason: "the page's microformat category");
     });
 
+    test('the start: an ISO time with an offset, only while live', () {
+      Map<String, dynamic> started(Object? value) => {
+        ...body,
+        'microformat': {
+          'playerMicroformatRenderer': {
+            'liveBroadcastDetails': {'isLiveNow': true, 'startTimestamp': value},
+          },
+        },
+      };
+      expect(_synthetic(started('2026-09-23T18:47:51+02:00')).room.startedAt, DateTime.utc(2026, 9, 23, 16, 47, 51));
+      expect(_synthetic(started('2026-09-23T16:47:51Z')).room.startedAt, DateTime.utc(2026, 9, 23, 16, 47, 51));
+      for (final value in ['2026-09-23 16:47:51', '1970-01-01T00:00:00Z', 'soon', 1790619788, null]) {
+        expect(_synthetic(started(value)).room.startedAt, isNull, reason: '$value');
+      }
+    });
+
     test('thumbnails: the last https one on ytimg.com or ggpht.com', () {
       Map<String, dynamic> thumbs(List<String> urls) => _with(
         body,
@@ -442,6 +828,11 @@ void main() {
       expect(
         _synthetic(thumbs(['https://yt3.ggpht.com/a.jpg', 'https://evilytimg.com/b.jpg'])).room.cover,
         'https://yt3.ggpht.com/a.jpg',
+      );
+      expect(
+        _synthetic(thumbs(['https://i.ytimg.com/a.jpg', 'https://yt3.googleusercontent.com/b.jpg'])).room.cover,
+        'https://i.ytimg.com/a.jpg',
+        reason: 'googleusercontent.com only for avatars',
       );
       expect(_synthetic(thumbs([for (var i = 0; i < 65; i++) 'https://i.ytimg.com/$i.jpg'])).room.cover, isEmpty);
     });
@@ -560,6 +951,7 @@ void main() {
       expect(YouTubeApi.pageHeaders(''), containsPair('referer', 'https://www.youtube.com/'));
       expect(YouTubeApi.pageHeaders(_live), containsPair('cookie', 'SOCS=CAI'));
       expect(YouTubeApi.playerHeaders(_live), containsPair('accept', 'application/json'));
+      expect(YouTubeApi.mediaHeaders(''), containsPair('referer', 'https://www.youtube.com/'));
     });
 
     test("3.x's status rules", () {

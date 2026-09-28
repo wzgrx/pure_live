@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S03-resolve-handle-live",
+  "capturedAt": "2026-09-28T19:29:31.839916Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://www.youtube.com/youtubei/v1/navigation/resolve_url?prettyPrint=false",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Cookie": "SOCS=CAI",
+      "Origin": "https://www.youtube.com",
+      "Referer": "https://www.youtube.com/",
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": "{\"context\":{\"client\":{\"clientName\":\"WEB\",\"clientVersion\":\"2.20260925.01.00\",\"hl\":\"en\",\"gl\":\"US\"}},\"url\":\"https://www.youtube.com/@LofiGirl/live\"}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=UTF-8",
+      "date": "Mon, 28 Sep 2026 19:29:32 GMT",
+      "server": "scaffolding on HTTPServer2",
+      "vary": [
+        "X-Origin",
+        "Referer",
+        "Origin,Accept-Encoding"
+      ],
+      "x-frame-options": "SAMEORIGIN",
+      "x-content-type-options": "nosniff"
+    }
+  },
+  "raw": {
+    "sha256": "0289b7e5c8248e53b76378444185e09458a74ead361e2a98946a75dbaef9e164",
+    "length": 1090
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.responseContext.visitorData",
+      "rule": "secret"
+    },
+    {
+      "where": "$.responseContext.serviceTrackingParams[service=GFEEDBACK].params[key=visitor_data].value",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.U.23 recorder (schema 1)"
+}

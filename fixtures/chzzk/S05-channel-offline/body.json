@@ -1,0 +1,24 @@
+{
+  "code": 200,
+  "message": null,
+  "content": {
+    "channelId": "12bba8d480ba0ffaf85656afd76fa792",
+    "channelName": "PUBG 배틀그라운드B",
+    "channelImageUrl": "https://nng-phinf.pstatic.net/MjAyNjAzMTNfNTEg/MDAxNzczMzkxMjA0NzIz.pyTznT2-cNmW94a2iHopy2OSaDLNqGLyiTtumfX3EmQg.pEcRtir7CIqHn5czqaaZTocJim8CqEhJj3iUbm5Xw2cg.PNG/image.png",
+    "verifiedMark": true,
+    "verifiedMarkType": null,
+    "officialChannel": false,
+    "channelType": "STREAMING",
+    "channelDescription": "",
+    "followerCount": 7071,
+    "openLive": false,
+    "subscriptionAvailability": false,
+    "subscriptionPaymentAvailability": {
+      "iapAvailability": false,
+      "iabAvailability": false
+    },
+    "adMonetizationAvailability": false,
+    "activatedChannelBadgeIds": [],
+    "paidProductSaleAllowed": false
+  }
+}

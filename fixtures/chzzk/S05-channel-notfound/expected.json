@@ -1,0 +1,12 @@
+{
+  "generator": "ChzzkApi.channel",
+  "value": {
+    "channel": {
+      "requests": 1,
+      "value": {
+        "throws": "ChzzkException",
+        "message": "CHZZK identity"
+      }
+    }
+  }
+}

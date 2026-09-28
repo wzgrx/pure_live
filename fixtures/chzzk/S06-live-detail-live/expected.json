@@ -1,0 +1,223 @@
+{
+  "generator": "ChzzkSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetail": {
+      "requests": 4,
+      "value": {
+        "roomId": "af3323d30e11ae42c39d7203c7e07fa2",
+        "userId": "af3323d30e11ae42c39d7203c7e07fa2",
+        "title": "ㄱㅈㅇㅎ 교통정비공사 사장 황인정",
+        "nick": "너불",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNDAyMjlfMjcz/MDAxNzA5MjE0NDYwMzEy.dQvgcBdhcAdX8cAx0YgzS0YMrakV3Z4ss6Mz1b5DfUcg.yuS4A_DBGE7z1BGuBpEyZnE7FnQUx1jk1VhBhkTpHBYg.JPEG/IMG_3079.jpg",
+        "cover": "https://livecloud-thumb.akamaized.net/chzzk/livecloud/KR/stream/27370372/live/21333674/record/59752585/thumbnail/image_480.jpg",
+        "area": "Grand Theft Auto V",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "11370",
+        "totalViewers": "",
+        "followers": "106641",
+        "platform": "chzzk",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "实时 HLS 已启用；独立时光机回看会话纳入下一协议批次。",
+        "introduction": "광고문의 : biz@pixelnetwork.co.kr\n개인메일 : sk11092005@naver.com",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "referer": "https://chzzk.naver.com/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://chzzk.naver.com/live/af3323d30e11ae42c39d7203c7e07fa2"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": 2,
+      "value": {
+        "roomId": "af3323d30e11ae42c39d7203c7e07fa2",
+        "userId": "af3323d30e11ae42c39d7203c7e07fa2",
+        "title": "ㄱㅈㅇㅎ 교통정비공사 사장 황인정",
+        "nick": "너불",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNDAyMjlfMjcz/MDAxNzA5MjE0NDYwMzEy.dQvgcBdhcAdX8cAx0YgzS0YMrakV3Z4ss6Mz1b5DfUcg.yuS4A_DBGE7z1BGuBpEyZnE7FnQUx1jk1VhBhkTpHBYg.JPEG/IMG_3079.jpg",
+        "cover": "https://livecloud-thumb.akamaized.net/chzzk/livecloud/KR/stream/27370372/live/21333674/record/59752585/thumbnail/image_480.jpg",
+        "area": "Grand Theft Auto V",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "11370",
+        "totalViewers": "",
+        "followers": "106641",
+        "platform": "chzzk",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "实时 HLS 已启用；独立时光机回看会话纳入下一协议批次。",
+        "introduction": "광고문의 : biz@pixelnetwork.co.kr\n개인메일 : sk11092005@naver.com",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "referer": "https://chzzk.naver.com/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://chzzk.naver.com/live/af3323d30e11ae42c39d7203c7e07fa2"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": 4,
+      "value": {
+        "roomId": "af3323d30e11ae42c39d7203c7e07fa2",
+        "userId": "af3323d30e11ae42c39d7203c7e07fa2",
+        "title": "ㄱㅈㅇㅎ 교통정비공사 사장 황인정",
+        "nick": "너불",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNDAyMjlfMjcz/MDAxNzA5MjE0NDYwMzEy.dQvgcBdhcAdX8cAx0YgzS0YMrakV3Z4ss6Mz1b5DfUcg.yuS4A_DBGE7z1BGuBpEyZnE7FnQUx1jk1VhBhkTpHBYg.JPEG/IMG_3079.jpg",
+        "cover": "https://livecloud-thumb.akamaized.net/chzzk/livecloud/KR/stream/27370372/live/21333674/record/59752585/thumbnail/image_480.jpg",
+        "area": "Grand Theft Auto V",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "11370",
+        "totalViewers": "",
+        "followers": "106641",
+        "platform": "chzzk",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "实时 HLS 已启用；独立时光机回看会话纳入下一协议批次。",
+        "introduction": "광고문의 : biz@pixelnetwork.co.kr\n개인메일 : sk11092005@naver.com",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "referer": "https://chzzk.naver.com/",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://chzzk.naver.com/live/af3323d30e11ae42c39d7203c7e07fa2"
+      }
+    },
+    "getLiveStatus": {
+      "requests": 2,
+      "value": true
+    },
+    "getPlayQualites": {
+      "requests": 0,
+      "value": [
+        {
+          "quality": "1080p60 · HLS",
+          "id": "1080p60",
+          "sort": 10808384000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/1080p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/1080p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "720p60 · HLS",
+          "id": "720p60",
+          "sort": 7203192000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/720p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/720p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "480p · HLS",
+          "id": "480p",
+          "sort": 4801692000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/480p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/480p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "360p · HLS",
+          "id": "360p",
+          "sort": 3600696000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/360p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/360p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        },
+        {
+          "quality": "144p · HLS",
+          "id": "144p",
+          "sort": 1440192000,
+          "data": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/144p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/144p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ]
+        }
+      ]
+    },
+    "getPlayUrls": {
+      "1080p60": [
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/1080p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/1080p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+      ],
+      "720p60": [
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/720p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/720p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+      ],
+      "480p": [
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/480p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/480p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+      ],
+      "360p": [
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/360p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/360p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+      ],
+      "144p": [
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/144p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+        "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/144p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+      ]
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "1080p60": {
+        "requests": 4,
+        "value": {
+          "urls": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/1080p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/1080p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ],
+          "appliedQualityData": "1080p60"
+        }
+      },
+      "720p60": {
+        "requests": 4,
+        "value": {
+          "urls": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/720p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/720p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ],
+          "appliedQualityData": "720p60"
+        }
+      },
+      "480p": {
+        "requests": 4,
+        "value": {
+          "urls": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/480p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/480p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ],
+          "appliedQualityData": "480p"
+        }
+      },
+      "360p": {
+        "requests": 4,
+        "value": {
+          "urls": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/360p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/360p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ],
+          "appliedQualityData": "360p"
+        }
+      },
+      "144p": {
+        "requests": 4,
+        "value": {
+          "urls": [
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/144p/hdntl=exp=1790586285~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=4da3a550521d371dda9e9852962df0ec4ae123a73187d3d9ea7a337e43286613/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_hls_chunklist.m3u8?vp=45OUMic1QCTg-_GMtvm0OKrE1XKR4j3ab-VRLb",
+            "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/144p/hdntl=exp=1790586296~acl=*%2F2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj%2F*~data=hdntl~hmac=e588dafedf307d49d4b3e21af1db79429bfabd721eee69829ded8018840b285d/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_chunklist.m3u8?vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf"
+          ],
+          "appliedQualityData": "144p"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "sample": "S07-master-llhls",
+  "capturedAt": "2026-09-27T16:04:46.142191Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://livecloud.akamaized.net/chzzk/lip2_kr/cflexnmss2u0005/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/fotd1j9s4kbsztwhu1ln73u5jxtbl8g594_playlist.m3u8?hdnts=st=1790525056~exp=1790586266~acl=*/2oazt6he5e7cygo91vzgc3gfl5jxtbl8g7rj/*~hmac=1bbaf5d5ab7d430c72c9d6b5f357be16b63c52d39b4ca1dc35af4718cd73bafa&vp=67SEPjs3TFDy-_UJvqe5QUdV3LGP5r6js-MUGf",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://chzzk.naver.com",
+      "Referer": "https://chzzk.naver.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": [
+        "keep-alive",
+        "Transfer-Encoding"
+      ],
+      "cache-control": "max-age=1",
+      "access-control-allow-origin": "*",
+      "date": "Sun, 27 Sep 2026 16:04:46 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "server-timing": [
+        "entry-cache;desc=\"MISS\", entry-dur;dur=0.006",
+        "cdn-cache; desc=HIT",
+        "edge; dur=195"
+      ],
+      "content-type": "application/x-mpegURL",
+      "x-akamai-td-map": "cha4.akamai.net",
+      "server": "XPLATFORM",
+      "x-entry-request-id": "bc628e9181df0173950dab812f546a87",
+      "timing-allow-origin": "*",
+      "keep-alive": "timeout=20",
+      "akamai-mon-iucid-del": "1561860",
+      "akamai-request-bc": "[a=23.56.170.198,b=540688789,c=g,n=US_CA_SANJOSE,o=20940],[c=c,n=US_CA_SANJOSE,o=20940],[c=p,n=US_CA_SANJOSE,o=20940],[c=c,n=JP_13_TOKYO,o=20940],[a=36,c=o]"
+    }
+  },
+  "raw": {
+    "sha256": "780a57f20db4ac6db540d44e1634d518ffe04e2e176a9b0b15f4f917a2ba326c",
+    "length": 1812
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "text:vp",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/hmac=([0-9a-f]{16,})/",
+      "rule": "secret"
+    },
+    {
+      "where": "url:vp",
+      "rule": "secret"
+    },
+    {
+      "where": "url:/hmac=([0-9a-f]{16,})/",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

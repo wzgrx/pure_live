@@ -1,0 +1,12 @@
+{
+  "generator": "ChzzkApi.liveDetail",
+  "value": {
+    "liveDetail": {
+      "requests": 1,
+      "value": {
+        "throws": "ChzzkException",
+        "message": "CHZZK missing"
+      }
+    }
+  }
+}

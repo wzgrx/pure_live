@@ -1,0 +1,16 @@
+{
+  "generator": "ChzzkApi.channel",
+  "value": {
+    "channel": {
+      "requests": 1,
+      "value": {
+        "id": "af3323d30e11ae42c39d7203c7e07fa2",
+        "name": "너불",
+        "avatar": "https://nng-phinf.pstatic.net/MjAyNDAyMjlfMjcz/MDAxNzA5MjE0NDYwMzEy.dQvgcBdhcAdX8cAx0YgzS0YMrakV3Z4ss6Mz1b5DfUcg.yuS4A_DBGE7z1BGuBpEyZnE7FnQUx1jk1VhBhkTpHBYg.JPEG/IMG_3079.jpg",
+        "description": "광고문의 : biz@pixelnetwork.co.kr\n개인메일 : sk11092005@naver.com",
+        "followers": 106641,
+        "isLive": true
+      }
+    }
+  }
+}

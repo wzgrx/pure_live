@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "platform": "chzzk",
+  "sample": "S06-live-detail-live",
+  "capturedAt": "2026-09-27T16:02:39.145708Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.chzzk.naver.com/service/v3.1/channels/af3323d30e11ae42c39d7203c7e07fa2/live-detail",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://chzzk.naver.com",
+      "Referer": "https://chzzk.naver.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "access-control-allow-origin": "https://chzzk.naver.com",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 16:02:39 GMT",
+      "vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+      ],
+      "referrer-policy": "unsafe-url",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "x-xss-protection": "0",
+      "server": "nfront",
+      "access-control-allow-credentials": "true",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "expires": "0"
+    }
+  },
+  "raw": {
+    "sha256": "30e58a62da9988be0cc9fdcc27aa273dcacb160388e0c3f68d2d730124393185",
+    "length": 8433
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.content.livePlaybackJson.media[0].path:vp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.livePlaybackJson.media[0].path:/hmac=([0-9a-f]{16,})/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.livePlaybackJson.media[0].encodingTrack[5].path:vp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.livePlaybackJson.media[0].encodingTrack[5].path:/hmac=([0-9a-f]{16,})/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.livePlaybackJson.media[1].path:vp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.livePlaybackJson.media[1].path:/hmac=([0-9a-f]{16,})/",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.livePlaybackJson.media[1].encodingTrack[5].path:vp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content.livePlaybackJson.media[1].encodingTrack[5].path:/hmac=([0-9a-f]{16,})/",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

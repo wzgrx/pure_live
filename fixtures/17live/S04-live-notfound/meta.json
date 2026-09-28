@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "sample": "S04-live-notfound",
+  "capturedAt": "2026-09-27T19:53:00.513514Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api-dsa.17app.co/api/v1/lives/999999999",
+    "headers": {
+      "Origin": "https://17.live",
+      "Referer": "https://17.live/",
+      "Accept": "application/json, text/plain, */*"
+    }
+  },
+  "response": {
+    "status": 520,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "trace-id": "940f731df98fa80dbe042290db2afc1e",
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://17.live",
+      "date": "Sun, 27 Sep 2026 19:53:01 GMT",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "via": "1.1 google",
+      "content-type": "application/json"
+    }
+  },
+  "raw": {
+    "sha256": "2b52cd287c6cb52e5a6fd4628c7dcd71af1fed0586d779aabbccc07df854a0e2",
+    "length": 65
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

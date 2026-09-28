@@ -1,0 +1,25 @@
+{
+  "generator": "SeventeenLiveSite.searchRooms",
+  "value": {
+    "searchRooms": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/liveStreams/search?query=zxqvnothingfixture"
+      ],
+      "value": []
+    },
+    "searchRooms(pageSize 1)": {
+      "requests": [
+        "https://api-dsa.17app.co/api/v1/liveStreams/search?query=zxqvnothingfixture"
+      ],
+      "value": []
+    },
+    "searchRooms(page 2)": {
+      "requests": [],
+      "value": []
+    },
+    "searchRooms(pageSize 0)": {
+      "requests": [],
+      "value": []
+    }
+  }
+}

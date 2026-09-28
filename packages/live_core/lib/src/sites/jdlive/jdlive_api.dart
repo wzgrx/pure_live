@@ -9,7 +9,8 @@ import 'package:meta/meta.dart';
 
 const _site = 'jdlive';
 
-/// A broadcast's state as the play answer says it (3.x's `JdLiveState`).
+/// A broadcast's state as the play answer or a card says it (3.x's
+/// `JdLiveState`; `secret` is [JdLiveRoom.appOnly] now, whatever the state).
 enum JdLiveState {
   /// `status` 1.
   live,
@@ -17,26 +18,27 @@ enum JdLiveState {
   /// `status` 0: announced, not started.
   preview,
 
-  /// `status` 2: ended.
+  /// `status` 2: ended (the answer may still carry the stopped live
+  /// addresses, sample S05-play-ended).
   offline,
 
-  /// `status` 3: ended, with a replay on JD's side (3.x showed it offline).
+  /// `status` 3: ended, with the recording on JD Cloud's video service
+  /// ([JdLiveRoom.recording]; 3.x showed it offline).
   replay,
 
   /// `status` 10 or 11: paused by the streamer.
   paused,
-
-  /// `secret` 1: watchable in JD's app only, whatever the status.
-  restricted,
 
   /// Any other status, or none.
   unknown,
 }
 
 /// One broadcast (3.x's `JdLiveRoom`): a featured list card, or the play
-/// answer of a room (with its media when live), completed from a card
-/// already seen ([enrich]). The play answer has no title, shop name,
-/// avatar or views; 3.x wrote [JdLiveApi.siteName] for the names then.
+/// answer of a room (with its media when live or a replay), completed from
+/// a card already seen ([enrich]). The play answer has no title, shop name,
+/// avatar, cover or views; they stay empty then (3.x wrote
+/// [JdLiveApi.siteName] for the names and the blurred background as the
+/// cover), so a follow keeps what it stored (`LiveRoom.mergeFrom`).
 ///
 /// It is also the [LiveRoom.data] of a room entry or recording detail: the
 /// addresses carry no signature or expiry, and the streams are read from
@@ -48,13 +50,17 @@ final class JdLiveRoom {
     required this.liveId,
     required this.state,
     this.authorId = '',
-    this.nick = JdLiveApi.siteName,
-    this.title = JdLiveApi.siteName,
+    this.nick = '',
+    this.title = '',
     this.avatar = '',
     this.cover = '',
+    this.background = '',
     this.totalViews,
     this.hls,
     this.flv,
+    this.recording,
+    this.appOnly = false,
+    this.restriction,
   });
 
   /// The broadcast (`liveId`): the room's identity. Every broadcast has its
@@ -64,17 +70,22 @@ final class JdLiveRoom {
   /// The shop's account (`authorId`); '' when unknown.
   final String authorId;
 
-  /// The shop's name (`userName`), or [JdLiveApi.siteName].
+  /// The shop's name (`userName`); '' when unknown (upgrade 28-2).
   final String nick;
 
-  /// The title, or [JdLiveApi.siteName].
+  /// The title; '' when unknown (upgrade 28-2).
   final String title;
 
   /// The shop's avatar (`userPic`); '' when unknown.
   final String avatar;
 
-  /// The card's cover (`indexImage`) or the play answer's `blurredImg`.
+  /// The card's cover (`indexImage`); '' when no card was seen (upgrade
+  /// 28-3: the play answer's blurred image is only the [background]).
   final String cover;
+
+  /// The play answer's `blurredImg`: a blurred frame for the room page's
+  /// background (upgrade 28-3, M13); '' for a card.
+  final String background;
 
   /// Cumulative views (`pv`); null when unknown.
   final int? totalViews;
@@ -85,35 +96,56 @@ final class JdLiveRoom {
   /// The HLS playlist (`h5VideoUrl`) of a live broadcast.
   final Uri? hls;
 
-  /// The FLV stream (`videoUrl`) of a live broadcast.
+  /// The FLV stream (`videoUrl`, else `pcVideoUrl`, upgrade 28-4) of a live
+  /// broadcast.
   final Uri? flv;
 
+  /// The recording (an HLS playlist on JD Cloud's video service) of a
+  /// replay; null otherwise.
+  final Uri? recording;
+
+  /// `secret` 1: watchable in JD's app only, whatever the state.
+  final bool appOnly;
+
+  /// What keeps this client from playing it, as the play answer tells:
+  /// [LiveRestriction.appOnly], [LiveRestriction.unplayable] (live without
+  /// an address, or a replay without a recording) or
+  /// [LiveRestriction.none]; null for a card (the list does not say).
+  final LiveRestriction? restriction;
+
   /// This play answer with what it lacks taken from [known], a card of the
-  /// same broadcast (3.x's `enrich`): the account, the names while they are
-  /// the placeholder, the avatar, the cover while empty, the views. State
-  /// and media stay this answer's.
+  /// same broadcast (3.x's `enrich`): the account, the names, the avatar,
+  /// the cover and the views while this answer has none. State, background,
+  /// media and restriction stay this answer's.
   JdLiveRoom enrich(JdLiveRoom known) => JdLiveRoom(
     liveId: liveId,
     authorId: authorId.isEmpty ? known.authorId : authorId,
-    nick: nick == JdLiveApi.siteName ? known.nick : nick,
-    title: title == JdLiveApi.siteName ? known.title : title,
+    nick: nick.isEmpty ? known.nick : nick,
+    title: title.isEmpty ? known.title : title,
     avatar: avatar.isEmpty ? known.avatar : avatar,
     cover: cover.isEmpty ? known.cover : cover,
+    background: background.isEmpty ? known.background : background,
     totalViews: totalViews ?? known.totalViews,
     state: state,
     hls: hls,
     flv: flv,
+    recording: recording,
+    appOnly: appOnly,
+    restriction: restriction,
   );
 
   /// Why this broadcast cannot be played, or null (3.x's snapshot check):
-  /// app-only is `NeedsLogin`; any state but live, or no playlist, is
-  /// `StreamUnavailable`.
-  SiteError? get streamError => switch (state) {
-    JdLiveState.restricted => NeedsLogin(_site, '$liveId: JD app only (secret)'),
-    JdLiveState.live when hls == null || flv == null => StreamUnavailable(_site, '$liveId: live without media'),
-    JdLiveState.live => null,
-    _ => StreamUnavailable(_site, '$liveId is ${state.name}'),
-  };
+  /// app-only, any state but live or replay, live without an address and a
+  /// replay without a recording are `StreamUnavailable`, with the reason.
+  SiteError? get streamError {
+    if (appOnly) return StreamUnavailable(_site, '$liveId: JD app only (secret)');
+    return switch (state) {
+      JdLiveState.live when hls == null && flv == null => StreamUnavailable(_site, '$liveId: live without media'),
+      JdLiveState.replay when recording == null => StreamUnavailable(_site, '$liveId: replay without a recording'),
+      JdLiveState.live || JdLiveState.replay => null,
+      _ => StreamUnavailable(_site, '$liveId is ${state.name}'),
+    };
+  }
 }
 
 /// One page of the featured list (3.x's `JdLivePage`).
@@ -132,8 +164,9 @@ final class JdLivePage {
   /// `currentCount`: the entries served so far, sent with the next page.
   final int nextCount;
 
-  /// Whether 3.x asked for another page: this one had at least
-  /// [JdLiveApi.pageSize] broadcasts.
+  /// Whether to ask for another page: this one had a broadcast and
+  /// `currentCount` moved on (upgrade 28-1: the list ends with an empty
+  /// page; 3.x asked only after a page of 30 broadcasts).
   final bool hasMore;
 }
 
@@ -160,9 +193,9 @@ abstract final class JdLiveApi {
   };
 
   /// 3.x's media headers of [liveId] (`mediaHeaders`): what its room entry
-  /// sent for the playlist check, and the rooms' `httpHeaders` (in the 3.x
-  /// JSON). 3.x's player had no JD branch and sent none of them
-  /// ([line]).
+  /// sends for the playlist check, the rooms' `httpHeaders` (in the 3.x
+  /// JSON), and the headers of every line (upgrade 28-5; 3.x's player had
+  /// no JD branch and sent none of them).
   static Map<String, String> mediaHeaders(String liveId) => {
     'origin': webOrigin,
     'referer': link(liveId),
@@ -175,9 +208,14 @@ abstract final class JdLiveApi {
   /// The largest playlist 3.x checked, in characters.
   static const int playlistLimit = 1024 * 1024;
 
-  /// 3.x's platform name: the category, the area's type, the cards' area,
-  /// and the names the play answer lacks.
+  /// 3.x's platform name: the category, the area's type and the cards'
+  /// area. No longer written for the names the play answer lacks (28-2).
   static const String siteName = 'JD Live';
+
+  /// The domain of JD Cloud's video service, where replays are recorded
+  /// (`discover.300hu.com`, S05-play-replay; its answers carry JD Cloud
+  /// storage headers).
+  static const String recordingHost = '300hu.com';
 
   /// `areaType` of the one area.
   static const String areaType = 'official';
@@ -198,9 +236,6 @@ abstract final class JdLiveApi {
     areaName: areaName,
   );
 
-  /// Broadcasts a page has when 3.x asks for the next one.
-  static const int pageSize = 30;
-
   /// Largest recommendation slice (a larger page size is cut to it, 3.x).
   static const int maxRecommendSize = 30;
 
@@ -210,11 +245,13 @@ abstract final class JdLiveApi {
   /// Last page 3.x asked for.
   static const int maxPage = 10000;
 
-  /// The notice of a room (3.x's zh.json `jdlive_chat_notice`).
-  static const String chatNotice = '京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。';
+  /// The notice of a room (text key `jdlive_chat_notice`), in words for
+  /// users (M4.U; 3.x: "京东远端聊天尚待接入；公开目录的 pv 字段按累计观看展示，不标记为当前并发人数。").
+  static const String chatNotice = '这里暂时看不到京东直播的聊天。人数是累计观看，不是正在观看的人数。';
 
-  /// The notice of an app-only room (`jdlive_restricted_notice`).
-  static const String restrictedNotice = '该京东直播仅限京东应用访问，界面保持未知状态，不将其显示成未开播。';
+  /// The notice of an app-only room (`jdlive_restricted_notice`; M4.U,
+  /// 3.x: "该京东直播仅限京东应用访问，界面保持未知状态，不将其显示成未开播。").
+  static const String restrictedNotice = '这场京东直播只能在京东 App 里观看。';
 
   /// Id of the HLS quality.
   static const String hlsId = 'hls';
@@ -227,6 +264,13 @@ abstract final class JdLiveApi {
 
   /// 3.x's second quality (zh.json `jdlive_quality_flv`).
   static const LivePlayQuality flvQuality = LivePlayQuality(quality: 'FLV 原始线路', id: flvId, sort: 1);
+
+  /// Id of a replay's one quality (new in M4.U; 3.x did not play replays).
+  static const String replayId = 'replay';
+
+  /// A replay's one quality: its recording, named `原画` like every new
+  /// quality (the unified quality naming).
+  static const LivePlayQuality replayQuality = LivePlayQuality(quality: '原画', id: replayId, sort: 3);
 
   static final RegExp _liveId = RegExp(r'^[1-9]\d{4,17}$');
   static final RegExp _route = RegExp(r'^/?([1-9]\d{4,17})(?:/(?:live|notice|closed|replay))?(?:\?.*)?$');
@@ -305,15 +349,18 @@ abstract final class JdLiveApi {
 
   // Featured list -------------------------------------------------------------
 
-  /// `liveListWithTabToM` page [page] (3.x's `parseDirectoryJson`): the
-  /// `templateType` 1 entries are broadcasts, the others (`-100`) are
-  /// promotions and skipped. An entry without a valid id, whose `liveId`
-  /// differs from its `id`, or repeating one, is skipped; an entry that is
-  /// not an object, a broadcast without a `data` object, or a name or image
-  /// that is not text, fails the page (`ApiChanged`). `currentCount` is
-  /// required. There is another page when this one had at least [pageSize]
-  /// broadcasts (3.x).
-  static JdLivePage directory(String body, {required int page, int status = 200}) {
+  /// `liveListWithTabToM` page [page] (3.x's `parseDirectoryJson`), asked
+  /// after [after] entries (`currentCount`): the `templateType` 1 entries
+  /// are broadcasts, the others (`-100` promotions, `3` official replays)
+  /// are skipped. An entry without a valid id, whose `liveId` differs from
+  /// its `id`, or repeating one, is skipped (3.x). An entry that cannot be
+  /// read (not an object, a broadcast without a `data` object, a name or
+  /// image that is not text) is skipped too (the unified fault tolerance;
+  /// 3.x failed the page), unless nothing on the page can be read: then
+  /// the page is `ApiChanged`, as is a list that is not one or lacks
+  /// `currentCount`. Names left blank stay empty (28-2). There is another
+  /// page while a page has broadcasts and `currentCount` moves on (28-1).
+  static JdLivePage directory(String body, {required int page, int after = 0, int status = 200}) {
     const what = 'liveListWithTabToM';
     final data = _data(body, status: status, what: what);
     final rows = data['list'];
@@ -322,72 +369,118 @@ abstract final class JdLiveApi {
     }
     final seen = <String>{};
     final rooms = <JdLiveRoom>[];
+    var unreadable = 0;
     for (final row in rows) {
-      final card = _object(row, '$what entry');
-      if (_int(card['templateType']) != 1) continue;
-      final item = _object(card['data'], '$what broadcast');
-      final liveId = _id(item['liveId'] ?? item['id']);
-      if (liveId == null || _id(item['id']) != liveId || !seen.add(liveId)) continue;
-      rooms.add(
-        JdLiveRoom(
-          liveId: liveId,
-          authorId: _id(item['authorId']) ?? '',
-          nick: _optionalText(item['userName'], 'userName of $liveId', fallback: siteName),
-          title: _optionalText(item['title'], 'title of $liveId', fallback: siteName),
-          avatar: _image(item['userPic'], 'userPic of $liveId'),
-          cover: _image(item['indexImage'], 'indexImage of $liveId'),
-          totalViews: _count(item['pv']),
-          state: state(item['status']),
-        ),
-      );
+      final JdLiveRoom? card;
+      try {
+        card = _card(row);
+      } on ApiChanged {
+        unreadable++;
+        continue;
+      }
+      if (card != null && seen.add(card.liveId)) rooms.add(card);
     }
+    if (unreadable > 0 && rooms.isEmpty) throw ApiChanged(_site, '$what: $unreadable unreadable entries, no broadcast');
     final next = _count(data['currentCount']);
     if (next == null) throw ApiChanged(_site, '$what: currentCount is ${data['currentCount']}');
-    return JdLivePage(rooms: rooms, nextCount: next, hasMore: rooms.length >= pageSize);
+    return JdLivePage(rooms: rooms, nextCount: next, hasMore: rooms.isNotEmpty && next > after);
+  }
+
+  /// The broadcast of a list entry, or null for another kind of entry or an
+  /// invalid id; `ApiChanged` when it cannot be read.
+  static JdLiveRoom? _card(Object? row) {
+    const what = 'liveListWithTabToM';
+    final card = _object(row, '$what entry');
+    if (_int(card['templateType']) != 1) return null;
+    final item = _object(card['data'], '$what broadcast');
+    final liveId = _id(item['liveId'] ?? item['id']);
+    if (liveId == null || _id(item['id']) != liveId) return null;
+    return JdLiveRoom(
+      liveId: liveId,
+      authorId: _id(item['authorId']) ?? '',
+      nick: _optionalText(item['userName'], 'userName of $liveId'),
+      title: _optionalText(item['title'], 'title of $liveId'),
+      avatar: _image(item['userPic'], 'userPic of $liveId'),
+      cover: _image(item['indexImage'], 'indexImage of $liveId'),
+      totalViews: _count(item['pv']),
+      state: state(item['status']),
+    );
   }
 
   // Play answer ---------------------------------------------------------------
 
   /// `getImmediatePlayToM` for [liveId] (3.x's `parseRoomJson`): the state,
-  /// the cover (`blurredImg`) and, when live, the HLS playlist and FLV
-  /// stream of one stream key on JD Cloud (https, `*.jdcloud.com`, under
-  /// `/live/`). A live answer without both, or with two keys, is
-  /// `ApiChanged`, as is an answer for another broadcast. The answer has no
-  /// names (see [JdLiveRoom]).
+  /// `secret`, the blurred background (`blurredImg`, 28-3) and the media.
+  /// The answer has no names, cover or views (see [JdLiveRoom]); an answer
+  /// for another broadcast is `ApiChanged`.
+  ///
+  /// Media, one bad address costing only its quality (28-4; 3.x failed the
+  /// whole room when a live answer lacked one): the HLS playlist
+  /// (`h5VideoUrl`) and FLV stream of JD Cloud's live CDN (https,
+  /// `*.jdcloud.com`, under `/live/`); the FLV is `videoUrl`, else
+  /// `pcVideoUrl`, the first one of the playlist's stream key when there is
+  /// a playlist. A replay's recording is the first of `h5VideoUrl`,
+  /// `videoUrl` and `pcVideoUrl` that is an HLS playlist on JD Cloud's
+  /// video service ([recordingHost]).
+  ///
+  /// The restriction: app-only for `secret` 1; unplayable for a live
+  /// broadcast without an address or a replay without a recording; none
+  /// otherwise.
   static JdLiveRoom play(String body, {required String liveId, int status = 200}) {
     const what = 'getImmediatePlayToM';
     final data = _data(body, status: status, what: what);
     final answered = _id(data['liveId']);
     if (answered != liveId) throw ApiChanged(_site, '$what: asked $liveId, got ${data['liveId']}');
-    final current = state(data['status'], secret: data['secret']);
-    final hls = _media(data['h5VideoUrl'], '.m3u8', 'h5VideoUrl of $liveId');
-    final flv = _media(data['videoUrl'], '.flv', 'videoUrl of $liveId');
-    if (current == JdLiveState.live && (hls == null || flv == null || _streamKey(hls) != _streamKey(flv))) {
-      throw ApiChanged(_site, '$what: $liveId is live without one stream in h5VideoUrl and videoUrl');
+    final current = state(data['status']);
+    final appOnly = _int(data['secret']) == 1;
+    final hls = _media(data['h5VideoUrl'], '.m3u8');
+    Uri? flv;
+    for (final field in ['videoUrl', 'pcVideoUrl']) {
+      final candidate = _media(data[field], '.flv');
+      if (candidate != null && (hls == null || _streamKey(candidate) == _streamKey(hls))) {
+        flv = candidate;
+        break;
+      }
     }
+    Uri? recording;
+    if (current == JdLiveState.replay) {
+      for (final field in ['h5VideoUrl', 'videoUrl', 'pcVideoUrl']) {
+        if (_recording(data[field]) case final found?) {
+          recording = found;
+          break;
+        }
+      }
+    }
+    final unplayable =
+        (current == JdLiveState.live && hls == null && flv == null) ||
+        (current == JdLiveState.replay && recording == null);
     return JdLiveRoom(
       liveId: liveId,
       state: current,
-      cover: _image(data['blurredImg'], 'blurredImg of $liveId'),
+      background: _image(data['blurredImg'], null),
       hls: hls,
       flv: flv,
+      recording: recording,
+      appOnly: appOnly,
+      restriction: appOnly
+          ? LiveRestriction.appOnly
+          : unplayable
+          ? LiveRestriction.unplayable
+          : LiveRestriction.none,
     );
   }
 
-  /// 3.x's state of [status]: `secret` 1 is app-only whatever the status;
-  /// 1 live, 0 preview, 2 ended, 3 replay, 10 and 11 paused, anything else
-  /// (or none) unknown.
-  static JdLiveState state(Object? status, {Object? secret}) {
-    if ((_int(secret) ?? 0) == 1) return JdLiveState.restricted;
-    return switch (_int(status)) {
-      1 => JdLiveState.live,
-      0 => JdLiveState.preview,
-      2 => JdLiveState.offline,
-      3 => JdLiveState.replay,
-      10 || 11 => JdLiveState.paused,
-      _ => JdLiveState.unknown,
-    };
-  }
+  /// 3.x's state of [status]: 1 live, 0 preview, 2 ended, 3 replay, 10 and
+  /// 11 paused, anything else (or none) unknown. `secret` is not a state any
+  /// more ([JdLiveRoom.appOnly]).
+  static JdLiveState state(Object? status) => switch (_int(status)) {
+    1 => JdLiveState.live,
+    0 => JdLiveState.preview,
+    2 => JdLiveState.offline,
+    3 => JdLiveState.replay,
+    10 || 11 => JdLiveState.paused,
+    _ => JdLiveState.unknown,
+  };
 
   /// 3.x's check of a live broadcast's HLS playlist at room entry and
   /// before a recording (`validatePlaylist`): at most [playlistLimit]
@@ -444,73 +537,106 @@ abstract final class JdLiveApi {
   // Rooms and streams ---------------------------------------------------------
 
   /// The room of [room] (3.x's `_room`): the broadcast id; the shop's
-  /// account as user, else the broadcast; the title and shop name (the
-  /// placeholder when unknown); the avatar, else the cover; the area `JD
-  /// Live`; the views as cumulative viewers when known; live for live,
-  /// offline for preview, ended and replay, unknown for app-only, paused
-  /// and unknown; 3.x's notice and media headers. [withData] (room entry
-  /// and recording) keeps [room] as the room's data, with its media.
+  /// account as user; the title, shop name, avatar and cover as known,
+  /// else empty, so a follow keeps what it stored (28-2, 28-3; 3.x wrote
+  /// `JD Live`, the broadcast id and the blurred background); the area `JD
+  /// Live`; the views as cumulative viewers when known; live for live
+  /// (app-only too, marked by the restriction), offline for preview and
+  /// ended, replay for a replay (unplayable without a recording), unknown
+  /// for paused and unknown; the notice and 3.x's media headers.
+  /// [withData] (room entry and recording) keeps [room] as the room's
+  /// data, with its media and background.
   static LiveRoom room(JdLiveRoom room, {bool withData = false}) {
     final total = room.totalViews;
     return LiveRoom(
       roomId: room.liveId,
       platform: _site,
-      userId: room.authorId.isEmpty ? room.liveId : room.authorId,
+      userId: room.authorId.isEmpty ? null : room.authorId,
       link: link(room.liveId),
       title: room.title,
       nick: room.nick,
-      avatar: room.avatar.isEmpty ? room.cover : room.avatar,
+      avatar: room.avatar,
       cover: room.cover,
       area: siteName,
       totalViewers: total == null ? '' : '$total',
       audienceMetricType: total == null ? AudienceMetricType.unknown : AudienceMetricType.totalViewers,
       liveStatus: switch (room.state) {
         JdLiveState.live => LiveStatus.live,
-        JdLiveState.preview || JdLiveState.offline || JdLiveState.replay => LiveStatus.offline,
-        JdLiveState.restricted || JdLiveState.paused || JdLiveState.unknown => LiveStatus.unknown,
+        JdLiveState.preview || JdLiveState.offline => LiveStatus.offline,
+        JdLiveState.replay => LiveStatus.replay,
+        JdLiveState.paused || JdLiveState.unknown => LiveStatus.unknown,
       },
-      notice: room.state == JdLiveState.restricted ? restrictedNotice : chatNotice,
+      restriction: room.restriction,
+      notice: room.appOnly ? restrictedNotice : chatNotice,
       httpHeaders: mediaHeaders(room.liveId),
       data: withData ? room : null,
     );
   }
 
-  /// 3.x's qualities of a live [room]: HLS, then FLV.
-  static List<LivePlayQuality> qualities(JdLiveRoom room) => [hlsQuality, if (room.flv != null) flvQuality];
+  /// The qualities of a playable [room]: HLS, then FLV, for a live one
+  /// (3.x; only those with an address, 28-4); the recording for a replay.
+  static List<LivePlayQuality> qualities(JdLiveRoom room) => switch (room.state) {
+    JdLiveState.replay => [if (room.recording != null) replayQuality],
+    _ => [if (room.hls != null) hlsQuality, if (room.flv != null) flvQuality],
+  };
 
-  /// The line of quality [qualityId] of a live [room]: its playlist (HLS)
-  /// or stream (FLV), the host as line id. No headers: 3.x's player had no
-  /// JD branch and sent its own defaults (the stream plays without them,
-  /// spec §6). No lease: the addresses carry no signature or expiry. The
-  /// codec is not written (the answer does not say it). Another quality is
-  /// a caller error.
+  /// The line of quality [qualityId] of a playable [room]: a live one's
+  /// playlist (HLS) or stream (FLV), a replay's recording (HLS); the host
+  /// as line id, and [mediaHeaders] (28-5; the stream also plays without
+  /// them, spec §6). No lease: the addresses carry no signature or expiry.
+  /// The codec is not written (the answer does not say it). A quality the
+  /// room lacks is `StreamUnavailable`; another quality is a caller error.
   static LivePlayLine line(JdLiveRoom room, String qualityId) {
+    final live = room.state == JdLiveState.live;
     final (url, format) = switch (qualityId) {
-      hlsId => (room.hls, StreamFormat.hls),
-      flvId => (room.flv, StreamFormat.flv),
+      hlsId => (live ? room.hls : null, StreamFormat.hls),
+      flvId => (live ? room.flv : null, StreamFormat.flv),
+      replayId => (room.state == JdLiveState.replay ? room.recording : null, StreamFormat.hls),
       _ => throw ArgumentError.value(qualityId, 'qualityId', 'not a JD Live quality'),
     };
     if (url == null) throw StreamUnavailable(_site, '${room.liveId}: no $qualityId');
-    return LivePlayLine('$url', format: format, lineId: url.host);
+    return LivePlayLine('$url', format: format, lineId: url.host, headers: mediaHeaders(room.liveId));
   }
 }
 
-/// A JD Cloud stream of [extension] (3.x's `_mediaUri`), or null: https,
-/// `*.jdcloud.com`, port 443, no user info or fragment, under `/live/`,
-/// without spaces or control characters, at most 8192 characters. A value
-/// that is not text is `ApiChanged`.
-Uri? _media(Object? value, String extension, String what) {
-  final raw = _optionalText(value, what);
+/// A JD Cloud live stream of [extension] (3.x's `_mediaUri`), or null:
+/// https, `*.jdcloud.com`, port 443, no user info or fragment, under
+/// `/live/`, without spaces or control characters, at most 8192
+/// characters. A value that is not text is no stream (28-4; 3.x:
+/// `ApiChanged`).
+Uri? _media(Object? value, String extension) {
+  final uri = _address(value);
+  if (uri == null ||
+      !_hostIs(uri.host, 'jdcloud.com') ||
+      !uri.path.startsWith('/live/') ||
+      !uri.path.toLowerCase().endsWith(extension)) {
+    return null;
+  }
+  return uri;
+}
+
+/// A replay's recording, or null: an HLS playlist (`.m3u8`) on JD Cloud's
+/// video service (`*.300hu.com`), otherwise as [_media].
+Uri? _recording(Object? value) {
+  final uri = _address(value);
+  if (uri == null || !_hostIs(uri.host, JdLiveApi.recordingHost) || !uri.path.toLowerCase().endsWith('.m3u8')) {
+    return null;
+  }
+  return uri;
+}
+
+/// An https address on the default port, without user info, fragment,
+/// spaces or control characters, at most 8192 characters; null otherwise.
+Uri? _address(Object? value) {
+  if (value is! String) return null;
+  final raw = value.trim();
   if (raw.isEmpty || raw.length > 8192 || RegExp(r'[\s\x00-\x1f]').hasMatch(raw)) return null;
   final uri = Uri.tryParse(raw);
   if (uri == null ||
       !uri.isScheme('https') ||
       uri.userInfo.isNotEmpty ||
       uri.hasFragment ||
-      !_hostIs(uri.host, 'jdcloud.com') ||
-      (uri.hasPort && uri.port != 443) ||
-      !uri.path.startsWith('/live/') ||
-      !uri.path.toLowerCase().endsWith(extension)) {
+      (uri.hasPort && uri.port != 443)) {
     return null;
   }
   return uri;
@@ -525,9 +651,13 @@ String _streamKey(Uri uri) {
 
 /// A JD image (3.x's `_image`): https on `*.360buyimg.com`, no user info or
 /// fragment, as `Uri` writes it; '' for anything else. A value that is not
-/// text is `ApiChanged`.
-String _image(Object? value, String what) {
-  final uri = Uri.tryParse(_optionalText(value, what));
+/// text is `ApiChanged` (a list entry that cannot be read), or no image
+/// when [what] is null (the play answer's background, 28-4's tolerance).
+String _image(Object? value, String? what) {
+  final text = what == null
+      ? (value is String && value.length <= 65536 ? value.trim() : '')
+      : _optionalText(value, what);
+  final uri = Uri.tryParse(text);
   if (uri == null ||
       !uri.isScheme('https') ||
       uri.userInfo.isNotEmpty ||
@@ -569,14 +699,13 @@ int? _count(Object? value) {
 /// 3.x's text of an envelope field: text trimmed, anything else written.
 String _text(Object? value) => value is String ? value.trim() : value?.toString().trim() ?? '';
 
-/// 3.x's optional text: null is [fallback]; text (at most 65536
-/// characters) trimmed with runs of whitespace made one space, [fallback]
-/// when blank; anything else is `ApiChanged`.
-String _optionalText(Object? value, String what, {String fallback = ''}) {
-  if (value == null) return fallback;
+/// 3.x's optional text: null is ''; text (at most 65536 characters) trimmed
+/// with runs of whitespace made one space; anything else is `ApiChanged`.
+/// Blank stays '' (3.x wrote `JD Live` for a blank name or title, 28-2).
+String _optionalText(Object? value, String what) {
+  if (value == null) return '';
   if (value is! String || value.length > 65536) throw ApiChanged(_site, '$what is not text');
-  final text = value.trim().replaceAll(RegExp(r'\s+'), ' ');
-  return text.isEmpty ? fallback : text;
+  return value.trim().replaceAll(RegExp(r'\s+'), ' ');
 }
 
 Map<String, dynamic> _object(Object? value, String what) {

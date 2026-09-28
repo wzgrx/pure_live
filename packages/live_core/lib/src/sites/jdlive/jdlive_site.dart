@@ -27,18 +27,21 @@ const _searchLimit = 32;
 /// - the featured list `liveListWithTabToM` (the one area, the directory,
 ///   the recommendations and the search filter), paged natively: page 1
 ///   starts a sequence at the clock's time, and each next page sends the
-///   previous `currentCount` with that time. The directory, the
-///   recommendations (and the area) and each search keyword keep their own
-///   sequence;
+///   previous `currentCount` with that time, while the previous page had
+///   new broadcasts (upgrade 28-1; a broadcast already listed in the
+///   sequence is not listed again). The directory, the recommendations (and
+///   the area) and each search keyword keep their own sequence;
 /// - a room is the play answer `getImmediatePlayToM` (refresh, live status,
 ///   exact search: one request); room entry and recording of a live room
-///   also download and check its HLS playlist (two requests); recovery asks
-///   both again. Each call has one 20 s deadline (3.x's `_scope`).
+///   with a playlist also download and check it (two requests); recovery
+///   asks both again. A replay plays its recording, not downloaded
+///   beforehand. Each call has one 20 s deadline (3.x's `_scope`).
 ///
-/// The play answer has no title, shop name, avatar or views; they come
-/// from the list cards seen in this session, as in 3.x, else the room says
-/// `JD Live`. Rooms are identified by the broadcast id (`liveId`) asked
-/// for. Failures are `SiteError`s; nothing is disguised as an offline room.
+/// The play answer has no title, shop name, avatar, cover or views; they
+/// come from the list cards seen in this session, as in 3.x, else they stay
+/// empty (upgrades 28-2, 28-3), so a follow keeps what it stored. Rooms are
+/// identified by the broadcast id (`liveId`) asked for. Failures are
+/// `SiteError`s; nothing is disguised as an offline room.
 final class JdLiveSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -145,7 +148,10 @@ final class JdLiveSite extends LiveSite
   /// Page [page] of sequence [key] (3.x's `_directory`): page 1 starts the
   /// sequence; a later page needs the previous page of the same sequence
   /// to have asked for it, else it is empty without a request, as is a
-  /// page below 1. The cards are remembered for the play answers.
+  /// page below 1. A broadcast an earlier page of the sequence listed is
+  /// left out, and a page without new broadcasts is the last (the unified
+  /// timeline rule, with 28-1's "go on while a page has broadcasts"). The
+  /// cards are remembered for the play answers.
   Future<JdLivePage> _page(String key, int page, CancelToken? cancel) async {
     _checkCancelled(cancel);
     if (page < 1) return JdLivePage.empty;
@@ -160,15 +166,20 @@ final class JdLiveSite extends LiveSite
         JdLiveApi.apiHeaders,
         cancel: token,
       );
-      return JdLiveApi.directory(response.text, page: page, status: response.status);
+      return JdLiveApi.directory(response.text, page: page, after: count, status: response.status);
     });
     result.rooms.forEach(_remember);
-    if (result.hasMore) {
+    final fresh = [
+      for (final room in result.rooms)
+        if (sequence.listed.add(room.liveId)) room,
+    ];
+    final hasMore = result.hasMore && fresh.isNotEmpty;
+    if (hasMore) {
       sequence.counts[page + 1] = result.nextCount;
     } else {
       sequence.counts.remove(page + 1);
     }
-    return result;
+    return JdLivePage(rooms: fresh, nextCount: result.nextCount, hasMore: hasMore);
   }
 
   /// A new sequence for [key] at the clock's time; searches beyond
@@ -200,8 +211,8 @@ final class JdLiveSite extends LiveSite
       page == 1 && pageSize >= 1 ? JdLiveApi.categories() : const [];
 
   /// Page [page] of the featured list, for the one area or the
-  /// recommendations (3.x): its broadcasts, and whether it had
-  /// [JdLiveApi.pageSize] of them. Another area is a caller error.
+  /// recommendations (3.x): its broadcasts, and whether another page may
+  /// follow (28-1). Another area is a caller error.
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
     _checkArea(category);
@@ -285,13 +296,17 @@ final class JdLiveSite extends LiveSite
 
   /// The play answer of [liveId]; with [withMedia], a live broadcast's
   /// playlist is downloaded (3.x's media headers) and checked too, within
-  /// the same deadline (3.x's `room`).
+  /// the same deadline (3.x's `room`). A live broadcast with only an FLV
+  /// stream (28-4) has nothing to check, an app-only one is not played (one
+  /// request, as 3.x, which did not count it live); a replay's recording is
+  /// not downloaded (JD records whole broadcasts: 1.4 MB and 9,500 segments
+  /// for a week, 2026-09-28).
   Future<JdLiveRoom> _play(String liveId, {required bool withMedia, CancelToken? cancel}) =>
       _scoped(cancel, (token) async {
         final response = await _get(JdLiveApi.playUrl(liveId, now: _now()), JdLiveApi.apiHeaders, cancel: token);
         final room = JdLiveApi.play(response.text, liveId: liveId, status: response.status);
         final hls = room.hls;
-        if (withMedia && room.state == JdLiveState.live && hls != null) {
+        if (withMedia && room.state == JdLiveState.live && !room.appOnly && hls != null) {
           final playlist = await _get(hls, JdLiveApi.mediaHeaders(liveId), cancel: token);
           JdLiveApi.checkPlaylist(playlist.text, expected: hls, status: playlist.status);
         }
@@ -311,7 +326,8 @@ final class JdLiveSite extends LiveSite
   }
 
   /// The room: the play answer and, when live, the playlist check (two
-  /// requests, 3.x). The room carries its [JdLiveRoom] with the media.
+  /// requests, 3.x). The room carries its [JdLiveRoom] with the media and
+  /// the blurred background.
   @override
   Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, withMedia: true);
 
@@ -323,9 +339,10 @@ final class JdLiveSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withMedia: true);
 
-  /// Whether the play answer says live (one request, 3.x). A state that is
-  /// neither live nor ended is an error, never "offline": app-only is
-  /// `NeedsLogin`, paused `StreamUnavailable`, an unknown status
+  /// Whether the play answer says live (one request, 3.x); an app-only
+  /// broadcast is live too (the unified rule for restricted broadcasts;
+  /// 3.x: an error). A state that is neither live nor ended is an error,
+  /// never "offline": paused is `StreamUnavailable`, an unknown status
   /// `ApiChanged`.
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
@@ -336,7 +353,7 @@ final class JdLiveSite extends LiveSite
     return switch (room.state) {
       JdLiveState.live => true,
       JdLiveState.preview || JdLiveState.offline || JdLiveState.replay => false,
-      JdLiveState.restricted || JdLiveState.paused => throw room.streamError!,
+      JdLiveState.paused => throw StreamUnavailable(_site, '$liveId is paused'),
       JdLiveState.unknown => throw ApiChanged(_site, '$liveId: unknown status'),
     };
   }
@@ -345,9 +362,10 @@ final class JdLiveSite extends LiveSite
 
   /// The play answer of [detail] when it can be played (3.x's snapshot
   /// check, no request): a JD room, not offline, with the data of a room
-  /// entry or recording detail (a card or refresh has none) that is live.
-  /// Otherwise the reason (`StreamUnavailable`, or `NeedsLogin` for an
-  /// app-only room); another platform's room is a caller error.
+  /// entry or recording detail (a card or refresh has none) that is live
+  /// with an address or a replay with its recording. Otherwise the reason
+  /// (`StreamUnavailable`: app-only, offline, no address or recording);
+  /// another platform's room is a caller error.
   JdLiveRoom _playable(LiveRoom detail) {
     if (detail.platform != _site) throw ArgumentError.value(detail.platform, 'detail', 'not a JD Live room');
     final liveId = _liveId(detail.roomId);
@@ -361,8 +379,9 @@ final class JdLiveSite extends LiveSite
     return data;
   }
 
-  /// 3.x's qualities, HLS then FLV, when the room can be played (no
-  /// request).
+  /// The qualities when the room can be played (no request): 3.x's HLS then
+  /// FLV for a live room (those with an address, 28-4), `原画` for a
+  /// replay's recording.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
       JdLiveApi.qualities(_playable(detail));
@@ -371,17 +390,19 @@ final class JdLiveSite extends LiveSite
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The line of [quality] from the room's play answer, no request (3.x):
-  /// the applied quality is the one asked for. A room that cannot be played
-  /// says why (see [getPlayQualities]); another quality is a caller error.
+  /// The line of [quality] from the room's play answer, no request (3.x),
+  /// with the media headers (28-5): the applied quality is the one asked
+  /// for. A room that cannot be played says why (see [getPlayQualities]),
+  /// as does a quality it lacks; another quality is a caller error.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final id = '${quality.selectionId}';
     return LivePlayUrlResolution.lines([JdLiveApi.line(_playable(detail), id)], appliedQualityData: id);
   }
 
-  /// A fresh play answer and playlist check for [quality] (two requests,
-  /// 3.x): [detail] must have been playable, and the broadcast still is.
+  /// A fresh play answer and, for a live broadcast, playlist check for
+  /// [quality] (two requests, 3.x; one for a replay): [detail] must have
+  /// been playable, and the broadcast still is.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
     required LiveRoom detail,
@@ -389,7 +410,7 @@ final class JdLiveSite extends LiveSite
   }) async {
     final id = '${quality.selectionId}';
     final liveId = _playable(detail).liveId;
-    if (id != JdLiveApi.hlsId && id != JdLiveApi.flvId) {
+    if (id != JdLiveApi.hlsId && id != JdLiveApi.flvId && id != JdLiveApi.replayId) {
       throw ArgumentError.value(quality, 'quality', 'not a JD Live quality');
     }
     final fresh = await _detail(liveId, withMedia: true);
@@ -405,10 +426,12 @@ final class JdLiveSite extends LiveSite
 }
 
 /// One page sequence (3.x's `_JdDirectorySequence`): the time of its first
-/// page and the `currentCount` to send for each page it may ask for.
+/// page, the `currentCount` to send for each page it may ask for, and the
+/// broadcasts it listed.
 final class _Sequence {
   new(this.timestamp);
 
   final int timestamp;
   final Map<int, int> counts = {1: 0};
+  final Set<String> listed = {};
 }

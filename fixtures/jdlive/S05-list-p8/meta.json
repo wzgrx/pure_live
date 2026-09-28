@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "platform": "jdlive",
+  "sample": "S05-list-p8",
+  "capturedAt": "2026-09-28T20:14:01.520339Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.m.jd.com/api?appid=h5-live&functionId=liveListWithTabToM&v=1790626000000&body=%7B%22tabId%22%3A1%2C%22currentCount%22%3A%22215%22%2C%22page%22%3A8%2C%22timestamp%22%3A1790626000000%7D",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+      "Origin": "https://lives.jd.com",
+      "Referer": "https://lives.jd.com/",
+      "Accept": "application/json, text/plain, */*"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 20:14:02 GMT",
+      "content-type": "application/json",
+      "x-rp-sdtoken": "set;1800;E9Nx87aGvZBWf7MtD0_P5f1BLlcCxSR5WKSpEcgo__vmAyjO89Bve_YY5eAeYBCgMOYnKrcoD4ysRs-Rx-5xgpDdstagK3uafrgrqusO3HndBorn_PMTcuLg7CkQw-uABOJLgu0B4o",
+      "vary": "Accept-Encoding",
+      "x-mlaas-at": "hit=0&id=10740178.53843.17906264425292589",
+      "content-encoding": "gzip",
+      "access-control-allow-origin": "https://lives.jd.com",
+      "access-control-allow-credentials": "true",
+      "x-api-request-id": "10106882019-112246-1790626442519",
+      "access-control-expose-headers": "X-Rp-Sdtoken,X-API-Request-Id,Date,X-MLaas-At",
+      "server": "jfe"
+    }
+  },
+  "raw": {
+    "sha256": "6c5ef46911aaa510c6d34311025448c8583b192ed3d91157eb0626a7ad490f53",
+    "length": 265
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "header:x-rp-sdtoken",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.U.28 recorder (schema 1)"
+}

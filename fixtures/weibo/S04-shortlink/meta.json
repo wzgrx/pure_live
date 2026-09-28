@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "weibo",
+  "sample": "S04-shortlink",
+  "capturedAt": "2026-09-28T18:50:48.837612Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://t.cn/AXWbinBd",
+    "headers": {
+      "Referer": "https://weibo.com/l/wblive/",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "content-type": "text/html;charset=UTF-8",
+      "content-length": "243",
+      "connection": "keep-alive",
+      "location": "https://weibo.com/l/wblive/p/show/1022:2321325347771573207158",
+      "date": "Mon, 28 Sep 2026 18:50:48 GMT",
+      "server": "SHANHAI-SERVER",
+      "lb": "123.56.139.83",
+      "ssl_node": "ecs-10-93-117-42-aliyun.paas.weibo.com"
+    }
+  },
+  "raw": {
+    "sha256": "a7d2746543572624d33461b4fbcd59bcf0f81d35fb241d4830c8a7c6f3123bba",
+    "length": 243
+  },
+  "body": "body.html",
+  "scrubbed": [],
+  "tool": "M4.U.18 recorder (schema 1)"
+}

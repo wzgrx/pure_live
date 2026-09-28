@@ -17,14 +17,17 @@ const _site = 'weibo';
 /// had `EmptyDanmaku`). The requests are 3.x's, with 3.x's headers:
 /// - the catalog is one category with one area, without a request;
 /// - the recommendations (and that area) are the snapshot
-///   `pc_recommend/list.json?count=10` (one page; page 2 and later are empty
-///   without a request, and callers' page sizes are not applied, as in 3.x);
+///   `pc_recommend/list.json?count=100` (18-1; one page; page 2 and later
+///   are empty without a request, and callers' page sizes are not applied,
+///   as in 3.x);
 /// - a nickname search filters that snapshot; a broadcast id or room link
-///   finds that room;
+///   finds that room; a `t.cn` short link is followed once (18-9);
 /// - room entry, follow refreshes and recordings read
 ///   `room/show_pc_live.json` (one request);
-/// - every playback, recovery and recording reads that detail again (one
-///   request) and plays its FLV; there is no signed URL to reuse.
+/// - every live playback, recovery and recording reads that detail again
+///   (one request) and plays its FLV; there is no signed URL to reuse. A
+///   replay plays its recording (18-5), from the detail when the room has
+///   it.
 ///
 /// A room is one broadcast, not the anchor (see [WeiboApi]). Failures are
 /// `SiteError`s; nothing is disguised as an offline room.
@@ -139,6 +142,9 @@ final class WeiboSite extends LiveSite
   ///   request;
   /// - a broadcast id or room link ([WeiboApi.exactRoom]) finds that room,
   ///   or nothing when the site says it does not exist;
+  /// - a `t.cn` short link ([WeiboApi.shortLink], 18-9) is asked where it
+  ///   leads (one request, redirects not followed); a Weibo room link there
+  ///   finds that room as above, anything else nothing;
   /// - another link (a URL with a scheme and host) or a blank keyword finds
   ///   nothing, without a request;
   /// - anything else filters the snapshot's nicknames
@@ -153,7 +159,9 @@ final class WeiboSite extends LiveSite
     _checkCancelled(cancel);
     _checkPage(page, pageSize);
     if (page > 1) return const [];
-    final exact = WeiboApi.exactRoom(keyword);
+    final input = keyword.trim();
+    final short = WeiboApi.shortLink(input);
+    final exact = short != null ? await _shortLinkRoom(short, cancel: cancel) : WeiboApi.exactRoom(input);
     if (exact != null) {
       try {
         return [await _detail(exact, cancel: cancel)];
@@ -161,10 +169,26 @@ final class WeiboSite extends LiveSite
         return const [];
       }
     }
-    final input = keyword.trim();
     if (input.isEmpty || _isLink(input)) return const [];
     final snapshot = await getDirectoryPage(cancel: cancel);
     return WeiboApi.searchSnapshot(input, snapshot.rooms, pageSize: pageSize);
+  }
+
+  /// The broadcast short link [link] leads to: one request without
+  /// following the redirect. A redirect to a Weibo room link gives its
+  /// broadcast; a redirect elsewhere (another platform, `weibo.com/sorry`
+  /// for an unknown code), an answer without a redirect and HTTP 404 give
+  /// null; other statuses fail as [WeiboApi.checkStatus] says.
+  Future<String?> _shortLinkRoom(Uri link, {CancelToken? cancel}) async {
+    final response = await _get(link, cancel: cancel);
+    final status = response.status;
+    if (ShortLinkSession.redirectStatuses.contains(status)) {
+      final target = ShortLinkSession.redirectTarget(link, response);
+      return target == null ? null : WeiboApi.liveIdFromUrl('$target');
+    }
+    if ((status >= 200 && status < 300) || status == 404) return null;
+    WeiboApi.checkStatus(status, 't.cn');
+    return null;
   }
 
   /// Whether [input] is a link (`scheme://…`) rather than a keyword. 3.x
@@ -200,44 +224,58 @@ final class WeiboSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
 
-  /// Whether the broadcast is live: true when live, false for a replay. A
-  /// state 3.x did not know is no answer (3.x threw): a restricted
-  /// broadcast is `NeedsLogin`, any other `StreamUnavailable` (see
-  /// [WeiboApi.unplayable]).
+  /// Whether the broadcast is live: true when live (a restricted broadcast
+  /// too, 18-4), false for a replay or an ended broadcast (18-3). A state
+  /// 3.x did not know is no answer (3.x threw): `StreamUnavailable`.
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     final room = await _detail(roomId);
     if (room.isLiveNow) return true;
-    if (room.isRecord) return false;
-    final data = room.data;
-    throw (data is WeiboRoomData ? WeiboApi.unplayable(data) : null) ??
-        StreamUnavailable(_site, '${room.roomId}: state not known');
+    if (room.isRecord || room.liveStatus == LiveStatus.offline) return false;
+    throw StreamUnavailable(_site, '${room.roomId}: state not known');
   }
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's one quality, 原始流 ([WeiboApi.original]), without a request,
-  /// when the room's detail says it plays; otherwise its reason
-  /// ([WeiboApi.unplayable]; 3.x returned no qualities for a replay).
+  /// The one quality the room plays, without a request: 3.x's 原始流
+  /// ([WeiboApi.original]) live, 原画 ([WeiboApi.replay]) for a replay's
+  /// recording (18-5). A room whose detail does not play is refused with
+  /// its reason ([WeiboApi.unplayable]; 3.x returned no qualities for a
+  /// replay). Without detail data (a list card, a stored follow) a replay
+  /// offers [WeiboApi.replay], an offline state nothing, anything else
+  /// [WeiboApi.original].
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
+    final data = detail.data;
+    if (data is WeiboRoomData) {
+      if (WeiboApi.unplayable(data) case final error?) throw error;
+      return [WeiboApi.qualityOf(data)!];
+    }
     _checkPlayable(detail);
-    return const [WeiboApi.original];
+    return [if (detail.isRecord) WeiboApi.replay else WeiboApi.original];
   }
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The lines of the broadcast as the site answers now: the detail is read
-  /// again (one request, 3.x), must still be the same anchor's and must
-  /// play. A quality other than [WeiboApi.original], or a room whose known
-  /// detail does not play, is refused without a request.
+  /// The lines of the broadcast:
+  /// - [WeiboApi.original]: as the site answers now. The detail is read
+  ///   again (one request, 3.x), must still be the same anchor's, live and
+  ///   playable; a broadcast that ended meanwhile is `StreamUnavailable`,
+  ///   never its replay.
+  /// - [WeiboApi.replay]: the recording of the room's detail, without a
+  ///   request (an unsigned VOD); without detail data the detail is read
+  ///   once.
+  ///
+  /// Another quality, a room whose known detail does not play, or a quality
+  /// the known detail does not offer is refused without a request.
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) =>
       _resolve(detail, quality);
 
-  /// As [resolvePlayUrlsRaw] (3.x read the detail again for every attempt).
+  /// As [resolvePlayUrlsRaw] (3.x read the detail again for every attempt;
+  /// a replay's recording does not change).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
     required LiveRoom detail,
@@ -245,35 +283,65 @@ final class WeiboSite extends LiveSite
   }) => _resolve(detail, quality);
 
   Future<LivePlayUrlResolution> _resolve(LiveRoom detail, LivePlayQuality quality) async {
-    if ('${quality.selectionId}' != '${WeiboApi.original.selectionId}') {
-      throw StreamUnavailable(_site, 'quality ${quality.selectionId} is not offered');
+    final asked = '${quality.selectionId}';
+    if (asked != '${WeiboApi.original.selectionId}' && asked != '${WeiboApi.replay.selectionId}') {
+      throw StreamUnavailable(_site, 'quality $asked is not offered');
     }
-    _checkPlayable(detail);
     final known = detail.data;
+    if (known is WeiboRoomData) {
+      final replayUrl = _offered(known, asked).replayUrl;
+      if (replayUrl != null) return WeiboApi.replayResolution(replayUrl);
+    } else {
+      _checkPlayable(detail);
+    }
     final owner = known is WeiboRoomData ? known.ownerId : int.tryParse(detail.userId?.trim() ?? '');
     final fresh = await _detail(detail.roomId, ownerId: owner != null && owner > 0 ? owner : null);
-    final data = fresh.data! as WeiboRoomData;
-    if (WeiboApi.unplayable(data) case final error?) throw error;
-    return WeiboApi.resolution(data.mediaUrls);
+    final data = _offered(fresh.data! as WeiboRoomData, asked);
+    return data.replayUrl != null ? WeiboApi.replayResolution(data.replayUrl!) : WeiboApi.resolution(data.mediaUrls);
   }
 
-  /// Throws why [room] cannot play, from what its detail already says: its
-  /// [WeiboRoomData], or without one (a list card, a stored follow) a
-  /// replay or offline state.
-  static void _checkPlayable(LiveRoom room) {
-    final data = room.data;
-    if (data is WeiboRoomData) {
-      if (WeiboApi.unplayable(data) case final error?) throw error;
-    } else if (room.isRecord || room.isExplicitlyOfflineNow) {
-      throw StreamUnavailable(_site, '${room.roomId} is not live');
+  /// [data] when it plays quality [asked]; otherwise why not.
+  static WeiboRoomData _offered(WeiboRoomData data, String asked) {
+    if (WeiboApi.unplayable(data) case final error?) throw error;
+    final offered = WeiboApi.qualityOf(data)!;
+    if ('${offered.selectionId}' != asked) {
+      throw StreamUnavailable(
+        _site,
+        offered == WeiboApi.replay ? 'the broadcast has ended; its replay is quality replay' : 'not a replay',
+      );
     }
+    return data;
+  }
+
+  /// Throws when [room], without detail data (a list card, a stored
+  /// follow), is known not to play: an offline state.
+  static void _checkPlayable(LiveRoom room) {
+    if (room.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '${room.roomId} is not live');
   }
 
   // Links ---------------------------------------------------------------------
 
   /// The broadcast of a Weibo room link (see [WeiboApi.liveIdFromUrl]); a
-  /// bare broadcast id is no link (it is found by search). The site's share
-  /// short links (`t.cn`) were not followed by 3.x either.
+  /// bare broadcast id is no link (it is found by search).
   @override
   String? roomIdFromUrl(String url) => WeiboApi.liveIdFromUrl(url);
+
+  /// `t.cn` short links ([WeiboApi.shortLink], 18-9; 3.x did not follow
+  /// them).
+  @override
+  bool needsResolving(String url) => WeiboApi.shortLink(url) != null;
+
+  /// Follows one redirect of a `t.cn` link without fetching the target: a
+  /// Weibo room link there is that room; any other target is parsed again
+  /// by every platform (`t.cn` shortens links to other sites too), and
+  /// `weibo.com/sorry` (an unknown code) leads nowhere.
+  @override
+  Future<LinkResolution?> resolveUrl(String url, ShortLinkSession session) async {
+    final start = WeiboApi.shortLink(url);
+    if (start == null) return null;
+    final target = ShortLinkSession.redirectTarget(start, await session.get(start, headers: WeiboApi.headers));
+    if (target == null) return null;
+    final roomId = WeiboApi.liveIdFromUrl('$target');
+    return roomId != null ? LinkRoom(roomId) : LinkRedirect(target);
+  }
 }

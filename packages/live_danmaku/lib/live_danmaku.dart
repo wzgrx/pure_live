@@ -18,5 +18,6 @@ export 'src/filters/repeated_filter.dart';
 export 'src/filters/similarity_filter.dart';
 export 'src/registry.dart';
 export 'src/sites/bilibili.dart';
+export 'src/sites/douyin.dart';
 export 'src/sites/douyu.dart';
 export 'src/socket_connection.dart';

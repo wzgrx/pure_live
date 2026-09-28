@@ -1,0 +1,4417 @@
+{
+  "generator": "3.x DouyinDanmaku.decodeMessage, one instance per sample or vector (fixtures/douyin/danmaku/legacy_expected.dart, run by legacy_expected.sh)",
+  "value": {
+    "args": {
+      "webRid": "148108118778",
+      "roomId": "7690183442860198697",
+      "userId": "2824504236962640624",
+      "cookie": ""
+    },
+    "heartbeat": "OgJoYg==",
+    "join": "OgJoYg==",
+    "cursorTime": 1790519970273,
+    "signature": "6l+ErMiddwgL2Tah",
+    "endpoints": [
+      "wss://webcast100-ws-web-lq.douyin.com/webcast/im/push/v2/?app_name=douyin_web&version_code=180800&webcast_sdk_version=1.0.15&update_version_code=1.0.15&compress=gzip&cursor=h-1_t-1790519970273_r-1_d-1_u-1&host=https%3A%2F%2Flive.douyin.com&aid=6383&live_id=1&did_rule=3&debug=false&maxCacheMessageNumber=20&endpoint=live_pc&support_wrds=1&im_path=%2Fwebcast%2Fim%2Ffetch%2F&user_unique_id=2824504236962640624&device_platform=web&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_language=zh-CN&browser_platform=Win32&browser_name=Mozilla&browser_version=5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F134.0.0.0+Safari%2F537.36&browser_online=true&tz_name=Asia%2FShanghai&identity=audience&room_id=7690183442860198697&need_persist_msg_count=15&heartbeatDuration=0&signature=6l%2BErMiddwgL2Tah",
+      "wss://webcast100-ws-web-hl.douyin.com/webcast/im/push/v2/?app_name=douyin_web&version_code=180800&webcast_sdk_version=1.0.15&update_version_code=1.0.15&compress=gzip&cursor=h-1_t-1790519970273_r-1_d-1_u-1&host=https%3A%2F%2Flive.douyin.com&aid=6383&live_id=1&did_rule=3&debug=false&maxCacheMessageNumber=20&endpoint=live_pc&support_wrds=1&im_path=%2Fwebcast%2Fim%2Ffetch%2F&user_unique_id=2824504236962640624&device_platform=web&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_language=zh-CN&browser_platform=Win32&browser_name=Mozilla&browser_version=5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F134.0.0.0+Safari%2F537.36&browser_online=true&tz_name=Asia%2FShanghai&identity=audience&room_id=7690183442860198697&need_persist_msg_count=15&heartbeatDuration=0&signature=6l%2BErMiddwgL2Tah"
+    ],
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+      "Origin": "https://live.douyin.com",
+      "Referer": "https://live.douyin.com/148108118778"
+    },
+    "headersWithCookie": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+      "Cookie": "ttwid=1%7Csynthetic",
+      "Origin": "https://live.douyin.com",
+      "Referer": "https://live.douyin.com/148108118778"
+    },
+    "headersWithBlankCookie": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+      "Origin": "https://live.douyin.com",
+      "Referer": "https://live.douyin.com/148108118778"
+    },
+    "frames": [
+      {
+        "line": 2,
+        "effects": [
+          {
+            "send": "EO3ZjNWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+          }
+        ]
+      },
+      {
+        "line": 4,
+        "effects": [
+          {
+            "send": "EPfZjNWSt92CRDoDYWNrQkFpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cg=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众1",
+              "userId": "579432622234547",
+              "message": "木森大气",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224691106976802",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "k!",
+              "userId": "8727542766180611",
+              "message": "1",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224699158959150",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众2",
+              "userId": "890700115389",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224685221991464",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 6,
+        "effects": [
+          {
+            "send": "EIfajNWSt92CRDoDYWNrQkFpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cg=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众3",
+              "userId": "29022464958",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690219056905819177",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众4",
+              "userId": "456986612382",
+              "message": "左上角有苹果18手机[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224686661915690",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 306000
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 8,
+        "effects": [
+          {
+            "send": "EIzajNWSt92CRDoDYWNrQkFpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cg=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众5",
+              "userId": "798181452920",
+              "message": "[赞][赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224699521881098",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众6",
+              "userId": "3174493713106159",
+              "message": "🀄️",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224691999003694",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众7",
+              "userId": "79491138050",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221459547214874",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众8",
+              "userId": "2836820760934463",
+              "message": "3号牛🐮",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224700447036466",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众9",
+              "userId": "317106805058692",
+              "message": "3号晋级",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224696161883136",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 10,
+        "effects": []
+      },
+      {
+        "line": 11,
+        "effects": [
+          {
+            "send": "EJXljNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众10",
+              "userId": "892096150993016",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221741512070170",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众11",
+              "userId": "57243134498",
+              "message": "1",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224695875048489",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众12",
+              "userId": "25820803151",
+              "message": "这一组个个都牛",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224703475143680",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众13",
+              "userId": "7199474043868466",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222816612062259",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众14",
+              "userId": "222223668555",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224707476050953",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众15",
+              "userId": "22216839801",
+              "message": "优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224698786337834",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 13,
+        "effects": [
+          {
+            "send": "ENHwkNWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxODc5MzMxMHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDcxODI3OTg3MTE0NA=="
+          }
+        ]
+      },
+      {
+        "line": 15,
+        "effects": [
+          {
+            "send": "ENbwkNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众16",
+              "userId": "471072809528",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222373736698906",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众17",
+              "userId": "47374170618",
+              "message": "嘉路优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224706112672806",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众18",
+              "userId": "5025431866323770",
+              "message": "加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224695720530971",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 306000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众19",
+              "userId": "1179624509223852",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222184611091494",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 17,
+        "effects": [
+          {
+            "send": "EO+HldWSt92CRDoDYWNrQmVpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTYxNDkwN3xzZXE6NHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDcyMjU3NDgzODkwOQ=="
+          }
+        ]
+      },
+      {
+        "line": 19,
+        "effects": [
+          {
+            "send": "EPOHldWSt92CRDoDYWNrQmJpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNjkwNTQ1N3xzZXE6MXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxODI3OTg3MTE0NA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众20",
+              "userId": "84231518781",
+              "message": "[赞][赞][赞][赞][赞][666][666][666][666][666][666][666][666]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224706148307994",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众21",
+              "userId": "5374074172670895",
+              "message": "2号励害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224708487074852",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众22",
+              "userId": "674471929497",
+              "message": "这小子会唱[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224708192736294",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众23",
+              "userId": "74794414279",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221541866869810",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 21,
+        "effects": [
+          {
+            "send": "EJSSldWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcyMjU3NDgzODkwOQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众24",
+              "userId": "32524727904",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222428576519208",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众25",
+              "userId": "26187439450",
+              "message": "厉害啊",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224702884320266",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 23,
+        "effects": [
+          {
+            "send": "EMaemdWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTIzMDQ1M3x3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDcyNjg2OTgwNTcwOA=="
+          }
+        ]
+      },
+      {
+        "line": 25,
+        "effects": [
+          {
+            "send": "EMuemdWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcyMjU3NDgzODkwOQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众26",
+              "userId": "8259430836725166",
+              "message": "333",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224710525604918",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众27",
+              "userId": "16748168316",
+              "message": "苹果汁",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224709705045026",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众28",
+              "userId": "49522230374",
+              "message": "2",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224709422978111",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "Yhcd.",
+              "userId": "402626996409",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222089634436106",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众29",
+              "userId": "6530257010661648",
+              "message": "来",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224702900606006",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众30",
+              "userId": "259008876725",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220897727714345",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 306000
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 27,
+        "effects": [
+          {
+            "send": "EJ2qmdWSt92CRDoDYWNrQmJpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxODc3OTMwOXxzZXE6MXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcyNjg2OTgwNTcwOA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众31",
+              "userId": "134627231980",
+              "message": "左上角有苹果18手机一",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224709716595727",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众32",
+              "userId": "272565960219688",
+              "message": "1号坚定精准，2号干脆饱满，3号磅礴大气[赞][赞][赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224697494803492",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众33",
+              "userId": "860475655492941",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224713114555428",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众34",
+              "userId": "4672551703429784",
+              "message": "危险了",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224709406889006",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 29,
+        "effects": [
+          {
+            "send": "ENXAndWSt92CRDoDYWNrQmZpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNjQ1ODEyOHxzZXE6MTJ8d3NzX21zZ190eXBlOndyZHN8d3Jkc192Ojc2OTAyMjQ3MzExNjQ3NzI3NTU="
+          }
+        ]
+      },
+      {
+        "line": 31,
+        "effects": [
+          {
+            "send": "ENnAndWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcyNjg2OTgwNTcwOA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众35",
+              "userId": "4603327156784663",
+              "message": "[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224711891309578",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众36",
+              "userId": "472874913102",
+              "message": "[打call]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224716671571007",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众37",
+              "userId": "15668861479",
+              "message": "1号",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224715270263858",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众38",
+              "userId": "64523965126",
+              "message": "牛逼",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224709494707200",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众39",
+              "userId": "3843872244947560",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222254227706899",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 33,
+        "effects": [
+          {
+            "send": "ELrNodWSt92CRDoDYWNrQmVpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxODQ0OTgzNnxzZXE6NHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDczNTQ1OTc0MDQ4OA=="
+          }
+        ]
+      },
+      {
+        "line": 35,
+        "effects": [
+          {
+            "send": "EL3NodWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDczMTE2NDc3Mjc1NQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众11",
+              "userId": "57243134498",
+              "message": "1",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224725024543763",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众40",
+              "userId": "57758150283",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222508964336682",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众41",
+              "userId": "338536447372",
+              "message": "[赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224717606081545",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 304000
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 37,
+        "effects": [
+          {
+            "send": "EO/ZodWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDczNTQ1OTc0MDQ4OA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众42",
+              "userId": "6316782881620808",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224724047565887",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众43",
+              "userId": "7396484750817438",
+              "message": "今天都是神仙打架[赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224707849868328",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众44",
+              "userId": "11749149373",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224721042592783",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众45",
+              "userId": "5993217660094728",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221472828920882",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 39,
+        "effects": [
+          {
+            "send": "ENXnpdWSt92CRDoDYWNrQmVpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNjkwNTQ1N3xzZXE6MXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDczOTc1NDcwODEzNw=="
+          }
+        ]
+      },
+      {
+        "line": 41,
+        "effects": [
+          {
+            "send": "ENnnpdWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDczNTQ1OTc0MDQ4OA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众46",
+              "userId": "690389665867",
+              "message": "高手",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224723322491955",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众47",
+              "userId": "62361689646",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224721993307151",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众48",
+              "userId": "611356211045",
+              "message": "都厉害[赞][赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224721208497187",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众49",
+              "userId": "5950830796520094",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221327677953062",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众50",
+              "userId": "82742823416",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224721854518306",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众51",
+              "userId": "6649346615324456",
+              "message": "各有千秋",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224728317957120",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 43,
+        "effects": [
+          {
+            "send": "EOL8qdWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxODY1Nzg2NXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc0NDA0OTY3NjYxOQ=="
+          }
+        ]
+      },
+      {
+        "line": 45,
+        "effects": [
+          {
+            "send": "EOj8qdWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDczOTc1NDcwODEzNw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众52",
+              "userId": "5158595471683665",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690219022656771082",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众53",
+              "userId": "832843126251991",
+              "message": "231",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224727824585782",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众54",
+              "userId": "43476907877",
+              "message": "支持久久",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224733430584360",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 306000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众55",
+              "userId": "15619673870",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220073748141106",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众56",
+              "userId": "89069816890",
+              "message": "[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224731447546906",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 47,
+        "effects": [
+          {
+            "send": "EJOJqtWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc0ODM0NDY0MjQ3NA=="
+          }
+        ]
+      },
+      {
+        "line": 49,
+        "effects": [
+          {
+            "send": "EJmJqtWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc0NDA0OTY3NjYxOQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众57",
+              "userId": "8624188369015664",
+              "message": "厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224724655543322",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众58",
+              "userId": "5302659720468915",
+              "message": "王夺",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224732680737842",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众59",
+              "userId": "37694165278",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221343904535587",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众60",
+              "userId": "89385109155",
+              "message": "3号厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224728865330227",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 51,
+        "effects": [
+          {
+            "send": "ELSWrtWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc0ODM0NDY0MjQ3NA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众61",
+              "userId": "495610860078",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224736933532706",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众62",
+              "userId": "56669118403",
+              "message": "左上角有苹果18手机[赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224728865461283",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众63",
+              "userId": "14475849797",
+              "message": "[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224735850075170",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众64",
+              "userId": "70298069883",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221894156391465",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 53,
+        "effects": [
+          {
+            "send": "EMagstWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc1MjYzOTYxNTE0MA=="
+          }
+        ]
+      },
+      {
+        "line": 55,
+        "effects": [
+          {
+            "send": "EM2gstWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc0ODM0NDY0MjQ3NA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众65",
+              "userId": "4151490682750079",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221902212666406",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众66",
+              "userId": "40893661462",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224737302352932",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众67",
+              "userId": "13540146160",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220484333343807",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众68",
+              "userId": "837868564769",
+              "message": "3333",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224740375680038",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 57,
+        "effects": [
+          {
+            "send": "EI64stWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNDQwMDgyOXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc1MjYzOTYyMzAwOA=="
+          }
+        ]
+      },
+      {
+        "line": 59,
+        "effects": [
+          {
+            "send": "EJS4stWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc1MjYzOTYxNTE0MA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众69",
+              "userId": "484000283694714",
+              "message": "？",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224742074569738",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 305000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众70",
+              "userId": "6477209341015975",
+              "message": "🀄️🀄️",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224733742879744",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众71",
+              "userId": "49769676893",
+              "message": "111111111111111111",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224742088365094",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众72",
+              "userId": "3149661259617229",
+              "message": "？",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224745392280595",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 62,
+        "effects": []
+      },
+      {
+        "line": 63,
+        "effects": [
+          {
+            "send": "EIjFttWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc1MjYzOTYyMzAwOA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众73",
+              "userId": "2171785431",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690219295717102633",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众74",
+              "userId": "52326922762",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221140880380974",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众75",
+              "userId": "2180765039700464",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224736397333504",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众76",
+              "userId": "192639936509923",
+              "message": "加油加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224741508584499",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 65,
+        "effects": [
+          {
+            "send": "EKHQutWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNDQwMDgyOXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc2MTIyOTU0NDM1MA=="
+          }
+        ]
+      },
+      {
+        "line": 67,
+        "effects": [
+          {
+            "send": "EKbQutWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc1MjYzOTYyMzAwOA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众77",
+              "userId": "13699508157",
+              "message": "[互粉]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224743397446702",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众78",
+              "userId": "455196209428",
+              "message": "牛逼",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224740618212388",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众79",
+              "userId": "67032853982",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690219828260164659",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众80",
+              "userId": "208634987655",
+              "message": "哇塞嘉璐优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224741974479910",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众81",
+              "userId": "42875276628",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221357317723186",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众82",
+              "userId": "46647665259",
+              "message": "1",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224739317535784",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众83",
+              "userId": "6091998993734605",
+              "message": "嘉璐优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224744243450915",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 69,
+        "effects": [
+          {
+            "send": "EMnmutWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNDQwMDgyOXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc2NTUyNDUxNDc0MQ=="
+          }
+        ]
+      },
+      {
+        "line": 71,
+        "effects": [
+          {
+            "send": "EM7mutWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc2MTIyOTU0NDM1MA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众84",
+              "userId": "201385014469",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224748656350249",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 305000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众85",
+              "userId": "3035220734557662",
+              "message": "厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224749487510574",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众86",
+              "userId": "55252332776",
+              "message": "123",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224742528160778",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众87",
+              "userId": "66097488375",
+              "message": "加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224749655266330",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 73,
+        "effects": [
+          {
+            "send": "ENzxvtWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc2NTUyNDUxNDc0MQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众88",
+              "userId": "740783355892",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221283901412386",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众89",
+              "userId": "4926014891754535",
+              "message": "优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224748915348521",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众90",
+              "userId": "41488931670",
+              "message": "11111",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224744101762063",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 75,
+        "effects": [
+          {
+            "send": "ELr9wtWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTIzMDQ1M3x3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc2OTgxOTQ3ODc2Mw=="
+          }
+        ]
+      },
+      {
+        "line": 77,
+        "effects": [
+          {
+            "send": "EL79wtWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc2NTUyNDUxNDc0MQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众91",
+              "userId": "7346197389737088",
+              "message": "王夺",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224744243893283",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众92",
+              "userId": "32410651966",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224753546089513",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众93",
+              "userId": "8720475587355362",
+              "message": "3号",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224751450395689",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众94",
+              "userId": "3977956140663446",
+              "message": "神仙打架",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224737056855074",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 79,
+        "effects": [
+          {
+            "send": "EOCKw9WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc2OTgxOTQ3ODc2Mw=="
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 306000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众95",
+              "userId": "5763619958081120",
+              "message": "[赞][赞][赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224752335442959",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众96",
+              "userId": "381639615838",
+              "message": "大气",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224756688966696",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众97",
+              "userId": "353070550143",
+              "message": "加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224755970954249",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众98",
+              "userId": "37791976444",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690219732541592614",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众99",
+              "userId": "5927509226048429",
+              "message": "优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224754729800723",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 81,
+        "effects": [
+          {
+            "send": "EPefx9WSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk4MDU1MXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc3NDExNDQ0NzgxNg=="
+          }
+        ]
+      },
+      {
+        "line": 83,
+        "effects": [
+          {
+            "send": "EPyfx9WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc2OTgxOTQ3ODc2Mw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众100",
+              "userId": "64245338576",
+              "message": "一号王夺最棒[比心]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224766213051401",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众101",
+              "userId": "234535615816993",
+              "message": "222",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224762300650523",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众102",
+              "userId": "8574697295397721",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222151249679400",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众103",
+              "userId": "59189102697",
+              "message": "有瑕疵",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224759116207139",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众104",
+              "userId": "4146343788941229",
+              "message": "嘉路加油3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224760778658879",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 85,
+        "effects": [
+          {
+            "send": "EIasy9WSt92CRDoDYWNrQmVpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxODQ0OTgzNnxzZXE6NHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc3ODQwOTQxMzU2MA=="
+          }
+        ]
+      },
+      {
+        "line": 87,
+        "effects": [
+          {
+            "send": "EIisy9WSt92CRDoDYWNrQkdpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNjEyNDgyM3xzZXE6MXx3c3NfbXNnX3R5cGU6cg=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众105",
+              "userId": "8282874141168592",
+              "message": "左上角有苹果18手机[鼓掌][鼓掌][鼓掌]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224763885769768",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众106",
+              "userId": "835825429074",
+              "message": "木森一路长虹",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224760188048424",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "pnfl3952666209323",
+              "userId": "74399565284",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224014761743379",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众44",
+              "userId": "11749149373",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224760188081192",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 89,
+        "effects": [
+          {
+            "send": "EP64y9WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc3ODQwOTQxMzU2MA=="
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 306000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众107",
+              "userId": "12292065770",
+              "message": "前三都厉害[鼓掌][鼓掌][鼓掌][鼓掌]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224765149582378",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众108",
+              "userId": "7426678347750248",
+              "message": "[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771086849039",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众109",
+              "userId": "53028095649",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222695384749075",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众90",
+              "userId": "41488931670",
+              "message": "1111111",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224767534486528",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众110",
+              "userId": "5093455132390388",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771595162639",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众111",
+              "userId": "3810715569592281",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222352387200046",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 91,
+        "effects": [
+          {
+            "send": "EKTFz9WSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNzUwMTg5NHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc4MjcwNDM3OTM1NQ=="
+          }
+        ]
+      },
+      {
+        "line": 93,
+        "effects": [
+          {
+            "send": "EKXFz9WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc3ODQwOTQxMzU2MA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众112",
+              "userId": "259166858555",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220771617461263",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众113",
+              "userId": "181640065163",
+              "message": "选歌失败",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771086865423",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众114",
+              "userId": "45290272449",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224765793309746",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众115",
+              "userId": "79763942796",
+              "message": "牛",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224766773416960",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 95,
+        "effects": [
+          {
+            "send": "EOHb09WSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc4Njk5OTM1NTgxNA=="
+          }
+        ]
+      },
+      {
+        "line": 97,
+        "effects": [
+          {
+            "send": "EOnb09WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc4MjcwNDM3OTM1NQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众116",
+              "userId": "414910020120",
+              "message": "嘉路加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771561362478",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众117",
+              "userId": "737689671607",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220517601481728",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众118",
+              "userId": "5541055986347738",
+              "message": "[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224767220241434",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众119",
+              "userId": "40575030852",
+              "message": "2",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771239515146",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众120",
+              "userId": "6014408982702975",
+              "message": "加油[鼓掌][鼓掌][鼓掌][鼓掌]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771879048227",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 99,
+        "effects": [
+          {
+            "send": "EK3n09WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc4Njk5OTM1NTgxNA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "Kxduiylx",
+              "userId": "64472765117",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221662989571099",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 306000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "@K93",
+              "userId": "591596080391003",
+              "message": "厉害[赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771824915497",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众121",
+              "userId": "3309057133381179",
+              "message": "1",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224773625353257",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众122",
+              "userId": "4383375381450285",
+              "message": "1",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224768400069651",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众123",
+              "userId": "59844319456",
+              "message": "优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224763751486479",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 101,
+        "effects": [
+          {
+            "send": "EKvz19WSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc5MTI5NDMyMzI1NQ=="
+          }
+        ]
+      },
+      {
+        "line": 103,
+        "effects": [
+          {
+            "send": "ELfz19WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc4Njk5OTM1NTgxNA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众124",
+              "userId": "493587994013",
+              "message": "王夺优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771596456975",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众125",
+              "userId": "521147927834",
+              "message": "危险了",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771782890511",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众126",
+              "userId": "54572020259",
+              "message": "加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224773470049326",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众127",
+              "userId": "608918519881758",
+              "message": "厉害👍👍👍👍👍👍👍👍👍👍👍",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224768282235958",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 105,
+        "effects": [
+          {
+            "send": "EKz+29WSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc5NTU4OTI4MzAxMA=="
+          }
+        ]
+      },
+      {
+        "line": 107,
+        "effects": [
+          {
+            "send": "EK/+29WSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc5MTI5NDMyMzI1NQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众128",
+              "userId": "4965598949774433",
+              "message": "必须12号",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224771120469042",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众129",
+              "userId": "3561254923940564",
+              "message": "3号厉害[鼓掌][鼓掌]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224782118458406",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众130",
+              "userId": "15328247594",
+              "message": "高手",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224778507523098",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众131",
+              "userId": "480766313878",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221524412584994",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 302000
+              }
+            }
+          }
+        ]
+      },
+      {
+        "line": 109,
+        "effects": [
+          {
+            "send": "EIeW2NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc5NTU4OTI4MzAxMA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众132",
+              "userId": "41176225244",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222239749624858",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "T",
+              "userId": "645179390500",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220536090186761",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众133",
+              "userId": "73872237889",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222357901939727",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众134",
+              "userId": "137949982681",
+              "message": "优秀[比心][比心][比心]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224786848814134",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众135",
+              "userId": "7387777680774693",
+              "message": "厉害👍👍👍👍",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224785914352649",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 112,
+        "effects": []
+      },
+      {
+        "line": 113,
+        "effects": [
+          {
+            "send": "EOGi3NWSt92CRDoDYWNrQmVpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNzg0ODY3N3xzZXE6MXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDc5OTg4NDI1MDM0Mg=="
+          }
+        ]
+      },
+      {
+        "line": 115,
+        "effects": [
+          {
+            "send": "EOOi3NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc5NTU4OTI4MzAxMA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众136",
+              "userId": "250241549779",
+              "message": "3号厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224784237614095",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众137",
+              "userId": "81462623672",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221535156261939",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众138",
+              "userId": "28413968437",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690219937773048851",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众139",
+              "userId": "2243547299076248",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221302653522944",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众140",
+              "userId": "45147336211",
+              "message": "3333",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224788687639590",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众141",
+              "userId": "7460704051816828",
+              "message": "大气",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224786828973107",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众142",
+              "userId": "6074251604844223",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221607613682698",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 117,
+        "effects": [
+          {
+            "send": "EMOu4NWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNDQwMDgyOXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDgwNDE3OTIxNzUxMw=="
+          }
+        ]
+      },
+      {
+        "line": 119,
+        "effects": [
+          {
+            "send": "EMau4NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDc5OTg4NDI1MDM0Mg=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众143",
+              "userId": "8617732748167055",
+              "message": "3号嘉路",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224790537294902",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众144",
+              "userId": "19753859360",
+              "message": "这个厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224779901703194",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "Qjzpa",
+              "userId": "3605978956695096",
+              "message": "每个都厉害[赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224786833478665",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 121,
+        "effects": [
+          {
+            "send": "EO+74NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgwNDE3OTIxNzUxMw=="
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 305000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众145",
+              "userId": "3484738814663408",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222893888410678",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众146",
+              "userId": "31238942967",
+              "message": "11111111",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224788363187227",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众147",
+              "userId": "5759742440908207",
+              "message": "33333333333333333333333",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224793589290024",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众148",
+              "userId": "5741530663156972",
+              "message": "[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224794785960996",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众149",
+              "userId": "859300638423",
+              "message": "3[赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224793463362601",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 123,
+        "effects": [
+          {
+            "send": "EJzS5NWSt92CRDoDYWNrQmZpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNjQ1ODEyOHxzZXE6MTJ8d3NzX21zZ190eXBlOndyZHN8d3Jkc192Ojc2OTAyMjQ4MDg0NzQxODQ4NzA="
+          }
+        ]
+      },
+      {
+        "line": 125,
+        "effects": [
+          {
+            "send": "EKLS5NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgwNDE3OTIxNzUxMw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众150",
+              "userId": "67445120083",
+              "message": "[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224791351006259",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众66",
+              "userId": "40893661462",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224789391397929",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众151",
+              "userId": "3957195457571911",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222632358794249",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众152",
+              "userId": "87093644966",
+              "message": "主打陪伴 木森优秀 大气",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224793100555310",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 127,
+        "effects": [
+          {
+            "send": "EKjf6NWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk4MDU1MXx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDgxMjc2OTE1MjQ5MQ=="
+          }
+        ]
+      },
+      {
+        "line": 129,
+        "effects": [
+          {
+            "send": "EKzf6NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgwODQ3NDE4NDg3MA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众153",
+              "userId": "76224762710",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224800618533939",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众154",
+              "userId": "865754787684",
+              "message": "1.3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224791045018687",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "Hcd-",
+              "userId": "56341409580",
+              "message": "11111113333333",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224792983000102",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众155",
+              "userId": "83705281726",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220181835420706",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众156",
+              "userId": "20727768799",
+              "message": "左上角有苹果18手机[666][666][666]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224797461353523",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 131,
+        "effects": [
+          {
+            "send": "EJrs6NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgxMjc2OTE1MjQ5MQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众157",
+              "userId": "8270251737488100",
+              "message": "厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224799302636559",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众158",
+              "userId": "65894366445",
+              "message": "嘉路加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224801458934835",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 302000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众159",
+              "userId": "40574508364060",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224798353953826",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众160",
+              "userId": "8099127664274991",
+              "message": "2323232323232323232323232323",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224791844885540",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众161",
+              "userId": "33409978125",
+              "message": "2号厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224796513391679",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 133,
+        "effects": [
+          {
+            "send": "EJv57NWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNjgwMTMyMnx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDgxNzA2NDExOTg0NA=="
+          }
+        ]
+      },
+      {
+        "line": 135,
+        "effects": [
+          {
+            "send": "EJ757NWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgxMjc2OTE1MjQ5MQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众162",
+              "userId": "3630960951707769",
+              "message": "[鼓掌][鼓掌][鼓掌][鼓掌][鼓掌][鼓掌][鼓掌][鼓掌]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224803504378922",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众163",
+              "userId": "678153736117",
+              "message": "嘉路",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224797515371547",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众164",
+              "userId": "602828463426",
+              "message": "13",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224804573795391",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众91",
+              "userId": "7346197389737088",
+              "message": "王夺",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224796034683939",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众165",
+              "userId": "474212821746",
+              "message": "专业",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224798635742242",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众166",
+              "userId": "136427516092",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224799403037731",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 137,
+        "effects": [
+          {
+            "send": "ENeP8dWSt92CRDoDYWNrQmZpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNjQ1ODEyOHxzZXE6MTJ8d3NzX21zZ190eXBlOndyZHN8d3Jkc192Ojc2OTAyMjQ4MjEzNTkwODc3MjQ="
+          }
+        ]
+      },
+      {
+        "line": 139,
+        "effects": [
+          {
+            "send": "EN2P8dWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgxNzA2NDExOTg0NA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众167",
+              "userId": "8410290501153668",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690219678644818990",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众168",
+              "userId": "20002244145",
+              "message": "优秀[赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224803702903844",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众169",
+              "userId": "47593163505",
+              "message": "2",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224797701788706",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众170",
+              "userId": "578445390178",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221519223477286",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 141,
+        "effects": [
+          {
+            "send": "EIWb8dWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgyMTM1OTA4NzcyNA=="
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 302000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众171",
+              "userId": "374291193867",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222498171982875",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众172",
+              "userId": "1623446861274943",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690222907574047785",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众173",
+              "userId": "4198151311180709",
+              "message": "222222222222",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224795033670696",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众174",
+              "userId": "5207248559373826",
+              "message": "1",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224813222646811",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众175",
+              "userId": "7720242211741109",
+              "message": "2号声音真干净",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224813327111206",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 143,
+        "effects": [
+          {
+            "send": "EIGn9dWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNzUwMTg5NHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDgyNTY1NDA1NTQ4NQ=="
+          }
+        ]
+      },
+      {
+        "line": 145,
+        "effects": [
+          {
+            "send": "EIan9dWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgyMTM1OTA4NzcyNA=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众176",
+              "userId": "7418839028594513",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224818055369774",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众177",
+              "userId": "111556328126",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224810782364707",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众178",
+              "userId": "292680687754",
+              "message": "1111111",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224805103195170",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众179",
+              "userId": "16829320267",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224809523909670",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众180",
+              "userId": "35896764311",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224811110110208",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 147,
+        "effects": [
+          {
+            "send": "EJKz+dWSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxODc5MzMxMHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDgyOTk0OTAyMzI5Nw=="
+          }
+        ]
+      },
+      {
+        "line": 149,
+        "effects": [
+          {
+            "send": "EJiz+dWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgyNTY1NDA1NTQ4NQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众181",
+              "userId": "2236559255643740",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224815890371624",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众182",
+              "userId": "207281805935313",
+              "message": "[玫瑰]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224815278134310",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "Ktui",
+              "userId": "7783231815991937",
+              "message": "13",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224811794404371",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众183",
+              "userId": "5808423955893870",
+              "message": "这个也历害[赞][赞][赞][赞][赞][鼓掌][鼓掌][鼓掌]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224809037829171",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 151,
+        "effects": [
+          {
+            "send": "EMDJ+dWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgyOTk0OTAyMzI5Nw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众184",
+              "userId": "318416757931",
+              "message": "牛",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224803270972451",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 301000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众185",
+              "userId": "82085425188",
+              "message": "厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224808660915242",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众186",
+              "userId": "3647753297576157008",
+              "message": "左上角有苹果18手机z",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224816772977718",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众187",
+              "userId": "4765012082939424",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224814038389795",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众188",
+              "userId": "416805407311",
+              "message": "王夺",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224816930673700",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众189",
+              "userId": "549068693034911",
+              "message": "2号优秀",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224808257524782",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 153,
+        "effects": [
+          {
+            "send": "EJrW/dWSt92CRDoDYWNrQmVpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxODQ0OTgzNnxzZXE6NHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDgzNDI0Mzk5MDUzNw=="
+          }
+        ]
+      },
+      {
+        "line": 155,
+        "effects": [
+          {
+            "send": "EJ/W/dWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgyOTk0OTAyMzI5Nw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众190",
+              "userId": "77137408348",
+              "message": "3",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224814134236179",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众91",
+              "userId": "7346197389737088",
+              "message": "王夺",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224819820598306",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众191",
+              "userId": "55479124270",
+              "message": "3号",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224817308832818",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众192",
+              "userId": "88091309706",
+              "message": "3[赞][赞][赞]",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224805485548584",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 157,
+        "effects": [
+          {
+            "send": "EMHjgdaSt92CRDoDYWNrQl9pbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNzUwMTg5NHx3c3NfbXNnX3R5cGU6d3Jkc3x3cmRzX3Y6NzY5MDIyNDgzODUzODk1ODYyOQ=="
+          }
+        ]
+      },
+      {
+        "line": 159,
+        "effects": [
+          {
+            "send": "EMPjgdaSt92CRDoDYWNrQmJpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxNzg0ODY3N3xzZXE6MXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgzNDI0Mzk5MDUzNw=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众193",
+              "userId": "58412659634",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690220886876804105",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众194",
+              "userId": "18276404280",
+              "message": "支持森哥",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224820764218410",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众195",
+              "userId": "13307241996",
+              "message": "左上角有苹果18手机",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690221833170392118",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众196",
+              "userId": "2461268308595951",
+              "message": "厉害了",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224823935570971",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      },
+      {
+        "line": 161,
+        "effects": [
+          {
+            "send": "EIHwgdaSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDgzODUzODk1ODYyOQ=="
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众197",
+              "userId": "5751580069946463",
+              "message": "加油",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224823123317786",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众198",
+              "userId": "8188184286159637",
+              "message": "大气大气大气",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224819065885711",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众199",
+              "userId": "7525279305395753",
+              "message": "3号厉害",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224818555622400",
+              "sentAt": null,
+              "data": null
+            }
+          },
+          {
+            "message": {
+              "type": "online",
+              "userName": "",
+              "userId": "",
+              "message": "",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "",
+              "sentAt": null,
+              "data": {
+                "kind": "onlineViewers",
+                "value": 301000
+              }
+            }
+          },
+          {
+            "message": {
+              "type": "chat",
+              "userName": "观众200",
+              "userId": "324294245450121",
+              "message": "2",
+              "color": "#ffffff",
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "messageId": "douyin:7690224826620728358",
+              "sentAt": null,
+              "data": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "generator": "KilakilaApi.detail(playback: false / true) + LiveUrlTool share import of https://live.kilakila.cn/room/1",
+  "value": {
+    "detail(playback: false)": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila service"
+      },
+      "requests": [
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=1"
+      ]
+    },
+    "detail(playback: true)": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila service"
+      },
+      "requests": [
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=1"
+      ]
+    },
+    "shareImport": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila service"
+      },
+      "requests": [
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=1"
+      ]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "generator": "KilakilaSite.searchRooms (page size 20) + supportsSearchPaginationFor",
+  "value": {
+    "searchRooms": {
+      "value": [],
+      "requests": [
+        "https://live.kilakila.cn/aboutus/serach/kw/zxqvnoresultfixture"
+      ]
+    },
+    "supportsSearchPaginationFor": true
+  }
+}

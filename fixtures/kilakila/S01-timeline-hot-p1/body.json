@@ -1,0 +1,481 @@
+{
+  "code": 200,
+  "msg": "ok",
+  "data": {
+    "header": {
+      "": ""
+    },
+    "body": {
+      "h": {
+        "code": 200,
+        "msg": "操作成功",
+        "success": true,
+        "alert": true,
+        "flush": true,
+        "time": 1790528945143
+      },
+      "b": {
+        "pageNo": 1,
+        "pageSize": 10,
+        "data": [
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2267924182039789690",
+              "uid": 3738290188297,
+              "title": "进来听听  万一喜欢呢",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/373829018829717899165174597c7d8a53f70be0c11034483be16c5020PC.jpg",
+              "pushFlow": "qvgd://kayx.bmfn.ifqmughsxwg.mvi.jk/gha/1670050295086053578?xvwo_yhr=4123562689-1-1-n3nc19m808zg895lh70t74fof4y315bd",
+              "watchNumber": 635,
+              "tagList": [],
+              "roomDiscountResp": [],
+              "iconUrlList": [],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "iconUrl": "https://img.hongrenshuo.com.cn/shenhuijiaobiao.png",
+                  "width": 231,
+                  "height": 63
+                }
+              }
+            },
+            "userResp": {
+              "id": 3738290188297,
+              "nickname": "罗兰🐳【吉琅】",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3738290188297.png?t=1789817068000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 2069130976499335350,
+                "uid": 3738290188297
+              },
+              "userNobleResp": {
+                "uid": 3738290188297,
+                "status": 1
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268648231921516614",
+              "uid": 3337171177480,
+              "title": "#顶级青叔",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/333717117748017905226148846c07523613f2c2c64180f8f1a23fff84PC.gif",
+              "pushFlow": "vwqp://fcqt.wxgv.bshangzrlma.mzr.xo/ksd/6852862457622436020?bxbz_aje=2184136917-5-7-ts357a33125ps37gj75a768ll18u1z0e",
+              "watchNumber": 617,
+              "tagList": [
+                {
+                  "id": 713460,
+                  "themeColor": [],
+                  "assistColor": []
+                }
+              ],
+              "roomDiscountResp": [],
+              "iconUrlList": [],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "iconUrl": "https://img.hongrenshuo.com.cn/shenhuijiaobiao.png",
+                  "width": 231,
+                  "height": 63
+                }
+              }
+            },
+            "userResp": {
+              "id": 3337171177480,
+              "nickname": "陈煜🍁⁰⁹₂₈宠粉日",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3337171177480.png?t=1788676978000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 199442,
+                "uid": 3337171177480
+              },
+              "avatarFrameList": [
+                []
+              ],
+              "userNobleResp": {
+                "uid": 3337171177480,
+                "status": 1
+              },
+              "userMusicianLevelResp": {
+                "id": 3
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268450556051718173",
+              "uid": 3674092253247,
+              "title": "欢迎来到克拉农场",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/367409225324717778172453565136571d0858ea7cd240795d22f3440aPC.png",
+              "pushFlow": "svaj://siph.ynqv.carunwaiqry.ttv.ln/oab/3378427370154332488?gsar_vlg=9541314960-9-1-5x379845j26826930vr7aj94v3801p35",
+              "watchNumber": 1132,
+              "tagList": [
+                {
+                  "id": 713256,
+                  "themeColor": [],
+                  "assistColor": []
+                }
+              ],
+              "roomDiscountResp": [],
+              "iconUrlList": [
+                []
+              ],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "iconUrl": "https://img.hongrenshuo.com.cn/ff629932-17ca-40ed-a6af-d29941842169.png",
+                  "width": 231,
+                  "height": 63
+                },
+                "rightIconResp": {
+                  "iconUrl": "http://img.kilakila.cn/352a4e73-6765-4573-9f84-a2bd660b87e0.png",
+                  "width": 60,
+                  "height": 60
+                }
+              }
+            },
+            "userResp": {
+              "id": 3674092253247,
+              "nickname": "程也ᨳ𝒞𝓎原创单曲「小熊宇宙」",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3674092253247.png?t=1785872233000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 2202171995129380972,
+                "uid": 3674092253247
+              },
+              "avatarFrameList": [
+                [],
+                [],
+                []
+              ],
+              "userNobleResp": {
+                "uid": 3674092253247,
+                "status": 1
+              },
+              "userMusicianLevelResp": {
+                "id": 4
+              },
+              "identifyLevelResp": {
+                "id": 1
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268427930164002983",
+              "uid": 3633862029329,
+              "title": "性感少妇音",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/363386202932917738550255988d7c38d1f81da6d637e975df6f0fea95PC.png",
+              "pushFlow": "uclf://djfj.dbpo.lujzctlfork.hqe.ae/nmv/4389944822295435818?ignn_trf=3651061277-0-4-4a23u17468mqhj7yk665k0q9u0mc59t3",
+              "watchNumber": 287,
+              "tagList": [],
+              "roomDiscountResp": [],
+              "iconUrlList": [
+                []
+              ],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "iconUrl": "https://img.hongrenshuo.com.cn/a4714b70-684d-4ce2-8b09-79e6b7377d44.png",
+                  "width": 231,
+                  "height": 63
+                },
+                "rightIconResp": {
+                  "iconUrl": "http://img.kilakila.cn/b42dc54d-0bd3-4531-a21a-a713205ea2d2.png",
+                  "width": 60,
+                  "height": 60
+                }
+              }
+            },
+            "userResp": {
+              "id": 3633862029329,
+              "nickname": "一叶乔恩",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3633862029329.png?t=1789486290000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 1949931185765351453,
+                "uid": 3633862029329
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268032483935125754",
+              "uid": 2034811400233,
+              "title": "9",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/203481140023317685676818029d668e9a9279d4e3f033c701a18fc7b2PC.jpg",
+              "pushFlow": "gbnf://dvwt.udsb.xqqskzbjuob.qtu.ru/agk/0563357420418303203?zsme_fzj=2561298926-1-0-6kv85f41es1n7706m6y4ea3ao560d7t1",
+              "watchNumber": 355,
+              "tagList": [],
+              "roomDiscountResp": [],
+              "iconUrlList": [
+                []
+              ],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "iconUrl": "https://img.hongrenshuo.com.cn/shenhuijiaobiao.png",
+                  "width": 231,
+                  "height": 63
+                },
+                "rightIconResp": {
+                  "iconUrl": "http://img.kilakila.cn/352a4e73-6765-4573-9f84-a2bd660b87e0.png",
+                  "width": 60,
+                  "height": 60
+                }
+              }
+            },
+            "userResp": {
+              "id": 2034811400233,
+              "nickname": "墨白ᵐᵇ😱『Wanna』",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/2034811400233.png?t=1745237464000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 8246,
+                "uid": 2034811400233
+              },
+              "avatarFrameList": [
+                []
+              ],
+              "userNobleResp": {
+                "uid": 2034811400233,
+                "status": 1
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268679559412973729",
+              "uid": 3874757120014,
+              "title": "全能新人 有趣~",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/387475712001417773599304855ccf9b05b34ebbccbeece56a25ba0554PC.jpg",
+              "pushFlow": "ngql://fckd.jcvh.fszrjaockgg.nbl.go/cmt/4396409116214833891?pdvo_yrz=2152200682-3-5-8i88012y80719z4h6r114a3ce8o6zb5b",
+              "watchNumber": 327,
+              "tagList": [],
+              "roomDiscountResp": [],
+              "iconUrlList": [
+                []
+              ],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "name": "温柔学长"
+                },
+                "rightIconResp": {
+                  "iconUrl": "http://img.kilakila.cn/352a4e73-6765-4573-9f84-a2bd660b87e0.png",
+                  "width": 60,
+                  "height": 60
+                }
+              }
+            },
+            "userResp": {
+              "id": 3874757120014,
+              "nickname": "不会ℬ𝒽首发《期待的约定》",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3874757120014.png?t=1790062915000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 2132826282096853179,
+                "uid": 3874757120014
+              },
+              "identifyLevelResp": {
+                "id": 2
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268470227001933885",
+              "uid": 3647255392265,
+              "title": "🐹₌᳐･֊･₌᳐ᨳ𝒞𝓎🍀‎的直播间",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/36472553922651787770407899222814.gif",
+              "pushFlow": "crkr://jlzk.kvxe.sfeudlfuhjy.azm.vy/ocx/7702854120366272492?yxzv_dif=2560792296-7-1-539r2157o469000a38t09m8e97lrhd58",
+              "watchNumber": 156,
+              "tagList": [],
+              "roomDiscountResp": [],
+              "iconUrlList": [],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "iconUrl": "https://img.hongrenshuo.com.cn/shenhuijiaobiao.png",
+                  "width": 231,
+                  "height": 63
+                }
+              }
+            },
+            "userResp": {
+              "id": 3647255392265,
+              "nickname": "🐹₌᳐･֊･₌᳐ᨳ𝒞𝓎🍀‎",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3647255392265.png?t=1787419934000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 2046703194150535208,
+                "uid": 3647255392265
+              },
+              "avatarFrameList": [
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                []
+              ],
+              "userNobleResp": {
+                "uid": 3647255392265,
+                "status": 1
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268400115955794260",
+              "uid": 3516049969187,
+              "title": "563🐾晚上嚎",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/35160499691871790324512148043174.png",
+              "pushFlow": "oysw://etao.ytnz.rbrlsersaxp.azm.pa/cqh/7659318888945706077?spvm_fib=1938412182-2-5-f774l032767490395pzrj49h9z38pp44",
+              "watchNumber": 225,
+              "tagList": [
+                {
+                  "id": 713504,
+                  "themeColor": [],
+                  "assistColor": []
+                }
+              ],
+              "roomDiscountResp": [],
+              "iconUrlList": [],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "name": "一起聊八卦"
+                }
+              }
+            },
+            "userResp": {
+              "id": 3516049969187,
+              "nickname": "许迟𝓧𝓬🦊『散修』26号宠粉日",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3516049969187.png?t=1790417862000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 2031597892954751057,
+                "uid": 3516049969187
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268397710774108455",
+              "uid": 3774452584458,
+              "title": "9.27",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/377445258445817905176614359f67297e50526c07f3a84a78090032ffPC.gif",
+              "pushFlow": "vxlv://znpf.klrx.kepmotumtpp.spp.oj/dvz/1792926441157118289?shcq_ala=5608312058-0-3-3o9ctfy2t1964917nf4up1f49559071j",
+              "watchNumber": 113,
+              "tagList": [],
+              "roomDiscountResp": [],
+              "iconUrlList": [],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "name": "找人玩游戏"
+                }
+              }
+            },
+            "userResp": {
+              "id": 3774452584458,
+              "nickname": "彭白white『琅声雅集』",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/3774452584458.png?t=1790431473000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 2007878008349655280,
+                "uid": 3774452584458
+              }
+            }
+          },
+          {
+            "dataType": 8,
+            "roomResq": {
+              "roomIdStr": "2268628973288161475",
+              "uid": 4185309802556,
+              "title": "xiu",
+              "goldPrice": 0,
+              "status": 4,
+              "backPic": "https://img.hongrenshuo.com.cn/418530980255617893580078117cb2b7165fce5f3b27a77aa8be87a077PC.jpg",
+              "pushFlow": "tlvd://lakh.xqab.rzznylbrcvx.qoh.tu/jbq/2381517199163715145?yqdl_xfu=5857727136-1-5-h42c753586fn01l2w7o90s53c8b31j6k",
+              "watchNumber": 58,
+              "tagList": [],
+              "roomDiscountResp": [],
+              "iconUrlList": [],
+              "cornerMarkResp": {
+                "leftIconResp": {
+                  "iconUrl": "https://img.hongrenshuo.com.cn/0128musician3.png",
+                  "width": 468,
+                  "height": 126
+                }
+              }
+            },
+            "userResp": {
+              "id": 4185309802556,
+              "nickname": "林感🍃ᴸᵍ『Starry』",
+              "headPortraitUrl": "https://img.hongrenshuo.com.cn/4185309802556.png?t=1790022114000",
+              "status": 1,
+              "privilegeResp": [],
+              "numberInfo": {
+                "id": 2196645514680729751,
+                "uid": 4185309802556
+              },
+              "userMusicianLevelResp": {
+                "id": 3
+              }
+            }
+          }
+        ],
+        "isLastPage": false,
+        "linkTagId": 107,
+        "linkTagName": "萌星",
+        "gender": 0
+      }
+    },
+    "newheaders": {
+      "HTTP/1.1 200 OK": "",
+      "Date": "Sun, 27 Sep 2026 17:09:05 GMT",
+      "Content-Type": "application/json;charset=UTF-8",
+      "Transfer-Encoding": "chunked",
+      "Connection": "keep-alive",
+      "Vary": "Accept-Encoding",
+      "Server": "Apache-Coyote/1.1",
+      "Access-Control-Allow-Origin": "*"
+    }
+  }
+}

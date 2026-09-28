@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "kilakila",
+  "sample": "S03-search",
+  "capturedAt": "2026-09-27T17:09:20.925626Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.kilakila.cn/aboutus/serach/kw/%E5%B0%8F",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://live.kilakila.cn/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "HDSESSION=lgh0badwqy7i00b4zqj4h6uhw4; expires=Sun, 04-Oct-2026 17:09:20 GMT; Max-Age=604800; path=/; domain=kilakila.cn",
+      "cache-control": "private",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:09:21 GMT",
+      "access-control-allow-origin": "*",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "content-type": "text/html; charset=utf-8",
+      "pragma": "no-cache",
+      "server": "openresty/1.9.15.1",
+      "access-control-allow-headers": "x-auth-token,DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,xAuthToken",
+      "x-powered-by": "ThinkPHP",
+      "access-control-allow-methods": "GET,POST",
+      "expires": "Thu, 19 Nov 1981 08:52:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "6f5554fa90ca4cabdf1c2b7e5040391a3df94a3fedccc7c23a13a091bd690295",
+    "length": 23135
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "set-cookie:HDSESSION",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

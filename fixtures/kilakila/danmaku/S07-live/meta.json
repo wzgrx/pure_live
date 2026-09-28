@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "platform": "kilakila",
+  "case": "S07-live",
+  "room": "kilakila:3674092253247",
+  "danmakuKeys": {
+    "roomId": "2268450556051718173"
+  },
+  "capturedAt": "2026-09-27T17:16:12.388636Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://wim.hongrenshuo.com.cn/socket.io/?roomId=2268450556051718173&appId=111&clientType=1&EIO=3&transport=websocket",
+      "headers": {
+        "origin": "https://live.kilakila.cn",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 59,
+  "raw": {
+    "sha256": "9b72f26c2302b3e53e540c99316050f678904435fabc42615480b9542846f231",
+    "length": 134103
+  },
+  "scrubbed": [
+    {
+      "where": "$.body.response.sender_info",
+      "rule": "person"
+    },
+    {
+      "where": "$.content[other t]",
+      "rule": "dropped"
+    },
+    {
+      "where": "$.content[t=200,220]",
+      "rule": "person"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

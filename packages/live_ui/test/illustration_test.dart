@@ -36,7 +36,9 @@ void main() {
     expect(apply([0, 0, 1]), [knock.r, knock.g, knock.b]);
   });
 
-  testWidgets('the set in light and dark (golden)', (tester) async {
+  // Pixel-exact goldens are made on Linux (WSL); other hosts rasterise
+  // antialiased edges a little differently.
+  testWidgets('the set in light and dark (golden)', skip: !Platform.isLinux, (tester) async {
     tester.view
       ..physicalSize = const Size(1220, 300)
       ..devicePixelRatio = 1;

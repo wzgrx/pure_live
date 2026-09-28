@@ -1,9 +1,11 @@
 // SHOWROOM parsing against the recorded samples, compared field by field with
 // 3.x's frozen output (expected.json, written by
 // fixtures/showroom/legacy_expected.dart from 3.x's ShowroomApi, ShowroomSite
-// and ShowroomLink). Every intended difference is listed with its reason;
-// everything else must match. The synthetic cases port 3.x's
-// showroom_catalog_test.dart and pin 3.x's checks.
+// and ShowroomLink). Every intended difference is listed with its reason
+// (`changed:`, with the upgrade row of docs/UPGRADES.md); everything else
+// must match. The M2.1 keys 3.x never wrote are checked apart (`added:`).
+// The synthetic cases port 3.x's showroom_catalog_test.dart and pin 3.x's
+// checks, as far as the upgrades kept them.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -13,19 +15,44 @@ import 'fixture.dart';
 
 Fixture _sample(String name) => Fixture.load('showroom', name);
 
+/// Keys 3.x never wrote (M2.1); [_expectParity] checks them apart.
+const _v4Keys = ['startedAt', 'restriction'];
+
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
-/// 3.x wrote, except [changed] (intended differences). 3.x wrote null where
-/// the immutable model writes ''.
+/// 3.x wrote, except [changed] (intended differences), and that the v4 keys
+/// are exactly [added]. 3.x wrote null where the immutable model writes ''.
 void _expectParity(
   Map<String, Object?> actual,
   Map<String, dynamic> legacy, {
   Set<String> changed = const {},
+  Map<String, Object?> added = const {},
   String? reason,
 }) {
   for (final MapEntry(:key, :value) in legacy.entries) {
     if (changed.contains(key)) continue;
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
+  for (final key in _v4Keys) {
+    expect(actual[key], added[key], reason: '${reason ?? ''} $key (v4 key)');
+  }
+}
+
+/// The live rows of S01 by room id, as answered.
+final Map<String, Map<String, dynamic>> _rows = {
+  for (final genre in (jsonDecode(_sample('S01-onlives').body) as Map<String, dynamic>)['onlives'] as List)
+    for (final row in ((genre as Map<String, dynamic>)['lives'] as List).cast<Map<String, dynamic>>())
+      if (row['room_id'] != null) '${row['room_id']}': row,
+};
+
+/// [seconds] since the epoch as `toJson` writes a start time.
+String _iso(int seconds) => DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true).toIso8601String();
+
+/// The v4 keys of the S01 card of [roomId]: the row's `started_at` and, for
+/// its `premium_room_type` 0 (every S01 row), restriction none.
+Map<String, Object?> _cardAdded(String roomId) {
+  final row = _rows[roomId]!;
+  expect(row['premium_room_type'], 0, reason: roomId);
+  return {'startedAt': _iso(row['started_at'] as int), 'restriction': 'none'};
 }
 
 /// 3.x's room projection: toJson plus `link`.
@@ -42,7 +69,8 @@ void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
   final expected = _maps(legacy);
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(_projection(room), expected[index], reason: '$reason[$index]');
+    // added: the row's start time and restriction (the unified rules).
+    _expectParity(_projection(room), expected[index], added: _cardAdded(room.roomId), reason: '$reason[$index]');
   }
 }
 
@@ -207,7 +235,7 @@ void main() {
         expect(room.popularity, isEmpty);
       }
       final profile = ShowroomApi.profile(_sample('S03-profile-live').body, roomId: 577362);
-      final room = ShowroomApi.room(profile, live: true);
+      final room = ShowroomApi.room(profile, (live: true, restriction: null, danmaku: null));
       expect((room.totalViewers, room.onlineViewers), ('3941', ''));
     });
 
@@ -233,7 +261,7 @@ void main() {
     });
   });
 
-  group("the snapshot's checks (3.x)", () {
+  group("the snapshot's checks", () {
     test('a message cell is skipped instead of failing the snapshot (REG-SHOWROOM-001)', () {
       final snapshot = ShowroomApi.snapshot(
         jsonEncode({
@@ -259,7 +287,9 @@ void main() {
       expect(recorded.genre(110), isEmpty, reason: 'S01: Announcer is one message cell');
     });
 
-    test('a malformed live row still fails the whole snapshot', () {
+    test('a malformed live row drops only itself; a snapshot of unreadable rows is still ApiChanged', () {
+      // The unified rule on malformed rows: 3.x and M4.19 failed the whole
+      // snapshot (3.x's showroom_catalog_test.dart fixed that).
       for (final (field, value) in [
         ('main_name', null),
         ('main_name', '  '),
@@ -274,17 +304,78 @@ void main() {
         ('genre_name', false),
       ]) {
         final row = _live(1003)..[field] = value;
+        final snapshot = ShowroomApi.snapshot(_onlives([_live(1), row, _live(2), _placeholder]));
+        expect(snapshot.genres.single.lives.map((live) => live.roomId), [1, 2], reason: '$field $value');
         expect(() => ShowroomApi.snapshot(_onlives([row])), throwsA(isA<ApiChanged>()), reason: '$field $value');
       }
-      expect(() => ShowroomApi.snapshot(_onlives([_live(1), 'x'])), throwsA(isA<ApiChanged>()));
-      expect(() => ShowroomApi.snapshot(_onlives([_live(1)], genreId: 'x')), throwsA(isA<ApiChanged>()));
-      expect(() => ShowroomApi.snapshot(_onlives([_live(1)], genreName: '')), throwsA(isA<ApiChanged>()));
+      expect(ShowroomApi.snapshot(_onlives([_live(1), 'x'])).genres.single.lives.single.roomId, 1);
+      expect(() => ShowroomApi.snapshot(_onlives(['x', 7])), throwsA(isA<ApiChanged>()));
+      expect(
+        ShowroomApi.snapshot(_onlives([_placeholder])).genres.single.lives,
+        isEmpty,
+        reason: 'message cells only: nobody is live, not a changed API',
+      );
+    });
+
+    test('a malformed genre drops only itself; a snapshot without a genre is still ApiChanged', () {
+      final good = {
+        'genre_id': 112,
+        'genre_name': 'Music',
+        'lives': [_live(1)],
+      };
+      for (final bad in <Object?>[
+        'x',
+        {'genre_id': 'x', 'genre_name': 'A', 'lives': <Object?>[]},
+        {'genre_id': 5, 'genre_name': '', 'lives': <Object?>[]},
+        {'genre_id': 5, 'genre_name': 'A', 'lives': 'x'},
+        {'genre_id': 5, 'genre_name': 'A', 'lives': List.generate(5001, (index) => _live(index + 1))},
+      ]) {
+        final snapshot = ShowroomApi.snapshot(
+          jsonEncode({
+            'onlives': [bad, good],
+          }),
+        );
+        expect(snapshot.genres.map((genre) => genre.id), [112], reason: '$bad');
+        expect(
+          () => ShowroomApi.snapshot(
+            jsonEncode({
+              'onlives': [bad],
+            }),
+          ),
+          throwsA(isA<ApiChanged>()),
+          reason: '$bad',
+        );
+      }
       expect(() => ShowroomApi.snapshot(jsonEncode({'onlives': <Object?>[]})), throwsA(isA<ApiChanged>()));
       expect(() => ShowroomApi.snapshot(jsonEncode({'onlives': 'x'})), throwsA(isA<ApiChanged>()));
       expect(
         () => ShowroomApi.snapshot(jsonEncode({'onlives': List.generate(129, (_) => <String, Object?>{})})),
         throwsA(isA<ApiChanged>()),
       );
+    });
+
+    test('cards: the start time of started_at and restriction none for premium_room_type 0 (unified rules)', () {
+      final king = ShowroomApi.card(_snapshot().popular.first);
+      expect(king.startedAt, DateTime.utc(2026, 9, 27, 13, 49, 2), reason: 'S01 started_at 1790516942');
+      expect(king.restriction, LiveRestriction.none);
+      expect(king.isLiveNow, isTrue);
+      for (final (value, restriction) in [
+        (0, LiveRestriction.none),
+        ('0', LiveRestriction.none),
+        (1, null),
+        (2, null),
+        (null, null),
+        ('x', null),
+      ]) {
+        final live = ShowroomApi.snapshot(_onlives([_live(1)..['premium_room_type'] = value])).genres.single.lives;
+        expect(ShowroomApi.card(live.single).restriction, restriction, reason: '$value');
+      }
+      for (final value in [0, -1, 946684799, 4102444801, '1790516942x', null, 1.5]) {
+        final live = ShowroomApi.snapshot(_onlives([_live(1)..['started_at'] = value])).genres.single.lives;
+        expect(ShowroomApi.card(live.single).startedAt, isNull, reason: '$value');
+      }
+      expect(ShowroomApi.startTime('1790516942'), DateTime.utc(2026, 9, 27, 13, 49, 2));
+      expect(ShowroomApi.startTime(1790516942)!.isUtc, isTrue);
     });
 
     test('strings of digits count as numbers; optional counts may be missing or blank (3.x)', () {
@@ -368,17 +459,37 @@ void main() {
       }
     });
 
-    for (final (sample, info, id) in [
-      ('S03-profile-live', 'S04-live-info-live', '577362'),
-      ('S03-profile-offline', 'S04-live-info-offline', '61576'),
+    for (final (sample, info, id, changed, added) in [
+      // added: the start time (current_live_started_at) and restriction none
+      // (premium_room_type 0) of a live room (the unified rules).
+      (
+        'S03-profile-live',
+        'S04-live-info-live',
+        '577362',
+        const <String>{},
+        {'startedAt': _iso(1790516942), 'restriction': 'none'},
+      ),
+      // changed: watching and totalViewers, 19-4 (an offline room shows no
+      // audience; 3.x wrote the view_num of 0).
+      (
+        'S03-profile-offline',
+        'S04-live-info-offline',
+        '61576',
+        const {'watching', 'totalViewers'},
+        const <String, Object?>{},
+      ),
     ]) {
       test('$sample with $info matches 3.x (entry, refresh and recording rooms)', () {
         final profile = ShowroomApi.profile(_sample(sample).body, roomId: int.parse(id));
         final state = ShowroomApi.liveInfo(_sample(info).body, roomId: int.parse(id));
-        final room = ShowroomApi.room(profile, live: state.live);
+        final room = ShowroomApi.room(profile, state);
         final legacy = _legacy(sample)[id] as Map<String, dynamic>;
         for (final entry in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
-          _expectParity(_projection(room), _result(legacy[entry])! as Map<String, dynamic>, reason: '$sample $entry');
+          final want = _result(legacy[entry])! as Map<String, dynamic>;
+          _expectParity(_projection(room), want, changed: changed, added: added, reason: '$sample $entry');
+          for (final key in changed) {
+            expect((want[key], room.toJson()[key]), ('0', ''), reason: '$sample $entry $key');
+          }
         }
         expect(_result(legacy['getLiveStatus']), state.live);
         expect(room.roomId, id);
@@ -386,17 +497,88 @@ void main() {
       });
     }
 
-    test('a live room: name as title, "music" genre, view_num even offline (3.x), the comment server when live', () {
+    test('live_info: a live room has its restriction and comment arguments; an offline one neither', () {
       final live = ShowroomApi.liveInfo(_sample('S04-live-info-live').body, roomId: 577362);
-      expect(live, (live: true, bcsvrHost: 'online.showroom-live.com', bcsvrKey: '6e6c686835796846:23483509'));
+      expect((live.live, live.restriction), (true, LiveRestriction.none));
+      final args = live.danmaku!;
+      expect((args.roomId, args.host, args.key), ('577362', 'online.showroom-live.com', '6e6c686835796846:23483509'));
+      expect('$args', isNot(contains(args.key)));
       final offline = ShowroomApi.liveInfo(_sample('S04-live-info-offline').body, roomId: 61576);
-      expect(offline, (live: false, bcsvrHost: null, bcsvrKey: null));
+      expect(offline, (live: false, restriction: null, danmaku: null));
       final profile = ShowroomApi.profile(_sample('S03-profile-offline').body, roomId: 61576);
-      final room = ShowroomApi.room(profile, live: false);
-      expect((room.title, room.area, room.totalViewers, room.followers), ('福岡 聖菜（AKB48）', 'idol', '0', '24809'));
+      final room = ShowroomApi.room(profile, offline);
+      expect((room.title, room.area, room.followers), ('福岡 聖菜（AKB48）', 'idol', '24809'));
       expect(room.effectiveLiveStatus, LiveStatus.offline);
       expect(room.link, 'https://www.showroom-live.com/r/48_Seina_Fukuoka');
       expect(room.introduction, startsWith('おしゃべり好きなので'));
+      expect(room.danmakuData, isNull, reason: 'the site adds the arguments on room entry');
+    });
+
+    test('19-4: an offline room has no audience, start time or restriction; followers stay', () {
+      final body = _profileBody();
+      final profile = ShowroomApi.profile(jsonEncode(body), roomId: 577362);
+      expect(profile.liveStartedAt, DateTime.utc(2026, 9, 27, 13, 49, 2));
+      final offline = ShowroomApi.room(profile, (live: false, restriction: null, danmaku: null));
+      expect((offline.watching, offline.totalViewers, offline.onlineViewers), ('', '', ''));
+      expect(offline.followers, '91');
+      expect(offline.audienceMetricType, AudienceMetricType.totalViewers);
+      expect((offline.startedAt, offline.restriction), (null, null));
+      // An offline room's current_live_started_at is never used: S03 writes
+      // 0, and the checks of 2026-09-28 found the scheduled start of a
+      // coming broadcast there.
+      final other = ShowroomApi.profile(_sample('S03-profile-offline').body, roomId: 61576);
+      expect(other.liveStartedAt, isNull);
+      final live = ShowroomApi.room(profile, (live: true, restriction: null, danmaku: null));
+      expect((live.watching, live.totalViewers, live.startedAt), ('3941', '3941', profile.liveStartedAt));
+      expect(live.restriction, isNull, reason: 'not known: premium_room_type other than 0');
+      final missing = ShowroomApi.profile(jsonEncode({...body, 'current_live_started_at': 0}), roomId: 577362);
+      expect(missing.liveStartedAt, isNull);
+    });
+
+    test('restrictions: premium_room_type 0 is none; anything else is not known (19-5 blocked)', () {
+      String info(Object? premium) =>
+          jsonEncode({...jsonDecode(_sample('S04-live-info-live').body) as Map, 'premium_room_type': premium});
+      for (final (value, restriction) in [
+        (0, LiveRestriction.none),
+        (1, null),
+        (3, null),
+        (null, null),
+        ('paid', null),
+      ]) {
+        expect(ShowroomApi.liveInfo(info(value), roomId: 577362).restriction, restriction, reason: '$value');
+      }
+      expect(ShowroomApi.restrictionOf('0'), LiveRestriction.none);
+    });
+
+    test('comment arguments: a host on showroom-live.com and a key without white space, else none', () {
+      ShowroomDanmakuArgs? args(Object? host, Object? key) => ShowroomApi.danmakuArgs(roomId: 5, host: host, key: key);
+      expect(args(' Online.SHOWROOM-live.com ', 'k:1')!.host, 'online.showroom-live.com');
+      expect(args('showroom-live.com', 'k:1')!.key, 'k:1');
+      for (final host in [
+        null,
+        '',
+        7,
+        'evilshowroom-live.com',
+        'online.showroom-live.com.example',
+        'online.showroom-live.com:8080',
+        'wss://online.showroom-live.com',
+        'online.showroom-live.com/x',
+        'a..showroom-live.com',
+      ]) {
+        expect(args(host, 'k:1'), isNull, reason: '$host');
+      }
+      for (final key in [null, '', '  ', 5, 'a b', 'a\tb', 'a\nb', 'x' * 257]) {
+        expect(args('online.showroom-live.com', key), isNull, reason: '$key');
+      }
+      String info(Map<String, Object?> change) =>
+          jsonEncode({...jsonDecode(_sample('S04-live-info-live').body) as Map, ...change});
+      expect(ShowroomApi.liveInfo(info({'bcsvr_host': 'evil.example.com'}), roomId: 577362).danmaku, isNull);
+      expect(ShowroomApi.liveInfo(info({'bcsvr_key': ''}), roomId: 577362).danmaku, isNull);
+      expect(
+        ShowroomApi.liveInfo(info({'bcsvr_key': ''}), roomId: 577362).live,
+        isTrue,
+        reason: 'the room still opens',
+      );
     });
 
     test("live_status: 2 is live, 0 and 1 offline, anything else ApiChanged; another room's answer is ApiChanged", () {
@@ -476,15 +658,28 @@ void main() {
   });
 
   group('S05 streams', () {
-    test('qualities, their URLs and the recovery match 3.x: 自动 first, then 原画, 中画质, 低画质; WebRTC skipped', () {
+    test('qualities, their URLs and the recovery match 3.x, except 自动 is last (19-2); WebRTC skipped', () {
       final rows = ShowroomApi.streamRows(_sample('S05-streaming-live').body);
       expect(rows, hasLength(8));
       final qualities = ShowroomApi.qualities(rows);
       final legacy = _legacy('S03-profile-live')['577362'] as Map<String, dynamic>;
-      expect([
-        for (final quality in qualities)
-          {'quality': quality.quality, 'id': quality.id, 'sort': quality.sort, 'data': quality.data},
-      ], _result(legacy['getPlayQualites']));
+      final want = _maps(_result(legacy['getPlayQualites']));
+      // changed: order and the sort of 自动, 19-2 (原画 first and the default,
+      // 自动 last; 3.x: 自动 first with sort 2000). Names, ids and URLs are
+      // 3.x's, so stored preferences need no mapping.
+      expect(want.first['quality'], '自动');
+      expect(want.first['sort'], 2000);
+      expect(
+        [
+          for (final quality in qualities)
+            {'quality': quality.quality, 'id': quality.id, 'sort': quality.sort, 'data': quality.data},
+        ],
+        [
+          ...want.skip(1),
+          {...want.first, 'sort': ShowroomApi.autoSort},
+        ],
+      );
+      expect(qualities.map((quality) => quality.quality), ['原画', '中画质', '低画质', '自动']);
       final urls = legacy['getPlayUrls'] as Map<String, dynamic>;
       for (final quality in qualities) {
         final resolution = ShowroomApi.resolution(quality);
@@ -498,8 +693,8 @@ void main() {
         expect(line.codec, isNull);
       }
       final recovery = _result(legacy['resolvePlayUrlsForRecoveryRaw(hls_all:100:0)'])! as Map<String, dynamic>;
-      expect(ShowroomApi.resolution(qualities.first).urls, recovery['urls']);
-      expect(recovery['appliedQualityData'], qualities.first.id);
+      expect(ShowroomApi.resolution(qualities.last).urls, recovery['urls']);
+      expect(recovery['appliedQualityData'], qualities.last.id);
     });
 
     test('an offline room has no stream: StreamUnavailable (3.x gave an empty quality list)', () {
@@ -515,7 +710,7 @@ void main() {
       );
     });
 
-    test("labels and ranks: 3.x's thresholds", () {
+    test("labels and ranks: 3.x's thresholds; 自动 last (19-2)", () {
       final qualities = ShowroomApi.qualities([
         _stream(id: 1, quality: 150, url: 'https://a.showroom-txlive.com/150.m3u8'),
         _stream(quality: 200, url: 'https://a.showroom-txlive.com/200.m3u8'),
@@ -527,17 +722,23 @@ void main() {
       expect(
         [for (final quality in qualities) '${quality.quality} ${quality.id} ${quality.sort}'],
         [
-          '自动 hls_all:5:0 2000',
           '原画 hls:4:1500 1500',
           '中画质 hls:3:999 999',
           '中画质 hls:2:200 200',
           '中画质 hls:6:200 200',
           '低画质 hls:1:150 150',
+          '自动 hls_all:5:0 -1',
         ],
       );
+      final zero = ShowroomApi.qualities([
+        _stream(type: 'hls_all', id: 5, quality: 0, url: 'https://a.showroom-txlive.com/abr.m3u8'),
+        _stream(id: 1, quality: 0, url: 'https://a.showroom-txlive.com/0.m3u8'),
+      ]);
+      expect(zero.map((quality) => quality.quality), ['低画质', '自动'], reason: 'even below a tier of quality 0');
     });
 
-    test('any irregular HLS row fails them all (3.x); a repeated URL is skipped before it is checked', () {
+    test('an irregular HLS row drops only its tier; HLS rows none of which can be read are ApiChanged', () {
+      // The unified rule on bad addresses: 3.x failed every tier.
       for (final row in [
         _stream(url: 'http://a.showroom-txlive.com/x.m3u8'),
         _stream(url: 'https://a.example.com/x.m3u8'),
@@ -552,15 +753,16 @@ void main() {
         _stream(isDefault: 1),
         _stream(type: 5),
       ]) {
-        expect(
-          () => ShowroomApi.qualities([_stream(url: 'https://a.showroom-txlive.com/first.m3u8'), row]),
-          throwsA(isA<ApiChanged>()),
-          reason: '$row',
-        );
+        final kept = ShowroomApi.qualities([_stream(url: 'https://a.showroom-txlive.com/first.m3u8'), row]);
+        expect(kept.single.data, ['https://a.showroom-txlive.com/first.m3u8'], reason: '$row');
+        expect(() => ShowroomApi.qualities([row]), throwsA(isA<ApiChanged>()), reason: '$row');
       }
       expect(() => ShowroomApi.qualities(['x']), throwsA(isA<ApiChanged>()));
+      expect(ShowroomApi.qualities(['x', _stream()]).single.id, 'hls:2:1000');
       final repeated = ShowroomApi.qualities([_stream(), _stream(id: 9, label: null)]);
       expect(repeated.single.id, 'hls:2:1000');
+      final second = ShowroomApi.qualities([_stream(id: 9, label: null), _stream()]);
+      expect(second.single.id, 'hls:2:1000', reason: 'a broken row does not hide a good one with the same URL');
       final other = ShowroomApi.qualities([_stream(), _stream(type: 'dash', url: 'ftp://x')]);
       expect(other, hasLength(1), reason: 'other types are skipped before their URL is checked');
     });

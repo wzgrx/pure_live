@@ -1,0 +1,35 @@
+{
+  "generator": "SoopSite.getStreamAid(khm11903, bno, hd) and getPlayUrls",
+  "value": {
+    "getStreamAid": ".K73.uxkBWUNATwZ8Pd0.7tP8SEqaVmufiRnIJZC3FgQSarrwVHHk5SjZebtdYg_XeyidxRx-Ew5OY9tp-cUom8Z8hCGCSfc7JTR4jdbDmgopsw0syNuuCn2krHFBBxLgNf3Sx41nmPLb8VTtvLr_cvAqztq7LonfhRnqx3kAxpeQCnSXsHhudswbkTMigM7HHpuBFB3OLG0uRs0mwd4HkucVLvRU2f789t8-OMWIcu",
+    "getPlayUrls": [
+      "https://live-global-cdn-v02.sooplive.com/live-stmc-28/auth_playlist.m3u8?aid=.K73.uxkBWUNATwZ8Pd0.7tP8SEqaVmufiRnIJZC3FgQSarrwVHHk5SjZebtdYg_XeyidxRx-Ew5OY9tp-cUom8Z8hCGCSfc7JTR4jdbDmgopsw0syNuuCn2krHFBBxLgNf3Sx41nmPLb8VTtvLr_cvAqztq7LonfhRnqx3kAxpeQCnSXsHhudswbkTMigM7HHpuBFB3OLG0uRs0mwd4HkucVLvRU2f789t8-OMWIcu"
+    ],
+    "request": {
+      "method": "POST",
+      "url": "https://live.sooplive.co.kr/afreeca/player_live_api.php?bjid=khm11903",
+      "form": {
+        "bid": "khm11903",
+        "bno": "297314125",
+        "type": "aid",
+        "pwd": "",
+        "player_type": "html5",
+        "stream_type": "common",
+        "quality": "hd",
+        "mode": "landing",
+        "from_api": "0",
+        "is_revive": "false"
+      },
+      "headers": {
+        "Accept": "*/*",
+        "Origin": "https://www.sooplive.co.kr",
+        "Referer": "https://www.sooplive.co.kr/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Cookie": ""
+      }
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "sample": "S06-aid-original",
+  "capturedAt": "2026-09-27T17:31:13.839674Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://live.sooplive.co.kr/afreeca/player_live_api.php?bjid=khm11903",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Referer": "https://play.sooplive.co.kr/khm11903",
+      "Origin": "https://play.sooplive.co.kr"
+    },
+    "body": "bid=khm11903&bno=297314125&type=aid&pwd=&player_type=html5&stream_type=common&quality=original&mode=landing&from_api=0&is_revive=false"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": [
+        "AbroadChk=YQ; path=/; domain=sooplive.co.kr",
+        "AbroadVod=YQ; expires=Sun, 27-Sep-2026 20:31:14 GMT; Max-Age=10800; path=/; domain=sooplive.co.kr",
+        "_au=ad9dc13ba2673a1ef535553a7f7f3e6e; expires=Tue, 26-Sep-2028 17:31:14 GMT; Max-Age=63072000; path=/; domain=.sooplive.co.kr",
+        "_au3rd=ad9dc13ba2673a1ef535553a7f7f3e6e; expires=Tue, 26 Sep 2028 17:31:14 GMT; path=/; domain=.sooplive.co.kr; SameSite=None; Secure;",
+        "_au=ad9dc13ba2673a1ef535553a7f7f3e6e; expires=Tue, 26-Sep-2028 17:31:14 GMT; Max-Age=63072000; path=/; domain=.sooplive.co.kr",
+        "_ausa=2z8hqmb4uo; expires=Sun, 27-Sep-2026 17:36:14 GMT; Max-Age=300; path=/; domain=.sooplive.co.kr",
+        "_ausb=6j1j29snt3; expires=Sun, 27-Sep-2026 18:01:14 GMT; Max-Age=1800; path=/; domain=.sooplive.co.kr",
+        "_ausa=4jm0r72919; expires=Sun, 27-Sep-2026 17:36:14 GMT; Max-Age=300; path=/; domain=.sooplive.co.kr",
+        "_ausb=0sfc33xpu0; expires=Sun, 27-Sep-2026 18:01:14 GMT; Max-Age=1800; path=/; domain=.sooplive.co.kr"
+      ],
+      "last-modified": "Sun, 27 Sep 2026 17:31:14 GMT",
+      "cache-control": [
+        "no-store, no-cache, must-revalidate",
+        "post-check=0, pre-check=0"
+      ],
+      "date": "Sun, 27 Sep 2026 17:31:14 GMT",
+      "access-control-allow-origin": "https://play.sooplive.co.kr",
+      "x-amz-cf-pop": "SFO53-P9",
+      "origin-agent-cluster": "?0",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "x-amz-cf-id": "Y3l9o7thxnxcyr20sKyFhBHw_2OnZkfxb7pgZjM_NE5VGAw5h9SvJw==",
+      "pragma": "no-cache",
+      "content-type": "text/html; charset=utf-8",
+      "server": "nginx",
+      "x-powered-by": "PHP/7.2.11",
+      "access-control-allow-credentials": "true",
+      "content-length": "290",
+      "p3p": "CP=\"NOI CURa ADMa DEVa TAIa OUR DELa BUS IND PHY ONL UNI COM NAV INT DEM PRE\"",
+      "via": "1.1 4660377cf8ee21acc4070c6ebdac8910.cloudfront.net (CloudFront)",
+      "x-cache": "Miss from cloudfront",
+      "expires": "Mon, 26 Jul 1997 05:00:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "1866c34050d83c4bf6b15cba406b4587388b652dcb1a9262d596dae9a4290750",
+    "length": 313
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "text:AID",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:AbroadChk",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:AbroadVod",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:_au",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:_au3rd",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:_ausa",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:_ausb",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

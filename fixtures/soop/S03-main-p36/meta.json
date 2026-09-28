@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "sample": "S03-main-p36",
+  "capturedAt": "2026-09-27T17:30:33.265882Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.sooplive.co.kr/api/main_broad_list_api.php?selectType=action&selectValue=all&orderType=view_cnt&pageNo=36&lang=ko_KR",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.sooplive.co.kr/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": [
+        "AbroadChk=EY; path=/; domain=sooplive.co.kr",
+        "AbroadVod=EY; expires=Sun, 27-Sep-2026 20:30:33 GMT; Max-Age=10800; path=/; domain=sooplive.co.kr"
+      ],
+      "date": "Sun, 27 Sep 2026 17:30:33 GMT",
+      "x-amz-cf-pop": "SFO53-P9",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "origin-agent-cluster": "?0",
+      "x-amz-cf-id": "5hraiSo-oKAk8xTvkB8bqSoq6az3exvGwce76dczX1Xyjm-gp3DxOA==",
+      "content-type": "text/html; charset=utf-8",
+      "server": "nginx",
+      "x-powered-by": "PHP/7.2.11",
+      "content-length": "3216",
+      "p3p": "CP=\"NOI CURa ADMa DEVa TAIa OUR DELa BUS IND PHY ONL UNI COM NAV INT DEM PRE\"",
+      "via": "1.1 c612b57783f5b443f2cb6528fa89b29c.cloudfront.net (CloudFront)",
+      "x-cache": "Miss from cloudfront"
+    }
+  },
+  "raw": {
+    "sha256": "8827af5e6ba04b52474f80ee0ba0c7568bdf282ef007f85f87f9a41056ed9141",
+    "length": 19932
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "set-cookie:AbroadChk",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:AbroadVod",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

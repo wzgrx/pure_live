@@ -1,0 +1,21 @@
+{
+  "generator": "SoopSite.searchRooms(zzqqxxkkyyww, page 1, pageSize 30)",
+  "value": {
+    "rooms": [],
+    "request": {
+      "method": "GET",
+      "url": "https://sch.sooplive.co.kr/api.php?l=DF&m=liveSearch&c=UTF-8&w=webk&isMobile=0&onlyParent=1&szType=json&szOrder=score&szKeyword=zzqqxxkkyyww&nPageNo=1&nListCnt=30&tab=live&location=total_search&isHashSearch=0&v=2.0",
+      "form": {},
+      "headers": {
+        "Accept": "*/*",
+        "Origin": "https://www.sooplive.co.kr",
+        "Referer": "https://www.sooplive.co.kr/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Cookie": ""
+      }
+    }
+  }
+}

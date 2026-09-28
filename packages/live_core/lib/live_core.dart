@@ -24,3 +24,5 @@ export 'src/sites/douyu/douyu_api.dart';
 export 'src/sites/douyu/douyu_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
+export 'src/sites/soop/soop_api.dart';
+export 'src/sites/soop/soop_site.dart';

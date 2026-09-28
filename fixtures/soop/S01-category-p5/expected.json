@@ -1,0 +1,598 @@
+{
+  "generator": "SoopSite.getSubCategores(LiveCategory(1, 热门), 5, 120)",
+  "value": {
+    "areas": [
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360097",
+        "areaName": "아스달 연대기: 세 개의 세력",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/3552670d91369a652.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360098",
+        "areaName": "서머너즈 워: 천공의 아레나",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/730769034a9824552.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360099",
+        "areaName": "레이븐2",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/3819670d9138ae176.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360101",
+        "areaName": "로드나인",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/5369670d913abedf2.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360102",
+        "areaName": "젠레스 존 제로",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/29/71806901c21d19b49.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360103",
+        "areaName": "콜 오브 듀티: 모바일",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/3436670d913ccf4f3.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360104",
+        "areaName": "에이지 오브 엠파이어 모바일",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/800369034d26c7894.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360106",
+        "areaName": "지천",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/632469034d4785b30.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360107",
+        "areaName": "명일방주",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/651769034d586fb40.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360108",
+        "areaName": "발할라 서바이벌",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/01/24/5339679321dcb78dd.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360109",
+        "areaName": "레이튼 교수와 이상한 마을 HD",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/975569034dbf467b3.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360110",
+        "areaName": "레이튼 교수와 악마의 상자 HD",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/686769034d6ac2016.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360111",
+        "areaName": "레전드 오브 이미르",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/02/21/812567b7e329d7238.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360115",
+        "areaName": "쿠키런: 오븐스매시",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/04/25/9210680b163a5ce93.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360116",
+        "areaName": "작혼: 리치 마작",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/149969034dd9cabbf.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360117",
+        "areaName": "세븐나이츠 리버스",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/05/15/845868259f4c15ece.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360118",
+        "areaName": "제5인격",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/29/79726901c258a08e4.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360119",
+        "areaName": "EA SPORTS FC 모바일",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/08/12/3567689ad4c385b29.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360120",
+        "areaName": "메이플스토리M",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/08/12/1285689ad7ceacc2c.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360121",
+        "areaName": "뱀피르",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/08/20/324568a5586865f24.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360122",
+        "areaName": "아키텍트",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/12/10/737369390d302edce.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360123",
+        "areaName": "로스트아크 모바일",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/11/11/20636912c1d02d43a.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360124",
+        "areaName": "아스텔리아 M",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/14/976968ee0fca3fca3.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360125",
+        "areaName": "듀엣 나이트 어비스",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/28/239269007de0d2252.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360127",
+        "areaName": "카오스 제로 나이트메어",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/30/85646902f41054a43.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360128",
+        "areaName": "스텔라 소라",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/01/21/1137697039410c87e.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360129",
+        "areaName": "명일방주: 엔드필드",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/07/15/19806a56ee5aa3cb9.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360130",
+        "areaName": "블루 프로토콜: 스타 레조넌스",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/03/19/888669bb84b9a8ac6.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360131",
+        "areaName": "몬길: STAR DIVE",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/04/08/602369d5dcb27b8ca.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360132",
+        "areaName": "메이플 키우기",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/04/10/651769d884d9a96dd.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360133",
+        "areaName": "이환",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/04/15/229269df19ac23cf7.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360134",
+        "areaName": "아주르 프로밀리아",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/05/15/92376a067b9161913.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360135",
+        "areaName": "브롤스타즈",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/05/15/42306a06bb30a5b2d.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360136",
+        "areaName": "브레이커스 모바일",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/06/11/66546a2a3467406e1.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360137",
+        "areaName": "솔: 인챈트",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/06/17/60536a3238f8bab09.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360138",
+        "areaName": "삼국지: 천하결전",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/07/03/77626a471f2cb7603.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360139",
+        "areaName": "히간: 이루실",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/08/12/28986a7bfd412cba9.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360141",
+        "areaName": "도깨비의세계",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/09/07/39746a9e1c5945fbb.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360143",
+        "areaName": "뱅드림! 아워 노트",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/09/22/76396ab20a21ecdf5.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00360144",
+        "areaName": "템빨: 오버기어드",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/09/22/97266ab20c17925c9.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00370010",
+        "areaName": "챔피언스리그",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/9127670d913ee2874.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00370011",
+        "areaName": "프리미어리그",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/4284670d913fea5c0.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00370014",
+        "areaName": "국가대표",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/06/08/18716a2633c22e70b.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00370015",
+        "areaName": "Dailynews Cup",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/06/15/92996a2f90ea1f3f9.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00370016",
+        "areaName": "축구 콘텐츠",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/09/03/27066a98e18eca359.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00390029",
+        "areaName": "KTV 국민방송",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/08/11/74566a7ab23b4c3b1.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00410000",
+        "areaName": "2026 전국체전",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/08/19/52906a85449d66d2d.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00570006",
+        "areaName": "볼링",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/3466670d914d78a2a.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00570017",
+        "areaName": "배드민턴",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/08/08/718468958ddd32126.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00570019",
+        "areaName": "수영",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/09/03/227968b7c8995a77e.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00570020",
+        "areaName": "미식축구",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/12/04/347569312a5a5c258.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00570021",
+        "areaName": "육상",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/01/12/21686964760a342e2.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00570022",
+        "areaName": "다트",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/07/08/71516a4e0e1a372fb.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00690000",
+        "areaName": "해외프로농구",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/10/01/676768dc96b9aaad7.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00720000",
+        "areaName": "LCK",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/1707670d9156ca223.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00840001",
+        "areaName": "아마 야구",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/12/04/447669312a0ca40da.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00840002",
+        "areaName": "아마 축구",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/12/04/633869312a156903b.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00840003",
+        "areaName": "아마 배구",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/12/04/534269312a1f5261b.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00840004",
+        "areaName": "아마 농구",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/12/04/868469312a2aec156.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00880000",
+        "areaName": "SOOPER LEAGUE",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2024/10/15/3303670d916232e49.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00940014",
+        "areaName": "기타 드라마",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/12/18/8978694398295738d.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00970000",
+        "areaName": "장애인스포츠",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2025/03/25/384567e20c5e69234.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "00980000",
+        "areaName": "모터스포츠",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/04/13/883369dc6e933cef8.png",
+        "shortName": null
+      },
+      {
+        "platform": "soop",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "01050000",
+        "areaName": "KBO",
+        "areaPic": "https://admin.img.sooplive.com/category_img/2026/03/09/531169ae2ef17e392.jpg",
+        "shortName": null
+      }
+    ],
+    "request": {
+      "method": "GET",
+      "url": "https://sch.sooplive.co.kr/api.php?m=categoryList&szKeyword&szOrder=view_cnt&nPageNo=5&nListCnt=120&nOffset=0&szPlatform=pc",
+      "form": {},
+      "headers": {
+        "Accept": "*/*",
+        "Origin": "https://www.sooplive.co.kr",
+        "Referer": "https://www.sooplive.co.kr/",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Cookie": ""
+      }
+    }
+  }
+}

@@ -1,0 +1,2937 @@
+{
+  "generator": "LookLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + LookLiveApi.room + mediaUri (with S01-video-p1, S02-audio-p1; synthetic: this answer for room 21623632); variants: edited copies at every depth",
+  "value": {
+    "recorded": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetail → getPlayQualites": {
+        "result": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetail → getPlayUrls(hls:source)": {
+        "result": [
+          "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+        ],
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayQualites": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayUrls(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayQualites": {
+        "result": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRecording → getPlayUrls(hls:source)": {
+        "result": [
+          "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+        ],
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "platform in another case": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "room link as id": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "api.room": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "sessionId": "134543183",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "kind": "video",
+          "streamType": 1,
+          "state": "live",
+          "popularity": null,
+          "currentViewers": null,
+          "isAppOnly": false,
+          "variants": [
+            {
+              "id": "hls:source",
+              "protocol": "hls",
+              "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+            },
+            {
+              "id": "flv:source",
+              "protocol": "flv",
+              "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+            }
+          ]
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "api.room(includeMedia: false)": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "sessionId": "134543183",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "kind": "video",
+          "streamType": 1,
+          "state": "live",
+          "popularity": null,
+          "currentViewers": null,
+          "isAppOnly": false,
+          "variants": []
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "invalid ids": {
+      "": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "1": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "abc": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "0123": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "https://look.163.com/hot?id=21623631": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      }
+    },
+    "after the list": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "1",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "440",
+          "onlineViewers": "1",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "api.room(21623632) answered with this room": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live identity"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623632\"}"
+      ]
+    },
+    "LookLiveApi.mediaUri": {
+      "hls http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8",
+      "flv http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=x": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=x",
+      "flv http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=x": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "rtmp http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls  http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8 ": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8",
+      "hls https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8",
+      "hls HTTPS://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8",
+      "hls http://PULL0583D674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8",
+      "hls http://live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls http://a.b.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls http://pull_1.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls http://pull0583d674.live.126.net:80/live/800897349fe246e994f36976011de4d5/playlist.m3u8": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8",
+      "hls http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "hls http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8/": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls http://pull0583d674.live.126.net/live//800897349fe246e994f36976011de4d5/playlist.m3u8": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls http://pull0583d674.live.126.net/vod/800897349fe246e994f36976011de4d5/playlist.m3u8": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hls ": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      }
+    },
+    "variants": {
+      "liveStatus 0": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": false,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        }
+      },
+      "liveStatus -1": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": false,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "after the list": {
+          "getRoomDetailForRefresh": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getLiveStatus": false,
+          "getRoomDetail": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getRoomDetail → getPlayQualites": [],
+          "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          }
+        }
+      },
+      "liveStatus -10": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "该 LOOK 直播受私密房或账号访问条件限制，界面保持未知状态。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "该 LOOK 直播受私密房或账号访问条件限制，界面保持未知状态。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "after the list": {
+          "getRoomDetailForRefresh": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 3,
+            "isRecord": false,
+            "status": false,
+            "notice": "该 LOOK 直播受私密房或账号访问条件限制，界面保持未知状态。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getLiveStatus": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live access"
+          },
+          "getRoomDetail": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 3,
+            "isRecord": false,
+            "status": false,
+            "notice": "该 LOOK 直播受私密房或账号访问条件限制，界面保持未知状态。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getRoomDetail → getPlayQualites": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          }
+        }
+      },
+      "liveStatus 2": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        }
+      },
+      "liveStatus text": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "liveStatus missing": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 3,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        }
+      },
+      "liveType 2": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "语音直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "语音直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "liveType 3": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "liveType missing": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "liveStreamType 50": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "liveStreamType 50 without liveUrl": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "after the list": {
+          "getRoomDetailForRefresh": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getLiveStatus": true,
+          "getRoomDetail": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getRoomDetail → getPlayQualites": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          }
+        }
+      },
+      "liveStreamType missing without liveUrl": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "after the list": {
+          "getRoomDetailForRefresh": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getLiveStatus": true,
+          "getRoomDetail": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getRoomDetail → getPlayQualites": [
+            {
+              "quality": "HLS 原始线路",
+              "id": "hls:source",
+              "sort": 2,
+              "data": null
+            },
+            {
+              "quality": "FLV 原始线路",
+              "id": "flv:source",
+              "sort": 1,
+              "data": null
+            }
+          ],
+          "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+            "urls": [
+              "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+            ],
+            "appliedQualityData": "hls:source"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+            "urls": [
+              "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+            ],
+            "appliedQualityData": "flv:source"
+          }
+        }
+      },
+      "liveUrl null": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "after the list": {
+          "getRoomDetailForRefresh": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getLiveStatus": true,
+          "getRoomDetail": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getRoomDetail → getPlayQualites": [
+            {
+              "quality": "HLS 原始线路",
+              "id": "hls:source",
+              "sort": 2,
+              "data": null
+            },
+            {
+              "quality": "FLV 原始线路",
+              "id": "flv:source",
+              "sort": 1,
+              "data": null
+            }
+          ],
+          "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+            "urls": [
+              "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+            ],
+            "appliedQualityData": "hls:source"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+            "urls": [
+              "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+            ],
+            "appliedQualityData": "flv:source"
+          }
+        }
+      },
+      "liveUrl empty": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "after the list": {
+          "getRoomDetailForRefresh": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getLiveStatus": true,
+          "getRoomDetail": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getRoomDetail → getPlayQualites": [
+            {
+              "quality": "HLS 原始线路",
+              "id": "hls:source",
+              "sort": 2,
+              "data": null
+            },
+            {
+              "quality": "FLV 原始线路",
+              "id": "flv:source",
+              "sort": 1,
+              "data": null
+            }
+          ],
+          "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+            "urls": [
+              "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+            ],
+            "appliedQualityData": "hls:source"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+            "urls": [
+              "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+            ],
+            "appliedQualityData": "flv:source"
+          }
+        }
+      },
+      "liveUrl text": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "hlsPullUrl missing": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        },
+        "after the list": {
+          "getRoomDetailForRefresh": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getLiveStatus": true,
+          "getRoomDetail": {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          "getRoomDetail → getPlayQualites": [
+            {
+              "quality": "FLV 原始线路",
+              "id": "flv:source",
+              "sort": 1,
+              "data": null
+            }
+          ],
+          "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+            "throws": "LookLiveException",
+            "message": "LOOK Live mediaUnavailable"
+          },
+          "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+            "urls": [
+              "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+            ],
+            "appliedQualityData": "flv:source"
+          }
+        }
+      },
+      "httpPullUrl missing": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        }
+      },
+      "hlsPullUrl other host": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "liveStatus -1 with an invalid hlsPullUrl": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": false,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        }
+      },
+      "roomInfo missing": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "roomInfo id missing": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "anchor missing": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "anchor liveRoomNo other": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        }
+      },
+      "anchor liveRoomNo number": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "anchor userId missing": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      },
+      "title missing": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "title spaced": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "nickName number": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "avatarUrl missing": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "avatarUrl and liveCoverUrl missing": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "",
+          "cover": "",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "",
+          "cover": "",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "code 404": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        }
+      },
+      "code 424": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        }
+      },
+      "code 520": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        }
+      },
+      "code 522": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        }
+      },
+      "code 555": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        }
+      },
+      "code 500": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        }
+      },
+      "code text": {
+        "getRoomDetailForRefresh": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getLiveStatus": true,
+        "getRoomDetail": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "getRoomDetail → getPlayQualites": [
+          {
+            "quality": "HLS 原始线路",
+            "id": "hls:source",
+            "sort": 2,
+            "data": null
+          },
+          {
+            "quality": "FLV 原始线路",
+            "id": "flv:source",
+            "sort": 1,
+            "data": null
+          }
+        ],
+        "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+          ],
+          "appliedQualityData": "hls:source"
+        },
+        "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+          "urls": [
+            "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+          ],
+          "appliedQualityData": "flv:source"
+        }
+      },
+      "code missing": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        }
+      },
+      "data null": {
+        "getRoomDetailForRefresh": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getLiveStatus": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "getRoomDetail": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        }
+      }
+    }
+  }
+}

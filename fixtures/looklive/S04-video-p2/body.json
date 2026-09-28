@@ -1,0 +1,22 @@
+{
+  "code": 200,
+  "msg": null,
+  "message": null,
+  "data": {
+    "itemList": null,
+    "labelBar": {
+      "currentLabelId": 0,
+      "labelList": [
+        {
+          "labelName": "热门",
+          "labelId": 0,
+          "totalCount": 0
+        }
+      ]
+    },
+    "topBanner": null,
+    "hasMore": false,
+    "offset": 20
+  },
+  "success": true
+}

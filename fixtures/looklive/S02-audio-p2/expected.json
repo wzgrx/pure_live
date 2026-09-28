@@ -1,0 +1,1102 @@
+{
+  "generator": "LookLiveApi.directory (audio page 2) + LookLiveSite.getCategoryRooms (audio page 2)",
+  "value": {
+    "directory(audio, 2)": {
+      "result": {
+        "rooms": [
+          {
+            "roomId": "181408025",
+            "userId": "1751995745",
+            "sessionId": "134598466",
+            "title": "倾听树洞，聊一聊吧。",
+            "nick": "南禾音",
+            "avatar": "https://p3.music.126.net/UEmtJmluvVipCFVFqfufzw==/109951174001440291.jpg",
+            "cover": "https://p3.music.126.net/3VuP3we9POMPB1bNxSxsTw==/109951174001528356.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 376,
+            "currentViewers": 3,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/eb1b86b139d7455bbefbb9bd3037f688/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/eb1b86b139d7455bbefbb9bd3037f688.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "325808387",
+            "userId": "572793023",
+            "sessionId": "134598464",
+            "title": "我是真的爱上你",
+            "nick": "婆果西婆吆",
+            "avatar": "https://p4.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+            "cover": "https://p4.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 824,
+            "currentViewers": 8,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/b9d2b60ca47c44298e6d6b5fd3349d01/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/b9d2b60ca47c44298e6d6b5fd3349d01.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "378046308",
+            "userId": "3948652467",
+            "sessionId": "134607297",
+            "title": "倾听你，治愈你",
+            "nick": "九荔_暖暖版",
+            "avatar": "https://p3.music.126.net/E2UCtqOBh_5_9_SUgs2YWw==/109951169789419056.jpg",
+            "cover": "https://p4.music.126.net/re1lvkmBWXHlPo0MnXHrXA==/109951172548290916.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 1038,
+            "currentViewers": 5,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/252743570ca243258d14eba11e3f91c4/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/252743570ca243258d14eba11e3f91c4.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "485752076",
+            "userId": "7961640766",
+            "sessionId": "134609302",
+            "title": "湖北第一纯情",
+            "nick": "甜熙熙-急头巴老愁13W梯度",
+            "avatar": "https://p4.music.126.net/nKWB77nR1jYbDrVQVW4RlQ==/109951173980134897.jpg",
+            "cover": "https://p3.music.126.net/4ZWl1-wxcaYAzq2vodFyCA==/109951172112163096.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 883,
+            "currentViewers": 7,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/3ffe87a426a24e50be0e9dbae38ae232/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/3ffe87a426a24e50be0e9dbae38ae232.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "379066633",
+            "userId": "505712550",
+            "sessionId": "134595751",
+            "title": "知心姐姐开播啦～",
+            "nick": "释子是柿子",
+            "avatar": "https://p3.music.126.net/WS9pqggStzUGtJpKUdG0rw==/109951169503578210.jpg",
+            "cover": "https://p3.music.126.net/7MyJVNlUCLdhBlTX6DjKYA==/109951168690890168.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 444,
+            "currentViewers": 4,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/89ebec5e473649bd9a090e0e4b9d78b2/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/89ebec5e473649bd9a090e0e4b9d78b2.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "453310516",
+            "userId": "6364034185",
+            "sessionId": "134610232",
+            "title": "说你想念我的呢喃",
+            "nick": "麓小橘",
+            "avatar": "https://p3.music.126.net/Qp3AhgwucCKz4Uzd0KCaew==/109951173975066548.jpg",
+            "cover": "https://p4.music.126.net/LD8YcK4mdUK0fKP7WMrAJg==/109951173969931459.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 630,
+            "currentViewers": 6,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/66a8548b12204c79acd7e4c3ec29ea45/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/66a8548b12204c79acd7e4c3ec29ea45.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "529808276",
+            "userId": "8664625579",
+            "sessionId": "134599432",
+            "title": "只是对你温柔",
+            "nick": "小馨欣---",
+            "avatar": "https://p3.music.126.net/vjMbS9QZ8EMrNyaTpItObQ==/109951169699235488.jpg",
+            "cover": "https://p4.music.126.net/aiflEdcFTFvDwvfiUjykXw==/109951168767254321.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 184,
+            "currentViewers": 3,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/39fe8d0a66b6426b8996eb5bd7390f08/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/39fe8d0a66b6426b8996eb5bd7390f08.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "237490849",
+            "userId": "1544392167",
+            "sessionId": "134610969",
+            "title": "自古逢秋悲寂寥",
+            "nick": "匿名",
+            "avatar": "https://p3.music.126.net/WOw3ViSlgoJszSK8-9K_RQ==/109951174009822303.jpg",
+            "cover": "https://p4.music.126.net/z-xhaXP7OY-sKw271O3QTQ==/109951172437760488.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 1228,
+            "currentViewers": 5,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/94d47f64b5c3460e88ceddc7f07e2aff/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/94d47f64b5c3460e88ceddc7f07e2aff.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "290046568",
+            "userId": "1720521026",
+            "sessionId": "134596485",
+            "title": "你的痛苦我都添乱 生怕你解决",
+            "nick": "今晚台灯没电了",
+            "avatar": "https://p4.music.126.net/XHi3InlETbT1pdbP-lmAeQ==/109951171465694002.jpg",
+            "cover": "https://p3.music.126.net/SFsf71KvmtAXt6TE4N5MXg==/109951174014972947.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 385,
+            "currentViewers": 4,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/6a3636f3aeaa4325b362d9081817fe38/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/6a3636f3aeaa4325b362d9081817fe38.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "241281048",
+            "userId": "1802750812",
+            "sessionId": "134610230",
+            "title": "我有酒你有故事吗",
+            "nick": "小仙女999z",
+            "avatar": "https://p3.music.126.net/BXe-ksVBY3RsRlUqAUEFEQ==/109951167743442117.jpg",
+            "cover": "https://p3.music.126.net/jjDKJYjjW6h-DxAkMqCdDw==/109951168543257349.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 37,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/6b14bdc6ded645a98e0e8d36aeaf8004/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/6b14bdc6ded645a98e0e8d36aeaf8004.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "225810429",
+            "userId": "1791327104",
+            "sessionId": "134602356",
+            "title": "一粒种子的旅行",
+            "nick": "豆豆紫云",
+            "avatar": "https://p4.music.126.net/6H7S-N5y34lXcCXUepIU8w==/109951166521490225.jpg",
+            "cover": "https://p3.music.126.net/QbvSj8o9MG8G3hDw0w2C6w==/109951172061186618.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 42,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/ca3608cf38374e63b45d8ae63d0155ba/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/ca3608cf38374e63b45d8ae63d0155ba.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "273362228",
+            "userId": "2069153318",
+            "sessionId": "134602355",
+            "title": "你在干什么呢～",
+            "nick": "宁婉秋-祝10月1日生日快乐版",
+            "avatar": "https://p4.music.126.net/Hx41QacFXDYMCZdJ_306hQ==/109951173929378963.jpg",
+            "cover": "https://p4.music.126.net/9kc9oUgPc2CFdWzfU6KzEw==/109951173928466674.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 444,
+            "currentViewers": 7,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/3043607b680d464987e21c79f33d08e4/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/3043607b680d464987e21c79f33d08e4.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "210710324",
+            "userId": "1680046314",
+            "sessionId": "134602353",
+            "title": "你的专属秘密树洞",
+            "nick": "第3位注销中",
+            "avatar": "https://p4.music.126.net/XoNLHcBGudvNHtUBPxf_wg==/109951174009636285.jpg",
+            "cover": "https://p3.music.126.net/sf60oLHTrVr-IWdrH6eLNA==/109951173778469042.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 1274,
+            "currentViewers": 7,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/25277865fdcc4a4ab0471ca0bf780f54/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/25277865fdcc4a4ab0471ca0bf780f54.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "11319946",
+            "userId": "454961991",
+            "sessionId": "134600431",
+            "title": "开播挣猫粮拉~",
+            "nick": "白白",
+            "avatar": "https://p4.music.126.net/AEhbELRc2_UwN36Z9dy8dw==/109951172852200683.jpg",
+            "cover": "https://p3.music.126.net/Ja3DmthvFK8p7hO87WONCw==/109951169023340329.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 1583,
+            "currentViewers": 8,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/0179125c1234475f80962c861f39787a/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/0179125c1234475f80962c861f39787a.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "350667806",
+            "userId": "3721069827",
+            "sessionId": "134606323",
+            "title": "等待一个有缘人",
+            "nick": "碧丽莉",
+            "avatar": "https://p4.music.126.net/pAeOpFcdBb8TjbXrnsKa9A==/109951169615395449.jpg",
+            "cover": "https://p4.music.126.net/ATxjD20W999TO2jfKZeCAQ==/109951173947976264.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 127,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/5cffb23f96654faa91f9153da37362b2/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/5cffb23f96654faa91f9153da37362b2.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "576717118",
+            "userId": "12327145932",
+            "sessionId": "134602351",
+            "title": "贵州最后少女",
+            "nick": "朝朝财",
+            "avatar": "https://p4.music.126.net/86wtO3Q_ufsy6EH2cParzw==/109951173851326359.jpg",
+            "cover": "https://p4.music.126.net/fVye-CE-ng3g50A42grSpw==/109951171412948299.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 824,
+            "currentViewers": 5,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/0c8b34633fdb4fe9984f38601f045d76/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/0c8b34633fdb4fe9984f38601f045d76.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "207739688",
+            "userId": "281387786",
+            "sessionId": "134599428",
+            "title": "高 雅 女 主 播",
+            "nick": "慢",
+            "avatar": "https://p3.music.126.net/IEgp4JetPyieX-SVxqgbWg==/109951173977669720.jpg",
+            "cover": "https://p3.music.126.net/O4-EKJv1oDgGI8wc7u6CNw==/109951174006426342.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 1815,
+            "currentViewers": 11,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/25d25f8b74414dbe877985a4f0f9676e/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/25d25f8b74414dbe877985a4f0f9676e.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "366497413",
+            "userId": "1878314879",
+            "sessionId": "134600429",
+            "title": "点歌热评999+歌曲！",
+            "nick": "娴babyGirl",
+            "avatar": "https://p3.music.126.net/0NrRDNSl8PXtBOG6jWZFRQ==/109951173999202211.jpg",
+            "cover": "https://p4.music.126.net/24OoyDr3NdCiHFlimj2Bvg==/109951174005464672.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 49,
+            "currentViewers": 3,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/21d52ccf48634ed7af35353537639778/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/21d52ccf48634ed7af35353537639778.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "634849609",
+            "userId": "17433649993",
+            "sessionId": "134602349",
+            "title": "极品破碎音～",
+            "nick": "许诺_筹筹梯度",
+            "avatar": "https://p4.music.126.net/du81o9RxUT_vWMloPvWvSA==/109951173992390591.jpg",
+            "cover": "https://p4.music.126.net/zFIozsQbsBNmlY0kI1E9DQ==/109951172828649713.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 413,
+            "currentViewers": 6,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/e78c308adfb745f59d282dd7fd6c44c3/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/e78c308adfb745f59d282dd7fd6c44c3.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "265119741",
+            "userId": "292368970",
+            "sessionId": "134601368",
+            "title": "你的心事我倾听",
+            "nick": "还是硕硕呐-",
+            "avatar": "https://p3.music.126.net/LMaidrybLbMCghyx56GO1Q==/109951173923848419.jpg",
+            "cover": "https://p4.music.126.net/MBzmEqGu8pGizaBzTAW_og==/109951173551090181.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 601,
+            "currentViewers": 4,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/4725949ae14348d9b868c2d6a81a3f59/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/4725949ae14348d9b868c2d6a81a3f59.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": true
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+      ]
+    },
+    "getCategoryRooms(audio, 2)": {
+      "result": [
+        {
+          "roomId": "181408025",
+          "userId": "1751995745",
+          "title": "倾听树洞，聊一聊吧。",
+          "nick": "南禾音",
+          "avatar": "https://p3.music.126.net/UEmtJmluvVipCFVFqfufzw==/109951174001440291.jpg",
+          "cover": "https://p3.music.126.net/3VuP3we9POMPB1bNxSxsTw==/109951174001528356.jpg",
+          "area": "语音直播",
+          "watching": "3",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "376",
+          "onlineViewers": "3",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=181408025",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=181408025"
+        },
+        {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p4.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p4.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "8",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "824",
+          "onlineViewers": "8",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        {
+          "roomId": "378046308",
+          "userId": "3948652467",
+          "title": "倾听你，治愈你",
+          "nick": "九荔_暖暖版",
+          "avatar": "https://p3.music.126.net/E2UCtqOBh_5_9_SUgs2YWw==/109951169789419056.jpg",
+          "cover": "https://p4.music.126.net/re1lvkmBWXHlPo0MnXHrXA==/109951172548290916.jpg",
+          "area": "语音直播",
+          "watching": "5",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "1038",
+          "onlineViewers": "5",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=378046308",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=378046308"
+        },
+        {
+          "roomId": "485752076",
+          "userId": "7961640766",
+          "title": "湖北第一纯情",
+          "nick": "甜熙熙-急头巴老愁13W梯度",
+          "avatar": "https://p4.music.126.net/nKWB77nR1jYbDrVQVW4RlQ==/109951173980134897.jpg",
+          "cover": "https://p3.music.126.net/4ZWl1-wxcaYAzq2vodFyCA==/109951172112163096.jpg",
+          "area": "语音直播",
+          "watching": "7",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "883",
+          "onlineViewers": "7",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=485752076",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=485752076"
+        },
+        {
+          "roomId": "379066633",
+          "userId": "505712550",
+          "title": "知心姐姐开播啦～",
+          "nick": "释子是柿子",
+          "avatar": "https://p3.music.126.net/WS9pqggStzUGtJpKUdG0rw==/109951169503578210.jpg",
+          "cover": "https://p3.music.126.net/7MyJVNlUCLdhBlTX6DjKYA==/109951168690890168.jpg",
+          "area": "语音直播",
+          "watching": "4",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "444",
+          "onlineViewers": "4",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=379066633",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=379066633"
+        },
+        {
+          "roomId": "453310516",
+          "userId": "6364034185",
+          "title": "说你想念我的呢喃",
+          "nick": "麓小橘",
+          "avatar": "https://p3.music.126.net/Qp3AhgwucCKz4Uzd0KCaew==/109951173975066548.jpg",
+          "cover": "https://p4.music.126.net/LD8YcK4mdUK0fKP7WMrAJg==/109951173969931459.jpg",
+          "area": "语音直播",
+          "watching": "6",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "630",
+          "onlineViewers": "6",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=453310516",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=453310516"
+        },
+        {
+          "roomId": "529808276",
+          "userId": "8664625579",
+          "title": "只是对你温柔",
+          "nick": "小馨欣---",
+          "avatar": "https://p3.music.126.net/vjMbS9QZ8EMrNyaTpItObQ==/109951169699235488.jpg",
+          "cover": "https://p4.music.126.net/aiflEdcFTFvDwvfiUjykXw==/109951168767254321.jpg",
+          "area": "语音直播",
+          "watching": "3",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "184",
+          "onlineViewers": "3",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=529808276",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=529808276"
+        },
+        {
+          "roomId": "237490849",
+          "userId": "1544392167",
+          "title": "自古逢秋悲寂寥",
+          "nick": "匿名",
+          "avatar": "https://p3.music.126.net/WOw3ViSlgoJszSK8-9K_RQ==/109951174009822303.jpg",
+          "cover": "https://p4.music.126.net/z-xhaXP7OY-sKw271O3QTQ==/109951172437760488.jpg",
+          "area": "语音直播",
+          "watching": "5",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "1228",
+          "onlineViewers": "5",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=237490849",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=237490849"
+        },
+        {
+          "roomId": "290046568",
+          "userId": "1720521026",
+          "title": "你的痛苦我都添乱 生怕你解决",
+          "nick": "今晚台灯没电了",
+          "avatar": "https://p4.music.126.net/XHi3InlETbT1pdbP-lmAeQ==/109951171465694002.jpg",
+          "cover": "https://p3.music.126.net/SFsf71KvmtAXt6TE4N5MXg==/109951174014972947.jpg",
+          "area": "语音直播",
+          "watching": "4",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "385",
+          "onlineViewers": "4",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=290046568",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=290046568"
+        },
+        {
+          "roomId": "241281048",
+          "userId": "1802750812",
+          "title": "我有酒你有故事吗",
+          "nick": "小仙女999z",
+          "avatar": "https://p3.music.126.net/BXe-ksVBY3RsRlUqAUEFEQ==/109951167743442117.jpg",
+          "cover": "https://p3.music.126.net/jjDKJYjjW6h-DxAkMqCdDw==/109951168543257349.jpg",
+          "area": "语音直播",
+          "watching": "1",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "37",
+          "onlineViewers": "1",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=241281048",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=241281048"
+        },
+        {
+          "roomId": "225810429",
+          "userId": "1791327104",
+          "title": "一粒种子的旅行",
+          "nick": "豆豆紫云",
+          "avatar": "https://p4.music.126.net/6H7S-N5y34lXcCXUepIU8w==/109951166521490225.jpg",
+          "cover": "https://p3.music.126.net/QbvSj8o9MG8G3hDw0w2C6w==/109951172061186618.jpg",
+          "area": "语音直播",
+          "watching": "1",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "42",
+          "onlineViewers": "1",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=225810429",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=225810429"
+        },
+        {
+          "roomId": "273362228",
+          "userId": "2069153318",
+          "title": "你在干什么呢～",
+          "nick": "宁婉秋-祝10月1日生日快乐版",
+          "avatar": "https://p4.music.126.net/Hx41QacFXDYMCZdJ_306hQ==/109951173929378963.jpg",
+          "cover": "https://p4.music.126.net/9kc9oUgPc2CFdWzfU6KzEw==/109951173928466674.jpg",
+          "area": "语音直播",
+          "watching": "7",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "444",
+          "onlineViewers": "7",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=273362228",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=273362228"
+        },
+        {
+          "roomId": "210710324",
+          "userId": "1680046314",
+          "title": "你的专属秘密树洞",
+          "nick": "第3位注销中",
+          "avatar": "https://p4.music.126.net/XoNLHcBGudvNHtUBPxf_wg==/109951174009636285.jpg",
+          "cover": "https://p3.music.126.net/sf60oLHTrVr-IWdrH6eLNA==/109951173778469042.jpg",
+          "area": "语音直播",
+          "watching": "7",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "1274",
+          "onlineViewers": "7",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=210710324",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=210710324"
+        },
+        {
+          "roomId": "11319946",
+          "userId": "454961991",
+          "title": "开播挣猫粮拉~",
+          "nick": "白白",
+          "avatar": "https://p4.music.126.net/AEhbELRc2_UwN36Z9dy8dw==/109951172852200683.jpg",
+          "cover": "https://p3.music.126.net/Ja3DmthvFK8p7hO87WONCw==/109951169023340329.jpg",
+          "area": "语音直播",
+          "watching": "8",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "1583",
+          "onlineViewers": "8",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=11319946",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=11319946"
+        },
+        {
+          "roomId": "350667806",
+          "userId": "3721069827",
+          "title": "等待一个有缘人",
+          "nick": "碧丽莉",
+          "avatar": "https://p4.music.126.net/pAeOpFcdBb8TjbXrnsKa9A==/109951169615395449.jpg",
+          "cover": "https://p4.music.126.net/ATxjD20W999TO2jfKZeCAQ==/109951173947976264.jpg",
+          "area": "语音直播",
+          "watching": "2",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "127",
+          "onlineViewers": "2",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=350667806",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=350667806"
+        },
+        {
+          "roomId": "576717118",
+          "userId": "12327145932",
+          "title": "贵州最后少女",
+          "nick": "朝朝财",
+          "avatar": "https://p4.music.126.net/86wtO3Q_ufsy6EH2cParzw==/109951173851326359.jpg",
+          "cover": "https://p4.music.126.net/fVye-CE-ng3g50A42grSpw==/109951171412948299.jpg",
+          "area": "语音直播",
+          "watching": "5",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "824",
+          "onlineViewers": "5",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=576717118",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=576717118"
+        },
+        {
+          "roomId": "207739688",
+          "userId": "281387786",
+          "title": "高 雅 女 主 播",
+          "nick": "慢",
+          "avatar": "https://p3.music.126.net/IEgp4JetPyieX-SVxqgbWg==/109951173977669720.jpg",
+          "cover": "https://p3.music.126.net/O4-EKJv1oDgGI8wc7u6CNw==/109951174006426342.jpg",
+          "area": "语音直播",
+          "watching": "11",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "1815",
+          "onlineViewers": "11",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=207739688",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=207739688"
+        },
+        {
+          "roomId": "366497413",
+          "userId": "1878314879",
+          "title": "点歌热评999+歌曲！",
+          "nick": "娴babyGirl",
+          "avatar": "https://p3.music.126.net/0NrRDNSl8PXtBOG6jWZFRQ==/109951173999202211.jpg",
+          "cover": "https://p4.music.126.net/24OoyDr3NdCiHFlimj2Bvg==/109951174005464672.jpg",
+          "area": "语音直播",
+          "watching": "3",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "49",
+          "onlineViewers": "3",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=366497413",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=366497413"
+        },
+        {
+          "roomId": "634849609",
+          "userId": "17433649993",
+          "title": "极品破碎音～",
+          "nick": "许诺_筹筹梯度",
+          "avatar": "https://p4.music.126.net/du81o9RxUT_vWMloPvWvSA==/109951173992390591.jpg",
+          "cover": "https://p4.music.126.net/zFIozsQbsBNmlY0kI1E9DQ==/109951172828649713.jpg",
+          "area": "语音直播",
+          "watching": "6",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "413",
+          "onlineViewers": "6",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=634849609",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=634849609"
+        },
+        {
+          "roomId": "265119741",
+          "userId": "292368970",
+          "title": "你的心事我倾听",
+          "nick": "还是硕硕呐-",
+          "avatar": "https://p3.music.126.net/LMaidrybLbMCghyx56GO1Q==/109951173923848419.jpg",
+          "cover": "https://p4.music.126.net/MBzmEqGu8pGizaBzTAW_og==/109951173551090181.jpg",
+          "area": "语音直播",
+          "watching": "4",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "601",
+          "onlineViewers": "4",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=265119741",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=265119741"
+        }
+      ],
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+      ]
+    }
+  }
+}

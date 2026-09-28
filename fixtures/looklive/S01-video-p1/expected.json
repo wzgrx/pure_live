@@ -1,0 +1,4798 @@
+{
+  "generator": "LookLiveSite.getCategores + getDirectoryPage + getRecommendRooms + getCategoryRooms + searchRoomsCancellable (with every other sample; synthetic: an empty video page 2, not-found look-ups of 2162 and 99999999) + LookLiveApi.directory + encryptPayload + LookLiveLink; variants: LookLiveApi.directory of edited copies",
+  "value": {
+    "headers": {
+      "requestHeaders": {
+        "Accept": "application/json, text/plain, */*",
+        "Origin": "https://look.163.com",
+        "Referer": "https://look.163.com/",
+        "User-Agent": "Mozilla/5.0"
+      },
+      "mediaHeaders(21623631)": {
+        "Origin": "https://look.163.com",
+        "Referer": "https://look.163.com/live?id=21623631",
+        "User-Agent": "Mozilla/5.0"
+      }
+    },
+    "encryptPayload": {
+      "{\"offset\":0,\"limit\":20}": {
+        "params": "oHkLd52ofA3k/zndl36a8U1O4zHnBfKbbKjMR5BPce+0g9PYp5zhE1V3NRH3CjTU",
+        "encSecKey": "35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+      },
+      "{\"offset\":20,\"limit\":20}": {
+        "params": "bT7Kr1bxDVMoBpn0mj+p5Ud8LSK6v5sqOBChUszzJb7nmXCrMNpnBtvjotm63fI3",
+        "encSecKey": "35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+      },
+      "{\"liveRoomNo\":\"21623631\"}": {
+        "params": "1Tj+rp0BPunszj2VG7qpfM1E6qoUixjO7CPI+6CKGQxt6zJT23WuolhlA7I/no6V",
+        "encSecKey": "35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+      },
+      "{\"liveRoomNo\":\"181408025\"}": {
+        "params": "QYeCsR9MiaXZMMod9xzMHu4q5o3LQDD8r6i3Hn9amG60iaGkx9+TG8N8WIpZMz5S",
+        "encSecKey": "35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+      },
+      "{\"liveRoomNo\":\"325808387\"}": {
+        "params": "CaN3pRNhUoadis6OKWXkqB17yTPUt3racXie8amkFfjYbUV0ITLszRVk8rOabLlF",
+        "encSecKey": "35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+      },
+      "{\"liveRoomNo\":\"645235480\"}": {
+        "params": "QH//yJTLQrR4wd7UMCBXfHb9H/G9rJrbzxMX4XhYPuZ7nk953zENyGfXL+gtdk/e",
+        "encSecKey": "35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+      },
+      "{}": {
+        "params": "kxBNj/l03n7aQ/q0EdABwtOsIYuwYGkESNTUk4QvWCg=",
+        "encSecKey": "35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+      }
+    },
+    "getCategores": {
+      "result": [
+        {
+          "id": "looklive",
+          "name": "LOOK 直播",
+          "children": [
+            {
+              "platform": "looklive",
+              "areaType": "official",
+              "typeName": "LOOK 直播",
+              "areaId": "video",
+              "areaName": "视频直播",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "looklive",
+              "areaType": "official",
+              "typeName": "LOOK 直播",
+              "areaId": "audio",
+              "areaName": "语音直播",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ],
+      "requests": []
+    },
+    "getCategores(pageSize: 1)": {
+      "result": [
+        "video"
+      ],
+      "requests": []
+    },
+    "getCategores(page: 2)": {
+      "result": 0,
+      "requests": []
+    },
+    "getCategores(pageSize: 0)": {
+      "result": 0,
+      "requests": []
+    },
+    "directory(video, 1)": {
+      "result": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "95878198",
+            "userId": "250700726",
+            "sessionId": "134046414",
+            "title": "一人评论一句",
+            "nick": "崽崽",
+            "avatar": "https://p4.music.126.net/fn60XA2IE6sN906ejmxPHQ==/109951168060283670.jpg",
+            "cover": "https://p3.music.126.net/R_eggJlQZUgv5tXXRAP5hw==/109951168125145498.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 41,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}"
+      ]
+    },
+    "directory(video, 0)": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": []
+    },
+    "directory(video, 10001)": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": []
+    },
+    "getDirectoryPage": {
+      "page 1": {
+        "result": {
+          "rooms": [
+            {
+              "roomId": "21623631",
+              "userId": "351218439",
+              "title": "ASOT电音电台直播中",
+              "nick": "Armin van Buuren",
+              "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+              "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+              "area": "视频直播",
+              "watching": "1",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "440",
+              "onlineViewers": "1",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=21623631",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=21623631"
+            },
+            {
+              "roomId": "217327486",
+              "userId": "1728634721",
+              "title": "Chillhop电台",
+              "nick": "Chillhop Music",
+              "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+              "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+              "area": "视频直播",
+              "watching": "1",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "34",
+              "onlineViewers": "1",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=217327486",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=217327486"
+            },
+            {
+              "roomId": "95878198",
+              "userId": "250700726",
+              "title": "一人评论一句",
+              "nick": "崽崽",
+              "avatar": "https://p4.music.126.net/fn60XA2IE6sN906ejmxPHQ==/109951168060283670.jpg",
+              "cover": "https://p3.music.126.net/R_eggJlQZUgv5tXXRAP5hw==/109951168125145498.jpg",
+              "area": "视频直播",
+              "watching": "1",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "41",
+              "onlineViewers": "1",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=95878198",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=95878198"
+            },
+            {
+              "roomId": "125684768",
+              "userId": "1461100267",
+              "title": "今天发誓拿下你",
+              "nick": "森屿",
+              "avatar": "https://p4.music.126.net/2xHjZpzq6uuO2eJ_GXD1xA==/109951173989551179.jpg",
+              "cover": "https://p3.music.126.net/6FopOeorGG_pRN4ye8CbTA==/109951172551083886.jpg",
+              "area": "语音直播",
+              "watching": "14",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "8382",
+              "onlineViewers": "14",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=125684768",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=125684768"
+            },
+            {
+              "roomId": "478667579",
+              "userId": "7892610362",
+              "title": "今年也请继续见面吧～",
+              "nick": "是一只小满-众筹18w过梯度",
+              "avatar": "https://p3.music.126.net/W4Q9ZcQDMfDEQXkGeL5OOw==/109951173436568521.jpg",
+              "cover": "https://p3.music.126.net/_53N5Z8uNxdK-kCMywLfrw==/109951168698291557.jpg",
+              "area": "语音直播",
+              "watching": "16",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "2562",
+              "onlineViewers": "16",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=478667579",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=478667579"
+            },
+            {
+              "roomId": "591080427",
+              "userId": "12934072127",
+              "title": "把我当成她吧",
+              "nick": "啾不甜",
+              "avatar": "https://p4.music.126.net/bejSJpgxho17Qe7rTcPBwA==/109951173934068931.jpg",
+              "cover": "https://p4.music.126.net/4jVwaWv6LO1ptI7Rhr-SMQ==/109951172706145278.jpg",
+              "area": "语音直播",
+              "watching": "8",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "1942",
+              "onlineViewers": "8",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=591080427",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=591080427"
+            },
+            {
+              "roomId": "314647747",
+              "userId": "3287735575",
+              "title": "助力农村孩子实现梦想",
+              "nick": "姩姩RovY",
+              "avatar": "https://p4.music.126.net/JYCZHaCxZULyM0GByHo_tA==/109951173816137098.jpg",
+              "cover": "https://p3.music.126.net/GN9kB9veMW9ZzTuxt6vb0Q==/109951173590999979.jpg",
+              "area": "语音直播",
+              "watching": "7",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "2884",
+              "onlineViewers": "7",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=314647747",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=314647747"
+            },
+            {
+              "roomId": "432899621",
+              "userId": "3975804468",
+              "title": "进来不许叫宝宝☔",
+              "nick": "坏貝_",
+              "avatar": "https://p4.music.126.net/cj54QkSVfU6obihQthZjuA==/109951173957327317.jpg",
+              "cover": "https://p4.music.126.net/kBBd2lFAX00A77oUA2jAbw==/109951173876745046.jpg",
+              "area": "语音直播",
+              "watching": "11",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "2372",
+              "onlineViewers": "11",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=432899621",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=432899621"
+            },
+            {
+              "roomId": "600050825",
+              "userId": "13351158463",
+              "title": "在云村做主播是种什么体验",
+              "nick": "阿月啊_ayuea",
+              "avatar": "https://p3.music.126.net/T0bxvHLANMydf7ARj9mKvQ==/109951171458364799.jpg",
+              "cover": "https://p4.music.126.net/Kj45PXsr0x4inQ1ssaX6Lg==/109951171518095051.jpg",
+              "area": "语音直播",
+              "watching": "1",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "40",
+              "onlineViewers": "1",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=600050825",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=600050825"
+            },
+            {
+              "roomId": "24617315",
+              "userId": "476791862",
+              "title": "像水一样平静🧊",
+              "nick": "慵懒兔ya",
+              "avatar": "https://p4.music.126.net/gasXYvPq8XEhVfyv1KOupA==/109951172421208833.jpg",
+              "cover": "https://p4.music.126.net/VUgAgqp41c8CPv5vph3gSw==/109951172416235947.jpg",
+              "area": "语音直播",
+              "watching": "6",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "493",
+              "onlineViewers": "6",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=24617315",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=24617315"
+            },
+            {
+              "roomId": "502841223",
+              "userId": "1376139971",
+              "title": "一个默默无闻的…",
+              "nick": "Saknsx",
+              "avatar": "https://p4.music.126.net/ARKfYXIsVBHZ29EC9S8SBw==/109951174001984734.jpg",
+              "cover": "https://p4.music.126.net/Lt7VUzMY92H4ilhGiJKBjg==/109951173987853023.jpg",
+              "area": "语音直播",
+              "watching": "2",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "60",
+              "onlineViewers": "2",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=502841223",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=502841223"
+            },
+            {
+              "roomId": "264336243",
+              "userId": "2007238542",
+              "title": "你的专属秘密树洞",
+              "nick": "苏丹",
+              "avatar": "https://p4.music.126.net/PMobC9LwsggqKkXHTK2rBw==/109951174003954654.jpg",
+              "cover": "https://p4.music.126.net/Qq6pr5g8y1QVNiz8YDT6mw==/109951165323651127.jpg",
+              "area": "语音直播",
+              "watching": "2",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "56",
+              "onlineViewers": "2",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=264336243",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=264336243"
+            },
+            {
+              "roomId": "213364881",
+              "userId": "403158134",
+              "title": "好久不见，中秋快乐",
+              "nick": "木头人",
+              "avatar": "https://p4.music.126.net/S0oNVlq_S20xNRQJsNfx-A==/109951173640626038.jpg",
+              "cover": "https://p4.music.126.net/JYuPf1q28MHBAeohajHczw==/109951165939044854.jpg",
+              "area": "语音直播",
+              "watching": "4",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "201",
+              "onlineViewers": "4",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=213364881",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=213364881"
+            },
+            {
+              "roomId": "279358327",
+              "userId": "2089949230",
+              "title": "安静的人 安静的直播间～",
+              "nick": "Y-安露许愿心动热气球",
+              "avatar": "https://p4.music.126.net/xSRkNKG5AEFii5r5gn90_A==/109951173876749687.jpg",
+              "cover": "https://p3.music.126.net/G47Qwky1H11CcgSb_xt8GQ==/109951173939521577.jpg",
+              "area": "语音直播",
+              "watching": "2",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "102",
+              "onlineViewers": "2",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=279358327",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=279358327"
+            },
+            {
+              "roomId": "229465367",
+              "userId": "1923405325",
+              "title": "单曲循环的流行歌曲",
+              "nick": "我没那么帅别对我太崇敬_",
+              "avatar": "https://p3.music.126.net/LOtm4GA8d_vg6o3VezWyfg==/109951172312609996.jpg",
+              "cover": "https://p3.music.126.net/U4LsFo_rmOsmxPfMxHuMFQ==/109951172929278745.jpg",
+              "area": "语音直播",
+              "watching": "1",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "162",
+              "onlineViewers": "1",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=229465367",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=229465367"
+            },
+            {
+              "roomId": "229021175",
+              "userId": "1687853544",
+              "title": "说话！遇到难回答的又不说话了",
+              "nick": "施情画意.",
+              "avatar": "https://p4.music.126.net/I67EtD0bvqdaxNho2Xyi_w==/109951171297759515.jpg",
+              "cover": "https://p4.music.126.net/PT2_PdX8akhlQUdYKm0Z1A==/109951169892760620.jpg",
+              "area": "语音直播",
+              "watching": "2",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "302",
+              "onlineViewers": "2",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=229021175",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=229021175"
+            },
+            {
+              "roomId": "372701909",
+              "userId": "3921438516",
+              "title": "倘若我们还有话说",
+              "nick": "胆Dan",
+              "avatar": "https://p3.music.126.net/vyWq2iMPvwg11GvVoEVXUQ==/109951169711751565.jpg",
+              "cover": "https://p4.music.126.net/ZvqnCoErgQT27E_zuByWHA==/109951168892050667.jpg",
+              "area": "语音直播",
+              "watching": "3",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "100",
+              "onlineViewers": "3",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=372701909",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=372701909"
+            },
+            {
+              "roomId": "594274109",
+              "userId": "13081003900",
+              "title": "纯素颜直播❤️",
+              "nick": "肉肉_Rosamond",
+              "avatar": "https://p4.music.126.net/cSlUWZbawBvHsOyEclGDwg==/109951173908918192.jpg",
+              "cover": "https://p4.music.126.net/0xPzbKQCl-TUxpBrUl5sKg==/109951172552659401.jpg",
+              "area": "语音直播",
+              "watching": "9",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "1923",
+              "onlineViewers": "9",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=594274109",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=594274109"
+            },
+            {
+              "roomId": "442167192",
+              "userId": "5216673353",
+              "title": "花花世界太危险，只有这里才是温柔乡",
+              "nick": "憨憨",
+              "avatar": "https://p3.music.126.net/kI1LHRPJBtz_XcTzEWLw9g==/109951170430953516.jpg",
+              "cover": "https://p4.music.126.net/8xFddLtX3GmgiAu6QcoZQg==/109951169236002937.jpg",
+              "area": "语音直播",
+              "watching": "2",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "75",
+              "onlineViewers": "2",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=442167192",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=442167192"
+            },
+            {
+              "roomId": "651143864",
+              "userId": "17724754660",
+              "title": "look一股清流",
+              "nick": "vigor呀",
+              "avatar": "https://p3.music.126.net/PwPW3W-GEuLhPFR6y-TO0A==/109951174004746826.jpg",
+              "cover": "https://p4.music.126.net/S-mdYOe-QnVfDqqhyF-ryA==/109951174008029560.jpg",
+              "area": "语音直播",
+              "watching": "2",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "177",
+              "onlineViewers": "2",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=651143864",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=651143864"
+            },
+            {
+              "roomId": "459493851",
+              "userId": "6415609372",
+              "title": "做你倾吐心事的树洞",
+              "nick": "林M雨",
+              "avatar": "https://p4.music.126.net/90vGBvoVSm2gCFbL8dhg_g==/109951166997491127.jpg",
+              "cover": "https://p4.music.126.net/9Q5f3AZQD1pZkC3G-KbNaQ==/109951173953757386.jpg",
+              "area": "语音直播",
+              "watching": "4",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "301",
+              "onlineViewers": "4",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=459493851",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=459493851"
+            },
+            {
+              "roomId": "519989900",
+              "userId": "8507159049",
+              "title": "点歌卡点免费，今天福利局",
+              "nick": "红妆",
+              "avatar": "https://p4.music.126.net/6rTc8bJI68igC57CzvcnJA==/109951173992362126.jpg",
+              "cover": "https://p3.music.126.net/YIrZ7teUQ_RZbx9ROY-h4w==/109951173114679235.jpg",
+              "area": "语音直播",
+              "watching": "2",
+              "audienceMetricType": "onlineViewers",
+              "popularity": "303",
+              "onlineViewers": "2",
+              "totalViewers": "",
+              "followers": "0",
+              "platform": "looklive",
+              "liveStatus": 0,
+              "isRecord": false,
+              "status": true,
+              "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+              "isCatchUp": false,
+              "httpHeaders": {
+                "origin": "https://look.163.com",
+                "referer": "https://look.163.com/live?id=519989900",
+                "user-agent": "Mozilla/5.0"
+              },
+              "link": "https://look.163.com/live?id=519989900"
+            }
+          ],
+          "page": 1,
+          "hasMore": true
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "page 2": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+        ]
+      },
+      "page 3": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":40,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":40,\"limit\":20}"
+        ],
+        "unmatched": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":40,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":40,\"limit\":20}"
+        ]
+      },
+      "video page 1": {
+        "result": {
+          "roomIds": [
+            "21623631",
+            "217327486",
+            "95878198"
+          ],
+          "page": 1,
+          "hasMore": false
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "video page 2": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}"
+        ]
+      },
+      "audio page 1": {
+        "result": {
+          "roomIds": [
+            "125684768",
+            "478667579",
+            "591080427",
+            "314647747",
+            "432899621",
+            "600050825",
+            "24617315",
+            "502841223",
+            "264336243",
+            "213364881",
+            "279358327",
+            "229465367",
+            "229021175",
+            "372701909",
+            "594274109",
+            "442167192",
+            "651143864",
+            "459493851",
+            "519989900"
+          ],
+          "page": 1,
+          "hasMore": true
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "audio page 2": {
+        "result": {
+          "roomIds": [
+            "181408025",
+            "325808387",
+            "378046308",
+            "485752076",
+            "379066633",
+            "453310516",
+            "529808276",
+            "237490849",
+            "290046568",
+            "241281048",
+            "225810429",
+            "273362228",
+            "210710324",
+            "11319946",
+            "350667806",
+            "576717118",
+            "207739688",
+            "366497413",
+            "634849609",
+            "265119741"
+          ],
+          "page": 2,
+          "hasMore": true
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+        ]
+      },
+      "otherArea": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "otherType": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "page 0": {
+        "result": {
+          "roomIds": [],
+          "page": 0,
+          "hasMore": false
+        },
+        "requests": []
+      },
+      "page 10001": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "requests": []
+      },
+      "page 2 with an empty video page": {
+        "result": {
+          "roomIds": [
+            "181408025",
+            "325808387",
+            "378046308",
+            "485752076",
+            "379066633",
+            "453310516",
+            "529808276",
+            "237490849",
+            "290046568",
+            "241281048",
+            "225810429",
+            "273362228",
+            "210710324",
+            "11319946",
+            "350667806",
+            "576717118",
+            "207739688",
+            "366497413",
+            "634849609",
+            "265119741"
+          ],
+          "page": 2,
+          "hasMore": true
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+        ]
+      }
+    },
+    "getRecommendRooms": {
+      "page 1 size 30": {
+        "result": [
+          "21623631",
+          "217327486",
+          "95878198",
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "600050825",
+          "24617315",
+          "502841223",
+          "264336243",
+          "213364881",
+          "279358327",
+          "229465367",
+          "229021175",
+          "372701909",
+          "594274109",
+          "442167192",
+          "651143864",
+          "459493851",
+          "519989900"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "page 1 size 1": {
+        "result": [
+          "21623631"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "page 1 size 10": {
+        "result": [
+          "21623631",
+          "217327486",
+          "95878198",
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "600050825",
+          "24617315"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "page 1 size 100": {
+        "result": [
+          "21623631",
+          "217327486",
+          "95878198",
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "600050825",
+          "24617315",
+          "502841223",
+          "264336243",
+          "213364881",
+          "279358327",
+          "229465367",
+          "229021175",
+          "372701909",
+          "594274109",
+          "442167192",
+          "651143864",
+          "459493851",
+          "519989900"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "page 0 size 30": {
+        "result": [],
+        "requests": []
+      },
+      "page 1 size 0": {
+        "result": [],
+        "requests": []
+      },
+      "page 2 size 30": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+        ]
+      }
+    },
+    "getCategoryRooms": {
+      "video page 1": {
+        "result": [
+          "21623631",
+          "217327486",
+          "95878198"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "audio page 1": {
+        "result": [
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "600050825",
+          "24617315",
+          "502841223",
+          "264336243",
+          "213364881",
+          "279358327",
+          "229465367",
+          "229021175",
+          "372701909",
+          "594274109",
+          "442167192",
+          "651143864",
+          "459493851",
+          "519989900"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "audio page 2": {
+        "result": [
+          "181408025",
+          "325808387",
+          "378046308",
+          "485752076",
+          "379066633",
+          "453310516",
+          "529808276",
+          "237490849",
+          "290046568",
+          "241281048",
+          "225810429",
+          "273362228",
+          "210710324",
+          "11319946",
+          "350667806",
+          "576717118",
+          "207739688",
+          "366497413",
+          "634849609",
+          "265119741"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+        ]
+      },
+      "audio page 1 size 5": {
+        "result": [
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "audio page 0": {
+        "result": [],
+        "requests": []
+      },
+      "otherArea": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      }
+    },
+    "searchRoomsCancellable": {
+      "Armin": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "armin VAN": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "ASOT": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "电台": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "34",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=217327486",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=217327486"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "  电台  ": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "34",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=217327486",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=217327486"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "1": {
+        "result": [
+          "21623631",
+          "217327486",
+          "95878198",
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "24617315",
+          "502841223",
+          "213364881",
+          "229021175",
+          "372701909",
+          "594274109",
+          "442167192",
+          "651143864",
+          "459493851",
+          "519989900"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "zzqnomatch": {
+        "result": [],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "21623631": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "181408025": {
+        "result": [
+          {
+            "roomId": "181408025",
+            "userId": "1751995745",
+            "title": "倾听树洞，聊一聊吧。",
+            "nick": "南禾音",
+            "avatar": "https://p2.music.126.net/UEmtJmluvVipCFVFqfufzw==/109951174001440291.jpg",
+            "cover": "https://p1.music.126.net/3VuP3we9POMPB1bNxSxsTw==/109951174001528356.jpg",
+            "area": "语音直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=181408025",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=181408025"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"181408025\"}"
+        ]
+      },
+      "325808387": {
+        "result": [
+          {
+            "roomId": "325808387",
+            "userId": "572793023",
+            "title": "我是真的爱上你",
+            "nick": "婆果西婆吆",
+            "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+            "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+            "area": "语音直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=325808387",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=325808387"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "645235480": {
+        "result": [
+          {
+            "roomId": "645235480",
+            "userId": "17650321062",
+            "title": "在云村做主播是种什么体验",
+            "nick": "zy-晗辰男友-天使冠29厅战",
+            "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+            "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+            "area": "视频直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=645235480",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=645235480"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "2162": {
+        "result": [],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"2162\"}"
+        ]
+      },
+      "99999999": {
+        "result": [],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "https://look.163.com/live?id=21623631": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "https://look.163.com/live?id=21623631&position=3": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "LOOK https://look.163.com/live?id=21623631": {
+        "result": [],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "https://example.com/live?id=21623631": {
+        "result": [],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "": {
+        "result": [],
+        "requests": []
+      },
+      "  ": {
+        "result": [],
+        "requests": []
+      },
+      "Armin page 2": {
+        "result": [],
+        "requests": []
+      },
+      "21623631 page 2": {
+        "result": [],
+        "requests": []
+      },
+      "电台 size 1": {
+        "result": [
+          "21623631"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "电台 size 100": {
+        "result": [
+          "21623631",
+          "217327486"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "电台 size 101": {
+        "result": [],
+        "requests": []
+      },
+      "电台 size 0": {
+        "result": [],
+        "requests": []
+      },
+      "Armin without a token": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      }
+    },
+    "known": {
+      "getRoomDetailForRefresh before the list": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getDirectoryPage 1": {
+        "result": 22,
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "getRoomDetailForRefresh after the list": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "1",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "440",
+          "onlineViewers": "1",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetail after the list": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "1",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "440",
+          "onlineViewers": "1",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms after the list": {
+        "result": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "area": "视频直播",
+            "watching": "1",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "440",
+            "onlineViewers": "1",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "looklive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://look.163.com",
+              "referer": "https://look.163.com/live?id=21623631",
+              "user-agent": "Mozilla/5.0"
+            },
+            "link": "https://look.163.com/live?id=21623631"
+          }
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getDirectoryPage 1 after the room": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "1",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "440",
+          "onlineViewers": "1",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "getRoomDetailForRefresh after a search": {
+        "result": {
+          "roomId": "21623631",
+          "userId": "351218439",
+          "title": "ASOT电音电台直播中",
+          "nick": "Armin van Buuren",
+          "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+          "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+          "area": "视频直播",
+          "watching": "1",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "440",
+          "onlineViewers": "1",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=21623631",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=21623631"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "LookLiveLink.parseRoomId": {
+      "21623631": "21623631",
+      " 21623631 ": "21623631",
+      "1": null,
+      "12": "12",
+      "0123": null,
+      "123456789012345678": "123456789012345678",
+      "1234567890123456789": null,
+      "https://look.163.com/live?id=21623631": "21623631",
+      "https://look.163.com/live?id=21623631&position=3": "21623631",
+      "http://look.163.com/live?id=21623631": "21623631",
+      "HTTPS://LOOK.163.COM/LIVE?id=21623631": "21623631",
+      "https://look.163.com/live/?id=21623631": "21623631",
+      "https://look.163.com//live?id=21623631": "21623631",
+      "https://look.163.com:443/live?id=21623631": "21623631",
+      "https://look.163.com:80/live?id=21623631": "21623631",
+      "http://look.163.com:443/live?id=21623631": "21623631",
+      "https://look.163.com:8443/live?id=21623631": null,
+      "https://user@look.163.com/live?id=21623631": null,
+      "https://look.163.com/live?id=21623631#chat": null,
+      "https://look.163.com/live?id=21623631&id=2": null,
+      "https://look.163.com/live?ID=21623631": null,
+      "https://look.163.com/live?id=0123": null,
+      "https://look.163.com/live?id=1": null,
+      "https://look.163.com/live?id=abc": null,
+      "https://look.163.com/live?id=%3121623631": "121623631",
+      "https://look.163.com/live": null,
+      "https://look.163.com/hot?id=21623631": null,
+      "https://look.163.com/live/21623631": null,
+      "https://look.163.com/live/room?id=21623631": null,
+      "https://look.163.com.evil.test/live?id=21623631": null,
+      "https://m.look.163.com/live?id=21623631": null,
+      "ftp://look.163.com/live?id=21623631": null,
+      "https://look.163.com/%FF?id=21623631": null,
+      "https://look.163.com/live?id=%FF": null,
+      "LOOK https://look.163.com/live?id=21623631": null,
+      "https://look.163.com/live?id=21623631\n": "21623631",
+      "https://look.163.com/live?id=21623631　": "21623631",
+      "look.163.com/live?id=21623631": null
+    },
+    "LookLiveLink.watchUrl": {
+      "21623631": "https://look.163.com/live?id=21623631",
+      " 21623631 ": "https://look.163.com/live?id=21623631",
+      "https://look.163.com/live?id=21623631&x=1": "https://look.163.com/live?id=21623631",
+      "1": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid LOOK Live room identity"
+      },
+      "abc": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid LOOK Live room identity"
+      }
+    },
+    "variants": {
+      "recorded": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "type number 1": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "type 2": {
+        "rooms": [
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "95878198",
+            "userId": "250700726",
+            "sessionId": "134046414",
+            "title": "一人评论一句",
+            "nick": "崽崽",
+            "avatar": "https://p4.music.126.net/fn60XA2IE6sN906ejmxPHQ==/109951168060283670.jpg",
+            "cover": "https://p3.music.126.net/R_eggJlQZUgv5tXXRAP5hw==/109951168125145498.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 41,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "type missing": {
+        "rooms": [
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "95878198",
+            "userId": "250700726",
+            "sessionId": "134046414",
+            "title": "一人评论一句",
+            "nick": "崽崽",
+            "avatar": "https://p4.music.126.net/fn60XA2IE6sN906ejmxPHQ==/109951168060283670.jpg",
+            "cover": "https://p3.music.126.net/R_eggJlQZUgv5tXXRAP5hw==/109951168125145498.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 41,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveData null": {
+        "rooms": [
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "95878198",
+            "userId": "250700726",
+            "sessionId": "134046414",
+            "title": "一人评论一句",
+            "nick": "崽崽",
+            "avatar": "https://p4.music.126.net/fn60XA2IE6sN906ejmxPHQ==/109951168060283670.jpg",
+            "cover": "https://p3.music.126.net/R_eggJlQZUgv5tXXRAP5hw==/109951168125145498.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 41,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveData text": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "item not an object": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveType 2": {
+        "rooms": [
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "95878198",
+            "userId": "250700726",
+            "sessionId": "134046414",
+            "title": "一人评论一句",
+            "nick": "崽崽",
+            "avatar": "https://p4.music.126.net/fn60XA2IE6sN906ejmxPHQ==/109951168060283670.jpg",
+            "cover": "https://p3.music.126.net/R_eggJlQZUgv5tXXRAP5hw==/109951168125145498.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 41,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveType 3": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveType text": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveType missing": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "userInfo missing": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveRoomNo text": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveRoomNo spaced text": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveRoomNo 0": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveRoomNo one digit": {
+        "rooms": [
+          {
+            "roomId": "7",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveRoomNo 19 digits": {
+        "rooms": [
+          {
+            "roomId": "1234567890123456789",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveRoomNo missing": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "userId missing": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveId missing": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveTitle missing": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveTitle number": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveTitle spaced": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "a  b",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "nickname missing": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl missing": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl https": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/a.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl with port": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl protocol-relative": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl ftp": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl user info": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl fragment": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "avatarUrl other host": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://example.com/a.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveCoverUrl missing": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "popularity missing": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": null,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "popularity text": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 12,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "popularity negative": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "popularity fraction": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "onlineNumber missing": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": null,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "onlineNumber zero": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 0,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "onlineNumber negative": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "onlineNumber text": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 9,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveUrl null": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": []
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "liveUrl text": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveUrl empty": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": []
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "hlsPullUrl missing": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "httpPullUrl empty": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "hlsPullUrl https": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "hlsPullUrl with query": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8?netease=x"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "hlsPullUrl upper-case scheme": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "hlsPullUrl spaced": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "hlsPullUrl other host": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl lookalike host": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl with port": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl user info": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl fragment": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl upper-case key": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl as FLV": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl rtmp": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hlsPullUrl long query": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "httpPullUrl number": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "httpPullUrl without query": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "httpPullUrl as HLS": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "liveStreamType 50 without liveUrl": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": 50,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": true,
+            "variants": []
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "second card repeats the first": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "95878198",
+            "userId": "250700726",
+            "sessionId": "134046414",
+            "title": "一人评论一句",
+            "nick": "崽崽",
+            "avatar": "https://p4.music.126.net/fn60XA2IE6sN906ejmxPHQ==/109951168060283670.jpg",
+            "cover": "https://p3.music.126.net/R_eggJlQZUgv5tXXRAP5hw==/109951168125145498.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 41,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/c0a6ec3b81d74a50b9c8861ea0696d53.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "itemList null": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "itemList not a list": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "itemList empty": {
+        "rooms": [],
+        "hasMore": false
+      },
+      "itemList 100 entries": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "itemList 101 entries": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hasMore missing": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hasMore text": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "hasMore true": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": true
+      },
+      "code 404": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live missing"
+      },
+      "code 424": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live access"
+      },
+      "code 520": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live access"
+      },
+      "code 522": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live access"
+      },
+      "code 555": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live access"
+      },
+      "code 500": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live service"
+      },
+      "code 301": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live service"
+      },
+      "code text": {
+        "rooms": [
+          {
+            "roomId": "21623631",
+            "userId": "351218439",
+            "sessionId": "134543183",
+            "title": "ASOT电音电台直播中",
+            "nick": "Armin van Buuren",
+            "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+            "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 440,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "217327486",
+            "userId": "1728634721",
+            "sessionId": "134388747",
+            "title": "Chillhop电台",
+            "nick": "Chillhop Music",
+            "avatar": "https://p4.music.126.net/vtmYMjdpdOCDNfCCvfUetA==/109951169698664040.jpg",
+            "cover": "https://p3.music.126.net/KdsRE-fxakVXbaWi2AZ-9Q==/109951173366810246.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 34,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pullhls67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://flv67a4fdc7.live.126.net/live/21772191d8f249d7993b3e95adea2602.flv?netease=flv67a4fdc7.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": false
+      },
+      "code missing": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live service"
+      },
+      "data null": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "data list": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "root list": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "not JSON": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "empty body": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "audio list answered with this video list": {
+        "rooms": [],
+        "hasMore": false
+      },
+      "getDirectoryPage(video): liveRoomNo one digit": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid LOOK Live room identity"
+      },
+      "getDirectoryPage(video): liveRoomNo 19 digits": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid LOOK Live room identity"
+      },
+      "getDirectoryPage(video): avatarUrl missing": {
+        "roomId": "21623631",
+        "userId": "351218439",
+        "title": "ASOT电音电台直播中",
+        "nick": "Armin van Buuren",
+        "avatar": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+        "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+        "area": "视频直播",
+        "watching": "1",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "440",
+        "onlineViewers": "1",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "looklive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://look.163.com",
+          "referer": "https://look.163.com/live?id=21623631",
+          "user-agent": "Mozilla/5.0"
+        },
+        "link": "https://look.163.com/live?id=21623631"
+      },
+      "getDirectoryPage(video): onlineNumber missing": {
+        "roomId": "21623631",
+        "userId": "351218439",
+        "title": "ASOT电音电台直播中",
+        "nick": "Armin van Buuren",
+        "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+        "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+        "area": "视频直播",
+        "watching": "440",
+        "audienceMetricType": "popularity",
+        "popularity": "440",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "looklive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://look.163.com",
+          "referer": "https://look.163.com/live?id=21623631",
+          "user-agent": "Mozilla/5.0"
+        },
+        "link": "https://look.163.com/live?id=21623631"
+      },
+      "getDirectoryPage(video): no audience": {
+        "roomId": "21623631",
+        "userId": "351218439",
+        "title": "ASOT电音电台直播中",
+        "nick": "Armin van Buuren",
+        "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+        "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+        "area": "视频直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "looklive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://look.163.com",
+          "referer": "https://look.163.com/live?id=21623631",
+          "user-agent": "Mozilla/5.0"
+        },
+        "link": "https://look.163.com/live?id=21623631"
+      },
+      "getDirectoryPage(video): liveStreamType 50 without liveUrl": {
+        "roomId": "21623631",
+        "userId": "351218439",
+        "title": "ASOT电音电台直播中",
+        "nick": "Armin van Buuren",
+        "avatar": "https://p3.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+        "cover": "https://p3.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+        "area": "视频直播",
+        "watching": "1",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "440",
+        "onlineViewers": "1",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "looklive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://look.163.com",
+          "referer": "https://look.163.com/live?id=21623631",
+          "user-agent": "Mozilla/5.0"
+        },
+        "link": "https://look.163.com/live?id=21623631"
+      }
+    }
+  }
+}

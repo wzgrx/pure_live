@@ -1,0 +1,678 @@
+{
+  "generator": "LookLiveSite's rooms, live status and search on this answer (replayed for room 99999999: the sample asked for room 1, which 3.x never sends); the room request answered with each HTTP status and with bodies that are empty, not JSON or over 2 MiB; the video list answered with 404, 503 and not JSON",
+  "value": {
+    "request": "{\"liveRoomNo\":\"1\"}",
+    "api.room(1)": {
+      "result": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid LOOK Live room identity"
+      },
+      "requests": []
+    },
+    "recorded": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "platform in another case": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "room link as id": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "api.room": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      },
+      "api.room(includeMedia: false)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+        ]
+      }
+    },
+    "searchRooms": {
+      "result": [],
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"99999999\"}"
+      ]
+    },
+    "room status 401": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 403": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live access"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 404": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": [],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 429": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live rateLimited"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live rateLimited"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live rateLimited"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live rateLimited"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 500": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 502": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 503": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 302": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 400": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room status 204": {
+      "getRoomDetail": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live transport"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+        ]
+      }
+    },
+    "room empty 200": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+      ]
+    },
+    "room not JSON": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+      ]
+    },
+    "room over 2 MiB": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+      ]
+    },
+    "room at 2 MiB": {
+      "result": {
+        "roomId": "21623631",
+        "userId": "351218439",
+        "title": "ASOT电音电台直播中",
+        "nick": "Armin van Buuren",
+        "avatar": "https://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+        "cover": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+        "area": "视频直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "looklive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://look.163.com",
+          "referer": "https://look.163.com/live?id=21623631",
+          "user-agent": "Mozilla/5.0"
+        },
+        "link": "https://look.163.com/live?id=21623631"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"21623631\"}"
+      ]
+    },
+    "video list status 404": {
+      "getDirectoryPage": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "getCategoryRooms(audio)": {
+        "result": [
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "600050825",
+          "24617315",
+          "502841223",
+          "264336243",
+          "213364881",
+          "279358327",
+          "229465367",
+          "229021175",
+          "372701909",
+          "594274109",
+          "442167192",
+          "651143864",
+          "459493851",
+          "519989900"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live missing"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      }
+    },
+    "video list status 503": {
+      "getDirectoryPage": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "getCategoryRooms(audio)": {
+        "result": [
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "600050825",
+          "24617315",
+          "502841223",
+          "264336243",
+          "213364881",
+          "279358327",
+          "229465367",
+          "229021175",
+          "372701909",
+          "594274109",
+          "442167192",
+          "651143864",
+          "459493851",
+          "519989900"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live service"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      }
+    },
+    "video list not JSON": {
+      "getDirectoryPage": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "getCategoryRooms(audio)": {
+        "result": [
+          "125684768",
+          "478667579",
+          "591080427",
+          "314647747",
+          "432899621",
+          "600050825",
+          "24617315",
+          "502841223",
+          "264336243",
+          "213364881",
+          "279358327",
+          "229465367",
+          "229021175",
+          "372701909",
+          "594274109",
+          "442167192",
+          "651143864",
+          "459493851",
+          "519989900"
+        ],
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      },
+      "searchRooms": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live schema"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}",
+          "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+        ]
+      }
+    }
+  }
+}

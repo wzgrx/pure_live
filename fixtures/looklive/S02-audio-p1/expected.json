@@ -1,0 +1,588 @@
+{
+  "generator": "LookLiveApi.directory (audio page 1; video page 1 answered with this list) + LookLiveSite.getCategoryRooms (video, answered with this list)",
+  "value": {
+    "directory(audio, 1)": {
+      "result": {
+        "rooms": [
+          {
+            "roomId": "125684768",
+            "userId": "1461100267",
+            "sessionId": "134601372",
+            "title": "今天发誓拿下你",
+            "nick": "森屿",
+            "avatar": "https://p4.music.126.net/2xHjZpzq6uuO2eJ_GXD1xA==/109951173989551179.jpg",
+            "cover": "https://p3.music.126.net/6FopOeorGG_pRN4ye8CbTA==/109951172551083886.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 8382,
+            "currentViewers": 14,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/3ff3de40fc604927a5fa71e7a94a61d7/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/3ff3de40fc604927a5fa71e7a94a61d7.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "478667579",
+            "userId": "7892610362",
+            "sessionId": "134596484",
+            "title": "今年也请继续见面吧～",
+            "nick": "是一只小满-众筹18w过梯度",
+            "avatar": "https://p3.music.126.net/W4Q9ZcQDMfDEQXkGeL5OOw==/109951173436568521.jpg",
+            "cover": "https://p3.music.126.net/_53N5Z8uNxdK-kCMywLfrw==/109951168698291557.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 2562,
+            "currentViewers": 16,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/81bc4696866340eeb69af51fa309f8a2/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/81bc4696866340eeb69af51fa309f8a2.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "591080427",
+            "userId": "12934072127",
+            "sessionId": "134600435",
+            "title": "把我当成她吧",
+            "nick": "啾不甜",
+            "avatar": "https://p4.music.126.net/bejSJpgxho17Qe7rTcPBwA==/109951173934068931.jpg",
+            "cover": "https://p4.music.126.net/4jVwaWv6LO1ptI7Rhr-SMQ==/109951172706145278.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 1942,
+            "currentViewers": 8,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/7880969df9cf4b88a098f815923d7585/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/7880969df9cf4b88a098f815923d7585.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "314647747",
+            "userId": "3287735575",
+            "sessionId": "134599416",
+            "title": "助力农村孩子实现梦想",
+            "nick": "姩姩RovY",
+            "avatar": "https://p4.music.126.net/JYCZHaCxZULyM0GByHo_tA==/109951173816137098.jpg",
+            "cover": "https://p3.music.126.net/GN9kB9veMW9ZzTuxt6vb0Q==/109951173590999979.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 2884,
+            "currentViewers": 7,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/6c0f019a75384f0e9e33161a79d8bfc4/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/6c0f019a75384f0e9e33161a79d8bfc4.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "432899621",
+            "userId": "3975804468",
+            "sessionId": "134598459",
+            "title": "进来不许叫宝宝☔",
+            "nick": "坏貝_",
+            "avatar": "https://p4.music.126.net/cj54QkSVfU6obihQthZjuA==/109951173957327317.jpg",
+            "cover": "https://p4.music.126.net/kBBd2lFAX00A77oUA2jAbw==/109951173876745046.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 2372,
+            "currentViewers": 11,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/912a008fbb5149eaaeb8474ec93b1863/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/912a008fbb5149eaaeb8474ec93b1863.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "600050825",
+            "userId": "13351158463",
+            "sessionId": "134597445",
+            "title": "在云村做主播是种什么体验",
+            "nick": "阿月啊_ayuea",
+            "avatar": "https://p3.music.126.net/T0bxvHLANMydf7ARj9mKvQ==/109951171458364799.jpg",
+            "cover": "https://p4.music.126.net/Kj45PXsr0x4inQ1ssaX6Lg==/109951171518095051.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 40,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/b453cceba42148928c1205ce28b76417/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/b453cceba42148928c1205ce28b76417.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "24617315",
+            "userId": "476791862",
+            "sessionId": "134606327",
+            "title": "像水一样平静🧊",
+            "nick": "慵懒兔ya",
+            "avatar": "https://p4.music.126.net/gasXYvPq8XEhVfyv1KOupA==/109951172421208833.jpg",
+            "cover": "https://p4.music.126.net/VUgAgqp41c8CPv5vph3gSw==/109951172416235947.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 493,
+            "currentViewers": 6,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/a1d106fd9c6e4f2e9d8e9d6fec82d596/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/a1d106fd9c6e4f2e9d8e9d6fec82d596.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "502841223",
+            "userId": "1376139971",
+            "sessionId": "134595753",
+            "title": "一个默默无闻的…",
+            "nick": "Saknsx",
+            "avatar": "https://p4.music.126.net/ARKfYXIsVBHZ29EC9S8SBw==/109951174001984734.jpg",
+            "cover": "https://p4.music.126.net/Lt7VUzMY92H4ilhGiJKBjg==/109951173987853023.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 60,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/896b19681d59472bafa86c8557b8d8bf/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/896b19681d59472bafa86c8557b8d8bf.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "264336243",
+            "userId": "2007238542",
+            "sessionId": "134610233",
+            "title": "你的专属秘密树洞",
+            "nick": "苏丹",
+            "avatar": "https://p4.music.126.net/PMobC9LwsggqKkXHTK2rBw==/109951174003954654.jpg",
+            "cover": "https://p4.music.126.net/Qq6pr5g8y1QVNiz8YDT6mw==/109951165323651127.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 56,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/6742519053174ca2b8c599e2f858d111/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/6742519053174ca2b8c599e2f858d111.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "213364881",
+            "userId": "403158134",
+            "sessionId": "134600438",
+            "title": "好久不见，中秋快乐",
+            "nick": "木头人",
+            "avatar": "https://p4.music.126.net/S0oNVlq_S20xNRQJsNfx-A==/109951173640626038.jpg",
+            "cover": "https://p4.music.126.net/JYuPf1q28MHBAeohajHczw==/109951165939044854.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 201,
+            "currentViewers": 4,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/8efb545d7adb4a969d002cdfe3894c97/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/8efb545d7adb4a969d002cdfe3894c97.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "279358327",
+            "userId": "2089949230",
+            "sessionId": "134609307",
+            "title": "安静的人 安静的直播间～",
+            "nick": "Y-安露许愿心动热气球",
+            "avatar": "https://p4.music.126.net/xSRkNKG5AEFii5r5gn90_A==/109951173876749687.jpg",
+            "cover": "https://p3.music.126.net/G47Qwky1H11CcgSb_xt8GQ==/109951173939521577.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 102,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/2abf4272bc5f4a7984a037b6ba57c6cb/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/2abf4272bc5f4a7984a037b6ba57c6cb.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "229465367",
+            "userId": "1923405325",
+            "sessionId": "134599444",
+            "title": "单曲循环的流行歌曲",
+            "nick": "我没那么帅别对我太崇敬_",
+            "avatar": "https://p3.music.126.net/LOtm4GA8d_vg6o3VezWyfg==/109951172312609996.jpg",
+            "cover": "https://p3.music.126.net/U4LsFo_rmOsmxPfMxHuMFQ==/109951172929278745.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 162,
+            "currentViewers": 1,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/536a44f386e346bcafcbf99df9d735e7/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/536a44f386e346bcafcbf99df9d735e7.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "229021175",
+            "userId": "1687853544",
+            "sessionId": "134609306",
+            "title": "说话！遇到难回答的又不说话了",
+            "nick": "施情画意.",
+            "avatar": "https://p4.music.126.net/I67EtD0bvqdaxNho2Xyi_w==/109951171297759515.jpg",
+            "cover": "https://p4.music.126.net/PT2_PdX8akhlQUdYKm0Z1A==/109951169892760620.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 302,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/791027c0cc494f6ab4d62e62e9ce3e08/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/791027c0cc494f6ab4d62e62e9ce3e08.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "372701909",
+            "userId": "3921438516",
+            "sessionId": "134604374",
+            "title": "倘若我们还有话说",
+            "nick": "胆Dan",
+            "avatar": "https://p3.music.126.net/vyWq2iMPvwg11GvVoEVXUQ==/109951169711751565.jpg",
+            "cover": "https://p4.music.126.net/ZvqnCoErgQT27E_zuByWHA==/109951168892050667.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 100,
+            "currentViewers": 3,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/76d7758925e74d9fa49ccbe8a62ba9ce/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/76d7758925e74d9fa49ccbe8a62ba9ce.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "594274109",
+            "userId": "13081003900",
+            "sessionId": "134599440",
+            "title": "纯素颜直播❤️",
+            "nick": "肉肉_Rosamond",
+            "avatar": "https://p4.music.126.net/cSlUWZbawBvHsOyEclGDwg==/109951173908918192.jpg",
+            "cover": "https://p4.music.126.net/0xPzbKQCl-TUxpBrUl5sKg==/109951172552659401.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 1923,
+            "currentViewers": 9,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/ba36d0b26a6e4a06a10df825f14435a6/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/ba36d0b26a6e4a06a10df825f14435a6.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "442167192",
+            "userId": "5216673353",
+            "sessionId": "134599439",
+            "title": "花花世界太危险，只有这里才是温柔乡",
+            "nick": "憨憨",
+            "avatar": "https://p3.music.126.net/kI1LHRPJBtz_XcTzEWLw9g==/109951170430953516.jpg",
+            "cover": "https://p4.music.126.net/8xFddLtX3GmgiAu6QcoZQg==/109951169236002937.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 75,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/28157987071a4efda9ba48766f225f39/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/28157987071a4efda9ba48766f225f39.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "651143864",
+            "userId": "17724754660",
+            "sessionId": "134600437",
+            "title": "look一股清流",
+            "nick": "vigor呀",
+            "avatar": "https://p3.music.126.net/PwPW3W-GEuLhPFR6y-TO0A==/109951174004746826.jpg",
+            "cover": "https://p4.music.126.net/S-mdYOe-QnVfDqqhyF-ryA==/109951174008029560.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 177,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/bd35c987cad64f429ccdad5c5a78fec5/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/bd35c987cad64f429ccdad5c5a78fec5.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "459493851",
+            "userId": "6415609372",
+            "sessionId": "134604372",
+            "title": "做你倾吐心事的树洞",
+            "nick": "林M雨",
+            "avatar": "https://p4.music.126.net/90vGBvoVSm2gCFbL8dhg_g==/109951166997491127.jpg",
+            "cover": "https://p4.music.126.net/9Q5f3AZQD1pZkC3G-KbNaQ==/109951173953757386.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 301,
+            "currentViewers": 4,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/891f5f9eeaad45b2936d7185e90c928d/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/891f5f9eeaad45b2936d7185e90c928d.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          },
+          {
+            "roomId": "519989900",
+            "userId": "8507159049",
+            "sessionId": "134598467",
+            "title": "点歌卡点免费，今天福利局",
+            "nick": "红妆",
+            "avatar": "https://p4.music.126.net/6rTc8bJI68igC57CzvcnJA==/109951173992362126.jpg",
+            "cover": "https://p3.music.126.net/YIrZ7teUQ_RZbx9ROY-h4w==/109951173114679235.jpg",
+            "kind": "audio",
+            "streamType": null,
+            "state": "live",
+            "popularity": 303,
+            "currentViewers": 2,
+            "isAppOnly": false,
+            "variants": [
+              {
+                "id": "hls:source",
+                "protocol": "hls",
+                "uri": "https://pull0583d674.live.126.net/live/d945149449a44530ac2ac0ad9a0c79f0/playlist.m3u8"
+              },
+              {
+                "id": "flv:source",
+                "protocol": "flv",
+                "uri": "https://pull0583d674.live.126.net/live/d945149449a44530ac2ac0ad9a0c79f0.flv?netease=pull0583d674.live.126.net"
+              }
+            ]
+          }
+        ],
+        "hasMore": true
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":0,\"limit\":20}"
+      ]
+    },
+    "directory(video, 1) answered with this list": {
+      "result": {
+        "rooms": [
+          {
+            "roomId": "495455091",
+            "userId": "8060813546",
+            "sessionId": "134469447",
+            "title": "全天公会赛求援",
+            "nick": "EL-YOLO-聘诉看个签",
+            "avatar": "https://p3.music.126.net/WcijUvoBlKQQHHkC4z7HuQ==/109951172220735404.jpg",
+            "cover": "https://p4.music.126.net/pyeqT3vxmwk9Q5xqW9eFPw==/109951172220210492.jpg",
+            "kind": "video",
+            "streamType": null,
+            "state": "live",
+            "popularity": 22104,
+            "currentViewers": 47,
+            "isAppOnly": false,
+            "variants": []
+          }
+        ],
+        "hasMore": true
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}"
+      ]
+    },
+    "getCategoryRooms(video) answered with this list": {
+      "result": [
+        {
+          "roomId": "495455091",
+          "userId": "8060813546",
+          "title": "全天公会赛求援",
+          "nick": "EL-YOLO-聘诉看个签",
+          "avatar": "https://p3.music.126.net/WcijUvoBlKQQHHkC4z7HuQ==/109951172220735404.jpg",
+          "cover": "https://p4.music.126.net/pyeqT3vxmwk9Q5xqW9eFPw==/109951172220210492.jpg",
+          "area": "视频直播",
+          "watching": "47",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "22104",
+          "onlineViewers": "47",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=495455091",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=495455091"
+        }
+      ],
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":0,\"limit\":20}"
+      ]
+    }
+  }
+}

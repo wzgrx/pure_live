@@ -1,0 +1,43 @@
+{
+  "generator": "LookLiveApi.directory (video page 2) + LookLiveSite.getDirectoryPage + getRecommendRooms + getCategoryRooms (page 2, with S02-audio-p2)",
+  "value": {
+    "directory(video, 2)": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}"
+      ]
+    },
+    "getDirectoryPage(page: 2)": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}",
+        "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+      ]
+    },
+    "getRecommendRooms(page: 2)": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}",
+        "POST https://api.look.163.com/weapi/livestream/listen/homepage/recommend/list {\"offset\":20,\"limit\":20}"
+      ]
+    },
+    "getCategoryRooms(video, 2)": {
+      "result": {
+        "throws": "LookLiveException",
+        "message": "LOOK Live schema"
+      },
+      "requests": [
+        "POST https://api.look.163.com/weapi/livestream/homepage/recommend {\"offset\":20,\"limit\":20}"
+      ]
+    }
+  }
+}

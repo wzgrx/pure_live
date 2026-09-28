@@ -1,0 +1,80 @@
+{
+  "code": 200,
+  "data": {
+    "roomInfo": {
+      "id": 134598464,
+      "roomId": 909690154,
+      "title": "我是真的爱上你",
+      "liveCoverUrl": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+      "liveStreamType": 6,
+      "orientationScope": 2,
+      "liveStreamSubType": null,
+      "liveUrl": {
+        "httpPullUrl": "http://pull0583d674.live.126.net/live/b9d2b60ca47c44298e6d6b5fd3349d01.flv?netease=pull0583d674.live.126.net",
+        "hlsPullUrl": "http://pull0583d674.live.126.net/live/b9d2b60ca47c44298e6d6b5fd3349d01/playlist.m3u8",
+        "rtmpPullUrl": "rtmp://pull0583d674.live.126.net/live/b9d2b60ca47c44298e6d6b5fd3349d01"
+      },
+      "liveType": 2,
+      "bgCoverUrl": "https://p1.music.126.net/JFRNA74IAvqFsgIIhR9mqA==/109951169284142350.jpg",
+      "agoraRoomNo": 0,
+      "startTime": 1790528802334,
+      "backgroundAnimateUrl": "",
+      "foregroundAnimateUrl": "http://f2.iplay.126.net/LTIyODAzOA==/02456cc33eaec8e05ae9bdc3e32fa2ab.mp4",
+      "rtcSupplier": 0,
+      "videoUrl": ""
+    },
+    "liveStatus": -1,
+    "anchor": {
+      "userId": 572793023,
+      "nickName": "婆果西婆吆",
+      "avatarUrl": "http://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+      "authStatus": 1,
+      "userType": 4,
+      "avatarDetail": {
+        "userType": 4,
+        "identityLevel": 1,
+        "identityIconUrl": "https://p5.music.126.net/obj/wo3DlcOGw6DClTvDisK1/4874132307/4499/f228/d867/da64b9725e125943ad4e14e4c72d0884.png"
+      },
+      "gender": 2,
+      "liveRoomNo": "325808387",
+      "liveLevel": 0,
+      "cuteNumber": 0
+    },
+    "officialShow": null,
+    "stealth": false,
+    "largeShow": null,
+    "rtcStatusDetail": null,
+    "officialArena": null,
+    "anchorIntroduce": null,
+    "cdnRecord": null,
+    "audioLiveRoom": null,
+    "officialLiveRoom": false,
+    "themeRoomDto": null,
+    "musicianChannelDto": null,
+    "riskRoom": false,
+    "feeInfo": null,
+    "transCodingUrl": null,
+    "defaultTransCoding": 0,
+    "hasNewUserGift": false,
+    "anonymousMode": false,
+    "gslbConf": 0,
+    "newUserToProtected": false,
+    "avgRoomExt": {
+      "businessId": null,
+      "labelList": null,
+      "coverImgNosKey": null,
+      "coverImg": null,
+      "originCoverImg": null,
+      "previewImgNosKeyList": null,
+      "previewImgList": null,
+      "originPreviewImgList": null,
+      "roleImgNosKeyList": null,
+      "roleImgList": null,
+      "originRoleImgList": null,
+      "slogan": null
+    },
+    "publicRoomId": null,
+    "clubHouseExt": null
+  },
+  "message": ""
+}

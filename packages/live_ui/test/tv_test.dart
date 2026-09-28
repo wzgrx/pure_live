@@ -366,6 +366,43 @@ void main() {
     expect(rings, ringOn(text));
   });
 
+  testWidgets('a focused segment of a segmented button gets the ring too', (tester) async {
+    addTearDown(() => FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic);
+    tester.view
+      ..physicalSize = const Size(960, 540)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: PureTheme.tv(Appearance.dark),
+        builder: (context, child) => TvRoot(config: const TvConfig(enabled: true), child: child!),
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 0, label: Text('暂停')),
+                ButtonSegment(value: 1, label: Text('退出')),
+              ],
+              selected: const {0},
+              onSelectionChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    Focus.of(tester.element(find.text('退出'))).requestFocus();
+    await tester.pump();
+    final segment = tester.getRect(find.ancestor(of: find.text('退出'), matching: find.byType(TextButton)));
+    expect(
+      find.byType(TvListFocusRings),
+      paints..something((method, arguments) {
+        if (method != #drawRect) return false;
+        final paint = arguments[1] as Paint;
+        return arguments[0] == segment.deflate(1.5) && paint.style == PaintingStyle.stroke && paint.strokeWidth == 3;
+      }),
+    );
+  });
+
   testWidgets('a focused tab gets the ring too', (tester) async {
     addTearDown(() => FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic);
     tester.view

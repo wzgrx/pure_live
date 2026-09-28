@@ -7,9 +7,10 @@ import 'package:live_ui/src/tv/tv_scope.dart';
 /// The focus ring of list rows in TV mode (principles §5.3): whichever
 /// [ListTile] holds the remote's focus (a plain row, a switch, radio or
 /// checkbox row, an expansion header, a slider inside a row) gets the same
-/// 3 dp ring as a [FocusFrame], drawn inside its bounds; so do menu items
-/// and tabs, the other rows the theme only fills. The theme's focus fill
-/// alone reads at under 2:1 from the sofa.
+/// 3 dp ring as a [FocusFrame], drawn inside its bounds; so do menu items,
+/// tabs and the segments of a segmented button, the other controls the
+/// theme only fills. The theme's focus fill alone reads at under 2:1 from
+/// the sofa.
 ///
 /// One layer over the whole app draws it, so every list row has it without
 /// wrapping each one; rows that already are a [FocusFrame] (their tile does
@@ -96,9 +97,13 @@ class _TvListFocusRingsState extends State<TvListFocusRings> {
         row = context;
         return false;
       }
+      if (widget is ButtonStyleButton) {
+        // A segment of a segmented button: the theme only fills it.
+        if (_inSegmentedButton(ancestor)) row = ancestor;
+        return false;
+      }
       // Controls that show focus themselves, and the ends of a row's reach.
-      if (widget is ButtonStyleButton ||
-          widget is IconButton ||
+      if (widget is IconButton ||
           widget is PopupMenuButton ||
           widget is TextField ||
           widget is RawChip ||
@@ -112,6 +117,17 @@ class _TvListFocusRingsState extends State<TvListFocusRings> {
       return ++depth < 40;
     });
     return row;
+  }
+
+  static bool _inSegmentedButton(Element element) {
+    var found = false;
+    var depth = 0;
+    element.visitAncestorElements((ancestor) {
+      found = ancestor.widget is SegmentedButton;
+      // The segmented button's own Material sits in between.
+      return !found && ++depth < 24;
+    });
+    return found;
   }
 
   /// The focused row's rect and its viewport's, in this layer's coordinates.

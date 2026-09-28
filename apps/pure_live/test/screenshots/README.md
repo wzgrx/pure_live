@@ -54,12 +54,13 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 
 - 数据全部是虚构的（`shot_world.dart`）：12 个开播直播间、4 个未开播的关注、搜索只有 B 站、斗鱼、虎牙有结果；标题故意有长有短，人数覆盖“523”到“128万”。
 - 封面不加载网络图片，显示无封面时的占位；播放器用 `FakeEngine`，画面是黑的，控制层处于显示状态；聊天是一批固定的弹幕。
+- 名字带 `-white` 的截图把画面换成纯白（`debugPictureBackground`，假引擎没有画面）：控制层的遮罩必须让白字在最亮的画面上也读得清（principles §2.2）。
 - 录制中心只有“已完成”“失败”“已停止”三种任务：正在录制需要真的直播流。
 - 时间：时长和“3 小时前”相对测试开始时刻计算；全屏时钟读 `clockProvider`，固定为 20:30。
 - 已过首次启动：一次性提示不出现。阴影按真实方式绘制（测试框架默认把阴影画成黑边，这里关掉了）。
 - “出错”截图用应用的重试策略 `networkRetry`（网络错误重试两次，1 s、2 s），推进 4 秒假时间后截：错误必须在 4 秒内出现。
 
-## 页面清单（68 张）
+## 页面清单（77 张）
 
 | 文件 | 页面 | 尺寸 | 主题 | 语言 |
 |---|---|---|---|---|
@@ -107,6 +108,12 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | `room_phone_light_zh-Hans.png` | 直播间 | 手机竖屏 | 浅色 | 简体 |
 | `room_phoneland_light_zh-Hans.png` | 直播间（直接全屏） | 手机横屏 | 浅色 | 简体 |
 | `room_xlarge_dark_zh-Hans.png` | 直播间 | 超大（Windows） | 深色 | 简体 |
+| `room-chat_phoneland_dark_zh-Hans.png` | 直播间（全屏，聊天浮层） | 手机横屏 | 深色 | 简体 |
+| `room-failed_phone_dark_zh-Hans.png` | 直播间（播放失败：重试、换线路） | 手机竖屏 | 深色 | 简体 |
+| `room-loading_phone_light_zh-Hans.png` | 直播间（正在连接） | 手机竖屏 | 浅色 | 简体 |
+| `room-tip_large_dark_zh-Hans.png` | 直播间（一次性提示） | 大（Windows） | 深色 | 简体 |
+| `room-white_phone_light_zh-Hans.png` | 直播间（白色画面） | 手机竖屏 | 浅色 | 简体 |
+| `room-white_phoneland_light_zh-Hans.png` | 直播间（白色画面，全屏和锁定键） | 手机横屏 | 浅色 | 简体 |
 | `search-empty_large_dark_zh-Hans.png` | 搜索（无结果） | 大（Windows） | 深色 | 简体 |
 | `search-empty_phone_light_zh-Hans.png` | 搜索（无结果） | 手机竖屏 | 浅色 | 简体 |
 | `search_expanded_light_zh-Hans.png` | 搜索（有结果） | 展开 | 浅色 | 简体 |
@@ -130,6 +137,9 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 | `tv-follows-card_tv_black_zh-Hans.png` | TV 首页（焦点在卡片） | TV | 纯黑 | 简体 |
 | `tv-follows_tv_dark_zh-Hans.png` | TV 首页（焦点在导航轨，轨道展开） | TV | 深色 | 简体 |
 | `tv-room_tv_dark_zh-Hans.png` | TV 直播间（按 OK 后的信息栏和控制行） | TV | 深色 | 简体 |
+| `tv-room-list_tv_dark_zh-Hans.png` | TV 直播间（左侧直播间列表） | TV | 深色 | 简体 |
+| `tv-room-settings_tv_dark_zh-Hans.png` | TV 直播间（右侧播放设置） | TV | 深色 | 简体 |
+| `tv-room-white_tv_dark_zh-Hans.png` | TV 直播间（白色画面上的信息栏） | TV | 深色 | 简体 |
 | `tv-settings_tv_dark_zh-Hans.png` | TV 设置（焦点在分组列表） | TV | 深色 | 简体 |
 
 ## 加一张截图
@@ -137,4 +147,4 @@ flutter test --exclude-tags screenshots         # 只跑其余测试
 1. 在对应的 `*_screens_test.dart` 里写 `screenshot('<页面>', ShotScreen.<尺寸>, (app) => app.go('<路由>'), theme: …, locale: …)`；全屏路由用 `app.push`，需要等待的状态用 `app.frames()`。
 2. 页面要的数据放进 `ShotWorld`；需要的 provider 替换放进 `ShotApp.pump`。
 3. `flutter test --update-goldens test/screenshots --plain-name <文件名>` 生成，看过再提交，并把它加进上表。
-4. 总量控制在 8 MB 以内（现在约 6.2 MB）。
+4. 总量控制在 8 MB 以内（现在约 7.0 MB）。

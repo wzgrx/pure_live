@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/appearance.dart';
@@ -128,22 +130,32 @@ class RoomLayout extends StatelessWidget {
       );
     }
     return LayoutBuilder(
-      builder: (context, constraints) => Stack(
-        fit: StackFit.expand,
-        children: [
-          black,
-          Positioned(
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: constraints.maxWidth * 0.4,
-            child: ColoredBox(
-              color: const Color(0xB3000000),
-              child: SafeArea(left: false, child: panel),
+      builder: (context, constraints) {
+        final width = constraints.maxWidth * 0.4;
+        final media = MediaQuery.of(context);
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // The picture's bars keep to the left 60%, as if the chat were
+            // an edge of the screen: none of their buttons (the chat toggle
+            // among them) lies under it.
+            MediaQuery(
+              data: media.copyWith(padding: media.padding.copyWith(right: math.max(media.padding.right, width))),
+              child: black,
             ),
-          ),
-        ],
-      ),
+            Positioned(
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: width,
+              child: ColoredBox(
+                color: const Color(0xB3000000),
+                child: SafeArea(left: false, child: panel),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

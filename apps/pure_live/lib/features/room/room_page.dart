@@ -378,14 +378,14 @@ class _RoomPageState extends ConsumerState<RoomPage> {
     });
   }
 
-  /// A one-time tip (principles §6.5): a small bar at the bottom, 3 s, off
-  /// the middle of the picture. Deferred: it may be asked for during build.
+  /// A one-time tip (principles §6.5): on the picture's top left for 3 s,
+  /// off its middle; a window-wide bar would cover the chat input on
+  /// desktops. Deferred: it may be asked for during build.
   void _tip(Tip tip, String text) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !ref.read(appPrefsProvider.notifier).takeTip(tip)) return;
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(content: Text(text), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 3)),
-      );
+      final player = _videoKey.currentState;
+      if (!mounted || player == null || !ref.read(appPrefsProvider.notifier).takeTip(tip)) return;
+      player.showTip(text);
     });
   }
 

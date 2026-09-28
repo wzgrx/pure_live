@@ -118,11 +118,7 @@ class TvRoomLayerState extends ConsumerState<TvRoomLayer> {
       _root.requestFocus();
       // Once per installation (principles §6.5).
       if (ref.read(appPrefsProvider.notifier).takeTip(Tip.tvRoom)) {
-        widget.player.currentState?.showHint(
-          Icons.settings_remote_outlined,
-          t.room.tv.hint,
-          duration: const Duration(seconds: 4),
-        );
+        widget.player.currentState?.showTip(t.room.tv.hint, duration: const Duration(seconds: 4));
       }
     });
   }
@@ -240,15 +236,18 @@ class TvRoomLayerState extends ConsumerState<TvRoomLayer> {
         children: [
           widget.child,
           if (_controls)
-            _ControlBar(
-              detail: widget.detail,
-              state: _state,
-              entries: widget.entries(),
-              firstFocus: _firstControl,
-              followed: widget.followed,
-              onFollow: widget.onFollow,
-              player: widget.player,
-              onPanel: openPanel,
+            // Over the picture: at most 1.3× text (principles §2.3).
+            OnVideoTextScale(
+              child: _ControlBar(
+                detail: widget.detail,
+                state: _state,
+                entries: widget.entries(),
+                firstFocus: _firstControl,
+                followed: widget.followed,
+                onFollow: widget.onFollow,
+                player: widget.player,
+                onPanel: openPanel,
+              ),
             ),
           if (_panel == TvPanel.rooms)
             Align(
@@ -309,6 +308,26 @@ class _ControlBar extends ConsumerWidget {
   final GlobalKey<PlayerViewState> player;
   final ValueChanged<TvPanel> onPanel;
 
+  /// Secondary text on the scrim: 5:1 even over a white frame (white70
+  /// would give 3.8:1).
+  static const Color _secondary = Color(0xE6FFFFFF);
+
+  /// Scrolls the row just enough to show the focused button: the row is
+  /// clipped at the safe area (principles §5.3), so a button past it would
+  /// hold focus unseen.
+  static void _reveal(BuildContext context) {
+    final box = context.findRenderObject();
+    final viewport = Scrollable.maybeOf(context)?.context.findRenderObject();
+    if (box is! RenderBox || viewport is! RenderBox || !box.attached || !viewport.attached) return;
+    final rect = MatrixUtils.transformRect(box.getTransformTo(viewport), Offset.zero & box.size);
+    final policy = rect.left < 0
+        ? ScrollPositionAlignmentPolicy.keepVisibleAtStart
+        : rect.right > viewport.size.width
+        ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+        : null;
+    if (policy != null) Scrollable.ensureVisible(context, duration: Motion.short, alignmentPolicy: policy);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -318,70 +337,83 @@ class _ControlBar extends ConsumerWidget {
     final audience = shownAudience(card.audience, preferOnline: ref.watch(preferRealOnlineSetting));
     final position = entries.indexWhere((entry) => entry.ref == card.ref);
     final paused = state.phase == PlaybackPhase.paused;
+    final numeric = LiveTheme.of(context).numeric;
     Widget button(IconData icon, String label, VoidCallback onPressed, {FocusNode? focusNode}) => Padding(
       padding: const EdgeInsets.only(right: Space.s3),
-      child: FilledButton.tonalIcon(focusNode: focusNode, onPressed: onPressed, icon: Icon(icon), label: Text(label)),
-    );
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const IgnorePointer(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0x00000000), Color(0x00000000), Color(0xB3000000)],
-                stops: [0, 0.45, 1],
-              ),
-            ),
-          ),
+      child: Builder(
+        builder: (context) => FilledButton.tonalIcon(
+          focusNode: focusNode,
+          onFocusChange: (focused) {
+            if (focused) _reveal(context);
+          },
+          onPressed: onPressed,
+          icon: Icon(icon),
+          label: Text(label),
         ),
-        SafeArea(
-          child: Align(
-            alignment: Alignment.bottomLeft,
+      ),
+    );
+    // The bar sits on 60% black to the bottom edge with a short fade above
+    // (principles §2.2); its content keeps inside the safe area, and so does
+    // the button row, which scrolls instead of running past the margin.
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: VideoBarScrim(
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.only(top: Space.s2),
             child: Column(
+              key: const ValueKey('tv-room-bar'),
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    PlatformLogo(platformId: card.ref.platform, size: 24),
-                    const SizedBox(width: Space.s2),
-                    Flexible(
-                      child: Text(
-                        card.anchorName,
-                        style: theme.textTheme.titleLarge!.copyWith(color: ink),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          PlatformLogo(platformId: card.ref.platform, size: 24),
+                          const SizedBox(width: Space.s2),
+                          Flexible(
+                            child: Text(
+                              card.anchorName,
+                              style: theme.textTheme.titleLarge!.copyWith(color: ink),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: Space.s3),
+                          if (card.state == LiveState.live) const LiveBadge(),
+                          if (audience != null) ...[
+                            const SizedBox(width: Space.s3),
+                            Text(formatCount(audience), style: numeric.copyWith(color: ink)),
+                          ],
+                        ],
                       ),
                     ),
-                    const SizedBox(width: Space.s3),
-                    if (card.state == LiveState.live) const LiveBadge(),
-                    if (audience != null) ...[
+                    // Where the room is in the list, at the right margin.
+                    if (position >= 0) ...[
                       const SizedBox(width: Space.s3),
-                      Text(formatCount(audience), style: LiveTheme.of(context).numeric.copyWith(color: ink)),
-                    ],
-                    const Spacer(),
-                    if (position >= 0)
                       Text(
                         '${position + 1} / ${entries.length}',
-                        style: LiveTheme.of(context).numeric.copyWith(color: Colors.white70),
+                        key: const ValueKey('tv-room-position'),
+                        style: numeric.copyWith(color: _secondary),
                       ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: Space.s1),
                 Text(
                   [card.title, platformNames[card.ref.platform] ?? card.ref.platform, ?card.area].join(' · '),
-                  style: theme.textTheme.bodyMedium!.copyWith(color: Colors.white70),
+                  style: theme.textTheme.bodyMedium!.copyWith(color: _secondary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: Space.s3),
                 FocusTraversalGroup(
                   child: SingleChildScrollView(
+                    key: const ValueKey('tv-room-buttons'),
                     scrollDirection: Axis.horizontal,
-                    clipBehavior: Clip.none,
                     child: Row(
                       children: [
                         button(
@@ -418,7 +450,7 @@ class _ControlBar extends ConsumerWidget {
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

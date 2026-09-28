@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -226,6 +227,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('正在连接弹幕…'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('principles §6.5: the first desktop room shows its tip on the picture, not over the chat input', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    await openRoom(tester, size: const Size(1400, 900));
+    final tip = find.textContaining('剧场模式');
+    expect(find.descendant(of: find.byType(PlayerView), matching: tip), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+    final picture = tester.getRect(find.byType(PlayerView));
+    final rect = tester.getRect(find.byKey(const ValueKey('room-tip')));
+    expect(rect.left - picture.left, lessThan(24), reason: 'top left');
+    expect(rect.bottom, lessThan(picture.center.dy), reason: 'off the middle');
+    await tester.pump(const Duration(seconds: 3));
+    expect(tip, findsNothing, reason: 'gone after 3 s');
+    await tester.pump(const Duration(seconds: 1));
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('principles §5.2: with the chat over a landscape phone, the bars keep to the left 60%', (tester) async {
+    await openRoom(tester, size: const Size(852, 393));
+    await tester.tap(find.byTooltip('聊天'));
+    await tester.pumpAndSettle();
+    expect(find.text('正在连接弹幕…'), findsOneWidget, reason: 'the chat floats over the right 40%');
+    for (final bar in ['room-top-bar', 'room-bottom-bar']) {
+      expect(tester.getRect(find.byKey(ValueKey(bar))).right, lessThanOrEqualTo(852 * 0.6 + 0.5), reason: bar);
+    }
+    // The toggle is not under the chat: it closes it.
+    await tester.tap(find.byTooltip('收起聊天'));
+    await tester.pumpAndSettle();
+    expect(find.text('正在连接弹幕…'), findsNothing);
+    expect(tester.getRect(find.byKey(const ValueKey('room-top-bar'))).right, 852);
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('F-ROOM-15: with 进入直播间自动全屏 on, fullscreen follows 1 s after entry', (tester) async {

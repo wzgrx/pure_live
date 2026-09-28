@@ -1,0 +1,1399 @@
+{
+  "generator": "BaiduLiveSite.getCategores + getDirectoryPage + getRecommendRooms + getCategoryRooms + getPlayQualites(card) + searchRooms + BaiduLiveApi.parseDirectoryJson + signFeedParameters",
+  "value": {
+    "name": "百度直播",
+    "directoryNoticeKey": "baidulive_directory_scope",
+    "getCategores(1) before the feed": {
+      "requests": [],
+      "value": [
+        {
+          "id": "baidulive",
+          "name": "百度直播",
+          "children": [
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "rec",
+              "areaName": "推荐",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "shopping",
+              "areaName": "购物",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "finance",
+              "areaName": "财经",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "health",
+              "areaName": "健康",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "education",
+              "areaName": "教育",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "news",
+              "areaName": "新闻",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "leisure",
+              "areaName": "休闲",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ]
+    },
+    "getCategores(2)": {
+      "requests": [],
+      "value": 0
+    },
+    "getCategores(1, pageSize 0)": {
+      "requests": [],
+      "value": 0
+    },
+    "getDirectoryPage(1)": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://tiebac.baidu.com/livefeed/feed",
+          "form": {
+            "appname": "pclive",
+            "sid": "",
+            "ua": "320_480_pc_1.0_0",
+            "uid": "<device>",
+            "timestamp": "<time>",
+            "source": "pclive",
+            "resource": "banner,tab,feed",
+            "scene": "pc_channel",
+            "session_id": "",
+            "refresh_type": "0",
+            "refresh_index": "1",
+            "tab": "rec",
+            "channel_id": "570",
+            "sign": "<sign>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "page": 1,
+        "hasMore": true,
+        "rooms": [
+          {
+            "roomId": "11574803010",
+            "userId": "Lu8oS5dECWWILYh-On7OQw",
+            "title": "喜上眉梢装饰画！好彩头！",
+            "nick": "锦尚书画",
+            "avatar": "https://avatar.bdstatic.com/it/u=661532094,1306932522&fm=3012&app=3012&autime=1781337034&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/5f899b40195cc36fe1504fdd347022f2.png?x-bce-process=image/crop,x_243,y_47,w_2260,h_1271",
+            "area": "家居饰品",
+            "watching": "5918",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "5918",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11574803010",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11574803010"
+          },
+          {
+            "roomId": "11571271139",
+            "userId": "dfRqNeUDDCW-6oFOKntpVQ",
+            "title": "祝东升医生谈：什么年龄适合做拉皮",
+            "nick": "面部提升祝东升",
+            "avatar": "https://avatar.bdstatic.com/it/u=2596891051,3843614576&fm=3012&app=3012&autime=1780631343&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/89ce1d3216c89c9d147dda9de8190091.png?x-bce-process=image/crop,x_0,y_0,w_1920,h_1080",
+            "area": "美容养生",
+            "watching": "1485",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1485",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11571271139",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11571271139"
+          },
+          {
+            "roomId": "11583285295",
+            "userId": "goi1Lor5TsSD0Tn8PTXWSw",
+            "title": "去过南疆才算是真正的到过南疆，南疆有比北疆更深厚的人文！",
+            "nick": "新疆柚子旅游",
+            "avatar": "https://avatar.bdstatic.com/it/u=1016311599,1920946840&fm=3012&app=3012&autime=1789604660&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/d92e4497c459e8e7927cd9da940b1518.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+            "area": "家庭游",
+            "watching": "1227",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1227",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11583285295",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11583285295"
+          },
+          {
+            "roomId": "11580831895",
+            "userId": "HrHDhX_odODP1C7VcaUA2g",
+            "title": "内蒙额济纳旗胡杨林6日游，无二次消费，舒适航空保姆车",
+            "nick": "内蒙胡杨林金牌领队",
+            "avatar": "https://avatar.bdstatic.com/it/u=906660465,3359961457&fm=3012&app=3012&autime=1790098859&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/8ec01505921f81e856f9bad34a268d4e.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+            "area": "国内景点打卡",
+            "watching": "1799",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1799",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11580831895",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11580831895"
+          },
+          {
+            "roomId": "11560887291",
+            "userId": "P8czDTv88jMSp07uiSVPjg",
+            "title": "奇门排盘分析讲堂",
+            "nick": "方塘国学讲堂",
+            "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+            "area": "兴趣培训",
+            "watching": "25357",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "25357",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11560887291",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11560887291"
+          },
+          {
+            "roomId": "11583280342",
+            "userId": "BUn6emFtzD5RPprk_LsW4A",
+            "title": "讲讲乙肝三部曲！",
+            "nick": "肝病科洪臣",
+            "avatar": "https://avatar.bdstatic.com/it/u=996657376,2430474003&fm=3012&app=3012&autime=1790065693&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/d1a4e09369345d247af75fa7f0e10012.png?x-bce-process=image/crop,x_1,y_0,w_654,h_368",
+            "area": "生活保健",
+            "watching": "409",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "409",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11583280342",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11583280342"
+          },
+          {
+            "roomId": "11563511937",
+            "userId": "UrCysu_q5eXL75IhLjTtBg",
+            "title": "带状疱疹：病程、忌口与症状全解析",
+            "nick": "神经外科郭宇鹏",
+            "avatar": "https://avatar.bdstatic.com/it/u=2448846640,2255162526&fm=3012&app=3012&autime=1789696820&size=b200,200",
+            "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_2211414_2211414_1_-999_1756712228.png?",
+            "area": "外科",
+            "watching": "5780",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "5780",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11563511937",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11563511937"
+          },
+          {
+            "roomId": "11527002124",
+            "userId": "udfgv2lQm43IM6vA4vbcAQ",
+            "title": "增额寿到底该怎么选？",
+            "nick": "衡量保险说",
+            "avatar": "https://avatar.bdstatic.com/it/u=4123962162,1489130213&fm=3012&app=3012&autime=1778494483&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/b87aac6657648c109a1bae9deac0d5a1.jpeg",
+            "area": "保险",
+            "watching": "9207",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "9207",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11527002124",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11527002124"
+          },
+          {
+            "roomId": "11527156412",
+            "userId": "ltEq1HB46LXZ07i4QEkdBg",
+            "title": "王璟教授：耳鸣、耳聋、中耳炎、突发性耳聋、听力下降",
+            "nick": "耳科专家王璟",
+            "avatar": "https://avatar.bdstatic.com/it/u=3145066240,582621840&fm=3012&app=3012&autime=1780629771&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/2b69616bb1e8dbfb12b87998f91e750e.jpeg?x-bce-process=image/crop,x_0,y_34,w_750,h_422",
+            "area": "预防保健",
+            "watching": "812",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "812",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11527156412",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11527156412"
+          },
+          {
+            "roomId": "11567330672",
+            "userId": "p3im1yxh3teH0pmBhsAflQ",
+            "title": "2026还能买房吗？",
+            "nick": "谦哥聊房",
+            "avatar": "https://avatar.bdstatic.com/it/u=2561622160,1541079807&fm=3012&app=3012&autime=1750334667&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/18fa17e0dc52c2424afe567cd76e829c.jpeg?x-bce-process=image/crop,x_0,y_63,w_1200,h_675",
+            "area": "时政",
+            "watching": "10120",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "10120",
+            "totalViewers": "",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11567330672",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11567330672"
+          }
+        ]
+      }
+    },
+    "getCategores(1) after the feed": {
+      "requests": [],
+      "value": [
+        {
+          "id": "baidulive",
+          "name": "百度直播",
+          "children": [
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "rec",
+              "areaName": "推荐",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "shopping",
+              "areaName": "购物",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "finance",
+              "areaName": "财经",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "health",
+              "areaName": "健康",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "education",
+              "areaName": "教育",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "news",
+              "areaName": "新闻",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "baidulive",
+              "areaType": "official",
+              "typeName": "百度直播",
+              "areaId": "leisure",
+              "areaName": "休闲",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ]
+    },
+    "getDirectoryPage(0)": {
+      "requests": [],
+      "value": {
+        "page": 0,
+        "hasMore": false,
+        "rooms": []
+      }
+    },
+    "getDirectoryPage(3) after page 1": {
+      "requests": [],
+      "value": {
+        "page": 3,
+        "hasMore": false,
+        "rooms": []
+      }
+    },
+    "getDirectoryPage(1, another platform)": {
+      "requests": [],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live identity"
+      }
+    },
+    "getDirectoryPage(1, unknown area)": {
+      "requests": [],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live identity"
+      }
+    },
+    "getRecommendRooms(1)": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://tiebac.baidu.com/livefeed/feed",
+          "form": {
+            "appname": "pclive",
+            "sid": "",
+            "ua": "320_480_pc_1.0_0",
+            "uid": "<device>",
+            "timestamp": "<time>",
+            "source": "pclive",
+            "resource": "banner,tab,feed",
+            "scene": "pc_channel",
+            "session_id": "",
+            "refresh_type": "0",
+            "refresh_index": "1",
+            "tab": "rec",
+            "channel_id": "570",
+            "sign": "<sign>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": [
+        {
+          "roomId": "11574803010",
+          "userId": "Lu8oS5dECWWILYh-On7OQw",
+          "title": "喜上眉梢装饰画！好彩头！",
+          "nick": "锦尚书画",
+          "avatar": "https://avatar.bdstatic.com/it/u=661532094,1306932522&fm=3012&app=3012&autime=1781337034&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/5f899b40195cc36fe1504fdd347022f2.png?x-bce-process=image/crop,x_243,y_47,w_2260,h_1271",
+          "area": "家居饰品",
+          "watching": "5918",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "5918",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11574803010",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11574803010"
+        },
+        {
+          "roomId": "11571271139",
+          "userId": "dfRqNeUDDCW-6oFOKntpVQ",
+          "title": "祝东升医生谈：什么年龄适合做拉皮",
+          "nick": "面部提升祝东升",
+          "avatar": "https://avatar.bdstatic.com/it/u=2596891051,3843614576&fm=3012&app=3012&autime=1780631343&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/89ce1d3216c89c9d147dda9de8190091.png?x-bce-process=image/crop,x_0,y_0,w_1920,h_1080",
+          "area": "美容养生",
+          "watching": "1485",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1485",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11571271139",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11571271139"
+        },
+        {
+          "roomId": "11583285295",
+          "userId": "goi1Lor5TsSD0Tn8PTXWSw",
+          "title": "去过南疆才算是真正的到过南疆，南疆有比北疆更深厚的人文！",
+          "nick": "新疆柚子旅游",
+          "avatar": "https://avatar.bdstatic.com/it/u=1016311599,1920946840&fm=3012&app=3012&autime=1789604660&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/d92e4497c459e8e7927cd9da940b1518.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "area": "家庭游",
+          "watching": "1227",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1227",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11583285295",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11583285295"
+        },
+        {
+          "roomId": "11580831895",
+          "userId": "HrHDhX_odODP1C7VcaUA2g",
+          "title": "内蒙额济纳旗胡杨林6日游，无二次消费，舒适航空保姆车",
+          "nick": "内蒙胡杨林金牌领队",
+          "avatar": "https://avatar.bdstatic.com/it/u=906660465,3359961457&fm=3012&app=3012&autime=1790098859&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/8ec01505921f81e856f9bad34a268d4e.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "area": "国内景点打卡",
+          "watching": "1799",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1799",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11580831895",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11580831895"
+        },
+        {
+          "roomId": "11560887291",
+          "userId": "P8czDTv88jMSp07uiSVPjg",
+          "title": "奇门排盘分析讲堂",
+          "nick": "方塘国学讲堂",
+          "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+          "area": "兴趣培训",
+          "watching": "25357",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "25357",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11560887291",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11560887291"
+        },
+        {
+          "roomId": "11583280342",
+          "userId": "BUn6emFtzD5RPprk_LsW4A",
+          "title": "讲讲乙肝三部曲！",
+          "nick": "肝病科洪臣",
+          "avatar": "https://avatar.bdstatic.com/it/u=996657376,2430474003&fm=3012&app=3012&autime=1790065693&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/d1a4e09369345d247af75fa7f0e10012.png?x-bce-process=image/crop,x_1,y_0,w_654,h_368",
+          "area": "生活保健",
+          "watching": "409",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "409",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11583280342",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11583280342"
+        },
+        {
+          "roomId": "11563511937",
+          "userId": "UrCysu_q5eXL75IhLjTtBg",
+          "title": "带状疱疹：病程、忌口与症状全解析",
+          "nick": "神经外科郭宇鹏",
+          "avatar": "https://avatar.bdstatic.com/it/u=2448846640,2255162526&fm=3012&app=3012&autime=1789696820&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_2211414_2211414_1_-999_1756712228.png?",
+          "area": "外科",
+          "watching": "5780",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "5780",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11563511937",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11563511937"
+        },
+        {
+          "roomId": "11527002124",
+          "userId": "udfgv2lQm43IM6vA4vbcAQ",
+          "title": "增额寿到底该怎么选？",
+          "nick": "衡量保险说",
+          "avatar": "https://avatar.bdstatic.com/it/u=4123962162,1489130213&fm=3012&app=3012&autime=1778494483&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/b87aac6657648c109a1bae9deac0d5a1.jpeg",
+          "area": "保险",
+          "watching": "9207",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "9207",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11527002124",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11527002124"
+        },
+        {
+          "roomId": "11527156412",
+          "userId": "ltEq1HB46LXZ07i4QEkdBg",
+          "title": "王璟教授：耳鸣、耳聋、中耳炎、突发性耳聋、听力下降",
+          "nick": "耳科专家王璟",
+          "avatar": "https://avatar.bdstatic.com/it/u=3145066240,582621840&fm=3012&app=3012&autime=1780629771&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/2b69616bb1e8dbfb12b87998f91e750e.jpeg?x-bce-process=image/crop,x_0,y_34,w_750,h_422",
+          "area": "预防保健",
+          "watching": "812",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "812",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11527156412",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11527156412"
+        },
+        {
+          "roomId": "11567330672",
+          "userId": "p3im1yxh3teH0pmBhsAflQ",
+          "title": "2026还能买房吗？",
+          "nick": "谦哥聊房",
+          "avatar": "https://avatar.bdstatic.com/it/u=2561622160,1541079807&fm=3012&app=3012&autime=1750334667&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/18fa17e0dc52c2424afe567cd76e829c.jpeg?x-bce-process=image/crop,x_0,y_63,w_1200,h_675",
+          "area": "时政",
+          "watching": "10120",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "10120",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11567330672",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11567330672"
+        }
+      ]
+    },
+    "getRecommendRooms(1, pageSize 4)": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://tiebac.baidu.com/livefeed/feed",
+          "form": {
+            "appname": "pclive",
+            "sid": "",
+            "ua": "320_480_pc_1.0_0",
+            "uid": "<device>",
+            "timestamp": "<time>",
+            "source": "pclive",
+            "resource": "banner,tab,feed",
+            "scene": "pc_channel",
+            "session_id": "",
+            "refresh_type": "0",
+            "refresh_index": "1",
+            "tab": "rec",
+            "channel_id": "570",
+            "sign": "<sign>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": [
+        {
+          "roomId": "11574803010",
+          "userId": "Lu8oS5dECWWILYh-On7OQw",
+          "title": "喜上眉梢装饰画！好彩头！",
+          "nick": "锦尚书画",
+          "avatar": "https://avatar.bdstatic.com/it/u=661532094,1306932522&fm=3012&app=3012&autime=1781337034&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/5f899b40195cc36fe1504fdd347022f2.png?x-bce-process=image/crop,x_243,y_47,w_2260,h_1271",
+          "area": "家居饰品",
+          "watching": "5918",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "5918",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11574803010",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11574803010"
+        },
+        {
+          "roomId": "11571271139",
+          "userId": "dfRqNeUDDCW-6oFOKntpVQ",
+          "title": "祝东升医生谈：什么年龄适合做拉皮",
+          "nick": "面部提升祝东升",
+          "avatar": "https://avatar.bdstatic.com/it/u=2596891051,3843614576&fm=3012&app=3012&autime=1780631343&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/89ce1d3216c89c9d147dda9de8190091.png?x-bce-process=image/crop,x_0,y_0,w_1920,h_1080",
+          "area": "美容养生",
+          "watching": "1485",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1485",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11571271139",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11571271139"
+        },
+        {
+          "roomId": "11583285295",
+          "userId": "goi1Lor5TsSD0Tn8PTXWSw",
+          "title": "去过南疆才算是真正的到过南疆，南疆有比北疆更深厚的人文！",
+          "nick": "新疆柚子旅游",
+          "avatar": "https://avatar.bdstatic.com/it/u=1016311599,1920946840&fm=3012&app=3012&autime=1789604660&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/d92e4497c459e8e7927cd9da940b1518.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "area": "家庭游",
+          "watching": "1227",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1227",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11583285295",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11583285295"
+        },
+        {
+          "roomId": "11580831895",
+          "userId": "HrHDhX_odODP1C7VcaUA2g",
+          "title": "内蒙额济纳旗胡杨林6日游，无二次消费，舒适航空保姆车",
+          "nick": "内蒙胡杨林金牌领队",
+          "avatar": "https://avatar.bdstatic.com/it/u=906660465,3359961457&fm=3012&app=3012&autime=1790098859&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/8ec01505921f81e856f9bad34a268d4e.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "area": "国内景点打卡",
+          "watching": "1799",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1799",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11580831895",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11580831895"
+        }
+      ]
+    },
+    "getCategoryRooms(rec, 1)": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://tiebac.baidu.com/livefeed/feed",
+          "form": {
+            "appname": "pclive",
+            "sid": "",
+            "ua": "320_480_pc_1.0_0",
+            "uid": "<device>",
+            "timestamp": "<time>",
+            "source": "pclive",
+            "resource": "banner,tab,feed",
+            "scene": "pc_channel",
+            "session_id": "",
+            "refresh_type": "0",
+            "refresh_index": "1",
+            "tab": "rec",
+            "channel_id": "570",
+            "sign": "<sign>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": [
+        {
+          "roomId": "11574803010",
+          "userId": "Lu8oS5dECWWILYh-On7OQw",
+          "title": "喜上眉梢装饰画！好彩头！",
+          "nick": "锦尚书画",
+          "avatar": "https://avatar.bdstatic.com/it/u=661532094,1306932522&fm=3012&app=3012&autime=1781337034&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/5f899b40195cc36fe1504fdd347022f2.png?x-bce-process=image/crop,x_243,y_47,w_2260,h_1271",
+          "area": "家居饰品",
+          "watching": "5918",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "5918",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11574803010",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11574803010"
+        },
+        {
+          "roomId": "11571271139",
+          "userId": "dfRqNeUDDCW-6oFOKntpVQ",
+          "title": "祝东升医生谈：什么年龄适合做拉皮",
+          "nick": "面部提升祝东升",
+          "avatar": "https://avatar.bdstatic.com/it/u=2596891051,3843614576&fm=3012&app=3012&autime=1780631343&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/89ce1d3216c89c9d147dda9de8190091.png?x-bce-process=image/crop,x_0,y_0,w_1920,h_1080",
+          "area": "美容养生",
+          "watching": "1485",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1485",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11571271139",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11571271139"
+        },
+        {
+          "roomId": "11583285295",
+          "userId": "goi1Lor5TsSD0Tn8PTXWSw",
+          "title": "去过南疆才算是真正的到过南疆，南疆有比北疆更深厚的人文！",
+          "nick": "新疆柚子旅游",
+          "avatar": "https://avatar.bdstatic.com/it/u=1016311599,1920946840&fm=3012&app=3012&autime=1789604660&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/d92e4497c459e8e7927cd9da940b1518.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "area": "家庭游",
+          "watching": "1227",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1227",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11583285295",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11583285295"
+        },
+        {
+          "roomId": "11580831895",
+          "userId": "HrHDhX_odODP1C7VcaUA2g",
+          "title": "内蒙额济纳旗胡杨林6日游，无二次消费，舒适航空保姆车",
+          "nick": "内蒙胡杨林金牌领队",
+          "avatar": "https://avatar.bdstatic.com/it/u=906660465,3359961457&fm=3012&app=3012&autime=1790098859&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/8ec01505921f81e856f9bad34a268d4e.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "area": "国内景点打卡",
+          "watching": "1799",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1799",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11580831895",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11580831895"
+        },
+        {
+          "roomId": "11560887291",
+          "userId": "P8czDTv88jMSp07uiSVPjg",
+          "title": "奇门排盘分析讲堂",
+          "nick": "方塘国学讲堂",
+          "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+          "area": "兴趣培训",
+          "watching": "25357",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "25357",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11560887291",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11560887291"
+        },
+        {
+          "roomId": "11583280342",
+          "userId": "BUn6emFtzD5RPprk_LsW4A",
+          "title": "讲讲乙肝三部曲！",
+          "nick": "肝病科洪臣",
+          "avatar": "https://avatar.bdstatic.com/it/u=996657376,2430474003&fm=3012&app=3012&autime=1790065693&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/d1a4e09369345d247af75fa7f0e10012.png?x-bce-process=image/crop,x_1,y_0,w_654,h_368",
+          "area": "生活保健",
+          "watching": "409",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "409",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11583280342",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11583280342"
+        },
+        {
+          "roomId": "11563511937",
+          "userId": "UrCysu_q5eXL75IhLjTtBg",
+          "title": "带状疱疹：病程、忌口与症状全解析",
+          "nick": "神经外科郭宇鹏",
+          "avatar": "https://avatar.bdstatic.com/it/u=2448846640,2255162526&fm=3012&app=3012&autime=1789696820&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_2211414_2211414_1_-999_1756712228.png?",
+          "area": "外科",
+          "watching": "5780",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "5780",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11563511937",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11563511937"
+        },
+        {
+          "roomId": "11527002124",
+          "userId": "udfgv2lQm43IM6vA4vbcAQ",
+          "title": "增额寿到底该怎么选？",
+          "nick": "衡量保险说",
+          "avatar": "https://avatar.bdstatic.com/it/u=4123962162,1489130213&fm=3012&app=3012&autime=1778494483&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/b87aac6657648c109a1bae9deac0d5a1.jpeg",
+          "area": "保险",
+          "watching": "9207",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "9207",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11527002124",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11527002124"
+        },
+        {
+          "roomId": "11527156412",
+          "userId": "ltEq1HB46LXZ07i4QEkdBg",
+          "title": "王璟教授：耳鸣、耳聋、中耳炎、突发性耳聋、听力下降",
+          "nick": "耳科专家王璟",
+          "avatar": "https://avatar.bdstatic.com/it/u=3145066240,582621840&fm=3012&app=3012&autime=1780629771&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/2b69616bb1e8dbfb12b87998f91e750e.jpeg?x-bce-process=image/crop,x_0,y_34,w_750,h_422",
+          "area": "预防保健",
+          "watching": "812",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "812",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11527156412",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11527156412"
+        },
+        {
+          "roomId": "11567330672",
+          "userId": "p3im1yxh3teH0pmBhsAflQ",
+          "title": "2026还能买房吗？",
+          "nick": "谦哥聊房",
+          "avatar": "https://avatar.bdstatic.com/it/u=2561622160,1541079807&fm=3012&app=3012&autime=1750334667&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/18fa17e0dc52c2424afe567cd76e829c.jpeg?x-bce-process=image/crop,x_0,y_63,w_1200,h_675",
+          "area": "时政",
+          "watching": "10120",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "10120",
+          "totalViewers": "",
+          "platform": "baidulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://live.baidu.com",
+            "referer": "https://live.baidu.com/m/room/11567330672",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://live.baidu.com/m/room/11567330672"
+        }
+      ]
+    },
+    "getPlayQualites(card)": {
+      "requests": [],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live identity"
+      }
+    },
+    "searchRooms(nickname)": {
+      "requests": [],
+      "value": []
+    },
+    "parseDirectoryJson": {
+      "sessionId": "1790532543461",
+      "refreshIndex": 1,
+      "hasMore": true,
+      "categories": [
+        {
+          "id": "rec",
+          "name": "推荐",
+          "channelId": 570
+        },
+        {
+          "id": "shopping",
+          "name": "购物",
+          "channelId": 574
+        },
+        {
+          "id": "finance",
+          "name": "财经",
+          "channelId": 611
+        },
+        {
+          "id": "health",
+          "name": "健康",
+          "channelId": 612
+        },
+        {
+          "id": "education",
+          "name": "教育",
+          "channelId": 613
+        },
+        {
+          "id": "news",
+          "name": "新闻",
+          "channelId": 575
+        },
+        {
+          "id": "leisure",
+          "name": "休闲",
+          "channelId": 616
+        }
+      ],
+      "rooms": [
+        {
+          "roomId": "11574803010",
+          "userId": "Lu8oS5dECWWILYh-On7OQw",
+          "nick": "锦尚书画",
+          "title": "喜上眉梢装饰画！好彩头！",
+          "avatar": "https://avatar.bdstatic.com/it/u=661532094,1306932522&fm=3012&app=3012&autime=1781337034&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/5f899b40195cc36fe1504fdd347022f2.png?x-bce-process=image/crop,x_243,y_47,w_2260,h_1271",
+          "category": "家居饰品",
+          "currentViewers": 5918,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11571271139",
+          "userId": "dfRqNeUDDCW-6oFOKntpVQ",
+          "nick": "面部提升祝东升",
+          "title": "祝东升医生谈：什么年龄适合做拉皮",
+          "avatar": "https://avatar.bdstatic.com/it/u=2596891051,3843614576&fm=3012&app=3012&autime=1780631343&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/89ce1d3216c89c9d147dda9de8190091.png?x-bce-process=image/crop,x_0,y_0,w_1920,h_1080",
+          "category": "美容养生",
+          "currentViewers": 1485,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11583285295",
+          "userId": "goi1Lor5TsSD0Tn8PTXWSw",
+          "nick": "新疆柚子旅游",
+          "title": "去过南疆才算是真正的到过南疆，南疆有比北疆更深厚的人文！",
+          "avatar": "https://avatar.bdstatic.com/it/u=1016311599,1920946840&fm=3012&app=3012&autime=1789604660&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/d92e4497c459e8e7927cd9da940b1518.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "category": "家庭游",
+          "currentViewers": 1227,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11580831895",
+          "userId": "HrHDhX_odODP1C7VcaUA2g",
+          "nick": "内蒙胡杨林金牌领队",
+          "title": "内蒙额济纳旗胡杨林6日游，无二次消费，舒适航空保姆车",
+          "avatar": "https://avatar.bdstatic.com/it/u=906660465,3359961457&fm=3012&app=3012&autime=1790098859&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/8ec01505921f81e856f9bad34a268d4e.png?x-bce-process=image/crop,x_1,y_0,w_1138,h_640",
+          "category": "国内景点打卡",
+          "currentViewers": 1799,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11560887291",
+          "userId": "P8czDTv88jMSp07uiSVPjg",
+          "nick": "方塘国学讲堂",
+          "title": "奇门排盘分析讲堂",
+          "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+          "category": "兴趣培训",
+          "currentViewers": 25357,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11583280342",
+          "userId": "BUn6emFtzD5RPprk_LsW4A",
+          "nick": "肝病科洪臣",
+          "title": "讲讲乙肝三部曲！",
+          "avatar": "https://avatar.bdstatic.com/it/u=996657376,2430474003&fm=3012&app=3012&autime=1790065693&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/d1a4e09369345d247af75fa7f0e10012.png?x-bce-process=image/crop,x_1,y_0,w_654,h_368",
+          "category": "生活保健",
+          "currentViewers": 409,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11563511937",
+          "userId": "UrCysu_q5eXL75IhLjTtBg",
+          "nick": "神经外科郭宇鹏",
+          "title": "带状疱疹：病程、忌口与症状全解析",
+          "avatar": "https://avatar.bdstatic.com/it/u=2448846640,2255162526&fm=3012&app=3012&autime=1789696820&size=b200,200",
+          "cover": "https://bdlive-digital-human.cdn.bcebos.com/dh_foreground/img_2211414_2211414_1_-999_1756712228.png?",
+          "category": "外科",
+          "currentViewers": 5780,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11527002124",
+          "userId": "udfgv2lQm43IM6vA4vbcAQ",
+          "nick": "衡量保险说",
+          "title": "增额寿到底该怎么选？",
+          "avatar": "https://avatar.bdstatic.com/it/u=4123962162,1489130213&fm=3012&app=3012&autime=1778494483&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/b87aac6657648c109a1bae9deac0d5a1.jpeg",
+          "category": "保险",
+          "currentViewers": 9207,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11527156412",
+          "userId": "ltEq1HB46LXZ07i4QEkdBg",
+          "nick": "耳科专家王璟",
+          "title": "王璟教授：耳鸣、耳聋、中耳炎、突发性耳聋、听力下降",
+          "avatar": "https://avatar.bdstatic.com/it/u=3145066240,582621840&fm=3012&app=3012&autime=1780629771&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/2b69616bb1e8dbfb12b87998f91e750e.jpeg?x-bce-process=image/crop,x_0,y_34,w_750,h_422",
+          "category": "预防保健",
+          "currentViewers": 812,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        },
+        {
+          "roomId": "11567330672",
+          "userId": "p3im1yxh3teH0pmBhsAflQ",
+          "nick": "谦哥聊房",
+          "title": "2026还能买房吗？",
+          "avatar": "https://avatar.bdstatic.com/it/u=2561622160,1541079807&fm=3012&app=3012&autime=1750334667&size=b200,200",
+          "cover": "https://huibo-data.cdn.bcebos.com/upload/18fa17e0dc52c2424afe567cd76e829c.jpeg?x-bce-process=image/crop,x_0,y_63,w_1200,h_675",
+          "category": "时政",
+          "currentViewers": 10120,
+          "followers": null,
+          "state": "live",
+          "variants": []
+        }
+      ]
+    },
+    "signature": {
+      "recorded": "ff2a32fa3ad277f7f223cf753eacb917",
+      "signFeedParameters": "ff2a32fa3ad277f7f223cf753eacb917"
+    },
+    "signFeedParameters(b=2, a=1)": "6ccb27769bec11fe1c1db46f74b97f15"
+  }
+}

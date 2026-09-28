@@ -1,0 +1,727 @@
+{
+  "generator": "BaiduLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + searchRooms (+ S01-feed-rec-p1 for the enriched detail) + BaiduLiveApi.parseRoomJson + validateMediaUri + BaiduLiveLink",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "11560887291",
+        "userId": "P8czDTv88jMSp07uiSVPjg",
+        "title": "奇门排盘分析讲堂",
+        "nick": "方塘国学讲堂",
+        "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+        "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+        "area": "教育",
+        "watching": "25357",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "25357",
+        "totalViewers": "",
+        "followers": "41347",
+        "platform": "baidulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.baidu.com",
+          "referer": "https://live.baidu.com/m/room/11560887291",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.baidu.com/m/room/11560887291"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "11560887291",
+        "userId": "P8czDTv88jMSp07uiSVPjg",
+        "title": "奇门排盘分析讲堂",
+        "nick": "方塘国学讲堂",
+        "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+        "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+        "area": "教育",
+        "watching": "25357",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "25357",
+        "totalViewers": "",
+        "followers": "41347",
+        "platform": "baidulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.baidu.com",
+          "referer": "https://live.baidu.com/m/room/11560887291",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.baidu.com/m/room/11560887291"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "11560887291",
+        "userId": "P8czDTv88jMSp07uiSVPjg",
+        "title": "奇门排盘分析讲堂",
+        "nick": "方塘国学讲堂",
+        "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+        "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+        "area": "教育",
+        "watching": "25357",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "25357",
+        "totalViewers": "",
+        "followers": "41347",
+        "platform": "baidulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.baidu.com",
+          "referer": "https://live.baidu.com/m/room/11560887291",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.baidu.com/m/room/11560887291"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": true
+    },
+    "getPlayQualites": {
+      "requests": [],
+      "value": [
+        {
+          "quality": "HLS 720P · AVC",
+          "id": "hls:720:avc",
+          "sort": 7201
+        },
+        {
+          "quality": "FLV 原始线路 · AVC",
+          "id": "flv:0:avc",
+          "sort": 2
+        }
+      ]
+    },
+    "getPlayUrls": {
+      "hls:720:avc": {
+        "requests": [],
+        "value": [
+          "https://hls.liveshow.bdstatic.com/live/stream_bduid_6325759471_11560887291-L3.m3u8"
+        ]
+      },
+      "flv:0:avc": {
+        "requests": [],
+        "value": [
+          "https://hls-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv?kabr_spts=-3000&logid=722978952&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+          "https://flv-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv"
+        ]
+      }
+    },
+    "resolvePlayUrlsRaw": {
+      "hls:720:avc": {
+        "requests": [],
+        "value": {
+          "urls": [
+            "https://hls.liveshow.bdstatic.com/live/stream_bduid_6325759471_11560887291-L3.m3u8"
+          ],
+          "appliedQualityData": "hls:720:avc"
+        }
+      },
+      "flv:0:avc": {
+        "requests": [],
+        "value": {
+          "urls": [
+            "https://hls-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv?kabr_spts=-3000&logid=722978952&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+            "https://flv-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv"
+          ],
+          "appliedQualityData": "flv:0:avc"
+        }
+      }
+    },
+    "resolvePlayUrlsForRecoveryRaw": {
+      "hls:720:avc": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": {
+          "urls": [
+            "https://hls.liveshow.bdstatic.com/live/stream_bduid_6325759471_11560887291-L3.m3u8"
+          ],
+          "appliedQualityData": "hls:720:avc"
+        }
+      },
+      "flv:0:avc": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": {
+          "urls": [
+            "https://hls-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv?kabr_spts=-3000&logid=722978952&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+            "https://flv-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv"
+          ],
+          "appliedQualityData": "flv:0:avc"
+        }
+      }
+    },
+    "getPlayQualites(refreshed)": {
+      "requests": [],
+      "value": {
+        "throws": "BaiduLiveException",
+        "message": "Baidu Live identity"
+      }
+    },
+    "searchRooms": {
+      "11560887291": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "11560887291",
+            "userId": "P8czDTv88jMSp07uiSVPjg",
+            "title": "奇门排盘分析讲堂",
+            "nick": "方塘国学讲堂",
+            "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+            "area": "教育",
+            "watching": "25357",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "25357",
+            "totalViewers": "",
+            "followers": "41347",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11560887291",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11560887291"
+          }
+        ]
+      },
+      " 11560887291 ": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "11560887291",
+            "userId": "P8czDTv88jMSp07uiSVPjg",
+            "title": "奇门排盘分析讲堂",
+            "nick": "方塘国学讲堂",
+            "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+            "area": "教育",
+            "watching": "25357",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "25357",
+            "totalViewers": "",
+            "followers": "41347",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11560887291",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11560887291"
+          }
+        ]
+      },
+      "https://live.baidu.com/m/room/11560887291": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "11560887291",
+            "userId": "P8czDTv88jMSp07uiSVPjg",
+            "title": "奇门排盘分析讲堂",
+            "nick": "方塘国学讲堂",
+            "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+            "area": "教育",
+            "watching": "25357",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "25357",
+            "totalViewers": "",
+            "followers": "41347",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11560887291",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11560887291"
+          }
+        ]
+      },
+      "https://live.baidu.com/m/media/pclive/pchome/live.html?room_id=11560887291": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "11560887291",
+            "userId": "P8czDTv88jMSp07uiSVPjg",
+            "title": "奇门排盘分析讲堂",
+            "nick": "方塘国学讲堂",
+            "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+            "area": "教育",
+            "watching": "25357",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "25357",
+            "totalViewers": "",
+            "followers": "41347",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11560887291",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11560887291"
+          }
+        ]
+      },
+      "https://live.baidu.com/m/media/multipage/liveshow/index/cdxqdh?room_id=11560887291": {
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://mbd.baidu.com/searchbox",
+            "query": {
+              "cmd": "371",
+              "action": "star",
+              "service": "bdbox",
+              "osname": "pc",
+              "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+              "ua": "360_740_ANDROID_0",
+              "bd_vid": "",
+              "uid": "<device>",
+              "_": "<time>"
+            },
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://live.baidu.com",
+              "Referer": "https://live.baidu.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "11560887291",
+            "userId": "P8czDTv88jMSp07uiSVPjg",
+            "title": "奇门排盘分析讲堂",
+            "nick": "方塘国学讲堂",
+            "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+            "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+            "area": "教育",
+            "watching": "25357",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "25357",
+            "totalViewers": "",
+            "followers": "41347",
+            "platform": "baidulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://live.baidu.com",
+              "referer": "https://live.baidu.com/m/room/11560887291",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://live.baidu.com/m/room/11560887291"
+          }
+        ]
+      }
+    },
+    "searchRooms(page 2)": {
+      "requests": [],
+      "value": []
+    },
+    "parseRoomJson": {
+      "roomId": "11560887291",
+      "userId": "P8czDTv88jMSp07uiSVPjg",
+      "nick": "方塘国学讲堂",
+      "title": "奇门排盘分析讲堂",
+      "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+      "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+      "category": "教育",
+      "currentViewers": 25357,
+      "followers": 41347,
+      "state": "live",
+      "variants": [
+        {
+          "id": "hls:720:avc",
+          "protocol": "hls",
+          "resolution": 720,
+          "codec": "avc",
+          "urls": [
+            "https://hls.liveshow.bdstatic.com/live/stream_bduid_6325759471_11560887291-L3.m3u8"
+          ]
+        },
+        {
+          "id": "flv:0:avc",
+          "protocol": "flv",
+          "resolution": 0,
+          "codec": "avc",
+          "urls": [
+            "https://hls-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv?kabr_spts=-3000&logid=722978952&ls_from=searchbox_371&ls_scene=baidu_liveshow",
+            "https://flv-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv"
+          ]
+        }
+      ]
+    },
+    "parseRoomJson(another room)": {
+      "throws": "BaiduLiveException",
+      "message": "Baidu Live identity"
+    },
+    "getRoomDetail after the directory": {
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://mbd.baidu.com/searchbox",
+          "query": {
+            "cmd": "371",
+            "action": "star",
+            "service": "bdbox",
+            "osname": "pc",
+            "data": "{\"data\":{\"room_id\":\"11560887291\",\"device_id\":\"<device>\",\"source_type\":0},\"replay_slice\":0,\"nid\":\"\",\"schemeParams\":{\"src_pre\":\"pc\",\"src_suf\":\"other\",\"bd_vid\":\"\",\"share_uid\":\"\",\"share_cuk\":\"\",\"share_ecid\":\"\",\"zb_tag\":\"\",\"shareTaskInfo\":\"{\\\"room_id\\\":\\\"11560887291\\\"}\",\"share_from\":\"\",\"ext_params\":\"\",\"nid\":\"\"}}",
+            "ua": "360_740_ANDROID_0",
+            "bd_vid": "",
+            "uid": "<device>",
+            "_": "<time>"
+          },
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://live.baidu.com",
+            "Referer": "https://live.baidu.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "11560887291",
+        "userId": "P8czDTv88jMSp07uiSVPjg",
+        "title": "奇门排盘分析讲堂",
+        "nick": "方塘国学讲堂",
+        "avatar": "https://avatar.bdstatic.com/it/u=2395283737,3437459070&fm=3012&app=3012&autime=1789696434&size=b200,200",
+        "cover": "https://huibo-data.cdn.bcebos.com/upload/5e87c708b60bd4c4cab65c56af3486a5.jpeg?x-bce-process=image/crop,x_0,y_0,w_1280,h_720",
+        "area": "教育",
+        "watching": "25357",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "25357",
+        "totalViewers": "",
+        "followers": "41347",
+        "platform": "baidulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "百度远端聊天尚待接入；目录 audience_count 与房间 online_users 按当前观看人数展示，主播粉丝数单独展示。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://live.baidu.com",
+          "referer": "https://live.baidu.com/m/room/11560887291",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://live.baidu.com/m/room/11560887291"
+      }
+    },
+    "BaiduLiveLink.parseRoomId": {
+      "11560887291": "11560887291",
+      " 11560887291 ": "11560887291",
+      "123456": "123456",
+      "12345": null,
+      "012345678": null,
+      "123456789012345678901": null,
+      "https://live.baidu.com/m/room/11560887291": "11560887291",
+      "https://live.baidu.com/m/room/11560887291?source=anchorrooms": "11560887291",
+      "https://live.baidu.com/m/room/11560887291/": "11560887291",
+      "https://live.baidu.com//m//room//11560887291": "11560887291",
+      "https://LIVE.BAIDU.COM/m/room/11560887291": "11560887291",
+      "https://live.baidu.com:443/m/room/11560887291": "11560887291",
+      "https://live.baidu.com/m/media/pclive/pchome/live.html?room_id=11560887291&source=h5pre": "11560887291",
+      "https://live.baidu.com/m/media/multipage/liveshow/index/cdxqdh?room_id=11560887291": "11560887291",
+      "https://live.baidu.com/m/media/multipage/liveshow/index/cdx.qdh?room_id=11560887291": null,
+      "https://live.baidu.com/m/media/multipage/liveshow/index?room_id=11560887291": null,
+      "https://live.baidu.com/search?room_id=11560887291": null,
+      "https://live.baidu.com/m/room/11560887291#chat": null,
+      "https://live.baidu.com:8443/m/room/11560887291": null,
+      "https://user@live.baidu.com/m/room/11560887291": null,
+      "https://live.baidu.com.evil.test/m/room/11560887291": null,
+      "http://live.baidu.com/m/room/11560887291": null,
+      "https://live.baidu.com/M/Room/11560887291": null,
+      "https://live.baidu.com/m/room/abc": null,
+      "https://live.baidu.com/m/media/pclive/pchome/live.html?room_id=12": null,
+      "https://live.baidu.com/m/media/pclive/pchome/live.html": null
+    },
+    "BaiduLiveLink.watchUrl": "https://live.baidu.com/m/room/11560887291",
+    "BaiduLiveApi.mediaHeaders": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Origin": "https://live.baidu.com",
+      "Referer": "https://live.baidu.com/m/room/11560887291"
+    },
+    "BaiduLiveApi.apiHeaders": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://live.baidu.com",
+      "Referer": "https://live.baidu.com/"
+    },
+    "BaiduLiveApi.validateMediaUri": {
+      "hls http://hls.liveshow.bdstatic.com/live/stream_bduid_6325759471_11560887291-L3.m3u8": "https://hls.liveshow.bdstatic.com/live/stream_bduid_6325759471_11560887291-L3.m3u8",
+      "flv https://hls-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv?kabr_spts=-3000": "https://hls-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv?kabr_spts=-3000",
+      "flv https://flv-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv": "https://flv-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.flv",
+      "flv http://flv.liveshow.lss-user.baidubce.com/live/stream_bduid_6325759471_11560887291-L3.flv": null,
+      "hls http://hls2.liveshow.lss-user.baidubce.com/live/stream_bduid_6325759471_11560887291-L3/playlist.m3u8": null,
+      "flv https://hls-live.bdstatic.com/live/stream_bduid_6325759471_99999999999.flv": null,
+      "flv https://hls-live.bdstatic.com/live/stream_bduid_6325759471_11560887291.m3u8": null,
+      "flv https://hls-live.bdstatic.com/other/stream_bduid_6325759471_11560887291.flv": null,
+      "flv https://hls-live.bdstatic.com:8443/live/stream_bduid_6325759471_11560887291.flv": null,
+      "hls https://p2.bdstatic.com/rtmp.liveshow.lss-user.baidubce.com/live/stream_bduid_7108620967_11560887291/merged.m3u8": null
+    }
+  }
+}

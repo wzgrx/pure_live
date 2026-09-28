@@ -1,0 +1,23 @@
+{
+  "generator": "parsePicartoHls(body, https://edge1-eu-west.picarto.tv/stream/hls/golive+allatir/index.m3u8); 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "qualities": [
+      {
+        "quality": "720p 60fps",
+        "id": "[\"1280x720\",60.0,\"avc1.640020,mp4a.40.2\",null,null]",
+        "sort": 3502640,
+        "data": [
+          "https://edge1-eu-west.picarto.tv/stream/hls/golive+allatir/1_0/index.m3u8"
+        ]
+      }
+    ],
+    "request": {
+      "method": "GET",
+      "url": "https://edge1-eu-west.picarto.tv/stream/hls/golive+allatir/index.m3u8",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

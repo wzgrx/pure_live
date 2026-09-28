@@ -1,0 +1,23 @@
+{
+  "generator": "PicartoSite.getDirectoryPage(page: 4) (also with the public directory area), getRecommendRooms(page: 4), getCategoryRooms(public directory, page: 4); 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "page": 4,
+    "hasMore": false,
+    "rooms": [],
+    "getRecommendRooms": [],
+    "publicDirectory": {
+      "page": 4,
+      "hasMore": false,
+      "rooms": []
+    },
+    "getCategoryRooms": [],
+    "request": {
+      "method": "GET",
+      "url": "https://ptvintern.picarto.tv/api/explore?first=30&page=4&filter_params%5Badult%5D=false&order_by%5Bfield%5D=viewers&order_by%5Border%5D=DESC&type=stream",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

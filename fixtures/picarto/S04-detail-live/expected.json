@@ -1,0 +1,97 @@
+{
+  "generator": "PicartoSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus(allatir), getPlayQualites and getPlayUrls of the entered room; 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "roomId": "allatir",
+      "userId": "942670",
+      "title": "STREAM COMMISSIONS OPEN",
+      "nick": "allatir",
+      "avatar": "https://images.picarto.tv/ptvimages/9/94/942670/avatars/036c33e82faefebd20d731b2c866aaac.jpg",
+      "cover": "https://thumb-eu-west1.picarto.tv/thumbnail/allatir.jpg",
+      "area": "Furry",
+      "watching": "52",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "52",
+      "totalViewers": "61071",
+      "followers": "0",
+      "platform": "picarto",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "https://picarto.tv/allatir"
+    },
+    "refreshRequests": 1,
+    "getRoomDetail": {
+      "roomId": "allatir",
+      "userId": "942670",
+      "title": "STREAM COMMISSIONS OPEN",
+      "nick": "allatir",
+      "avatar": "https://images.picarto.tv/ptvimages/9/94/942670/avatars/036c33e82faefebd20d731b2c866aaac.jpg",
+      "cover": "https://thumb-eu-west1.picarto.tv/thumbnail/allatir.jpg",
+      "area": "Furry",
+      "watching": "52",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "52",
+      "totalViewers": "61071",
+      "followers": "0",
+      "platform": "picarto",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "https://picarto.tv/allatir"
+    },
+    "roomEntryRequests": [
+      "https://ptvintern.picarto.tv/api/channel/detail/allatir",
+      "https://edge1-eu-west.picarto.tv/stream/hls/golive+allatir/index.m3u8"
+    ],
+    "getRoomDetailForRecording": {
+      "roomId": "allatir",
+      "userId": "942670",
+      "title": "STREAM COMMISSIONS OPEN",
+      "nick": "allatir",
+      "avatar": "https://images.picarto.tv/ptvimages/9/94/942670/avatars/036c33e82faefebd20d731b2c866aaac.jpg",
+      "cover": "https://thumb-eu-west1.picarto.tv/thumbnail/allatir.jpg",
+      "area": "Furry",
+      "watching": "52",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "52",
+      "totalViewers": "61071",
+      "followers": "0",
+      "platform": "picarto",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "https://picarto.tv/allatir"
+    },
+    "getLiveStatus": true,
+    "getPlayQualites": [
+      {
+        "quality": "720p 60fps",
+        "id": "[\"1280x720\",60.0,\"avc1.640020,mp4a.40.2\",null,null]",
+        "sort": 3502640,
+        "data": [
+          "https://edge1-eu-west.picarto.tv/stream/hls/golive+allatir/1_0/index.m3u8"
+        ]
+      }
+    ],
+    "getPlayUrls": {
+      "[\"1280x720\",60.0,\"avc1.640020,mp4a.40.2\",null,null]": [
+        "https://edge1-eu-west.picarto.tv/stream/hls/golive+allatir/1_0/index.m3u8"
+      ]
+    },
+    "request": {
+      "method": "GET",
+      "url": "https://ptvintern.picarto.tv/api/channel/detail/allatir",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

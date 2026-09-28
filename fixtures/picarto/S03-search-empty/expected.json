@@ -1,0 +1,14 @@
+{
+  "generator": "PicartoSite.searchRooms(zxqvnoresultfixture, page: 1, pageSize: 20); 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "rooms": [],
+    "request": {
+      "method": "GET",
+      "url": "https://ptvintern.picarto.tv/api/search?first=20&page=1&q=zxqvnoresultfixture&type=searchProfiles&tag_search=false",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

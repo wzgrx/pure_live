@@ -1,0 +1,75 @@
+{
+  "generator": "PicartoSite.getDirectoryPage(page: 3) (also with the public directory area), getRecommendRooms(page: 3), getCategoryRooms(public directory, page: 3); 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "page": 3,
+    "hasMore": false,
+    "rooms": [
+      {
+        "roomId": "sfguru18",
+        "userId": "1406969",
+        "title": "Live with Restreamer",
+        "nick": "sfguru18",
+        "avatar": "https://images.picarto.tv/ptvimages/avatar.jpg",
+        "cover": "https://thumb-us-losangeles.picarto.tv/thumbnail/sfguru18.jpg",
+        "area": "Creative",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "0",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "picarto",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://picarto.tv/sfguru18"
+      },
+      {
+        "roomId": "HYETVLIVE",
+        "userId": "1336319",
+        "title": "Live From Yerevan",
+        "nick": "HYETVLIVE",
+        "avatar": "https://images.picarto.tv/ptvimages/avatar.jpg",
+        "cover": "https://thumb-eu-west1.picarto.tv/thumbnail/HYETVLIVE.jpg",
+        "area": "Music",
+        "watching": "0",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "0",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "picarto",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://picarto.tv/HYETVLIVE"
+      }
+    ],
+    "getRecommendRooms": [
+      "sfguru18",
+      "HYETVLIVE"
+    ],
+    "publicDirectory": {
+      "page": 3,
+      "hasMore": false,
+      "rooms": [
+        "sfguru18",
+        "HYETVLIVE"
+      ]
+    },
+    "getCategoryRooms": [
+      "sfguru18",
+      "HYETVLIVE"
+    ],
+    "request": {
+      "method": "GET",
+      "url": "https://ptvintern.picarto.tv/api/explore?first=30&page=3&filter_params%5Badult%5D=false&order_by%5Bfield%5D=viewers&order_by%5Border%5D=DESC&type=stream",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

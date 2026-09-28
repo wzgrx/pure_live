@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "sample": "S06-chat-token",
+  "capturedAt": "2026-09-27T17:43:30.401962Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://ptvintern.picarto.tv/ptvapi",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://picarto.tv/",
+      "Origin": "https://picarto.tv",
+      "Content-Type": "application/json"
+    },
+    "body": "{\"query\":\"query ($name: String) { generateJwtToken(channel_name: $name) { key } }\",\"variables\":{\"name\":\"allatir\"}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "no-store",
+      "access-control-allow-origin": "*",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:43:30 GMT",
+      "vary": "Accept-Encoding",
+      "content-encoding": "gzip",
+      "cf-cache-status": "DYNAMIC",
+      "content-type": "application/json; charset=utf-8",
+      "server": "cloudflare",
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cf-ray": "a41c4fa12ab7b231-SJC",
+      "etag": "W/\"211-JumIC8cGcwu+hPz4Edhy420MARs\""
+    }
+  },
+  "raw": {
+    "sha256": "bba3e15d301e197f23a690a470dd7ba76f51a660f86c0cb4b51d6b1e84812dcc",
+    "length": 529
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.generateJwtToken.key",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

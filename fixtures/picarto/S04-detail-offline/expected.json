@@ -1,0 +1,83 @@
+{
+  "generator": "PicartoSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus(Kaiyote), getPlayQualites and getPlayUrls of the entered room; 3.x's picarto adapter run verbatim over the sample (docs/modules/M4.11-picarto.md)",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "roomId": "Kaiyote",
+      "userId": "354297",
+      "title": "My Channel Title",
+      "nick": "Kaiyote",
+      "avatar": "https://images.picarto.tv/ptvimages/3/35/354297/avatars/0b4d0fd8b44c89255171fec139fc2a32.jpg",
+      "cover": "",
+      "area": "Creative",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "0",
+      "totalViewers": "18",
+      "followers": "0",
+      "platform": "picarto",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://picarto.tv/Kaiyote"
+    },
+    "refreshRequests": 1,
+    "getRoomDetail": {
+      "roomId": "Kaiyote",
+      "userId": "354297",
+      "title": "My Channel Title",
+      "nick": "Kaiyote",
+      "avatar": "https://images.picarto.tv/ptvimages/3/35/354297/avatars/0b4d0fd8b44c89255171fec139fc2a32.jpg",
+      "cover": "",
+      "area": "Creative",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "0",
+      "totalViewers": "18",
+      "followers": "0",
+      "platform": "picarto",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://picarto.tv/Kaiyote"
+    },
+    "roomEntryRequests": [
+      "https://ptvintern.picarto.tv/api/channel/detail/Kaiyote"
+    ],
+    "getRoomDetailForRecording": {
+      "roomId": "Kaiyote",
+      "userId": "354297",
+      "title": "My Channel Title",
+      "nick": "Kaiyote",
+      "avatar": "https://images.picarto.tv/ptvimages/3/35/354297/avatars/0b4d0fd8b44c89255171fec139fc2a32.jpg",
+      "cover": "",
+      "area": "Creative",
+      "watching": "0",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "0",
+      "totalViewers": "18",
+      "followers": "0",
+      "platform": "picarto",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://picarto.tv/Kaiyote"
+    },
+    "getLiveStatus": false,
+    "getPlayQualites": [],
+    "getPlayUrls": {},
+    "request": {
+      "method": "GET",
+      "url": "https://ptvintern.picarto.tv/api/channel/detail/Kaiyote",
+      "headers": {
+        "Referer": "https://picarto.tv/",
+        "Origin": "https://picarto.tv"
+      }
+    }
+  }
+}

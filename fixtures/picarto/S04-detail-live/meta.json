@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "platform": "picarto",
+  "sample": "S04-detail-live",
+  "capturedAt": "2026-09-27T17:43:19.739868Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://ptvintern.picarto.tv/api/channel/detail/allatir",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://picarto.tv/",
+      "Origin": "https://picarto.tv"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "cache-control": "public, s-maxage=60",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 17:43:20 GMT",
+      "access-control-allow-origin": "*",
+      "vary": [
+        "Accept-Encoding",
+        "Accept-Encoding"
+      ],
+      "content-encoding": "gzip",
+      "cf-cache-status": "DYNAMIC",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "server": "cloudflare",
+      "alt-svc": "h3=\":443\"; ma=86400",
+      "cf-ray": "a41c4f5e1fd79913-SJC",
+      "x-cacheable": "1",
+      "x-cache": "EXPIRED",
+      "expires": "-1"
+    }
+  },
+  "raw": {
+    "sha256": "60e614884c8261df65fed198c0f027d48a9c529f437b771aefe61b70072c7e13",
+    "length": 4961
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

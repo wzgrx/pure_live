@@ -2304,6 +2304,8 @@ class _Translations$ui$en implements Translations$ui$zh_Hans {
   @override
   String get cancel => 'Cancel';
   @override
+  String get loading => 'Loading';
+  @override
   String get justNow => 'just now';
   @override
   String minutesAgo({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(

@@ -361,7 +361,8 @@ class RecordTaskTile extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(details.join(' · '), style: LiveTheme.of(context).numeric),
+          // The subtitle's own size and weight, never heavier than the name.
+          Text(details.join(' · '), style: LiveTheme.tabularFigures),
           if (problem != null)
             Text(
               t.recording.problemWithStage(problem: recordFailureText(problem), stage: recordStageText(problem.stage)),

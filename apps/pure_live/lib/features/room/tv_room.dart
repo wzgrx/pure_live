@@ -360,13 +360,17 @@ class _ControlBar extends ConsumerWidget {
                     if (card.state == LiveState.live) const LiveBadge(),
                     if (audience != null) ...[
                       const SizedBox(width: Space.s3),
-                      Text(formatCount(audience), style: LiveTheme.of(context).numeric.copyWith(color: ink)),
+                      Text(
+                        formatCount(audience),
+                        style: LiveTheme.numeric(Theme.of(context).textTheme.labelMedium!).copyWith(color: ink),
+                      ),
                     ],
                     const Spacer(),
                     if (position >= 0)
                       Text(
                         '${position + 1} / ${entries.length}',
-                        style: LiveTheme.of(context).numeric.copyWith(color: Colors.white70),
+                        style: LiveTheme.numeric(Theme.of(context).textTheme.labelMedium!)
+                            .copyWith(color: Colors.white70),
                       ),
                   ],
                 ),

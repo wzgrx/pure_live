@@ -405,7 +405,7 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
                 height: _rowHeight,
                 child: ListTile(
                   selected: phase == ProgrammePhase.live || replaying,
-                  leading: Text(clockText(programme.start), style: LiveTheme.of(context).numeric),
+                  leading: Text(clockText(programme.start), style: LiveTheme.tabularFigures),
                   title: Text(programme.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                   subtitle: programme.subtitle == null
                       ? null

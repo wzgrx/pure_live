@@ -2231,6 +2231,8 @@ class Translations$ui$zh_Hant implements Translations$ui$zh_Hans {
   @override
   String get cancel => '取消';
   @override
+  String get loading => '正在載入';
+  @override
   String get justNow => '剛剛';
   @override
   String minutesAgo({required num n}) =>

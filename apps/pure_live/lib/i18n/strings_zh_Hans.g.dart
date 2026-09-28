@@ -3023,6 +3023,9 @@ class Translations$ui$zh_Hans {
   /// zh-Hans: '取消'
   String get cancel => '取消';
 
+  /// zh-Hans: '正在加载'
+  String get loading => '正在加载';
+
   /// zh-Hans: '刚刚'
   String get justNow => '刚刚';
 

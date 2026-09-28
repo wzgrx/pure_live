@@ -8,6 +8,7 @@
   "retry": "Retry",
   "ok": "OK",
   "cancel": "Cancel",
+  "loading": "Loading",
   "justNow": "just now",
   "minutesAgo(param=n)": {
     "one": "{n} minute ago",

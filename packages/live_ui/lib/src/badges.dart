@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/color_tokens.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/theme.dart';
 import 'package:live_ui/src/ui_text.dart';
@@ -40,43 +41,63 @@ const _logos = {
   'bigo',
 };
 
-/// A platform's logo, used as is (principles §3.4).
+/// A platform's logo, used as is (principles §3.4), on a white r1 tile so
+/// it reads the same on light and dark surfaces and on any cover.
+///
+/// Logos come in three sizes: [Sizes.logoSmall] (on covers and beside small
+/// text), [Sizes.logoMedium] (dense rows and tabs) and [Sizes.logoLarge]
+/// (leading a row, on a cover placeholder, on TV). The image fills the
+/// tile's decoration, so no clip layer is added (principles §7.11).
 class PlatformLogo extends StatelessWidget {
   /// Creates the logo.
-  const new({required this.platformId, this.size = Sizes.logoCard, super.key});
+  const new({required this.platformId, this.size = Sizes.logoSmall, super.key})
+    : assert(
+        size == Sizes.logoSmall || size == Sizes.logoMedium || size == Sizes.logoLarge,
+        'a platform logo is 16, 20 or 24 dp (principles §3.4)',
+      );
 
   /// Platform id (`douyu`).
   final String platformId;
 
-  /// Edge length.
+  /// Edge length: 16, 20 or 24.
   final double size;
+
+  /// Whether this package ships a logo for [platformId].
+  static bool has(String platformId) => _logos.contains(platformId);
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(Radii.r1),
-      child: SizedBox.square(
-        dimension: size,
-        child: _logos.contains(platformId)
-            ? Image.asset(
-                'assets/platforms/$platformId.png',
-                package: 'live_ui',
-                width: size,
-                height: size,
-                cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
-                fit: BoxFit.cover,
-              )
-            : ColoredBox(
-                color: scheme.secondaryContainer,
-                child: Center(
-                  child: Text(
-                    platformId.isEmpty ? '?' : platformId[0].toUpperCase(),
-                    style: TextStyle(fontSize: size * 0.6, color: scheme.onSecondaryContainer, height: 1),
-                  ),
-                ),
-              ),
+    final radius = BorderRadius.circular(Radii.r1);
+    if (!_logos.contains(platformId)) {
+      final scheme = Theme.of(context).colorScheme;
+      return DecoratedBox(
+        decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: radius),
+        child: SizedBox.square(
+          dimension: size,
+          child: Center(
+            child: Text(
+              platformId.isEmpty ? '?' : platformId[0].toUpperCase(),
+              style: TextStyle(fontSize: size * 0.6, color: scheme.onSecondaryContainer, height: 1),
+            ),
+          ),
+        ),
+      );
+    }
+    final pixels = (size * MediaQuery.devicePixelRatioOf(context)).ceil();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: FixedColors.logoTile,
+        borderRadius: radius,
+        image: DecorationImage(
+          image: ResizeImage(
+            AssetImage('assets/platforms/$platformId.png', package: 'live_ui'),
+            width: pixels,
+            height: pixels,
+          ),
+          fit: BoxFit.cover,
+        ),
       ),
+      child: SizedBox.square(dimension: size),
     );
   }
 }
@@ -95,7 +116,7 @@ class LiveBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final live = LiveTheme.of(context);
-    final style = live.numeric.copyWith(color: live.onLive);
+    final style = LiveTheme.numeric(Theme.of(context).textTheme.labelMedium!).copyWith(color: live.onLive);
     final words = LiveUiText.current;
     Widget badge(String text) => DecoratedBox(
       decoration: BoxDecoration(color: live.live, borderRadius: BorderRadius.circular(Radii.r1)),
@@ -135,7 +156,7 @@ class RecordingBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = LiveTheme.of(context).numeric.copyWith(color: Colors.white);
+    final style = Theme.of(context).textTheme.labelMedium!.copyWith(color: Colors.white);
     return DecoratedBox(
       decoration: BoxDecoration(color: const Color(0x99000000), borderRadius: BorderRadius.circular(Radii.r1)),
       child: Padding(
@@ -143,10 +164,7 @@ class RecordingBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const DecoratedBox(
-              decoration: BoxDecoration(color: Color(0xFFFF3B30), shape: BoxShape.circle),
-              child: SizedBox.square(dimension: 6),
-            ),
+            const RecordingDot(),
             const SizedBox(width: Space.s1),
             Text(LiveUiText.current.recording, style: style),
           ],
@@ -182,13 +200,7 @@ class StatusTag extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (recording) ...[
-              DecoratedBox(
-                decoration: BoxDecoration(color: scheme.error, shape: BoxShape.circle),
-                child: const SizedBox.square(dimension: 6),
-              ),
-              const SizedBox(width: Space.s1),
-            ],
+            if (recording) ...[const RecordingDot(), const SizedBox(width: Space.s1)],
             Text(text ?? LiveUiText.current.recording, style: style),
           ],
         ),
@@ -210,7 +222,7 @@ class CoverLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = LiveTheme.of(context).numeric.copyWith(color: Colors.white);
+    final style = LiveTheme.numeric(Theme.of(context).textTheme.labelMedium!).copyWith(color: Colors.white);
     return DecoratedBox(
       decoration: BoxDecoration(color: const Color(0x99000000), borderRadius: BorderRadius.circular(Radii.r1)),
       child: Padding(
@@ -226,4 +238,21 @@ class CoverLabel extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The solid dot of "录制中" (principles §2.2): the live red in every theme,
+/// always next to the word, so recording never relies on colour alone. A
+/// button that starts recording shows an outlined circle instead.
+class RecordingDot extends StatelessWidget {
+  /// Creates the dot.
+  const new({this.size = 6, super.key});
+
+  /// Diameter.
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(color: FixedColors.live, shape: BoxShape.circle),
+    child: SizedBox.square(dimension: size),
+  );
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/avatar.dart';
 import 'package:live_ui/src/badges.dart';
 import 'package:live_ui/src/metrics.dart';
 import 'package:live_ui/src/tv/focus_frame.dart';
+import 'package:live_ui/src/tv/tv_scope.dart';
 import 'package:live_ui/src/ui_text.dart';
 
 /// Card density (principles §4.3).
@@ -49,7 +51,9 @@ class RoomCardView extends StatelessWidget {
   /// Whether the room is live now.
   final bool isLive;
 
-  /// Cover image; a neutral placeholder when null or failing.
+  /// Cover image. While it loads the cover is a plain surfaceContainerHighest
+  /// block; without a cover or when it fails, the block carries the 24 dp
+  /// platform logo in the middle (principles §3.4).
   final ImageProvider? cover;
 
   /// Formatted audience figure (`355.1万`), shown bottom right.
@@ -118,48 +122,41 @@ class RoomCardView extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(Radii.r2),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        ColoredBox(color: scheme.surfaceContainerHighest),
-                        if (cover != null)
-                          Image(
-                            image: cover!,
-                            fit: BoxFit.cover,
-                            gaplessPlayback: true,
-                            errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                          ),
+                  child: RoomCover(
+                    cover: cover,
+                    platformId: platformId,
+                    children: [
+                      Positioned(
+                        left: Space.s1 + 2,
+                        top: Space.s1 + 2,
+                        // principles §3.4: 24 dp on TV, 16 elsewhere.
+                        child: PlatformLogo(
+                          platformId: platformId,
+                          size: TvScope.of(context).enabled ? Sizes.logoLarge : Sizes.logoSmall,
+                        ),
+                      ),
+                      if (recording) const Positioned(right: Space.s1 + 2, top: Space.s1 + 2, child: RecordingBadge()),
+                      // One row, so large text shortens the badge instead
+                      // of drawing it under the audience.
+                      if (isLive || audience != null)
                         Positioned(
                           left: Space.s1 + 2,
-                          top: Space.s1 + 2,
-                          child: PlatformLogo(platformId: platformId),
-                        ),
-                        if (recording)
-                          const Positioned(right: Space.s1 + 2, top: Space.s1 + 2, child: RecordingBadge()),
-                        // One row, so large text shortens the badge instead
-                        // of drawing it under the audience.
-                        if (isLive || audience != null)
-                          Positioned(
-                            left: Space.s1 + 2,
-                            right: Space.s1 + 2,
-                            bottom: Space.s1 + 2,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Align(
-                                    alignment: AlignmentDirectional.bottomStart,
-                                    child: isLive ? LiveBadge(duration: liveFor) : null,
-                                  ),
+                          right: Space.s1 + 2,
+                          bottom: Space.s1 + 2,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  alignment: AlignmentDirectional.bottomStart,
+                                  child: isLive ? LiveBadge(duration: liveFor) : null,
                                 ),
-                                if (audience != null) ...[const SizedBox(width: Space.s1), CoverLabel(audience!)],
-                              ],
-                            ),
+                              ),
+                              if (audience != null) ...[const SizedBox(width: Space.s1), CoverLabel(audience!)],
+                            ],
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 ),
                 Padding(
@@ -208,6 +205,7 @@ class OfflineRoomRow extends StatelessWidget {
   const new({
     required this.platformId,
     required this.anchorName,
+    this.seed,
     this.avatar,
     this.subtitle,
     this.tag,
@@ -222,6 +220,10 @@ class OfflineRoomRow extends StatelessWidget {
 
   /// Streamer's name.
   final String anchorName;
+
+  /// Picks the initial's tone ([InitialAvatar.seed]): the room key; the
+  /// platform and name when null.
+  final String? seed;
 
   /// Avatar image.
   final ImageProvider? avatar;
@@ -243,7 +245,6 @@ class OfflineRoomRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     // One focus target with the card's remote keys; the row keeps its fill.
     return FocusFrame(
       onActivate: onTap,
@@ -257,14 +258,7 @@ class OfflineRoomRow extends StatelessWidget {
           child: ListTile(
             onTap: onTap,
             onLongPress: onMenu,
-            leading: CircleAvatar(
-              backgroundColor: scheme.surfaceContainerHighest,
-              // Material 3's default is onPrimaryContainer: white on this
-              // light grey in the fidelity scheme.
-              foregroundColor: scheme.onSurfaceVariant,
-              foregroundImage: avatar,
-              child: Text(anchorName.isEmpty ? '?' : anchorName.characters.first),
-            ),
+            leading: InitialAvatar(name: anchorName, seed: seed ?? '$platformId:$anchorName', image: avatar),
             title: Row(
               children: [
                 Flexible(child: Text(anchorName, maxLines: 1, overflow: TextOverflow.ellipsis)),
@@ -273,9 +267,132 @@ class OfflineRoomRow extends StatelessWidget {
               ],
             ),
             subtitle: subtitle == null ? null : Text(subtitle!, maxLines: 1),
-            trailing: PlatformLogo(platformId: platformId, size: Sizes.iconDense),
+            trailing: PlatformLogo(platformId: platformId, size: Sizes.logoMedium),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A 16:9 cover without a clip layer (principles §7.11): the image fills a
+/// decoration with r2 corners. While the first image loads the block is
+/// plain surfaceContainerHighest, with no spinner; with no cover, or when it
+/// fails, the 24 dp platform logo sits in the middle (principles §3.4). A new
+/// [cover] (a refreshed live cover) replaces the old one only once it has
+/// loaded, so the card never flashes back to the placeholder.
+class RoomCover extends StatefulWidget {
+  /// Creates the cover.
+  const new({required this.cover, required this.platformId, this.children = const [], super.key});
+
+  /// The image; null for none.
+  final ImageProvider? cover;
+
+  /// Platform of the logo on the placeholder.
+  final String platformId;
+
+  /// Marks drawn on top (badges, logo, audience), usually [Positioned].
+  final List<Widget> children;
+
+  @override
+  State<RoomCover> createState() => _RoomCoverState();
+}
+
+class _RoomCoverState extends State<RoomCover> {
+  /// The image the decoration paints; null until one has loaded.
+  ImageProvider? _shown;
+
+  /// The image being resolved, and its stream and listener.
+  ImageProvider? _pending;
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+
+  /// The latest image failed and nothing was shown before it.
+  bool _failed = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolve();
+  }
+
+  @override
+  void didUpdateWidget(RoomCover oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.cover != oldWidget.cover) _resolve();
+  }
+
+  void _resolve() {
+    final cover = widget.cover;
+    if (cover == null) {
+      _stopListening();
+      _pending = null;
+      _shown = null;
+      _failed = false;
+      return;
+    }
+    if (cover == _pending || cover == _shown) return;
+    _stopListening();
+    _pending = cover;
+    final stream = cover.resolve(createLocalImageConfiguration(context));
+    final listener = ImageStreamListener(
+      (image, _) {
+        // Only the signal is needed; the decoration holds its own handle.
+        image.dispose();
+        if (!mounted || _pending != cover) return;
+        setState(() {
+          _shown = cover;
+          _pending = null;
+          _failed = false;
+        });
+        _stopListening();
+      },
+      onError: (_, _) {
+        if (!mounted || _pending != cover) return;
+        // A failed refresh keeps the picture that was there.
+        setState(() {
+          _pending = null;
+          _failed = _shown == null;
+        });
+        _stopListening();
+      },
+    );
+    _stream = stream..addListener(listener);
+    _listener = listener;
+  }
+
+  void _stopListening() {
+    final listener = _listener;
+    if (listener != null) _stream?.removeListener(listener);
+    _stream = null;
+    _listener = null;
+  }
+
+  @override
+  void dispose() {
+    _stopListening();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = _shown;
+    final placeholder = widget.cover == null || (_failed && shown == null);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(Radii.r2),
+        image: shown == null ? null : DecorationImage(image: shown, fit: BoxFit.cover, onError: (_, _) {}),
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (placeholder)
+            Center(
+              child: PlatformLogo(platformId: widget.platformId, size: Sizes.logoLarge),
+            ),
+          ...widget.children,
+        ],
       ),
     );
   }

@@ -20,6 +20,7 @@ final class LiveUiText {
     required this.retry,
     required this.ok,
     required this.cancel,
+    required this.loading,
     required this.justNow,
     required this.minutesAgo,
     required this.hoursAgo,
@@ -39,6 +40,7 @@ final class LiveUiText {
     retry: '重试',
     ok: '确定',
     cancel: '取消',
+    loading: '正在加载',
     justNow: '刚刚',
     minutesAgo: _minutesAgoHans,
     hoursAgo: _hoursAgoHans,
@@ -76,6 +78,9 @@ final class LiveUiText {
 
   /// Default label of a secondary action.
   final String cancel;
+
+  /// Spoken label of a loading skeleton.
+  final String loading;
 
   /// Less than a minute ago.
   final String justNow;

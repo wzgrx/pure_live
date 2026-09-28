@@ -76,6 +76,75 @@ void main() {
     expect(black.colorScheme.surface, PureTheme.of(Appearance.black).colorScheme.surface);
     expect(black.colorScheme.primary, isNot(PureTheme.of(Appearance.black).colorScheme.primary));
   });
+
+  typeScaleTests();
+}
+
+void typeScaleTests() {
+  test('principles §2.3: every text style has a line height of at least 1.4 times its size, rounded to even', () {
+    for (final (name, theme) in [
+      ('phone', PureTheme.of(Appearance.light, platform: TargetPlatform.android)),
+      ('windows', PureTheme.of(Appearance.dark, platform: TargetPlatform.windows)),
+      ('tv', PureTheme.tv(Appearance.dark, platform: TargetPlatform.android)),
+    ]) {
+      final text = theme.textTheme;
+      final styles = {
+        'displayLarge': text.displayLarge,
+        'displayMedium': text.displayMedium,
+        'displaySmall': text.displaySmall,
+        'headlineLarge': text.headlineLarge,
+        'headlineMedium': text.headlineMedium,
+        'headlineSmall': text.headlineSmall,
+        'titleLarge': text.titleLarge,
+        'titleMedium': text.titleMedium,
+        'titleSmall': text.titleSmall,
+        'bodyLarge': text.bodyLarge,
+        'bodyMedium': text.bodyMedium,
+        'bodySmall': text.bodySmall,
+        'labelLarge': text.labelLarge,
+        'labelMedium': text.labelMedium,
+        'labelSmall': text.labelSmall,
+      };
+      for (final MapEntry(key: role, value: style) in styles.entries) {
+        final size = style!.fontSize!;
+        final line = (size * style.height!).round();
+        expect(size, greaterThanOrEqualTo(12), reason: '$name $role: 12 sp at least');
+        expect(line, greaterThanOrEqualTo(size * 1.4), reason: '$name $role: $size/$line');
+        expect(line.isEven, isTrue, reason: '$name $role: $size/$line');
+      }
+    }
+    final phone = PureTheme.of(Appearance.light, platform: TargetPlatform.android).textTheme;
+    expect((phone.labelSmall!.fontSize!, (phone.labelSmall!.fontSize! * phone.labelSmall!.height!).round()), (12, 18));
+    expect(
+      (phone.headlineLarge!.fontSize!, (phone.headlineLarge!.fontSize! * phone.headlineLarge!.height!).round()),
+      (32, 46),
+    );
+  });
+
+  test('numeric adds tabular figures and keeps the size and weight of the text it sits in', () {
+    final text = PureTheme.of(Appearance.light, platform: TargetPlatform.android).textTheme;
+    final figure = LiveTheme.numeric(text.bodySmall!);
+    expect(figure.fontFeatures, [const FontFeature.tabularFigures()]);
+    expect(figure.fontWeight, text.bodySmall!.fontWeight);
+    expect(figure.fontSize, text.bodySmall!.fontSize);
+    expect(LiveTheme.tabularFigures.fontWeight, isNull, reason: 'merges into the surrounding style');
+    expect(LiveTheme.tabularFigures.fontSize, isNull);
+  });
+
+  test('principles §2.4: inputs and the search box are r2; sliders draw no tick marks', () {
+    for (final theme in [
+      PureTheme.of(Appearance.light, platform: TargetPlatform.android),
+      PureTheme.tv(Appearance.dark, platform: TargetPlatform.android),
+    ]) {
+      final border = theme.inputDecorationTheme.border! as OutlineInputBorder;
+      expect(border.borderRadius, BorderRadius.circular(Radii.r2));
+      final shape = theme.searchBarTheme.shape!.resolve(const {})! as RoundedRectangleBorder;
+      expect(shape.borderRadius, BorderRadius.circular(Radii.r2));
+      expect(theme.sliderTheme.tickMarkShape, SliderTickMarkShape.noTickMark);
+    }
+    final tvFocus = PureTheme.tv(Appearance.dark).inputDecorationTheme.focusedBorder! as OutlineInputBorder;
+    expect(tvFocus.borderRadius, BorderRadius.circular(Radii.r2));
+  });
 }
 
 extension LiveThemeTester on LiveTheme {

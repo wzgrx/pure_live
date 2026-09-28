@@ -829,7 +829,8 @@ class _RoomInfo extends ConsumerWidget {
       logicalWidth: 48,
       devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
     );
-    final numeric = LiveTheme.of(context).numeric;
+    // The figure keeps the weight of the platform name beside it (principles §2.3).
+    final numeric = LiveTheme.numeric(theme.textTheme.bodySmall!);
     return Padding(
       padding: const EdgeInsets.all(Space.s4),
       child: Column(

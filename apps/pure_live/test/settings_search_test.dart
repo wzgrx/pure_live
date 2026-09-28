@@ -52,6 +52,59 @@ void main() {
     });
   }
 
+  // Each setting has one tile per device: the phone's default volume once
+  // showed twice on Android (under 音量 and again at the end of 播放). The
+  // host running the tests is Linux, so the Android and Windows tiles are
+  // built by asking for them.
+  for (final (name, android, windows) in [
+    ('Android', true, false),
+    ('Windows', false, true),
+    ('Linux', false, false),
+  ]) {
+    testWidgets('$name: every playback setting shows once, and the index lists exactly those', (tester) async {
+      final store = await openStore(tester);
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [storeProvider.overrideWithValue(store)],
+          child: MaterialApp(
+            theme: PureTheme.of(Appearance.light, platform: TargetPlatform.android),
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: Column(
+                  children: playbackSettingTiles(android: android, windows: windows),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final shown = [
+        for (final anchor in tester.widgetList<SettingAnchor>(find.byType(SettingAnchor, skipOffstage: false)))
+          anchor.id,
+      ];
+      final repeated = {
+        for (final id in shown)
+          if (shown.where((other) => other == id).length > 1) id,
+      };
+      expect(repeated, isEmpty, reason: 'a setting shows twice');
+      final indexed = [
+        for (final entry in settingsIndex(android: android, windows: windows))
+          if (entry.group == SettingsGroup.playback) entry.id,
+      ];
+      expect(indexed.toSet(), hasLength(indexed.length), reason: 'the index lists a setting twice');
+      expect(shown.toSet(), indexed.toSet());
+      expect(
+        shown.where((id) => id == Settings.defaultMobileVolume.id),
+        hasLength(1),
+        reason: 'phones show it under 音量, desktops at the end',
+      );
+    });
+  }
+
   test('every 3.x name belongs to an indexed setting', () {
     final entries = [...settingsIndex(android: true, windows: false), ...settingsIndex(android: false, windows: true)];
     for (final MapEntry(:key, value: names) in t.settings.search.legacy.entries) {

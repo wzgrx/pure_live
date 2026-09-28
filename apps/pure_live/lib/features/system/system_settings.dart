@@ -45,17 +45,23 @@ enum SystemSettingsSection {
 /// list it among its const tiles.
 class SystemSettingTiles extends StatelessWidget {
   /// Shows the tiles of [section].
-  const new(this.section, {super.key});
+  const new(this.section, {this.android, this.windows, super.key});
 
   /// The section.
   final SystemSettingsSection section;
+
+  /// Describes Android (true) or not (false) instead of this device; tests.
+  final bool? android;
+
+  /// Describes Windows (true) or not (false) instead of this device; tests.
+  final bool? windows;
 
   @override
   Widget build(BuildContext context) => Column(
     mainAxisSize: MainAxisSize.min,
     children: switch (section) {
-      SystemSettingsSection.general => systemGeneralTiles(),
-      SystemSettingsSection.playback => systemPlaybackTiles(),
+      SystemSettingsSection.general => systemGeneralTiles(windows: windows),
+      SystemSettingsSection.playback => systemPlaybackTiles(android: android, windows: windows),
     },
   );
 }

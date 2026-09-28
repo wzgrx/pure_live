@@ -22,16 +22,23 @@ enum LookLiveKind {
 
 /// A room's state in the room answer (3.x's `LookLiveState`). List cards
 /// are always live.
+///
+/// The values follow LOOK's web client (`look.163.com`, app and Live
+/// chunks): its `LIVE_STATUS_TYPE` is `{NOLIVE: 0, LIVING: 1, FORBID: -10}`;
+/// the room page shows "- 直播间已关闭 -" for -1, 0 and -2, and for -4 hides
+/// the stream behind "该直播间已涉嫌违规…整改期间直播内容将被屏蔽".
 enum LookLiveState {
   /// `liveStatus` 1.
   live,
 
-  /// `liveStatus` 0 or -1.
+  /// `liveStatus` 0, -1 or -2 (upgrade 32-2: 3.x showed -2 as unknown).
   offline,
 
-  /// `liveStatus` -10: a private room or one with account conditions (3.x
-  /// showed it as unknown with a notice).
-  restricted,
+  /// `liveStatus` -10 (`FORBID`: the room may not broadcast) or -4 (blocked
+  /// while it corrects a violation). Upgrade 32-2: 3.x read -10 as a
+  /// private or account-restricted room and showed it as unknown, and -4 as
+  /// unknown.
+  banned,
 
   /// Any other `liveStatus`, or none.
   unknown,
@@ -77,6 +84,10 @@ final class LookLiveRoom {
     this.streamType,
     this.popularity,
     this.currentViewers,
+    this.startedAt,
+    this.hasAddress = false,
+    this.mediaChecked = false,
+    this.paid,
     Iterable<LookLiveVariant> variants = const [],
   }) : variants = List.unmodifiable(variants);
 
@@ -104,8 +115,11 @@ final class LookLiveRoom {
   /// Video or voice.
   final LookLiveKind kind;
 
-  /// `liveStreamType` of the room answer (the lists do not carry it): 50 is
-  /// a room type the website has no media for.
+  /// The stream type: `liveStreamType` of the room answer, `type` of a list
+  /// card's `liveData` (upgrade 32-4; 3.x read `liveStreamType` there, which
+  /// the lists do not carry). LOOK's web client names 1 normal, 6 audio, 12
+  /// mobile game, 19 music festival and 50 multi-person; 50 is a room type
+  /// the website has no media for.
   final int? streamType;
 
   /// The state.
@@ -117,30 +131,61 @@ final class LookLiveRoom {
   /// The list's current viewers (`onlineNumber`); null when unknown.
   final int? currentViewers;
 
+  /// When the broadcast started (`roomInfo.startTime`, epoch milliseconds),
+  /// for a live room answer; null otherwise (the lists do not say).
+  final DateTime? startedAt;
+
+  /// Whether the answer or card carries a stream address (`hlsPullUrl` or
+  /// `httpPullUrl` text, valid or not), read at every depth: a refresh
+  /// tells an app-only room from one with streams without reading them.
+  final bool hasAddress;
+
+  /// Whether [variants] were read from this answer's addresses: a list card,
+  /// or a live room answer at room entry and recording.
+  final bool mediaChecked;
+
+  /// Whether the broadcast needs a ticket: the room answer's `feeInfo.fee`
+  /// without a `sessionKey` (LOOK's web client then shows "请购票后观看"
+  /// instead of the stream). Null for a list card (the lists do not say).
+  final bool? paid;
+
   /// The streams, HLS first: a list card's, or a live room's at room entry
-  /// and recording; empty otherwise.
+  /// and recording; empty otherwise. An address that fails the checks is
+  /// left out (upgrade 32-6).
   final List<LookLiveVariant> variants;
 
   /// Whether this room is watchable in LOOK's app only: stream type 50
-  /// without streams (3.x). A refreshed room has no streams, so its stream
-  /// type alone decides.
-  bool get isAppOnly => streamType == 50 && variants.isEmpty;
+  /// without streams (3.x), and without any address in the answer, so a
+  /// refresh (which reads no streams) tells it too (3.x's refresh took
+  /// every type 50 room for app-only).
+  bool get isAppOnly => streamType == 50 && !hasAddress && variants.isEmpty;
+
+  /// What keeps this client from playing a live room (M2.1): app-only, a
+  /// ticket ([paid]), or no usable address (unplayable); none otherwise.
+  /// Not live: none, except null for an unknown state; a list card that
+  /// can be played says null, as it does not tell tickets.
+  LiveRestriction? get restriction => switch (state) {
+    LookLiveState.unknown => null,
+    LookLiveState.live when isAppOnly => LiveRestriction.appOnly,
+    LookLiveState.live when paid ?? false => LiveRestriction.paid,
+    LookLiveState.live when variants.isEmpty && (mediaChecked || !hasAddress) => LiveRestriction.unplayable,
+    LookLiveState.live when paid == null => null,
+    _ => LiveRestriction.none,
+  };
 
   /// This answer with what it lacks taken from [known], the last card or
   /// answer of the same room (3.x's `enrich`): the account, names and
   /// images while empty, the stream type while unknown; the audience of the
-  /// same broadcast; and that broadcast's streams while this live answer
-  /// has none (unless the stream type is 50). State and kind stay this
-  /// answer's.
+  /// same broadcast while this answer is live (upgrade 32-5; 3.x also gave
+  /// an ended room its last heat and viewers); and that broadcast's streams
+  /// while this live answer has none (unless the stream type is 50). State,
+  /// kind, start, addresses and ticket stay this answer's.
   LookLiveRoom enrich(LookLiveRoom known) {
     final sameSession = sessionId.isNotEmpty && sessionId == known.sessionId;
+    final live = state == LookLiveState.live;
     final effectiveStreamType = streamType ?? known.streamType;
     final keepKnownVariants =
-        variants.isEmpty &&
-        sameSession &&
-        state == LookLiveState.live &&
-        known.state == LookLiveState.live &&
-        effectiveStreamType != 50;
+        variants.isEmpty && sameSession && live && known.state == LookLiveState.live && effectiveStreamType != 50;
     return LookLiveRoom(
       roomId: roomId,
       userId: userId.isEmpty ? known.userId : userId,
@@ -152,20 +197,25 @@ final class LookLiveRoom {
       kind: kind,
       streamType: effectiveStreamType,
       state: state,
-      popularity: popularity ?? (sameSession ? known.popularity : null),
-      currentViewers: currentViewers ?? (sameSession ? known.currentViewers : null),
+      popularity: popularity ?? (sameSession && live ? known.popularity : null),
+      currentViewers: currentViewers ?? (sameSession && live ? known.currentViewers : null),
+      startedAt: startedAt,
+      hasAddress: hasAddress,
+      mediaChecked: mediaChecked,
+      paid: paid,
       variants: keepKnownVariants ? known.variants : variants,
     );
   }
 
-  /// Why this room cannot be played, or null (3.x's snapshot check): a
-  /// restricted room is `NeedsLogin`; a room that is not live, or has no
-  /// streams (such as an app-only room), is `StreamUnavailable`.
+  /// Why this room cannot be played, or null (3.x's snapshot check), each
+  /// `StreamUnavailable` with the reason: not live (offline, banned,
+  /// unknown), app-only, a ticket, or no streams.
   SiteError? get streamError => switch (state) {
-    LookLiveState.restricted => NeedsLogin(_site, '$roomId is restricted (liveStatus -10)'),
     LookLiveState.live when isAppOnly => StreamUnavailable(_site, '$roomId is watchable in the LOOK app only'),
+    LookLiveState.live when paid ?? false => StreamUnavailable(_site, '$roomId needs a ticket (feeInfo.fee)'),
     LookLiveState.live when variants.isEmpty => StreamUnavailable(_site, '$roomId is live without streams'),
     LookLiveState.live => null,
+    LookLiveState.banned => StreamUnavailable(_site, '$roomId is banned by LOOK'),
     _ => StreamUnavailable(_site, '$roomId is ${state.name}'),
   };
 }
@@ -211,8 +261,8 @@ abstract final class LookLiveApi {
   };
 
   /// 3.x's media headers of [roomId] (`mediaHeaders`): the rooms'
-  /// `httpHeaders` (in the 3.x JSON). 3.x's player had no LOOK branch and
-  /// sent none of them ([line]).
+  /// `httpHeaders` (in the 3.x JSON), and the headers of every line
+  /// (upgrade 32-3; 3.x's player had no LOOK branch and sent none of them).
   static Map<String, String> mediaHeaders(String roomId) => {
     'origin': origin,
     'referer': link(roomId),
@@ -266,14 +316,21 @@ abstract final class LookLiveApi {
     areaName: audioAreaName,
   );
 
-  /// The notice of every room (3.x's zh.json `looklive_chat_notice`).
-  static const String chatNotice = 'LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。';
+  /// The notice of every room (text key `looklive_chat_notice`), in words
+  /// for users (M4.U; 3.x: "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。").
+  static const String chatNotice = '这里暂时看不到 LOOK 直播的聊天。人数是正在观看的人数，热度另外显示。';
 
-  /// The notice line of a restricted room (`looklive_restricted_notice`).
-  static const String restrictedNotice = '该 LOOK 直播受私密房或账号访问条件限制，界面保持未知状态。';
+  /// The notice line of a banned room (text key `looklive_restricted_notice`;
+  /// M4.U, 3.x: "该 LOOK 直播受私密房或账号访问条件限制，界面保持未知状态。", upgrade 32-2).
+  static const String bannedNotice = '这个 LOOK 直播间被平台禁播或正在违规整改，现在不能观看。';
 
-  /// The notice line of an app-only room (`looklive_app_only_notice`).
-  static const String appOnlyNotice = '该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。';
+  /// The notice line of an app-only room (`looklive_app_only_notice`; M4.U,
+  /// 3.x: "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。").
+  static const String appOnlyNotice = '这场 LOOK 直播只能在 LOOK App 里观看。';
+
+  /// The notice line of a ticketed broadcast (new text key
+  /// `looklive_paid_notice`, M13).
+  static const String paidNotice = '这场 LOOK 直播要购票才能观看。';
 
   /// Id of the HLS quality.
   static const String hlsId = 'hls:source';
@@ -432,10 +489,14 @@ abstract final class LookLiveApi {
   /// A recommendation page of [kind] (3.x's `directory`): the `type` "1"
   /// entries with live data; a card of the other kind is skipped (the voice
   /// list injects video cards), as is an entry without `liveData`. Each room
-  /// once, where it first appeared, with the last card's data (3.x). An
-  /// entry that is not an object, a `liveType` other than 1 or 2, or a card
-  /// failing 3.x's checks ([_card]) fails the page (`ApiChanged`), as do
-  /// more than [maxEntries] entries and a `hasMore` that is not a boolean.
+  /// once, where it first appeared, with the last card's data (3.x).
+  ///
+  /// An entry that cannot be read (not an object, a `liveType` other than 1
+  /// or 2, a card failing [_card]'s checks) is skipped (upgrade 32-6: 3.x
+  /// failed the page), unless nothing on the page can be read: then the
+  /// page is `ApiChanged`, as are more than [maxEntries] entries and a
+  /// `hasMore` that is not a boolean. A bad stream address costs only that
+  /// stream of the card.
   ///
   /// A list past its end answers `itemList: null` with `hasMore: false`
   /// (S04-video-p2); that is an empty last page. 3.x required a list there,
@@ -454,27 +515,42 @@ abstract final class LookLiveApi {
       );
     }
     final rooms = <String, LookLiveRoom>{};
+    var unreadable = 0;
     for (final row in rows) {
-      final item = _object(row, '$what entry');
-      if ('${item['type']}' != '1' || item['liveData'] == null) continue;
-      final live = _object(item['liveData'], '$what liveData');
-      final cardKind = _kindOf(live['liveType'], what);
-      if (cardKind != kind) continue;
-      final room = _card(live, kind: kind, what: what);
-      rooms[room.roomId] = room;
+      final LookLiveRoom? room;
+      try {
+        room = _entry(row, kind: kind, what: what);
+      } on ApiChanged {
+        unreadable++;
+        continue;
+      }
+      if (room != null) rooms[room.roomId] = room;
     }
+    if (unreadable > 0 && rooms.isEmpty) throw ApiChanged(_site, '$what: $unreadable unreadable entries, no room');
     return LookLivePage(rooms: rooms.values, hasMore: hasMore);
   }
 
-  /// A list card (3.x's `_directoryRoom`): number `userInfo.liveRoomNo`,
-  /// account `userInfo.userId`, session `liveId` (all required ids), title
-  /// `liveTitle`, name `userInfo.nickname`, avatar, cover, heat
-  /// `popularity`, viewers `onlineNumber` (null when missing, else a
-  /// non-negative integer) and the streams of `liveUrl`; live. The list has
-  /// no `liveStreamType`.
+  /// The card of a list entry, or null for another kind of entry or card;
+  /// `ApiChanged` when it cannot be read.
+  static LookLiveRoom? _entry(Object? row, {required LookLiveKind kind, required String what}) {
+    final item = _object(row, '$what entry');
+    if ('${item['type']}' != '1' || item['liveData'] == null) return null;
+    final live = _object(item['liveData'], '$what liveData');
+    return _kindOf(live['liveType'], what) == kind ? _card(live, kind: kind, what: what) : null;
+  }
+
+  /// A list card (3.x's `_directoryRoom`): number `userInfo.liveRoomNo` (a
+  /// room number, 2 to 18 digits: 3.x failed the page on another one when
+  /// it made the room), account `userInfo.userId`, session `liveId` (all
+  /// required ids), title `liveTitle`, name `userInfo.nickname`, avatar,
+  /// cover, heat `popularity`, viewers `onlineNumber` (null when missing,
+  /// else a non-negative integer), stream type `type` (32-4) and the
+  /// streams of `liveUrl`; live.
   static LookLiveRoom _card(Map<String, dynamic> live, {required LookLiveKind kind, required String what}) {
     final user = _object(live['userInfo'], '$what userInfo');
     final roomId = _id(user['liveRoomNo'], '$what liveRoomNo');
+    if (!isRoomNumber(roomId)) throw ApiChanged(_site, '$what: room number $roomId is not 2 to 18 digits');
+    final urls = live['liveUrl'];
     return LookLiveRoom(
       roomId: roomId,
       userId: _id(user['userId'], 'userId of $roomId'),
@@ -484,26 +560,31 @@ abstract final class LookLiveApi {
       avatar: _picture(user['avatarUrl']),
       cover: _picture(live['liveCoverUrl']),
       kind: kind,
-      streamType: _int(live['liveStreamType']),
+      streamType: _int(live['liveStreamType'] ?? live['type']),
       state: LookLiveState.live,
       popularity: _count(live['popularity'], 'popularity of $roomId'),
       currentViewers: _count(live['onlineNumber'], 'onlineNumber of $roomId'),
-      variants: _variants(live['liveUrl'], roomId),
+      hasAddress: _hasAddress(urls),
+      mediaChecked: true,
+      variants: _variants(urls),
     );
   }
 
   // Room ----------------------------------------------------------------------
 
   /// `room/get/v3` for [roomId] (3.x's `room`): the anchor must answer for
-  /// this number (else `ApiChanged`); state from `liveStatus` (1 live, 0 and
-  /// -1 offline, -10 restricted, anything else unknown); kind from
-  /// `roomInfo.liveType` (1 or 2, else `ApiChanged`); account, session
-  /// (required ids), title, name, avatar, cover and stream type. The
+  /// this number (else `ApiChanged`); state from `liveStatus` (1 live; 0, -1
+  /// and -2 offline; -10 and -4 banned; anything else unknown, see
+  /// [LookLiveState]); kind from `roomInfo.liveType` (1 or 2, else
+  /// `ApiChanged`); account, session (required ids), title, name, avatar,
+  /// cover, stream type, whether it carries addresses, the ticket
+  /// (`feeInfo`) and, when live, the start (`roomInfo.startTime`). The
   /// streams are read only with [withMedia] and when live (3.x: a refresh
-  /// never looked at them). No audience: the answer has none.
+  /// never looked at them); a bad address costs only its stream (32-6). No
+  /// audience: the answer has none.
   static LookLiveRoom room(String body, {required String roomId, bool withMedia = true, int status = 200}) {
     const what = 'room/get/v3';
-    final data = _data(body, status: status, what: what);
+    final data = _data(body, status: status, what: what, room: true);
     final anchor = _object(data['anchor'], '$what anchor');
     final answered = _id(anchor['liveRoomNo'], '$what anchor.liveRoomNo');
     if (answered != roomId) throw ApiChanged(_site, '$what: asked $roomId, got $answered');
@@ -511,10 +592,12 @@ abstract final class LookLiveApi {
     final kind = _kindOf(info['liveType'], what);
     final state = switch (_int(data['liveStatus'])) {
       1 => LookLiveState.live,
-      0 || -1 => LookLiveState.offline,
-      -10 => LookLiveState.restricted,
+      0 || -1 || -2 => LookLiveState.offline,
+      -10 || -4 => LookLiveState.banned,
       _ => LookLiveState.unknown,
     };
+    final live = state == LookLiveState.live;
+    final urls = info['liveUrl'];
     return LookLiveRoom(
       roomId: roomId,
       userId: _id(anchor['userId'], 'userId of $roomId'),
@@ -526,38 +609,51 @@ abstract final class LookLiveApi {
       kind: kind,
       streamType: _int(info['liveStreamType']),
       state: state,
-      variants: withMedia && state == LookLiveState.live ? _variants(info['liveUrl'], roomId) : const [],
+      startedAt: live ? _time(info['startTime']) : null,
+      hasAddress: _hasAddress(urls),
+      mediaChecked: withMedia && live,
+      paid: _paid(data['feeInfo']),
+      variants: withMedia && live ? _variants(urls) : const [],
     );
   }
 
   // Streams -------------------------------------------------------------------
 
   /// The streams of `liveUrl` (3.x's `_variants`): the HLS playlist, then
-  /// the FLV stream, each when present ([mediaUri]); none for null. A
-  /// `liveUrl` that is not an object is `ApiChanged`.
-  static List<LookLiveVariant> _variants(Object? value, String roomId) {
-    if (value == null) return const [];
-    final urls = _object(value, 'liveUrl of $roomId');
+  /// the FLV stream, each when present and accepted by [mediaUri]. A bad
+  /// address, or a `liveUrl` that is not an object, costs only its streams
+  /// (upgrade 32-6: 3.x failed the whole list page or room entry).
+  static List<LookLiveVariant> _variants(Object? value) {
+    if (value is! Map<String, dynamic>) return const [];
     return [
       for (final (id, key, format) in const [
         (hlsId, 'hlsPullUrl', StreamFormat.hls),
         (flvId, 'httpPullUrl', StreamFormat.flv),
       ])
-        if (_text(urls[key]) case final raw when raw.isNotEmpty)
-          LookLiveVariant(
-            id: id,
-            format: format,
-            uri: mediaUri(raw, format: format),
-          ),
+        if (_text(value[key]) case final raw when raw.isNotEmpty)
+          if (_mediaUriOrNull(raw, format) case final uri?) LookLiveVariant(id: id, format: format, uri: uri),
     ];
   }
+
+  static Uri? _mediaUriOrNull(String raw, StreamFormat format) {
+    try {
+      return mediaUri(raw, format: format);
+    } on ApiChanged {
+      return null;
+    }
+  }
+
+  /// Whether `liveUrl` carries an HLS or FLV address, valid or not.
+  static bool _hasAddress(Object? value) =>
+      value is Map && (_text(value['hlsPullUrl']).isNotEmpty || _text(value['httpPullUrl']).isNotEmpty);
 
   /// A stream address as 3.x accepted it (`mediaUri`), made https: http(s)
   /// on a `*.live.126.net` host (one label of letters, digits and hyphens),
   /// no user info, port or fragment, a query of at most 2048 characters,
   /// and the path `/live/<32 lower-case hex>/playlist.m3u8` (HLS) or
   /// `/live/<32 lower-case hex>.flv` (FLV). Anything else is `ApiChanged`
-  /// (3.x failed the whole list page or room entry).
+  /// (3.x failed the whole list page or room entry; the parsing now leaves
+  /// that stream out, 32-6).
   static Uri mediaUri(String raw, {required StreamFormat format}) {
     final source = Uri.tryParse(raw.trim());
     final path = switch (format) {
@@ -586,18 +682,24 @@ abstract final class LookLiveApi {
   ];
 
   /// The line of quality [qualityId] of a playable [room]: its stream, the
-  /// host as line id. No headers: 3.x's player had no LOOK branch and sent
-  /// its own defaults. No lease: the addresses carry no signature or expiry.
-  /// No codec: the answer does not say it (voice rooms have no video). A
-  /// quality the room lacks is `StreamUnavailable`; one that is not LOOK's
-  /// is a caller error.
+  /// host as line id, and the web's media headers ([mediaHeaders]: `Origin`,
+  /// the room page as `Referer`, 3.x's user agent; upgrade 32-3, 3.x's
+  /// player sent its own defaults). No lease: the addresses carry no
+  /// signature or expiry. No codec: the answer does not say it (voice rooms
+  /// have no video). A quality the room lacks is `StreamUnavailable`; one
+  /// that is not LOOK's is a caller error.
   static LivePlayLine line(LookLiveRoom room, String qualityId) {
     if (qualityId != hlsId && qualityId != flvId) {
       throw ArgumentError.value(qualityId, 'qualityId', 'not a LOOK Live quality');
     }
     for (final variant in room.variants) {
       if (variant.id == qualityId) {
-        return LivePlayLine('${variant.uri}', format: variant.format, lineId: variant.uri.host);
+        return LivePlayLine(
+          '${variant.uri}',
+          headers: mediaHeaders(room.roomId),
+          format: variant.format,
+          lineId: variant.uri.host,
+        );
       }
     }
     throw StreamUnavailable(_site, '${room.roomId} has no $qualityId');
@@ -607,16 +709,18 @@ abstract final class LookLiveApi {
 
   /// The room of [room] (3.x's `_room`): the number, account, title and
   /// name; the avatar, else the cover; the area by kind; current viewers as
-  /// the audience when known, else the heat (both kept apart); live,
-  /// offline, or unknown for restricted and unknown states; the notice
-  /// lines (restricted, app-only, chat); 3.x's media headers. [withData]
-  /// (room entry and recording) keeps [room] as the room's data, with its
-  /// streams. A number that is not 2 to 18 digits (a list may carry one)
-  /// is `ApiChanged`, as 3.x's link failed on it.
+  /// the audience when known, else the heat (both kept apart); the state
+  /// (live, offline, banned or unknown; upgrade 32-2: 3.x showed -10 as
+  /// unknown); the start and the restriction ([LookLiveRoom.restriction]);
+  /// the notice lines (banned, app-only, ticket, chat); 3.x's media
+  /// headers. [withData] (room entry and recording) keeps [room] as the
+  /// room's data, with its streams. A number that is not 2 to 18 digits is
+  /// `ApiChanged`, as 3.x's link failed on it.
   static LiveRoom liveRoom(LookLiveRoom room, {bool withData = false}) {
     if (!isRoomNumber(room.roomId)) throw ApiChanged(_site, 'room number ${room.roomId} is not 2 to 18 digits');
     final online = room.currentViewers?.toString();
     final heat = room.popularity?.toString();
+    final restriction = room.restriction;
     return LiveRoom(
       platform: _site,
       roomId: room.roomId,
@@ -630,8 +734,11 @@ abstract final class LookLiveApi {
       liveStatus: switch (room.state) {
         LookLiveState.live => LiveStatus.live,
         LookLiveState.offline => LiveStatus.offline,
-        LookLiveState.restricted || LookLiveState.unknown => LiveStatus.unknown,
+        LookLiveState.banned => LiveStatus.banned,
+        LookLiveState.unknown => LiveStatus.unknown,
       },
+      startedAt: room.startedAt,
+      restriction: restriction,
       watching: online ?? heat ?? '',
       onlineViewers: online ?? '',
       popularity: heat ?? '',
@@ -641,8 +748,9 @@ abstract final class LookLiveApi {
           ? AudienceMetricType.popularity
           : AudienceMetricType.unknown,
       notice: [
-        if (room.state == LookLiveState.restricted) restrictedNotice,
-        if (room.isAppOnly) appOnlyNotice,
+        if (room.state == LookLiveState.banned) bannedNotice,
+        if (restriction == LiveRestriction.appOnly) appOnlyNotice,
+        if (restriction == LiveRestriction.paid) paidNotice,
         chatNotice,
       ].join('\n'),
       httpHeaders: mediaHeaders(room.roomId),
@@ -676,6 +784,23 @@ int? _count(Object? value, String what) {
   final count = _int(value);
   if (count == null || count < 0) throw ApiChanged(_site, '$what is ${_kind(value)}');
   return count;
+}
+
+/// A time in epoch milliseconds (`startTime`), UTC; null when missing, zero
+/// or not a number.
+DateTime? _time(Object? value) => switch (_int(value)) {
+  final int ms when ms > 0 => DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true),
+  _ => null,
+};
+
+/// Whether `feeInfo` asks for a ticket, as LOOK's web client decides it:
+/// `fee` set (true or a non-zero number) and no `sessionKey` (a bought
+/// ticket; never for an anonymous client).
+bool _paid(Object? feeInfo) {
+  if (feeInfo is! Map) return false;
+  final fee = feeInfo['fee'];
+  final key = feeInfo['sessionKey'];
+  return (fee == true || (fee is num && fee != 0)) && (key == null || key == '');
 }
 
 /// 3.x's ids: a number, or text trimmed, of 1 to 19 digits not starting
@@ -748,7 +873,13 @@ void _checkStatus(int status, {required String what}) {
 /// `code` 404 is `NotFound`, 424, 520, 522 and 555 are `RiskControl`
 /// (3.x's "access"), anything but 200 is `ApiChanged`; `data` must be an
 /// object.
-Map<String, dynamic> _data(String body, {required int status, required String what}) {
+///
+/// For the [room] answer, 424 and 555 say why the room cannot be watched
+/// (LOOK's web client: 424 "暂不支持此直播，请在APP中查看", 555 opens the
+/// password box of a private room), so they are `StreamUnavailable` with
+/// that reason (M4.U: the unified rule on restricted rooms); 520 and 522
+/// ("你当前无法进入直播间") stay `RiskControl`.
+Map<String, dynamic> _data(String body, {required int status, required String what, bool room = false}) {
   _checkStatus(status, what: what);
   // UTF-8 needs at most three bytes per UTF-16 unit, so short bodies need no
   // encoding.
@@ -770,6 +901,10 @@ Map<String, dynamic> _data(String body, {required int status, required String wh
       return _object(root['data'], '$what data');
     case 404:
       throw NotFound(_site, '$what: code 404 $message'.trim());
+    case 424 when room:
+      throw StreamUnavailable(_site, '$what: code 424, watchable in the LOOK app only $message'.trim());
+    case 555 when room:
+      throw StreamUnavailable(_site, '$what: code 555, a private room with a password $message'.trim());
     case 424 || 520 || 522 || 555:
       throw RiskControl(_site, detail: '$what: code $code $message'.trim());
     default:

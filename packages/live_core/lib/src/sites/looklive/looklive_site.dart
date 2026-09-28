@@ -26,14 +26,15 @@ const _knownLimit = 2000;
 /// - the video and voice recommendation lists, 20 rooms a page, paged
 ///   natively. The directory without an area, the recommendations and the
 ///   search ask both lists for the same page and merge them (video first);
-///   an area asks its own list;
+///   an area asks its own list. The merged pages remember which list has
+///   ended and no longer ask it (upgrade 32-1; page 1 starts over);
 /// - a room is `room/get/v3` (one request at every depth); recovery asks it
 ///   again. The streams are read at room entry and recording only.
 ///
 /// Rooms seen in the lists complete later answers of the same broadcast
-/// (heat and viewers, which the room answer lacks), as in 3.x. Rooms are
-/// identified by the room number asked for. Failures are `SiteError`s;
-/// nothing is disguised as an offline room.
+/// (heat and viewers, which the room answer lacks, while it is live), as in
+/// 3.x. Rooms are identified by the room number asked for. Failures are
+/// `SiteError`s; nothing is disguised as an offline room.
 final class LookLiveSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -55,6 +56,10 @@ final class LookLiveSite extends LiveSite
 
   /// The last card or answer of each room, oldest first.
   final Map<String, LookLiveRoom> _known = {};
+
+  /// The page at which each list answered "no more" in the merged pages
+  /// (32-1); cleared by the next merged page 1.
+  final Map<LookLiveKind, int> _ended = {};
 
   @override
   String get id => _site;
@@ -138,17 +143,32 @@ final class LookLiveSite extends LiveSite
   }
 
   /// Page [page] of [kind]'s list, or of both merged when null (3.x's
-  /// `_directory`): both requests at once, video rooms first, each room
+  /// `_directory`): the requests at once, video rooms first, each room
   /// once; another page when either list has one. A page below 1 is empty
   /// without a request.
+  ///
+  /// Merged, a list that answered "no more" on an earlier page is not asked
+  /// again (upgrade 32-1: 3.x asked both lists on every page, and the video
+  /// list, a few rooms long, answered `itemList: null` each time). Page 1
+  /// always asks both and starts the record over, so pulling to refresh
+  /// sees a list that has grown again.
   Future<LookLivePage> _page(int page, LookLiveKind? kind, CancelToken? cancel) async {
     _checkCancelled(cancel);
     if (page < 1) return LookLivePage.empty;
     if (kind != null) return await _list(kind, page, cancel);
-    final results = await Future.wait([
-      _list(LookLiveKind.video, page, cancel),
-      _list(LookLiveKind.audio, page, cancel),
-    ]);
+    final asked = [
+      for (final list in LookLiveKind.values)
+        if (_ended[list] case final end when end == null || page <= end) list,
+    ];
+    final results = await Future.wait([for (final list in asked) _list(list, page, cancel)]);
+    if (page == 1) _ended.clear();
+    for (final (index, list) in asked.indexed) {
+      if (!results[index].hasMore) {
+        _ended[list] = page;
+      } else if (_ended[list] case final end? when end <= page) {
+        _ended.remove(list);
+      }
+    }
     final rooms = <String, LookLiveRoom>{};
     for (final result in results) {
       for (final room in result.rooms) {
@@ -275,16 +295,16 @@ final class LookLiveSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withMedia: true);
 
-  /// Whether the room answer says live (one request, 3.x). A restricted
-  /// room is `NeedsLogin` and an unknown state `ApiChanged`, never
-  /// "offline".
+  /// Whether the room answer says live (one request, 3.x): live rooms that
+  /// cannot be played here (app-only, ticketed) are live too. A banned room
+  /// is not live (32-2; 3.x failed on -10); an unknown state is
+  /// `ApiChanged`, never "offline".
   @override
   Future<bool> getLiveStatus({required String roomId}) async {
     final room = await _answer(roomId, withMedia: false);
     return switch (room.state) {
       LookLiveState.live => true,
-      LookLiveState.offline => false,
-      LookLiveState.restricted => throw room.streamError!,
+      LookLiveState.offline || LookLiveState.banned => false,
       LookLiveState.unknown => throw ApiChanged(_site, '${room.roomId}: unknown liveStatus'),
     };
   }
@@ -294,12 +314,13 @@ final class LookLiveSite extends LiveSite
   /// The room data of [detail] when it can be played (3.x's snapshot check,
   /// no request): a LOOK room, not offline, with the data of a room entry
   /// or recording detail (a card or refresh has none), live with streams.
-  /// Otherwise the reason (`StreamUnavailable`, or `NeedsLogin` for a
-  /// restricted room); another platform's room is a caller error.
+  /// Otherwise `StreamUnavailable` with the reason (see
+  /// [LookLiveRoom.streamError]); another platform's room is a caller
+  /// error.
   LookLiveRoom _playable(LiveRoom detail) {
     if (detail.platform != _site) throw ArgumentError.value(detail.platform, 'detail', 'not a LOOK Live room');
     final roomId = _roomId(detail.roomId);
-    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$roomId is offline');
+    if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, '$roomId is ${detail.effectiveLiveStatus.name}');
     final data = detail.data;
     if (data is! LookLiveRoom || data.roomId != roomId) {
       throw StreamUnavailable(_site, '$roomId has no room answer; open the room first');

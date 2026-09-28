@@ -1,0 +1,808 @@
+{
+  "generator": "fixtures/twitch/danmaku/legacy_expected.dart: 3.x TwitchDanmaku.decodeMessage over the frames of each case of cases.json, in order, with what it sent back",
+  "value": [
+    {
+      "name": "3.x: keeps messages whose user has no configured color",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "Viewer",
+          "userId": "u1",
+          "message": "hello",
+          "color": "#ffffff",
+          "messageId": "m1",
+          "sentAt": 1700000000000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "3.x: decodes every line and IRC escaped display names",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "First User",
+          "userId": "",
+          "message": "one",
+          "color": "#00ff7f",
+          "messageId": "m1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "second",
+          "userId": "",
+          "message": "two",
+          "color": "#ff0000",
+          "messageId": "m2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "a blank or missing display name falls back to the nick of the prefix",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "spacey",
+          "userId": "",
+          "message": "blank name",
+          "color": "#ffffff",
+          "messageId": "a1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "noname",
+          "userId": "",
+          "message": "no display-name tag",
+          "color": "#ffffff",
+          "messageId": "a2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "Padded",
+          "userId": "",
+          "message": "padded name",
+          "color": "#ffffff",
+          "messageId": "a3",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "without a display name or a nick in the prefix the name is Twitch",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "Twitch",
+          "userId": "",
+          "message": "server line",
+          "color": "#ffffff",
+          "messageId": "b1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "a line without tags: 3.x's prefix pattern skips the leading nick",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "Twitch",
+          "userId": "",
+          "message": "hello",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "hey",
+          "userId": "",
+          "message": "hey! you",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "bare",
+          "userId": "",
+          "message": "empty tag section",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "colours with 1-3, 5 or 7 hex digits were white in 3.x",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "Blue",
+          "userId": "",
+          "message": "Twitch default Blue",
+          "color": "#ffffff",
+          "messageId": "c1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "Navy",
+          "userId": "",
+          "message": "navy",
+          "color": "#ffffff",
+          "messageId": "c2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "Grey",
+          "userId": "",
+          "message": "dark grey",
+          "color": "#ffffff",
+          "messageId": "c3",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "Black",
+          "userId": "",
+          "message": "black",
+          "color": "#ffffff",
+          "messageId": "c4",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "colours 3.x and M2 read alike",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "DodgerBlue",
+          "color": "#1e90ff",
+          "messageId": "d1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "Green, four digits",
+          "color": "#008000",
+          "messageId": "d2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "SpringGreen, four digits",
+          "color": "#00ff7f",
+          "messageId": "d3",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "lower case",
+          "color": "#ff69b4",
+          "messageId": "d4",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "without #",
+          "color": "#ff4500",
+          "messageId": "d5",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "eight digits",
+          "color": "#ff0000",
+          "messageId": "d6",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "unreadable",
+          "color": "#ffffff",
+          "messageId": "d7",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "no color tag",
+          "color": "#ffffff",
+          "messageId": "d8",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "tag escapes as 3.x reads them",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "semi;colon",
+          "userId": "",
+          "message": "escaped semicolon",
+          "color": "#ffffff",
+          "messageId": "e1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "back\\ lash",
+          "userId": "",
+          "message": "escaped backslash",
+          "color": "#ffffff",
+          "messageId": "e2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "a\\ b",
+          "userId": "",
+          "message": "3.x's order: an escaped backslash before s",
+          "color": "#ffffff",
+          "messageId": "e3",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "trailing\\",
+          "userId": "",
+          "message": "a lone backslash",
+          "color": "#ffffff",
+          "messageId": "e4",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "x=y",
+          "userId": "",
+          "message": "an entry without = and = in a value",
+          "color": "#ffffff",
+          "messageId": "e5",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "line\rbreak",
+          "userId": "",
+          "message": "escaped CR and LF",
+          "color": "#ffffff",
+          "messageId": "e6",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "ids and times missing, empty or unreadable",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "no ids",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "B",
+          "userId": "",
+          "message": "empty tags",
+          "color": "#ffffff",
+          "messageId": "",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "C",
+          "userId": "42",
+          "message": "before 1970",
+          "color": "#ffffff",
+          "messageId": "f3",
+          "sentAt": -1000,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "a time beyond DateTime's range loses the whole frame in 3.x",
+      "messages": [],
+      "sent": []
+    },
+    {
+      "name": "/me lines (CTCP ACTION)",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "\u0001ACTION waves\u0001",
+          "color": "#ffffff",
+          "messageId": "h1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "\u0001ACTION without the closing byte",
+          "color": "#ffffff",
+          "messageId": "h2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "\u0001ACTION\u0001",
+          "color": "#ffffff",
+          "messageId": "h3",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "\u0001ACTIONS is not an action\u0001",
+          "color": "#ffffff",
+          "messageId": "h4",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "\u0001VERSION\u0001",
+          "color": "#ffffff",
+          "messageId": "h5",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "not \u0001ACTION at the start\u0001",
+          "color": "#ffffff",
+          "messageId": "h6",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "a PRIVMSG without a text part is skipped; empty text is chat",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "",
+          "color": "#ffffff",
+          "messageId": "i2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "the line is trimmed; the text keeps ' :' and inner spaces",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "  two  spaces : colon",
+          "color": "#ffffff",
+          "messageId": "j1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "other commands carry no chat",
+      "messages": [],
+      "sent": []
+    },
+    {
+      "name": "a line of another command whose text holds ' PRIVMSG ' is chat to 3.x",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "Sub",
+          "userId": "",
+          "message": "hello",
+          "color": "#ffffff",
+          "messageId": "l1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "a binary frame is read as UTF-8, malformed bytes replaced",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "B",
+          "userId": "",
+          "message": "café � ok",
+          "color": "#ffffff",
+          "messageId": "m1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "lines broken by LF alone, blank lines",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "",
+          "message": "one",
+          "color": "#ffffff",
+          "messageId": "n1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        },
+        {
+          "type": "chat",
+          "userName": "B",
+          "userId": "",
+          "message": "two",
+          "color": "#ffffff",
+          "messageId": "n2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "PING alone is answered with PONG",
+      "messages": [],
+      "sent": [
+        "PONG :tmi.twitch.tv"
+      ]
+    },
+    {
+      "name": "PING with another argument",
+      "messages": [],
+      "sent": [
+        "PONG :irc-ws.chat.twitch.tv"
+      ]
+    },
+    {
+      "name": "PING first in a frame with chat: 3.x sends the whole frame back",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "1",
+          "message": "after the ping",
+          "color": "#ffffff",
+          "messageId": "p1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": [
+        "PONG :tmi.twitch.tv\r\n@display-name=A;id=p1;user-id=1 :a!a@a.tmi.twitch.tv PRIVMSG #room :after the ping"
+      ]
+    },
+    {
+      "name": "PING after another line: 3.x does not answer it",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "A",
+          "userId": "1",
+          "message": "before the ping",
+          "color": "#ffffff",
+          "messageId": "p2",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "a refused login: NOTICE * and no chat",
+      "messages": [],
+      "sent": []
+    },
+    {
+      "name": "Korean, Chinese and emoji",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "시청자",
+          "userId": "5",
+          "message": "안녕하세요 你好 😀",
+          "color": "#ff7f50",
+          "messageId": "o1",
+          "sentAt": null,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    },
+    {
+      "name": "a reply: only the message's own tags are read",
+      "messages": [
+        {
+          "type": "chat",
+          "userName": "Replier",
+          "userId": "8",
+          "message": "@Parent das ist doch das geile",
+          "color": "#7100ff",
+          "messageId": "q1",
+          "sentAt": 1790535030445,
+          "userLevel": "",
+          "fansLevel": "",
+          "fansName": "",
+          "isLocal": false,
+          "data": null
+        }
+      ],
+      "sent": []
+    }
+  ]
+}

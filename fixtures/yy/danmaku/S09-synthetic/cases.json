@@ -1,0 +1,300 @@
+{
+  "note": "Synthetic server frames for what the recording (S08-live) lacks: failed handshake steps, by-sid and routed chat, other channels and apps, names, extra items, XML bodies, malformed packets and frames. A session for topSid/subSid and uuid begins the handshake, then consumes each frame of a case in order; \"prelude\": true puts the frames of \"prelude\" (anonymous login, AP login, join) first. A frame is a list of packets, concatenated. Packet types, with the defaults of 3.x's tests (legacy/test/yy_protocol_test.dart): \"login\" (778500: envelope 0, realUri 20078, result 0, uid32 5, uid64 4294967301 or none when null, username, password, cookie [1,2,3]; \"payloadHex\" replaces the payload), \"ap\" (775940: appId 259, result 200, context \"259:0\"), \"join\" (512011 with realUri 2048514 and code 0: topSid, subSid, status 4, error \"\"; \"emptyPayload\" sends none), \"chat\" (app 31's 3104600 via \"group\" 533080, \"bySid\" 28760 or \"router\" 512011: topSid, subSid, text, color, nick (null: no name part), extras [[key, text]], innerUri, lengthDelta added to the chat block length), \"pong\" (794372) and \"hex\" (raw bytes). Names and texts are made up.",
+  "topSid": 22490906,
+  "subSid": 22490906,
+  "uuid": "00000000-0000-4000-8000-000000000001",
+  "prelude": [
+    [{"type": "login"}],
+    [{"type": "ap"}],
+    [{"type": "join"}]
+  ],
+  "cases": [
+    {
+      "name": "anonymous login, AP login and channel join in order",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "join"}]
+      ]
+    },
+    {
+      "name": "the router joins another room",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "join", "topSid": 22490907}]
+      ]
+    },
+    {
+      "name": "the router joins another sub channel",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "join", "subSid": 22490907}]
+      ]
+    },
+    {
+      "name": "the join is refused with a status and a reason",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "join", "status": 10, "error": "频道已关闭"}]
+      ]
+    },
+    {
+      "name": "the join is refused with a status only",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "join", "status": 10}]
+      ]
+    },
+    {
+      "name": "the join route fails",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "join", "code": 500, "emptyPayload": true}]
+      ]
+    },
+    {
+      "name": "another routed answer fails without failing the join",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "join", "realUri": 2048515, "code": 500, "emptyPayload": true}],
+        [{"type": "join"}]
+      ]
+    },
+    {
+      "name": "anonymous login answers another protocol",
+      "frames": [[{"type": "login", "realUri": 20079}]]
+    },
+    {
+      "name": "anonymous login is refused",
+      "frames": [[{"type": "login", "result": 1}]]
+    },
+    {
+      "name": "anonymous login envelope is refused",
+      "frames": [[{"type": "login", "envelope": 500}]]
+    },
+    {
+      "name": "anonymous login without a 64-bit uid uses the 32-bit one",
+      "frames": [
+        [{"type": "login", "uid64": null, "uid32": 7}],
+        [{"type": "ap"}],
+        [{"type": "join"}]
+      ]
+    },
+    {
+      "name": "anonymous login without any uid is refused",
+      "frames": [[{"type": "login", "uid64": null, "uid32": 0}]]
+    },
+    {
+      "name": "anonymous login with a truncated payload fails the handshake",
+      "frames": [[{"type": "login", "payloadHex": "000000000000"}]]
+    },
+    {
+      "name": "AP login is refused",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap", "result": 403}]
+      ]
+    },
+    {
+      "name": "answers out of order are ignored",
+      "frames": [
+        [{"type": "ap"}],
+        [{"type": "join"}],
+        [{"type": "login"}],
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "ap"}],
+        [{"type": "join"}],
+        [{"type": "join"}]
+      ]
+    },
+    {
+      "name": "chat before the join is ignored",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "ap"}],
+        [{"type": "chat", "text": "太早了"}]
+      ]
+    },
+    {
+      "name": "chat after the join, another room's dropped",
+      "prelude": true,
+      "frames": [
+        [{"type": "chat", "nick": "测试用户", "text": "晚上好"}],
+        [{"type": "chat", "topSid": 22490907, "subSid": 22490907, "nick": "其他房间", "text": "忽略"}],
+        [{"type": "chat", "subSid": 22490907, "nick": "其他子频道", "text": "忽略"}]
+      ]
+    },
+    {
+      "name": "every packet of one frame",
+      "prelude": true,
+      "frames": [
+        [
+          {"type": "chat", "nick": "甲", "text": "第一条"},
+          {"type": "pong"},
+          {"type": "chat", "via": "bySid", "nick": "乙", "text": "第二条"},
+          {"type": "chat", "via": "router", "nick": "丙", "text": "第三条"}
+        ]
+      ]
+    },
+    {
+      "name": "handshake and chat in one frame",
+      "frames": [
+        [
+          {"type": "login"},
+          {"type": "ap"},
+          {"type": "join"},
+          {"type": "chat", "nick": "丁", "text": "同一帧"}
+        ]
+      ]
+    },
+    {
+      "name": "chat of other apps and inner uris is ignored",
+      "prelude": true,
+      "frames": [
+        [
+          {"type": "chat", "app": 103, "text": "礼物"},
+          {"type": "chat", "via": "bySid", "app": 101, "text": "进场"},
+          {"type": "chat", "innerUri": 3104601, "text": "别的消息"}
+        ]
+      ]
+    },
+    {
+      "name": "a routed chat with a failed route is ignored",
+      "prelude": true,
+      "frames": [[{"type": "chat", "via": "router", "code": 404, "text": "失败的路由"}]]
+    },
+    {
+      "name": "names: none, blank, spaced; text trimmed; blank text dropped",
+      "prelude": true,
+      "frames": [
+        [{"type": "chat", "nick": null, "text": "没有名字"}],
+        [{"type": "chat", "nick": "  ", "text": "空白名字"}],
+        [{"type": "chat", "nick": " 前后空格 ", "text": "  前后空格的正文  "}],
+        [{"type": "chat", "nick": "空白正文", "text": "   "}]
+      ]
+    },
+    {
+      "name": "extra items after the name, colour ignored",
+      "prelude": true,
+      "frames": [
+        [{"type": "chat", "nick": "有附加项", "text": "附加项", "color": 6881363, "extras": [[100, "别名一"], [101, "别名二"]]}]
+      ]
+    },
+    {
+      "name": "emoticon codes stay as they are",
+      "prelude": true,
+      "frames": [[{"type": "chat", "nick": "表情", "text": "/{mg 好听/{tx"}]]
+    },
+    {
+      "name": "XML body with one txt",
+      "prelude": true,
+      "frames": [
+        [{"type": "chat", "nick": "投票", "text": "<?xml version=\"1.0\"?><msg><txt data=\"发起了欢乐投票，快来支持吧！\" /></msg>"}]
+      ]
+    },
+    {
+      "name": "XML body with entities and an emoticon code",
+      "prelude": true,
+      "frames": [
+        [{"type": "chat", "nick": "实体", "text": "<?xml version=\"1.0\"?><msg><txt data=\"a &amp; b &lt;3 &quot;引号&quot; &#x4F60;&#22909;&#x1F600; /{tx\" /></msg>"}]
+      ]
+    },
+    {
+      "name": "XML body with two txt elements around another element",
+      "prelude": true,
+      "frames": [
+        [{"type": "chat", "nick": "两段", "text": "<msg><txt data=\"前半\"/><face id=\"1\"/><txt data='后半'/></msg>"}]
+      ]
+    },
+    {
+      "name": "XML body without txt",
+      "prelude": true,
+      "frames": [
+        [{"type": "chat", "nick": "没有正文", "text": "<?xml version=\"1.0\"?><msg><face id=\"1\"/></msg>"}]
+      ]
+    },
+    {
+      "name": "text that only looks like XML later stays as it is",
+      "prelude": true,
+      "frames": [[{"type": "chat", "nick": "尖括号", "text": "我 <3 你 <txt data=\"x\"/>"}]]
+    },
+    {
+      "name": "a malformed chat after the join is a warning",
+      "prelude": true,
+      "frames": [
+        [
+          {"type": "chat", "nick": "越界", "text": "长度越界", "lengthDelta": -4},
+          {"type": "chat", "nick": "正常", "text": "之后的包照常"}
+        ]
+      ]
+    },
+    {
+      "name": "a packet shorter than its fields after the join is a warning",
+      "prelude": true,
+      "frames": [[{"type": "hex", "hex": "0c00000058220800c8000100"}]]
+    },
+    {
+      "name": "a truncated frame while joining is a warning",
+      "frames": [[{"type": "hex", "hex": "140000000c000000c800"}]]
+    },
+    {
+      "name": "a packet length past the frame drops the rest",
+      "prelude": true,
+      "frames": [
+        [
+          {"type": "chat", "nick": "先", "text": "在前面"},
+          {"type": "hex", "hex": "ff00000058220800c800"},
+          {"type": "chat", "nick": "后", "text": "被丢掉"}
+        ]
+      ]
+    },
+    {
+      "name": "a packet length below the header drops the rest",
+      "prelude": true,
+      "frames": [
+        [
+          {"type": "hex", "hex": "0900000058220800c800"},
+          {"type": "chat", "nick": "后", "text": "被丢掉"}
+        ]
+      ]
+    },
+    {
+      "name": "a trailer shorter than a header",
+      "prelude": true,
+      "frames": [
+        [
+          {"type": "chat", "nick": "先", "text": "在前面"},
+          {"type": "hex", "hex": "0a000000"}
+        ]
+      ]
+    },
+    {
+      "name": "a malformed handshake packet fails the handshake",
+      "frames": [
+        [{"type": "login"}],
+        [{"type": "hex", "hex": "0e00000004d70b00c80003010000"}]
+      ]
+    },
+    {
+      "name": "after a failure nothing is read and no heartbeat is sent",
+      "frames": [
+        [{"type": "login", "result": 1}],
+        [{"type": "ap"}],
+        [{"type": "join"}],
+        [{"type": "chat", "text": "失败之后"}]
+      ]
+    },
+    {
+      "name": "pongs are skipped",
+      "prelude": true,
+      "frames": [[{"type": "pong"}, {"type": "pong"}]]
+    }
+  ]
+}

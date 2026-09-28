@@ -55,6 +55,10 @@
     {
       "where": "url.uuid",
       "rule": "secret"
+    },
+    {
+      "where": "apLoginReply.address",
+      "rule": "secret"
     }
   ],
   "tool": "live_cli danmaku --record (schema 1)"

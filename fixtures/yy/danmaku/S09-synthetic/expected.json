@@ -1,0 +1,2047 @@
+{
+  "generator": "fixtures/yy/danmaku/legacy_expected.dart: each case of cases.json built into server frames with 3.x YyProtocolWriter, then 3.x YyProtocolSession (after beginHandshake) over them, chats turned into LiveMessages as YyDanmaku did",
+  "value": [
+    {
+      "name": "anonymous login, AP login and channel join in order",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "the router joins another room",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABsvVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 加入频道失败：4",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "the router joins another sub channel",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGy9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 加入频道失败：4",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "the join is refused with a status and a reason",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "VAAAAAvQBwDIAAAAAkIfAAAANgAAABovVwEFAAAAGi9XARovVwF7AAAACg8A6aKR6YGT5bey5YWz6ZetAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 加入频道失败：10，频道已关闭",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "the join is refused with a status only",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAACgAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 加入频道失败：10",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "the join route fails",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "HgAAAAvQBwDIAAAAAkIfAPQBAAAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 加入频道路由失败：500",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "another routed answer fails without failing the join",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "HgAAAAvQBwDIAAAAA0IfAPQBAAAAAAQAAAAEAAD/",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "anonymous login answers another protocol",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG9OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 匿名登录返回了未知协议：20079",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "anonymous login is refused",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAABAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 匿名登录失败：0/1",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "anonymous login envelope is refused",
+      "frames": [
+        "TgAAAAThCwDIAAAA9AEAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 匿名登录失败：500/0",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "anonymous login without a 64-bit uid uses the 32-bit one",
+      "frames": [
+        "RgAAAAThCwDIAAAAAAAAAG5OAAAuAAAAAAAAAAAABwAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAA==",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABwAAAAAAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "xAAAAAvUBwDIAAAAAkEfAAAAJgAAAAcAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQcAAAAAAAAAhAAAAAgAAAECQR8AEAAAAgMBAAAHAAAAAAAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAArAAAHAgAAAAEAAAAEABovVwFnAAAAEwBGN195eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAcAAAAAAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAcAAAAAAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAcAAAAAAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "anonymous login without any uid is refused",
+      "frames": [
+        "RgAAAAThCwDIAAAAAAAAAG5OAAAuAAAAAAAAAAAAAAAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAA=="
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 匿名登录失败：0/0",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "anonymous login with a truncated payload fails the handshake",
+      "frames": [
+        "HgAAAAThCwDIAAAAAAAAAG5OAAAGAAAAAAAAAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 弹幕协议握手数据异常：FormatException: YY packet is truncated at 6: need 4, available 0",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "AP login is refused",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAACTAQAABQAyNTk6MH8AAAHSBAAAAAA="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY AP 登录失败：403",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "answers out of order are ignored",
+      "frames": [
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/"
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingUdb",
+          "heartbeat": null
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingUdb",
+          "heartbeat": null
+        },
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "chat before the join is ignored",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "bgAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAATAAAAEwAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAAKlnpZYZOAAAAAAAAAAAMAOa1i+ivleeUqOaItwAAAAA="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "chat after the join, another room's dropped",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "bgAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAATAAAAEwAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAAWmYKTn1ZAAAAAAAAAAAMAOa1i+ivleeUqOaItwAAAAA=",
+        "bAAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAASgAAAEoAAABYXy8AyAAFAAAAGy9XARsvVwEcAAAAAAAAAAAA////ABAAAAAEAAAA/V9ldQAAAAAAAAAADADlhbbku5bmiL/pl7QAAAAA",
+        "bwAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAATQAAAE0AAABYXy8AyAAFAAAAGi9XARsvVwEcAAAAAAAAAAAA////ABAAAAAEAAAA/V9ldQAAAAAAAAAADwDlhbbku5blrZDpopHpgZMAAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "测试用户",
+              "userId": "",
+              "message": "晚上好",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "every packet of one frame",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "ZQAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAQwAAAEMAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAALHsATmFnAAAAAAAAAAADAOeUsgAAAAAeAAAABB8MAMgAEAAAAAEAAAADAQAAo0+5agAAAABVAAAAWHAAAMgAHwAaL1cBQwBDAAAAWF8vAMgABQAAABovVwEaL1cBHgAAAAAAAAAAAP///wAQAAAABgAAACx7jE5hZwAAAAAAAAAAAwDkuZkAAAAAeQAAAAvQBwDIAAAAWCIIAAAAWwAAAAEAAAAAAAAAGi9XAQAAAAAfAAAAQwAAAEMAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAALHsJTmFnAAAAAAAAAAADAOS4mQAAAAAEAAAABAAA/w=="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "甲",
+              "userId": "",
+              "message": "第一条",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            },
+            {
+              "type": "chat",
+              "userName": "乙",
+              "userId": "",
+              "message": "第二条",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            },
+            {
+              "type": "chat",
+              "userName": "丙",
+              "userId": "",
+              "message": "第三条",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "handshake and chat in one frame",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAAIwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAABFAAAAC9AHAMgAAAACQh8AAAAnAAAAGi9XAQUAAAAaL1cBGi9XAXsAAAAEAAAAAAAAAAAAAAUAAAABAAAABAAAAAQAAP9lAAAAWCIIAMgAAQAAAAAAAAAaL1cBAAAAAB8AAABDAAAAQwAAAFhfLwDIAAUAAAAaL1cBGi9XAR4AAAAAAAAAAAD///8AEAAAAAYAAAAMVABOJ14AAAAAAAAAAAMA5LiBAAAAAA=="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg==",
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA",
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "丁",
+              "userId": "",
+              "message": "同一帧",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "chat of other apps and inner uris is ignored",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "bAAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAABnAAAASgAAAEoAAABYXy8AyAAFAAAAGi9XARovVwEcAAAAAAAAAAAA////ABAAAAAEAAAAPHlpcgAAAAAAAAAADADmtYvor5XnlKjmiLcAAAAAXAAAAFhwAADIAGUAGi9XAUoASgAAAFhfLwDIAAUAAAAaL1cBGi9XARwAAAAAAAAAAAD///8AEAAAAAQAAADbjzpXAAAAAAAAAAAMAOa1i+ivleeUqOaItwAAAABwAAAAWCIIAMgAAQAAAAAAAAAaL1cBAAAAAB8AAABOAAAATgAAAFlfLwDIAAUAAAAaL1cBGi9XASAAAAAAAAAAAAD///8AEAAAAAgAAAArUoR2iG1vYAAAAAAAAAAADADmtYvor5XnlKjmiLcAAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "a routed chat with a failed route is ignored",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "hgAAAAvQBwDIAAAAWCIIAJQBaAAAAAEAAAAAAAAAGi9XAQAAAAAfAAAAUAAAAFAAAABYXy8AyAAFAAAAGi9XARovVwEiAAAAAAAAAAAA////ABAAAAAKAAAAMVkljYR2740xdQAAAAAAAAAADADmtYvor5XnlKjmiLcAAAAABAAAAAQAAP8="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "names: none, blank, spaced; text trimmed; blank text dropped",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "XgAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAPAAAADwAAABYXy8AyAAFAAAAGi9XARovVwEgAAAAAAAAAAAA////ABAAAAAIAAAAoWwJZw1UV1sAAAAAAAAAAA==",
+        "ZgAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAARAAAAEQAAABYXy8AyAAFAAAAGi9XARovVwEgAAAAAAAAAAAA////ABAAAAAIAAAAenp9dg1UV1sAAAAAAAAAAAIAICAAAAAA",
+        "gAAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAXgAAAF4AAABYXy8AyAAFAAAAGi9XARovVwEuAAAAAAAAAAAA////ABAAAAAWAAAAIAAgAE1SDlR6ejxohHZja4dlIAAgAAAAAAAAAAAADgAg5YmN5ZCO56m65qC8IAAAAAA=",
+        "bgAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAATAAAAEwAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAAIAAgACAAAAAAAAAAAAAMAOepuueZveato+aWhwAAAAA="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "YY用户",
+              "userId": "",
+              "message": "没有名字",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "YY用户",
+              "userId": "",
+              "message": "空白名字",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "前后空格",
+              "userId": "",
+              "message": "前后空格的正文",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "extra items after the name, colour ignored",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "iAAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAZgAAAGYAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAAUwBpABAAAAAGAAAARJagUnmYAAAAAAAAAAAMAOaciemZhOWKoOmhuQIAAABkAAkA5Yir5ZCN5LiAZQAJAOWIq+WQjeS6jA=="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "有附加项",
+              "userId": "",
+              "message": "附加项",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "emoticon codes stay as they are",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "eAAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAVgAAAFYAAABYXy8AyAAFAAAAGi9XARovVwEuAAAAAAAAAAAA////ABAAAAAWAAAALwB7AG0AZwAgAH1ZLFQvAHsAdAB4AAAAAAAAAAAABgDooajmg4UAAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "表情",
+              "userId": "",
+              "message": "/{mg 好听/{tx",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "XML body with one txt",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "3AAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAugAAALoAAABYXy8AyAAFAAAAGi9XARovVwGSAAAAAAAAAAAA////ABAAAAB6AAAAPAA/AHgAbQBsACAAdgBlAHIAcwBpAG8AbgA9ACIAMQAuADAAIgA/AD4APABtAHMAZwA+ADwAdAB4AHQAIABkAGEAdABhAD0AIgDRU3eNhk4ia1BOlWJoeQz/619lZy9lAWMnVAH/IgAgAC8APgA8AC8AbQBzAGcAPgAAAAAAAAAAAAYA5oqV56WoAAAAAA=="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "投票",
+              "userId": "",
+              "message": "<?xml version=\"1.0\"?><msg><txt data=\"发起了欢乐投票，快来支持吧！\" /></msg>",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "XML body with entities and an emoticon code",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "OgEAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAGAEAABgBAABYXy8AyAAFAAAAGi9XARovVwHwAAAAAAAAAAAA////ABAAAADYAAAAPAA/AHgAbQBsACAAdgBlAHIAcwBpAG8AbgA9ACIAMQAuADAAIgA/AD4APABtAHMAZwA+ADwAdAB4AHQAIABkAGEAdABhAD0AIgBhACAAJgBhAG0AcAA7ACAAYgAgACYAbAB0ADsAMwAgACYAcQB1AG8AdAA7ABVf91MmAHEAdQBvAHQAOwAgACYAIwB4ADQARgA2ADAAOwAmACMAMgAyADkAMAA5ADsAJgAjAHgAMQBGADYAMAAwADsAIAAvAHsAdAB4ACIAIAAvAD4APAAvAG0AcwBnAD4AAAAAAAAAAAAGAOWunuS9kwAAAAA="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "实体",
+              "userId": "",
+              "message": "<?xml version=\"1.0\"?><msg><txt data=\"a &amp; b &lt;3 &quot;引号&quot; &#x4F60;&#22909;&#x1F600; /{tx\" /></msg>",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "XML body with two txt elements around another element",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "1AAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAsgAAALIAAABYXy8AyAAFAAAAGi9XARovVwGKAAAAAAAAAAAA////ABAAAAByAAAAPABtAHMAZwA+ADwAdAB4AHQAIABkAGEAdABhAD0AIgBNUkpTIgAvAD4APABmAGEAYwBlACAAaQBkAD0AIgAxACIALwA+ADwAdAB4AHQAIABkAGEAdABhAD0AJwAOVEpTJwAvAD4APAAvAG0AcwBnAD4AAAAAAAAAAAAGAOS4pOautQAAAAA="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "两段",
+              "userId": "",
+              "message": "<msg><txt data=\"前半\"/><face id=\"1\"/><txt data='后半'/></msg>",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "XML body without txt",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "xAAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAogAAAKIAAABYXy8AyAAFAAAAGi9XARovVwF0AAAAAAAAAAAA////ABAAAABcAAAAPAA/AHgAbQBsACAAdgBlAHIAcwBpAG8AbgA9ACIAMQAuADAAIgA/AD4APABtAHMAZwA+ADwAZgBhAGMAZQAgAGkAZAA9ACIAMQAiAC8APgA8AC8AbQBzAGcAPgAAAAAAAAAAAAwA5rKh5pyJ5q2j5paHAAAAAA=="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "没有正文",
+              "userId": "",
+              "message": "<?xml version=\"1.0\"?><msg><face id=\"1\"/></msg>",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "text that only looks like XML later stays as it is",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "kQAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAbwAAAG8AAABYXy8AyAAFAAAAGi9XARovVwFEAAAAAAAAAAAA////ABAAAAAsAAAAEWIgADwAMwAgAGBPIAA8AHQAeAB0ACAAZABhAHQAYQA9ACIAeAAiAC8APgAAAAAAAAAAAAkA5bCW5ous5Y+3AAAAAA=="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "尖括号",
+              "userId": "",
+              "message": "我 <3 你 <txt data=\"x\"/>",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "a malformed chat after the join is a warning",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "agAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAASAAAAEgAAABYXy8AyAAFAAAAGi9XARovVwEcAAAAAAAAAAAA////ABAAAAAIAAAAf5WmXoqNTHUAAAAAAAAAAAYA6LaK55WMAAAAAG4AAABYIggAyAABAAAAAAAAABovVwEAAAAAHwAAAEwAAABMAAAAWF8vAMgABQAAABovVwEaL1cBJAAAAAAAAAAAAP///wAQAAAADAAAAEtODlSEdgVTZ3E4XgAAAAAAAAAABgDmraPluLgAAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "正常",
+              "userId": "",
+              "message": "之后的包照常",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [
+            "YY 聊天消息格式异常：FormatException: YY 聊天正文长度越界"
+          ],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "a packet shorter than its fields after the join is a warning",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "DAAAAFgiCADIAAEA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [
+            "YY 弹幕消息格式异常：FormatException: YY packet is truncated at 10: need 4, available 2"
+          ],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "a truncated frame while joining is a warning",
+      "frames": [
+        "FAAAAAwAAADIAA=="
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [
+            "YY WebSocket 帧长度异常：20/10"
+          ],
+          "phase": "waitingUdb",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "a packet length past the frame drops the rest",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "ZQAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAQwAAAEMAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAAKFdNUmKXAAAAAAAAAAADAOWFiAAAAAD/AAAAWCIIAMgAZQAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAQwAAAEMAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAAq4giToljAAAAAAAAAAADAOWQjgAAAAA="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "先",
+              "userId": "",
+              "message": "在前面",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [
+            "YY WebSocket 帧长度异常：255/111"
+          ],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "a packet length below the header drops the rest",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "CQAAAFgiCADIAGUAAABYIggAyAABAAAAAAAAABovVwEAAAAAHwAAAEMAAABDAAAAWF8vAMgABQAAABovVwEaL1cBHgAAAAAAAAAAAP///wAQAAAABgAAAKuIIk6JYwAAAAAAAAAAAwDlkI4AAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [
+            "YY WebSocket 帧长度异常：9/111"
+          ],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "a trailer shorter than a header",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "ZQAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAAQwAAAEMAAABYXy8AyAAFAAAAGi9XARovVwEeAAAAAAAAAAAA////ABAAAAAGAAAAKFdNUmKXAAAAAAAAAAADAOWFiAAAAAAKAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [
+            {
+              "type": "chat",
+              "userName": "先",
+              "userId": "",
+              "message": "在前面",
+              "color": "#ffffff",
+              "messageId": "",
+              "sentAt": null,
+              "userLevel": "",
+              "fansLevel": "",
+              "fansName": "",
+              "isLocal": false,
+              "data": null
+            }
+          ],
+          "failure": null,
+          "warnings": [
+            "YY WebSocket 尾部数据不足 10 字节"
+          ],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    },
+    {
+      "name": "a malformed handshake packet fails the handshake",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "DgAAAATXCwDIAAMBAAA="
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 弹幕协议握手数据异常：FormatException: YY packet is truncated at 14: need 4, available 0",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "after a failure nothing is read and no heartbeat is sent",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAABAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "cAAAAFgiCADIAAEAAAAAAAAAGi9XAQAAAAAfAAAATgAAAE4AAABYXy8AyAAFAAAAGi9XARovVwEgAAAAAAAAAAAA////ABAAAAAIAAAAMVkljUtODlQAAAAAAAAAAAwA5rWL6K+V55So5oi3AAAAAA=="
+      ],
+      "results": [
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": "YY 匿名登录失败：0/1",
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "failed",
+          "heartbeat": null
+        }
+      ]
+    },
+    {
+      "name": "pongs are skipped",
+      "frames": [
+        "TgAAAAThCwDIAAAAAAAAAG5OAAA2AAAAAAAAAAAABQAAADkwAAAJAGFub255bW91cwYAc2VjcmV0AwABAgMCAAQFAAAAAAUAAAABAAAA",
+        "IwAAAATXCwDIAAMBAADIAAAABQAyNTk6MH8AAAHSBAAAAAA=",
+        "RQAAAAvQBwDIAAAAAkIfAAAAJwAAABovVwEFAAAAGi9XARovVwF7AAAABAAAAAAAAAAAAAAFAAAAAQAAAAQAAAAEAAD/",
+        "HgAAAAQfDADIABAAAAABAAAAAwEAAKNPuWoAAAAAHgAAAAQfDADIABAAAAABAAAAAwEAAKNPuWoAAAAA"
+      ],
+      "results": [
+        {
+          "outbound": [
+            "1gAAAATWCwDIAIcAAAAJAGFub255bW91cwYAc2VjcmV0AgAAAAAAAAAAAAAACwB5eXRpYW5sYWl0dhEAQjgtOTctNUEtMTctQUQtNEQQAHl5bXdlYm5feXltd2ViaDUAAAAAAAAAAAAAAAAAAAAAJAAwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDEDAQAABQAAAAEAAAAAAAADAAECAwUAMjU5OjAAAAAAAAAAAAAAAAAAAAD/////AAABAAAABwBCQ0lGVmVyAgBWMg=="
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingAp",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "zQAAAAvUBwDIAAAAAkEfAAAAJgAAAAUAAAAaL1cBGi9XAQIAAAACAAAAAQAwAwAAAAEAMQUAAAABAAAAjQAAAAgAAAECQR8AEAAAAgMBAAAFAAAAAQAAAAwAAAQAAAAAAAAAAAgAAAUAAAAAIwAABgAAAAAAAAAAAAANAGNoYW5uZWxBdXRoZXIAAAAAAAA0AAAHAgAAAAEAAAAEABovVwFnAAAAHABGNDI5NDk2NzMwMV95eW13ZWJoNV8xODk3N18wBgAACAAAeHh4/w==",
+            "KgAAAFg3CADIAAUAAAABAAAABQAAAB8AAABlAAAAZgAAAGcAAAARAAAA"
+          ],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "waitingJoin",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [
+            "eAAAAFg1CADIAAUAAAABAAAABgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAQAAAMBAAAaL1cBGi9XAQADAAADAQAAAAAAABovVwEAAQAAAwEAAAAAAAAaL1cBAAEAAAMBAAAaL1cBGi9XAQAA",
+            "OAAAAFg1CADIAAUAAAABAAAAAgAAAAEAAAAAAAAAGi9XAQAAAAACAAAAAAAAABovVwEAAAAAAAA="
+          ],
+          "ready": true,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        },
+        {
+          "outbound": [],
+          "ready": false,
+          "messages": [],
+          "failure": null,
+          "warnings": [],
+          "phase": "joined",
+          "heartbeat": "DgAAAAQeDADIAAAAAAA="
+        }
+      ]
+    }
+  ]
+}

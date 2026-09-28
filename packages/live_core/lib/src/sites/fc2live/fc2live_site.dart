@@ -12,29 +12,28 @@ const _site = 'fc2live';
 /// Where the API answers.
 const _host = 'live.fc2.com';
 
-/// How long a snapshot fetched without a cancel token is reused (3.x).
-const _snapshotLifetime = Duration(seconds: 20);
-
 /// The FC2 Live adapter (3.x's `Fc2Site` and `Fc2Api`; parsing in
 /// [Fc2LiveApi], the control socket in [Fc2LiveControl]).
 ///
-/// Anonymous, like 3.x: no cookie, no account and no comments (3.x's FC2
-/// had `EmptyDanmaku`). Every request is a form POST with 3.x's headers
-/// that does not follow redirects and goes as `fc2live`, so the app routes
-/// the platform through its proxy setting. The requests are 3.x's:
+/// Anonymous, like 3.x: no cookie and no account. Comments (M5) take their
+/// own control socket from the arguments of room entry and recording
+/// ([Fc2LiveDanmakuArgs], 26-3); `getDanmaku` stays `EmptyDanmaku`. Every
+/// request is a form POST with 3.x's headers that does not follow
+/// redirects and goes as `fc2live`, so the app routes the platform through
+/// its proxy setting. The requests are 3.x's:
 /// - the directory, the recommendations, the area rooms and the keyword
 ///   search are all the `allchannellist.php` snapshot of every channel on
-///   air, paged locally. A snapshot asked for without a cancel token is
-///   shared for 20 s (and while it is being fetched); one asked for with a
-///   token (the directory and search pages always pass one) is fetched
-///   anew, as in 3.x;
+///   air, paged locally. Page 1 of the directory and of the search (the
+///   pull to refresh) always asks anew; every other call reuses a snapshot
+///   younger than [snapshotLifetime], so the pages after the first come
+///   from the same snapshot as the first (26-1; see [getDirectoryPage]);
 /// - a room is one `memberApi.php` request, at room entry, refresh,
 ///   recording and the live-status check alike; a search for a channel
 ///   number or link is that request too;
-/// - streams have no URL: the one quality resolves to a
-///   [Fc2LiveInputRecipe] that playback and recording open themselves with
-///   [openControl] (M7, M8): `memberApi.php`, `getControlServer.php` and
-///   the control socket, held while they play.
+/// - streams have no URL: each quality resolves to a [Fc2LiveInputRecipe]
+///   that playback and recording open themselves with [openControl] (M7,
+///   M8): `memberApi.php`, `getControlServer.php` and the control socket,
+///   held while they play.
 ///
 /// Rooms are identified by the channel number, as 3.x stored them.
 /// Failures are `SiteError`s; nothing is disguised as an offline room.
@@ -61,6 +60,9 @@ final class Fc2LiveSite extends LiveSite
     DateTime Function()? now,
   }) : _connector = connector ?? Fc2LiveControl.connect,
        _now = now ?? DateTime.now;
+
+  /// How long a snapshot is reused after it arrived (3.x's 20 s).
+  static const Duration snapshotLifetime = Duration(seconds: 20);
 
   /// Transport.
   final LiveHttp http;
@@ -130,16 +132,45 @@ final class Fc2LiveSite extends LiveSite
     return Fc2LiveApi.directory(response.text, status: response.status);
   }
 
-  /// The `allchannellist` snapshot. With [cancel] it is always fetched anew
-  /// (3.x: a cancellable caller never shares a request). Without, the last
-  /// one is reused for 20 s after it arrived, and a fetch under way is
-  /// shared (3.x fetched again for every caller that came before the first
-  /// answer); a failed fetch is forgotten.
-  Future<List<Fc2LiveChannel>> _snapshotFor(CancelToken? cancel) {
-    if (cancel != null) return _fetchSnapshot(cancel: cancel);
-    final cached = _snapshot;
-    final at = _snapshotAt;
-    if (cached != null && (at == null || _now().difference(at) < _snapshotLifetime)) return cached;
+  /// The `allchannellist` snapshot.
+  ///
+  /// [fresh] (page 1 of the directory or the search: the pull to refresh)
+  /// always asks anew. Otherwise the last snapshot is reused while it is
+  /// younger than [snapshotLifetime] after it arrived, whoever fetched it
+  /// (26-1: 3.x fetched anew for every call with a cancel token, so each
+  /// page of the directory and the search came from another snapshot, and
+  /// rooms repeated or went missing across pages). A call without [cancel]
+  /// also shares a fetch under way (3.x fetched again for every caller that
+  /// came before the first answer); one with [cancel] only reuses a
+  /// snapshot that has arrived, and fetches its own with the token
+  /// otherwise, so cancelling it never fails another caller. The latest
+  /// successful fetch becomes the shared snapshot; a failed or cancelled
+  /// one is forgotten.
+  Future<List<Fc2LiveChannel>> _snapshotFor({CancelToken? cancel, bool fresh = false}) async {
+    if (!fresh) {
+      final cached = _snapshot;
+      final at = _snapshotAt;
+      if (cached != null && (at == null ? cancel == null : _young(at))) {
+        final channels = await cached;
+        _checkCancelled(cancel);
+        return channels;
+      }
+    }
+    if (cancel == null) return await _share();
+    final channels = await _fetchSnapshot(cancel: cancel);
+    _snapshot = Future.value(channels);
+    _snapshotAt = _now();
+    return channels;
+  }
+
+  bool _young(DateTime at) {
+    final age = _now().difference(at);
+    return age >= Duration.zero && age < snapshotLifetime;
+  }
+
+  /// A new fetch, shared with every caller without a cancel token until it
+  /// arrives, and then for [snapshotLifetime]; a failed one is forgotten.
+  Future<List<Fc2LiveChannel>> _share() {
     late final Future<List<Fc2LiveChannel>> fetch;
     fetch = _fetchSnapshot().then(
       (channels) {
@@ -170,14 +201,17 @@ final class Fc2LiveSite extends LiveSite
   }
 
   /// Page [page] (20 rooms) of [category]'s channels, or of every channel
-  /// when it is null or `all` (3.x). A page below 1 or an area that is not
-  /// one of this platform's is a caller error, without a request.
+  /// when it is null or `all` (3.x). Page 1 (the pull to refresh) asks for
+  /// a new snapshot; later pages come from the last one while it is younger
+  /// than [snapshotLifetime], so they neither repeat nor skip rooms of page
+  /// 1 (26-1). A page below 1 or an area that is not one of this platform's
+  /// is a caller error, without a request.
   @override
   Future<LiveDirectoryPage> getDirectoryPage({int page = 1, LiveArea? category, CancelToken? cancel}) async {
     if (page < 1) throw RangeError.range(page, 1, null, 'page');
     final filter = category == null ? null : Fc2LiveApi.areaFilter(category);
     _checkCancelled(cancel);
-    final channels = await _snapshotFor(cancel);
+    final channels = await _snapshotFor(cancel: cancel, fresh: page == 1);
     return Fc2LiveApi.directoryPage([
       for (final channel in channels)
         if (Fc2LiveApi.inArea(channel, filter)) channel,
@@ -190,7 +224,7 @@ final class Fc2LiveSite extends LiveSite
   @override
   Future<List<LiveRoom>> getRecommendRooms({int page = 1, int pageSize = 30}) async {
     if (!Fc2LiveApi.validSlice(page: page, pageSize: pageSize)) return const [];
-    final channels = await _snapshotFor(null);
+    final channels = await _snapshotFor();
     return [for (final channel in Fc2LiveApi.slice(channels, page: page, pageSize: pageSize)) Fc2LiveApi.room(channel)];
   }
 
@@ -201,7 +235,7 @@ final class Fc2LiveSite extends LiveSite
     final filter = Fc2LiveApi.areaFilter(category);
     if (!Fc2LiveApi.validSlice(page: page, pageSize: pageSize)) return const [];
     final channels = [
-      for (final channel in await _snapshotFor(null))
+      for (final channel in await _snapshotFor())
         if (Fc2LiveApi.inArea(channel, filter)) channel,
     ];
     return [for (final channel in Fc2LiveApi.slice(channels, page: page, pageSize: pageSize)) Fc2LiveApi.room(channel)];
@@ -209,20 +243,32 @@ final class Fc2LiveSite extends LiveSite
 
   // Search --------------------------------------------------------------------
 
+  /// As [searchRoomsCancellable], every keyword page from the shared
+  /// snapshot (3.x shared it with every call without a cancel token).
   @override
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) =>
-      searchRoomsCancellable(keyword, page: page, pageSize: pageSize);
+      _search(keyword, page: page, pageSize: pageSize, fresh: false);
 
   /// 3.x's search: a channel number or channel link is looked up
   /// (`memberApi`, found also when offline; only page 1, and a channel that
   /// does not exist gives nothing); any other keyword filters the snapshot
-  /// (see [Fc2LiveApi.search]), page [page] of [pageSize]. A blank keyword
+  /// (see [Fc2LiveApi.search]), page [page] of [pageSize]. Page 1 asks for a
+  /// new snapshot; later pages come from the last one while it is younger
+  /// than [snapshotLifetime] (26-1, as [getDirectoryPage]). A blank keyword
   /// or a page 3.x served nothing for gives nothing, without a request.
   @override
   Future<List<LiveRoom>> searchRoomsCancellable(
     String keyword, {
     int page = 1,
     int pageSize = 30,
+    CancelToken? cancel,
+  }) => _search(keyword, page: page, pageSize: pageSize, cancel: cancel, fresh: page == 1);
+
+  Future<List<LiveRoom>> _search(
+    String keyword, {
+    required int page,
+    required int pageSize,
+    required bool fresh,
     CancelToken? cancel,
   }) async {
     final query = keyword.trim();
@@ -237,7 +283,7 @@ final class Fc2LiveSite extends LiveSite
       }
     }
     _checkCancelled(cancel);
-    final channels = await _snapshotFor(cancel);
+    final channels = await _snapshotFor(cancel: cancel, fresh: fresh);
     return [
       for (final channel in Fc2LiveApi.slice(Fc2LiveApi.search(channels, query), page: page, pageSize: pageSize))
         Fc2LiveApi.room(channel),
@@ -261,52 +307,48 @@ final class Fc2LiveSite extends LiveSite
     return Fc2LiveApi.member(response.text, channelId: channelId, status: response.status);
   }
 
-  Future<LiveRoom> _detail(String roomId) async => Fc2LiveApi.room((await _member(_channel(roomId))).channel);
+  Future<LiveRoom> _detail(String roomId, {bool danmaku = false}) async =>
+      Fc2LiveApi.room((await _member(_channel(roomId))).channel, danmaku: danmaku);
 
   /// The channel's member answer (one request). A channel that is not on
   /// air is offline (3.x failed on it, see [Fc2LiveApi.member]); a
-  /// restricted one keeps 3.x's unknown state and notice.
+  /// restricted one is live and marked with its restriction (26-9; 3.x
+  /// showed it unknown), keeping 3.x's notice. The room carries the
+  /// comment arguments (26-3, M5).
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, danmaku: true);
 
-  /// The same one request (3.x).
+  /// The same one request (3.x), without the comment arguments.
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
-  /// The same one request: recording opens its own control from the
-  /// recipe.
+  /// The same one request, with the comment arguments: recording opens its
+  /// own control from the recipe.
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, danmaku: true);
 
-  /// Whether the channel is on air (one request). A restricted channel's
-  /// state cannot be told apart for this viewer: `NeedsLogin`, as 3.x
-  /// refused it (`access`).
+  /// Whether the channel is on air (one request). A restricted broadcast is
+  /// on air (26-9; 3.x refused it with `access`); playing it is refused
+  /// with the reason.
   @override
-  Future<bool> getLiveStatus({required String roomId}) async {
-    final channel = (await _member(_channel(roomId))).channel;
-    if (channel.state == Fc2LiveState.restricted) throw NeedsLogin(_site, 'channel ${channel.channelId} is restricted');
-    return channel.state == Fc2LiveState.live;
-  }
+  Future<bool> getLiveStatus({required String roomId}) async =>
+      (await _member(_channel(roomId))).channel.state != Fc2LiveState.offline;
 
   // Control -------------------------------------------------------------------
 
   /// A fresh control grant of [channelId] (3.x's `Fc2Api.controlGrant`):
   /// `memberApi.php`, then `getControlServer.php` with the channel's
   /// version. A channel that is not on air is `StreamUnavailable`, a
-  /// restricted one `NeedsLogin`, both without the second request. A grant
-  /// is good for one control socket, about a minute; the comment connection
-  /// (M5) takes its own.
+  /// restricted one is refused by its restriction
+  /// ([Fc2LiveApi.refusal]: `NeedsLogin` for signed-in viewers only, else
+  /// `StreamUnavailable` with the reason; 3.x: always `access`), both
+  /// without the second request. A grant is good for one control socket,
+  /// about a minute; the comment connection (M5) takes its own.
   Future<Fc2LiveGrant> controlGrant(String channelId, {CancelToken? cancel}) async {
     final id = _channel(channelId);
     final member = await _member(id, cancel: cancel);
-    switch (member.channel.state) {
-      case Fc2LiveState.offline:
-        throw StreamUnavailable(_site, 'channel $id is not on air');
-      case Fc2LiveState.restricted:
-        throw NeedsLogin(_site, 'channel $id is paid, ticketed, login-only or limited');
-      case Fc2LiveState.live:
-        break;
-    }
+    if (member.channel.state == Fc2LiveState.offline) throw StreamUnavailable(_site, 'channel $id is not on air');
+    if (Fc2LiveApi.refusal(member.channel.restriction, id) case final refusal?) throw refusal;
     final version = member.version;
     if (version == null) throw ApiChanged(_site, 'memberApi: channel $id is live without a version');
     final response = await _post('/api/getControlServer.php', {
@@ -323,17 +365,26 @@ final class Fc2LiveSite extends LiveSite
   }
 
   /// A control of [channelId] (3.x's `Fc2ControlSession.open`): a fresh
-  /// grant and its socket, open once the master is known. The caller owns
-  /// it and closes it when its consumer is done; playback and recording
-  /// open one each (M7, M8). [cancel] reaches the requests and the socket
-  /// while it opens, not the open control.
-  Future<Fc2LiveControl> openControl(String channelId, {CancelToken? cancel}) async {
+  /// grant and its socket, open once the playlist of [quality] is known
+  /// (`auto`, 3.x's master, or a tier's single variant, 26-2; a recipe's
+  /// [Fc2LiveInputRecipe.quality]). The caller owns it and closes it when
+  /// its consumer is done; playback and recording open one each (M7, M8).
+  /// [cancel] reaches the requests and the socket while it opens, not the
+  /// open control. A quality that is not one of [Fc2LiveApi.qualityIds] is
+  /// the caller's mistake, without a request.
+  Future<Fc2LiveControl> openControl(
+    String channelId, {
+    CancelToken? cancel,
+    String quality = Fc2LiveApi.autoQualityId,
+  }) async {
+    if (!Fc2LiveApi.qualityIds.contains(quality)) throw ArgumentError.value(quality, 'quality', 'not an FC2 quality');
     final grant = await controlGrant(channelId, cancel: cancel);
     return await Fc2LiveControl.open(
       grant,
       connector: _connector,
       route: proxy.routeFor(_site, grant.socket),
       cancel: cancel,
+      quality: quality,
       startupTimeout: controlStartupTimeout,
     );
   }
@@ -341,46 +392,50 @@ final class Fc2LiveSite extends LiveSite
   // Streams -------------------------------------------------------------------
 
   /// The channel of a room that can be played: this platform's room, not
-  /// said to be offline (`StreamUnavailable`), not restricted (`NeedsLogin`),
-  /// and live (else `StreamUnavailable`: 3.x refused every room it had not
-  /// seen live).
+  /// said to be offline (`StreamUnavailable`), not restricted (refused by
+  /// its restriction, [Fc2LiveApi.refusal], from the room's data or, for a
+  /// stored room, its `restriction`), and live (else `StreamUnavailable`:
+  /// 3.x refused every room it had not seen live).
   static String _playable(LiveRoom detail) {
     if (detail.platform != _site) throw ArgumentError.value(detail.platform, 'detail', 'not an FC2 Live room');
     final channelId = _channel(detail.roomId);
     if (detail.isExplicitlyOfflineNow) throw StreamUnavailable(_site, 'channel $channelId is offline');
     final data = detail.data;
-    if (data is Fc2LiveRoomData && data.channelId == channelId && data.state == Fc2LiveState.restricted) {
-      throw NeedsLogin(_site, 'channel $channelId is restricted');
-    }
+    final restriction = data is Fc2LiveRoomData && data.channelId == channelId ? data.restriction : detail.restriction;
+    if (Fc2LiveApi.refusal(restriction, channelId) case final refusal?) throw refusal;
     if (!detail.isLiveNow) throw StreamUnavailable(_site, 'channel $channelId is not known to be live');
     return channelId;
   }
 
-  /// 3.x's one quality, `auto` (the site's adaptive master), for a room
-  /// that can be played ([_playable]); no request. 3.x gave an offline room
-  /// an empty list and refused a room without its entry data.
+  /// The qualities of a room that can be played ([_playable]), without a
+  /// request (26-2): the three tiers, best first, then 3.x's `auto` (see
+  /// [Fc2LiveApi.qualities]). 3.x gave `auto` alone, an offline room an
+  /// empty list, and refused a room without its entry data.
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
     _playable(detail);
-    return const [Fc2LiveApi.autoQuality];
+    return Fc2LiveApi.qualities;
   }
 
   @override
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The recipe of the channel (3.x's owned input): no URL, no request. A
-  /// quality other than `auto` is the caller's mistake. The applied quality
-  /// is `auto`.
+  /// The recipe of the channel in [quality] (3.x's owned input): no URL,
+  /// no request. A quality that is not one of [Fc2LiveApi.qualities] is the
+  /// caller's mistake. The applied quality is the one asked for; the
+  /// control says which one plays when the channel lacks a tier
+  /// ([Fc2LiveControl.quality], M7).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final channelId = _playable(detail);
-    if ('${quality.selectionId}' != Fc2LiveApi.autoQuality.id) {
-      throw ArgumentError.value(quality, 'quality', 'FC2 Live has only the auto quality');
+    final id = '${quality.selectionId}';
+    if (!Fc2LiveApi.qualityIds.contains(id)) {
+      throw ArgumentError.value(quality, 'quality', 'not an FC2 Live quality');
     }
     return LivePlayUrlResolution.owned(
-      input: Fc2LiveInputRecipe(channelId),
-      appliedQualityData: Fc2LiveApi.autoQuality.id,
+      input: Fc2LiveInputRecipe(channelId, quality: id),
+      appliedQualityData: id,
     );
   }
 

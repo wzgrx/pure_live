@@ -94,6 +94,34 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
   });
 
+  testWidgets('principles §2.3: the system text scale times the in-app size stops at 2×', (tester) async {
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final store = (await tester.runAsync(LiveStore.inMemory))!;
+    addTearDown(() => tester.runAsync(store.close));
+    await tester.runAsync(() => store.settings.set(Settings.textScale, 1.3));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sitesProvider.overrideWithValue({for (final id in platformOrder) id: PlatformSite(FakeSite(id))}),
+          storeProvider.overrideWithValue(store),
+          recordManagerProvider.overrideWithValue(fakeRecordManager()),
+          followsProvider.overrideWith((ref) => Stream.value(const [])),
+          followRefreshProvider.overrideWith(_NoRefresh.new),
+        ],
+        child: const PureLiveApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final scaler = MediaQuery.textScalerOf(tester.element(find.byType(NavigationBar)));
+    // It was 2 × 1.3: a 14 sp label at 36.4 sp.
+    expect(scaler.scale(14), 28);
+    expect(scaler.scale(10), 20);
+  });
+
   testWidgets('§6.2: Ctrl+F opens search with its box focused', (tester) async {
     tester.view.physicalSize = const Size(1280, 800);
     tester.view.devicePixelRatio = 1;

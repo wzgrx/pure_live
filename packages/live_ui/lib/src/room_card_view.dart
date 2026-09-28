@@ -125,16 +125,9 @@ class RoomCardView extends StatelessWidget {
                   child: RoomCover(
                     cover: cover,
                     platformId: platformId,
+                    // principles §3.4: 24 dp on TV, 16 elsewhere.
+                    cornerLogo: TvScope.of(context).enabled ? Sizes.logoLarge : Sizes.logoSmall,
                     children: [
-                      Positioned(
-                        left: Space.s1 + 2,
-                        top: Space.s1 + 2,
-                        // principles §3.4: 24 dp on TV, 16 elsewhere.
-                        child: PlatformLogo(
-                          platformId: platformId,
-                          size: TvScope.of(context).enabled ? Sizes.logoLarge : Sizes.logoSmall,
-                        ),
-                      ),
                       if (recording) const Positioned(right: Space.s1 + 2, top: Space.s1 + 2, child: RecordingBadge()),
                       // One row, so large text shortens the badge instead
                       // of drawing it under the audience.
@@ -276,20 +269,31 @@ class OfflineRoomRow extends StatelessWidget {
 }
 
 /// A 16:9 cover without a clip layer (principles §7.11): the image fills a
-/// decoration with r2 corners. While the first image loads the block is
-/// plain surfaceContainerHighest, with no spinner; with no cover, or when it
-/// fails, the 24 dp platform logo sits in the middle (principles §3.4). A new
+/// decoration with r2 corners and the platform logo sits top left
+/// (principles §4.3). While the first image loads the block is plain
+/// surfaceContainerHighest, with no spinner; with no cover, or when it
+/// fails, the 24 dp logo moves to the middle of the block instead
+/// (principles §3.4), so the card never shows the same logo twice. A new
 /// [cover] (a refreshed live cover) replaces the old one only once it has
 /// loaded, so the card never flashes back to the placeholder.
 class RoomCover extends StatefulWidget {
   /// Creates the cover.
-  const new({required this.cover, required this.platformId, this.children = const [], super.key});
+  const new({
+    required this.cover,
+    required this.platformId,
+    this.cornerLogo = Sizes.logoSmall,
+    this.children = const [],
+    super.key,
+  });
 
   /// The image; null for none.
   final ImageProvider? cover;
 
-  /// Platform of the logo on the placeholder.
+  /// Platform of the logo.
   final String platformId;
+
+  /// Size of the top-left logo over a picture.
+  final double cornerLogo;
 
   /// Marks drawn on top (badges, logo, audience), usually [Positioned].
   final List<Widget> children;
@@ -390,6 +394,12 @@ class _RoomCoverState extends State<RoomCover> {
           if (placeholder)
             Center(
               child: PlatformLogo(platformId: widget.platformId, size: Sizes.logoLarge),
+            )
+          else
+            Positioned(
+              left: Space.s1 + 2,
+              top: Space.s1 + 2,
+              child: PlatformLogo(platformId: widget.platformId, size: widget.cornerLogo),
             ),
           ...widget.children,
         ],

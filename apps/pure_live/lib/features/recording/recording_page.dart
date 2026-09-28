@@ -388,13 +388,22 @@ class RecordTaskTile extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              PlatformLogo(platformId: task.room.platform),
-              const SizedBox(width: Space.s1),
-              // The subtitle's own size and weight, never heavier than the name.
-              Flexible(child: Text(details.join(' · '), style: LiveTheme.tabularFigures)),
-            ],
+          // The logo rides on the first line, also when the line wraps. The
+          // subtitle's own size and weight, never heavier than the name.
+          Text.rich(
+            TextSpan(
+              children: [
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(end: Space.s1),
+                    child: PlatformLogo(platformId: task.room.platform),
+                  ),
+                ),
+                TextSpan(text: details.join(' · ')),
+              ],
+            ),
+            style: LiveTheme.tabularFigures,
           ),
           if (problem != null)
             Text(

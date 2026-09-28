@@ -96,9 +96,9 @@ void main() {
       ),
     );
     expect(find.text('直播'), findsNothing);
-    // The corner logo and, without a cover, the placeholder's (letter tiles
-    // for a platform without a logo).
-    expect(find.text('U'), findsNWidgets(2));
+    // Without a cover the logo (a letter tile for a platform without one)
+    // sits in the middle of the placeholder, once.
+    expect(find.text('U'), findsOneWidget);
     expect(find.textContaining('主播 · 标题', findRichText: true), findsOneWidget);
   });
 

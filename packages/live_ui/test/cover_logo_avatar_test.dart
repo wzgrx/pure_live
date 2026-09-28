@@ -54,9 +54,11 @@ void main() {
           as BoxDecoration;
 
   group('principles §3.4: the cover placeholder', () {
-    testWidgets('without a cover the block carries the 24 dp logo; no clip layer', (tester) async {
+    testWidgets('without a cover the block carries the 24 dp logo in the middle, once; no clip layer', (tester) async {
       await tester.pumpWidget(host(const RoomCardView(platformId: 'douyu', anchorName: 'a', title: 'b', isLive: true)));
-      expect(logoSizes(tester), unorderedEquals([Sizes.logoSmall, Sizes.logoLarge]));
+      expect(logoSizes(tester), [Sizes.logoLarge]);
+      final cover = tester.getRect(find.byType(RoomCover));
+      expect(tester.getCenter(find.byType(PlatformLogo)), cover.center);
       expect(find.byType(ClipRRect), findsNothing, reason: 'principles §7.11');
       final decoration = coverDecoration(tester);
       expect(decoration.image, isNull);
@@ -89,7 +91,7 @@ void main() {
       cover.fail();
       await tester.pump();
       await tester.pump();
-      expect(logoSizes(tester), unorderedEquals([Sizes.logoSmall, Sizes.logoLarge]));
+      expect(logoSizes(tester), [Sizes.logoLarge]);
       expect(coverDecoration(tester).image, isNull);
     });
 
@@ -115,10 +117,13 @@ void main() {
     });
 
     testWidgets('on TV the corner logo is 24 dp', (tester) async {
+      final cover = _Controlled('tv');
       await tester.pumpWidget(
-        host(const RoomCardView(platformId: 'douyu', anchorName: 'a', title: 'b', isLive: true), tv: true),
+        host(RoomCardView(platformId: 'douyu', anchorName: 'a', title: 'b', isLive: true, cover: cover), tv: true),
       );
-      expect(logoSizes(tester), [Sizes.logoLarge, Sizes.logoLarge]);
+      expect(logoSizes(tester), [Sizes.logoLarge]);
+      final card = tester.getRect(find.byType(RoomCover));
+      expect(tester.getTopLeft(find.byType(PlatformLogo)), card.topLeft + const Offset(6, 6));
     });
   });
 

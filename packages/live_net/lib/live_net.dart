@@ -3,6 +3,7 @@
 library;
 
 export 'src/calls.dart';
+export 'src/codec/brotli.dart';
 export 'src/cookies.dart';
 export 'src/diagnostics.dart';
 export 'src/headers.dart';

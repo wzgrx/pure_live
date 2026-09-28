@@ -1,0 +1,2 @@
+# Brotli streams keep their exact bytes.
+*.bin binary

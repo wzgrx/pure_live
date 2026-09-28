@@ -1,0 +1,278 @@
+{
+  "channelListData": {
+    "result": 0,
+    "requestId": "cc432891d337478db8518c9625829f21",
+    "liveList": [
+      {
+        "disableDanmakuShow": false,
+        "requestId": "cc432891d337478db8518c9625829f21",
+        "groupId": "cc432891d337478db8518c9625829f21_0_0&-124&&lf",
+        "action": 40,
+        "href": "40740702",
+        "streamName": "kszt_BkwgFx_iyC8",
+        "portrait": false,
+        "formatLikeCount": "1455",
+        "formatOnlineCount": "115",
+        "panoramic": false,
+        "bizCustomData": "{\"typeId\":402,\"liveCutStatus\":1}",
+        "cdnAuthBiz": 0,
+        "liveId": "29RchpoKMpA",
+        "likeCount": 1455,
+        "onlineCount": 115,
+        "coverUrls": [
+          "https://js-live.static.yximgs.com/bs2/ztlc/cover_29RchpoKMpA_raw.jpg?imageView2/1/w/198/h/111",
+          "https://ali-live.static.yximgs.com/bs2/ztlc/cover_29RchpoKMpA_raw.jpg"
+        ],
+        "createTime": 1790519855941,
+        "user": {
+          "action": 3,
+          "href": "40740702",
+          "isFollowing": false,
+          "followingStatus": 1,
+          "nameColor": 2,
+          "verifiedTypes": [
+            5
+          ],
+          "contributeCount": "91",
+          "sexTrend": 2,
+          "avatarFrame": 453,
+          "avatarFrameMobileImg": "https://imgs.aixifan.com/cms/2020_02_25/1582625746741.png",
+          "avatarFramePcImg": "https://imgs.aixifan.com/cms/2020_02_25/1582625675993.png",
+          "fanCountValue": 5313,
+          "liveId": "29RchpoKMpA",
+          "headUrl": "https://tx-free-imgs.acfun.cn/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png?imageView2/1/w/40/h/40|imageslim",
+          "followingCount": "560",
+          "gender": -1,
+          "headCdnUrls": [
+            {
+              "url": "https://tx-free-imgs.acfun.cn/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png?imageslim",
+              "freeTrafficCdn": true
+            },
+            {
+              "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png?imageslim",
+              "freeTrafficCdn": false
+            }
+          ],
+          "isJoinUpCollege": true,
+          "followingCountValue": 560,
+          "contributeCountValue": 91,
+          "fanCount": "5313",
+          "avatarImage": "https://tx-free-imgs.acfun.cn/cms/2020_02_25/1582625675993.png?imageslim",
+          "userHeadImgInfo": {
+            "width": 0,
+            "height": 0,
+            "size": 0,
+            "type": 0,
+            "animated": false,
+            "thumbnailImage": {
+              "cdnUrls": [
+                {
+                  "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                  "freeTrafficCdn": false
+                }
+              ]
+            },
+            "smallSharedImage": {
+              "cdnUrls": [
+                {
+                  "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                  "freeTrafficCdn": false
+                }
+              ]
+            },
+            "expandedImage": {
+              "cdnUrls": [
+                {
+                  "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                  "freeTrafficCdn": false
+                }
+              ]
+            },
+            "originImage": {
+              "cdnUrls": [
+                {
+                  "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                  "freeTrafficCdn": false
+                }
+              ]
+            },
+            "thumbnailImageCdnUrl": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png"
+          },
+          "isFollowed": false,
+          "socialMedal": {},
+          "name": "Evelonda-飒旦",
+          "signature": "大家好！这里是个人势虚拟偶像~飒旦~喜欢我的话请关注，喂香蕉吧！我会多多努力哒！",
+          "id": "40740702"
+        },
+        "authorId": 40740702,
+        "title": "西八！",
+        "type": {
+          "id": 402,
+          "name": "游戏",
+          "categoryId": 4,
+          "categoryName": "虚拟偶像"
+        },
+        "hasFansClub": true,
+        "paidShowUserBuyStatus": false
+      }
+    ],
+    "count": 1,
+    "pcursor": "1",
+    "host-name": "sn1-yopcc-rgs-mgpl59.jjogyz",
+    "totalCount": 19
+  },
+  "totalCount": 19,
+  "channelData": {},
+  "liveList": [
+    {
+      "disableDanmakuShow": false,
+      "requestId": "cc432891d337478db8518c9625829f21",
+      "groupId": "cc432891d337478db8518c9625829f21_0_0&-124&&lf",
+      "action": 40,
+      "href": "40740702",
+      "streamName": "kszt_BkwgFx_iyC8",
+      "portrait": false,
+      "formatLikeCount": "1455",
+      "formatOnlineCount": "115",
+      "panoramic": false,
+      "bizCustomData": "{\"typeId\":402,\"liveCutStatus\":1}",
+      "cdnAuthBiz": 0,
+      "liveId": "29RchpoKMpA",
+      "likeCount": 1455,
+      "onlineCount": 115,
+      "coverUrls": [
+        "https://js-live.static.yximgs.com/bs2/ztlc/cover_29RchpoKMpA_raw.jpg?imageView2/1/w/198/h/111",
+        "https://ali-live.static.yximgs.com/bs2/ztlc/cover_29RchpoKMpA_raw.jpg"
+      ],
+      "createTime": 1790519855941,
+      "user": {
+        "action": 3,
+        "href": "40740702",
+        "isFollowing": false,
+        "followingStatus": 1,
+        "nameColor": 2,
+        "verifiedTypes": [
+          5
+        ],
+        "contributeCount": "91",
+        "sexTrend": 2,
+        "avatarFrame": 453,
+        "avatarFrameMobileImg": "https://imgs.aixifan.com/cms/2020_02_25/1582625746741.png",
+        "avatarFramePcImg": "https://imgs.aixifan.com/cms/2020_02_25/1582625675993.png",
+        "fanCountValue": 5313,
+        "liveId": "29RchpoKMpA",
+        "headUrl": "https://tx-free-imgs.acfun.cn/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png?imageView2/1/w/40/h/40|imageslim",
+        "followingCount": "560",
+        "gender": -1,
+        "headCdnUrls": [
+          {
+            "url": "https://tx-free-imgs.acfun.cn/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png?imageslim",
+            "freeTrafficCdn": true
+          },
+          {
+            "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png?imageslim",
+            "freeTrafficCdn": false
+          }
+        ],
+        "isJoinUpCollege": true,
+        "followingCountValue": 560,
+        "contributeCountValue": 91,
+        "fanCount": "5313",
+        "avatarImage": "https://tx-free-imgs.acfun.cn/cms/2020_02_25/1582625675993.png?imageslim",
+        "userHeadImgInfo": {
+          "width": 0,
+          "height": 0,
+          "size": 0,
+          "type": 0,
+          "animated": false,
+          "thumbnailImage": {
+            "cdnUrls": [
+              {
+                "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                "freeTrafficCdn": false
+              }
+            ]
+          },
+          "smallSharedImage": {
+            "cdnUrls": [
+              {
+                "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                "freeTrafficCdn": false
+              }
+            ]
+          },
+          "expandedImage": {
+            "cdnUrls": [
+              {
+                "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                "freeTrafficCdn": false
+              }
+            ]
+          },
+          "originImage": {
+            "cdnUrls": [
+              {
+                "url": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png",
+                "freeTrafficCdn": false
+              }
+            ]
+          },
+          "thumbnailImageCdnUrl": "https://imgs.aixifan.com/newUpload/40740702_93f759209962473bbb91f67e00e274ab.png"
+        },
+        "isFollowed": false,
+        "socialMedal": {},
+        "name": "Evelonda-飒旦",
+        "signature": "大家好！这里是个人势虚拟偶像~飒旦~喜欢我的话请关注，喂香蕉吧！我会多多努力哒！",
+        "id": "40740702"
+      },
+      "authorId": 40740702,
+      "title": "西八！",
+      "type": {
+        "id": 402,
+        "name": "游戏",
+        "categoryId": 4,
+        "categoryName": "虚拟偶像"
+      },
+      "hasFansClub": true,
+      "paidShowUserBuyStatus": false
+    }
+  ],
+  "recommendAuthorsData": [],
+  "channelFilters": {
+    "liveChannelDisplayFilters": [
+      {
+        "displayFilters": [
+          {
+            "filterType": 1,
+            "filterId": 0,
+            "name": "全部"
+          },
+          {
+            "filterType": 1,
+            "filterId": 4,
+            "name": "虚拟偶像",
+            "cover": "https://imgs.aixifan.com/FowQSlTo_1qlJQpKSftfNhLRWyEr"
+          },
+          {
+            "filterType": 1,
+            "filterId": 1,
+            "name": "游戏",
+            "cover": "https://imgs.aixifan.com/FtGC4FHr_QoKK3SFPMu3XplFBED_"
+          },
+          {
+            "filterType": 1,
+            "filterId": 3,
+            "name": "娱乐",
+            "cover": "https://imgs.aixifan.com/FulOzINhcRHTM0pC-f8mWyAtUxhQ"
+          },
+          {
+            "filterType": 1,
+            "filterId": 2,
+            "name": "其他",
+            "cover": "https://imgs.aixifan.com/FqfkAzYf-OIM05G0vUA0KiJWoBrx"
+          }
+        ]
+      }
+    ]
+  }
+}

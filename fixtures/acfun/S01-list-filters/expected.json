@@ -1,0 +1,69 @@
+{
+  "generator": "AcfunSite.getCategores(1, 30)",
+  "value": {
+    "getCategores": [
+      {
+        "id": "acfun",
+        "name": "AcFun 直播",
+        "children": [
+          {
+            "platform": "acfun",
+            "areaType": "1",
+            "typeName": "AcFun 直播",
+            "areaId": "0",
+            "areaName": "全部",
+            "areaPic": "",
+            "shortName": null
+          },
+          {
+            "platform": "acfun",
+            "areaType": "1",
+            "typeName": "AcFun 直播",
+            "areaId": "4",
+            "areaName": "虚拟偶像",
+            "areaPic": "https://imgs.aixifan.com/FowQSlTo_1qlJQpKSftfNhLRWyEr",
+            "shortName": null
+          },
+          {
+            "platform": "acfun",
+            "areaType": "1",
+            "typeName": "AcFun 直播",
+            "areaId": "1",
+            "areaName": "游戏",
+            "areaPic": "https://imgs.aixifan.com/FtGC4FHr_QoKK3SFPMu3XplFBED_",
+            "shortName": null
+          },
+          {
+            "platform": "acfun",
+            "areaType": "1",
+            "typeName": "AcFun 直播",
+            "areaId": "3",
+            "areaName": "娱乐",
+            "areaPic": "https://imgs.aixifan.com/FulOzINhcRHTM0pC-f8mWyAtUxhQ",
+            "shortName": null
+          },
+          {
+            "platform": "acfun",
+            "areaType": "1",
+            "typeName": "AcFun 直播",
+            "areaId": "2",
+            "areaName": "其他",
+            "areaPic": "https://imgs.aixifan.com/FqfkAzYf-OIM05G0vUA0KiJWoBrx",
+            "shortName": null
+          }
+        ]
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "url": "https://live.acfun.cn/api/channel/list?count=1&pcursor=",
+        "form": {},
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "Referer": "https://live.acfun.cn/"
+        }
+      }
+    ]
+  }
+}

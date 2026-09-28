@@ -1,0 +1,67 @@
+{
+  "generator": "AcfunApi.playback(40740702): visitor/login, then startPlay with the session",
+  "value": {
+    "playback": {
+      "liveId": "29RchpoKMpA",
+      "qualities": [
+        {
+          "id": "BLUE_RAY",
+          "label": "蓝光 8M",
+          "rank": 1000130,
+          "urls": [
+            "https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8.flv?auth_key=1793123185-4-6-9r3x152m6u95u4a403y1b2n10f9qa016&oidc=alihb"
+          ]
+        },
+        {
+          "id": "SUPER",
+          "label": "蓝光 4M",
+          "rank": 1000070,
+          "urls": [
+            "https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8_hd4000.flv?auth_key=1793123185-4-3-839s499yu7l56447j9p9hg8y02328bo8&oidc=alihb&tsc=origin"
+          ]
+        },
+        {
+          "id": "HIGH",
+          "label": "超清",
+          "rank": 1000050,
+          "urls": [
+            "https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8_hd2000.flv?auth_key=1793123185-3-6-4d9i88j4081b9mn250949u1735len213&oidc=alihb&tsc=origin"
+          ]
+        },
+        {
+          "id": "STANDARD",
+          "label": "高清",
+          "rank": 1000030,
+          "urls": [
+            "https://ali-acfun-adaptive.pull.etoote.com/livecloud/kszt_BkwgFx_iyC8_sd1000.flv?auth_key=1793123185-0-8-3ey79836qg03vp3t2750n9553604npy8&oidc=alihb&tsc=origin"
+          ]
+        }
+      ]
+    },
+    "login": {
+      "method": "POST",
+      "url": "https://id.app.acfun.cn/rest/app/visitor/login",
+      "form": {
+        "sid": "acfun.api.visitor"
+      },
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "Referer": "https://live.acfun.cn/",
+        "Cookie": "_did=web_{did};",
+        "content-type": "application/x-www-form-urlencoded"
+      }
+    },
+    "startPlayQuery": {
+      "subBiz": "mainApp",
+      "kpn": "ACFUN_APP",
+      "kpf": "PC_WEB",
+      "userId": "5325718935839988",
+      "did": "web_{did}",
+      "acfun.api.visitor_st": "EfGjJ1J4sx0zoOmyiouetBIzau6wdLUsCmynSA1uqZoHYCIKbLddFojqaKi6d4H_xW2zCjKPHexqyCn3CDa2fXp_Pncen64yppSrtDVt3aFT7bbeB0o-ZMSD4YkKGqFG72vFs6IqIEdyfti4HnyEk1e0bgJW1cFTaclh50UzfpiIcRmkPSZeTwlMvWRkmtGO9GxlM7vkOYf7XsIAOuSMgxCXt-2FCUn3BeC-I6Ra9VejCKBpJ-vwrEVso22MlGuJZTY"
+    },
+    "startPlayForm": {
+      "authorId": "40740702",
+      "pullStreamType": "FLV"
+    }
+  }
+}

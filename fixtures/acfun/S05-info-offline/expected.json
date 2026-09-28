@@ -1,0 +1,93 @@
+{
+  "generator": "AcfunSite.getRoomDetailForRefresh / getLiveStatus / getRoomDetail / getRoomDetailForRecording(1) + getPlayQualites + getPlayUrls",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "roomId": "1",
+      "userId": "1",
+      "title": "",
+      "nick": "admin",
+      "avatar": "https://tx-free-imgs.acfun.cn/style/image/201907/VsoZ0Ihz28OCepqHbv2xdaXQE8YbHnpd.jpg?imageslim",
+      "cover": "",
+      "area": "",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "2125",
+      "platform": "acfun",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://live.acfun.cn/live/1"
+    },
+    "refreshRequests": [
+      {
+        "method": "GET",
+        "url": "https://live.acfun.cn/api/live/info?authorId=1",
+        "form": {},
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "Referer": "https://live.acfun.cn/"
+        }
+      }
+    ],
+    "getLiveStatus": false,
+    "getRoomDetail": {
+      "roomId": "1",
+      "userId": "1",
+      "title": "",
+      "nick": "admin",
+      "avatar": "https://tx-free-imgs.acfun.cn/style/image/201907/VsoZ0Ihz28OCepqHbv2xdaXQE8YbHnpd.jpg?imageslim",
+      "cover": "",
+      "area": "",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "2125",
+      "platform": "acfun",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://live.acfun.cn/live/1"
+    },
+    "detailRequests": [
+      {
+        "method": "GET",
+        "url": "https://live.acfun.cn/api/live/info?authorId=1",
+        "form": {},
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "Referer": "https://live.acfun.cn/"
+        }
+      }
+    ],
+    "getRoomDetailForRecording": {
+      "roomId": "1",
+      "userId": "1",
+      "title": "",
+      "nick": "admin",
+      "avatar": "https://tx-free-imgs.acfun.cn/style/image/201907/VsoZ0Ihz28OCepqHbv2xdaXQE8YbHnpd.jpg?imageslim",
+      "cover": "",
+      "area": "",
+      "watching": "",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "2125",
+      "platform": "acfun",
+      "liveStatus": 1,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false,
+      "link": "https://live.acfun.cn/live/1"
+    },
+    "getPlayQualites": [],
+    "getPlayUrls": {}
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "generator": "AcfunSearchClient.parsePage(page 1); AcfunSite.searchRooms / searchAnchors(page 1, pageSize 20)",
+  "value": {
+    "parsePage": {
+      "total": 0,
+      "rooms": []
+    },
+    "searchRooms": [],
+    "searchAnchors": [],
+    "requests": [
+      {
+        "method": "GET",
+        "url": "https://www.acfun.cn/search?keyword=%E8%B1%88%E7%BF%80%E7%AB%A1%E9%BE%98%E7%9A%93%E9%BD%83&type=user&pCursor=1&quickViewId=up-list&reqID=1&ajaxpipe=1",
+        "form": {},
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "Referer": "https://www.acfun.cn/search"
+        }
+      },
+      {
+        "method": "GET",
+        "url": "https://www.acfun.cn/search?keyword=%E8%B1%88%E7%BF%80%E7%AB%A1%E9%BE%98%E7%9A%93%E9%BD%83&type=user&pCursor=1&quickViewId=up-list&reqID=1&ajaxpipe=1",
+        "form": {},
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "Referer": "https://www.acfun.cn/search"
+        }
+      }
+    ]
+  }
+}

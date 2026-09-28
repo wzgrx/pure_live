@@ -1,0 +1,55 @@
+{
+  "generator": "AcfunSite.getRoomDetailForRefresh / getLiveStatus / getRoomDetail / getRoomDetailForRecording(99999999999) + getPlayQualites + getPlayUrls",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "throws": {
+        "type": "AcfunApiException",
+        "message": "AcFun schema",
+        "kind": "schema"
+      }
+    },
+    "refreshRequests": [
+      {
+        "method": "GET",
+        "url": "https://live.acfun.cn/api/live/info?authorId=99999999999",
+        "form": {},
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "Referer": "https://live.acfun.cn/"
+        }
+      }
+    ],
+    "getLiveStatus": {
+      "throws": {
+        "type": "AcfunApiException",
+        "message": "AcFun schema",
+        "kind": "schema"
+      }
+    },
+    "getRoomDetail": {
+      "throws": {
+        "type": "AcfunApiException",
+        "message": "AcFun schema",
+        "kind": "schema"
+      }
+    },
+    "detailRequests": [
+      {
+        "method": "GET",
+        "url": "https://live.acfun.cn/api/live/info?authorId=99999999999",
+        "form": {},
+        "headers": {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+          "Referer": "https://live.acfun.cn/"
+        }
+      }
+    ],
+    "getRoomDetailForRecording": {
+      "throws": {
+        "type": "AcfunApiException",
+        "message": "AcFun schema",
+        "kind": "schema"
+      }
+    }
+  }
+}

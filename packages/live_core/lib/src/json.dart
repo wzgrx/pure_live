@@ -8,6 +8,9 @@ const Map<String, String> _named = {
   'quot': '"',
   'apos': "'",
   'nbsp': ' ',
+  'ensp': '\u2002',
+  'emsp': '\u2003',
+  'thinsp': '\u2009',
   'mdash': '—',
   'ndash': '–',
   'hellip': '…',
@@ -24,8 +27,8 @@ const Map<String, String> _named = {
 
 final _entity = RegExp('&(#x[0-9a-fA-F]+|#[0-9]+|[a-zA-Z]+);');
 
-/// Decodes HTML character references (`&amp;`, `&nbsp;`, `&#39;`, `&#x1F600;`);
-/// unknown names stay as written.
+/// Decodes HTML character references (`&amp;`, `&nbsp;`, `&ensp;`, `&#39;`,
+/// `&#x1F600;`); unknown names stay as written.
 String decodeHtmlEntities(String text) {
   if (!text.contains('&')) return text;
   return text.replaceAllMapped(_entity, (match) {

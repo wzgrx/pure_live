@@ -1,0 +1,28 @@
+{
+  "generator": "CCSite.getRoomDetailForRefresh + getRoomDetail + getPlayQualites + getPlayUrls",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "throws": "RangeError",
+      "message": "RangeError (length): Invalid value: Valid value range is empty: 0"
+    },
+    "getRoomDetail": {
+      "roomId": "376267758",
+      "title": "",
+      "nick": "",
+      "avatar": "",
+      "cover": "",
+      "watching": "",
+      "audienceMetricType": "popularity",
+      "popularity": "",
+      "onlineViewers": "",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "cc",
+      "liveStatus": 3,
+      "isRecord": false,
+      "status": false,
+      "isCatchUp": false
+    },
+    "getPlayQualites": []
+  }
+}

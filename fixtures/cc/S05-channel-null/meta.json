@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S05-channel-null",
+  "capturedAt": "2026-09-28T09:49:00.781139Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://cc.163.com/live/channel/?channelids=null&anchor_ccid=376267758",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 09:49:01 GMT",
+      "content-type": "application/json",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "x-mock-by": "APISIX/3.10.0",
+      "server": "APISIX",
+      "x-apisix-response-start": "1790588941458",
+      "x-apisix-traceid": "ee9159fae401f692",
+      "x-apisix-routename": "CC main site mock channel"
+    }
+  },
+  "raw": {
+    "sha256": "466afcc312c61dc9552ecdf6e3874dd4bf030f7bd56824d50f158ec957304e4b",
+    "length": 40
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "M4.9 recorder (schema 1)"
+}

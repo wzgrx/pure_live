@@ -1,0 +1,48 @@
+{
+  "show_vbr": 1,
+  "vbrname_sel": "high",
+  "capture_type": 9,
+  "videourl": "https://alirelayhdl.cc.netease.com/pushstation/544d36afcaffd8355a34260267129tc2.flv?src=webcc_h5&_t=53456caae904277d&relaySecret=1790526630-pyd-tchnmk-8ip5zbk70y5yk9zjo01e99388h58367d&auth_key=1790526930-c2399732910k7ey88q0yw67j194879fx-3-047o29312955b3151ss6m3z564g83079",
+  "live_device": "pc",
+  "bakcdnfree": 0,
+  "gametype": 9141,
+  "anchor_uid": 260267129,
+  "subId": 5728999,
+  "ptscopy_enable": {
+    "high": 0,
+    "ultra": 0,
+    "original": 0,
+    "standard": 0
+  },
+  "vbrname_list": [
+    "original",
+    "ultra",
+    "high",
+    "standard"
+  ],
+  "is_horizontal": 1,
+  "record_room_audio": 1,
+  "cdn_list": [
+    "ali"
+  ],
+  "cdnfree": 0,
+  "vbr_choose_by_user": 0,
+  "cdn_sel": "ali",
+  "bakcdn_sel": "ali",
+  "transformer_id": 1,
+  "play_cfg": {
+    "url": "http://vlogger.cc.163.com/player/PLAYER_STAT_SEC",
+    "frequency": 1
+  },
+  "roomId": 2231474,
+  "bakvideourl": "https://alirelayhdl.cc.netease.com/pushstation/544d36afcaffd8355a34260267129tc2.flv?src=webcc_h5&_t=53456caae904277d&relaySecret=1790526630-pyd-tchnmk-8ip5zbk70y5yk9zjo01e99388h58367d&auth_key=1790526930-88g12i0u75639jw171w82d75255e5kj2-6-7i734268nii3hp19752y708f16323943",
+  "vbrname_mapping": {
+    "high": "高清",
+    "ultra": "超清",
+    "original": "原画",
+    "standard": "标清"
+  },
+  "multiplyIpReq": 0,
+  "stream_features": {},
+  "vbr_sel": 1000
+}

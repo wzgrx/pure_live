@@ -1,0 +1,748 @@
+{
+  "result": [
+    {
+      "squareId": "5bed591cd545681d1421bd58",
+      "type": "NETEASE",
+      "name": "炉石传说",
+      "icon": "https://ok.166.net/reunionpub/2024-09-25/ntesgod_cms/1727257834509_fhozxy.png",
+      "appKey": "ld2"
+    },
+    {
+      "squareId": "66582fab362aa845431aa96e",
+      "type": "NETEASE",
+      "name": "蛋仔滑滑",
+      "icon": "https://ok.166.net/reunionpub/2024-09-26/ntesgod_cms/1727318037334_ztoem3.png",
+      "appKey": "s10"
+    },
+    {
+      "squareId": "64a7d0ad9fa9a6000158b885",
+      "type": "NETEASE",
+      "name": "七日世界",
+      "icon": "https://ok.166.net/reunionpub/2026-01-22/ntesgod_cms/1769064283801_ac0ww4.png",
+      "appKey": "h73"
+    },
+    {
+      "squareId": "682aab149ebce25069b4492b",
+      "type": "NETEASE",
+      "name": "命运：群星",
+      "icon": "https://ok.166.net/reunionpub/2025-10-14/ntesgod_cms/1760446109985_db1ilg.png",
+      "appKey": "g108"
+    },
+    {
+      "squareId": "60a61f832a3be16207f9651c",
+      "type": "NETEASE",
+      "name": "逆水寒手游",
+      "icon": "https://ok.166.net/reunionpub/2026-06-25/ntesgod_cms/1782392035388_5rnzzx.png",
+      "appKey": "l36"
+    },
+    {
+      "squareId": "61e8de8323939b00018093ae",
+      "type": "NETEASE",
+      "name": "永劫无间手游",
+      "icon": "https://ok.166.net/reunionpub/2026-07-01/ntesgod_cms/1782907126012_ffpqsq.png",
+      "appKey": "l22"
+    },
+    {
+      "squareId": "5bed6281d545682b8bb8a761",
+      "type": "NETEASE",
+      "name": "阴阳师",
+      "icon": "https://ok.166.net/reunionpub/2026-09-08/ntesgod_cms/1788856548715_m5rwu8.png",
+      "appKey": "g37"
+    },
+    {
+      "squareId": "5bee2d70d545682b8bb8cc76",
+      "type": "NETEASE",
+      "name": "梦幻西游手游",
+      "icon": "https://ok.166.net/reunionpub/2026-09-23/ntesgod_cms/1790165468247_jrrzpp.png",
+      "appKey": "g18"
+    },
+    {
+      "squareId": "63058976010e2e0001e72a49",
+      "type": "NETEASE",
+      "name": "燕云十六声",
+      "icon": "https://ok.166.net/reunionpub/2025-01-16/ntesgod_cms/1737000206174_cttjab.png",
+      "appKey": "h72"
+    },
+    {
+      "squareId": "67cfb1d1c830b42add6b1499",
+      "type": "NETEASE",
+      "name": "头号追击",
+      "icon": "https://ok.166.net/reunionpub/2025-03-11/ntesgod_cms/1741664095586_kb2wcl.png",
+      "appKey": "lh10"
+    },
+    {
+      "squareId": "5bed3a66d5456863cff33f8a",
+      "type": "NETEASE",
+      "name": "第五人格",
+      "icon": "https://ok.166.net/reunionpub/2026-04-02/ntesgod_cms/1775096683912_sxqfao.png",
+      "appKey": "h55"
+    },
+    {
+      "squareId": "5bed4080d5456863cff340d9",
+      "type": "NETEASE",
+      "name": "暗黑破坏神：不朽",
+      "icon": "https://ok.166.net/reunionpub/2026-06-24/ntesgod_cms/1782288658055_zgrajm.png",
+      "appKey": "g67"
+    },
+    {
+      "squareId": "5cb546a0d5456870b97d9424",
+      "type": "NETEASE",
+      "name": "光·遇",
+      "icon": "https://ok.166.net/reunionpub/2026-03-19/ntesgod_cms/1773886231490_rhlfsa.png",
+      "appKey": "ma75"
+    },
+    {
+      "squareId": "614161195690033352f8c0fb",
+      "type": "NETEASE",
+      "name": "巅峰极速",
+      "icon": "https://ok.166.net/reunionpub/2026-09-23/ntesgod_cms/1790129016952_xvq7pp.png",
+      "appKey": "g112"
+    },
+    {
+      "squareId": "66b1dcd86d0caa7e0bd04023",
+      "type": "NETEASE",
+      "name": "漫威终极逆转",
+      "icon": "https://ok.166.net/reunionpub/2024-08-06/ntesgod_cms/1722936032155_rvenqn.png",
+      "appKey": "ba2"
+    },
+    {
+      "squareId": "66c7093015e017195e38de30",
+      "type": "NETEASE",
+      "name": "漫威争锋",
+      "icon": "https://ok.166.net/reunionpub/2024-08-22/ntesgod_cms/1724319565772_61tzc7.png",
+      "appKey": "x20"
+    },
+    {
+      "squareId": "5fd31fbdd54568442dc5cd5d",
+      "type": "NETEASE",
+      "name": "永劫无间",
+      "icon": "https://ok.166.net/reunionpub/2026-06-24/ntesgod_cms/1782286149721_ycl64j.png",
+      "appKey": "d90"
+    },
+    {
+      "squareId": "5bf1230fd54568184893d9a7",
+      "type": "NETEASE",
+      "name": "率土之滨",
+      "icon": "https://ok.166.net/reunionpub/2025-11-14/ntesgod_cms/1763116387272_70cziy.png",
+      "appKey": "g10"
+    },
+    {
+      "squareId": "5db948b9d545686817da6853",
+      "type": "NETEASE",
+      "name": "哈利波特：魔法觉醒",
+      "icon": "https://ok.166.net/reunionpub/2024-02-06/ntesgod_cms/1707205030672_zc96pz.png",
+      "appKey": "g92"
+    },
+    {
+      "squareId": "5bed3a7dd5456863cff33f98",
+      "type": "NETEASE",
+      "name": "明日之后",
+      "icon": "https://ok.166.net/reunionpub/2026-07-23/ntesgod_cms/1784774084073_rryiql.png",
+      "appKey": "g66"
+    },
+    {
+      "squareId": "6433fe64c8dc9d0001d35788",
+      "type": "NETEASE",
+      "name": "暂时叫它：天字七六",
+      "icon": "https://ok.166.net/reunionpub/2023-04-10/ntesgod_cms/1681131523834_au8ueb.png",
+      "appKey": "h76"
+    },
+    {
+      "squareId": "5bf6a9b7d545687607551be6",
+      "type": "NETEASE",
+      "name": "影之诗",
+      "icon": "https://ok.166.net/reunionpub/2025-06-17/ntesgod_cms/1750142159138_lafk3q.png",
+      "appKey": "ma68"
+    },
+    {
+      "squareId": "682ad9d86bf8ce27b779f5cd",
+      "type": "NETEASE",
+      "name": "遗忘之海",
+      "icon": "https://ok.166.net/reunionpub/2026-07-06/ntesgod_cms/1783306168499_hlptdi.png",
+      "appKey": "h74"
+    },
+    {
+      "squareId": "5ca34f81d545684ac58a2385",
+      "type": "NETEASE",
+      "name": "游戏王：决斗链接",
+      "icon": "https://ok.166.net/reunionpub/2019-09-02/ntesgod_cms/1567393488897_moxxen.png",
+      "appKey": "ma84"
+    },
+    {
+      "squareId": "5bed7f21d545682b8bb8c1c2",
+      "type": "NETEASE",
+      "name": "我的世界",
+      "icon": "https://ok.166.net/reunionpub/2026-02-06/ntesgod_cms/1770350225778_mgql19.png",
+      "appKey": "g79"
+    },
+    {
+      "squareId": "6392d37c3d697400012fa87b",
+      "type": "NETEASE",
+      "name": "大话西游：归来",
+      "icon": "https://ok.166.net/reunionpub/2026-04-15/ntesgod_cms/1776219551011_91o1mq.png",
+      "appKey": "g123"
+    },
+    {
+      "squareId": "6073be535787ea6fca49da69",
+      "type": "NETEASE",
+      "name": "绝对演绎",
+      "icon": "https://ok.166.net/reunionpub/2021-04-15/ntesgod_cms/1618483891341_fegosd.png",
+      "appKey": "l30"
+    },
+    {
+      "squareId": "607eef8a5787ea2d861d17f8",
+      "type": "NETEASE",
+      "name": "星际猎人-无尽的拉格朗日",
+      "icon": "https://ok.166.net/reunionpub/2026-02-04/ntesgod_cms/1770172180825_fevix7.png",
+      "appKey": "g86"
+    },
+    {
+      "squareId": "64e5a23eac8c1700011f3e22",
+      "type": "NETEASE",
+      "name": "无限大",
+      "icon": "https://ok.166.net/reunionpub/2025-09-23/ntesgod_cms/1758593231936_dci967.png",
+      "appKey": "l50"
+    },
+    {
+      "squareId": "60dc0bf15690034e6e1427b7",
+      "type": "NETEASE",
+      "name": "漫威对决",
+      "icon": "https://ok.166.net/reunionpub/2021-11-19/ntesgod_cms/1637302656074_ydgvpl.png",
+      "appKey": "lh3"
+    },
+    {
+      "squareId": "616e7852c1a0e9721bfd8656",
+      "type": "NETEASE",
+      "name": "《光·遇》云游戏",
+      "icon": "https://ok.166.net/reunionpub/2022-12-30/ntesgod_cms/1672390042494_qpcgn6.png",
+      "appKey": "ma75_wd"
+    },
+    {
+      "squareId": "66209f01b3d11600010d470f",
+      "type": "NETEASE",
+      "name": "灵兽大冒险",
+      "icon": "https://ok.166.net/reunionpub/2025-07-30/ntesgod_cms/1753881209861_dic8m1.png",
+      "appKey": "g136"
+    },
+    {
+      "squareId": "68ef7d587052cb36ecd0fb8f",
+      "type": "NETEASE",
+      "name": "星绘友晴天",
+      "icon": "https://ok.166.net/reunionpub/2025-11-14/ntesgod_cms/1763103389683_piamac.png",
+      "appKey": "l28"
+    },
+    {
+      "squareId": "6805beb55330c270b8271a32",
+      "type": "NETEASE",
+      "name": "云·七日世界",
+      "icon": "https://ok.166.net/reunionpub/2025-04-21/ntesgod_cms/1745208014829_cyjhvu.png",
+      "appKey": "h73_wd"
+    },
+    {
+      "squareId": "667e31e7be07794bf41f9ab7",
+      "type": "NETEASE",
+      "name": "乱斗西游2",
+      "icon": "https://ok.166.net/reunionpub/2024-06-28/ntesgod_cms/1719546226417_ubbxgv.png",
+      "appKey": "g4"
+    },
+    {
+      "squareId": "673c3c053d3c864d6af7ea22",
+      "type": "NETEASE",
+      "name": "万民长歌：三国",
+      "icon": "https://ok.166.net/reunionpub/2025-05-19/ntesgod_cms/1747641543486_5wild5.png",
+      "appKey": "x28"
+    },
+    {
+      "squareId": "691ed44b941b8901de23430c",
+      "type": "NETEASE",
+      "name": "妖妖棋（原代号：妖鬼）",
+      "icon": "https://ok.166.net/reunionpub/2026-01-27/ntesgod_cms/1769481910822_cgygje.png",
+      "appKey": "kk8"
+    },
+    {
+      "squareId": "69005e7084637473d5fcbc7c",
+      "type": "NETEASE",
+      "name": "暗黑破坏神Ⅳ",
+      "icon": "https://ok.166.net/reunionpub/2025-10-28/ntesgod_cms/1761631836249_0ahxbg.png",
+      "appKey": "ld3"
+    },
+    {
+      "squareId": "68301b5e6bf8ce27b779fe11",
+      "type": "NETEASE",
+      "name": "暗黑破坏神：不朽（微端）",
+      "icon": "https://ok.166.net/reunionpub/2025-05-23/ntesgod_cms/1747983120288_hxfgwj.png",
+      "appKey": "g67_wd"
+    },
+    {
+      "squareId": "68d60d03574d3e39e96440d9",
+      "type": "NETEASE",
+      "name": "大话西游2口袋版",
+      "icon": "https://ok.166.net/reunionpub/2025-09-26/ntesgod_cms/1758858491311_kllo6l.png",
+      "appKey": "g16"
+    },
+    {
+      "squareId": "6854e3609cc1bd7f418e16a6",
+      "type": "NETEASE",
+      "name": "归唐",
+      "icon": "https://ok.166.net/reunionpub/2025-06-20/ntesgod_cms/1750393686702_b3kdec.png",
+      "appKey": "dj01"
+    },
+    {
+      "squareId": "6879aec7c6f1177b7958609f",
+      "type": "NETEASE",
+      "name": "暗黑破坏神Ⅱ",
+      "icon": "https://ok.166.net/reunionpub/2025-07-18/ntesgod_cms/1752808688103_0tzvpe.png",
+      "appKey": "ld9"
+    },
+    {
+      "squareId": "690c53d8779634590edac41a",
+      "type": "NETEASE",
+      "name": "云・天下：万象",
+      "icon": "https://ok.166.net/reunionpub/2025-11-06/ntesgod_cms/1762415496980_axzig6.png",
+      "appKey": "tx2_wd"
+    },
+    {
+      "squareId": "5ca497fbd545684ac58a444d",
+      "type": "NETEASE",
+      "name": "猫和老鼠",
+      "icon": "https://ok.166.net/reunionpub/2019-08-09/ntesgod_cms/1565362186095_ldx5zg.png",
+      "appKey": "h18new"
+    },
+    {
+      "squareId": "5c78e353d5456822cdaabd1d",
+      "type": "NETEASE",
+      "name": "梦幻西游三维版",
+      "icon": "https://ok.166.net/reunionpub/2019-09-04/ntesgod_cms/1567571394863_jmuvsb.png",
+      "appKey": "g68"
+    },
+    {
+      "squareId": "5bee3fa9d545682b8bb8d11e",
+      "type": "NETEASE",
+      "name": "决战！平安京",
+      "icon": "https://ok.166.net/reunionpub/2024-03-15/ntesgod_cms/1710471176359_selsbx.png",
+      "appKey": "g78"
+    },
+    {
+      "squareId": "5bf68a54d54568760755102b",
+      "type": "NETEASE",
+      "name": "荒野行动",
+      "icon": "https://ok.166.net/reunionpub/2025-07-23/ntesgod_cms/1753259486525_o3qwiy.png",
+      "appKey": "g83"
+    },
+    {
+      "squareId": "5cd96e07d545683abe5e6c45",
+      "type": "NETEASE",
+      "name": "遇见逆水寒",
+      "icon": "https://ok.166.net/reunionpub/2019-08-30/ntesgod_cms/1567147867915_pdljcg.png",
+      "appKey": "l20"
+    },
+    {
+      "squareId": "5d5fd698d5456833a3fc189c",
+      "type": "NETEASE",
+      "name": "时空中的绘旅人",
+      "icon": "https://ok.166.net/reunionpub/2020-08-11/ntesgod_cms/1597110522341_lcfgwh.png",
+      "appKey": "g99"
+    },
+    {
+      "squareId": "5cde5501d545683c1b49ac67",
+      "type": "NETEASE",
+      "name": "天谕手游",
+      "icon": "https://ok.166.net/reunionpub/2020-10-23/ntesgod_cms/1603442121120_c0vcgd.png",
+      "appKey": "pm02"
+    },
+    {
+      "squareId": "5bf6a9e4d545687607551bfa",
+      "type": "NETEASE",
+      "name": "天下手游",
+      "icon": "https://ok.166.net/reunionpub/2025-07-22/ntesgod_cms/1753154239727_ql6em1.png",
+      "appKey": "g55"
+    },
+    {
+      "squareId": "5bed7397d545682b8bb8b79e",
+      "type": "NETEASE",
+      "name": "一梦江湖",
+      "icon": "https://ok.166.net/reunionpub/2026-01-30/ntesgod_cms/1769773034837_y8jzc6.png",
+      "appKey": "h42"
+    },
+    {
+      "squareId": "5cde77d6d5456820ff753a7e",
+      "type": "NETEASE",
+      "name": "阴阳师：妖怪屋",
+      "icon": "https://ok.166.net/reunionpub/2020-06-10/ntesgod_cms/1591755577332_iccbxr.png",
+      "appKey": "g103"
+    },
+    {
+      "squareId": "5bee2c28d545682b8bb8cc02",
+      "type": "NETEASE",
+      "name": "倩女幽魂手游",
+      "icon": "https://ok.166.net/reunionpub/2019-08-20/ntesgod_cms/1566305139844_tj3pgn.png",
+      "appKey": "l10"
+    },
+    {
+      "squareId": "5bf6a974d545687607551bdc",
+      "type": "NETEASE",
+      "name": "大唐无双手游",
+      "icon": "https://ok.166.net/reunionpub/2024-11-27/ntesgod_cms/1732697249714_8bpz61.png",
+      "appKey": "g51"
+    },
+    {
+      "squareId": "5bf6a9cbd545687607551bee",
+      "type": "NETEASE",
+      "name": "实况足球",
+      "icon": "https://ok.166.net/reunionpub/2026-07-28/ntesgod_cms/1785203619375_f9howx.png",
+      "appKey": "ma78"
+    },
+    {
+      "squareId": "5bed615dd545682b8bb8a710",
+      "type": "NETEASE",
+      "name": "梦幻西游互通版",
+      "icon": "https://ok.166.net/reunionpub/2019-08-12/ntesgod_cms/1565619425951_klblof.png",
+      "appKey": "xyq"
+    },
+    {
+      "squareId": "5ce24c18d545686baa11f179",
+      "type": "NETEASE",
+      "name": "阴阳师：百闻牌",
+      "icon": "https://ok.166.net/reunionpub/2025-02-20/ntesgod_cms/1740031583016_hwo1ym.png",
+      "appKey": "g97"
+    },
+    {
+      "squareId": "609d18b533e3b467d0fe2346",
+      "type": "NETEASE",
+      "name": "超凡先锋",
+      "icon": "https://ok.166.net/reunionpub/2021-05-18/ntesgod_cms/1621326136377_vftnbd.png",
+      "appKey": "g101"
+    },
+    {
+      "squareId": "619f88332a3be17388cf8356",
+      "type": "NETEASE",
+      "name": "第五人格极速版",
+      "icon": "https://ok.166.net/reunionpub/2021-11-25/ntesgod_cms/1637832774530_wldpmj.png",
+      "appKey": "h55_wd"
+    },
+    {
+      "squareId": "61b808f156900337aeb0a3ec",
+      "type": "NETEASE",
+      "name": "大话西游3",
+      "icon": "https://ok.166.net/reunionpub/2025-12-12/ntesgod_cms/1765535834008_gcwzqc.png",
+      "appKey": "xy3"
+    },
+    {
+      "squareId": "60054a7dd5456877d226706e",
+      "type": "NETEASE",
+      "name": "蛋仔派对",
+      "icon": "https://ok.166.net/reunionpub/2026-07-24/ntesgod_cms/1784888002941_fjqecx.png",
+      "appKey": "u5"
+    },
+    {
+      "squareId": "5bee8bbed5456836d63fdbc1",
+      "type": "NETEASE",
+      "name": "大话西游2",
+      "icon": "https://ok.166.net/reunionpub/2025-01-20/ntesgod_cms/1737376971153_mkp6io.png",
+      "appKey": "xy2"
+    },
+    {
+      "squareId": "613577ac33e3b45648a4e388",
+      "type": "NETEASE",
+      "name": "云哈利波特：魔法觉醒",
+      "icon": "https://ok.166.net/reunionpub/2023-06-07/ntesgod_cms/1686123867514_gsgrr6.png",
+      "appKey": "g92_wd"
+    },
+    {
+      "squareId": "5ce27945d545686baa11ffd5",
+      "type": "NETEASE",
+      "name": "大话西游2免费版",
+      "icon": "https://ok.166.net/reunionpub/2022-08-11/ntesgod_cms/1660183627383_chezkw.png",
+      "appKey": "dh2free"
+    },
+    {
+      "squareId": "6296d5320a4b070001e580b3",
+      "type": "NETEASE",
+      "name": "坦克连",
+      "icon": "https://ok.166.net/reunionpub/2022-11-29/ntesgod_cms/1669694913014_cr1dqu.png",
+      "appKey": "h67"
+    },
+    {
+      "squareId": "5dd4f9e4d5456858dcae1f1e",
+      "type": "NETEASE",
+      "name": "大唐无双电脑版",
+      "icon": "https://ok.166.net/reunionpub/2026-04-20/ntesgod_cms/1776693608416_x2drpq.png",
+      "appKey": "dt"
+    },
+    {
+      "squareId": "62765df323939b0001bdee65",
+      "type": "NETEASE",
+      "name": "天下手游极速版",
+      "icon": "https://ok.166.net/reunionpub/2022-05-07/ntesgod_cms/1651916845430_dq1t1y.png",
+      "appKey": "g55_wd"
+    },
+    {
+      "squareId": "5e8c2467d54568744abe6a0c",
+      "type": "NETEASE",
+      "name": "忘川风华录",
+      "icon": "https://ok.166.net/reunionpub/2022-09-27/ntesgod_cms/1664245774779_3ll93z.jpg",
+      "appKey": "pm03"
+    },
+    {
+      "squareId": "5fd736d3d54568318bb4366b",
+      "type": "NETEASE",
+      "name": "王牌竞速",
+      "icon": "https://ok.166.net/reunionpub/2021-07-02/ntesgod_cms/1625232151851_wlyfv2.png",
+      "appKey": "h65"
+    },
+    {
+      "squareId": "5ca42065d545684ac58a2dc6",
+      "type": "NETEASE",
+      "name": "Disorder",
+      "icon": "https://ok.166.net/forum/wh/forum/202104/29/172100bdi9prqus5gtjzaa.png",
+      "appKey": "g101na"
+    },
+    {
+      "squareId": "5bee2b6bd545682b8bb8cbb7",
+      "type": "NETEASE",
+      "name": "逆水寒端游",
+      "icon": "https://ok.166.net/reunionpub/2026-06-24/ntesgod_cms/1782286923937_autkcn.png",
+      "appKey": "nsh"
+    },
+    {
+      "squareId": "5cd52360d545683abe5de41f",
+      "type": "NETEASE",
+      "name": "EVE无烬星河",
+      "icon": "https://ok.166.net/reunionpub/2022-05-11/ntesgod_cms/1652262134462_zka35a.png",
+      "appKey": "g85"
+    },
+    {
+      "squareId": "5d527f50d5456804e26bc539",
+      "type": "NETEASE",
+      "name": "狼人杀",
+      "icon": "https://ok.166.net/reunionpub/2019-10-31/ntesgod_cms/1572515747567_yg5mgh.png",
+      "appKey": "ma77"
+    },
+    {
+      "squareId": "5bed626dd545682b8bb8a74f",
+      "type": "NETEASE",
+      "name": "新倩女幽魂",
+      "icon": "https://ok.166.net/reunionpub/2018-07-24/ntesgod_cms/1532404188661_icnjbz.jpg",
+      "appKey": "qn"
+    },
+    {
+      "squareId": "614194f05690033352f8c110",
+      "type": "NETEASE",
+      "name": "萤火突击",
+      "icon": "https://ok.166.net/reunionpub/2024-01-09/ntesgod_cms/1704789478763_pfuka7.png",
+      "appKey": "h75"
+    },
+    {
+      "squareId": "632077d376a0cf0001051fe4",
+      "type": "NETEASE",
+      "name": "全明星街球派对",
+      "icon": "https://ok.166.net/reunionpub/2026-08-19/ntesgod_cms/1787104657809_pbm7lg.png",
+      "appKey": "l33"
+    },
+    {
+      "squareId": "5f336c20d545683a59dc1907",
+      "type": "NETEASE",
+      "name": "梦幻西游网页版",
+      "icon": "https://ok.166.net/reunionpub/2025-01-14/ntesgod_cms/1736837371140_892ote.png",
+      "appKey": "g102"
+    },
+    {
+      "squareId": "63e31744310aaa00019bff15",
+      "type": "NETEASE",
+      "name": "大唐无双手游极速版",
+      "icon": "https://ok.166.net/reunionpub/2023-06-07/ntesgod_cms/1686123676182_rhbmcr.png",
+      "appKey": "g51_wd"
+    },
+    {
+      "squareId": "646cafc876a0cf000104dee9",
+      "type": "NETEASE",
+      "name": "天下贰",
+      "icon": "https://ok.166.net/reunionpub/2023-06-02/ntesgod_cms/1685693860675_cplufg.png",
+      "appKey": "tx2"
+    },
+    {
+      "squareId": "678629de41313f7847726508",
+      "type": "NETEASE",
+      "name": "云·永劫无间",
+      "icon": "https://ok.166.net/reunionpub/2025-01-14/ntesgod_cms/1736845768993_9asl9o.png",
+      "appKey": "l22_wd"
+    },
+    {
+      "squareId": "6749644c4e66e36d05b220c6",
+      "type": "NETEASE",
+      "name": "实况足球Online",
+      "icon": "https://ok.166.net/reunionpub/2024-11-29/ntesgod_cms/1732862839069_ybqdqb.png",
+      "appKey": "ma172"
+    },
+    {
+      "squareId": "646735733d697400017c9b22",
+      "type": "NETEASE",
+      "name": "云・逆水寒",
+      "icon": "https://img.166.net/gameyw-misc/opd/squash/20230519/114225-qm3zh8va57.png",
+      "appKey": "micro_l36"
+    },
+    {
+      "squareId": "5bed5f69d545682b8bb8a0f9",
+      "type": "NETEASE",
+      "name": "魔兽世界",
+      "icon": "https://ok.166.net/reunionpub/2026-08-19/ntesgod_cms/1787133717390_gssfcl.png",
+      "appKey": "wow"
+    },
+    {
+      "squareId": "66c6d5fb234752503aec38a5",
+      "type": "NETEASE",
+      "name": "坦克世界闪击战",
+      "icon": "https://ok.166.net/reunionpub/2024-08-22/ntesgod_cms/1724306742652_b3nbez.png",
+      "appKey": "ma67"
+    },
+    {
+      "squareId": "67b6fdca350eeb7a320be43e",
+      "type": "NETEASE",
+      "name": "冰汽时代：最后的家园",
+      "icon": "https://ok.166.net/reunionpub/2025-04-09/ntesgod_cms/1744169613406_kbwbnt.png",
+      "appKey": "g125"
+    },
+    {
+      "squareId": "5bed3d75d5456863cff3404a",
+      "type": "NETEASE",
+      "name": "守望先锋",
+      "icon": "https://ok.166.net/reunionpub/2025-02-19/ntesgod_cms/1739905004107_zkogmy.png",
+      "appKey": "ld5"
+    },
+    {
+      "squareId": "678f9580659ccd410b712e44",
+      "type": "NETEASE",
+      "name": "暗黑破坏神Ⅲ",
+      "icon": "https://ok.166.net/reunionpub/2025-01-21/ntesgod_cms/1737464287025_qowszn.png",
+      "appKey": "ld10"
+    },
+    {
+      "squareId": "65e9a5fab8d9bc0001f8943b",
+      "type": "NETEASE",
+      "name": "歧路旅人：大陆的霸者",
+      "icon": "https://ok.166.net/reunionpub/2026-02-12/ntesgod_cms/1770879009879_ioihjl.png",
+      "appKey": "ma167"
+    },
+    {
+      "squareId": "66e0127fabc34a1a670582e2",
+      "type": "NETEASE",
+      "name": "界外狂潮",
+      "icon": "https://ok.166.net/reunionpub/2024-11-29/ntesgod_cms/1732851092501_hm0fib.png",
+      "appKey": "l26"
+    },
+    {
+      "squareId": "63ae576a3d6974000177ac67",
+      "type": "NETEASE",
+      "name": "猎魂觉醒",
+      "icon": "https://ok.166.net/reunionpub/2024-06-05/ntesgod_cms/1717563674211_qnaqbv.png",
+      "appKey": "h37"
+    },
+    {
+      "squareId": "66b1900d6d0caa7e0bd03fde",
+      "type": "NETEASE",
+      "name": "山海奇旅",
+      "icon": "https://ok.166.net/reunionpub/2024-09-12/ntesgod_cms/1726123298913_deecdf.png",
+      "appKey": "s8"
+    },
+    {
+      "squareId": "67726d4e2276e452930f541d",
+      "type": "NETEASE",
+      "name": "云·燕云十六声",
+      "icon": "https://ok.166.net/reunionpub/2024-12-30/ntesgod_cms/1735565597585_osls4n.png",
+      "appKey": "h72_wd"
+    },
+    {
+      "squareId": "6927001bc4d28407b956af99",
+      "type": "NETEASE",
+      "name": "我的世界红石下载器",
+      "icon": "https://ok.166.net/reunionpub/2025-11-26/ntesgod_cms/1764163578044_4hk86n.png",
+      "appKey": "g79_minidl"
+    },
+    {
+      "squareId": "68f9fa687f7e84512b782b39",
+      "type": "NETEASE",
+      "name": "天下贰经典版",
+      "icon": "https://ok.166.net/reunionpub/2025-12-26/ntesgod_cms/1766716544249_txndxe.png",
+      "appKey": "oldclassic"
+    },
+    {
+      "squareId": "6a180ed15668fc341312e5b6",
+      "type": "NETEASE",
+      "name": "诡影藏锋",
+      "icon": "https://ok.166.net/reunionpub/2026-05-28/ntesgod_cms/1779961534959_wouyit.png",
+      "appKey": "l46"
+    },
+    {
+      "squareId": "6a47823a1105887e0fb0a56e",
+      "type": "NETEASE",
+      "name": "云·遗忘之海",
+      "icon": "https://ok.166.net/reunionpub/2026-07-03/ntesgod_cms/1783071281324_perpyo.png",
+      "appKey": "h74_wd"
+    },
+    {
+      "squareId": "6a6890c2796c37436c0f36c1",
+      "type": "NETEASE",
+      "name": "雾海之下",
+      "icon": "https://ok.166.net/reunionpub/2026-08-04/ntesgod_cms/1785830728381_0riyoc.png",
+      "appKey": "l145"
+    },
+    {
+      "squareId": "6a94f11dd6086b6d349c4743",
+      "type": "NETEASE",
+      "name": "千里之路",
+      "icon": "https://ok.166.net/reunionpub/2026-08-31/ntesgod_cms/1788145931191_f8xf1y.png",
+      "appKey": "g150"
+    },
+    {
+      "squareId": "5bed5080d5456801cd943c43",
+      "type": "NETEASE",
+      "name": "星际争霸Ⅱ",
+      "icon": "https://ok.166.net/reunionpub/2020-04-05/ntesgod_cms/1586061032271_dfzgsa.png",
+      "appKey": "ld6"
+    },
+    {
+      "squareId": "5bed7223d545682b8bb8b732",
+      "type": "NETEASE",
+      "name": "大话西游手游",
+      "icon": "https://ok.166.net/reunionpub/2026-09-16/ntesgod_cms/1789527553578_yda2q7.png",
+      "appKey": "g17"
+    },
+    {
+      "squareId": "6469a3913d697400017c9b3a",
+      "type": "NETEASE",
+      "name": "破碎之地",
+      "icon": "https://ok.166.net/reunionpub/2024-05-23/ntesgod_cms/1716431900842_pumsuy.png",
+      "appKey": "g119"
+    },
+    {
+      "squareId": "5bf65253d54568748d85395c",
+      "type": "NETEASE",
+      "name": "天下：万象",
+      "icon": "https://ok.166.net/reunionpub/2025-12-15/ntesgod_cms/1765782231683_995emv.png",
+      "appKey": "tx3"
+    },
+    {
+      "squareId": "657ad941b5b61800018cebc2",
+      "type": "NETEASE",
+      "name": "世界之外",
+      "icon": "https://ok.166.net/reunionpub/2023-12-28/ntesgod_cms/1703746552999_oekvdq.png",
+      "appKey": "g126"
+    },
+    {
+      "squareId": "645c8cbf3d697400017c9a26",
+      "type": "NETEASE",
+      "name": "突袭：暗影传说",
+      "icon": "https://ok.166.net/reunionpub/2023-05-11/ntesgod_cms/1683786968536_p3ezmy.png",
+      "appKey": "ma166"
+    },
+    {
+      "squareId": "5e5c7716d545685171a9aa49",
+      "type": "NETEASE",
+      "name": "一起优诺",
+      "icon": "https://ok.166.net/reunionpub/2020-03-05/ntesgod_cms/1583400302069_rxjfau.png",
+      "appKey": "mn1"
+    }
+  ],
+  "code": 200,
+  "errmsg": "OK"
+}

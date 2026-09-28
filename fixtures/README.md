@@ -33,3 +33,7 @@ flutter test test/fixtures_expected/douyu_test.dart                             
 ```
 
 `expected.json` 第一次生成后要人工审核再提交。之后它的每次变化都要在提交说明里讲清楚，是平台接口变了还是解析器改了。
+
+## 自己补的期望值
+
+归档时的旧版对照工具只覆盖了前五个平台（哔哩哔哩、斗鱼、虎牙、抖音、快手），3.x 也已经不能构建。其余平台重构时，`expected.json` 由该平台目录下的 `legacy_expected.dart` 生成：它把 v3 对应的解析代码原样搬进一个纯 Dart 程序，只把网络、设置、日志换成读样本或桩。每个 `expected.json` 的 `generator` 字段写明了来源；生成方法见各平台的模块记录（`docs/modules/M4.*.md`）。

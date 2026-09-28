@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S05-lives-missing",
+  "capturedAt": "2026-09-27T16:30:02.881813Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.cc.163.com/v1/activitylives/anchor/lives?anchor_ccid=88888888888",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://cc.163.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "date": "Sun, 27 Sep 2026 16:30:03 GMT",
+      "x-app-server-addr": "7.60.38.154:10000",
+      "vary": "Origin",
+      "x-apisix-traceid": "fab68e40e3363372",
+      "content-type": "application/json",
+      "server": "APISIX",
+      "x-ms-service": "activitylives",
+      "x-b3-traceid": "fab68e40e3363372",
+      "x-b3-sampled": "0",
+      "content-length": "78",
+      "x-b3-version": "1.1.68",
+      "x-apisix-ms-service": "activitylives",
+      "x-apisix-response-start": "1790526603420",
+      "x-apisix-routename": "webccms consul.api.activitylives"
+    }
+  },
+  "raw": {
+    "sha256": "b552d2d6fe619724f8a4b3ad35430a5c8de31d5e1cc6ffe87233679403ebb14e",
+    "length": 78
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

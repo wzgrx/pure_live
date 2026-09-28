@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "platform": "cc",
+  "sample": "S01-dashen-games",
+  "capturedAt": "2026-09-28T09:48:59.611086Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://inf.ds.163.com/v1/web/game-center/basic/base-info-list/by-type?gameType=NETEASE",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://ds.163.com/glive/",
+      "Origin": "https://ds.163.com"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "nginx",
+      "date": "Mon, 28 Sep 2026 09:49:00 GMT",
+      "content-type": "application/json;charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "expires": "0",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "set-cookie": "GL-XSRF-TOKEN=i42ta4et-8700-5d19-0436-85k65hc0kv24; path=/; domain=.ds.163.com; secure",
+      "x-xss-protection": "1; mode=block",
+      "pragma": "no-cache",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "strict-transport-security": "max-age=31536000 ; includeSubDomains",
+      "x-apisix-response-start": "1790588940209",
+      "vary": "Origin",
+      "access-control-allow-origin": "https://ds.163.com",
+      "access-control-allow-methods": "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,CONNECT,TRACE",
+      "access-control-max-age": "3600",
+      "access-control-allow-headers": "GL-ClientType,GL-Version,GL-CurTime,GL-DeviceId,GL-Token,GL-Uid,GL-Source,GL-CheckSum,GL-Nonce,GL-Gm-Sdk-Token,GL-UnisdkDeviceId,GL-Udid,GL-Channel,GL-ActiveSquareId,Content-Type,GL-X-XSRF-TOKEN,GL-Shield-Id,GL-Wx-Token,Cer-X-XSRF-TOKEN,Cer-CheckSum,Cer-Nonce,Cer-TimeStamp,Cer-Face-Token,Cer-ClientType,Cer-Device",
+      "access-control-allow-credentials": "true",
+      "ntes-trace-id": "15de18203641407a:15de18203641407a:0:1"
+    }
+  },
+  "raw": {
+    "sha256": "85958308eb09b98f5b5d61c8190fc9b8c0bfa9ff77adc9c8e091a8670199d82b",
+    "length": 19776
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:GL-XSRF-TOKEN",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.9 recorder (schema 1)"
+}

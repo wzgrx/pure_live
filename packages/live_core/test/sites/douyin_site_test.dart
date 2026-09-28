@@ -621,6 +621,8 @@ void main() {
       final data = room.data! as DouyinRoomData;
       expect((data.webRid, data.roomId, data.issuedAt), (_webRid, _roomId, _capturedAt));
       expect(data.streamUrl, isNotNull);
+      // enter has no start time; no extra request is made for one (M4.U).
+      expect((room.startedAt, room.restriction), (null, LiveRestriction.none));
       expect(_paths(http), [_home, _enter]);
       final enter = http.requests.last;
       expect(enter.url.queryParameters.keys, Fixture.load('douyin', 'S04-enter-live').url.queryParameters.keys);
@@ -650,10 +652,80 @@ void main() {
       expect(live.roomId, _webRid, reason: 'a room_id is one broadcast; the web_rid is the room (3.x did the same)');
       expect((live.danmakuData! as DouyinDanmakuArgs).roomId, _roomId);
       expect(await site.getPlayQualities(detail: live), isNotEmpty);
+      // M4.U (unified principle "开播时间"): reflow carries start_time.
+      expect((live.startedAt, live.restriction), (DateTime.utc(2026, 9, 20, 22, 10, 48), LiveRestriction.none));
       final ended = await site.getRoomDetail(roomId: '7376083140344859455');
       expect(ended.roomId, '745964462470');
       expect(ended.isExplicitlyOfflineNow, isTrue);
+      expect((ended.startedAt, ended.restriction), (null, null));
       expect(_paths(http), [_home, _reflow, _reflow, _enter]);
+    });
+
+    test('a follow keeps the start time while enter refreshes it live, and drops it once offline (M2.1)', () async {
+      final (:site, :http) = _replay(['S01-home', 'S05-reflow-live', 'S04-enter-live', 'S04-enter-offline']);
+      final stored = await site.getRoomDetailForRefresh(roomId: _roomId);
+      expect(stored.roomId, _webRid);
+      final refreshed = stored.mergeFrom(await site.getRoomDetailForRefresh(roomId: _webRid));
+      expect(refreshed.startedAt, DateTime.utc(2026, 9, 20, 22, 10, 48), reason: 'enter gives none: kept');
+      expect(refreshed.restriction, LiveRestriction.none);
+      final offline = LiveRoom(
+        platform: 'douyin',
+        roomId: '745964462470',
+        liveStatus: LiveStatus.live,
+        startedAt: refreshed.startedAt,
+      ).mergeFrom(await site.getRoomDetailForRefresh(roomId: '745964462470'));
+      expect((offline.isExplicitlyOfflineNow, offline.startedAt), (true, null));
+      expect(_paths(http), [_home, _reflow, _enter, _enter], reason: 'one request per refresh, as before');
+    });
+
+    /// S04-enter-live with its room edited by [edit].
+    ReplaySample editedEnter(void Function(Map<String, dynamic> room) edit) {
+      final recorded = ReplaySample.load('$_root/S04-enter-live');
+      final body = jsonDecode(utf8.decode(recorded.bytes)) as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>;
+      final room = Map<String, dynamic>.of((data['data'] as List).first as Map<String, dynamic>);
+      edit(room);
+      return ReplaySample(
+        method: 'GET',
+        url: recorded.url,
+        status: recorded.status,
+        headers: recorded.headers,
+        bytes: utf8.encode(
+          jsonEncode({
+            ...body,
+            'data': {
+              ...data,
+              'data': [room],
+            },
+          }),
+        ),
+      );
+    }
+
+    test('4-1: enter without status but room_status 0 is live, with its streams', () async {
+      final (:site, :http) = _replay([
+        'S01-home',
+        editedEnter(
+          (room) => room
+            ..remove('status')
+            ..remove('status_str'),
+        ),
+      ]);
+      final detail = await site.getRoomDetail(roomId: _webRid);
+      expect((detail.isLiveNow, detail.restriction), (true, LiveRestriction.none));
+      expect((await site.getPlayQualities(detail: detail)).first.id, 'origin');
+      expect(_paths(http), [_home, _enter]);
+    });
+
+    test('live without a stream: shown live and unplayable; playback says why (unified principle)', () async {
+      final (:site, :http) = _replay(['S01-home', editedEnter((room) => room.remove('stream_url'))]);
+      final detail = await site.getRoomDetail(roomId: _webRid);
+      expect(
+        (detail.isLiveNow, detail.restriction, detail.followGroup),
+        (true, LiveRestriction.unplayable, FollowGroup.live),
+      );
+      await expectLater(site.getPlayQualities(detail: detail), throwsA(isA<StreamUnavailable>()));
+      expect(_paths(http), [_home, _enter], reason: 'no request for the refusal');
     });
 
     test('a missing room is NotFound without the page fallback (3.x ended in a failed HEAD)', () async {

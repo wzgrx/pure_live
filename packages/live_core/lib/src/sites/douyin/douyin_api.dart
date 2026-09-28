@@ -242,7 +242,8 @@ abstract final class DouyinApi {
   /// A room may be nested (`lives.rawdata`, `aweme_info.live_info`, …, JSON
   /// strings included). Identity is `owner.web_rid`, else the room_id
   /// (REG-DOUYIN-014); `status` 2 is live; duplicates are dropped. As in 3.x
-  /// the card's picture is the streamer's large avatar, then the cover.
+  /// the card's picture is the streamer's large avatar, then the cover; a
+  /// missing nickname stays empty.
   static List<LiveRoom> searchRooms(String body, {int status = 200, Map<String, List<String>> headers = const {}}) {
     _checkHttp(body, status, headers, 'search');
     final items = <Object?>[];
@@ -298,7 +299,9 @@ abstract final class DouyinApi {
       roomId: id,
       platform: _site,
       title: _firstText([raw['title'], room['title'], item['title'], item['desc'], nickname]) ?? '',
-      nick: nickname ?? '抖音直播',
+      // No placeholder name (3.x wrote "抖音直播"): an empty one keeps a
+      // follow's stored name, and the UI shows the site name (M2.1).
+      nick: nickname ?? '',
       cover: _firstImage([owner['avatar_large'], raw['cover'], room['cover'], raw['cover_url']]),
       avatar: _firstImage([owner['avatar_thumb'], owner['avatar_large']]),
       area:
@@ -333,8 +336,8 @@ abstract final class DouyinApi {
 
   /// `room/web/enter/` for [webRid] (the identity, as requested): the room is
   /// `data.data[0]`, the streamer `data.user` when the room is offline.
-  /// `status` 2 is live, anything else (a missing status too) offline, as in
-  /// 3.x.
+  /// `status` 2 is live and any other status offline, as in 3.x; a missing
+  /// status defers to `data.room_status` (0 live, 2 ended; upgrade 4-1).
   /// 4001038 or an empty list is `NotFound`; an empty 200 (no ttwid, or a
   /// rejected signature) is `RiskControl`.
   static DouyinRoom enter(
@@ -349,12 +352,18 @@ abstract final class DouyinApi {
     if (list.isEmpty) throw NotFound(_site, 'enter: no room for $webRid');
     final room = _map(list.first);
     if (room == null) throw const ApiChanged(_site, 'enter: data.data[0] is not an object');
-    return _room(webRid: webRid.trim(), room: room, person: _map(data['user']), live: _isLive(room));
+    return _room(
+      webRid: webRid.trim(),
+      room: room,
+      person: _map(data['user']),
+      live: _isLive(room, roomStatus: data['room_status']),
+    );
   }
 
   /// `room/reflow/info/` for a room_id: the identity is `room.owner.web_rid`;
   /// `status` 4 means the queried broadcast ended (query enter with the
-  /// web_rid instead, as 3.x did).
+  /// web_rid instead, as 3.x did). It is the only room answer that carries
+  /// the broadcast's start (`start_time`), see [LiveRoom.startedAt].
   static DouyinRoom reflow(String body, {int status = 200, Map<String, List<String>> headers = const {}}) {
     final root = _checked(body, status, headers, 'reflow');
     final room = _map(_map(root['data'])?['room']);
@@ -411,6 +420,18 @@ abstract final class DouyinApi {
     );
   }
 
+  /// A detail answer (enter, reflow, room page) as a room. While live:
+  ///
+  /// - [LiveRoom.startedAt] is `start_time`, else `create_time` (Unix
+  ///   seconds; only reflow has them, lists write a placeholder 0);
+  /// - [LiveRoom.restriction] is [LiveRestriction.unplayable] when
+  ///   `stream_url` has no video quality for this client (the platform says
+  ///   live but gives no stream), else [LiveRestriction.none]. Douyin's own
+  ///   paid and secret-room fields (`paid_live_data.paid_type`,
+  ///   `basis.secret_room`) were 0 or absent in every recorded room, so they
+  ///   are not read.
+  ///
+  /// An offline room has neither.
   static DouyinRoom _room({
     required String webRid,
     required Map<String, dynamic> room,
@@ -422,6 +443,7 @@ abstract final class DouyinApi {
     final owner = _map(room['owner']);
     final online = live ? _online(room) : '';
     final total = live ? _total(room) : '';
+    final streamUrl = live ? _map(room['stream_url']) : null;
     return (
       room: LiveRoom(
         roomId: webRid,
@@ -445,17 +467,36 @@ abstract final class DouyinApi {
         link: '$_origin/$webRid',
         introduction: _text(owner?['signature']) ?? '',
         notice: '',
+        startedAt: live ? _epochSeconds(room['start_time']) ?? _epochSeconds(room['create_time']) : null,
+        restriction: live
+            ? (_variants(streamUrl).list.isEmpty ? LiveRestriction.unplayable : LiveRestriction.none)
+            : null,
       ),
       roomId: _firstId([room['id_str'], room['id']]),
-      streamUrl: live ? _map(room['stream_url']) : null,
+      streamUrl: streamUrl,
       userUniqueId: userUniqueId,
       sessionEnded: sessionEnded,
     );
   }
 
-  /// `status` 2 (number or string) is live, anything else offline, a missing
-  /// status included (3.x's rule; enter's `data.room_status` is not read).
-  static bool _isLive(Map<String, dynamic> room) => jsonInt(room['status']) == 2;
+  /// `status` 2 (number or string) is live and any other status offline
+  /// (3.x's rule). A missing status defers to enter's [roomStatus]
+  /// (`data.room_status`: 0 live, 2 ended; upgrade 4-1, the archived v4's
+  /// rule); without either the room is offline, as in 3.x.
+  static bool _isLive(Map<String, dynamic> room, {Object? roomStatus}) => switch (jsonInt(room['status'])) {
+    final int status => status == 2,
+    null => jsonInt(roomStatus) == 0,
+  };
+
+  /// A time in Unix seconds; null for 0 (Douyin's placeholder), negatives,
+  /// values too large to be seconds and anything that is not an integer.
+  static DateTime? _epochSeconds(Object? value) => switch (jsonInt(value)) {
+    final int seconds when seconds > 0 && seconds < 100000000000 => DateTime.fromMillisecondsSinceEpoch(
+      seconds * 1000,
+      isUtc: true,
+    ),
+    _ => null,
+  };
 
   /// `webcast/user/me/`: the signed-in account's nickname. 20003 ("User
   /// doesn't login", also the answer without a cookie) is `NeedsLogin`

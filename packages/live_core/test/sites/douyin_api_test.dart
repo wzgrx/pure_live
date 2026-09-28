@@ -16,21 +16,33 @@ Map<String, List<String>> _headers(Fixture fixture) => {
     '$key'.toLowerCase(): value is List ? [for (final item in value) '$item'] : ['$value'],
 };
 
+/// The room keys v4 added (M2.1), which 3.x never wrote.
+const _v4Keys = {'startedAt', 'restriction'};
+
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
 /// 3.x wrote, except [changed] (intended differences). 3.x wrote null where
 /// the immutable model writes ''. The danmaku arguments and whether the
 /// stream description was kept are not room JSON and are checked apart.
+/// The v4 keys must be exactly [added] (M4.U, see each call's reason).
 void _expectParity(
   Map<String, Object?> actual,
   Map<String, dynamic> legacy, {
   Set<String> changed = const {},
+  Map<String, Object?> added = const {},
   String? reason,
 }) {
   for (final MapEntry(:key, :value) in legacy.entries) {
     if (changed.contains(key) || key == 'danmakuData' || key == 'streamUrlKept') continue;
     expect(actual[key] ?? '', value ?? '', reason: '${reason ?? ''} $key');
   }
+  for (final key in _v4Keys) {
+    expect(actual[key], added[key], reason: '${reason ?? ''} $key (v4 key)');
+  }
 }
+
+/// M4.U (unified principle "受限", M2.1): a live detail with a video stream
+/// says it has no restriction.
+const Map<String, Object?> _playable = {'restriction': 'none'};
 
 /// The raw room objects of a list sample by identity (feed envelopes or
 /// partition items).
@@ -104,7 +116,10 @@ void main() {
 
     test('rooms, order and fields match 3.x; the online count is no longer called cumulative', () {
       final rooms = DouyinApi.feed(fixture.body, status: fixture.status, headers: _headers(fixture));
+      // No v4 keys: the list's start_time and create_time are a placeholder
+      // 0, and a list says nothing about restrictions.
       _expectListRooms(rooms, (legacy['rooms'] as List).cast<Map<String, dynamic>>(), fixture);
+      expect(_rawRooms(fixture).values.map((room) => (room['start_time'], room['create_time'])).toSet(), {(0, 0)});
       expect(rooms.map((room) => room.area).toSet(), {DouyinApi.recommendArea});
       expect(rooms.every((room) => room.isLiveNow && room.link == 'https://live.douyin.com/${room.roomId}'), isTrue);
     });
@@ -194,11 +209,13 @@ void main() {
         final legacyRoom = legacy['room'] as Map<String, dynamic>;
         final raw = (((jsonDecode(fixture.body) as Map)['data'] as Map)['data'] as List).first as Map<String, dynamic>;
         final stats = raw['stats'] as Map<String, dynamic>?;
+        // enter has no start time (no start_time or create_time): startedAt
+        // stays null; a live room with video says it has no restriction.
         switch (name) {
           case 'S04-enter-live':
             // The exact online count (stats.user_count_str "2665") instead of
             // the bucketed room.user_count_str "2000+" (REG-DOUYIN-008).
-            _expectParity(parsed.room.toJson(), legacyRoom, changed: {'onlineViewers'});
+            _expectParity(parsed.room.toJson(), legacyRoom, changed: {'onlineViewers'}, added: _playable);
             expect(legacyRoom['onlineViewers'], '2000+');
             expect(parsed.room.onlineViewers, stats!['user_count_str']);
           case 'S04-enter-live-portrait':
@@ -208,12 +225,14 @@ void main() {
               parsed.room.toJson(),
               legacyRoom,
               changed: {'onlineViewers', 'totalViewers', 'audienceMetricType'},
+              added: _playable,
             );
             expect((legacyRoom['totalViewers'], legacyRoom['onlineViewers']), ('2268', '2000+'));
             expect((parsed.room.onlineViewers, parsed.room.totalViewers, parsed.room.watching), ('2268', '', '2268'));
             expect(parsed.room.audienceMetricType, AudienceMetricType.onlineViewers);
             expect(stats!['user_count_str'], '2268');
           default:
+            // Offline: neither a start time nor a restriction.
             _expectParity(parsed.room.toJson(), legacyRoom);
         }
         expect(parsed.room.roomId, webRid, reason: 'the identity is the requested web_rid');
@@ -245,12 +264,16 @@ void main() {
   });
 
   group('S05 reflow', () {
-    test('S05-reflow-live: identity is owner.web_rid; room and qualities match 3.x', () {
+    test('S05-reflow-live: identity is owner.web_rid; room and qualities match 3.x; the start time', () {
       final fixture = _sample('S05-reflow-live');
       final parsed = DouyinApi.reflow(fixture.body, status: fixture.status, headers: _headers(fixture));
       final legacy = fixture.legacy as Map<String, dynamic>;
       final legacyRoom = legacy['room'] as Map<String, dynamic>;
-      _expectParity(parsed.room.toJson(), legacyRoom);
+      final raw = ((jsonDecode(fixture.body) as Map)['data'] as Map)['room'] as Map<String, dynamic>;
+      expect((raw['start_time'], raw['create_time']), (1789942248, 1789941901));
+      // M4.U (unified principle "开播时间", M2.1): reflow's start_time.
+      _expectParity(parsed.room.toJson(), legacyRoom, added: {..._playable, 'startedAt': '2026-09-20T22:10:48.000Z'});
+      expect(parsed.room.startedAt, DateTime.utc(2026, 9, 20, 22, 10, 48));
       expect(parsed.sessionEnded, isFalse);
       expect(parsed.roomId, fixture.url.queryParameters['room_id']);
       expect(parsed.roomId, (legacyRoom['danmakuData'] as Map)['roomId']);
@@ -267,6 +290,11 @@ void main() {
       final parsed = DouyinApi.reflow(fixture.body);
       expect(parsed.sessionEnded, isTrue);
       expect(parsed.room.roomId, (legacy['room'] as Map)['roomId']);
+      expect(
+        (parsed.room.startedAt, parsed.room.restriction),
+        (null, null),
+        reason: 'an ended broadcast has no start time to show (its start_time is 2024-06-03), nor a restriction',
+      );
       final enter = _sample('S04-enter-offline');
       final entered = DouyinApi.enter(enter.body, webRid: parsed.room.roomId);
       _expectParity(entered.room.toJson(), legacy['room'] as Map<String, dynamic>);
@@ -293,8 +321,9 @@ void main() {
 
     test('the room matches 3.x but for the introduction and the exact online count', () {
       // introduction: 3.x filled it with the title; the page has no
-      // owner.signature. onlineViewers: the exact count, not "5000+".
-      _expectParity(parsed.room.toJson(), legacyRoom, changed: {'introduction', 'onlineViewers'});
+      // owner.signature. onlineViewers: the exact count, not "5000+". The
+      // page has no start time.
+      _expectParity(parsed.room.toJson(), legacyRoom, changed: {'introduction', 'onlineViewers'}, added: _playable);
       expect(legacyRoom['introduction'], legacyRoom['title']);
       expect(parsed.room.introduction, '');
       expect(legacyRoom['onlineViewers'], '5000+');
@@ -844,6 +873,93 @@ void main() {
     });
   });
 
+  group('M4.U upgrades', () {
+    DouyinRoom enter(Map<String, Object?> data, Map<String, Object?> room) => DouyinApi.enter(
+      jsonEncode({
+        'status_code': 0,
+        'data': {
+          ...data,
+          'data': [
+            {'id_str': '7000000000000000001', 'title': 't', ...room},
+          ],
+        },
+      }),
+      webRid: '1',
+    );
+
+    Map<String, dynamic> recorded(String name) =>
+        (jsonDecode(_sample(name).body) as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    final stream = ((recorded('S04-enter-live')['data'] as List).first as Map<String, dynamic>)['stream_url'];
+
+    test('4-1: a missing status defers to data.room_status (0 live); status wins; neither is offline', () {
+      // 3.x read a missing status as offline whatever room_status said.
+      final live = enter({'room_status': 0}, {'stream_url': stream});
+      expect((live.room.effectiveLiveStatus, live.room.isLiveNow), (LiveStatus.live, true));
+      expect(live.streamUrl, isNotNull, reason: 'a live room keeps its streams');
+      expect(DouyinApi.qualities(live.streamUrl), isNotEmpty);
+      for (final (data, room, status) in [
+        ({'room_status': '0'}, <String, Object?>{'status': ''}, LiveStatus.live),
+        ({'room_status': 2}, <String, Object?>{}, LiveStatus.offline),
+        ({'room_status': 1}, <String, Object?>{}, LiveStatus.offline),
+        (<String, Object?>{}, <String, Object?>{}, LiveStatus.offline),
+        ({'room_status': 0}, <String, Object?>{'status': 4}, LiveStatus.offline),
+        ({'room_status': 2}, <String, Object?>{'status': 2}, LiveStatus.live),
+      ]) {
+        expect(enter(data, room).room.effectiveLiveStatus, status, reason: '$data $room');
+      }
+      // The recorded answers agree: status 2 with room_status 0, status 4
+      // with room_status 2 (S04).
+      for (final (name, roomStatus) in [('S04-enter-live', 0), ('S04-enter-offline', 2)]) {
+        expect(recorded(name)['room_status'], roomStatus, reason: name);
+      }
+    });
+
+    test('restriction (unified principle): a live detail without a video stream is unplayable', () {
+      expect(enter(const {}, {'status': 2, 'stream_url': stream}).room.restriction, LiveRestriction.none);
+      final bare = enter(const {}, {'status': 2}).room;
+      expect((bare.isLiveNow, bare.restriction), (true, LiveRestriction.unplayable));
+      expect(bare.followGroup, FollowGroup.live, reason: 'still live, marked on the card');
+      final audioOnly = enter(const {}, {
+        'status': 2,
+        'stream_url': {
+          'flv_pull_url': {'ao': 'https://cdn.test/a.flv?only_audio=1'},
+        },
+      }).room;
+      expect(audioOnly.restriction, LiveRestriction.unplayable);
+      expect(enter(const {}, {'status': 4}).room.restriction, isNull, reason: 'offline: nothing to restrict');
+    });
+
+    test('start time (unified principle): start_time, else create_time, in seconds; only while live', () {
+      DateTime? startedAt(Map<String, Object?> room) => enter(const {}, {'status': 2, ...room}).room.startedAt;
+      expect(startedAt({'start_time': 1789942248, 'create_time': 1789941901}), DateTime.utc(2026, 9, 20, 22, 10, 48));
+      expect(startedAt({'start_time': 0, 'create_time': '1789941901'}), DateTime.utc(2026, 9, 20, 22, 5, 1));
+      for (final value in [0, -1, '', 'x', 1789942248000, null]) {
+        expect(startedAt({'start_time': value}), isNull, reason: '$value');
+      }
+      expect(enter(const {}, {'status': 4, 'start_time': 1789942248}).room.startedAt, isNull);
+      expect(
+        enter(const {}, {'status': 2, 'start_time': 1789942248}).room.toJson()['startedAt'],
+        '2026-09-20T22:10:48.000Z',
+      );
+    });
+
+    test('placeholder (unified principle, M2.1): a search card without a nickname has an empty name', () {
+      final room = DouyinApi.searchRooms(
+        jsonEncode({
+          'status_code': 0,
+          'data': [
+            {
+              'rawdata': jsonEncode({'id_str': '9', 'status': 2, 'title': 't'}),
+            },
+          ],
+        }),
+      ).single;
+      // 3.x wrote "抖音直播"; empty keeps a follow's stored name and the UI
+      // shows the localized site name.
+      expect((room.nick, room.hasNick, room.displayNick('抖音')), ('', false, '抖音'));
+    });
+  });
+
   group('danmaku arguments', () {
     const args = DouyinDanmakuArgs(webRid: '5479', roomId: '7687', userId: '7312345678901234567', cookie: 'ttwid=s');
 
@@ -893,12 +1009,6 @@ void main() {
       reason: 'an empty room list',
     );
     expect(() => DouyinApi.reflow('{"status_code":0,"data":{"room":{"status":2}}}'), throwsA(isA<ApiChanged>()));
-    // A missing status is offline as in 3.x, whatever data.room_status says.
-    final noStatus = DouyinApi.enter(
-      '{"status_code":0,"data":{"room_status":0,"data":[{"id_str":"7000000000000000001","title":"t"}]}}',
-      webRid: '1',
-    );
-    expect(noStatus.room.isExplicitlyOfflineNow, isTrue);
     expect(
       DouyinApi.enter('{"status_code":0,"data":{"data":[{"status":"2","title":"t"}]}}', webRid: '1').room.isLiveNow,
       isTrue,

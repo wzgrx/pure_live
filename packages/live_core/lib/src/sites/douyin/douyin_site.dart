@@ -579,8 +579,10 @@ final class DouyinSite extends LiveSite
     _ => (await getRoomDetailForRefresh(roomId: detail.roomId)).data! as DouyinRoomData,
   };
 
-  /// The video qualities, best first; an offline room, or one with only
-  /// audio, is `StreamUnavailable` (3.x gave an empty list).
+  /// The video qualities, best first; an offline room, or a live one without
+  /// video (only audio or no stream; the detail marks it
+  /// [LiveRestriction.unplayable]), is `StreamUnavailable` (3.x gave an empty
+  /// list).
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
     final data = await _data(detail);

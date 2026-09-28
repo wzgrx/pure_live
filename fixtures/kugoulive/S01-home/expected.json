@@ -1,0 +1,454 @@
+{
+  "generator": "KugouLiveApi.parseCategoriesHtml + KugouLiveSite.getCategores + id + name + directoryNoticeKey",
+  "value": {
+    "parseCategoriesHtml": [
+      {
+        "id": "8000",
+        "name": "推荐"
+      },
+      {
+        "id": "100001",
+        "name": "一起玩"
+      },
+      {
+        "id": "100002",
+        "name": "音乐"
+      },
+      {
+        "id": "31050",
+        "name": "高清"
+      },
+      {
+        "id": "7024",
+        "name": "舞蹈"
+      },
+      {
+        "id": "1009",
+        "name": "颜值"
+      },
+      {
+        "id": "1001",
+        "name": "新秀"
+      },
+      {
+        "id": "3007",
+        "name": "酷次元"
+      },
+      {
+        "id": "7041",
+        "name": "搞笑"
+      },
+      {
+        "id": "31",
+        "name": "国风"
+      },
+      {
+        "id": "6201",
+        "name": "游戏女神"
+      },
+      {
+        "id": "6007",
+        "name": "王者荣耀"
+      },
+      {
+        "id": "6004",
+        "name": "和平精英"
+      },
+      {
+        "id": "6003",
+        "name": "网游竞技"
+      }
+    ],
+    "parseCategoriesHtml(no links)": [
+      {
+        "id": "8000",
+        "name": "推荐"
+      },
+      {
+        "id": "100001",
+        "name": "一起玩"
+      },
+      {
+        "id": "100002",
+        "name": "音乐"
+      },
+      {
+        "id": "31050",
+        "name": "高清"
+      },
+      {
+        "id": "7024",
+        "name": "舞蹈"
+      },
+      {
+        "id": "1009",
+        "name": "颜值"
+      },
+      {
+        "id": "1001",
+        "name": "新秀"
+      },
+      {
+        "id": "3007",
+        "name": "酷次元"
+      },
+      {
+        "id": "7041",
+        "name": "搞笑"
+      },
+      {
+        "id": "31",
+        "name": "国风"
+      },
+      {
+        "id": "6201",
+        "name": "游戏女神"
+      },
+      {
+        "id": "6007",
+        "name": "王者荣耀"
+      },
+      {
+        "id": "6004",
+        "name": "和平精英"
+      },
+      {
+        "id": "6003",
+        "name": "网游竞技"
+      }
+    ],
+    "getCategores(2, 1000)": {
+      "requests": [],
+      "value": []
+    },
+    "getCategores(1, 0)": {
+      "requests": [],
+      "value": []
+    },
+    "getCategores(1, 1000)": {
+      "requests": [
+        {
+          "url": "https://fanxing.kugou.com/",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": [
+        {
+          "id": "kugoulive",
+          "name": "酷狗直播",
+          "children": [
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "8000",
+              "areaName": "推荐",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "100001",
+              "areaName": "一起玩",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "100002",
+              "areaName": "音乐",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "31050",
+              "areaName": "高清",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "7024",
+              "areaName": "舞蹈",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "1009",
+              "areaName": "颜值",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "1001",
+              "areaName": "新秀",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "3007",
+              "areaName": "酷次元",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "7041",
+              "areaName": "搞笑",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "31",
+              "areaName": "国风",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6201",
+              "areaName": "游戏女神",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6007",
+              "areaName": "王者荣耀",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6004",
+              "areaName": "和平精英",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6003",
+              "areaName": "网游竞技",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ]
+    },
+    "getCategores(1, 1000) again": {
+      "requests": [],
+      "value": [
+        {
+          "id": "kugoulive",
+          "name": "酷狗直播",
+          "children": [
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "8000",
+              "areaName": "推荐",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "100001",
+              "areaName": "一起玩",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "100002",
+              "areaName": "音乐",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "31050",
+              "areaName": "高清",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "7024",
+              "areaName": "舞蹈",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "1009",
+              "areaName": "颜值",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "1001",
+              "areaName": "新秀",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "3007",
+              "areaName": "酷次元",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "7041",
+              "areaName": "搞笑",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "31",
+              "areaName": "国风",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6201",
+              "areaName": "游戏女神",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6007",
+              "areaName": "王者荣耀",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6004",
+              "areaName": "和平精英",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "6003",
+              "areaName": "网游竞技",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ]
+    },
+    "getCategores(1, 3)": {
+      "requests": [],
+      "value": [
+        {
+          "id": "kugoulive",
+          "name": "酷狗直播",
+          "children": [
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "8000",
+              "areaName": "推荐",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "100001",
+              "areaName": "一起玩",
+              "areaPic": null,
+              "shortName": null
+            },
+            {
+              "platform": "kugoulive",
+              "areaType": "official",
+              "typeName": "酷狗直播",
+              "areaId": "100002",
+              "areaName": "音乐",
+              "areaPic": null,
+              "shortName": null
+            }
+          ]
+        }
+      ]
+    },
+    "id": "kugoulive",
+    "name": "酷狗直播",
+    "directoryNoticeKey": "kugoulive_directory_scope"
+  }
+}

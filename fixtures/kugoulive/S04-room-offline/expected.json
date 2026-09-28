@@ -1,0 +1,240 @@
+{
+  "generator": "KugouLiveSite.getRoomDetailForRefresh + getLiveStatus + getRoomDetail + getRoomDetailForRecording + getPlayQualites + resolvePlayUrlsForRecoveryRaw + searchRoomsCancellable",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=1014306",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "1014306",
+        "userId": "5704006",
+        "title": "永久的陪伴会有吗？三富以上5000币加管理，加微信",
+        "nick": "伊伊给你唱歌听",
+        "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/ea892ea267c04de166957276a87c0420.jpg",
+        "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/98d787bc13a30225de007c678fb7328c.jpg",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "96530",
+        "platform": "kugoulive",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/1014306",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/1014306"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=1014306",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": false
+    },
+    "getRoomDetail": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=1014306",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "1014306",
+        "userId": "5704006",
+        "title": "永久的陪伴会有吗？三富以上5000币加管理，加微信",
+        "nick": "伊伊给你唱歌听",
+        "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/ea892ea267c04de166957276a87c0420.jpg",
+        "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/98d787bc13a30225de007c678fb7328c.jpg",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "96530",
+        "platform": "kugoulive",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/1014306",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/1014306"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=1014306",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "1014306",
+        "userId": "5704006",
+        "title": "永久的陪伴会有吗？三富以上5000币加管理，加微信",
+        "nick": "伊伊给你唱歌听",
+        "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/ea892ea267c04de166957276a87c0420.jpg",
+        "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/98d787bc13a30225de007c678fb7328c.jpg",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "96530",
+        "platform": "kugoulive",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/1014306",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/1014306"
+      }
+    },
+    "data.variants": [],
+    "getPlayQualites": {
+      "requests": [],
+      "value": []
+    },
+    "resolvePlayUrlsRaw": {},
+    "getPlayUrls": {},
+    "resolvePlayUrlsRaw(hls:4:1:2)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live mediaUnavailable"
+      }
+    },
+    "resolvePlayUrlsForRecoveryRaw(flv:4:1:2)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live mediaUnavailable"
+      }
+    },
+    "getPlayQualites(refreshed room)": {
+      "requests": [],
+      "value": []
+    },
+    "searchRooms": {
+      "1014306": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=1014306",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "1014306",
+            "userId": "5704006",
+            "title": "永久的陪伴会有吗？三富以上5000币加管理，加微信",
+            "nick": "伊伊给你唱歌听",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/ea892ea267c04de166957276a87c0420.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/98d787bc13a30225de007c678fb7328c.jpg",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "96530",
+            "platform": "kugoulive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/1014306",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/1014306"
+          }
+        ]
+      },
+      "https://fanxing.kugou.com/1014306": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=1014306",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "1014306",
+            "userId": "5704006",
+            "title": "永久的陪伴会有吗？三富以上5000币加管理，加微信",
+            "nick": "伊伊给你唱歌听",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/ea892ea267c04de166957276a87c0420.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/98d787bc13a30225de007c678fb7328c.jpg",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "96530",
+            "platform": "kugoulive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/1014306",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/1014306"
+          }
+        ]
+      }
+    }
+  }
+}

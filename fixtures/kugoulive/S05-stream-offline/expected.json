@@ -1,0 +1,9 @@
+{
+  "generator": "KugouLiveApi.parseMediaJson",
+  "value": {
+    "parseMediaJson(1014306)": {
+      "throws": "KugouLiveException",
+      "message": "Kugou Live mediaUnavailable"
+    }
+  }
+}

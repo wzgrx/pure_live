@@ -1,0 +1,22 @@
+{
+  "generator": "KugouLiveApi.parseMediaJson",
+  "value": {
+    "parseMediaJson(3197156)": [
+      {
+        "id": "flv:4:1:2",
+        "protocol": "flv",
+        "rate": 4,
+        "codec": 1,
+        "layout": 2,
+        "urls": [
+          "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+          "https://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+        ]
+      }
+    ],
+    "parseMediaJson(3197157)": {
+      "throws": "KugouLiveException",
+      "message": "Kugou Live mediaUnavailable"
+    }
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "generator": "KugouLiveSite.getDirectoryPage(category) + getCategoryRooms (with S01-home for the catalog)",
+  "value": {
+    "getDirectoryPage(1, 7024)": {
+      "requests": [
+        {
+          "url": "https://fx1.service.kugou.com/mfanxing-home/h5/cdn/room/index/list_v4?pid=0&kugouId=0&doubleLiveFirst=1&sysVersion=0&platform=7&device=PureLive-Web&channel=0&version=99999&longitude=0&latitude=0&appid=1010&liveTypeFilter=0&isNew=0&entranceType=0&uiMode=0&page=1&cid=7024",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "page": 1,
+        "hasMore": false,
+        "rooms": [
+          {
+            "roomId": "6865756",
+            "userId": "910454539",
+            "title": "我会一直等",
+            "nick": "九离nine",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/e1cd9b10da0ceb1c426d639e86c6874e.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/d10b58243031e0508f05e5ad156ab071.jpg",
+            "area": "酷狗直播",
+            "watching": "8",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "25897",
+            "onlineViewers": "8",
+            "totalViewers": "",
+            "followers": "19479",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/6865756",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/6865756"
+          },
+          {
+            "roomId": "50616437",
+            "userId": "184597897",
+            "title": "游戏",
+            "nick": "星联汇林知意",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/6f7dc5b2266f45518cf962328ed36062.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/4b6b9c7c6ff1c8fbf5fc915e3d77f441.jpg",
+            "area": "酷狗直播",
+            "watching": "7",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "36268",
+            "onlineViewers": "7",
+            "totalViewers": "",
+            "followers": "5106",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/50616437",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/50616437"
+          },
+          {
+            "roomId": "2429125",
+            "userId": "89284178",
+            "title": "嘿，是你的缘分",
+            "nick": "汽水summer",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/717c4129edd0061fe7fc6194019b2711.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/40002fa9d9c8392910aa6344ddabdf83.jpg",
+            "area": "酷狗直播",
+            "watching": "8",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "25626",
+            "onlineViewers": "8",
+            "totalViewers": "",
+            "followers": "11363",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/2429125",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/2429125"
+          },
+          {
+            "roomId": "5849718",
+            "userId": "1931917221",
+            "title": "确定不来看看我吗",
+            "nick": "吴百羡",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/4be9febf3aefdc8bf0228dc416cbf1bd.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/ca825f9cc8a37790cc8fec8b6e724e9e.jpg",
+            "area": "酷狗直播",
+            "watching": "4",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "19819",
+            "onlineViewers": "4",
+            "totalViewers": "",
+            "followers": "3889",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/5849718",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/5849718"
+          },
+          {
+            "roomId": "1638341",
+            "userId": "280778091",
+            "title": "距离100米",
+            "nick": "一只团团88",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/199d6c3bf7755c6646934eb3bbd8a1a0.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/4035967557f71e62bd54ba1a12b16e3a.jpg",
+            "area": "酷狗直播",
+            "watching": "3",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "45828",
+            "onlineViewers": "3",
+            "totalViewers": "",
+            "followers": "21542",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/1638341",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/1638341"
+          }
+        ]
+      }
+    },
+    "getCategoryRooms(7024, 1, 3)": {
+      "requests": [
+        {
+          "url": "https://fx1.service.kugou.com/mfanxing-home/h5/cdn/room/index/list_v4?pid=0&kugouId=0&doubleLiveFirst=1&sysVersion=0&platform=7&device=PureLive-Web&channel=0&version=99999&longitude=0&latitude=0&appid=1010&liveTypeFilter=0&isNew=0&entranceType=0&uiMode=0&page=1&cid=7024",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": [
+        {
+          "roomId": "6865756",
+          "userId": "910454539",
+          "title": "我会一直等",
+          "nick": "九离nine",
+          "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/e1cd9b10da0ceb1c426d639e86c6874e.jpg",
+          "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/d10b58243031e0508f05e5ad156ab071.jpg",
+          "area": "酷狗直播",
+          "watching": "8",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "25897",
+          "onlineViewers": "8",
+          "totalViewers": "",
+          "followers": "19479",
+          "platform": "kugoulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://fanxing.kugou.com",
+            "referer": "https://fanxing.kugou.com/6865756",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://fanxing.kugou.com/6865756"
+        },
+        {
+          "roomId": "50616437",
+          "userId": "184597897",
+          "title": "游戏",
+          "nick": "星联汇林知意",
+          "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/6f7dc5b2266f45518cf962328ed36062.jpg",
+          "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/4b6b9c7c6ff1c8fbf5fc915e3d77f441.jpg",
+          "area": "酷狗直播",
+          "watching": "7",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "36268",
+          "onlineViewers": "7",
+          "totalViewers": "",
+          "followers": "5106",
+          "platform": "kugoulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://fanxing.kugou.com",
+            "referer": "https://fanxing.kugou.com/50616437",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://fanxing.kugou.com/50616437"
+        },
+        {
+          "roomId": "2429125",
+          "userId": "89284178",
+          "title": "嘿，是你的缘分",
+          "nick": "汽水summer",
+          "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/717c4129edd0061fe7fc6194019b2711.jpg",
+          "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/40002fa9d9c8392910aa6344ddabdf83.jpg",
+          "area": "酷狗直播",
+          "watching": "8",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "25626",
+          "onlineViewers": "8",
+          "totalViewers": "",
+          "followers": "11363",
+          "platform": "kugoulive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://fanxing.kugou.com",
+            "referer": "https://fanxing.kugou.com/2429125",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://fanxing.kugou.com/2429125"
+        }
+      ]
+    },
+    "getDirectoryPage(1, other platform)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    },
+    "getDirectoryPage(1, other area type)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    },
+    "getDirectoryPage(1, 100003 before the catalog)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    },
+    "getDirectoryPage(1, 100003 after the catalog)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    }
+  }
+}

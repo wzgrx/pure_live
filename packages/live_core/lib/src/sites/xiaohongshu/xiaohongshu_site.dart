@@ -22,9 +22,12 @@ const _shortLinkTimeout = Duration(seconds: 12);
 /// search looks up the one room a room id, share link, short link or app
 /// deep link names. A room is its public share page, read anonymously as
 /// `xiaohongshu` with 3.x's headers and without following redirects; the
-/// page also holds the pull addresses. Room ids are the broadcast rooms
-/// asked for. There is no danmaku (3.x's `EmptyDanmaku`) and no account.
-/// Failures are `SiteError`s; nothing is disguised as an offline room.
+/// page also holds the pull addresses (one quality per `quality_type`, its
+/// H.264 and H.265 addresses as lines). Room ids are the broadcast rooms
+/// asked for: following the streamer across broadcasts (16-5) is blocked,
+/// see [XiaohongshuApi]. There is no danmaku (3.x's `EmptyDanmaku`), no
+/// account and no start time. Failures are `SiteError`s; nothing is
+/// disguised as an offline room.
 final class XiaohongshuSite extends LiveSite
     with LiveSiteLinks
     implements
@@ -103,8 +106,9 @@ final class XiaohongshuSite extends LiveSite
   /// page, an app deep link, or a short link followed hop by hop within
   /// `xhslink.com` (at most 12 seconds). Other keywords, and pages after
   /// the first, give nothing without a request. The room is the follow
-  /// refresh's (no stream data); a page answered with 404 gives nothing,
-  /// every other failure is thrown, as in 3.x.
+  /// refresh's (no stream data). A room that does not exist (HTTP 404, or
+  /// the page's "未找到直播间", 16-1; 3.x showed an error for the latter)
+  /// gives nothing; every other failure is thrown, as in 3.x.
   @override
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) async {
     if (page != 1) return const [];
@@ -112,8 +116,11 @@ final class XiaohongshuSite extends LiveSite
     final roomId = XiaohongshuApi.roomIdFrom(text) ?? await _shortLinkRoom(text);
     if (roomId == null) return const [];
     final response = await _page(roomId);
-    if (response.status == 404) return const [];
-    return [XiaohongshuApi.room(response.text, requestedId: roomId, status: response.status).room];
+    try {
+      return [XiaohongshuApi.room(response.text, requestedId: roomId, status: response.status).room];
+    } on NotFound {
+      return const [];
+    }
   }
 
   /// The room a short link [text] leads to, in a session of its own.
@@ -183,9 +190,10 @@ final class XiaohongshuSite extends LiveSite
 
   // Streams -------------------------------------------------------------------
 
-  /// 3.x's qualities of the stream [detail] carries (a room without it, like
-  /// a search card, is read first). A room known to be offline has none
-  /// (`StreamUnavailable`, without a request; 3.x listed nothing).
+  /// The qualities of the stream [detail] carries (a room without it, like
+  /// a search card, is read first): one per `quality_type` (16-3). A room
+  /// known to be offline has none (`StreamUnavailable`, without a request;
+  /// 3.x listed nothing).
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
       XiaohongshuApi.qualities(XiaohongshuApi.playable(await _data(detail, fresh: false)));
@@ -194,7 +202,8 @@ final class XiaohongshuSite extends LiveSite
   Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async =>
       (await resolvePlayUrlsRaw(detail: detail, quality: quality)).urls;
 
-  /// The lines of [quality] in the stream [detail] carries.
+  /// The lines of [quality] in the stream [detail] carries; a 3.x quality
+  /// id (`h264:HD`) plays its quality now ([XiaohongshuApi.qualityIdFromLegacy]).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
     required LiveRoom detail,

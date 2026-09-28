@@ -18,11 +18,11 @@ final secrets = await SecretStore.open(
 
 | 属性 | 内容 | 主要方法 |
 |---|---|---|
-| `store.follows` | 关注（`FollowedRoom`：房间快照、关注时间、自定义顺序、标签 id） | `watchAll()`、`watch(ref)`、`watchContains(ref)`、`follow(snapshot)`、`unfollow(ref)`（返回被删的项，用于撤销）、`restore(entries)`、`reorder(refs)`、`count()` |
+| `store.follows` | 关注（`FollowedRoom`：房间快照、关注时间、自定义顺序、标签 id） | `watchAll()`、`watch(ref)`、`watchContains(ref)`、`follow(snapshot)`、`unfollow(ref)`（返回被删的项，用于撤销）、`unfollowAll(refs)`（多选，一次事务）、`restore(entries)`、`reorder(refs)`、`count()` |
 | `store.rooms` | 关注、历史、标签共用的房间快照 | `update(snapshots)`（刷新结果，只更新已有房间）、`get` / `watch(ref)`、`prune()` |
 | `store.history` | 观看历史，最新在前，上限 `Settings.historyLimit`（0 = 不限） | `watchAll()`、`record(snapshot)`、`remove(ref)`、`clear(shownSnapshot)`（只删清空时看到的记录）、`restore(entries)`、`trim()` |
 | `store.searchHistory` | 最近的搜索词（F-SRC-06）：最新在前，最多 20 条，同一个词（去空白、不分大小写）只留一条；“记录搜索历史”（`Settings.recordSearchHistory`）关闭时不记录 | `watchAll()`、`record(keyword)`、`remove(keyword)`（返回被删的项）、`clear([shown])`（只删清空时看到的记录）、`restore(entries)` |
-| `store.tags` | 标签（关注分组），名称不区分大小写唯一 | `watchAll()`、`create`、`rename`、`describe`、`delete`、`reorder`、`setTagsOf(ref, ids)`、`addRooms` / `removeRooms`、`watchTagsOf(ref)` |
+| `store.tags` | 标签（关注分组），名称不区分大小写唯一 | `watchAll()`、`create`、`rename`、`describe`、`delete`、`reorder`、`setTagsOf(ref, ids)`、`addRooms` / `removeRooms`、`changeTagsOf(refs, add:, remove:)`（多选“设置分组”，一次事务）、`watchTagsOf(ref)` |
 | `store.blockRules` | 弹幕屏蔽词和屏蔽用户，按去空白小写后唯一 | `watchAll([kind])`、`add(kind, value)`、`remove(kind, value)` |
 | `store.followAreas` | 关注的分区（身份：平台、命名空间、分区 id） | `watchAll()`、`follow`、`unfollow`、`contains` |
 | `store.roomPrefs` | 房间级偏好（`volume`、`portraitLayout`） | `get` / `set`、`volumeOf` / `setVolume` |

@@ -168,6 +168,29 @@ final class TagStore {
     }
   });
 
+  /// Changes the groups of every room in [refs] in one transaction
+  /// (multi-select "设置分组", spec/product.md F-FAV-09): tags in [add] are
+  /// added to each room, tags in [remove] taken off; the other tags of each
+  /// room stay. Unknown tag ids are ignored.
+  Future<void> changeTagsOf(Iterable<RoomRef> refs, {Set<String> add = const {}, Set<String> remove = const {}}) =>
+      _db.transaction(() async {
+        final added = await _existing(add);
+        for (final ref in refs) {
+          final room = await RoomRows.ensure(_db, ref);
+          if (remove.isNotEmpty) {
+            await (_db.delete(_db.roomTags)..where((row) => row.room.equals(room) & row.tag.isIn(remove))).go();
+          }
+          for (final id in added) {
+            await _db
+                .into(_db.roomTags)
+                .insert(
+                  RoomTagsCompanion.insert(room: room, tag: id),
+                  mode: InsertMode.insertOrIgnore,
+                );
+          }
+        }
+      });
+
   Future<Set<String>> _existing(Set<String> ids) async {
     if (ids.isEmpty) return const {};
     final rows = await (_db.select(_db.tags)..where((tag) => tag.id.isIn(ids))).get();

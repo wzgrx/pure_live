@@ -63,6 +63,26 @@ void main() {
       expect(room.audience.online, isNull);
     });
 
+    test('F-FAV-09: unfollowAll removes the chosen follows at once; restore puts them back in place', () async {
+      for (final id in ['1', '2', '3', '4']) {
+        await store.follows.follow(snapshot('douyu', id));
+      }
+      final tag = await store.tags.create('常看');
+      await store.tags.setTagsOf(RoomRef('douyu', '3'), {tag.id});
+      final removed = await store.follows.unfollowAll([
+        RoomRef('douyu', '3'),
+        RoomRef('douyu', '1'),
+        RoomRef('douyu', 'not-followed'),
+      ]);
+      expect(removed.map((follow) => follow.ref.roomId), ['1', '3'], reason: 'in list order, unknown rooms skipped');
+      expect((await store.follows.all()).map((follow) => follow.ref.roomId), ['2', '4']);
+      await store.follows.restore(removed);
+      final back = await store.follows.all();
+      expect(back.map((follow) => follow.ref.roomId), ['1', '2', '3', '4']);
+      expect(back[2].tagIds, {tag.id}, reason: 'groups stay with the room');
+      expect(await store.follows.unfollowAll(const []), isEmpty);
+    });
+
     test('unfollow returns the entry for undo; restore puts it back', () async {
       await store.follows.follow(snapshot('douyu', '1'));
       await store.follows.follow(snapshot('douyu', '2'));
@@ -169,6 +189,22 @@ void main() {
       await expectLater(store.tags.rename(music.id, 'GAMES'), throwsA(isA<TagNameException>()));
       await store.tags.rename(games.id, 'GAMES');
       expect((await store.tags.all()).map((tag) => tag.name), ['GAMES', 'Music']);
+    });
+
+    test('F-FAV-09: changeTagsOf adds and removes groups of several rooms, leaving the others', () async {
+      final a = await store.tags.create('A');
+      final b = await store.tags.create('B');
+      final c = await store.tags.create('C');
+      final one = RoomRef('douyu', '1');
+      final two = RoomRef('douyu', '2');
+      await store.tags.setTagsOf(one, {a.id, c.id});
+      await store.tags.setTagsOf(two, {b.id});
+      await store.tags.changeTagsOf([one, two], add: {b.id, 'missing'}, remove: {a.id});
+      expect(await store.tags.tagsOf(one), {b.id, c.id});
+      expect(await store.tags.tagsOf(two), {b.id});
+      await store.tags.changeTagsOf([one, two], remove: {b.id});
+      expect(await store.tags.tagsOf(one), {c.id});
+      expect(await store.tags.tagsOf(two), isEmpty);
     });
 
     test('membership, reorder and delete', () async {

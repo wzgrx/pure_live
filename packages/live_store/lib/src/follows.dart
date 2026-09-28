@@ -140,7 +140,25 @@ final class FollowStore {
     return previous;
   });
 
-  /// Puts back entries returned by [unfollow] with their order and time.
+  /// Unfollows every room in [refs] in one transaction (multi-select
+  /// "取消关注", spec/product.md F-FAV-09) and returns the removed entries in
+  /// list order, for undo. Rooms that were not followed are skipped; a
+  /// failed write unfollows none.
+  Future<List<FollowedRoom>> unfollowAll(Iterable<RoomRef> refs) => _db.transaction(() async {
+    final wanted = refs.toSet();
+    final removed = [
+      for (final follow in await all())
+        if (wanted.contains(follow.ref)) follow,
+    ];
+    for (final follow in removed) {
+      final row = await RoomRows.find(_db, follow.ref);
+      await (_db.delete(_db.follows)..where((entry) => entry.room.equals(row!.id))).go();
+    }
+    return removed;
+  });
+
+  /// Puts back entries returned by [unfollow] or [unfollowAll] with their
+  /// order and time.
   Future<void> restore(Iterable<FollowedRoom> entries) => _db.transaction(() async {
     for (final entry in entries) {
       final id = await RoomRows.ensure(_db, entry.ref);

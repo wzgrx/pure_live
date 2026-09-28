@@ -14,6 +14,9 @@ const _search = 'sch.sooplive.co.kr';
 /// Where the player API and the recommendations are answered.
 const _live = 'live.sooplive.co.kr';
 
+/// Where streamers' stations are answered (7-5).
+const _station = 'chapi.sooplive.co.kr';
+
 /// More catalog pages than the platform has ever had (5 of 120 in 2026-09),
 /// so a server that never says "no more" cannot loop the catalog.
 const _maxCategoryPages = 20;
@@ -23,9 +26,14 @@ final RegExp _controlCharacters = RegExp(r'[\u0000-\u001F\u007F]');
 /// Streamer ids (3.x's link rule): letters, digits, `_` and `-`.
 final RegExp _roomIdPattern = RegExp(r'^[a-zA-Z0-9_-]+$');
 
-/// Hosts of SOOP pages 3.x recognised. The former `afreecatv.com`, which
-/// SOOP's own search answers still link to, is a later upgrade.
-const _hosts = ['sooplive.co.kr', 'sooplive.com'];
+/// Hosts of SOOP pages: 3.x's two and the former `afreecatv.com`, which
+/// SOOP's own search answers still link to (`url`: `http://afreecatv.com/<id>`,
+/// S04; 7-7).
+const _hosts = ['sooplive.co.kr', 'sooplive.com', 'afreecatv.com'];
+
+/// SOOP app links in a share text (7-9): `sooplive://…` up to the first
+/// space, quote or bracket.
+final RegExp _appLinks = RegExp(r'''sooplive://[^\s<>"'()\[\]{}，。！？、；：）》」』”’]+''', caseSensitive: false);
 
 /// First path segments that are pages there, not streamers (besides
 /// [RoomPaths.reservedSegments]).
@@ -38,9 +46,12 @@ const _pages = {'live', 'vod', 'main', 'my', 'all', 'player'};
 /// through its proxy setting; it carries 3.x's API headers and the user's
 /// cookie when one is stored (3.x sent it with every request, the media and
 /// the danmaku connection). The room page's `player_live_api` answer holds
-/// everything streams need; a stream is its assigned playlist with a key
-/// (`aid`) asked for per quality. Failures are `SiteError`s; nothing is
-/// disguised as an offline room.
+/// everything streams need; room entry also reads the streamer's station
+/// (profile, viewers, unknown streamers; 7-5). A stream is the assigned
+/// playlist with a key (`aid`) asked for per quality. Restricted broadcasts
+/// (age, password, subscribers) are live rooms marked with the
+/// restriction; asking for their stream explains it. Failures are
+/// `SiteError`s; nothing is disguised as an offline room.
 final class SoopSite extends LiveSite
     with LiveSiteLinks
     implements LiveSiteRoomRefresher, LiveSiteRecordRoomResolver, LivePlayUrlResolver, LivePlayRecoveryResolver {
@@ -207,30 +218,71 @@ final class SoopSite extends LiveSite
 
   // Rooms ---------------------------------------------------------------------
 
-  Future<LiveRoom> _detail(String roomId, {bool roomEntry = false}) async {
+  /// [roomId] trimmed, or `NotFound` without a request when it is no
+  /// streamer id.
+  static String _checked(String roomId) {
     final id = roomId.trim();
     if (!_roomIdPattern.hasMatch(id)) throw NotFound(_site, 'room id "$id" is not a SOOP streamer id');
+    return id;
+  }
+
+  Future<LiveRoom> _detail(String roomId, {bool withDanmaku = false}) async {
+    final id = _checked(roomId);
     final response = await _player(id, type: 'live');
     return SoopApi.roomDetail(
       response.text,
       requestedId: id,
       now: _now(),
       cookie: _cookie(),
-      withDanmaku: roomEntry,
-      roomEntry: roomEntry,
+      withDanmaku: withDanmaku,
       status: response.status,
     );
   }
 
-  /// The room with its broadcast and danmaku arguments. A streamer who is
-  /// not broadcasting (or blocked) is `StreamUnavailable` here: 3.x's page
-  /// reported a failed load for them, while its refresh said offline. An
-  /// age-restricted broadcast without an adult-verified cookie is
-  /// `NeedsLogin`.
-  @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) => _detail(roomId, roomEntry: true);
+  /// The station of streamer [id] (7-5): `missing` when the platform says
+  /// there is no such streamer; `station` null when the request failed or
+  /// was cancelled (the room then stays the player API's answer). Never
+  /// completes with an exception, so it can run beside the player API.
+  Future<({SoopStation? station, bool missing})> _stationOf(String id) async {
+    try {
+      final response = await _get(Uri.https(_station, '/api/$id/station'));
+      return (station: SoopApi.station(response.text, status: response.status), missing: false);
+    } on NotFound {
+      return (station: null, missing: true);
+    } on Exception {
+      // SiteError, a cancelled TransportFailure: the answer stands alone.
+      return (station: null, missing: false);
+    }
+  }
 
-  /// Follow-card refresh: the same answer without danmaku arguments.
+  /// The room with its broadcast and danmaku arguments, completed with the
+  /// streamer's station, asked for at the same time (one request more than
+  /// 3.x, at room entry only; 7-5): the profile picture, tagline, viewers,
+  /// and for a restricted broadcast the name and cover the player API
+  /// leaves out ([SoopApi.withStation]).
+  ///
+  /// A streamer who is not broadcasting is offline and a blocked one
+  /// banned (7-4; 3.x's page reported a failed load for both). An unknown
+  /// streamer, which the player API answers like an offline one, is
+  /// `NotFound` when the station says so; when the station fails the room
+  /// is offline. Restricted broadcasts are live with their restriction.
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId}) async {
+    final id = _checked(roomId);
+    final detail = _detail(id, withDanmaku: true);
+    final station = _stationOf(id);
+    final room = await detail;
+    final found = await station;
+    if (found.missing && room.effectiveLiveStatus == LiveStatus.offline) {
+      throw NotFound(_site, 'station: no streamer "$id"');
+    }
+    final profile = found.station;
+    return profile == null ? room : SoopApi.withStation(room, profile, now: _now());
+  }
+
+  /// Follow-card refresh: the player API's answer alone, without danmaku
+  /// arguments (one request, as in 3.x). An unknown streamer is offline
+  /// here, as in 3.x; a restricted broadcast is live with its restriction.
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
@@ -274,16 +326,14 @@ final class SoopSite extends LiveSite
   }) async => await _resolve(detail.roomId.trim(), quality, await _broadcast(detail, fresh: true));
 
   /// The broadcast [detail] carries, or (when it has none, or [fresh]) the
-  /// player API's; a room that is not broadcasting has none
-  /// (`StreamUnavailable`), an age-restricted one needs a login.
+  /// player API's. A room without one fails with the reason
+  /// ([SoopApi.noStream]): an age-restricted broadcast needs a login; a
+  /// password, subscribers-only or ended one is `StreamUnavailable`.
   Future<SoopRoomData> _broadcast(LiveRoom detail, {required bool fresh}) async {
     if (detail.data case final SoopRoomData data when !fresh) return data;
     final room = await _detail(detail.roomId);
-    final data = room.data;
-    if (!room.isLiveNow || data is! SoopRoomData) {
-      throw StreamUnavailable(_site, 'player_live_api: ${detail.roomId} is ${room.effectiveLiveStatus.name}');
-    }
-    return data;
+    if (room.data case final SoopRoomData data when room.isLiveNow) return data;
+    throw SoopApi.noStream(room);
   }
 
   /// 3.x's order: the playlist assigned for the preset, then its key.
@@ -308,10 +358,11 @@ final class SoopSite extends LiveSite
 
   /// A streamer page on a SOOP host: the first path segment
   /// (`play.sooplive.co.kr/{id}/{broadcast}`, `ch.sooplive.co.kr/{id}`,
-  /// `www.sooplive.com/{id}`), or the one after `station`
-  /// (`www.sooplive.co.kr/station/{id}`, which 3.x read as the streamer
-  /// "station"). Ids are lower case, as the platform writes them. Search,
-  /// VOD and other pages are not rooms.
+  /// `www.sooplive.com/{id}`, and on the former domain
+  /// `afreecatv.com/{id}`, `play.afreecatv.com/{id}`; 7-7), or the one
+  /// after `station` (`www.sooplive.co.kr/station/{id}`, which 3.x read as
+  /// the streamer "station"). Ids are lower case, as the platform writes
+  /// them. Search, VOD and other pages are not rooms.
   @override
   String? roomIdFromUrl(String url) {
     final uri = Uri.tryParse(url);
@@ -324,5 +375,14 @@ final class SoopSite extends LiveSite
     final id = segments.first.trim().toLowerCase();
     if (!RoomPaths.isRoomIdentifier(id, _roomIdPattern) || _pages.contains(id) || id == 'station') return null;
     return id;
+  }
+
+  /// Streamers of the SOOP app links in a share text (7-9):
+  /// `sooplive://player/live?broad_no=…&user_id=<id>` ([SoopApi.appLinkRoomId]).
+  @override
+  Iterable<String> roomIdsInShareText(String text) sync* {
+    for (final match in _appLinks.allMatches(text)) {
+      if (SoopApi.appLinkRoomId(match.group(0)!) case final id?) yield id;
+    }
   }
 }

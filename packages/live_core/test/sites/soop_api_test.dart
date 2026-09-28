@@ -1,7 +1,9 @@
 // SOOP parsing against the recorded samples, compared field by field with
 // 3.x's frozen output (expected.json: 3.x's soop_site.dart run over the same
 // samples, docs/modules/M4.07-soop.md). Every intended difference is listed
-// with its reason; everything else must match.
+// with its reason (the M4.U upgrades by item number, 7-1 … 7-9 in
+// docs/UPGRADES.md); everything else must match. Samples recorded for M4.U
+// (password, subscribers-only, 1440p) have no 3.x output.
 import 'dart:convert';
 import 'dart:io';
 
@@ -32,13 +34,25 @@ void _expectParity(
 }
 
 /// List cards against 3.x's: same rooms in the same order, every field
-/// equal.
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {required String reason}) {
+/// equal but [changed] and title and name, which are 3.x's with their HTML
+/// entities decoded (7-2). The new keys `startedAt` and `restriction` are
+/// checked by their own tests (3.x wrote neither).
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {required String reason, Set<String> changed = const {}}) {
   final expected = (legacy! as List).cast<Map<String, dynamic>>();
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(room.toJson(), expected[index], reason: '$reason[$index]');
+    _expectParity(room.toJson(), expected[index], changed: {'title', 'nick', ...changed}, reason: '$reason[$index]');
+    expect(room.title, decodeHtmlEntities('${expected[index]['title'] ?? ''}'), reason: '7-2 $reason[$index]');
+    expect(room.nick, decodeHtmlEntities('${expected[index]['nick'] ?? ''}'), reason: '7-2 $reason[$index]');
   }
+}
+
+/// The list entries of a sample's answer (`data.list`, `broad` or
+/// `REAL_BROAD`).
+List<Map<String, dynamic>> _entries(String name) {
+  final root = jsonDecode(_sample(name).body) as Map<String, dynamic>;
+  final list = (root['data'] as Map<String, dynamic>?)?['list'] ?? root['broad'] ?? root['REAL_BROAD'];
+  return (list as List).cast<Map<String, dynamic>>();
 }
 
 /// The `CHANNEL` of a synthetic player API answer.
@@ -91,11 +105,92 @@ void main() {
       });
     }
 
-    test('titles keep their HTML entities as 3.x showed them (decoding is a later upgrade)', () {
-      final rooms = SoopApi.areaRooms(_sample('S02-area-p1').body, areaName: '');
-      expect(rooms.where((room) => room.title.contains('&amp;')), isNotEmpty);
-      expect(SoopApi.recommendRooms(_sample('S03-main-p1').body).where((room) => room.title.contains('&gt;&lt;')), [
-        isA<LiveRoom>(),
+    test('titles and names have their HTML entities decoded (7-2; 3.x showed &amp; and &gt;&lt;)', () {
+      final area = SoopApi.areaRooms(_sample('S02-area-p1').body, areaName: '');
+      final legacy = (_legacy('S02-area-p1')['rooms'] as List).cast<Map<String, dynamic>>();
+      expect(legacy.where((room) => '${room['title']}'.contains('&amp;')), hasLength(2));
+      expect(area.where((room) => room.title.contains('&amp;') || room.title.contains('&gt;')), isEmpty);
+      expect(area.map((room) => room.title), containsAll(['랜만><', '928개 냠냠 & 역팬1000개, 방셀 핀볼']));
+      final main = SoopApi.recommendRooms(_sample('S03-main-p1').body);
+      expect(main.where((room) => room.title == '랜만><'), hasLength(1));
+      final room = SoopApi.recommendRooms(
+        jsonEncode({
+          'broad': [
+            {'user_id': 'ab12', 'broad_title': 'a &amp; b &#39;c&#39;', 'user_nick': 'x&lt;y&gt;'},
+          ],
+        }),
+      ).single;
+      expect((room.title, room.nick), ("a & b 'c'", 'x<y>'));
+    });
+
+    test('cards carry the start time: broad_start in Korean time (7-9)', () {
+      for (final (name, captured) in [
+        ('S02-area-p1', _sample('S02-area-p1').capturedAt),
+        ('S03-main-p1', _sample('S03-main-p1').capturedAt),
+        ('S04-search-p1', _sample('S04-search-p1').capturedAt),
+      ]) {
+        final rooms = switch (name) {
+          'S02-area-p1' => SoopApi.areaRooms(_sample(name).body, areaName: ''),
+          'S03-main-p1' => SoopApi.recommendRooms(_sample(name).body),
+          _ => SoopApi.searchRooms(_sample(name).body),
+        };
+        final entries = _entries(name);
+        expect(rooms, hasLength(entries.length));
+        for (final (index, room) in rooms.indexed) {
+          expect(room.startedAt, isNotNull, reason: '$name ${room.roomId}');
+          expect(room.startedAt!.isUtc, isTrue);
+          // Read as UTC the latest starts would be after the recording.
+          expect(room.startedAt!.isBefore(captured), isTrue, reason: '$name ${room.roomId}');
+          expect(
+            room.startedAt!.add(const Duration(hours: 9)).toIso8601String().substring(0, 19).replaceFirst('T', ' '),
+            '${entries[index]['broad_start']}'.substring(0, 19),
+            reason: '$name ${room.roomId}',
+          );
+        }
+      }
+      // khm11903 on the air since 19:59:31 KST, as BTIME says (S05).
+      final khm = SoopApi.areaRooms(_sample('S02-area-p1').body, areaName: '').first;
+      expect((khm.roomId, khm.startedAt), ('khm11903', DateTime.utc(2026, 9, 22, 10, 59, 31)));
+      expect(khm.toJson()['startedAt'], '2026-09-22T10:59:31.000Z');
+    });
+
+    test('cards carry the restriction; restricted broadcasts stay live cards', () {
+      final area = SoopApi.areaRooms(_sample('S02-area-p1').body, areaName: '');
+      final entries = _entries('S02-area-p1');
+      for (final (index, room) in area.indexed) {
+        final adult = entries[index]['grade'] == 19;
+        expect(room.restriction, adult ? LiveRestriction.adult : LiveRestriction.none, reason: room.roomId);
+        expect(room.isLiveNow, isTrue);
+        expect(room.followGroup, FollowGroup.live);
+      }
+      expect(area.where((room) => room.restriction == LiveRestriction.adult), hasLength(13));
+      final main = SoopApi.recommendRooms(_sample('S03-main-p1').body);
+      expect(main.where((room) => room.restriction == LiveRestriction.adult), hasLength(2));
+      expect(main.where((room) => room.restriction == LiveRestriction.none), hasLength(58));
+      // Search: `broad_grade` 19 with `is_password` Y is a password room
+      // (the stronger restriction), 19 alone adult.
+      final search = SoopApi.searchRooms(_sample('S04-search-p1').body);
+      expect(
+        {for (final room in search) room.restriction},
+        {LiveRestriction.none, LiveRestriction.password, LiveRestriction.adult},
+      );
+      expect(search.where((room) => room.restriction == LiveRestriction.password), hasLength(1));
+      expect(search.where((room) => room.restriction == LiveRestriction.adult), hasLength(1));
+      // Subscribers only (`subscription_only` 2, recorded 2026-09-29 in the
+      // recommendations; S05-live-subscribers).
+      final subscribers = SoopApi.recommendRooms(
+        jsonEncode({
+          'broad': [
+            {'user_id': 'kirababy2', 'is_password': 'N', 'subscription_only': '2', 'broad_grade': '0'},
+            {'user_id': 'ab12', 'is_password': 'N', 'subscription_only': '2', 'broad_grade': '19'},
+            {'user_id': 'cd34'},
+          ],
+        }),
+      );
+      expect(subscribers.map((room) => room.restriction), [
+        LiveRestriction.subscribersOnly,
+        LiveRestriction.subscribersOnly,
+        null,
       ]);
     });
 
@@ -127,14 +222,26 @@ void main() {
       expect(split, greaterThan(0));
     });
 
-    test('S04 search: the rooms 3.x found, without an area as in 3.x', () {
+    test("S04 search: the rooms 3.x found, with the area from broad_cate_name (7-3; 3.x's was empty)", () {
       final fixture = _sample('S04-search-p1');
       final rooms = SoopApi.searchRooms(fixture.body, status: fixture.status);
-      _expectRooms(rooms, _legacy('S04-search-p1')['rooms'], reason: 'S04');
-      // 3.x read `standard_broad_cate_name`, which the answers no longer
-      // carry; `broad_cate_name` has the area (a later upgrade).
-      expect(rooms.every((room) => room.area == ''), isTrue);
-      expect(fixture.body, contains('"broad_cate_name"'));
+      // area: 3.x read `standard_broad_cate_name`, which the answers no
+      // longer carry, and showed none (7-3).
+      _expectRooms(rooms, _legacy('S04-search-p1')['rooms'], reason: 'S04', changed: {'area'});
+      final legacy = (_legacy('S04-search-p1')['rooms'] as List).cast<Map<String, dynamic>>();
+      expect(legacy.every((room) => (room['area'] ?? '') == ''), isTrue);
+      expect(rooms.map((room) => room.area), [for (final entry in _entries('S04-search-p1')) entry['broad_cate_name']]);
+      expect(rooms.first.area, '종합게임');
+      expect(rooms.every((room) => room.area!.isNotEmpty), isTrue);
+      // Without broad_cate_name, 3.x's field is still read.
+      final old = SoopApi.searchRooms(
+        jsonEncode({
+          'REAL_BROAD': [
+            {'user_id': 'ab12', 'standard_broad_cate_name': 'x &amp; y'},
+          ],
+        }),
+      );
+      expect(old.single.area, 'x & y');
     });
 
     test('an empty search page is empty although HAS_MORE_LIST says more (REG-SOOP-007)', () {
@@ -215,6 +322,12 @@ void main() {
       expect(room.userId, isNull);
       expect(room.cover, '${expected['cover']}'.replaceFirst('{now}', '${_now.millisecondsSinceEpoch}'));
       expect(room.link, 'https://play.sooplive.co.kr/khm11903');
+      // New keys (3.x wrote neither): BTIME 455474 s before the recording
+      // is the station's and the lists' broad_start, 19:59:31 KST; BPWD N,
+      // P_MIN_TIER 0 and GRADE 0 say no restriction.
+      expect(fixture.capturedAt.difference(_now).inSeconds, 0);
+      expect(room.startedAt, DateTime.utc(2026, 9, 22, 10, 59, 31));
+      expect(room.restriction, LiveRestriction.none);
       final data = room.data! as SoopRoomData;
       final legacyData = expected['data'] as Map<String, dynamic>;
       expect(data.bno, legacyData['bno']);
@@ -249,51 +362,127 @@ void main() {
     });
 
     for (final (name, id) in [('S05-live-offline', 'phonics1'), ('S05-live-missing', 'zzzqqqxxxnotexist1')]) {
-      test('$name: RESULT 0 is offline on refresh and recording, a failed load at room entry, as in 3.x', () {
+      test('$name: RESULT 0 is offline at every depth (7-4; 3.x: a failed load at room entry)', () {
         final fixture = _sample(name);
         final legacy = _legacy(name);
-        final room = SoopApi.roomDetail(fixture.body, requestedId: id, now: _now);
+        final room = SoopApi.roomDetail(fixture.body, requestedId: id, now: _now, withDanmaku: true);
         _expectParity(room.toJson(), legacy['getRoomDetailForRefresh'] as Map<String, dynamic>, reason: name);
         _expectParity(room.toJson(), legacy['getRoomDetailForRecording'] as Map<String, dynamic>, reason: name);
-        expect(room.effectiveLiveStatus, LiveStatus.offline, reason: 'REG-SOOP-005 kept: an unknown id too');
+        expect(room.effectiveLiveStatus, LiveStatus.offline, reason: 'the player API cannot tell an unknown id');
         expect(room.data, isNull);
+        expect(room.startedAt, isNull);
+        expect(room.restriction, isNull, reason: 'no broadcast to judge');
         // 3.x's room entry lumped RESULT 0 with failures: an error room,
-        // state unknown, "获取房间信息失败".
-        expect((legacy['getRoomDetail'] as Map)['liveStatus'], LiveStatus.unknown.index);
-        expect(
-          () => SoopApi.roomDetail(fixture.body, requestedId: id, now: _now, withDanmaku: true, roomEntry: true),
-          throwsA(isA<StreamUnavailable>()),
+        // state unknown, "获取房间信息失败". Now offline there too (7-4);
+        // the station tells an unknown streamer apart (7-5).
+        _expectParity(
+          room.toJson(),
+          legacy['getRoomDetail'] as Map<String, dynamic>,
+          changed: {'liveStatus', 'watching'},
+          reason: '7-4 $name',
         );
+        expect((legacy['getRoomDetail'] as Map)['liveStatus'], LiveStatus.unknown.index);
+        expect(room.toJson()['liveStatus'], LiveStatus.offline.index);
         expect(legacy['getPlayQualites'], isEmpty);
       });
     }
 
-    test('S05 adult: RESULT -6 is NeedsLogin (3.x: an unknown-state room, and StateError on refresh)', () {
+    test('S05 adult: RESULT -6 is a live, age-restricted room (7-5; 3.x: unknown state, StateError)', () {
       final fixture = _sample('S05-live-adult');
       final legacy = _legacy('S05-live-adult');
-      expect(() => SoopApi.roomDetail(fixture.body, requestedId: 'bumzi98', now: _now), throwsA(isA<NeedsLogin>()));
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'bumzi98', now: fixture.capturedAt);
+      expect(room.isLiveNow, isTrue);
+      expect(room.followGroup, FollowGroup.live);
+      expect(room.restriction, LiveRestriction.adult);
+      expect(room.isRestricted, isTrue);
+      expect(room.title, '다시보기 X 추석 토끼 떡 찧다가 술마시는중');
+      // BTIME 14665 before the recording: 22:26:31 KST, the station's
+      // broad_start (S05-station-adult).
+      expect(room.startedAt, DateTime.utc(2026, 9, 27, 13, 26, 31));
+      expect(room.data, isNull, reason: 'no stream without an adult-verified login');
+      expect(room.nick, '', reason: 'the answer names no streamer; the station does at room entry');
+      expect(SoopApi.noStream(room), isA<NeedsLogin>());
       expect((legacy['getRoomDetail'] as Map)['liveStatus'], LiveStatus.unknown.index);
       expect(((legacy['getRoomDetailForRefresh'] as Map)['throws'] as Map)['type'], 'StateError');
       expect(((legacy['getRoomDetailForRecording'] as Map)['throws'] as Map)['type'], 'StateError');
     });
 
-    test("RESULT -2 is banned (3.x's refresh), a failed load at room entry; no VIEWPRESET is offline", () {
-      final banned = SoopApi.roomDetail(_channel({'RESULT': -2}), requestedId: 'ab12', now: _now);
-      expect(banned.effectiveLiveStatus, LiveStatus.banned);
+    test('S05 adult with a password: RESULT -8 is live and password-protected (7-8)', () {
+      final fixture = _sample('S05-live-adult-password');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'qazeee', now: fixture.capturedAt);
+      expect(room.isLiveNow, isTrue);
+      expect(room.restriction, LiveRestriction.password, reason: 'a login alone does not open it');
+      expect(room.title, '회복중..');
       expect(
-        () => SoopApi.roomDetail(_channel({'RESULT': -2}), requestedId: 'ab12', now: _now, roomEntry: true),
-        throwsA(isA<StreamUnavailable>()),
+        room.startedAt,
+        fixture.capturedAt.subtract(const Duration(seconds: 13497)).copyWith(microsecond: 0, millisecond: 0),
       );
-      // 3.x's rule at every depth, room entry included: RESULT 1 without
-      // presets is an offline room.
+      expect(
+        SoopApi.noStream(room),
+        isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('password')),
+      );
+    });
+
+    test('S05 subscribers only: RESULT -14 is live for subscribers only, without title or time', () {
+      final fixture = _sample('S05-live-subscribers');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'kirababy2', now: _now, withDanmaku: true);
+      expect(room.isLiveNow, isTrue);
+      expect(room.restriction, LiveRestriction.subscribersOnly);
+      expect((room.title, room.startedAt, room.danmakuData), ('', null, null));
+      expect(
+        SoopApi.noStream(room),
+        isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('subscribers')),
+      );
+    });
+
+    test('S05 password: RESULT 1 with BPWD Y is live, password-protected, with its broadcast (7-8)', () {
+      final fixture = _sample('S05-live-password');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'nsh100427', now: fixture.capturedAt);
+      expect(room.isLiveNow, isTrue);
+      expect(room.restriction, LiveRestriction.password);
+      expect((room.data! as SoopRoomData).password, isTrue);
+      expect(room.title, '다잉라이트');
+      expect(room.nick, '아스모.');
+      expect(
+        room.startedAt,
+        fixture.capturedAt.subtract(const Duration(seconds: 9694)).copyWith(microsecond: 0, millisecond: 0),
+      );
+    });
+
+    test('RESULT 1 restrictions: a password before subscribers only before adult; none when all are clear', () {
+      Map<String, Object?> live(Map<String, Object?> flags) => {
+        'RESULT': 1,
+        'BNO': '1',
+        'VIEWPRESET': [
+          {'name': 'original'},
+        ],
+        ...flags,
+      };
+      LiveRestriction? restriction(Map<String, Object?> flags) =>
+          SoopApi.roomDetail(_channel(live(flags)), requestedId: 'ab12', now: _now).restriction;
+      expect(restriction({'BPWD': 'N', 'P_MIN_TIER': '0', 'GRADE': '0'}), LiveRestriction.none);
+      expect(restriction({'BPWD': 'Y', 'P_MIN_TIER': '2', 'GRADE': '19'}), LiveRestriction.password);
+      expect(restriction({'BPWD': 'N', 'P_MIN_TIER': '2', 'GRADE': '19'}), LiveRestriction.subscribersOnly);
+      expect(restriction({'BPWD': 'N', 'P_MIN_TIER': '0', 'GRADE': '19'}), LiveRestriction.adult);
+      expect(restriction({}), isNull, reason: 'no flag, no judgement');
+    });
+
+    test('RESULT -2 is banned at every depth (7-4); no VIEWPRESET is offline', () {
+      final banned = SoopApi.roomDetail(_channel({'RESULT': -2}), requestedId: 'ab12', now: _now, withDanmaku: true);
+      expect(banned.effectiveLiveStatus, LiveStatus.banned);
+      expect(banned.restriction, isNull);
+      expect(SoopApi.noStream(banned), isA<StreamUnavailable>());
+      // 3.x's rule at every depth: RESULT 1 without presets is an offline
+      // room.
       final idle = SoopApi.roomDetail(
-        _channel({'RESULT': 1, 'BJID': 'ab12', 'BNO': '9', 'TITLE': 'x'}),
+        _channel({'RESULT': 1, 'BJID': 'ab12', 'BNO': '9', 'TITLE': 'x', 'BTIME': 60, 'BPWD': 'N'}),
         requestedId: 'ab12',
         now: _now,
-        roomEntry: true,
+        withDanmaku: true,
       );
       expect(idle.effectiveLiveStatus, LiveStatus.offline);
       expect(idle.data, isNull, reason: 'no broadcast to stream');
+      expect((idle.startedAt, idle.restriction), (null, null), reason: 'not live');
     });
 
     test('missing fields are empty (3.x wrote "null" or threw); a password broadcast is marked', () {
@@ -336,18 +525,214 @@ void main() {
     });
   });
 
+  group('station (7-5)', () {
+    SoopStation station(String name) {
+      final fixture = _sample(name);
+      return SoopApi.station(fixture.body, status: fixture.status);
+    }
+
+    test('S05 station: the profile, and the broadcast while one is on', () {
+      final live = station('S05-station-live');
+      expect(live.nick, '봉준');
+      expect(live.avatar, 'https://profile.img.sooplive.co.kr/LOGO/kh/khm11903/khm11903.jpg');
+      expect(live.introduction, '스타1 전프로게이머 김봉준 입니다.');
+      final broadcast = live.broadcast!;
+      expect(broadcast.bno, '297314125');
+      expect(broadcast.title, '봉준');
+      expect(broadcast.viewers, '35465');
+      expect(broadcast.startedAt, DateTime.utc(2026, 9, 22, 10, 59, 31), reason: 'broad_start 19:59:31 KST');
+      expect(broadcast.restriction, LiveRestriction.none);
+      final offline = station('S05-station-offline');
+      expect((offline.nick, offline.broadcast), ('김민교.', null));
+      expect(offline.introduction, '실력과 재미와 감동을 겸비한 방송');
+      final adult = station('S05-station-adult');
+      expect(adult.broadcast!.restriction, LiveRestriction.adult);
+      expect(adult.broadcast!.viewers, '3209');
+      expect(adult.introduction, '', reason: 'an empty station_title');
+      expect(station('S05-station-subscribers').broadcast!.restriction, LiveRestriction.subscribersOnly);
+    });
+
+    test('an unknown streamer is NotFound (HTTP 515, code 9000); other failures as every answer', () {
+      final missing = _sample('S05-station-missing');
+      expect(missing.status, 515);
+      expect(() => SoopApi.station(missing.body, status: missing.status), throwsA(isA<NotFound>()));
+      expect(() => SoopApi.station('bad gateway', status: 502), throwsA(isA<NetworkFailure>()));
+      expect(() => SoopApi.station('{"x":1}'), throwsA(isA<ApiChanged>()));
+    });
+
+    test("live: the station adds the profile picture, tagline and viewers; the player API's answer stays", () {
+      final fixture = _sample('S05-live-live');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'khm11903', now: _now, withDanmaku: true);
+      final entry = SoopApi.withStation(room, station('S05-station-live'), now: _now);
+      expect(entry.avatar, 'https://profile.img.sooplive.co.kr/LOGO/kh/khm11903/khm11903.jpg');
+      expect(entry.introduction, '스타1 전프로게이머 김봉준 입니다.');
+      expect((entry.onlineViewers, entry.watching), ('35465', '35465'));
+      expect(entry.effectiveAudienceMetricType, AudienceMetricType.onlineViewers);
+      for (final (label, value, expected) in [
+        ('title', entry.title, room.title),
+        ('nick', entry.nick, room.nick),
+        ('cover', entry.cover, room.cover),
+        ('area', entry.area, room.area),
+      ]) {
+        expect(value, expected, reason: label);
+      }
+      expect(entry.startedAt, room.startedAt);
+      expect(entry.restriction, LiveRestriction.none);
+      expect(entry.data, same(room.data));
+      expect(entry.danmakuData, same(room.danmakuData));
+      // 3.x's room: no introduction, no audience, the built avatar.
+      _expectParity(
+        entry.toJson(),
+        _legacy('S05-live-live')['getRoomDetail'] as Map<String, dynamic>,
+        changed: {'userId', 'cover', 'data', 'danmakuData', 'avatar', 'introduction', 'watching', 'onlineViewers'},
+        reason: '7-5',
+      );
+    });
+
+    test('a live answer keeps its figures when the station names another broadcast', () {
+      final fixture = _sample('S05-live-live');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'khm11903', now: _now);
+      const other = SoopStation(
+        nick: 'x',
+        avatar: 'https://a/b.jpg',
+        broadcast: SoopStationBroadcast(bno: '1', viewers: '5', restriction: LiveRestriction.password),
+      );
+      final entry = SoopApi.withStation(room, other, now: _now);
+      expect((entry.avatar, entry.onlineViewers, entry.restriction), ('https://a/b.jpg', '', LiveRestriction.none));
+      expect(entry.nick, '봉준', reason: "the answer's name stays");
+    });
+
+    test('offline (7-4): the profile only; the unknown streamer is told apart by the station', () {
+      final fixture = _sample('S05-live-offline');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'phonics1', now: _now, withDanmaku: true);
+      final entry = SoopApi.withStation(room, station('S05-station-offline'), now: _now);
+      expect(entry.effectiveLiveStatus, LiveStatus.offline);
+      expect(entry.nick, '김민교.');
+      expect(entry.avatar, 'https://profile.img.sooplive.co.kr/LOGO/ph/phonics1/phonics1.jpg');
+      expect(entry.introduction, '실력과 재미와 감동을 겸비한 방송');
+      expect((entry.title, entry.cover, entry.startedAt, entry.restriction), ('', '', null, null));
+      expect(entry.followGroup, FollowGroup.offline);
+    });
+
+    test('age-restricted (7-5): live with the station name, picture, viewers, cover and start time', () {
+      final fixture = _sample('S05-live-adult');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'bumzi98', now: fixture.capturedAt);
+      final entry = SoopApi.withStation(room, station('S05-station-adult'), now: _now);
+      expect(entry.isLiveNow, isTrue);
+      expect(entry.restriction, LiveRestriction.adult);
+      expect(entry.nick, '하니니');
+      expect(entry.title, '다시보기 X 추석 토끼 떡 찧다가 술마시는중');
+      expect(entry.avatar, 'https://profile.img.sooplive.co.kr/LOGO/bu/bumzi98/bumzi98.jpg');
+      expect(entry.onlineViewers, '3209');
+      expect(entry.cover, 'https://liveimg.sooplive.co.kr/m/297428401?_t=${_now.millisecondsSinceEpoch}');
+      expect(entry.startedAt, DateTime.utc(2026, 9, 27, 13, 26, 31), reason: "BTIME's, the same as broad_start");
+      expect(entry.data, isNull);
+      expect(SoopApi.noStream(entry), isA<NeedsLogin>());
+    });
+
+    test('subscribers only: the station supplies title, cover and start time the answer lacks', () {
+      final fixture = _sample('S05-live-subscribers');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'kirababy2', now: _now);
+      final entry = SoopApi.withStation(room, station('S05-station-subscribers'), now: _now);
+      expect(entry.isLiveNow, isTrue);
+      expect(entry.restriction, LiveRestriction.subscribersOnly);
+      expect(entry.title, '햇비랑 프클하려고 왔음');
+      expect(entry.nick, '유키라');
+      expect(entry.onlineViewers, '41');
+      expect(entry.cover, 'https://liveimg.sooplive.co.kr/m/297445461?_t=${_now.millisecondsSinceEpoch}');
+      expect(entry.startedAt, DateTime.utc(2026, 9, 28, 10, 51, 15), reason: 'broad_start 19:51:15 KST');
+    });
+
+    test('offline in the player API but on air at the station: live, and unplayable unless restricted', () {
+      final room = SoopApi.roomDetail(_channel({'RESULT': 0}), requestedId: 'ab12', now: _now);
+      const onAir = SoopStation(
+        nick: 'n',
+        broadcast: SoopStationBroadcast(bno: '7', title: 't', viewers: '3'),
+      );
+      final entry = SoopApi.withStation(room, onAir, now: _now);
+      expect(entry.isLiveNow, isTrue);
+      expect(entry.restriction, LiveRestriction.unplayable);
+      expect((entry.title, entry.onlineViewers), ('t', '3'));
+      expect(SoopApi.noStream(entry), isA<StreamUnavailable>());
+      const locked = SoopStation(
+        broadcast: SoopStationBroadcast(bno: '7', restriction: LiveRestriction.password),
+      );
+      expect(SoopApi.withStation(room, locked, now: _now).restriction, LiveRestriction.password);
+      final banned = SoopApi.roomDetail(_channel({'RESULT': -2}), requestedId: 'ab12', now: _now);
+      final blocked = SoopApi.withStation(banned, onAir, now: _now);
+      expect((blocked.effectiveLiveStatus, blocked.nick), (LiveStatus.banned, 'n'), reason: 'banned stays banned');
+    });
+  });
+
+  group('restriction and time helpers', () {
+    test('restrictionOf reads every spelling the answers use', () {
+      expect(SoopApi.restrictionOf(), isNull);
+      expect(SoopApi.restrictionOf(password: 'N', subscribers: '0', grade: '0'), LiveRestriction.none);
+      for (final yes in [true, 1, '1', 'Y', 'y', 'true']) {
+        expect(SoopApi.restrictionOf(password: yes), LiveRestriction.password, reason: '$yes');
+      }
+      for (final no in [false, 0, '0', 'N', '']) {
+        expect(SoopApi.restrictionOf(password: no), LiveRestriction.none, reason: '$no');
+      }
+      expect(SoopApi.restrictionOf(subscribers: 2), LiveRestriction.subscribersOnly);
+      expect(SoopApi.restrictionOf(grade: 19), LiveRestriction.adult);
+      expect(SoopApi.restrictionOf(grade: '19', subscribers: '1'), LiveRestriction.subscribersOnly);
+    });
+
+    test('stricter keeps the stronger restriction', () {
+      expect(SoopApi.stricter(null, null), isNull);
+      expect(SoopApi.stricter(LiveRestriction.none, null), LiveRestriction.none);
+      expect(SoopApi.stricter(LiveRestriction.adult, LiveRestriction.subscribersOnly), LiveRestriction.subscribersOnly);
+      expect(SoopApi.stricter(LiveRestriction.password, LiveRestriction.adult), LiveRestriction.password);
+      expect(SoopApi.stricter(LiveRestriction.none, LiveRestriction.adult), LiveRestriction.adult);
+    });
+
+    test('koreanTime: KST to UTC; malformed or impossible times are null', () {
+      expect(SoopApi.koreanTime('2026-09-22 19:59:31'), DateTime.utc(2026, 9, 22, 10, 59, 31));
+      expect(SoopApi.koreanTime('2026-09-22 19:59:31.0'), DateTime.utc(2026, 9, 22, 10, 59, 31));
+      expect(SoopApi.koreanTime('2026-09-23 03:00:00'), DateTime.utc(2026, 9, 22, 18));
+      for (final bad in [null, '', '0000-00-00 00:00:00', '2026-13-01 00:00:00', '2026-09-22', 'x', 1700000000]) {
+        expect(SoopApi.koreanTime(bad), isNull, reason: '$bad');
+      }
+    });
+
+    test('startedBefore: whole seconds before now; missing, zero or negative is null', () {
+      final now = DateTime.utc(2026, 9, 27, 17, 30, 45, 900);
+      expect(SoopApi.startedBefore(455474, now), DateTime.utc(2026, 9, 22, 10, 59, 31));
+      expect(SoopApi.startedBefore('60', now), DateTime.utc(2026, 9, 27, 17, 29, 45));
+      for (final bad in [null, 0, -5, '', 'x']) {
+        expect(SoopApi.startedBefore(bad, now), isNull, reason: '$bad');
+      }
+    });
+  });
+
   group('qualities', () {
-    test("S05: 3.x's qualities, names, order and order values", () {
+    test("S05: 3.x's qualities, but 720p (hd4k) is “超清” after the source and before 540p (7-1)", () {
       final fixture = _sample('S05-live-live');
       final data = SoopApi.roomDetail(fixture.body, requestedId: 'khm11903', now: _now).data! as SoopRoomData;
       final qualities = SoopApi.qualities(data.presets);
+      final legacy = (_legacy('S05-live-live')['getPlayQualites'] as List).cast<Map<String, dynamic>>();
+      // 3.x: hd4k had no tier, so it sorted by bitrate alone after 360p,
+      // under its request name.
+      expect(legacy.map((quality) => quality['quality']), ['原画', '高清', '标清', 'hd4k']);
+      expect(legacy.last['sort'], 4000);
+      Map<String, Object?> json(LivePlayQuality quality) => {
+        'quality': quality.quality,
+        'id': quality.id,
+        'data': quality.data,
+        'sort': quality.sort,
+      };
+      // The other three are 3.x's, name, id and order value alike; hd4k
+      // changed its name and order value (7-1), not its id.
       expect([
         for (final quality in qualities)
-          {'quality': quality.quality, 'id': quality.id, 'data': quality.data, 'sort': quality.sort},
-      ], _legacy('S05-live-live')['getPlayQualites']);
-      // The 720p preset (hd4k) has no tier: it sorts by bitrate alone, after
-      // 360p, under its request name, as 3.x showed it (a later upgrade).
-      expect(qualities.map((quality) => quality.quality), ['原画', '高清', '标清', 'hd4k']);
+          if (quality.id != 'hd4k') json(quality),
+      ], legacy.sublist(0, 3));
+      final hd4k = qualities.singleWhere((quality) => quality.id == 'hd4k');
+      expect((hd4k.quality, hd4k.sort, hd4k.data), ('超清', 350004000, const <String>[]));
+      expect(qualities.map((quality) => quality.quality), ['原画', '超清', '高清', '标清']);
+      expect(qualities.map((quality) => quality.id), ['original', 'hd4k', 'hd', 'sd']);
+      expect(data.presets.firstWhere((preset) => preset.name == 'hd4k').bps, 4000);
     });
 
     test("3.x's case: auto and repeats dropped, a source without bitrate first (REG-SOOP-004)", () {
@@ -366,7 +751,7 @@ void main() {
       expect(qualities.first.sort, greaterThan(qualities.last.sort));
     });
 
-    test('tiers: original > master > fullhd > hd > sd > low > other names by bitrate (3.x)', () {
+    test("tiers: original > master > fullhd > hd4k > hd > sd > low > other names by bitrate (3.x's, 7-1)", () {
       final names = ['low', 'x2', 'sd', 'hd', 'hd4k', 'fullhd', 'master', 'original', 'x1'];
       final qualities = SoopApi.qualities([
         for (final name in names) SoopPreset(name: name, bps: name == 'x1' ? 90000 : 10),
@@ -375,15 +760,40 @@ void main() {
         'original',
         'master',
         'fullhd',
+        'hd4k',
         'hd',
         'sd',
         'low',
         'x1',
         'x2',
-        'hd4k',
       ]);
       expect(SoopApi.qualitySort('original', 0), 600000000);
-      expect(SoopApi.qualitySort('hd4k', 4000), 4000);
+      expect(SoopApi.qualitySort('hd4k', 4000), 350004000);
+      expect(SoopApi.qualitySort('HD4K', 0), 350000000, reason: 'case ignored');
+      expect(SoopApi.qualitySort('hd', 99999999), lessThan(SoopApi.qualitySort('hd4k', 0)), reason: 'tiers never mix');
+      expect(SoopApi.qualitySort('x', 4000), 4000);
+      expect(SoopApi.qualityName(const SoopPreset(name: 'HD4K')), '超清');
+      expect(SoopApi.qualityName(const SoopPreset(name: 'hd8k')), '蓝光');
+      expect(SoopApi.qualityName(const SoopPreset(name: 'original')), '原画');
+      expect(SoopApi.qualitySort('hd8k', 8000), 400008000);
+    });
+
+    test('a 1440p source: its 1080p transcode hd8k is “蓝光” right after it (7-1; 3.x: “hd8k”, last)', () {
+      final fixture = _sample('S05-live-1440p');
+      final room = SoopApi.roomDetail(fixture.body, requestedId: 'rrvv17', now: fixture.capturedAt);
+      final data = room.data! as SoopRoomData;
+      expect(
+        [for (final preset in data.presets) '${preset.name}:${preset.bps}'],
+        ['sd:500', 'hd:1000', 'hd4k:4000', 'hd8k:8000', 'original:16000', 'auto:16000'],
+      );
+      final qualities = SoopApi.qualities(data.presets);
+      expect(qualities.map((quality) => quality.id), ['original', 'hd8k', 'hd4k', 'hd', 'sd']);
+      expect(qualities.map((quality) => quality.quality), ['原画', '蓝光', '超清', '高清', '标清']);
+      expect(
+        room.startedAt,
+        fixture.capturedAt.subtract(const Duration(seconds: 18545)).copyWith(millisecond: 0, microsecond: 0),
+      );
+      expect(room.restriction, LiveRestriction.none);
     });
   });
 
@@ -416,14 +826,25 @@ void main() {
         'CHATNO': '1',
       }, roomId: 'khm11903')!;
       expect(domain.url.toString(), 'wss://chat-dee9364c.sooplive.com:9001/Websocket/khm11903');
-      // From CHIP, 3.x's `.sooplive.co.kr` (the hosts the API names are on
-      // sooplive.com; switching is a later upgrade).
+      // From CHIP the host is on sooplive.com, where every CHDOMAIN is
+      // (7-6; 3.x's case expected `.sooplive.co.kr`).
       final ip = SoopApi.danmakuArgs({'CHIP': '222.233.54.76', 'CHPT': 9000, 'CHATNO': '1'}, roomId: 'room id')!;
-      expect(ip.url.toString(), 'wss://chat-dee9364c.sooplive.co.kr:9001/Websocket/room%20id');
+      expect(ip.url.toString(), 'wss://chat-dee9364c.sooplive.com:9001/Websocket/room%20id');
+      expect(ip.plainUrl.toString(), 'ws://chat-dee9364c.sooplive.com:9000/Websocket/room%20id');
       expect(SoopApi.danmakuArgs({'CHDOMAIN': 'chat.example', 'CHPT': 65535, 'CHATNO': '1'}, roomId: 'room'), isNull);
       expect(SoopApi.danmakuArgs({'CHIP': '999.1.1.1', 'CHPT': 9000, 'CHATNO': '1'}, roomId: 'room'), isNull);
       expect(SoopApi.danmakuArgs({'CHDOMAIN': 'chat.example', 'CHPT': 9000}, roomId: 'room'), isNull);
       expect(SoopApi.danmakuArgs({'CHDOMAIN': 'chat.example', 'CHPT': 9000, 'CHATNO': '1'}, roomId: ' '), isNull);
+    });
+
+    test('the host built from CHIP is the one the API names in CHDOMAIN (7-6)', () {
+      for (final name in ['S05-live-live', 'S05-live-password']) {
+        final channel = SoopApi.channel(_sample(name).body).channel;
+        final named = SoopApi.danmakuArgs(channel, roomId: 'a')!;
+        final built = SoopApi.danmakuArgs({...channel}..remove('CHDOMAIN'), roomId: 'a')!;
+        expect(built.url, named.url, reason: name);
+        expect(built.plainUrl, named.plainUrl, reason: name);
+      }
     });
 
     test('the recorded danmaku session used the same endpoints', () {
@@ -436,6 +857,35 @@ void main() {
         'CHATNO': keys['chatNo'],
       }, roomId: '${keys['bj']}')!;
       expect([args.url.toString(), args.plainUrl.toString()], handshakes);
+    });
+  });
+
+  group('app links (7-9)', () {
+    test('the app link list entries carry (S02 `scheme`) names the streamer', () {
+      final entry = _entries('S02-area-p1').first;
+      expect(entry['scheme'], 'sooplive://player/live?broad_no=297314125&user_id=khm11903&channel=');
+      expect(SoopApi.appLinkRoomId('${entry['scheme']}'), 'khm11903');
+      expect(
+        SoopApi.appLink('khm11903', bno: '297314125'),
+        'sooplive://player/live?broad_no=297314125&user_id=khm11903',
+      );
+      expect(SoopApi.appLink(' khm11903 '), 'sooplive://player/live?user_id=khm11903');
+      expect(SoopApi.appLinkRoomId(SoopApi.appLink('khm11903')), 'khm11903');
+    });
+
+    test('other schemes, pages and ids are not app links', () {
+      expect(SoopApi.appLinkRoomId('SOOPLIVE://PLAYER/LIVE?user_id=KHM11903'), 'khm11903');
+      for (final link in [
+        'sooplive://player/vod?user_id=khm11903',
+        'sooplive://station?user_id=khm11903',
+        'sooplive://player/live?broad_no=1',
+        'sooplive://player/live?user_id=a/b',
+        'https://play.sooplive.co.kr/player/live?user_id=khm11903',
+        'afreeca://player/live?user_id=khm11903',
+        '',
+      ]) {
+        expect(SoopApi.appLinkRoomId(link), isNull, reason: link);
+      }
     });
   });
 
@@ -481,6 +931,17 @@ void main() {
         throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains('password'))),
       );
       expect(() => SoopApi.aid(_channel({'RESULT': 1, 'AID': ''})), throwsA(isA<StreamUnavailable>()));
+    });
+
+    test('S06 password: the key is refused without the password (RESULT 0), named as such (7-8)', () {
+      final fixture = _sample('S06-aid-password');
+      expect(SoopApi.channel(fixture.body).result, 0);
+      expect(
+        () => SoopApi.aid(fixture.body, status: fixture.status, password: true),
+        throwsA(
+          isA<StreamUnavailable>().having((error) => error.detail, 'detail', 'aid: RESULT 0, password-protected'),
+        ),
+      );
     });
 
     test("the line: 3.x's URL with the media headers 3.x's player sent, HLS, no lease", () {

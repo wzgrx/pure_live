@@ -1,0 +1,64 @@
+{
+  "code": 0,
+  "data": {
+    "liveSessionId": "6abab280h6c538cda",
+    "liveType": 0,
+    "normalRoomInfo": {
+      "fansCount": 16503,
+      "imgPath": "/v2/fxroomcover/489f59626b1310e736bd661e498f5a6e.jpg",
+      "kugouId": 1817414874,
+      "limitType": 2,
+      "limitValue": 3,
+      "nickName": "\u90ed\u6e29\u67d4i\u604b\u5fc3U",
+      "officialMesg": {
+        "actionId": 0,
+        "appCllectionId": 0,
+        "appCllectionTitle": "",
+        "appLink": "",
+        "appLinkType": 0,
+        "appRoomId": 0,
+        "appRoomType": 0,
+        "appTopicNums": 0,
+        "broadcastId": 0,
+        "content": "",
+        "kugouId": 0,
+        "pid": "",
+        "privateChat": "",
+        "publicChat": "",
+        "showRoomTypes": "",
+        "specialCllectionId": 0
+      },
+      "privateMesg": "\u8c22\u8c22\u4f60\u4e3a\u6211\u7684\u60c5\u7eea\u4ef7\u503c\u4e70\u5355\uff0e\u5bf9\u6211\u597d\u7684\u4eba\u6211\u4e00\u5b9a\u52a0\u500d\u8fd8\u4ed6~",
+      "publicMesg": "\u9ad8166\u91cd100\u5982\u679c\u53ef\u4ee5\u7684\u8bdd\u80fd\u4e00\u76f4\u966a\u7740\u6211\u5417",
+      "roomBroadCast": [
+        {
+          "delay": 1,
+          "text": "\u5b98\u65b9\u516c\u544a\uff1a\u8425\u9020\u7eff\u8272\u5065\u5eb7\u76f4\u64ad\uff0c\u9177\u72d7\u76f4\u64ad\u63d0\u5021\u7406\u6027\u6d88\u8d39\u3002\u4e25\u7981\u8bf1\u5bfc\u672a\u6210\u5e74\u4eba\u4e0a\u9ea6\u6216\u6d88\u8d39\uff0c\u4e25\u7981\u4efb\u4f55\u9ec4\u8d4c\u6bd2\u7b49\u8fdd\u6cd5\u8fdd\u89c4\u884c\u4e3a\uff0c\u4e0d\u5f97\u53d1\u5e03\u4e0d\u826f\u5185\u5bb9\uff0c\u5e73\u53f024\u5c0f\u65f6\u5de1\u67e5\uff0c\u53d1\u73b0\u8bf7\u53ca\u65f6\u4e3e\u62a5\uff0c\u6838\u5b9e\u8fdd\u89c4\u8005\u5c06\u88ab\u5c01\u53f7\uff01"
+        },
+        {
+          "delay": 2,
+          "text": "\u5021\u5bfc\u5171\u540c\u62b5\u5236\u7f51\u7edc\u6c34\u519b\uff0c\u51c0\u5316\u7f51\u7edc\u73af\u5883\uff0c\u5171\u540c\u8425\u9020\u6e05\u6717\u7684\u7f51\u7edc\u7a7a\u95f4\u3002"
+        }
+      ],
+      "signType": 2,
+      "singerId": 0,
+      "singerInfo": null,
+      "specialType": 0,
+      "starLevel": 45,
+      "switchJsonStr": "",
+      "totalStarNum": 0,
+      "type": 0,
+      "url": "",
+      "userId": 1817414874,
+      "userLogo": "/v2/fxuserlogo/2672df571fe5cb5c60fa3409e29f4b4d.jpg"
+    },
+    "roomTag": [
+      0
+    ],
+    "roomType": 0,
+    "transientStatus": 0,
+    "type": 0
+  },
+  "msg": "",
+  "times": 1790628452499
+}

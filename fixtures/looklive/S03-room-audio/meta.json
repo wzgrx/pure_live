@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "platform": "looklive",
+  "sample": "S03-room-audio",
+  "capturedAt": "2026-09-27T18:19:58.939878Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://api.look.163.com/weapi/livestream/room/get/v3",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://look.163.com",
+      "Referer": "https://look.163.com/",
+      "User-Agent": "Mozilla/5.0",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "params=QYeCsR9MiaXZMMod9xzMHu4q5o3LQDD8r6i3Hn9amG60iaGkx9%2BTG8N8WIpZMz5S&encSecKey=35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "NMTID=76FoqExb1XP2YiMl3tNjRVQdiznmuEJFHPb2RvnzO; Max-Age=315360000; Expires=Wed, 24 Sep 2036 18:19:59 GMT; Path=/; Domain=.look.163.com",
+      "cache-control": [
+        "no-cache",
+        "no-store"
+      ],
+      "access-control-allow-origin": "https://look.163.com",
+      "date": "Sun, 27 Sep 2026 18:19:59 GMT",
+      "content-encoding": "gzip",
+      "access-control-expose-headers": "Date,Content-Encoding,Vary,Server,Transfer-Encoding,Connection",
+      "mconfig-bucket": "999999",
+      "x-traceid": "000001a0e41866a0038f0a64b9170006",
+      "content-type": "application/json;charset=UTF-8",
+      "x-from-src": "203.0.113.7",
+      "server": "nginx",
+      "gw-time": "1790533199520",
+      "access-control-allow-credentials": "true",
+      "x-httpcache-status": "NML-L3",
+      "content-length": "896",
+      "x-cv": "1790533199556",
+      "x-traceid-v2": "e9509c75eb5f37e9a810df989ad04e0b^1788330143794^-8089916272",
+      "gw-thread": "524028",
+      "expires": "Thu, 01 Jan 1970 00:00:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "f7db9dd11d9e4a98710925c778a2b50fa182c6ae6221ee54383e887a4ba425b8",
+    "length": 1804
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:NMTID",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-from-src",
+      "rule": "ip"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

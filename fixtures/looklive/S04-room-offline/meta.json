@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "platform": "looklive",
+  "sample": "S04-room-offline",
+  "capturedAt": "2026-09-28T13:51:25.453701Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://api.look.163.com/weapi/livestream/room/get/v3",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Origin": "https://look.163.com",
+      "Referer": "https://look.163.com/",
+      "User-Agent": "Mozilla/5.0",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "params=CaN3pRNhUoadis6OKWXkqB17yTPUt3racXie8amkFfjYbUV0ITLszRVk8rOabLlF&encSecKey=35701388baf89fed412e11269b9c76625d095ecaf17f03fa018abe19ea2d38b949debf242ee39a71ca1f6cda71b1b86a45aa909ee27f7e78e267d34e732f0de948206c3340a788d0003372183e2f753c1f78b66ac23d134ac1fc9b993156520ea826b8aa89a962d4491b4b8d7e08738e1da9b07aa39bf4a7ef0b1c210728cd52"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": "NMTID=35GEx4-xvH9qkR2m5zvjqceNnJn9LqDTKMn6MmwsM; Max-Age=315360000; Expires=Thu, 25 Sep 2036 13:51:26 GMT; Path=/; Domain=.look.163.com",
+      "cache-control": [
+        "no-cache",
+        "no-store"
+      ],
+      "access-control-allow-origin": "https://look.163.com",
+      "date": "Mon, 28 Sep 2026 13:51:26 GMT",
+      "content-encoding": "gzip",
+      "access-control-expose-headers": "Date,Content-Encoding,Vary,Server,Transfer-Encoding,Connection",
+      "mconfig-bucket": "999999",
+      "x-traceid": "000001a0e848e4b30d410a30e2c6026f",
+      "content-type": "application/json;charset=UTF-8",
+      "x-from-src": "203.0.113.7",
+      "server": "nginx",
+      "gw-time": "1790603486387",
+      "access-control-allow-credentials": "true",
+      "content-length": "1032",
+      "x-httpcache-status": "NML-L3",
+      "x-cv": "1790603486409",
+      "x-traceid-v2": "80e1ccd9fe208b88fa764843501def67^1788329346723^-8332425407",
+      "gw-thread": "399827",
+      "expires": "Thu, 01 Jan 1970 00:00:00 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "cffb44853bfdeff05357af58e8f085c746a4f7b09b2e7150b5f4d27ad441dc9c",
+    "length": 2027
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:NMTID",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-from-src",
+      "rule": "ip"
+    }
+  ],
+  "tool": "M4.32 recorder (schema 1)"
+}

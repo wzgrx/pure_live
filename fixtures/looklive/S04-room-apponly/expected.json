@@ -1,0 +1,359 @@
+{
+  "generator": "LookLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + LookLiveApi.room",
+  "value": {
+    "recorded": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "645235480",
+          "userId": "17650321062",
+          "title": "在云村做主播是种什么体验",
+          "nick": "zy-晗辰男友-天使冠29厅战",
+          "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+          "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=645235480",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=645235480"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "645235480",
+          "userId": "17650321062",
+          "title": "在云村做主播是种什么体验",
+          "nick": "zy-晗辰男友-天使冠29厅战",
+          "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+          "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=645235480",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=645235480"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "645235480",
+          "userId": "17650321062",
+          "title": "在云村做主播是种什么体验",
+          "nick": "zy-晗辰男友-天使冠29厅战",
+          "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+          "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=645235480",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=645235480"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "getRoomDetail → getPlayQualites": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → getPlayUrls(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayQualites": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayUrls(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayQualites": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayUrls(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "platform in another case": {
+        "result": {
+          "roomId": "645235480",
+          "userId": "17650321062",
+          "title": "在云村做主播是种什么体验",
+          "nick": "zy-晗辰男友-天使冠29厅战",
+          "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+          "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=645235480",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=645235480"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "room link as id": {
+        "result": {
+          "roomId": "645235480",
+          "userId": "17650321062",
+          "title": "在云村做主播是种什么体验",
+          "nick": "zy-晗辰男友-天使冠29厅战",
+          "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+          "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+          "area": "视频直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "该直播使用官网未开放网页媒体的房型，请在 LOOK 客户端中观看。\nLOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=645235480",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=645235480"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "api.room": {
+        "result": {
+          "roomId": "645235480",
+          "userId": "17650321062",
+          "sessionId": "134529157",
+          "title": "在云村做主播是种什么体验",
+          "nick": "zy-晗辰男友-天使冠29厅战",
+          "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+          "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+          "kind": "video",
+          "streamType": 50,
+          "state": "live",
+          "popularity": null,
+          "currentViewers": null,
+          "isAppOnly": true,
+          "variants": []
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      },
+      "api.room(includeMedia: false)": {
+        "result": {
+          "roomId": "645235480",
+          "userId": "17650321062",
+          "sessionId": "134529157",
+          "title": "在云村做主播是种什么体验",
+          "nick": "zy-晗辰男友-天使冠29厅战",
+          "avatar": "https://p2.music.126.net/YcoBFixxU6ofZDsyJJliNg==/109951173913490749.jpg",
+          "cover": "https://p2.music.126.net/jEmV4EAKaS9LODXrH2o6rg==/109951173440354652.jpg",
+          "kind": "video",
+          "streamType": 50,
+          "state": "live",
+          "popularity": null,
+          "currentViewers": null,
+          "isAppOnly": true,
+          "variants": []
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"645235480\"}"
+        ]
+      }
+    }
+  }
+}

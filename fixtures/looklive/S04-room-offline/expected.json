@@ -1,0 +1,422 @@
+{
+  "generator": "LookLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getPlayUrls + LookLiveApi.room (with S02-audio-p2)",
+  "value": {
+    "recorded": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "getRoomDetail → getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetail → getPlayUrls(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRefresh → getPlayUrls(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(flv:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → resolvePlayUrlsForRecoveryRaw(auto)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getRoomDetailForRecording → getPlayUrls(hls:source)": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live mediaUnavailable"
+        },
+        "requests": []
+      },
+      "otherPlatform": {
+        "result": {
+          "throws": "LookLiveException",
+          "message": "LOOK Live identity"
+        },
+        "requests": []
+      },
+      "platform in another case": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "room link as id": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "api.room": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "sessionId": "134598464",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "kind": "audio",
+          "streamType": 6,
+          "state": "offline",
+          "popularity": null,
+          "currentViewers": null,
+          "isAppOnly": false,
+          "variants": []
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "api.room(includeMedia: false)": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "sessionId": "134598464",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "kind": "audio",
+          "streamType": 6,
+          "state": "offline",
+          "popularity": null,
+          "currentViewers": null,
+          "isAppOnly": false,
+          "variants": []
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      }
+    },
+    "after audio page 2": {
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "8",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "824",
+          "onlineViewers": "8",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "getRoomDetail": {
+        "result": {
+          "roomId": "325808387",
+          "userId": "572793023",
+          "title": "我是真的爱上你",
+          "nick": "婆果西婆吆",
+          "avatar": "https://p1.music.126.net/qXh6yvfc1kqYyGCf5ZPEjQ==/109951173535081864.jpg",
+          "cover": "https://p2.music.126.net/_Pgd7SWkYt0PWGREB7xO7g==/109951173714521111.jpg",
+          "area": "语音直播",
+          "watching": "8",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "824",
+          "onlineViewers": "8",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "looklive",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "LOOK 远端聊天尚待接入；官网 popularity 按平台热度展示，onlineNumber 按当前观看人数单独展示。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://look.163.com",
+            "referer": "https://look.163.com/live?id=325808387",
+            "user-agent": "Mozilla/5.0"
+          },
+          "link": "https://look.163.com/live?id=325808387"
+        },
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          "POST https://api.look.163.com/weapi/livestream/room/get/v3 {\"liveRoomNo\":\"325808387\"}"
+        ]
+      }
+    }
+  }
+}

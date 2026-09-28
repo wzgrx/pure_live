@@ -1,0 +1,80 @@
+{
+  "code": 200,
+  "data": {
+    "roomInfo": {
+      "id": 134543183,
+      "roomId": 462192286,
+      "title": "ASOT电音电台直播中",
+      "liveCoverUrl": "https://p1.music.126.net/y-H5ttUqsAWZOjY7T-dxQw==/109951173831863282.jpg",
+      "liveStreamType": 1,
+      "orientationScope": 1,
+      "liveStreamSubType": null,
+      "liveUrl": {
+        "httpPullUrl": "http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5.flv?netease=pull0583d674.live.126.net",
+        "hlsPullUrl": "http://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5/playlist.m3u8",
+        "rtmpPullUrl": "rtmp://pull0583d674.live.126.net/live/800897349fe246e994f36976011de4d5"
+      },
+      "liveType": 1,
+      "bgCoverUrl": null,
+      "agoraRoomNo": 0,
+      "startTime": 1787733200612,
+      "backgroundAnimateUrl": "",
+      "foregroundAnimateUrl": "",
+      "rtcSupplier": 0,
+      "videoUrl": ""
+    },
+    "liveStatus": 1,
+    "anchor": {
+      "userId": 351218439,
+      "nickName": "Armin van Buuren",
+      "avatarUrl": "http://p2.music.126.net/azOjMDuUPaj1hN4ZjS4nEw==/109951171948910186.jpg",
+      "authStatus": 1,
+      "userType": 2,
+      "avatarDetail": {
+        "userType": 2,
+        "identityLevel": 1,
+        "identityIconUrl": "https://p5.music.126.net/obj/wo3DlcOGw6DClTvDisK1/4788940880/1a1f/68f5/b59a/b444b81b88567108ba88194fa29144f5.png"
+      },
+      "gender": 1,
+      "liveRoomNo": "21623631",
+      "liveLevel": 0,
+      "cuteNumber": 0
+    },
+    "officialShow": null,
+    "stealth": false,
+    "largeShow": null,
+    "rtcStatusDetail": null,
+    "officialArena": null,
+    "anchorIntroduce": null,
+    "cdnRecord": null,
+    "audioLiveRoom": null,
+    "officialLiveRoom": false,
+    "themeRoomDto": null,
+    "musicianChannelDto": null,
+    "riskRoom": false,
+    "feeInfo": null,
+    "transCodingUrl": null,
+    "defaultTransCoding": 0,
+    "hasNewUserGift": false,
+    "anonymousMode": false,
+    "gslbConf": 0,
+    "newUserToProtected": true,
+    "avgRoomExt": {
+      "businessId": null,
+      "labelList": null,
+      "coverImgNosKey": null,
+      "coverImg": null,
+      "originCoverImg": null,
+      "previewImgNosKeyList": null,
+      "previewImgList": null,
+      "originPreviewImgList": null,
+      "roleImgNosKeyList": null,
+      "roleImgList": null,
+      "originRoleImgList": null,
+      "slogan": null
+    },
+    "publicRoomId": 13312643641,
+    "clubHouseExt": null
+  },
+  "message": ""
+}

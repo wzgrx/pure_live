@@ -1,0 +1,34 @@
+{
+  "generator": "KuaishowSite.getSubCategores + getAllSubCategores",
+  "value": {
+    "getSubCategores": [
+      {
+        "platform": "kuaishou",
+        "areaType": "8",
+        "typeName": "文化",
+        "areaId": "1000023",
+        "areaName": "科普",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xc9v6x8bzrwdhm.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "8",
+        "typeName": "文化",
+        "areaId": "1000022",
+        "areaName": "教育",
+        "areaPic": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5xrcj6yezseywvs.jpg",
+        "shortName": null
+      }
+    ],
+    "getAllSubCategores": {
+      "requestedPages": [
+        "1"
+      ],
+      "areaIds": [
+        "1000023",
+        "1000022"
+      ]
+    }
+  }
+}

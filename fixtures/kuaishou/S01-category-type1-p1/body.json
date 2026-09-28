@@ -1,0 +1,507 @@
+{
+  "data": {
+    "list": [
+      {
+        "id": "22008",
+        "name": "和平精英",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22008-20220530172807.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22008-20190508121424.png",
+        "description": "腾讯自研军事竞赛体验手游。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "2026"
+      },
+      {
+        "id": "1001",
+        "name": "王者荣耀",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1001-20220530172824.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-1001-20180130151241.png",
+        "description": "腾讯MOBA类5V5英雄对战手游",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "1053"
+      },
+      {
+        "id": "22484",
+        "name": "暗区突围",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22484-20220530172821.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22484-20210811145217.jpg",
+        "description": "一款高拟真硬核射击手游，打造了全新的沉浸式暗区战场体验！",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "125"
+      },
+      {
+        "id": "2",
+        "name": "穿越火线",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-2-20181130184450.jpg",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-2-20250820155120.png",
+        "description": "由Smile Gate开发，腾讯游戏发行的一款第一人称射击游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "76"
+      },
+      {
+        "id": "21",
+        "name": "绝地求生",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-21-20240924171929.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-21-20240329181744.png",
+        "description": "(PUBG) 是一款战术竞技型射击类沙盒游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "30"
+      },
+      {
+        "id": "1",
+        "name": "英雄联盟",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1-20181130184505.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-1-20240913104350.png",
+        "description": "由美国拳头游戏(Riot Games)开发、中国大陆地区腾讯游戏代理运营的英雄对战。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "129"
+      },
+      {
+        "id": "22762",
+        "name": "黑神话悟空",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22762-20240813185304.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22762-20240813185306.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "DJRY",
+        "categoryName": "单机热游",
+        "roomCount": "8"
+      },
+      {
+        "id": "22181",
+        "name": "原神",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22181-20220530172826.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22181-20200910185610.png",
+        "description": "《原神》是由米哈游自研的一款开放世界冒险游戏。在2020年全球同步登陆主机端、PC端和移动端以来，在海内外收获了众多玩家的喜爱。玩家将在《原神》中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，玩家可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界里，让好奇心驱使自己发掘各个角落的奥秘……",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "144"
+      },
+      {
+        "id": "1009",
+        "name": "我的世界",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1009-20220530172805.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-1009-20180131183029.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "241"
+      },
+      {
+        "id": "1054",
+        "name": "QQ飞车手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1054-20220530172805.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-1054-20191211141937.png",
+        "description": "QQ飞车手游在玩法上传承了端游的操作，巅峰还原，万众期待。一起来享受指尖上的漂移！",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "14"
+      },
+      {
+        "id": "22337",
+        "name": "蛋仔派对",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22337-20220530172819.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22337-20210927115719.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "305"
+      },
+      {
+        "id": "22494",
+        "name": "金铲铲之战",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22494-20220530172824.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22494-20210824152755.png",
+        "description": "《金铲铲之战》是英雄联盟 云顶之弈正版授权的自动战斗品类手游，每局比赛由八名玩家共同进行一场各自为战的博弈对抗，玩家通过招兵买马，融合英雄，提升战力，排兵布阵，成为最终立于战场上的赢家。 ",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "23"
+      },
+      {
+        "id": "22130",
+        "name": "使命召唤手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22130-20220530172819.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22130-20201103142111.png",
+        "description": "这一战，打出新花样",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "38"
+      },
+      {
+        "id": "22150",
+        "name": "DNF手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22150-20220530172827.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22150-20200622144728.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "22"
+      },
+      {
+        "id": "3",
+        "name": "地下城与勇士",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-3-20181130184447.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-3-20240913103917.png",
+        "description": "由韩国网络游戏公司NEOPLE开发、腾讯游戏代理发行的一款2D卷轴式横版格斗过关网络游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "95"
+      },
+      {
+        "id": "22645",
+        "name": "崩坏：星穹铁道",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22645-20230207130051.png",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22645-20230207130418.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "80"
+      },
+      {
+        "id": "22723",
+        "name": "三角洲行动",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22723-20240301141234.png",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22723-20240301141236.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "818"
+      },
+      {
+        "id": "1000024",
+        "name": "其他",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xphycykeia8q9q.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22479-20240913171921.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "6969"
+      },
+      {
+        "id": "22146",
+        "name": "无畏契约",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22146-20230202175719.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22146-20230202175719.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "77"
+      },
+      {
+        "id": "1000020",
+        "name": "购物",
+        "poster": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5x7ahbj43sp85a2.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22488-20240913144758.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "2.4万"
+      },
+      {
+        "id": "7",
+        "name": "传奇",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-7-20220530172810.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-7-20240913103902.png",
+        "description": "盛大游戏推出的一款大型多人在线角色扮演游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "614"
+      },
+      {
+        "id": "1000004",
+        "name": "才艺",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22479-20240913174531.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "YL",
+        "categoryName": "娱乐",
+        "roomCount": "1965"
+      },
+      {
+        "id": "1000023",
+        "name": "科普",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xc9v6x8bzrwdhm.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240913174637.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "KJ",
+        "categoryName": "文化",
+        "roomCount": "1831"
+      },
+      {
+        "id": "22658",
+        "name": "热血传奇",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22658-20230509174949.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22658-20230515144143.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "141"
+      },
+      {
+        "id": "25",
+        "name": "CS:GO",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-25-20220530172816.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-25-20220701151256.jpg",
+        "description": "反恐精英：全球攻势，原名Counter-Strike: Global Offensive，是一款由VALVE与Hidden Path Entertainment合作开发、Valve Software发行的第一人称射击游戏，于2012年8月21日在欧美地区正式发售，国服发布会于2017年4月11日在北京召开，游戏为《反恐精英》系列游戏的第四款作品。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "14"
+      },
+      {
+        "id": "1000003",
+        "name": "音乐",
+        "poster": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5x282kzyf9apbwc.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-2003-20240913143124.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "YL",
+        "categoryName": "娱乐",
+        "roomCount": "6885"
+      },
+      {
+        "id": "1011",
+        "name": "火影忍者",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1011-20220530172814.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-1011-20180131183058.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "126"
+      },
+      {
+        "id": "22742",
+        "name": "龙岛异兽起源",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22742-20240606175802.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22742-20240606175804.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "19"
+      },
+      {
+        "id": "1006",
+        "name": "穿越火线手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1006-20220530172813.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-1006-20180130151554.png",
+        "description": "一款国民级竞技第一人称射击手游，玩家能够随时随地体验射击的乐趣和竞技对抗的热血。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "69"
+      },
+      {
+        "id": "1000002",
+        "name": "舞蹈",
+        "poster": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5xdvfitv5fhfa2u.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240913174837.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "YL",
+        "categoryName": "娱乐",
+        "roomCount": "663"
+      },
+      {
+        "id": "1000021",
+        "name": "媒体",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgqei7nhev5gea.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22479-20240913174715.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "79"
+      },
+      {
+        "id": "1000006",
+        "name": "颜值",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xttizt8qtzyr84.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923113316.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "YL",
+        "categoryName": "娱乐",
+        "roomCount": "1280"
+      },
+      {
+        "id": "1000005",
+        "name": "脱口秀",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xhj47899cpmbei.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240913174759.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "YL",
+        "categoryName": "娱乐",
+        "roomCount": "281"
+      },
+      {
+        "id": "1000008",
+        "name": "汽车",
+        "poster": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5x828ki8eja3bka.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22479-20240923112756.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "5422"
+      },
+      {
+        "id": "1000007",
+        "name": "情感",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xpkwtwhcur2d5u.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923112957.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "YL",
+        "categoryName": "娱乐",
+        "roomCount": "1573"
+      },
+      {
+        "id": "22088",
+        "name": "经典单机",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22088-20220530172823.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22088-20210113215207.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "DJRY",
+        "categoryName": "单机热游",
+        "roomCount": "164"
+      },
+      {
+        "id": "22737",
+        "name": "热血传奇手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22737-20240521150306.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22737-20240521150308.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "109"
+      },
+      {
+        "id": "1000016",
+        "name": "健康",
+        "poster": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5xdr8mtxd7gvsqc.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923105435.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "2553"
+      },
+      {
+        "id": "15",
+        "name": "街机游戏",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-15-20181130184459.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-15-20240913104008.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "DJRY",
+        "categoryName": "单机热游",
+        "roomCount": "94"
+      },
+      {
+        "id": "22551",
+        "name": "恐龙岛",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22551-20220530172816.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22551-20220216152013.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "28"
+      },
+      {
+        "id": "1000011",
+        "name": "美妆",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xk7qys4rwxthiq.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923111135.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "1905"
+      },
+      {
+        "id": "1000015",
+        "name": "田园",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xmm8gtnd6utmbq.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923113055.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "3196"
+      },
+      {
+        "id": "1000019",
+        "name": "文玩",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xkb6a2sr2h2934.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923113254.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "1055"
+      },
+      {
+        "id": "22786",
+        "name": "超自然行动组",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22786-20250221163522.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22786-20250221163523.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "210"
+      },
+      {
+        "id": "1000014",
+        "name": "旅游",
+        "poster": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5xcmxqa97xuig99.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923153310.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "485"
+      },
+      {
+        "id": "22018",
+        "name": "第五人格",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22018-20220530172818.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22018-20180408104905.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "86"
+      },
+      {
+        "id": "22814",
+        "name": "王者万象棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22814-20251216165838.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22814-20251216165841.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "49"
+      },
+      {
+        "id": "22793",
+        "name": "无畏契约手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22793-20250421135905.png",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22793-20250421135923.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "SYXX",
+        "categoryName": "手游休闲",
+        "roomCount": "58"
+      },
+      {
+        "id": "1000009",
+        "name": "美食",
+        "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xuxt3cufw736ty.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22479-20240923110914.png",
+        "description": "快手，拥抱每一种生活。",
+        "categoryAbbr": "ZH",
+        "categoryName": "综合",
+        "roomCount": "1358"
+      },
+      {
+        "id": "32",
+        "name": "大话西游2",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-32-20220530172821.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-32-20210421160256.png",
+        "description": "大话西游2是一款以西游题材为背景，网易自主研发的多人在线角色扮演回合制游戏；于2002年8月15日起正式运营，至今已经运营了18年，多次斩获行业大奖，最高在线126W，累计注册用户超2亿！",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "117"
+      }
+    ],
+    "hasMore": true
+  }
+}

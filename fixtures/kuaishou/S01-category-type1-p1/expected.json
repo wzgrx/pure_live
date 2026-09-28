@@ -1,0 +1,457 @@
+{
+  "generator": "KuaishowSite.getSubCategores",
+  "value": {
+    "getSubCategores": [
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22008",
+        "areaName": "和平精英",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22008-20220530172807.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1001",
+        "areaName": "王者荣耀",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1001-20220530172824.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22484",
+        "areaName": "暗区突围",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22484-20220530172821.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "2",
+        "areaName": "穿越火线",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-2-20181130184450.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "21",
+        "areaName": "绝地求生",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-21-20240924171929.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1",
+        "areaName": "英雄联盟",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1-20181130184505.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22762",
+        "areaName": "黑神话悟空",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22762-20240813185304.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22181",
+        "areaName": "原神",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22181-20220530172826.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1009",
+        "areaName": "我的世界",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1009-20220530172805.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1054",
+        "areaName": "QQ飞车手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1054-20220530172805.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22337",
+        "areaName": "蛋仔派对",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22337-20220530172819.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22494",
+        "areaName": "金铲铲之战",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22494-20220530172824.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22130",
+        "areaName": "使命召唤手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22130-20220530172819.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22150",
+        "areaName": "DNF手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22150-20220530172827.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "3",
+        "areaName": "地下城与勇士",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-3-20181130184447.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22645",
+        "areaName": "崩坏：星穹铁道",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22645-20230207130051.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22723",
+        "areaName": "三角洲行动",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22723-20240301141234.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000024",
+        "areaName": "其他",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xphycykeia8q9q.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22146",
+        "areaName": "无畏契约",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22146-20230202175719.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000020",
+        "areaName": "购物",
+        "areaPic": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5x7ahbj43sp85a2.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "7",
+        "areaName": "传奇",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-7-20220530172810.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000004",
+        "areaName": "才艺",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000023",
+        "areaName": "科普",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xc9v6x8bzrwdhm.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22658",
+        "areaName": "热血传奇",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22658-20230509174949.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "25",
+        "areaName": "CS:GO",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-25-20220530172816.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000003",
+        "areaName": "音乐",
+        "areaPic": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5x282kzyf9apbwc.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1011",
+        "areaName": "火影忍者",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1011-20220530172814.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22742",
+        "areaName": "龙岛异兽起源",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22742-20240606175802.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1006",
+        "areaName": "穿越火线手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1006-20220530172813.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000002",
+        "areaName": "舞蹈",
+        "areaPic": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5xdvfitv5fhfa2u.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000021",
+        "areaName": "媒体",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgqei7nhev5gea.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000006",
+        "areaName": "颜值",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xttizt8qtzyr84.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000005",
+        "areaName": "脱口秀",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xhj47899cpmbei.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000008",
+        "areaName": "汽车",
+        "areaPic": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5x828ki8eja3bka.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000007",
+        "areaName": "情感",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xpkwtwhcur2d5u.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22088",
+        "areaName": "经典单机",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22088-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22737",
+        "areaName": "热血传奇手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22737-20240521150306.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000016",
+        "areaName": "健康",
+        "areaPic": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5xdr8mtxd7gvsqc.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "15",
+        "areaName": "街机游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-15-20181130184459.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22551",
+        "areaName": "恐龙岛",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22551-20220530172816.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000011",
+        "areaName": "美妆",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xk7qys4rwxthiq.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000015",
+        "areaName": "田园",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xmm8gtnd6utmbq.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000019",
+        "areaName": "文玩",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xkb6a2sr2h2934.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22786",
+        "areaName": "超自然行动组",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22786-20250221163522.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000014",
+        "areaName": "旅游",
+        "areaPic": "http://ali-gamezone.static.yximgs.com/bs2/imageGameZone/5xcmxqa97xuig99.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22018",
+        "areaName": "第五人格",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22018-20220530172818.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22814",
+        "areaName": "王者万象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22814-20251216165838.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "22793",
+        "areaName": "无畏契约手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22793-20250421135905.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "1000009",
+        "areaName": "美食",
+        "areaPic": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xuxt3cufw736ty.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "1",
+        "typeName": "热门",
+        "areaId": "32",
+        "areaName": "大话西游2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-32-20220530172821.webp",
+        "shortName": null
+      }
+    ]
+  }
+}

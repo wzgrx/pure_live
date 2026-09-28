@@ -1,0 +1,507 @@
+{
+  "data": {
+    "list": [
+      {
+        "id": "1018",
+        "name": "JJ斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1018-20220530172823.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-1018-20210302193905.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "47"
+      },
+      {
+        "id": "22185",
+        "name": "天天象棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22185-20220530172821.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22185-20201010104329.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "44"
+      },
+      {
+        "id": "6",
+        "name": "斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-6-20220530172807.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-6-20240923164758.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "54"
+      },
+      {
+        "id": "10",
+        "name": "象棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-10-20220530172809.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-10-20210331170541.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "33"
+      },
+      {
+        "id": "1017",
+        "name": "欢乐斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1017-20220530172812.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-1017-20180131182304.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "30"
+      },
+      {
+        "id": "22427",
+        "name": "指尖四川麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22427-20220530172810.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22427-20210423171947.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "27"
+      },
+      {
+        "id": "9",
+        "name": "麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-9-20181130184522.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-9-20210331170516.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "17"
+      },
+      {
+        "id": "22339",
+        "name": "微乐斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22339-20220530172813.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22339-20241219094711.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "20"
+      },
+      {
+        "id": "22429",
+        "name": "途游斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22429-20220530172805.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22429-20210425180425.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "14"
+      },
+      {
+        "id": "20",
+        "name": "三国杀",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-20-20220530172819.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-20-20180628164019.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "10"
+      },
+      {
+        "id": "22563",
+        "name": "多乐麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22563-20220530172815.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22563-20220325170153.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "9"
+      },
+      {
+        "id": "22313",
+        "name": "嘻嘻红中麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22313-20220530172825.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22313-20210115120117.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "8"
+      },
+      {
+        "id": "22672",
+        "name": "途游麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22672-20230606153138.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22672-20230606153141.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "8"
+      },
+      {
+        "id": "11",
+        "name": "军棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-11-20220530172823.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-11-20201028152310.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "10"
+      },
+      {
+        "id": "22426",
+        "name": "微乐四川麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22426-20220530172822.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22426-20210423110527.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "10"
+      },
+      {
+        "id": "1026",
+        "name": "欢乐麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1026-20220729112113.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-1026-20180209124131.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "9"
+      },
+      {
+        "id": "22764",
+        "name": "芒果斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22764-20240925152623.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22764-20240925144108.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "9"
+      },
+      {
+        "id": "22338",
+        "name": "禅游斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22338-20220530172823.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22338-20210201102515.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "6"
+      },
+      {
+        "id": "22447",
+        "name": "JJ象棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22447-20220530172813.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22447-20210628150204.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "7"
+      },
+      {
+        "id": "22778",
+        "name": "微乐麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22778-20241217183838.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22778-20241219094724.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "7"
+      },
+      {
+        "id": "22652",
+        "name": "全民口袋麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22652-20230418173020.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22652-20230418173025.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22722",
+        "name": "约游麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22722-20240223150612.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22722-20240223150613.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "4"
+      },
+      {
+        "id": "22435",
+        "name": "联众棋牌",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22435-20220530172807.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22435-20210512184631.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22478",
+        "name": "JJ麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22478-20220530172822.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22478-20210802153240.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "4"
+      },
+      {
+        "id": "1052",
+        "name": "四川麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1052-20220530172805.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-1052-20180209123852.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "4"
+      },
+      {
+        "id": "22813",
+        "name": "皇冠斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22813-20251212192614.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22813-20251212192616.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "1037",
+        "name": "中国象棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1037-20220530172820.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-1037-20180209123815.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "5"
+      },
+      {
+        "id": "22765",
+        "name": "开运麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22765-20240925144348.jpg",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22765-20240925144351.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "2"
+      },
+      {
+        "id": "22354",
+        "name": "快手棋牌馆",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22354-20220530172805.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22354-20210220191356.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "2"
+      },
+      {
+        "id": "22782",
+        "name": "大掼蛋（腾讯）",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22782-20250115164436.jpg",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22782-20250115164438.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22752",
+        "name": "多乐够级",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22752-20240719164040.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22752-20240719164042.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22498",
+        "name": "友旗麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22498-20220530172814.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22498-20210902115722.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22674",
+        "name": "斗地主比赛",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22674-20230608154014.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22674-20230608154016.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22736",
+        "name": "棋者象棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22736-20240520165201.png",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22736-20240520165203.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22260",
+        "name": "五子棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22260-20220530172809.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22260-20201228161534.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22421",
+        "name": "微乐象棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22421-20220530172823.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22421-20210415150553.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22760",
+        "name": "指尖天天斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22760-20240809163140.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22760-20240809163142.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22428",
+        "name": "天天军棋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22428-20220530172808.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22428-20210425170559.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "2"
+      },
+      {
+        "id": "22311",
+        "name": "多乐游戏",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22311-20220530172805.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22311-20210415173555.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22727",
+        "name": "边锋掼蛋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22727-20240325124244.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22727-20240325124246.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22438",
+        "name": "好彩麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22438-20220908173419.png",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22438-20220908173423.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "1"
+      },
+      {
+        "id": "22541",
+        "name": "芝麻红中麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22541-20220530172822.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22541-20211129162851.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22542",
+        "name": "赖子斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22542-20220530172821.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22542-20211130173347.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22622",
+        "name": "喜喜斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22622-20221018175615.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22622-20221018175622.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22746",
+        "name": "玖玖麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22746-20240702112228.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22746-20240702112230.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22773",
+        "name": "拼米长沙麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22773-20241114151551.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22773-20241114151553.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22280",
+        "name": "就要斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22280-20220530172825.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22280-20210108174341.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22384",
+        "name": "雀姬",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22384-20220530172822.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22384-20210326132444.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22403",
+        "name": "八牛斗地主",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22403-20220530172806.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22403-20211018144326.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      },
+      {
+        "id": "22422",
+        "name": "蜀山四川麻将",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22422-20220530172812.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22422-20210415151506.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "QP",
+        "categoryName": "棋牌游戏",
+        "roomCount": "0"
+      }
+    ],
+    "hasMore": true
+  }
+}

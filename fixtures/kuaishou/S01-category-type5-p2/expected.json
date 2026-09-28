@@ -1,0 +1,125 @@
+{
+  "generator": "KuaishowSite.getSubCategores + getAllSubCategores",
+  "value": {
+    "getSubCategores": [
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22430",
+        "areaName": "富豪麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22430-20220530172814.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22446",
+        "areaName": "赛赛斗地主",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22446-20220530172821.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22472",
+        "areaName": "虾游麻将",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22472-20220530172810.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22473",
+        "areaName": "白金岛游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22473-20220530172825.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22495",
+        "areaName": "夺宝跑得快",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22495-20220530172820.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "5",
+        "typeName": "棋牌",
+        "areaId": "22499",
+        "areaName": "国际象棋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22499-20220530172812.webp",
+        "shortName": null
+      }
+    ],
+    "getAllSubCategores": {
+      "requestedPages": [
+        "1",
+        "2"
+      ],
+      "areaIds": [
+        "1018",
+        "22185",
+        "6",
+        "10",
+        "1017",
+        "22427",
+        "9",
+        "22339",
+        "22429",
+        "20",
+        "22563",
+        "22313",
+        "22672",
+        "11",
+        "22426",
+        "1026",
+        "22764",
+        "22338",
+        "22447",
+        "22778",
+        "22652",
+        "22722",
+        "22435",
+        "22478",
+        "1052",
+        "22813",
+        "1037",
+        "22765",
+        "22354",
+        "22782",
+        "22752",
+        "22498",
+        "22674",
+        "22736",
+        "22260",
+        "22421",
+        "22760",
+        "22428",
+        "22311",
+        "22727",
+        "22438",
+        "22541",
+        "22542",
+        "22622",
+        "22746",
+        "22773",
+        "22280",
+        "22384",
+        "22403",
+        "22422",
+        "22430",
+        "22446",
+        "22472",
+        "22473",
+        "22495",
+        "22499"
+      ]
+    }
+  }
+}

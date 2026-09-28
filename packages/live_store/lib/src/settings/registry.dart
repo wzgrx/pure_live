@@ -596,6 +596,10 @@ abstract final class Settings {
   /// History size limit; 0 means unlimited (store.md §3).
   static const historyLimit = IntSetting('history.limit', 50, min: 0, legacy: [LegacyKey('historyLimit')]);
 
+  /// Remember recent search keywords (spec/product.md F-SRC-06); on by
+  /// default, and turning it off clears them. New in v4, no 3.x key.
+  static const recordSearchHistory = BoolSetting('search.recordHistory', true);
+
   /// Visible platforms in discover, in order (store.md §6.4.8); IPTV shows as
   /// the "网络电视" platform (iptv.md §5), as it did in 3.x.
   static const catalogPlatforms = StringListSetting(
@@ -1031,6 +1035,7 @@ abstract final class Settings {
     coverRefreshInterval,
     liveAlerts,
     historyLimit,
+    recordSearchHistory,
     catalogPlatforms,
     catalogPreferred,
     iptvAutoSync,

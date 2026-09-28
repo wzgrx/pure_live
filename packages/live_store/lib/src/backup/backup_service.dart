@@ -14,6 +14,7 @@ import 'package:live_store/src/follows.dart';
 import 'package:live_store/src/iptv.dart';
 import 'package:live_store/src/live_store.dart';
 import 'package:live_store/src/rooms.dart';
+import 'package:live_store/src/search_history.dart';
 import 'package:live_store/src/secrets/secret_store.dart';
 import 'package:live_store/src/settings/registry.dart';
 import 'package:live_store/src/settings/setting.dart';
@@ -349,6 +350,7 @@ final class BackupService {
         }
       }
       if (plan.iptv case final iptv?) await _applyIptv(db, iptv, now);
+      await _applySearchHistory(db, plan);
     });
     await _store.settings.load();
     await _store.history.trim();
@@ -365,6 +367,37 @@ final class BackupService {
       } on Object catch (error) {
         plan.report.note('recordTasks', 'writeFailed', error.runtimeType.toString());
       }
+    }
+  }
+
+  /// F-SRC-06: the file's search history replaces the local one, unless
+  /// recording is off after the import: then there is no history, as when
+  /// the user turns it off.
+  Future<void> _applySearchHistory(StoreDatabase db, ImportPlan plan) async {
+    const setting = Settings.recordSearchHistory;
+    final imported = plan.settings?[setting.id] as bool?;
+    final recording = imported ?? (plan.replaceSettings ? setting.defaultValue : _store.settings.get(setting));
+    final entries = plan.searchHistory;
+    if (recording && entries == null) return;
+    await db.delete(db.searchHistoryEntries).go();
+    if (!recording) {
+      if (entries != null && entries.isNotEmpty) {
+        plan.report
+          ..written('searchHistory', 0)
+          ..note('searchHistory', 'recordingOff');
+      }
+      return;
+    }
+    for (final entry in entries!) {
+      await db
+          .into(db.searchHistoryEntries)
+          .insertOnConflictUpdate(
+            SearchHistoryEntriesCompanion.insert(
+              keywordFolded: entry.folded,
+              keyword: SearchHistoryStore.normalize(entry.keyword),
+              searchedAt: entry.searchedAt.toUtc().millisecondsSinceEpoch,
+            ),
+          );
     }
   }
 

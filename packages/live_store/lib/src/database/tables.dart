@@ -230,6 +230,27 @@ class SettingEntries extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+/// Recent search keywords (spec/product.md F-SRC-06, schema 3): one row per
+/// keyword, compared trimmed and lower-cased.
+@DataClassName('SearchHistoryRow')
+class SearchHistoryEntries extends Table {
+  @override
+  String get tableName => 'search_history';
+
+  /// The keyword trimmed, inner spaces collapsed and lower-cased: its
+  /// identity.
+  TextColumn get keywordFolded => text()();
+
+  /// The keyword as last searched (trimmed, inner spaces collapsed).
+  TextColumn get keyword => text()();
+
+  /// When it was last searched (UTC milliseconds).
+  IntColumn get searchedAt => integer()();
+
+  @override
+  Set<Column> get primaryKey => {keywordFolded};
+}
+
 /// Internal bookkeeping: import ledger, device id, first-run flags.
 @DataClassName('MetaRow')
 class MetaEntries extends Table {

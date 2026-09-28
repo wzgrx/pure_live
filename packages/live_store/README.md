@@ -21,6 +21,7 @@ final secrets = await SecretStore.open(
 | `store.follows` | 关注（`FollowedRoom`：房间快照、关注时间、自定义顺序、标签 id） | `watchAll()`、`watch(ref)`、`watchContains(ref)`、`follow(snapshot)`、`unfollow(ref)`（返回被删的项，用于撤销）、`restore(entries)`、`reorder(refs)`、`count()` |
 | `store.rooms` | 关注、历史、标签共用的房间快照 | `update(snapshots)`（刷新结果，只更新已有房间）、`get` / `watch(ref)`、`prune()` |
 | `store.history` | 观看历史，最新在前，上限 `Settings.historyLimit`（0 = 不限） | `watchAll()`、`record(snapshot)`、`remove(ref)`、`clear(shownSnapshot)`（只删清空时看到的记录）、`restore(entries)`、`trim()` |
+| `store.searchHistory` | 最近的搜索词（F-SRC-06）：最新在前，最多 20 条，同一个词（去空白、不分大小写）只留一条；“记录搜索历史”（`Settings.recordSearchHistory`）关闭时不记录 | `watchAll()`、`record(keyword)`、`remove(keyword)`（返回被删的项）、`clear([shown])`（只删清空时看到的记录）、`restore(entries)` |
 | `store.tags` | 标签（关注分组），名称不区分大小写唯一 | `watchAll()`、`create`、`rename`、`describe`、`delete`、`reorder`、`setTagsOf(ref, ids)`、`addRooms` / `removeRooms`、`watchTagsOf(ref)` |
 | `store.blockRules` | 弹幕屏蔽词和屏蔽用户，按去空白小写后唯一 | `watchAll([kind])`、`add(kind, value)`、`remove(kind, value)` |
 | `store.followAreas` | 关注的分区（身份：平台、命名空间、分区 id） | `watchAll()`、`follow`、`unfollow`、`contains` |
@@ -66,6 +67,7 @@ await backup.restoreFile(file, mode: RestoreMode.follows);    // 仅恢复关注
 - 先整体解析和校验成 `ImportPlan`，出错抛 `FormatException`（版本高于 4 抛 `BackupTooNewException`），什么都不写；同一时间只能有一个恢复（`StateError`）。
 - 完整恢复：文件里有的分区整体替换本机数据，没有的分区不动。v4 的 settings 分区替换 `synced` 作用域（同一平台家族时再加 `device`）；3.x 只写文件里出现的键。仅关注恢复只替换关注和关注分区。
 - 3.x 导入按 store.md §6.4 规范化：无效房间丢弃、按 RoomRef 去重（先出现的保留位置，后出现的补空字段）、虎牙 onlineViewers 转人气、标签以 `roomTagsMap` 为准（纯房间号键匹配导入的关注和历史，名称重复合并）、`roomVolumes` / `portraitRoomOverrides` 转房间偏好、Cookie 进密钥库、历史按文件里的上限截断。
+- 搜索历史（schema 3 的 `search_history` 表）在完整备份的 `searchHistory` 分区：`[{keyword, searchedAt}]`，最新在前。没有这个分区的旧备份（包括 3.x）恢复时本机搜索历史不变；更早的 v4 版本读到这个分区只在报告里记 `unknownSection`。恢复后“记录搜索历史”为关时不写入，本机的也清空（报告记 `recordingOff`）。
 - `ImportReport` 给出每类数据的读入、写入、丢弃数和原因（只含房间号、键名，不含密钥）。
 - 口令错误或没给口令：其余部分照常导入，`report.secretsSkipped` 为真。PBKDF2 在另一个 isolate 里算（桌面 JIT 约 1.4 秒）。
 

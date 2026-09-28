@@ -26,6 +26,7 @@ part 'database.g.dart';
     IptvGuideSources,
     IptvGuideChannels,
     IptvProgrammes,
+    SearchHistoryEntries,
   ],
 )
 final class StoreDatabase extends _$StoreDatabase {
@@ -33,9 +34,10 @@ final class StoreDatabase extends _$StoreDatabase {
   new(super.e);
 
   /// Version history: 1 the preview tables; 2 adds IPTV playlists, channels,
-  /// guide sources, guide channels and programmes (spec/modules/iptv.md §7).
+  /// guide sources, guide channels and programmes (spec/modules/iptv.md §7);
+  /// 3 adds the search history (spec/product.md F-SRC-06).
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +53,9 @@ final class StoreDatabase extends _$StoreDatabase {
         await m.createIndex(schema.iptvChannelsGroup);
         await m.createIndex(schema.iptvProgrammesChannel);
         await m.createIndex(schema.iptvProgrammesStop);
+      },
+      from2To3: (m, schema) async {
+        await m.createTable(schema.searchHistory);
       },
     ),
     beforeOpen: (details) async {

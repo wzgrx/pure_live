@@ -244,6 +244,15 @@ const Map<String, AudiencePlatformCapability> audienceCapabilities = {
     hasTotalViewers: false,
     onlineAvailability: AudienceOnlineAvailability.unsupported,
   ),
+  // Inke's app answers (the hot list, the current broadcast) carry
+  // numbers.real, the "N人在看" the app shows, and online_users, a larger
+  // display figure kept as heat (REG-INKE-003). The website showcases carry
+  // neither; 3.x showed no Inke audience (M4.U.14).
+  'inke': AudiencePlatformCapability(
+    hasPopularity: true,
+    hasTotalViewers: false,
+    onlineAvailability: AudienceOnlineAvailability.roomList,
+  ),
   // AcFun onlineCount is independent of likes/followers; author search omits it.
   'acfun': AudiencePlatformCapability(
     hasPopularity: false,

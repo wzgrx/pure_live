@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "platform": "inke",
+  "sample": "S06-placeholder-share",
+  "capturedAt": "2026-09-28T17:41:07.924839Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://webapi.busi.inke.cn/web/live_share_pc?uid=778398645",
+    "headers": {
+      "Referer": "https://www.inke.cn/",
+      "Origin": "https://www.inke.cn",
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "openresty/1.9.7.4",
+      "date": "Mon, 28 Sep 2026 17:41:08 GMT",
+      "content-type": "text/html; charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "close",
+      "x-powered-by": "PHP/7.1.12",
+      "set-cookie": [
+        "PHPSESSID=5dc73b0b50b10551ab17c9974f08fb20; path=/",
+        "_csrfToken=99640a72758c6638ce816bb220d2a70f; expires=Mon, 28-Sep-2026 20:41:08 GMT; Max-Age=10800; path=/"
+      ],
+      "expires": "Thu, 19 Nov 1981 08:52:00 GMT",
+      "cache-control": "no-store, no-cache, must-revalidate",
+      "pragma": "no-cache",
+      "access-control-allow-origin": "https://www.inke.cn",
+      "access-control-allow-headers": "X-Requested-With",
+      "access-control-allow-methods": "GET,POST,OPTIONS",
+      "access-control-allow-credentials": "true",
+      "server-info": "ali-c-opd-proxy06.bj_2026-09-29-01:41:08:769"
+    }
+  },
+  "raw": {
+    "sha256": "6c77daf28ab5ff39bda14273291e31164b75b9fde021c8c8b618ced918fcd649",
+    "length": 890
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "set-cookie:PHPSESSID",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:_csrfToken",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.U.14 recorder (schema 1)"
+}

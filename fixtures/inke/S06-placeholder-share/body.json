@@ -1,0 +1,26 @@
+{
+  "error_code": 0,
+  "message": "ok",
+  "data": {
+    "media_info": {
+      "nick": "西宝😘",
+      "portrait": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc4ODM2NTQ3NzUzNyM4MDMjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+      "inke_id": 778398645,
+      "level": 11,
+      "gender": 0,
+      "gender_img": "/Public/images/gender-0.png",
+      "area": "北京市",
+      "description": "如果是对的人，晚一点也没关系🥂",
+      "level_img": "http://img2.inke.cn/MTUzMDA3ODA0OTA1NyM2NTAjanBn.jpg"
+    },
+    "records": [],
+    "status": 1,
+    "portrait": "https://imagescale.inke.cn/imageproxy2/dimgm/scaleImage?url=http%3A%2F%2Fimg.ikstatic.cn%2FMTc4ODM2NTQ3NzUzNyM4MDMjanBn.jpg&w=100&h=100&s=80&c=0&o=0",
+    "liveid": "1790598852240024",
+    "live_uid": "778398645",
+    "is_follow": 0,
+    "live_type": "",
+    "sub_live_type": "",
+    "live_name": "正在直播中"
+  }
+}

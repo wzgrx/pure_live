@@ -1,0 +1,1120 @@
+{
+  "generator": "3.x DouyinDanmaku.decodeMessage, one instance per sample or vector (fixtures/douyin/danmaku/legacy_expected.dart, run by legacy_expected.sh)",
+  "value": {
+    "vectors": [
+      {
+        "vector": "plain-payload-with-ack",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 1,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "k!",
+                  "userId": "8727542766180611",
+                  "message": "第二条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "gzip-by-encoding",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 2,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "gzip-encoding-upper-case",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 3,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "gzip-encoding-upper-case-on-plain-payload",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 4,
+            "effects": [
+              {
+                "error": "FormatException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "gzip-by-magic-bytes",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 5,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "gzip-encoding-on-plain-payload",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 6,
+            "effects": [
+              {
+                "error": "FormatException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "no-ack-requested",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 7,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "ack-without-log-id-or-internal-ext",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 8,
+            "effects": [
+              {
+                "send": "EAA6A2Fja0IA"
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "ack-log-id-above-2^63",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 9,
+            "effects": [
+              {
+                "send": "EP///////////wE6A2Fja0JcaW50ZXJuYWxfc3JjOnB1c2hzZXJ2ZXJ8Zmlyc3RfcmVxX21zOjE3OTA1MTk5NzEwMjV8d3NzX21zZ190eXBlOnJ8d3Jkc192Ojc2OTAyMjQ3MTM5ODQ5MDY1Mzc="
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "need-ack-varint-with-high-bits-only",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 10,
+            "effects": [
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          },
+          {
+            "line": 11,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "第一条",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-times",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 12,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "毫秒",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": 1790519968123,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "秒",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": 1790519968000,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "零",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "只有 eventTime",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "1e11 整",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": 100000000000000,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-message-ids",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 13,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "common id",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "envelope id",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:42",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "no id",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "no common",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:43",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "negative envelope",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:-5",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-rooms",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 14,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "this room",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "room 0",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "no common",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224709082037814",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-without-user-or-content",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 15,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "",
+                  "userId": "0",
+                  "message": "no user",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众1",
+                  "userId": "579432622234547",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "",
+                  "userId": "12",
+                  "message": "user without name",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-with-full-user-and-extras",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 16,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "观众3",
+                  "userId": "29022464958",
+                  "message": "左上角有苹果18手机",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224691106976802",
+                  "sentAt": 1790519968000,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-common-split-in-two",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 17,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "second",
+                  "userId": "1",
+                  "message": "merged",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:99",
+                  "sentAt": 1790519968000,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "chat-fields-with-other-wire-types",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 18,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "name",
+                  "userId": "31",
+                  "message": "kept",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7",
+                  "sentAt": null,
+                  "data": null
+                }
+              },
+              {
+                "message": {
+                  "type": "chat",
+                  "userName": "",
+                  "userId": "0",
+                  "message": "common as varint",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "douyin:7690224709082037814",
+                  "sentAt": null,
+                  "data": null
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "online-counts",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 19,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "onlineViewers",
+                    "value": 306000
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "onlineViewers",
+                    "value": 1234
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "onlineViewers",
+                    "value": 12000
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "onlineViewers",
+                    "value": 2000
+                  }
+                }
+              },
+              {
+                "message": {
+                  "type": "online",
+                  "userName": "",
+                  "userId": "",
+                  "message": "",
+                  "color": "#ffffff",
+                  "userLevel": "",
+                  "fansLevel": "",
+                  "fansName": "",
+                  "isLocal": false,
+                  "messageId": "",
+                  "sentAt": null,
+                  "data": {
+                    "kind": "onlineViewers",
+                    "value": 0
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "other-methods-ignored",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 20,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "server-heartbeat-reply",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 21,
+            "effects": []
+          },
+          {
+            "line": 22,
+            "effects": []
+          }
+        ]
+      },
+      {
+        "vector": "malformed-frames",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 23,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 24,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 25,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 26,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 27,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 28,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 29,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 30,
+            "effects": []
+          },
+          {
+            "line": 31,
+            "effects": [
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          },
+          {
+            "line": 32,
+            "effects": [
+              {
+                "error": "FormatException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "malformed-chat-before-good-chat",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 33,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "malformed-online-before-good-chat",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 34,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "error": "InvalidProtocolBufferException"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "create-time-out-of-range",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "7690000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 35,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              },
+              {
+                "error": "RangeError"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vector": "uint64-ids-above-2^63",
+        "args": {
+          "webRid": "100000000001",
+          "roomId": "9300000000000000001",
+          "userId": "7300000000000000001",
+          "cookie": ""
+        },
+        "frames": [
+          {
+            "line": 36,
+            "effects": [
+              {
+                "send": "EO3ZjNWSt92CRDoDYWNrQlxpbnRlcm5hbF9zcmM6cHVzaHNlcnZlcnxmaXJzdF9yZXFfbXM6MTc5MDUxOTk3MTAyNXx3c3NfbXNnX3R5cGU6cnx3cmRzX3Y6NzY5MDIyNDcxMzk4NDkwNjUzNw=="
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

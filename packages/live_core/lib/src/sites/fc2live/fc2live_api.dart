@@ -214,7 +214,8 @@ final class Fc2LiveInputRecipe implements LiveInputRecipe {
   /// The channel number.
   final String channelId;
 
-  /// The quality id: a tier (`30`, `20`, `10`, 26-2) or `auto`.
+  /// The quality id: a tier (`50`, `40`, `30`, `20`, `10`, 26-2) or
+  /// `auto`.
   final String quality;
 
   /// `fc2live:<channel>:<quality>` (3.x's `fc2live:<channel>:auto`).
@@ -307,27 +308,33 @@ abstract final class Fc2LiveApi {
   /// label are 3.x's.
   static const LivePlayQuality autoQuality = LivePlayQuality(id: autoQualityId, quality: '自适应 HLS');
 
-  /// The three tiers of 26-2, best first. The id is the tier's playlist
-  /// mode in the control's HLS answer (`30`, `20`, `10`; the site's player
-  /// calls them 1.2 Mbps, 400 Kbps and 150 Kbps). The labels are the
-  /// shared names of high, standard and low (`LiveQualityLabel`); the
-  /// highest is not the source, the site transcodes all three.
+  /// The tiers of 26-2, best first. The id is the tier's playlist mode in
+  /// the control's HLS answer; the site transcodes every tier, none is the
+  /// source. The labels follow the site's player (`mode10`…`mode50`):
+  /// - `50` 3 Mbps (β) and `40` 2 Mbps, offered only for some channels
+  ///   (a 1080p broadcast in control/S07-control-hd): 超清 with the rate;
+  /// - `30` 1.2 Mbps, `20` 400 Kbps and `10` 150 Kbps, offered for every
+  ///   channel recorded: the shared names of high, standard and low
+  ///   (`LiveQualityLabel`).
   static const List<LivePlayQuality> tierQualities = [
+    LivePlayQuality(id: '50', quality: '超清 3M（β）', sort: 50),
+    LivePlayQuality(id: '40', quality: '超清 2M', sort: 40),
     LivePlayQuality(id: '30', quality: '高清', sort: 30),
     LivePlayQuality(id: '20', quality: '标清', sort: 20),
     LivePlayQuality(id: '10', quality: '流畅', sort: 10),
   ];
 
   /// The playlist modes of [tierQualities], best first.
-  static const List<int> tierModes = [30, 20, 10];
+  static const List<int> tierModes = [50, 40, 30, 20, 10];
 
-  /// Every quality of a live room in menu order (26-2): the tiers, best
-  /// first (the default), then [autoQuality].
+  /// Every quality a live room can have, in menu order (26-2): the tiers,
+  /// best first, then [autoQuality]. A room lists those its channel offers
+  /// ([qualitiesOf]).
   static const List<LivePlayQuality> qualities = [...tierQualities, autoQuality];
 
   /// The ids of [qualities]. 3.x's one id, `auto`, is unchanged, so stored
   /// quality ids need no mapping (M9).
-  static const Set<String> qualityIds = {'30', '20', '10', autoQualityId};
+  static const Set<String> qualityIds = {'50', '40', '30', '20', '10', autoQualityId};
 
   static final RegExp _channelId = RegExp(r'^[1-9]\d{0,11}$');
 
@@ -824,6 +831,17 @@ abstract final class Fc2LiveApi {
     }
     return uri;
   }
+
+  /// The qualities a channel offers by its HLS answer's [playlists]
+  /// ([hlsPlaylists]), in menu order (26-2): each tier with a variant in
+  /// any family (so `50` and `40` only for the channels that have them),
+  /// then [autoQuality] when a master is there. Empty when the answer has
+  /// neither (sound only).
+  static List<LivePlayQuality> qualitiesOf(Map<int, Uri> playlists) => [
+    for (final quality in tierQualities)
+      if ([0, 1, 2].any((offset) => playlists.containsKey(int.parse('${quality.id}') + offset))) quality,
+    if ([0, 1, 2].any(playlists.containsKey)) autoQuality,
+  ];
 
   /// The low-latency master (mode 0) of the HLS answer, the one 3.x played
   /// (see [hlsPlaylists]); an answer without it is `ApiChanged`.

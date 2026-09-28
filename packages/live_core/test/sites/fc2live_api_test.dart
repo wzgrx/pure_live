@@ -237,9 +237,10 @@ Map<String, dynamic> _hlsAnswer({Object? status = 0, Object? playlists, Map<Stri
   },
 };
 
-/// The recorded HLS answer of S04 (62996200).
-Map<String, dynamic> _recordedAnswer() =>
-    _sample('control/S04-control').frames
+/// The recorded HLS answer of [sample]: S04 (62996200, tiers 10–30) or S07
+/// (10200498, a 1080p broadcast with tiers 10–50).
+Map<String, dynamic> _recordedAnswer([String sample = 'control/S04-control']) =>
+    _sample(sample).frames
         .map((frame) => jsonDecode(frame) as Map<String, dynamic>)
         .firstWhere((message) => message['name'] == '_response_');
 
@@ -589,7 +590,7 @@ void main() {
   });
 
   group('streams', () {
-    test("the three tiers, then 3.x's auto unchanged; recipes per quality (26-2)", () {
+    test("the tiers, then 3.x's auto unchanged; recipes per quality (26-2)", () {
       final legacy = _legacy('S02-member-live');
       final quality = _maps(_result(legacy['getPlayQualites'])).single;
       const auto = Fc2LiveApi.autoQuality;
@@ -597,9 +598,16 @@ void main() {
       // 3.x offered auto alone; now the tiers come first (26-2).
       expect(
         [for (final quality in Fc2LiveApi.qualities) (quality.id, quality.quality)],
-        [('30', '高清'), ('20', '标清'), ('10', '流畅'), ('auto', '自适应 HLS')],
+        [('50', '超清 3M（β）'), ('40', '超清 2M'), ('30', '高清'), ('20', '标清'), ('10', '流畅'), ('auto', '自适应 HLS')],
       );
-      expect(Fc2LiveApi.qualities.map((quality) => quality.sort), [30, 20, 10, 0], reason: 'best first, auto last');
+      expect(Fc2LiveApi.qualities.map((quality) => quality.sort), [
+        50,
+        40,
+        30,
+        20,
+        10,
+        0,
+      ], reason: 'best first, auto last');
       expect(Fc2LiveApi.qualityIds, {for (final quality in Fc2LiveApi.qualities) quality.id});
       expect(Fc2LiveApi.qualityIds, contains(quality['id']), reason: "3.x's stored id needs no mapping (M9)");
       final resolved = _result(legacy['resolvePlayUrlsRaw(auto)'])! as Map<String, dynamic>;
@@ -661,6 +669,12 @@ void main() {
       expect(() => Fc2LiveApi.hlsMaster(answer, channelId: '10608314'), throwsA(isA<ApiChanged>()));
       expect(() => Fc2LiveApi.hlsPlaylists(answer, channelId: '10608314'), throwsA(isA<ApiChanged>()));
       expect(legacy['sent'], [Fc2LiveControl.hlsRequest]);
+      expect(Fc2LiveApi.qualitiesOf(playlists).map((quality) => quality.id), [
+        '30',
+        '20',
+        '10',
+        'auto',
+      ], reason: 'no 50 or 40 for this channel: not listed');
     });
 
     test("S04 a tier plays its high-latency variant; auto plays 3.x's master (26-2)", () {
@@ -670,9 +684,47 @@ void main() {
         expect(chosen.quality, quality);
         expect(chosen.url, playlists[mode], reason: quality);
       }
-      for (final quality in ['', 'original', '40', '31', '030']) {
+      for (final (quality, playing) in [('50', '30'), ('40', '30')]) {
+        expect(Fc2LiveApi.playlistFor(playlists, quality)?.quality, playing, reason: '$quality: the next lower tier');
+      }
+      for (final quality in ['', 'original', '60', '31', '030']) {
         expect(Fc2LiveApi.playlistFor(playlists, quality), isNull, reason: quality);
       }
+    });
+
+    test('S07 (recorded for M4.U): a 1080p broadcast offers 50 and 40 too, each on its high-latency variant', () {
+      final frames = _sample('control/S07-control-hd').frames.map((frame) => jsonDecode(frame) as Map);
+      expect(frames.singleWhere((message) => message['name'] == 'video_information')['arguments'], {
+        'type': 'publish',
+        'width': 1920,
+        'height': 1080,
+      });
+      final answer = _recordedAnswer('control/S07-control-hd');
+      final playlists = Fc2LiveApi.hlsPlaylists(answer, channelId: '10200498');
+      expect(playlists.keys.toList()..sort(), [
+        for (final mode in [0, 10, 20, 30, 40, 50, 90]) ...[mode, mode + 1, mode + 2],
+      ]);
+      expect(playlists[0]?.queryParameters['targets'], '10,20,30,40,50,90');
+      expect(
+        [for (final quality in Fc2LiveApi.qualitiesOf(playlists)) (quality.id, quality.quality)],
+        [('50', '超清 3M（β）'), ('40', '超清 2M'), ('30', '高清'), ('20', '标清'), ('10', '流畅'), ('auto', '自适应 HLS')],
+      );
+      for (final (quality, mode) in [('50', 51), ('40', 41), ('30', 31), ('auto', 0)]) {
+        final chosen = Fc2LiveApi.playlistFor(playlists, quality)!;
+        expect((chosen.quality, chosen.url), (quality, playlists[mode]), reason: quality);
+        expect(chosen.url.path, '/a/stream/10200498/$mode/${mode == 0 ? 'master_playlist' : 'playlist'}');
+      }
+    });
+
+    test('the qualities a channel offers: tiers with a variant in any family, auto with a master', () {
+      List<Object?> ids(List<int> modes) => [
+        for (final quality in Fc2LiveApi.qualitiesOf({for (final mode in modes) mode: Uri.parse(_variant(mode))}))
+          quality.id,
+      ];
+      expect(ids([0, 10, 20, 30]), ['30', '20', '10', 'auto']);
+      expect(ids([41, 52, 12]), ['50', '40', '10'], reason: 'any family; no master, no auto');
+      expect(ids([1]), ['auto']);
+      expect(ids([90, 91, 92]), isEmpty, reason: 'sound only');
     });
 
     test('a missing tier falls back to the next lower, then higher, then a master; auto to the best tier', () {
@@ -684,6 +736,8 @@ void main() {
         null => null,
       };
       expect(play([10, 20, 30], '30'), ('30', 30), reason: 'only low latency: the low-latency variant');
+      expect(play([10, 21, 31, 0], '50'), ('30', 31), reason: 'no 50 or 40: the next lower tier');
+      expect(play([10, 51], '40'), ('10', 10), reason: 'lower tiers before higher ones');
       expect(play([22, 32], '30'), ('30', 32), reason: 'only middle latency');
       expect(play([10, 11, 21, 0], '30'), ('20', 21), reason: 'no 30: the next lower tier');
       expect(play([30, 31, 0], '10'), ('30', 31), reason: 'no 10 or 20: the next higher tier');
@@ -1124,7 +1178,7 @@ void main() {
       for (final bad in ['', '0', 'abc', 'https://live.fc2.com/10608314/']) {
         expect(() => Fc2LiveInputRecipe(bad), throwsArgumentError, reason: bad);
       }
-      for (final quality in ['', '40', 'original', 'AUTO']) {
+      for (final quality in ['', '60', 'original', 'AUTO']) {
         expect(() => Fc2LiveInputRecipe('10608314', quality: quality), throwsArgumentError, reason: quality);
       }
       final room = Fc2LiveApi.room(Fc2LiveApi.member(_memberPayload(), channelId: '10608314').channel);

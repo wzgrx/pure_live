@@ -162,11 +162,33 @@ final class _Failing implements LiveHttp {
 // The control socket ----------------------------------------------------------
 
 /// The server's messages in the recorded control conversation, in order.
-List<String> _serverFrames() => [
-  for (final line in File('$_root/control/S04-control/frames.jsonl').readAsLinesSync())
+List<String> _serverFrames([String sample = 'S04-control']) => [
+  for (final line in File('$_root/control/$sample/frames.jsonl').readAsLinesSync())
     if (line.trim().isNotEmpty)
       if (jsonDecode(line) case {'dir': 'in', 'text': final String text}) text,
 ];
+
+/// The channel of control/S07-control-hd, a 1080p broadcast whose answer
+/// offers the tiers 50 and 40 too.
+const _hd = '10200498';
+
+/// Synthetic answers for [_hd]: S02-member-live's member answer about it and
+/// S03-control's grant for its control socket (only the channel differs).
+List<ReplaySample> _hdAnswers() {
+  final member = jsonDecode(Fixture.load('fc2live', 'S02-member-live').body) as Map<String, dynamic>;
+  ((member['data'] as Map<String, dynamic>)['channel_data'] as Map<String, dynamic>)['channelid'] = _hd;
+  final grant = jsonDecode(Fixture.load('fc2live', 'S03-control').body) as Map<String, dynamic>;
+  grant['url'] = (grant['url'] as String).replaceFirst('/channels/$_live', '/channels/$_hd');
+  return [
+    _synthetic('/api/memberApi.php', _memberForm(_hd), member),
+    ReplaySample(
+      method: 'POST',
+      url: Uri.parse('https://live.fc2.com/api/getControlServer.php'),
+      status: 200,
+      bytes: utf8.encode(jsonEncode(grant)),
+    ),
+  ];
+}
 
 String _message(String name, [Object? arguments]) => jsonEncode({'name': name, 'arguments': arguments ?? {}});
 
@@ -290,7 +312,7 @@ void main() {
       expect(site, isA<LivePlayUrlResolver>());
       expect(site, isA<LivePlayRecoveryResolver>());
       expect(site, isNot(isA<LivePlayUrlCursorResolver>()));
-      expect(site, isNot(isA<LiveQualityDiscovery>()));
+      expect(site, isA<LiveQualityDiscovery>(), reason: 'the qualities come from a control answer (26-2)');
       expect(Fc2LiveControl.pingInterval, const Duration(seconds: 15), reason: "3.x's control ping");
     });
 
@@ -685,18 +707,77 @@ void main() {
   });
 
   group('streams', () {
-    test('the three tiers and 3.x auto for a live room from entry, refresh or a card; no request (26-2)', () async {
-      final setup = _setup(['S02-member-live', 'S01-directory']);
+    test("the qualities the channel's control answer offers, from entry, refresh or a card (26-2)", () async {
+      final channels = [for (var i = 0; i < 3; i++) _Channel(_serverFrames())];
+      final connector = _Connector([...channels]);
+      final setup = _setup(['S02-member-live', 'S01-directory', 'S03-control'], connector: connector.call);
       final entry = await setup.site.getRoomDetail(roomId: _live);
       final refresh = await setup.site.getRoomDetailForRefresh(roomId: _live);
-      final card = (await setup.site.getRecommendRooms()).first;
+      final card = (await setup.site.getRecommendRooms(pageSize: 100)).firstWhere((room) => room.roomId == _live);
       final requests = setup.http.requests.length;
       for (final room in [entry, refresh, card]) {
         final qualities = await setup.site.getPlayQualities(detail: room);
+        // S04 has no 50 or 40: they are not listed.
         expect(qualities.map((quality) => quality.selectionId), ['30', '20', '10', 'auto']);
         expect(qualities.map((quality) => quality.quality), ['高清', '标清', '流畅', '自适应 HLS']);
       }
-      expect(setup.http.requests, hasLength(requests));
+      // A control each (3.x listed auto without a request): member, grant,
+      // socket, closed before the list is returned.
+      final grant = _legacyRequests(_legacy('S02-member-live')['Fc2Api.controlGrant']);
+      expect(_sent(setup.http.requests.skip(requests)), [...grant, ...grant, ...grant]);
+      expect(connector.calls, hasLength(3));
+      expect(channels.map((channel) => channel.closed), everyElement(isTrue));
+      expect(channels.map((channel) => channel.sent), everyElement([Fc2LiveControl.hlsRequest]));
+    });
+
+    test('S07: a channel with the tiers 50 and 40 lists them first; each plays its high-latency variant', () async {
+      final connector = _Connector([
+        _Channel(_serverFrames('S07-control-hd')),
+        _Channel(_serverFrames('S07-control-hd')),
+      ]);
+      final setup = _setup(const [], extra: _hdAnswers(), connector: connector.call);
+      final room = LiveRoom(platform: 'fc2live', roomId: _hd, liveStatus: LiveStatus.live);
+      final qualities = await setup.site.discoverPlayQualities(detail: room);
+      expect(qualities.map((quality) => (quality.selectionId, quality.quality)), [
+        ('50', '超清 3M（β）'),
+        ('40', '超清 2M'),
+        ('30', '高清'),
+        ('20', '标清'),
+        ('10', '流畅'),
+        ('auto', '自适应 HLS'),
+      ]);
+      final resolution = await setup.site.resolvePlayUrlsRaw(detail: room, quality: qualities.first);
+      expect(resolution.inputRecipe, Fc2LiveInputRecipe(_hd, quality: '50'));
+      final control = await setup.site.openControl(_hd, quality: '50');
+      expect((control.quality, control.playlist.path), ('50', '/a/stream/$_hd/51/playlist'));
+      await control.close();
+      expect(connector.calls, hasLength(2));
+    });
+
+    test('a discovery honours its cancel token and never leaves a socket open', () async {
+      final cancelled = CancelToken()..cancel();
+      final early = _controlSetup(_Channel(_serverFrames()));
+      final detail = LiveRoom(platform: 'fc2live', roomId: _live, liveStatus: LiveStatus.live);
+      await expectLater(early.site.discoverPlayQualities(detail: detail, cancel: cancelled), _cancelled);
+      expect(early.http.requests, isEmpty);
+      expect(early.connector.calls, isEmpty);
+
+      final channel = _Channel([_message('connect_complete')]);
+      final setup = _controlSetup(channel);
+      final cancel = CancelToken();
+      final discovery = setup.site.discoverPlayQualities(detail: detail, cancel: cancel);
+      while (!channel.sent.contains(Fc2LiveControl.hlsRequest)) {
+        await pumpEventQueue();
+      }
+      cancel.cancel();
+      await expectLater(discovery, _cancelled);
+      expect(channel.closed, isTrue);
+      final silent = _Channel([_message('connect_complete')]);
+      await expectLater(
+        _controlSetup(silent, startup: const Duration(milliseconds: 50)).site.getPlayQualities(detail: detail),
+        throwsA(isA<NetworkFailure>()),
+      );
+      expect(silent.closed, isTrue);
     });
 
     test("each quality's recipe: no URL, 3.x's identity for auto, the same for recovery; no request", () async {
@@ -713,7 +794,7 @@ void main() {
       final recovery = await setup.site.resolvePlayUrlsForRecovery(detail: detail, quality: quality);
       expect(recovery.inputRecipe, resolution.inputRecipe);
       expect(await setup.site.getPlayUrls(detail: detail, quality: quality), isEmpty);
-      final qualities = await setup.site.getPlayQualities(detail: detail);
+      const qualities = Fc2LiveApi.qualities;
       for (final tier in qualities) {
         final unified = await setup.site.resolvePlayUrls(detail: detail, quality: tier);
         expect(unified.inputRecipe, Fc2LiveInputRecipe(_live, quality: '${tier.id}'));
@@ -764,7 +845,11 @@ void main() {
           restriction: LiveRestriction.none,
         ).toJson(),
       );
-      expect(await setup.site.getPlayQualities(detail: stored), Fc2LiveApi.qualities);
+      expect(
+        (await setup.site.resolvePlayUrlsRaw(detail: stored, quality: quality)).inputRecipe,
+        Fc2LiveInputRecipe(_live),
+        reason: 'restriction none plays',
+      );
       final pending = LiveRoom(platform: 'fc2live', roomId: _live, liveStatus: LiveStatus.unknown);
       await expectLater(setup.site.getPlayQualities(detail: pending), throwsA(isA<StreamUnavailable>()));
       final other = LiveRoom(platform: 'bilibili', roomId: _live, liveStatus: LiveStatus.live);
@@ -772,7 +857,7 @@ void main() {
       final bad = LiveRoom(platform: 'fc2live', roomId: 'abc', liveStatus: LiveStatus.live);
       await expectLater(setup.site.getPlayQualities(detail: bad), throwsA(isA<NotFound>()));
       final live = await _setup(['S02-member-live']).site.getRoomDetail(roomId: _live);
-      for (final id in ['original', '40', 'AUTO']) {
+      for (final id in ['original', '60', 'AUTO']) {
         await expectLater(
           setup.site.resolvePlayUrlsRaw(
             detail: live,
@@ -920,16 +1005,16 @@ void main() {
       expect(sound.closed, isTrue);
     });
 
-    test('a quality that is not one of the four is refused without a request or a socket', () async {
+    test('a quality that is not one of the six is refused without a request or a socket', () async {
       final setup = _controlSetup(_Channel(_serverFrames()));
-      for (final quality in ['40', 'original', '']) {
+      for (final quality in ['60', 'original', '']) {
         await expectLater(setup.site.openControl(_live, quality: quality), throwsArgumentError, reason: quality);
       }
       expect(setup.http.requests, isEmpty);
       expect(setup.connector.calls, isEmpty);
       final grant = Fc2LiveApi.grant(Fixture.load('fc2live', 'S03-control').body, channelId: _live);
       await expectLater(
-        Fc2LiveControl.open(grant, connector: setup.connector.call, quality: '40'),
+        Fc2LiveControl.open(grant, connector: setup.connector.call, quality: '60'),
         throwsArgumentError,
       );
       expect(setup.connector.calls, isEmpty);

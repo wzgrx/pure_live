@@ -30,6 +30,9 @@ const _host = 'live.fc2.com';
 /// - a room is one `memberApi.php` request, at room entry, refresh,
 ///   recording and the live-status check alike; a search for a channel
 ///   number or link is that request too;
+/// - the qualities are the ones the channel's control answer offers
+///   (26-2): listing them opens a control and closes it
+///   ([discoverPlayQualitiesRaw]);
 /// - streams have no URL: each quality resolves to a [Fc2LiveInputRecipe]
 ///   that playback and recording open themselves with [openControl] (M7,
 ///   M8): `memberApi.php`, `getControlServer.php` and the control socket,
@@ -46,7 +49,8 @@ final class Fc2LiveSite extends LiveSite
         LiveSiteRoomRefresher,
         LiveSiteRecordRoomResolver,
         LivePlayUrlResolver,
-        LivePlayRecoveryResolver {
+        LivePlayRecoveryResolver,
+        LiveQualityDiscovery {
   /// Creates the adapter. Control sockets connect with [connector] (default
   /// [Fc2LiveControl.connect]: `dart:io` with 3.x's 15 s ping) through
   /// [proxy]'s route for `fc2live`, the one the app gives [http] too.
@@ -407,14 +411,30 @@ final class Fc2LiveSite extends LiveSite
     return channelId;
   }
 
-  /// The qualities of a room that can be played ([_playable]), without a
-  /// request (26-2): the three tiers, best first, then 3.x's `auto` (see
-  /// [Fc2LiveApi.qualities]). 3.x gave `auto` alone, an offline room an
-  /// empty list, and refused a room without its entry data.
+  /// The qualities the room's channel offers ([discoverPlayQualitiesRaw]).
   @override
-  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
-    _playable(detail);
-    return Fc2LiveApi.qualities;
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) =>
+      discoverPlayQualitiesRaw(detail: detail);
+
+  /// The qualities the room's channel offers now (26-2), best first: a room
+  /// that cannot be played is refused first, without a request
+  /// ([_playable]); otherwise a control is opened ([openControl]:
+  /// `memberApi.php`, `getControlServer.php` and the socket), its HLS
+  /// answer read ([Fc2LiveApi.qualitiesOf]: `50` and `40` only for the
+  /// channels that have them, then 3.x's `auto`) and the control closed
+  /// before this returns. Only the control's answer tells which tiers a
+  /// channel has, so this costs two requests and a socket (3.x listed
+  /// `auto` alone, without a request). [cancel] reaches the requests and
+  /// the socket while it opens.
+  @override
+  Future<List<LivePlayQuality>> discoverPlayQualitiesRaw({required LiveRoom detail, CancelToken? cancel}) async {
+    final channelId = _playable(detail);
+    final control = await openControl(channelId, cancel: cancel);
+    try {
+      return Fc2LiveApi.qualitiesOf(control.playlists);
+    } finally {
+      await control.close();
+    }
   }
 
   @override
@@ -424,8 +444,8 @@ final class Fc2LiveSite extends LiveSite
   /// The recipe of the channel in [quality] (3.x's owned input): no URL,
   /// no request. A quality that is not one of [Fc2LiveApi.qualities] is the
   /// caller's mistake. The applied quality is the one asked for; the
-  /// control says which one plays when the channel lacks a tier
-  /// ([Fc2LiveControl.quality], M7).
+  /// control says which one plays when the channel no longer offers that
+  /// tier ([Fc2LiveControl.quality], M7).
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
     final channelId = _playable(detail);

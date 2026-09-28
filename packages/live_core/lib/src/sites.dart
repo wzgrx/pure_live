@@ -185,6 +185,34 @@ abstract final class SiteIds {
     'kick.com',
   };
 
+  /// Platforms whose room id is a user name that the platform itself matches
+  /// without regard to case, so room identity ignores case there
+  /// (`LiveRoom.identityKeyFor`; docs/modules/M2.1-model.md). The room id
+  /// keeps the spelling it was stored with; only comparisons fold it.
+  ///
+  /// - Twitch: the login name. Logins are lower case; the adapter requests
+  ///   the lower-case form of any spelling (M4.8).
+  /// - SOOP: the streamer id (BJ id). The platform answers it in lower case
+  ///   and links are lower-cased (M4.7).
+  /// - Picarto: the channel name. The platform finds a channel in any case
+  ///   and answers its own spelling (`kaiyote`, `KAIYOTE` → `Kaiyote`, M4.11).
+  /// - TwitCasting: the screen id. The adapter requests its lower-case form
+  ///   (M4.12).
+  /// - TikTok: the user name (`uniqueId`). The answer is matched in any case
+  ///   and the adapter already lower-cases the room id (M4.22).
+  /// - PandaTV: the login id. 3.x matched the room data in any case (M4.25).
+  ///
+  /// Not included: numeric ids (case does not apply), YouTube video and
+  /// channel ids (case-sensitive), niconico programme ids, CHZZK channel ids
+  /// (hex the adapter already lower-cases), and ids whose case rule the
+  /// platform has not shown: Douyu and Huya aliases, Kuaishou user ids, Bigo
+  /// ids.
+  static const Set<String> caseInsensitiveRoomIds = {twitch, soop, picarto, twitcasting, tiktok, pandaLive};
+
+  /// Whether rooms of [platform] are identified without regard to the room
+  /// id's case (see [caseInsensitiveRoomIds]).
+  static bool ignoresRoomIdCase(String platform) => caseInsensitiveRoomIds.contains(platform.trim().toLowerCase());
+
   static final Set<String> _supported = supported.toSet();
 
   /// Whether [id] is a supported platform (case and spaces ignored).

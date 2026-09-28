@@ -239,8 +239,8 @@ final class TikTokSite extends LiveSite
     if (detail.platform != _site) throw ArgumentError.value(detail.platform, 'detail', 'not a TikTok room');
     final username = _username(detail.roomId);
     switch (detail.effectiveLiveStatus) {
-      case LiveStatus.offline:
-        throw StreamUnavailable(_site, '@$username is offline');
+      case LiveStatus.offline || LiveStatus.carousel:
+        throw StreamUnavailable(_site, '@$username is ${detail.effectiveLiveStatus.name}');
       case LiveStatus.banned:
         throw NeedsLogin(_site, '@$username is restricted');
       case LiveStatus.live || LiveStatus.replay || LiveStatus.unknown:

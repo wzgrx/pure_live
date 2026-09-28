@@ -263,8 +263,8 @@ final class YouTubeSite extends LiveSite
   /// content checks) `NeedsLogin`, a room without status `ApiChanged`.
   static void _checkPlayable(LiveRoom room) {
     switch (room.effectiveLiveStatus) {
-      case LiveStatus.offline:
-        throw StreamUnavailable(_site, '${room.roomId} is offline');
+      case LiveStatus.offline || LiveStatus.carousel:
+        throw StreamUnavailable(_site, '${room.roomId} is ${room.effectiveLiveStatus.name}');
       case LiveStatus.banned:
         throw NeedsLogin(_site, '${room.roomId} is restricted');
       case LiveStatus.unknown:

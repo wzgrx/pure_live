@@ -1,9 +1,10 @@
 import 'package:live_core/src/audience.dart';
+import 'package:live_core/src/sites.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
 /// A room's broadcast state. Stored by **index** in room JSON, so the order
-/// must never change.
+/// must never change; new states are only appended.
 enum LiveStatus {
   /// Broadcasting now.
   live,
@@ -12,6 +13,8 @@ enum LiveStatus {
   offline,
 
   /// Playing a recording or replay: playable, but not a live broadcast.
+  /// A replay the platform gives no stream for carries
+  /// [LiveRestriction.unplayable].
   replay,
 
   /// Not known (no platform evidence, or the last request failed).
@@ -19,6 +22,68 @@ enum LiveStatus {
 
   /// Banned or closed by the platform.
   banned,
+
+  /// Looping old videos while the streamer is off (Bilibili's carousel).
+  /// Grouped with offline and not playable. 3.x does not know index 5 and
+  /// reads such a record from its `status: false`, as offline.
+  carousel,
+}
+
+/// Why a room that is on air cannot simply be played. Lists and the room
+/// page still show the room as live and mark the kind; playback explains it
+/// (docs/UPGRADES.md, "统一原则").
+///
+/// Stored by **name** in room JSON, so kinds can be added in any position;
+/// a name this build does not know reads as [none].
+enum LiveRestriction {
+  /// No restriction.
+  none,
+
+  /// Only signed-in viewers can watch (playback fails with `NeedsLogin`).
+  needsLogin,
+
+  /// A paid broadcast or ticket.
+  paid,
+
+  /// Only the streamer's subscribers or members.
+  subscribersOnly,
+
+  /// Private or friends-only.
+  private,
+
+  /// Only in the platform's own app.
+  appOnly,
+
+  /// Not available in the viewer's region (playback fails with
+  /// `RegionBlocked`).
+  regionBlocked,
+
+  /// Protected by a room password.
+  password,
+
+  /// Adult content behind the platform's age check.
+  adult,
+
+  /// The platform says the room is on or has a replay, but gives this
+  /// client no stream (for example a replay without an address).
+  unplayable;
+
+  /// The kind stored as [name]; an unknown name (a kind added by a later
+  /// build) is [none].
+  static LiveRestriction fromName(Object? name) => values.asNameMap()[name] ?? none;
+}
+
+/// Where the follow page lists a room (3.x's live, replay and offline tabs).
+enum FollowGroup {
+  /// Broadcasting now, restricted or not.
+  live,
+
+  /// A replay that can be played.
+  replay,
+
+  /// Everything else: offline, carousel, banned, pending, and a replay
+  /// marked [LiveRestriction.unplayable].
+  offline,
 }
 
 /// Catch-up (time-shift) playback of an IPTV channel.
@@ -71,15 +136,23 @@ final class CatchUp {
 /// stored for follows and history (3.x's `LiveRoom`).
 ///
 /// Immutable, with identity equality: two rooms are equal when platform and
-/// room id match (room numbers are unique only within a platform). Platform
-/// and room id are normalized on creation, so the identity used as a map key
-/// can never change afterwards (3.x's fields were mutable).
+/// room id match (room numbers are unique only within a platform; case is
+/// ignored where the platform ignores it, see [identityKey]). Platform and
+/// room id are normalized on creation, so the identity used as a map key can
+/// never change afterwards (3.x's fields were mutable).
 ///
 /// Fields that a platform response may omit are nullable, and null means
 /// "not in this response": [mergeFrom] keeps the stored value then.
+///
+/// Placeholders: an adapter that does not get the real [nick], [title] or
+/// [cover] leaves it empty, never fills in a stand-in such as "JD Live" or
+/// "Steam Broadcast". [mergeFrom] keeps a stored value only against an empty
+/// one, so a stand-in would overwrite the name a follow stored. The UI shows
+/// the platform's name for an empty [nick] ([displayNick]).
 @immutable
 final class LiveRoom {
-  /// Creates a room. [platform] is lower-cased and [roomId] trimmed.
+  /// Creates a room. [platform] is lower-cased, [roomId] trimmed and
+  /// [startedAt] converted to UTC.
   new({
     String? roomId,
     String? platform,
@@ -97,6 +170,8 @@ final class LiveRoom {
     this.totalViewers = '',
     this.followers = '0',
     this.liveStatus,
+    DateTime? startedAt,
+    this.restriction,
     this.introduction,
     this.notice,
     this.data,
@@ -110,6 +185,7 @@ final class LiveRoom {
     List<String> tagIds = const [],
   }) : roomId = roomId?.trim() ?? '',
        platform = platform?.trim().toLowerCase() ?? 'unknown',
+       startedAt = startedAt?.toUtc(),
        httpHeaders = HttpHeaderPolicy.normalize(httpHeaders),
        tagIds = List.unmodifiable(tagIds);
 
@@ -121,6 +197,9 @@ final class LiveRoom {
   /// - `isRecord: true` means [LiveStatus.replay].
   /// - Earlier builds stored Huya's popularity (URI 8006) as concurrent
   ///   viewers; it is moved back to [popularity].
+  /// - `startedAt` (ISO 8601, or epoch milliseconds) and `restriction` (a
+  ///   [LiveRestriction] name) are v4 keys; a record without them has
+  ///   neither.
   factory fromJson(Map<String, Object?> json) {
     String? text(String key) => json[key]?.toString();
     final platform = text('platform') ?? 'UNKNOWN';
@@ -154,6 +233,8 @@ final class LiveRoom {
       totalViewers: text('totalViewers') ?? '',
       followers: text('followers') ?? '0',
       liveStatus: _statusFromJson(json),
+      startedAt: _timeFromJson(json['startedAt']),
+      restriction: json['restriction'] == null ? null : LiveRestriction.fromName(json['restriction']),
       notice: text('notice') ?? '',
       introduction: text('introduction') ?? '',
       epgId: text('epgId') ?? '',
@@ -224,6 +305,16 @@ final class LiveRoom {
   /// Broadcast state; null when the response did not say.
   final LiveStatus? liveStatus;
 
+  /// When the current broadcast (or the replayed one) started, UTC; null
+  /// when the response did not say or the room is not on.
+  final DateTime? startedAt;
+
+  /// What keeps the current broadcast from simply playing. Null means the
+  /// response did not say (a light status refresh, a record older than
+  /// v4); [LiveRestriction.none] means the platform was checked and there
+  /// is no restriction. See [mergeFrom] and [effectiveRestriction].
+  final LiveRestriction? restriction;
+
   /// Room introduction.
   final String? introduction;
 
@@ -257,28 +348,69 @@ final class LiveRoom {
   /// Tags of a followed room (local only).
   final List<String> tagIds;
 
-  /// `platform:roomId`, the identity used by follows, tags and merges.
-  String get identityKey => '$platform:$roomId';
+  /// `platform:roomId`, the identity used by follows, tags and merges; see
+  /// [identityKeyFor]. [roomId] itself keeps the spelling it was created
+  /// with.
+  String get identityKey => identityKeyFor(platform: platform, roomId: roomId);
 
   /// Whether [other] is the same room.
   bool hasSameIdentity(LiveRoom other) => identityKey == other.identityKey;
 
-  /// Whether this is [platform]'s room [roomId] (both normalized).
+  /// Whether this is [platform]'s room [roomId], compared as [identityKeyFor]
+  /// does.
   bool hasIdentity({required String platform, required String roomId}) =>
-      this.platform == platform.trim().toLowerCase() && this.roomId == roomId.trim();
+      identityKey == identityKeyFor(platform: platform, roomId: roomId);
+
+  /// The identity of [platform]'s room [roomId]: `platform:roomId` with the
+  /// platform lower-cased and the room id trimmed, and the room id also
+  /// lower-cased on platforms whose room ids are user names the platform
+  /// matches without regard to case ([SiteIds.caseInsensitiveRoomIds]).
+  /// Elsewhere case is significant (a YouTube video id, for example).
+  static String identityKeyFor({required String platform, required String roomId}) {
+    final site = platform.trim().toLowerCase();
+    final id = roomId.trim();
+    return '$site:${SiteIds.ignoresRoomIdCase(site) ? id.toLowerCase() : id}';
+  }
 
   /// The state used for display and playback: unknown when not given.
   LiveStatus get effectiveLiveStatus => liveStatus ?? LiveStatus.unknown;
 
-  /// Broadcasting now.
+  /// Broadcasting now (restricted or not).
   bool get isLiveNow => effectiveLiveStatus == LiveStatus.live;
 
-  /// Live or replay: something can be played.
+  /// Live or replay: something can be played. A restriction does not change
+  /// this (playback explains it); a carousel is not playable.
   bool get isPlayableNow => isLiveNow || effectiveLiveStatus == LiveStatus.replay;
 
-  /// The platform said offline or banned.
-  bool get isExplicitlyOfflineNow =>
-      effectiveLiveStatus == LiveStatus.offline || effectiveLiveStatus == LiveStatus.banned;
+  /// The platform said offline, banned or carousel (the streamer is off).
+  bool get isExplicitlyOfflineNow => switch (effectiveLiveStatus) {
+    LiveStatus.offline || LiveStatus.banned || LiveStatus.carousel => true,
+    LiveStatus.live || LiveStatus.replay || LiveStatus.unknown => false,
+  };
+
+  /// The restriction, or [LiveRestriction.none] when the response did not
+  /// say.
+  LiveRestriction get effectiveRestriction => restriction ?? LiveRestriction.none;
+
+  /// Whether a restriction is known (for the card's mark).
+  bool get isRestricted => effectiveRestriction != LiveRestriction.none;
+
+  /// Where the follow page lists this room: live rooms (restricted or not)
+  /// as live, playable replays as replay, everything else as offline,
+  /// including a carousel and a replay marked [LiveRestriction.unplayable].
+  FollowGroup get followGroup => switch (effectiveLiveStatus) {
+    LiveStatus.live => FollowGroup.live,
+    LiveStatus.replay when restriction != LiveRestriction.unplayable => FollowGroup.replay,
+    _ => FollowGroup.offline,
+  };
+
+  /// Whether the platform gave a streamer name.
+  bool get hasNick => nick.trim().isNotEmpty;
+
+  /// The streamer name to show: [nick], or [platformName] when it is empty.
+  /// The platform's display name is localized by the UI (3.x's
+  /// `site_<id>` strings), so the caller passes it in.
+  String displayNick(String platformName) => hasNick ? nick.trim() : platformName;
 
   /// The state is not known yet.
   bool get isLiveStatusPending => effectiveLiveStatus == LiveStatus.unknown;
@@ -433,14 +565,28 @@ final class LiveRoom {
   /// A fresh detail [incoming] applied without losing local data.
   ///
   /// Responses are sparse: an omitted state, title or audience means "not in
-  /// this response", not "offline" or "erase". Tags stay local; IPTV headers
-  /// come from the playlist. Rooms of another identity are ignored.
+  /// this response", not "offline" or "erase". An empty name, title or cover
+  /// keeps the stored one (adapters leave them empty instead of writing a
+  /// placeholder). Tags stay local; IPTV headers come from the playlist.
+  /// Rooms of another identity are ignored.
+  ///
+  /// [startedAt] and [restriction] describe one broadcast. The incoming value
+  /// wins whenever it is given ([LiveRestriction.none] clears a stored
+  /// restriction). An omitted one keeps the stored value while [incoming]
+  /// reports no other state (its state is omitted or unknown, the stored one
+  /// is unknown, or both are the same); once the state changes, for example
+  /// live to offline or replay to live, it becomes null (not known), so a
+  /// later broadcast never shows the last one's start time or restriction.
   LiveRoom mergeFrom(LiveRoom incoming) {
     if (!hasSameIdentity(incoming)) return this;
     String prefer(String incoming, String current) => incoming.trim().isEmpty ? current : incoming;
     String? preferNullable(String? incoming, String? current) =>
         incoming == null || incoming.trim().isEmpty ? current : incoming;
     final given = incoming.audienceMetricType;
+    final sameBroadcast = switch ((liveStatus, incoming.liveStatus)) {
+      (_, null || LiveStatus.unknown) || (null || LiveStatus.unknown, _) => true,
+      (final current, final next) => current == next,
+    };
     return LiveRoom(
       roomId: roomId,
       platform: platform,
@@ -458,6 +604,8 @@ final class LiveRoom {
       totalViewers: prefer(incoming.totalViewers, totalViewers),
       followers: prefer(incoming.followers, followers),
       liveStatus: incoming.liveStatus ?? liveStatus,
+      startedAt: incoming.startedAt ?? (sameBroadcast ? startedAt : null),
+      restriction: incoming.restriction ?? (sameBroadcast ? restriction : null),
       introduction: preferNullable(incoming.introduction, introduction),
       notice: preferNullable(incoming.notice, notice),
       data: incoming.data ?? data,
@@ -517,6 +665,8 @@ final class LiveRoom {
     String? totalViewers,
     String? followers,
     LiveStatus? liveStatus,
+    DateTime? startedAt,
+    LiveRestriction? restriction,
     String? introduction,
     String? notice,
     Object? data,
@@ -545,6 +695,8 @@ final class LiveRoom {
     totalViewers: totalViewers ?? this.totalViewers,
     followers: followers ?? this.followers,
     liveStatus: liveStatus ?? this.liveStatus,
+    startedAt: startedAt ?? this.startedAt,
+    restriction: restriction ?? this.restriction,
     introduction: introduction ?? this.introduction,
     notice: notice ?? this.notice,
     data: data ?? this.data,
@@ -560,7 +712,10 @@ final class LiveRoom {
 
   /// The JSON 3.x reads and writes. `status` and `isRecord` are derived from
   /// the canonical state, so a restored backup never carries a contradiction.
-  /// `link` is written too (3.x read it but never wrote it).
+  /// `link` is written too (3.x read it but never wrote it). The v4 keys
+  /// `startedAt` (ISO 8601 UTC) and `restriction` (the name) are written
+  /// only when set, so a room without them writes exactly 3.x's keys; 3.x
+  /// ignores both.
   Map<String, Object?> toJson() => {
     'roomId': roomId,
     'userId': userId,
@@ -581,6 +736,8 @@ final class LiveRoom {
     'liveStatus': effectiveLiveStatus.index,
     'isRecord': isRecord,
     'status': isLiveNow,
+    if (startedAt case final at?) 'startedAt': at.toIso8601String(),
+    if (restriction case final kind?) 'restriction': kind.name,
     'notice': notice,
     'introduction': introduction,
     'epgId': epgId,
@@ -610,6 +767,41 @@ final class LiveRoom {
     };
   }
 
+  /// An ISO 8601 text (without an offset it is UTC, as written) or epoch
+  /// milliseconds (a number or a text of digits); anything else, or a time
+  /// not after the epoch, is null.
+  static DateTime? _timeFromJson(Object? value) {
+    final text = value is String ? value.trim() : null;
+    final millis = switch (value) {
+      num() when value.isFinite && value > 0 && value <= _maxEpochMillis => value.toInt(),
+      String() when _digits.hasMatch(text!) => int.tryParse(text),
+      _ => null,
+    };
+    if (millis != null) {
+      return millis > 0 && millis <= _maxEpochMillis ? DateTime.fromMillisecondsSinceEpoch(millis, isUtc: true) : null;
+    }
+    final parsed = text == null || _digits.hasMatch(text) ? null : DateTime.tryParse(text);
+    if (parsed == null) return null;
+    final utc = parsed.isUtc
+        ? parsed
+        : DateTime.utc(
+            parsed.year,
+            parsed.month,
+            parsed.day,
+            parsed.hour,
+            parsed.minute,
+            parsed.second,
+            parsed.millisecond,
+            parsed.microsecond,
+          );
+    return utc.millisecondsSinceEpoch > 0 ? utc : null;
+  }
+
+  /// The largest time [DateTime] can hold, epoch milliseconds.
+  static const int _maxEpochMillis = 8640000000000000;
+
+  static final RegExp _digits = RegExp(r'^\d+$');
+
   static int? _int(Object? value) => value is num ? value.toInt() : int.tryParse(value?.toString() ?? '');
 
   static double? _finiteDouble(Object? value) {
@@ -624,5 +816,5 @@ final class LiveRoom {
   int get hashCode => identityKey.hashCode;
 
   @override
-  String toString() => 'LiveRoom($identityKey, ${effectiveLiveStatus.name}, $title)';
+  String toString() => 'LiveRoom($platform:$roomId, ${effectiveLiveStatus.name}, $title)';
 }

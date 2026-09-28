@@ -1,11 +1,13 @@
 // SixRoomSite over the recorded 6.cn responses (ReplayHttp) and a few
-// synthetic ones: the request headers and forms, the homepage directory with
-// 3.x's local pages and 90 s snapshot, the search and its room lookups, rooms
-// cold (the room page's user id, which 3.x no longer found) and after the
-// directory or search (3.x's remembered user ids and cards), the streams,
-// cancellation, the deadline, links and the error mapping. Requests are
-// compared with the ones 3.x sent (expected.json records them with their
-// headers and forms).
+// synthetic ones: the request headers and forms, the directory (all rooms
+// still the homepage with 3.x's local pages and 90 s snapshot; the areas and
+// recommendations the app's mobile lists and 星颜 the web's subarea list
+// since M4.U.31), the search and its room lookups, rooms cold (the room
+// page's user id, which 3.x no longer found) and after the directory or
+// search (3.x's remembered user ids and cards), the streams, cancellation,
+// the deadline, links and the error mapping. Requests are compared with the
+// ones 3.x sent (expected.json records them with their headers and forms);
+// intended differences are listed with `changed:` and the upgrade's number.
 import 'dart:async';
 import 'dart:convert';
 
@@ -24,12 +26,47 @@ const _offline = '191111';
 const _missing = '99999999999';
 const _longKeyword = 'qzxqzxqzxqzxqzxqzxqz';
 
+/// The live broadcast's start (inroom `liveinfo.starttime`).
+final _liveStart = DateTime.utc(2026, 9, 28, 11, 25, 29);
+
 const _home = ['S04-home'];
 const _liveRoom = ['S05-page-live', 'S05-inroom-live'];
 const _offlineRoom = ['S05-page-offline', 'S05-inroom-offline'];
 const _search = ['S02-search', 'S02-search-empty', 'S05-search-long'];
 
+/// The mobile lists at 30 a page and the web's 星颜 list (S06, 2026-09-28
+/// 21:02 UTC).
+const _lists = [
+  'S06-list-special-p1',
+  'S06-list-special-p2',
+  'S06-list-u0-p1',
+  'S06-list-u0-p2',
+  'S06-list-u1-p1',
+  'S06-list-u2-p1',
+  'S06-list-u8-p1',
+  'S06-list-u10-p1',
+  'S06-subarea-face',
+];
+
 const LivePlayQuality _source = LivePlayQuality(quality: 'FLV 原始线路', id: 'flv:source');
+
+/// Room keys every room changed: the notice is in words for users now
+/// (unified rule "说明文字").
+const _notice = {'notice'};
+
+/// Room keys of a room read from inroom with no card seen: the title is the
+/// broadcaster's signature (31-2), the avatar the broadcaster's own (31-1;
+/// 3.x showed the cover), and the notice.
+const _inroomRoom = {'title', 'avatar', 'notice'};
+
+/// Room keys of a room read from inroom after a card with the broadcaster's
+/// avatar: only the title (31-2) and the notice (the avatar is the same
+/// image).
+const _inroomAfterCard = {'title', 'notice'};
+
+/// Room keys of a search card: its state (31-3), no area stand-in (unified
+/// rule "占位信息"), and the notice.
+const _searchCard = {'liveStatus', 'status', 'area', 'notice'};
 
 Map<String, dynamic> _legacy(String sample) => Fixture.load('sixroom', sample).legacy as Map<String, dynamic>;
 
@@ -60,6 +97,17 @@ List<List<Object?>> _sent(Iterable<LiveRequest> requests) => [
       if (request.body case final body?) Uri.splitQueryString(utf8.decode(body)) else null,
     ],
 ];
+
+/// The request of page [page] of the mobile list [type] at [size].
+List<Object?> _listRequest(String type, int page, {int size = 30}) => [
+  'GET',
+  '${SixRoomApi.listUrl(type, page: page, size: size)}',
+  SixRoomApi.listHeaders,
+  null,
+];
+
+/// The request of the web's 星颜 list.
+final List<Object?> _faceRequest = ['GET', '${SixRoomApi.subareaUrl(10)}', SixRoomApi.webHeaders, null];
 
 typedef _Setup = ({SixRoomSite site, ReplayHttp http});
 
@@ -135,11 +183,22 @@ void _expectParity(LiveRoom room, Object? legacy, {Set<String> changed = const {
   }
 }
 
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {Set<String> changed = const {}, String reason = ''}) {
   final expected = (legacy! as List).cast<Map<String, dynamic>>();
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(room, expected[index], reason: '$reason[$index]');
+    _expectParity(room, expected[index], changed: changed, reason: '$reason[$index]');
+  }
+}
+
+/// Asserts the homepage cards [rooms] equal 3.x's [legacy] ones: the
+/// notice is new, and the one room without an area has none (3.x wrote the
+/// platform's name; unified rule "占位信息").
+void _expectHomeCards(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
+  _expectRooms(rooms, legacy, changed: {..._notice, 'area'}, reason: reason);
+  for (final (index, room) in rooms.indexed) {
+    final area = ((legacy! as List)[index] as Map<String, dynamic>)['area'];
+    expect(room.area, area == SixRoomApi.siteName ? '' : area, reason: '$reason[$index]');
   }
 }
 
@@ -147,6 +206,24 @@ List<String> _ids(Iterable<LiveRoom> rooms) => [for (final room in rooms) room.r
 
 LiveArea _area(String id, String name) =>
     LiveArea(platform: 'sixroom', areaType: 'official', areaId: id, areaName: name, typeName: '六间房直播');
+
+final LiveArea _all = _area('all', '全部');
+
+const _areaNames = {'all': '全部', 'song': '歌区', 'dance': '舞区', 'talk': '脱口秀', 'face': '星颜', 'party': '派对'};
+
+/// The rooms of the mobile list sample [name].
+List<String> _listIds(String name, String type) {
+  final url = Fixture.load('sixroom', name).url;
+  return [
+    for (final room in SixRoomApi.list(
+      Fixture.load('sixroom', name).body,
+      type: type,
+      page: int.parse(url.queryParameters['p']!),
+      size: int.parse(url.queryParameters['size']!),
+    ).rooms)
+      room.roomId,
+  ];
+}
 
 /// A room page of [roomId] naming [userId] (as 6.cn writes it now).
 String _roomPage(String roomId, String userId) => [
@@ -165,16 +242,39 @@ String _inroomAnswer(String roomId, String userId) => jsonEncode({
   },
 });
 
+/// A mobile list row of room [roomId].
+Map<String, Object?> _row(String roomId) => {
+  'rid': roomId,
+  'uid': '${10000000 + int.parse(roomId)}',
+  'username': 'N$roomId',
+  'liveid': '2224${roomId.padLeft(5, '0')}',
+  'count': 100,
+  'anchor_area': '歌区',
+};
+
 void main() {
   group('requests', () {
-    test("3.x's URLs, headers and forms, no redirects, 15 s, as sixroom", () async {
-      final setup = _setup([..._home, ..._liveRoom]);
-      await setup.site.getDirectoryPage(cancel: CancelToken());
+    test("3.x's URLs, headers and forms, no redirects, 15 s, as sixroom; the app's and the web's lists", () async {
+      final setup = _setup([..._home, ..._liveRoom, ..._lists]);
+      await setup.site.getDirectoryPage(category: _all, cancel: CancelToken());
       await setup.site.getRoomDetail(roomId: _live);
       final legacyDirectory = (_legacy('S04-home')['getDirectoryPage(all)'] as Map<String, dynamic>)['1'];
       final legacyRoom = (_legacy('S05-inroom-live')['after the directory'] as Map<String, dynamic>)['getRoomDetail'];
       expect(_sent(setup.http.requests), [..._legacyRequests(legacyDirectory), ..._legacyRequests(legacyRoom)]);
       expect(setup.http.requests.map((request) => request.method), ['GET', 'POST']);
+      // 31-4: the recommendations and areas are the app's lists (its
+      // headers, without a body), 星颜 the web's subarea list.
+      setup.http.requests.clear();
+      await setup.site.getDirectoryPage(cancel: CancelToken());
+      await setup.site.getCategoryRooms(_area('song', '歌区'));
+      await setup.site.getCategoryRooms(_area('face', '星颜'));
+      expect(_sent(setup.http.requests), [_listRequest('special', 1), _listRequest('u0', 1), _faceRequest]);
+      expect(SixRoomApi.listHeaders, {
+        'user-agent': SixRoomApi.mobileUserAgent,
+        'accept': 'application/json,text/plain,*/*',
+        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.7',
+        'referer': 'https://ios.6.cn/?ver=8.0.3&build=4',
+      });
       // Cold, the room page first: 3.x sent it too, then failed on it.
       final cold = _setup(_liveRoom);
       await cold.site.getRoomDetail(roomId: _live);
@@ -187,7 +287,7 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('sixroom', '六间房直播'));
       expect(setup.site.directoryNoticeKey, _legacy('S04-home')['directoryNoticeKey']);
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Six Rooms chat');
+      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Six Rooms chat (31-6 is M5)');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled; statuses are mapped', () async {
@@ -213,6 +313,12 @@ void main() {
           reason: '$status',
         );
         expect(http.requests, hasLength(1), reason: 'the room page failed first');
+        await expectLater(SixRoomSite(http).getRecommendRooms(), throwsA(matcher), reason: 'list $status');
+        await expectLater(
+          SixRoomSite(http).getCategoryRooms(_area('face', '星颜')),
+          throwsA(matcher),
+          reason: 'subarea $status',
+        );
       }
     });
 
@@ -224,6 +330,7 @@ void main() {
         final site = SixRoomSite(http, deadline: const Duration(milliseconds: 50));
         await expectLater(site.getRoomDetail(roomId: _live), throwsA(isA<NetworkFailure>()));
         expect(http.requests.single.cancel?.isCancelled, isTrue, reason: 'the request is cancelled too');
+        await expectLater(site.getRecommendRooms(), throwsA(isA<NetworkFailure>()));
         expect(SixRoomSite(http).deadline, const Duration(seconds: 20));
         final cancel = CancelToken();
         final search = SixRoomSite(http).searchRoomsCancellable('诺', cancel: cancel);
@@ -246,6 +353,7 @@ void main() {
       final legacy = _legacy('S04-home');
       final categories = await setup.site.getCategories(1, 30);
       expect(categories.single.children.map((area) => area.areaId), ['all', 'song', 'dance', 'talk', 'face', 'party']);
+      expect(categories.single.children.map((area) => area.areaName), _areaNames.values);
       expect(
         (await setup.site.getCategories(1, 3)).single.children.map((area) => area.areaId),
         _result(legacy['getCategores(pageSize: 3)']),
@@ -255,63 +363,188 @@ void main() {
       expect(setup.http.requests, isEmpty);
     });
 
-    test("every page of all rooms and of every area is 3.x's, with 3.x's requests", () async {
+    test("every page of all rooms is 3.x's, with 3.x's requests (the homepage, 90 s)", () async {
       final legacy = _legacy('S04-home');
       final setup = _setup(_home, clock: () => DateTime.utc(2026, 9, 28, 13, 50));
       final all = legacy['getDirectoryPage(all)'] as Map<String, dynamic>;
       for (final MapEntry(:key, :value) in all.entries) {
         setup.http.requests.clear();
-        final page = await setup.site.getDirectoryPage(page: int.parse(key), cancel: CancelToken());
+        final page = await setup.site.getDirectoryPage(page: int.parse(key), category: _all, cancel: CancelToken());
         final expected = _result(value)! as Map<String, dynamic>;
-        _expectRooms(page.rooms, expected['rooms'], reason: 'all $key');
+        _expectHomeCards(page.rooms, expected['rooms'], reason: 'all $key');
         expect((page.page, page.hasMore), (expected['page'], expected['hasMore']), reason: 'all $key');
         expect(_sent(setup.http.requests), _legacyRequests(value), reason: 'all $key');
       }
-      final areas = legacy['getDirectoryPage(category)'] as Map<String, dynamic>;
-      for (final MapEntry(key: areaId, value: pages) in areas.entries) {
-        final name = {'all': '全部', 'song': '歌区', 'dance': '舞区', 'talk': '脱口秀', 'face': '星颜', 'party': '派对'}[areaId]!;
-        for (final MapEntry(:key, :value) in (pages as Map<String, dynamic>).entries) {
-          setup.http.requests.clear();
-          final page = await setup.site.getDirectoryPage(page: int.parse(key), category: _area(areaId, name));
-          final expected = _result(value)! as Map<String, dynamic>;
-          expect(_ids(page.rooms), expected['rooms'], reason: '$areaId $key');
-          expect(page.hasMore, expected['hasMore'], reason: '$areaId $key');
-          expect(_sent(setup.http.requests), _legacyRequests(value), reason: '$areaId $key');
-        }
+      final pages = (legacy['getDirectoryPage(category)'] as Map<String, dynamic>)['all'] as Map<String, dynamic>;
+      for (final MapEntry(:key, :value) in pages.entries) {
+        setup.http.requests.clear();
+        final page = await setup.site.getDirectoryPage(page: int.parse(key), category: _all);
+        final expected = _result(value)! as Map<String, dynamic>;
+        expect(_ids(page.rooms), expected['rooms'], reason: 'all area $key');
+        expect(page.hasMore, expected['hasMore'], reason: 'all area $key');
+        expect(_sent(setup.http.requests), _legacyRequests(value), reason: 'all area $key');
       }
-      _expectRooms(
-        (await setup.site.getDirectoryPage(category: _area('song', '歌区'))).rooms,
-        (_result(legacy['getDirectoryPage(song page 1)'])! as Map<String, dynamic>)['rooms'],
-      );
+      // The cards carry the broadcast's start (M2.1).
+      final first = (await setup.site.getDirectoryPage(category: _all)).rooms;
+      expect(first.every((room) => room.startedAt != null), isTrue);
+      expect(first.every((room) => room.restriction == null), isTrue, reason: 'a card says nothing about it');
     });
 
-    test("3.x's 90 s homepage snapshot: page 1 of all rooms refreshes it, other pages and areas reuse it", () async {
-      var now = DateTime.utc(2026, 9, 28, 13, 50);
-      final setup = _setup(_home, clock: () => now);
-      final legacy = _legacy('S04-home')['cache'] as Map<String, dynamic>;
-      Future<void> step(String name, Future<List<LiveRoom>> Function() call) async {
+    test("the areas are the app's lists, a request a page; 3.x filtered the homepage (31-4)", () async {
+      final setup = _setup([..._home, ..._lists]);
+      // 3.x's pages of these areas were the homepage filtered (13:51 UTC);
+      // the app's lists are a later recording (21:02 UTC), so the rooms are
+      // not compared with 3.x's.
+      for (final (id, type, pages) in [('song', 'u0', 2), ('dance', 'u1', 1), ('talk', 'u2', 1), ('party', 'u8', 1)]) {
+        for (var page = 1; page <= pages; page++) {
+          setup.http.requests.clear();
+          final result = await setup.site.getDirectoryPage(page: page, category: _area(id, _areaNames[id]!));
+          expect(_ids(result.rooms), _listIds('S06-list-$type-p$page', type), reason: '$id $page');
+          expect(result.hasMore, page < pages, reason: '$id $page');
+          expect(_sent(setup.http.requests), [_listRequest(type, page)], reason: '$id $page');
+          for (final room in result.rooms) {
+            expect(room.area, _areaNames[id], reason: '$id ${room.roomId}');
+            expect(room.isLiveNow, isTrue);
+            expect(room.startedAt, isNotNull);
+          }
+        }
+      }
+      // The same through the category rooms, at any page size (the list
+      // takes it).
+      setup.http.requests.clear();
+      final song = await setup.site.getCategoryRooms(_area('song', '歌区'), page: 2);
+      expect(_ids(song), _listIds('S06-list-u0-p2', 'u0'));
+      expect(_sent(setup.http.requests), [_listRequest('u0', 2)]);
+      final small = _setup(['S01-list-u8-p1']);
+      expect(
+        _ids(await small.site.getCategoryRooms(_area('party', '派对'), pageSize: 20)),
+        _listIds('S01-list-u8-p1', 'u8'),
+      );
+      expect(_sent(small.http.requests), [_listRequest('u8', 1, size: 20)]);
+    });
+
+    test("星颜 is the web's subarea list (the app's is empty), read whole and paged locally for 90 s", () async {
+      var now = DateTime.utc(2026, 9, 28, 21, 3);
+      final setup = _setup(_lists, clock: () => now);
+      final face = _area('face', '星颜');
+      final all = [
+        for (final room in SixRoomApi.subarea(Fixture.load('sixroom', 'S06-subarea-face').body)) room.roomId,
+      ];
+      expect(all, hasLength(9));
+      Future<void> step(int page, List<String> ids, {required bool request}) async {
         setup.http.requests.clear();
-        expect(_ids(await call()), _result(legacy[name]), reason: name);
-        expect(_sent(setup.http.requests), _legacyRequests(legacy[name]), reason: name);
+        expect(_ids(await setup.site.getCategoryRooms(face, page: page, pageSize: 4)), ids, reason: '$now $page');
+        expect(_sent(setup.http.requests), [if (request) _faceRequest], reason: '$now $page');
+      }
+
+      // Page 2 with no snapshot loads it; pages 3 and 4 reuse it.
+      await step(2, [...all.skip(4).take(4)], request: true);
+      await step(3, [all.last], request: false);
+      await step(4, [], request: false);
+      // Page 1 reloads; the snapshot serves for 90 s.
+      await step(1, [...all.take(4)], request: true);
+      now = now.add(const Duration(seconds: 89));
+      await step(2, [...all.skip(4).take(4)], request: false);
+      now = now.add(const Duration(seconds: 1));
+      await step(2, [...all.skip(4).take(4)], request: true);
+      final page = await setup.site.getDirectoryPage(category: face);
+      expect(_ids(page.rooms), all);
+      expect(page.hasMore, isFalse);
+      expect(page.rooms.every((room) => room.avatar.isNotEmpty && room.area == '星颜'), isTrue);
+      expect(page.rooms.first.startedAt, isNull, reason: 'the featured rows have no realstarttime');
+      expect(page.rooms[3].startedAt, isNotNull);
+    });
+
+    test("the recommendations are the app's `special` list (31-4; 3.x: all rooms)", () async {
+      final setup = _setup([..._lists, 'S01-list-special-p1']);
+      final first = await setup.site.getDirectoryPage(cancel: CancelToken());
+      expect(_ids(first.rooms), _listIds('S06-list-special-p1', 'special'));
+      expect(first.hasMore, isTrue);
+      final second = await setup.site.getDirectoryPage(page: 2);
+      expect(_ids(second.rooms), _listIds('S06-list-special-p2', 'special'));
+      expect(second.hasMore, isFalse);
+      expect(_sent(setup.http.requests), [_listRequest('special', 1), _listRequest('special', 2)]);
+      expect(first.rooms.map((room) => room.area).toSet(), containsAll(['歌区', '舞区', '脱口秀', '星颜']));
+      setup.http.requests.clear();
+      expect(await setup.site.getRecommendRooms(), hasLength(30));
+      expect(_ids(await setup.site.getRecommendRooms(pageSize: 20)), _listIds('S01-list-special-p1', 'special'));
+      expect(_sent(setup.http.requests), [_listRequest('special', 1), _listRequest('special', 1, size: 20)]);
+      // 3.x's slices that send nothing.
+      final slices = _legacy('S04-home')['getRecommendRooms'] as Map<String, dynamic>;
+      setup.http.requests.clear();
+      for (final (page, size) in [(1, 0), (0, 30)]) {
+        expect(await setup.site.getRecommendRooms(page: page, pageSize: size), isEmpty);
+        expect(_result(slices['page $page size $size']), isEmpty);
+      }
+      expect(setup.http.requests, isEmpty);
+    });
+
+    test('a list leaves out the rooms its earlier pages gave since page 1 (the list moves between pages)', () async {
+      final pages = <int, List<String>>{
+        1: ['101', '102', '103'],
+        2: ['103', '104', '101', '105'],
+        3: ['103', '101'],
+      };
+      final http = _Scripted((request) {
+        final page = int.parse(request.url.queryParameters['p']!);
+        final size = int.parse(request.url.queryParameters['size']!);
+        return _response(
+          request,
+          jsonEncode({
+            'flag': '001',
+            'content': {
+              'u0': [for (final id in pages[page] ?? const <String>[]) _row(id)],
+              'roomListCount': {'u0': size * 3 + 1},
+            },
+          }),
+        );
+      });
+      final site = SixRoomSite(http);
+      final song = _area('song', '歌区');
+      expect(_ids(await site.getCategoryRooms(song)), ['101', '102', '103']);
+      expect(_ids(await site.getCategoryRooms(song, page: 2)), ['104', '105']);
+      final all = await site.getDirectoryPage(page: 3, category: song);
+      expect((all.rooms.length, all.hasMore), (0, true), reason: 'nothing new, and the list goes on');
+      // A page asked again is measured against the pages before it only.
+      expect(_ids(await site.getCategoryRooms(song, page: 2)), ['104', '105']);
+      // Page 1 starts again; another page size is its own sequence.
+      expect(_ids(await site.getCategoryRooms(song)), ['101', '102', '103']);
+      expect(_ids(await site.getCategoryRooms(song, page: 2, pageSize: 20)), ['103', '104', '101', '105']);
+      expect(http.requests, hasLength(6));
+    });
+
+    test("the homepage's 90 s snapshot (3.x) is for all rooms only; page 1 reloads it", () async {
+      var now = DateTime.utc(2026, 9, 28, 13, 50);
+      final setup = _setup([..._home, ..._lists], clock: () => now);
+      final legacy = _legacy('S04-home')['cache'] as Map<String, dynamic>;
+      final homeRequest = _legacyRequests((_legacy('S04-home')['getDirectoryPage(all)'] as Map)['1']);
+      Future<void> step(String name, Future<List<LiveRoom>> Function() call, {required bool home}) async {
+        setup.http.requests.clear();
+        final rooms = await call();
+        if (name == 'all page 2' || name == 'all page 1') expect(_ids(rooms), _result(legacy[name]), reason: name);
+        expect(_sent(setup.http.requests).where((request) => request[1] == '${SixRoomApi.homeUrl}'), [
+          if (home) ...homeRequest,
+        ], reason: name);
       }
 
       final site = setup.site;
-      await step('song page 1 (empty cache)', () => site.getCategoryRooms(_area('song', '歌区')));
-      await step('dance page 1', () => site.getCategoryRooms(_area('dance', '舞区')));
-      await step('all page 2', () async => (await site.getDirectoryPage(page: 2)).rooms);
-      await step('all page 1', () async => (await site.getDirectoryPage()).rooms);
+      // The areas no longer load the homepage (3.x's first step did).
+      await step('song page 1', () => site.getCategoryRooms(_area('song', '歌区')), home: false);
+      await step('all page 2', () async => (await site.getDirectoryPage(page: 2, category: _all)).rooms, home: true);
+      await step('all page 3', () async => (await site.getDirectoryPage(page: 3, category: _all)).rooms, home: false);
+      await step('all page 1', () async => (await site.getDirectoryPage(category: _all)).rooms, home: true);
       now = now.add(const Duration(seconds: 89));
-      await step('+89 s talk page 1', () => site.getCategoryRooms(_area('talk', '脱口秀')));
+      await step('+89 s all page 2', () => site.getCategoryRooms(_all, page: 2), home: false);
       now = now.add(const Duration(seconds: 1));
-      await step('+90 s talk page 1', () => site.getCategoryRooms(_area('talk', '脱口秀')));
-      await step('recommend page 2', () => site.getRecommendRooms(page: 2));
-      await step('recommend page 1', site.getRecommendRooms);
+      await step('+90 s all page 2', () => site.getCategoryRooms(_all, page: 2), home: true);
+      await step('recommend page 1', site.getRecommendRooms, home: false);
       now = now.subtract(const Duration(seconds: 1));
-      await step('clock back 1 s: party page 1', () => site.getCategoryRooms(_area('party', '派对')));
+      await step('clock back 1 s: all page 2', () => site.getCategoryRooms(_all, page: 2), home: true);
+      expect(_result(legacy['all page 2']), isNotEmpty);
     });
 
     test('a page below 1 is empty and another area an error, without a request; past 10000 too', () async {
-      final setup = _setup(_home);
+      final setup = _setup([..._home, ..._lists]);
       final legacy = _legacy('S04-home')['getDirectoryPage(edge)'] as Map<String, dynamic>;
       for (final key in ['page 0', 'page 0 other platform']) {
         expect(_result(legacy[key]), {'rooms': <Object?>[], 'page': 0, 'hasMore': false}, reason: key);
@@ -338,47 +571,40 @@ void main() {
       expect(_result(legacy['page 10001']), containsPair('throws', 'SixRoomException.schema'));
       await expectLater(setup.site.getDirectoryPage(page: 10001), throwsA(isA<RangeError>()));
       await expectLater(setup.site.getRecommendRooms(page: 10001), throwsA(isA<RangeError>()));
+      await expectLater(setup.site.getCategoryRooms(_all, page: 10001), throwsA(isA<RangeError>()));
       expect(setup.http.requests, isEmpty);
-      final last = await setup.site.getDirectoryPage(page: 10000);
+      final last = await setup.site.getDirectoryPage(page: 10000, category: _all);
       expect((last.rooms.length, last.hasMore), (0, false));
       expect(_sent(setup.http.requests), _legacyRequests(legacy['page 10000']));
+      // 3.x trimmed the area id.
+      setup.http.requests.clear();
       final spaced = await setup.site.getDirectoryPage(category: _area(' song ', '歌区'));
-      expect(_ids(spaced.rooms), (_result(legacy['area id with spaces'])! as Map<String, dynamic>)['rooms']);
+      expect(_ids(spaced.rooms), _listIds('S06-list-u0-p1', 'u0'));
+      expect(_sent(setup.http.requests), [_listRequest('u0', 1)]);
     });
 
-    test("3.x's recommendation slices and area rooms, with 3.x's requests", () async {
+    test("all rooms by any page size are 3.x's recommendations (3.x's recommendations were all rooms)", () async {
       final legacy = _legacy('S04-home');
       final slices = legacy['getRecommendRooms'] as Map<String, dynamic>;
-      for (final (page, size) in [(1, 30), (1, 3), (2, 20), (1, 0), (0, 30), (1, 101), (15, 30), (16, 30)]) {
+      for (final (page, size) in [(1, 30), (1, 3), (2, 20), (1, 101), (15, 30), (16, 30)]) {
         final setup = _setup(_home);
         final traced = slices['page $page size $size'];
-        expect(_ids(await setup.site.getRecommendRooms(page: page, pageSize: size)), _result(traced));
+        expect(_ids(await setup.site.getCategoryRooms(_all, page: page, pageSize: size)), _result(traced));
         expect(_sent(setup.http.requests), _legacyRequests(traced), reason: '$page/$size');
       }
-      _expectRooms(
-        await _setup(_home).site.getRecommendRooms(pageSize: 3),
+      _expectHomeCards(
+        await _setup(_home).site.getCategoryRooms(_all, pageSize: 3),
         _result(legacy['getRecommendRooms(page 1 size 3)']),
       );
-      final areas = legacy['getCategoryRooms'] as Map<String, dynamic>;
-      for (final (id, name) in [('song', '歌区'), ('face', '星颜'), ('party', '派对')]) {
-        final setup = _setup(_home);
-        final traced = areas['$id page 1 size 5'];
-        _expectRooms(await setup.site.getCategoryRooms(_area(id, name), pageSize: 5), _result(traced), reason: id);
-        expect(_sent(setup.http.requests), _legacyRequests(traced), reason: id);
-      }
-      final party = _setup(_home);
-      expect(
-        _ids(await party.site.getCategoryRooms(_area('party', '派对'), page: 2, pageSize: 20)),
-        _result(areas['party page 2 size 20']),
-      );
-      expect(await party.site.getCategoryRooms(_area('party', '派对'), page: 0), isEmpty);
-      expect(await party.site.getCategoryRooms(_area('party', '派对'), pageSize: 0), isEmpty);
-      expect(party.http.requests, hasLength(1));
+      final face = _setup(_lists);
+      expect(await face.site.getCategoryRooms(_area('face', '星颜'), page: 0), isEmpty);
+      expect(await face.site.getCategoryRooms(_area('face', '星颜'), pageSize: 0), isEmpty);
+      expect(face.http.requests, isEmpty);
     });
   });
 
   group('search', () {
-    test("keywords give 3.x's rooms with 3.x's requests", () async {
+    test("keywords give 3.x's rooms with 3.x's requests; cards say whether they are live (31-3)", () async {
       final legacy = _legacy('S02-search')['searchRooms'] as Map<String, dynamic>;
       for (final (keyword, page, size) in [
         ('诺', 1, 30),
@@ -397,12 +623,20 @@ void main() {
       ]) {
         final setup = _setup([..._search, ..._liveRoom, 'S03-room-notfound']);
         final traced = legacy['"$keyword" page $page size $size'];
-        _expectRooms(
-          await setup.site.searchRoomsCancellable(keyword, page: page, pageSize: size, cancel: CancelToken()),
-          _result(traced),
-          reason: '$keyword/$page/$size',
+        final rooms = await setup.site.searchRoomsCancellable(
+          keyword,
+          page: page,
+          pageSize: size,
+          cancel: CancelToken(),
         );
+        _expectRooms(rooms, _result(traced), changed: _searchCard, reason: '$keyword/$page/$size');
         expect(_sent(setup.http.requests), _legacyRequests(traced), reason: '$keyword/$page/$size');
+        for (final room in rooms) {
+          expect(
+            room.liveStatus,
+            room.roomId == '277288' || room.roomId == '68160' ? LiveStatus.live : LiveStatus.offline,
+          );
+        }
       }
     });
 
@@ -428,7 +662,7 @@ void main() {
         expect(_result(traced), containsPair('throws', 'SixRoomException.schema'), reason: keyword);
         final setup = _setup(_liveRoom);
         final rooms = await setup.site.searchRooms(keyword);
-        _expectParity(rooms.single, _result(known), reason: keyword);
+        _expectParity(rooms.single, _result(known), changed: _inroomRoom, reason: keyword);
         final data = rooms.single.data! as SixRoomRoomData;
         expect(data.stream, isNull);
         expect(_sent(setup.http.requests), [
@@ -445,11 +679,11 @@ void main() {
       setup.http.requests.clear();
       final legacy = _legacy('S05-inroom-offline')['after the search'] as Map<String, dynamic>;
       final detail = await setup.site.getRoomDetail(roomId: _offline);
-      _expectParity(detail, _result(legacy['getRoomDetail']));
+      _expectParity(detail, _result(legacy['getRoomDetail']), changed: _inroomAfterCard);
       expect(_sent(setup.http.requests), _legacyRequests(legacy['getRoomDetail']));
       expect(setup.http.requests.single.method, 'POST', reason: 'the second card was remembered too');
       final again = await setup.site.searchRooms('诺', pageSize: 2);
-      expect(again.last.effectiveLiveStatus, LiveStatus.offline, reason: 'the card takes the known state (3.x)');
+      expect(again.last.effectiveLiveStatus, LiveStatus.offline);
     });
 
     test('a prompt page other than "too long" is RiskControl (3.x: access)', () async {
@@ -477,15 +711,18 @@ void main() {
           _ => setup.site.getRoomDetailForRecording(roomId: _live),
         };
         final media = depth != 'getRoomDetailForRefresh';
-        _expectParity(room, _result(known['includeMedia $media']), reason: depth);
+        _expectParity(room, _result(known['includeMedia $media']), changed: _inroomRoom, reason: depth);
         expect(_sent(setup.http.requests), [
           ..._legacyRequests(cold[depth]),
           ..._legacyRequests(warm[depth]),
         ], reason: depth);
         final data = room.data! as SixRoomRoomData;
-        expect((data.userId, data.state), (_liveUid, SixRoomState.live));
+        expect((data.userId, data.state, data.restriction), (_liveUid, SixRoomState.live, LiveRestriction.none));
         expect(data.stream != null, media, reason: '$depth: the stream only with the media (3.x)');
         expect(room.danmakuData, depth == 'getRoomDetail' ? isA<SixRoomDanmakuArgs>() : isNull);
+        expect((room.startedAt, room.restriction), (_liveStart, LiveRestriction.none), reason: 'M2.1');
+        expect(room.title, '但行好事，莫问前程', reason: '31-2');
+        expect(room.avatar, isNot(room.cover), reason: '31-1');
       }
       expect(_result(cold['getLiveStatus']), containsPair('throws', 'SixRoomException.schema'));
       expect(await _setup(_liveRoom).site.getLiveStatus(roomId: _live), isTrue);
@@ -497,7 +734,7 @@ void main() {
       final legacy = _legacy('S05-inroom-live')['after the directory'] as Map<String, dynamic>;
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording', 'getLiveStatus']) {
         final setup = _setup([..._home, ..._liveRoom]);
-        await setup.site.getDirectoryPage(cancel: CancelToken());
+        await setup.site.getDirectoryPage(category: _all, cancel: CancelToken());
         setup.http.requests.clear();
         final result = await switch (depth) {
           'getRoomDetail' => setup.site.getRoomDetail(roomId: _live),
@@ -506,22 +743,41 @@ void main() {
           _ => setup.site.getLiveStatus(roomId: _live),
         };
         if (result is LiveRoom) {
-          _expectParity(result, _result(legacy[depth]), reason: depth);
-          expect(result.avatar, isNot(result.cover), reason: "the card's avatar (3.x)");
+          _expectParity(result, _result(legacy[depth]), changed: _inroomAfterCard, reason: depth);
+          expect(result.avatar, isNot(result.cover), reason: "the broadcaster's avatar");
+          expect(result.popularity, '23444', reason: "the card's, the same broadcast still live (31-5)");
         } else {
           expect(result, _result(legacy[depth]));
         }
         expect(_sent(setup.http.requests), _legacyRequests(legacy[depth]), reason: depth);
       }
       final setup = _setup([..._home, ..._liveRoom]);
-      await setup.site.getDirectoryPage(cancel: CancelToken());
+      await setup.site.getDirectoryPage(category: _all, cancel: CancelToken());
       final link = await setup.site.getRoomDetail(roomId: 'https://v.6.cn/$_live?from=home');
-      _expectParity(link, _result(_legacy('S05-inroom-live')['getRoomDetail(link)']));
+      _expectParity(link, _result(_legacy('S05-inroom-live')['getRoomDetail(link)']), changed: _inroomAfterCard);
       expect(link.roomId, _live);
       await setup.site.getRoomDetail(roomId: _live);
-      final card = (await setup.site.getDirectoryPage(cancel: CancelToken())).rooms.first;
-      _expectRooms([card], _result(_legacy('S05-inroom-live')['directory card after the room']));
+      final card = (await setup.site.getDirectoryPage(category: _all, cancel: CancelToken())).rooms.first;
+      _expectRooms([card], _result(_legacy('S05-inroom-live')['directory card after the room']), changed: _notice);
       expect(card.followers, '425628', reason: "the room's followers stay on the card (3.x)");
+    });
+
+    test("a room seen on a mobile list is read with one request; once ended, without the card's numbers", () async {
+      final http = _Scripted((request) {
+        if (request.method == 'GET') return _response(request, Fixture.load('sixroom', 'S06-list-u0-p1').body);
+        final userId = Uri.splitQueryString(utf8.decode(request.body!))['ruid']!;
+        return _response(request, _inroomAnswer('828957', userId));
+      });
+      final site = SixRoomSite(http);
+      // 828957 is on the 歌区 list; its broadcaster is known from the card.
+      final card = (await site.getCategoryRooms(_area('song', '歌区'))).firstWhere((room) => room.roomId == '828957');
+      expect((card.popularity, card.startedAt != null), ('4012', true));
+      http.requests.clear();
+      final detail = await site.getRoomDetailForRefresh(roomId: '828957');
+      expect(http.requests.map((request) => request.method), ['POST']);
+      expect(Uri.splitQueryString(utf8.decode(http.requests.single.body!))['ruid'], card.userId);
+      expect((detail.liveStatus, detail.popularity, detail.startedAt), (LiveStatus.offline, '', null), reason: '31-5');
+      expect(detail.area, '歌区', reason: "the card's area where the answer has none");
     });
 
     test("offline: 3.x's room cold and after the search", () async {
@@ -531,12 +787,13 @@ void main() {
       final setup = _setup(_offlineRoom);
       final room = await setup.site.getRoomDetail(roomId: _offline);
       expect(_result(cold['getRoomDetail']), containsPair('throws', 'SixRoomException.schema'));
-      _expectParity(room, _result(legacy['knownUserId']));
+      _expectParity(room, _result(legacy['knownUserId']), changed: _inroomRoom);
       expect(_sent(setup.http.requests), [
         ..._legacyRequests(cold['getRoomDetail']),
         ..._legacyRequests(warm['getRoomDetail']),
       ]);
       expect(room.effectiveLiveStatus, LiveStatus.offline);
+      expect((room.startedAt, room.restriction), (null, LiveRestriction.none));
       expect(await _setup(_offlineRoom).site.getLiveStatus(roomId: _offline), isFalse);
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
         final searched = _setup([..._offlineRoom, 'S02-search']);
@@ -546,7 +803,7 @@ void main() {
           'getRoomDetailForRefresh' => searched.site.getRoomDetailForRefresh(roomId: _offline),
           _ => searched.site.getRoomDetailForRecording(roomId: _offline),
         };
-        _expectParity(detail, _result(warm[depth]), reason: depth);
+        _expectParity(detail, _result(warm[depth]), changed: _inroomAfterCard, reason: depth);
       }
     });
 
@@ -584,19 +841,32 @@ void main() {
       expect(none.http.requests, isEmpty);
     });
 
-    test('a private or black-screen room is unknown with its notice; its status and streams are unavailable', () async {
-      for (final edit in <void Function(Map<String, dynamic>)>[
-        (root) => _content(root)['isPriveRoom'] = 1,
-        (root) => _content(root)['blackScreenInfo'] = {'msg': '黑屏', 'endtm': 1},
-      ]) {
-        final setup = _setup(_liveRoom, extra: [_inroom(edit)]);
-        final room = await setup.site.getRoomDetail(roomId: _live);
-        expect(room.effectiveLiveStatus, LiveStatus.unknown);
-        expect(room.notice, '${SixRoomApi.restrictedNotice}\n${SixRoomApi.chatNotice}');
-        await expectLater(setup.site.getLiveStatus(roomId: _live), throwsA(isA<StreamUnavailable>()));
-        await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
-      }
-    });
+    test(
+      'a private or black-screen broadcast is live and restricted (M2.1; 3.x: unknown); it cannot be played',
+      () async {
+        for (final (edit, restriction, reason) in <(void Function(Map<String, dynamic>), LiveRestriction, String)>[
+          ((root) => _content(root)['isPriveRoom'] = 1, LiveRestriction.private, 'private'),
+          ((root) => _content(root)['blackScreenInfo'] = {'msg': '黑屏', 'endtm': 1}, LiveRestriction.unplayable, '黑屏'),
+        ]) {
+          final setup = _setup(_liveRoom, extra: [_inroom(edit)]);
+          final room = await setup.site.getRoomDetail(roomId: _live);
+          expect(
+            (room.effectiveLiveStatus, room.restriction, room.followGroup),
+            (LiveStatus.live, restriction, FollowGroup.live),
+          );
+          expect(room.notice, '${SixRoomApi.restrictedNotice}\n${SixRoomApi.chatNotice}');
+          expect(await setup.site.getLiveStatus(roomId: _live), isTrue, reason: '3.x: access');
+          await expectLater(
+            setup.site.getPlayQualities(detail: room),
+            throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains(reason))),
+          );
+          await expectLater(
+            setup.site.resolvePlayUrlsRaw(detail: room, quality: _source),
+            throwsA(isA<StreamUnavailable>()),
+          );
+        }
+      },
+    );
 
     test('the site remembers the last 2000 rooms (3.x: every one)', () async {
       const count = 2001;
@@ -621,7 +891,7 @@ void main() {
       });
       final site = SixRoomSite(http);
       for (var page = 1; page <= 21; page++) {
-        await site.getRecommendRooms(page: page, pageSize: 100);
+        await site.getCategoryRooms(_all, page: page, pageSize: 100);
       }
       http.requests.clear();
       await site.getRoomDetailForRefresh(roomId: '${1000 + count - 1}');
@@ -629,6 +899,22 @@ void main() {
       http.requests.clear();
       await site.getRoomDetailForRefresh(roomId: '1000');
       expect(http.requests.map((request) => request.method), ['GET', 'POST'], reason: 'forgotten: the room page');
+    });
+
+    test("a refresh after the broadcast ended keeps no card's popularity or start (31-5)", () async {
+      final ended = _setup(
+        _home,
+        extra: [_inroom((root) => (_content(root)['liveinfo'] as Map<String, dynamic>).remove('id'))],
+      );
+      final card = (await ended.site.getDirectoryPage(category: _all)).rooms.firstWhere((room) => room.roomId == _live);
+      expect((card.popularity, card.startedAt), ('23444', _liveStart));
+      final room = await ended.site.getRoomDetailForRefresh(roomId: _live);
+      expect((room.liveStatus, room.popularity, room.watching, room.startedAt), (LiveStatus.offline, '', '', null));
+      expect(room.audienceMetricType, AudienceMetricType.unknown);
+      expect((room.followers, room.avatar, room.cover.isNotEmpty), ('425628', card.avatar, true));
+      // The card listed next keeps its own numbers.
+      final again = (await ended.site.getDirectoryPage(page: 2, category: _all)).rooms;
+      expect(again.every((room) => room.popularity.isNotEmpty), isTrue);
     });
   });
 
@@ -638,7 +924,7 @@ void main() {
           (_legacy('S05-inroom-live')['after the directory'] as Map<String, dynamic>)['getRoomDetail → streams']
               as Map<String, dynamic>;
       final setup = _setup([..._home, ..._liveRoom]);
-      await setup.site.getDirectoryPage(cancel: CancelToken());
+      await setup.site.getDirectoryPage(category: _all, cancel: CancelToken());
       final room = await setup.site.getRoomDetail(roomId: _live);
       setup.http.requests.clear();
       final qualities = await setup.site.getPlayQualities(detail: room);
@@ -676,7 +962,7 @@ void main() {
     });
 
     test('rooms that cannot be played say why, without a request', () async {
-      final setup = _setup([..._liveRoom, ..._offlineRoom, ..._home]);
+      final setup = _setup([..._liveRoom, ..._offlineRoom, ..._lists]);
       final refreshed = await setup.site.getRoomDetailForRefresh(roomId: _live);
       final offline = await setup.site.getRoomDetail(roomId: _offline);
       final card = (await setup.site.getRecommendRooms()).first;

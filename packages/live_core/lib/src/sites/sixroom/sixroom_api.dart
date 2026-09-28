@@ -10,20 +10,19 @@ import 'package:meta/meta.dart';
 
 const _site = 'sixroom';
 
-/// A room's state as 3.x read the inroom answer.
+/// A room's state.
 enum SixRoomState {
-  /// A live id and a stream name.
+  /// A list card; an inroom answer with a live id and a stream name, or a
+  /// private or black-screen room with a live id; a search card with the
+  /// page's live mark.
   live,
 
-  /// Neither.
+  /// An inroom answer without them; a search card without the live mark
+  /// that links the broadcaster's profile.
   offline,
 
-  /// A private room (`isPriveRoom`) or a black screen
-  /// (`blackScreenInfo.msg`): 3.x shows it as unknown with its own notice,
-  /// never as offline.
-  restricted,
-
-  /// A search card: the result page says nothing 3.x read.
+  /// A search card that says neither (M4.U.31: 3.x read no live mark, so
+  /// every search card was unknown).
   unknown,
 }
 
@@ -48,24 +47,26 @@ final class SixRoomStream {
   final String? codec;
 }
 
-/// One room as 3.x's `SixRoomRoom` held it: a homepage card, a search card,
-/// or a room read from the inroom answer.
+/// One room: a list card (homepage, mobile list, web subarea), a search
+/// card, or a room read from the inroom answer (3.x's `SixRoomRoom`).
 @immutable
 final class SixRoomRoom {
   /// Creates the room.
   const new({
     required this.roomId,
     required this.userId,
-    required this.nick,
-    required this.title,
     required this.state,
+    this.nick = '',
+    this.title = '',
     this.liveId = '',
     this.avatar = '',
     this.cover = '',
     this.category = '',
     this.popularity,
     this.followers,
-    this.ownerAvatar = '',
+    this.startedAt,
+    this.restriction,
+    this.restrictionNote = '',
     this.stream,
     this.mediaError,
   });
@@ -79,15 +80,16 @@ final class SixRoomRoom {
   /// The broadcast id (`liveid`); '' when not live or not given.
   final String liveId;
 
-  /// The broadcaster's name, or [SixRoomApi.placeholder].
+  /// The broadcaster's name; '' when the answer has none (M4.U.31: 3.x
+  /// wrote `Six Rooms`, which overwrote a follow's name).
   final String nick;
 
-  /// The title, else the mood, else the name (3.x), or
-  /// [SixRoomApi.placeholder].
+  /// The title, else the broadcaster's signature, else the name; ''.
   final String title;
 
-  /// The avatar 3.x read (the homepage's `picuser`, the search card's image,
-  /// inroom `headPicUrl` or `picuser`); ''.
+  /// The broadcaster's avatar (a card's `picuser`, the search card's image,
+  /// inroom `headPicUrl`, `picuser` or `uoption.picuser`); '' when not
+  /// given, never the cover (31-1). Mobile list cards have none.
   final String avatar;
 
   /// The poster; ''.
@@ -96,21 +98,29 @@ final class SixRoomRoom {
   /// The area (`anchor_area`, else `rtypename`); ''.
   final String category;
 
-  /// The homepage's `count`, platform popularity; null when not given.
+  /// A card's `count`, platform popularity; null when not given.
   final int? popularity;
 
   /// Inroom `fans_num`; null when not given.
   final int? followers;
 
+  /// When the broadcast began (a card's `realstarttime`, inroom
+  /// `liveinfo.starttime`), UTC; null when not given or not live.
+  final DateTime? startedAt;
+
+  /// The restriction the inroom answer states: `private` (`isPriveRoom`),
+  /// `unplayable` (a black screen, `blackScreenInfo.msg`) or `none`; null
+  /// for cards and answers that say nothing about it.
+  final LiveRestriction? restriction;
+
+  /// The black screen's message; ''.
+  final String restrictionNote;
+
   /// The state.
   final SixRoomState state;
 
-  /// Inroom `roominfo.uoption.picuser`, the broadcaster's avatar where 3.x
-  /// did not look: shown only when there is neither [avatar] nor [cover].
-  final String ownerAvatar;
-
   /// The live room's stream, read on room entry and for recording (3.x's
-  /// `includeMedia`); null otherwise.
+  /// `includeMedia`); null otherwise, and for restricted rooms.
   final SixRoomStream? stream;
 
   /// Why a live room read with its media has no [stream]: a stream name
@@ -118,32 +128,50 @@ final class SixRoomRoom {
   /// without variants).
   final SiteError? mediaError;
 
+  /// Whether this room and [known] can be the same broadcast: either state
+  /// is unknown, or both are offline, or both are live with no differing
+  /// broadcast ids.
+  bool _sameBroadcast(SixRoomRoom known) => switch ((state, known.state)) {
+    (SixRoomState.unknown, _) || (_, SixRoomState.unknown) => true,
+    (SixRoomState.live, SixRoomState.live) => liveId.isEmpty || known.liveId.isEmpty || liveId == known.liveId,
+    (final current, final earlier) => current == earlier,
+  };
+
   /// This room with the fields its answer lacks taken from [known], an
-  /// earlier card or room of the same room (3.x's `enrich`): the user and
-  /// live ids, avatars, cover and area when empty, the name and title when
-  /// they are the placeholder, popularity and followers when not given, the
-  /// state when unknown. The media stay this room's.
-  SixRoomRoom enrich(SixRoomRoom known) => SixRoomRoom(
-    roomId: roomId,
-    userId: userId.isEmpty ? known.userId : userId,
-    liveId: liveId.isEmpty ? known.liveId : liveId,
-    nick: nick == SixRoomApi.placeholder ? known.nick : nick,
-    title: title == SixRoomApi.placeholder ? known.title : title,
-    avatar: avatar.isEmpty ? known.avatar : avatar,
-    cover: cover.isEmpty ? known.cover : cover,
-    category: category.isEmpty ? known.category : category,
-    popularity: popularity ?? known.popularity,
-    followers: followers ?? known.followers,
-    state: state == SixRoomState.unknown ? known.state : state,
-    ownerAvatar: ownerAvatar.isEmpty ? known.ownerAvatar : ownerAvatar,
-    stream: stream,
-    mediaError: mediaError,
-  );
+  /// earlier card or room of the same room (3.x's `enrich`): the user id,
+  /// name, title, avatar, cover and area when empty, the followers when not
+  /// given, the state when unknown. What belongs to one broadcast (the
+  /// broadcast id, popularity, start time and restriction) is taken only
+  /// from the same live broadcast (31-5: 3.x kept the last card's
+  /// popularity on a room that had ended). The media stay this room's.
+  SixRoomRoom enrich(SixRoomRoom known) {
+    final same = _sameBroadcast(known);
+    final live = state != SixRoomState.offline && known.state == SixRoomState.live && same;
+    return SixRoomRoom(
+      roomId: roomId,
+      userId: userId.isEmpty ? known.userId : userId,
+      liveId: liveId.isEmpty && live ? known.liveId : liveId,
+      nick: nick.isEmpty ? known.nick : nick,
+      title: title.isEmpty ? known.title : title,
+      avatar: avatar.isEmpty ? known.avatar : avatar,
+      cover: cover.isEmpty ? known.cover : cover,
+      category: category.isEmpty ? known.category : category,
+      popularity: popularity ?? (live ? known.popularity : null),
+      followers: followers ?? known.followers,
+      startedAt: startedAt ?? (live ? known.startedAt : null),
+      restriction: restriction ?? (same ? known.restriction : null),
+      restrictionNote: restriction == null && same ? known.restrictionNote : restrictionNote,
+      state: state == SixRoomState.unknown ? known.state : state,
+      stream: stream,
+      mediaError: mediaError,
+    );
+  }
 }
 
-/// What a room detail carries besides 3.x's fields: the broadcaster, the
-/// state and, on room entry and for recording, the stream. The interface
-/// shows the notice of [state] in its own language (M13).
+/// What a room detail carries besides the model's fields: the broadcaster,
+/// the state, the restriction and, on room entry and for recording, the
+/// stream. The interface shows the notice of the restriction in its own
+/// language (M13).
 @immutable
 final class SixRoomRoomData {
   /// Creates the data.
@@ -152,6 +180,8 @@ final class SixRoomRoomData {
     required this.userId,
     required this.state,
     this.liveId = '',
+    this.restriction,
+    this.restrictionNote = '',
     this.stream,
     this.mediaError,
   });
@@ -168,21 +198,36 @@ final class SixRoomRoomData {
   /// The state.
   final SixRoomState state;
 
+  /// The restriction the answer states (see [SixRoomRoom.restriction]).
+  final LiveRestriction? restriction;
+
+  /// The black screen's message; ''.
+  final String restrictionNote;
+
   /// The FLV stream, read on room entry and for recording; null for a
-  /// refresh (3.x left refreshed rooms without data).
+  /// refresh (3.x left refreshed rooms without data) and for restricted
+  /// rooms.
   final SixRoomStream? stream;
 
   /// Why the live room has no stream, when its stream name is unusable.
   final SiteError? mediaError;
 
-  /// Why this room cannot be played, or null: not live (offline, private or
-  /// black screen, unknown) is `StreamUnavailable`; a live one with an
-  /// unusable stream name says so; a live one read without its stream (a
-  /// refresh) is `StreamUnavailable` until the room is entered.
+  /// Why this room cannot be played, or null: offline or unknown is
+  /// `StreamUnavailable`; so is a live private or black-screen room, with
+  /// the reason; a live one with an unusable stream name says so; a live one
+  /// read without its stream (a refresh) is `StreamUnavailable` until the
+  /// room is entered.
   SiteError? get streamError => switch (state) {
     SixRoomState.offline => StreamUnavailable(_site, '$roomId is offline'),
-    SixRoomState.restricted => StreamUnavailable(_site, '$roomId is private or behind a black screen'),
     SixRoomState.unknown => StreamUnavailable(_site, '$roomId: state unknown'),
+    SixRoomState.live when restriction == LiveRestriction.private => StreamUnavailable(
+      _site,
+      '$roomId is a private room',
+    ),
+    SixRoomState.live when restriction == LiveRestriction.unplayable => StreamUnavailable(
+      _site,
+      '$roomId has a black screen${restrictionNote.isEmpty ? '' : ': $restrictionNote'}',
+    ),
     SixRoomState.live when mediaError != null => mediaError,
     SixRoomState.live when stream == null => StreamUnavailable(
       _site,
@@ -191,6 +236,9 @@ final class SixRoomRoomData {
     SixRoomState.live => null,
   };
 }
+
+/// One page of a mobile list: its cards, and whether the list goes on.
+typedef SixRoomListPage = ({List<SixRoomRoom> rooms, bool hasMore});
 
 /// What the danmaku module needs for a room (M5): the room number and the
 /// broadcaster's user id. 3.x had no Six Rooms chat (`EmptyDanmaku`); the
@@ -212,9 +260,10 @@ final class SixRoomDanmakuArgs {
   String toString() => '$roomId/$userId';
 }
 
-/// One of 3.x's six areas: its id, name and the homepage `anchor_area` it
-/// keeps (null for all rooms).
-typedef _Area = ({String id, String name, String? anchorArea});
+/// One of 3.x's six areas: its id and name (3.x's, kept so followed areas
+/// stay valid) and where its rooms come from (31-4): a mobile list type,
+/// a web subarea, or neither for all rooms (the homepage, 3.x).
+typedef _Area = ({String id, String name, String? mobileType, int? subarea});
 
 /// Pure parsing of 6.cn answers (3.x's `SixRoomApi`, `SixRoomLink` and the
 /// models of its `SixRoomSite`). Each function takes the answer and its
@@ -233,21 +282,25 @@ abstract final class SixRoomApi {
   /// The largest answer 3.x read, in UTF-8 bytes.
   static const int responseLimit = 8 * 1024 * 1024;
 
-  /// How long 3.x reused the homepage for category pages and later pages.
+  /// How long a list read whole (the homepage, a web subarea) serves its
+  /// later pages (3.x's homepage snapshot).
   static const Duration directoryCacheLifetime = Duration(seconds: 90);
 
-  /// The platform's name (3.x's zh.json `site_sixroom`): the category, the
-  /// areas' type and the area of a room without one.
+  /// The platform's name (3.x's zh.json `site_sixroom`): the category and
+  /// the areas' type. A room without an area has none (3.x showed this
+  /// name, which a follow then stored).
   static const String siteName = '六间房直播';
 
   /// `areaType` of the areas.
   static const String areaType = 'official';
 
-  /// 3.x's name and title of a room without them.
-  static const String placeholder = 'Six Rooms';
-
-  /// Rooms per directory page (3.x's `getDirectoryPage`).
+  /// Rooms per directory page (3.x's `getDirectoryPage`), also asked of the
+  /// mobile lists (which take any `size`).
   static const int pageSize = 30;
+
+  /// The mobile list type of the recommendations (31-4, the archived
+  /// adapter's): the live rooms of every area by popularity.
+  static const String recommendType = 'special';
 
   /// The last directory page 3.x asked for.
   static const int maxPage = 10000;
@@ -258,12 +311,13 @@ abstract final class SixRoomApi {
   /// The longest keyword 3.x sent; 6.cn itself takes 15 characters.
   static const int maxKeywordLength = 80;
 
-  /// The notice of every room (3.x's zh.json `sixroom_chat_notice`).
-  static const String chatNotice = '六间房远端聊天尚待接入；大厅 count 保留为平台热度，不标记为唯一并发人数，主播粉丝数单独展示。';
+  /// The notice of every room (`sixroom_chat_notice`, in words for users
+  /// since M4.U.31; 3.x's was a developer's note).
+  static const String chatNotice = '这里暂时看不到六间房的聊天。人数是平台的热度，不是正在观看的人数。';
 
   /// The notice of a private or black-screen room, before [chatNotice]
-  /// (`sixroom_restricted_notice`).
-  static const String restrictedNotice = '该六间房直播受私密房或黑屏访问条件限制，界面保持未知状态，不将其显示成未开播。';
+  /// (`sixroom_restricted_notice`, in words for users since M4.U.31).
+  static const String restrictedNotice = '这个六间房直播间是私密房或暂时黑屏，现在不能在这里观看。';
 
   /// Id of the one quality.
   static const String qualityId = 'flv:source';
@@ -276,13 +330,16 @@ abstract final class SixRoomApi {
   /// The one line's id: the FLV host.
   static const String lineId = 'wlive';
 
+  /// 3.x's areas and their sources (31-4). The mobile list has no "all"
+  /// and answers `content: []` for 星颜 (`u10`, sample S06-list-u10-p1),
+  /// so all rooms stay the homepage and 星颜 is the web's subarea 10.
   static const List<_Area> _areas = [
-    (id: 'all', name: '全部', anchorArea: null),
-    (id: 'song', name: '歌区', anchorArea: '歌区'),
-    (id: 'dance', name: '舞区', anchorArea: '舞区'),
-    (id: 'talk', name: '脱口秀', anchorArea: '脱口秀'),
-    (id: 'face', name: '星颜', anchorArea: '星颜'),
-    (id: 'party', name: '派对', anchorArea: '派对'),
+    (id: 'all', name: '全部', mobileType: null, subarea: null),
+    (id: 'song', name: '歌区', mobileType: 'u0', subarea: null),
+    (id: 'dance', name: '舞区', mobileType: 'u1', subarea: null),
+    (id: 'talk', name: '脱口秀', mobileType: 'u2', subarea: null),
+    (id: 'face', name: '星颜', mobileType: null, subarea: 10),
+    (id: 'party', name: '派对', mobileType: 'u8', subarea: null),
   ];
 
   /// The headers of the homepage, search and room pages (3.x's
@@ -297,11 +354,16 @@ abstract final class SixRoomApi {
   /// The headers of the inroom request (3.x's `mobileHeaders`, and the form
   /// type Dio added).
   static const Map<String, String> mobileHeaders = {
+    ...listHeaders,
+    'content-type': 'application/x-www-form-urlencoded',
+  };
+
+  /// The headers of the mobile lists: 3.x's mobile headers without a body.
+  static const Map<String, String> listHeaders = {
     'user-agent': mobileUserAgent,
     'accept': 'application/json,text/plain,*/*',
     'accept-language': 'zh-CN,zh;q=0.9,en;q=0.7',
     'referer': 'https://ios.6.cn/?ver=8.0.3&build=4',
-    'content-type': 'application/x-www-form-urlencoded',
   };
 
   /// 3.x's `mediaHeaders`, written into rooms (`httpHeaders`, in 3.x's
@@ -363,6 +425,27 @@ abstract final class SixRoomApi {
   /// The homepage: every live room, in `window.__SMARTY_ALL_VARIABLES__`.
   static final Uri homeUrl = Uri.parse('$origin/');
 
+  /// Page [page] of [size] rooms of the mobile list [type] (`u0`,
+  /// `special`; the app's `coop-mobile-getlivelistnew.php`, 31-4).
+  static Uri listUrl(String type, {required int page, required int size}) => Uri.parse('$origin/coop/mobile/index.php')
+      .replace(
+        queryParameters: {
+          'padapi': 'coop-mobile-getlivelistnew.php',
+          'av': '3.1',
+          'encpass': '',
+          'logiuid': '',
+          'isnew': '1',
+          'size': '$size',
+          'p': '$page',
+          'type': type,
+        },
+      );
+
+  /// The web's list of subarea [subarea] (10 is 星颜; the channel pages of
+  /// v.6.cn, 31-4): every live room of it in one answer.
+  static Uri subareaUrl(int subarea) =>
+      Uri.parse('$origin/subareaIndex/getSubareaIndexNew.php').replace(queryParameters: {'subarea': '$subarea'});
+
   /// The search page for [keyword].
   static Uri searchUrl(String keyword) =>
       Uri.parse('$origin/search.php').replace(queryParameters: {'type': 'use', 'key': keyword});
@@ -399,35 +482,66 @@ abstract final class SixRoomApi {
     ),
   ];
 
-  /// The area id of [category] (null is all rooms), or null when it is not
-  /// one of 3.x's areas (another platform or type, an unknown id). The id
-  /// is trimmed (3.x).
-  static String? areaIdOf(LiveArea? category) {
-    if (category == null) return 'all';
+  /// The area id of [category], or null when it is not one of 3.x's areas
+  /// (another platform or type, an unknown id). The id is trimmed (3.x).
+  static String? areaIdOf(LiveArea category) {
     if (category.platform != _site || category.areaType != areaType) return null;
     final id = category.areaId.trim();
     return _areas.any((area) => area.id == id) ? id : null;
   }
 
-  /// The rooms of [rooms] in area [areaId]: all, or those whose area is the
-  /// area's name (3.x filtered the homepage locally).
-  static List<SixRoomRoom> inArea(List<SixRoomRoom> rooms, String areaId) {
-    final anchorArea = _areas.firstWhere((area) => area.id == areaId).anchorArea;
-    return anchorArea == null
-        ? rooms
-        : [
-            for (final room in rooms)
-              if (room.category == anchorArea) room,
-          ];
-  }
+  /// The mobile list type of area [areaId] (`song` is `u0`), or null for
+  /// all rooms (the homepage) and 星颜 (the web's subarea).
+  static String? mobileTypeOf(String areaId) => _areas.firstWhere((area) => area.id == areaId).mobileType;
+
+  /// The web subarea of area [areaId] (星颜 is 10), or null.
+  static int? subareaOf(String areaId) => _areas.firstWhere((area) => area.id == areaId).subarea;
 
   // Directory -----------------------------------------------------------------
 
+  /// The live card of a list row (homepage, mobile list, web subarea), or
+  /// null when it has no room number or user id: name (`username`, the
+  /// subarea's featured rows `alias`), title (else the signature
+  /// `userMood`, else the name), avatar (`picuser`, which the mobile list
+  /// lacks), cover (`pospic`, `pic`, `pospic_sp`), area, `count` as
+  /// popularity and `realstarttime` as the start.
+  static SixRoomRoom? _card(Map<String, dynamic> row) {
+    final roomId = _string(row['rid']);
+    final userId = _string(row['uid']);
+    if (roomIdOf(roomId) != roomId || !isUserId(userId)) return null;
+    final nick = _firstText([row['username'], row['alias']]);
+    return SixRoomRoom(
+      roomId: roomId,
+      userId: userId,
+      liveId: _string(row['liveid'] ?? row['lid']),
+      nick: nick,
+      title: _firstText([row['livetitle'], row['userMood'], nick]),
+      avatar: _image(row['picuser']),
+      cover: _firstImage([row['pospic'], row['pic'], row['pospic_sp']]),
+      category: _text(row['anchor_area']),
+      popularity: _count(row['count']),
+      startedAt: _time(row['realstarttime']),
+      state: SixRoomState.live,
+    );
+  }
+
+  /// The cards of [rows], in order, once per room; rows without a room
+  /// number or user id are skipped.
+  static List<SixRoomRoom> _cards(Iterable<Object?> rows) {
+    final seen = <String>{};
+    final rooms = <SixRoomRoom>[];
+    for (final value in rows) {
+      final row = _map(value);
+      final room = row == null ? null : _card(row);
+      if (room != null && seen.add(room.roomId)) rooms.add(room);
+    }
+    return rooms;
+  }
+
   /// The homepage's rooms (3.x's `parseDirectoryHtml`): the embedded
   /// `typeList` (JSON, or JSON text), in its order, once per room; a row
-  /// needs a room number and a user id. Name, title (else mood, else name),
-  /// avatar, cover (`pospic`, `pic`, `pospic_sp`), area and `count` as
-  /// popularity; all live. No room at all is `ApiChanged`.
+  /// needs a room number and a user id (see [_card]); all live. No room at
+  /// all is `ApiChanged`.
   static List<SixRoomRoom> directory(String body, {int status = 200}) {
     const what = 'homepage';
     _checkStatus(body, status: status, what: what);
@@ -441,31 +555,67 @@ abstract final class SixRoomApi {
       }
     }
     if (rows is! List) throw const ApiChanged(_site, '$what: no typeList');
-    final seen = <String>{};
-    final rooms = <SixRoomRoom>[];
-    for (final value in rows) {
-      final row = _map(value);
-      if (row == null) continue;
-      final roomId = _string(row['rid']);
-      final userId = _string(row['uid']);
-      if (roomIdOf(roomId) != roomId || !isUserId(userId) || !seen.add(roomId)) continue;
-      final nick = _text(row['username'], fallback: placeholder);
-      rooms.add(
-        SixRoomRoom(
-          roomId: roomId,
-          userId: userId,
-          liveId: _string(row['liveid'] ?? row['lid']),
-          nick: nick,
-          title: _firstText([row['livetitle'], row['userMood'], nick], fallback: placeholder),
-          avatar: _image(row['picuser']),
-          cover: _firstImage([row['pospic'], row['pic'], row['pospic_sp']]),
-          category: _text(row['anchor_area']),
-          popularity: _count(row['count']),
-          state: SixRoomState.live,
-        ),
-      );
-    }
+    final rooms = _cards(rows);
     if (rooms.isEmpty) throw const ApiChanged(_site, '$what: typeList has no room');
+    return List.unmodifiable(rooms);
+  }
+
+  /// The `content` of a 6.cn JSON answer whose `flag` is `001`; another
+  /// flag is `RiskControl` (with the message), none `ApiChanged`.
+  static Object? _content(String body, {required int status, required String what}) {
+    _checkStatus(body, status: status, what: what);
+    final root = _decodeObject(body, what);
+    final flag = root['flag'];
+    if (flag is! String) throw ApiChanged(_site, '$what: flag is $flag');
+    if (flag != '001') throw RiskControl(_site, detail: '$what: flag $flag ${_text(root['content'])}');
+    return root['content'];
+  }
+
+  /// Page [page] of [size] rooms of the mobile list [type] (31-4, the
+  /// archived adapter's `getlivelistnew`): the rows of `content[type]` as
+  /// live cards (see [_card]; a bad row is skipped), and whether the list
+  /// goes on: the page had rows and `roomListCount[type]` is past it (a full
+  /// page when it is not given). A type without rooms answers
+  /// `content: []`. A list whose rows are all unreadable, or no list for the
+  /// type, is `ApiChanged`.
+  static SixRoomListPage list(
+    String body, {
+    required String type,
+    required int page,
+    required int size,
+    int status = 200,
+  }) {
+    final what = 'mobile list $type';
+    final content = _content(body, status: status, what: what);
+    if (content is List && content.isEmpty) return (rooms: const [], hasMore: false);
+    final map = _map(content);
+    final rows = map?[type];
+    if (map == null || rows is! List) throw ApiChanged(_site, '$what: no $type list');
+    final rooms = _cards(rows);
+    if (rooms.isEmpty && rows.isNotEmpty) throw ApiChanged(_site, '$what: no readable room');
+    final total = _count(_map(map['roomListCount'])?[type]);
+    final hasMore = rows.isNotEmpty && (total == null ? rows.length >= size : page * size < total);
+    return (rooms: List.unmodifiable(rooms), hasMore: hasMore);
+  }
+
+  /// The web's subarea list (星颜 is subarea 10, 31-4): the featured rows of
+  /// `bigLiveList.list`, then `liveList` (an object by user id), as live
+  /// cards once per room (see [_card]; a bad row is skipped). Neither list
+  /// is `ApiChanged`; rows but no readable room too.
+  static List<SixRoomRoom> subarea(String body, {int status = 200}) {
+    const what = 'subarea list';
+    final content = _map(_content(body, status: status, what: what));
+    final featured = _map(content?['bigLiveList'])?['list'];
+    final others = content?['liveList'];
+    final rows = [
+      if (featured is List) ...featured,
+      if (others is Map) ...others.values else if (others is List) ...others,
+    ];
+    if (featured is! List && others is! Map && others is! List) {
+      throw const ApiChanged(_site, '$what: no bigLiveList or liveList');
+    }
+    final rooms = _cards(rows);
+    if (rooms.isEmpty && rows.isNotEmpty) throw const ApiChanged(_site, '$what: no readable room');
     return List.unmodifiable(rooms);
   }
 
@@ -508,10 +658,13 @@ abstract final class SixRoomApi {
   /// `ul.search-user > li[data-uid]` of the `page-search-user` block, once
   /// per room: the user id, the room of the `a.user-box` link, the name
   /// (`.alias`) as name and title, the image of `.pic img` (`data-src`,
-  /// else `src`) as avatar; state unknown (3.x read no live mark). 6.cn's
-  /// "输入内容过长" page (a keyword over 15 characters) is no result; any
-  /// other prompt page is `RiskControl` (3.x's `access`), anything else
-  /// `ApiChanged`.
+  /// else `src`) as avatar. The state (31-3; 3.x read none, so every card
+  /// was unknown): live with the page's live mark (`i.live`, "直播中"),
+  /// offline without it when the link is the broadcaster's profile
+  /// (`/profile/<room>`, which the page gives rooms that are not live),
+  /// else unknown. 6.cn's "输入内容过长" page (a keyword over 15 characters)
+  /// is no result; any other prompt page is `RiskControl` (3.x's `access`),
+  /// anything else `ApiChanged`.
   static List<SixRoomRoom> search(String body, {int status = 200}) {
     const what = 'search page';
     _checkStatus(body, status: status, what: what);
@@ -536,9 +689,11 @@ abstract final class SixRoomApi {
     for (final item in items) {
       final userId = item.attributes['data-uid']!.trim();
       final href = item.query((element) => element.tag == 'a' && element.hasClass('user-box'))?.attributes['href'];
+      final Uri link;
       final String? roomId;
       try {
-        roomId = roomIdOf('${Uri.parse(origin).resolve(href ?? '')}');
+        link = Uri.parse(origin).resolve(href ?? '');
+        roomId = roomIdOf('$link');
       } on FormatException {
         continue;
       }
@@ -550,7 +705,10 @@ abstract final class SixRoomApi {
                 .takeWhile((ancestor) => !identical(ancestor, item))
                 .any((ancestor) => ancestor.hasClass('pic')),
       );
-      final nick = _text(item.query((element) => element.hasClass('alias'))?.text, fallback: placeholder);
+      final nick = _text(item.query((element) => element.hasClass('alias'))?.text);
+      final live = item.query((element) => element.tag == 'i' && element.hasClass('live')) != null;
+      // roomIdOf accepted the path, so its segments decode.
+      final profile = link.pathSegments.first.toLowerCase() == 'profile';
       rooms.add(
         SixRoomRoom(
           roomId: roomId,
@@ -558,7 +716,11 @@ abstract final class SixRoomApi {
           nick: nick,
           title: nick,
           avatar: _firstImage([image?.attributes['data-src'], image?.attributes['src']]),
-          state: SixRoomState.unknown,
+          state: live
+              ? SixRoomState.live
+              : profile
+              ? SixRoomState.offline
+              : SixRoomState.unknown,
         ),
       );
     }
@@ -601,8 +763,19 @@ abstract final class SixRoomApi {
   /// `parseRoomJson`): `flag` `001`, else 402 is `NotFound` (6.cn's "暂不能
   /// 进入此房间", sample S05-inroom-missing), another flag `RiskControl`
   /// (3.x's `access`), none `ApiChanged`. The room and broadcaster must be
-  /// the ones asked. Private or black screen is restricted; a live id and a
-  /// stream name are live; else offline. With [media], a live room's stream
+  /// the ones asked.
+  ///
+  /// A live id and a stream name are live, else offline. A private room
+  /// (`isPriveRoom`) is restriction `private`, a black screen
+  /// (`blackScreenInfo.msg`) `unplayable`, otherwise `none` (null when the
+  /// answer has neither field); such a room is live with a live id alone
+  /// (3.x showed it as unknown; M2.1: a restricted broadcast is live). The
+  /// title is the broadcast's title, else the broadcaster's signature
+  /// (3.x's `roominfo.userMood`, which answers do not have, then
+  /// `roomParamInfo.operation.userMood`, 31-2), else the name; the avatar
+  /// `headPicUrl`,
+  /// `picuser`, else `uoption.picuser` (31-1); a live room's start is
+  /// `liveinfo.starttime`. With [media], an unrestricted live room's stream
   /// (`v<user id>-<live id>[-many]`, else [SixRoomRoom.mediaError]). A
   /// [roomId] (number or link) or [userId] that is no id is a caller error.
   static SixRoomRoom room(
@@ -639,16 +812,20 @@ abstract final class SixRoomApi {
     }
     final liveId = _string(liveInfo['id']);
     final flvTitle = _string(liveInfo['flvtitle']);
-    final restricted = _truthy(content['isPriveRoom']) || _text(_map(content['blackScreenInfo'])?['msg']).isNotEmpty;
-    final state = restricted
-        ? SixRoomState.restricted
-        : liveId.isNotEmpty && flvTitle.isNotEmpty
-        ? SixRoomState.live
-        : SixRoomState.offline;
-    final nick = _text(roomInfo['alias'], fallback: placeholder);
+    final blackScreen = _text(_map(content['blackScreenInfo'])?['msg']);
+    final restriction = _truthy(content['isPriveRoom'])
+        ? LiveRestriction.private
+        : blackScreen.isNotEmpty
+        ? LiveRestriction.unplayable
+        : content.containsKey('isPriveRoom') || content.containsKey('blackScreenInfo')
+        ? LiveRestriction.none
+        : null;
+    final restricted = restriction != null && restriction != LiveRestriction.none;
+    final state = liveId.isNotEmpty && (flvTitle.isNotEmpty || restricted) ? SixRoomState.live : SixRoomState.offline;
+    final nick = _text(roomInfo['alias']);
     SixRoomStream? stream;
     SiteError? mediaError;
-    if (media && state == SixRoomState.live) {
+    if (media && state == SixRoomState.live && !restricted) {
       final url = mediaUri(userId: actualUserId, liveId: liveId, flvTitle: flvTitle);
       if (url == null) {
         mediaError = ApiChanged(_site, '$what of $id: stream name $flvTitle for live $liveId');
@@ -671,13 +848,15 @@ abstract final class SixRoomApi {
       userId: actualUserId,
       liveId: liveId,
       nick: nick,
-      title: _firstText([liveInfo['title'], roomInfo['userMood'], nick], fallback: placeholder),
-      avatar: _firstImage([roomInfo['headPicUrl'], roomInfo['picuser']]),
+      title: _firstText([liveInfo['title'], roomInfo['userMood'], _map(params['operation'])?['userMood'], nick]),
+      avatar: _firstImage([roomInfo['headPicUrl'], roomInfo['picuser'], _map(roomInfo['uoption'])?['picuser']]),
       cover: _firstImage([liveInfo['spredPic'], liveInfo['pospic'], liveInfo['largepic'], liveInfo['pic']]),
       category: _firstText([roomInfo['anchor_area'], roomInfo['rtypename']]),
       followers: _count(params['fans_num']),
+      startedAt: state == SixRoomState.live ? _time(liveInfo['starttime']) : null,
+      restriction: restriction,
+      restrictionNote: restriction == LiveRestriction.unplayable ? blackScreen : '',
       state: state,
-      ownerAvatar: _image(_map(roomInfo['uoption'])?['picuser']),
       stream: stream,
       mediaError: mediaError,
     );
@@ -705,14 +884,15 @@ abstract final class SixRoomApi {
 
   // Rooms, qualities and lines ------------------------------------------------
 
-  /// The card or room of [room] (3.x's `_room`): the avatar, else the cover
-  /// (what 3.x showed: inroom has no avatar where 3.x looked), else
-  /// [SixRoomRoom.ownerAvatar]; the area, else [siteName]; the popularity
-  /// as the audience; followers; the state (restricted and unknown are
-  /// unknown, never offline); 3.x's notice and headers; [data] and
-  /// [danmaku] as given.
+  /// The card or room of [room] (3.x's `_room`): the avatar (never the
+  /// cover, 31-1), the area, the name and title as given ('' when the
+  /// answer has none: a follow keeps what it stored, M2.1); the popularity
+  /// as the audience; followers; the state; the start and restriction
+  /// (M2.1; the start only while live); the notices and 3.x's headers;
+  /// [data] and [danmaku] as given.
   static LiveRoom liveRoom(SixRoomRoom room, {SixRoomRoomData? data, SixRoomDanmakuArgs? danmaku}) {
     final popularity = room.popularity?.toString() ?? '';
+    final restricted = room.restriction != null && room.restriction != LiveRestriction.none;
     return LiveRoom(
       roomId: room.roomId,
       platform: _site,
@@ -720,13 +900,9 @@ abstract final class SixRoomApi {
       link: link(room.roomId),
       title: room.title,
       nick: room.nick,
-      avatar: room.avatar.isNotEmpty
-          ? room.avatar
-          : room.cover.isNotEmpty
-          ? room.cover
-          : room.ownerAvatar,
+      avatar: room.avatar,
       cover: room.cover,
-      area: room.category.isEmpty ? siteName : room.category,
+      area: room.category,
       watching: popularity,
       popularity: popularity,
       followers: room.followers?.toString() ?? '',
@@ -734,9 +910,11 @@ abstract final class SixRoomApi {
       liveStatus: switch (room.state) {
         SixRoomState.live => LiveStatus.live,
         SixRoomState.offline => LiveStatus.offline,
-        SixRoomState.restricted || SixRoomState.unknown => LiveStatus.unknown,
+        SixRoomState.unknown => LiveStatus.unknown,
       },
-      notice: room.state == SixRoomState.restricted ? '$restrictedNotice\n$chatNotice' : chatNotice,
+      startedAt: room.state == SixRoomState.live ? room.startedAt : null,
+      restriction: room.restriction,
+      notice: restricted ? '$restrictedNotice\n$chatNotice' : chatNotice,
       httpHeaders: mediaHeaders(room.roomId),
       data: data,
       danmakuData: danmaku,
@@ -749,6 +927,8 @@ abstract final class SixRoomApi {
     userId: room.userId,
     liveId: room.liveId,
     state: room.state,
+    restriction: room.restriction,
+    restrictionNote: room.restrictionNote,
     stream: room.stream,
     mediaError: room.mediaError,
   );
@@ -792,20 +972,16 @@ Map<String, dynamic>? _map(Object? value) =>
 /// 3.x's `_string`: any value as trimmed text; '' for null.
 String _string(Object? value) => value?.toString().trim() ?? '';
 
-/// 3.x's `_text`: [_string] with runs of white space made one space, or
-/// [fallback] when empty.
-String _text(Object? value, {String fallback = ''}) {
-  final text = _string(value).replaceAll(RegExp(r'\s+'), ' ').trim();
-  return text.isEmpty ? fallback : text;
-}
+/// 3.x's `_text`: [_string] with runs of white space made one space.
+String _text(Object? value) => _string(value).replaceAll(RegExp(r'\s+'), ' ').trim();
 
-/// The first non-empty [_text] of [values], or [fallback].
-String _firstText(Iterable<Object?> values, {String fallback = ''}) {
+/// The first non-empty [_text] of [values], or ''.
+String _firstText(Iterable<Object?> values) {
   for (final value in values) {
     final text = _text(value);
     if (text.isNotEmpty) return text;
   }
-  return fallback;
+  return '';
 }
 
 /// 3.x's `_integer`: an integer or number (truncated), or integer text with
@@ -815,6 +991,13 @@ int? _count(Object? value) {
   if (value is num) return value >= 0 ? value.toInt() : null;
   final parsed = int.tryParse(_string(value).replaceAll(',', ''));
   return parsed != null && parsed >= 0 ? parsed : null;
+}
+
+/// A time in epoch seconds (a number or digits), UTC; null for 0, a
+/// negative or anything else.
+DateTime? _time(Object? value) {
+  final seconds = _count(value);
+  return seconds == null || seconds <= 0 ? null : DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true);
 }
 
 /// 3.x's `_truthy`: true, 1 or `'1'`.

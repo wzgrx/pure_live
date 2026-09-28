@@ -1,0 +1,127 @@
+{
+  "generator": "PandaLiveApi.searchBroadcasters(20) as PandaLiveSite._room",
+  "value": {
+    "searchBroadcasters": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/live/bj_list",
+          "form": {
+            "offset": "0",
+            "limit": "20",
+            "searchVal": "데이지"
+          },
+          "referer": "https://www.pandalive.co.kr/search/bj?text=%EB%8D%B0%EC%9D%B4%EC%A7%80"
+        }
+      ],
+      "value": {
+        "page": 1,
+        "hasMore": false,
+        "rooms": [
+          {
+            "roomId": "daisy00",
+            "userId": "24133575",
+            "title": "순둥)데이디 온",
+            "nick": "데이지ღ",
+            "avatar": "https://cdn.pandalive.co.kr/upload/user/03/03d3c386-e2b2-4f49-9079-1bdaca07d0f9.jpeg",
+            "cover": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/tPMD7l7WapP2_NPl6OujGL5vq_17_0.jpg",
+            "area": "ind",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "49",
+            "followers": "8027",
+            "platform": "pandalive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "introduction": "",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/daisy00",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/daisy00"
+          },
+          {
+            "roomId": "flffl369",
+            "userId": "28103135",
+            "title": "데이지ෆ",
+            "nick": "데이지ෆ",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_F1.jpg",
+            "cover": "",
+            "area": "",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "platform": "pandalive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "introduction": "",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/flffl369",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/flffl369"
+          },
+          {
+            "roomId": "hhd006",
+            "userId": "23677624",
+            "title": "데이지방송국",
+            "nick": "데이지방송국",
+            "avatar": "https://cdn.pandalive.co.kr/upload/noimg/user/noimg_M0.jpg",
+            "cover": "",
+            "area": "",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "platform": "pandalive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "introduction": "",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/hhd006",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/hhd006"
+          },
+          {
+            "roomId": "candygirl35",
+            "userId": "17405084",
+            "title": "데이지⚘",
+            "nick": "데이지⚘",
+            "avatar": "https://cdn.pandalive.co.kr/upload/user/a1/a113dbc8-dce4-4566-b532-1e17a95f7cff.png",
+            "cover": "",
+            "area": "",
+            "watching": "0",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "platform": "pandalive",
+            "liveStatus": 1,
+            "isRecord": false,
+            "status": false,
+            "notice": "PandaTV 远端聊天尚待接入；user 字段按平台当前在线人数展示，playCnt 不作为并发人数。",
+            "introduction": "",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.pandalive.co.kr",
+              "referer": "https://www.pandalive.co.kr/live/play/candygirl35",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.pandalive.co.kr/live/play/candygirl35"
+          }
+        ]
+      }
+    }
+  }
+}

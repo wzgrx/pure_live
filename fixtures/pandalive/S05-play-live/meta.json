@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "platform": "pandalive",
+  "sample": "S05-play-live",
+  "capturedAt": "2026-09-27T18:48:38.520580Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://api.pandalive.co.kr/v1/live/play",
+    "headers": {
+      "Origin": "https://www.pandalive.co.kr",
+      "Referer": "https://www.pandalive.co.kr/play/daisy00",
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "action=watch&userId=daisy00&password=&shareLinkType="
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "X-Device-Info",
+      "connection": "keep-alive",
+      "set-cookie": [
+        "sessKey=r97u2ok7-7u40-855j-0dfd-1scu52kqzk66; path=/; domain=.pandalive.co.kr; secure; SameSite=None",
+        "79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee=6P0V59fX2dN3HUo%5YLVi3lWK%0ChZWDCq7ScDF2qzom3ZGH6beDKQaU60gF6bd%3Wop8SlJHsyRhLyuEIojzerql%5RygIuWxDJzOjyLhk48DNxYZH9bUXfEpjvE8XO4vshDeeW; path=/; domain=.pandalive.co.kr",
+        "partner=spsflmi; path=/; domain=.pandalive.co.kr"
+      ],
+      "access-control-allow-origin": "https://www.pandalive.co.kr",
+      "date": "Sun, 27 Sep 2026 18:48:38 GMT",
+      "transfer-encoding": "chunked",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "content-type": "application/json",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "a9f627adf2538731950f60d2c145d5f25562eba7692a254172beb3ec6ffee674",
+    "length": 11678
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.PlayList.hls3[0].url:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.PlayList.hls2[0].url:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.PlayList.hls[0].url:token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.PlayList.whip[0].token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[0].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[0].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[0].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[0].userProfileImgHash",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[0].userProfileImg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[1].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[1].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[1].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[2].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[2].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[2].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[3].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[3].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[3].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[4].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[4].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[4].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[5].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[5].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[5].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[6].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[6].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[6].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[6].userProfileImgHash",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[6].userProfileImg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[7].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[7].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[7].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[7].userProfileImgHash",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[7].userProfileImg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[8].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[8].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[8].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[9].userIdx",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[9].userId",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[9].userNick",
+      "rule": "person"
+    },
+    {
+      "where": "$.fanList[9].userProfileImgHash",
+      "rule": "secret"
+    },
+    {
+      "where": "$.fanList[9].userProfileImg",
+      "rule": "secret"
+    },
+    {
+      "where": "$.chatServer.token",
+      "rule": "secret"
+    },
+    {
+      "where": "$.roomInfo",
+      "rule": "secret"
+    },
+    {
+      "where": "$.ispInfo.organization",
+      "rule": "secret"
+    },
+    {
+      "where": "$.ispInfo.isp",
+      "rule": "secret"
+    },
+    {
+      "where": "$.ispInfo.countryCode",
+      "rule": "secret"
+    },
+    {
+      "where": "$.loginInfo.sessKey",
+      "rule": "secret"
+    },
+    {
+      "where": "$.userIp",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:sessKey",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:partner",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

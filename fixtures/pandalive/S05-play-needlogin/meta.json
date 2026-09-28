@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "platform": "pandalive",
+  "sample": "S05-play-needlogin",
+  "capturedAt": "2026-09-27T18:48:47.523974Z",
+  "route": "direct",
+  "request": {
+    "method": "POST",
+    "url": "https://api.pandalive.co.kr/v1/live/play",
+    "headers": {
+      "Origin": "https://www.pandalive.co.kr",
+      "Referer": "https://www.pandalive.co.kr/play/youngddo819",
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": "action=watch&userId=youngddo819&password=&shareLinkType="
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "X-Device-Info",
+      "connection": "keep-alive",
+      "set-cookie": [
+        "sessKey=07372e13-67y7-049x-lf47-eqy8sg9n9976; path=/; domain=.pandalive.co.kr; secure; SameSite=None",
+        "79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee=YxEjOnNb46MK1W1TBm0qacqr17jM4usrVujeD5p11rPfvBx8yKX29F9wnwdCDxMG8hI5LUkGur5B%7C4w4yypDJYVMQuc7dWhVVJrTM6jlwETZvh5UP135ReLEL7zgIkSG; path=/; domain=.pandalive.co.kr",
+        "partner=qgwqpex; path=/; domain=.pandalive.co.kr"
+      ],
+      "date": "Sun, 27 Sep 2026 18:48:48 GMT",
+      "transfer-encoding": "chunked",
+      "access-control-allow-origin": "https://www.pandalive.co.kr",
+      "content-type": "application/json",
+      "server": "nginx"
+    }
+  },
+  "raw": {
+    "sha256": "02b5b6957a39468f89f3726caf38f5a4e8d8466cd72e0d5db837cc4dba5c1938",
+    "length": 151
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.userIp",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:sessKey",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:79b0c6d4081955eb1c9b2417b9015e73b776b816f05c1f6e3cbf8c71c57259ee",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:partner",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

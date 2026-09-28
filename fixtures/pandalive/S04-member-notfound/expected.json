@@ -1,0 +1,109 @@
+{
+  "generator": "PandaLiveSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + searchRooms",
+  "value": {
+    "getRoomDetail": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "zxqvnouserfix",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/zxqvnouserfix"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "getRoomDetailForRefresh": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "zxqvnouserfix",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/zxqvnouserfix"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "zxqvnouserfix",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/zxqvnouserfix"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://api.pandalive.co.kr/v1/member/bj",
+          "form": {
+            "userId": "zxqvnouserfix",
+            "info": "media fanGrade"
+          },
+          "referer": "https://www.pandalive.co.kr/live/play/zxqvnouserfix"
+        }
+      ],
+      "value": {
+        "throws": "PandaLiveException",
+        "message": "PandaTV schema"
+      }
+    },
+    "searchRooms": {
+      "zxqvnouserfix": {
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://api.pandalive.co.kr/v1/member/bj",
+            "form": {
+              "userId": "zxqvnouserfix",
+              "info": "media fanGrade"
+            },
+            "referer": "https://www.pandalive.co.kr/live/play/zxqvnouserfix"
+          }
+        ],
+        "value": {
+          "throws": "PandaLiveException",
+          "message": "PandaTV schema"
+        }
+      },
+      "https://www.pandalive.co.kr/channel/zxqvnouserfix": {
+        "requests": [
+          {
+            "method": "POST",
+            "url": "https://api.pandalive.co.kr/v1/member/bj",
+            "form": {
+              "userId": "zxqvnouserfix",
+              "info": "media fanGrade"
+            },
+            "referer": "https://www.pandalive.co.kr/live/play/zxqvnouserfix"
+          }
+        ],
+        "value": {
+          "throws": "PandaLiveException",
+          "message": "PandaTV schema"
+        }
+      }
+    }
+  }
+}

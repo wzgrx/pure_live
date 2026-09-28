@@ -1,0 +1,286 @@
+{
+  "roomBlindInfo": {
+    "enable": false,
+    "name": "",
+    "blindType": ""
+  },
+  "roomFreezeInfo": {
+    "enable": false,
+    "name": "",
+    "userType": "",
+    "managerExcpt": "",
+    "fanExcpt": ""
+  },
+  "roomBanInfo": {
+    "enable": false,
+    "banType": "",
+    "site": ""
+  },
+  "excelBroadcast": null,
+  "token": "ssE6oFWgWnAWY9FfPAJdtNymXuVOKaH5OhZ9.seYhdKRgRiM8W0Y6YES9TBF4FVcpPZGrqSVzSpX5LGG9HgT3OOigSpnwUf7bJglsN5itrh9mfUG4XwY1IGShHUz1HliwbAjsOAP5OuMbHDbnduSdKaK1Ttukz5HmHpnsqSYgOoT1NYGbTFPxIEOlXoQ9HCQ0MdT6DIqbHfznIabnz4bcF6xkE58QvPUKUPWGXetpD2PWGdD1HHDuCfhcywahAofmn43jLHjzeUPtJclzr4ClnNaoOUWqElf5Ad8eHjayRjPxGrJ4ZgPaGrAfDlN0UmfbWBT7HBVhX7O5XZFlKtPdCc09.sCe7NIlnyPM4rjbikb9jyy161_ieeVkQJSabhaCYhZg",
+  "enterChat": [],
+  "html5": true,
+  "channel": "24133575",
+  "media": {
+    "code": "24133575_20260928cde58537d81232ea",
+    "title": "순둥)데이디 온",
+    "titleJa": "アイドル顔デイジーでづ～！！",
+    "userId": "daisy00",
+    "userIdx": 24133575,
+    "userNick": "데이지ღ",
+    "userNickJa": "デイジーღ",
+    "category": "ind",
+    "isAdult": false,
+    "isPw": false,
+    "type": "free",
+    "heart": 0,
+    "user": 47,
+    "userLimit": 1000,
+    "sizeWidth": 1920,
+    "sizeHeight": 1080,
+    "browser": "web",
+    "startTime": "2026-09-28 02:00:35",
+    "endTime": "0000-00-00 00:00:00",
+    "isLive": true,
+    "onAirType": "live",
+    "liveType": "live",
+    "playCnt": 903,
+    "likeCnt": 39,
+    "bookmarkCnt": 7157,
+    "fanCnt": 8027,
+    "totalScoreCnt": 482113,
+    "newBjYN": "N",
+    "storage": "ivs",
+    "isGuestLive": "N",
+    "thumbUrl": "https://cdn.pandalive.co.kr/thumbnails/2026/9/27/tPMD7l7WapP2_NPl6OujGL5vq_17_0.jpg",
+    "userImg": "https://cdn.pandalive.co.kr/upload/user/03/03d3c386-e2b2-4f49-9079-1bdaca07d0f9.jpeg",
+    "listUp": "",
+    "listDeco": "0",
+    "userUp": "",
+    "quality": 0,
+    "ivsThumbnail": "https://cdn.pandalive.co.kr/ivs/v1/658583162646/tPMD7l7WapP2/2026/9/27/17/0/NPl6OujGL5vq/media/latest_thumbnail/thumb.jpg",
+    "sttType": "clova",
+    "globalYN": "Y",
+    "latencyMode": "RT"
+  },
+  "mode": "live",
+  "chatMode": "chat",
+  "playMode": "play",
+  "PlayList": {
+    "size": {
+      "width": 1920,
+      "height": 1080
+    },
+    "hls3": [
+      {
+        "name": "자동",
+        "sort": 1,
+        "url": "https://ffdced10e5f6.us-west-2.playback.live-video.net/api/video/v1/us-west-2.658583162646.channel.tPMD7l7WapP2.m3u8?token=orU5gZIpSnLXJ8BcTEJpmUxoMgJKZzS8AHX1.wmVcj1K3I1tuft6vkE8pkj7vFnFszd96AIpxPmz2new3ue55NQL3MRF3HjJ9NLhzKVIjKgU7UdFkVB4mCPxyS1OMFVJ4dMmXTBAMWpDmHcT3hpdaqH7yaZQfqPUfYJV7cMZuCyUoJRL3FYNDLm9IMvWyAMRRO4ImRhE1Xb53VLM8JlPiEFXGZ6QrSWWyp1W6owfbe9OkLGnvUtxqYDFzSgT9uzi7eMM3KUEfs2Mdn5fthx98WUZhfX1mIbesXkdmUMW9NWX8GYQxtWDiJuR3KBA2CdU8FUoxUiV9euouJ9Hod3MmY64baIQrzH2lyIeoqf9ambxnxF7lNfIgwIJyyfldL4djWb7mYY2hQAyijrYxQ25mo2KbHZZwi5O4f4IkoUI6YR2fxHpbof1rqzVhdgMlpOJytEX0fKW0TJhnjGK9AY3.ig-tLD6EKpwh0T7MjHZWkvNpWof0PeuvYUBNU4cgT__hKu4vtlOss49XPecpIZjoQ-6Tv0Mtl3eOitbRAidKoNCZbF0cd5zmkTygQ9xjVRl2fKPSeB8ewPg_KLxsOGjz"
+      }
+    ],
+    "hls2": [
+      {
+        "name": "자동",
+        "sort": 1,
+        "url": "https://ffdced10e5f6.us-west-2.playback.live-video.net/api/video/v1/us-west-2.658583162646.channel.tPMD7l7WapP2.m3u8?token=orU5gZIpSnLXJ8BcTEJpmUxoMgJKZzS8AHX1.wmVcj1K3I1tuft6vkE8pkj7vFnFszd96AIpxPmz2new3ue55NQL3MRF3HjJ9NLhzKVIjKgU7UdFkVB4mCPxyS1OMFVJ4dMmXTBAMWpDmHcT3hpdaqH7yaZQfqPUfYJV7cMZuCyUoJRL3FYNDLm9IMvWyAMRRO4ImRhE1Xb53VLM8JlPiEFXGZ6QrSWWyp1W6owfbe9OkLGnvUtxqYDFzSgT9uzi7eMM3KUEfs2Mdn5fthx98WUZhfX1mIbesXkdmUMW9NWX8GYQxtWDiJuR3KBA2CdU8FUoxUiV9euouJ9Hod3MmY64baIQrzH2lyIeoqf9ambxnxF7lNfIgwIJyyfldL4djWb7mYY2hQAyijrYxQ25mo2KbHZZwi5O4f4IkoUI6YR2fxHpbof1rqzVhdgMlpOJytEX0fKW0TJhnjGK9AY3.ig-tLD6EKpwh0T7MjHZWkvNpWof0PeuvYUBNU4cgT__hKu4vtlOss49XPecpIZjoQ-6Tv0Mtl3eOitbRAidKoNCZbF0cd5zmkTygQ9xjVRl2fKPSeB8ewPg_KLxsOGjz"
+      }
+    ],
+    "hls": [
+      {
+        "name": "자동",
+        "sort": 1,
+        "url": "https://ffdced10e5f6.us-west-2.playback.live-video.net/api/video/v1/us-west-2.658583162646.channel.tPMD7l7WapP2.m3u8?token=orU5gZIpSnLXJ8BcTEJpmUxoMgJKZzS8AHX1.wmVcj1K3I1tuft6vkE8pkj7vFnFszd96AIpxPmz2new3ue55NQL3MRF3HjJ9NLhzKVIjKgU7UdFkVB4mCPxyS1OMFVJ4dMmXTBAMWpDmHcT3hpdaqH7yaZQfqPUfYJV7cMZuCyUoJRL3FYNDLm9IMvWyAMRRO4ImRhE1Xb53VLM8JlPiEFXGZ6QrSWWyp1W6owfbe9OkLGnvUtxqYDFzSgT9uzi7eMM3KUEfs2Mdn5fthx98WUZhfX1mIbesXkdmUMW9NWX8GYQxtWDiJuR3KBA2CdU8FUoxUiV9euouJ9Hod3MmY64baIQrzH2lyIeoqf9ambxnxF7lNfIgwIJyyfldL4djWb7mYY2hQAyijrYxQ25mo2KbHZZwi5O4f4IkoUI6YR2fxHpbof1rqzVhdgMlpOJytEX0fKW0TJhnjGK9AY3.ig-tLD6EKpwh0T7MjHZWkvNpWof0PeuvYUBNU4cgT__hKu4vtlOss49XPecpIZjoQ-6Tv0Mtl3eOitbRAidKoNCZbF0cd5zmkTygQ9xjVRl2fKPSeB8ewPg_KLxsOGjz"
+      }
+    ],
+    "whip": [
+      {
+        "name": "자동",
+        "sort": 1,
+        "token": "ruPlhCmqZkALEbE7HJFqMdT1bMC9AtlIGADfEabxDKF6LnPrppvdh1L2qKQrUrFnQVjxk8XkFnv4FOz9KSIeDoQ3YAM5eFZoxOycIKqmpJnyRy02xqV8Q8hKMdfdPb9.tdPmtTSyHsX0XGC5BwDwLLoqAouyyEG9LBd8CUMkNCnxXSufjqMmCoelZWNqQTt7SWMnCgavBC88FZBcBEYjIwEeAtc4HfCnUCC6YRfkFbylfsAje0QfE0OcHaHpbp30MOixHrh1wqu0jv13SPQ1QER7CqI2MPqkJOFjRtK2JkN5GAdkSF8RVmO9n5XbRzEdN2DaGPZ0v1HxOpX5Gh0VIhL7HtmxTLMqSIDtGwJ7ZT59t258puurBoB8t2Z1DX0jL1fkr3SnmS0xteFrtYZxzSp2EQ28wEPsry8eDUEdMAL7lFkfB5JeqPI9Dvc5aVIbGuahOK7lAzUqWNFiJUF9IdLgW7yjJnZoVXDiDfjadSWraSu0HB50zIJgxf8iXENyUCWnPIMnJppawMRwEIBbShzoJIxnh5rff2Anp6NjdGQsQna3wtYvfDdhBFU8dwhktODypoU8nnR3t2OqMHTtHgDwKxgzvLIrizcqnQF8NlYeQCMlWVKqN0NPcVCvHpvph1KjSeseISZ7nQGrRgXqv4hpedU1EcMuXNCnyL2nWesdrESeSwFrTL3jKFWRS4S9MQBFAgkTMWAzaZSLBI75Pa5rHsFiicFoz68mMuRvPcIriX.km0icepLQqd4lWnajmiWhJY6TBLBAV_PJFzcTJMpUTToES1duEWux8yG-OO3FrG8heE-5djz-4pahhqnXoDmTGCi4ndS2LzUrj-Ek8kEPibDEBaq7Tz_gI7qot1rltyt"
+      }
+    ]
+  },
+  "iePlayMode": "hlsOnly",
+  "fan": {
+    "level": 0,
+    "name": "",
+    "isManager": false,
+    "isRoomMaster": false,
+    "rank": 0
+  },
+  "fanList": [
+    {
+      "rank": 1,
+      "userIdx": 6611395,
+      "userId": "wizfak59",
+      "userNick": "观众1",
+      "isEverFan": true,
+      "userProfileImgHash": "gkvttm/rwib/54/67a81e8t-x9ek-5366-bn21-7d16fr709s6b.tjnw",
+      "userProfileImg": "snnkh://btd.qhgzrvits.mt.wz/dyjgyw/hkek/46/42z25r8j-q8lm-5949-ws55-9n63fr629v2n.dqqf",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 2,
+      "userIdx": 7720402,
+      "userId": "ldmsp2899",
+      "userNick": "观众2",
+      "isEverFan": true,
+      "userProfileImgHash": "",
+      "userProfileImg": "",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 3,
+      "userIdx": 32378501,
+      "userId": "ebxsec",
+      "userNick": "观众3",
+      "isEverFan": true,
+      "userProfileImgHash": "",
+      "userProfileImg": "",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 4,
+      "userIdx": 61191713,
+      "userId": "xacyaz338",
+      "userNick": "观众4",
+      "isEverFan": true,
+      "userProfileImgHash": "",
+      "userProfileImg": "",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 5,
+      "userIdx": 17350095,
+      "userId": "43aaeqgf",
+      "userNick": "观众5",
+      "isEverFan": true,
+      "userProfileImgHash": "",
+      "userProfileImg": "",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 6,
+      "userIdx": 52176086,
+      "userId": "ezumrilb96",
+      "userNick": "观众6",
+      "isEverFan": true,
+      "userProfileImgHash": "",
+      "userProfileImg": "",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 7,
+      "userIdx": 11571356,
+      "userId": "kloi3ums",
+      "userNick": "观众7",
+      "isEverFan": true,
+      "userProfileImgHash": "mwtbwq/tnze/33/08a8x4c4-7269-5965-4f22-hq0n75dd2783.dget",
+      "userProfileImg": "wtnhi://rzz.qfvzywiid.rv.rj/ledmgf/ofsw/41/06n0r0b3-1721-5610-0o21-tr3a32iw1178.msmu",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 8,
+      "userIdx": 82453670,
+      "userId": "vkbj87936776",
+      "userNick": "观众8",
+      "isEverFan": true,
+      "userProfileImgHash": "gtpnik/lbkq/03/853at4j6-8402-8908-0q10-b609426k1dx7.sohh",
+      "userProfileImg": "qqqpn://tse.zckgrnfvv.fj.xi/bpvcng/rrma/97/585kn7z9-5608-2201-7i99-h114827p1by3.umjo",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 9,
+      "userIdx": 161386,
+      "userId": "uajedn76",
+      "userNick": "观众9",
+      "isEverFan": true,
+      "userProfileImgHash": "",
+      "userProfileImg": "",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    },
+    {
+      "rank": 10,
+      "userIdx": 85845289,
+      "userId": "ofbgrl62",
+      "userNick": "观众10",
+      "isEverFan": true,
+      "userProfileImgHash": "kddpbi/cesb/2t/9f13pxyz-512d-9u11-s074-w22e05p6h0c5.tkt",
+      "userProfileImg": "jxgah://wzz.jjhycluwy.ej.em/anqskq/srje/0x/4g69rpfj-324d-3x20-k374-m49k96y3j9n7.szc",
+      "fanLevel": 5,
+      "fanName": "=͟͟͞͞♡샤스타데이지",
+      "country": "kr"
+    }
+  ],
+  "isBookmark": false,
+  "adultOut": false,
+  "chatServer": {
+    "url": "",
+    "t": 1790534918,
+    "token": "55fc1d9b6c9dfcbd3c5affae0e90ae238d5817790a084e31730429ef6da68017"
+  },
+  "roomInfo": "3q68636369193fqz34o8i277n614a830e8246hqm038989o081jm2n2428884494:fkIcHF2eClenqBF6KVpjFs6cCKCfCU5xFbiyB5Uvv9WnCHBpWN4qRhmlSLHnj51ikdFdLWSmScKiaNKzOSQmg5Xsu53DEVM1PSOcMbQvhKDzzI4=",
+  "ranking": 104,
+  "chatMessage": {
+    "intro": "24시간 모니터링 중입니다!\n건전한 채팅을 위해 저속한 표현 등은 제재의 대상이 됩니다.\n팬더티비 에서는 어떠한 경우에도 접속 정보 및 개인정보를 요구하지 않습니다. 운영팀 사칭에 주의하시어 개인정보가 유출되는 일이 없도록 당부 부탁 드리겠습니다.\n\n또한 최근 팬더티비 사이트를 사칭하거나 이미지를 도용하는 피싱사이트가 확인되었습니다. 팬더티비에서는 현재 접속하고 계시는 공식 사이트를 제외한 어떠한 사이트도 운영하지 않습니다. 발견 즉시 고객센터로 제보 부탁 드리며 피해가 발생하지 않도록 주의하시기 바랍니다. 감사합니다.",
+    "livePlusSwitchGuideMessage": "본 방송은 실제 시차가 거의없는 LIVE+로 전환이 가능합니다. 설정에서 시청방식을 변경하여 시차없는 실시간 반응을 경험해 보세요!",
+    "livePlusWelcomeMessage": "현재 방송은 실제 시차가 거의 없는 라이브+ 방송입니다.\nBJ와 소통 시 시차없는 실시간 반응을 경험해 보세요!"
+  },
+  "ispInfo": {
+    "organization": "RRU WE Bboemvi (Azctesu)",
+    "isp": "Xrgvr Uypn Pzhmnamhrer",
+    "countryCode": "NN"
+  },
+  "vipDeco": 0,
+  "playItemInfo": {
+    "coinHave": 0,
+    "itemInfo": [],
+    "postCountReadN": 0
+  },
+  "mission": {
+    "stat": "on",
+    "coin": "100"
+  },
+  "streamType": "RT",
+  "isRTReport": true,
+  "livePlusSwitchThreshold": 100,
+  "comboTimeoutMs": 15000,
+  "thumbnailRatio": "16:9",
+  "result": true,
+  "message": "시청이 시작되었습니다.",
+  "loginInfo": {
+    "sessKey": "r97u2ok7-7u40-855j-0dfd-1scu52kqzk66",
+    "userInfo": {
+      "isLogin": false,
+      "isCaptcha": false
+    },
+    "siteMode": {
+      "needAuth": true,
+      "mode": "c",
+      "type": "b"
+    },
+    "deviceInfo": {
+      "type": "web",
+      "version": "undefine"
+    }
+  },
+  "userIp": "086.360.849.007"
+}

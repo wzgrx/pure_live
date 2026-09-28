@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "platform": "pandalive",
+  "sample": "S06-master",
+  "capturedAt": "2026-09-27T18:50:14.254403Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://ffdced10e5f6.us-west-2.playback.live-video.net/api/video/v1/us-west-2.658583162646.channel.tPMD7l7WapP2.m3u8?token=fhL5gURlHwPCP2WmLZXnsRrzVmYSJtW3GES1.wbNoq7T2P7bdrr8ooZ0ojy8sIaZrmz54TKiqXgu7idr7tt07NRM6NMU0YqH4EDvzZFIgExV6AcTdXP0fBQpeO6DKION5nDgGDYZHPyBkSuX9ofjrrJ9kdSOzyGZmFVX0eJEcBlH0XEK7QXzVZG23YFKsVYNLNQdoFeCcCI8kXzXPN8XKNPI2WFNlOCCpo7N5jgene3RjLZroVugbJCVyRqW1pon0eFC9LCGzs4Spa1ixub97BTEqhM7tErpdHzowDEZ8QMKpIBYohMQgDiN8UCD3SpZ5RFLfWjH6allwJ0Qic1PgV95yhAZtzL2wiSpnoo7yfusklU7mUiYntNCbixutE7stCq7rUI6tTJozybUlQ03vk6RdTVJsf4V7b4ZzuMX9ZB8wfWbsdp6vsfMhpzIpxOLgmHL5tPP0YHuynAY1OI5.lO9AB8lTGLlc07C4IcEnruxsb1-5lrtLp2yKF2pmy4knwjhKckivNaBRLVR-jbdQdy-j6pjviuFv7vxyItqqfGbaN1mGMHRIDJjl0hPRVPJUeGfQ-yzxptRfQmL-XP9s",
+    "headers": {
+      "Origin": "https://www.pandalive.co.kr",
+      "Referer": "https://www.pandalive.co.kr/play/daisy00",
+      "Accept": "*/*"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "x-amzn-trace-id": "Root=1-6ab96566-0d22aed30618b7dd7b3fbd36",
+      "transfer-encoding": "chunked",
+      "date": "Sun, 27 Sep 2026 18:50:14 GMT",
+      "access-control-allow-origin": "https://www.pandalive.co.kr",
+      "x-amz-cf-pop": "SFO53-P10",
+      "content-encoding": "gzip",
+      "vary": "Accept-Encoding",
+      "x-amz-cf-id": "j5Ir4y7Wsod5utKYk1WieUyyQlpIw4QnILu0EClBI-Y3gyOCNfgHcQ==",
+      "via": "1.1 20c43a0e6fb1d8790d777292bc628d74.cloudfront.net (CloudFront)",
+      "content-type": "application/vnd.apple.mpegurl",
+      "x-cache": "Miss from cloudfront"
+    }
+  },
+  "raw": {
+    "sha256": "3adf0c9a810b4523e83403b802c36f8b01de741f27e0da97ab9b55f7642675e6",
+    "length": 10319
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "text:/DATA-ID=\"USER-IP\",VALUE=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/DATA-ID=\"USER-COUNTRY\",VALUE=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/DATA-ID=\"SERVING-ID\",VALUE=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/DATA-ID=\"VIDEO-SESSION-ID\",VALUE=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text:/DATA-ID=\"[CE]\",VALUE=\"([^\"]+)\"/",
+      "rule": "secret"
+    },
+    {
+      "where": "text://v1/playlist/([A-Za-z0-9_-]{32,})\\.m3u8/",
+      "rule": "secret"
+    },
+    {
+      "where": "url:token",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

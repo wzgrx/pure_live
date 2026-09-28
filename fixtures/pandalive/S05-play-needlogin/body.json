@@ -1,0 +1,8 @@
+{
+  "result": false,
+  "message": "본인인증이 필요합니다.",
+  "errorData": {
+    "code": "needAdult"
+  },
+  "userIp": "592.715.062.048"
+}

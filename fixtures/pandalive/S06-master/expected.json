@@ -1,0 +1,74 @@
+{
+  "generator": "PandaLiveApi.parseManifest + PandaLiveSite.getPlayQualites naming",
+  "value": {
+    "parseManifest": [
+      {
+        "id": "1080p30",
+        "label": "1080p30",
+        "height": 1080,
+        "frameRate": 30.0,
+        "bandwidth": 7817961,
+        "uri": "https://ffdced10e5f6.use23.playlist.live-video.net/v1/playlist/SuiP7SUOnEFNGF1NoOtoQ_x5-E8N9WPAoGOcfsp69ffzem50bk0jR4fZ3byexVG97Ps1whO8IUSVQ1pAmqRWkbGVuMobRBtiUVVB8uc-J41Uwd0yINnVLrV4RXboX01jIys9Xwpu7iybiwquKybEvZEjASdljR_i6Pjpr8rGS9vltphl-tsYRX5WXqbW9380tpXrgrqtUY5g2-DDXIcotPfKw1DKBorwHBhqoMI9H59lurGF40cebh9b059OzsYk-xgfi5BDVk6vMQdDQIt7oulklALXTbUwQ08s_fyPYuTL2i2nhBU9Jm4Op-ac1XmcougOGptg_XRDxjjYz7zqHXKn7s4zrmVSOGwhfYdwNmMXyPJ8aNGmnxlhsbNeuZ4GKkEbSpOHqtGoOrs9HpcknMtDjz2-0tJckNvyVWRp_Sm36dmCpOsbLZ-LyDhmRMHieEdu1gfyJ2k1WnJIwEu08z-t-5qamdCjfLkM51-PbuebIsjy1ymdmlH5bFWOKWFtcSNygE86C3TlL1NDt_uKPTttpzkMgcdDirUR9fGZrFX0QqTuEjMXsd-5ePD0_w8o2Rg9iup4O9EeI-nqrckdRLt7x-T2Qh3DWMlS05DdCkD1MwKGnVCKtTvk3afuG74o2Mwgj7rWreuXhmF2qDxw4fzUMBh78pEbgQBhQ6sQJhicEy3XdNhmIlCNa5lSxfTZ7dFarSGEl51oO0q9VSjMz4V3hbxif8dLo84ZQXa-Pv51puZo8s8v45mU6LeGqP38WilgI_kWsvy2A2Jth9p2xLpSyKtLNn8lEHa7PEX_0xcHrjAmgXMULFgVEGbBrXXc0KX9A88U0OhzWPfqvAQXbaJX8k-zK6TaSbrlvPgK_YeH_JNFQ_BRylG2_VyLesxl613uVAndi1x1kOG106_E5zegD7LoVjl8RaXXfZI9dU5BWvikf-31QS0Tt5rsOQvpPmBIoDCA71vNLc-w3UV9KaEjh2ZezeYTzu-G8KwFmWN1OLZ2KiHmd_HyW8yUp5-KUo03dDQ-YbdphKd-9jqA99bx5AaL3Jsjrnc0hUkUTtpKA1wAhYKPHmXjXDxhJAVtWTAlVJgve9RiJxNAWQ.m3u8"
+      },
+      {
+        "id": "720p30",
+        "label": "720p30",
+        "height": 720,
+        "frameRate": 30.0,
+        "bandwidth": 2373000,
+        "uri": "https://ffdced10e5f6.use23.playlist.live-video.net/v1/playlist/JeHSQssQGRM6SLo7xcc7n1A7zqTQCqtm0LaACysFXBPMj3j0C7lO0nB1ehvoGnfHpmDKkt3gHe0V5nlrg_aU6A5gqzUGG34eXpssDh0zkNJDa4dgQKzM4kMHLiuFEzZJNZpdf1SD3dBCDlelgFgbseIWdHD33GCr2DYDErKvUM04REUALEfCtFuN6y3IbX8ULJ6lhQ1SHMKMxFzV8Ur5JRH6sKEJeB34jZTfbb9MXhn1qfJ5zWxdXHIgEKfbe4s_b1WdoK4m8Se16M1NDoO9VxKlnx4Cee6TJ4BzBkprJiHq9cX822V4BDTZjjnlPuEy-xzOGaqyK00W53O_75fS_-13OBA6CMcaMHfxocEeWb1Ngpliz0j6Dinc1_IDlkFcjkBkgdyzVEacCLcG2Nbz4CtTK6uAm9Ta-V0kewu_wijALmol3CwqgxAeHr0jfziV82gx8lAaQiP02L1aUmInQ1l8uYzOQOuBm7NR0zp9yhFbQTv9YotSQoVIFAtds4vR_bfqd54AjaQyLZW8DWiRP9GMCMmn85iDGszB5ZP-3NiQnHaXzPkk_bktK4A9XHzlz1r-1eRJZVTmpS6IEf1RSDubHl_anqMZjZfkxco5FUzY_E_6hXbQJc82F3C5fa6_6qnCEl6ixETTqJOx8prkow7xwIPs91capft52f70XBCeHfghUQYfEFmY6pGH3826Xtl0OHXBp8E4bSlGTB1407JxOico0VFisT6ERrkkSfKorV4R_NGp4YGn4B6lKshkS5sZJbcNxUKmUPMEtqafZAufKomLx7gFSeqOLWv9Qh3EzppyEuBf0wfQWdf_gOvjRA-p4Vh38UNSKQcv6Yi_uFKLv77JWgfCjdYjU325g7XUdHzvs7mUdZN_ltb1ahxOwFRpac555Rk4bP3JXxCP4GDHTXQ2QUQxDg_5tbmk9pj84iBVvgTw5WZWsRvMDMrly2xpzyKlb7MdjccHNxtKjzfn_tlXvpqCpioGZgE6AhmANz9Q-aLzoZYPHe4T5Lmk-ZVYYI3ccORi1B6PCC92c9o9nq0_VwcG3VOvfdyzt__h1_QoZVzFfQTpw7WnxC0qAAqT.m3u8"
+      },
+      {
+        "id": "480p30",
+        "label": "480p30",
+        "height": 480,
+        "frameRate": 30.0,
+        "bandwidth": 1427999,
+        "uri": "https://ffdced10e5f6.use23.playlist.live-video.net/v1/playlist/HbcGqfdyVQQUjN1EAUMQMr_xg_1sFxbva9ypc310JFa7gUfvS7Qo6O1W_6pe1tHjwxmkU_EEPecWyo9EgKTH0SQ_CLug8BLC7VAXGtc9hnOJIsLXbuzsFC4fvSLhBZwQ9Zs592qmCdVnsDG3BDSgrVt7xCtqe9ma9-NQ4anNskxk0kRi1L4m54yxP7xvJYfrT0ArEoJ8i1abmTzSDoO7W9yOac4p5SB625v727dIcUDF3dgcFH97pw-hR8YdFXMNTrBN3QfadqA1kO07UsjmReVK5N1anAbwc09syY3HOFGqqaOdIR1A8FUebe6jHxjTKxGpvnUn2Ww0V55U0g8njewCI3H06UBU_OimieVn9FoTJU75mJr-k9LVuj8lBD834idmMbrOFZlduFq_D-H_v3EqTQcCe3ny4gXarcnGdM_JNir7dCkPr3Yu1xHJSke1kta8zXUK41qXE3C4sOcAh3w1mhBzkJkVI0XxmySCs8SzZv6_NF0OEKFmfjB8F5Cp6rzSvBSkwM5sVmWi_XR8WymomKnILnbM3BAl_5DCCLRC28gHQU0Ntz2zBEP1_NQgA4tX9QarjXET6olLRBm7RhHuH3jPmkVtHzA3MLXg2uaf3SGicK_01nNdUKmZTl4V_rKIM2VYkAjYIKJYaAKPncGGeJxnvOTb5uLUvz8_xWzRaDTenKujKHCq1h-yINiEWjuoUSMSrZBo9hJeAa4Ff3Welq-p_jykxvaRVMxECrn1KVWMUpBHLvIb-b5Qs94aFR2rmr1SCZOidtiJI5RhF13V06m8GiHP1y3vsEoIwz9MH2YuYL6BTOGoEoIb1vCMitayRhwX51lMbH0PqiaAeKz0-Jxi-xy0ds6hzmELUvDci7RUFjj3ZuZGAd0wzmi4cm2GsPPjTtMpaEYyrnYqF9qBezSu5WTlFkjXKBt6N6KIcEIooc7XGdu1XWU9TOTG2V5_Veu-MTa3HMIarHMdsir7tAuTKNtfxgNqZdvMAv_jcTlrde_v8aAet2XgjxnNGZNV_GxclAlu_a3G-NtHxCqSauY9LYAmNrlDNFGmZJNbADunk7ZnQlROXA.m3u8"
+      },
+      {
+        "id": "360p30",
+        "label": "360p30",
+        "height": 360,
+        "frameRate": 30.0,
+        "bandwidth": 630000,
+        "uri": "https://ffdced10e5f6.use23.playlist.live-video.net/v1/playlist/ClFLnQxrV4-d1upk4UTBQ6iAXpqbvdnMNT-tE1WPkZpLCHV8RrSMPLtMaCCx9doSB_DjweD9xL85Cy5V19VVrSJ-1SFgTi2qL5_CczRADEcTZLWFObg3NCR6P6GUttui9NwCqhFVgmFuX_ohtDIlIMSAOTiFKTTgq9KPwNFV1RwXzwGAR0Ih5nP9kuNc3kUyDvP94Re-As9jCOddrjwy3dBwOLpoDfyIrlEhizpCcc_YFGIK_e8TyYgqiYdU-YJuVQDxPLVJYlhN533aVaBMLLNk7J4VxPWKW-35cY-ph0aGlmuMHRz_Y5TzmDH6KEXXn2reUKAx6TZTs_iWfnJU5-fB-oBnlPuAwALE0gjcdbRn1LUbdIDLdykeFFuTpFdss_V5GA7qjhktZIZZiCtB8Pk37i7hbvxSYTSUZj4e8TCvYhvG5zRtpW81G6xcahIbyZ6bt7DW38AKgIdiWhu2TThS1FR_xDlhKgYxE6ld3uxAbCvTJffuRNy3gcmOa589qp74tAHZ73Q0TBlHtaJI8QVsv1npTLYsEy5vRafoREDuakzQBb0uOsGlVevn-K4dAwRB0oqsWEGzYnRiKD_bYQ-ipvnUvOG4l0LNNp1DgW_YY3D4Phzb1EujS_8yxGXxqnZDUYTs7PW-P1FueVh5wwHRK3y1G_Ki0lzNdNv3P-cC6MyIjCtHjBHBYG0ciA584hjYrl9rEkqnUhaHbt5aheVzrzhtUbmofq_eyNvJOq472X_66MPOf4evPGwuj4_umC46M4uDSyhgvXqnatIA-8WqIvH4NeuJn3JQ60ubrkUJVRTGjB-StazG7kXK03yhZJbWRzb7GH_TUkOld746W1sDJ2roEuAhU3i7TKvP3rNnh3hRhjrGxnfbdIB6Zjk-g7ZbeV-Az7diSVWDVLWxGIhLIJbVrQiqvhdXb4eFtsz3HpGSLbaGZibYwDCL1L02sLGjt9Y2BEBPAQGMD3ca49TSs2FbT5p6fTDwLt1kGg_3op3rLxay8qUeYlo69g9tOBx0CLllZMAr9D9W3c-TOv8YCHHZOpf7ye48YFH9LBRgkaR.m3u8"
+      },
+      {
+        "id": "160p30",
+        "label": "160p30",
+        "height": 160,
+        "frameRate": 30.0,
+        "bandwidth": 230000,
+        "uri": "https://ffdced10e5f6.use23.playlist.live-video.net/v1/playlist/VuvEbl24huVgNUWH1JedQm9Fjnf8cDnfA5M9Le2REvDwFKGnPRyQKS7UWbShkboJmbLmtbCme67rHJkddymW4yFFPdnhHgGAWIQ-hBLSsTOOax3XBHItUm9llMAT8n6RobuSkC_HEr1dh7rAo2S6dmj3z_O2GUhWshwXjviQB0ah6tE52yOc7lqdc8OQHm14U7rXkH7qPKhjc8EZmFLMzSuPS9-EnVS-At-jnlvgODU0dW0DC0fSAfMMfzSpwHuhpCWGn-Clgi9tuV3kxDW4qeJGY9qxaYmXtmyTlrxk6xfawlkEgkDaoKuC3EyKMw8LHNyXSphZFiXP0abQXe0KAffVjBCsbN84x2toVKFe442CNRztpwObUb70IcWRwEms3w5uD4AvxUPjrHnquIkHy4unTql8NKNt0PakgrBgud-n3vcSdx7XsDWjnxuMTXGmP8GU-P0xlUuW-PqY3zh1dgBusFizkDA-9rTyQQIlhGskgqmcN9DJyzJxKOU2yKrG16EplauRiaFwNL1COqpAcNa4yOFQ80rCznJDs-SkcctWPiY1z4K7s7GDP7FLJxy0uf-vHzTflz7xUknb4zI1IZ89koJ6-ndBVWyKWgn3Xz1SqpB-aTKkS0Xjszc3rgeuMQnESGvLSo9RQv-TTI6A_C6rA3C3FSEyBZao-i5NndNu9ih6yaoW-WlhjymgxEKlgjHGSxZBrfA4h2s0awqG1cJ8uKzxpivIlcycZOIxURStW6VZ0WJ4KT43EVhKo59biUaS8dNsU5a2r7ToyPMTCsF0CzQ4VaTR5YLmFja3e777mmwxqjHNCSyu8HxJwmtx5RP7P4FBeXBPGZj7hEJbI0wP9_TBQvsVBnED2TKcdLQmIjK9GIWPvzvhot2cYFT_2E_yQHbWvTB9ZbL2WmvVZm-MHvafhPHrRYK8tm4GmX_NbUKM7PgVfEzDS6Z95WmrsxXmBy3yOsU1b048VbevjYNZ9cnMbXLQX7l_AUBOGCoiG4z6HU0leylh6f8iIaxEvTerF-o3nYib4HLjXBwGkJJwl1RtqI5lWPrT.m3u8"
+      }
+    ],
+    "qualities": [
+      {
+        "quality": "1080p30 · HLS",
+        "id": "1080p30",
+        "sort": 10807817961
+      },
+      {
+        "quality": "720p30 · HLS",
+        "id": "720p30",
+        "sort": 7202373000
+      },
+      {
+        "quality": "480p30 · HLS",
+        "id": "480p30",
+        "sort": 4801427999
+      },
+      {
+        "quality": "360p30 · HLS",
+        "id": "360p30",
+        "sort": 3600630000
+      },
+      {
+        "quality": "160p30 · HLS",
+        "id": "160p30",
+        "sort": 1600230000
+      }
+    ]
+  }
+}

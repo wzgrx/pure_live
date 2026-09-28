@@ -5,6 +5,8 @@
 // and their recovery, cancellation, the deadline, links and the error
 // mapping. Requests are compared with the ones 3.x sent (expected.json
 // records them without the clock: `v`, `t` and the list's `timestamp`).
+// Rooms differ from 3.x's only where listed with `changed:` and the reason
+// (the M4.U upgrades by item number, docs/UPGRADES.md 28-1 to 28-7).
 import 'dart:async';
 import 'dart:convert';
 
@@ -26,9 +28,29 @@ const _live = '48395626';
 /// The clock values the samples were recorded with.
 final DateTime _archivedClock = DateTime.fromMillisecondsSinceEpoch(1790533000000);
 final DateTime _recordedClock = DateTime.fromMillisecondsSinceEpoch(1790600000000);
+final DateTime _upgradeClock = DateTime.fromMillisecondsSinceEpoch(1790626000000);
 
 const _archived = ['S01-list-p1', 'S01-list-p2', 'S02-play-live', 'S02-play-old'];
 const _recorded = ['S04-list', 'S04-play-live', 'S04-playlist'];
+
+/// Room keys every room changed: the notice is in words for users now (the
+/// unified rule for developer notes, M4.U).
+const _notice = {'notice'};
+
+/// Room keys a play answer without a list card changed: 28-2 (no `JD Live`
+/// title or shop name, no broadcast id as the shop account, no cover as the
+/// avatar: all empty, so a follow keeps what it stored), 28-3 (the blurred
+/// image is not the cover) and the notice.
+const _playOnly = {'title', 'nick', 'userId', 'avatar', 'cover', 'notice'};
+
+/// Room keys a play answer completed from a list card changed: 28-3 (the
+/// card's cover instead of the blurred image) and the notice.
+const _afterCard = {'cover', 'notice'};
+
+/// Room keys of the old id changed besides [_playOnly]: status 3 without a
+/// recording is an unplayable replay (the unified replay rule; 3.x:
+/// offline).
+const Set<String> _oldReplay = {..._playOnly, 'liveStatus', 'isRecord'};
 
 Map<String, dynamic> _legacy(String sample) => Fixture.load('jdlive', sample).legacy as Map<String, dynamic>;
 
@@ -62,6 +84,10 @@ List<String> _sent(Iterable<LiveRequest> requests) => [for (final request in req
 /// The list request's `timestamp`.
 int _timestamp(LiveRequest request) =>
     (jsonDecode(request.url.queryParameters['body']!) as Map<String, dynamic>)['timestamp'] as int;
+
+/// The list request's page.
+int _page(LiveRequest request) =>
+    (jsonDecode(request.url.queryParameters['body']!) as Map<String, dynamic>)['page'] as int;
 
 typedef _Setup = ({JdLiveSite site, ReplayHttp http});
 
@@ -164,7 +190,7 @@ void _expectParity(LiveRoom room, Object? legacy, {Set<String> changed = const {
   }
 }
 
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {Set<String> changed = _notice, String reason = ''}) {
   final expected = legacy! as List;
   if (expected.isNotEmpty && expected.first is String) {
     expect(rooms.map((room) => room.roomId), expected, reason: reason);
@@ -172,7 +198,7 @@ void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
   }
   expect(rooms.map((room) => room.roomId), [for (final room in expected) (room as Map)['roomId']], reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(room, expected[index], reason: '$reason[$index]');
+    _expectParity(room, expected[index], changed: changed, reason: '$reason[$index]');
   }
 }
 
@@ -348,17 +374,65 @@ void main() {
       expect(_legacyRequests(legacy['page 2 first']), isEmpty);
     });
 
-    test('S04: 29 broadcasts on page 1, so 3.x asks for no page 2', () async {
-      final setup = _recordedSetup();
+    test('28-1: S04 page 1 has 29 broadcasts; 3.x asked for no page 2, now pages go on until an empty one', () async {
+      final ids = [
+        for (final room in JdLiveApi.directory(Fixture.load('jdlive', 'S04-list').body, page: 1).rooms) room.liveId,
+      ];
+      final timestamp = _recordedClock.millisecondsSinceEpoch;
+      // Page 2 repeats the first broadcast of page 1 and adds two; page 3 is
+      // the empty end (S05-list-p8's shape).
+      final setup = _recordedSetup(
+        extra: [
+          _answer(
+            JdLiveApi.listUrl(page: 2, count: 36, timestamp: timestamp, now: _recordedClock),
+            _listBody([ids.first, '48400001', '48400002'], count: 39),
+          ),
+          _answer(
+            JdLiveApi.listUrl(page: 3, count: 39, timestamp: timestamp, now: _recordedClock),
+            Fixture.load('jdlive', 'S05-list-p8').body.replaceFirst('"currentCount":215', '"currentCount":39'),
+          ),
+        ],
+      );
       final legacy = _legacy('S04-list');
       final page = await setup.site.getDirectoryPage();
       final expected = _result((legacy['getDirectoryPage'] as Map<String, dynamic>)['page 1'])! as Map<String, dynamic>;
       _expectRooms(page.rooms, expected['rooms']);
-      expect((page.rooms.length, page.hasMore), (29, false));
-      expect((await setup.site.getDirectoryPage(page: 2)).rooms, isEmpty);
+      expect(expected['hasMore'], isFalse, reason: '3.x: fewer than 30 broadcasts');
+      expect((page.rooms.length, page.hasMore), (29, true));
+      final second = await setup.site.getDirectoryPage(page: 2);
+      expect(second.rooms.map((room) => room.roomId), ['48400001', '48400002'], reason: 'page 1 listed the first');
+      expect(second.hasMore, isTrue);
+      final third = await setup.site.getDirectoryPage(page: 3);
+      expect(third.rooms, isEmpty);
+      expect(third.hasMore, isFalse);
+      expect((await setup.site.getDirectoryPage(page: 4)).rooms, isEmpty);
+      expect(setup.http.requests, hasLength(3), reason: 'page 4 is not asked for');
+      expect(setup.http.requests.map(_timestamp).toSet(), {timestamp}, reason: 'one sequence');
+      expect(
+        [
+          for (final request in setup.http.requests)
+            (jsonDecode(request.url.queryParameters['body']!) as Map<String, dynamic>)['currentCount'],
+        ],
+        ['0', '36', '39'],
+      );
       expect(await setup.site.getRecommendRooms(), hasLength(29));
-      expect(await setup.site.getRecommendRooms(page: 2), isEmpty);
-      expect(setup.http.requests, hasLength(2), reason: 'page 1 of each sequence only');
+      expect((await setup.site.getRecommendRooms(page: 2)).map((room) => room.roomId), ['48400001', '48400002']);
+      expect(setup.http.requests, hasLength(5), reason: 'the recommendations are their own sequence');
+    });
+
+    test('28-1: a page with only broadcasts already listed ends the sequence (no endless paging)', () async {
+      final http = _Scripted(
+        (request) => _response(request, _listBody(['48000001', '48000002'], count: 2 * _page(request))),
+      );
+      final site = JdLiveSite(http);
+      expect((await site.getDirectoryPage()).hasMore, isTrue);
+      final again = await site.getDirectoryPage(page: 2);
+      expect(again.rooms, isEmpty);
+      expect(again.hasMore, isFalse);
+      expect((await site.getDirectoryPage(page: 3)).rooms, isEmpty);
+      expect(http.requests, hasLength(2));
+      final first = await site.getDirectoryPage();
+      expect(first.rooms, hasLength(2), reason: 'a new sequence lists them again');
     });
 
     test('recommendations and the area: their own sequence, cut to 30, sizes below 1 give nothing (3.x)', () async {
@@ -435,7 +509,13 @@ void main() {
       ]) {
         final setup = _setup(_archived);
         final rooms = await setup.site.searchRoomsCancellable(keyword, cancel: CancelToken());
-        _expectRooms(rooms, _result(legacy[keyword]), reason: keyword);
+        // An id or room link finds the room by its play answer alone.
+        final changed = keyword == _archivedOld
+            ? _oldReplay
+            : JdLiveApi.liveIdOf(keyword) != null
+            ? _playOnly
+            : _notice;
+        _expectRooms(rooms, _result(legacy[keyword]), changed: changed, reason: keyword);
         if (keyword == 'https://example.com/x') {
           expect(setup.http.requests, isEmpty, reason: '3.x filtered the list with the URL (1 request, no match)');
           expect(_legacyRequests(legacy[keyword]), hasLength(1));
@@ -470,7 +550,7 @@ void main() {
         setup = _setup(_archived);
         final keyword = name.split(' ').first;
         final rooms = await setup.site.searchRoomsCancellable(keyword, page: page, pageSize: size);
-        _expectRooms(rooms, _result(legacy[name]), reason: name);
+        _expectRooms(rooms, _result(legacy[name]), changed: _playOnly, reason: name);
         expect(_sent(setup.http.requests), _legacyRequests(legacy[name]), reason: name);
       }
       setup = _setup(_archived);
@@ -524,10 +604,11 @@ void main() {
           'getRoomDetailForRefresh' => setup.site.getRoomDetailForRefresh(roomId: _live),
           _ => setup.site.getRoomDetailForRecording(roomId: _live),
         };
-        _expectParity(room, _result(legacy[depth]), reason: depth);
+        _expectParity(room, _result(legacy[depth]), changed: _playOnly, reason: depth);
         expect(_sent(setup.http.requests), _legacyRequests(legacy[depth]), reason: depth);
         expect(room.data, depth == 'getRoomDetailForRefresh' ? isNull : isA<JdLiveRoom>(), reason: depth);
         expect(room.roomId, _live);
+        expect((room.restriction, room.startedAt), (LiveRestriction.none, null), reason: 'JD gives no start time');
       }
       final setup = _recordedSetup();
       expect(await setup.site.getLiveStatus(roomId: _live), _result(legacy['getLiveStatus']));
@@ -541,38 +622,60 @@ void main() {
       _expectParity(
         await setup.site.getRoomDetailForRefresh(roomId: _archivedLive),
         _result(recorded['getRoomDetailForRefresh']),
+        changed: _playOnly,
       );
       expect(_failure(_result(recorded['getRoomDetail'])), 'transport', reason: '3.x: no recorded playlist');
       final withPlaylist = legacy['withS04Playlist'] as Map<String, dynamic>;
       setup = _setup(_archived, extra: [_playlist(_archivedKey)]);
       final room = await setup.site.getRoomDetail(roomId: _archivedLive);
-      _expectParity(room, _result(withPlaylist['getRoomDetail']));
+      _expectParity(room, _result(withPlaylist['getRoomDetail']), changed: _playOnly);
       expect(_sent(setup.http.requests), _legacyRequests(withPlaylist['getRoomDetail']));
       setup = _setup(_archived, extra: [_playlist(_archivedKey)]);
       await setup.site.getDirectoryPage();
       final after = (legacy['withS04Playlist after the list'] as Map<String, dynamic>)['getRoomDetail'];
-      _expectParity(await setup.site.getRoomDetail(roomId: _archivedLive), _result(after));
+      final entered = await setup.site.getRoomDetail(roomId: _archivedLive);
+      _expectParity(entered, _result(after), changed: _afterCard);
+      final card = (await _setup(_archived).site.getDirectoryPage()).rooms.first;
+      expect(entered.cover, card.cover, reason: "28-3: the card's cover");
+      expect((entered.data! as JdLiveRoom).background, (_result(after)! as Map)['cover'], reason: '28-3: background');
     });
 
     test("the list cards complete play answers, and the answer replaces the card (3.x's _known)", () async {
       final known = _legacy('S01-list-p1')['known'] as Map<String, dynamic>;
       var setup = _setup(_archived);
-      _expectParity(
-        await setup.site.getRoomDetailForRefresh(roomId: _archivedLive),
-        _result(known['getRoomDetailForRefresh before the list']),
-      );
+      final before = await setup.site.getRoomDetailForRefresh(roomId: _archivedLive);
+      _expectParity(before, _result(known['getRoomDetailForRefresh before the list']), changed: _playOnly);
+      expect((before.title, before.nick, before.userId, before.avatar, before.cover), ('', '', null, '', ''));
       await setup.site.getDirectoryPage();
       final after = await setup.site.getRoomDetailForRefresh(roomId: _archivedLive);
-      _expectParity(after, _result(known['getRoomDetailForRefresh after the list']));
+      _expectParity(after, _result(known['getRoomDetailForRefresh after the list']), changed: _afterCard);
       expect((after.title, after.nick, after.userId), ('有爱，科技也动情~~海信', '海信诚一恒专卖店', '24304104'));
       final search = await setup.site.searchRooms(_archivedLive);
-      _expectParity(search.single, (_result(known['searchRooms after the list'])! as List).single);
+      _expectParity(search.single, (_result(known['searchRooms after the list'])! as List).single, changed: _afterCard);
       setup = _setup(_archived);
       await setup.site.searchRooms('海信');
       _expectParity(
         await setup.site.getRoomDetailForRefresh(roomId: _archivedLive),
         _result(known['getRoomDetailForRefresh after a search']),
+        changed: _afterCard,
       );
+    });
+
+    test('28-2: after a restart a refresh keeps the follow its shop name, title, account, avatar and cover', () async {
+      final follow = (await _recordedSetup().site.getDirectoryPage()).rooms.first;
+      final restarted = _recordedSetup();
+      final refreshed = await restarted.site.getRoomDetailForRefresh(roomId: follow.roomId);
+      expect(
+        (refreshed.title, refreshed.nick, refreshed.userId, refreshed.avatar, refreshed.cover),
+        ('', '', null, '', ''),
+      );
+      final merged = follow.mergeFrom(refreshed);
+      expect((merged.title, merged.nick, merged.userId), ('国民喜糖徐福记优选', '徐福记食品店', '23924087'));
+      expect((merged.avatar, merged.cover), (follow.avatar, follow.cover));
+      expect((merged.liveStatus, merged.restriction), (LiveStatus.live, LiveRestriction.none));
+      expect(restarted.http.requests, hasLength(1), reason: 'one request, as 3.x');
+      final unnamed = LiveRoom(roomId: follow.roomId, platform: 'jdlive').mergeFrom(refreshed);
+      expect(unnamed.displayNick('京东直播'), '京东直播', reason: 'the interface shows the platform name (M13)');
     });
 
     test('the cards kept are bounded: the oldest of more than 2000 is forgotten', () async {
@@ -591,7 +694,7 @@ void main() {
         await site.getDirectoryPage(page: i);
       }
       expect(page, 67, reason: '2010 cards');
-      expect((await site.getRoomDetailForRefresh(roomId: '48000000')).nick, 'JD Live', reason: 'forgotten');
+      expect((await site.getRoomDetailForRefresh(roomId: '48000000')).nick, isEmpty, reason: 'forgotten (28-2)');
       expect((await site.getRoomDetailForRefresh(roomId: '48002009')).nick, 'shop 48002009');
     });
 
@@ -599,7 +702,7 @@ void main() {
       final legacy = _legacy('S04-play-live')['recorded'] as Map<String, dynamic>;
       final setup = _recordedSetup();
       final room = await setup.site.getRoomDetailForRefresh(roomId: 'https://lives.jd.com/#/$_live/live');
-      _expectParity(room, _result(legacy['room link as id']));
+      _expectParity(room, _result(legacy['room link as id']), changed: _playOnly);
       expect(room.roomId, _live);
       for (final id in ['', 'abc', '1234', '0123456']) {
         await expectLater(setup.site.getRoomDetail(roomId: id), throwsA(isA<NotFound>()), reason: id);
@@ -608,14 +711,13 @@ void main() {
       expect(setup.http.requests, hasLength(1));
     });
 
-    test('live status: live, ended; app-only, paused and unknown are errors, never offline', () async {
+    test('live status: live (app-only too), ended; paused and unknown are errors, never offline', () async {
       final legacy = _legacy('S02-play-live')['variants'] as Map<String, dynamic>;
       for (final (name, data, error) in [
         ('status text', <String, Object?>{'status': '1'}, null),
         ('status 2', <String, Object?>{'status': 2}, null),
         ('status 0', <String, Object?>{'status': 0}, null),
         ('status 3', <String, Object?>{'status': 3}, null),
-        ('secret 1', <String, Object?>{'secret': 1}, isA<NeedsLogin>()),
         ('status 10', <String, Object?>{'status': 10}, isA<StreamUnavailable>()),
         ('status 11', <String, Object?>{'status': 11}, isA<StreamUnavailable>()),
         ('status 99', <String, Object?>{'status': 99}, isA<ApiChanged>()),
@@ -631,11 +733,20 @@ void main() {
         }
         expect(http.requests, hasLength(1));
       }
+      // App-only is live (the unified rule for restricted broadcasts; 3.x:
+      // `access`, NeedsLogin since M4.28).
+      expect(_failure((legacy['secret 1'] as Map<String, dynamic>)['getLiveStatus']), 'access');
+      final restricted = _Scripted((request) => _response(request, _editedPlay({'secret': 1})));
+      expect(await JdLiveSite(restricted).getLiveStatus(roomId: _archivedLive), isTrue);
+      final ended = _Scripted((request) => _response(request, _editedPlay({'secret': 1, 'status': 2})));
+      expect(await JdLiveSite(ended).getLiveStatus(roomId: _archivedLive), isFalse);
       final old = _setup(_archived);
       expect(await old.site.getLiveStatus(roomId: _archivedOld), isFalse);
+      final replay = _setup(['S05-play-replay'], now: () => _upgradeClock);
+      expect(await replay.site.getLiveStatus(roomId: _live), isFalse, reason: 'a replay is not live');
     });
 
-    test('the old id is offline at every depth (status 3, 3.x) and cannot be played', () async {
+    test('the old id is an unplayable replay at every depth (status 3; 3.x: offline) and cannot be played', () async {
       final legacy = _legacy('S02-play-old')['recorded'] as Map<String, dynamic>;
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
         final setup = _setup(_archived);
@@ -644,15 +755,50 @@ void main() {
           'getRoomDetailForRefresh' => setup.site.getRoomDetailForRefresh(roomId: _archivedOld),
           _ => setup.site.getRoomDetailForRecording(roomId: _archivedOld),
         };
-        _expectParity(room, _result(legacy[depth]), reason: depth);
+        _expectParity(room, _result(legacy[depth]), changed: _oldReplay, reason: depth);
         expect(_sent(setup.http.requests), _legacyRequests(legacy[depth]), reason: 'no playlist when not live');
-        expect(room.liveStatus, LiveStatus.offline);
+        expect((room.liveStatus, room.restriction), (LiveStatus.replay, LiveRestriction.unplayable));
+        expect(room.followGroup, FollowGroup.offline);
         expect(_result(legacy['$depth → getPlayQualites']), anyOf(isEmpty, isA<Map<String, dynamic>>()));
         await expectLater(
           setup.site.getPlayQualities(detail: room),
           throwsA(isA<StreamUnavailable>()),
           reason: '3.x: [] for an offline room',
         );
+      }
+    });
+
+    test('a replay: one request at every depth, its recording plays as "原画" with the media headers', () async {
+      for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
+        final setup = _setup(['S05-play-replay'], now: () => _upgradeClock);
+        final room = await switch (depth) {
+          'getRoomDetail' => setup.site.getRoomDetail(roomId: _live),
+          'getRoomDetailForRefresh' => setup.site.getRoomDetailForRefresh(roomId: _live),
+          _ => setup.site.getRoomDetailForRecording(roomId: _live),
+        };
+        expect(setup.http.requests, hasLength(1), reason: '$depth: the recording is not downloaded');
+        expect(
+          (room.liveStatus, room.restriction, room.followGroup),
+          (LiveStatus.replay, LiveRestriction.none, FollowGroup.replay),
+        );
+        if (depth == 'getRoomDetailForRefresh') continue;
+        final qualities = await setup.site.getPlayQualities(detail: room);
+        expect(qualities, [JdLiveApi.replayQuality]);
+        final resolution = await setup.site.resolvePlayUrls(detail: room, quality: qualities.single);
+        final line = resolution.lines.single;
+        expect(line.url, startsWith('https://discover.300hu.com/m3u8/$_live/'));
+        expect(line.format, StreamFormat.hls);
+        expect(line.headers, JdLiveApi.mediaHeaders(_live), reason: '28-5');
+        expect(resolution.appliedQualityData, JdLiveApi.replayId);
+        await expectLater(
+          setup.site.resolvePlayUrlsRaw(detail: room, quality: JdLiveApi.hlsQuality),
+          throwsA(isA<StreamUnavailable>()),
+          reason: 'the live stream ended',
+        );
+        expect(setup.http.requests, hasLength(1), reason: 'no request to play');
+        final recovered = await setup.site.resolvePlayUrlsForRecovery(detail: room, quality: qualities.single);
+        expect(recovered.urls, [line.url]);
+        expect(setup.http.requests, hasLength(2), reason: 'recovery asks the play answer again, one request');
       }
     });
 
@@ -681,6 +827,7 @@ void main() {
       _expectParity(
         await missing.site.getRoomDetailForRefresh(roomId: _live),
         _result(playlist404['getRoomDetailForRefresh']),
+        changed: _playOnly,
         reason: 'refresh does not read the playlist',
       );
       final empty = _recordedSetup(extra: [_playlist('F366C61365FB1F9B4BC62D90DBE239B1', body: '#EXTM3U\n')]);
@@ -712,7 +859,7 @@ void main() {
           final line = resolution.lines.single;
           expect(line.format, quality.id == 'hls' ? StreamFormat.hls : StreamFormat.flv);
           expect(line.lineId, 'zt-pull-ai.jdcloud.com');
-          expect(line.headers, isEmpty, reason: "3.x's player sent no JD headers");
+          expect(line.headers, JdLiveApi.mediaHeaders(_live), reason: "28-5 (3.x's player sent no JD headers)");
           expect(line.lease, isNull);
         }
         expect(
@@ -785,9 +932,14 @@ void main() {
       final restricted = _Scripted((request) => _response(request, _editedPlay({'secret': 1})));
       final site = JdLiveSite(restricted);
       final room = await site.getRoomDetail(roomId: _archivedLive);
-      expect((room.liveStatus, room.notice), (LiveStatus.unknown, JdLiveApi.restrictedNotice));
-      await expectLater(site.getPlayQualities(detail: room), throwsA(isA<NeedsLogin>()));
-      expect(restricted.requests, hasLength(1), reason: 'no playlist when not live');
+      expect((room.liveStatus, room.restriction), (LiveStatus.live, LiveRestriction.appOnly), reason: '3.x: unknown');
+      expect(room.notice, JdLiveApi.restrictedNotice);
+      await expectLater(
+        site.getPlayQualities(detail: room),
+        throwsA(isA<StreamUnavailable>().having((error) => '$error', 'reason', contains('app only'))),
+        reason: 'M2.1: appOnly is StreamUnavailable with its reason (M4.28: NeedsLogin)',
+      );
+      expect(restricted.requests, hasLength(1), reason: 'no playlist for an app-only broadcast (3.x: 1 request)');
       final other = LiveRoom(roomId: _live, platform: 'bilibili', liveStatus: LiveStatus.live);
       expect(() => setup.site.getPlayQualities(detail: other), throwsArgumentError);
     });

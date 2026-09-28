@@ -1,9 +1,11 @@
 // JD Live parsing against the recorded samples, compared field by field with
 // 3.x's frozen output (expected.json, written by
 // fixtures/jdlive/legacy_expected.dart from 3.x's JdLiveApi, JdLiveLink and
-// JdLiveSite). Every intended difference is listed with its reason;
-// everything else must match. The synthetic cases are the edited copies the
-// generator ran through 3.x (`variants`) and 3.x's jd_live_site_test.dart.
+// JdLiveSite). Every intended difference is listed with its reason (the
+// M4.28 differences, and the M4.U upgrades by item number, docs/UPGRADES.md
+// 28-1 to 28-7); everything else must match. The synthetic cases are the
+// edited copies the generator ran through 3.x (`variants`) and 3.x's
+// jd_live_site_test.dart. The S05 samples (M4.U.28) have no 3.x output.
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -19,6 +21,24 @@ Map<String, dynamic> _legacy(String name) => _sample(name).legacy as Map<String,
 Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 
 List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<String, dynamic>>();
+
+/// Room keys every room changed: the notice is in words for users now (the
+/// unified rule for developer notes, M4.U).
+const _notice = {'notice'};
+
+/// Room keys a play answer without a list card changed: 28-2 (no `JD Live`
+/// title or shop name, no broadcast id as the shop account, no cover as the
+/// avatar: all empty, so a follow keeps what it stored), 28-3 (the blurred
+/// image is not the cover) and the notice.
+const _playOnly = {'title', 'nick', 'userId', 'avatar', 'cover', 'notice'};
+
+/// Room keys a play answer completed from a list card changed: 28-3 (the
+/// card's cover instead of the blurred image) and the notice.
+const _afterCard = {'cover', 'notice'};
+
+/// Broadcast keys a play answer changed: 28-2 (names empty) and 28-3 (the
+/// blurred image is the background, not the cover).
+const _playBroadcast = {'nick', 'title', 'cover'};
 
 /// Asserts that [actual] (a `toJson`) equals 3.x's [legacy] map on every key
 /// 3.x wrote, except [changed] (intended differences). 3.x wrote null where
@@ -39,11 +59,11 @@ void _expectParity(
 /// 3.x's room projection: toJson plus `link`.
 Map<String, Object?> _projection(LiveRoom room) => {...room.toJson(), 'link': room.link};
 
-void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = ''}) {
+void _expectRooms(List<LiveRoom> rooms, Object? legacy, {Set<String> changed = const {}, String reason = ''}) {
   final expected = _maps(legacy);
   expect(rooms.map((room) => room.roomId), expected.map((room) => room['roomId']), reason: reason);
   for (final (index, room) in rooms.indexed) {
-    _expectParity(_projection(room), expected[index], reason: '$reason[$index]');
+    _expectParity(_projection(room), expected[index], changed: changed, reason: '$reason[$index]');
   }
 }
 
@@ -61,18 +81,34 @@ Map<String, Object?> _broadcast(JdLiveRoom room) => {
   'flv': room.flv?.toString(),
 };
 
-void _expectPage(JdLivePage page, Object? legacy, {int? rooms, String reason = ''}) {
+void _expectBroadcast(JdLiveRoom room, Object? legacy, {Set<String> changed = const {}, String reason = ''}) {
+  final actual = _broadcast(room);
+  for (final MapEntry(:key, :value) in (legacy! as Map<String, dynamic>).entries) {
+    if (changed.contains(key)) continue;
+    expect(actual[key], value, reason: '$reason $key');
+  }
+}
+
+/// Asserts a page against 3.x's: the next count, the broadcasts (the first
+/// [rooms] when given) except [changed] keys, and whether another page
+/// follows, which is 28-1's rule now: the page had a broadcast (3.x: 30 of
+/// them).
+void _expectPage(JdLivePage page, Object? legacy, {int? rooms, Set<String> changed = const {}, String reason = ''}) {
   final expected = legacy! as Map<String, dynamic>;
   expect(page.nextCount, expected['nextCount'], reason: reason);
-  expect(page.hasMore, expected['hasMore'], reason: reason);
+  expect(page.hasMore, page.rooms.isNotEmpty, reason: '$reason: 28-1');
   final listed = expected['rooms'];
   if (listed is int) {
     expect(page.rooms, hasLength(listed), reason: reason);
+    expect(expected['hasMore'], listed >= 30, reason: "$reason: 3.x's rule");
     return;
   }
   final broadcasts = _maps(listed);
   final actual = rooms == null ? page.rooms : page.rooms.take(rooms).toList();
-  expect(actual.map(_broadcast), broadcasts, reason: reason);
+  expect(actual.map((room) => room.liveId), broadcasts.map((room) => room['liveId']), reason: reason);
+  for (final (index, room) in actual.indexed) {
+    _expectBroadcast(room, broadcasts[index], changed: changed, reason: '$reason[$index]');
+  }
 }
 
 /// 3.x's failure kind of a legacy error projection (`JD Live <kind>`), or
@@ -109,10 +145,10 @@ String _editedList(String sample, void Function(Map<String, dynamic> json) edit)
   return jsonEncode(json);
 }
 
-/// S02-play-live's JSON with `data` fields replaced (null removes one) and
+/// [sample]'s play JSON with `data` fields replaced (null removes one) and
 /// root fields in [root].
-String _editedPlay(Map<String, Object?> data, {Map<String, Object?> root = const {}}) {
-  final json = jsonDecode(_sample('S02-play-live').body) as Map<String, dynamic>;
+String _editedPlay(Map<String, Object?> data, {Map<String, Object?> root = const {}, String sample = 'S02-play-live'}) {
+  final json = jsonDecode(_sample(sample).body) as Map<String, dynamic>;
   final fields = json['data'] as Map<String, dynamic>;
   for (final MapEntry(:key, :value) in data.entries) {
     value == null ? fields.remove(key) : fields[key] = value;
@@ -126,6 +162,9 @@ String _editedPlay(Map<String, Object?> data, {Map<String, Object?> root = const
 const _archivedLive = '48378944';
 const _live = '48395626';
 const _stream = 'https://zt-pull-ai.jdcloud.com/live/F366C61365FB1F9B4BC62D90DBE239B1_fhd';
+const _recording =
+    'https://discover.300hu.com/m3u8/48395626/48395626_1790617263553_1_qtrans.m3u8'
+    '?originM3u8=48395626_1790012438_1790617202_1790617263553_qt.m3u8';
 
 void main() {
   group('S01 featured list', () {
@@ -149,17 +188,19 @@ void main() {
       expect(first.nick, '海信诚一恒专卖店');
       expect(first.totalViews, 37);
       expect(first.hls, isNull, reason: 'cards have no media');
+      expect(first.restriction, isNull, reason: 'the list does not say');
+      expect(first.background, isEmpty);
     });
 
     test('page 2: 30 more, none repeated, currentCount 67', () {
-      final page = JdLiveApi.directory(_sample('S01-list-p2').body, page: 2);
+      final page = JdLiveApi.directory(_sample('S01-list-p2').body, page: 2, after: 37);
       _expectPage(page, _legacy('S01-list-p2')['parseDirectoryJson']);
       final first = JdLiveApi.directory(_sample('S01-list-p1').body, page: 1);
       expect(
         page.rooms.map((room) => room.liveId).toSet().intersection(first.rooms.map((room) => room.liveId).toSet()),
         isEmpty,
       );
-      expect(page.nextCount, 67);
+      expect((page.nextCount, page.hasMore), (67, true));
     });
 
     test("the cards as rooms: every field of 3.x's directory pages 1 and 2", () {
@@ -169,7 +210,7 @@ void main() {
           for (final card in JdLiveApi.directory(_sample(sample).body, page: page).rooms) JdLiveApi.room(card),
         ];
         final legacy = _result(pages['page $page'])! as Map<String, dynamic>;
-        _expectRooms(rooms, legacy['rooms'], reason: 'page $page');
+        _expectRooms(rooms, legacy['rooms'], changed: _notice, reason: 'page $page');
       }
       final card = JdLiveApi.room(JdLiveApi.directory(_sample('S01-list-p1').body, page: 1).rooms.first);
       expect(card.userId, '24304104', reason: 'the shop account');
@@ -178,6 +219,8 @@ void main() {
       expect(card.effectiveOnlineViewers, isEmpty);
       expect(card.httpHeaders, JdLiveApi.mediaHeaders(_archivedLive), reason: "3.x's room headers (in the 3.x JSON)");
       expect(card.data, isNull, reason: 'a card cannot be played');
+      expect((card.restriction, card.startedAt), (null, null), reason: 'the list says neither');
+      expect(card.notice, JdLiveApi.chatNotice);
     });
 
     test("3.x's list checks on edited copies", () {
@@ -233,13 +276,33 @@ void main() {
         'data missing': jsonEncode({'code': '0', 'subCode': '0'}),
       };
       expect(bodies.keys.toSet(), variants.keys.toSet());
+      // An entry that cannot be read is skipped now; 3.x failed the page
+      // (the unified fault tolerance). The broadcasts left.
+      const skipped = {
+        'userName number': 29,
+        'userPic number': 29,
+        'data not an object': 29,
+        'list item not an object': 30,
+      };
+      // A blank name or title stays empty (28-2; 3.x: `JD Live`).
+      const blank = {'userName null': 'nick', 'title blank': 'title'};
       for (final MapEntry(key: name, value: body) in bodies.entries) {
         final legacy = variants[name];
         final failure = _failure(legacy);
-        if (failure != null) {
+        if (skipped[name] case final left?) {
+          expect(failure, 'schema', reason: name);
+          final page = JdLiveApi.directory(body, page: 1);
+          expect((page.rooms.length, page.hasMore), (left, true), reason: name);
+          if (name != 'list item not an object') {
+            expect(page.rooms.map((room) => room.liveId), isNot(contains(_archivedLive)), reason: name);
+          }
+        } else if (failure != null) {
           expect(() => JdLiveApi.directory(body, page: 1), _typed(failure), reason: name);
         } else {
-          _expectPage(JdLiveApi.directory(body, page: 1), legacy, rooms: 2, reason: name);
+          final page = JdLiveApi.directory(body, page: 1);
+          final field = blank[name];
+          _expectPage(page, legacy, rooms: 2, changed: {?field}, reason: name);
+          if (field != null) expect(_broadcast(page.rooms.first)[field], isEmpty, reason: name);
         }
       }
     });
@@ -282,11 +345,14 @@ void main() {
   });
 
   group('S02 play answer', () {
-    test("the live answer: state, cover and one stream key, no names (3.x's parseRoomJson)", () {
+    test("the live answer: state, background and one stream key, no names (3.x's parseRoomJson)", () {
       final room = JdLiveApi.play(_sample('S02-play-live').body, liveId: _archivedLive);
-      expect(_broadcast(room), _legacy('S02-play-live')['parseRoomJson']);
+      final legacy = _legacy('S02-play-live')['parseRoomJson'] as Map<String, dynamic>;
+      _expectBroadcast(room, legacy, changed: _playBroadcast);
+      expect((room.nick, room.title, room.cover), ('', '', ''), reason: '28-2, 28-3 (3.x: JD Live, the blurred image)');
+      expect(room.background, legacy['cover'], reason: '28-3: the blurred image is the background');
       expect(room.state, JdLiveState.live);
-      expect(room.nick, JdLiveApi.siteName, reason: 'the answer has no names');
+      expect((room.appOnly, room.restriction), (false, LiveRestriction.none));
       expect(room.streamError, isNull);
       expect(
         () => JdLiveApi.play(_sample('S02-play-live').body, liveId: '48378945'),
@@ -295,24 +361,46 @@ void main() {
       );
     });
 
-    test('the room at refresh depth matches 3.x: the placeholder names, the cover as avatar, no views', () {
+    test('the room at refresh depth: empty names, account, avatar and cover (28-2, 28-3); the rest as 3.x', () {
       final legacy = (_legacy('S02-play-live')['recorded'] as Map<String, dynamic>)['getRoomDetailForRefresh'];
       final room = JdLiveApi.room(JdLiveApi.play(_sample('S02-play-live').body, liveId: _archivedLive));
-      _expectParity(_projection(room), _result(legacy)! as Map<String, dynamic>);
-      expect((room.title, room.nick, room.userId), ('JD Live', 'JD Live', _archivedLive));
-      expect(room.avatar, room.cover);
+      final expected = _result(legacy)! as Map<String, dynamic>;
+      _expectParity(_projection(room), expected, changed: _playOnly);
+      expect((expected['title'], expected['nick'], expected['userId']), ('JD Live', 'JD Live', _archivedLive));
+      expect(expected['avatar'], expected['cover'], reason: '3.x: the blurred image as avatar and cover');
+      expect((room.title, room.nick, room.userId, room.avatar, room.cover), ('', '', null, '', ''));
+      expect(room.displayNick('京东直播'), '京东直播', reason: '28-2: the interface shows the platform name');
+      expect(room.restriction, LiveRestriction.none);
+      expect(room.startedAt, isNull, reason: 'JD Live gives no start time');
       expect(room.effectiveAudienceMetricType, AudienceMetricType.unknown);
       expect(room.data, isNull);
+      expect(room.notice, JdLiveApi.chatNotice);
     });
 
-    test('the list card completes the play answer (3.x enrich): names, account, avatar, views; cover stays', () {
+    test('a follow keeps its stored names, account, avatar and cover when refreshed (28-2, 28-3)', () {
+      final card = JdLiveApi.room(JdLiveApi.directory(_sample('S01-list-p1').body, page: 1).rooms.first);
+      final refreshed = JdLiveApi.room(JdLiveApi.play(_sample('S02-play-live').body, liveId: _archivedLive));
+      final merged = card.mergeFrom(refreshed);
+      expect(
+        (merged.title, merged.nick, merged.userId, merged.avatar, merged.cover),
+        (card.title, card.nick, card.userId, card.avatar, card.cover),
+      );
+      expect((merged.liveStatus, merged.restriction), (LiveStatus.live, LiveRestriction.none));
+    });
+
+    test('the list card completes the play answer (3.x enrich): names, account, avatar, views and cover (28-3)', () {
       final known = JdLiveApi.directory(_sample('S01-list-p1').body, page: 1).rooms.first;
-      final room = JdLiveApi.play(_sample('S02-play-live').body, liveId: _archivedLive).enrich(known);
+      final answer = JdLiveApi.play(_sample('S02-play-live').body, liveId: _archivedLive);
+      final room = answer.enrich(known);
       final legacy =
           (_legacy('S01-list-p1')['known'] as Map<String, dynamic>)['getRoomDetailForRefresh after the list'];
-      _expectParity(_projection(JdLiveApi.room(room)), _result(legacy)! as Map<String, dynamic>);
-      expect(room.cover, isNot(known.cover), reason: "3.x kept the play answer's blurredImg");
+      final expected = _result(legacy)! as Map<String, dynamic>;
+      _expectParity(_projection(JdLiveApi.room(room)), expected, changed: _afterCard);
+      expect(expected['cover'], answer.background, reason: "3.x kept the play answer's blurred image");
+      expect(room.cover, known.cover, reason: "28-3: the card's cover");
+      expect(room.background, answer.background);
       expect(room.hls, isNotNull);
+      expect(room.restriction, LiveRestriction.none);
     });
 
     test("3.x's play checks on edited copies: states, notices, stream keys, hosts, envelope", () {
@@ -353,21 +441,75 @@ void main() {
         'data missing': _editedPlay({}, root: {'data': null}),
       };
       expect(bodies.keys.toSet(), variants.keys.toSet());
+      // 3.x failed the whole room (refresh too) for these; now one bad
+      // address costs only its quality: the FLV comes from `pcVideoUrl`
+      // (28-4), and a background that is not text is no background (the
+      // unified fault tolerance). The qualities left.
+      const tolerated = {
+        'videoUrl missing': ['hls', 'flv'],
+        'videoUrl empty': ['hls', 'flv'],
+        'videoUrl number': ['hls', 'flv'],
+        'videoUrl http': ['hls', 'flv'],
+        'videoUrl other key': ['hls', 'flv'],
+        'videoUrl other host': ['hls', 'flv'],
+        'videoUrl other port': ['hls', 'flv'],
+        'videoUrl not /live/': ['hls', 'flv'],
+        'pcVideoUrl only': ['hls', 'flv'],
+        'h5VideoUrl missing': ['flv'],
+        'both missing': ['flv'],
+        'blurredImg number': ['hls', 'flv'],
+      };
+      // States that changed: app-only is live (or what its status says),
+      // marked appOnly (the unified rule for restricted broadcasts; 3.x:
+      // unknown); status 3 is a replay, unplayable without a recording on
+      // JD Cloud's video service (the unified replay rule; 3.x: offline).
+      const states = {
+        'secret 1': (LiveStatus.live, LiveRestriction.appOnly),
+        'secret 1 offline': (LiveStatus.offline, LiveRestriction.appOnly),
+        'status 3': (LiveStatus.replay, LiveRestriction.unplayable),
+      };
       for (final MapEntry(key: name, value: body) in bodies.entries) {
         final legacy = variants[name] as Map<String, dynamic>;
         final refresh = legacy['getRoomDetailForRefresh'];
         final failure = _failure(refresh);
+        if (tolerated[name] case final ids?) {
+          expect(failure, 'schema', reason: name);
+          final broadcast = JdLiveApi.play(body, liveId: _archivedLive);
+          final room = JdLiveApi.room(broadcast, withData: true);
+          expect((room.liveStatus, room.restriction), (LiveStatus.live, LiveRestriction.none), reason: name);
+          expect(broadcast.streamError, isNull, reason: name);
+          expect([for (final quality in JdLiveApi.qualities(broadcast)) quality.id], ids, reason: name);
+          for (final id in ids) {
+            expect(JdLiveApi.line(broadcast, id).url, contains(key), reason: '$name $id: the same stream');
+          }
+          continue;
+        }
         if (failure != null) {
           expect(() => JdLiveApi.play(body, liveId: _archivedLive), _typed(failure), reason: name);
           continue;
         }
         final broadcast = JdLiveApi.play(body, liveId: _archivedLive);
-        _expectParity(_projection(JdLiveApi.room(broadcast)), refresh! as Map<String, dynamic>, reason: name);
+        final state = states[name];
+        final changed = {
+          ..._playOnly,
+          if (state != null) ...{'liveStatus', 'status', 'isRecord'},
+        };
+        _expectParity(
+          _projection(JdLiveApi.room(broadcast)),
+          refresh! as Map<String, dynamic>,
+          changed: changed,
+          reason: name,
+        );
         _expectParity(
           _projection(JdLiveApi.room(broadcast, withData: true)),
           legacy['getRoomDetail']! as Map<String, dynamic>,
+          changed: changed,
           reason: '$name entry',
         );
+        if (state != null) {
+          final room = JdLiveApi.room(broadcast);
+          expect((room.liveStatus, room.restriction), state, reason: name);
+        }
         // 3.x's qualities: the two for a live broadcast, [] for an offline
         // room (now StreamUnavailable, see jdlive_site_test), else
         // mediaUnavailable.
@@ -380,21 +522,28 @@ void main() {
             reason: name,
           );
         } else {
-          expect(broadcast.streamError, isA<SiteError>(), reason: name);
+          expect(broadcast.streamError, isA<StreamUnavailable>(), reason: name);
         }
       }
     });
 
-    test('states: app-only is NeedsLogin, others not live are StreamUnavailable (3.x: mediaUnavailable)', () {
+    test('states and restrictions: app-only is StreamUnavailable with its reason, the notice says so', () {
       final restricted = JdLiveApi.play(_editedPlay({'secret': 1}), liveId: _archivedLive);
-      expect(restricted.state, JdLiveState.restricted);
-      expect(restricted.streamError, isA<NeedsLogin>());
+      expect((restricted.state, restricted.appOnly), (JdLiveState.live, true));
+      expect(
+        restricted.streamError,
+        isA<StreamUnavailable>().having((error) => '$error', 'reason', contains('app only')),
+        reason: 'M2.1: appOnly is StreamUnavailable (3.x: NeedsLogin, M4.28)',
+      );
       final room = JdLiveApi.room(restricted, withData: true);
-      expect((room.liveStatus, room.notice), (LiveStatus.unknown, JdLiveApi.restrictedNotice));
+      expect((room.liveStatus, room.isLiveNow, room.followGroup), (LiveStatus.live, true, FollowGroup.live));
+      expect(
+        (room.restriction, room.isRestricted, room.notice),
+        (LiveRestriction.appOnly, true, JdLiveApi.restrictedNotice),
+      );
       for (final (status, state, liveStatus) in [
         (0, JdLiveState.preview, LiveStatus.offline),
         (2, JdLiveState.offline, LiveStatus.offline),
-        (3, JdLiveState.replay, LiveStatus.offline),
         (10, JdLiveState.paused, LiveStatus.unknown),
         (11, JdLiveState.paused, LiveStatus.unknown),
         (99, JdLiveState.unknown, LiveStatus.unknown),
@@ -402,23 +551,30 @@ void main() {
         final broadcast = JdLiveApi.play(_editedPlay({'status': status}), liveId: _archivedLive);
         expect(broadcast.state, state, reason: '$status');
         expect(broadcast.streamError, isA<StreamUnavailable>(), reason: '$status');
-        expect(JdLiveApi.room(broadcast).liveStatus, liveStatus, reason: '$status');
+        final room = JdLiveApi.room(broadcast);
+        expect((room.liveStatus, room.restriction), (liveStatus, LiveRestriction.none), reason: '$status');
       }
-      expect(JdLiveApi.state(1, secret: '1'), JdLiveState.restricted);
+      expect(JdLiveApi.state('1'), JdLiveState.live);
       expect(JdLiveApi.state(1.0), JdLiveState.live);
       expect(JdLiveApi.state(true), JdLiveState.unknown);
+      expect(JdLiveApi.chatNotice, isNot(contains('pv')), reason: 'plain words, no field names');
     });
 
-    test('the old id: status 3 without addresses is offline (3.x: not replay)', () {
+    test('the old id: status 3 without a recording is an unplayable replay (3.x: offline)', () {
       final legacy = _legacy('S02-play-old');
       final room = JdLiveApi.play(_sample('S02-play-old').body, liveId: '10000');
-      expect(_broadcast(room), legacy['parseRoomJson']);
+      _expectBroadcast(room, legacy['parseRoomJson'], changed: _playBroadcast);
       for (final depth in ['getRoomDetail', 'getRoomDetailForRefresh', 'getRoomDetailForRecording']) {
         final expected = _result((legacy['recorded'] as Map<String, dynamic>)[depth])! as Map<String, dynamic>;
-        _expectParity(_projection(JdLiveApi.room(room, withData: depth != 'getRoomDetailForRefresh')), expected);
+        final actual = JdLiveApi.room(room, withData: depth != 'getRoomDetailForRefresh');
+        _expectParity(_projection(actual), expected, changed: {..._playOnly, 'liveStatus', 'isRecord'}, reason: depth);
+        expect((expected['liveStatus'], expected['isRecord']), (1, false), reason: '3.x: offline');
       }
-      expect(JdLiveApi.room(room).liveStatus, LiveStatus.offline);
+      final replay = JdLiveApi.room(room);
+      expect((replay.liveStatus, replay.restriction), (LiveStatus.replay, LiveRestriction.unplayable));
+      expect(replay.followGroup, FollowGroup.offline, reason: 'an unplayable replay is grouped offline (M2.1)');
       expect(room.streamError, isA<StreamUnavailable>());
+      expect(JdLiveApi.qualities(room), isEmpty);
     });
   });
 
@@ -462,30 +618,34 @@ void main() {
   });
 
   group('S04 recorded together', () {
-    test('the list page has 29 broadcasts: 3.x does not ask for page 2', () {
+    test('the list page has 29 broadcasts: 3.x did not ask for page 2, now it does (28-1)', () {
       final page = JdLiveApi.directory(_sample('S04-list').body, page: 1);
-      _expectPage(page, _legacy('S04-list')['parseDirectoryJson']);
-      expect((page.rooms.length, page.nextCount, page.hasMore), (29, 36, false));
+      final legacy = _legacy('S04-list')['parseDirectoryJson'] as Map<String, dynamic>;
+      _expectPage(page, legacy);
+      expect(legacy['hasMore'], isFalse, reason: '3.x: fewer than 30 broadcasts');
+      expect((page.rooms.length, page.nextCount, page.hasMore), (29, 36, true));
     });
 
-    test('room entry: every field of 3.x, with the play answer as data', () {
+    test('room entry: every field of 3.x but 28-2 and 28-3, with the play answer as data', () {
       final legacy = _legacy('S04-play-live');
       final broadcast = JdLiveApi.play(_sample('S04-play-live').body, liveId: _live);
-      expect(_broadcast(broadcast), legacy['parseRoomJson']);
+      _expectBroadcast(broadcast, legacy['parseRoomJson'], changed: _playBroadcast);
       final recorded = legacy['recorded'] as Map<String, dynamic>;
       for (final depth in ['getRoomDetail', 'getRoomDetailForRecording']) {
         final room = JdLiveApi.room(broadcast, withData: true);
-        _expectParity(_projection(room), _result(recorded[depth])! as Map<String, dynamic>, reason: depth);
+        _expectParity(_projection(room), _result(recorded[depth])! as Map<String, dynamic>, changed: _playOnly);
         expect(room.data, same(broadcast));
       }
       final known = JdLiveApi.directory(_sample('S04-list').body, page: 1).rooms.first;
       final enriched = JdLiveApi.room(broadcast.enrich(known), withData: true);
       final after = (legacy['after the list'] as Map<String, dynamic>)['getRoomDetail'];
-      _expectParity(_projection(enriched), _result(after)! as Map<String, dynamic>);
+      _expectParity(_projection(enriched), _result(after)! as Map<String, dynamic>, changed: _afterCard);
       expect((enriched.title, enriched.nick), ('国民喜糖徐福记优选', '徐福记食品店'));
+      expect(enriched.cover, known.cover, reason: "28-3: the card's indexImage");
+      expect((enriched.data! as JdLiveRoom).background, contains('!q70.jpg'), reason: 'the blurred image');
     });
 
-    test("qualities and lines: 3.x's names and ids; the line has its format and host, no headers or lease", () {
+    test("qualities and lines: 3.x's names and ids; the line has its format, host and media headers (28-5)", () {
       final legacy = _legacy('S04-play-live')['recorded'] as Map<String, dynamic>;
       final broadcast = JdLiveApi.play(_sample('S04-play-live').body, liveId: _live);
       final qualities = JdLiveApi.qualities(broadcast);
@@ -499,12 +659,17 @@ void main() {
         expect([line.url], urls, reason: id);
         expect(line.format, id == 'hls' ? StreamFormat.hls : StreamFormat.flv);
         expect(line.lineId, 'zt-pull-ai.jdcloud.com');
-        expect(line.headers, isEmpty, reason: "3.x's player had no JD headers (PlaybackHeaderResolver)");
+        expect(line.headers, {
+          'origin': 'https://lives.jd.com',
+          'referer': 'https://lives.jd.com/#/$_live',
+          'user-agent': JdLiveApi.userAgent,
+        }, reason: "28-5: the web's media headers (3.x's player sent none)");
         expect(line.lease, isNull, reason: 'no signature or expiry');
         expect(line.codec, isNull);
       }
       expect(JdLiveApi.line(broadcast, 'hls').url, '$_stream.m3u8');
       expect(() => JdLiveApi.line(broadcast, 'auto'), throwsArgumentError);
+      expect(() => JdLiveApi.line(broadcast, JdLiveApi.replayId), throwsA(isA<StreamUnavailable>()));
     });
 
     test("the playlist check matches 3.x's validatePlaylist", () {
@@ -561,6 +726,133 @@ void main() {
       expect(() => JdLiveApi.checkPlaylist('', expected: hls, status: 404), throwsA(isA<StreamUnavailable>()));
       expect(() => JdLiveApi.checkPlaylist('', expected: hls, status: 403), throwsA(isA<RiskControl>()));
       expect(() => JdLiveApi.checkPlaylist('', expected: hls, status: 502), throwsA(isA<NetworkFailure>()));
+    });
+  });
+
+  group('S05 upgrades (M4.U.28, no 3.x output)', () {
+    test('28-1: the list goes on while a page has broadcasts; the last one (20) is not 30, the empty one ends', () {
+      final first = JdLiveApi.directory(_sample('S05-list-p1').body, page: 1);
+      expect((first.rooms.length, first.nextCount, first.hasMore), (30, 37, true));
+      final last = JdLiveApi.directory(_sample('S05-list-p7').body, page: 7, after: 187);
+      expect((last.rooms.length, last.nextCount, last.hasMore), (20, 215, true), reason: '3.x stopped here (< 30)');
+      final entries = ((jsonDecode(_sample('S05-list-p7').body) as Map)['data'] as Map)['list'] as List;
+      expect(
+        [for (final entry in entries) (entry as Map)['templateType']].where((type) => type == 3),
+        hasLength(8),
+        reason: "official replays are not the featured list's broadcasts (skipped, as 3.x)",
+      );
+      final end = JdLiveApi.directory(_sample('S05-list-p8').body, page: 8, after: 215);
+      expect(end.rooms, isEmpty);
+      expect((end.nextCount, end.hasMore), (215, false));
+      final stuck = JdLiveApi.directory(_sample('S05-list-p7').body, page: 8, after: 215);
+      expect(stuck.hasMore, isFalse, reason: 'currentCount did not move on');
+    });
+
+    test('fault tolerance: an unreadable entry is skipped; a page of nothing but unreadable entries fails', () {
+      final one = _editedList('S05-list-p7', (json) {
+        final list = (json['data'] as Map)['list'] as List;
+        final entry = list.firstWhere((entry) => (entry as Map)['templateType'] == 1) as Map;
+        (entry['data'] as Map)['title'] = ['not text'];
+        list.add({'templateType': 1, 'data': 7});
+      });
+      final page = JdLiveApi.directory(one, page: 7, after: 187);
+      expect((page.rooms.length, page.hasMore), (19, true));
+      final none = _editedList('S05-list-p7', (json) => (json['data'] as Map)['list'] = [5, 'x', null]);
+      expect(() => JdLiveApi.directory(none, page: 7), throwsA(isA<ApiChanged>()));
+      final promotions = _editedList(
+        'S05-list-p7',
+        (json) => (json['data'] as Map)['list'] = [
+          {'templateType': -100, 'cardId': '28'},
+        ],
+      );
+      expect(JdLiveApi.directory(promotions, page: 7).rooms, isEmpty, reason: 'nothing unreadable');
+    });
+
+    test('a replay plays its recording on JD Cloud video (the unified replay rule): one quality "原画"', () {
+      final replay = JdLiveApi.play(_sample('S05-play-replay').body, liveId: _live);
+      expect(replay.state, JdLiveState.replay);
+      expect(replay.recording, Uri.parse(_recording));
+      expect((replay.hls, replay.flv), (null, null), reason: 'the three fields hold the recording');
+      expect((replay.restriction, replay.streamError), (LiveRestriction.none, null));
+      final room = JdLiveApi.room(replay, withData: true);
+      expect((room.liveStatus, room.isRecord, room.isPlayableNow), (LiveStatus.replay, true, true));
+      expect(room.followGroup, FollowGroup.replay);
+      expect((room.title, room.nick, room.cover), ('', '', ''), reason: '28-2, 28-3');
+      expect(JdLiveApi.qualities(replay), [JdLiveApi.replayQuality]);
+      expect((JdLiveApi.replayQuality.quality, JdLiveApi.replayQuality.id), ('原画', 'replay'));
+      final line = JdLiveApi.line(replay, JdLiveApi.replayId);
+      expect((line.url, line.format, line.lineId), (_recording, StreamFormat.hls, 'discover.300hu.com'));
+      expect(line.headers, JdLiveApi.mediaHeaders(_live), reason: '28-5');
+      expect(() => JdLiveApi.line(replay, JdLiveApi.hlsId), throwsA(isA<StreamUnavailable>()));
+      for (final (name, value) in [
+        ('other host', _recording.replaceFirst('discover.300hu.com', 'example.com')),
+        ('http', _recording.replaceFirst('https:', 'http:')),
+        ('not a playlist', _recording.replaceFirst('.m3u8?', '.mp4?')),
+        ('a live stream', '$_stream.m3u8'),
+      ]) {
+        final edited = JdLiveApi.play(
+          _editedPlay({'h5VideoUrl': value, 'videoUrl': value, 'pcVideoUrl': value}, sample: 'S05-play-replay'),
+          liveId: _live,
+        );
+        expect((edited.recording, edited.restriction), (null, LiveRestriction.unplayable), reason: name);
+        expect(JdLiveApi.room(edited).followGroup, FollowGroup.offline, reason: name);
+      }
+      final second = JdLiveApi.play(_editedPlay({'h5VideoUrl': ''}, sample: 'S05-play-replay'), liveId: _live);
+      expect(second.recording, Uri.parse(_recording), reason: '`videoUrl` when `h5VideoUrl` is empty');
+    });
+
+    test('an ended broadcast still carries its stopped live addresses: offline, not playable', () {
+      final ended = JdLiveApi.play(_sample('S05-play-ended').body, liveId: '48378908');
+      expect((ended.state, ended.recording), (JdLiveState.offline, null));
+      expect(ended.hls, isNotNull);
+      expect(ended.streamError, isA<StreamUnavailable>());
+      final room = JdLiveApi.room(ended);
+      expect((room.liveStatus, room.restriction), (LiveStatus.offline, LiveRestriction.none));
+      expect(() => JdLiveApi.line(ended, JdLiveApi.hlsId), throwsA(isA<StreamUnavailable>()));
+    });
+
+    test('28-4: the FLV of the playlist stream key; a live answer without any address is live and unplayable', () {
+      const other = 'https://zt-pull-ai.jdcloud.com/live/OTHER_fhd.flv';
+      final mismatch = JdLiveApi.play(_editedPlay({'videoUrl': other}, sample: 'S04-play-live'), liveId: _live);
+      expect(mismatch.flv.toString(), '$_stream.flv', reason: '`pcVideoUrl`, of the same stream as the playlist');
+      final noneMatches = JdLiveApi.play(
+        _editedPlay({'videoUrl': other, 'pcVideoUrl': other}, sample: 'S04-play-live'),
+        liveId: _live,
+      );
+      expect((noneMatches.hls.toString(), noneMatches.flv), ('$_stream.m3u8', null));
+      expect(JdLiveApi.qualities(noneMatches), [JdLiveApi.hlsQuality]);
+      final flvOnly = JdLiveApi.play(
+        _editedPlay({'h5VideoUrl': null, 'videoUrl': other}, sample: 'S04-play-live'),
+        liveId: _live,
+      );
+      expect(flvOnly.flv.toString(), other, reason: 'without a playlist any JD FLV does');
+      expect(() => JdLiveApi.line(flvOnly, JdLiveApi.hlsId), throwsA(isA<StreamUnavailable>()));
+      final bare = JdLiveApi.play(
+        _editedPlay({'h5VideoUrl': 1, 'videoUrl': null, 'pcVideoUrl': 'x'}, sample: 'S04-play-live'),
+        liveId: _live,
+      );
+      expect((bare.state, bare.restriction), (JdLiveState.live, LiveRestriction.unplayable));
+      expect(bare.streamError, isA<StreamUnavailable>());
+      final room = JdLiveApi.room(bare);
+      expect((room.liveStatus, room.followGroup), (LiveStatus.live, FollowGroup.live));
+    });
+
+    test('28-7 blocked: the unsigned shop playback list has titles, covers and start times, no names or live one', () {
+      // livePlayBackToM (the web's shop replay tab) takes the shop account
+      // and lists past broadcasts only.
+      final shop = (jsonDecode(_sample('S05-playback').body) as Map)['data'] as List;
+      final ended = shop.cast<Map<String, dynamic>>().firstWhere((entry) => entry['liveId'] == _live);
+      expect(ended['title'], '国民喜糖徐福记优选');
+      expect(ended['beginTime'], 1790012438000, reason: 'the start in the recording address too');
+      expect(_recording, contains('_1790012438_'));
+      expect(shop.cast<Map<String, dynamic>>().every((entry) => !entry.containsKey('userName')), isTrue);
+      final card = JdLiveApi.directory(_sample('S05-list-p1').body, page: 1).rooms.first;
+      expect((card.state, card.authorId), (JdLiveState.live, '26206329'));
+      expect(_sample('S05-playback-live').url.queryParameters['body'], contains(card.authorId));
+      final listed = ((jsonDecode(_sample('S05-playback-live').body) as Map)['data'] as List)
+          .map((entry) => (entry as Map)['liveId'])
+          .toList();
+      expect(listed, isNot(contains(card.liveId)), reason: "the shop's current broadcast is not in it");
     });
   });
 }

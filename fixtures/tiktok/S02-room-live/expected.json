@@ -1,0 +1,63 @@
+{
+  "generator": "TikTokApi.resolveReference + TikTokSite.searchRooms (with S01-user-live) + the TikTok step of LiveUrlTool._parseLiveUrl",
+  "value": {
+    "TikTokApi.resolveReference": {
+      "result": "qvc",
+      "requests": [
+        "https://webcast.tiktok.com/webcast/room/info/?aid=1988&room_id=7690279124098681614"
+      ]
+    },
+    "searchRooms(share link)": {
+      "result": [
+        {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        }
+      ],
+      "requests": [
+        "https://webcast.tiktok.com/webcast/room/info/?aid=1988&room_id=7690279124098681614",
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "LiveUrlTool.parseLiveUrl (TikTok step)": {
+      "result": [
+        "qvc",
+        "tiktok"
+      ],
+      "requests": [
+        "https://webcast.tiktok.com/webcast/room/info/?aid=1988&room_id=7690279124098681614"
+      ]
+    },
+    "LiveUrlTool.parseLiveUrl (TikTok step, user link)": {
+      "result": [
+        "qvc",
+        "tiktok"
+      ],
+      "requests": []
+    }
+  }
+}

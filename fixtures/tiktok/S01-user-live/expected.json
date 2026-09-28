@@ -1,0 +1,945 @@
+{
+  "generator": "TikTokSite.getRoomDetailForRefresh + getRoomDetail + getRoomDetailForRecording + getLiveStatus + searchRooms + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getDirectoryPage + getRecommendRooms; TikTokLink.parse + parseOrUsername + parseDurableUsername + normalizeUsername + url; WebSearchRoomParser.parse (TikTok step); trustedHosts: the same calls over this answer with tiktokcdn-us.com spelled tiktokcdn.com (3.x trusted only the latter)",
+  "value": {
+    "getRoomDetailForRefresh(qvc)": {
+      "result": {
+        "roomId": "qvc",
+        "userId": "6768510980420043782",
+        "title": "Pumpkin Spice Season",
+        "nick": "QVC, Inc",
+        "avatar": "",
+        "cover": "",
+        "area": "TikTok LIVE",
+        "watching": "203",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "203",
+        "totalViewers": "9492",
+        "followers": "1597439",
+        "platform": "tiktok",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+        "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.tiktok.com",
+          "referer": "https://www.tiktok.com/@qvc/live",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.tiktok.com/@qvc/live"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "getRoomDetailForRefresh(QVC)": {
+      "result": {
+        "roomId": "qvc",
+        "userId": "6768510980420043782",
+        "title": "Pumpkin Spice Season",
+        "nick": "QVC, Inc",
+        "avatar": "",
+        "cover": "",
+        "area": "TikTok LIVE",
+        "watching": "203",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "203",
+        "totalViewers": "9492",
+        "followers": "1597439",
+        "platform": "tiktok",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+        "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://www.tiktok.com",
+          "referer": "https://www.tiktok.com/@qvc/live",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://www.tiktok.com/@qvc/live"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "getRoomDetailForRefresh(@qvc)": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok identity"
+      },
+      "requests": []
+    },
+    "getRoomDetail": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok schema"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok schema"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "getLiveStatus": {
+      "result": true,
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "searchRooms(qvc)": {
+      "result": [
+        {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "searchRooms(@qvc)": {
+      "result": [
+        {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "searchRooms(QVC)": {
+      "result": [
+        {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "searchRooms(https://www.tiktok.com/@qvc/live)": {
+      "result": [
+        {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "",
+          "cover": "",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        }
+      ],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+      ]
+    },
+    "searchRooms(https://vm.tiktok.com/ZMabcdef/)": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms(not a user!)": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms()": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms(qvc, page: 2)": {
+      "result": [],
+      "requests": []
+    },
+    "getPlayQualites": {
+      "getRoomDetail": {
+        "throws": "TikTokException",
+        "message": "TikTok schema"
+      }
+    },
+    "links": {
+      "qvc": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "qvc",
+        "WebSearchRoomParser.parse": null
+      },
+      "@qvc": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "QVC": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "qvc",
+        "WebSearchRoomParser.parse": null
+      },
+      " qvc ": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "qvc",
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@qvc": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": "qvc",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "qvc"
+        ]
+      },
+      "https://www.tiktok.com/@qvc/live": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": "qvc",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "qvc"
+        ]
+      },
+      "https://m.tiktok.com/@QVC/live/": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": "qvc",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "qvc"
+        ]
+      },
+      "http://tiktok.com/@qvc": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "qvc"
+        },
+        "TikTokLink.parseDurableUsername": "qvc",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "qvc"
+        ]
+      },
+      "https://www.tiktok.com/@qvc/video/7300000000000000000": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@qvc/live#chat": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://user:pass@www.tiktok.com/@qvc": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@qvc/../live": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://vm.tiktok.com/ZMabcdef/": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/t/ZTabcdef/": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/share/live/7690279124098681614": {
+        "TikTokLink.parse": {
+          "kind": "roomId",
+          "id": "7690279124098681614"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "roomId",
+          "id": "7690279124098681614"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/share/live/123": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.evil.com/@qvc": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "not a user!": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "a..b": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "a..b"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "a..b",
+        "WebSearchRoomParser.parse": null
+      },
+      "_": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "_"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "_",
+        "WebSearchRoomParser.parse": null
+      },
+      "": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      }
+    },
+    "TikTokLink.url": "https://www.tiktok.com/@qvc/live",
+    "getDirectoryPage": {
+      "result": {
+        "rooms": [],
+        "page": 1,
+        "hasMore": false
+      },
+      "requests": []
+    },
+    "getDirectoryPage(page: 2)": {
+      "result": {
+        "rooms": [],
+        "page": 2,
+        "hasMore": false
+      },
+      "requests": []
+    },
+    "getRecommendRooms": {
+      "result": [],
+      "requests": []
+    },
+    "trustedHosts": {
+      "getRoomDetailForRefresh(qvc)": {
+        "result": {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=47821eda&x-expires=1790712000&x-signature=vwEQtXBOxYHN40hfLouiN6MA7GR%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p19-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=9809935f&x-expires=1790712000&x-signature=lqw1XlzDTkn%2BJbktajoi7OCYYEo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+        ]
+      },
+      "getRoomDetailForRefresh(QVC)": {
+        "result": {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=47821eda&x-expires=1790712000&x-signature=vwEQtXBOxYHN40hfLouiN6MA7GR%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p19-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=9809935f&x-expires=1790712000&x-signature=lqw1XlzDTkn%2BJbktajoi7OCYYEo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+        ]
+      },
+      "getRoomDetailForRefresh(@qvc)": {
+        "result": {
+          "throws": "TikTokException",
+          "message": "TikTok identity"
+        },
+        "requests": []
+      },
+      "getRoomDetail": {
+        "result": {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=47821eda&x-expires=1790712000&x-signature=vwEQtXBOxYHN40hfLouiN6MA7GR%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p19-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=9809935f&x-expires=1790712000&x-signature=lqw1XlzDTkn%2BJbktajoi7OCYYEo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "qvc",
+          "userId": "6768510980420043782",
+          "title": "Pumpkin Spice Season",
+          "nick": "QVC, Inc",
+          "avatar": "https://p16-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=47821eda&x-expires=1790712000&x-signature=vwEQtXBOxYHN40hfLouiN6MA7GR%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "cover": "https://p19-common-sign.tiktokcdn.com/tos-useast8-avt-0068-tx2/23dd665710f2c7bf7ebebcc67a89873d~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=9809935f&x-expires=1790712000&x-signature=lqw1XlzDTkn%2BJbktajoi7OCYYEo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+          "area": "TikTok LIVE",
+          "watching": "203",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "203",
+          "totalViewers": "9492",
+          "followers": "1597439",
+          "platform": "tiktok",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "TikTok LIVE 远端聊天尚待接入；当前观看与累计进房分别展示。",
+          "introduction": "This is shopping brought to life 🛍️\n#LoveQVC\n@QVC Beauty \n@QVC Fashion \n@QVC Home",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.tiktok.com",
+            "referer": "https://www.tiktok.com/@qvc/live",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.tiktok.com/@qvc/live"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+        ]
+      },
+      "getPlayQualites": {
+        "result": [
+          {
+            "quality": "原始画质 · 1080x1920 · H264 · FLV",
+            "id": "h264:origin:flv",
+            "sort": 10120
+          },
+          {
+            "quality": "原始画质 · 1080x1920 · H264 · HLS",
+            "id": "h264:origin:hls",
+            "sort": 10110
+          },
+          {
+            "quality": "超清 60 帧 · 1080x1920 · H265 · FLV",
+            "id": "h265:uhd_60:flv",
+            "sort": 9020
+          },
+          {
+            "quality": "超清 60 帧 · 1080x1920 · H265 · HLS",
+            "id": "h265:uhd_60:hls",
+            "sort": 9010
+          },
+          {
+            "quality": "高清 60 帧 · 720x1280 · H265 · FLV",
+            "id": "h265:hd_60:flv",
+            "sort": 8020
+          },
+          {
+            "quality": "高清 60 帧 · 720x1280 · H265 · HLS",
+            "id": "h265:hd_60:hls",
+            "sort": 8010
+          },
+          {
+            "quality": "高清 · 720x1280 · H264 · FLV",
+            "id": "h264:hd:flv",
+            "sort": 6120
+          },
+          {
+            "quality": "高清 · 720x1280 · H264 · HLS",
+            "id": "h264:hd:hls",
+            "sort": 6110
+          },
+          {
+            "quality": "高清 · 720x1280 · H265 · FLV",
+            "id": "h265:hd:flv",
+            "sort": 6020
+          },
+          {
+            "quality": "高清 · 720x1280 · H265 · HLS",
+            "id": "h265:hd:hls",
+            "sort": 6010
+          },
+          {
+            "quality": "标清 · 540x960 · H265 · FLV",
+            "id": "h265:sd:flv",
+            "sort": 5020
+          },
+          {
+            "quality": "标清 · 540x960 · H265 · HLS",
+            "id": "h265:sd:hls",
+            "sort": 5010
+          },
+          {
+            "quality": "流畅 · 360x640 · H265 · FLV",
+            "id": "h265:ld:flv",
+            "sort": 4020
+          },
+          {
+            "quality": "流畅 · 360x640 · H265 · HLS",
+            "id": "h265:ld:hls",
+            "sort": 4010
+          }
+        ],
+        "requests": []
+      },
+      "getPlayUrls": {
+        "h264:origin:flv": {
+          "result": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980.flv?expire=1791749747&sign=33187c8df95247f2866028de71159b42"
+          ],
+          "requests": []
+        },
+        "h264:origin:hls": {
+          "result": [
+            "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980/index.m3u8?expire=1791749747&sign=0cc022238daceee2092f073ff80b9465"
+          ],
+          "requests": []
+        },
+        "h265:uhd_60:flv": {
+          "result": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_uhd560.flv?expire=1791749747&sign=7bab3ae8e9ea7c72bb0bcc6bc4552e90"
+          ],
+          "requests": []
+        },
+        "h265:uhd_60:hls": {
+          "result": [
+            "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_uhd560/index.m3u8?expire=1791749747&sign=71590d292a283a2043d77faecbaa4ff2"
+          ],
+          "requests": []
+        },
+        "h265:hd_60:flv": {
+          "result": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd560.flv?expire=1791749747&sign=8170fbe7d5d5a484814506442b83fe29"
+          ],
+          "requests": []
+        },
+        "h265:hd_60:hls": {
+          "result": [
+            "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd560/index.m3u8?expire=1791749747&sign=06d62e61df59a9c29e2b243ce3e0cf79"
+          ],
+          "requests": []
+        },
+        "h264:hd:flv": {
+          "result": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd.flv?expire=1791749747&sign=eee65f53e9421ce50211670eae679f02"
+          ],
+          "requests": []
+        },
+        "h264:hd:hls": {
+          "result": [
+            "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd/index.m3u8?expire=1791749747&sign=e8d28a79023c39c200661fccd268a29a"
+          ],
+          "requests": []
+        },
+        "h265:hd:flv": {
+          "result": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd5.flv?expire=1791749747&sign=578b5c72dc4ee60caea63367c29a80b2"
+          ],
+          "requests": []
+        },
+        "h265:hd:hls": {
+          "result": [
+            "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd5/index.m3u8?expire=1791749747&sign=1ead8f062d15a4f4ef27e9589c6948f6"
+          ],
+          "requests": []
+        },
+        "h265:sd:flv": {
+          "result": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_sd5.flv?expire=1791749747&sign=47428c3dd46c036bb3a62f301f465365"
+          ],
+          "requests": []
+        },
+        "h265:sd:hls": {
+          "result": [
+            "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_sd5/index.m3u8?expire=1791749747&sign=59314e23acedbd6b0165debbc6530a2c"
+          ],
+          "requests": []
+        },
+        "h265:ld:flv": {
+          "result": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_ld5.flv?expire=1791749747&sign=dfd9c9b9f89900715dc1ac1a27df8713"
+          ],
+          "requests": []
+        },
+        "h265:ld:hls": {
+          "result": [
+            "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_ld5/index.m3u8?expire=1791749747&sign=e4731de361b43be4de8db4947f39b886"
+          ],
+          "requests": []
+        }
+      },
+      "resolvePlayUrlsRaw": {
+        "h264:origin:flv": {
+          "result": {
+            "urls": [
+              "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980.flv?expire=1791749747&sign=33187c8df95247f2866028de71159b42"
+            ],
+            "appliedQualityData": "h264:origin:flv"
+          },
+          "requests": []
+        },
+        "h264:origin:hls": {
+          "result": {
+            "urls": [
+              "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980/index.m3u8?expire=1791749747&sign=0cc022238daceee2092f073ff80b9465"
+            ],
+            "appliedQualityData": "h264:origin:hls"
+          },
+          "requests": []
+        },
+        "h265:uhd_60:flv": {
+          "result": {
+            "urls": [
+              "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_uhd560.flv?expire=1791749747&sign=7bab3ae8e9ea7c72bb0bcc6bc4552e90"
+            ],
+            "appliedQualityData": "h265:uhd_60:flv"
+          },
+          "requests": []
+        },
+        "h265:uhd_60:hls": {
+          "result": {
+            "urls": [
+              "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_uhd560/index.m3u8?expire=1791749747&sign=71590d292a283a2043d77faecbaa4ff2"
+            ],
+            "appliedQualityData": "h265:uhd_60:hls"
+          },
+          "requests": []
+        },
+        "h265:hd_60:flv": {
+          "result": {
+            "urls": [
+              "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd560.flv?expire=1791749747&sign=8170fbe7d5d5a484814506442b83fe29"
+            ],
+            "appliedQualityData": "h265:hd_60:flv"
+          },
+          "requests": []
+        },
+        "h265:hd_60:hls": {
+          "result": {
+            "urls": [
+              "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd560/index.m3u8?expire=1791749747&sign=06d62e61df59a9c29e2b243ce3e0cf79"
+            ],
+            "appliedQualityData": "h265:hd_60:hls"
+          },
+          "requests": []
+        },
+        "h264:hd:flv": {
+          "result": {
+            "urls": [
+              "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd.flv?expire=1791749747&sign=eee65f53e9421ce50211670eae679f02"
+            ],
+            "appliedQualityData": "h264:hd:flv"
+          },
+          "requests": []
+        },
+        "h264:hd:hls": {
+          "result": {
+            "urls": [
+              "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd/index.m3u8?expire=1791749747&sign=e8d28a79023c39c200661fccd268a29a"
+            ],
+            "appliedQualityData": "h264:hd:hls"
+          },
+          "requests": []
+        },
+        "h265:hd:flv": {
+          "result": {
+            "urls": [
+              "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd5.flv?expire=1791749747&sign=578b5c72dc4ee60caea63367c29a80b2"
+            ],
+            "appliedQualityData": "h265:hd:flv"
+          },
+          "requests": []
+        },
+        "h265:hd:hls": {
+          "result": {
+            "urls": [
+              "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_hd5/index.m3u8?expire=1791749747&sign=1ead8f062d15a4f4ef27e9589c6948f6"
+            ],
+            "appliedQualityData": "h265:hd:hls"
+          },
+          "requests": []
+        },
+        "h265:sd:flv": {
+          "result": {
+            "urls": [
+              "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_sd5.flv?expire=1791749747&sign=47428c3dd46c036bb3a62f301f465365"
+            ],
+            "appliedQualityData": "h265:sd:flv"
+          },
+          "requests": []
+        },
+        "h265:sd:hls": {
+          "result": {
+            "urls": [
+              "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_sd5/index.m3u8?expire=1791749747&sign=59314e23acedbd6b0165debbc6530a2c"
+            ],
+            "appliedQualityData": "h265:sd:hls"
+          },
+          "requests": []
+        },
+        "h265:ld:flv": {
+          "result": {
+            "urls": [
+              "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980_ld5.flv?expire=1791749747&sign=dfd9c9b9f89900715dc1ac1a27df8713"
+            ],
+            "appliedQualityData": "h265:ld:flv"
+          },
+          "requests": []
+        },
+        "h265:ld:hls": {
+          "result": {
+            "urls": [
+              "https://pull-hls-f16-tt01.tiktokcdn.com/game/stream-3578925130487169980_ld5/index.m3u8?expire=1791749747&sign=e4731de361b43be4de8db4947f39b886"
+            ],
+            "appliedQualityData": "h265:ld:hls"
+          },
+          "requests": []
+        }
+      },
+      "resolvePlayUrlsForRecoveryRaw": {
+        "result": {
+          "urls": [
+            "https://pull-f5-tt01.tiktokcdn.com/game/stream-3578925130487169980.flv?expire=1791749747&sign=33187c8df95247f2866028de71159b42"
+          ],
+          "appliedQualityData": "h264:origin:flv"
+        },
+        "requests": [
+          "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=qvc"
+        ]
+      },
+      "getPlayQualites(refresh card)": {
+        "throws": "TikTokException",
+        "message": "TikTok identity"
+      }
+    }
+  }
+}

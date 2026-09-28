@@ -1,0 +1,333 @@
+{
+  "generator": "TikTokSite.getRoomDetailForRefresh + getRoomDetail + getRoomDetailForRecording + getLiveStatus + searchRooms + getPlayQualites + getPlayUrls + resolvePlayUrlsRaw + resolvePlayUrlsForRecoveryRaw + getDirectoryPage + getRecommendRooms; TikTokLink.parse + parseOrUsername + parseDurableUsername + normalizeUsername + url; WebSearchRoomParser.parse (TikTok step)",
+  "value": {
+    "getRoomDetailForRefresh(nasa)": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok missing"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "getRoomDetailForRefresh(NASA)": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok missing"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "getRoomDetailForRefresh(@nasa)": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok identity"
+      },
+      "requests": []
+    },
+    "getRoomDetail": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok missing"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok missing"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "getLiveStatus": {
+      "result": {
+        "throws": "TikTokException",
+        "message": "TikTok missing"
+      },
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "searchRooms(nasa)": {
+      "result": [],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "searchRooms(@nasa)": {
+      "result": [],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "searchRooms(NASA)": {
+      "result": [],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "searchRooms(https://www.tiktok.com/@nasa/live)": {
+      "result": [],
+      "requests": [
+        "https://www.tiktok.com/api-live/user/room/?aid=1988&sourceType=54&staleTime=600000&uniqueId=nasa"
+      ]
+    },
+    "searchRooms(https://vm.tiktok.com/ZMabcdef/)": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms(not a user!)": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms()": {
+      "result": [],
+      "requests": []
+    },
+    "searchRooms(nasa, page: 2)": {
+      "result": [],
+      "requests": []
+    },
+    "getPlayQualites": {
+      "getRoomDetail": {
+        "throws": "TikTokException",
+        "message": "TikTok missing"
+      }
+    },
+    "links": {
+      "nasa": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "nasa",
+        "WebSearchRoomParser.parse": null
+      },
+      "@nasa": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "NASA": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "nasa",
+        "WebSearchRoomParser.parse": null
+      },
+      " nasa ": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "nasa",
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@nasa": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": "nasa",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "nasa"
+        ]
+      },
+      "https://www.tiktok.com/@nasa/live": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": "nasa",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "nasa"
+        ]
+      },
+      "https://m.tiktok.com/@NASA/live/": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": "nasa",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "nasa"
+        ]
+      },
+      "http://tiktok.com/@nasa": {
+        "TikTokLink.parse": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "nasa"
+        },
+        "TikTokLink.parseDurableUsername": "nasa",
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": [
+          "tiktok",
+          "nasa"
+        ]
+      },
+      "https://www.tiktok.com/@nasa/video/7300000000000000000": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@nasa/live#chat": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://user:pass@www.tiktok.com/@nasa": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/@nasa/../live": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://vm.tiktok.com/ZMabcdef/": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/t/ZTabcdef/": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/share/live/7690279124098681614": {
+        "TikTokLink.parse": {
+          "kind": "roomId",
+          "id": "7690279124098681614"
+        },
+        "TikTokLink.parseOrUsername": {
+          "kind": "roomId",
+          "id": "7690279124098681614"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.com/share/live/123": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "https://www.tiktok.evil.com/@nasa": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "not a user!": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      },
+      "a..b": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "a..b"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "a..b",
+        "WebSearchRoomParser.parse": null
+      },
+      "_": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": {
+          "kind": "username",
+          "id": "_"
+        },
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": "_",
+        "WebSearchRoomParser.parse": null
+      },
+      "": {
+        "TikTokLink.parse": null,
+        "TikTokLink.parseOrUsername": null,
+        "TikTokLink.parseDurableUsername": null,
+        "TikTokLink.normalizeUsername": null,
+        "WebSearchRoomParser.parse": null
+      }
+    },
+    "TikTokLink.url": "https://www.tiktok.com/@nasa/live",
+    "getDirectoryPage": {
+      "result": {
+        "rooms": [],
+        "page": 1,
+        "hasMore": false
+      },
+      "requests": []
+    },
+    "getDirectoryPage(page: 2)": {
+      "result": {
+        "rooms": [],
+        "page": 2,
+        "hasMore": false
+      },
+      "requests": []
+    },
+    "getRecommendRooms": {
+      "result": [],
+      "requests": []
+    }
+  }
+}

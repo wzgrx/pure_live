@@ -49,6 +49,8 @@ export 'src/sites/picarto/picarto_api.dart';
 export 'src/sites/picarto/picarto_site.dart';
 export 'src/sites/soop/soop_api.dart';
 export 'src/sites/soop/soop_site.dart';
+export 'src/sites/tiktok/tiktok_api.dart';
+export 'src/sites/tiktok/tiktok_site.dart';
 export 'src/sites/twitcasting/twitcasting_api.dart';
 export 'src/sites/twitcasting/twitcasting_site.dart';
 export 'src/sites/twitch/twitch_api.dart';

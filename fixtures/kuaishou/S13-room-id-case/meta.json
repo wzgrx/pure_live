@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "platform": "kuaishou",
+  "sample": "S13-room-id-case",
+  "capturedAt": "2026-09-28T16:32:43.729473Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.kuaishou.com/u/kpl704668133",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+      "sec-ch-ua": "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "document",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-site": "same-origin",
+      "sec-fetch-user": "?1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "date": "Mon, 28 Sep 2026 16:32:45 GMT",
+      "content-type": "text/html; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "content-security-policy": "default-src 'self' 'unsafe-inline' *.yximgs.com *.kwimgs.com data: *.kskwai.com *.kgw.com blob: *;script-src 'self' 'unsafe-inline' 'unsafe-eval' *.yximgs.com *.kgw.com *.kskwai.com blob:;style-src 'self' 'unsafe-inline' *.kgw.com *.kskwai.com;frame-ancestors http://localhost:3000/ 'self' https://cf.qq.com https://wot.360.cn https://www.yjwujian.cn https://www.ssjj.cn https://ssjj.cn/games/taitan https://pnl.pwesports.cn/ https://pnl-qa.pwesports.cn/ https://lpl.qq.com/act/a20220322city https://pvp.qq.com https://nz.qq.com https://id5.163.com https://www.dota2.com.cn https://www.dota2.com.cn/international/2023/live https://cac.pwesports.cn https://cac.pwesports.cn/2023 https://cdn.df.qq.com",
+      "x-kslogid": "790613164713467365",
+      "x-ksclient-ip": "203.0.113.7",
+      "content-encoding": "br",
+      "set-cookie": [
+        "kuaishou.live.bfb1s=60796447308724587e8571c65094f405; path=/; httponly",
+        "clientid=3; path=/; expires=Tue, 28 Sep 2027 16:32:44 GMT; domain=live.kuaishou.com; httponly",
+        "did=mqx_472n3t57c8a4qs96778o20276efi57ea; path=/; expires=Tue, 28 Sep 2027 16:32:44 GMT; domain=live.kuaishou.com; httponly",
+        "client_key=96558010; path=/; expires=Tue, 28 Sep 2027 16:32:44 GMT; domain=live.kuaishou.com; httponly",
+        "kpn=BNZS_GVTS; path=/; expires=Tue, 28 Sep 2027 16:32:44 GMT; domain=live.kuaishou.com; httponly"
+      ]
+    }
+  },
+  "raw": {
+    "sha256": "c514f46567262f9c9eb45053143a48022b232d1907c5a6005cb9c496225132e1",
+    "length": 95591
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "text:did",
+      "rule": "secret"
+    },
+    {
+      "where": "text:userName",
+      "rule": "person"
+    },
+    {
+      "where": "text:txSecret",
+      "rule": "secret"
+    },
+    {
+      "where": "text:stat",
+      "rule": "secret"
+    },
+    {
+      "where": "text:auth_key",
+      "rule": "secret"
+    },
+    {
+      "where": "text:userId",
+      "rule": "person"
+    },
+    {
+      "where": "set-cookie:kuaishou.live.bfb1s",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:did",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:client_key",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:kpn",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-ksclient-ip",
+      "rule": "secret"
+    }
+  ],
+  "tool": "curl 8 + manual scrub with the live_cli kuaishou rules (M4.U.5)"
+}

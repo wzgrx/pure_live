@@ -239,6 +239,7 @@ void main() {
         'tiktok',
         'pandalive',
         'douyu',
+        'kuaishou',
       });
       expect(SiteIds.supported.toSet().containsAll(SiteIds.caseInsensitiveRoomIds), isTrue);
       for (final platform in SiteIds.supported) {

@@ -59,9 +59,10 @@ final class KuaishouSite extends LiveSite
   _Session? _session;
   Future<void>? _bootstrap;
 
-  /// The cursor each area page needs, by `areaId#page`: '' for none, null
-  /// past the last page.
-  final Map<String, String?> _areaCursors = {};
+  /// What each area page after the first needs, by `areaId#page`: the
+  /// previous page's `cursor` ('' for none) and the identities of the rooms
+  /// listed on the pages before it; null past the last page.
+  final Map<String, ({String cursor, Set<String> listed})?> _areaPages = {};
 
   @override
   String get id => _site;
@@ -228,19 +229,25 @@ final class KuaishouSite extends LiveSite
   /// page after the first sends the previous page's `cursor` (3.x never
   /// did and got page 1 again); a page not reached yet is walked to from
   /// page 1, and a page past the last is empty without a request.
+  ///
+  /// A room already listed on an earlier page since page 1 was last read,
+  /// or earlier on the same page, is left out: the live ranking shifts
+  /// between requests and a room moving down shows up again on the next
+  /// page (docs/UPGRADES.md, "翻页"). Reading page 1 again starts over.
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) =>
       _areaRooms(category.areaId.trim(), page < 1 ? 1 : page);
 
   Future<List<LiveRoom>> _areaRooms(String areaId, int page) async {
-    String? cursor;
+    var cursor = '';
+    var listed = const <String>{};
     if (page > 1) {
       final key = '$areaId#$page';
-      if (!_areaCursors.containsKey(key)) await _areaRooms(areaId, page - 1);
-      if (!_areaCursors.containsKey(key)) return const [];
-      final stored = _areaCursors[key];
+      if (!_areaPages.containsKey(key)) await _areaRooms(areaId, page - 1);
+      if (!_areaPages.containsKey(key)) return const [];
+      final stored = _areaPages[key];
       if (stored == null) return const [];
-      if (stored.isNotEmpty) cursor = stored;
+      (:cursor, :listed) = stored;
     }
     final board = areaId.length < 7 ? 'gameboard' : 'non-gameboard';
     final response = await _get(
@@ -249,7 +256,7 @@ final class KuaishouSite extends LiveSite
         'pageSize': '20',
         'gameId': areaId,
         'page': '$page',
-        'cursor': ?cursor,
+        if (cursor.isNotEmpty) 'cursor': cursor,
       }),
       _webHeaders(),
     );
@@ -259,12 +266,17 @@ final class KuaishouSite extends LiveSite
       cookie: _danmakuCookie(),
       status: response.status,
     );
+    final seen = {...listed};
+    final rooms = [
+      for (final room in result.rooms)
+        if (seen.add(room.identityKey)) room,
+    ];
     final next = '$areaId#${page + 1}';
-    _areaCursors
+    _areaPages
       ..remove(next)
-      ..[next] = result.hasMore ? result.cursor ?? '' : null;
-    if (_areaCursors.length > 256) _areaCursors.remove(_areaCursors.keys.first);
-    return result.rooms;
+      ..[next] = result.hasMore ? (cursor: result.cursor ?? '', listed: Set.unmodifiable(seen)) : null;
+    if (_areaPages.length > 256) _areaPages.remove(_areaPages.keys.first);
+    return rooms;
   }
 
   /// The home list: one page (3.x answered every page with it), one card

@@ -243,7 +243,8 @@ void main() {
     test('game areas (id shorter than 7) page by number on gameboard/list', () async {
       final setup = _setup(['S02-gameboard-p1', 'S02-gameboard-p2']);
       expect(await setup.site.getCategoryRooms(game), hasLength(20));
-      expect(await setup.site.getCategoryRooms(game, page: 2), hasLength(20));
+      // 20 cards, one of them already on page 1 (M4.U.5, see below).
+      expect(await setup.site.getCategoryRooms(game, page: 2), hasLength(19));
       expect(setup.http.requests.map((request) => request.url), [
         Fixture.load('kuaishou', 'S02-gameboard-p1').url,
         Fixture.load('kuaishou', 'S02-gameboard-p2').url,
@@ -288,6 +289,71 @@ void main() {
       expect(await endPage.site.getCategoryRooms(small), hasLength(1));
       expect(await endPage.site.getCategoryRooms(small, page: 2), isEmpty);
       expect(endPage.http.requests, hasLength(1));
+    });
+
+    test('M4.U.5 翻页: a room already listed since page 1 is left out of later pages; no extra request', () async {
+      // The live ranking moved between the two recorded requests: qingyi223
+      // is on both pages.
+      final setup = _setup(['S02-gameboard-p1', 'S02-gameboard-p2']);
+      final page1 = await setup.site.getCategoryRooms(game);
+      expect(page1.map((room) => room.roomId), contains('qingyi223'));
+      final raw2 = [
+        for (final item
+            in ((jsonDecode(Fixture.load('kuaishou', 'S02-gameboard-p2').body) as Map)['data'] as Map)['list'] as List)
+          ((item as Map)['author'] as Map)['id'] as String,
+      ];
+      expect(raw2, contains('qingyi223'));
+      final page2 = await setup.site.getCategoryRooms(game, page: 2);
+      expect(page2.map((room) => room.roomId), [...raw2.where((id) => id != 'qingyi223')], reason: 'order kept');
+      expect(
+        (await setup.site.getCategoryRooms(game, page: 2)).map((room) => room.roomId),
+        page2.map((room) => room.roomId),
+        reason: 'reading a page again gives the same rooms',
+      );
+      await setup.site.getCategoryRooms(game);
+      expect(await setup.site.getCategoryRooms(game, page: 2), hasLength(19), reason: 'page 1 again starts over');
+      expect(setup.http.requests, hasLength(5), reason: 'one request per page read, as before');
+
+      final repeated = _setup(
+        [],
+        extra: [
+          _synthetic('https://live.kuaishou.com/live_api/gameboard/list?filterType=0&pageSize=20&gameId=7&page=1', {
+            'data': {
+              'hasMore': false,
+              'list': [
+                for (final id in ['a', 'b', 'a'])
+                  {
+                    'id': 'L$id',
+                    'author': {'id': id},
+                  },
+              ],
+            },
+          }),
+        ],
+      );
+      expect(
+        (await repeated.site.getCategoryRooms(const LiveArea(platform: 'kuaishou', areaId: '7')))
+            .map((room) => room.roomId),
+        ['a', 'b'],
+        reason: 'and once within a page',
+      );
+    });
+
+    test('M4.U.5 开播时间: a card’s start stays with a follow refreshed while live and goes when it ends', () async {
+      final setup = _setup(
+        ['S02-gameboard-p1', 'S09-room-live'],
+        script: {
+          '/u/$_live': [ReplaySample.load('$_root/S09-room-live'), _moved('S11-room-offline', _page(_live))],
+        },
+      );
+      final card = (await setup.site.getCategoryRooms(game)).firstWhere((room) => room.roomId == _live);
+      expect(card.startedAt, DateTime.utc(2026, 9, 27, 9, 19, 38, 677), reason: 'statrtTime 1790500778677');
+      expect(card.restriction, LiveRestriction.none);
+      final live = card.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: _live));
+      expect((live.isLiveNow, live.startedAt, live.restriction), (true, card.startedAt, LiveRestriction.none));
+      final ended = live.mergeFrom(await setup.site.getRoomDetailForRefresh(roomId: _live));
+      expect((ended.isLiveNow, ended.startedAt, ended.restriction), (false, null, null));
+      expect(_count(setup.http, '/u/$_live'), 2, reason: 'one request per refresh, as before');
     });
   });
 
@@ -607,6 +673,55 @@ void main() {
         ),
         throwsA(isA<NotFound>()),
       );
+    });
+
+    test('M4.U.5 受限: a living page without streams is live and unplayable; playing it asks nothing more', () async {
+      // A user cookie keeps the anonymous session out of the trace.
+      final vault = MemoryCookieVault()..set('kuaishou', 'did=user');
+      addTearDown(vault.dispose);
+      final setup = _setup(
+        [],
+        cookies: vault,
+        extra: [
+          _synthetic(
+            _page('abc'),
+            '<html><script>window.__INITIAL_STATE__=${jsonEncode({
+              'liveroom': {
+                'playList': [
+                  {
+                    'isLiving': true,
+                    'author': {'id': 'abc', 'name': 'A'},
+                    'liveStream': {
+                      'id': 'L1',
+                      'playUrls': {'h264': <String, dynamic>{}, 'hevc': <String, dynamic>{}},
+                    },
+                  },
+                ],
+              },
+            })};</script></html>',
+          ),
+        ],
+      );
+      final room = await setup.site.getRoomDetail(roomId: 'abc');
+      expect(
+        (room.isLiveNow, room.restriction, room.followGroup),
+        (true, LiveRestriction.unplayable, FollowGroup.live),
+      );
+      await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
+      expect(_trace(setup.http), ['GET /u/abc did=user'], reason: 'the page it was opened with already said so');
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: 'abc');
+      expect(refreshed.restriction, LiveRestriction.unplayable, reason: 'the refresh reads the same page');
+    });
+
+    test('M4.U.5 房间身份: a follow stored in another case takes the refresh of its lower-case id', () async {
+      final setup = _setup(['S13-room-id-case']);
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: 'kpl704668133');
+      expect(_trace(setup.http), ['GET /u/kpl704668133 -']);
+      final follow = LiveRoom(platform: 'kuaishou', roomId: _loop, nick: 'old', tagIds: const ['t']);
+      final merged = follow.mergeFrom(refreshed);
+      expect((merged.roomId, merged.nick, merged.isLiveNow), (_loop, refreshed.nick, true));
+      expect(merged.tagIds, ['t']);
+      expect({follow, refreshed}, hasLength(1), reason: 'one room whatever the case');
     });
 
     test('a card’s streams play without a request', () async {

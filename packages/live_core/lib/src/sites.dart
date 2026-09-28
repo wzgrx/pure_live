@@ -204,12 +204,15 @@ abstract final class SiteIds {
   /// - Douyu: a rid or 靓号 (digits) or an alias. The room page redirects an
   ///   alias in any case to the same rid (`lpl`, `LPL`, `Lpl` → 288016,
   ///   M4.U.2).
+  /// - Kuaishou: the user id. The room page finds a streamer in any case and
+  ///   answers its own spelling (`kpl704668133` → `KPL704668133`,
+  ///   `3X6B3WKUDIYPU2C` → `3x6b3wkudiypu2c`; M4.U.5, sample S13).
   ///
   /// Not included: numeric ids (case does not apply), YouTube video and
   /// channel ids (case-sensitive), niconico programme ids, CHZZK channel ids
   /// (hex the adapter already lower-cases), and ids whose case rule the
-  /// platform has not shown: Huya aliases, Kuaishou user ids, Bigo ids.
-  static const Set<String> caseInsensitiveRoomIds = {twitch, soop, picarto, twitcasting, tiktok, pandaLive, douyu};
+  /// platform has not shown: Huya aliases, Bigo ids.
+  static const Set<String> caseInsensitiveRoomIds = {twitch, soop, picarto, twitcasting, tiktok, pandaLive, douyu, kuaishou};
 
   /// Whether rooms of [platform] are identified without regard to the room
   /// id's case (see [caseInsensitiveRoomIds]).

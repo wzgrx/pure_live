@@ -123,6 +123,8 @@ abstract final class KuaishouApi {
   /// area page, and the paging the server reports (`hasMore`, and the
   /// non-gameboard `cursor` the next page must send). A card without an
   /// author id is skipped; missing fields are empty (3.x failed the page).
+  /// Cards carry the broadcast's start and, when they have streams, no
+  /// restriction (see [LiveRoom.startedAt], [LiveRoom.restriction]).
   static ({List<LiveRoom> rooms, bool hasMore, String? cursor}) areaRooms(
     String body, {
     required DateTime issuedAt,
@@ -220,6 +222,15 @@ abstract final class KuaishouApi {
   /// and, with [withStreams], its `playUrls` go into [KuaishouRoomData];
   /// the danmaku arguments carry [cookie]. [url] is the page's final URL
   /// (a verification redirect is `RiskControl`).
+  ///
+  /// A living room's [LiveRoom.restriction] is [LiveRestriction.none] when
+  /// `playUrls` has a playable quality and [LiveRestriction.unplayable]
+  /// when the page says living but gives this client none; it is read with
+  /// or without [withStreams]. `liveStream.privateLive` is not read: it was
+  /// false on every recorded page, so what true means (and whether such a
+  /// page still has streams) is unknown. The page has no broadcast start
+  /// (the `startTime` values in it belong to site configuration), so
+  /// [LiveRoom.startedAt] stays null; cards have it.
   static LiveRoom roomDetail(
     String body, {
     required String requestedId,
@@ -237,6 +248,7 @@ abstract final class KuaishouApi {
     final description = _text(author['description']);
     final liveStreamId = jsonString(stream['id']);
     final id = requestedId.trim();
+    final living = _truthy(room['isLiving']);
     return LiveRoom(
       roomId: id,
       platform: _site,
@@ -248,7 +260,8 @@ abstract final class KuaishouApi {
       watching: '',
       audienceMetricType: AudienceMetricType.onlineViewers,
       followers: jsonString(_fields(author['counts'])['fan']) ?? '0',
-      liveStatus: _truthy(room['isLiving']) ? LiveStatus.live : LiveStatus.offline,
+      liveStatus: living ? LiveStatus.live : LiveStatus.offline,
+      restriction: living ? _restriction(stream['playUrls']) ?? LiveRestriction.unplayable : null,
       link: roomPageUrl(id),
       introduction: description,
       notice: description,
@@ -474,6 +487,12 @@ abstract final class KuaishouApi {
   /// (the lists hold live rooms; the card's own `living` is false even for
   /// them). 3.x kept `liveStreamId` in `link`; it is in [KuaishouRoomData]
   /// now and `link` is the room page.
+  ///
+  /// [LiveRoom.startedAt] is the card's `statrtTime` (the platform's
+  /// spelling; `startTime` is accepted too), in epoch milliseconds. A card
+  /// with a playable stream has no restriction ([LiveRestriction.none]); a
+  /// card without one leaves it unknown, since a list may leave streams out
+  /// and the room page decides.
   static LiveRoom? _card(Object? value, {required DateTime issuedAt, required String cookie, bool recommend = false}) {
     final item = _object(value);
     if (item == null) return null;
@@ -497,6 +516,8 @@ abstract final class KuaishouApi {
       onlineViewers: watching,
       audienceMetricType: AudienceMetricType.onlineViewers,
       liveStatus: LiveStatus.live,
+      startedAt: _epochMilliseconds(item['statrtTime']) ?? _epochMilliseconds(item['startTime']),
+      restriction: _restriction(item['playUrls']),
       link: roomPageUrl(id),
       introduction: recommend ? flatBio ?? '' : null,
       notice: recommend ? bio : null,
@@ -518,6 +539,19 @@ abstract final class KuaishouApi {
     final dot = name.lastIndexOf('.');
     return dot >= 0 && _imageExtensions.contains(name.substring(dot + 1).toLowerCase()) ? url : '$url.jpg';
   }
+
+  /// [LiveRestriction.none] when [playUrls] has a playable quality, else
+  /// null (the caller decides what having none means).
+  static LiveRestriction? _restriction(Object? playUrls) => _tiers(playUrls).isEmpty ? null : LiveRestriction.none;
+
+  /// A time in epoch milliseconds; null for 0, negatives, values that are
+  /// not milliseconds (before 2001 or after 2286, such as a time in
+  /// seconds) and anything that is not an integer.
+  static DateTime? _epochMilliseconds(Object? value) => switch (jsonInt(value)) {
+    final int milliseconds when milliseconds >= 1000000000000 && milliseconds < 10000000000000 =>
+      DateTime.fromMillisecondsSinceEpoch(milliseconds, isUtc: true),
+    _ => null,
+  };
 
   /// `liveroom.playList[0]` of a room page, with the status and `errorType`
   /// mapping applied.

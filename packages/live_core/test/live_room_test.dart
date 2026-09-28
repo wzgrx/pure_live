@@ -128,8 +128,15 @@ void main() {
       expect(room.toJson()['status'], isFalse);
     });
 
-    test('the enum order is the stored format', () {
-      expect(LiveStatus.values.map((value) => value.name), ['live', 'offline', 'replay', 'unknown', 'banned']);
+    test('the enum order is the stored format (3.x five, then appended states)', () {
+      expect(LiveStatus.values.map((value) => value.name), [
+        'live',
+        'offline',
+        'replay',
+        'unknown',
+        'banned',
+        'carousel',
+      ]);
     });
 
     test('a base site without platform evidence gives an unknown room', () async {

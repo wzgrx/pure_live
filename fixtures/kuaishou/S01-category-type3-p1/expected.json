@@ -1,0 +1,457 @@
+{
+  "generator": "KuaishowSite.getSubCategores",
+  "value": {
+    "getSubCategores": [
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22744",
+        "areaName": "格斗游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22744-20240619160209.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22762",
+        "areaName": "黑神话悟空",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22762-20240813185304.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22088",
+        "areaName": "经典单机",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22088-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "15",
+        "areaName": "街机游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-15-20181130184459.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22193",
+        "areaName": "植物大战僵尸",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22193-20220530172816.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22743",
+        "areaName": "奥特曼传奇英雄2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22743-20240617191530.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22139",
+        "areaName": "NBA2k系列",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22139-20200429151033.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22190",
+        "areaName": "生化危机系列",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22190-20220530172810.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22716",
+        "areaName": "燕云十六声",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22716-20231229112326.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22624",
+        "areaName": "快邀足球",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22624-20221107143903.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22189",
+        "areaName": "红警",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22189-20201012213553.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22013",
+        "areaName": "方舟",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22013-20220530172821.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22616",
+        "areaName": "互动玩法",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22616-20221012152110.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22138",
+        "areaName": "逃离塔科夫",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22138-20200427144702.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22020",
+        "areaName": "战神系列",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22020-20220530172810.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22788",
+        "areaName": "界外狂潮",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22788-20250305190007.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22073",
+        "areaName": "恐惧饥饿",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22073-20220711161345.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22039",
+        "areaName": "饥荒",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22039-20220530172826.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22078",
+        "areaName": "战地系列",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22078-20181129155710.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22601",
+        "areaName": "房地产大亨",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22601-20220803202035.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22085",
+        "areaName": "APEX英雄",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22085-20220530172820.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22051",
+        "areaName": "武侠乂",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22051-20220530172815.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22053",
+        "areaName": "流星蝴蝶剑",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22053-20181127103806.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22067",
+        "areaName": "荒野大镖客：救赎",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22067-20181130184528.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22220",
+        "areaName": "赛博朋克2077",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22220-20220530172811.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22045",
+        "areaName": "NBA2KOL2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22045-20220530172818.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22133",
+        "areaName": "骑马与砍杀系列",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22133-20200407134211.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22772",
+        "areaName": "解限机",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22772-20241111152757.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22804",
+        "areaName": "FCONLINE",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22804-20250730200417.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22830",
+        "areaName": "天使魔剑",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22830-20260303191054.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22352",
+        "areaName": "鬼谷八荒",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22352-20220530172804.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22412",
+        "areaName": "冰与火之舞",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22412-20220530172809.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22562",
+        "areaName": "灵境奇谈",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22562-20220530172808.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22670",
+        "areaName": "暗黑破坏神4",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22670-20230605180343.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22052",
+        "areaName": "怪物猎人系列",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22052-20181130184445.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22054",
+        "areaName": "古墓丽影系列",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22054-20181130184459.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22071",
+        "areaName": "FIFA ONLINE4",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22071-20220530172804.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22252",
+        "areaName": "红警OL",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22252-20220530172815.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22689",
+        "areaName": "奥特曼传奇英雄",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22689-20230822142114.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22712",
+        "areaName": "猛兽派对",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22712-20231129170610.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22719",
+        "areaName": "幻兽帕鲁",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22719-20240202163356.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22726",
+        "areaName": "浪人崛起",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22726-20240321163553.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22824",
+        "areaName": "奥星热浪",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22824-20260206141048.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22093",
+        "areaName": "只狼：影逝二度",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22093-20220530172812.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22194",
+        "areaName": "看门狗军团",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22194-20220530172811.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22351",
+        "areaName": "英灵神殿",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22351-20220530172809.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22386",
+        "areaName": "双人成行",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22386-20220530172815.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22424",
+        "areaName": "都市天际线",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22424-20220530172821.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22565",
+        "areaName": "赏金游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22565-20220530172817.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "3",
+        "typeName": "单机",
+        "areaId": "22715",
+        "areaName": "最终决战",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22715-20231225164958.png",
+        "shortName": null
+      }
+    ]
+  }
+}

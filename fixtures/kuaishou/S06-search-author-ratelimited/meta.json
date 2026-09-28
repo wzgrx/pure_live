@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "platform": "kuaishou",
+  "sample": "S06-search-author-ratelimited",
+  "capturedAt": "2026-09-27T10:20:40.205366Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://live.kuaishou.com/live_api/search/author?keyword=%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80&page=1&lssid=",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
+      "connection": "keep-alive",
+      "sec-ch-ua": "Google Chrome;v=107, Chromium;v=107, Not=A?Brand;v=24",
+      "sec-ch-ua-platform": "macOS",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-User": "?1",
+      "Referer": "https://live.kuaishou.com/search?keyword=%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "keep-alive",
+      "set-cookie": [
+        "clientid=3; path=/; expires=Mon, 27 Sep 2027 10:20:40 GMT; domain=kuaishou.com; httponly",
+        "did=nas_9l304b6010779407k8b8z250p0upw1k8; path=/; expires=Mon, 27 Sep 2027 10:20:40 GMT; domain=kuaishou.com; httponly"
+      ],
+      "date": "Sun, 27 Sep 2026 10:20:40 GMT",
+      "x-ksclient-ip": "534.071.262.389",
+      "content-length": "141",
+      "content-type": "application/json; charset=utf-8",
+      "x-kslogid": "790504440538254951"
+    }
+  },
+  "raw": {
+    "sha256": "250c400268bd39f38aff1b40945d2a96631c2677e565a67e23f2e520397b9fe3",
+    "length": 141
+  },
+  "body": "body.json",
+  "scrubbed": [
+    {
+      "where": "$.data.host-name",
+      "rule": "secret"
+    },
+    {
+      "where": "set-cookie:did",
+      "rule": "secret"
+    },
+    {
+      "where": "header:x-ksclient-ip",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli fixture capture (schema 1)"
+}

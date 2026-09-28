@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "platform": "kuaishou",
+  "case": "S16-live",
+  "room": "kuaishou:Kslala666",
+  "danmakuKeys": {
+    "liveStreamId": "tboibnUkiRK"
+  },
+  "capturedAt": "2026-09-27T14:40:24.598373Z",
+  "route": "direct",
+  "handshakes": [],
+  "frames": 10,
+  "raw": {
+    "sha256": "ceba267cadf71485fe8bac9796683bf730a80a5be586da9e16f91d033d10e345",
+    "length": 14450
+  },
+  "scrubbed": [
+    {
+      "where": "$.liveStreamFeeds[*].author",
+      "rule": "person"
+    },
+    {
+      "where": "$.liveStreamFeeds[*].content",
+      "rule": "person"
+    },
+    {
+      "where": "url.liveStreamId",
+      "rule": "secret"
+    }
+  ],
+  "tool": "live_cli danmaku --record (schema 1)"
+}

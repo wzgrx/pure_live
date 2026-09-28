@@ -1,0 +1,1657 @@
+{
+  "data": {
+    "list": [
+      {
+        "id": "Wr6HxVR1N7Q",
+        "poster": "https://p5-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzU0MzZfMTk3NDc2NzIxNV8xNDk2OTEyMjc2Nl9sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/Wr6HxVR1N7Q_ShowAvcHdL0.flv?txSecret=467646dcd5146566a6e37d777c7f4825&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "吉林省二人转艺术剧院直播中",
+        "statrtTime": 1790502874848,
+        "author": {
+          "id": "3xcrxpqgcstd4vq",
+          "name": "吉林省二人转艺术剧院",
+          "description": "吉林省二人转艺术剧院是一家以演出二人转为主，戏剧、歌舞、小品为辅的专业艺术表演团体。",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/02/28/16/BMjAyNTAyMjgxNjQzMTlfMTk3NDc2NzIxNV8yX2hkMTcyXzEyNQ==_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 1974767215,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": true,
+            "description": "",
+            "type": 1,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "546",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "P4lpMlO94Hg",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/14/BMjAyNjA5MjcxNDU0MTFfNDk2OTYxMzIwM18xNDk2ODg0MzA3N19sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "bitrate": 1000,
+                  "qualityType": "STANDARD",
+                  "level": 30,
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": false,
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/P4lpMlO94Hg_ShowAvcSdL0.flv?txSecret=5c8ee87b1e71839e73e5c8c142aba96d&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=edgeWm&sidc=2959&no_script=1&ss=s20&tfc_buyer=0",
+                  "name": "高清",
+                  "shortName": "高清"
+                },
+                {
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true,
+                  "id": 1,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/P4lpMlO94Hg_ShowAvcHdL0.flv?txSecret=32d7bf46e0c572254630de773365dba5&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=edgeWm&sidc=2959&no_script=1&ss=s20&tfc_buyer=0",
+                  "name": "超清",
+                  "shortName": "超清"
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "果果分享豫剧",
+        "statrtTime": 1790492048701,
+        "author": {
+          "id": "3xfmmhy89ufmn6y",
+          "name": "果果爱听戏",
+          "description": "一个戏曲爱好者，没事直播听听戏曲",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/08/18/22/BMjAyNTA4MTgyMjA3NDNfNDk2OTYxMzIwM18yX2hkNDg4XzY3Nw==_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 4969613203,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "high",
+        "qualityLabel": "超清",
+        "watchingCount": "538",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "HuiMpHJWmhs",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/14/BMjAyNjA5MjcxNDQ4MDhfNzY0MjU1OTQxXzE0OTY4ODMzNDk3X2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/HuiMpHJWmhs_ma1500-AuditAvcOriginL3.flv?txSecret=69e936c63b9e5fb155927002cebc0054&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=206577&no_script=1&srcStrm=HuiMpHJWmhs&ss=s20&tfc_buyer=1",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "铁粉们进来看戏",
+        "statrtTime": 1790491686287,
+        "author": {
+          "id": "3x8xf6v4brtphc2",
+          "name": "阳光三姐 521（会珍）",
+          "description": "感谢快手平台，感谢帮过我的人，自从我走了网络道路，认识了很多的朋友，感恩帮过我的人，不管是滴水之恩，还是举手之劳，都铭记于心，人活一世，遇人万千，懂你的人不多，帮过你的人 是贵人，这样的人不多，倍感珍惜，做人，永远要记得感恩！感恩我生命中的贵人🙏🙏",
+          "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2025/04/05/16/BMjAyNTA0MDUxNjM1NDVfNzY0MjU1OTQxXzJfaGQ0OTVfMTM=_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 764255941,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "500",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "TgPIKB3DxKk",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/15/BMjAyNjA5MjcxNTM3NDNfNjk4MTY4MTlfMTQ5Njg5MTQ1MTBfbHY=.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/TgPIKB3DxKk_ShowAvcHdL0.flv?txSecret=a324c5de44cb77188c1e479ff4c654a3&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "中秋快乐",
+        "statrtTime": 1790494661912,
+        "author": {
+          "id": "3xjsu4uphrnykdy",
+          "name": "二人转王靖惠。",
+          "description": "每天下午2.30点直播\n谢谢关注➕",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/04/16/02/BMjAyNjA0MTYwMjI2MTBfNjk4MTY4MTlfMV9oZDE2M185OTQ=_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 69816819,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "491",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "Zm2tIP5YgbA",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/10/BMjAyNjA5MjcxMDE3MDFfMTQ1MjA3NTgxM18xNDk2ODQyODI3N19sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "bitrate": 1000,
+                  "qualityType": "STANDARD",
+                  "level": 30,
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": false,
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/Zm2tIP5YgbA_ShowAvcSdL0.flv?txSecret=21ce5ca31624262cc673577f7f096ecf&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0",
+                  "name": "高清",
+                  "shortName": "高清"
+                },
+                {
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true,
+                  "id": 1,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/Zm2tIP5YgbA_ShowAvcHdL1.flv?txSecret=146abfebdbd5dd605f4dea33be9331c3&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0",
+                  "name": "超清",
+                  "shortName": "超清"
+                },
+                {
+                  "bitrate": 4000,
+                  "qualityType": "SUPER",
+                  "level": 70,
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": false,
+                  "id": 2,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/Zm2tIP5YgbA_ShowAvcHdL2.flv?txSecret=c8d05074c768a95f734f48d3c912bfb2&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0",
+                  "name": "蓝光 4M",
+                  "shortName": "4M"
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "安徽快手第一女团.....",
+        "statrtTime": 1790475418320,
+        "author": {
+          "id": "3x3gwk6ufme9t72",
+          "name": "TC布丁女团-A",
+          "description": "王者荣耀陈天赐和QQ飞车布丁创建的TC布丁女团安徽芜湖团！\n每天上午10点和下午7点两场直播，两班人码！\n主播禁止以各种形式收取转账以及红包！举报并核实奖励1000元红包，且全额退还转账以及红包，主播扣除当月工资！",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/09/11/20/BMjAyNTA5MTEyMDUwMjVfMTQ1MjA3NTgxM18xX2hkMjQ5Xzk0Nw==_s.jpg",
+          "sex": "M",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 1452075813,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "super",
+        "qualityLabel": "蓝光 4M",
+        "watchingCount": "474",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "aJJrirpVIuo",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzQ5NTBfODE1MTUyMDMzXzE0OTY5MTE1NDg4X2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "bitrate": 1000,
+                  "qualityType": "STANDARD",
+                  "level": 30,
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": false,
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/aJJrirpVIuo_ShowAvcSdL0.flv?txSecret=15f3f0a27c693a24e3fbc5cded6d7e1e&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2959&no_script=1&ss=s20&tfc_buyer=0",
+                  "name": "高清",
+                  "shortName": "高清"
+                },
+                {
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true,
+                  "id": 1,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/aJJrirpVIuo_ShowAvcHdL0.flv?txSecret=f689b6111826863a9357f12f4ebc8de2&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2959&no_script=1&ss=s20&tfc_buyer=0",
+                  "name": "超清",
+                  "shortName": "超清"
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "晋梆大舞台—中秋国乐专场",
+        "statrtTime": 1790502587251,
+        "author": {
+          "id": "3x7k29w2txyvqyy",
+          "name": "《晋梆大舞台》橙色夫妻",
+          "description": "演出合作电话：13934615451\n★一级演员\n★荣获联合国世界非遗国际和平艺术家\n★2025年中国文化国际传播年度人物奖\n★《星光大道》2019年度总决赛“五强”\n★太原市环卫工人“形象代言人” \n★CCTⅤ-1 CCTV-3《星光大道》《民歌中国》《中国民歌盛典》《向幸福出发》《幸福账单》《回声嘹亮》《开门大吉》特邀嘉宾 \n★小桔灯爱心联盟“爱心公益大使” \n★中国第六届原生民歌大赛“特别奖” \n★全国职业院校技能大赛“一等奖”  \n★山西省政府最高奖项“杏花奖”\n；",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2019/12/21/00/BMjAxOTEyMjEwMDQ4MjFfODE1MTUyMDMzXzJfaGQ3OTdfOTIz_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 815152033,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "high",
+        "qualityLabel": "超清",
+        "watchingCount": "432",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "dy3gamPPzp4",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzQ1MjJfMTMxNzg0MzA1N18xNDk2OTEwODgzMV9sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/dy3gamPPzp4_ShowAvcHdL0-AuditAvcOriginL3.flv?txSecret=35b97ea48a428f8c214e89fdf291c0cd&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&srcStrm=dy3gamPPzp4&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "直播高跷秧歌",
+        "statrtTime": 1790502320600,
+        "author": {
+          "id": "3xa9wc47q84miks",
+          "name": "建平开心",
+          "description": "建平开心每天晚18点直播高跷秧歌",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2023/02/02/22/BMjAyMzAyMDIyMjIwMTZfMTMxNzg0MzA1N18yX2hkNDYyXzcy_s.jpg",
+          "sex": "M",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 1317843057,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "432",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "EVLoLYl2fY0",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/18/BMjAyNjA5MjcxODExMjBfNjM0OTc3MzkyXzE0OTY5MTU1MjIzX2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/EVLoLYl2fY0_ma1500-AuditAvcOriginL3.flv?txSecret=81c9e34a92104738e00fde1e8ef073af&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2959&no_script=1&srcStrm=EVLoLYl2fY0&ss=s20&tfc_buyer=1",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "恭贺计珍儿子结婚",
+        "statrtTime": 1790503878993,
+        "author": {
+          "id": "3xa86yrrjhtrdg2",
+          "name": "高小燕小号",
+          "description": "敢于奋斗，勇往直前，人生坎坷，但要继续！13834752691",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2021/04/17/09/BMjAyMTA0MTcwOTU0NTJfNjM0OTc3MzkyXzJfaGQ2MTdfNzA3_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 634977392,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "406",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "6RuLkC2zmtg",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzU5MTZfOTY2MjE4OTdfMTQ5NjkxMzEyMThfbHY=.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/6RuLkC2zmtg_ShowAvcHdL0-AuditAvcOriginL3.flv?txSecret=f63f02e059114b0aaa0c4c7b1124a04b&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&srcStrm=6RuLkC2zmtg&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "盘锦张有才乡村大舞台",
+        "statrtTime": 1790503153395,
+        "author": {
+          "id": "3x3zupssitp3sq9",
+          "name": "盘锦张有才《乡村大舞台》",
+          "description": "辽宁盘锦婚礼主持人歌手张宇，可全国接单，承接各种开业庆典活动主持唱歌🎤婚礼，祝寿，开业，满月宴，升学宴！酷🐶词曲原创《干杯吧好兄弟》原创改编婚礼开场曲《我叫张有才》酷🐶原唱单曲《都挺不容易》《春秋大梦》谢谢大家支持🙏",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/11/04/12/BMjAyNTExMDQxMjMxMzJfOTY2MjE4OTdfMV9oZDc3NV80Njc=_s.jpg",
+          "sex": "M",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 96621897,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "377",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "5ibvXfR47Js",
+        "poster": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzM0MTdfNDM2Nzg3MTgxXzE0OTY5MDkyNzI0X2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/5ibvXfR47Js_ShowAvcHdL0.flv?txSecret=8fb8b297666bf0001df828252b092820&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "东环岛广场大秧歌",
+        "statrtTime": 1790501655737,
+        "author": {
+          "id": "3xxmfc23wgy8ksg",
+          "name": "孙大美",
+          "description": "🌹每晚六点直播东北大秧歌、高跷🌹\n🌹一份耕耘一份收获，未必；🌹\n🌹九份耕耘一份收获，一定。🌹\n❤感谢快手平台感谢所有的朋友❤\n🙏感谢每一位家人的关注与陪伴🙏\n❤感恩所有遇见❤有你们真好❤",
+          "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2025/02/08/10/BMjAyNTAyMDgxMDQ1NDdfNDM2Nzg3MTgxXzJfaGQyODVfOTMz_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 436787181,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "375",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "1CtK11J2esc",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjU3MzlfMTUxODUzMTc1OF8xNDk2OTAzNTkzOV9sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://ws-origin.pull.yximgs.com/gifshow/1CtK11J2esc_ShowAvcHdL0.flv?wsTime=6aba3f61&wsSecret=434ce7f4bd306ba77f0641a06d5399cf&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "家人们开心快乐",
+        "statrtTime": 1790499457130,
+        "author": {
+          "id": "3xadg6kyb3gd35g",
+          "name": "女神带刺玫瑰520",
+          "description": "晚五点直播，让我们一起走进快手平台，感谢官方，感谢快手平台能认识这么多的新老朋友，官方大大能多多支持和鼓励谢谢，快手不倒女神陪你到老，女神的爱，只爱一人，是你吗？\n❗️私信的都是骗子，请注意辨别粉丝量，谨防上当受骗。",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/26/16/BMjAyNjA5MjYxNjU5NDRfMTUxODUzMTc1OF8xX2hkNzgyXzQwOQ==_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 1518531758,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "369",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "wGIZYEYjQ8E",
+        "poster": "https://p5-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzE3MDVfNjg3NTM1MDQ1XzE0OTY5MDY2NDMzX2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/wGIZYEYjQ8E_ShowAvcHdL0.flv?txSecret=1e3a2795a0a9449ef0adb6894678d4a2&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "快手大舞台 有梦咱都来",
+        "statrtTime": 1790500623160,
+        "author": {
+          "id": "3xaaz4rkbederni",
+          "name": "维姐",
+          "description": "终其一生为尔而活",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/10/10/20/BMjAyNTEwMTAyMDE4MTVfNjg3NTM1MDQ1XzJfaGQ3NDlfODQ1_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 687535045,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "354",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "pkIv5brd4es",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjMxNDNfMTM2MjExMjIzXzE0OTY4OTk3NDcwX2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://bd-origin.pull.yximgs.com/gifshow/pkIv5brd4es_ShowAvcHdL0.flv?wsTime=1790590817&wsSecret=8a9bbbb7345714831a9e064b4f53addf&tsc=origin&oidc=edgeWm&sidc=201165&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "榆树公园",
+        "statrtTime": 1790497899449,
+        "author": {
+          "id": "3xmxwabj7x8xbda",
+          "name": "演员王柱",
+          "description": "感谢官方\n感谢喜欢我支持我的每一位大哥大姐，弟弟妹妹，叔叔阿姨，茫茫人海与你相遇",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/08/01/23/BMjAyNjA4MDEyMzU1MjFfMTM2MjExMjIzXzJfaGQzODFfNjI1_s.jpg",
+          "sex": "M",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 136211223,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "281",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "HSTPWwuzahY",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/15/BMjAyNjA5MjcxNTE5MjNfMjc3NDU0OTg4XzE0OTY4ODg1ODMzX2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://ali-origin.pull.yximgs.com/gifshow/HSTPWwuzahY_ShowAvcHdL0.flv?auth_key=8454612059-7-4-336ud225s116336j3r95lm8p53h9t6w5&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "感谢大家支持",
+        "statrtTime": 1790493561528,
+        "author": {
+          "id": "3xzp6cup8erm9fu",
+          "name": "东北浪🌻二人转",
+          "description": "我们来自辽宁省沈阳市新民市\n\n二人转爱好者，非喜勿喷\n\n玩快手只为开心，也希望给大家带来快乐。\n\n感谢快手官方支持！",
+          "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2020/11/18/07/BMjAyMDExMTgwNzEzMTRfMjc3NDU0OTg4XzJfaGQ5NTBfMzM0_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 277454988,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "281",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "druMRsPQOuk",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzA3NThfMjExMzkxMDQ0MV8xNDk2OTA1MjczNV9sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/druMRsPQOuk_ShowAvcHdL0.flv?txSecret=f6de10c800968d0407298517ff59f3fe&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=edgeWm&sidc=205251&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "开播啦！",
+        "statrtTime": 1790500075568,
+        "author": {
+          "id": "3xzyw5d4k9yzi9k",
+          "name": "华姐晚六点二十",
+          "description": "大家好。我是60后的一位老大姐，来快手平台赚取生活费，我是一个对口型聊天带货的主播",
+          "avatar": "https://p66.a.kwimgs.com/uhead/AB/2025/07/22/23/BMjAyNTA3MjIyMzAyMTlfMjExMzkxMDQ0MV8yX2hkMTk5XzU0Ng==_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 2113910441,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "276",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "lNgql-tGyBs",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjQ2MTFfNjY5NjU1NDQzXzE0OTY5MDE5MTAxX2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/lNgql-tGyBs_ShowAvcHdL0.flv?txSecret=7de4b5dc8da0f6351c2918632ad6a25e&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=edgeWm&sidc=206577&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "家人们，进来听秦腔方言聊天",
+        "statrtTime": 1790498769414,
+        "author": {
+          "id": "3xe4jb7fnecjw5g",
+          "name": "秦腔羊哥",
+          "description": "兴趣爱好，秦腔，歌曲，感谢官方搭建了这么好的绿色平台，让我在这个平台上，展示了自我，感谢大家的评论点赞",
+          "avatar": "https://p66.a.kwimgs.com/uhead/AB/2026/04/29/12/BMjAyNjA0MjkxMjM3MjZfNjY5NjU1NDQzXzJfaGQ1ODBfMzA2_s.jpg",
+          "sex": "M",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 669655443,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "270",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "0DZJFUi_9hQ",
+        "poster": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzE1NDJfMTc1NTY3NjY0OV8xNDk2OTA2NDM5OF9sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/0DZJFUi_9hQ_ShowAvcHdL0.flv?txSecret=7a0ca5db45b9fc65a3544fb8fe732f20&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=206077&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "家人们，好久不见，唱小曲，",
+        "statrtTime": 1790500540004,
+        "author": {
+          "id": "3xsa9vq2ctnk2tw",
+          "name": "柳大创业",
+          "description": "感谢快手官方平台！我是一个60后，地地道道的农村妇女，兴趣爱好：喜欢唱农村小曲，唱歌，爱听秦腔。感谢官方平台推送人气。",
+          "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2025/01/26/19/BMjAyNTAxMjYxOTI0MzRfMTc1NTY3NjY0OV8yX2hkMTI1Xzc4MA==_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 1755676649,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "270",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "vOuFkP5MIM4",
+        "poster": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjQwMDFfNTc5NDMxNDkyXzE0OTY5MDEwMjkxX2x2.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://ws-origin.pull.yximgs.com/gifshow/vOuFkP5MIM4_ShowAvcHdL0.flv?wsTime=6aba3f61&wsSecret=22afc2a6131a244d3d8607150dd80da4&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=2012&no_script=1&ss=s20&pushMode=1&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "用戏18434651500",
+        "statrtTime": 1790498398725,
+        "author": {
+          "id": "3xps7fb5q4x8chi",
+          "name": "曹慧618",
+          "description": "",
+          "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/06/22/17/BMjAyNjA2MjIxNzI2MTlfNTc5NDMxNDkyXzJfaGQ5NjZfMzEz_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 579431492,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "259",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "JjRrKq0Ja6Y",
+        "poster": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzQyMDBfNjAyNTQ0MDdfMTQ5NjkxMDM5NDJfbHY=.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/JjRrKq0Ja6Y_ShowAvcHdL0.flv?txSecret=4fbdbd377ea68567aa3191e02f533002&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "中秋节快乐",
+        "statrtTime": 1790502118050,
+        "author": {
+          "id": "3xyjcsckp9ifa7u",
+          "name": "二人转💋大楠",
+          "description": "喜欢唱歌。戏曲\n姓名:苑胜男\n每天中午2点 晚上7.00直播 \n喜欢我来个关注吧\n从小就喜欢二人转地方戏让你我相识相知\n愿快手这个平台能建起我们友谊的桥梁\n不争不抢做好自己\n爱我的人我加倍对你好\n恨我的人我用心去感化你 \n兴趣爱好：旅游。走遍祖国的大好河山",
+          "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2022/09/06/18/BMjAyMjA5MDYxODQzMTNfNjAyNTQ0MDdfMl9oZDc5Ml82OTU=_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 60254407,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "257",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      },
+      {
+        "id": "q3DBim0HIGQ",
+        "poster": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzI4NDhfMTI1MjI4NzEwMF8xNDk2OTA4MzY3MF9sdg==.jpg",
+        "playUrls": [
+          {
+            "hideAuto": false,
+            "autoDefaultSelect": true,
+            "cdnFeature": [],
+            "businessType": 0,
+            "freeTrafficCdn": false,
+            "version": "2.0",
+            "type": "dynamic",
+            "adaptationSet": {
+              "gopDuration": 2000,
+              "representation": [
+                {
+                  "id": 0,
+                  "url": "https://tx-origin.pull.yximgs.com/gifshow/q3DBim0HIGQ_ShowAvcHdL0.flv?txSecret=30304c9f94942dc4489c6bea9406004e&txTime=6aba3f61&stat=H1xxBnPqWAGLhXY4HLApKyYfGT7h3QZZ%2BgQnWQat4wlZzaypeMVwda%2FOpaVos%2FNF&tsc=origin&oidc=watchmen&sidc=205251&no_script=1&ss=s20&tfc_buyer=0",
+                  "bitrate": 2000,
+                  "qualityType": "HIGH",
+                  "level": 50,
+                  "name": "超清",
+                  "shortName": "超清",
+                  "hidden": false,
+                  "enableAdaptive": true,
+                  "defaultSelect": true
+                }
+              ]
+            }
+          }
+        ],
+        "caption": "来吃八碗了",
+        "statrtTime": 1790501326158,
+        "author": {
+          "id": "3xn9a5tk3af3yve",
+          "name": "临沂陈大妹",
+          "description": "",
+          "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2021/08/22/08/BMjAyMTA4MjIwODQxMzZfMTI1MjI4NzEwMF8yX2hkODI0XzEzNg==_s.jpg",
+          "sex": "F",
+          "living": false,
+          "followStatus": "UN_FOLLOWED",
+          "constellation": "",
+          "cityName": "",
+          "originUserId": 1252287100,
+          "privacy": false,
+          "isNew": false,
+          "timestamp": 1790504417869,
+          "verifiedStatus": {
+            "verified": false,
+            "description": "",
+            "type": 0,
+            "new": false,
+            "iconUrl": ""
+          },
+          "bannedStatus": {
+            "banned": false,
+            "socialBanned": false,
+            "isolate": false,
+            "defriend": false
+          },
+          "counts": {}
+        },
+        "gameInfo": {
+          "id": 1000004,
+          "name": "才艺",
+          "poster": "http://js-gamezone.static.yximgs.com/bs2/imageGameZone/5xgu6hhd5ab7rya.jpg"
+        },
+        "hasRedPack": false,
+        "hasBet": false,
+        "followed": false,
+        "expTag": "1_u/0_unknown0",
+        "hotIcon": "",
+        "living": false,
+        "quality": "standard",
+        "qualityLabel": "高清",
+        "watchingCount": "256",
+        "landscape": false,
+        "likeCount": 0,
+        "type": "live"
+      }
+    ],
+    "hasMore": true,
+    "cursor": "257_1252287100",
+    "labelList": []
+  }
+}

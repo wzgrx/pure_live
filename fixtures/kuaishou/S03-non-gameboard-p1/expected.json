@@ -1,0 +1,789 @@
+{
+  "generator": "KuaishowSite.getCategoryRooms + parsePlayQualities(room.data)",
+  "value": [
+    {
+      "roomId": "3x6b3wkudiypu2c",
+      "title": "二人转大舞台",
+      "nick": "娜家小剧场",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2026/09/24/14/BMjAyNjA5MjQxNDEwNDRfNDU4NjEyMDA4XzJfaGQyNzdfNjU5_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/15/BMjAyNjA5MjcxNTAwMzJfNDU4NjEyMDA4XzE0OTY4ODU0MTAwX2x2.jpg",
+      "area": "才艺",
+      "watching": "1.3万",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1.3万",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "sT_bLSKudA8",
+      "danmakuData": {
+        "liveStreamId": "sT_bLSKudA8",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/sT_bLSKudA8_ShowAvcHdL2.flv?wsTime=6aba3f55&wsSecret=1aaf22fd09159fa631da4838cc390387&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/sT_bLSKudA8_ShowAvcHdL1.flv?wsTime=6aba3f55&wsSecret=6bf3333e0b719a90d728262c170631c3&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/sT_bLSKudA8_ShowAvcSdL0.flv?wsTime=6aba3f55&wsSecret=361ca685fa89d396407cc03f19dc818b&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xdhg9tjh62vdrm",
+      "title": "这个时间谁行？",
+      "nick": "捌贰捌·壮志凌云",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2026/08/04/14/BMjAyNjA4MDQxNDM0MzRfMTY2MTU3NzE5Nl8xX2hkMTBfNzk3_s.jpg",
+      "cover": "https://p66.a.kwimgs.com/uhead/AB/2026/09/27/18/BMjAyNjA5MjcxODA1MDhfMTY2MTU3NzE5Nl8xNDk2OTE0MzkyMl9sdg==.jpg",
+      "area": "才艺",
+      "watching": "1.0万",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1.0万",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "K_Nb6d1wHes",
+      "danmakuData": {
+        "liveStreamId": "K_Nb6d1wHes",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/K_Nb6d1wHes_ShowAvcHdL2.flv?txSecret=c300dcc88cea5def4f8216c659e0d846&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/K_Nb6d1wHes_ShowAvcHdL1.flv?txSecret=90afb67127f7a240a8bb8b2012b96315&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/K_Nb6d1wHes_ShowAvcSdL0.flv?txSecret=617df8e6565b8458d7032ffc7e3b86f7&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xhnhp7jftz8hvu",
+      "title": "情绪价值拉满！~",
+      "nick": "TD-Stars",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2026/03/23/16/BMjAyNjAzMjMxNjE4MjJfNDgxODEzNTQ5NF8xX2hkOTgzXzg4Ng==_s.jpg",
+      "cover": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/14/BMjAyNjA5MjcxNDAxNTBfNDgxODEzNTQ5NF8xNDk2ODc1OTA2M19sdg==.jpg",
+      "area": "才艺",
+      "watching": "3063",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "3063",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "0qJXAgfa8Gs",
+      "danmakuData": {
+        "liveStreamId": "0qJXAgfa8Gs",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/0qJXAgfa8Gs_ShowAvcHdL2.flv?txSecret=9f59dc0944dca11be36333353bd8110f&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/0qJXAgfa8Gs_ShowAvcHdL1.flv?txSecret=2aec4da444feba7fcdeeb85aad410923&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/0qJXAgfa8Gs_ShowAvcSdL0.flv?txSecret=1061764b7c88abfbc257272da691c7e1&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=205492&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x267785bvn7ykc",
+      "title": "大秧歌曲想要拿笔来",
+      "nick": "兴龙人秧歌曲制作",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/04/27/15/BMjAyNjA0MjcxNTE1NThfMTc2OTgzNDIxNF8yX2hkOTcwXzMwNg==_s.jpg",
+      "cover": "https://p66.a.kwimgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjIzMjNfMTc2OTgzNDIxNF8xNDk2ODk4NTA0OF9sdg==.jpg",
+      "area": "才艺",
+      "watching": "2847",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "2847",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "1qR8GFRGGO4",
+      "danmakuData": {
+        "liveStreamId": "1qR8GFRGGO4",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 质臻",
+          "id": "蓝光 质臻\u0000130",
+          "sort": 130,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1qR8GFRGGO4_EcAvcFhdL3Mate.flv?txSecret=38fd55fb5b0e4d910ce6e6d709455728&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        },
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1qR8GFRGGO4_EcAvcFhdL0Mate.flv?txSecret=0e8d8a5a713300976b9a59d434fcc8cc&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1qR8GFRGGO4_EcAvcHdL0Mate.flv?txSecret=8623c0693c5d4e40e80ad72cbbe11d6d&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/1qR8GFRGGO4_EcAvcSdL0Mate.flv?txSecret=75cd150cd8228af8baa9f04b6025d2be&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xi2kx7nrazdzpg",
+      "title": "相识是缘",
+      "nick": "二人转大白龙",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/06/25/23/BMjAyNTA2MjUyMzM5NDJfNjE5MjE0MjkyXzJfaGQyNTBfOTc1_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzI2MjZfNjE5MjE0MjkyXzE0OTY5MDgwMTY2X2x2.jpg",
+      "area": "才艺",
+      "watching": "2810",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "2810",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "P7dmtGcdE9M",
+      "danmakuData": {
+        "liveStreamId": "P7dmtGcdE9M",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/P7dmtGcdE9M_ma1500-AuditAvcOriginL3.flv?txSecret=6300881abab9ba13f07cfae62b97eaea&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&srcStrm=P7dmtGcdE9M&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xed4mpfhurqqym",
+      "title": "听戏，进来。",
+      "nick": "💰蛋姐.老苗💰",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2020/03/26/15/BMjAyMDAzMjYxNTI4MDdfMzQwNDIyODA1XzJfaGQ4NTZfNTY0_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzAwNTVfMzQwNDIyODA1XzE0OTY5MDQxNjEwX2x2.jpg",
+      "area": "才艺",
+      "watching": "1557",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1557",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "_LuHgVcUmro",
+      "danmakuData": {
+        "liveStreamId": "_LuHgVcUmro",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/_LuHgVcUmro_ma1500.flv?txSecret=fd05837a6632101733e7bb1ecb501ef3&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xqq6nbkz6jwpzg",
+      "title": "希望大家多多 支持我",
+      "nick": "戏曲主播贾二妮i",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2023/11/22/20/BMjAyMzExMjIyMDU0NTJfMTI2NTI0NTI1NF8xX2hkNjg3Xzg4Mw==_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/14/BMjAyNjA5MjcxNDAxNTlfMTI2NTI0NTI1NF8xNDk2ODc1OTM3MF9sdg==.jpg",
+      "area": "才艺",
+      "watching": "1317",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1317",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "O_LcbhQpRx0",
+      "danmakuData": {
+        "liveStreamId": "O_LcbhQpRx0",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ty-origin.pull.yximgs.com/gifshow/O_LcbhQpRx0_ShowAvcHdL0.flv?ty_Time=1790590805&ty_Secret=11d74abd29af7b4db584e0ab5f25c65c&tsc=origin&oidc=watchmen&sidc=2527&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x3x9m43g7zvkwm",
+      "title": "开国王了？",
+      "nick": "奉天领秀-喜悦",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/08/10/14/BMjAyNjA4MTAxNDI5MjBfNDQxNTQ5OTY5N18xX2hkNzM2XzM4Nw==_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjQ5NTdfNDQxNTQ5OTY5N18xNDk2OTAyNDU0Nl9sdg==.jpg",
+      "area": "才艺",
+      "watching": "1205",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1205",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "sAbmU4kIyOk",
+      "danmakuData": {
+        "liveStreamId": "sAbmU4kIyOk",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/sAbmU4kIyOk_ShowAvcHdL2.flv?txSecret=b7c7c857219c40b0696b7c04e244bb5e&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/sAbmU4kIyOk_ShowAvcHdL1.flv?txSecret=681bf8abaccebd5a399fd766fe457928&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/sAbmU4kIyOk_ShowAvcSdL0.flv?txSecret=89426216bdebc5ddf8f1dc41665a6199&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xhfenvewdqjwu4",
+      "title": "大秧歌嗨起来",
+      "nick": "光头强（正能量）",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2025/12/09/00/BMjAyNTEyMDkwMDU5MTdfMzQzNzMyNjk4XzJfaGQ1NjJfMzI=_s.jpg",
+      "cover": "https://p66.a.kwimgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzUwMjFfMzQzNzMyNjk4XzE0OTY5MTE2MzAxX2x2.jpg",
+      "area": "才艺",
+      "watching": "1059",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1059",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "lPP15SxPSME",
+      "danmakuData": {
+        "liveStreamId": "lPP15SxPSME",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/lPP15SxPSME_ma1500.flv?txSecret=859744f25d279ff407e9936e22e30b70&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x4ecnae7cnedqu",
+      "title": "榆树公园",
+      "nick": "演员广明",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2022/05/26/01/BMjAyMjA1MjYwMTM2MjNfMTI3NDAyMTQ5OF8xX2hkNzhfNDQw_s.jpg",
+      "cover": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/15/BMjAyNjA5MjcxNTUxMjZfMTI3NDAyMTQ5OF8xNDk2ODkzNDY0OF9sdg==.jpg",
+      "area": "才艺",
+      "watching": "1020",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1020",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "CZ81mkfREmA",
+      "danmakuData": {
+        "liveStreamId": "CZ81mkfREmA",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/CZ81mkfREmA_ma1500-AuditAvcOriginL3.flv?txSecret=e35b378c04a0093948ba60face5b160e&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&srcStrm=CZ81mkfREmA&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xk6g979a5p2rt2",
+      "title": "终于把她请来了",
+      "nick": "奉天领秀·惊鸿",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/08/10/14/BMjAyNjA4MTAxNDA3NDhfMzc5NTg2MDQ0MV8yX2hkODI3XzQzNA==_s.jpg",
+      "cover": "https://p5-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzA2NDBfMzc5NTg2MDQ0MV8xNDk2OTA1MDg0N19sdg==.jpg",
+      "area": "才艺",
+      "watching": "1010",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "1010",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "oX-F96j95Ic",
+      "danmakuData": {
+        "liveStreamId": "oX-F96j95Ic",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "蓝光 4M",
+          "id": "蓝光 4M\u000070",
+          "sort": 70,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/oX-F96j95Ic_ShowAvcHdL2.flv?txSecret=36ca25df421e857fca15f5b4e6339341&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/oX-F96j95Ic_ShowAvcHdL1.flv?txSecret=7ea6cd58d3848e675195f8f6500c9063&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        },
+        {
+          "quality": "高清",
+          "id": "高清\u000030",
+          "sort": 30,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/oX-F96j95Ic_ShowAvcSdL0.flv?txSecret=31ea233688a83a6c19c5842532706cec&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=edgeWm&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xxc98xawi7ia9c",
+      "title": "解压画头像搞笑主播",
+      "nick": "小神金马良✏️",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2026/07/10/04/BMjAyNjA3MTAwNDQwMTlfNTU1Mzk0MjMyNV8xX2hkNjAyXzc1MA==_s.jpg",
+      "cover": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjM1MDlfNTU1Mzk0MjMyNV8xNDk2OTAwMjY0MV9sdg==.jpg",
+      "area": "才艺",
+      "watching": "824",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "824",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "8nMYPQ3jzSw",
+      "danmakuData": {
+        "liveStreamId": "8nMYPQ3jzSw",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/8nMYPQ3jzSw_ShowAvcHdL0.flv?wsTime=6aba3f55&wsSecret=f452539eeedbf087ffdcceae86e09bc0&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=205599&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xng65ktki5aeai",
+      "title": "喜欢东北大秧歌的进直播间",
+      "nick": "华子.直播高跷",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2024/04/21/22/BMjAyNDA0MjEyMjA4MDdfMTI4NDc2NTkyMV8yX2hkNjA3XzIxMg==_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzMzMzhfMTI4NDc2NTkyMV8xNDk2OTA5MTczMF9sdg==.jpg",
+      "area": "才艺",
+      "watching": "813",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "813",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "q29ZuxPKgGY",
+      "danmakuData": {
+        "liveStreamId": "q29ZuxPKgGY",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/q29ZuxPKgGY_ma1500-AuditAvcOriginL3.flv?txSecret=47ea74fe0a459c2733d0ea1e5265eb01&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&srcStrm=q29ZuxPKgGY&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xn8awmaycmfipe",
+      "title": "真开心呀",
+      "nick": "演员佟长江",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2023/03/04/11/BMjAyMzAzMDQxMTAxMzFfNTc5Nzc5NDYxXzFfaGQ4NzBfODIw_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjU3MzNfNTc5Nzc5NDYxXzE0OTY5MDM1NzUyX2x2.jpg",
+      "area": "才艺",
+      "watching": "776",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "776",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "f08z457EG3g",
+      "danmakuData": {
+        "liveStreamId": "f08z457EG3g",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/f08z457EG3g_ma1500-AuditAvcOriginL3.flv?txSecret=e5ce0124fae92ecfcf499bcf047e5f6e&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&srcStrm=f08z457EG3g&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x6utsa4zdhv84w",
+      "title": "好多人看，我火了吗",
+      "nick": "三蛋",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/06/26/22/BMjAyNjA2MjYyMjI4MjdfMzA4NTgzNDcwM18xX2hkNzQ4Xzg0MA==_s.jpg",
+      "cover": "https://p5-pro.a.yximgs.com/uhead/AB/2026/09/27/17/BMjAyNjA5MjcxNzQyMTlfMzA4NTgzNDcwM18xNDk2OTEwNDQyNl9sdg==.jpg",
+      "area": "才艺",
+      "watching": "769",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "769",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "TYtbQOIA5kM",
+      "danmakuData": {
+        "liveStreamId": "TYtbQOIA5kM",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/TYtbQOIA5kM_ShowAvcHdL0.flv?txSecret=99456dd6c3151c45de237fa006e479c4&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=207615&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x9j7qjhzneu4dw",
+      "title": "家人们种秋节快乐",
+      "nick": "李财《一撮毛师傅》",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2025/11/15/01/BMjAyNTExMTUwMTE2MTZfMzkzMTU5OTU1XzJfaGQzODZfMzY=_s.jpg",
+      "cover": "https://p4-pro.a.yximgs.com/uhead/AB/2026/09/27/15/BMjAyNjA5MjcxNTE0NDNfMzkzMTU5OTU1XzE0OTY4ODc4NTA1X2x2.jpg",
+      "area": "才艺",
+      "watching": "754",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "754",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "n876-HZ_QNc",
+      "danmakuData": {
+        "liveStreamId": "n876-HZ_QNc",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/n876-HZ_QNc_ma1500-AuditAvcOriginL3.flv?wsTime=6aba3f55&wsSecret=148272b264be7d43a0375533f6debe7f&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=2012&no_script=1&srcStrm=n876-HZ_QNc&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xpt8fpfrdu822g",
+      "title": "直播中提到了你！",
+      "nick": "九久酒 玛瑙",
+      "avatar": "https://p5-pro.a.yximgs.com/uhead/AB/2022/04/11/16/BMjAyMjA0MTExNjQ0MjhfMzQzOTYxODYxXzJfaGQ5MTFfMjY2_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/15/BMjAyNjA5MjcxNTA0MDVfMzQzOTYxODYxXzE0OTY4ODYwODYxX2x2.jpg",
+      "area": "才艺",
+      "watching": "694",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "694",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "zBWkfScDu7A",
+      "danmakuData": {
+        "liveStreamId": "zBWkfScDu7A",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/zBWkfScDu7A_ma1500.flv?txSecret=74bc0c3c1ec731a2665dd496d04896c6&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3x7mb9khzifaxj4",
+      "title": "书法春联",
+      "nick": "揽月书法",
+      "avatar": "https://p4-pro.a.yximgs.com/uhead/AB/2026/08/05/20/BMjAyNjA4MDUyMDM5MTNfMTE3MTA3MTA4M18yX2hkMjRfOTYy_s.jpg",
+      "cover": "https://p66.a.kwimgs.com/uhead/AB/2026/09/27/15/BMjAyNjA5MjcxNTUzNTJfMTE3MTA3MTA4M18xNDk2ODkzODUxMF9sdg==.jpg",
+      "area": "才艺",
+      "watching": "676",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "676",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "eXqM_4KwRww",
+      "danmakuData": {
+        "liveStreamId": "eXqM_4KwRww",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://ws-origin.pull.yximgs.com/gifshow/eXqM_4KwRww_ma1500.flv?wsTime=6aba3f55&wsSecret=d13e13348c1f7efda99e8c53bf47412e&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=203562&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xg4d2tsiac6jja",
+      "title": "现场演出直播传统正戏",
+      "nick": "演员姚小龙~虎丫",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2021/08/11/01/BMjAyMTA4MTEwMTIwNDlfMTYxNjc1MDUyN18yX2hkNTY4XzI0Mw==_s.jpg",
+      "cover": "https://p66.a.kwimgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjUxMDBfMTYxNjc1MDUyN18xNDk2OTAyNjA3OF9sdg==.jpg",
+      "area": "才艺",
+      "watching": "656",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "656",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "VB4yfAWUinE",
+      "danmakuData": {
+        "liveStreamId": "VB4yfAWUinE",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/VB4yfAWUinE_ma1500.flv?txSecret=eb8b282d0bae607ca3231ca978e346f0&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201165&no_script=1&ss=s20&tfc_buyer=1"
+          ]
+        }
+      ]
+    },
+    {
+      "roomId": "3xcrtc4zgkh2exq",
+      "title": "努力加油",
+      "nick": "🐯才艺小颖🐯",
+      "avatar": "https://p2-pro.a.yximgs.com/uhead/AB/2026/02/20/01/BMjAyNjAyMjAwMTI4MTdfOTUwNDg0NDY2XzFfaGQ5OTdfMzky_s.jpg",
+      "cover": "https://p2-pro.a.yximgs.com/uhead/AB/2026/09/27/16/BMjAyNjA5MjcxNjI4NDJfOTUwNDg0NDY2XzE0OTY4OTkyOTQ2X2x2.jpg",
+      "area": "才艺",
+      "watching": "609",
+      "audienceMetricType": "onlineViewers",
+      "popularity": "",
+      "onlineViewers": "609",
+      "totalViewers": "",
+      "followers": "0",
+      "platform": "kuaishou",
+      "liveStatus": 0,
+      "isRecord": false,
+      "status": true,
+      "isCatchUp": false,
+      "link": "7katVdT9M-I",
+      "danmakuData": {
+        "liveStreamId": "7katVdT9M-I",
+        "cookie": ""
+      },
+      "qualities": [
+        {
+          "quality": "超清",
+          "id": "超清\u000050",
+          "sort": 50,
+          "lines": [
+            "https://tx-origin.pull.yximgs.com/gifshow/7katVdT9M-I_ShowAvcHdL0.flv?txSecret=1a93e0152041094299f0fdd05467bdde&txTime=6aba3f55&stat=XhgTgm3hh4RPoxLcF%2BMb%2Fe7L%2BST4koUBck46Rq6Adw8XszuDGWXuZA1j9ZYR9iWe&tsc=origin&oidc=watchmen&sidc=201230&no_script=1&ss=s20&tfc_buyer=0"
+          ]
+        }
+      ]
+    }
+  ]
+}

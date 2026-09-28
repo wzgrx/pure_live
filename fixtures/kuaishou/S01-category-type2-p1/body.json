@@ -1,0 +1,507 @@
+{
+  "data": {
+    "list": [
+      {
+        "id": "2",
+        "name": "穿越火线",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-2-20181130184450.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-2-20250820155120.png",
+        "description": "由Smile Gate开发，腾讯游戏发行的一款第一人称射击游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "76"
+      },
+      {
+        "id": "21",
+        "name": "绝地求生",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-21-20240924171929.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-21-20240329181744.png",
+        "description": "(PUBG) 是一款战术竞技型射击类沙盒游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "30"
+      },
+      {
+        "id": "1",
+        "name": "英雄联盟",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1-20181130184505.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-1-20240913104350.png",
+        "description": "由美国拳头游戏(Riot Games)开发、中国大陆地区腾讯游戏代理运营的英雄对战。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "129"
+      },
+      {
+        "id": "1009",
+        "name": "我的世界",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1009-20220530172805.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-1009-20180131183029.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "241"
+      },
+      {
+        "id": "3",
+        "name": "地下城与勇士",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-3-20181130184447.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-3-20240913103917.png",
+        "description": "由韩国网络游戏公司NEOPLE开发、腾讯游戏代理发行的一款2D卷轴式横版格斗过关网络游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "95"
+      },
+      {
+        "id": "13",
+        "name": "守望先锋",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-13-20211029182148.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-13-20240920182213.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "2"
+      },
+      {
+        "id": "22146",
+        "name": "无畏契约",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22146-20230202175719.png",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22146-20230202175719.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "77"
+      },
+      {
+        "id": "7",
+        "name": "传奇",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-7-20220530172810.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-7-20240913103902.png",
+        "description": "盛大游戏推出的一款大型多人在线角色扮演游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "614"
+      },
+      {
+        "id": "22658",
+        "name": "热血传奇",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22658-20230509174949.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22658-20230515144143.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "141"
+      },
+      {
+        "id": "25",
+        "name": "CS:GO",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-25-20220530172816.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-25-20220701151256.jpg",
+        "description": "反恐精英：全球攻势，原名Counter-Strike: Global Offensive，是一款由VALVE与Hidden Path Entertainment合作开发、Valve Software发行的第一人称射击游戏，于2012年8月21日在欧美地区正式发售，国服发布会于2017年4月11日在北京召开，游戏为《反恐精英》系列游戏的第四款作品。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "14"
+      },
+      {
+        "id": "22742",
+        "name": "龙岛异兽起源",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22742-20240606175802.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22742-20240606175804.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "19"
+      },
+      {
+        "id": "22737",
+        "name": "热血传奇手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22737-20240521150306.jpg",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22737-20240521150308.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "109"
+      },
+      {
+        "id": "22551",
+        "name": "恐龙岛",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22551-20220530172816.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22551-20220216152013.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "28"
+      },
+      {
+        "id": "32",
+        "name": "大话西游2",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-32-20220530172821.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-32-20210421160256.png",
+        "description": "大话西游2是一款以西游题材为背景，网易自主研发的多人在线角色扮演回合制游戏；于2002年8月15日起正式运营，至今已经运营了18年，多次斩获行业大奖，最高在线126W，累计注册用户超2亿！",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "117"
+      },
+      {
+        "id": "4",
+        "name": "QQ飞车",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-4-20220530172811.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-4-20180209115623.png",
+        "description": "一款结合休闲和竞技玩法的时尚赛车游戏，采用了物理引擎PhysX来保证车辆运行时的真实感。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "27"
+      },
+      {
+        "id": "22017",
+        "name": "魔域",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22017-20220530172808.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22017-20240920181747.png",
+        "description": "魔域是以幻兽、PK、群殴为核心的终身免费网络游戏,开创了网络游戏的全新篇章!在游戏中你可以享受到一人带多宠的全新游戏乐趣。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "36"
+      },
+      {
+        "id": "22791",
+        "name": "失控进化",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22791-20250407163328.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22791-20260703192943.png",
+        "description": "Rust玩法授权硬核生存对抗游戏",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "41"
+      },
+      {
+        "id": "22662",
+        "name": "仙侠游戏",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22662-20230524161742.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22662-20230524161745.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "30"
+      },
+      {
+        "id": "18",
+        "name": "魔兽世界",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-18-20181130184507.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-18-20240913104036.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "38"
+      },
+      {
+        "id": "22106",
+        "name": "逆战",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22106-20190816115343.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22106-20240913104049.png",
+        "description": "《逆战》是腾讯自研FPS网游领军之作。游戏采用第一人称射击形式表现，虚幻3引擎开发，包含猎场、爆破、塔防、团竞等46种模式玩法。 近未来科技背景下，守卫者和突击者冲突不断升级，黑暗势力渗透世界的每个角落。人类联盟在呼唤你，一起战出逆态度！",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "13"
+      },
+      {
+        "id": "33",
+        "name": "冒险岛",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-33-20220530172822.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-33-20240913104509.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "44"
+      },
+      {
+        "id": "22538",
+        "name": "回合制游戏",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22538-20220530172825.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22538-20211202142521.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "51"
+      },
+      {
+        "id": "23",
+        "name": "坦克世界",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-23-20211029182157.png",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-23-20240913104225.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "17"
+      },
+      {
+        "id": "22873",
+        "name": "诡秘之主游戏",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22873-20260821112300.jpg",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22873-20260821112254.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "13"
+      },
+      {
+        "id": "22758",
+        "name": "暗区突围:无限",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22758-20240801180930.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22758-20240801180930.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "13"
+      },
+      {
+        "id": "22410",
+        "name": "永劫无间",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22410-20220530172817.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22410-20210406225806.png",
+        "description": "《永劫无间》是一款高自由度的买断制多人动作竞技游戏，由中国“24工作室” 制作。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "9"
+      },
+      {
+        "id": "22288",
+        "name": "诛仙2",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22288-20220530172816.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22288-20240913104409.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "12"
+      },
+      {
+        "id": "30",
+        "name": "反恐精英",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-30-20220530172816.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-30-20240913103930.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "8"
+      },
+      {
+        "id": "22460",
+        "name": "CS1.6",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22460-20220530172813.webp",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22460-20210707105306.png",
+        "description": "反恐精英》（Counter-Strike，简称CS）是由Valve Software公司研发的一款第一人称射击类游戏，属于《半条命》（Half-Life）的其中一个游戏模组衍生而成的游戏.。2003年9月9日，《反恐精英》1.6版本（以下简称“CS1.6”）正式发行，并被各大国际电子竞技赛事列为必备团队项目。WCG、ESWC、CPL为CS1.6传统的三大赛事，每年吸引数以万计的电竞玩家参与。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "9"
+      },
+      {
+        "id": "22103",
+        "name": "lol云顶之弈",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22103-20190731154012.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22103-20240913104300.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "2"
+      },
+      {
+        "id": "22621",
+        "name": "吃鸡手游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22621-20221017130058.jpg",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22621-20221017130100.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "4"
+      },
+      {
+        "id": "22",
+        "name": "梦幻西游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22-20220530172809.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22-20210402225715.png",
+        "description": "一款由网易自行开发并营运的网络游戏。游戏以著名的章回小说《西游记》故事为背景，透过Q版的人物，试图营造出浪漫的网络游戏风格。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "3"
+      },
+      {
+        "id": "19",
+        "name": "魔兽争霸",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-19-20211029182107.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-19-20240920181727.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "22050",
+        "name": "问道",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22050-20220530172818.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22050-20220420161414.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "3"
+      },
+      {
+        "id": "22083",
+        "name": "星际争霸2",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22083-20211029182248.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22083-20240913104333.png",
+        "description": "《星际争霸》（英语：StarCraft）是暴雪娱乐制作发行的一款即时战略游戏。这是星际争霸系列游戏的第一部作品，于1998年3月31日正式发行。游戏拥有3部资料片，但是正式发行的只有《母巢之战》。其续作《星际争霸II：自由之翼》已于2010年7月27日发行。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "12",
+        "name": "DOTA2",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-12-20220530154922.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-12-20240913104248.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "22469",
+        "name": "DOTA1",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22469-20220530172826.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22469-20210720152332.png",
+        "description": "《DotA》（Defense of the Ancients），可以译作守护古树、守护遗迹、远古遗迹守卫， 是由暴雪公司出品即时战略游戏《魔兽争霸3》的一款多人即时对战、自定义地图，可支持10个人同时连线游戏，是暴雪公司官方认可的魔兽争霸的RPG地图。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "3"
+      },
+      {
+        "id": "22287",
+        "name": "永恒之塔",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22287-20220530172818.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22287-20240920182710.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "4"
+      },
+      {
+        "id": "29",
+        "name": "梦三国2",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-29-20220530172823.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-29-20240913104022.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "2"
+      },
+      {
+        "id": "22079",
+        "name": "跑跑卡丁车",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22079-20220530172812.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22079-20240920181803.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "2"
+      },
+      {
+        "id": "27",
+        "name": "龙之谷",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-27-20220530172812.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-27-20240920182117.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "34",
+        "name": "彩虹岛",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-34-20220530172809.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-34-20240913103957.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "4"
+      },
+      {
+        "id": "22718",
+        "name": "决胜巅峰",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22718-20250109165447.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22718-20250109165450.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "22235",
+        "name": "生死狙击",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22235-20220530172818.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22235-20201218113502.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "4"
+      },
+      {
+        "id": "22663",
+        "name": "策略游戏",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22663-20230524161759.png",
+        "iconUrl": "https://p66-live.wskwai.com/udata/pkg/icon-game-22663-20230524161801.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "22382",
+        "name": "战舰世界",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22382-20220530172814.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22382-20210322112216.jpg",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "2"
+      },
+      {
+        "id": "22060",
+        "name": "流放之路",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22060-20220530172823.webp",
+        "iconUrl": "https://p4-live.wskwai.com/udata/pkg/icon-game-22060-20240920182104.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "22175",
+        "name": "CFHD",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22175-20220530172808.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22175-20210331181533.png",
+        "description": "CFHD作为穿越火线十周年公布的诚意之作，继承IP经典，视觉体验、公平竞技、玩法创新上做到全面突破。在着力打造竞技枪战标杆的同时，推出了众多创新玩法内容，为广大玩家们带来更加丰富的枪战乐趣。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      },
+      {
+        "id": "14",
+        "name": "炉石传说",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-14-20211029182013.png",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-14-20180626140647.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "5"
+      },
+      {
+        "id": "22145",
+        "name": "FPS新游",
+        "poster": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22145-20220530172808.webp",
+        "iconUrl": "https://p66-live.wsbkwai.com/udata/pkg/icon-game-22145-20240920183828.png",
+        "description": "发现好玩有趣的游戏。",
+        "categoryAbbr": "WYJJ",
+        "categoryName": "网游竞技",
+        "roomCount": "1"
+      }
+    ],
+    "hasMore": true
+  }
+}

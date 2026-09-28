@@ -1,0 +1,457 @@
+{
+  "generator": "KuaishowSite.getSubCategores",
+  "value": {
+    "getSubCategores": [
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "2",
+        "areaName": "穿越火线",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-2-20181130184450.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "21",
+        "areaName": "绝地求生",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-21-20240924171929.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "1",
+        "areaName": "英雄联盟",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1-20181130184505.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "1009",
+        "areaName": "我的世界",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-1009-20220530172805.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "3",
+        "areaName": "地下城与勇士",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-3-20181130184447.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "13",
+        "areaName": "守望先锋",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-13-20211029182148.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22146",
+        "areaName": "无畏契约",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22146-20230202175719.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "7",
+        "areaName": "传奇",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-7-20220530172810.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22658",
+        "areaName": "热血传奇",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22658-20230509174949.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "25",
+        "areaName": "CS:GO",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-25-20220530172816.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22742",
+        "areaName": "龙岛异兽起源",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22742-20240606175802.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22737",
+        "areaName": "热血传奇手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22737-20240521150306.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22551",
+        "areaName": "恐龙岛",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22551-20220530172816.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "32",
+        "areaName": "大话西游2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-32-20220530172821.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "4",
+        "areaName": "QQ飞车",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-4-20220530172811.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22017",
+        "areaName": "魔域",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22017-20220530172808.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22791",
+        "areaName": "失控进化",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22791-20250407163328.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22662",
+        "areaName": "仙侠游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22662-20230524161742.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "18",
+        "areaName": "魔兽世界",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-18-20181130184507.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22106",
+        "areaName": "逆战",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22106-20190816115343.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "33",
+        "areaName": "冒险岛",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-33-20220530172822.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22538",
+        "areaName": "回合制游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22538-20220530172825.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "23",
+        "areaName": "坦克世界",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-23-20211029182157.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22873",
+        "areaName": "诡秘之主游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22873-20260821112300.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22758",
+        "areaName": "暗区突围:无限",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22758-20240801180930.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22410",
+        "areaName": "永劫无间",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22410-20220530172817.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22288",
+        "areaName": "诛仙2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22288-20220530172816.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "30",
+        "areaName": "反恐精英",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-30-20220530172816.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22460",
+        "areaName": "CS1.6",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22460-20220530172813.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22103",
+        "areaName": "lol云顶之弈",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22103-20190731154012.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22621",
+        "areaName": "吃鸡手游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22621-20221017130058.jpg",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22",
+        "areaName": "梦幻西游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22-20220530172809.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "19",
+        "areaName": "魔兽争霸",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-19-20211029182107.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22050",
+        "areaName": "问道",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22050-20220530172818.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22083",
+        "areaName": "星际争霸2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22083-20211029182248.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "12",
+        "areaName": "DOTA2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-12-20220530154922.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22469",
+        "areaName": "DOTA1",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22469-20220530172826.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22287",
+        "areaName": "永恒之塔",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22287-20220530172818.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "29",
+        "areaName": "梦三国2",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-29-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22079",
+        "areaName": "跑跑卡丁车",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22079-20220530172812.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "27",
+        "areaName": "龙之谷",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-27-20220530172812.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "34",
+        "areaName": "彩虹岛",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-34-20220530172809.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22718",
+        "areaName": "决胜巅峰",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22718-20250109165447.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22235",
+        "areaName": "生死狙击",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22235-20220530172818.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22663",
+        "areaName": "策略游戏",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22663-20230524161759.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22382",
+        "areaName": "战舰世界",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22382-20220530172814.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22060",
+        "areaName": "流放之路",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22060-20220530172823.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22175",
+        "areaName": "CFHD",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22175-20220530172808.webp",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "14",
+        "areaName": "炉石传说",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-14-20211029182013.png",
+        "shortName": null
+      },
+      {
+        "platform": "kuaishou",
+        "areaType": "2",
+        "typeName": "网游",
+        "areaId": "22145",
+        "areaName": "FPS新游",
+        "areaPic": "https://tx2.a.kwimgs.com/udata/pkg/cover-game-22145-20220530172808.webp",
+        "shortName": null
+      }
+    ]
+  }
+}

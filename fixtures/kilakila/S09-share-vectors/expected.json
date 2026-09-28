@@ -1,0 +1,163 @@
+{
+  "generator": "KilakilaLink.parse of every vector url",
+  "value": [
+    {
+      "name": "new-live.kilakila.cn-detail",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "new-live.kilakila.cn-detail-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "new-live.kilakila.cn-room",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "new-live.kilakila.cn-room-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "new-www.hongdoufm.com-detail",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "new-www.hongdoufm.com-detail-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "new-www.hongdoufm.com-room",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "new-www.hongdoufm.com-room-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "new-owner",
+      "parse": {
+        "kind": "owner",
+        "id": "1234567890123"
+      }
+    },
+    {
+      "name": "old-live.kilakila.cn-detail",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "old-live.kilakila.cn-detail-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "old-live.kilakila.cn-room",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "old-live.kilakila.cn-room-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "old-www.hongdoufm.com-detail",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "old-www.hongdoufm.com-detail-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "old-www.hongdoufm.com-room",
+      "parse": {
+        "kind": "broadcast",
+        "id": "9007199254740993123"
+      }
+    },
+    {
+      "name": "old-www.hongdoufm.com-room-wrong-signature",
+      "parse": null
+    },
+    {
+      "name": "old-owner",
+      "parse": {
+        "kind": "owner",
+        "id": "1234567890123"
+      }
+    },
+    {
+      "name": "room-extra-decoded-parameters",
+      "parse": {
+        "kind": "broadcast",
+        "id": "12345"
+      }
+    },
+    {
+      "name": "detail-extra-raw-parameters",
+      "parse": {
+        "kind": "broadcast",
+        "id": "12345"
+      }
+    },
+    {
+      "name": "malformed-plaintext-20",
+      "parse": null
+    },
+    {
+      "name": "malformed-plaintext-21",
+      "parse": null
+    },
+    {
+      "name": "malformed-plaintext-22",
+      "parse": null
+    },
+    {
+      "name": "malformed-plaintext-23",
+      "parse": null
+    },
+    {
+      "name": "malformed-plaintext-24",
+      "parse": null
+    },
+    {
+      "name": "malformed-plaintext-25",
+      "parse": null
+    },
+    {
+      "name": "malformed-plaintext-26",
+      "parse": null
+    },
+    {
+      "name": "observed-official-desktop-share",
+      "parse": {
+        "kind": "broadcast",
+        "id": "2261269383617708096"
+      }
+    },
+    {
+      "name": "observed-room-redirect-2026-09-27",
+      "parse": {
+        "kind": "broadcast",
+        "id": "2268450556051718173"
+      }
+    }
+  ]
+}

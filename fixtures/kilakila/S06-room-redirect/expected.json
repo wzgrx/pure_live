@@ -1,0 +1,23 @@
+{
+  "generator": "KilakilaLink.parse of the request URL and the Location + LiveUrlTool share import of the Location",
+  "value": {
+    "KilakilaLink.parse(request)": {
+      "kind": "broadcast",
+      "id": "2268450556051718173"
+    },
+    "KilakilaLink.parse(location)": {
+      "kind": "broadcast",
+      "id": "2268450556051718173"
+    },
+    "shareImport(location)": {
+      "value": [
+        "3674092253247",
+        "kilakila"
+      ],
+      "requests": [
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=2268450556051718173",
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247"
+      ]
+    }
+  }
+}

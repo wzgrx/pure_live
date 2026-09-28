@@ -1,0 +1,58 @@
+{
+  "generator": "KilakilaSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus / searchRooms(1 and its owner URL) + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila notFound"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=1"
+      ]
+    },
+    "getRoomDetail": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila notFound"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=1"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila notFound"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=1"
+      ]
+    },
+    "getLiveStatus": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila notFound"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=1"
+      ]
+    },
+    "searchRooms(uid)": {
+      "value": [],
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=1"
+      ]
+    },
+    "searchRooms(ownerUrl)": {
+      "value": [],
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=1"
+      ]
+    },
+    "supportsSearchPaginationFor": false,
+    "getPlayQualites": {
+      "throws": "KilakilaException",
+      "message": "Kilakila notFound"
+    }
+  }
+}

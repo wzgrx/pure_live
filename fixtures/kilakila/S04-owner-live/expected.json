@@ -1,0 +1,173 @@
+{
+  "generator": "KilakilaSite.getRoomDetailForRefresh / getRoomDetail / getRoomDetailForRecording / getLiveStatus / searchRooms(3674092253247 and its owner URL) + getPlayQualites + getPlayUrls + resolvePlayUrlsForRecoveryRaw",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "value": {
+        "roomId": "3674092253247",
+        "userId": "3674092253247",
+        "title": "欢迎来到克拉农场",
+        "nick": "程也ᨳ𝒞𝓎原创单曲「小熊宇宙」",
+        "avatar": "https://img.hongrenshuo.com.cn/3674092253247.png?t=1785872233000",
+        "cover": "https://img.hongrenshuo.com.cn/367409225324717778172453565136571d0858ea7cd240795d22f3440aPC.png",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "kilakila",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://live.hongrenshuo.com.cn/index/roomuser/uid/3674092253247"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247"
+      ]
+    },
+    "getRoomDetail": {
+      "value": {
+        "roomId": "3674092253247",
+        "userId": "3674092253247",
+        "title": "欢迎来到克拉农场",
+        "nick": "程也ᨳ𝒞𝓎原创单曲「小熊宇宙」",
+        "avatar": "https://img.hongrenshuo.com.cn/3674092253247.png?t=1785872233000",
+        "cover": "https://img.hongrenshuo.com.cn/3674092253247178879230212402a41b31bbc2f0bf1877bfc339b01f79PC.gif",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "kilakila",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://live.hongrenshuo.com.cn/index/roomuser/uid/3674092253247"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247",
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=2268450556051718173"
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "value": {
+        "roomId": "3674092253247",
+        "userId": "3674092253247",
+        "title": "欢迎来到克拉农场",
+        "nick": "程也ᨳ𝒞𝓎原创单曲「小熊宇宙」",
+        "avatar": "https://img.hongrenshuo.com.cn/3674092253247.png?t=1785872233000",
+        "cover": "https://img.hongrenshuo.com.cn/3674092253247178879230212402a41b31bbc2f0bf1877bfc339b01f79PC.gif",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "onlineViewers": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "kilakila",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "isCatchUp": false,
+        "link": "https://live.hongrenshuo.com.cn/index/roomuser/uid/3674092253247"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247",
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=2268450556051718173"
+      ]
+    },
+    "getLiveStatus": {
+      "value": true,
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247"
+      ]
+    },
+    "searchRooms(uid)": {
+      "value": [
+        {
+          "roomId": "3674092253247",
+          "userId": "3674092253247",
+          "title": "欢迎来到克拉农场",
+          "nick": "程也ᨳ𝒞𝓎原创单曲「小熊宇宙」",
+          "avatar": "https://img.hongrenshuo.com.cn/3674092253247.png?t=1785872233000",
+          "cover": "https://img.hongrenshuo.com.cn/367409225324717778172453565136571d0858ea7cd240795d22f3440aPC.png",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "kilakila",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "isCatchUp": false,
+          "link": "https://live.hongrenshuo.com.cn/index/roomuser/uid/3674092253247"
+        }
+      ],
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247"
+      ]
+    },
+    "searchRooms(ownerUrl)": {
+      "value": [
+        {
+          "roomId": "3674092253247",
+          "userId": "3674092253247",
+          "title": "欢迎来到克拉农场",
+          "nick": "程也ᨳ𝒞𝓎原创单曲「小熊宇宙」",
+          "avatar": "https://img.hongrenshuo.com.cn/3674092253247.png?t=1785872233000",
+          "cover": "https://img.hongrenshuo.com.cn/367409225324717778172453565136571d0858ea7cd240795d22f3440aPC.png",
+          "watching": "",
+          "audienceMetricType": "unknown",
+          "popularity": "",
+          "onlineViewers": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "kilakila",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "isCatchUp": false,
+          "link": "https://live.hongrenshuo.com.cn/index/roomuser/uid/3674092253247"
+        }
+      ],
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247"
+      ]
+    },
+    "supportsSearchPaginationFor": false,
+    "getPlayQualites": [
+      {
+        "quality": "FLV",
+        "id": "flv",
+        "sort": 0,
+        "getPlayUrls": [
+          "https://pull.live.hongrenshuo.com.cn/hrs/2268450556051718173.flv?auth_key=1793120972-0-0-f276aa3fae4abe96194509573670b1f4"
+        ]
+      },
+      {
+        "quality": "HLS",
+        "id": "hls",
+        "sort": 0,
+        "getPlayUrls": [
+          "https://pull.live.hongrenshuo.com.cn/hrs/2268450556051718173.m3u8?auth_key=1793120972-0-0-a59835c7063d49ae59468fb4c3c2c440"
+        ]
+      }
+    ],
+    "resolvePlayUrlsForRecoveryRaw": {
+      "value": {
+        "urls": [
+          "https://pull.live.hongrenshuo.com.cn/hrs/2268450556051718173.flv?auth_key=1793120972-0-0-f276aa3fae4abe96194509573670b1f4"
+        ],
+        "appliedQualityData": "flv"
+      },
+      "requests": [
+        "https://live.hongrenshuo.com.cn/Tg/personalH5?uid=3674092253247",
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=2268450556051718173"
+      ]
+    }
+  }
+}

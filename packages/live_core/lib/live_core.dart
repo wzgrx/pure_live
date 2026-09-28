@@ -3,6 +3,7 @@
 /// (docs/modules/M2-core.md).
 library;
 
+export 'src/aes.dart';
 export 'src/audience.dart';
 export 'src/convert.dart';
 export 'src/hls_source_query_policy.dart';
@@ -29,6 +30,8 @@ export 'src/sites/douyu/douyu_api.dart';
 export 'src/sites/douyu/douyu_site.dart';
 export 'src/sites/huya/huya_api.dart';
 export 'src/sites/huya/huya_site.dart';
+export 'src/sites/kilakila/kilakila_api.dart';
+export 'src/sites/kilakila/kilakila_site.dart';
 export 'src/sites/kuaishou/kuaishou_api.dart';
 export 'src/sites/kuaishou/kuaishou_site.dart';
 export 'src/sites/missevan/missevan_api.dart';

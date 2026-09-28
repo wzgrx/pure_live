@@ -1,0 +1,33 @@
+{
+  "generator": "KilakilaApi.detail(playback: false / true)",
+  "value": {
+    "detail(playback: false)": {
+      "value": {
+        "roomId": "2261269383617708096",
+        "userId": "4222454968365",
+        "title": "2026/9/8早上",
+        "nick": "一泽ᶻ💧『秦琅』",
+        "cover": "https://img.hongrenshuo.com.cn/4222454968365178807692313974631135f0c6b261d939e5ede92d0266PC.gif",
+        "avatar": "https://img.hongrenshuo.com.cn/4222454968365.png?t=1786584245000",
+        "statusCode": 10,
+        "goldPrice": 0,
+        "watchNumber": 409,
+        "isLive": false,
+        "link": "https://live.kilakila.cn/room/2261269383617708096",
+        "media": {}
+      },
+      "requests": [
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=2261269383617708096"
+      ]
+    },
+    "detail(playback: true)": {
+      "value": {
+        "throws": "KilakilaException",
+        "message": "Kilakila stateUnsupported"
+      },
+      "requests": [
+        "https://live.kilakila.cn/LiveRoom/getRoomInfo?roomId=2261269383617708096"
+      ]
+    }
+  }
+}

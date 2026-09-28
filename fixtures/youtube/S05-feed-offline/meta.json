@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S05-feed-offline",
+  "capturedAt": "2026-09-27T18:58:37.463627Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCX6OQ3DkcsbYNE6H8uQQuVA",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "cache-control": "public, max-age=900",
+      "date": "Sun, 27 Sep 2026 18:46:40 GMT",
+      "content-encoding": "gzip",
+      "content-length": "6503",
+      "age": "718",
+      "content-type": "text/xml; charset=UTF-8",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "0",
+      "server": "YouTube RSS Feeds server",
+      "expires": "Sun, 27 Sep 2026 19:01:40 GMT"
+    }
+  },
+  "raw": {
+    "sha256": "7534f6b49e6e9eec2a07fd7e146813f888efd5a4f4233b9779ea5c3f1487c08a",
+    "length": 29949
+  },
+  "body": "body.xml",
+  "scrubbed": [],
+  "tool": "live_cli fixture capture (schema 1)"
+}

@@ -1,0 +1,85 @@
+{
+  "responseContext": {
+    "visitorData": "Nnc8UUuIWNoHR87qarf8y-HKUuQQVzWOYjPZHvAdEp%4O%9D",
+    "serviceTrackingParams": [
+      {
+        "service": "CSI",
+        "params": [
+          {
+            "key": "c",
+            "value": "WEB"
+          },
+          {
+            "key": "cver",
+            "value": "2.20260925.01.00"
+          },
+          {
+            "key": "yt_li",
+            "value": "0"
+          },
+          {
+            "key": "ResolveUrl_rid",
+            "value": "0xa8534f71f44824dc"
+          }
+        ]
+      },
+      {
+        "service": "GFEEDBACK",
+        "params": [
+          {
+            "key": "logged_in",
+            "value": "0"
+          },
+          {
+            "key": "visitor_data",
+            "value": "Nnc8UUuIWNoHR87qarf8y-HKUuQQVzWOYjPZHvAdEp%4O%9D"
+          }
+        ]
+      },
+      {
+        "service": "GUIDED_HELP",
+        "params": [
+          {
+            "key": "logged_in",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "service": "ECATCHER",
+        "params": [
+          {
+            "key": "client.version",
+            "value": "2.20260925"
+          },
+          {
+            "key": "client.name",
+            "value": "WEB"
+          }
+        ]
+      }
+    ],
+    "mainAppWebResponseContext": {
+      "loggedOut": true
+    },
+    "responseId": "IhMIpP_yl7mPlwMVT0BMCB0lqCwM",
+    "webResponseContextExtensionData": {
+      "hasDecorated": true
+    }
+  },
+  "endpoint": {
+    "clickTrackingParams": "IhMIpP_yl7mPlwMVT0BMCB0lqCwMMghleHRlcm5hbMoBBL_ALzU=",
+    "commandMetadata": {
+      "webCommandMetadata": {
+        "url": "/channel/UCX6OQ3DkcsbYNE6H8uQQuVA/live",
+        "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+        "rootVe": 3611,
+        "apiUrl": "/youtubei/v1/browse"
+      }
+    },
+    "browseEndpoint": {
+      "browseId": "UCX6OQ3DkcsbYNE6H8uQQuVA",
+      "params": "EgRsaXZluAEAkgMA8gYECgJ6AA%3D%3D"
+    }
+  }
+}

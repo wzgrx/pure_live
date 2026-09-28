@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S07-hls-live",
+  "capturedAt": "2026-09-28T12:23:10.709216Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/hfr/1/playlist_duration/30/manifest_duration/30/maudio/1/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/go/1/rqh/5/reg/0/pacing/0/nvgoi/1/ncsapi/1/keepalive/yes/fexp/51565115%2C52178456/dover/11/itag/0/playlist_type/DVR/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Chfr%2Cplaylist_duration%2Cmanifest_duration%2Cmaudio%2Css%2Cssa%2Cbui%2Cspc%2Cvprv%2Cgo%2Crqh%2Creg%2Citag%2Cplaylist_type/sig/UB1q1SVrOEYcJQoGgtYgfjyHZyUUJuUJyyDFJ1VLAGkI4plh2nbL8E0JYEKK-w0FyQwPWabPkOUNlm4fsHfecEWRS51-8zopaC_U/file/index.m3u8",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+      "Origin": "https://www.youtube.com"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/vnd.apple.mpegurl",
+      "date": "Mon, 28 Sep 2026 12:23:11 GMT",
+      "expires": "Fri, 01 Jan 1990 00:00:00 GMT",
+      "cache-control": "no-cache, must-revalidate",
+      "server": "HTTP server (unknown)",
+      "content-length": "8319",
+      "x-frame-options": "SAMEORIGIN"
+    }
+  },
+  "raw": {
+    "sha256": "2993e78e14309ec0bed7aa536ae1aa11531acee1322eced2acd29e38fb812f34",
+    "length": 8319
+  },
+  "body": "body.m3u8",
+  "scrubbed": [
+    {
+      "where": "body path /ei/",
+      "rule": "secret"
+    },
+    {
+      "where": "body path /ip/",
+      "rule": "secret"
+    },
+    {
+      "where": "body path /lsig/",
+      "rule": "secret"
+    },
+    {
+      "where": "body path /mip/",
+      "rule": "secret"
+    },
+    {
+      "where": "body path /sig/",
+      "rule": "secret"
+    },
+    {
+      "where": "request url path /ei/",
+      "rule": "secret"
+    },
+    {
+      "where": "request url path /ip/",
+      "rule": "secret"
+    },
+    {
+      "where": "request url path /sig/",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.23 recorder (schema 1)"
+}

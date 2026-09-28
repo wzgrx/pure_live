@@ -1,0 +1,426 @@
+{
+  "generator": "YouTubeSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + searchRoomsCancellable (with S09-watch-ended, S09-player-ended)",
+  "value": {
+    "9njefMDxzqw": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "9njefMDxzqw",
+          "userId": "UC1sELGmy5jp5fQUugmuYlXQ",
+          "title": "Minecraft LIVE - September 2026",
+          "nick": "Minecraft",
+          "avatar": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "cover": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "area": "Gaming",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "Game drops! Minecraft Dungeons II! Big news! More!\n \nMinecraft LIVE is back! Watch the community pre-show then learn about everything happening in the wide world of Minecraft in this jam-packed Minecraft LIVE! New game drops, developer insights, Minecraft Dungeons II, and some extra special announcements – it’s all coming up! Once it’s over, stick around for the Deep Dig After Show where our developers and guests delve deeper into some of the new features.   \n\nTune in on September 26th at 10am PT / 1pm ET / 6pm BST / 7pm CEST. \nAmerican Sign Language: https://youtube.com/live/vKkn3Xz9GlM\nBritish Sign Language: https://youtube.com/live/HzvQddPcsTc\nAudio Descriptions: https://youtube.com/live/536FOix4xE4\n\nGet Minecraft Dungeons II at: https://www.minecraft.net/store/minecraft-dungeons-ii-deluxe-edition \n\nCheck out Minecraft.net for more information! \nhttps://www.minecraft.net/",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=9njefMDxzqw"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "9njefMDxzqw",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "9njefMDxzqw",
+          "userId": "UC1sELGmy5jp5fQUugmuYlXQ",
+          "title": "Minecraft LIVE - September 2026",
+          "nick": "Minecraft",
+          "avatar": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "cover": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "area": "Gaming",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "Game drops! Minecraft Dungeons II! Big news! More!\n \nMinecraft LIVE is back! Watch the community pre-show then learn about everything happening in the wide world of Minecraft in this jam-packed Minecraft LIVE! New game drops, developer insights, Minecraft Dungeons II, and some extra special announcements – it’s all coming up! Once it’s over, stick around for the Deep Dig After Show where our developers and guests delve deeper into some of the new features.   \n\nTune in on September 26th at 10am PT / 1pm ET / 6pm BST / 7pm CEST. \nAmerican Sign Language: https://youtube.com/live/vKkn3Xz9GlM\nBritish Sign Language: https://youtube.com/live/HzvQddPcsTc\nAudio Descriptions: https://youtube.com/live/536FOix4xE4\n\nGet Minecraft Dungeons II at: https://www.minecraft.net/store/minecraft-dungeons-ii-deluxe-edition \n\nCheck out Minecraft.net for more information! \nhttps://www.minecraft.net/",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=9njefMDxzqw"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "9njefMDxzqw",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "9njefMDxzqw",
+          "userId": "UC1sELGmy5jp5fQUugmuYlXQ",
+          "title": "Minecraft LIVE - September 2026",
+          "nick": "Minecraft",
+          "avatar": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "cover": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "area": "Gaming",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "Game drops! Minecraft Dungeons II! Big news! More!\n \nMinecraft LIVE is back! Watch the community pre-show then learn about everything happening in the wide world of Minecraft in this jam-packed Minecraft LIVE! New game drops, developer insights, Minecraft Dungeons II, and some extra special announcements – it’s all coming up! Once it’s over, stick around for the Deep Dig After Show where our developers and guests delve deeper into some of the new features.   \n\nTune in on September 26th at 10am PT / 1pm ET / 6pm BST / 7pm CEST. \nAmerican Sign Language: https://youtube.com/live/vKkn3Xz9GlM\nBritish Sign Language: https://youtube.com/live/HzvQddPcsTc\nAudio Descriptions: https://youtube.com/live/536FOix4xE4\n\nGet Minecraft Dungeons II at: https://www.minecraft.net/store/minecraft-dungeons-ii-deluxe-edition \n\nCheck out Minecraft.net for more information! \nhttps://www.minecraft.net/",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=9njefMDxzqw"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "9njefMDxzqw",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "getLiveStatus": {
+        "result": false,
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "9njefMDxzqw",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "streams": [],
+      "getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "resolvePlayUrlsRaw": {},
+      "resolvePlayUrlsForRecoveryRaw(hls:auto)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getPlayQualites (refreshed room)": {
+        "result": [],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "9njefMDxzqw",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "searchRooms": {
+      "result": [
+        {
+          "roomId": "9njefMDxzqw",
+          "userId": "UC1sELGmy5jp5fQUugmuYlXQ",
+          "title": "Minecraft LIVE - September 2026",
+          "nick": "Minecraft",
+          "avatar": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "cover": "https://i.ytimg.com/vi/9njefMDxzqw/sddefault.jpg?v=6aad685e",
+          "area": "Gaming",
+          "watching": "",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 1,
+          "isRecord": false,
+          "status": false,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "Game drops! Minecraft Dungeons II! Big news! More!\n \nMinecraft LIVE is back! Watch the community pre-show then learn about everything happening in the wide world of Minecraft in this jam-packed Minecraft LIVE! New game drops, developer insights, Minecraft Dungeons II, and some extra special announcements – it’s all coming up! Once it’s over, stick around for the Deep Dig After Show where our developers and guests delve deeper into some of the new features.   \n\nTune in on September 26th at 10am PT / 1pm ET / 6pm BST / 7pm CEST. \nAmerican Sign Language: https://youtube.com/live/vKkn3Xz9GlM\nBritish Sign Language: https://youtube.com/live/HzvQddPcsTc\nAudio Descriptions: https://youtube.com/live/536FOix4xE4\n\nGet Minecraft Dungeons II at: https://www.minecraft.net/store/minecraft-dungeons-ii-deluxe-edition \n\nCheck out Minecraft.net for more information! \nhttps://www.minecraft.net/",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=9njefMDxzqw"
+        }
+      ],
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://www.youtube.com/watch?v=9njefMDxzqw",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cookie": "SOCS=CAI",
+            "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cookie": "SOCS=CAI",
+            "Referer": "https://www.youtube.com/watch?v=9njefMDxzqw",
+            "Content-Type": "application/json; charset=utf-8",
+            "Origin": "https://www.youtube.com"
+          },
+          "body": {
+            "videoId": "9njefMDxzqw",
+            "contentCheckOk": true,
+            "racyCheckOk": true,
+            "context": {
+              "client": {
+                "clientName": "ANDROID",
+                "clientVersion": "21.08.266",
+                "platform": "DESKTOP",
+                "clientScreen": "EMBED",
+                "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                "browserName": "Chrome"
+              },
+              "user": {
+                "lockedSafetyMode": false
+              },
+              "request": {
+                "useSsl": true
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

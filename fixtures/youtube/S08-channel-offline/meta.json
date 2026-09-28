@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "platform": "youtube",
+  "sample": "S08-channel-offline",
+  "capturedAt": "2026-09-28T12:23:14.833575Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA/live",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Cookie": "SOCS=CAI",
+      "Referer": "https://www.youtube.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8",
+      "x-content-type-options": "nosniff",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "expires": "Mon, 01 Jan 1990 00:00:00 GMT",
+      "date": "Mon, 28 Sep 2026 12:23:12 GMT",
+      "x-frame-options": "SAMEORIGIN",
+      "server": "ESF",
+      "vary": "Sec-CH-UA-Arch, Sec-CH-UA-Bitness, Sec-CH-UA-Full-Version, Sec-CH-UA-Full-Version-List, Sec-CH-UA-Model, Sec-CH-UA-WoW64, Sec-CH-UA-Form-Factors, Sec-CH-UA-Platform, Sec-CH-UA-Platform-Version, Sec-CH-Viewport-Width, Sec-CH-DPR, Device-Memory,Accept-Encoding",
+      "transfer-encoding": "chunked"
+    }
+  },
+  "raw": {
+    "sha256": "877acf99548a0f447fd6ce052e0646ee73431161fa01f3c896b782266d930122",
+    "length": 1340113
+  },
+  "body": "body.html",
+  "scrubbed": [
+    {
+      "where": "$ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[*].tabRenderer.content.sectionListRenderer.contents[*].itemSectionRenderer.contents[*].channelVideoPlayerRenderer.inlinePlaybackEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[*].tabRenderer.content.sectionListRenderer.contents[*].itemSectionRenderer.contents[*].channelVideoPlayerRenderer.readMoreText.runs[*].navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[*].tabRenderer.content.sectionListRenderer.contents[*].itemSectionRenderer.contents[*].channelVideoPlayerRenderer.title.runs[*].navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[*].tabRenderer.content.sectionListRenderer.contents[*].itemSectionRenderer.contents[*].shelfRenderer.content.horizontalListRenderer.items[*].lockupViewModel.contentImage.thumbnailViewModel.overlays[*].thumbnailHoverOverlayToggleActionsViewModel.buttons[*].toggleButtonViewModel.defaultButtonViewModel.buttonViewModel.onTap.innertubeCommand.signalServiceEndpoint.actions[*].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[*].tabRenderer.content.sectionListRenderer.contents[*].itemSectionRenderer.contents[*].shelfRenderer.content.horizontalListRenderer.items[*].lockupViewModel.metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel.content.listViewModel.listItems[*].listItemViewModel.rendererContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions[*].addToPlaylistCommand.videoCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[*].tabRenderer.content.sectionListRenderer.contents[*].itemSectionRenderer.contents[*].shelfRenderer.content.horizontalListRenderer.items[*].lockupViewModel.rendererContext.commandContext.onTap.innertubeCommand.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[*].tabRenderer.content.sectionListRenderer.contents[*].itemSectionRenderer.contents[*].shelfRenderer.playAllButton.buttonRenderer.navigationEndpoint.watchEndpoint.watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url:ip",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.responseContext.serviceTrackingParams[*].params[*].value",
+      "rule": "secret"
+    },
+    {
+      "where": "$ytInitialData.responseContext.webResponseContextExtensionData.ytConfigData.visitorData",
+      "rule": "secret"
+    }
+  ],
+  "tool": "M4.23 recorder (schema 1)",
+  "trimmed": "kept what 3.x reads: the canonical link, INNERTUBE_API_KEY, ytInitialPlayerResponse and ytInitialData (a watch page keeps contents.twoColumnWatchNextResults.results and currentVideoEndpoint)"
+}

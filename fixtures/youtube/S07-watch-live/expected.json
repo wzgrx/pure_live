@@ -1,0 +1,1067 @@
+{
+  "generator": "YouTubeSite.getRoomDetail + getRoomDetailForRefresh + getRoomDetailForRecording + getLiveStatus + getPlayQualites + resolvePlayUrlsRaw + getPlayUrlInvalidAt + getPlayUrlRefreshAt + resolvePlayUrlsForRecoveryRaw + searchRoomsCancellable + getRecommendRooms + getDirectoryPage (with S07-watch-live, S07-player-live, S07-hls-live)",
+  "value": {
+    "nI725iVsyoQ": {
+      "getRoomDetail": {
+        "result": {
+          "roomId": "nI725iVsyoQ",
+          "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+          "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+          "nick": "Lofi Girl",
+          "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+          "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+          "area": "Music",
+          "watching": "1256",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1256",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "url": "https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/hfr/1/playlist_duration/30/manifest_duration/30/maudio/1/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/go/1/rqh/5/reg/0/pacing/0/nvgoi/1/ncsapi/1/keepalive/yes/fexp/51565115%2C52178456/dover/11/itag/0/playlist_type/DVR/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Chfr%2Cplaylist_duration%2Cmanifest_duration%2Cmaudio%2Css%2Cssa%2Cbui%2Cspc%2Cvprv%2Cgo%2Crqh%2Creg%2Citag%2Cplaylist_type/sig/UB1q1SVrOEYcJQoGgtYgfjyHZyUUJuUJyyDFJ1VLAGkI4plh2nbL8E0JYEKK-w0FyQwPWabPkOUNlm4fsHfecEWRS51-8zopaC_U/file/index.m3u8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Origin": "https://www.youtube.com"
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRefresh": {
+        "result": {
+          "roomId": "nI725iVsyoQ",
+          "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+          "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+          "nick": "Lofi Girl",
+          "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+          "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+          "area": "Music",
+          "watching": "1256",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1256",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "getRoomDetailForRecording": {
+        "result": {
+          "roomId": "nI725iVsyoQ",
+          "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+          "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+          "nick": "Lofi Girl",
+          "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+          "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+          "area": "Music",
+          "watching": "1256",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "1256",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "youtube",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+          "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://www.youtube.com",
+            "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "url": "https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/hfr/1/playlist_duration/30/manifest_duration/30/maudio/1/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/go/1/rqh/5/reg/0/pacing/0/nvgoi/1/ncsapi/1/keepalive/yes/fexp/51565115%2C52178456/dover/11/itag/0/playlist_type/DVR/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Chfr%2Cplaylist_duration%2Cmanifest_duration%2Cmaudio%2Css%2Cssa%2Cbui%2Cspc%2Cvprv%2Cgo%2Crqh%2Creg%2Citag%2Cplaylist_type/sig/UB1q1SVrOEYcJQoGgtYgfjyHZyUUJuUJyyDFJ1VLAGkI4plh2nbL8E0JYEKK-w0FyQwPWabPkOUNlm4fsHfecEWRS51-8zopaC_U/file/index.m3u8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Origin": "https://www.youtube.com"
+            }
+          }
+        ]
+      },
+      "getLiveStatus": {
+        "result": true,
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "streams": [
+        {
+          "id": "hls:1080:0:h264",
+          "label": "1080p",
+          "protocol": "hls",
+          "codec": "h264",
+          "height": 1080,
+          "frameRate": 30.0,
+          "bitrate": 5420722,
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/96/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D137/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/MI8r5FMkJTNwEPBBXzRQif1m_0yb83NDtsPYWvbZWo-dRaIuEd8dqjsCFSQ7VmaP-WRirH5sd88A1Gy771FPGO-ROXZc0IKZmeYFJw%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/MCbKcsBmBDAwXkSqZNmJ8G-gnEPMb0cEcvcs7yV0lvJ9hTn9yrCqVp1MEPMJ2tT7NEZ0Zt-Fytb9E1A4ltqr2OaE4y_jtAiiCE6H_y%3D%3D/playlist/index.m3u8"
+          ]
+        },
+        {
+          "id": "hls:720:0:h264",
+          "label": "720p",
+          "protocol": "hls",
+          "codec": "h264",
+          "height": 720,
+          "frameRate": 30.0,
+          "bitrate": 2969452,
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/95/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D136/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/VF5u4KFzHCBaVQF_ay3bkj7wxbj1nczIgs958USv4WGi1ECb96j78VziEjOk-_tVNOM1lfW7yYoed6sMhaGAG5yaINHfrmbx7JqcrD%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/MQgYymAeXLDnWlLQh1oHSSMpnH5YjrMKUPmEIppCBbA3_PHJFmEWJRpZVSk0bwOAu-Xqc5ugufJtHHdy7FLQDdGszFoSqf04G4HJ/playlist/index.m3u8"
+          ]
+        },
+        {
+          "id": "hls:480:0:h264",
+          "label": "480p",
+          "protocol": "hls",
+          "codec": "h264",
+          "height": 480,
+          "frameRate": 30.0,
+          "bitrate": 1568726,
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/94/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D135/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/SD3t7MLbRMJsSXhYj1qp627Wt948bOMgcaUgyDfWHIiR2lNzBHydZWZGVKZy0bZ--ZuE-h3UCq_GkGbIUT3hK_vrKEAaQUmFp9G2yL%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/XTfDcwTnDrLpDEurIMeb5RN-M9leNH4mzPCJlRa88j_7l9VvkO3gsR56SdPM-jITmU0XwxyF5-jV4HTG4od9Er1t6esAFlrV5Pwf24D%3D/playlist/index.m3u8"
+          ]
+        },
+        {
+          "id": "hls:360:0:h264",
+          "label": "360p",
+          "protocol": "hls",
+          "codec": "h264",
+          "height": 360,
+          "frameRate": 30.0,
+          "bitrate": 1209862,
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/93/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D134/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/XB9g7IVvLlMuME29LzEPEgq-Z8wuMpzXdsWtupaU7P9Vd8sVAcb2JTVZBqKFpvRjzIxnrx1nFLMU4vMrF49qROTb5bAJtp3Ih3laX3a%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/GIzEnrAyEOZiSajg00kpXwAjniGEUrtLurzCFmonPT-4a2xVxSIvg67DCOG50OF5O2MchymUSHf28ApIFoQJdVTwjHSD-YIxV6Eo6r%3D%3D/playlist/index.m3u8"
+          ]
+        },
+        {
+          "id": "hls:240:0:h264",
+          "label": "240p",
+          "protocol": "hls",
+          "codec": "h264",
+          "height": 240,
+          "frameRate": 30.0,
+          "bitrate": 546239,
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/92/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D139/sgovp/gir%3Dyes%3Bitag%3D133/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/SC2k1DEsJUUyVIVGDjxYRTwYOlqkfxsLRykSYFFTeUfzwjbBBPx_FL5YXSaB7kLpWLCWakFQYYskf1Wp6LKBMEEEAkfXmzexaZeR/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/SAlKzhLeKDKvFj4h65HuaEBY9ZUVYhCjw4PoepXsQc5atI25a93geLfDBEEGyZpjnCYoxkiBEiSfm3wuY-2iMIkD2WULCWkVh9WUkc%3D%3D/playlist/index.m3u8"
+          ]
+        },
+        {
+          "id": "hls:144:0:h264",
+          "label": "144p",
+          "protocol": "hls",
+          "codec": "h264",
+          "height": 144,
+          "frameRate": 15.0,
+          "bitrate": 290288,
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/91/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D139/sgovp/gir%3Dyes%3Bitag%3D160/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/ZW5o4XKuWUMfQOKep_6fF8liKPRT0Qchozm_NSao-tlxCg9eOePQID5_OtZiz5vEK2OHFjMC811GBNGzoZvg1ns1IbH8oawK0wbvWW%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/DUqOxyPsYxDcPDTIaWX2ticxUv86buPDmEz0TnsGABOfJgRVQP2qpvf5EzYI88ZnAmg0Ph94uxGF44P4NYe4uIaKtxvMRk0bp8zvMNm%3D/playlist/index.m3u8"
+          ]
+        },
+        {
+          "id": "dash:auto",
+          "label": "DASH Auto",
+          "protocol": "dash",
+          "codec": "",
+          "height": null,
+          "frameRate": null,
+          "bitrate": null,
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/dash/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/as/fmp4_audio_clear%2Cwebm_audio_clear%2Cwebm2_audio_clear%2Cfmp4_sd_hd_clear%2Cwebm2_sd_hd_clear/ss/1/ssa/1/spc/I-rgIX97dSres9pm69_T6M1HwYcgtZvLowm-fi8NCvkDElGjxPUg22V_7-U/vprv/1/rqh/2/reg/0/pacing/0/itag_bl/376%2C377%2C384%2C385%2C612%2C613%2C617%2C619%2C623%2C628%2C655%2C656%2C660%2C662%2C666%2C671%2C798%2C799%2C803%2C804%2C868%2C870%2C872%2C874%2C876%2C880%2C882%2C884%2C886%2C888%2C897%2C899/keepalive/yes/fexp/51565115%2C52178456/itag/0/playlist_type/LIVE/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Cas%2Css%2Cssa%2Cspc%2Cvprv%2Crqh%2Creg%2Citag%2Cplaylist_type/sig/BM8l4FYlEYJjQaspyk0xWr2J9qNQi0FXLOuhA9-Axyj1IXkqcbRz--HUCUYVwsvhBY-WGCYTlFhzB8rqoZswt1_Cw20NSgZ6aTBD"
+          ]
+        }
+      ],
+      "getPlayQualites": {
+        "result": [
+          {
+            "quality": "1080p · H264 · HLS",
+            "id": "hls:1080:0:h264",
+            "sort": 1080060,
+            "data": null
+          },
+          {
+            "quality": "720p · H264 · HLS",
+            "id": "hls:720:0:h264",
+            "sort": 720060,
+            "data": null
+          },
+          {
+            "quality": "480p · H264 · HLS",
+            "id": "hls:480:0:h264",
+            "sort": 480060,
+            "data": null
+          },
+          {
+            "quality": "360p · H264 · HLS",
+            "id": "hls:360:0:h264",
+            "sort": 360060,
+            "data": null
+          },
+          {
+            "quality": "240p · H264 · HLS",
+            "id": "hls:240:0:h264",
+            "sort": 240060,
+            "data": null
+          },
+          {
+            "quality": "144p · H264 · HLS",
+            "id": "hls:144:0:h264",
+            "sort": 144045,
+            "data": null
+          },
+          {
+            "quality": "DASH 自动 · DASH",
+            "id": "dash:auto",
+            "sort": 10,
+            "data": null
+          }
+        ],
+        "requests": []
+      },
+      "resolvePlayUrlsRaw": {
+        "hls:1080:0:h264": {
+          "result": {
+            "urls": [
+              "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/96/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D137/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/MI8r5FMkJTNwEPBBXzRQif1m_0yb83NDtsPYWvbZWo-dRaIuEd8dqjsCFSQ7VmaP-WRirH5sd88A1Gy771FPGO-ROXZc0IKZmeYFJw%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/MCbKcsBmBDAwXkSqZNmJ8G-gnEPMb0cEcvcs7yV0lvJ9hTn9yrCqVp1MEPMJ2tT7NEZ0Zt-Fytb9E1A4ltqr2OaE4y_jtAiiCE6H_y%3D%3D/playlist/index.m3u8"
+            ],
+            "appliedQualityData": "hls:1080:0:h264",
+            "invalidAt": [
+              "2026-09-28T18:23:08.000Z"
+            ],
+            "refreshAt": [
+              "2026-09-28T18:13:08.000Z"
+            ]
+          },
+          "requests": []
+        },
+        "hls:720:0:h264": {
+          "result": {
+            "urls": [
+              "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/95/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D136/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/VF5u4KFzHCBaVQF_ay3bkj7wxbj1nczIgs958USv4WGi1ECb96j78VziEjOk-_tVNOM1lfW7yYoed6sMhaGAG5yaINHfrmbx7JqcrD%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/MQgYymAeXLDnWlLQh1oHSSMpnH5YjrMKUPmEIppCBbA3_PHJFmEWJRpZVSk0bwOAu-Xqc5ugufJtHHdy7FLQDdGszFoSqf04G4HJ/playlist/index.m3u8"
+            ],
+            "appliedQualityData": "hls:720:0:h264",
+            "invalidAt": [
+              "2026-09-28T18:23:08.000Z"
+            ],
+            "refreshAt": [
+              "2026-09-28T18:13:08.000Z"
+            ]
+          },
+          "requests": []
+        },
+        "hls:480:0:h264": {
+          "result": {
+            "urls": [
+              "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/94/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D135/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/SD3t7MLbRMJsSXhYj1qp627Wt948bOMgcaUgyDfWHIiR2lNzBHydZWZGVKZy0bZ--ZuE-h3UCq_GkGbIUT3hK_vrKEAaQUmFp9G2yL%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/XTfDcwTnDrLpDEurIMeb5RN-M9leNH4mzPCJlRa88j_7l9VvkO3gsR56SdPM-jITmU0XwxyF5-jV4HTG4od9Er1t6esAFlrV5Pwf24D%3D/playlist/index.m3u8"
+            ],
+            "appliedQualityData": "hls:480:0:h264",
+            "invalidAt": [
+              "2026-09-28T18:23:08.000Z"
+            ],
+            "refreshAt": [
+              "2026-09-28T18:13:08.000Z"
+            ]
+          },
+          "requests": []
+        },
+        "hls:360:0:h264": {
+          "result": {
+            "urls": [
+              "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/93/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D134/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/XB9g7IVvLlMuME29LzEPEgq-Z8wuMpzXdsWtupaU7P9Vd8sVAcb2JTVZBqKFpvRjzIxnrx1nFLMU4vMrF49qROTb5bAJtp3Ih3laX3a%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/GIzEnrAyEOZiSajg00kpXwAjniGEUrtLurzCFmonPT-4a2xVxSIvg67DCOG50OF5O2MchymUSHf28ApIFoQJdVTwjHSD-YIxV6Eo6r%3D%3D/playlist/index.m3u8"
+            ],
+            "appliedQualityData": "hls:360:0:h264",
+            "invalidAt": [
+              "2026-09-28T18:23:08.000Z"
+            ],
+            "refreshAt": [
+              "2026-09-28T18:13:08.000Z"
+            ]
+          },
+          "requests": []
+        },
+        "hls:240:0:h264": {
+          "result": {
+            "urls": [
+              "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/92/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D139/sgovp/gir%3Dyes%3Bitag%3D133/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/SC2k1DEsJUUyVIVGDjxYRTwYOlqkfxsLRykSYFFTeUfzwjbBBPx_FL5YXSaB7kLpWLCWakFQYYskf1Wp6LKBMEEEAkfXmzexaZeR/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/SAlKzhLeKDKvFj4h65HuaEBY9ZUVYhCjw4PoepXsQc5atI25a93geLfDBEEGyZpjnCYoxkiBEiSfm3wuY-2iMIkD2WULCWkVh9WUkc%3D%3D/playlist/index.m3u8"
+            ],
+            "appliedQualityData": "hls:240:0:h264",
+            "invalidAt": [
+              "2026-09-28T18:23:08.000Z"
+            ],
+            "refreshAt": [
+              "2026-09-28T18:13:08.000Z"
+            ]
+          },
+          "requests": []
+        },
+        "hls:144:0:h264": {
+          "result": {
+            "urls": [
+              "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/91/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D139/sgovp/gir%3Dyes%3Bitag%3D160/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/ZW5o4XKuWUMfQOKep_6fF8liKPRT0Qchozm_NSao-tlxCg9eOePQID5_OtZiz5vEK2OHFjMC811GBNGzoZvg1ns1IbH8oawK0wbvWW%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/DUqOxyPsYxDcPDTIaWX2ticxUv86buPDmEz0TnsGABOfJgRVQP2qpvf5EzYI88ZnAmg0Ph94uxGF44P4NYe4uIaKtxvMRk0bp8zvMNm%3D/playlist/index.m3u8"
+            ],
+            "appliedQualityData": "hls:144:0:h264",
+            "invalidAt": [
+              "2026-09-28T18:23:08.000Z"
+            ],
+            "refreshAt": [
+              "2026-09-28T18:13:08.000Z"
+            ]
+          },
+          "requests": []
+        },
+        "dash:auto": {
+          "result": {
+            "urls": [
+              "https://manifest.googlevideo.com/api/manifest/dash/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/as/fmp4_audio_clear%2Cwebm_audio_clear%2Cwebm2_audio_clear%2Cfmp4_sd_hd_clear%2Cwebm2_sd_hd_clear/ss/1/ssa/1/spc/I-rgIX97dSres9pm69_T6M1HwYcgtZvLowm-fi8NCvkDElGjxPUg22V_7-U/vprv/1/rqh/2/reg/0/pacing/0/itag_bl/376%2C377%2C384%2C385%2C612%2C613%2C617%2C619%2C623%2C628%2C655%2C656%2C660%2C662%2C666%2C671%2C798%2C799%2C803%2C804%2C868%2C870%2C872%2C874%2C876%2C880%2C882%2C884%2C886%2C888%2C897%2C899/keepalive/yes/fexp/51565115%2C52178456/itag/0/playlist_type/LIVE/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Cas%2Css%2Cssa%2Cspc%2Cvprv%2Crqh%2Creg%2Citag%2Cplaylist_type/sig/BM8l4FYlEYJjQaspyk0xWr2J9qNQi0FXLOuhA9-Axyj1IXkqcbRz--HUCUYVwsvhBY-WGCYTlFhzB8rqoZswt1_Cw20NSgZ6aTBD"
+            ],
+            "appliedQualityData": "dash:auto",
+            "invalidAt": [
+              "2026-09-28T18:23:08.000Z"
+            ],
+            "refreshAt": [
+              "2026-09-28T18:13:08.000Z"
+            ]
+          },
+          "requests": []
+        }
+      },
+      "resolvePlayUrlsForRecoveryRaw(hls:1080:0:h264)": {
+        "result": {
+          "urls": [
+            "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/itag/96/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D137/rqh/1/hls_chunk_host/rr1---sn-4jpm0n-nwje.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/playlist_duration/30/manifest_duration/30/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/reg/0/playlist_type/DVR/initcwndbps/996125/met/1790598191,/mh/Pj/mip/203.0.113.7/mm/44/mn/sn-4jpm0n-nwje/ms/lva/mv/m/mvi/1/pl/24/rms/lva,lva/dover/11/pacing/0/keepalive/yes/fexp/51565115,52178456/mt/1790597815/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,rqh,xpc,playlist_duration,manifest_duration,ss,ssa,bui,spc,vprv,reg,playlist_type/sig/MI8r5FMkJTNwEPBBXzRQif1m_0yb83NDtsPYWvbZWo-dRaIuEd8dqjsCFSQ7VmaP-WRirH5sd88A1Gy771FPGO-ROXZc0IKZmeYFJw%3D%3D/lsparams/hls_chunk_host,initcwndbps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms/lsig/MCbKcsBmBDAwXkSqZNmJ8G-gnEPMb0cEcvcs7yV0lvJ9hTn9yrCqVp1MEPMJ2tT7NEZ0Zt-Fytb9E1A4ltqr2OaE4y_jtAiiCE6H_y%3D%3D/playlist/index.m3u8"
+          ],
+          "appliedQualityData": "hls:1080:0:h264"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "url": "https://manifest.googlevideo.com/api/manifest/hls_variant/expire/1790619788/ei/UOz4lqUUDqAJwoGL9BfZ8Kq/ip/203.0.113.7/id/nI725iVsyoQ.1/source/yt_live_broadcast/requiressl/yes/xpc/EgVo2aDSNQ%3D%3D/hfr/1/playlist_duration/30/manifest_duration/30/maudio/1/ss/1/ssa/1/bui/AWzQHwqOIrmXJb-mv1q6uTduk362nG8-y92oxs9CrG3Ii5k9c4ZgnkInztsZttJj5jSgK8yxH4peitki/spc/I-rgIX94dSres9pm69_T6M1HwYchtZvLowm-fi8NCvkDElGjxPUg62aX7zV15Q/vprv/1/go/1/rqh/5/reg/0/pacing/0/nvgoi/1/ncsapi/1/keepalive/yes/fexp/51565115%2C52178456/dover/11/itag/0/playlist_type/DVR/sparams/expire%2Cei%2Cip%2Cid%2Csource%2Crequiressl%2Cxpc%2Chfr%2Cplaylist_duration%2Cmanifest_duration%2Cmaudio%2Css%2Cssa%2Cbui%2Cspc%2Cvprv%2Cgo%2Crqh%2Creg%2Citag%2Cplaylist_type/sig/UB1q1SVrOEYcJQoGgtYgfjyHZyUUJuUJyyDFJ1VLAGkI4plh2nbL8E0JYEKK-w0FyQwPWabPkOUNlm4fsHfecEWRS51-8zopaC_U/file/index.m3u8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Origin": "https://www.youtube.com"
+            }
+          }
+        ]
+      },
+      "getPlayQualites (refreshed room)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube identity"
+        },
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "searchRooms": {
+      "nI725iVsyoQ": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "https://www.youtube.com/watch?v=nI725iVsyoQ": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "https://youtu.be/nI725iVsyoQ": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "https://www.youtube.com/live/nI725iVsyoQ": {
+        "result": [
+          {
+            "roomId": "nI725iVsyoQ",
+            "userId": "UCSJ4gkVC6NrvII8umztf0Ow",
+            "title": "24/7 deep sleep music 🌌 calm ambient to sleep & dream to",
+            "nick": "Lofi Girl",
+            "avatar": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "cover": "https://i.ytimg.com/vi/nI725iVsyoQ/sddefault.jpg?v=6ab3f71c",
+            "area": "Music",
+            "watching": "1256",
+            "audienceMetricType": "onlineViewers",
+            "popularity": "",
+            "onlineViewers": "1256",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "youtube",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "YouTube Live 远端聊天尚待接入；仅在直播页返回专用并发观看字段时显示当前在线，不把累计播放量当作在线人数。",
+            "introduction": "Drift off under the stars with 24/7 sleep music, gently guiding you into deep sleep and peaceful dreams.\n\n🎼 | Listen on Spotify, Apple Music and more\n→ https://lnk.to/deep_sleep\n\nClear your head and settle in under the stars. Streaming 24/7, our radio plays steady sleep music inspired by late-night stargazing and deep space dreams. Designed with no sudden shifts, this deep sleep music quiets an overactive mind so you can drift off effortlessly. Dim the lights, get cozy, and tune in whenever you're ready to rest.\n\n💤 Listen, relax, breathe, and fall asleep peacefully.\n\n🌎 | Lofi Girl on all social media\n→ https://link.lofigirl.com/m/Community\n\n🌐 | Our Websites\n→ https://link.lofigirl.com/m/website\n\n👕 | Lofi Girl merch\n→ https://link.lofigirl.com/sleep\n\n🎭 | Create your lofi avatar now\n→ https://lofigirl.com/generator/\n\n🎨 | Illustration & animation credits:\n\nProduction: Léonore Kuszel\nArt Direction & Supervision: Laura Vuillerme, Julien Maret \nBG : Laura Vuillerme, Manon Bailly\nAnimation: Anaïs Mirliaz\nAssist, clean & color: Léa Savinel, Jasmine Nacer-Cherif,  Alice Mimran-Didelot\nCompositing: Ashley Sfeir\n\n🧡 All visuals and music in this video are 100% crafted by talented human artists, without the use of AI. We’re committed to delivering genuine, hand-made creations for our audience to enjoy.\n#sleepmusic #lofiradio #relaxingmusic #lofimusic #sleepplaylist",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://www.youtube.com",
+              "referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+          }
+        ],
+        "requests": [
+          {
+            "method": "GET",
+            "url": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ"
+            }
+          },
+          {
+            "method": "POST",
+            "url": "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Cookie": "SOCS=CAI",
+              "Referer": "https://www.youtube.com/watch?v=nI725iVsyoQ",
+              "Content-Type": "application/json; charset=utf-8",
+              "Origin": "https://www.youtube.com"
+            },
+            "body": {
+              "videoId": "nI725iVsyoQ",
+              "contentCheckOk": true,
+              "racyCheckOk": true,
+              "context": {
+                "client": {
+                  "clientName": "ANDROID",
+                  "clientVersion": "21.08.266",
+                  "platform": "DESKTOP",
+                  "clientScreen": "EMBED",
+                  "clientFormFactor": "UNKNOWN_FORM_FACTOR",
+                  "browserName": "Chrome"
+                },
+                "user": {
+                  "lockedSafetyMode": false
+                },
+                "request": {
+                  "useSsl": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "nI725iVsyoQ page 2": {
+        "result": [],
+        "requests": []
+      },
+      "nI725iVsyoQ pageSize 0": {
+        "result": [],
+        "requests": []
+      },
+      "blank": {
+        "result": [],
+        "requests": []
+      },
+      "lofi girl": {
+        "result": [],
+        "requests": []
+      }
+    },
+    "catalog": {
+      "getRecommendRooms": {
+        "result": [],
+        "requests": []
+      },
+      "getRecommendRooms(page: 0)": {
+        "result": [],
+        "requests": []
+      },
+      "getDirectoryPage": {
+        "result": {
+          "rooms": [],
+          "page": 1,
+          "hasMore": false
+        },
+        "requests": []
+      },
+      "getDirectoryPage(page: 2)": {
+        "result": {
+          "rooms": [],
+          "page": 2,
+          "hasMore": false
+        },
+        "requests": []
+      },
+      "getDirectoryPage(page: 0)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube schema"
+        },
+        "requests": []
+      },
+      "getDirectoryPage(category)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube schema"
+        },
+        "requests": []
+      },
+      "directoryNoticeKey": "youtube_directory_scope",
+      "id": "youtube",
+      "name": "YouTube Live"
+    },
+    "identity": {
+      "getRoomDetail(other platform)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube identity"
+        },
+        "requests": []
+      },
+      "getRoomDetail(bad id)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube identity"
+        },
+        "requests": []
+      },
+      "getPlayQualites(card without data)": {
+        "result": {
+          "throws": "YouTubeException",
+          "message": "YouTube identity"
+        },
+        "requests": []
+      },
+      "getPlayQualites(offline card)": {
+        "result": [],
+        "requests": []
+      }
+    }
+  }
+}

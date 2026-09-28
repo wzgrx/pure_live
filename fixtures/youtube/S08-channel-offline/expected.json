@@ -1,0 +1,40 @@
+{
+  "generator": "YouTubeApi.resolveReference + YouTubeSite.searchRoomsCancellable (with S08-channel-offline)",
+  "value": {
+    "resolveReference": {
+      "result": {
+        "throws": "YouTubeException",
+        "message": "YouTube notLive"
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA/live",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cookie": "SOCS=CAI",
+            "Referer": "https://www.youtube.com/"
+          }
+        }
+      ]
+    },
+    "searchRooms": {
+      "result": [],
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA/live",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cookie": "SOCS=CAI",
+            "Referer": "https://www.youtube.com/"
+          }
+        }
+      ]
+    }
+  }
+}

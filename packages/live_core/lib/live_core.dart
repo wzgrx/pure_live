@@ -62,6 +62,8 @@ export 'src/sites/showroom/showroom_api.dart';
 export 'src/sites/showroom/showroom_site.dart';
 export 'src/sites/soop/soop_api.dart';
 export 'src/sites/soop/soop_site.dart';
+export 'src/sites/steambroadcast/steambroadcast_api.dart';
+export 'src/sites/steambroadcast/steambroadcast_site.dart';
 export 'src/sites/tiktok/tiktok_api.dart';
 export 'src/sites/tiktok/tiktok_site.dart';
 export 'src/sites/twitcasting/twitcasting_api.dart';

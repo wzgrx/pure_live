@@ -1,0 +1,555 @@
+{
+  "generator": "SteamBroadcastSite room calls (with S05-mpd-live, S05-master-live; S01 for the remembered cards) + SteamBroadcastApi.parseWatchHtml",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "76561199485215572",
+        "userId": "76561199485215572",
+        "title": "Steam Broadcast",
+        "nick": "PWM Game Manager",
+        "avatar": "",
+        "cover": "",
+        "area": "Steam Community",
+        "watching": "7994",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "7994",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "steambroadcast",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://steamcommunity.com",
+          "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+        "data": {
+          "steamId": "76561199485215572",
+          "broadcaster": "PWM Game Manager",
+          "title": "Steam Broadcast",
+          "game": "",
+          "cover": "",
+          "avatar": "",
+          "currentViewers": 7994,
+          "state": "live",
+          "master": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+        }
+      },
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        },
+        {
+          "url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Origin": "https://steamcommunity.com",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        }
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "76561199485215572",
+        "userId": "76561199485215572",
+        "title": "Steam Broadcast",
+        "nick": "PWM Game Manager",
+        "avatar": "",
+        "cover": "",
+        "area": "Steam Community",
+        "watching": "7994",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "7994",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "steambroadcast",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://steamcommunity.com",
+          "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+      },
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "76561199485215572",
+        "userId": "76561199485215572",
+        "title": "Steam Broadcast",
+        "nick": "PWM Game Manager",
+        "avatar": "",
+        "cover": "",
+        "area": "Steam Community",
+        "watching": "7994",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "7994",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "steambroadcast",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://steamcommunity.com",
+          "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+        "data": {
+          "steamId": "76561199485215572",
+          "broadcaster": "PWM Game Manager",
+          "title": "Steam Broadcast",
+          "game": "",
+          "cover": "",
+          "avatar": "",
+          "currentViewers": 7994,
+          "state": "live",
+          "master": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+        }
+      },
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        },
+        {
+          "url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Origin": "https://steamcommunity.com",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        }
+      ]
+    },
+    "getLiveStatus": {
+      "result": true,
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      ]
+    },
+    "getRoomDetail → streams": {
+      "getPlayQualites": {
+        "result": [
+          {
+            "quality": "自适应 HLS",
+            "id": "auto",
+            "sort": 0,
+            "data": null
+          }
+        ],
+        "requests": []
+      },
+      "resolvePlayUrlsRaw": {
+        "result": {
+          "urls": [
+            "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+          ],
+          "appliedQualityData": "auto"
+        },
+        "requests": []
+      },
+      "resolvePlayUrlsForRecoveryRaw": {
+        "result": {
+          "urls": [
+            "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+          ],
+          "appliedQualityData": "auto"
+        },
+        "requests": [
+          {
+            "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            }
+          },
+          {
+            "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/javascript, */*; q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          },
+          {
+            "url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Origin": "https://steamcommunity.com",
+              "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+            }
+          }
+        ]
+      },
+      "getPlayUrls": {
+        "result": [
+          "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+        ],
+        "requests": []
+      },
+      "otherQuality": {
+        "result": {
+          "throws": "SteamBroadcastException.schema",
+          "message": "Steam Broadcast schema"
+        },
+        "requests": []
+      }
+    },
+    "getRoomDetailForRefresh → streams": {
+      "getPlayQualites": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "resolvePlayUrlsRaw": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "resolvePlayUrlsForRecoveryRaw": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getPlayUrls": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "otherQuality": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      }
+    },
+    "getRoomDetail(watch link)": {
+      "result": {
+        "roomId": "76561199485215572",
+        "userId": "76561199485215572",
+        "title": "Steam Broadcast",
+        "nick": "PWM Game Manager",
+        "avatar": "",
+        "cover": "",
+        "area": "Steam Community",
+        "watching": "7994",
+        "audienceMetricType": "onlineViewers",
+        "popularity": "",
+        "onlineViewers": "7994",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "steambroadcast",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://steamcommunity.com",
+          "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+        "data": {
+          "steamId": "76561199485215572",
+          "broadcaster": "PWM Game Manager",
+          "title": "Steam Broadcast",
+          "game": "",
+          "cover": "",
+          "avatar": "",
+          "currentViewers": 7994,
+          "state": "live",
+          "master": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+        }
+      },
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        },
+        {
+          "url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Origin": "https://steamcommunity.com",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        }
+      ]
+    },
+    "getRoomDetail(other platform)": {
+      "result": {
+        "throws": "SteamBroadcastException.identity",
+        "message": "Steam Broadcast identity"
+      },
+      "requests": []
+    },
+    "getRoomDetail(not an id)": {
+      "result": {
+        "throws": "SteamBroadcastException.identity",
+        "message": "Steam Broadcast identity"
+      },
+      "requests": []
+    },
+    "after the directory": {
+      "result": [
+        {
+          "roomId": "76561199485215572",
+          "userId": "76561199485215572",
+          "title": "NTE: Neverness to Everness",
+          "nick": "PWM Game Manager",
+          "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+          "area": "NTE: Neverness to Everness",
+          "watching": "7994",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "7994",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "steambroadcast",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://steamcommunity.com",
+            "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "data": {
+            "steamId": "76561199485215572",
+            "broadcaster": "PWM Game Manager",
+            "title": "NTE: Neverness to Everness",
+            "game": "NTE: Neverness to Everness",
+            "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+            "avatar": "",
+            "currentViewers": 7994,
+            "state": "live",
+            "master": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net"
+          }
+        },
+        {
+          "roomId": "76561199485215572",
+          "userId": "76561199485215572",
+          "title": "NTE: Neverness to Everness",
+          "nick": "PWM Game Manager",
+          "avatar": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+          "cover": "https://steambroadcast.akamaized.net/broadcast/76561199485215572/4005242549293303728/thumbnail/?broadcast_origin=ext3-sgp1.steamserver.net",
+          "area": "NTE: Neverness to Everness",
+          "watching": "7994",
+          "audienceMetricType": "onlineViewers",
+          "popularity": "",
+          "onlineViewers": "7994",
+          "totalViewers": "",
+          "followers": "0",
+          "platform": "steambroadcast",
+          "liveStatus": 0,
+          "isRecord": false,
+          "status": true,
+          "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+          "isCatchUp": false,
+          "httpHeaders": {
+            "origin": "https://steamcommunity.com",
+            "referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+          },
+          "link": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+        }
+      ],
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/apps/allcontenthome?l=english&browsefilter=trend&appHubSubSection=13&forceanon=1&p=1&broadcastsoffset=0&numperpage=10",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/?subsection=broadcasts",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        },
+        {
+          "url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Origin": "https://steamcommunity.com",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561199485215572&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561199485215572",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      ]
+    },
+    "parseWatchHtml": {
+      "recorded": "PWM Game Manager",
+      "otherSteamId": {
+        "throws": "SteamBroadcastException.identity",
+        "message": "Steam Broadcast identity"
+      },
+      "withoutConfig": {
+        "throws": "SteamBroadcastException.missing",
+        "message": "Steam Broadcast missing"
+      },
+      "badConfig": {
+        "throws": "SteamBroadcastException.schema",
+        "message": "Steam Broadcast schema"
+      },
+      "titleOnly": "PWM Game Manager",
+      "noTitle": "Steam broadcaster",
+      "unknownAccount": "76561199485215572",
+      "emptyName": "Steam broadcaster"
+    }
+  }
+}

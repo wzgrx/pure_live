@@ -1,0 +1,267 @@
+{
+  "generator": "SteamBroadcastSite room calls (with S04-mpd-offline)",
+  "value": {
+    "getRoomDetail": {
+      "result": {
+        "roomId": "76561197960287930",
+        "userId": "76561197960287930",
+        "title": "Steam Broadcast",
+        "nick": "Rabscuttle",
+        "avatar": "",
+        "cover": "",
+        "area": "Steam Community",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "steambroadcast",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://steamcommunity.com",
+          "referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+        "data": {
+          "steamId": "76561197960287930",
+          "broadcaster": "Rabscuttle",
+          "title": "Steam Broadcast",
+          "game": "",
+          "cover": "",
+          "avatar": "",
+          "currentViewers": null,
+          "state": "offline",
+          "master": null
+        }
+      },
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561197960287930&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      ]
+    },
+    "getRoomDetailForRefresh": {
+      "result": {
+        "roomId": "76561197960287930",
+        "userId": "76561197960287930",
+        "title": "Steam Broadcast",
+        "nick": "Rabscuttle",
+        "avatar": "",
+        "cover": "",
+        "area": "Steam Community",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "steambroadcast",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://steamcommunity.com",
+          "referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+      },
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561197960287930&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      ]
+    },
+    "getRoomDetailForRecording": {
+      "result": {
+        "roomId": "76561197960287930",
+        "userId": "76561197960287930",
+        "title": "Steam Broadcast",
+        "nick": "Rabscuttle",
+        "avatar": "",
+        "cover": "",
+        "area": "Steam Community",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "popularity": "",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "steambroadcast",
+        "liveStatus": 1,
+        "isRecord": false,
+        "status": false,
+        "notice": "Steam 远端聊天尚待接入；界面人数来自平台明确返回的当前并发观看数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://steamcommunity.com",
+          "referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+        "data": {
+          "steamId": "76561197960287930",
+          "broadcaster": "Rabscuttle",
+          "title": "Steam Broadcast",
+          "game": "",
+          "cover": "",
+          "avatar": "",
+          "currentViewers": null,
+          "state": "offline",
+          "master": null
+        }
+      },
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561197960287930&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      ]
+    },
+    "getLiveStatus": {
+      "result": false,
+      "requests": [
+        {
+          "url": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930"
+          }
+        },
+        {
+          "url": "https://steamcommunity.com/broadcast/getbroadcastmpd/?broadcastid=0&steamid=76561197960287930&viewertoken=0&sessionid",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/javascript, */*; q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://steamcommunity.com/broadcast/watch/76561197960287930",
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        }
+      ]
+    },
+    "getRoomDetail → streams": {
+      "getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "resolvePlayUrlsRaw": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "resolvePlayUrlsForRecoveryRaw": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getPlayUrls": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "otherQuality": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      }
+    },
+    "getRoomDetailForRefresh → streams": {
+      "getPlayQualites": {
+        "result": [],
+        "requests": []
+      },
+      "resolvePlayUrlsRaw": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "resolvePlayUrlsForRecoveryRaw": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "getPlayUrls": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      },
+      "otherQuality": {
+        "result": {
+          "throws": "SteamBroadcastException.mediaUnavailable",
+          "message": "Steam Broadcast mediaUnavailable"
+        },
+        "requests": []
+      }
+    },
+    "parseWatchHtml": "Rabscuttle"
+  }
+}

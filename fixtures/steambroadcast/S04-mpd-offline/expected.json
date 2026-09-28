@@ -1,0 +1,16 @@
+{
+  "generator": "SteamBroadcastApi.parseBroadcastJson",
+  "value": {
+    "recorded": {
+      "steamId": "76561197960287930",
+      "broadcaster": "X",
+      "title": "Steam Broadcast",
+      "game": "",
+      "cover": "",
+      "avatar": "",
+      "currentViewers": null,
+      "state": "offline",
+      "master": null
+    }
+  }
+}

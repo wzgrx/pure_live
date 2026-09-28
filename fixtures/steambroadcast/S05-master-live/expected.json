@@ -1,0 +1,42 @@
+{
+  "generator": "SteamBroadcastApi.validateMaster",
+  "value": {
+    "recorded": "valid",
+    "otherSteamId": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "otherHost": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "variantOnOtherHost": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "audioOnOtherHost": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "variantWithoutOrigin": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "noVariant": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "notHls": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "relativeVariant": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    },
+    "seventeenVariants": {
+      "throws": "SteamBroadcastException.schema",
+      "message": "Steam Broadcast schema"
+    }
+  }
+}

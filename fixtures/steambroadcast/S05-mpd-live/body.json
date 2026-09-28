@@ -1,0 +1,19 @@
+{
+  "success": "ready",
+  "retry": 0,
+  "broadcastid": "4005242549293303728",
+  "eresult": 1,
+  "url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/manifest/0/cache7-lax1.steamcontent.com/?broadcast_origin=ext3-sgp1.steamserver.net",
+  "viewertoken": "5300167508285485498",
+  "hls_url": "https://cache7-lax1.steamcontent.com/broadcast/76561199485215572/2865773875667772173/hls_manifest/0/cache7-lax1.steamcontent.com/master.m3u8?broadcast_origin=ext3-sgp1.steamserver.net",
+  "heartbeat_interval": 30,
+  "is_rtmp": 1,
+  "title": "",
+  "num_viewers": 7994,
+  "is_webrtc": null,
+  "webrtc_session_id": null,
+  "webrtc_offer_sdp": null,
+  "webrtc_turn_server": null,
+  "is_replay": 0,
+  "cdn_auth_url_parameters": null
+}

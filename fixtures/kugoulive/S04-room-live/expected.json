@@ -1,0 +1,572 @@
+{
+  "generator": "KugouLiveSite.getRoomDetailForRefresh + getLiveStatus + getRoomDetail + getRoomDetailForRecording + getPlayQualites + resolvePlayUrlsRaw + getPlayUrlInvalidAt + getPlayUrlRefreshAt + getPlayUrls + resolvePlayUrlsForRecoveryRaw + searchRoomsCancellable (with S05-stream-live) + KugouLiveLink + KugouLiveApi.mediaHeaders + validateMediaUri + mediaInvalidAt + mediaRefreshAt",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "3197156",
+        "userId": "1458522292",
+        "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+        "nick": "钱响响",
+        "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+        "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "10984",
+        "platform": "kugoulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/3197156",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/3197156"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": true
+    },
+    "getRoomDetail": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        },
+        {
+          "url": "https://fx1.service.kugou.com/video/pc/live/pull/mutiline/streamaddr?std_rid=3197156&std_plat=7&std_kid=0&streamType=1-2-4-5-8&ua=fx-flash&targetLiveTypes=1-5-6&version=1000&supportEncryptMode=1&appid=1010&_=<ms>",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "3197156",
+        "userId": "1458522292",
+        "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+        "nick": "钱响响",
+        "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+        "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "10984",
+        "platform": "kugoulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/3197156",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/3197156"
+      }
+    },
+    "getRoomDetailForRecording": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        },
+        {
+          "url": "https://fx1.service.kugou.com/video/pc/live/pull/mutiline/streamaddr?std_rid=3197156&std_plat=7&std_kid=0&streamType=1-2-4-5-8&ua=fx-flash&targetLiveTypes=1-5-6&version=1000&supportEncryptMode=1&appid=1010&_=<ms>",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "3197156",
+        "userId": "1458522292",
+        "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+        "nick": "钱响响",
+        "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+        "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "10984",
+        "platform": "kugoulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/3197156",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/3197156"
+      }
+    },
+    "data.variants": [
+      {
+        "id": "flv:4:1:2",
+        "protocol": "flv",
+        "rate": 4,
+        "codec": 1,
+        "layout": 2,
+        "urls": [
+          "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+          "https://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+        ]
+      }
+    ],
+    "getPlayQualites": {
+      "requests": [],
+      "value": [
+        {
+          "quality": "FLV 码率档 4",
+          "id": "flv:4:1:2",
+          "sort": 42,
+          "data": null
+        }
+      ]
+    },
+    "resolvePlayUrlsRaw": {
+      "flv:4:1:2": {
+        "requests": [],
+        "value": {
+          "urls": [
+            "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+            "https://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+          ],
+          "appliedQualityData": "flv:4:1:2",
+          "invalidAt": [
+            "2026-09-28T05:52:53.000Z",
+            "2026-09-28T05:52:53.000Z"
+          ],
+          "refreshAt": [
+            "2026-09-28T05:47:53.000Z",
+            "2026-09-28T05:47:53.000Z"
+          ]
+        }
+      }
+    },
+    "getPlayUrls": {
+      "flv:4:1:2": {
+        "requests": [],
+        "value": [
+          "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+          "https://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+        ]
+      }
+    },
+    "resolvePlayUrlsRaw(hls:4:1:2)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live mediaUnavailable"
+      }
+    },
+    "resolvePlayUrlsForRecoveryRaw(flv:4:1:2)": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        },
+        {
+          "url": "https://fx1.service.kugou.com/video/pc/live/pull/mutiline/streamaddr?std_rid=3197156&std_plat=7&std_kid=0&streamType=1-2-4-5-8&ua=fx-flash&targetLiveTypes=1-5-6&version=1000&supportEncryptMode=1&appid=1010&_=<ms>",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "urls": [
+          "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+          "https://tx2.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=40-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72"
+        ],
+        "appliedQualityData": "flv:4:1:2"
+      }
+    },
+    "getPlayQualites(refreshed room)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    },
+    "getRoomDetail(link)": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        },
+        {
+          "url": "https://fx1.service.kugou.com/video/pc/live/pull/mutiline/streamaddr?std_rid=3197156&std_plat=7&std_kid=0&streamType=1-2-4-5-8&ua=fx-flash&targetLiveTypes=1-5-6&version=1000&supportEncryptMode=1&appid=1010&_=<ms>",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "3197156",
+        "userId": "1458522292",
+        "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+        "nick": "钱响响",
+        "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+        "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "10984",
+        "platform": "kugoulive",
+        "liveStatus": 0,
+        "isRecord": false,
+        "status": true,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/3197156",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/3197156"
+      }
+    },
+    "getRoomDetail(other platform)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    },
+    "getRoomDetail(bad id)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    },
+    "getPlayQualites(live card without data)": {
+      "requests": [],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live identity"
+      }
+    },
+    "getPlayQualites(offline card)": {
+      "requests": [],
+      "value": []
+    },
+    "searchRooms": {
+      "3197156": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "3197156",
+            "userId": "1458522292",
+            "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+            "nick": "钱响响",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "10984",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/3197156",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/3197156"
+          }
+        ]
+      },
+      " 3197156 ": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "3197156",
+            "userId": "1458522292",
+            "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+            "nick": "钱响响",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "10984",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/3197156",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/3197156"
+          }
+        ]
+      },
+      "https://fanxing.kugou.com/3197156": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "3197156",
+            "userId": "1458522292",
+            "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+            "nick": "钱响响",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "10984",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/3197156",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/3197156"
+          }
+        ]
+      },
+      "https://mfanxing.kugou.com/?roomId=3197156": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=3197156",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "3197156",
+            "userId": "1458522292",
+            "title": "通宵主播！！！！王者女侠，峡谷相约！！！！打王者的可以预约！",
+            "nick": "钱响响",
+            "avatar": "https://p3.fx.kgimg.com/v2/fxuserlogo/30cfc5a844178b3ab537d2879b0e8efd.jpg",
+            "cover": "https://p3.fx.kgimg.com/v2/fxroomcover/138b49eac8a44c3c69f43fbbc6676d28.jpg",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "10984",
+            "platform": "kugoulive",
+            "liveStatus": 0,
+            "isRecord": false,
+            "status": true,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/3197156",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/3197156"
+          }
+        ]
+      }
+    },
+    "searchRooms(3197156, page 2)": {
+      "requests": [],
+      "value": []
+    },
+    "KugouLiveLink.parseRoomId": {
+      "3197156": "3197156",
+      " 3197156 ": "3197156",
+      "999": "999",
+      "12": null,
+      "012345": null,
+      "123456789012": null,
+      "https://fanxing.kugou.com/3197156": "3197156",
+      "http://fanxing.kugou.com/3197156": "3197156",
+      "HTTPS://FANXING.KUGOU.COM/3197156": "3197156",
+      "https://fanxing.kugou.com/3197156?refer=2177": "3197156",
+      "https://fanxing.kugou.com/3197156/": "3197156",
+      "https://fanxing.kugou.com//3197156": "3197156",
+      "https://fanxing.kugou.com:443/3197156": "3197156",
+      "http://fanxing.kugou.com:80/3197156": "3197156",
+      "https://fanxing.kugou.com:8443/3197156": null,
+      "https://mfanxing.kugou.com/3197156": "3197156",
+      "https://mfanxing.kugou.com/?roomId=3197156": "3197156",
+      "https://mfanxing.kugou.com?roomId=3197156": "3197156",
+      "https://mfanxing.kugou.com/share?roomId=3197156": null,
+      "https://mfanxing.kugou.com/?roomId=12": null,
+      "https://fanxing2.kugou.com/3197156": null,
+      "https://fanxing.kugou.com/3197156#chat": null,
+      "https://fanxing.kugou.com/3197156#": "3197156",
+      "https://user@fanxing.kugou.com/3197156": null,
+      "https://fanxing.kugou.com.evil.test/3197156": null,
+      "https://fanxing.kugou.com/pcindex/category/7024": null,
+      "https://fanxing.kugou.com/channel/3197156": null,
+      "ftp://fanxing.kugou.com/3197156": null,
+      "fanxing.kugou.com/3197156": null,
+      "酷狗 https://fanxing.kugou.com/3197156": null,
+      "": null
+    },
+    "KugouLiveLink.watchUrl": {
+      "3197156": "https://fanxing.kugou.com/3197156",
+      " 3197156 ": "https://fanxing.kugou.com/3197156",
+      "12": {
+        "throws": "FormatException",
+        "message": "FormatException: Invalid Kugou Live room identity"
+      }
+    },
+    "KugouLiveApi.mediaHeaders": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Origin": "https://fanxing.kugou.com",
+      "Referer": "https://fanxing.kugou.com/3197156"
+    },
+    "KugouLiveApi.validateMediaUri": {
+      "recorded": "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72",
+      "another room": null,
+      "as hls": null,
+      "http": null,
+      "other host": null,
+      "port": null,
+      "no txSecret": null,
+      "short txTime": null,
+      "fragment": null
+    },
+    "lease": {
+      "https://tx105.liveplay.live.kugou.com/live/fx_hifi_1458522292.flv?cn=fx&ua=fx-flash&fx-ps=5-0-1790531573496&txSecret=1df769428f8e5561058b79c3654df3a5&txTime=6ABA00B5&token=0-3197156-5-6533-3-2742-7yx610b9-8o634x572557sd6vdp0i4b4720l6rh72": {
+        "invalidAt": "2026-09-28T05:52:53.000Z",
+        "refreshAt": "2026-09-28T05:47:53.000Z"
+      },
+      "https://tx2.liveplay.live.kugou.com/live/x.flv?txTime=6ABA00B5": {
+        "invalidAt": "2026-09-28T05:52:53.000Z",
+        "refreshAt": "2026-09-28T05:47:53.000Z"
+      },
+      "https://tx2.liveplay.live.kugou.com/live/x.flv?txTime=6AB": {
+        "invalidAt": null,
+        "refreshAt": null
+      },
+      "https://tx2.liveplay.live.kugou.com/live/x.flv?txTime=12345678901234567": {
+        "invalidAt": null,
+        "refreshAt": null
+      },
+      "https://tx2.liveplay.live.kugou.com/live/x.flv?txTime=6ab70000": {
+        "invalidAt": "2026-09-25T23:13:04.000Z",
+        "refreshAt": "2026-09-27T18:00:00.000Z"
+      },
+      "https://tx2.liveplay.live.kugou.com/live/x.flv": {
+        "invalidAt": null,
+        "refreshAt": null
+      },
+      "not a url %": {
+        "invalidAt": null,
+        "refreshAt": null
+      }
+    }
+  }
+}

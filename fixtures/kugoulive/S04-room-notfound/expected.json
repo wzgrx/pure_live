@@ -1,0 +1,180 @@
+{
+  "generator": "KugouLiveSite.getRoomDetailForRefresh + getLiveStatus + getRoomDetail + searchRoomsCancellable",
+  "value": {
+    "getRoomDetailForRefresh": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=999",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "999",
+        "userId": "0",
+        "title": "Kugou Live",
+        "nick": "Kugou Live",
+        "avatar": "",
+        "cover": "",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "kugoulive",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/999",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/999"
+      }
+    },
+    "getLiveStatus": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=999",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "throws": "KugouLiveException",
+        "message": "Kugou Live access"
+      }
+    },
+    "getRoomDetail": {
+      "requests": [
+        {
+          "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=999",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://fanxing.kugou.com",
+            "Referer": "https://fanxing.kugou.com/"
+          }
+        }
+      ],
+      "value": {
+        "roomId": "999",
+        "userId": "0",
+        "title": "Kugou Live",
+        "nick": "Kugou Live",
+        "avatar": "",
+        "cover": "",
+        "area": "酷狗直播",
+        "watching": "",
+        "audienceMetricType": "unknown",
+        "totalViewers": "",
+        "followers": "0",
+        "platform": "kugoulive",
+        "liveStatus": 3,
+        "isRecord": false,
+        "status": false,
+        "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+        "isCatchUp": false,
+        "httpHeaders": {
+          "origin": "https://fanxing.kugou.com",
+          "referer": "https://fanxing.kugou.com/999",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+        },
+        "link": "https://fanxing.kugou.com/999"
+      }
+    },
+    "searchRooms": {
+      "999": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=999",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "999",
+            "userId": "0",
+            "title": "Kugou Live",
+            "nick": "Kugou Live",
+            "avatar": "",
+            "cover": "",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "kugoulive",
+            "liveStatus": 3,
+            "isRecord": false,
+            "status": false,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/999",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/999"
+          }
+        ]
+      },
+      "https://fanxing.kugou.com/999": {
+        "requests": [
+          {
+            "url": "https://service2.fanxing.kugou.com/roomcen/room/web/cdn/getEnterRoomInfo?roomId=999",
+            "headers": {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*",
+              "Origin": "https://fanxing.kugou.com",
+              "Referer": "https://fanxing.kugou.com/"
+            }
+          }
+        ],
+        "value": [
+          {
+            "roomId": "999",
+            "userId": "0",
+            "title": "Kugou Live",
+            "nick": "Kugou Live",
+            "avatar": "",
+            "cover": "",
+            "area": "酷狗直播",
+            "watching": "",
+            "audienceMetricType": "unknown",
+            "totalViewers": "",
+            "followers": "0",
+            "platform": "kugoulive",
+            "liveStatus": 3,
+            "isRecord": false,
+            "status": false,
+            "notice": "酷狗远端聊天尚待接入；viewerNum/getViewerNum 按当前观看人数展示，hot 按平台热度展示，fansCount 单独作为粉丝数。",
+            "isCatchUp": false,
+            "httpHeaders": {
+              "origin": "https://fanxing.kugou.com",
+              "referer": "https://fanxing.kugou.com/999",
+              "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+            },
+            "link": "https://fanxing.kugou.com/999"
+          }
+        ]
+      }
+    }
+  }
+}

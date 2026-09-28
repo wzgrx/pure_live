@@ -75,6 +75,10 @@
     {
       "where": "signal.user",
       "rule": "person"
+    },
+    {
+      "where": "header.instanceId, register.answer.instanceId (the link session id, same varint length; by hand in M5.9)",
+      "rule": "secret"
     }
   ],
   "tool": "live_cli danmaku --record (schema 1)"

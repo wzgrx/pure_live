@@ -4,7 +4,8 @@
 // search, room details for entry, refresh and recording, streams with their
 // leases and recovery onto a new broadcast, cancellation, links through the
 // link parser and the error mapping. The synthetic worlds port 3.x's
-// kilakila_application_test.dart.
+// kilakila_application_test.dart. Tests named with an M4.U item number
+// (docs/UPGRADES.md, 15-x) cover the approved upgrades.
 import 'dart:convert';
 import 'dart:io';
 
@@ -305,6 +306,133 @@ void main() {
     });
   });
 
+  group('15-3 timelines: page 100 is the last, anchors listed once across pages', () {
+    // A timeline whose page n lists the anchors of [pages] (1-based).
+    _Scripted pagesOf(List<List<String>> pages) => _Scripted((request) {
+      final page = int.parse(request.url.queryParameters['pageNo']!);
+      final uids = page <= pages.length ? pages[page - 1] : const <String>[];
+      return _response(
+        request,
+        _timeline(request.url, [for (final uid in uids) _card('${uid}0')..['uid'] = uid], more: page < pages.length),
+      );
+    });
+
+    List<String> ids(LiveDirectoryPage page) => [for (final room in page.rooms) room.roomId];
+
+    test('an anchor listed on an earlier page is left out; reading a page again gives the same rooms', () async {
+      final http = pagesOf([
+        ['1', '2'],
+        ['2', '3', '1'],
+        ['4', '3'],
+      ]);
+      final site = KilakilaSite(http);
+      expect(ids(await site.getDirectoryPage()), ['1', '2']);
+      final second = await site.getDirectoryPage(page: 2);
+      expect(ids(second), ['3'], reason: '3.x listed 2 and 1 again');
+      expect(second.hasMore, isTrue);
+      expect(ids(await site.getDirectoryPage(page: 2)), ['3'], reason: 'the same page again');
+      final third = await site.getDirectoryPage(page: 3);
+      expect(ids(third), ['4']);
+      expect(third.hasMore, isFalse);
+      expect(http.requests, hasLength(4), reason: 'one request a page read, none added');
+    });
+
+    test('page 1 again starts over; other page sizes and timelines keep their own record', () async {
+      final http = pagesOf([
+        ['1', '2'],
+        ['2', '3'],
+      ]);
+      final site = KilakilaSite(http);
+      await site.getDirectoryPage();
+      expect(ids(await site.getDirectoryPage(page: 2)), ['3']);
+      expect(ids(await site.getDirectoryPage()), ['1', '2'], reason: 'a pull to refresh');
+      expect(ids(await site.getDirectoryPage(page: 2)), ['3']);
+      expect(
+        [for (final room in await site.getRecommendRooms(page: 2, pageSize: 10)) room.roomId],
+        ['3'],
+        reason: 'the directory pager and the recommendations of ten are one timeline',
+      );
+      expect(
+        [for (final room in await site.getRecommendRooms(page: 2)) room.roomId],
+        ['2', '3'],
+        reason: 'pages of 30 are another timeline, not read from page 1 yet',
+      );
+      final stars = (await site.getCategories(1, 30)).single.children.last;
+      expect(ids(await site.getDirectoryPage(page: 2, category: stars)), ['2', '3']);
+    });
+
+    test('a page reached without the pages before it is deduplicated within itself only', () async {
+      final site = KilakilaSite(
+        pagesOf([
+          ['1'],
+          ['1'],
+          ['1', '2'],
+        ]),
+      );
+      expect(ids(await site.getDirectoryPage(page: 3)), ['1', '2']);
+    });
+
+    test('three pages in a row without a new anchor end the timeline; one such page does not', () async {
+      expect(KilakilaSite.maxPagesWithoutNew, 3);
+      final http = pagesOf([
+        ['1', '2'],
+        ['2'],
+        ['3'],
+        ['1', '3'],
+        ['2'],
+        ['7'],
+        ['9'],
+      ]);
+      final site = KilakilaSite(http);
+      final pages = [for (var page = 1; page <= 5; page++) await site.getDirectoryPage(page: page)];
+      expect(pages.map(ids), [
+        ['1', '2'],
+        <String>[],
+        ['3'],
+        <String>[],
+        <String>[],
+      ]);
+      expect(pages.map((page) => page.hasMore), [true, true, true, true, true]);
+      final sixth = await site.getDirectoryPage(page: 6);
+      expect(ids(sixth), ['7'], reason: 'two quiet pages do not end it');
+      final quiet = pagesOf([
+        ['1'],
+        ['1'],
+        ['1'],
+        ['1'],
+        ['2'],
+      ]);
+      final ended = KilakilaSite(quiet);
+      final read = [for (var page = 1; page <= 4; page++) await ended.getDirectoryPage(page: page)];
+      expect(read.map((page) => page.hasMore), [true, true, true, false]);
+      expect(quiet.requests, hasLength(4));
+    });
+
+    test('page 100 is the last; a later page is empty without a request (REG-KILAKILA-005)', () async {
+      final http = pagesOf([
+        for (var page = 1; page <= 120; page++) ['$page'],
+      ]);
+      final site = KilakilaSite(http);
+      expect((await site.getDirectoryPage(page: 99)).hasMore, isTrue);
+      final last = await site.getDirectoryPage(page: 100);
+      expect(ids(last), ['100']);
+      expect(last.hasMore, isFalse);
+      final after = await site.getDirectoryPage(page: 101);
+      expect((after.rooms.length, after.hasMore), (0, false));
+      expect(await site.getRecommendRooms(page: 150, pageSize: 10), isEmpty);
+      expect(http.requests, hasLength(2));
+      await expectLater(site.getDirectoryPage(page: 100001), throwsArgumentError, reason: 'still a caller error');
+    });
+
+    test('the rising stars end at their empty tail page (S01-timeline-new-tail; 3.x failed there)', () async {
+      final setup = _setup(['S01-timeline-new-tail']);
+      final stars = (await setup.site.getCategories(1, 30)).single.children.last;
+      final tail = await setup.site.getDirectoryPage(page: 51, category: stars);
+      expect((tail.rooms.length, tail.hasMore), (0, false));
+      expect(_urls(setup.http.requests), [Fixture.load('kilakila', 'S01-timeline-new-tail').url.toString()]);
+    });
+  });
+
   group('search', () {
     test('keywords: one request a page, no lookup per anchor; the state stays unknown (3.x)', () async {
       final setup = _setup(['S03-search', 'S03-search-p2', 'S03-search-empty']);
@@ -330,7 +458,7 @@ void main() {
       expect(linked.single.roomId, _liveOwner);
       final zhubo = await setup.site.searchRooms('https://live.kilakila.cn/zhubo/$_offlineOwner');
       expect(zhubo.single.title, zhubo.single.nick, reason: "an anchor without a broadcast is 3.x's profile card");
-      expect(zhubo.single.isLiveStatusPending, isTrue);
+      expect(zhubo.single.effectiveLiveStatus, LiveStatus.offline, reason: '15-1 (3.x: unknown)');
       expect(await setup.site.searchRooms('1'), isEmpty, reason: 'an unknown anchor is no result');
       expect(await setup.site.searchRooms(_liveOwner, page: 2), isEmpty);
       expect(_urls(setup.http.requests), [
@@ -344,15 +472,61 @@ void main() {
       }
     });
 
-    test('broadcast links, other links, padded numbers and blanks find nothing without a request (3.x)', () async {
-      final setup = _setup([]);
-      for (final input in [
-        '00100',
-        'https://live.kilakila.cn/room/$_first',
-        'https://evil.test/index/roomuser/uid/100',
-        'https://evil.test/zhubo/123',
-        '   ',
+    test('15-4: a broadcast link finds its anchor: getRoomInfo, then the profile (3.x: nothing)', () async {
+      final setup = _setup(['S05-room-live', 'S04-owner-live']);
+      final redirect = Fixture.load('kilakila', 'S06-room-redirect');
+      final location = ((redirect.meta['response'] as Map)['headers'] as Map)['location'] as String;
+      for (final link in [
+        location,
+        redirect.url.toString(),
+        'https://www.hongdoufm.com/PcLive/index/detail?id=$_liveBroadcast',
       ]) {
+        setup.http.requests.clear();
+        final found = (await setup.site.searchRooms(link)).single;
+        expect((found.roomId, found.isLiveNow, found.onlineViewers), (_liveOwner, true, '193'), reason: link);
+        expect(_paths(setup.http.requests), ['/LiveRoom/getRoomInfo', '/Tg/personalH5'], reason: link);
+        expect(setup.http.requests.first.url.queryParameters, {'roomId': _liveBroadcast});
+        expect(setup.site.supportsSearchPaginationFor(link), isFalse, reason: 'one exact answer');
+      }
+      setup.http.requests.clear();
+      expect(await setup.site.searchRooms(location, page: 2), isEmpty);
+      expect(setup.http.requests, isEmpty);
+      final uid = await setup.site.searchRooms(_liveOwner);
+      expect(uid.single.toJson(), (await setup.site.searchRooms(location)).single.toJson(), reason: 'as the uid');
+    });
+
+    test('15-4: an unknown broadcast or a historical replay finds nothing; other failures are errors', () async {
+      final notFound = _setup(['S05-room-notfound']);
+      expect(await notFound.site.searchRooms('https://live.kilakila.cn/room/1'), isEmpty);
+      expect(notFound.http.requests, hasLength(1));
+      final replay = _Scripted(
+        (request) => _response(
+          request,
+          jsonEncode({
+            'h': {'code': 5966, 'success': false},
+          }),
+        ),
+      );
+      expect(await KilakilaSite(replay).searchRooms('https://live.kilakila.cn/room/$_first'), isEmpty);
+      expect(replay.requests, hasLength(1));
+      final gone = KilakilaSite(_world(card: () => {'roomSourceType': 0, 'recommendSource': 0}));
+      final offline = (await gone.searchRooms('https://live.kilakila.cn/room/$_first')).single;
+      expect((offline.roomId, offline.effectiveLiveStatus), ('100', LiveStatus.offline), reason: 'the anchor now');
+      final broken = _Scripted((request) => _response(request, jsonEncode({'h': <String, Object?>{}})));
+      await expectLater(
+        KilakilaSite(broken).searchRooms('https://live.kilakila.cn/room/$_first'),
+        throwsA(isA<ApiChanged>()),
+      );
+      final down = _Scripted((request) => _response(request, '', status: 503));
+      await expectLater(
+        KilakilaSite(down).searchRooms('https://live.kilakila.cn/room/$_first'),
+        throwsA(isA<NetworkFailure>()),
+      );
+    });
+
+    test('other links, padded numbers and blanks find nothing without a request (3.x)', () async {
+      final setup = _setup([]);
+      for (final input in ['00100', 'https://evil.test/index/roomuser/uid/100', 'https://evil.test/zhubo/123', '   ']) {
         expect(await setup.site.searchRooms(input), isEmpty, reason: input);
         expect(setup.site.supportsSearchPaginationFor(input), isFalse, reason: input);
       }
@@ -372,9 +546,23 @@ void main() {
       expect(site.supportsSearchPaginationFor('Re:Zero'), isTrue);
     });
 
-    test('keywords, pages and sizes the site does not take are refused without a request (3.x)', () async {
+    test('15-5: a keyword over 100 characters is cut there and searched (3.x refused it)', () async {
+      final http = _Scripted((request) => _response(request, '<div class="userList"></div>'));
+      final site = KilakilaSite(http);
+      expect(await site.searchRooms('${'小' * 120}x'), isEmpty);
+      expect(await site.searchRooms('${'x' * 99}😀', page: 2), isEmpty);
+      expect(
+        [for (final request in http.requests) request.url.pathSegments],
+        [
+          ['aboutus', 'serach', 'kw', '小' * 100],
+          ['aboutus', 'serach', 'kw', 'x' * 99, 'p', '2'],
+        ],
+      );
+      expect(site.supportsSearchPaginationFor('小' * 120), isTrue);
+    });
+
+    test('pages and sizes the site does not take are refused without a request (3.x)', () async {
       final setup = _setup([]);
-      await expectLater(setup.site.searchRooms('x' * 101), throwsArgumentError);
       await expectLater(setup.site.searchRooms('音乐', page: 0), throwsArgumentError);
       await expectLater(setup.site.searchRooms('音乐', page: 10001), throwsArgumentError);
       await expectLater(setup.site.searchRooms('音乐', pageSize: 0), throwsArgumentError);
@@ -420,16 +608,37 @@ void main() {
       expect(_urls(setup.http.requests), _legacyRequests('S04-owner-live', 'getLiveStatus'));
     });
 
-    test('an anchor without a broadcast: one request, unknown state, no stream (3.x)', () async {
+    test('15-1: an anchor without a broadcast is offline: one request, no stream (3.x: unknown)', () async {
       final setup = _setup(['S04-owner-offline']);
       final room = await setup.site.getRoomDetail(roomId: _offlineOwner);
-      expect(room.effectiveLiveStatus, LiveStatus.unknown);
+      expect(room.effectiveLiveStatus, LiveStatus.offline);
+      expect(room.danmakuData, isNull, reason: 'no broadcast, no chat room');
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: _offlineOwner);
+      expect((refreshed.effectiveLiveStatus, refreshed.followGroup), (LiveStatus.offline, FollowGroup.offline));
       expect(await setup.site.getLiveStatus(roomId: _offlineOwner), isFalse);
       await expectLater(setup.site.getPlayQualities(detail: room), throwsA(isA<StreamUnavailable>()));
+      await expectLater(setup.site.getPlayQualities(detail: refreshed), throwsA(isA<StreamUnavailable>()));
       expect(_urls(setup.http.requests), [
         ..._legacyRequests('S04-owner-offline', 'getRoomDetail'),
+        ..._legacyRequests('S04-owner-offline', 'getRoomDetailForRefresh'),
         ..._legacyRequests('S04-owner-offline', 'getLiveStatus'),
-      ]);
+      ], reason: 'an offline room asks nothing for its stream');
+    });
+
+    test('15-2 and the start: refresh and entry have the listeners now and so far and the start', () async {
+      final setup = _setup(['S04-owner-live', 'S05-room-live']);
+      final refreshed = await setup.site.getRoomDetailForRefresh(roomId: _liveOwner);
+      final entered = await setup.site.getRoomDetail(roomId: _liveOwner);
+      final recorded = await setup.site.getRoomDetailForRecording(roomId: _liveOwner);
+      for (final room in [refreshed, entered, recorded]) {
+        expect(room.onlineViewers, '193');
+        expect(room.audienceValue(preferRealOnline: true, platformEnabled: true), '193');
+        expect(room.startedAt, DateTime.utc(2026, 9, 27, 14, 6, 42, 790));
+        expect(room.restriction, LiveRestriction.none);
+      }
+      expect((refreshed.totalViewers, entered.totalViewers), ('1136', '1135'), reason: 'card, then getRoomInfo');
+      expect(entered.cover, refreshed.cover, reason: '15-7: the card cover, not the default background');
+      expect(entered.cover, isNot(endsWith('.gif')));
     });
 
     test('an unknown anchor is NotFound; an id that is no uid asks nothing', () async {
@@ -460,9 +669,12 @@ void main() {
       expect((again.data! as KilakilaRoomData).broadcast!.broadcastId, _second);
     });
 
-    test('an unknown advertised status stays unknown on refresh (3.x)', () async {
+    test('an unknown advertised status stays unknown on refresh (3.x); an ended one is offline (15-1)', () async {
       final site = KilakilaSite(_world(card: () => {..._card(), 'status': 77}));
       expect((await site.getRoomDetailForRefresh(roomId: '100')).effectiveLiveStatus, LiveStatus.unknown);
+      final ended = KilakilaSite(_world(card: () => {..._card(), 'status': 10}));
+      final room = await ended.getRoomDetailForRefresh(roomId: '100');
+      expect((room.effectiveLiveStatus, room.isRecord), (LiveStatus.offline, false));
     });
 
     test('a broadcast that ended between the two requests cannot be played (3.x failed here too)', () async {
@@ -483,11 +695,12 @@ void main() {
       await expectLater(replaced.getRoomDetail(roomId: '100'), throwsA(isA<ApiChanged>()));
     });
 
-    test('paid, not live or URL-less broadcasts open; their stream says why (3.x failed at entry)', () async {
-      for (final (changes, matcher) in [
-        (<String, dynamic>{'goldPrice': 1}, isA<NeedsLogin>()),
-        (<String, dynamic>{'status': 77}, isA<StreamUnavailable>()),
-        (<String, dynamic>{'flvPlayUrl': '', 'hlsPlayUrl': ''}, isA<StreamUnavailable>()),
+    test('paid, ended, not live or URL-less broadcasts open; their stream says why (3.x failed at entry)', () async {
+      for (final (changes, status, restriction, detail) in [
+        (<String, dynamic>{'goldPrice': 1}, LiveStatus.live, LiveRestriction.paid, '(paid)'),
+        (<String, dynamic>{'status': 10}, LiveStatus.offline, null, 'status 10'),
+        (<String, dynamic>{'status': 77}, LiveStatus.unknown, null, 'status 77'),
+        (<String, dynamic>{'flvPlayUrl': '', 'hlsPlayUrl': ''}, LiveStatus.live, LiveRestriction.none, 'no pull URL'),
       ]) {
         final http = _world(changes: changes);
         final site = KilakilaSite(http);
@@ -495,7 +708,12 @@ void main() {
           await site.getRoomDetail(roomId: '100'),
           await site.getRoomDetailForRecording(roomId: '100'),
         ]) {
-          await expectLater(site.getPlayQualities(detail: entered), throwsA(matcher), reason: '$changes');
+          expect((entered.effectiveLiveStatus, entered.restriction), (status, restriction), reason: '$changes');
+          await expectLater(
+            site.getPlayQualities(detail: entered),
+            throwsA(isA<StreamUnavailable>().having((error) => error.detail, 'detail', contains(detail))),
+            reason: '$changes (3.x: NeedsLogin for a paid broadcast)',
+          );
         }
         expect(http.requests, hasLength(4), reason: 'the stream needs no further request');
       }
@@ -503,47 +721,57 @@ void main() {
   });
 
   group('streams', () {
-    test('qualities and lines from room entry: no request, headers and lease on the line', () async {
+    test('15-6: one 原画 from room entry with an FLV and an HLS line: no request, headers and leases', () async {
       final setup = _setup(['S04-owner-live', 'S05-room-live']);
       final room = await setup.site.getRoomDetail(roomId: _liveOwner);
-      final qualities = await setup.site.getPlayQualities(detail: room);
+      final quality = (await setup.site.getPlayQualities(detail: room)).single;
       final legacy = _legacy('S04-owner-live')['getPlayQualites'] as List;
-      expect(qualities.map((quality) => quality.id), [for (final quality in legacy) (quality as Map)['id']]);
-      for (final (index, quality) in qualities.indexed) {
-        final resolution = await setup.site.resolvePlayUrls(detail: room, quality: quality);
-        expect(resolution.urls, (legacy[index] as Map)['getPlayUrls']);
-        final line = resolution.lines.single;
+      expect((quality.quality, quality.id), ('原画', 'original'), reason: '3.x: FLV and HLS');
+      final resolution = await setup.site.resolvePlayUrls(detail: room, quality: quality);
+      expect(resolution.urls, [for (final old in legacy) ...((old as Map)['getPlayUrls'] as List)]);
+      expect(resolution.lines.map((line) => line.lineId), ['flv', 'hls']);
+      for (final line in resolution.lines) {
         expect(line.headers, KilakilaApi.headers);
         expect(line.lease!.expiresAt, DateTime.fromMillisecondsSinceEpoch(1793120972 * 1000, isUtc: true));
-        expect(await setup.site.getPlayUrls(detail: room, quality: quality), resolution.urls);
       }
+      expect(await setup.site.getPlayUrls(detail: room, quality: quality), resolution.urls);
+      final old = await setup.site.resolvePlayUrls(
+        detail: room,
+        quality: const LivePlayQuality(quality: 'HLS', id: 'hls'),
+      );
+      expect(old.urls, resolution.urls, reason: "3.x's ids name the same quality");
       expect(setup.http.requests, hasLength(2));
     });
 
     test('a list card is entered first; a room called offline asks nothing', () async {
       final setup = _setup(['S01-timeline-hot-p1', 'S04-owner-live', 'S05-room-live']);
       final card = (await setup.site.getDirectoryPage()).rooms.firstWhere((room) => room.roomId == _liveOwner);
-      expect(await setup.site.getPlayQualities(detail: card), hasLength(2));
+      expect(await setup.site.getPlayQualities(detail: card), hasLength(1));
       expect(_paths(setup.http.requests), ['/pcLive/timeline', '/Tg/personalH5', '/LiveRoom/getRoomInfo']);
       final offline = LiveRoom(roomId: _liveOwner, platform: 'kilakila', liveStatus: LiveStatus.offline);
       await expectLater(setup.site.getPlayQualities(detail: offline), throwsA(isA<StreamUnavailable>()));
       expect(setup.http.requests, hasLength(3));
     });
 
-    test('recovery follows the anchor to a new broadcast with the same quality ids (3.x)', () async {
+    test('recovery follows the anchor to a new broadcast with the same quality id (3.x)', () async {
       var current = _first;
       final http = _world(current: () => current);
       final site = KilakilaSite(http);
       final room = await site.getRoomDetail(roomId: '100');
-      final quality = (await site.getPlayQualities(detail: room)).first;
-      expect(quality.selectionId, 'flv');
-      expect(await site.getPlayUrls(detail: room, quality: quality), [_media(_first)]);
+      final quality = (await site.getPlayQualities(detail: room)).single;
+      expect(quality.selectionId, 'original');
+      expect(await site.getPlayUrls(detail: room, quality: quality), [_media(_first), _media(_first, 'm3u8')]);
       current = _second;
       final recovered = await site.resolvePlayUrlsForRecovery(detail: room, quality: quality);
-      expect(recovered.urls, [_media(_second)]);
-      expect(recovered.appliedQualityData, 'flv');
-      expect(recovered.lines.single.lease!.cutsConnection, isFalse);
-      expect(http.requests, hasLength(4));
+      expect(recovered.urls, [_media(_second), _media(_second, 'm3u8')]);
+      expect(recovered.appliedQualityData, 'original');
+      expect(recovered.lines.map((line) => line.lease!.cutsConnection), [false, true]);
+      final legacy = await site.resolvePlayUrlsForRecovery(
+        detail: room,
+        quality: const LivePlayQuality(quality: 'FLV', id: 'flv'),
+      );
+      expect((legacy.urls.first, legacy.appliedQualityData), (_media(_second), 'original'), reason: "3.x's id");
+      expect(http.requests, hasLength(6));
     });
 
     test('recovery never reuses the old signed URLs (3.x)', () async {
@@ -551,13 +779,11 @@ void main() {
       final site = KilakilaSite(_world(current: () => current, changes: {'hlsPlayUrl': ''}));
       final room = await site.getRoomDetail(roomId: '100');
       current = _second;
-      await expectLater(
-        site.resolvePlayUrlsForRecovery(
-          detail: room,
-          quality: LivePlayQuality(quality: 'HLS', id: 'hls', data: [_media(_first, 'm3u8')]),
-        ),
-        throwsA(isA<StreamUnavailable>()),
+      final recovered = await site.resolvePlayUrlsForRecovery(
+        detail: room,
+        quality: LivePlayQuality(quality: 'HLS', id: 'hls', data: [_media(_first, 'm3u8')]),
       );
+      expect(recovered.urls, [_media(_second)], reason: "the new broadcast's own line, not the quality's data");
       final ended = KilakilaSite(_world(card: () => {'roomSourceType': 0, 'recommendSource': 0}));
       await expectLater(
         ended.resolvePlayUrlsForRecovery(

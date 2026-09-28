@@ -1,0 +1,34 @@
+{
+  "code": 200,
+  "msg": "ok",
+  "data": {
+    "header": {
+      "": ""
+    },
+    "body": {
+      "h": {
+        "code": 200,
+        "msg": "操作成功",
+        "success": true,
+        "alert": true,
+        "flush": true,
+        "time": 1790617945452
+      },
+      "b": {
+        "pageNo": 51,
+        "pageSize": 10,
+        "data": []
+      }
+    },
+    "newheaders": {
+      "HTTP/1.1 200 OK": "",
+      "Date": "Mon, 28 Sep 2026 17:52:25 GMT",
+      "Content-Type": "application/json;charset=UTF-8",
+      "Transfer-Encoding": "chunked",
+      "Connection": "keep-alive",
+      "Vary": "Accept-Encoding",
+      "Server": "Apache-Coyote/1.1",
+      "Access-Control-Allow-Origin": "*"
+    }
+  }
+}

@@ -8,16 +8,19 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
 import 'package:pure_live_app/core/audience.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
 import 'package:pure_live_app/features/follows/follow_status.dart';
 import 'package:pure_live_app/features/follows/groups.dart';
+import 'package:pure_live_app/features/onboarding/onboarding_page.dart';
 import 'package:pure_live_app/features/room/room_switch.dart';
 import 'package:pure_live_app/features/rooms/card_marks.dart';
 import 'package:pure_live_app/features/rooms/room_card_menu.dart';
 import 'package:pure_live_app/features/rooms/room_grid.dart';
+import 'package:pure_live_app/features/search/search_empty.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
 /// Which follows to show: live, all, or all by group (principles §4.1).
@@ -128,16 +131,23 @@ class _FollowsPageState extends ConsumerState<FollowsPage> {
         ],
       ),
       body: follows.when(
-        loading: () => const LoadingView(),
-        error: (error, _) => MessageView.error(title: t.follows.loadFailed, message: '$error'),
+        loading: () =>
+            RoomGridSkeleton(density: ref.watch(denseFollowsSetting) ? CardDensity.compact : CardDensity.standard),
+        error: (error, _) =>
+            ErrorView(error, title: t.follows.loadFailed, onRetry: () => ref.invalidate(followsProvider)),
         data: (rooms) {
+          // principles §3.3: the three ways to get follows.
           if (rooms.isEmpty) {
             return MessageView(
-              icon: Icons.favorite_border,
+              illustration: Illustration.followsEmpty,
               title: t.follows.emptyTitle,
               message: t.follows.emptyMessage,
               actionLabel: t.follows.goDiscover,
               onAction: () => context.go('/discover'),
+              actions: [
+                MessageAction(t.follows.pasteLink, () => pasteRoomLink(context)),
+                MessageAction(t.follows.importData, () => context.push(welcomeLocation)),
+              ],
             );
           }
           return PageBody(
@@ -302,6 +312,7 @@ class _FollowListState extends ConsumerState<_FollowList> {
               return OfflineRoomRow(
                 platformId: room.ref.platform,
                 anchorName: room.anchorName.isEmpty ? room.ref.roomId : room.anchorName,
+                seed: room.ref.key,
                 avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
                 subtitle: subtitle,
                 tag: tag,
@@ -391,8 +402,17 @@ class _FollowListState extends ConsumerState<_FollowList> {
               if (live.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 80),
-                    child: MessageView(title: session.checking ? t.follows.checking : t.follows.noneLive),
+                    padding: const EdgeInsets.only(top: Space.s8),
+                    // While the first refresh runs the line above says so.
+                    child: session.checking
+                        ? MessageView(title: t.follows.checking)
+                        : MessageView(
+                            illustration: Illustration.noneLive,
+                            title: t.follows.noneLive,
+                            message: t.follows.noneLiveMessage,
+                            actionLabel: t.follows.showAll,
+                            onAction: () => widget.onFilter(_Filter.all),
+                          ),
                   ),
                 ),
               liveGrid(live, _focus),

@@ -1107,6 +1107,8 @@ class Translations$errors$zh_Hant implements Translations$errors$zh_Hans {
   String platformUnsupportedDetail({required Object name}) => '${name}已下線或這個版本還不支援，追蹤和觀看紀錄會一直保留。';
   @override
   String get generic => '發生錯誤';
+  @override
+  String get genericDetail => '原因還沒有歸類。可以重試；一直出現時，在「診斷與記錄」裡匯出診斷包，附在問題回報裡。';
 }
 
 // Path: follows
@@ -1130,6 +1132,10 @@ class Translations$follows$zh_Hant implements Translations$follows$zh_Hans {
   String get emptyMessage => '在探索或搜尋裡找到主播，進入直播間後點「追蹤」。';
   @override
   String get goDiscover => '去探索';
+  @override
+  String get pasteLink => '貼上連結';
+  @override
+  String get importData => '匯入舊資料或備份';
   @override
   String get orderNotSaved => '順序沒有儲存，請重試';
   @override
@@ -1174,6 +1180,10 @@ class Translations$follows$zh_Hant implements Translations$follows$zh_Hans {
   String get manageGroups => '管理群組';
   @override
   String get noneLive => '追蹤的主播都沒開播';
+  @override
+  String get noneLiveMessage => '開播後會出現在這裡；打開「開播提醒」可以第一時間知道。';
+  @override
+  String get showAll => '看全部關注';
   @override
   String allCount({required Object n}) => '全部追蹤 ${n}';
   @override
@@ -2013,6 +2023,10 @@ class Translations$search$zh_Hant implements Translations$search$zh_Hans {
   @override
   String get empty => '沒有找到相關的直播間';
   @override
+  String get emptyHint => '檢查關鍵字有沒有錯字，或換個平台再搜；有直播間連結時，直接貼上就能打開。';
+  @override
+  String get clipboardEmpty => '剪貼簿裡沒有文字，先複製直播間連結或分享口令';
+  @override
   late final Translations$search$sort$zh_Hant sort = Translations$search$sort$zh_Hant.internal(_root);
   @override
   late final Translations$search$web$zh_Hant web = Translations$search$web$zh_Hant.internal(_root);
@@ -2244,6 +2258,8 @@ class Translations$ui$zh_Hant implements Translations$ui$zh_Hans {
   String get ok => '確定';
   @override
   String get cancel => '取消';
+  @override
+  String get loading => '正在載入';
   @override
   String get justNow => '剛剛';
   @override

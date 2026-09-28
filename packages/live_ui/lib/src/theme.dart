@@ -25,7 +25,6 @@ final class LiveTheme extends ThemeExtension<LiveTheme> {
     required this.success,
     required this.warning,
     required this.focusRing,
-    required this.numeric,
   });
 
   /// "Live" badge fill; semantic, not the brand colour.
@@ -43,28 +42,27 @@ final class LiveTheme extends ThemeExtension<LiveTheme> {
   /// Keyboard and remote focus outline.
   final Color focusRing;
 
-  /// Tabular figures for audience counts, durations and bit rates, so numbers
-  /// do not shift when they refresh.
-  final TextStyle numeric;
+  /// Tabular figures and nothing else: merged into the surrounding text style
+  /// (a [Text] inside a list tile's subtitle keeps the subtitle's size,
+  /// weight and colour).
+  static const TextStyle tabularFigures = TextStyle(fontFeatures: [FontFeature.tabularFigures()]);
+
+  /// [base] with tabular figures, for audience counts, durations, bit rates
+  /// and clocks, so numbers do not shift when they refresh (principles
+  /// §2.3). Size, weight and colour stay those of [base]: a figure in a
+  /// subtitle is never heavier than the title above it.
+  static TextStyle numeric(TextStyle base) => base.merge(tabularFigures);
 
   /// The extension of [context]'s theme.
   static LiveTheme of(BuildContext context) => Theme.of(context).extension<LiveTheme>()!;
 
   @override
-  LiveTheme copyWith({
-    Color? live,
-    Color? onLive,
-    Color? success,
-    Color? warning,
-    Color? focusRing,
-    TextStyle? numeric,
-  }) => LiveTheme(
+  LiveTheme copyWith({Color? live, Color? onLive, Color? success, Color? warning, Color? focusRing}) => LiveTheme(
     live: live ?? this.live,
     onLive: onLive ?? this.onLive,
     success: success ?? this.success,
     warning: warning ?? this.warning,
     focusRing: focusRing ?? this.focusRing,
-    numeric: numeric ?? this.numeric,
   );
 
   @override
@@ -76,7 +74,6 @@ final class LiveTheme extends ThemeExtension<LiveTheme> {
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       focusRing: Color.lerp(focusRing, other.focusRing, t)!,
-      numeric: TextStyle.lerp(numeric, other.numeric, t)!,
     );
   }
 }
@@ -211,7 +208,6 @@ abstract final class PureTheme {
       fontFamily: fontFamily,
       locale: locale,
     ).apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
-    final numeric = text.labelMedium!.copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     final desktop =
         !tv && (target == TargetPlatform.windows || target == TargetPlatform.linux || target == TargetPlatform.macOS);
     final overlayRadius = BorderRadius.circular(desktop ? Radii.r2 : Radii.r4);
@@ -287,12 +283,20 @@ abstract final class PureTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.r3)),
       ),
+      // Inputs are r2 (principles §2.4), the search box included: it is an
+      // input, and full rounding is kept for buttons, chips, avatars and
+      // switches.
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHigh,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.full), borderSide: BorderSide.none),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.r2), borderSide: BorderSide.none),
         contentPadding: const EdgeInsets.symmetric(horizontal: Space.s4, vertical: Space.s3),
       ),
+      searchBarTheme: SearchBarThemeData(
+        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.r2))),
+      ),
+      // No tick marks: with many steps they merge into a dotted line.
+      sliderTheme: SliderThemeData(tickMarkShape: SliderTickMarkShape.noTickMark),
       scrollbarTheme: ScrollbarThemeData(
         // Desktop keeps a thin scrollbar visible (principles §2.1).
         thumbVisibility: WidgetStatePropertyAll(desktop),
@@ -314,7 +318,6 @@ abstract final class PureTheme {
           success: tokens.success,
           warning: tokens.warning,
           focusRing: focusRing,
-          numeric: numeric,
         ),
       ],
     );
@@ -360,10 +363,10 @@ abstract final class PureTheme {
         ),
       ),
       tabBarTheme: theme.tabBarTheme.copyWith(overlayColor: overlay),
-      searchBarTheme: SearchBarThemeData(side: side, overlayColor: overlay),
+      searchBarTheme: theme.searchBarTheme.copyWith(side: side, overlayColor: overlay),
       inputDecorationTheme: theme.inputDecorationTheme.copyWith(
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(Radii.full),
+          borderRadius: BorderRadius.circular(Radii.r2),
           borderSide: BorderSide(color: ring, width: 3),
         ),
       ),
@@ -371,10 +374,6 @@ abstract final class PureTheme {
     );
   }
 
-  /// Type scale of spec/design/tokens.json; the system font with explicit CJK
-  /// fallbacks (principles §2.3). On TV every role is one step larger and
-  /// body text is at least 14 sp (principles §5.3), with the same ≥ 1.4
-  /// line height rounded up to an even number.
   /// Whether [locale] reads Traditional Chinese: script Hant, or Chinese of
   /// Taiwan, Hong Kong or Macau without a script.
   static bool isTraditionalChinese(Locale? locale) {
@@ -423,6 +422,11 @@ abstract final class PureTheme {
     );
   }
 
+  /// Type scale of spec/design/tokens.json; the system font with explicit CJK
+  /// fallbacks (principles §2.3). Every role, on TV too, has a line height of
+  /// at least 1.4 times its size, rounded up to an even number (Chinese
+  /// needs the room); on TV every role is one step larger and body text is
+  /// at least 14 sp (principles §5.3).
   static TextTheme _textTheme(TargetPlatform platform, {bool tv = false, String? fontFamily, Locale? locale}) {
     // Principles §2.3: the UI variants of the Windows CJK fonts; Traditional
     // Chinese swaps YaHei for JhengHei and the SC fallbacks for TC ones.
@@ -464,10 +468,10 @@ abstract final class PureTheme {
       );
     }
     return TextTheme(
-      displayLarge: style(57, 64, regular),
-      displayMedium: style(45, 52, regular),
+      displayLarge: style(57, 80, regular),
+      displayMedium: style(45, 64, regular),
       displaySmall: style(36, 52, semibold),
-      headlineLarge: style(32, 40, semibold),
+      headlineLarge: style(32, 46, semibold),
       headlineMedium: style(28, 40, semibold),
       headlineSmall: style(24, 34, semibold),
       titleLarge: style(22, 32, semibold),
@@ -478,7 +482,7 @@ abstract final class PureTheme {
       bodySmall: style(12, 18, regular),
       labelLarge: style(14, 20, semibold),
       labelMedium: style(12, 18, semibold),
-      labelSmall: style(12, 16, semibold),
+      labelSmall: style(12, 18, semibold),
     );
   }
 }

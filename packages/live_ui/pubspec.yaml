@@ -11,12 +11,21 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  # Draws the empty-state and error illustrations (principles §3.3).
+  vector_graphics: ^1.2.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Compiles assets/illustrations/*.svg when assets are built (tests too).
+  vector_graphics_compiler: ^1.3.0
   very_good_analysis: ^11.0.0
 
 flutter:
   assets:
     - assets/platforms/
+    # principles §3.3: SVG compiled to vector_graphics binaries at build
+    # time, never parsed at run time.
+    - path: assets/illustrations/
+      transformers:
+        - package: vector_graphics_compiler

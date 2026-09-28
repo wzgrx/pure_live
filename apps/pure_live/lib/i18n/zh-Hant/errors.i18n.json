@@ -21,5 +21,6 @@
   "networkDetail": "檢查網路或 Proxy 設定後重試。",
   "platformUnsupported": "平台暫不支援",
   "platformUnsupportedDetail": "{name}已下線或這個版本還不支援，追蹤和觀看紀錄會一直保留。",
-  "generic": "發生錯誤"
+  "generic": "發生錯誤",
+  "genericDetail": "原因還沒有歸類。可以重試；一直出現時，在「診斷與記錄」裡匯出診斷包，附在問題回報裡。"
 }

@@ -56,6 +56,19 @@ final class _Chat implements RecordChatSource {
 }
 
 void main() {
+  test('loaded turns true once init has read the stored tasks, and the list is announced', () {
+    fakeAsync((async) {
+      final rig = _Rig();
+      final lists = <List<RecordTask>>[];
+      rig.manager.listChanges.listen(lists.add);
+      expect(rig.manager.loaded, isFalse, reason: 'an empty list before init is not "no tasks"');
+      unawaited(rig.manager.init());
+      async.flushMicrotasks();
+      expect(rig.manager.loaded, isTrue);
+      expect(lists, hasLength(1));
+    });
+  });
+
   test('start → recording → stop: stopped by the user, remuxed, stored without URLs or cookies', () {
     fakeAsync((async) {
       final rig = _Rig();

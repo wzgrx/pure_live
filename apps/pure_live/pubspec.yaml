@@ -54,6 +54,9 @@ dev_dependencies:
   fake_async: ^1.3.3
   flutter_test:
     sdk: flutter
+  # Runs as the asset transformer of live_ui's illustrations; the build
+  # runs it from this package (principles §3.3).
+  vector_graphics_compiler: ^1.3.0
   very_good_analysis: ^11.0.0
 
 flutter:

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart' show FixedColors;
 import 'package:pure_live_app/core/error_text.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/store.dart';
@@ -125,13 +126,13 @@ class RoomRecordButton extends ConsumerWidget {
     final running = state != null && (state.active || state == RecordState.waitingLive);
     final live = detail.state == LiveState.live;
     final label = running ? recordStateText(task!) : t.room.record;
-    final colors = Theme.of(context).colorScheme;
     return MenuAnchor(
       menuChildren: [
         for (final action in roomRecordActions(task, live: live))
           MenuItemButton(
             leadingIcon: Icon(switch (action) {
-              RoomRecordAction.recordNow => Icons.fiber_manual_record,
+              // An outlined circle: the solid dot means "recording now".
+              RoomRecordAction.recordNow => Icons.fiber_manual_record_outlined,
               RoomRecordAction.watch => Icons.schedule,
               RoomRecordAction.stop => Icons.stop,
               RoomRecordAction.checkNow => Icons.refresh,
@@ -154,7 +155,7 @@ class RoomRecordButton extends ConsumerWidget {
         final icon = Icon(
           running && state != RecordState.waitingLive ? Icons.fiber_manual_record : Icons.fiber_manual_record_outlined,
           size: 18,
-          color: running && state != RecordState.waitingLive ? colors.error : null,
+          color: running && state != RecordState.waitingLive ? FixedColors.live : null,
         );
         return running
             ? FilledButton.tonalIcon(

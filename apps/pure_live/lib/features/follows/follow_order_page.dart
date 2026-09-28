@@ -60,9 +60,10 @@ class _FollowOrderPageState extends ConsumerState<FollowOrderPage> {
                   final room = shown[index].room;
                   return ListTile(
                     key: ValueKey(room.ref.key),
-                    leading: CircleAvatar(
-                      foregroundImage: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
-                      child: Text(room.anchorName.characters.firstOrNull ?? '?'),
+                    leading: InitialAvatar(
+                      name: room.anchorName,
+                      seed: room.ref.key,
+                      image: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
                     ),
                     title: Text(room.anchorName.isEmpty ? room.ref.roomId : room.anchorName),
                     subtitle: Text(platformName(room.ref.platform)),

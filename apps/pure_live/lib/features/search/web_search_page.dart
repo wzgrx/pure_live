@@ -167,7 +167,7 @@ class _WebSearchPageState extends ConsumerState<WebSearchPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: PlatformLogo(platformId: room.platform, size: Sizes.iconLg),
+              leading: PlatformLogo(platformId: room.platform, size: Sizes.logoLarge),
               title: Text(t.search.web.roomFound),
               subtitle: Text('${platformNames[room.platform] ?? room.platform} · ${room.roomId}'),
             ),
@@ -295,7 +295,7 @@ class _PageRoomsSheet extends StatelessWidget {
               ListTile(title: Text(t.search.web.pageRoomsTitle)),
               for (final (:link, :room) in rooms)
                 ListTile(
-                  leading: PlatformLogo(platformId: room.platform, size: Sizes.iconLg),
+                  leading: PlatformLogo(platformId: room.platform, size: Sizes.logoLarge),
                   title: Text('${platformNames[room.platform] ?? room.platform} · ${room.roomId}'),
                   subtitle: Text(link.toString(), maxLines: 1, overflow: TextOverflow.ellipsis),
                   onTap: () => Navigator.pop(context, room),

@@ -9,6 +9,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_iptv/live_iptv.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/alerts/alert_tiles.dart';
@@ -333,10 +334,12 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
       minChildSize: 0.4,
       maxChildSize: 0.95,
       builder: (context, controller) => guide.when(
-        loading: () => const LoadingView(),
-        error: (error, _) => MessageView.error(
+        loading: () => const SkeletonList(leading: false),
+        error: (error, _) => ErrorView(
+          error,
           title: t.iptv.guideLoadFailed,
-          onAction: () => ref.invalidate(iptvGuideProvider(widget.room)),
+          compact: true,
+          onRetry: () => ref.invalidate(iptvGuideProvider(widget.room)),
         ),
         data: (programmes) {
           if (programmes.isEmpty) {
@@ -405,7 +408,7 @@ class _IptvGuideSheetState extends ConsumerState<IptvGuideSheet> {
                 height: _rowHeight,
                 child: ListTile(
                   selected: phase == ProgrammePhase.live || replaying,
-                  leading: Text(clockText(programme.start), style: LiveTheme.of(context).numeric),
+                  leading: Text(clockText(programme.start), style: LiveTheme.tabularFigures),
                   title: Text(programme.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                   subtitle: programme.subtitle == null
                       ? null

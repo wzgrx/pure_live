@@ -337,7 +337,7 @@ class _ControlBar extends ConsumerWidget {
     final audience = shownAudience(card.audience, preferOnline: ref.watch(preferRealOnlineSetting));
     final position = entries.indexWhere((entry) => entry.ref == card.ref);
     final paused = state.phase == PlaybackPhase.paused;
-    final numeric = LiveTheme.of(context).numeric;
+    final numeric = LiveTheme.numeric(theme.textTheme.labelMedium!);
     Widget button(IconData icon, String label, VoidCallback onPressed, {FocusNode? focusNode}) => Padding(
       padding: const EdgeInsets.only(right: Space.s3),
       child: Builder(
@@ -372,7 +372,7 @@ class _ControlBar extends ConsumerWidget {
                     Expanded(
                       child: Row(
                         children: [
-                          PlatformLogo(platformId: card.ref.platform, size: 24),
+                          PlatformLogo(platformId: card.ref.platform, size: Sizes.logoLarge),
                           const SizedBox(width: Space.s2),
                           Flexible(
                             child: Text(
@@ -512,7 +512,7 @@ class _RoomList extends StatelessWidget {
         return ListTile(
           autofocus: index == (here < 0 ? 0 : here),
           selected: playing,
-          leading: PlatformLogo(platformId: entry.ref.platform, size: 24),
+          leading: PlatformLogo(platformId: entry.ref.platform, size: Sizes.logoLarge),
           title: Text(entry.label, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: entry.title.isEmpty ? null : Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
           trailing: playing ? Text(t.room.tv.watching) : null,

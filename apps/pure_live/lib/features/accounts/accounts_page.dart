@@ -53,7 +53,7 @@ class _AccountsPageState extends ConsumerState<AccountsPage> {
             Padding(padding: const EdgeInsets.all(Space.s4), child: Text(t.accounts.storageNote)),
             for (final platform in platforms)
               ListTile(
-                leading: PlatformLogo(platformId: platform, size: Sizes.iconLg),
+                leading: PlatformLogo(platformId: platform, size: Sizes.logoLarge),
                 title: Text(platformNames[platform] ?? platform),
                 subtitle: Text(accountSummary(platform, store, ref.watch(accountCheckProvider(platform)), now: now)),
                 trailing: const Icon(Icons.chevron_right),

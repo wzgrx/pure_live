@@ -268,6 +268,9 @@ abstract final class FixedColors {
   /// Token `onLive`.
   static const onLive = Color(0xFFFFFFFF);
 
+  /// Token `logoTile`.
+  static const logoTile = Color(0xFFFFFFFF);
+
   /// Token `brandBlue`.
   static const brandBlue = Color(0xFF2E6FE0);
 

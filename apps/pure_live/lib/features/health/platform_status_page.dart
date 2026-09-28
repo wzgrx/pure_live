@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/i18n/strings.g.dart';
 
@@ -66,12 +67,13 @@ class PlatformStatusPage extends ConsumerWidget {
       body: PageBody(
         child: async.when(
           loading: () => LoadingView(label: t.health.checkingAll),
-          error: (error, _) => MessageView.error(title: t.health.checkFailed, message: '$error'),
+          error: (error, _) =>
+              ErrorView(error, title: t.health.checkFailed, onRetry: () => ref.invalidate(platformHealthProvider)),
           data: (results) => ListView(
             children: [
               for (final result in results)
                 ListTile(
-                  leading: PlatformLogo(platformId: result.platform, size: Sizes.iconLg),
+                  leading: PlatformLogo(platformId: result.platform, size: Sizes.logoLarge),
                   title: Text(platformNames[result.platform] ?? result.platform),
                   subtitle: Text(
                     result.ok ? t.health.ok(ms: result.elapsed.inMilliseconds) : result.problem ?? t.health.failed,

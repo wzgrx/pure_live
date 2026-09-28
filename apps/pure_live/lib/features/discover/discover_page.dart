@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
-import 'package:pure_live_app/core/error_text.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/discover/discover_refresh.dart';
@@ -20,7 +20,7 @@ Tab platformTab(String id) => Tab(
   child: Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      PlatformLogo(platformId: id, size: 18),
+      PlatformLogo(platformId: id, size: Sizes.logoMedium),
       const SizedBox(width: Space.s2),
       Text(platformNames[id] ?? id),
     ],
@@ -167,14 +167,7 @@ class _Categories extends ConsumerWidget {
     final layout = WindowLayout(MediaQuery.sizeOf(context));
     return async.when(
       loading: () => const LoadingView(),
-      error: (error, _) {
-        final text = describeError(error);
-        return MessageView.error(
-          title: text.title,
-          message: text.message,
-          onAction: () => ref.invalidate(categoriesProvider(platform)),
-        );
-      },
+      error: (error, _) => ErrorView(error, onRetry: () => ref.invalidate(categoriesProvider(platform))),
       data: (categories) {
         final followed = followedAreasIn(ref.watch(followedAreasProvider).value ?? const [], platform, categories);
         return ListView(

@@ -8,6 +8,7 @@
   "retry": "重试",
   "ok": "确定",
   "cancel": "取消",
+  "loading": "正在加载",
   "justNow": "刚刚",
   "minutesAgo(param=n)": {
     "other": "{n} 分钟前"

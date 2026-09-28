@@ -272,7 +272,7 @@ class _DanmakuSliderTileState extends State<DanmakuSliderTile> {
       final label = widget.format?.call(shown) ?? shown.toStringAsFixed(1);
       return ListTile(
         title: Text(widget.title),
-        subtitle: Slider(
+        subtitle: SettingSlider(
           value: shown,
           min: widget.min,
           max: widget.max,
@@ -289,10 +289,6 @@ class _DanmakuSliderTileState extends State<DanmakuSliderTile> {
             setState(() => _dragging = null);
             set(_typed(next));
           },
-        ),
-        trailing: SizedBox(
-          width: 56,
-          child: Text(label, style: Theme.of(context).textTheme.labelLarge, textAlign: TextAlign.end),
         ),
       );
     },

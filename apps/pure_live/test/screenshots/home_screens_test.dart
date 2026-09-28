@@ -33,6 +33,20 @@ void main() {
       world: () => ShotWorld(failedPlatforms: {'huya'}),
       theme: ShotTheme.dark,
     );
+    // principles §3.3: nobody live under 开播, and a failed read.
+    screenshot(
+      'follows-nonelive',
+      ShotScreen.phone,
+      (app) => app.go(followsLiveLocation),
+      world: () => ShotWorld(anyoneLive: false),
+    );
+    screenshot(
+      'follows-error',
+      ShotScreen.phone,
+      follows,
+      world: () => ShotWorld(followsFail: true),
+      theme: ShotTheme.dark,
+    );
   });
 
   group('discover', () {
@@ -86,5 +100,6 @@ void main() {
       overrides: (world) => [linkResolverProvider.overrideWithValue((input) async => RoomRef('douyu', '288016'))],
     );
     screenshot('search', ShotScreen.medium, search, locale: AppLocale.zhHant);
+    screenshot('search-empty', ShotScreen.phone, search, world: nothing, theme: ShotTheme.dark, locale: AppLocale.en);
   });
 }

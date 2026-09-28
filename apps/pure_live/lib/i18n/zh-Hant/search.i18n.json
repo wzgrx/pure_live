@@ -12,6 +12,8 @@
   "resolvingLink": "正在辨識連結",
   "noLinkMatch": "沒有辨識出直播間連結",
   "empty": "沒有找到相關的直播間",
+  "emptyHint": "檢查關鍵字有沒有錯字，或換個平台再搜；有直播間連結時，直接貼上就能打開。",
+  "clipboardEmpty": "剪貼簿裡沒有文字，先複製直播間連結或分享口令",
   "sort": {
     "smart": "智慧",
     "platform": "按平台",

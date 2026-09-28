@@ -47,7 +47,7 @@ class AudiencePage extends ConsumerWidget {
             for (final id in platformOrder)
               if (audienceNotes[id] case final note?)
                 ListTile(
-                  leading: PlatformLogo(platformId: id, size: 24),
+                  leading: PlatformLogo(platformId: id, size: Sizes.logoLarge),
                   title: Text(platformNames[id] ?? id),
                   subtitle: Text(note, style: theme.textTheme.bodySmall),
                 ),

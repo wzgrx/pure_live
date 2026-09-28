@@ -12,6 +12,8 @@
   "resolvingLink": "正在识别链接",
   "noLinkMatch": "没有识别出直播间链接",
   "empty": "没有找到相关的直播间",
+  "emptyHint": "检查关键词有没有错字，或换个平台再搜；有直播间链接时，直接粘贴就能打开。",
+  "clipboardEmpty": "剪贴板里没有文字，先复制直播间链接或分享口令",
   "sort": {
     "smart": "智能",
     "platform": "按平台",

@@ -1140,6 +1140,9 @@ class _Translations$errors$en implements Translations$errors$zh_Hans {
       '${name} has been retired or is not supported by this version. Its follows and watch history are kept.';
   @override
   String get generic => 'Something went wrong';
+  @override
+  String get genericDetail =>
+      'The cause is not one we recognise. Try again; if it keeps happening, export a diagnostics bundle from Diagnostics and logs and attach it to a bug report.';
 }
 
 // Path: follows
@@ -1163,6 +1166,10 @@ class _Translations$follows$en implements Translations$follows$zh_Hans {
   String get emptyMessage => 'Find streamers in Discover or Search, open their room and tap Follow.';
   @override
   String get goDiscover => 'Go to Discover';
+  @override
+  String get pasteLink => 'Paste a link';
+  @override
+  String get importData => 'Import old data or a backup';
   @override
   String get orderNotSaved => 'The order was not saved. Try again.';
   @override
@@ -1209,6 +1216,10 @@ class _Translations$follows$en implements Translations$follows$zh_Hans {
   String get manageGroups => 'Manage groups';
   @override
   String get noneLive => 'None of the streamers you follow are live';
+  @override
+  String get noneLiveMessage => 'They show up here when they go live; turn on live alerts to know at once.';
+  @override
+  String get showAll => 'Show all follows';
   @override
   String allCount({required Object n}) => 'All follows ${n}';
   @override
@@ -2086,6 +2097,11 @@ class _Translations$search$en implements Translations$search$zh_Hans {
   @override
   String get empty => 'No matching rooms';
   @override
+  String get emptyHint =>
+      'Check the spelling or try another platform. If you have a link to the room, paste it to open it.';
+  @override
+  String get clipboardEmpty => 'The clipboard has no text; copy a room link or share code first';
+  @override
   late final _Translations$search$sort$en sort = _Translations$search$sort$en._(_root);
   @override
   late final _Translations$search$web$en web = _Translations$search$web$en._(_root);
@@ -2317,6 +2333,8 @@ class _Translations$ui$en implements Translations$ui$zh_Hans {
   String get ok => 'OK';
   @override
   String get cancel => 'Cancel';
+  @override
+  String get loading => 'Loading';
   @override
   String get justNow => 'just now';
   @override

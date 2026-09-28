@@ -829,7 +829,8 @@ class _RoomInfo extends ConsumerWidget {
       logicalWidth: 48,
       devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
     );
-    final numeric = LiveTheme.of(context).numeric;
+    // The figure keeps the weight of the platform name beside it (principles §2.3).
+    final numeric = LiveTheme.numeric(theme.textTheme.bodySmall!);
     return Padding(
       padding: const EdgeInsets.all(Space.s4),
       child: Column(
@@ -837,11 +838,8 @@ class _RoomInfo extends ConsumerWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 24,
-                foregroundImage: avatar,
-                child: Text(card.anchorName.characters.firstOrNull ?? '?'),
-              ),
+              // The same toned initial as in follows (principles §3.4).
+              InitialAvatar(name: card.anchorName, seed: card.ref.key, image: avatar, size: 48),
               const SizedBox(width: Space.s3),
               Expanded(
                 child: Column(

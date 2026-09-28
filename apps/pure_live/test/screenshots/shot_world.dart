@@ -159,6 +159,8 @@ final class ShotWorld {
     this.catalog = ListMode.rooms,
     this.search = ListMode.rooms,
     this.follows = true,
+    this.anyoneLive = true,
+    this.followsFail = false,
     this.failedPlatforms = const {},
     this.playlists = false,
     DateTime? now,
@@ -172,6 +174,16 @@ final class ShotWorld {
 
   /// Whether there are follows (false: the empty follows page).
   final bool follows;
+
+  /// Whether any follow is live (false: only the offline follows).
+  final bool anyoneLive;
+
+  /// Whether reading the follows fails (the follows error state).
+  final bool followsFail;
+
+  /// What the follows provider answers.
+  Stream<List<FollowedRoom>> get followsStream =>
+      followsFail ? Stream.error(StateError('database disk image is malformed')) : Stream.value(followed);
 
   /// Platforms the last follow refresh could not reach (the banner).
   final Set<String> failedPlatforms;
@@ -276,7 +288,7 @@ final class ShotWorld {
   List<FollowedRoom> get followed => !follows
       ? const []
       : [
-          for (final (index, room) in shotRooms.take(8).indexed)
+          for (final (index, room) in shotRooms.take(anyoneLive ? 8 : 0).indexed)
             FollowedRoom(
               room: StoredRoom(
                 ref: RoomRef(room.platform, room.id),
@@ -315,7 +327,10 @@ final class ShotWorld {
       for (final follow in followed)
         if (failedPlatforms.contains(follow.ref.platform)) follow.ref.key,
     },
-    liveSince: {for (final room in shotRooms.take(8)) RoomRef(room.platform, room.id).key: now.subtract(room.liveFor)},
+    liveSince: {
+      for (final room in shotRooms.take(anyoneLive ? 8 : 0))
+        RoomRef(room.platform, room.id).key: now.subtract(room.liveFor),
+    },
     at: now.subtract(const Duration(minutes: 1)),
   );
 

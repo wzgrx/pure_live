@@ -6,6 +6,8 @@
   "emptyTitle": "還沒有追蹤的主播",
   "emptyMessage": "在探索或搜尋裡找到主播，進入直播間後點「追蹤」。",
   "goDiscover": "去探索",
+  "pasteLink": "貼上連結",
+  "importData": "匯入舊資料或備份",
   "orderNotSaved": "順序沒有儲存，請重試",
   "reorder": "調整順序",
   "sort": {
@@ -42,6 +44,8 @@
   },
   "manageGroups": "管理群組",
   "noneLive": "追蹤的主播都沒開播",
+  "noneLiveMessage": "開播後會出現在這裡；打開「開播提醒」可以第一時間知道。",
+  "showAll": "看全部關注",
   "allCount": "全部追蹤 {n}",
   "offlineCount": "未開播 {n}",
   "ungrouped": "未分組",

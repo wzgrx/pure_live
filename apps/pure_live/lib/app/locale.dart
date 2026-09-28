@@ -102,6 +102,7 @@ LiveUiText liveUiTextOf(Translations text) {
     retry: ui.retry,
     ok: ui.ok,
     cancel: ui.cancel,
+    loading: ui.loading,
     justNow: ui.justNow,
     minutesAgo: (minutes) => ui.minutesAgo(n: minutes),
     hoursAgo: (hours) => ui.hoursAgo(n: hours),

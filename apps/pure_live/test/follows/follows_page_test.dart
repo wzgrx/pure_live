@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -76,6 +77,7 @@ void main() {
     required FollowRefreshNotifier Function() refresh,
     List<Tag> tags = const [],
     Set<String> recording = const {},
+    Stream<List<FollowedRoom>>? stream,
   }) async {
     tester.view.physicalSize = const Size(393, 1400);
     tester.view.devicePixelRatio = 1;
@@ -95,6 +97,9 @@ void main() {
           builder: (context, state) => Text('直播间 ${state.pathParameters['roomId']}'),
         ),
         GoRoute(path: platformStatusLocation, builder: (context, state) => const Text('平台状态页')),
+        GoRoute(path: '/welcome', builder: (context, state) => const Text('导入页')),
+        GoRoute(path: '/search', builder: (context, state) => Text('搜索 ${state.uri.queryParameters['q']}')),
+        GoRoute(path: '/discover', builder: (context, state) => const Text('发现页')),
       ],
     );
     addTearDown(router.dispose);
@@ -105,7 +110,7 @@ void main() {
           sitesProvider.overrideWithValue({
             for (final id in ['bilibili', 'douyu', 'huya']) id: PlatformSite(FakeSite(id)),
           }),
-          followsProvider.overrideWith((ref) => Stream.value(follows)),
+          followsProvider.overrideWith((ref) => stream ?? Stream.value(follows)),
           followRefreshProvider.overrideWith(refresh),
           tagsProvider.overrideWith((ref) => Stream.value(tags)),
           recordingRoomsProvider.overrideWith((ref) => Stream.value(recording)),
@@ -334,5 +339,65 @@ void main() {
     expect(find.text('这个分组还没有主播'), findsOneWidget);
     expect(find.text('未分组 · 1'), findsOneWidget);
     expect(cardNames(tester), ['主播a']);
+  });
+
+  group('principles §3.3: empty and error states', () {
+    testWidgets('no follows: the picture and 去发现, 粘贴链接, 导入旧数据或备份', (tester) async {
+      await pumpPage(tester, follows: const [], refresh: () => _Done(null));
+      await tester.pump();
+      expect(tester.widget<IllustrationView>(find.byType(IllustrationView)).illustration, Illustration.followsEmpty);
+      expect(find.widgetWithText(FilledButton, '去发现'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, '粘贴链接'), findsOneWidget);
+      await tester.tap(find.widgetWithText(OutlinedButton, '导入旧数据或备份'));
+      await tester.pumpAndSettle();
+      expect(find.text('导入页'), findsOneWidget);
+    });
+
+    testWidgets('粘贴链接 searches the clipboard text, which opens a room link', (tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.getData') return <String, Object?>{'text': ' https://live.douyin.com/42 '};
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+      await pumpPage(tester, follows: const [], refresh: () => _Done(null));
+      await tester.pump();
+      await tester.tap(find.text('粘贴链接'));
+      await tester.pumpAndSettle();
+      expect(find.text('搜索 https://live.douyin.com/42'), findsOneWidget);
+    });
+
+    testWidgets('nobody live under 开播: the moon and 看全部关注, which shows everyone', (tester) async {
+      await pumpPage(
+        tester,
+        follows: [_follow('douyu', 'b', state: LiveState.offline)],
+        refresh: () => _Done(FollowRefreshResult(checked: 1, failedPlatforms: const {}, at: _now)),
+      );
+      await tester.pump();
+      await tester.tap(find.text('开播 0'));
+      await tester.pump();
+      expect(tester.widget<IllustrationView>(find.byType(IllustrationView)).illustration, Illustration.noneLive);
+      expect(find.text('关注的主播都没开播'), findsOneWidget);
+      await tester.tap(find.text('看全部关注'));
+      await tester.pump();
+      expect(find.byType(IllustrationView), findsNothing);
+      expect(find.text('主播b'), findsOneWidget);
+    });
+
+    testWidgets("a failed read says so in the user's words and retries; the exception text never shows", (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        follows: const [],
+        refresh: () => _Done(null),
+        stream: Stream.error(StateError('SqliteException(11): /data/secret.db is malformed')),
+      );
+      await tester.pump();
+      expect(find.text('读取关注失败'), findsOneWidget);
+      expect(find.textContaining('SqliteException'), findsNothing);
+      expect(find.textContaining('诊断包'), findsOneWidget, reason: 'the generic next step');
+      expect(find.widgetWithText(FilledButton, '重试'), findsOneWidget);
+      expect(tester.widget<IllustrationView>(find.byType(IllustrationView)).illustration, Illustration.error);
+    });
   });
 }

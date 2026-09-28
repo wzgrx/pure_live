@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show PageMargin;
+import 'package:live_ui/live_ui.dart' show LiveTheme, PageMargin;
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/settings/settings_search.dart';
 
@@ -152,7 +152,7 @@ class _SliderSettingTileState extends State<SliderSettingTile> {
       final label = widget.format?.call(shown) ?? shown.toStringAsFixed(1);
       return ListTile(
         title: Text(widget.title),
-        subtitle: Slider(
+        subtitle: SettingSlider(
           value: shown,
           min: widget.min,
           max: widget.max,
@@ -164,9 +164,67 @@ class _SliderSettingTileState extends State<SliderSettingTile> {
             set(widget.setting is IntSetting ? next.round() : next);
           },
         ),
-        trailing: Text(label, style: Theme.of(context).textTheme.labelLarge),
       );
     },
+  );
+}
+
+/// The slider line of a settings tile: the track, then the value in a
+/// fixed-width slot on the track's line, so every slider on a page has the
+/// same length whatever its value says, and the value does not float above
+/// the track as a list tile's trailing would. No tick marks (the theme's):
+/// with many steps they merge into a dotted line.
+class SettingSlider extends StatelessWidget {
+  const new({
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.label,
+    required this.onChanged,
+    this.divisions,
+    this.onChangeEnd,
+    super.key,
+  });
+
+  /// Width of the value slot at text scale 1: room for "1000 entries".
+  static const double valueWidth = 88;
+
+  final double value;
+  final double min;
+  final double max;
+  final int? divisions;
+
+  /// The value as shown (`100%`, `30 分钟`).
+  final String label;
+
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double>? onChangeEnd;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: divisions,
+          label: label,
+          onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
+        ),
+      ),
+      SizedBox(
+        key: const ValueKey('setting-slider-value'),
+        width: MediaQuery.textScalerOf(context).scale(valueWidth),
+        // A label longer than the slot shrinks rather than overflows.
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerEnd,
+          child: Text(label, maxLines: 1, style: LiveTheme.numeric(Theme.of(context).textTheme.bodyMedium!)),
+        ),
+      ),
+    ],
   );
 }
 

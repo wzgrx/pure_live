@@ -1503,6 +1503,9 @@ class Translations$errors$zh_Hans {
 
   /// zh-Hans: '出错了'
   String get generic => '出错了';
+
+  /// zh-Hans: '原因还没有归类。可以重试；一直出现时，在“诊断与日志”里导出诊断包，附在问题反馈里。'
+  String get genericDetail => '原因还没有归类。可以重试；一直出现时，在“诊断与日志”里导出诊断包，附在问题反馈里。';
 }
 
 // Path: follows
@@ -1533,6 +1536,12 @@ class Translations$follows$zh_Hans {
 
   /// zh-Hans: '去发现'
   String get goDiscover => '去发现';
+
+  /// zh-Hans: '粘贴链接'
+  String get pasteLink => '粘贴链接';
+
+  /// zh-Hans: '导入旧数据或备份'
+  String get importData => '导入旧数据或备份';
 
   /// zh-Hans: '顺序没有保存，请重试'
   String get orderNotSaved => '顺序没有保存，请重试';
@@ -1596,6 +1605,12 @@ class Translations$follows$zh_Hans {
 
   /// zh-Hans: '关注的主播都没开播'
   String get noneLive => '关注的主播都没开播';
+
+  /// zh-Hans: '开播后会出现在这里；打开“开播提醒”可以第一时间知道。'
+  String get noneLiveMessage => '开播后会出现在这里；打开“开播提醒”可以第一时间知道。';
+
+  /// zh-Hans: '看全部关注'
+  String get showAll => '看全部关注';
 
   /// zh-Hans: '全部关注 {n}'
   String allCount({required Object n}) => '全部关注 ${n}';
@@ -2778,6 +2793,12 @@ class Translations$search$zh_Hans {
   /// zh-Hans: '没有找到相关的直播间'
   String get empty => '没有找到相关的直播间';
 
+  /// zh-Hans: '检查关键词有没有错字，或换个平台再搜；有直播间链接时，直接粘贴就能打开。'
+  String get emptyHint => '检查关键词有没有错字，或换个平台再搜；有直播间链接时，直接粘贴就能打开。';
+
+  /// zh-Hans: '剪贴板里没有文字，先复制直播间链接或分享口令'
+  String get clipboardEmpty => '剪贴板里没有文字，先复制直播间链接或分享口令';
+
   late final Translations$search$sort$zh_Hans sort = Translations$search$sort$zh_Hans.internal(_root);
   late final Translations$search$web$zh_Hans web = Translations$search$web$zh_Hans.internal(_root);
 }
@@ -3041,6 +3062,9 @@ class Translations$ui$zh_Hans {
 
   /// zh-Hans: '取消'
   String get cancel => '取消';
+
+  /// zh-Hans: '正在加载'
+  String get loading => '正在加载';
 
   /// zh-Hans: '刚刚'
   String get justNow => '刚刚';

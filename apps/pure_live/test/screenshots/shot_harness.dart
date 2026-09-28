@@ -214,7 +214,9 @@ final class ShotApp {
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     final store = (await tester.runAsync(LiveStore.inMemory))!;
     addTearDown(() => tester.runAsync(store.close));
-    final manager = recorder == null ? null : await tester.runAsync(recorder);
+    // The quiet recorder has read its (empty) task list, as the app's has
+    // by the time anyone opens the recording center.
+    final manager = await tester.runAsync(recorder ?? _quietRecorder);
     await tester.runAsync(() async {
       final settings = store.settings;
       await settings.set(Settings.themeMode, theme == ShotTheme.light ? AppThemeMode.light : AppThemeMode.dark);
@@ -247,14 +249,14 @@ final class ShotApp {
           storeProvider.overrideWithValue(store),
           // The fullscreen clock (F-ROOM-17) reads the same on every run.
           clockProvider.overrideWithValue(() => DateTime(2026, 9, 28, 20, 30)),
-          recordManagerProvider.overrideWithValue(manager ?? _quietRecorder()),
+          recordManagerProvider.overrideWithValue(manager!),
           engineFactoryProvider.overrideWithValue(() {
             final engine = FakeEngine();
             engines.add(engine);
             return engine;
           }),
           networkKindProvider.overrideWith((ref) => Stream.value(NetworkKind.unmetered)),
-          followsProvider.overrideWith((ref) => Stream.value(world.followed)),
+          followsProvider.overrideWith((ref) => world.followsStream),
           followRefreshProvider.overrideWith(() => _Done(world.follows ? world.refresh : null)),
           tagsProvider.overrideWith((ref) => Stream.value(const [])),
           recordingRoomsProvider.overrideWith((ref) => Stream.value({'${shotRooms[1].platform}:${shotRooms[1].id}'})),
@@ -279,8 +281,17 @@ final class ShotApp {
     return ShotApp._(tester, world, container, engines, chats, screen);
   }
 
-  /// A recorder with no tasks that never touches the disk or the network.
-  static RecordManager _quietRecorder() => RecordManager(
+  /// A recorder with no tasks that never touches the disk or the network,
+  /// its (empty) task list read.
+  static Future<RecordManager> _quietRecorder() async {
+    final manager = unreadRecorder();
+    await manager.init();
+    return manager;
+  }
+
+  /// A recorder that has not read its tasks yet (the recording center's
+  /// loading state).
+  static RecordManager unreadRecorder() => RecordManager(
     rooms: SiteRecordRooms((_) => null),
     store: MemoryRecordTaskStore(),
     root: '/nonexistent',
@@ -323,13 +334,16 @@ final class ShotApp {
     await frames(3);
   }
 
-  /// Decodes the images on screen (platform logos) outside the fake clock.
+  /// Decodes the images on screen outside the fake clock: [Image] widgets
+  /// and images that fill decorations (platform logos, principles §7.11).
   Future<void> _images() async {
-    final elements = find.byType(Image).evaluate().toList();
-    if (elements.isEmpty) return;
-    await tester.runAsync(
-      () => Future.wait([for (final element in elements) precacheImage((element.widget as Image).image, element)]),
-    );
+    final images = [
+      for (final element in find.byType(Image).evaluate()) ((element.widget as Image).image, element),
+      for (final element in find.byType(DecoratedBox).evaluate())
+        if ((element.widget as DecoratedBox).decoration case BoxDecoration(:final image?)) (image.image, element),
+    ];
+    if (images.isEmpty) return;
+    await tester.runAsync(() => Future.wait([for (final (image, element) in images) precacheImage(image, element)]));
     await tester.pump();
   }
 

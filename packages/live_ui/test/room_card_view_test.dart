@@ -69,31 +69,18 @@ void main() {
     expect(audience.right, lessThanOrEqualTo(cover.right));
   });
 
-  testWidgets("an offline row's initial reads on its circle in light and dark", (tester) async {
-    double contrast(Color a, Color b) {
-      final (la, lb) = (a.computeLuminance(), b.computeLuminance());
-      return (la > lb ? la + 0.05 : lb + 0.05) / (la > lb ? lb + 0.05 : la + 0.05);
-    }
-
-    for (final appearance in [Appearance.light, Appearance.dark]) {
+  testWidgets("principles §3.4: an offline row's avatar is the shared initial avatar, toned by the room", (
+    tester,
+  ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: PureTheme.of(appearance, platform: TargetPlatform.android),
-          home: const Scaffold(
-            body: OfflineRoomRow(platformId: 'douyu', anchorName: '青柠'),
-          ),
-        ),
+      host(const OfflineRoomRow(platformId: 'douyu', anchorName: 'kiri', seed: 'douyu:1'), width: 360),
       );
-      final circle = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
-      final initial = tester.widget<RichText>(
-        find.descendant(of: find.byType(CircleAvatar), matching: find.byType(RichText)),
-      );
-      expect(
-        contrast(initial.text.style!.color!, circle.backgroundColor!),
-        greaterThanOrEqualTo(4.5),
-        reason: '$appearance (principles §2.2: text at least 4.5:1)',
-      );
-    }
+    final avatar = tester.widget<InitialAvatar>(find.byType(InitialAvatar));
+    expect(avatar.seed, 'douyu:1');
+    expect(find.text('K'), findsOneWidget);
+    expect(find.byType(CircleAvatar), findsNothing);
+    final logo = tester.widget<PlatformLogo>(find.byType(PlatformLogo));
+    expect(logo.size, Sizes.logoMedium);
   });
 
   testWidgets('compact density puts name and title on one line', (tester) async {
@@ -109,6 +96,8 @@ void main() {
       ),
     );
     expect(find.text('直播'), findsNothing);
+    // Without a cover the logo (a letter tile for a platform without one)
+    // sits in the middle of the placeholder, once.
     expect(find.text('U'), findsOneWidget);
     expect(find.textContaining('主播 · 标题', findRichText: true), findsOneWidget);
   });
@@ -143,6 +132,7 @@ void main() {
       retry: 'Retry',
       ok: 'OK',
       cancel: 'Cancel',
+      loading: 'Loading',
       justNow: 'just now',
       minutesAgo: (minutes) => '$minutes min ago',
       hoursAgo: (hours) => '$hours hr ago',

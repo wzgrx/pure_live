@@ -21,5 +21,6 @@
   "networkDetail": "检查网络或代理设置后重试。",
   "platformUnsupported": "平台暂不支持",
   "platformUnsupportedDetail": "{name}已下线或这个版本还不支持，关注和观看历史会一直保留。",
-  "generic": "出错了"
+  "generic": "出错了",
+  "genericDetail": "原因还没有归类。可以重试；一直出现时，在“诊断与日志”里导出诊断包，附在问题反馈里。"
 }

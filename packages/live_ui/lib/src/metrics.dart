@@ -63,8 +63,16 @@ abstract final class Sizes {
   /// Control icons at expanded width and in fullscreen, TV icons.
   static const double iconLg = 32;
 
-  /// Platform logo on a cover.
-  static const double logoCard = 16;
+  /// Platform logo on a cover and beside dense text (principles §3.4: the
+  /// smallest logo).
+  static const double logoSmall = 16;
+
+  /// Platform logo in dense rows and tabs.
+  static const double logoMedium = 20;
+
+  /// Platform logo leading a list row, centred on a cover placeholder, and
+  /// on TV (principles §3.4). Logos come in these three sizes only.
+  static const double logoLarge = 24;
 
   /// Default chat panel width in the room page at expanded width and above.
   static const double chatWidth = 360;

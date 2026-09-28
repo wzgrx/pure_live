@@ -23,6 +23,14 @@ void main() {
 
   // The remote starts on the rail (the first destination has focus).
   screenshot('tv-follows', ShotScreen.tv, (app) => app.go('/follows'), theme: ShotTheme.dark);
+  // principles §3.3: on TV the picture is 200 dp wide.
+  screenshot(
+    'tv-follows-empty',
+    ShotScreen.tv,
+    (app) => app.go('/follows'),
+    world: () => ShotWorld(follows: false),
+    theme: ShotTheme.dark,
+  );
   // Right into the page, down onto the first card: it grows and gets the ring.
   screenshot('tv-follows-card', ShotScreen.tv, (app) async {
     await app.go('/follows');

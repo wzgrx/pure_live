@@ -131,7 +131,7 @@ class _PlatformAccountPageState extends ConsumerState<PlatformAccountPage> {
         child: ListView(
           children: [
             ListTile(
-              leading: PlatformLogo(platformId: _platform, size: Sizes.iconLg),
+              leading: PlatformLogo(platformId: _platform, size: Sizes.logoLarge),
               title: Text(name),
               subtitle: Text(accountSummary(_platform, store, check, now: DateTime.now())),
             ),

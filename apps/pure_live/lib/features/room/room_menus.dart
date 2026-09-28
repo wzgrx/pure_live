@@ -10,6 +10,8 @@ import 'package:live_player/live_player.dart' show MpvEngine;
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pure_live_app/core/error_view.dart';
+import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/recording.dart';
 import 'package:pure_live_app/core/sites.dart';
 import 'package:pure_live_app/features/follows/follow_refresh.dart';
@@ -475,9 +477,19 @@ class _SwitchRoomPanel extends ConsumerWidget {
             updatedAt: task.createdAt,
           ),
     ];
+    final dpr = MediaQuery.devicePixelRatioOf(context);
     Widget list(AsyncValue<List<StoredRoom>> rooms, String empty) => rooms.when(
-      loading: () => const LoadingView(),
-      error: (error, _) => MessageView.error(title: t.common.loadFailed, message: '$error'),
+      loading: () => const SkeletonList(),
+      error: (error, _) => ErrorView(
+        error,
+        title: t.common.loadFailed,
+        compact: true,
+        onRetry: () {
+          ref
+            ..invalidate(followsProvider)
+            ..invalidate(historyProvider);
+        },
+      ),
       data: (rooms) {
         final shown = [
           for (final room in rooms)
@@ -489,13 +501,27 @@ class _SwitchRoomPanel extends ConsumerWidget {
           itemBuilder: (context, index) {
             final room = shown[index];
             final live = room.lastState == LiveState.live;
+            // principles §3.4: the streamer's avatar leads; the logo names
+            // the source beside the title.
             return ListTile(
-              leading: PlatformLogo(platformId: room.ref.platform, size: 24),
+              leading: InitialAvatar(
+                name: room.anchorName,
+                seed: room.ref.key,
+                image: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
+              ),
               title: Text(room.anchorName.isEmpty ? room.ref.roomId : room.anchorName, maxLines: 1),
-              subtitle: Text(
-                room.title.isEmpty ? (platformNames[room.ref.platform] ?? room.ref.platform) : room.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              subtitle: Row(
+                children: [
+                  PlatformLogo(platformId: room.ref.platform),
+                  const SizedBox(width: Space.s1),
+                  Expanded(
+                    child: Text(
+                      room.title.isEmpty ? (platformNames[room.ref.platform] ?? room.ref.platform) : room.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
               trailing: live ? const LiveBadge() : null,
               onTap: () => Navigator.pop(context, room.ref),

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live_app/app/routes.dart';
+import 'package:pure_live_app/core/error_view.dart';
 import 'package:pure_live_app/core/images.dart';
 import 'package:pure_live_app/core/store.dart';
 import 'package:pure_live_app/features/rooms/room_card_menu.dart';
@@ -49,9 +50,12 @@ class HistoryPage extends ConsumerWidget {
         ],
       ),
       body: async.isLoading && entries.isEmpty
-          ? const LoadingView()
+          ? const SkeletonList()
+          // A failed read is not an empty history.
+          : async.hasError && entries.isEmpty
+          ? ErrorView(async.error!, onRetry: () => ref.invalidate(historyProvider))
           : entries.isEmpty
-          ? MessageView(icon: Icons.history, title: t.me.noHistory)
+          ? MessageView(illustration: Illustration.noHistory, title: t.me.noHistory)
           : PageBody(
               maxContentWidth: Sizes.readingWidth,
               child: ListView.builder(
@@ -63,6 +67,7 @@ class HistoryPage extends ConsumerWidget {
                   return OfflineRoomRow(
                     platformId: room.ref.platform,
                     anchorName: room.anchorName,
+                    seed: room.ref.key,
                     avatar: networkImage(room.avatar, logicalWidth: 40, devicePixelRatio: dpr),
                     subtitle: [room.title, if (watched != null) formatAgo(watched, now)].join(' · '),
                     onTap: () => context.push(roomLocation(room.ref)),

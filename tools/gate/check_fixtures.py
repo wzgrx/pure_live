@@ -3,10 +3,13 @@
 Several platforms echo the caller's address back in a response header
 (`x-ksclient-ip`, `xhs-real-ip`, Baidu's Base64 `x-bfe-svbbrers`, ...). The
 archive's scrubber missed some of them, and real exit addresses reached git.
-This fails when any header whose name says it carries the client address holds
-an IPv4 address outside the reserved and documentation ranges, in plain text
-or Base64. Server addresses (load balancers, CDN nodes) are not client data
-and are not checked. Standard library only, so it runs in hooks.
+Headers are checked deny-by-default because the names vary (LOOK's
+`x-from-src` echoes it too): a recorded request or response header holding an
+IPv4 address outside the reserved and documentation ranges, in plain text or
+Base64, fails unless the header is a known server address (SERVER_HEADERS) or
+the match is a version number (`Chrome/140.0.0.0`). In response bodies only
+fields whose name says they carry the client address are checked. Standard
+library only, so it runs in hooks.
 """
 from pathlib import Path
 import base64
@@ -23,6 +26,12 @@ CLIENT_HEADER = re.compile(
     r'(real[-_]?ip|client[-_]?ip|public[-_]?ip|forwarded|remote[-_]?addr|connecting[-_]?ip|originating[-_]?ip|svbbrers)',
     re.IGNORECASE,
 )
+# Headers whose addresses belong to the platform (load balancers, CDN edges,
+# internal app servers), not to the caller.
+SERVER_HEADERS = frozenset({
+    'akamai-request-bc', 'lb', 'x-app-server-addr', 'x-route-server-addr',
+    'x-origin-response-time', 'x-parent-response-time',
+})
 IPV4 = re.compile(r'(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])')
 BASE64 = re.compile(r'[A-Za-z0-9+/_-]{8,}={0,2}')
 
@@ -34,8 +43,11 @@ ALLOWED = [ipaddress.ip_network(n) for n in (
 )]
 
 
-def _public(text):
-    for match in IPV4.findall(text):
+def _public(text, versions=False):
+    for found in IPV4.finditer(text):
+        match = found.group()
+        if versions and text[max(0, found.start() - 1):found.start()] == '/':
+            continue
         try:
             address = ipaddress.ip_address(match)
         except ValueError:
@@ -55,9 +67,10 @@ def _decoded(text):
                 continue
 
 
-def leaks(value):
-    """Public IPv4 addresses in one client-address header value."""
-    found = list(_public(value))
+def leaks(value, versions=False):
+    """Public IPv4 addresses in one value, plain or Base64; with [versions],
+    `name/1.2.3.4` version numbers are skipped."""
+    found = list(_public(value, versions))
     for decoded in _decoded(value):
         found.extend(_public(decoded))
     return found
@@ -84,6 +97,16 @@ def check(files):
         for where, value in _walk(data, ''):
             for address in leaks(value):
                 problems.append(f'{file}: {where.lstrip(".")} holds client address {address}')
+        if isinstance(data, dict):
+            for side in ('request', 'response'):
+                headers = (data.get(side) or {}).get('headers') if isinstance(data.get(side), dict) else None
+                if not isinstance(headers, dict):
+                    continue
+                for name, value in headers.items():
+                    if not isinstance(value, str) or name.lower() in SERVER_HEADERS or CLIENT_HEADER.search(name):
+                        continue
+                    for address in leaks(value, versions=True):
+                        problems.append(f'{file}: {side}.headers.{name} holds address {address} (add to SERVER_HEADERS only if it is the platform\'s)')
     return problems
 
 

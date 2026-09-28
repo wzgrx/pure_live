@@ -44,9 +44,19 @@ class CheckTest(unittest.TestCase):
             path.write_text(json.dumps({'data': {'client_ip': '8.8.4.4', 'deviceInfo': {'publicIP': '9.9.9.9'}}}), encoding='utf-8')
             self.assertEqual(len(check_fixtures.check([path])), 2)
 
-    def test_server_address_headers_are_ignored(self):
+    def test_unknown_header_with_public_address_fails(self):
         with tempfile.TemporaryDirectory() as directory:
-            meta = self._meta(directory, {'lb': '8.8.4.4', 'x-server-ip': '8.8.4.4'})
+            meta = self._meta(directory, {'x-from-src': '8.8.4.4'})
+            self.assertEqual(len(check_fixtures.check([meta])), 1)
+
+    def test_server_headers_and_versions_pass(self):
+        with tempfile.TemporaryDirectory() as directory:
+            meta = self._meta(directory, {
+                'lb': '8.8.4.4',
+                'x-app-server-addr': '8.8.4.4',
+                'server': 'openresty/1.13.6.1',
+                'user-agent': 'Mozilla/5.0 Chrome/140.0.0.0 Safari/537.36',
+            })
             self.assertEqual(check_fixtures.check([meta]), [])
 
 

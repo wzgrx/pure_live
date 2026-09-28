@@ -102,17 +102,18 @@ void main() {
       endpoints: [_primary],
       site: 'douyu',
       heartbeatInterval: const Duration(milliseconds: 10),
-      inactivityTimeout: const Duration(milliseconds: 40),
+      // Traffic every 100 ms for 1.2 s outlives the 1 s timeout only if each
+      // message resets it; the wide margin keeps the test stable under load.
+      inactivityTimeout: const Duration(seconds: 1),
       reconnectBaseDelay: const Duration(milliseconds: 5),
       onHeartbeat: () => beats++,
       connector: connector.call,
     );
     await socket.connect();
-    for (var index = 0; index < 4; index++) {
-      await Future<void>.delayed(const Duration(milliseconds: 15));
+    for (var index = 0; index < 12; index++) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       connector.channels.last.incoming.add('heartbeat-$index');
     }
-    await Future<void>.delayed(const Duration(milliseconds: 20));
     expect(connector.endpoints, hasLength(1));
     expect(socket.status, SocketStatus.connected);
     expect(beats, greaterThan(0));
@@ -169,7 +170,7 @@ void main() {
           Future.error(const SocketException('refused')),
     );
     await socket.connect();
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await _eventually(() => closed.isNotEmpty);
     expect(closed, hasLength(1));
     expect(closed.single, contains('refused'));
     expect(reconnecting, 1, reason: 'one notice per streak');
@@ -363,4 +364,15 @@ final class _MutablePolicy implements ProxyPolicy {
 
   @override
   ProxyRoute routeFor(String site, Uri url) => route();
+}
+
+/// Waits until [condition] holds, polling every few milliseconds, instead of
+/// sleeping a fixed time that a loaded machine can overrun. Fails after
+/// [timeout].
+Future<void> _eventually(bool Function() condition, {Duration timeout = const Duration(seconds: 5)}) async {
+  final watch = Stopwatch()..start();
+  while (!condition()) {
+    if (watch.elapsed > timeout) fail('condition not met within $timeout');
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
 }
